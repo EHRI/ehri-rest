@@ -10,6 +10,7 @@ libraryDependencies ++= Seq(
     "org.specs2" %% "specs2" % "1.6.1",
     "org.specs2" %% "specs2-scalaz-core" % "6.0.1" % "test",
     "com.tinkerpop" % "frames" % "2.1.0",
+    "com.tinkerpop.blueprints" % "blueprints-neo4j-graph" % "2.1.0",
     "org.neo4j" % "neo4j" % "1.8.M07",
     "org.neo4j" % "neo4j-kernel" % "1.8.M07",
     "org.neo4j" % "neo4j-kernel" % "1.8.M07" % "test" classifier "tests"
