@@ -21,7 +21,7 @@ class GraphTest extends Specification {
 
   "The Loaded Database" should {
     "contain the right number of vertices" in new CollectionDB {
-      graph.getVertices.toList.length must_== testData.flatMap(_._2).toList.length + 1 // including ROOT node
+      graph.getVertices.toList.length must_== testData.flatMap(_._2).toList.length + 3 // including ROOT node
     }
 
     "contain a collection present in the test data" in new CollectionDB {
@@ -83,6 +83,26 @@ class GraphTest extends Specification {
         ehri.createIndexedVertex(entity + ("isA" -> index), index)
       }
     }
+
+    val upidx = "userprofile"
+    val gpidx = "group"
+    val user = Map("isA" -> upidx, "userId" -> "1", "name" -> "Mike")
+    val group = Map("isA" -> gpidx, "name" -> "admin")
+
+
+    // Add a user profile
+    ehri.createVertexIndex(upidx)
+    val userVertex = ehri.createIndexedVertex(user, upidx)
+    ehri.createVertexIndex(gpidx)
+    val groupVertex = ehri.createIndexedVertex(group, gpidx)
+
+    ehri.createEdgeIndex("belongsTo")
+    val access = ehri.createIndexedEdge(
+        groupVertex.getId().asInstanceOf[java.lang.Long],
+        userVertex.getId().asInstanceOf[java.lang.Long],
+        "belongsTo", Map("read"->"true", "write"->"true"))
+
+
     tx.success()
   }
 }

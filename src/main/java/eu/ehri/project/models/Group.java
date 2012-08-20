@@ -7,7 +7,7 @@ import eu.ehri.project.relationships.*;
 
 public interface Group {
 
-    @Adjacency(label="contains") public Iterable<UserProfile> getUsers();
+    @Adjacency(label="belongsTo") public Iterable<UserProfile> getUsers();
 
     @Property("name") public String getName();
     @Property("name") public void setName(String name);

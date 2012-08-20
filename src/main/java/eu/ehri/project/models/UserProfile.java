@@ -5,6 +5,7 @@ import com.tinkerpop.frames.*;
 public interface UserProfile {
 
     @Adjacency(label="hasAnnotations") public Iterable<Annotation> getAnnotation();
+    @Adjacency(label="belongsTo") public Iterable<Group> getGroups();
 
     @Property("userId") public Long getUserId();
     @Property("name") public String getName();
