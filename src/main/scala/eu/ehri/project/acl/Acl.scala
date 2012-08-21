@@ -17,28 +17,37 @@ object Acl {
     }
   }
 
+  // We have to ascend the current accessors group
+  // hierarchy looking for a groups that are contained
+  // in the current entity's ACL list. Return the Access
+  // relationship objects and see which one is most liberal.
+  private def ascendGroupHierarchy(accessors: List[Accessor], ctrlGroups: List[(Access, Accessor)]
+    ): List[Access] = accessors match {
+    // accessor has no parents, so it's not allowed...
+    case Nil => Nil
+    case accessors => {
+      // get the list of Access objects at this level
+      val intersection: List[Access] = ctrlGroups.filter(t => accessors.contains(t._2)).map(t => t._1)
+      // add it to the list of Access objects in parent groups
+      intersection ++ accessors.flatMap(a => ascendGroupHierarchy(a.getParents.toList, ctrlGroups))
+    }
+  }
+
   def getAccessControl(entity: Entity, accessor: Accessor): Access = {
-    var access = new EntityAccessFactory().buildReadOnly(entity, accessor)
+    var defaultAccess = new EntityAccessFactory().buildReadOnly(entity, accessor)
     // Build a tuple of the entities access relationships, and the
     // respective groups they point to...
     val ctrlUserGroups = entity.getAccess.iterator.toList.map(entity => (entity, entity.getAccessor))
-    // we have to ascend the current accessors group
-    // hierarchy looking for a group that might be contained
-    // in the current entity's ACL list.
-    def ascendGroupHierarchy(parents: List[Accessor]): List[Access] = parents match {
-      // accessor has no parents, so it's not allowed...
-      case Nil => Nil
-      case parents => {
-        val intersection = ctrlUserGroups.flatMap { case (ctrl, userOrGroup) =>
-          if (parents.contains(userOrGroup)) List(ctrl)
-          else Nil
-        }
-        intersection ++ parents.flatMap(p => ascendGroupHierarchy(p.getParents.toList))
-      }
+    if (ctrlUserGroups.isEmpty) {
+      defaultAccess // default read-only access
+    } else {
+      val ctrls = ascendGroupHierarchy(List(accessor), ctrlUserGroups)
+      if (ctrls.isEmpty)
+        // TODO: How do we lock down an object completely???
+        defaultAccess
+      else
+        ctrls.max // return the most elevated access control
     }
-    val ctrls = ascendGroupHierarchy(List(accessor))
-    if (ctrls.isEmpty) access
-    else ctrls.max
   }
 }
 

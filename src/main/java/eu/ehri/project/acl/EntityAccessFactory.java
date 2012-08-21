@@ -14,5 +14,9 @@ public class EntityAccessFactory {
     public Access buildReadOnly(Entity entity, Accessor accessor) {
         return new EntityAccess(true, false, entity, accessor);
     }
+
+    public Access buildNoAccess(Entity entity, Accessor accessor) {
+        return new EntityAccess(false, false, entity, accessor);
+    }
 }
 

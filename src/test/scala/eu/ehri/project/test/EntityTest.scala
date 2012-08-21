@@ -165,19 +165,6 @@ class GraphTest extends Specification {
       ))
     )
 
-    // Test edges should specify a key/value for uniquely
-    // identifying both source and target node, the relationship
-    // label, and any accompanying data.
-    val testEdges = List(
-      ("u1", "belongsTo", "g1"),
-      ("u2", "belongsTo", "g1"),
-      ("r1", "holds", "c1"),
-      ("r1", "holds", "c2"),
-      ("r1", "holds", "c3"),
-      ("a1", "created", "c1"),
-      ("a2", "mentionedIn", "c2")
-    )
-
     val ehri = new Neo4jHelpers(graph.getBaseGraph.getRawGraph)
     val tx = graph.getBaseGraph.getRawGraph.beginTx
     testNodes.foreach { case(desc, node) =>
