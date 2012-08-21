@@ -116,6 +116,14 @@ class DataLoader(val graph: FramedGraph[Neo4jGraph]) {
     setSecurity("c2", "admin", true, true)
     setSecurity("c2", "Tim", false, false) // Tim belongs to admin, so this should be overridden
     setSecurity("c3", "niod", true, true)
+    
+    // add collections to repository
+    List("holds").map { label => 
+      val repo = graph.getBaseGraph.getVertices("identifier", "r1").toList.head
+      graph.getBaseGraph.getVertices("isA", "collection").toList.map { collection =>
+        createRelationship(repo, collection, label)
+      }
+    }
 
     tx.success()
   }
