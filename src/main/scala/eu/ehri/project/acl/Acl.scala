@@ -21,8 +21,7 @@ object Acl {
   // hierarchy looking for a groups that are contained
   // in the current entity's ACL list. Return the Access
   // relationship objects and see which one is most liberal.
-  private def ascendGroupHierarchy(accessors: List[Accessor], ctrlGroups: List[(Access, Accessor)]
-    ): List[Access] = accessors match {
+  private def ascendGroupHierarchy(accessors: List[Accessor], ctrlGroups: List[(Access, Accessor)]): List[Access] = accessors match {
     // accessor has no parents, so it's not allowed...
     case Nil => Nil
     case accessors => {

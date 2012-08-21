@@ -11,15 +11,13 @@ import eu.ehri.project.core.Neo4jHelpers
 import scala.collection.JavaConversions._
 import scalaj.collection.Imports._
 
-import org.neo4j.geoff
 import com.codahale.jerkson.Json
-
 
 class GraphTest extends Specification {
   sequential
   "The Initial Database" should {
     "be empty" in new DB {
-      ! graph.getVertices.iterator.hasNext
+      !graph.getVertices.iterator.hasNext
     }
   }
 
@@ -44,7 +42,7 @@ class GraphTest extends Specification {
       val groups = graph.getVertices("isA", "group", classOf[Group])
       groups.head.getUsers.iterator.hasNext
     }
-    
+
     "have read-access permissions" in new CollectionDB {
       val accessor = graph.getVertices("name", "niod", classOf[Accessor]).head
       val c1 = graph.getVertices("identifier", "c1", classOf[Entity]).head
@@ -94,84 +92,73 @@ class GraphTest extends Specification {
   trait CollectionDB extends DB {
 
     val testNodes = List(
-      ("c1", 
-      Map(
-        "isA" -> "collection",
-        "identifier" -> "c1",
-        "name" -> "Test Collection 1"
-      )),
+      ("c1",
+        Map(
+          "isA" -> "collection",
+          "identifier" -> "c1",
+          "name" -> "Test Collection 1")),
       ("c2",
-      Map(
-        "isA" -> "collection",
-        "identifier" -> "c2",
-        "name" -> "Test Collection 2"
-      )),
+        Map(
+          "isA" -> "collection",
+          "identifier" -> "c2",
+          "name" -> "Test Collection 2")),
       ("c3",
-      Map(
-        "isA" -> "collection",
-        "identifier" -> "c3",
-        "name" -> "Test Collection 3"
-      )),
+        Map(
+          "isA" -> "collection",
+          "identifier" -> "c3",
+          "name" -> "Test Collection 3")),
       ("r1",
-      Map(
-        "isA" -> "repository",
-        "identifier" -> "r1",
-        "name" -> "Repository 1"
-      )),
+        Map(
+          "isA" -> "repository",
+          "identifier" -> "r1",
+          "name" -> "Repository 1")),
       ("a1",
-      Map(
-        "isA" -> "authority",
-        "identifier" -> "a1",
-        "name" -> "Authority 1"
-      )),
+        Map(
+          "isA" -> "authority",
+          "identifier" -> "a1",
+          "name" -> "Authority 1")),
       ("a2",
-      Map(
-        "isA" -> "authority",
-        "identifier" -> "a2",
-        "name" -> "Authority 2"
-      )),
+        Map(
+          "isA" -> "authority",
+          "identifier" -> "a2",
+          "name" -> "Authority 2")),
       ("g1",
-      Map(
-        "isA" -> "group",
-        "name" -> "admin"
-      )),
+        Map(
+          "isA" -> "group",
+          "name" -> "admin")),
       ("g2",
-      Map(
-        "isA" -> "group",
-        "name" -> "niod"
-      )),
+        Map(
+          "isA" -> "group",
+          "name" -> "niod")),
       ("g3",
-      Map(
-        "isA" -> "group",
-        "name" -> "kcl"
-      )),
+        Map(
+          "isA" -> "group",
+          "name" -> "kcl")),
       ("u1",
-      Map(
-        "isA" -> "userprofile",
-        "userId" -> 1,
-        "name" -> "Mike"
-      )),
+        Map(
+          "isA" -> "userprofile",
+          "userId" -> 1,
+          "name" -> "Mike")),
       ("u2",
-      Map(
-        "isA" -> "userprofile",
-        "userId" -> 2,
-        "name" -> "Reto"
-      )),
+        Map(
+          "isA" -> "userprofile",
+          "userId" -> 2,
+          "name" -> "Reto")),
       ("u3",
-      Map(
-        "isA" -> "userprofile",
-        "userId" -> 3,
-        "name" -> "Tim"
-      ))
-    )
+        Map(
+          "isA" -> "userprofile",
+          "userId" -> 3,
+          "name" -> "Tim")))
 
     val ehri = new Neo4jHelpers(graph.getBaseGraph.getRawGraph)
     val tx = graph.getBaseGraph.getRawGraph.beginTx
-    testNodes.foreach { case(desc, node) =>
-      node.get("isA").map { case(index: String) =>
-        ehri.getOrCreateVertexIndex(index)
-        ehri.createIndexedVertex(node.asInstanceOf[Map[String,Object]], index)
-      }
+    testNodes.foreach {
+      case (desc, node) =>
+        node.get("isA").map {
+          case (index: String) =>
+            ehri.getOrCreateVertexIndex(index)
+            ehri.createIndexedVertex(node.asInstanceOf[Map[String, Object]], index)
+        }
     }
 
     // FIXME: This function is vulnerable to collisions!
@@ -185,7 +172,7 @@ class GraphTest extends Specification {
       ehri.createIndexedEdge(
         u.getId().asInstanceOf[java.lang.Long],
         g.getId().asInstanceOf[java.lang.Long],
-        label, Map[String,Object]())
+        label, Map[String, Object]())
     }
 
     def setSecurity(itemId: String, userOrGroupName: String, read: Boolean, write: Boolean) = {
@@ -197,10 +184,9 @@ class GraphTest extends Specification {
       ehri.createIndexedEdge(
         c.getId().asInstanceOf[java.lang.Long],
         g.getId().asInstanceOf[java.lang.Long],
-        label, Map("read" -> read, "write" -> write).asInstanceOf[Map[String,Object]]
-      )
+        label, Map("read" -> read, "write" -> write).asInstanceOf[Map[String, Object]])
     }
-    
+
     addUserToGroup("Mike", "admin")
     addUserToGroup("Mike", "kcl")
     addUserToGroup("Tim", "niod")

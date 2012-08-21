@@ -4,12 +4,16 @@ import com.tinkerpop.frames.*;
 
 public interface CollectionDescription {
 
-    @Adjacency(label="describes") public Collection getCollection();
+    @Adjacency(label = "describes")
+    public Collection getCollection();
 
-    @Property("title") public String getTitle();
-    @Property("identifier") public String getIdentifier();
-    @Property("languageOfDescription") public String getLanguageOfDescription();
+    @Property("title")
+    public String getTitle();
+
+    @Property("identifier")
+    public String getIdentifier();
+
+    @Property("languageOfDescription")
+    public String getLanguageOfDescription();
 
 }
-
-
