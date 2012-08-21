@@ -22,12 +22,15 @@ object Acl {
   // in the current entity's ACL list. Return the Access
   // relationship objects and see which one is most liberal.
   private def ascendGroupHierarchy(accessors: List[Accessor], ctrlGroups: List[(Access, Accessor)]): List[Access] = accessors match {
-    // accessor has no parents, so it's not allowed...
+    // Termination condition on recursive function
     case Nil => Nil
-    case accessors => {
-      // get the list of Access objects at this level
+    case _ => {
+      // Get the list of Access objects *at this level*.
+      // This is the intersection of the current accessors,
+      // and the accessors specified on the entity's security.
       val intersection: List[Access] = ctrlGroups.filter(t => accessors.contains(t._2)).map(t => t._1)
-      // add it to the list of Access objects in parent groups
+      // Recurse through the current accessor's parents and
+      // add any parent users/groups that are given access.
       intersection ++ accessors.flatMap(a => ascendGroupHierarchy(a.getParents.toList, ctrlGroups))
     }
   }
