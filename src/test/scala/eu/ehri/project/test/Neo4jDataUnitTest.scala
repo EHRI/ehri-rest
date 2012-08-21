@@ -89,8 +89,7 @@ class GraphTest extends Specification {
   }
 
   trait CollectionDB extends DB {
-
-    DataLoader.loadTestData(graph)
+    new DataLoader(graph).loadTestData
   }
 }
 
