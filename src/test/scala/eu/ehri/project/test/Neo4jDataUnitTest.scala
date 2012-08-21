@@ -6,11 +6,9 @@ import org.neo4j.test.TestGraphDatabaseFactory
 import com.tinkerpop.frames.FramedGraph
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph
 import eu.ehri.project.models._
-import eu.ehri.project.core.Neo4jHelpers
 
 import scala.collection.JavaConversions._
 
-import com.codahale.jerkson.Json
 
 class GraphTest extends Specification {
   sequential
