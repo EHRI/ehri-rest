@@ -71,6 +71,15 @@ class GraphTest extends Specification {
       access.getRead() mustEqual true
       access.getWrite() mustEqual true
     }
+
+    "ensure that group perms override user perms" in new CollectionDB {
+      val accessor = graph.getVertices("name", "Tim", classOf[Accessor]).head
+      val c1 = graph.getVertices("identifier", "c2", classOf[Entity]).head
+      val access = eu.ehri.project.acl.Acl.getAccessControl(c1, accessor)
+      println(access.getRead, access.getWrite)
+      access.getRead() mustEqual true
+      access.getWrite() mustEqual true
+    }
   }
 
   trait DB extends After {
@@ -208,10 +217,13 @@ class GraphTest extends Specification {
     addUserToGroup("Mike", "admin")
     addUserToGroup("Mike", "kcl")
     addUserToGroup("Tim", "niod")
+    addUserToGroup("Tim", "admin")
     addUserToGroup("Reto", "kcl")
 
     setSecurity("c1", "Mike", true, true)
     setSecurity("c2", "kcl", true, false)
+    setSecurity("c2", "admin", true, true)
+    setSecurity("c2", "Tim", false, false) // Tim belongs to admin, so this should be overridden
     setSecurity("c3", "niod", true, true)
 
     tx.success()
