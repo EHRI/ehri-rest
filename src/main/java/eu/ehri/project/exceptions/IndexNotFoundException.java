@@ -10,4 +10,8 @@ public class IndexNotFoundException extends Exception {
     public IndexNotFoundException(String message) {
         super(message);
     }
+
+    public IndexNotFoundException(String message, Exception cause) {
+        super(message, cause);
+    }
 }
