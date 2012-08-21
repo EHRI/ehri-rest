@@ -12,9 +12,14 @@ libraryDependencies ++= Seq(
     "com.tinkerpop" % "frames" % "2.1.0",
     "com.tinkerpop.blueprints" % "blueprints-neo4j-graph" % "2.1.0",
     "org.neo4j" % "neo4j" % "1.8.M07",
+    "org.scalaj" %% "scalaj-collection" % "1.2",
     "org.neo4j" % "neo4j-kernel" % "1.8.M07",
-    "org.neo4j" % "neo4j-kernel" % "1.8.M07" % "test" classifier "tests"
+    "org.neo4j" % "neo4j-kernel" % "1.8.M07" % "test" classifier "tests",
+    "com.codahale" %% "jerkson" % "0.5.0"
 )
 
-resolvers += "Neo4j Maven 2 release repository" at "http://m2.neo4j.org/releases"
+resolvers ++= Seq(
+    "Neo4j Maven 2 release repository" at "http://m2.neo4j.org/releases",
+    "Codahale Jerkson" at "http://repo.codahale.com"
+)
 

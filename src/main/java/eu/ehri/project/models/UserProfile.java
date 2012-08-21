@@ -2,7 +2,7 @@ package eu.ehri.project.models;
 
 import com.tinkerpop.frames.*;
 
-public interface UserProfile {
+public interface UserProfile extends Accessor {
 
     @Adjacency(label="hasAnnotations") public Iterable<Annotation> getAnnotation();
     @Adjacency(label="belongsTo") public Iterable<Group> getGroups();

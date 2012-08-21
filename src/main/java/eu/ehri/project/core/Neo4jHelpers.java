@@ -47,6 +47,22 @@ public class Neo4jHelpers {
 		return graph.createIndex(name,  Edge.class);
 	}
 	
+	public Index<Vertex> getOrCreateVertexIndex(String name) {
+        try {
+            return getVertexIndex(name);
+        } catch (IndexNotFoundException e) {
+    		return graph.createIndex(name,  Vertex.class);
+        }
+	}
+	
+	public Index<Edge> getOrCreateEdgeIndex(String name) {
+        try {
+            return getEdgeIndex(name);
+        } catch (IndexNotFoundException e) {
+            return graph.createIndex(name,  Edge.class);
+        }
+	}
+	
 	public Iterator<Vertex> simpleQuery(String index, String field, String query) 
 			throws IndexNotFoundException {
 		Iterator<Vertex> iter = getVertexIndex(index).get(field, query).iterator();
