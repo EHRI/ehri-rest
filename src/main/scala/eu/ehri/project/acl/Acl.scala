@@ -21,7 +21,7 @@ object Acl {
   // hierarchy looking for a groups that are contained
   // in the current entity's ACL list. Return the Access
   // relationship objects and see which one is most liberal.
-  private def ascendGroupHierarchy(accessors: List[Accessor], ctrlGroups: List[(Access, Accessor)]): List[Access] = accessors match {
+  private def searchPermissions(accessors: List[Accessor], ctrlGroups: List[(Access, Accessor)]): List[Access] = accessors match {
     // Termination condition on recursive function
     case Nil => Nil
     case _ => {
@@ -31,7 +31,7 @@ object Acl {
       val intersection: List[Access] = ctrlGroups.filter(t => accessors.contains(t._2)).map(t => t._1)
       // Recurse through the current accessor's parents and
       // add any parent users/groups that are given access.
-      intersection ++ accessors.flatMap(a => ascendGroupHierarchy(a.getParents.toList, ctrlGroups))
+      intersection ++ accessors.flatMap(a => searchPermissions(a.getParents.toList, ctrlGroups))
     }
   }
 
@@ -43,7 +43,7 @@ object Acl {
     if (ctrlUserGroups.isEmpty) {
       defaultAccess // default read-only access
     } else {
-      val ctrls = ascendGroupHierarchy(List(accessor), ctrlUserGroups)
+      val ctrls = searchPermissions(List(accessor), ctrlUserGroups)
       if (ctrls.isEmpty)
         // TODO: How do we lock down an object completely???
         defaultAccess
