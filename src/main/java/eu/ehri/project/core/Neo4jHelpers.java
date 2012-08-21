@@ -1,21 +1,21 @@
 package eu.ehri.project.core;
 
-import org.neo4j.graphdb.GraphDatabaseService;
+import java.util.Iterator;
+import java.util.Map;
 
+import org.neo4j.graphdb.DynamicRelationshipType;
+import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Node;
+
+import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Index;
 import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.blueprints.Vertex;
-import com.tinkerpop.blueprints.Edge;
-import org.neo4j.graphdb.Node;
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jEdge;
+import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jVertex;
-import org.neo4j.graphdb.DynamicRelationshipType;
 
 import eu.ehri.project.exceptions.IndexNotFoundException;
-
-import java.util.Iterator;
-import java.util.Map;
 
 public class Neo4jHelpers {
     public Neo4jHelpers(GraphDatabaseService g) {

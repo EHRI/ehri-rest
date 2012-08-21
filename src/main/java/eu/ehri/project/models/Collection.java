@@ -1,13 +1,14 @@
 package eu.ehri.project.models;
 
-import com.tinkerpop.frames.*;
+import com.tinkerpop.blueprints.Direction;
+import com.tinkerpop.frames.Adjacency;
 
 public interface Collection extends Entity {
 
-    @Adjacency(label = "holds")
+    @Adjacency(label = "holds", direction = Direction.IN)
     public CHInstitution getCHInstitution();
 
-    @Adjacency(label = "holds")
+    @Adjacency(label = "holds", direction = Direction.IN)
     public void setCHInstitution(final CHInstitution institution);
 
     @Adjacency(label = "hasDate")

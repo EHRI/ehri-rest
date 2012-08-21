@@ -1,6 +1,6 @@
 package eu.ehri.project.models;
 
-import com.tinkerpop.frames.*;
+import com.tinkerpop.frames.Adjacency;
 
 public interface CHInstitution extends Entity {
 

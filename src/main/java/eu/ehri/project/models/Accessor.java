@@ -1,9 +1,11 @@
 package eu.ehri.project.models;
 
-import eu.ehri.project.relationships.*;
-
 import com.tinkerpop.blueprints.Direction;
-import com.tinkerpop.frames.*;
+import com.tinkerpop.frames.Adjacency;
+import com.tinkerpop.frames.Incidence;
+import com.tinkerpop.frames.Property;
+
+import eu.ehri.project.relationships.Access;
 
 public interface Accessor {
     @Property("name")

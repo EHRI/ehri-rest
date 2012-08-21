@@ -1,7 +1,11 @@
 package eu.ehri.project.relationships;
 
-import com.tinkerpop.frames.*;
-import eu.ehri.project.models.*;
+import com.tinkerpop.frames.Domain;
+import com.tinkerpop.frames.Property;
+import com.tinkerpop.frames.Range;
+
+import eu.ehri.project.models.Accessor;
+import eu.ehri.project.models.Entity;
 
 public interface Access {
 

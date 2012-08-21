@@ -1,12 +1,15 @@
 package eu.ehri.project.models;
 
-import com.tinkerpop.frames.*;
+import com.tinkerpop.blueprints.Direction;
+import com.tinkerpop.frames.Adjacency;
+import com.tinkerpop.frames.Incidence;
+import com.tinkerpop.frames.Property;
 
-import eu.ehri.project.relationships.*;
+import eu.ehri.project.relationships.Access;
 
 public interface Group extends Accessor {
 
-    @Adjacency(label = "belongsTo")
+    @Adjacency(label = "belongsTo", direction = Direction.IN)
     public Iterable<UserProfile> getUsers();
 
     @Property("name")
