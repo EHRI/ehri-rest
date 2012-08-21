@@ -9,7 +9,6 @@ import eu.ehri.project.models._
 import eu.ehri.project.core.Neo4jHelpers
 
 import scala.collection.JavaConversions._
-import scalaj.collection.Imports._
 
 import com.codahale.jerkson.Json
 
@@ -23,7 +22,7 @@ class GraphTest extends Specification {
 
   "The Loaded Database" should {
     "contains the right number of vertices" in new CollectionDB {
-      graph.getVertices.toList.length must_== testNodes.length + 1 // including ROOT node
+      graph.getVertices.toList.length must_== DataLoader.testNodes.length + 1 // including ROOT node
     }
 
     "contains a collection present in the test data" in new CollectionDB {
@@ -91,115 +90,7 @@ class GraphTest extends Specification {
 
   trait CollectionDB extends DB {
 
-    val testNodes = List(
-      ("c1",
-        Map(
-          "isA" -> "collection",
-          "identifier" -> "c1",
-          "name" -> "Test Collection 1")),
-      ("c2",
-        Map(
-          "isA" -> "collection",
-          "identifier" -> "c2",
-          "name" -> "Test Collection 2")),
-      ("c3",
-        Map(
-          "isA" -> "collection",
-          "identifier" -> "c3",
-          "name" -> "Test Collection 3")),
-      ("r1",
-        Map(
-          "isA" -> "repository",
-          "identifier" -> "r1",
-          "name" -> "Repository 1")),
-      ("a1",
-        Map(
-          "isA" -> "authority",
-          "identifier" -> "a1",
-          "name" -> "Authority 1")),
-      ("a2",
-        Map(
-          "isA" -> "authority",
-          "identifier" -> "a2",
-          "name" -> "Authority 2")),
-      ("g1",
-        Map(
-          "isA" -> "group",
-          "name" -> "admin")),
-      ("g2",
-        Map(
-          "isA" -> "group",
-          "name" -> "niod")),
-      ("g3",
-        Map(
-          "isA" -> "group",
-          "name" -> "kcl")),
-      ("u1",
-        Map(
-          "isA" -> "userprofile",
-          "userId" -> 1,
-          "name" -> "Mike")),
-      ("u2",
-        Map(
-          "isA" -> "userprofile",
-          "userId" -> 2,
-          "name" -> "Reto")),
-      ("u3",
-        Map(
-          "isA" -> "userprofile",
-          "userId" -> 3,
-          "name" -> "Tim")))
-
-    val ehri = new Neo4jHelpers(graph.getBaseGraph.getRawGraph)
-    val tx = graph.getBaseGraph.getRawGraph.beginTx
-    testNodes.foreach {
-      case (desc, node) =>
-        node.get("isA").map {
-          case (index: String) =>
-            ehri.getOrCreateVertexIndex(index)
-            ehri.createIndexedVertex(node.asInstanceOf[Map[String, Object]], index)
-        }
-    }
-
-    // FIXME: This function is vulnerable to collisions!
-    def addUserToGroup(userName: String, groupName: String) = {
-      val label = "belongsTo"
-      ehri.getOrCreateEdgeIndex(label)
-
-      // add Mike to admin group
-      val g = graph.getBaseGraph.getVertices("name", groupName).toList.head
-      val u = graph.getBaseGraph.getVertices("name", userName).toList.head
-      ehri.createIndexedEdge(
-        u.getId().asInstanceOf[java.lang.Long],
-        g.getId().asInstanceOf[java.lang.Long],
-        label, Map[String, Object]())
-    }
-
-    def setSecurity(itemId: String, userOrGroupName: String, read: Boolean, write: Boolean) = {
-      val label = "access"
-      ehri.getOrCreateEdgeIndex(label)
-
-      val g = graph.getBaseGraph.getVertices("name", userOrGroupName).toList.head
-      val c = graph.getBaseGraph.getVertices("identifier", itemId).toList.head
-      ehri.createIndexedEdge(
-        c.getId().asInstanceOf[java.lang.Long],
-        g.getId().asInstanceOf[java.lang.Long],
-        label, Map("read" -> read, "write" -> write).asInstanceOf[Map[String, Object]])
-    }
-
-    addUserToGroup("Mike", "admin")
-    addUserToGroup("Mike", "kcl")
-    addUserToGroup("Tim", "niod")
-    addUserToGroup("Tim", "admin")
-    addUserToGroup("Reto", "kcl")
-
-    setSecurity("c1", "Mike", true, true)
-    setSecurity("c2", "kcl", true, false)
-    setSecurity("c2", "admin", true, true)
-    setSecurity("c2", "Tim", false, false) // Tim belongs to admin, so this should be overridden
-    setSecurity("c3", "niod", true, true)
-
-    tx.success()
+    DataLoader.loadTestData(graph)
   }
 }
 
