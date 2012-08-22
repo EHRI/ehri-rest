@@ -27,4 +27,16 @@ public interface DocumentaryUnit extends AccessibleEntity, DescribedEntity,
 
     @Adjacency(label = DocumentaryUnit.CHILD_OF, direction = Direction.IN)
     public Iterable<DocumentaryUnit> getChildren();
+    
+    @Adjacency(label = Authority.CREATED, direction = Direction.IN)
+    public Iterable<Authority> getCreators();
+    
+    @Adjacency(label = Authority.CREATED, direction = Direction.IN)
+    public void addCreator(final Authority creator);
+    
+    @Adjacency(label = Authority.MENTIONED_IN, direction = Direction.IN)
+    public Iterable<Authority> getNameAccess();    
+
+    @Adjacency(label = Authority.MENTIONED_IN, direction = Direction.IN)
+    public void addNameAccess(final Authority nameAccess);
 }
