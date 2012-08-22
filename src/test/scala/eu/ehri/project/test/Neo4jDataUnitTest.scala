@@ -9,7 +9,11 @@ import scala.collection.JavaConversions._
 import eu.ehri.project.models.Annotation
 
 class GraphTest extends Specification {
+  // FIXME: these tests need to run sequentially otherwise
+  // bad things happen with the Neo4j test database.
+  // It might be worth finding out why some time.
   sequential
+  
   "The Initial Database" should {
     "be empty (except for the ROOT node)" in new DB {
       graph.getVertices.toList.length mustEqual 1
