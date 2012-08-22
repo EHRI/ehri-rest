@@ -28,15 +28,19 @@ object TestData {
         "isA" -> DocumentaryUnit.isA,
         "identifier" -> "c3",
         "name" -> "Test Collection 3")),
+    ("cd3",
+      Map(
+        "isA" -> DocumentDescription.isA,
+        "title" -> "A Collection called 3")),
     ("c4",
       Map(
         "isA" -> DocumentaryUnit.isA,
         "identifier" -> "c4",
         "name" -> "Test Collection 4")),
-    ("cd3",
+    ("cd4",
       Map(
         "isA" -> DocumentDescription.isA,
-        "title" -> "A Collection called 3")),
+        "title" -> "A Collection called 4")),
     ("r1",
       Map(
         "isA" -> Agent.isA,
@@ -120,13 +124,21 @@ object TestData {
     // C4 is a child of C1
     ("c4", DocumentaryUnit.CHILD_OF, "c1", Map()),
     
+    // Repository has an address
+    ("r1", Agent.HAS_ADDRESS, "ar1", Map()),
+    
     // Descriptions describe entities
     ("cd1", Description.DESCRIBES, "c1", Map()),
     ("cd2", Description.DESCRIBES, "c2", Map()),
     ("cd3", Description.DESCRIBES, "c3", Map()),
+    ("cd4", Description.DESCRIBES, "c4", Map()),
     ("rd1", Description.DESCRIBES, "r1", Map()),
     ("ad1", Description.DESCRIBES, "a1", Map()),
     ("ad2", Description.DESCRIBES, "a2", Map()),
+    
+    // Authorities create and are mentionedIn collections
+    ("a1", Authority.CREATED, "c1", Map()),
+    ("a2", Authority.MENTIONED_IN, "c1", Map()),
     
     // Users belong to groups
     ("mike", UserProfile.BELONGS_TO, "adminGroup", Map()),

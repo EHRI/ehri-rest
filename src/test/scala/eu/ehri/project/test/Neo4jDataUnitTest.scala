@@ -51,6 +51,54 @@ class GraphTest extends Specification {
         c.getAgent == null
       } mustEqual Nil
     }
+    
+    "and have a description" in new LoadedDB {
+      helper.findTestElements(DocumentaryUnit.isA, classOf[DocumentaryUnit]).toList.filter { c =>
+        c.getDescriptions.isEmpty
+      } mustEqual Nil
+    }
+  }
+  
+  "Collection c1" should {
+    "have a creator a1" in new LoadedDB {
+      val c1 = helper.findTestElement("c1", classOf[DocumentaryUnit])
+      val a1 = helper.findTestElement("a1", classOf[Authority])
+      c1.getCreators.head mustEqual a1
+    }
+    
+    "and a name access point a2" in new LoadedDB {
+      val c1 = helper.findTestElement("c1", classOf[DocumentaryUnit])
+      val a2 = helper.findTestElement("a2", classOf[Authority])
+      c1.getNameAccess.head mustEqual a2
+    }
+  }
+  
+  "Authority a1" should {
+    "be the creator of collection c1" in new LoadedDB {
+      val c1 = helper.findTestElement("c1", classOf[DocumentaryUnit])
+      val a1 = helper.findTestElement("a1", classOf[Authority])
+      a1.getDocumentaryUnits.head mustEqual c1
+    }
+  }
+  
+  "Authority a2" should {
+    "be a name access point for collection c1" in new LoadedDB {
+      val c1 = helper.findTestElement("c1", classOf[DocumentaryUnit])
+      val a2 = helper.findTestElement("a2", classOf[Authority])
+      a2.getMentionedIn.head mustEqual c1
+    }
+  }
+  
+  "The repository" should {
+    "have an address" in new LoadedDB {
+      val repo = helper.findTestElement("r1", classOf[Agent])
+      repo.getAddresses.toList mustNotEqual Nil
+    }
+    
+    "and have a description" in new LoadedDB {
+      val repo = helper.findTestElement("r1", classOf[Agent])
+      repo.getDescriptions.toList mustNotEqual Nil
+    }
   }
 
   "The admin group" should {
