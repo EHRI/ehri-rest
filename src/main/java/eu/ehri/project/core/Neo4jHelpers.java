@@ -36,18 +36,19 @@ public class Neo4jHelpers {
         return graph.createIndex(name, cls);
     }
 
-    public <T extends Element> Index<T> getOrCreateIndex(String name, Class<T> cls) {
+    public <T extends Element> Index<T> getOrCreateIndex(String name,
+            Class<T> cls) {
         try {
             return getIndex(name, cls);
         } catch (IndexNotFoundException e) {
             return graph.createIndex(name, cls);
         }
     }
-    
+
     public Index<Edge> createdEdgeIndex(String name) {
         return createIndex(name, Edge.class);
     }
-    
+
     public Index<Vertex> createVertexIndex(String name) {
         return createIndex(name, Vertex.class);
     }
