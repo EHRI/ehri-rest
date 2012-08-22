@@ -5,10 +5,13 @@ import com.tinkerpop.frames.Property;
 
 public interface UserProfile extends Accessor {
 
-    @Adjacency(label = "hasAnnotations")
+    public static final String HAS_ANNOTATION = "hasAnnotation";
+    public static final String BELONGS_TO = "belongsTo";
+
+    @Adjacency(label = HAS_ANNOTATION)
     public Iterable<Annotation> getAnnotation();
 
-    @Adjacency(label = "belongsTo")
+    @Adjacency(label = BELONGS_TO)
     public Iterable<Group> getGroups();
 
     @Property("userId")

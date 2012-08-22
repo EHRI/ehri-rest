@@ -8,21 +8,24 @@ import com.tinkerpop.frames.Property;
 import eu.ehri.project.relationships.Access;
 
 public interface Accessor {
+    public static final String BELONGS_TO = "belongsTo";
+
     @Property("name")
     public String getName();
 
     @Property("name")
     public void setName();
 
-    @Adjacency(label = "belongsTo")
+    @Adjacency(label = BELONGS_TO)
     public Iterable<Accessor> getParents();
 
-    @Incidence(label = "access", direction = Direction.IN)
+    @Incidence(label = AccessibleEntity.ACCESS, direction = Direction.IN)
     public Iterable<Access> getAccess();
 
-    @Adjacency(label = "access", direction = Direction.IN)
-    public Iterable<Entity> getAccessibleEntities();
+    @Adjacency(label = AccessibleEntity.ACCESS, direction = Direction.IN)
+    public Iterable<AccessibleEntity> getAccessibleEntities();
 
-    @Adjacency(label = "access", direction = Direction.IN)
-    public void addAccessibleEntity(final Entity entity);
+    @Adjacency(label = AccessibleEntity.ACCESS, direction = Direction.IN)
+    public void addAccessibleEntity(final AccessibleEntity entity);
+
 }

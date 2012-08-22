@@ -9,7 +9,7 @@ import eu.ehri.project.relationships.Access;
 
 public interface Group extends Accessor {
 
-    @Adjacency(label = "belongsTo", direction = Direction.IN)
+    @Adjacency(label = UserProfile.BELONGS_TO, direction = Direction.IN)
     public Iterable<UserProfile> getUsers();
 
     @Property("name")
@@ -17,17 +17,5 @@ public interface Group extends Accessor {
 
     @Property("name")
     public void setName(String name);
-
-    @Adjacency(label = "access")
-    public void removeEntity(final Entity entity);
-
-    @Adjacency(label = "access")
-    public void setEntities(Iterable<Entity> entities);
-
-    @Adjacency(label = "access")
-    public void addEntity(final Entity entity);
-
-    @Incidence(label = "access")
-    public Iterable<Access> getAccess();
 
 }

@@ -5,7 +5,7 @@ import com.tinkerpop.frames.Property;
 import com.tinkerpop.frames.Range;
 
 import eu.ehri.project.models.Accessor;
-import eu.ehri.project.models.Entity;
+import eu.ehri.project.models.AccessibleEntity;
 
 public interface Access {
 
@@ -25,5 +25,5 @@ public interface Access {
     public Accessor getAccessor();
 
     @Domain
-    public Entity getEntity();
+    public AccessibleEntity getEntity();
 }

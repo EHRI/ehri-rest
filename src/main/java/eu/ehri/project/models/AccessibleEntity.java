@@ -6,7 +6,9 @@ import com.tinkerpop.frames.Property;
 
 import eu.ehri.project.relationships.Access;
 
-public interface Entity {
+public interface AccessibleEntity {
+
+    public static final String ACCESS = "access";
 
     @Property("name")
     public String getName();
@@ -23,12 +25,12 @@ public interface Entity {
     @Property("identifier")
     public String setIdentifier();
 
-    @Incidence(label = "access")
+    @Incidence(label = ACCESS)
     public Iterable<Access> getAccess();
 
-    @Adjacency(label = "access")
+    @Adjacency(label = ACCESS)
     public Iterable<Accessor> getAccessibleTo();
 
-    @Adjacency(label = "access")
+    @Adjacency(label = ACCESS)
     public void addAccessor(final Accessor accessor);
 }

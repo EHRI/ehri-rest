@@ -24,7 +24,7 @@ class GraphTest extends Specification {
     }
 
     "contains a collection present in the test data" in new LoadedDB {
-      val iter = graph.getVertices("identifier", "c3", classOf[Collection])
+      val iter = graph.getVertices("identifier", "c3", classOf[DocumentaryUnit])
       iter.head.getName mustEqual "Test Collection 3"
     }
 
@@ -36,8 +36,8 @@ class GraphTest extends Specification {
   
   "Collections" should {
     "be held by a repository" in new LoadedDB {
-      graph.getVertices("isA", "collection", classOf[Collection]).toList.filter { c =>
-        c.getCHInstitution == null
+      graph.getVertices("isA", "collection", classOf[DocumentaryUnit]).toList.filter { c =>
+        c.getAgent == null
       } mustEqual Nil
     }
   }
@@ -52,8 +52,8 @@ class GraphTest extends Specification {
   "The niod group" should {
     "have read-access permissions" in new LoadedDB {
       val accessor = graph.getVertices("name", "niod", classOf[Accessor]).head
-      val c1 = graph.getVertices("identifier", "c1", classOf[Entity]).head
-      val access = eu.ehri.project.acl.Acl.getAccessControl(c1, accessor)
+      val c = graph.getVertices("identifier", "c1", classOf[AccessibleEntity]).head
+      val access = eu.ehri.project.acl.Acl.getAccessControl(c, accessor)
       access.getRead() mustEqual true
       access.getWrite() mustEqual false
     }
@@ -62,8 +62,8 @@ class GraphTest extends Specification {
   "The c1 collection" should {
     "have read-write permissions for user 'Mike'" in new LoadedDB {
       val accessor = graph.getVertices("name", "Mike", classOf[Accessor]).head
-      val c1 = graph.getVertices("identifier", "c1", classOf[Entity]).head
-      val access = eu.ehri.project.acl.Acl.getAccessControl(c1, accessor)
+      val c = graph.getVertices("identifier", "c1", classOf[AccessibleEntity]).head
+      val access = eu.ehri.project.acl.Acl.getAccessControl(c, accessor)
       access.getRead() mustEqual true
       access.getWrite() mustEqual true
     }
@@ -72,8 +72,8 @@ class GraphTest extends Specification {
   "The c3 collection" should {
     "have read-write permissions for user 'Tim'" in new LoadedDB {
       val accessor = graph.getVertices("name", "Tim", classOf[Accessor]).head
-      val c1 = graph.getVertices("identifier", "c3", classOf[Entity]).head
-      val access = eu.ehri.project.acl.Acl.getAccessControl(c1, accessor)
+      val c = graph.getVertices("identifier", "c3", classOf[AccessibleEntity]).head
+      val access = eu.ehri.project.acl.Acl.getAccessControl(c, accessor)
       access.getRead() mustEqual true
       access.getWrite() mustEqual true
     }
@@ -82,8 +82,8 @@ class GraphTest extends Specification {
   "The c2 collection" should {
     "ensure that group perms override user perms" in new LoadedDB {
       val accessor = graph.getVertices("name", "Tim", classOf[Accessor]).head
-      val c1 = graph.getVertices("identifier", "c2", classOf[Entity]).head
-      val access = eu.ehri.project.acl.Acl.getAccessControl(c1, accessor)
+      val c = graph.getVertices("identifier", "c2", classOf[AccessibleEntity]).head
+      val access = eu.ehri.project.acl.Acl.getAccessControl(c, accessor)
       access.getRead() mustEqual true
       access.getWrite() mustEqual true
     }

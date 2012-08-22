@@ -1,17 +1,17 @@
 package eu.ehri.project.acl;
 
 import eu.ehri.project.models.Accessor;
-import eu.ehri.project.models.Entity;
+import eu.ehri.project.models.AccessibleEntity;
 import eu.ehri.project.relationships.Access;
 
 public class EntityAccess implements Access {
     Boolean read;
     Boolean write;
-    Entity entity;
+    AccessibleEntity entity;
     Accessor accessor;
 
-    protected EntityAccess(Boolean read, Boolean write, Entity entity,
-            Accessor accessor) {
+    protected EntityAccess(Boolean read, Boolean write,
+            AccessibleEntity entity, Accessor accessor) {
         this.read = read;
         this.write = write;
         this.entity = entity;
@@ -34,11 +34,11 @@ public class EntityAccess implements Access {
         this.write = canWrite;
     }
 
-    public Entity getEntity() {
+    public AccessibleEntity getEntity() {
         return entity;
     }
 
-    public void setEntity(Entity entity) {
+    public void setEntity(AccessibleEntity entity) {
         this.entity = entity;
     }
 

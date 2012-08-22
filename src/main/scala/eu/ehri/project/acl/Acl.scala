@@ -35,7 +35,7 @@ object Acl {
     }
   }
 
-  def getAccessControl(entity: Entity, accessor: Accessor): Access = {
+  def getAccessControl(entity: AccessibleEntity, accessor: Accessor): Access = {
     var defaultAccess = new EntityAccessFactory().buildReadOnly(entity, accessor)
     // Build a tuple of the entities access relationships, and the
     // respective groups they point to...

@@ -1,15 +1,18 @@
 package eu.ehri.project.models;
 
+import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Property;
 
 public interface Annotation {
 
-    @Adjacency(label = "hasAnnotation")
+    public static final String ANNOTATES = "annotates";
+
+    @Adjacency(label = UserProfile.HAS_ANNOTATION, direction = Direction.IN)
     public UserProfile getUser();
 
-    @Adjacency(label = "annotates")
-    public Entity getTarget();
+    @Adjacency(label = ANNOTATES)
+    public AccessibleEntity getTarget();
 
     @Property("body")
     public String getBody();
