@@ -6,6 +6,7 @@ import com.tinkerpop.frames.Adjacency;
 public interface DocumentaryUnit extends AccessibleEntity, DescribedEntity,
         TemporalEntity {
 
+    public static final String isA = "documentaryUnit";
     public static final String CHILD_OF = "childOf";
 
     @Adjacency(label = Agent.HOLDS, direction = Direction.IN)

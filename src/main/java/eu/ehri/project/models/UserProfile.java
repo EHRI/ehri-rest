@@ -5,6 +5,7 @@ import com.tinkerpop.frames.Property;
 
 public interface UserProfile extends Accessor {
 
+    public static final String isA = "userProfile";
     public static final String HAS_ANNOTATION = "hasAnnotation";
     public static final String BELONGS_TO = "belongsTo";
 

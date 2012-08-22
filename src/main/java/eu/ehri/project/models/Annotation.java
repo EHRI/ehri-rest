@@ -6,6 +6,7 @@ import com.tinkerpop.frames.Property;
 
 public interface Annotation {
 
+    public static final String isA = "annotation";
     public static final String ANNOTATES = "annotates";
 
     @Adjacency(label = UserProfile.HAS_ANNOTATION, direction = Direction.IN)

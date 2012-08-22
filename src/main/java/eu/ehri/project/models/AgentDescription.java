@@ -4,6 +4,8 @@ import com.tinkerpop.frames.Property;
 
 public interface AgentDescription extends Description {
 
+    public static final String isA = "agentDescription";
+    
     @Property("title")
     public String getTitle();
 
