@@ -8,13 +8,13 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 
 import com.tinkerpop.blueprints.Edge;
+import com.tinkerpop.blueprints.Element;
 import com.tinkerpop.blueprints.Index;
 import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jEdge;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jVertex;
-
 import eu.ehri.project.exceptions.IndexNotFoundException;
 
 public class Neo4jHelpers {
@@ -24,48 +24,37 @@ public class Neo4jHelpers {
 
     protected Neo4jGraph graph;
 
-    public Index<Vertex> getVertexIndex(String name)
+    public <T extends Element> Index<T> getIndex(String name, Class<T> cls)
             throws IndexNotFoundException {
-        Index<Vertex> index = graph.getIndex(name, Vertex.class);
+        Index<T> index = graph.getIndex(name, cls);
         if (index == null)
             throw new IndexNotFoundException(name);
         return index;
     }
 
-    public Index<Edge> getEdgeIndex(String name) throws IndexNotFoundException {
-        Index<Edge> index = graph.getIndex(name, Edge.class);
-        if (index == null)
-            throw new IndexNotFoundException(name);
-        return index;
+    public <T extends Element> Index<T> createIndex(String name, Class<T> cls) {
+        return graph.createIndex(name, cls);
     }
 
+    public <T extends Element> Index<T> getOrCreateIndex(String name, Class<T> cls) {
+        try {
+            return getIndex(name, cls);
+        } catch (IndexNotFoundException e) {
+            return graph.createIndex(name, cls);
+        }
+    }
+    
+    public Index<Edge> createdEdgeIndex(String name) {
+        return createIndex(name, Edge.class);
+    }
+    
     public Index<Vertex> createVertexIndex(String name) {
-        return graph.createIndex(name, Vertex.class);
-    }
-
-    public Index<Edge> createEdgeIndex(String name) {
-        return graph.createIndex(name, Edge.class);
-    }
-
-    public Index<Vertex> getOrCreateVertexIndex(String name) {
-        try {
-            return getVertexIndex(name);
-        } catch (IndexNotFoundException e) {
-            return graph.createIndex(name, Vertex.class);
-        }
-    }
-
-    public Index<Edge> getOrCreateEdgeIndex(String name) {
-        try {
-            return getEdgeIndex(name);
-        } catch (IndexNotFoundException e) {
-            return graph.createIndex(name, Edge.class);
-        }
+        return createIndex(name, Vertex.class);
     }
 
     public Iterator<Vertex> simpleQuery(String index, String field, String query)
             throws IndexNotFoundException {
-        Iterator<Vertex> iter = getVertexIndex(index).get(field, query)
+        Iterator<Vertex> iter = getIndex(index, Vertex.class).get(field, query)
                 .iterator();
         return iter;
     }
@@ -73,7 +62,7 @@ public class Neo4jHelpers {
     public Vertex createIndexedVertex(Map<String, Object> data, String indexName)
             throws IndexNotFoundException {
         try {
-            Index<Vertex> index = getVertexIndex(indexName);
+            Index<Vertex> index = getIndex(indexName, Vertex.class);
             Vertex node = graph.addVertex(null);
 
             for (Map.Entry<String, Object> entry : data.entrySet()) {
@@ -111,7 +100,7 @@ public class Neo4jHelpers {
                 .withName(label);
 
         try {
-            Index<Edge> index = getEdgeIndex(label);
+            Index<Edge> index = getIndex(label, Edge.class);
             Edge edge = new Neo4jEdge(src.createRelationshipTo(dst,
                     relationshipType), graph);
             for (Map.Entry<String, Object> entry : data.entrySet()) {
