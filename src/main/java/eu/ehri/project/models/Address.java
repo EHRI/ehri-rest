@@ -6,6 +6,8 @@ import com.tinkerpop.frames.Property;
 
 public interface Address {
     
+    public static final String isA = "address";
+    
     @Adjacency(label=Agent.HAS_ADDRESS, direction=Direction.IN)
     public Agent getAgent();
 

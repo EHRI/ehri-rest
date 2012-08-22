@@ -3,14 +3,11 @@ package eu.ehri.project.models;
 import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Property;
 
-public interface UserProfile extends Accessor {
+public interface UserProfile extends Accessor, Annotator {
 
     public static final String isA = "userProfile";
-    public static final String HAS_ANNOTATION = "hasAnnotation";
-    public static final String BELONGS_TO = "belongsTo";
 
-    @Adjacency(label = HAS_ANNOTATION)
-    public Iterable<Annotation> getAnnotation();
+    public static final String BELONGS_TO = "belongsTo";
 
     @Adjacency(label = BELONGS_TO)
     public Iterable<Group> getGroups();

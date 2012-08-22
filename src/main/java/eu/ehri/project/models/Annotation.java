@@ -7,7 +7,7 @@ import com.tinkerpop.frames.Property;
 
 import eu.ehri.project.relationships.Annotates;
 
-public interface Annotation {
+public interface Annotation extends AnnotatableEntity {
 
     public static final String isA = "annotation";
     public static final String ANNOTATES = "annotates";
@@ -16,10 +16,10 @@ public interface Annotation {
     public UserProfile getUser();
 
     @Adjacency(label = ANNOTATES)
-    public AccessibleEntity getTarget();
+    public AnnotatableEntity getTarget();
     
     @Incidence(label= ANNOTATES)
-    public Annotates getAnnotationContext();
+    public Annotates getContext();
 
     @Property("body")
     public String getBody();

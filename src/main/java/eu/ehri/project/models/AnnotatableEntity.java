@@ -9,10 +9,10 @@ import eu.ehri.project.relationships.Annotates;
 
 public interface AnnotatableEntity {
     @Incidence(label=Annotation.ANNOTATES, direction=Direction.IN)
-    public Iterable<Annotates> getAnnotationContexts();
+    public Iterable<Annotates> getContexts();
     
     @Incidence(label=Annotation.ANNOTATES, direction=Direction.IN)
-    public void addAnnotationContext(final Annotates annotates);
+    public void addContext(final Annotates annotates);
 
     @Adjacency(label=Annotation.ANNOTATES, direction=Direction.IN)
     public Iterable<Annotation> getAnnotations();

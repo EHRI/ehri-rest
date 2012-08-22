@@ -2,7 +2,7 @@ package eu.ehri.project.models;
 
 import com.tinkerpop.frames.Property;
 
-interface Authority extends AccessibleEntity, DescribedEntity,
+public interface Authority extends AccessibleEntity, DescribedEntity,
         AnnotatableEntity {
     
     public static final String isA = "authority";

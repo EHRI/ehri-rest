@@ -20,40 +20,45 @@ class GraphTest extends Specification {
 
   "The Loaded Database" should {
     "contains the right number of vertices" in new LoadedDB {
-      graph.getVertices.toList.length must_== DataLoader.testNodes.length + 1 // including ROOT node
+      graph.getVertices.toList.length must_== TestData.nodes.length + 1 // including ROOT node
     }
 
     "contains a collection present in the test data" in new LoadedDB {
-      val iter = graph.getVertices("identifier", "c3", classOf[DocumentaryUnit])
-      iter.head.getName mustEqual "Test Collection 3"
+      val c = dataLoader.findTestElement("c3", classOf[DocumentaryUnit])
+      c.getName mustEqual "Test Collection 3"
     }
 
     "contain some groups" in new LoadedDB {
-      val groups = graph.getVertices("isA", "group", classOf[Group])
+      val groups = dataLoader.findTestElements(Group.isA, classOf[Group])
+      groups mustNotEqual Nil
+    }
+
+    "contain some groups with users in" in new LoadedDB {
+      val groups = dataLoader.findTestElements(Group.isA, classOf[Group])
       groups.head.getUsers.toList mustNotEqual Nil
     }
   }
   
   "Collections" should {
     "be held by a repository" in new LoadedDB {
-      graph.getVertices("isA", "collection", classOf[DocumentaryUnit]).toList.filter { c =>
+      dataLoader.findTestElements(DocumentaryUnit.isA, classOf[DocumentaryUnit]).toList.filter { c =>
         c.getAgent == null
       } mustEqual Nil
     }
   }
 
   "The admin group" should {
-    "contain a user" in new LoadedDB {
-      val groups = graph.getVertices("name", "admin", classOf[Group])
-      groups.head.getUsers.toList mustNotEqual Nil
+    "contain some users" in new LoadedDB {
+      val admin = dataLoader.findTestElement("adminGroup", classOf[Group])
+      admin.getUsers.toList mustNotEqual Nil
     }
   }
 
   "The niod group" should {
     "have read-access permissions" in new LoadedDB {
-      val accessor = graph.getVertices("name", "niod", classOf[Accessor]).head
-      val c = graph.getVertices("identifier", "c1", classOf[AccessibleEntity]).head
-      val access = eu.ehri.project.acl.Acl.getAccessControl(c, accessor)
+      val accessor = dataLoader.findTestElement("niodGroup", classOf[Accessor])
+      val cl = dataLoader.findTestElement("c1", classOf[AccessibleEntity])
+      val access = eu.ehri.project.acl.Acl.getAccessControl(cl, accessor)
       access.getRead() mustEqual true
       access.getWrite() mustEqual false
     }
@@ -61,9 +66,9 @@ class GraphTest extends Specification {
   
   "The c1 collection" should {
     "have read-write permissions for user 'Mike'" in new LoadedDB {
-      val accessor = graph.getVertices("name", "Mike", classOf[Accessor]).head
-      val c = graph.getVertices("identifier", "c1", classOf[AccessibleEntity]).head
-      val access = eu.ehri.project.acl.Acl.getAccessControl(c, accessor)
+      val accessor = dataLoader.findTestElement("mike", classOf[Accessor])
+      val cl = dataLoader.findTestElement("c1", classOf[AccessibleEntity])
+      val access = eu.ehri.project.acl.Acl.getAccessControl(cl, accessor)
       access.getRead() mustEqual true
       access.getWrite() mustEqual true
     }
@@ -71,9 +76,9 @@ class GraphTest extends Specification {
   
   "The c3 collection" should {
     "have read-write permissions for user 'Tim'" in new LoadedDB {
-      val accessor = graph.getVertices("name", "Tim", classOf[Accessor]).head
-      val c = graph.getVertices("identifier", "c3", classOf[AccessibleEntity]).head
-      val access = eu.ehri.project.acl.Acl.getAccessControl(c, accessor)
+      val accessor = dataLoader.findTestElement("tim", classOf[Accessor])
+      val cl = dataLoader.findTestElement("c3", classOf[AccessibleEntity])
+      val access = eu.ehri.project.acl.Acl.getAccessControl(cl, accessor)
       access.getRead() mustEqual true
       access.getWrite() mustEqual true
     }
@@ -81,11 +86,23 @@ class GraphTest extends Specification {
   
   "The c2 collection" should {
     "ensure that group perms override user perms" in new LoadedDB {
-      val accessor = graph.getVertices("name", "Tim", classOf[Accessor]).head
-      val c = graph.getVertices("identifier", "c2", classOf[AccessibleEntity]).head
-      val access = eu.ehri.project.acl.Acl.getAccessControl(c, accessor)
+      val accessor = dataLoader.findTestElement("tim", classOf[Accessor])
+      val cl = dataLoader.findTestElement("c2", classOf[AccessibleEntity])
+      val access = eu.ehri.project.acl.Acl.getAccessControl(cl, accessor)
       access.getRead() mustEqual true
       access.getWrite() mustEqual true
+    }
+  }
+  
+  "The Mike user" should {
+    "have an annotation" in new LoadedDB {
+      val mike = dataLoader.findTestElement("mike", classOf[UserProfile])
+      mike.getAnnotations.toList mustNotEqual Nil
+    }
+    
+    "with the right body" in new LoadedDB {
+      val mike = dataLoader.findTestElement("mike", classOf[UserProfile])
+      mike.getAnnotations.head.getBody mustEqual "Hello Dolly!"
     }
   }
 
@@ -99,7 +116,8 @@ class GraphTest extends Specification {
   }
 
   trait LoadedDB extends DB {
-    new DataLoader(graph).loadTestData
+    val dataLoader = new DataLoader(graph)
+    dataLoader.loadTestData
   }
 }
 
