@@ -13,7 +13,7 @@ public interface Annotates {
     public AnnotatableEntity getEntity();
 
     @Domain
-    public UserProfile getUser();
+    public UserProfile getAnnotator();
     
     @Property("timestamp")
     public String getTimestamp();

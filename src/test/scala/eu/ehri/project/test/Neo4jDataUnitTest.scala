@@ -1,13 +1,12 @@
 package eu.ehri.project.test
 
 import org.specs2.mutable._
-
 import org.neo4j.test.TestGraphDatabaseFactory
 import com.tinkerpop.frames.FramedGraph
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph
 import eu.ehri.project.models._
-
 import scala.collection.JavaConversions._
+import eu.ehri.project.models.Annotation
 
 
 class GraphTest extends Specification {
@@ -103,6 +102,32 @@ class GraphTest extends Specification {
     "with the right body" in new LoadedDB {
       val mike = dataLoader.findTestElement("mike", classOf[UserProfile])
       mike.getAnnotations.head.getBody mustEqual "Hello Dolly!"
+    }
+    
+    "and the right target" in new LoadedDB {
+      val mike = dataLoader.findTestElement("mike", classOf[UserProfile])
+      val c1 = dataLoader.findTestElement("c1", classOf[AnnotatableEntity])
+      mike.getAnnotations.head.getTarget mustEqual c1      
+    }
+    
+    "and the right context" in new LoadedDB {
+      val mike = dataLoader.findTestElement("mike", classOf[Annotator])
+      val annotation = mike.getAnnotations.head
+      annotation.getContext.head.getField mustEqual "scopeAndContent"
+    }
+  }
+  
+  "The first annotation" should {
+    "be annotated by the second annotation" in new LoadedDB {
+      val ann1 = dataLoader.findTestElement("ann1", classOf[AnnotatableEntity])
+      val ann2 = dataLoader.findTestElement("ann2", classOf[Annotation])
+      ann2.getTarget mustEqual ann1
+    }
+    
+    "which has the right body" in new LoadedDB {
+      val ann1 = dataLoader.findTestElement("ann1", classOf[AnnotatableEntity])
+      val ann2 = dataLoader.findTestElement("ann2", classOf[Annotation])
+      ann1.getAnnotations.head.getBody mustEqual ann2.getBody      
     }
   }
 

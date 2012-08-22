@@ -98,7 +98,11 @@ object TestData {
     ("ann1",
       Map(
         "isA" -> Annotation.isA,
-        "body" -> "Hello Dolly!")))
+        "body" -> "Hello Dolly!")),
+    ("ann2",
+      Map(
+        "isA" -> Annotation.isA,
+        "body" -> "Annotating my annotation!")))
         
         
   val edges = List(
@@ -131,7 +135,9 @@ object TestData {
     ("c3", AccessibleEntity.ACCESS, "tim", Map("read" -> true, "write" -> true)),
     
     // Annotations
-    ("mike", Annotator.HAS_ANNOTATION, "ann1", Map("timestamp" -> "2012-08-08T00:00:00Z", "field" -> "scopeAndContent"))
-    
+    ("mike", Annotator.HAS_ANNOTATION, "ann1", Map()),
+    ("ann1", Annotation.ANNOTATES, "c1", Map("timestamp" -> "2012-08-08T00:00:00Z", "field" -> "scopeAndContent")),
+    ("tim", Annotator.HAS_ANNOTATION, "ann2", Map()),
+    ("ann2", Annotation.ANNOTATES, "ann1", Map("timestamp" -> "2012-08-08T00:00:00Z", "field" -> "scopeAndContent"))
   )
 }
