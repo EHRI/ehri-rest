@@ -28,6 +28,11 @@ object TestData {
         "isA" -> DocumentaryUnit.isA,
         "identifier" -> "c3",
         "name" -> "Test Collection 3")),
+    ("c4",
+      Map(
+        "isA" -> DocumentaryUnit.isA,
+        "identifier" -> "c4",
+        "name" -> "Test Collection 4")),
     ("cd3",
       Map(
         "isA" -> DocumentDescription.isA,
@@ -110,6 +115,10 @@ object TestData {
     ("r1", Agent.HOLDS, "c1", Map()),
     ("r1", Agent.HOLDS, "c2", Map()),
     ("r1", Agent.HOLDS, "c3", Map()),
+    ("r1", Agent.HOLDS, "c4", Map()),
+    
+    // C4 is a child of C1
+    ("c4", DocumentaryUnit.CHILD_OF, "c1", Map()),
     
     // Descriptions describe entities
     ("cd1", Description.DESCRIBES, "c1", Map()),
