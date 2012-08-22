@@ -2,6 +2,7 @@ package eu.ehri.project.models;
 
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.frames.Adjacency;
+import com.tinkerpop.frames.annotations.gremlin.GremlinGroovy;
 
 public interface DocumentaryUnit extends AccessibleEntity, DescribedEntity,
         TemporalEntity {
@@ -17,6 +18,9 @@ public interface DocumentaryUnit extends AccessibleEntity, DescribedEntity,
 
     @Adjacency(label = DocumentaryUnit.CHILD_OF)
     public DocumentaryUnit getParent();
+    
+    @GremlinGroovy("as('n').out('" + CHILD_OF + "').loop('n'){it.loops < 12}{true}.toList().unique()._()")
+    public Iterable<DocumentaryUnit> getAncestors();
 
     @Adjacency(label = DocumentaryUnit.CHILD_OF, direction = Direction.IN)
     public Iterable<DocumentaryUnit> getChildren();

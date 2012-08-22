@@ -4,8 +4,8 @@ import com.tinkerpop.frames.Domain;
 import com.tinkerpop.frames.Property;
 import com.tinkerpop.frames.Range;
 
-import eu.ehri.project.models.Accessor;
 import eu.ehri.project.models.AccessibleEntity;
+import eu.ehri.project.models.Accessor;
 
 public interface Access {
 

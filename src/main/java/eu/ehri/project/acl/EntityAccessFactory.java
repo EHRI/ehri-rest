@@ -1,7 +1,7 @@
 package eu.ehri.project.acl;
 
-import eu.ehri.project.models.Accessor;
 import eu.ehri.project.models.AccessibleEntity;
+import eu.ehri.project.models.Accessor;
 import eu.ehri.project.relationships.Access;
 
 public class EntityAccessFactory {
