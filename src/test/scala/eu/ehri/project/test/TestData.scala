@@ -121,8 +121,9 @@ object TestData {
     ("r1", Agent.HOLDS, "c3", Map()),
     ("r1", Agent.HOLDS, "c4", Map()),
     
-    // C4 is a child of C1
-    ("c4", DocumentaryUnit.CHILD_OF, "c1", Map()),
+    // C3 is a child of C2 and C2 of C1
+    ("c2", DocumentaryUnit.CHILD_OF, "c1", Map()),
+    ("c3", DocumentaryUnit.CHILD_OF, "c2", Map()),
     
     // Repository has an address
     ("r1", Agent.HAS_ADDRESS, "ar1", Map()),

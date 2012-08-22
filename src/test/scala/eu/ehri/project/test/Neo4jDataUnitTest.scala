@@ -127,22 +127,31 @@ class GraphTest extends Specification {
       access.getWrite() mustEqual true
     }
 
-    "have a child (c4)" in new LoadedDB {
+    "have a child (c2)" in new LoadedDB {
       val c1 = helper.findTestElement("c1", classOf[DocumentaryUnit])
-      val c4 = helper.findTestElement("c4", classOf[DocumentaryUnit])
-      c1.getChildren.head mustEqual c4
+      val c2 = helper.findTestElement("c2", classOf[DocumentaryUnit])
+      c1.getChildren.head mustEqual c2
     }
 
-    "and be the parent of c4" in new LoadedDB {
+    "and be the parent of c2" in new LoadedDB {
       val c1 = helper.findTestElement("c1", classOf[DocumentaryUnit])
-      val c4 = helper.findTestElement("c4", classOf[DocumentaryUnit])
-      c4.getParent mustEqual c1
+      val c2 = helper.findTestElement("c2", classOf[DocumentaryUnit])
+      c2.getParent mustEqual c1
     }
 
-    "and be the first ancestor of c4" in new LoadedDB {
+    "and be the first ancestor of c2" in new LoadedDB {
       val c1 = helper.findTestElement("c1", classOf[DocumentaryUnit])
-      val c4 = helper.findTestElement("c4", classOf[DocumentaryUnit])
-      c4.getAncestors.head mustEqual c1
+      val c2 = helper.findTestElement("c2", classOf[DocumentaryUnit])
+      c2.getAncestors.head mustEqual c1
+    }
+    
+    "and be the an ancestor of c3" in new LoadedDB {
+      val c1 = helper.findTestElement("c1", classOf[DocumentaryUnit])
+      val c2 = helper.findTestElement("c2", classOf[DocumentaryUnit])
+      val c3 = helper.findTestElement("c3", classOf[DocumentaryUnit])
+      c3.getAncestors.toList.length mustEqual 2
+      c3.getAncestors.head mustEqual c2
+      c3.getAncestors.last mustEqual c1
     }
   }
 
