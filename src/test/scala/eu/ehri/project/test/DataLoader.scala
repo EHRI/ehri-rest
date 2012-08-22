@@ -5,7 +5,7 @@ import eu.ehri.project.models._
 import eu.ehri.project.relationships._
 import com.tinkerpop.frames.FramedGraph
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph
-import com.tinkerpop.blueprints.Vertex
+import com.tinkerpop.blueprints.{Vertex,Edge}
 import scala.collection.JavaConversions._
 import com.sun.corba.se.impl.protocol.IsA
 
@@ -17,7 +17,7 @@ class DataLoader(val graph: FramedGraph[Neo4jGraph]) {
   val helper = new Neo4jHelpers(graph.getBaseGraph.getRawGraph)
 
   def createRelationship(src: Vertex, dst: Vertex, label: String, data: Map[String, Any] = Map()) = {
-    helper.getOrCreateEdgeIndex(label)
+    helper.getOrCreateIndex(label, classOf[Edge])
     helper.createIndexedEdge(
       src.getId().asInstanceOf[java.lang.Long],
       dst.getId().asInstanceOf[java.lang.Long],
@@ -78,7 +78,7 @@ class DataLoader(val graph: FramedGraph[Neo4jGraph]) {
       case (desc, node) =>
         node.get("isA").map {
           case (index: String) =>
-            helper.getOrCreateVertexIndex(index)
+            helper.getOrCreateIndex(index, classOf[Vertex])
             helper.createIndexedVertex(
                 (node + (DataLoader.DESCRIPTOR -> desc)).asInstanceOf[Map[String, Object]], index)
         }
