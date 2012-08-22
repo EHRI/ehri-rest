@@ -12,8 +12,8 @@ public interface Annotation extends AnnotatableEntity {
     public static final String isA = "annotation";
     public static final String ANNOTATES = "annotates";
 
-    @Adjacency(label = UserProfile.HAS_ANNOTATION, direction = Direction.IN)
-    public UserProfile getUser();
+    @Adjacency(label = Annotator.HAS_ANNOTATION, direction = Direction.IN)
+    public Annotator getAnnotator();
 
     @Adjacency(label = ANNOTATES)
     public AnnotatableEntity getTarget();
