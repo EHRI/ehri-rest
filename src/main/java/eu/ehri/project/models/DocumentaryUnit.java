@@ -18,8 +18,11 @@ public interface DocumentaryUnit extends AccessibleEntity, DescribedEntity,
 
     @Adjacency(label = DocumentaryUnit.CHILD_OF)
     public DocumentaryUnit getParent();
-    
-    @GremlinGroovy("as('n').out('" + CHILD_OF + "').loop('n'){it.loops < 12}{true}.toList().unique()._()")
+
+    /*
+     * Fetches a list of all ancestors (parent -> parent -> parent)
+     */
+    @GremlinGroovy("_().as('n').out('" + CHILD_OF + "').loop('n'){it.loops < 20}{true}")
     public Iterable<DocumentaryUnit> getAncestors();
 
     @Adjacency(label = DocumentaryUnit.CHILD_OF, direction = Direction.IN)
