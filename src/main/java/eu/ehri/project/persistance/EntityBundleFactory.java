@@ -5,7 +5,7 @@ import java.util.Map;
 
 import eu.ehri.project.exceptions.ValidationError;
 
-public final class EntityBundleFactory<T extends EntityBundle> {
+public final class EntityBundleFactory <T extends EntityBundle> {
     /*
      * Takes some data and constructs a bundle, running the types
      * validation routes to ensure the data fulfils the type contract.
