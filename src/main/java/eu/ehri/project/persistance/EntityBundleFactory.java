@@ -1,7 +1,5 @@
 package eu.ehri.project.persistance;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 
 
@@ -14,24 +12,14 @@ public final class EntityBundleFactory<T extends EntityBundle> {
      */
     public T buildBundle(Map<String, Object> data, Class<T> cls) throws ValidationError {
         try {
-            Constructor<T> constructor = cls.getConstructor(Map.class);            
-            T bundle = constructor.newInstance(data);
+            T bundle = cls.getConstructor(Map.class).newInstance(data);            
             bundle.validate();
             return bundle;
-        } catch (InstantiationException e) {
-            // What the hell are we supposed to do to handle this?
-            throw new RuntimeException("Something went badly wrong!", e);
-        } catch (IllegalAccessException e) {
-            // Ditto...
-            throw new RuntimeException("Something went badly wrong!", e);
-        } catch (NoSuchMethodException e) {
-            throw new RuntimeException("Something went badly wrong!", e);
-        } catch (SecurityException e) {
-            throw new RuntimeException("Something went badly wrong!", e);
-        } catch (IllegalArgumentException e) {
-            throw new RuntimeException("Something went badly wrong!", e);
-        } catch (InvocationTargetException e) {
-            throw new RuntimeException("Something went badly wrong!", e);
+        } catch (Exception e) {
+            // What the hell are we supposed to do to handle this raft of
+            // obscure reflection-related errors. Better to bail out and
+            // pass on the cause.
+            throw new RuntimeException(String.format("Error creating bundle class: '%s'", cls), e);
         }
     }
 }
