@@ -59,7 +59,7 @@ object Acl {
       // Build a Tuple of (AccessObject, UserOrGroup)
       // TODO: Zipping entity.getAccess and entity.getAccessors might
       // be more efficient here.
-      val ctrlUserGroups = entity.getAccess.iterator.toList.map(entity => (entity, entity.getAccessor))
+      val ctrlUserGroups = entity.getAccess.toList.map(entity => (entity, entity.getAccessor))
       // If there are no restrictions, default to read-only
       if (ctrlUserGroups.isEmpty) {
         new EntityAccessFactory().buildReadOnly(entity, accessor)
