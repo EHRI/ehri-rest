@@ -143,7 +143,6 @@ object TestData {
     
     // Users belong to groups
     ("mike", UserProfile.BELONGS_TO, "adminGroup", Map()),
-    ("reto", UserProfile.BELONGS_TO, "adminGroup", Map()),
     ("tim", UserProfile.BELONGS_TO, "adminGroup", Map()),
     ("mike", UserProfile.BELONGS_TO, "kclGroup", Map()),
     ("reto", UserProfile.BELONGS_TO, "kclGroup", Map()),

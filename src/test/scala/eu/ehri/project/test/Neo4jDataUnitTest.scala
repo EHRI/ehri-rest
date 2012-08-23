@@ -113,14 +113,14 @@ class GraphTest extends Specification {
 
     "be able to read/write everything" in new LoadedDB {
       val admin = helper.findTestElement("adminGroup", classOf[Accessor])
-      val mike = helper.findTestElement("mike", classOf[Accessor])
+      val reto = helper.findTestElement("reto", classOf[Accessor])
       val c3 = helper.findTestElement("c3", classOf[AccessibleEntity])
-      val mikeAccess = eu.ehri.project.acl.Acl.getAccessControl(c3, mike)
+      val retoAccess = eu.ehri.project.acl.Acl.getAccessControl(c3, reto)
       val adminAccess = eu.ehri.project.acl.Acl.getAccessControl(c3, admin)
       adminAccess.getRead mustEqual true
       adminAccess.getWrite mustEqual true
-      mikeAccess.getRead mustEqual false
-      mikeAccess.getWrite mustEqual false
+      retoAccess.getRead mustEqual false
+      retoAccess.getWrite mustEqual false
     }
   }
 
