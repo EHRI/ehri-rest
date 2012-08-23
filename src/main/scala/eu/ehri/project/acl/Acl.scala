@@ -7,8 +7,11 @@ import scala.collection.JavaConversions._
 
 object Acl {
 
-  // Define a custom comparator for Access controls. Because this
-  // is in implicit scope, it is used in the List[Access].max function.
+  /* 
+   * Define a custom comparator for Access controls. Because this
+   * is in implicit scope, it is used in the List[Access].max function.
+   * FIXME: There's bound to be a better way to do this.
+   */
   implicit object AccessOrdering extends Ordering[Access] {
     def compare(a: Access, b: Access): Int = {
       if (a.getWrite == b.getWrite && a.getRead == b.getRead) 0
@@ -19,17 +22,19 @@ object Acl {
   }
   
   /*
-   * Check if an accessor is admin. FIXME: Violation of encapsulation I guess,
-   * but how do make this a method on Group without implementing the interface???
+   * Check if an accessor is admin or a member of Admin.
    */
-  private def isAdmin(accessor: Accessor) = accessor.getName == Group.ADMIN_GROUP_NAME
+  private def isAdmin(accessor: Accessor) = {
+    (accessor :: accessor.getAllParents.toList).exists(_.getName == Group.ADMIN_GROUP_NAME)
+  }
 
-  // We have to ascend the current accessors group
-  // hierarchy looking for a groups that are contained
-  // in the current entity's ACL list. Return the Access
-  // relationship objects and see which one is most liberal.
+  /* We have to ascend the current accessors group
+   * hierarchy looking for a groups that are contained
+   * in the current entity's ACL list. Return the Access
+   * relationship objects and see which one is most liberal.
+   */
   private def searchPermissions(accessors: List[Accessor], ctrlGroups: List[(Access, Accessor)]): List[Access] = accessors match {
-    // Termination condition on recursive function
+    // Termination condition on recursive function.
     case Nil => Nil
     case _ => {
       // Get the list of Access objects *at this level*.
@@ -42,6 +47,9 @@ object Acl {
     }
   }
 
+  /*
+   * Find the Access permissions for a given entity and accessor. 
+   */
   def getAccessControl(entity: AccessibleEntity, accessor: Accessor): Access = {
     // Admin can read/write everything
     if (isAdmin(accessor)) {
