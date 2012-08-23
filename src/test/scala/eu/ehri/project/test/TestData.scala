@@ -71,7 +71,7 @@ object TestData {
     ("adminGroup",
       Map(
         "isA" -> Group.isA,
-        "name" -> "admin")),
+        "name" -> Group.ADMIN_GROUP_NAME)),
     ("niodGroup",
       Map(
         "isA" -> Group.isA,

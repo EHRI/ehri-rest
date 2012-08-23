@@ -7,7 +7,8 @@ import scala.collection.JavaConversions._
 
 object Acl {
 
-  // define a custom comparator for Access controls
+  // Define a custom comparator for Access controls. Because this
+  // is in implicit scope, it is used in the List[Access].max function.
   implicit object AccessOrdering extends Ordering[Access] {
     def compare(a: Access, b: Access): Int = {
       if (a.getWrite == b.getWrite && a.getRead == b.getRead) 0
@@ -16,6 +17,12 @@ object Acl {
       else -1
     }
   }
+  
+  /*
+   * Check if an accessor is admin. FIXME: Violation of encapsulation I guess,
+   * but how do make this a method on Group without implementing the interface???
+   */
+  private def isAdmin(accessor: Accessor) = accessor.getName == Group.ADMIN_GROUP_NAME
 
   // We have to ascend the current accessors group
   // hierarchy looking for a groups that are contained
@@ -36,19 +43,27 @@ object Acl {
   }
 
   def getAccessControl(entity: AccessibleEntity, accessor: Accessor): Access = {
-    var defaultAccess = new EntityAccessFactory().buildReadOnly(entity, accessor)
-    // Build a tuple of the entities access relationships, and the
-    // respective groups they point to...
-    val ctrlUserGroups = entity.getAccess.iterator.toList.map(entity => (entity, entity.getAccessor))
-    if (ctrlUserGroups.isEmpty) {
-      defaultAccess // default read-only access
+    // Admin can read/write everything
+    if (isAdmin(accessor)) {
+      new EntityAccessFactory().buildReadWrite(entity, accessor)
     } else {
-      val ctrls = searchPermissions(List(accessor), ctrlUserGroups)
-      if (ctrls.isEmpty)
-        // TODO: How do we lock down an object completely???
-        defaultAccess
-      else
-        ctrls.max // return the most elevated access control
+      // Otherwise, check if there are specified permissions.
+      // Build a Tuple of (AccessObject, UserOrGroup)
+      // TODO: Zipping entity.getAccess and entity.getAccessors might
+      // be more efficient here.
+      val ctrlUserGroups = entity.getAccess.iterator.toList.map(entity => (entity, entity.getAccessor))
+      // If there are no restrictions, default to read-only
+      if (ctrlUserGroups.isEmpty) {
+        new EntityAccessFactory().buildReadOnly(entity, accessor)
+      } else {
+        // If there are, search the Group hierarchy and find the most
+        // powerful set of permissions contained therein...
+        val ctrls = searchPermissions(List(accessor), ctrlUserGroups)
+        if (ctrls.isEmpty)
+          new EntityAccessFactory().buildNoAccess(entity, accessor)
+        else
+          ctrls.max
+      }
     }
   }
 }

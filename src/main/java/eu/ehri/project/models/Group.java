@@ -8,6 +8,8 @@ public interface Group extends Accessor {
 
     public static final String isA = "group";
     
+    public static final String ADMIN_GROUP_NAME = "admin";
+    
     @Adjacency(label = UserProfile.BELONGS_TO, direction = Direction.IN)
     public Iterable<UserProfile> getUsers();
 

@@ -110,13 +110,33 @@ class GraphTest extends Specification {
       val admin = helper.findTestElement("adminGroup", classOf[Group])
       admin.getUsers.toList mustNotEqual Nil
     }
+
+    "be able to read/write everything" in new LoadedDB {
+      val admin = helper.findTestElement("adminGroup", classOf[Accessor])
+      val mike = helper.findTestElement("mike", classOf[Accessor])
+      val c3 = helper.findTestElement("c3", classOf[AccessibleEntity])
+      val mikeAccess = eu.ehri.project.acl.Acl.getAccessControl(c3, mike)
+      val adminAccess = eu.ehri.project.acl.Acl.getAccessControl(c3, admin)
+      adminAccess.getRead mustEqual true
+      adminAccess.getWrite mustEqual true
+      mikeAccess.getRead mustEqual false
+      mikeAccess.getWrite mustEqual false
+    }
   }
 
   "The niod group" should {
-    "have read-access permissions" in new LoadedDB {
+    "have no access to items with admin-permissions" in new LoadedDB {
       val accessor = helper.findTestElement("niodGroup", classOf[Accessor])
-      val cl = helper.findTestElement("c1", classOf[AccessibleEntity])
-      val access = eu.ehri.project.acl.Acl.getAccessControl(cl, accessor)
+      val c1 = helper.findTestElement("c1", classOf[AccessibleEntity])
+      val access = eu.ehri.project.acl.Acl.getAccessControl(c1, accessor)
+      access.getRead() mustEqual false
+      access.getWrite() mustEqual false
+    }
+    
+    "but have read-only access to items with no specified permissions" in new LoadedDB {
+      val accessor = helper.findTestElement("niodGroup", classOf[Accessor])
+      val c4 = helper.findTestElement("c4", classOf[AccessibleEntity])
+      val access = eu.ehri.project.acl.Acl.getAccessControl(c4, accessor)
       access.getRead() mustEqual true
       access.getWrite() mustEqual false
     }
@@ -125,8 +145,8 @@ class GraphTest extends Specification {
   "The c1 collection" should {
     "have read-write permissions for user 'Mike'" in new LoadedDB {
       val accessor = helper.findTestElement("mike", classOf[Accessor])
-      val cl = helper.findTestElement("c1", classOf[AccessibleEntity])
-      val access = eu.ehri.project.acl.Acl.getAccessControl(cl, accessor)
+      val c1 = helper.findTestElement("c1", classOf[AccessibleEntity])
+      val access = eu.ehri.project.acl.Acl.getAccessControl(c1, accessor)
       access.getRead() mustEqual true
       access.getWrite() mustEqual true
     }
@@ -162,8 +182,8 @@ class GraphTest extends Specification {
   "The c3 collection" should {
     "have read-write permissions for user 'Tim'" in new LoadedDB {
       val accessor = helper.findTestElement("tim", classOf[Accessor])
-      val cl = helper.findTestElement("c3", classOf[AccessibleEntity])
-      val access = eu.ehri.project.acl.Acl.getAccessControl(cl, accessor)
+      val c3 = helper.findTestElement("c3", classOf[AccessibleEntity])
+      val access = eu.ehri.project.acl.Acl.getAccessControl(c3, accessor)
       access.getRead() mustEqual true
       access.getWrite() mustEqual true
     }
@@ -172,13 +192,13 @@ class GraphTest extends Specification {
   "The c2 collection" should {
     "ensure that group perms override user perms" in new LoadedDB {
       val accessor = helper.findTestElement("tim", classOf[Accessor])
-      val cl = helper.findTestElement("c2", classOf[AccessibleEntity])
-      val access = eu.ehri.project.acl.Acl.getAccessControl(cl, accessor)
+      val c2 = helper.findTestElement("c2", classOf[AccessibleEntity])
+      val access = eu.ehri.project.acl.Acl.getAccessControl(c2, accessor)
       access.getRead() mustEqual true
       access.getWrite() mustEqual true
     }
   }
-
+  
   "The Mike user" should {
     "have an annotation" in new LoadedDB {
       val mike = helper.findTestElement("mike", classOf[UserProfile])
