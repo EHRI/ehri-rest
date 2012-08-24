@@ -1,6 +1,9 @@
 package eu.ehri.project.test
 
 import eu.ehri.project.models._
+import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Annotator;
+import eu.ehri.project.models.base.Description;
 import eu.ehri.project.relationships._
 
 object TestData {

@@ -1,7 +1,7 @@
 package eu.ehri.project.exceptions;
 
-import eu.ehri.project.models.AccessibleEntity;
-import eu.ehri.project.models.Accessor;
+import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessor;
 
 public class PermissionDenied extends Exception {
 

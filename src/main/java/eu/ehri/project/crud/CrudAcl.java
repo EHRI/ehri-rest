@@ -4,8 +4,8 @@ import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
 import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.models.AccessibleEntity;
-import eu.ehri.project.models.Accessor;
+import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.relationships.Access;
 import eu.ehri.project.acl.Acl;
 

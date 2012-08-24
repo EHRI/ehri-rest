@@ -9,14 +9,15 @@ import com.tinkerpop.frames.Property;
 
 import eu.ehri.project.exceptions.ValidationError;
 
+import eu.ehri.project.models.EntityTypes;
 import eu.ehri.project.models.annotations.EntityType;
 
-public class BundleValidator <T> {
+public class BundleFactory <T> {
     private static final String GET = "get";
     private static final String MISSING_PROPERTY = "Missing property";
     private static final String INVALID_ENTITY = "No EntityType annotation";
     
-    public Map<String, Object> validateBundle(Map<String, Object> data, Class<T> cls) throws ValidationError {
+    public EntityBundle<T> buildBundle(Map<String, Object> data, Class<T> cls) throws ValidationError {
         // Take a Frames interface and some data, and check that
         // all the Property annotations are fulfilled.
         
@@ -28,7 +29,7 @@ public class BundleValidator <T> {
         
         if (!errors.isEmpty())     
             throw new ValidationError(cls, errors);        
-        return bundleData;
+        return new EntityBundle<T>(bundleData, cls);
     }
 
     /**
@@ -66,7 +67,7 @@ public class BundleValidator <T> {
         if (annotation == null) {
             errors.put("class", String.format("%s: '%s'", INVALID_ENTITY, cls.getName()));
         } else {
-            data.put("isA", annotation.value());
+            data.put(EntityTypes.KEY, annotation.value());
         }
     }
 }

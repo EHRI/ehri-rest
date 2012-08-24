@@ -6,7 +6,6 @@ import java.util.Map;
 import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
-
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Element;
 import com.tinkerpop.blueprints.Index;
@@ -62,8 +61,13 @@ public class Neo4jHelpers {
 
     public Vertex createIndexedVertex(Map<String, Object> data, String indexName)
             throws IndexNotFoundException {
+        Index<Vertex> index = getIndex(indexName, Vertex.class);
+        return createIndexedVertex(data, index);
+    }
+    
+    public Vertex createIndexedVertex(Map<String, Object> data, Index<Vertex> index) {    
         try {
-            Index<Vertex> index = getIndex(indexName, Vertex.class);
+            
             Vertex node = graph.addVertex(null);
 
             for (Map.Entry<String, Object> entry : data.entrySet()) {
@@ -75,9 +79,9 @@ public class Neo4jHelpers {
             }
             graph.stopTransaction(TransactionalGraph.Conclusion.SUCCESS);
             return node;
-        } catch (IndexNotFoundException e) {
+        } catch (Exception e) {
             graph.stopTransaction(TransactionalGraph.Conclusion.FAILURE);
-            throw e;
+            throw new RuntimeException(e);
         }
     }
 
@@ -97,11 +101,17 @@ public class Neo4jHelpers {
 
     public Edge createIndexedEdge(Node src, Node dst, String label,
             Map<String, Object> data) throws IndexNotFoundException {
+        Index<Edge> index = getIndex(label, Edge.class);
+        return createIndexedEdge(src, dst, label, data, index);
+    }
+    
+    public Edge createIndexedEdge(Node src, Node dst, String label,
+            Map<String, Object> data, Index<Edge> index) {
+            
         DynamicRelationshipType relationshipType = DynamicRelationshipType
                 .withName(label);
 
         try {
-            Index<Edge> index = getIndex(label, Edge.class);
             Edge edge = new Neo4jEdge(src.createRelationshipTo(dst,
                     relationshipType), graph);
             for (Map.Entry<String, Object> entry : data.entrySet()) {
@@ -113,9 +123,64 @@ public class Neo4jHelpers {
             }
             graph.stopTransaction(TransactionalGraph.Conclusion.SUCCESS);
             return edge;
-        } catch (IndexNotFoundException e) {
+        } catch (Exception e) {
             graph.stopTransaction(TransactionalGraph.Conclusion.FAILURE);
-            throw e;
+            throw new RuntimeException(e);
+        }
+    }
+    
+    /**
+     * Update a vertex
+     * 
+     * @param graphDb
+     * @param id
+     * @param data
+     * @param indexName
+     * @return
+     * @throws Exception
+     */
+    public Vertex updateIndexedVertex(long id, Map<String, Object> data, String indexName) 
+            throws IndexNotFoundException 
+    {
+        Index<Vertex> index = getIndex(indexName, Vertex.class);
+        return updateIndexedVertex(id, data, index);
+    }
+    
+    public Vertex updateIndexedVertex(long id, Map<String, Object> data, Index<Vertex> index) {
+        try {
+            Vertex node = graph.getVertex(id);
+            replaceProperties(index, node, data);
+
+            graph.stopTransaction(TransactionalGraph.Conclusion.SUCCESS);
+            return node;
+        } catch (Exception e) {
+            graph.stopTransaction(TransactionalGraph.Conclusion.FAILURE);
+            throw new RuntimeException(e);
+        }
+    }
+    
+    private <T extends Element> void replaceProperties(Index<T> index, T c, Map<String, Object> data)
+    {
+        // remove 'old' properties
+        for (String key : c.getPropertyKeys()) {
+            index.remove(key, c.getProperty(key), c);
+            c.removeProperty(key);
+        }
+
+        // add all 'new' properties to the relationship and index
+        addProperties(index, c, data);
+    }
+
+    // add properties to a property container like vertex and edge
+    private <T extends Element> void addProperties(Index<T> index, T c, Map<String, Object> data)
+    {
+        // TODO data cannot be null
+
+        for(Map.Entry<String, Object> entry : data.entrySet()) {
+            if (entry.getValue() == null)
+                continue;
+            c.setProperty(entry.getKey(), entry.getValue());
+            index.put(entry.getKey(), String.valueOf(entry.getValue()), c);
         }
     }
 }

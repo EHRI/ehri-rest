@@ -5,6 +5,7 @@ import org.neo4j.test.TestGraphDatabaseFactory
 import com.tinkerpop.frames.FramedGraph
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph
 import eu.ehri.project.models._
+import eu.ehri.project.models.base._
 import scala.collection.JavaConversions._
 import eu.ehri.project.models.Annotation
 
@@ -41,7 +42,7 @@ class GraphTest extends Specification {
     }
 
     "dump some GraphML" in new LoadedDB {
-      import com.tinkerpop.blueprints.util.io.graphml.GraphMLWriter
+import com.tinkerpop.blueprints.util.io.graphml.GraphMLWriter
       var output = new java.io.FileOutputStream("graphml.xml")
       GraphMLWriter.outputGraph(graph.getBaseGraph, output)
       output.close()

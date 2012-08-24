@@ -1,6 +1,8 @@
 package eu.ehri.project.acl
 
 import eu.ehri.project.models._
+import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.relationships._
 
 import scala.collection.JavaConversions._

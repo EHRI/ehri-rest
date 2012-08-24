@@ -2,13 +2,25 @@ package eu.ehri.project.persistance;
 
 import java.util.Map;
 
-import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.models.annotations.EntityType;
 
-public class EntityBundle {
+public class EntityBundle <T> {
     private Map<String,Object> data;
-    public EntityBundle(Map<String,Object> data) {
+    private Class<T> cls;
+    protected EntityBundle(Map<String,Object> data, Class<T> cls) {
         this.data = data;
+        this.cls = cls;
     }
     
-    public void validate() throws ValidationError {}
+    public Map<String,Object> getData() {
+        return this.data;
+    }
+    
+    public Class<T> getBundleClass() {
+        return cls;
+    }
+    
+    public String getEntityType() {
+        return cls.getAnnotation(EntityType.class).value();
+    }
 }
