@@ -6,6 +6,7 @@ import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
 import eu.ehri.project.core.Neo4jHelpers;
+import eu.ehri.project.exceptions.ValidationError;
 
 public class BundlePersister<T> {
 
@@ -17,14 +18,15 @@ public class BundlePersister<T> {
         this.helpers = new Neo4jHelpers(graph.getBaseGraph().getRawGraph());
     }
     
-    public T persist(EntityBundle<T> bundle) {
+    public T persist(EntityBundle<T> bundle) throws ValidationError {
         return persist(null, bundle);
     }
 
-    public T persist(Long id, EntityBundle<T> bundle) {
+    public T persist(Long id, EntityBundle<T> bundle) throws ValidationError {
         // This should handle logic for setting
         // revisions, created, update dates, and all
         // that jazz...
+        bundle.validate();
         Index<Vertex> index = helpers.getOrCreateIndex(bundle.getEntityType(), Vertex.class);
         Vertex node;
         if (id != null) {

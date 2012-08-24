@@ -1,14 +1,17 @@
 package eu.ehri.project.test
 
 import org.specs2.mutable._
+import org.specs2.matcher.ShouldThrownMatchers._
 import org.neo4j.test.TestGraphDatabaseFactory
 import com.tinkerpop.frames.FramedGraph
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph
 import eu.ehri.project.models._
 import eu.ehri.project.models.base._
 import eu.ehri.project.persistance._
+import eu.ehri.project.exceptions._
 import scala.collection.JavaConversions._
 import eu.ehri.project.models.Annotation
+import org.specs2.matcher.ShouldThrownMatchers
 
 trait DB extends After {
     // Set up our database...
@@ -268,12 +271,25 @@ import com.tinkerpop.blueprints.util.io.graphml.GraphMLWriter
       val newName = "Another Name"
       val c1 = helper.findTestElement("c1", classOf[DocumentaryUnit])
       val bundle = new BundleFactory[DocumentaryUnit]().fromFramedVertext(c1);
-      bundle.getData().put("name", newName);
+      bundle.setDataValue("name", newName);
       val persister = new BundlePersister[DocumentaryUnit](graph);      
       val doc = persister.persist(c1.asVertex.getId.asInstanceOf[Long], bundle);  
       val c1again = helper.findTestElement("c1", classOf[DocumentaryUnit])
       c1again.getName mustEqual newName
     }
+
+    "throw a validation error if we erase a needed value" in new LoadedDB {
+      val newName = "Another Name"
+      val c1 = helper.findTestElement("c1", classOf[DocumentaryUnit])
+      val oldName = c1.getName
+      val bundle = new BundleFactory[DocumentaryUnit]().fromFramedVertext(c1);
+      bundle.setDataValue("name", null);
+      val persister = new BundlePersister[DocumentaryUnit](graph);      
+      persister.persist(c1.asVertex.getId.asInstanceOf[Long], bundle) must throwA[ValidationError]  
+      val c1again = helper.findTestElement("c1", classOf[DocumentaryUnit])
+      c1again.getName mustEqual oldName
+    }
+
   }
 
 }
