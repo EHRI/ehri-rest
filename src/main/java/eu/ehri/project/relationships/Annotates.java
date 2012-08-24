@@ -1,13 +1,14 @@
 package eu.ehri.project.relationships;
 
 import com.tinkerpop.frames.Domain;
+import com.tinkerpop.frames.EdgeFrame;
 import com.tinkerpop.frames.Property;
 import com.tinkerpop.frames.Range;
 
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.AnnotatableEntity;
 
-public interface Annotates {
+public interface Annotates extends EdgeFrame {
 
     @Range
     public AnnotatableEntity getEntity();

@@ -3,12 +3,13 @@ package eu.ehri.project.models;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Property;
+import com.tinkerpop.frames.VertexFrame;
 
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.Accessor;
 
 @EntityType(EntityTypes.GROUP)
-public interface Group extends Accessor {
+public interface Group extends VertexFrame, Accessor {
 
     public static final String isA = "group";
     
