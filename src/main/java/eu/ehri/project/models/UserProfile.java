@@ -3,9 +3,10 @@ package eu.ehri.project.models;
 import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Property;
 
-public interface UserProfile extends Accessor, Annotator {
+import eu.ehri.project.models.annotations.EntityType;
 
-    public static final String isA = "userProfile";
+@EntityType(EntityTypes.USER_PROFILE)
+public interface UserProfile extends Accessor, Annotator {
 
     public static final String BELONGS_TO = "belongsTo";
 

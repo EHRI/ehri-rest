@@ -2,10 +2,12 @@ package eu.ehri.project.models;
 
 import com.tinkerpop.frames.Adjacency;
 
+import eu.ehri.project.models.annotations.EntityType;
+
+@EntityType(EntityTypes.AGENT)
 public interface Agent extends AccessibleEntity, DescribedEntity,
         AnnotatableEntity {
 
-    public static final String isA = "agent";
     public static final String HOLDS = "holds";
     public static final String HAS_ADDRESS = "hasAddress";
 

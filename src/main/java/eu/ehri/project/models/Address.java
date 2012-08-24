@@ -4,10 +4,11 @@ import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Property;
 
+import eu.ehri.project.models.annotations.EntityType;
+
+@EntityType(EntityTypes.ADDRESS)
 public interface Address {
-    
-    public static final String isA = "address";
-    
+        
     @Adjacency(label=Agent.HAS_ADDRESS, direction=Direction.IN)
     public Agent getAgent();
 

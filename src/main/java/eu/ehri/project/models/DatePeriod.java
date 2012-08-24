@@ -4,8 +4,10 @@ import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Property;
 
+import eu.ehri.project.models.annotations.EntityType;
+
+@EntityType(EntityTypes.DATE_PERIOD)
 public interface DatePeriod {
-    public static final String isA = "datePeriod";
     
     @Property("startDate")
     public String getStartDate();

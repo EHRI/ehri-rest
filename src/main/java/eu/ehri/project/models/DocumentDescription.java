@@ -2,8 +2,10 @@ package eu.ehri.project.models;
 
 import com.tinkerpop.frames.Property;
 
+import eu.ehri.project.models.annotations.EntityType;
+
+@EntityType(EntityTypes.DOCUMENT_DESCRIPTION)
 public interface DocumentDescription extends Description {
-    public static final String isA = "documentDescription";
 
     @Property("title")
     public String getTitle();

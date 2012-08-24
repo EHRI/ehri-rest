@@ -16,9 +16,6 @@ public interface AccessibleEntity {
     @Property("name")
     public void setName(String name);
 
-    @Property("element_type")
-    public String getType();
-
     @Property("identifier")
     public String getIdentifier();
 

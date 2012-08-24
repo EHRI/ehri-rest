@@ -4,6 +4,9 @@ import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Property;
 
+import eu.ehri.project.models.annotations.EntityType;
+
+@EntityType(EntityTypes.GROUP)
 public interface Group extends Accessor {
 
     public static final String isA = "group";

@@ -5,11 +5,12 @@ import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Incidence;
 import com.tinkerpop.frames.Property;
 
+import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.relationships.Annotates;
 
+@EntityType(EntityTypes.ANNOTATION)
 public interface Annotation extends AnnotatableEntity {
 
-    public static final String isA = "annotation";
     public static final String ANNOTATES = "annotates";
 
     @Adjacency(label = Annotator.HAS_ANNOTATION, direction = Direction.IN)

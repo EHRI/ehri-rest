@@ -7,110 +7,110 @@ object TestData {
   val nodes = List(
     ("c1",
       Map(
-        "isA" -> DocumentaryUnit.isA,
+        "isA" -> EntityTypes.DOCUMENTARY_UNIT,
         "identifier" -> "c1",
         "name" -> "Test Collection 1")),
     ("cd1",
       Map(
-        "isA" -> DocumentDescription.isA,
+        "isA" -> EntityTypes.DOCUMENT_DESCRIPTION,
         "title" -> "A Collection called 1")),
     ("c2",
       Map(
-        "isA" -> DocumentaryUnit.isA,
+        "isA" -> EntityTypes.DOCUMENTARY_UNIT,
         "identifier" -> "c2",
         "name" -> "Test Collection 2")),
     ("cd2",
       Map(
-        "isA" -> DocumentDescription.isA,
+        "isA" -> EntityTypes.DOCUMENT_DESCRIPTION,
         "title" -> "A Collection called 2")),
     ("c3",
       Map(
-        "isA" -> DocumentaryUnit.isA,
+        "isA" -> EntityTypes.DOCUMENTARY_UNIT,
         "identifier" -> "c3",
         "name" -> "Test Collection 3")),
     ("cd3",
       Map(
-        "isA" -> DocumentDescription.isA,
+        "isA" -> EntityTypes.DOCUMENT_DESCRIPTION,
         "title" -> "A Collection called 3")),
     ("c4",
       Map(
-        "isA" -> DocumentaryUnit.isA,
+        "isA" -> EntityTypes.DOCUMENTARY_UNIT,
         "identifier" -> "c4",
         "name" -> "Test Collection 4")),
     ("cd4",
       Map(
-        "isA" -> DocumentDescription.isA,
+        "isA" -> EntityTypes.DOCUMENT_DESCRIPTION,
         "title" -> "A Collection called 4")),
     ("r1",
       Map(
-        "isA" -> Agent.isA,
+        "isA" -> EntityTypes.AGENT,
         "identifier" -> "r1",
         "name" -> "Repository 1")),
     ("rd1",
       Map(
-        "isA" -> AgentDescription.isA,
+        "isA" -> EntityTypes.AGENT_DESCRIPTION,
         "title" -> "A Repository called 1")),
     ("a1",
       Map(
-        "isA" -> Authority.isA,
+        "isA" -> EntityTypes.AUTHORITY,
         "identifier" -> "a1",
         "name" -> "Authority 1")),
     ("ad1",
       Map(
-        "isA" -> AuthorityDescription.isA,
+        "isA" -> EntityTypes.AUTHORITY_DESCRIPTION,
         "title" -> "An Authority called 1")),
     ("a2",
       Map(
-        "isA" -> Authority.isA,
+        "isA" -> EntityTypes.AUTHORITY,
         "identifier" -> "a2",
         "name" -> "Authority 2")),
     ("ad2",
       Map(
-        "isA" -> AuthorityDescription.isA,
+        "isA" -> EntityTypes.AUTHORITY_DESCRIPTION,
         "title" -> "An Authority called 2")),
     ("adminGroup",
       Map(
-        "isA" -> Group.isA,
+        "isA" -> EntityTypes.GROUP,
         "name" -> Group.ADMIN_GROUP_NAME)),
     ("niodGroup",
       Map(
-        "isA" -> Group.isA,
+        "isA" -> EntityTypes.GROUP,
         "name" -> "niod")),
     ("kclGroup",
       Map(
-        "isA" -> Group.isA,
+        "isA" -> EntityTypes.GROUP,
         "name" -> "kcl")),
     ("mike",
       Map(
-        "isA" -> UserProfile.isA,
+        "isA" -> EntityTypes.USER_PROFILE,
         "userId" -> 1,
         "name" -> "Mike")),
     ("reto",
       Map(
-        "isA" -> UserProfile.isA,
+        "isA" -> EntityTypes.USER_PROFILE,
         "userId" -> 2,
         "name" -> "Reto")),
     ("tim",
       Map(
-        "isA" -> UserProfile.isA,
+        "isA" -> EntityTypes.USER_PROFILE,
         "userId" -> 3,
         "name" -> "Tim")),
     ("pd1",
       Map(
-        "isA" -> DatePeriod.isA,
+        "isA" -> EntityTypes.DATE_PERIOD,
         "startDate" -> "1943",
         "endDate" -> "1943")),
     ("ar1",
       Map(
-        "isA" -> Address.isA,
+        "isA" -> EntityTypes.ADDRESS,
         "streetAddress" -> "London")),
     ("ann1",
       Map(
-        "isA" -> Annotation.isA,
+        "isA" -> EntityTypes.ANNOTATION,
         "body" -> "Hello Dolly!")),
     ("ann2",
       Map(
-        "isA" -> Annotation.isA,
+        "isA" -> EntityTypes.ANNOTATION,
         "body" -> "Annotating my annotation!")))
         
         

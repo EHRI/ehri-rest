@@ -3,10 +3,12 @@ package eu.ehri.project.models;
 import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Property;
 
+import eu.ehri.project.models.annotations.EntityType;
+
+@EntityType(EntityTypes.AUTHORITY)
 public interface Authority extends AccessibleEntity, DescribedEntity,
         AnnotatableEntity {
     
-    public static final String isA = "authority";
     public static final String CREATED = "created";
     public static final String MENTIONED_IN = "mentionedIn";
     

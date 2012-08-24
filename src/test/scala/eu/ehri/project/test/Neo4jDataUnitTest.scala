@@ -31,12 +31,12 @@ class GraphTest extends Specification {
     }
 
     "contain some groups" in new LoadedDB {
-      val groups = helper.findTestElements(Group.isA, classOf[Group])
+      val groups = helper.findTestElements(EntityTypes.GROUP, classOf[Group])
       groups mustNotEqual Nil
     }
 
     "contain some groups with users in" in new LoadedDB {
-      val groups = helper.findTestElements(Group.isA, classOf[Group])
+      val groups = helper.findTestElements(EntityTypes.GROUP, classOf[Group])
       groups.head.getUsers.toList mustNotEqual Nil
     }
 
@@ -51,13 +51,13 @@ class GraphTest extends Specification {
 
   "Collections" should {
     "be held by a repository" in new LoadedDB {
-      helper.findTestElements(DocumentaryUnit.isA, classOf[DocumentaryUnit]).toList.filter { c =>
+      helper.findTestElements(EntityTypes.DOCUMENTARY_UNIT, classOf[DocumentaryUnit]).toList.filter { c =>
         c.getAgent == null
       } mustEqual Nil
     }
     
     "and have a description" in new LoadedDB {
-      helper.findTestElements(DocumentaryUnit.isA, classOf[DocumentaryUnit]).toList.filter { c =>
+      helper.findTestElements(EntityTypes.DOCUMENTARY_UNIT, classOf[DocumentaryUnit]).toList.filter { c =>
         c.getDescriptions.isEmpty
       } mustEqual Nil
     }

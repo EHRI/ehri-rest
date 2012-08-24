@@ -4,10 +4,12 @@ import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.annotations.gremlin.GremlinGroovy;
 
+import eu.ehri.project.models.annotations.EntityType;
+
+@EntityType(EntityTypes.DOCUMENTARY_UNIT)
 public interface DocumentaryUnit extends AccessibleEntity, DescribedEntity,
         TemporalEntity {
 
-    public static final String isA = "documentaryUnit";
     public static final String CHILD_OF = "childOf";
 
     @Adjacency(label = Agent.HOLDS, direction = Direction.IN)
