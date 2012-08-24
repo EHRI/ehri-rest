@@ -5,6 +5,7 @@ import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Property;
 
 import eu.ehri.project.models.annotations.EntityType;
+import eu.ehri.project.models.base.Accessor;
 
 @EntityType(EntityTypes.GROUP)
 public interface Group extends Accessor {

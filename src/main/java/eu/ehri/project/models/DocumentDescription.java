@@ -3,6 +3,7 @@ package eu.ehri.project.models;
 import com.tinkerpop.frames.Property;
 
 import eu.ehri.project.models.annotations.EntityType;
+import eu.ehri.project.models.base.Description;
 
 @EntityType(EntityTypes.DOCUMENT_DESCRIPTION)
 public interface DocumentDescription extends Description {

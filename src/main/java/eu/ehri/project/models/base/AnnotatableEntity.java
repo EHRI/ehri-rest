@@ -1,9 +1,10 @@
-package eu.ehri.project.models;
+package eu.ehri.project.models.base;
 
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Incidence;
 
+import eu.ehri.project.models.Annotation;
 import eu.ehri.project.relationships.Annotates;
 
 

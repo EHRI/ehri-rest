@@ -5,6 +5,9 @@ import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.annotations.gremlin.GremlinGroovy;
 
 import eu.ehri.project.models.annotations.EntityType;
+import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.DescribedEntity;
+import eu.ehri.project.models.base.TemporalEntity;
 
 @EntityType(EntityTypes.DOCUMENTARY_UNIT)
 public interface DocumentaryUnit extends AccessibleEntity, DescribedEntity,

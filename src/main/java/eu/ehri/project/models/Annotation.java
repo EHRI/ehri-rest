@@ -6,6 +6,8 @@ import com.tinkerpop.frames.Incidence;
 import com.tinkerpop.frames.Property;
 
 import eu.ehri.project.models.annotations.EntityType;
+import eu.ehri.project.models.base.AnnotatableEntity;
+import eu.ehri.project.models.base.Annotator;
 import eu.ehri.project.relationships.Annotates;
 
 @EntityType(EntityTypes.ANNOTATION)

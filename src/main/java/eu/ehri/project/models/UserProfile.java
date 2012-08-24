@@ -4,6 +4,8 @@ import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Property;
 
 import eu.ehri.project.models.annotations.EntityType;
+import eu.ehri.project.models.base.Accessor;
+import eu.ehri.project.models.base.Annotator;
 
 @EntityType(EntityTypes.USER_PROFILE)
 public interface UserProfile extends Accessor, Annotator {

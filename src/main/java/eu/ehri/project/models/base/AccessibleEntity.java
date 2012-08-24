@@ -1,4 +1,4 @@
-package eu.ehri.project.models;
+package eu.ehri.project.models.base;
 
 import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Incidence;
