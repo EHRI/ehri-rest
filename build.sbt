@@ -16,7 +16,8 @@ libraryDependencies ++= Seq(
     "org.scalaj" %% "scalaj-collection" % "1.2",
     "org.neo4j" % "neo4j-kernel" % "1.8.M07",
     "org.neo4j" % "neo4j-kernel" % "1.8.M07" % "test" classifier "tests",
-    "com.codahale" %% "jerkson" % "0.5.0"
+    "com.codahale" %% "jerkson" % "0.5.0",
+    "commons-collections" % "commons-collections" % "3.2.1"
 )
 
 resolvers ++= Seq(
