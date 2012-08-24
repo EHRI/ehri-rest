@@ -20,8 +20,8 @@ public class EntityBundle <T> {
     private static final String EMPTY_VALUE = "No value given for mandatory field";
     private static final String INVALID_ENTITY = "No EntityType annotation";
 
-    private Map<String,Object> data;
-    private Class<T> cls;
+    private final Map<String,Object> data;
+    private final Class<T> cls;
     private MultiValueMap errors = new MultiValueMap();
     protected EntityBundle(Map<String,Object> data, Class<T> cls) {
         this.data = new HashMap<String,Object>(data);
@@ -42,12 +42,15 @@ public class EntityBundle <T> {
         return extendData();
     }
     
-    public void setDataValue(String key, Object value) throws ValidationError {
-        data.put(key, value);
+    public EntityBundle<T> setDataValue(String key, Object value) throws ValidationError {
+        // FIXME: Seems like too much work being done here to maintain immutability???
+        Map<String,Object> temp = new HashMap<String,Object>(data);
+        temp.put(key, value);
+        return new EntityBundle<T>(temp, cls);
     }
     
-    public void setData(Map<String, Object> data) {
-        this.data = data;
+    public EntityBundle<T> setData(final Map<String, Object> data) {
+        return new EntityBundle<T>(data, cls);
     }
     
     public Class<T> getBundleClass() {

@@ -270,8 +270,7 @@ import com.tinkerpop.blueprints.util.io.graphml.GraphMLWriter
     "change the node the right way" in new LoadedDB {
       val newName = "Another Name"
       val c1 = helper.findTestElement("c1", classOf[DocumentaryUnit])
-      val bundle = new BundleFactory[DocumentaryUnit]().fromFramedVertext(c1);
-      bundle.setDataValue("name", newName);
+      val bundle = new BundleFactory[DocumentaryUnit]().fromFramedVertext(c1).setDataValue("name", newName);
       val persister = new BundlePersister[DocumentaryUnit](graph);      
       val doc = persister.persist(c1.asVertex.getId.asInstanceOf[Long], bundle);  
       val c1again = helper.findTestElement("c1", classOf[DocumentaryUnit])
@@ -282,15 +281,12 @@ import com.tinkerpop.blueprints.util.io.graphml.GraphMLWriter
       val newName = "Another Name"
       val c1 = helper.findTestElement("c1", classOf[DocumentaryUnit])
       val oldName = c1.getName
-      val bundle = new BundleFactory[DocumentaryUnit]().fromFramedVertext(c1);
-      bundle.setDataValue("name", null);
+      val bundle = new BundleFactory[DocumentaryUnit]().fromFramedVertext(c1).setDataValue("name", null);
       val persister = new BundlePersister[DocumentaryUnit](graph);      
       persister.persist(c1.asVertex.getId.asInstanceOf[Long], bundle) must throwA[ValidationError]  
       val c1again = helper.findTestElement("c1", classOf[DocumentaryUnit])
       c1again.getName mustEqual oldName
     }
-
   }
-
 }
 
