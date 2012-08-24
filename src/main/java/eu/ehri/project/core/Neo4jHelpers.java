@@ -81,6 +81,7 @@ public class Neo4jHelpers {
             return node;
         } catch (Exception e) {
             graph.stopTransaction(TransactionalGraph.Conclusion.FAILURE);
+            e.printStackTrace();
             throw new RuntimeException(e);
         }
     }

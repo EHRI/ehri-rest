@@ -6,7 +6,6 @@ import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
 import eu.ehri.project.core.Neo4jHelpers;
-import eu.ehri.project.exceptions.IndexNotFoundException;
 
 public class BundlePersister<T> {
 
@@ -17,10 +16,12 @@ public class BundlePersister<T> {
         this.graph = graph;
         this.helpers = new Neo4jHelpers(graph.getBaseGraph().getRawGraph());
     }
+    
+    public T persist(EntityBundle<T> bundle) {
+        return persist(null, bundle);
+    }
 
-    public T persist(Long id, EntityBundle<T> bundle)
-            throws IndexNotFoundException {
-
+    public T persist(Long id, EntityBundle<T> bundle) {
         // This should handle logic for setting
         // revisions, created, update dates, and all
         // that jazz...

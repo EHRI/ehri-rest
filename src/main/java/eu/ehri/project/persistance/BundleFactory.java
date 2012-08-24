@@ -2,17 +2,20 @@ package eu.ehri.project.persistance;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.Property;
+import com.tinkerpop.frames.VertexFrame;
 
 import eu.ehri.project.exceptions.ValidationError;
 
 import eu.ehri.project.models.EntityTypes;
 import eu.ehri.project.models.annotations.EntityType;
 
-public class BundleFactory <T> {
+public class BundleFactory <T extends VertexFrame> {
     private static final String GET = "get";
     private static final String MISSING_PROPERTY = "Missing property";
     private static final String INVALID_ENTITY = "No EntityType annotation";
@@ -69,5 +72,18 @@ public class BundleFactory <T> {
         } else {
             data.put(EntityTypes.KEY, annotation.value());
         }
+    }
+    
+    @SuppressWarnings("unchecked")
+    public EntityBundle<T> fromFramedVertext(T frame) throws ValidationError {
+        Vertex vertex = frame.asVertex();
+        Map<String,Object> data = new HashMap<String, Object>();
+        for (String key: vertex.getPropertyKeys()) {
+            data.put(key, vertex.getProperty(key));
+        }
+        // FIXME: WTF? That we have to run through this rigmarole to get
+        // the `T` class from a given FramedVertex instance is a sign that
+        // we're doing things very wrong!!!
+        return buildBundle(data, (Class<T>) frame.getClass().getInterfaces()[0]);        
     }
 }

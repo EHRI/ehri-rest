@@ -6,8 +6,23 @@ import com.tinkerpop.frames.FramedGraph
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph
 import eu.ehri.project.models._
 import eu.ehri.project.models.base._
+import eu.ehri.project.persistance._
 import scala.collection.JavaConversions._
 import eu.ehri.project.models.Annotation
+
+trait DB extends After {
+    // Set up our database...
+    val graph = new FramedGraph[Neo4jGraph](
+      new Neo4jGraph(
+        new TestGraphDatabaseFactory().newImpermanentDatabaseBuilder().newGraphDatabase()))
+
+    def after = Unit //graph.shutdown, not needed on impermanentDatabase
+}
+
+trait LoadedDB extends DB {
+    val helper = new DataLoader(graph)
+    helper.loadTestData
+}
 
 class GraphTest extends Specification {
   // FIXME: these tests need to run sequentially otherwise
@@ -237,19 +252,29 @@ import com.tinkerpop.blueprints.util.io.graphml.GraphMLWriter
       ann1.getAnnotations.head.getBody mustEqual ann2.getBody
     }
   }
-
-  trait DB extends After {
-    // Set up our database...
-    val graph = new FramedGraph[Neo4jGraph](
-      new Neo4jGraph(
-        new TestGraphDatabaseFactory().newImpermanentDatabaseBuilder().newGraphDatabase()))
-
-    def after = Unit //graph.shutdown, not needed on impermanentDatabase
+  
+  "Attempting to create a DocumentaryUnit bundle" should {
+    "not crash and result in a document with the same name as the test data" in new DB {
+      val m = Map("identifier" -> "c1", "name" -> "Collection 1");   
+      val bundle = new BundleFactory().buildBundle(m, classOf[DocumentaryUnit]);
+      val persister = new BundlePersister[DocumentaryUnit](graph);
+      val doc = persister.persist(bundle);      
+      doc.getName mustEqual m.getOrElse("name", "")
+    }
+  }
+  
+  "Attempting to update DocumentaryUnit" should {
+    "change the node the right way" in new LoadedDB {
+      val newName = "Another Name"
+      val c1 = helper.findTestElement("c1", classOf[DocumentaryUnit])
+      val bundle = new BundleFactory[DocumentaryUnit]().fromFramedVertext(c1);
+      bundle.getData().put("name", newName);
+      val persister = new BundlePersister[DocumentaryUnit](graph);      
+      val doc = persister.persist(c1.asVertex.getId.asInstanceOf[Long], bundle);  
+      val c1again = helper.findTestElement("c1", classOf[DocumentaryUnit])
+      c1again.getName mustEqual newName
+    }
   }
 
-  trait LoadedDB extends DB {
-    val helper = new DataLoader(graph)
-    helper.loadTestData
-  }
 }
 

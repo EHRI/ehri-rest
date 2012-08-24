@@ -3,6 +3,8 @@ package eu.ehri.project.exceptions;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.tinkerpop.frames.VertexFrame;
+
 import eu.ehri.project.persistance.EntityBundle;
 
 public class ValidationError extends Exception {
@@ -16,7 +18,7 @@ public class ValidationError extends Exception {
         super(message);
     }
     
-    public ValidationError(EntityBundle bundle, Map<String, String> errors) {
+    public ValidationError(EntityBundle<? extends VertexFrame> bundle, Map<String, String> errors) {
         this(formatErrors(bundle.getClass().getName(), errors));
     }
     
