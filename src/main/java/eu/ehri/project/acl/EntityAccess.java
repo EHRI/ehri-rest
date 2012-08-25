@@ -1,5 +1,7 @@
 package eu.ehri.project.acl;
 
+import com.tinkerpop.blueprints.Edge;
+
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.relationships.Access;
@@ -48,5 +50,10 @@ public class EntityAccess implements Access {
 
     public void setAccessor(Accessor accessor) {
         this.accessor = accessor;
+    }
+
+    public Edge asEdge() {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

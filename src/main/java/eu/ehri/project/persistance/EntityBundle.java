@@ -38,6 +38,10 @@ public class EntityBundle <T> {
         return !errors.isEmpty();
     }
     
+    public MultiValueMap getValidationErrors() {
+        return errors;
+    }
+    
     public Map<String,Object> getData() throws ValidationError {
         return extendData();
     }
@@ -77,18 +81,21 @@ public class EntityBundle <T> {
         for (Method method : cls.getMethods()) {
             for (Annotation annotation : method.getAnnotations()) {
                 if (annotation instanceof Property && method.getName().startsWith(GET)) {
-                    String name = ((Property) annotation).value();
-                    if (!data.containsKey(name)) {
-                        errors.put(name, MISSING_PROPERTY);
-                    } else {
-                        Object value = data.get(name);
-                        if (value == null) {
-                            errors.put(name, EMPTY_VALUE);
-                        }
-                    }
+                    checkField(((Property) annotation).value(), method);
                 }
             }
         }
+    }
+    
+    private void checkField(String name, Method method) {
+        if (!data.containsKey(name)) {
+            errors.put(name, MISSING_PROPERTY);
+        } else {
+            Object value = data.get(name);
+            if (value == null) {
+                errors.put(name, EMPTY_VALUE);
+            }
+        }        
     }
 
     /**

@@ -16,7 +16,6 @@ public class BundleFactory <T extends VertexFrame> {
         return new EntityBundle<T>(data, cls);
     }
 
-
     @SuppressWarnings("unchecked")
     public EntityBundle<T> fromFramedVertext(T frame) throws ValidationError {
         Vertex vertex = frame.asVertex();
