@@ -1,13 +1,18 @@
 package eu.ehri.project.models.base;
 
 import com.tinkerpop.frames.Adjacency;
+import com.tinkerpop.frames.VertexFrame;
 
 import eu.ehri.project.models.DatePeriod;
+import eu.ehri.project.models.annotations.CascadeDelete;
+import eu.ehri.project.models.annotations.Fetch;
 
-public interface TemporalEntity {
+public interface TemporalEntity extends VertexFrame {
 
     public static final String HAS_DATE = "hasDate";
 
+    @CascadeDelete
+    @Fetch
     @Adjacency(label = HAS_DATE)
     public abstract Iterable<DatePeriod> getDatePeriods();
 

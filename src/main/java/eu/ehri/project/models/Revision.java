@@ -1,4 +1,4 @@
-package eu.ehri.project.models.base;
+package eu.ehri.project.models;
 
 import com.tinkerpop.frames.VertexFrame;
 

@@ -17,6 +17,7 @@ libraryDependencies ++= Seq(
     "org.neo4j" % "neo4j-kernel" % "1.8.M07",
     "org.neo4j" % "neo4j-kernel" % "1.8.M07" % "test" classifier "tests",
     "com.codahale" %% "jerkson" % "0.5.0",
+    "net.liftweb" %% "lift-json-ext" % "2.4-M5",
     "commons-collections" % "commons-collections" % "3.2.1"
 )
 

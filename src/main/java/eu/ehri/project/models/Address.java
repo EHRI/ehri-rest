@@ -5,9 +5,10 @@ import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Property;
 
 import eu.ehri.project.models.annotations.EntityType;
+import eu.ehri.project.models.base.VersionedEntity;
 
 @EntityType(EntityTypes.ADDRESS)
-public interface Address {
+public interface Address extends VersionedEntity {
         
     @Adjacency(label=Agent.HAS_ADDRESS, direction=Direction.IN)
     public Agent getAgent();

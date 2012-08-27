@@ -1,9 +1,10 @@
 package eu.ehri.project.test
 
 import eu.ehri.project.models._
-import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.base.Annotator;
-import eu.ehri.project.models.base.Description;
+import eu.ehri.project.models.base.AccessibleEntity
+import eu.ehri.project.models.base.TemporalEntity
+import eu.ehri.project.models.base.Annotator
+import eu.ehri.project.models.base.Description
 import eu.ehri.project.relationships._
 
 object TestData {
@@ -44,6 +45,11 @@ object TestData {
       Map(
         "isA" -> EntityTypes.DOCUMENT_DESCRIPTION,
         "title" -> "A Collection called 4")),
+    ("dp1",
+      Map(
+        "isA" -> EntityTypes.DATE_PERIOD,
+        "startDate" -> "1940-01-01T00:00:01Z",
+        "endDate" -> "1945-12-12T00:00:01Z")),
     ("r1",
       Map(
         "isA" -> EntityTypes.AGENT,
@@ -139,6 +145,9 @@ object TestData {
     ("rd1", Description.DESCRIBES, "r1", Map()),
     ("ad1", Description.DESCRIBES, "a1", Map()),
     ("ad2", Description.DESCRIBES, "a2", Map()),
+    
+    // Collections have dates
+    ("c1", TemporalEntity.HAS_DATE, "dp1", Map()),
     
     // Authorities create and are mentionedIn collections
     ("a1", Authority.CREATED, "c1", Map()),

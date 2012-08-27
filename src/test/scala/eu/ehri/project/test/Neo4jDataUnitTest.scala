@@ -271,8 +271,9 @@ import com.tinkerpop.blueprints.util.io.graphml.GraphMLWriter
       val newName = "Another Name"
       val c1 = helper.findTestElement("c1", classOf[DocumentaryUnit])
       val bundle = new BundleFactory[DocumentaryUnit]().fromFramedVertext(c1).setDataValue("name", newName);
+      println(bundle, bundle.getClass)
       val persister = new BundlePersister[DocumentaryUnit](graph);      
-      val doc = persister.persist(c1.asVertex.getId.asInstanceOf[Long], bundle);  
+      val doc = persister.persist(bundle);  
       val c1again = helper.findTestElement("c1", classOf[DocumentaryUnit])
       c1again.getName mustEqual newName
     }
@@ -283,9 +284,22 @@ import com.tinkerpop.blueprints.util.io.graphml.GraphMLWriter
       val oldName = c1.getName
       val bundle = new BundleFactory[DocumentaryUnit]().fromFramedVertext(c1).setDataValue("name", null);
       val persister = new BundlePersister[DocumentaryUnit](graph);      
-      persister.persist(c1.asVertex.getId.asInstanceOf[Long], bundle) must throwA[ValidationError]  
+      persister.persist(bundle) must throwA[ValidationError]  
       val c1again = helper.findTestElement("c1", classOf[DocumentaryUnit])
       c1again.getName mustEqual oldName
+    }    
+  }
+  
+  "Bundles" should {
+    import eu.ehri.project.crud.ObjectToRepresentationConverter
+    import eu.ehri.project.crud.RepresentationToObjectConverter
+    
+    "be serialisable and deserializable" in new LoadedDB {
+      val c1 = helper.findTestElement("c1", classOf[DocumentaryUnit])
+      val json = ObjectToRepresentationConverter.convert(c1)
+      
+      val bundle = RepresentationToObjectConverter.convert(json)
+      bundle.getId() mustEqual c1.asVertex().getId()
     }
   }
 }

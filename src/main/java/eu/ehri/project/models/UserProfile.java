@@ -6,10 +6,11 @@ import com.tinkerpop.frames.VertexFrame;
 
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.Accessor;
+import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.Annotator;
 
 @EntityType(EntityTypes.USER_PROFILE)
-public interface UserProfile extends VertexFrame, Accessor, Annotator {
+public interface UserProfile extends VertexFrame, Accessor, Annotator, Actioner {
 
     public static final String BELONGS_TO = "belongsTo";
 

@@ -1,11 +1,10 @@
 package eu.ehri.project.models.base;
 
-import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Incidence;
 import com.tinkerpop.frames.VertexFrame;
 
-import eu.ehri.project.relationships.Access;
+import eu.ehri.project.models.Revision;
 import eu.ehri.project.relationships.RevisionContext;
 
 public interface VersionedEntity extends VertexFrame {

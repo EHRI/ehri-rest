@@ -4,11 +4,12 @@ import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Incidence;
 import com.tinkerpop.frames.Property;
+import com.tinkerpop.frames.VertexFrame;
 import com.tinkerpop.frames.annotations.gremlin.GremlinGroovy;
 
 import eu.ehri.project.relationships.Access;
 
-public interface Accessor {
+public interface Accessor extends VertexFrame {
     public static final String BELONGS_TO = "belongsTo";
 
     @Property("name")
