@@ -3,7 +3,6 @@ package eu.ehri.data.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import eu.ehri.data.EhriNeo4j;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -15,6 +14,8 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.test.TestGraphDatabaseFactory;
+
+import eu.ehri.data.EhriNeo4j;
 
 public class EhriNeo4jBasicTest {
 	   protected GraphDatabaseService graphDb;
@@ -149,7 +150,7 @@ public class EhriNeo4jBasicTest {
 			assertFalse(inV.hasRelationship());
 			
 			// we should not have a relationship with that id and property etc. in the neo4j database
-	        Relationship foundRelationship = graphDb.getRelationshipById(id);
+	        graphDb.getRelationshipById(id);
 	    }
 	    
 	    @Test

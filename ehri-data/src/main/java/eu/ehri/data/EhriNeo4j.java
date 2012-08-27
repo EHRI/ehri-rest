@@ -27,8 +27,6 @@ import java.util.Map;
  * neo4j Node => Vertex
  * neo4j Relationship => Edge 
  * 
- * @author paulboon
- *
  */
 public class EhriNeo4j {
 	/**
@@ -38,7 +36,7 @@ public class EhriNeo4j {
 
 	/**
 	 * 
-	 * @param graphDb
+	 * @param graphDb	The graph database
 	 * @param index
 	 * @param field
 	 * @param query
@@ -60,10 +58,10 @@ public class EhriNeo4j {
 	 * TODO maybe have it return a Vertex instead of a Node or rename it to createNodeIndexed?
 	 * Also remove the Index from the name?
 	 * 
-	 * @param graphDb
-	 * @param data Contains the properties of he node; key, value pairs
-	 * @param indexName
-	 * @return The node created
+	 * @param graphDb		The graph database
+	 * @param data 			The properties
+	 * @param indexName		The name of the index
+	 * @return 				The node created
 	 * @throws Exception
 	 */
 	public static Node createIndexedVertex(GraphDatabaseService graphDb, Map<String, Object> data, String indexName) throws Exception 
@@ -92,8 +90,8 @@ public class EhriNeo4j {
 	 * Neo4j requires you delete all adjacent edges first. 
 	 * Blueprints' removeVertex() method does that; the Neo4jServer DELETE URI does not.
 	 * 
-	 * @param graphDb
-	 * @param id
+	 * @param graphDb	The graph database
+	 * @param id		The vertex identifier
 	 */
 	public static void deleteVertex(GraphDatabaseService graphDb, long id)
 	{
@@ -106,10 +104,10 @@ public class EhriNeo4j {
 	/**
 	 * Update a vertex
 	 * 
-	 * @param graphDb
-	 * @param id
-	 * @param data
-	 * @param indexName
+	 * @param graphDb	The graph database
+	 * @param id		The vertex identifier
+	 * @param data		The properties
+	 * @param indexName	The name of the index
 	 * @return
 	 * @throws Exception
 	 */
@@ -139,12 +137,12 @@ public class EhriNeo4j {
 	/**
 	 * Create an indexed Edge
 	 * 
-	 * @param graphDb
-	 * @param outV
-	 * @param typeLabel
-	 * @param inV
-	 * @param data
-	 * @param indexName
+	 * @param graphDb	The graph database
+	 * @param outV		The outgoing vertex
+	 * @param typeLabel	The edge type
+	 * @param inV		The ingoing Vertex
+	 * @param data		The properties
+	 * @param indexName	The name of the index
 	 * @return
 	 * @throws Exception
 	 */
@@ -178,8 +176,8 @@ public class EhriNeo4j {
 	/**
 	 * Delete Edge
 	 * 
-	 * @param graphDb
-	 * @param id
+	 * @param graphDb	The graph database
+	 * @param id		The edge identifier
 	 */
 	public static void deleteEdge(GraphDatabaseService graphDb, long id)
 	{
@@ -193,10 +191,10 @@ public class EhriNeo4j {
 	 * Update Edge
 	 * similar to update Vertex, because the Type cannot be changed
 	 * 
-	 * @param graphDb
-	 * @param id
-	 * @param data
-	 * @param indexName
+	 * @param graphDb	The graph database
+	 * @param id		The edge identifier
+	 * @param data		The properties
+	 * @param indexName	The name of the index
 	 * @return
 	 * @throws Exception
 	 */
@@ -221,8 +219,23 @@ public class EhriNeo4j {
 		}
 	}	
 	
+	// create_indexed_vertex_with_subordinates(data, index_name, subs)
+	// update_indexed_vertex_with_subordinates(_id, data, index_name, subs) 
+	  
+	/*** index ***/
+	// get_or_create_vertex_index(index_name, index_params)
+	// get_or_create_edge_index(index_name, index_params)
+
+	
     /*** helpers ***/
 
+	/**
+	 * Replace properties to a property container like vertex and edge
+	 * 
+	 * @param index		The index of the container
+	 * @param c			The container Edge or Vertex
+	 * @param data		The properties
+	 */
 	private static void replaceProperties(Index index, PropertyContainer c, Map<String, Object> data)
 	{
 		// remove container from index
@@ -236,7 +249,13 @@ public class EhriNeo4j {
 		addProperties(index, c, data);
 	}
 	
-	// add properties to a property container like vertex and edge
+	/**
+	 * Add properties to a property container like vertex and edge
+	 * 
+	 * @param index	The index of the container
+	 * @param c		The container Edge or Vertex
+	 * @param data	The properties
+	 */
 	private static void addProperties(Index index, PropertyContainer c, Map<String, Object> data)
 	{
 		// TODO data cannot be null

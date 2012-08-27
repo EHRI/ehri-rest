@@ -2,12 +2,17 @@ package eu.ehri.plugin;
 
 import java.util.Map;
 
-import eu.ehri.data.EhriNeo4j;
-
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.server.plugins.*;
-import org.neo4j.server.rest.repr.Representation;
+import org.neo4j.server.plugins.Description;
+import org.neo4j.server.plugins.Name;
+import org.neo4j.server.plugins.Parameter;
+import org.neo4j.server.plugins.PluginTarget;
+import org.neo4j.server.plugins.ServerPlugin;
+import org.neo4j.server.plugins.Source;
 import org.neo4j.server.rest.repr.ObjectToRepresentationConverter;
+import org.neo4j.server.rest.repr.Representation;
+
+import eu.ehri.data.EhriNeo4j;
 
 /*
  * The rest interface for neo4j needs to be extended with utilities that do some extra work for us.
@@ -20,6 +25,15 @@ import org.neo4j.server.rest.repr.ObjectToRepresentationConverter;
 @Description("Plugin with utilities, which will be used to persists data for the EHRI collection registry")
 public class EhriNeo4jPlugin extends ServerPlugin {
 
+	/**
+	 * 
+	 * @param graphDB
+	 * @param index
+	 * @param field
+	 * @param query
+	 * @return
+	 * @throws Exception
+	 */
 	@Name("simpleQuery")
 	@Description("Fetch a collection with the given name.")
 	@PluginTarget(GraphDatabaseService.class)
@@ -39,6 +53,16 @@ public class EhriNeo4jPlugin extends ServerPlugin {
 	
 	/*** Vertex ***/
 
+	/**
+	 * Example with curl:
+	 * curl -X POST -H "Content-type: application/json" http://localhost:7474/db/data/ext/EhriNeo4jPlugin/graphdb/createIndexedVertex -d '{"index":"test", "data": {"name": "Test1"}}'
+	 * 
+	 * @param graphDB
+	 * @param data
+	 * @param index
+	 * @return
+	 * @throws Exception
+	 */
 	@Name("createIndexedVertex")
 	@Description("Create an indexed vertex")
 	@PluginTarget(GraphDatabaseService.class)
@@ -54,6 +78,15 @@ public class EhriNeo4jPlugin extends ServerPlugin {
 		);
 	}
 	
+	/**
+	 * Example with curl:
+	 * curl -X POST -H "Content-type: application/json" http://localhost:7474/db/data/ext/EhriNeo4jPlugin/graphdb/deleteVertex -d '{"id":"80449"}'
+	 * 
+	 * @param graphDB
+	 * @param id
+	 * @return
+	 * @throws Exception
+	 */
 	@Name("deleteVertex")
 	@Description("Delete a vertex")
 	@PluginTarget(GraphDatabaseService.class)
@@ -69,6 +102,15 @@ public class EhriNeo4jPlugin extends ServerPlugin {
 		);
 	}
 	
+	/**
+	 * 
+	 * @param graphDB
+	 * @param id
+	 * @param data
+	 * @param index
+	 * @return
+	 * @throws Exception
+	 */
 	@Name("updateIndexedVertex")
 	@Description("Update an indexed vertex")
 	@PluginTarget(GraphDatabaseService.class)
@@ -88,6 +130,17 @@ public class EhriNeo4jPlugin extends ServerPlugin {
 
 	/*** Edge ***/
 	
+	/**
+	 * 
+	 * @param graphDB
+	 * @param outV
+	 * @param typeLabel
+	 * @param inV
+	 * @param data
+	 * @param index
+	 * @return
+	 * @throws Exception
+	 */
 	@Name("createIndexedEdge")
 	@Description("Create an indexed edge")
 	@PluginTarget(GraphDatabaseService.class)
@@ -109,6 +162,13 @@ public class EhriNeo4jPlugin extends ServerPlugin {
 		);
 	}
 
+	/**
+	 * 
+	 * @param graphDB
+	 * @param id
+	 * @return
+	 * @throws Exception
+	 */
 	@Name("deleteEdge")
 	@Description("Delete an edge")
 	@PluginTarget(GraphDatabaseService.class)
@@ -124,6 +184,15 @@ public class EhriNeo4jPlugin extends ServerPlugin {
 		);
 	}
 	
+	/**
+	 * 
+	 * @param graphDB
+	 * @param id
+	 * @param data
+	 * @param index
+	 * @return
+	 * @throws Exception
+	 */
 	@Name("updateIndexedEdge")
 	@Description("update an indexed edge")
 	@PluginTarget(GraphDatabaseService.class)
