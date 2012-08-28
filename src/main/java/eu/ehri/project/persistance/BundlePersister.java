@@ -19,7 +19,7 @@ public class BundlePersister<T extends VertexFrame> {
         this.helpers = new Neo4jHelpers(graph.getBaseGraph().getRawGraph());
     }
     
-    public T persist(UpdateBundle<T> bundle) throws ValidationError {
+    public T persist(EntityUpdateBundle<T> bundle) throws ValidationError {
         bundle.validate();
         Index<Vertex> index = helpers.getOrCreateIndex(bundle.getEntityType(), Vertex.class);
         Vertex node = helpers.updateIndexedVertex(bundle.getId(), bundle.getData(), index);

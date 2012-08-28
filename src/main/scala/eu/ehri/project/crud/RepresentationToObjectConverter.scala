@@ -1,19 +1,19 @@
 package eu.ehri.project.crud
 
-import com.tinkerpop.frames.VertexFrame
+import com.tinkerpop.frames._
 
 import scala.collection.JavaConversions._
 
 import eu.ehri.project.persistance._
 
 import eu.ehri.project.core.utils.ClassUtils
-import eu.ehri.project.models.annotations.EntityType
+import eu.ehri.project.models.annotations.{EntityType,Dependent}
 import eu.ehri.project.models.EntityTypes
 
 import com.codahale.jerkson.Json
 
 import net.liftweb.json._
-import net.liftweb.json.JsonAST.{JValue, JObject}
+import net.liftweb.json.JsonAST.{JValue, JObject, JArray}
 
 case class Bundle(val id: Long, val data: JObject, val relationships: Map[String,JValue])
 
@@ -32,7 +32,7 @@ object RepresentationToObjectConverter {
  
   implicit val formats = Serialization.formats(NoTypeHints)
   
-  def deserialize[T <: VertexFrame](data: JValue): UpdateBundle[T] = {
+  def deserialize[T <: VertexFrame](data: JValue): EntityUpdateBundle[T] = {
     //val main: Bundle = Bundle(
     //   id = data.getOrElse("id", throw new Exception("No id found in deserialization")).asInstanceOf[java.lang.Integer].toLong,
     //   data = data.getOrElse("data", throw new Exception("No id found in deserialization")).asInstanceOf[Map[String,_]],
@@ -51,17 +51,28 @@ object RepresentationToObjectConverter {
     val bundle = (new BundleFactory[T]).buildBundle(
         main.id,
         main.data.values.asInstanceOf[Map[String,Object]], cls.asInstanceOf[Class[T]])
-    main.relationships.foldLeft(bundle) { case (bd, (reltype, data)) =>
+    val deps = getDependentRelations(cls)
+    main.relationships.filterKeys(r => deps.contains(r)).foldLeft(bundle) { case (bd, (reltype, data)) =>
       data match {
-        case list: List[JValue] => list.foldLeft(bd) { case(bd, (cdata: JValue)) =>
-          println("Deserializing type: " + reltype)
+        case JArray(list) => list.foldLeft(bd) { case(bd, (cdata: JValue)) =>
           bd.saveWith(reltype, deserialize[T](cdata))
         }
         case single: JValue => bd.saveWith(reltype, deserialize[T](single))
       }
     }
      bundle
-  } 
+  }
+  
+  def getDependentRelations(cls: Class[_]): List[String] = {
+    cls.getMethods.filter{ m =>
+      m.getAnnotation(classOf[Dependent]) != null 
+    }.flatMap { m => 
+      m.getAnnotation(classOf[Adjacency]) match {
+        case null => Nil
+        case ann: Adjacency => List(ann.label)
+      }
+    }.toList
+  }
   
   def getAllInterfaces(cls: Class[_]): Array[Class[_]] = { 
     val ifc = cls.getInterfaces()

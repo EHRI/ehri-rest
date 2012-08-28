@@ -2,7 +2,7 @@ package eu.ehri.project.models;
 
 import com.tinkerpop.frames.Adjacency;
 
-import eu.ehri.project.models.annotations.CascadeDelete;
+import eu.ehri.project.models.annotations.Dependent;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.base.AccessibleEntity;
@@ -21,7 +21,7 @@ public interface Agent extends AccessibleEntity, DescribedEntity,
     public Iterable<DocumentaryUnit> getCollections();
 
     @Fetch
-    @CascadeDelete
+    @Dependent
     @Adjacency(label= HAS_ADDRESS)
     public Iterable<Address> getAddresses();
     

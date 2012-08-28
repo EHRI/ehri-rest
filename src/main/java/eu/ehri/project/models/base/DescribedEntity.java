@@ -4,12 +4,12 @@ import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.VertexFrame;
 
-import eu.ehri.project.models.annotations.CascadeDelete;
+import eu.ehri.project.models.annotations.Dependent;
 import eu.ehri.project.models.annotations.Fetch;
 
 public interface DescribedEntity extends VertexFrame {
     @Fetch
-    @CascadeDelete
+    @Dependent
     @Adjacency(label = "describes", direction = Direction.IN)
     public Iterable<Description> getDescriptions();
 

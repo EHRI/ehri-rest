@@ -21,6 +21,6 @@ import java.lang.annotation.Target;
  * Indicates that the entity pointed to by the Framed Adjacency
  * should be deleted along with its master object.
  */
-public @interface CascadeDelete {
+public @interface Dependent {
 
 }
