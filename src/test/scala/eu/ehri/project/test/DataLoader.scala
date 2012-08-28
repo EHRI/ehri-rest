@@ -1,6 +1,7 @@
 package eu.ehri.project.test
 
-import eu.ehri.project.core.Neo4jHelpers
+import eu.ehri.project.core.GraphHelpers
+
 import eu.ehri.project.models._
 import eu.ehri.project.relationships._
 import com.tinkerpop.frames.FramedGraph
@@ -14,7 +15,7 @@ object DataLoader {
 }
 
 class DataLoader(val graph: FramedGraph[Neo4jGraph]) {
-  val helper = new Neo4jHelpers(graph.getBaseGraph.getRawGraph)
+  val helper = new GraphHelpers(graph.getBaseGraph.getRawGraph)
 
   def createRelationship(src: Vertex, dst: Vertex, label: String, data: Map[String, Any] = Map()) = {
     helper.getOrCreateIndex(label, classOf[Edge])

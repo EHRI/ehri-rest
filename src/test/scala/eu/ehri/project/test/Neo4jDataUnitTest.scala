@@ -1,17 +1,31 @@
 package eu.ehri.project.test
 
-import org.specs2.mutable._
-import org.specs2.matcher.ShouldThrownMatchers._
+import scala.collection.JavaConversions.iterableAsScalaIterable
+import scala.collection.JavaConversions.mapAsJavaMap
+
 import org.neo4j.test.TestGraphDatabaseFactory
-import com.tinkerpop.frames.FramedGraph
+import org.specs2.mutable.After
+import org.specs2.mutable.Specification
+
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph
-import eu.ehri.project.models._
-import eu.ehri.project.models.base._
-import eu.ehri.project.persistance._
-import eu.ehri.project.exceptions._
-import scala.collection.JavaConversions._
+import com.tinkerpop.frames.FramedGraph
+
+import eu.ehri.project.exceptions.ValidationError
+import eu.ehri.project.models.base.AccessibleEntity
+import eu.ehri.project.models.base.Accessor
+import eu.ehri.project.models.base.AnnotatableEntity
+import eu.ehri.project.models.base.Annotator
+import eu.ehri.project.models.Agent
 import eu.ehri.project.models.Annotation
-import org.specs2.matcher.ShouldThrownMatchers
+import eu.ehri.project.models.Authority
+import eu.ehri.project.models.Group
+import eu.ehri.project.models.UserProfile
+import eu.ehri.project.models.DocumentaryUnit
+import eu.ehri.project.models.EntityTypes
+import eu.ehri.project.persistance.BundleFactory
+import eu.ehri.project.persistance.BundlePersister
+import eu.ehri.project.views.ObjectToRepresentationConverter
+import eu.ehri.project.views.RepresentationToObjectConverter
 
 trait DB extends After {
     // Set up our database...
@@ -58,17 +72,10 @@ class GraphTest extends Specification {
       val groups = helper.findTestElements(EntityTypes.GROUP, classOf[Group])
       groups.head.getUsers.toList mustNotEqual Nil
     }
-
-    "dump some GraphML" in new LoadedDB {
-import com.tinkerpop.blueprints.util.io.graphml.GraphMLWriter
-      var output = new java.io.FileOutputStream("graphml.xml")
-      GraphMLWriter.outputGraph(graph.getBaseGraph, output)
-      output.close()
-      new java.io.File("graphml.xml").exists mustEqual true
-    }
+    
   }
-
-  "Collections" should {
+  
+  "Collections" should {    
     "be held by a repository" in new LoadedDB {
       helper.findTestElements(EntityTypes.DOCUMENTARY_UNIT, classOf[DocumentaryUnit]).toList.filter { c =>
         c.getAgent == null
@@ -291,16 +298,38 @@ import com.tinkerpop.blueprints.util.io.graphml.GraphMLWriter
   }
   
   "Bundles" should {
-    import eu.ehri.project.crud.ObjectToRepresentationConverter
-    import eu.ehri.project.crud.RepresentationToObjectConverter
-    
     "be serialisable and deserializable" in new LoadedDB {
       val c1 = helper.findTestElement("c1", classOf[DocumentaryUnit])
       val json = ObjectToRepresentationConverter.convert(c1)
       
       val bundle = RepresentationToObjectConverter.convert(json)
-      println(bundle)
       bundle.getId() mustEqual c1.asVertex().getId()
+    }
+    
+    "allow resaving" in new LoadedDB {
+      val c1 = helper.findTestElement("c1", classOf[DocumentaryUnit])
+      val json = ObjectToRepresentationConverter.convert(c1)
+      c1.getDescriptions.toList.length mustEqual 1
+      val bundle = RepresentationToObjectConverter.convert[DocumentaryUnit](json)
+      val persister = new BundlePersister[DocumentaryUnit](graph);      
+      val c1redux = persister.persist(bundle)
+      c1.getDescriptions.toList mustEqual c1redux.getDescriptions.toList
+      // Check saving the bundle didn't add another item
+      println(c1.getDescriptions.toList)
+      c1.getDescriptions.toList.length mustEqual 1
+    }
+    
+    "allow resaving with subordinate changes" in new LoadedDB {
+      val c1 = helper.findTestElement("c1", classOf[DocumentaryUnit])
+      val json = ObjectToRepresentationConverter.convert(c1)
+      val cd1 = c1.getDescriptions.toList.head
+      c1.removeDescription(cd1)
+      c1.getDescriptions.toList.length mustEqual 0
+      val bundle = RepresentationToObjectConverter.convert[DocumentaryUnit](json)
+      val persister = new BundlePersister[DocumentaryUnit](graph);      
+      val c1redux = persister.persist(bundle)
+      // Tada: it's back again
+      c1.getDescriptions.toList.length mustEqual 1
     }
   }
 }

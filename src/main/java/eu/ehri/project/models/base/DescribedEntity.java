@@ -19,4 +19,6 @@ public interface DescribedEntity extends VertexFrame {
     @Adjacency(label = "describes", direction = Direction.IN)
     public void setDescriptions(Iterable<Description> descriptions);
 
+    @Adjacency(label = "describes", direction = Direction.IN)
+    public void removeDescription(final Description description);
 }

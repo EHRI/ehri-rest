@@ -1,4 +1,4 @@
-package eu.ehri.project.crud
+package eu.ehri.project.views
 
 import com.tinkerpop.frames._
 import scala.collection.JavaConversions._

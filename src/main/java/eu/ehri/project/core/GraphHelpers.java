@@ -18,8 +18,8 @@ import com.tinkerpop.blueprints.impls.neo4j.Neo4jVertex;
 
 import eu.ehri.project.exceptions.IndexNotFoundException;
 
-public class Neo4jHelpers {
-    public Neo4jHelpers(GraphDatabaseService g) {
+public class GraphHelpers {
+    public GraphHelpers(GraphDatabaseService g) {
         graph = new Neo4jGraph(g);
     }
 

@@ -1,4 +1,4 @@
-package eu.ehri.project.crud
+package eu.ehri.project.views
 
 import eu.ehri.project.models._
 

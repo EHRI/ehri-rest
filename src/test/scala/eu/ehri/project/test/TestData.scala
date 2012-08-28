@@ -17,6 +17,8 @@ object TestData {
     ("cd1",
       Map(
         "isA" -> EntityTypes.DOCUMENT_DESCRIPTION,
+        "identifier" -> "c1",
+        "languageOfDescription" -> "en",
         "title" -> "A Collection called 1")),
     ("c2",
       Map(
@@ -26,6 +28,8 @@ object TestData {
     ("cd2",
       Map(
         "isA" -> EntityTypes.DOCUMENT_DESCRIPTION,
+        "identifier" -> "c2",
+        "languageOfDescription" -> "en",
         "title" -> "A Collection called 2")),
     ("c3",
       Map(
@@ -35,6 +39,8 @@ object TestData {
     ("cd3",
       Map(
         "isA" -> EntityTypes.DOCUMENT_DESCRIPTION,
+        "identifier" -> "c3",
+        "languageOfDescription" -> "en",
         "title" -> "A Collection called 3")),
     ("c4",
       Map(
@@ -44,6 +50,8 @@ object TestData {
     ("cd4",
       Map(
         "isA" -> EntityTypes.DOCUMENT_DESCRIPTION,
+        "identifier" -> "c4",
+        "languageOfDescription" -> "en",
         "title" -> "A Collection called 4")),
     ("dp1",
       Map(

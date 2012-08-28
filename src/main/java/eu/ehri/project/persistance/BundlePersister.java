@@ -2,7 +2,13 @@ package eu.ehri.project.persistance;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+
 import org.apache.commons.collections.map.MultiValueMap;
+
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Index;
@@ -13,7 +19,7 @@ import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.frames.VertexFrame;
 
-import eu.ehri.project.core.Neo4jHelpers;
+import eu.ehri.project.core.GraphHelpers;
 import eu.ehri.project.exceptions.IndexNotFoundException;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.annotations.Dependent;
@@ -21,44 +27,77 @@ import eu.ehri.project.models.annotations.Dependent;
 public class BundlePersister<T extends VertexFrame> {
 
     private final FramedGraph<Neo4jGraph> graph;
-    private final Neo4jHelpers helpers;
+    private final GraphHelpers helpers;
 
     public BundlePersister(FramedGraph<Neo4jGraph> graph) {
         this.graph = graph;
-        this.helpers = new Neo4jHelpers(graph.getBaseGraph().getRawGraph());
+        this.helpers = new GraphHelpers(graph.getBaseGraph().getRawGraph());
     }
     
-    private void saveDependents(MultiValueMap deps, Vertex master,
-            Class<? extends VertexFrame> cls) throws ValidationError {
+    private void saveDependents(Vertex master, Class<? extends VertexFrame> cls,
+            MultiValueMap deps) throws ValidationError {
+
+        Set<Long> existing = new HashSet<Long>();
+        Set<Long> refreshed = new HashSet<Long>();
+        
         for (Object key : deps.keySet()) {
             String relation = (String) key;
+
             for (Object obj : deps.getCollection(key)) {
                 EntityBundle<? extends VertexFrame> bundle = (EntityBundle<?>) obj;
-                Vertex child = insertOrUpdate(bundle);
-                Direction direction = directionOfRelationship(cls, bundle.getBundleClass(), relation);
-                // if (!master.getVertices(direction, (String)key).
-                // TODO: Check if the relationship already exists...
-                Index<Edge> index;
-                try {
-                    index = helpers.getIndex(relation, Edge.class);
-                } catch (IndexNotFoundException e) {
-                    e.printStackTrace();
-                    throw new RuntimeException(e);
-                }
-                if (direction == Direction.OUT) {
-                    helpers.createIndexedEdge((Long) master.getId(),
-                            (Long) child.getId(), relation,
-                            new HashMap<String, Object>(), index);
-                } else {
-                    helpers.createIndexedEdge((Long) child.getId(),
-                            (Long) master.getId(), relation,
-                            new HashMap<String, Object>(), index);
+                Vertex child = saveInDepth(bundle);
+                refreshed.add((Long)child.getId());
+                Direction direction = getDirectionOfRelationship(cls, bundle.getBundleClass(), relation);
+                
+                // FIXME: Traversing all the current relations here (for 
+                // every individual dependent) is very inefficient!
+                List<Long> current = getCurrentRelationships(master, direction, relation);
+                existing.addAll(current);
+                
+                // Create a relation if there isn't one already
+                if (!current.contains((Long)child.getId())) {
+                    Index<Edge> index;
+                    try {
+                        index = helpers.getIndex(relation, Edge.class);
+                    } catch (IndexNotFoundException e) {
+                        e.printStackTrace();
+                        throw new RuntimeException(e);
+                    }                
+                    if (direction == Direction.OUT) {
+                        helpers.createIndexedEdge((Long) master.getId(),
+                                (Long) child.getId(), relation,
+                                new HashMap<String, Object>(), index);
+                    } else {
+                        helpers.createIndexedEdge((Long) child.getId(),
+                                (Long) master.getId(), relation,
+                                new HashMap<String, Object>(), index);
+                    }
                 }
             }
         }
+        // TODO: Clean up dependent items that have not been saved in the
+        // current operation, and are therefore assumed deleted.
+    }
+    
+    private List<Long> getCurrentRelationships(final Vertex src, Direction direction, String label) {
+        List<Long> out = new LinkedList<Long>();
+        for (Vertex end : src.getVertices(direction, label)) {
+            out.add((Long)end.getId());
+        }        
+        return out;
+    }
+    
+    private Boolean hasCurrentRelationship(final Vertex src, final Vertex dst, Direction direction, String label) {
+        for (Vertex end : src.getVertices(direction, label)) {
+            // FIXME: Possible dodgy over-assuming Object comparison...
+            if ((Long)end.getId() == (Long)dst.getId()) {
+                return true;
+            }
+        }
+        return false;
     }
 
-    private Direction directionOfRelationship(
+    private Direction getDirectionOfRelationship(
             Class<? extends VertexFrame> classA,
             Class<? extends VertexFrame> classB, String rel) {
         for (Method method : classA.getMethods()) {
@@ -101,6 +140,12 @@ public class BundlePersister<T extends VertexFrame> {
             return insert(bundle);
         }
     }
+    
+    private Vertex saveInDepth(EntityBundle<? extends VertexFrame> bundle) throws ValidationError {
+        Vertex node = insertOrUpdate(bundle);
+        saveDependents(node, bundle.getBundleClass(), bundle.getSaveWith());
+        return node;
+    }
 
     public T persist(EntityBundle<T> bundle) throws ValidationError {
         // This should handle logic for setting
@@ -108,9 +153,7 @@ public class BundlePersister<T extends VertexFrame> {
         // that jazz...
         graph.getBaseGraph().getRawGraph().beginTx();
         try {
-            Vertex node = insertOrUpdate(bundle);
-            saveDependents(bundle.getSaveWith(), node, bundle.getBundleClass());
-            return graph.frame(node, bundle.getBundleClass());
+            return graph.frame(saveInDepth(bundle), bundle.getBundleClass());
         } catch (ValidationError err) {
             graph.getBaseGraph().stopTransaction(Conclusion.FAILURE);
             throw new ValidationError(err.getMessage());
