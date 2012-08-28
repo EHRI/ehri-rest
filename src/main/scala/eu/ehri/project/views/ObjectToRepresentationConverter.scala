@@ -6,6 +6,7 @@ import com.tinkerpop.frames.VertexFrame
 import com.tinkerpop.frames.Adjacency
 import com.tinkerpop.blueprints.Vertex
 import eu.ehri.project.models.annotations
+import eu.ehri.project.core.utils.AnnotationUtils
 import java.lang.annotation.Annotation
 import java.lang.reflect.Method
 import org.apache.commons.collections.map.MultiValueMap
@@ -17,11 +18,6 @@ import scala.collection.JavaConversions._
 import com.codahale.jerkson.Json
 
 object ObjectToRepresentationConverter extends DataConverter {
-
-  private def isFetchMethod(method: Method): Boolean = method.getAnnotation(classOf[annotations.Fetch]) match {
-    case null => false
-    case a => true
-  }
 
   private def getAdjacencyLabel(method: Method) = method.getAnnotation(classOf[Adjacency]) match {
     case null => None
@@ -53,9 +49,9 @@ object ObjectToRepresentationConverter extends DataConverter {
     
     var relations = Map[String, List[EntityBundle[T]]]()
     // Traverse the methods of the item's class, looking for
-    // @Adjacency annotations also annotated with @Fetch
+    // @Adjacency analso annotated with @Fetch
     for (method <- cls.getMethods()) {
-      if (isFetchMethod(method)) {
+      if (AnnotationUtils.isFetchMethod(method)) {
         getAdjacencyLabel(method).map { label =>
           method.setAccessible(true);
           method.invoke(item) match {
