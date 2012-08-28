@@ -16,7 +16,7 @@ public interface Authority extends VertexFrame, AccessibleEntity,
     public static final String CREATED = "created";
     public static final String MENTIONED_IN = "mentionedIn";
 
-    @Property("type_of_entity")
+    @Property("typeOfEntity")
     public String getTypeOfEntity();
 
     @Adjacency(label = CREATED)

@@ -71,24 +71,29 @@ object TestData {
     ("rd1",
       Map(
         "isA" -> EntityTypes.AGENT_DESCRIPTION,
+        "languageOfDescription" -> "en",
         "title" -> "A Repository called 1")),
     ("a1",
       Map(
         "isA" -> EntityTypes.AUTHORITY,
         "identifier" -> "a1",
+        "typeOfEntity" -> "person",
         "name" -> "Authority 1")),
     ("ad1",
       Map(
         "isA" -> EntityTypes.AUTHORITY_DESCRIPTION,
+        "languageOfDescription" -> "en",
         "title" -> "An Authority called 1")),
     ("a2",
       Map(
         "isA" -> EntityTypes.AUTHORITY,
+        "typeOfEntity" -> "person",
         "identifier" -> "a2",
         "name" -> "Authority 2")),
     ("ad2",
       Map(
         "isA" -> EntityTypes.AUTHORITY_DESCRIPTION,
+        "languageOfDescription" -> "en",
         "title" -> "An Authority called 2")),
     ("adminGroup",
       Map(

@@ -12,6 +12,10 @@ public class PermissionDenied extends Exception {
                 accessor.getName(), message));
     }
 
+    public PermissionDenied(String message) {
+        super(message);
+    }
+
     public PermissionDenied(Accessor accessor, AccessibleEntity entity) {
         super(String.format(
                 "Permission denied accessing resource '%s' as '%s')",

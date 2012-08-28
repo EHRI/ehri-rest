@@ -96,6 +96,19 @@ public class EntityBundle<T extends VertexFrame> {
         return ann.value();
     }
 
+
+    public void validateForUpdate() throws ValidationError {
+        if (id == null)
+            throw new ValidationError("No identifier given for update operation.");
+        validate();
+    }
+
+    public void validateForInsert() throws ValidationError {
+        if (id != null)
+            throw new ValidationError("Identifier is present but insert operation specified.");
+        validate();
+    }
+    
     public void validate() throws ValidationError {
         checkFields();
         checkIsA();

@@ -2,14 +2,11 @@ package eu.ehri.project.test
 
 import scala.collection.JavaConversions.iterableAsScalaIterable
 import scala.collection.JavaConversions.mapAsJavaMap
-
 import org.neo4j.test.TestGraphDatabaseFactory
 import org.specs2.mutable.After
 import org.specs2.mutable.Specification
-
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph
 import com.tinkerpop.frames.FramedGraph
-
 import eu.ehri.project.exceptions.ValidationError
 import eu.ehri.project.models.base.AccessibleEntity
 import eu.ehri.project.models.base.Accessor
@@ -23,15 +20,20 @@ import eu.ehri.project.models.UserProfile
 import eu.ehri.project.models.DocumentaryUnit
 import eu.ehri.project.models.EntityTypes
 import eu.ehri.project.persistance.BundleFactory
-import eu.ehri.project.persistance.BundlePersister
-import eu.ehri.project.views.ObjectToRepresentationConverter
-import eu.ehri.project.views.RepresentationToObjectConverter
+import eu.ehri.project.persistance.BundleDAO
+import eu.ehri.project.views.RepresentationConverter
+import eu.ehri.project.models.DatePeriod
+import eu.ehri.project.models.DocumentaryUnit
+
 
 trait DB extends After {
     // Set up our database...
     val graph = new FramedGraph[Neo4jGraph](
       new Neo4jGraph(
         new TestGraphDatabaseFactory().newImpermanentDatabaseBuilder().newGraphDatabase()))
+
+    // Helper for converting between bundles and frames
+    val converter = new RepresentationConverter
 
     def after = Unit //graph.shutdown, not needed on impermanentDatabase
 }
@@ -267,8 +269,8 @@ class GraphTest extends Specification {
     "not crash and result in a document with the same name as the test data" in new DB {
       val m = Map("identifier" -> "c1", "name" -> "Collection 1");   
       val bundle = new BundleFactory().buildBundle(m, classOf[DocumentaryUnit]);
-      val persister = new BundlePersister[DocumentaryUnit](graph);
-      val doc = persister.persist(bundle);      
+      val persister = new BundleDAO[DocumentaryUnit](graph);
+      val doc = persister.insert(bundle);      
       doc.getName mustEqual m.getOrElse("name", "")
     }
   }
@@ -278,9 +280,8 @@ class GraphTest extends Specification {
       val newName = "Another Name"
       val c1 = helper.findTestElement("c1", classOf[DocumentaryUnit])
       val bundle = new BundleFactory[DocumentaryUnit]().fromFramedVertext(c1).setDataValue("name", newName);
-      println(bundle, bundle.getClass)
-      val persister = new BundlePersister[DocumentaryUnit](graph);      
-      val doc = persister.persist(bundle);  
+      val persister = new BundleDAO[DocumentaryUnit](graph);      
+      val doc = persister.update(bundle);  
       val c1again = helper.findTestElement("c1", classOf[DocumentaryUnit])
       c1again.getName mustEqual newName
     }
@@ -290,8 +291,8 @@ class GraphTest extends Specification {
       val c1 = helper.findTestElement("c1", classOf[DocumentaryUnit])
       val oldName = c1.getName
       val bundle = new BundleFactory[DocumentaryUnit]().fromFramedVertext(c1).setDataValue("name", null);
-      val persister = new BundlePersister[DocumentaryUnit](graph);      
-      persister.persist(bundle) must throwA[ValidationError]  
+      val persister = new BundleDAO[DocumentaryUnit](graph);      
+      persister.update(bundle) must throwA[ValidationError]  
       val c1again = helper.findTestElement("c1", classOf[DocumentaryUnit])
       c1again.getName mustEqual oldName
     }    
@@ -300,48 +301,48 @@ class GraphTest extends Specification {
   "Bundles" should {
     "be serialisable and deserializable" in new LoadedDB {
       val c1 = helper.findTestElement("c1", classOf[DocumentaryUnit])
-      val json = ObjectToRepresentationConverter.convert(c1)
+      val json = converter.convert(c1)
       
-      val bundle = RepresentationToObjectConverter.convert(json)
+      val bundle = converter.convert(json)
       bundle.getId() mustEqual c1.asVertex().getId()
     }
     
     "allow resaving" in new LoadedDB {
       val c1 = helper.findTestElement("c1", classOf[DocumentaryUnit])
-      val json = ObjectToRepresentationConverter.convert(c1)
       c1.getDescriptions.toList.length mustEqual 1
-      val bundle = RepresentationToObjectConverter.convert[DocumentaryUnit](json)
-      val persister = new BundlePersister[DocumentaryUnit](graph);      
-      val c1redux = persister.persist(bundle)
+      val bundle = converter.vertexFrameToBundle[DocumentaryUnit](c1)
+      val persister = new BundleDAO[DocumentaryUnit](graph);      
+      val c1redux = persister.update(bundle)
       c1.getDescriptions.toList mustEqual c1redux.getDescriptions.toList
       // Check saving the bundle didn't add another item
-      println(c1.getDescriptions.toList)
       c1.getDescriptions.toList.length mustEqual 1
     }
     
     "allow resaving with subordinate changes" in new LoadedDB {
       val c1 = helper.findTestElement("c1", classOf[DocumentaryUnit])
-      val json = ObjectToRepresentationConverter.convert(c1)
+      // Save an object as JSON
+      val json = converter.convert(c1)
+      // Now change the object...
       val cd1 = c1.getDescriptions.toList.head
       c1.removeDescription(cd1)
       c1.getDescriptions.toList.length mustEqual 0
-      val bundle = RepresentationToObjectConverter.convert[DocumentaryUnit](json)
-      val persister = new BundlePersister[DocumentaryUnit](graph);      
-      val c1redux = persister.persist(bundle)
+      // And restore it again from the bundle.
+      val bundle = converter.convert[DocumentaryUnit](json)
+      val persister = new BundleDAO[DocumentaryUnit](graph);      
+      val c1redux = persister.update(bundle)
       // Tada: it's back again
       c1.getDescriptions.toList.length mustEqual 1
     }
     
     "delete removed subordinates" in new LoadedDB {
       val c1 = helper.findTestElement("c1", classOf[DocumentaryUnit])
-      val json = ObjectToRepresentationConverter.convert(c1)
-      val bundle = RepresentationToObjectConverter.convert[DocumentaryUnit](json)
+      val bundle = converter.vertexFrameToBundle[DocumentaryUnit](c1)
       c1.getDatePeriods().toList.length mustEqual 2
       val c = bundle.getSaveWith.getCollection("hasDate")            
       bundle.getSaveWith().remove("hasDate")
       bundle.getSaveWith().put("hasDate", c.toList.head)
-      val persister = new BundlePersister[DocumentaryUnit](graph);      
-      val c1redux = persister.persist(bundle)
+      val persister = new BundleDAO[DocumentaryUnit](graph);      
+      val c1redux = persister.update(bundle)
       c1.getDatePeriods().toList.length mustEqual 1
     }
   }
