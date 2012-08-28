@@ -77,6 +77,10 @@ public class BundlePersister<T extends VertexFrame> {
         }
         // TODO: Clean up dependent items that have not been saved in the
         // current operation, and are therefore assumed deleted.
+        existing.removeAll(refreshed);
+        for (Long id : existing) {
+            graph.removeVertex(graph.getVertex(id));
+        }
     }
     
     private List<Long> getCurrentRelationships(final Vertex src, Direction direction, String label) {
@@ -85,16 +89,6 @@ public class BundlePersister<T extends VertexFrame> {
             out.add((Long)end.getId());
         }        
         return out;
-    }
-    
-    private Boolean hasCurrentRelationship(final Vertex src, final Vertex dst, Direction direction, String label) {
-        for (Vertex end : src.getVertices(direction, label)) {
-            // FIXME: Possible dodgy over-assuming Object comparison...
-            if ((Long)end.getId() == (Long)dst.getId()) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private Direction getDirectionOfRelationship(
@@ -164,4 +158,27 @@ public class BundlePersister<T extends VertexFrame> {
             graph.getBaseGraph().stopTransaction(Conclusion.SUCCESS);
         }
     }
+    
+    public Integer deleteCount(EntityBundle<?> bundle, Integer count) throws ValidationError {
+        // Recursively blast everything away! Use with caution.
+        Integer c = count;        
+        MultiValueMap deps = bundle.getSaveWith();
+        for (Object key : deps.keySet()) {
+            for (Object obj : deps.getCollection(key)) {
+                EntityBundle<? extends VertexFrame> sub = (EntityBundle<?>) obj;
+                c += deleteCount(sub, c);
+            }
+        }
+        if (bundle.id != null) {
+            graph.removeVertex(graph.getVertex(bundle.id));
+            c += 1;
+        }                    
+        return c;
+    }
+
+    public Integer delete(EntityBundle<?> bundle) throws ValidationError {
+        // Recursively blast everything away! Use with caution.
+        return deleteCount(bundle, 0);                
+    }
+
 }
