@@ -1,5 +1,7 @@
 package eu.ehri.project.views;
 
+import java.util.Map;
+
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
@@ -35,9 +37,10 @@ public class Views<E extends AccessibleEntity> {
         return ObjectToRepresentationConverter.convert(entity);
     }
 
-    public String update(EntityBundle<E> bundle, Long user)
+    public String update(Map<String,Object> data, Long user)
             throws PermissionDenied, ValidationError {
         Accessor accessor = graph.getVertex(user, Accessor.class);
+        EntityBundle<E> bundle = RepresentationToObjectConverter.dataToBundle(data);
         if (bundle.getId() == null)
             throw new PermissionDenied(accessor,
                     "No identifier given for updating object.");
@@ -45,28 +48,26 @@ public class Views<E extends AccessibleEntity> {
         Access access = Acl.getAccessControl(entity, accessor);
         if (!(access.getRead() && access.getWrite()))
             throw new PermissionDenied(accessor, entity);
-
         BundlePersister<E> persister = new BundlePersister<E>(graph);
         return ObjectToRepresentationConverter.convert(persister
                 .persist(bundle));
     }
 
-    public String create(EntityBundle<E> bundle, Long user)
+    public String create(Map<String,Object> data, Long user)
             throws PermissionDenied, ValidationError {
         Accessor accessor = graph.getVertex(user, Accessor.class);
-        if (bundle.getId() != null)
-            throw new PermissionDenied(accessor,
-                    "Existing identifier given when creating object.");
         if (false /*
                    * Somehow check a user's global and/or repository
                    * permissions.
                    */)
             throw new PermissionDenied(accessor,
                     "No global write permissions present.");
-
+        EntityBundle<E> bundle = RepresentationToObjectConverter.dataToBundle(data);
+        if (bundle.getId() != null)
+            throw new PermissionDenied(accessor,
+                    "Existing identifier given when creating object.");
         BundlePersister<E> persister = new BundlePersister<E>(graph);
-        return ObjectToRepresentationConverter.convert(persister
-                .persist(bundle));
+        return ObjectToRepresentationConverter.convert(persister.persist(bundle));
     }
 
     public Integer delete(Long item, Long user) throws PermissionDenied, ValidationError {
