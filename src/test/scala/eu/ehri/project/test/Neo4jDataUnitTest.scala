@@ -331,6 +331,19 @@ class GraphTest extends Specification {
       // Tada: it's back again
       c1.getDescriptions.toList.length mustEqual 1
     }
+    
+    "delete removed subordinates" in new LoadedDB {
+      val c1 = helper.findTestElement("c1", classOf[DocumentaryUnit])
+      val json = ObjectToRepresentationConverter.convert(c1)
+      val bundle = RepresentationToObjectConverter.convert[DocumentaryUnit](json)
+      c1.getDatePeriods().toList.length mustEqual 2
+      val c = bundle.getSaveWith.getCollection("hasDate")            
+      bundle.getSaveWith().remove("hasDate")
+      bundle.getSaveWith().put("hasDate", c.toList.head)
+      val persister = new BundlePersister[DocumentaryUnit](graph);      
+      val c1redux = persister.persist(bundle)
+      c1.getDatePeriods().toList.length mustEqual 1
+    }
   }
 }
 
