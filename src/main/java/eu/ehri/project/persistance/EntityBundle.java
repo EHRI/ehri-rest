@@ -36,7 +36,7 @@ public class EntityBundle <T extends VertexFrame> implements DataBundle<T> {
     public EntityBundle<T> saveWith(String relation, EntityBundle<? extends VertexFrame> other) {
         MultiValueMap tmp = new MultiValueMap();
         for (Object key : saveWith.keySet()) {
-            tmp.put(key, saveWith.get(key));
+            tmp.putAll(key, saveWith.getCollection(key));
         }
         tmp.put(relation, other);
         return new EntityBundle<T>(data, cls, tmp);

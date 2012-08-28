@@ -36,7 +36,7 @@ public class EntityUpdateBundle <T extends VertexFrame> extends EntityBundle<T> 
     public EntityUpdateBundle<T> saveWith(String relation, EntityUpdateBundle<T> other) {
         MultiValueMap tmp = new MultiValueMap();
         for (Object key : saveWith.keySet()) {
-            tmp.put(key, saveWith.get(key));
+            tmp.putAll(key, saveWith.getCollection(key));
         }
         tmp.put(relation, other);
         return new EntityUpdateBundle<T>(id, data, cls, tmp);

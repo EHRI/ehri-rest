@@ -50,6 +50,11 @@ object TestData {
         "isA" -> EntityTypes.DATE_PERIOD,
         "startDate" -> "1940-01-01T00:00:01Z",
         "endDate" -> "1945-12-12T00:00:01Z")),
+    ("dp2",
+      Map(
+        "isA" -> EntityTypes.DATE_PERIOD,
+        "startDate" -> "1943-01-01T00:00:01Z",
+        "endDate" -> "1945-12-12T00:00:01Z")),
     ("r1",
       Map(
         "isA" -> EntityTypes.AGENT,
@@ -148,6 +153,7 @@ object TestData {
     
     // Collections have dates
     ("c1", TemporalEntity.HAS_DATE, "dp1", Map()),
+    ("c1", TemporalEntity.HAS_DATE, "dp2", Map()),
     
     // Authorities create and are mentionedIn collections
     ("a1", Authority.CREATED, "c1", Map()),

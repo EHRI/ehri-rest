@@ -60,7 +60,6 @@ object RepresentationToObjectConverter {
         case single: JValue => bd.saveWith(reltype, deserialize[T](single))
       }
     }
-     bundle
   }
   
   def getDependentRelations(cls: Class[_]): List[String] = {
