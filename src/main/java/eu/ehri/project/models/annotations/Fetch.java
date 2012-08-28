@@ -5,10 +5,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import com.tinkerpop.frames.VertexFrame;
-
-import eu.ehri.project.models.Address;
-
 /**
  * 
  * <pre>
@@ -19,10 +15,10 @@ import eu.ehri.project.models.Address;
  *   }
  * </pre>
  * 
- * Marks the entity pointed to by the framed Adjacency as one that
- * should typically be fetched and displayed along with the master
- * object.
+ * Marks the entity pointed to by the framed Adjacency as one that should
+ * typically be fetched and displayed along with the master object.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
-public @interface Fetch {}
+public @interface Fetch {
+}

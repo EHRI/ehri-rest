@@ -20,8 +20,8 @@ public interface Annotation extends AnnotatableEntity {
 
     @Adjacency(label = ANNOTATES)
     public AnnotatableEntity getTarget();
-    
-    @Incidence(label= ANNOTATES, direction=Direction.OUT)
+
+    @Incidence(label = ANNOTATES, direction = Direction.OUT)
     public Iterable<Annotates> getContext();
 
     @Property("body")

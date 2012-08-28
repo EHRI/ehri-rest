@@ -9,7 +9,7 @@ public interface Description extends VertexFrame, VersionedEntity {
 
     @Adjacency(label = DESCRIBES)
     public DescribedEntity getEntity();
-    
+
     @Property("languageCode")
     public String getLanguageOfDescription();
 

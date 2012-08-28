@@ -15,25 +15,25 @@ public interface Annotates extends EdgeFrame {
 
     @Domain
     public UserProfile getAnnotator();
-    
+
     @Property("timestamp")
     public String getTimestamp();
-    
+
     @Property("startChar")
     public Long getStartChar();
-    
+
     @Property("startChar")
     public void setStartChar(Long startChar);
-    
+
     @Property("endChar")
     public Long getEndChar();
-    
+
     @Property("endChar")
     public void setEndChar(Long endChar);
-    
+
     @Property("field")
     public String getField();
-    
+
     @Property("field")
     public void setField(String field);
 }

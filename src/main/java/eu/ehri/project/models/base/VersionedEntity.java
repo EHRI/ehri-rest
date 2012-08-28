@@ -9,10 +9,10 @@ import eu.ehri.project.relationships.RevisionContext;
 
 public interface VersionedEntity extends VertexFrame {
     public static final String HAS_REVISION = "hasRevision";
-    
-    @Adjacency(label=HAS_REVISION)
+
+    @Adjacency(label = HAS_REVISION)
     public Iterable<Revision> getRevisions();
-    
+
     @Incidence(label = HAS_REVISION)
     public Iterable<RevisionContext> getRevisionContexts();
 

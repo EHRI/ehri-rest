@@ -12,8 +12,8 @@ import eu.ehri.project.models.base.DescribedEntity;
 import eu.ehri.project.models.base.TemporalEntity;
 
 @EntityType(EntityTypes.DOCUMENTARY_UNIT)
-public interface DocumentaryUnit extends VertexFrame, AccessibleEntity, DescribedEntity,
-        TemporalEntity {
+public interface DocumentaryUnit extends VertexFrame, AccessibleEntity,
+        DescribedEntity, TemporalEntity {
 
     public static final String CHILD_OF = "childOf";
 
@@ -31,22 +31,23 @@ public interface DocumentaryUnit extends VertexFrame, AccessibleEntity, Describe
     /*
      * Fetches a list of all ancestors (parent -> parent -> parent)
      */
-    @GremlinGroovy("_().as('n').out('" + CHILD_OF + "').loop('n'){it.loops < 20}{true}")
+    @GremlinGroovy("_().as('n').out('" + CHILD_OF
+            + "').loop('n'){it.loops < 20}{true}")
     public Iterable<DocumentaryUnit> getAncestors();
 
     @Adjacency(label = DocumentaryUnit.CHILD_OF, direction = Direction.IN)
     public Iterable<DocumentaryUnit> getChildren();
-    
+
     @Fetch
     @Adjacency(label = Authority.CREATED, direction = Direction.IN)
     public Iterable<Authority> getCreators();
-    
+
     @Adjacency(label = Authority.CREATED, direction = Direction.IN)
     public void addCreator(final Authority creator);
-    
+
     @Fetch
     @Adjacency(label = Authority.MENTIONED_IN, direction = Direction.IN)
-    public Iterable<Authority> getNameAccess();    
+    public Iterable<Authority> getNameAccess();
 
     @Adjacency(label = Authority.MENTIONED_IN, direction = Direction.IN)
     public void addNameAccess(final Authority nameAccess);

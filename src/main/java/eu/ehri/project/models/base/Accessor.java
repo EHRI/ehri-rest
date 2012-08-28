@@ -20,8 +20,9 @@ public interface Accessor extends VertexFrame {
 
     @Adjacency(label = BELONGS_TO)
     public Iterable<Accessor> getParents();
-    
-    @GremlinGroovy("_().as('n').out('" + BELONGS_TO + "').loop('n'){it.loops < 20}{true}")
+
+    @GremlinGroovy("_().as('n').out('" + BELONGS_TO
+            + "').loop('n'){it.loops < 20}{true}")
     public Iterable<Accessor> getAllParents();
 
     @Incidence(label = AccessibleEntity.ACCESS, direction = Direction.IN)

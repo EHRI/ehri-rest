@@ -22,12 +22,12 @@ public interface Agent extends AccessibleEntity, DescribedEntity,
 
     @Fetch
     @Dependent
-    @Adjacency(label= HAS_ADDRESS)
+    @Adjacency(label = HAS_ADDRESS)
     public Iterable<Address> getAddresses();
-    
-    @Adjacency(label= HAS_ADDRESS)
-    public void addAddress(final Address address); 
-   
+
+    @Adjacency(label = HAS_ADDRESS)
+    public void addAddress(final Address address);
+
     @Adjacency(label = HOLDS)
     public void addCollection(final TemporalEntity collection);
 }

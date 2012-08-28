@@ -10,23 +10,23 @@ import eu.ehri.project.models.base.AnnotatableEntity;
 import eu.ehri.project.models.base.DescribedEntity;
 
 @EntityType(EntityTypes.AUTHORITY)
-public interface Authority extends VertexFrame, AccessibleEntity, DescribedEntity,
-        AnnotatableEntity {
-    
+public interface Authority extends VertexFrame, AccessibleEntity,
+        DescribedEntity, AnnotatableEntity {
+
     public static final String CREATED = "created";
     public static final String MENTIONED_IN = "mentionedIn";
-    
+
     @Property("type_of_entity")
     public String getTypeOfEntity();
-    
+
     @Adjacency(label = CREATED)
     public Iterable<DocumentaryUnit> getDocumentaryUnits();
-    
+
     @Adjacency(label = CREATED)
     public void addDocumentaryUnit(final DocumentaryUnit unit);
-    
+
     @Adjacency(label = MENTIONED_IN)
-    public Iterable<DocumentaryUnit> getMentionedIn();    
+    public Iterable<DocumentaryUnit> getMentionedIn();
 
     @Adjacency(label = MENTIONED_IN)
     public void addMentionedIn(final DocumentaryUnit unit);

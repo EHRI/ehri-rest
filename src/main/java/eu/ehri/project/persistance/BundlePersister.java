@@ -18,11 +18,13 @@ public class BundlePersister<T extends VertexFrame> {
         this.graph = graph;
         this.helpers = new Neo4jHelpers(graph.getBaseGraph().getRawGraph());
     }
-    
+
     public T persist(EntityUpdateBundle<T> bundle) throws ValidationError {
         bundle.validate();
-        Index<Vertex> index = helpers.getOrCreateIndex(bundle.getEntityType(), Vertex.class);
-        Vertex node = helpers.updateIndexedVertex(bundle.getId(), bundle.getData(), index);
+        Index<Vertex> index = helpers.getOrCreateIndex(bundle.getEntityType(),
+                Vertex.class);
+        Vertex node = helpers.updateIndexedVertex(bundle.getId(),
+                bundle.getData(), index);
         return graph.frame(node, bundle.getBundleClass());
     }
 
@@ -31,7 +33,8 @@ public class BundlePersister<T extends VertexFrame> {
         // revisions, created, update dates, and all
         // that jazz...
         bundle.validate();
-        Index<Vertex> index = helpers.getOrCreateIndex(bundle.getEntityType(), Vertex.class);
+        Index<Vertex> index = helpers.getOrCreateIndex(bundle.getEntityType(),
+                Vertex.class);
         Vertex node = helpers.createIndexedVertex(bundle.getData(), index);
         return graph.frame(node, bundle.getBundleClass());
     }

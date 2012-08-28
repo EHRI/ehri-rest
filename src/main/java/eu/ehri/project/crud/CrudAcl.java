@@ -10,7 +10,8 @@ import eu.ehri.project.relationships.Access;
 import eu.ehri.project.acl.Acl;
 
 public class CrudAcl {
-    public String detail(FramedGraph<Neo4jGraph> graph, Long item, Long user) throws PermissionDenied {
+    public String detail(FramedGraph<Neo4jGraph> graph, Long item, Long user)
+            throws PermissionDenied {
         AccessibleEntity entity = graph.getVertex(item, AccessibleEntity.class);
         Accessor accessor = graph.getVertex(user, Accessor.class);
         Access access = Acl.getAccessControl(entity, accessor);

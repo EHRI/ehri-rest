@@ -10,13 +10,13 @@ import eu.ehri.project.models.base.TemporalEntity;
 
 @EntityType(EntityTypes.DATE_PERIOD)
 public interface DatePeriod extends VertexFrame {
-    
+
     @Property("startDate")
     public String getStartDate();
-    
+
     @Property("endDate")
     public String getEndDate();
-    
-    @Adjacency(label=TemporalEntity.HAS_DATE, direction=Direction.IN)
+
+    @Adjacency(label = TemporalEntity.HAS_DATE, direction = Direction.IN)
     public TemporalEntity getEntity();
 }
