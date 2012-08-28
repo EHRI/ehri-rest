@@ -13,7 +13,7 @@ import scala.collection.JavaConversions._
 
 import com.codahale.jerkson.Json
 
-object ObjectToRepresentationConverter {
+object ObjectToRepresentationConverter extends DataConverter {
 
   private def isFetchMethod(method: Method): Boolean = method.getAnnotation(classOf[annotations.Fetch]) match {
     case null => false
@@ -29,35 +29,31 @@ object ObjectToRepresentationConverter {
     (k -> item.getProperty(k))
   }.toMap
 
-  def serialize(v: AnyRef): Map[String, Any] = v match {
-    case item: VertexFrame => {
-
-      var cls = item.getClass.getInterfaces.toList.head
-      var relations = Map[String, Any]()
-      // Traverse the methods of the item's class, looking for
-      // @Adjacency annotations also annotated with @Fetch
-      for (method <- cls.getMethods()) {
-        if (isFetchMethod(method)) {
-          getAdjacencyLabel(method).map { rel =>
-            method.setAccessible(true);
-            method.invoke(item) match {
-              case iter: java.lang.Iterable[VertexFrame] => {
-                relations = relations + (rel -> iter.toList.map(serialize))
-              }
-              case single: VertexFrame => {
-                relations = relations + (rel -> serialize(single))
-              }
-              case _ => // don't know how to serialize this!
+  def serialize(item: VertexFrame): Map[String, Any] = {
+    var cls = item.getClass.getInterfaces.toList.head
+    var relations = Map[String, Any]()
+    // Traverse the methods of the item's class, looking for
+    // @Adjacency annotations also annotated with @Fetch
+    for (method <- cls.getMethods()) {
+      if (isFetchMethod(method)) {
+        getAdjacencyLabel(method).map { label =>
+          method.setAccessible(true);
+          method.invoke(item) match {
+            case iter: java.lang.Iterable[VertexFrame] => {
+              relations = relations + (label -> iter.toList.map(serialize))
             }
+            case single: VertexFrame => {
+              relations = relations + (label -> serialize(single))
+            }
+            case _ => // don't know how to serialize this, so just skip it!
           }
         }
       }
-      Map(
-        "id" -> item.asVertex().getId(),
-        "data" -> vertexData(item.asVertex),
-        "relationships" -> relations)
     }
-    case _ => Map()
+    Map(
+      "id" -> item.asVertex().getId(),
+      "data" -> vertexData(item.asVertex),
+      "relationships" -> relations)
   }
 
   def convert(map: Map[String, Any]): String = Json.generate(map)
