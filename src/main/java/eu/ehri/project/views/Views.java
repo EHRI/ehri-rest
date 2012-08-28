@@ -17,9 +17,13 @@ import eu.ehri.project.views.ObjectToRepresentationConverter;
 
 public class Views<E extends AccessibleEntity> {
     
-    FramedGraph<Neo4jGraph> graph;
-    Class<E> cls;
+    private final FramedGraph<Neo4jGraph> graph;
+    private final Class<E> cls;
     
+    /**
+     * @param graph
+     * @param cls
+     */
     public Views(FramedGraph<Neo4jGraph> graph, Class<E> cls) {
         this.graph = graph;
         this.cls = cls;
@@ -56,5 +60,16 @@ public class Views<E extends AccessibleEntity> {
         
         BundlePersister<E> persister = new BundlePersister<E>(graph);
         return ObjectToRepresentationConverter.convert(persister.persist(bundle));
+    }
+    
+    public Integer delete(Long item, Long user) throws PermissionDenied {
+        E entity = graph.getVertex(item, cls);
+        Accessor accessor = graph.getVertex(user, Accessor.class);
+        if (false /* Somehow check a user's global and/or repository permissions. */)
+            throw new PermissionDenied(accessor, "No global delete permissions present.");
+        
+        BundlePersister<E> persister = new BundlePersister<E>(graph);
+        //return persister.delete(item);
+        return 1;
     }
 }
