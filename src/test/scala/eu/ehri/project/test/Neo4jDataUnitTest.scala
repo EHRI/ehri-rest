@@ -299,6 +299,7 @@ import com.tinkerpop.blueprints.util.io.graphml.GraphMLWriter
       val json = ObjectToRepresentationConverter.convert(c1)
       
       val bundle = RepresentationToObjectConverter.convert(json)
+      println(bundle)
       bundle.getId() mustEqual c1.asVertex().getId()
     }
   }

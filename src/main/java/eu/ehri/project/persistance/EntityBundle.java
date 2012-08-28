@@ -14,20 +14,22 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.EntityTypes;
 import eu.ehri.project.models.annotations.EntityType;
 
-public class EntityBundle<T extends VertexFrame> implements DataBundle<T> {
+public class EntityBundle<T extends VertexFrame> {
     private static final String GET = "get";
     private static final String MISSING_PROPERTY = "Missing mandatory field";
     private static final String EMPTY_VALUE = "No value given for mandatory field";
     private static final String INVALID_ENTITY = "No EntityType annotation";
 
+    protected final Long id;
     protected final Map<String, Object> data;
     protected final Class<T> cls;
     protected final MultiValueMap saveWith;
 
     private MultiValueMap errors = new MultiValueMap();
 
-    protected EntityBundle(final Map<String, Object> data, Class<T> cls,
+    protected EntityBundle(Long id, final Map<String, Object> data, Class<T> cls,
             final MultiValueMap saveWith) {
+        this.id = id;
         this.data = new HashMap<String, Object>(data);
         this.cls = cls;
         this.saveWith = saveWith;
@@ -40,13 +42,17 @@ public class EntityBundle<T extends VertexFrame> implements DataBundle<T> {
             tmp.putAll(key, saveWith.getCollection(key));
         }
         tmp.put(relation, other);
-        return new EntityBundle<T>(data, cls, tmp);
+        return new EntityBundle<T>(id, data, cls, tmp);
     }
 
     private Map<String, Object> extendData() {
         Map<String, Object> ext = new HashMap<String, Object>(data);
         ext.put(EntityTypes.KEY, getEntityType());
         return ext;
+    }
+
+    public Long getId() {
+        return id;
     }
 
     public Boolean hasErrors() {
@@ -65,17 +71,17 @@ public class EntityBundle<T extends VertexFrame> implements DataBundle<T> {
         return extendData();
     }
 
-    public DataBundle<T> setDataValue(String key, Object value)
+    public EntityBundle<T> setDataValue(String key, Object value)
             throws ValidationError {
         // FIXME: Seems like too much work being done here to maintain
         // immutability???
         Map<String, Object> temp = new HashMap<String, Object>(data);
         temp.put(key, value);
-        return new EntityBundle<T>(temp, cls, saveWith);
+        return new EntityBundle<T>(id, temp, cls, saveWith);
     }
 
     public EntityBundle<T> setData(final Map<String, Object> data) {
-        return new EntityBundle<T>(data, cls, saveWith);
+        return new EntityBundle<T>(id, data, cls, saveWith);
     }
 
     public Class<T> getBundleClass() {
@@ -133,4 +139,8 @@ public class EntityBundle<T extends VertexFrame> implements DataBundle<T> {
         }
     }
 
+    @Override
+    public String toString() {
+        return String.format("<%s: %s>", cls.getName(), data);
+    }
 }

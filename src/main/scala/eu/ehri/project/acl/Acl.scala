@@ -22,7 +22,7 @@ object Acl {
       else -1
     }
   }
-  
+
   /*
    * Check if an accessor is admin or a member of Admin.
    */
@@ -75,6 +75,6 @@ object Acl {
           ctrls.max
       }
     }
-  }  
+  }
 }
 

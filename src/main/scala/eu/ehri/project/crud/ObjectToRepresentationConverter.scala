@@ -15,12 +15,12 @@ import com.codahale.jerkson.Json
 
 object ObjectToRepresentationConverter {
 
-  def isFetchMethod(method: Method): Boolean = method.getAnnotation(classOf[annotations.Fetch]) match {
+  private def isFetchMethod(method: Method): Boolean = method.getAnnotation(classOf[annotations.Fetch]) match {
     case null => false
     case a => true
   }
 
-  def getAdjacencyLabel(method: Method) = method.getAnnotation(classOf[Adjacency]) match {
+  private def getAdjacencyLabel(method: Method) = method.getAnnotation(classOf[Adjacency]) match {
     case null => None
     case a => Some(a.label());
   }

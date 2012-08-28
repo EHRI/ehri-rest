@@ -90,9 +90,22 @@ public class Neo4jHelpers {
     }
 
     public Edge createIndexedEdge(Long src, Long dst, String label,
+            Map<String, Object> data, Index<Edge> index) {
+        GraphDatabaseService g = graph.getRawGraph();
+        return createIndexedEdge(g.getNodeById(src), g.getNodeById(dst), label,
+                data, index);
+    }
+
+    public Edge createIndexedEdge(Long src, Long dst, String label,
             Map<String, Object> data) throws IndexNotFoundException {
         GraphDatabaseService g = graph.getRawGraph();
         return createIndexedEdge(g.getNodeById(src), g.getNodeById(dst), label,
+                data);
+    }
+
+    public Edge createIndexedEdge(Object src, Object dst, String label,
+            Map<String, Object> data) throws IndexNotFoundException {
+        return createIndexedEdge(graph.getVertex(src), graph.getVertex(dst), label,
                 data);
     }
 
