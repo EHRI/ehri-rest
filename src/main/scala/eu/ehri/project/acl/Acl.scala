@@ -52,7 +52,7 @@ object Acl {
   /*
    * Find the Access permissions for a given entity and accessor. 
    */
-  def getAccessControl(entity: AccessibleEntity, accessor: Accessor): Access = {
+  def getAccessControl[E <: AccessibleEntity, A <: Accessor](entity: E, accessor: A): Access = {
     // Admin can read/write everything
     if (isAdmin(accessor)) {
       new EntityAccessFactory().buildReadWrite(entity, accessor)
