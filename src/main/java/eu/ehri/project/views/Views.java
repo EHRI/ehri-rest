@@ -67,6 +67,9 @@ public class Views<E extends AccessibleEntity> {
         Accessor accessor = graph.getVertex(user, Accessor.class);
         if (false /* Somehow check a user's global and/or repository permissions. */)
             throw new PermissionDenied(accessor, "No global delete permissions present.");
+        Access access = Acl.getAccessControl(entity, accessor);
+        if (!(access.getRead() && access.getWrite()))
+            throw new PermissionDenied(accessor, entity);
         
         BundlePersister<E> persister = new BundlePersister<E>(graph);
         //return persister.delete(item);
