@@ -20,6 +20,7 @@ import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.frames.VertexFrame;
 
 import eu.ehri.project.core.GraphHelpers;
+import eu.ehri.project.core.utils.AnnotationUtils;
 import eu.ehri.project.exceptions.IndexNotFoundException;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.annotations.Dependent;
@@ -33,36 +34,39 @@ public class BundlePersister<T extends VertexFrame> {
         this.graph = graph;
         this.helpers = new GraphHelpers(graph.getBaseGraph().getRawGraph());
     }
-    
-    private void saveDependents(Vertex master, Class<? extends VertexFrame> cls,
-            MultiValueMap deps) throws ValidationError {
+
+    private void saveDependents(Vertex master,
+            Class<? extends VertexFrame> cls, MultiValueMap deps)
+            throws ValidationError {
 
         Set<Long> existing = new HashSet<Long>();
         Set<Long> refreshed = new HashSet<Long>();
-        
+
         for (Object key : deps.keySet()) {
             String relation = (String) key;
 
             for (Object obj : deps.getCollection(key)) {
                 EntityBundle<? extends VertexFrame> bundle = (EntityBundle<?>) obj;
                 Vertex child = saveInDepth(bundle);
-                refreshed.add((Long)child.getId());
-                Direction direction = getDirectionOfRelationship(cls, bundle.getBundleClass(), relation);
-                
-                // FIXME: Traversing all the current relations here (for 
+                refreshed.add((Long) child.getId());
+                Direction direction = getDirectionOfRelationship(cls,
+                        bundle.getBundleClass(), relation);
+
+                // FIXME: Traversing all the current relations here (for
                 // every individual dependent) is very inefficient!
-                List<Long> current = getCurrentRelationships(master, direction, relation);
+                List<Long> current = getCurrentRelationships(master, direction,
+                        relation);
                 existing.addAll(current);
-                
+
                 // Create a relation if there isn't one already
-                if (!current.contains((Long)child.getId())) {
+                if (!current.contains(child.getId())) {
                     Index<Edge> index;
                     try {
                         index = helpers.getIndex(relation, Edge.class);
                     } catch (IndexNotFoundException e) {
                         e.printStackTrace();
                         throw new RuntimeException(e);
-                    }                
+                    }
                     if (direction == Direction.OUT) {
                         helpers.createIndexedEdge((Long) master.getId(),
                                 (Long) child.getId(), relation,
@@ -82,12 +86,13 @@ public class BundlePersister<T extends VertexFrame> {
             graph.removeVertex(graph.getVertex(id));
         }
     }
-    
-    private List<Long> getCurrentRelationships(final Vertex src, Direction direction, String label) {
+
+    private List<Long> getCurrentRelationships(final Vertex src,
+            Direction direction, String label) {
         List<Long> out = new LinkedList<Long>();
         for (Vertex end : src.getVertices(direction, label)) {
-            out.add((Long)end.getId());
-        }        
+            out.add((Long) end.getId());
+        }
         return out;
     }
 
@@ -134,8 +139,9 @@ public class BundlePersister<T extends VertexFrame> {
             return insert(bundle);
         }
     }
-    
-    private Vertex saveInDepth(EntityBundle<? extends VertexFrame> bundle) throws ValidationError {
+
+    private Vertex saveInDepth(EntityBundle<? extends VertexFrame> bundle)
+            throws ValidationError {
         Vertex node = insertOrUpdate(bundle);
         saveDependents(node, bundle.getBundleClass(), bundle.getSaveWith());
         return node;
@@ -158,27 +164,35 @@ public class BundlePersister<T extends VertexFrame> {
             graph.getBaseGraph().stopTransaction(Conclusion.SUCCESS);
         }
     }
-    
-    public Integer deleteCount(EntityBundle<?> bundle, Integer count) throws ValidationError {
+
+    public Integer deleteCount(EntityBundle<?> bundle, Integer count)
+            throws ValidationError {
         // Recursively blast everything away! Use with caution.
-        Integer c = count;        
-        MultiValueMap deps = bundle.getSaveWith();
-        for (Object key : deps.keySet()) {
-            for (Object obj : deps.getCollection(key)) {
-                EntityBundle<? extends VertexFrame> sub = (EntityBundle<?>) obj;
-                c += deleteCount(sub, c);
+        Integer c = count;
+        MultiValueMap fetch = bundle.getSaveWith();
+        List<String> deps = AnnotationUtils.getDependentRelations(bundle.getBundleClass());
+        for (Object key : fetch.keySet()) {
+            for (Object obj : fetch.getCollection(key)) {
+                // FIXME: Make it so we don't typically do this check for
+                // Dependent relations
+                if (deps.contains((String)key)) {
+                    EntityBundle<? extends VertexFrame> sub = (EntityBundle<?>) obj;
+                    c = deleteCount(sub, c);
+                }
             }
         }
         if (bundle.id != null) {
+            System.out.println(String.format("Deleting object %s %s", bundle.id, bundle.getEntityType()));
             graph.removeVertex(graph.getVertex(bundle.id));
             c += 1;
-        }                    
+        }
         return c;
     }
 
     public Integer delete(EntityBundle<?> bundle) throws ValidationError {
         // Recursively blast everything away! Use with caution.
-        return deleteCount(bundle, 0);                
+        graph.getBaseGraph().getRawGraph().beginTx();
+        return deleteCount(bundle, 0);
     }
 
 }

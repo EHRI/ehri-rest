@@ -91,8 +91,8 @@ public class EntityBundle<T extends VertexFrame> {
     public String getEntityType() {
         EntityType ann = cls.getAnnotation(EntityType.class);
         if (ann == null)
-            throw new RuntimeException(
-                    String.format("Programming error! Bad bundle type: %s", cls.getName()));
+            throw new RuntimeException(String.format(
+                    "Programming error! Bad bundle type: %s", cls.getName()));
         return ann.value();
     }
 

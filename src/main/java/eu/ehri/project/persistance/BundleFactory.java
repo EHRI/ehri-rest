@@ -37,8 +37,7 @@ public class BundleFactory<T extends VertexFrame> {
     }
 
     @SuppressWarnings("unchecked")
-    public EntityBundle<T> fromFramedVertext(T frame)
-            throws ValidationError {
+    public EntityBundle<T> fromFramedVertext(T frame) throws ValidationError {
         Vertex vertex = frame.asVertex();
         Map<String, Object> data = new HashMap<String, Object>();
         for (String key : vertex.getPropertyKeys()) {
@@ -47,8 +46,8 @@ public class BundleFactory<T extends VertexFrame> {
         // FIXME: WTF? That we have to run through this rigmarole to get
         // the `T` class from a given FramedVertex instance is a sign that
         // we're doing things very wrong!!!
-        return new EntityBundle<T>(((Long) vertex.getId()).longValue(),
-                data, (Class<T>) frame.getClass().getInterfaces()[0],
+        return new EntityBundle<T>(((Long) vertex.getId()).longValue(), data,
+                (Class<T>) frame.getClass().getInterfaces()[0],
                 new MultiValueMap());
     }
 }

@@ -105,8 +105,8 @@ public class GraphHelpers {
 
     public Edge createIndexedEdge(Object src, Object dst, String label,
             Map<String, Object> data) throws IndexNotFoundException {
-        return createIndexedEdge(graph.getVertex(src), graph.getVertex(dst), label,
-                data);
+        return createIndexedEdge(graph.getVertex(src), graph.getVertex(dst),
+                label, data);
     }
 
     public Edge createIndexedEdge(Neo4jVertex src, Neo4jVertex dst,

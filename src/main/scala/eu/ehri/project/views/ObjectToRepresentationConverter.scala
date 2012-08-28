@@ -32,33 +32,6 @@ object ObjectToRepresentationConverter extends DataConverter {
     (k -> item.getProperty(k))
   }.toMap
 
-  def serialize(item: VertexFrame): Map[String, Any] = {
-    var cls = item.getClass.getInterfaces.toList.head
-    var relations = Map[String, Any]()
-    // Traverse the methods of the item's class, looking for
-    // @Adjacency annotations also annotated with @Fetch
-    for (method <- cls.getMethods()) {
-      if (isFetchMethod(method)) {
-        getAdjacencyLabel(method).map { label =>
-          method.setAccessible(true);
-          method.invoke(item) match {
-            case iter: java.lang.Iterable[VertexFrame] => {
-              relations = relations + (label -> iter.toList.map(serialize))
-            }
-            case single: VertexFrame => {
-              relations = relations + (label -> serialize(single))
-            }
-            case _ => // don't know how to serialize this, so just skip it!
-          }
-        }
-      }
-    }
-    Map(
-      "id" -> item.asVertex().getId(),
-      "data" -> vertexData(item.asVertex),
-      "relationships" -> relations)
-  }
-
   def bundleToData[T <: VertexFrame](bundle: EntityBundle[T]): Map[String,Any] = {
     var relations = Map[String,List[Any]]()
     for (key <- bundle.getSaveWith().asInstanceOf[MultiValueMap].keySet()) {
