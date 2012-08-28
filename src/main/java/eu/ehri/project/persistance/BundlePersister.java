@@ -75,7 +75,7 @@ public class BundlePersister<T extends VertexFrame> {
                 }
             }
         }
-        // TODO: Clean up dependent items that have not been saved in the
+        // Clean up dependent items that have not been saved in the
         // current operation, and are therefore assumed deleted.
         existing.removeAll(refreshed);
         for (Long id : existing) {
