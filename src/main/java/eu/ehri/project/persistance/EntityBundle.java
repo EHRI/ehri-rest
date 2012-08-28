@@ -27,7 +27,7 @@ public class EntityBundle<T extends VertexFrame> {
 
     private MultiValueMap errors = new MultiValueMap();
 
-    protected EntityBundle(Long id, final Map<String, Object> data, Class<T> cls,
+    public EntityBundle(Long id, final Map<String, Object> data, Class<T> cls,
             final MultiValueMap saveWith) {
         this.id = id;
         this.data = new HashMap<String, Object>(data);
@@ -89,7 +89,11 @@ public class EntityBundle<T extends VertexFrame> {
     }
 
     public String getEntityType() {
-        return cls.getAnnotation(EntityType.class).value();
+        EntityType ann = cls.getAnnotation(EntityType.class);
+        if (ann == null)
+            throw new RuntimeException(
+                    String.format("Programming error! Bad bundle type: %s", cls.getName()));
+        return ann.value();
     }
 
     public void validate() throws ValidationError {
