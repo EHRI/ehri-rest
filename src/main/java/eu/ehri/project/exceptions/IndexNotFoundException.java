@@ -11,7 +11,7 @@ public class IndexNotFoundException extends Exception {
         super(message);
     }
 
-    public IndexNotFoundException(String message, Exception cause) {
+    public IndexNotFoundException(String message, Throwable cause) {
         super(message, cause);
     }
 }
