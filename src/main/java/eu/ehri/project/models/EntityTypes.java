@@ -4,7 +4,6 @@ package eu.ehri.project.models;
  * Set of entity types. TODO: Perhaps convert this to an enum?
  */
 public class EntityTypes {
-    public static final String KEY = "isA";
     public static final String AGENT = "agent";
     public static final String AUTHORITY = "authority";
     public static final String DOCUMENTARY_UNIT = "documentaryUnit";

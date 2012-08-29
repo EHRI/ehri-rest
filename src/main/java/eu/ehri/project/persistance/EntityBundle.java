@@ -11,7 +11,6 @@ import com.tinkerpop.frames.Property;
 import com.tinkerpop.frames.VertexFrame;
 
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.models.EntityTypes;
 import eu.ehri.project.models.annotations.EntityType;
 
 public class EntityBundle<T extends VertexFrame> {
@@ -47,7 +46,7 @@ public class EntityBundle<T extends VertexFrame> {
 
     private Map<String, Object> extendData() {
         Map<String, Object> ext = new HashMap<String, Object>(data);
-        ext.put(EntityTypes.KEY, getEntityType());
+        ext.put(EntityType.KEY, getEntityType());
         return ext;
     }
 

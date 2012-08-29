@@ -1,23 +1,29 @@
 package eu.ehri.project.views
 
-import eu.ehri.project.models._
-import com.tinkerpop.frames.VertexFrame
-import com.tinkerpop.frames.Adjacency
-import com.tinkerpop.blueprints.Vertex
-import eu.ehri.project.models.annotations
-import eu.ehri.project.core.utils.AnnotationUtils
-import java.lang.annotation.Annotation
 import java.lang.reflect.Method
-import org.apache.commons.collections.map.MultiValueMap
-import eu.ehri.project.persistance.EntityBundle
-import eu.ehri.project.exceptions.SerializationError
-import eu.ehri.project.exceptions.DeserializationError
+
 import scala.collection.JavaConversions._
-import com.codahale.jerkson.Json
-import net.liftweb.json._
-import net.liftweb.json.JsonAST.{ JValue, JObject, JArray }
 import scala.collection.JavaConverters._
+
+import org.apache.commons.collections.map.MultiValueMap
+
+import com.codahale.jerkson.Json
+import com.tinkerpop.blueprints.Vertex
+import com.tinkerpop.frames.Adjacency
+import com.tinkerpop.frames.VertexFrame
+
+import eu.ehri.project.core.utils.AnnotationUtils
+import eu.ehri.project.exceptions.DeserializationError
+import eu.ehri.project.exceptions.SerializationError
+import eu.ehri.project.models.annotations.EntityType
+import eu.ehri.project.models.EntityTypes
+import eu.ehri.project.models.annotations
 import eu.ehri.project.persistance.BundleFactory
+import eu.ehri.project.persistance.EntityBundle
+import net.liftweb.json.JsonAST.JArray
+import net.liftweb.json.JsonAST.JObject
+import net.liftweb.json.JsonAST.JValue
+import net.liftweb.json._
 
 /**
  * Helper class for extracting data from a JSON bundle.
@@ -65,10 +71,10 @@ class RepresentationConverter extends DataConverter {
       val id = data.get("id").map(_.asInstanceOf[Long]) // Optional!
       val props = data.get("data").map(_.asInstanceOf[java.util.Map[String, Object]].asScala).getOrElse(
         throw new DeserializationError("No item data map found"))
-      val isa: String = props.get(EntityTypes.KEY).map(_.asInstanceOf[String]).getOrElse(
-        throw new DeserializationError("No '%s' attribute found in item data".format(EntityTypes.KEY)))
+      val isa: String = props.get(EntityType.KEY).map(_.asInstanceOf[String]).getOrElse(
+        throw new DeserializationError("No '%s' attribute found in item data".format(EntityType.KEY)))
       val cls = classes.get(isa).map(_.asInstanceOf[Class[T]]).getOrElse(
-        throw new DeserializationError("No class found for type %s type: '%s'".format(EntityTypes.KEY, isa)))
+        throw new DeserializationError("No class found for type %s type: '%s'".format(EntityType.KEY, isa)))
       val relations: Map[String, Any] = data.get("relationships").map(_.asInstanceOf[Map[String, Any]]).getOrElse(
         Map[String, Any]()) // Also Optional!
 
@@ -93,7 +99,7 @@ class RepresentationConverter extends DataConverter {
     val ext = data.extract[InsertBundle]
 
     // we must have an isA to tell us the class to instantiate this to.
-    val isA: String = ext.data.values.get(EntityTypes.KEY).map(_.asInstanceOf[String]).getOrElse(
+    val isA: String = ext.data.values.get(EntityType.KEY).map(_.asInstanceOf[String]).getOrElse(
       throw new DeserializationError("Object has no 'ISA' field"))
     val cls = classes.getOrElse(isA,
       throw new DeserializationError(
@@ -137,7 +143,7 @@ class RepresentationConverter extends DataConverter {
    * Convert a VertexFrame[T] into a bundle[T].
    */
   def vertexFrameToBundle[T <: VertexFrame](item: VertexFrame): EntityBundle[T] = {
-    val isa = item.asVertex().getProperty(EntityTypes.KEY).asInstanceOf[String]
+    val isa = item.asVertex().getProperty(EntityType.KEY).asInstanceOf[String]
     val cls = classes.getOrElse(isa,
       throw new SerializationError("No isa found for vertex: %s".format(item)))
 
