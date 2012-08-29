@@ -158,10 +158,10 @@ class RepresentationConverter extends DataConverter {
         getAdjacencyLabel(method).map { label =>
           method.setAccessible(true);
           method.invoke(item) match {
-            case iter: java.lang.Iterable[VertexFrame] => {
+            case iter: java.lang.Iterable[T] => {
               relations = relations + (label -> iter.toList.map(vertexFrameToBundle[T]))
             }
-            case single: T => {
+            case single: VertexFrame => {
               relations = relations + (label -> List(vertexFrameToBundle[T](single)))
             }
             case _ => // don't know how to serialize this, so just skip it!
