@@ -53,7 +53,10 @@ public class EntityAccess implements Access {
     }
 
     public Edge asEdge() {
-        // TODO Auto-generated method stub
-        return null;
+        // We can't really do much with this since it's
+        // the object does not really represent an actual
+        // edge but just a proxy for one. TODO: Rethink
+        // things with an alternative for this.
+        throw new UnsupportedOperationException();
     }
 }
