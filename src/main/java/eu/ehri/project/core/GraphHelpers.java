@@ -1,3 +1,6 @@
+/**
+ * TODO Add license text
+ */
 package eu.ehri.project.core;
 
 import java.util.Iterator;
@@ -18,6 +21,14 @@ import com.tinkerpop.blueprints.impls.neo4j.Neo4jVertex;
 
 import eu.ehri.project.exceptions.IndexNotFoundException;
 
+/**
+ * Main purpose is to be used by the ehri-plugin to provide a REST API to the neo4j service
+ * Adds functionality that would otherwise require several neo4j calls 
+ * and when possible also hides neo4j specifics and use more generic GrapgDb names.
+ * neo4j Node => Vertex
+ * neo4j Relationship => Edge 
+ * 
+ */
 public class GraphHelpers {
     public GraphHelpers(GraphDatabaseService g) {
         graph = new Neo4jGraph(g);
@@ -25,6 +36,14 @@ public class GraphHelpers {
 
     protected Neo4jGraph graph;
 
+    /**
+     * Get an index of type <code>T</code>.
+     * 
+     * @param name
+     * @param cls
+     * @return
+     * @throws IndexNotFoundException
+     */
     public <T extends Element> Index<T> getIndex(String name, Class<T> cls)
             throws IndexNotFoundException {
         Index<T> index = graph.getIndex(name, cls);
@@ -33,10 +52,24 @@ public class GraphHelpers {
         return index;
     }
 
+    /**
+     * Create an index of type <code>T</code>.
+     * 
+     * @param name
+     * @param cls
+     * @return
+     */
     public <T extends Element> Index<T> createIndex(String name, Class<T> cls) {
         return graph.createIndex(name, cls);
     }
 
+    /**
+     * Get an index of type <code>T</code>, or create it if it does not exist.
+     * 
+     * @param name
+     * @param cls
+     * @return
+     */
     public <T extends Element> Index<T> getOrCreateIndex(String name,
             Class<T> cls) {
         try {
@@ -46,14 +79,35 @@ public class GraphHelpers {
         }
     }
 
+    /**
+     * Create an edge index.
+     * 
+     * @param name
+     * @return
+     */
     public Index<Edge> createdEdgeIndex(String name) {
         return createIndex(name, Edge.class);
     }
 
+    /**
+     * Create a vertex index.
+     * 
+     * @param name
+     * @return
+     */
     public Index<Vertex> createVertexIndex(String name) {
         return createIndex(name, Vertex.class);
     }
 
+    /**
+     * Query a graph index for a node with the given field of value query.
+     * 
+     * @param index
+     * @param field
+     * @param query
+     * @return
+     * @throws IndexNotFoundException
+     */
     public Iterator<Vertex> simpleQuery(String index, String field, String query)
             throws IndexNotFoundException {
         Iterator<Vertex> iter = getIndex(index, Vertex.class).get(field, query)
@@ -61,12 +115,27 @@ public class GraphHelpers {
         return iter;
     }
 
+    /**
+     * Create a vertex that is indexed using an index of the given name.
+     * 
+     * @param data
+     * @param indexName
+     * @return
+     * @throws IndexNotFoundException
+     */
     public Vertex createIndexedVertex(Map<String, Object> data, String indexName)
             throws IndexNotFoundException {
         Index<Vertex> index = getIndex(indexName, Vertex.class);
         return createIndexedVertex(data, index);
     }
-
+    
+    /**
+     * Create a vertex that is indexed using the given index.
+     * 
+     * @param data
+     * @param index
+     * @return
+     */
     public Vertex createIndexedVertex(Map<String, Object> data,
             Index<Vertex> index) {
         try {
@@ -89,6 +158,16 @@ public class GraphHelpers {
         }
     }
 
+    /**
+     * Create an edge that is indexed using the given index.
+     * 
+     * @param src
+     * @param dst
+     * @param label
+     * @param data
+     * @param index
+     * @return
+     */
     public Edge createIndexedEdge(Long src, Long dst, String label,
             Map<String, Object> data, Index<Edge> index) {
         GraphDatabaseService g = graph.getRawGraph();
@@ -96,6 +175,17 @@ public class GraphHelpers {
                 data, index);
     }
 
+    /**
+     * Create an edge that is indexed with an index of the same name
+     * as it's label.
+     * 
+     * @param src
+     * @param dst
+     * @param label
+     * @param data
+     * @return
+     * @throws IndexNotFoundException
+     */
     public Edge createIndexedEdge(Long src, Long dst, String label,
             Map<String, Object> data) throws IndexNotFoundException {
         GraphDatabaseService g = graph.getRawGraph();
@@ -103,25 +193,68 @@ public class GraphHelpers {
                 data);
     }
 
+    /**
+     * Create an edge that is indexed with an index of the same name
+     * as it's label.
+     *  
+     * @param src
+     * @param dst
+     * @param label
+     * @param data
+     * @return
+     * @throws IndexNotFoundException
+     */
     public Edge createIndexedEdge(Object src, Object dst, String label,
             Map<String, Object> data) throws IndexNotFoundException {
         return createIndexedEdge(graph.getVertex(src), graph.getVertex(dst),
                 label, data);
     }
-
+    
+    /**
+     * Create an edge that is indexed with an index of the same name
+     * as it's label.
+     *  
+     * @param src
+     * @param dst
+     * @param label
+     * @param data
+     * @return
+     * @throws IndexNotFoundException
+     */
     public Edge createIndexedEdge(Neo4jVertex src, Neo4jVertex dst,
             String label, Map<String, Object> data)
             throws IndexNotFoundException {
         return createIndexedEdge(src.getRawVertex(), dst.getRawVertex(), label,
                 data);
     }
-
+    
+    /**
+     * Create an edge that is indexed with an index of the same name
+     * as it's label.
+     *  
+     * @param src
+     * @param dst
+     * @param label
+     * @param data
+     * @return
+     * @throws IndexNotFoundException
+     */
     public Edge createIndexedEdge(Node src, Node dst, String label,
             Map<String, Object> data) throws IndexNotFoundException {
         Index<Edge> index = getIndex(label, Edge.class);
         return createIndexedEdge(src, dst, label, data, index);
     }
 
+     /**
+     * Create an edge that is indexed with the given index.
+     *  
+     * @param src
+     * @param dst
+     * @param label
+     * @param data
+     * @param index
+     * @return
+     */
     public Edge createIndexedEdge(Node src, Node dst, String label,
             Map<String, Object> data, Index<Edge> index) {
 
@@ -162,6 +295,14 @@ public class GraphHelpers {
         return updateIndexedVertex(id, data, index);
     }
 
+    /**
+     * Update a vertex using the given index.
+     * 
+     * @param id
+     * @param data
+     * @param index
+     * @return
+     */
     public Vertex updateIndexedVertex(long id, Map<String, Object> data,
             Index<Vertex> index) {
         try {
@@ -176,6 +317,15 @@ public class GraphHelpers {
         }
     }
 
+    /*** helpers ***/
+
+    /**
+     * Replace properties to a property container like vertex and edge
+     * 
+     * @param index     The index of the container
+     * @param c         The container Edge or Vertex of type <code>T</code>
+     * @param data      The properties
+     */
     private <T extends Element> void replaceProperties(Index<T> index, T c,
             Map<String, Object> data) {
         // remove 'old' properties
@@ -188,7 +338,13 @@ public class GraphHelpers {
         addProperties(index, c, data);
     }
 
-    // add properties to a property container like vertex and edge
+    /**
+     * Add properties to a property container like vertex and edge
+     * 
+     * @param index The index of the container
+     * @param c     The container Edge or Vertex of type <code>T</code>
+     * @param data  The properties
+     */
     private <T extends Element> void addProperties(Index<T> index, T c,
             Map<String, Object> data) {
         // TODO data cannot be null
