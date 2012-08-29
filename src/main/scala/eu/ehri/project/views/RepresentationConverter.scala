@@ -94,6 +94,10 @@ class RepresentationConverter extends DataConverter {
 
   /**
    * De-serialize a Json value to an an EntityUpdateBundle of type `T`.
+   * 
+   * TODO: Although it might be more efficient deserializing a bundle
+   * directly from JSON, it'd probably be nicer to do it via generic
+   * Map data via chained converters.
    */
   def jsonToBundle[T <: VertexFrame](data: JValue): EntityBundle[T] = {
     val ext = data.extract[InsertBundle]
