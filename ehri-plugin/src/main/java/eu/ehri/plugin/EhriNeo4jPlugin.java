@@ -19,6 +19,8 @@ import eu.ehri.data.EhriNeo4j;
  * Those could be accompliced by several calls to the rest api, 
  * but need to be atomic and therefore we like them to be new rest calls. 
  * 
+ * Note that it is by no means intended as a 'public' REST interface, but only for out Ehri system. 
+ * 
  * Instead of Node and Relationship we use Vertex and Edge in the method naming. 
  */
 

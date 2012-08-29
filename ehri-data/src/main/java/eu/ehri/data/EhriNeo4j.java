@@ -16,14 +16,16 @@ import com.tinkerpop.blueprints.pgm.Edge;
 import com.tinkerpop.blueprints.pgm.TransactionalGraph;
 import com.tinkerpop.blueprints.pgm.Vertex;
 import com.tinkerpop.blueprints.pgm.impls.neo4j.Neo4jGraph;
+import com.tinkerpop.blueprints.pgm.impls.Parameter;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
 
 /**
  * Main purpose is to be used by the ehri-plugin to provide a REST API to the neo4j service
  * Adds functionality that would otherwise require several neo4j calls 
- * and when possible also hides neo4j specifics and use more generic GrapgDb names.
+ * and when possible also hides neo4j specifics and use more generic GraphDb names.
  * neo4j Node => Vertex
  * neo4j Relationship => Edge 
  * 
@@ -223,9 +225,61 @@ public class EhriNeo4j {
 	// update_indexed_vertex_with_subordinates(_id, data, index_name, subs) 
 	  
 	/*** index ***/
+	// NOTE Indexes
+	//
+	// Ehhh for non-default configs... using params, otherwise you don't need it
+	// so if we want lucene fulltext , we need to, because thatis not the default!
+	//
+	// Also note that now we have no deleteIndex...
+	//
 	// get_or_create_vertex_index(index_name, index_params)
 	// get_or_create_edge_index(index_name, index_params)
 
+	public static com.tinkerpop.blueprints.pgm.Index<Vertex> getVertexIndex(GraphDatabaseService graphDb, String indexName)
+	{		
+		Neo4jGraph graph = new Neo4jGraph(graphDb);
+		com.tinkerpop.blueprints.pgm.Index<Vertex> index = graph.getIndex(indexName, Vertex.class);
+		
+		return index;
+	}	
+	
+	public static com.tinkerpop.blueprints.pgm.Index<Vertex> getOrCreateVertexIndex(GraphDatabaseService graphDb, String indexName, Map<String, Object> parameters) throws Exception
+	{
+		Neo4jGraph graph = new Neo4jGraph(graphDb);
+		
+		graph.setMaxBufferSize(0);
+		graph.startTransaction();
+		
+		try {
+			com.tinkerpop.blueprints.pgm.Index<Vertex> vertexIndex = 
+					graph.getIndex(indexName, Vertex.class);
+
+			if (vertexIndex == null) {
+				// create it
+				if (parameters == null || parameters.isEmpty()) {
+					// no parameters
+					vertexIndex = graph.createManualIndex(indexName, Vertex.class);
+				} else {
+					// construct List from parameter Map
+					// and then have the list in place of the varargs
+					ArrayList<Parameter> parametersList = new ArrayList<Parameter>();
+					for(Map.Entry<String, Object> entry : parameters.entrySet()) {
+						if (entry.getValue() == null)
+							continue;
+						parametersList.add(new Parameter<String, Object>(entry.getKey(), entry.getValue()));
+					}
+					
+					vertexIndex = graph.createManualIndex(indexName, Vertex.class, 
+						parametersList.toArray(new Parameter[parametersList.size()]));
+				}
+			}
+			graph.stopTransaction(TransactionalGraph.Conclusion.SUCCESS);
+			return vertexIndex;
+		} catch (Exception e) {
+			graph.stopTransaction(TransactionalGraph.Conclusion.FAILURE);
+			throw e;
+		}
+	}
 	
     /*** helpers ***/
 

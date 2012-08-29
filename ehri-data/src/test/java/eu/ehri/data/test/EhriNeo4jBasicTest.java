@@ -15,6 +15,9 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.test.TestGraphDatabaseFactory;
 
+import com.tinkerpop.blueprints.pgm.Index;
+import com.tinkerpop.blueprints.pgm.Vertex;
+
 import eu.ehri.data.EhriNeo4j;
 
 public class EhriNeo4jBasicTest {
@@ -182,6 +185,24 @@ public class EhriNeo4jBasicTest {
 	    	assertEquals(newValue, NEW_TEST_VALUE);
 	    }	    
 	    
+	    
+	    @Test
+	    public void testGetOrCreateVertexIndex() throws Exception
+	    {
+	    	final String NEW_INDEX_NAME = "newTestIndex";
+	    	
+	    	// make sure we don't have it
+	    	Index<Vertex> vertexIndex = EhriNeo4j.getVertexIndex(graphDb, NEW_INDEX_NAME);
+	    	assertEquals(vertexIndex, null);
+	    	
+	    	// create it
+	    	vertexIndex = EhriNeo4j.getOrCreateVertexIndex(graphDb, NEW_INDEX_NAME, null);
+	    	assertFalse(vertexIndex == null);
+	    	
+	    	// and check if we can find it via get
+	    	vertexIndex = EhriNeo4j.getVertexIndex(graphDb, NEW_INDEX_NAME);
+	    	assertFalse(vertexIndex == null);
+	    }
 	    
 	    /*** helpers ***/
 	    
