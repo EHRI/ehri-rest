@@ -28,7 +28,7 @@ import net.liftweb.json._
 /**
  * Helper class for extracting data from a JSON bundle.
  */
-case class InsertBundle(val id: Option[Long], val data: JObject, val relationships: Map[String, JValue])
+case class InsertBundle(val id: Option[Long], val data: JObject, val relationships: Map[String, List[JValue]])
 
 class RepresentationConverter extends DataConverter {
 
@@ -116,14 +116,9 @@ class RepresentationConverter extends DataConverter {
 
     val deps = getDependentRelations(bundle.getBundleClass)
     ext.relationships.filterKeys(r => deps.contains(r)).foldLeft(bundle) {
-      case (bd, (reltype, data)) =>
-        data match {
-          case JArray(list) => list.foldLeft(bd) {
-            case (bd, (cdata: JValue)) =>
-              bd.addRelation(reltype, jsonToBundle[T](cdata))
-          }
-          case single: JValue => bd.addRelation(reltype, jsonToBundle[T](single))
-        }
+      case (bd, (reltype, list)) => list.foldLeft(bd) { case (bd, (cdata: JValue)) =>
+        bd.addRelation(reltype, jsonToBundle[T](cdata))
+      }
     }
   }
 
