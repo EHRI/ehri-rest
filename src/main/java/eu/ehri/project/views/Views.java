@@ -69,11 +69,10 @@ public class Views <E extends AccessibleEntity> {
      * @return
      * @throws PermissionDenied
      */
-    public Map<String,Object> detail(Long item, Long user) throws PermissionDenied {
+    public E detail(Long item, Long user) throws PermissionDenied {
         E entity = graph.getVertex(item, cls);
         checkReadAccess(entity, user);
-        EntityBundle<E> bundle = converter.vertexFrameToBundle(entity);
-        return converter.bundleToData(bundle);
+        return entity;
     }
 
     /**
