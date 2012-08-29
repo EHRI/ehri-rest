@@ -31,6 +31,8 @@ import net.liftweb.json._
 case class InsertBundle(val id: Option[Long], val data: JObject, val relationships: Map[String, List[JValue]])
 
 class RepresentationConverter extends DataConverter {
+  
+  type JMap = java.util.Map[String, Object]
 
   // Implicit necessary for lift-json to do it's work.
   implicit val formats = Serialization.formats(NoTypeHints)
@@ -64,12 +66,14 @@ class RepresentationConverter extends DataConverter {
   /**
    * Convert a set of nested Maps into a bundle of type `T`.
    */
-  def dataToBundle[T <: VertexFrame](jdata: java.util.Map[String, Object]): EntityBundle[T] = {
-    // Apologies for this mess.
+  def dataToBundle[T <: VertexFrame](jdata: JMap): EntityBundle[T] = {
+    // Apologies for this mess. It's complicated by the need to convert
+    // back and forth between Scala and Java data types, though I remain
+    // convinced that writing it in Java would be too painful.
     try {
       val data = jdata.asScala
       val id = data.get("id").map(_.asInstanceOf[Long]) // Optional!
-      val props = data.get("data").map(_.asInstanceOf[java.util.Map[String, Object]].asScala).getOrElse(
+      val props = data.get("data").map(_.asInstanceOf[JMap].asScala).getOrElse(
         throw new DeserializationError("No item data map found"))
       val isa: String = props.get(EntityType.KEY).map(_.asInstanceOf[String]).getOrElse(
         throw new DeserializationError("No '%s' attribute found in item data".format(EntityType.KEY)))
@@ -80,7 +84,7 @@ class RepresentationConverter extends DataConverter {
 
       val m = new MultiValueMap()
       for (r <- relations.keySet) {
-        m.putAll(r, relations.get(r).map(_.asInstanceOf[List[java.util.HashMap[String, Object]]].map(dataToBundle[T])).getOrElse(List()))
+        m.putAll(r, relations.get(r).map(_.asInstanceOf[List[JMap]].map(dataToBundle[T])).getOrElse(List()))
       }
 
       new EntityBundle[T](if (id.isDefined) id.get else null, props.asJava, cls, m)
