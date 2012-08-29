@@ -63,19 +63,30 @@ class RepresentationConverter extends DataConverter {
    */
   def dataToBundle[T <: VertexFrame](jdata: java.util.Map[String,Object]): EntityBundle[T] = {
     // Apologies for this mess.
-    val data = jdata.asScala
-    val id = data.getOrElse("id", -1L).asInstanceOf[Long]
-    val props = data.get("data").map(_.asInstanceOf[java.util.Map[String,Object]].asScala).getOrElse(sys.error("No data!"))    
-    val isa: String = props.getOrElse(EntityTypes.KEY, throw new DeserializationError("No 'isA' attribute found in item data.")).asInstanceOf[String]
-    val cls = classes.getOrElse(isa, throw new DeserializationError("No class found for type isA type: " + isa)).asInstanceOf[Class[T]]
-    val relations: Map[String,Any] = data.getOrElse("relationships", Map[String,Any]()).asInstanceOf[Map[String,Any]]
-
-    val m = new MultiValueMap()
-    for (r <- relations.keySet) {
-      m.putAll(r, relations.get(r).map(_.asInstanceOf[List[java.util.HashMap[String,Object]]].map(dataToBundle[T])).getOrElse(List()))
-    }
+    try {
+      val data = jdata.asScala
+      val id = data.get("id").map(_.asInstanceOf[Long]) // Optional!
+      val props = data.get("data").map(_.asInstanceOf[java.util.Map[String,Object]].asScala).getOrElse(
+              throw new DeserializationError("No item data map found"))    
+      val isa: String = props.get(EntityTypes.KEY).map(_.asInstanceOf[String]).getOrElse(
+              throw new DeserializationError("No '%s' attribute found in item data".format(EntityTypes.KEY)))
+      val cls = classes.get(isa).map(_.asInstanceOf[Class[T]]).getOrElse(
+      		throw new DeserializationError("No class found for type %s type: '%s'".format(EntityTypes.KEY, isa)))
+      val relations: Map[String,Any] = data.get("relationships").map(_.asInstanceOf[Map[String,Any]]).getOrElse(
+              Map[String,Any]()) // Also Optional!
+              
+      val m = new MultiValueMap()
+      for (r <- relations.keySet) {
+        m.putAll(r, relations.get(r).map(_.asInstanceOf[List[java.util.HashMap[String,Object]]].map(dataToBundle[T])).getOrElse(List()))
+      }
     
-    new EntityBundle[T](if (id > 0) id else null, props.asJava, cls, m)
+      new EntityBundle[T](if (id.isDefined) id.get else null, props.asJava, cls, m)
+    } catch {
+      // We're highly liable to ClassCastExceptions here, in which case it must
+      // be a problem with the underlying data. Bail out and throw a deserialisation
+      // error with the cause.
+      case e: ClassCastException => throw new DeserializationError("Error deserializing data", e)
+    }
   }
   
   /**
@@ -85,8 +96,8 @@ class RepresentationConverter extends DataConverter {
     val ext = data.extract[InsertBundle]
 
     // we must have an isA to tell us the class to instantiate this to.
-    val isA: String = ext.data.values.getOrElse(EntityTypes.KEY,
-                throw new DeserializationError("Object has no 'ISA' field")).asInstanceOf[String]
+    val isA: String = ext.data.values.get(EntityTypes.KEY).map(_.asInstanceOf[String]).getOrElse(
+                throw new DeserializationError("Object has no 'ISA' field"))
     val cls = classes.getOrElse(isA,
                 throw new DeserializationError(
                     "ISA type '%s' is not a valid entity type %s".format(isA, classes))).asInstanceOf[Class[T]]
