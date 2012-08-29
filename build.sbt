@@ -9,6 +9,7 @@ scalaVersion := "2.9.1"
 libraryDependencies ++= Seq(
     "org.specs2" %% "specs2" % "1.6.1",
     "org.specs2" %% "specs2-scalaz-core" % "6.0.1" % "test",
+    "junit" % "junit" % "4.8.1" % "test",
     "com.tinkerpop" % "frames" % "2.1.0",
     "com.tinkerpop.gremlin" % "gremlin-java" % "2.1.0",
     "com.tinkerpop.blueprints" % "blueprints-neo4j-graph" % "2.1.0",
