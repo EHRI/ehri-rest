@@ -88,8 +88,6 @@ public class Views <E extends AccessibleEntity> {
     public E update(Map<String,Object> data, Long user)
             throws PermissionDenied, ValidationError {
         EntityBundle<E> bundle = converter.dataToBundle(data);
-        if (bundle.getId() == null)
-            throw new PermissionDenied("No identifier given for updating object.");
         E entity = graph.getVertex(bundle.getId(), cls);
         checkWriteAccess(entity, user);
         return new BundleDAO<E>(graph).update(bundle);
@@ -108,9 +106,6 @@ public class Views <E extends AccessibleEntity> {
             throws PermissionDenied, ValidationError {
         checkGlobalWriteAccess(user);
         EntityBundle<E> bundle = converter.dataToBundle(data);
-        if (bundle.getId() != null)
-            throw new PermissionDenied("Existing identifier given when creating object.");
-
         return new BundleDAO<E>(graph).insert(bundle);
     }
 
