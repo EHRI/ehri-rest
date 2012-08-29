@@ -24,7 +24,6 @@ import eu.ehri.project.persistance.BundleFactory
  */
 case class InsertBundle(val id: Option[Long], val data: JObject, val relationships: Map[String, JValue])
 
-
 class RepresentationConverter extends DataConverter {
 
   // Implicit necessary for lift-json to do it's work.
@@ -45,41 +44,39 @@ class RepresentationConverter extends DataConverter {
     (k -> item.getProperty(k))
   }.toMap
 
-    
   /**
    * Convert a JSON string to an EntityUpdateBundle of type `T`.
    */
   def convert[T <: VertexFrame](str: String): EntityBundle[T] = jsonToBundle[T](parse(str))
 
   def convert(map: java.util.Map[String, Object]): String = Json.generate(map)
-  
-  def convert[T <: VertexFrame](bundle: EntityBundle[T]): String = convert(bundleToData(bundle))
-  
-  def convert(item: VertexFrame): String = convert(bundleToData(vertexFrameToBundle(item)))
 
+  def convert[T <: VertexFrame](bundle: EntityBundle[T]): String = convert(bundleToData(bundle))
+
+  def convert(item: VertexFrame): String = convert(bundleToData(vertexFrameToBundle(item)))
 
   /**
    * Convert a set of nested Maps into a bundle of type `T`.
    */
-  def dataToBundle[T <: VertexFrame](jdata: java.util.Map[String,Object]): EntityBundle[T] = {
+  def dataToBundle[T <: VertexFrame](jdata: java.util.Map[String, Object]): EntityBundle[T] = {
     // Apologies for this mess.
     try {
       val data = jdata.asScala
       val id = data.get("id").map(_.asInstanceOf[Long]) // Optional!
-      val props = data.get("data").map(_.asInstanceOf[java.util.Map[String,Object]].asScala).getOrElse(
-              throw new DeserializationError("No item data map found"))    
+      val props = data.get("data").map(_.asInstanceOf[java.util.Map[String, Object]].asScala).getOrElse(
+        throw new DeserializationError("No item data map found"))
       val isa: String = props.get(EntityTypes.KEY).map(_.asInstanceOf[String]).getOrElse(
-              throw new DeserializationError("No '%s' attribute found in item data".format(EntityTypes.KEY)))
+        throw new DeserializationError("No '%s' attribute found in item data".format(EntityTypes.KEY)))
       val cls = classes.get(isa).map(_.asInstanceOf[Class[T]]).getOrElse(
-      		throw new DeserializationError("No class found for type %s type: '%s'".format(EntityTypes.KEY, isa)))
-      val relations: Map[String,Any] = data.get("relationships").map(_.asInstanceOf[Map[String,Any]]).getOrElse(
-              Map[String,Any]()) // Also Optional!
-              
+        throw new DeserializationError("No class found for type %s type: '%s'".format(EntityTypes.KEY, isa)))
+      val relations: Map[String, Any] = data.get("relationships").map(_.asInstanceOf[Map[String, Any]]).getOrElse(
+        Map[String, Any]()) // Also Optional!
+
       val m = new MultiValueMap()
       for (r <- relations.keySet) {
-        m.putAll(r, relations.get(r).map(_.asInstanceOf[List[java.util.HashMap[String,Object]]].map(dataToBundle[T])).getOrElse(List()))
+        m.putAll(r, relations.get(r).map(_.asInstanceOf[List[java.util.HashMap[String, Object]]].map(dataToBundle[T])).getOrElse(List()))
       }
-    
+
       new EntityBundle[T](if (id.isDefined) id.get else null, props.asJava, cls, m)
     } catch {
       // We're highly liable to ClassCastExceptions here, in which case it must
@@ -88,7 +85,7 @@ class RepresentationConverter extends DataConverter {
       case e: ClassCastException => throw new DeserializationError("Error deserializing data", e)
     }
   }
-  
+
   /**
    * De-serialize a Json value to an an EntityUpdateBundle of type `T`.
    */
@@ -97,54 +94,53 @@ class RepresentationConverter extends DataConverter {
 
     // we must have an isA to tell us the class to instantiate this to.
     val isA: String = ext.data.values.get(EntityTypes.KEY).map(_.asInstanceOf[String]).getOrElse(
-                throw new DeserializationError("Object has no 'ISA' field"))
+      throw new DeserializationError("Object has no 'ISA' field"))
     val cls = classes.getOrElse(isA,
-                throw new DeserializationError(
-                    "ISA type '%s' is not a valid entity type %s".format(isA, classes))).asInstanceOf[Class[T]]
-     
+      throw new DeserializationError(
+        "ISA type '%s' is not a valid entity type %s".format(isA, classes))).asInstanceOf[Class[T]]
+
     val bf = new BundleFactory[T]
-    val bundle = ext.id.map( id =>
-        bf.buildBundle(id, ext.data.values.asInstanceOf[Map[String, Object]], cls)).getOrElse(
-        bf.buildBundle(ext.data.values.asInstanceOf[Map[String, Object]], cls))
-                
+    val bundle = ext.id.map(id =>
+      bf.buildBundle(id, ext.data.values.asInstanceOf[Map[String, Object]], cls)).getOrElse(
+      bf.buildBundle(ext.data.values.asInstanceOf[Map[String, Object]], cls))
+
     val deps = getDependentRelations(bundle.getBundleClass)
     ext.relationships.filterKeys(r => deps.contains(r)).foldLeft(bundle) {
       case (bd, (reltype, data)) =>
         data match {
           case JArray(list) => list.foldLeft(bd) {
             case (bd, (cdata: JValue)) =>
-              bd.saveWith(reltype, jsonToBundle[T](cdata))
+              bd.addRelation(reltype, jsonToBundle[T](cdata))
           }
-          case single: JValue => bd.saveWith(reltype, jsonToBundle[T](single))
+          case single: JValue => bd.addRelation(reltype, jsonToBundle[T](single))
         }
     }
   }
-  
+
   /**
    * Convert a bundle into a set of nested Maps.
    */
-  def bundleToData[T <: VertexFrame](bundle: EntityBundle[T]): java.util.Map[String,Object] = {
-    var relations = Map[String,List[Any]]()
-    for (key <- bundle.getSaveWith().asInstanceOf[MultiValueMap].keySet()) {
-      val c = bundle.getSaveWith.getCollection(key).asInstanceOf[java.util.Collection[EntityBundle[T]]]
-      relations = relations + (key.asInstanceOf[String] -> c.toList.map(bundleToData[T]))      
+  def bundleToData[T <: VertexFrame](bundle: EntityBundle[T]): java.util.Map[String, Object] = {
+    var relations = Map[String, List[Any]]()
+    for (key <- bundle.getRelations.asInstanceOf[MultiValueMap].keySet()) {
+      val c = bundle.getRelations.getCollection(key).asInstanceOf[java.util.Collection[EntityBundle[T]]]
+      relations = relations + (key.asInstanceOf[String] -> c.toList.map(bundleToData[T]))
     }
-    
+
     Map(
       "id" -> bundle.getId(),
       "data" -> bundle.getData(),
-      "relationships" -> relations
-    )
+      "relationships" -> relations)
   }
-    
+
   /**
    * Convert a VertexFrame[T] into a bundle[T].
    */
   def vertexFrameToBundle[T <: VertexFrame](item: VertexFrame): EntityBundle[T] = {
     val isa = item.asVertex().getProperty(EntityTypes.KEY).asInstanceOf[String]
-    val cls = classes.getOrElse(isa, 
-            throw new SerializationError("No isa found for vertex: %s".format(item)))
-    
+    val cls = classes.getOrElse(isa,
+      throw new SerializationError("No isa found for vertex: %s".format(item)))
+
     var relations = Map[String, List[EntityBundle[T]]]()
     // Traverse the methods of the item's class, looking for
     // @Adjacency annotated with @Fetch
@@ -165,12 +161,14 @@ class RepresentationConverter extends DataConverter {
       }
     }
     val bundle = new EntityBundle[T](
-        item.asVertex.getId().asInstanceOf[Long],
-        vertexData(item.asVertex), cls.asInstanceOf[Class[T]], new MultiValueMap)    
-    relations.foldLeft(bundle) { case (bd, (rel, rels)) =>
-      rels.foldLeft(bd) { case (bd, r) =>
-        bd.saveWith(rel, r)        
-      }
+      item.asVertex.getId().asInstanceOf[Long],
+      vertexData(item.asVertex), cls.asInstanceOf[Class[T]], new MultiValueMap)
+    relations.foldLeft(bundle) {
+      case (bd, (rel, rels)) =>
+        rels.foldLeft(bd) {
+          case (bd, r) =>
+            bd.addRelation(rel, r)
+        }
     }
   }
 }

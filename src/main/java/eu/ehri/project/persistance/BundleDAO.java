@@ -137,7 +137,7 @@ public class BundleDAO<T extends VertexFrame> {
         Index<Vertex> index = helpers.getOrCreateIndex(bundle.getEntityType(),
                 Vertex.class);
         Vertex node = helpers.createIndexedVertex(bundle.getData(), index);
-        saveDependents(node, bundle.getBundleClass(), bundle.getSaveWith());
+        saveDependents(node, bundle.getBundleClass(), bundle.getRelations());
         return node;
     }
 
@@ -146,7 +146,7 @@ public class BundleDAO<T extends VertexFrame> {
                 Vertex.class);
         Vertex node = helpers.updateIndexedVertex(bundle.getId(),
                 bundle.getData(), index);
-        saveDependents(node, bundle.getBundleClass(), bundle.getSaveWith());
+        saveDependents(node, bundle.getBundleClass(), bundle.getRelations());
         return node;
     }
 
@@ -158,7 +158,7 @@ public class BundleDAO<T extends VertexFrame> {
                     bundle.getEntityType(), Vertex.class);
             Vertex node = helpers.updateIndexedVertex(bundle.getId(),
                     bundle.getData(), index);
-            saveDependents(node, bundle.getBundleClass(), bundle.getSaveWith());
+            saveDependents(node, bundle.getBundleClass(), bundle.getRelations());
             graph.getBaseGraph().stopTransaction(Conclusion.SUCCESS);
             return graph.frame(node, bundle.getBundleClass());
         } catch (ValidationError err) {
@@ -177,7 +177,7 @@ public class BundleDAO<T extends VertexFrame> {
             Index<Vertex> index = helpers.getOrCreateIndex(
                     bundle.getEntityType(), Vertex.class);
             Vertex node = helpers.createIndexedVertex(bundle.getData(), index);
-            saveDependents(node, bundle.getBundleClass(), bundle.getSaveWith());
+            saveDependents(node, bundle.getBundleClass(), bundle.getRelations());
             graph.getBaseGraph().stopTransaction(Conclusion.SUCCESS);
             return graph.frame(node, bundle.getBundleClass());
         } catch (ValidationError err) {
@@ -193,7 +193,7 @@ public class BundleDAO<T extends VertexFrame> {
             throws ValidationError {
         // Recursively blast everything away! Use with caution.
         Integer c = count;
-        MultiValueMap fetch = bundle.getSaveWith();
+        MultiValueMap fetch = bundle.getRelations();
         List<String> deps = AnnotationUtils.getDependentRelations(bundle
                 .getBundleClass());
         for (Object key : fetch.keySet()) {

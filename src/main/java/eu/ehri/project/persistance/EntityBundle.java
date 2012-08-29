@@ -23,23 +23,23 @@ public class EntityBundle<T extends VertexFrame> {
     protected final Long id;
     protected final Map<String, Object> data;
     protected final Class<T> cls;
-    protected final MultiValueMap saveWith;
+    protected final MultiValueMap relations;
 
     private MultiValueMap errors = new MultiValueMap();
 
     public EntityBundle(Long id, final Map<String, Object> data, Class<T> cls,
-            final MultiValueMap saveWith) {
+            final MultiValueMap relations) {
         this.id = id;
         this.data = new HashMap<String, Object>(data);
         this.cls = cls;
-        this.saveWith = saveWith;
+        this.relations = relations;
     }
 
-    public EntityBundle<T> saveWith(String relation,
+    public EntityBundle<T> addRelation(String relation,
             EntityBundle<? extends VertexFrame> other) {
         MultiValueMap tmp = new MultiValueMap();
-        for (Object key : saveWith.keySet()) {
-            tmp.putAll(key, saveWith.getCollection(key));
+        for (Object key : relations.keySet()) {
+            tmp.putAll(key, relations.getCollection(key));
         }
         tmp.put(relation, other);
         return new EntityBundle<T>(id, data, cls, tmp);
@@ -59,8 +59,8 @@ public class EntityBundle<T extends VertexFrame> {
         return !errors.isEmpty();
     }
 
-    public MultiValueMap getSaveWith() {
-        return saveWith;
+    public MultiValueMap getRelations() {
+        return relations;
     }
 
     public MultiValueMap getValidationErrors() {
@@ -77,11 +77,11 @@ public class EntityBundle<T extends VertexFrame> {
         // immutability???
         Map<String, Object> temp = new HashMap<String, Object>(data);
         temp.put(key, value);
-        return new EntityBundle<T>(id, temp, cls, saveWith);
+        return new EntityBundle<T>(id, temp, cls, relations);
     }
 
     public EntityBundle<T> setData(final Map<String, Object> data) {
-        return new EntityBundle<T>(id, data, cls, saveWith);
+        return new EntityBundle<T>(id, data, cls, relations);
     }
 
     public Class<T> getBundleClass() {

@@ -5,18 +5,16 @@ import scala.collection.JavaConversions._
 import eu.ehri.project.core.utils.ClassUtils
 import eu.ehri.project.models.annotations.{ EntityType, Dependent }
 
-
 trait DataConverter {
   /**
    * Convenience typedef of a class that is a subtype of VertexFrame
    */
-  protected type EntityClass = Class[_ <: VertexFrame]  
-  
+  protected type EntityClass = Class[_ <: VertexFrame]
+
   /**
-   * Lazy-loaded lookup of 
+   * Lazy-loaded lookup of
    */
   lazy val classes: Map[String, EntityClass] = getEntityClasses
-
 
   /**
    * Get a list of the relationship labels for entities that are

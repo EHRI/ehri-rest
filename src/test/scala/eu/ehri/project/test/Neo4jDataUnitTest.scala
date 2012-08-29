@@ -25,22 +25,21 @@ import eu.ehri.project.views.RepresentationConverter
 import eu.ehri.project.models.DatePeriod
 import eu.ehri.project.models.DocumentaryUnit
 
-
 trait DB extends After {
-    // Set up our database...
-    val graph = new FramedGraph[Neo4jGraph](
-      new Neo4jGraph(
-        new TestGraphDatabaseFactory().newImpermanentDatabaseBuilder().newGraphDatabase()))
+  // Set up our database...
+  val graph = new FramedGraph[Neo4jGraph](
+    new Neo4jGraph(
+      new TestGraphDatabaseFactory().newImpermanentDatabaseBuilder().newGraphDatabase()))
 
-    // Helper for converting between bundles and frames
-    val converter = new RepresentationConverter
+  // Helper for converting between bundles and frames
+  val converter = new RepresentationConverter
 
-    def after = Unit //graph.shutdown, not needed on impermanentDatabase
+  def after = Unit //graph.shutdown, not needed on impermanentDatabase
 }
 
 trait LoadedDB extends DB {
-    val helper = new DataLoader(graph)
-    helper.loadTestData
+  val helper = new DataLoader(graph)
+  helper.loadTestData
 }
 
 class GraphTest extends Specification {
@@ -48,7 +47,7 @@ class GraphTest extends Specification {
   // bad things happen with the Neo4j test database.
   // It might be worth finding out why some time.
   sequential
-  
+
   "The Initial Database" should {
     "be empty (except for the ROOT node)" in new DB {
       graph.getVertices.toList.length mustEqual 1
@@ -74,37 +73,37 @@ class GraphTest extends Specification {
       val groups = helper.findTestElements(EntityTypes.GROUP, classOf[Group])
       groups.head.getUsers.toList mustNotEqual Nil
     }
-    
+
   }
-  
-  "Collections" should {    
+
+  "Collections" should {
     "be held by a repository" in new LoadedDB {
       helper.findTestElements(EntityTypes.DOCUMENTARY_UNIT, classOf[DocumentaryUnit]).toList.filter { c =>
         c.getAgent == null
       } mustEqual Nil
     }
-    
+
     "and have a description" in new LoadedDB {
       helper.findTestElements(EntityTypes.DOCUMENTARY_UNIT, classOf[DocumentaryUnit]).toList.filter { c =>
         c.getDescriptions.isEmpty
       } mustEqual Nil
     }
   }
-  
+
   "Collection c1" should {
     "have a creator a1" in new LoadedDB {
       val c1 = helper.findTestElement("c1", classOf[DocumentaryUnit])
       val a1 = helper.findTestElement("a1", classOf[Authority])
       c1.getCreators.head mustEqual a1
     }
-    
+
     "and a name access point a2" in new LoadedDB {
       val c1 = helper.findTestElement("c1", classOf[DocumentaryUnit])
       val a2 = helper.findTestElement("a2", classOf[Authority])
       c1.getNameAccess.head mustEqual a2
     }
   }
-  
+
   "Authority a1" should {
     "be the creator of collection c1" in new LoadedDB {
       val c1 = helper.findTestElement("c1", classOf[DocumentaryUnit])
@@ -112,7 +111,7 @@ class GraphTest extends Specification {
       a1.getDocumentaryUnits.head mustEqual c1
     }
   }
-  
+
   "Authority a2" should {
     "be a name access point for collection c1" in new LoadedDB {
       val c1 = helper.findTestElement("c1", classOf[DocumentaryUnit])
@@ -120,13 +119,13 @@ class GraphTest extends Specification {
       a2.getMentionedIn.head mustEqual c1
     }
   }
-  
+
   "The repository" should {
     "have an address" in new LoadedDB {
       val repo = helper.findTestElement("r1", classOf[Agent])
       repo.getAddresses.toList mustNotEqual Nil
     }
-    
+
     "and have a description" in new LoadedDB {
       val repo = helper.findTestElement("r1", classOf[Agent])
       repo.getDescriptions.toList mustNotEqual Nil
@@ -160,7 +159,7 @@ class GraphTest extends Specification {
       access.getRead() mustEqual false
       access.getWrite() mustEqual false
     }
-    
+
     "but have read-only access to items with no specified permissions" in new LoadedDB {
       val accessor = helper.findTestElement("niodGroup", classOf[Accessor])
       val c4 = helper.findTestElement("c4", classOf[AccessibleEntity])
@@ -196,7 +195,7 @@ class GraphTest extends Specification {
       val c2 = helper.findTestElement("c2", classOf[DocumentaryUnit])
       c2.getAncestors.head mustEqual c1
     }
-    
+
     "and be the an ancestor of c3" in new LoadedDB {
       val c1 = helper.findTestElement("c1", classOf[DocumentaryUnit])
       val c2 = helper.findTestElement("c2", classOf[DocumentaryUnit])
@@ -226,7 +225,7 @@ class GraphTest extends Specification {
       access.getWrite() mustEqual true
     }
   }
-  
+
   "The Mike user" should {
     "have an annotation" in new LoadedDB {
       val mike = helper.findTestElement("mike", classOf[UserProfile])
@@ -264,24 +263,24 @@ class GraphTest extends Specification {
       ann1.getAnnotations.head.getBody mustEqual ann2.getBody
     }
   }
-  
+
   "Attempting to create a DocumentaryUnit bundle" should {
     "not crash and result in a document with the same name as the test data" in new DB {
-      val m = Map("identifier" -> "c1", "name" -> "Collection 1");   
+      val m = Map("identifier" -> "c1", "name" -> "Collection 1");
       val bundle = new BundleFactory().buildBundle(m, classOf[DocumentaryUnit]);
       val persister = new BundleDAO[DocumentaryUnit](graph);
-      val doc = persister.insert(bundle);      
+      val doc = persister.insert(bundle);
       doc.getName mustEqual m.getOrElse("name", "")
     }
   }
-  
+
   "Attempting to update DocumentaryUnit" should {
     "change the node the right way" in new LoadedDB {
       val newName = "Another Name"
       val c1 = helper.findTestElement("c1", classOf[DocumentaryUnit])
       val bundle = new BundleFactory[DocumentaryUnit]().fromFramedVertext(c1).setDataValue("name", newName);
-      val persister = new BundleDAO[DocumentaryUnit](graph);      
-      val doc = persister.update(bundle);  
+      val persister = new BundleDAO[DocumentaryUnit](graph);
+      val doc = persister.update(bundle);
       val c1again = helper.findTestElement("c1", classOf[DocumentaryUnit])
       c1again.getName mustEqual newName
     }
@@ -291,33 +290,33 @@ class GraphTest extends Specification {
       val c1 = helper.findTestElement("c1", classOf[DocumentaryUnit])
       val oldName = c1.getName
       val bundle = new BundleFactory[DocumentaryUnit]().fromFramedVertext(c1).setDataValue("name", null);
-      val persister = new BundleDAO[DocumentaryUnit](graph);      
-      persister.update(bundle) must throwA[ValidationError]  
+      val persister = new BundleDAO[DocumentaryUnit](graph);
+      persister.update(bundle) must throwA[ValidationError]
       val c1again = helper.findTestElement("c1", classOf[DocumentaryUnit])
       c1again.getName mustEqual oldName
-    }    
+    }
   }
-  
+
   "Bundles" should {
     "be serialisable and deserializable" in new LoadedDB {
       val c1 = helper.findTestElement("c1", classOf[DocumentaryUnit])
       val json = converter.convert(c1)
-      
+
       val bundle = converter.convert(json)
       bundle.getId() mustEqual c1.asVertex().getId()
     }
-    
+
     "allow resaving" in new LoadedDB {
       val c1 = helper.findTestElement("c1", classOf[DocumentaryUnit])
       c1.getDescriptions.toList.length mustEqual 1
       val bundle = converter.vertexFrameToBundle[DocumentaryUnit](c1)
-      val persister = new BundleDAO[DocumentaryUnit](graph);      
+      val persister = new BundleDAO[DocumentaryUnit](graph);
       val c1redux = persister.update(bundle)
       c1.getDescriptions.toList mustEqual c1redux.getDescriptions.toList
       // Check saving the bundle didn't add another item
       c1.getDescriptions.toList.length mustEqual 1
     }
-    
+
     "allow resaving with subordinate changes" in new LoadedDB {
       val c1 = helper.findTestElement("c1", classOf[DocumentaryUnit])
       // Save an object as JSON
@@ -328,20 +327,20 @@ class GraphTest extends Specification {
       c1.getDescriptions.toList.length mustEqual 0
       // And restore it again from the bundle.
       val bundle = converter.convert[DocumentaryUnit](json)
-      val persister = new BundleDAO[DocumentaryUnit](graph);      
+      val persister = new BundleDAO[DocumentaryUnit](graph);
       val c1redux = persister.update(bundle)
       // Tada: it's back again
       c1.getDescriptions.toList.length mustEqual 1
     }
-    
+
     "delete removed subordinates" in new LoadedDB {
       val c1 = helper.findTestElement("c1", classOf[DocumentaryUnit])
       val bundle = converter.vertexFrameToBundle[DocumentaryUnit](c1)
       c1.getDatePeriods().toList.length mustEqual 2
-      val c = bundle.getSaveWith.getCollection("hasDate")            
-      bundle.getSaveWith().remove("hasDate")
-      bundle.getSaveWith().put("hasDate", c.toList.head)
-      val persister = new BundleDAO[DocumentaryUnit](graph);      
+      val c = bundle.getRelations.getCollection("hasDate")
+      bundle.getRelations.remove("hasDate")
+      bundle.getRelations.put("hasDate", c.toList.head)
+      val persister = new BundleDAO[DocumentaryUnit](graph);
       val c1redux = persister.update(bundle)
       c1.getDatePeriods().toList.length mustEqual 1
     }
