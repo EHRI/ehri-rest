@@ -67,6 +67,7 @@ class RepresentationConverter extends DataConverter {
   /**
    * Convert a set of nested Maps into a bundle of type `T`.
    */
+  @throws(classOf[DeserializationError])
   def dataToBundle[T <: VertexFrame](jdata: JMap): EntityBundle[T] = {
     // Apologies for this mess. It's complicated by the need to convert
     // back and forth between Scala and Java data types, though I remain
@@ -105,6 +106,7 @@ class RepresentationConverter extends DataConverter {
    * directly from JSON, it'd probably be nicer to do it via generic
    * Map data via chained converters.
    */
+  @throws(classOf[DeserializationError])
   def jsonToBundle[T <: VertexFrame](data: JValue): EntityBundle[T] = {
     val ext = data.extract[InsertBundle]
 
