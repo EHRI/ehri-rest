@@ -59,12 +59,11 @@ public class EhriNeo4jBasicTest {
 
         Vertex indexedVertex = createIndexedVertexWithProperty(TEST_KEY,
                 TEST_VALUE);
-        Long vertexId = (Long) indexedVertex.getId();
         assertEquals((String) indexedVertex.getProperty(TEST_KEY), TEST_VALUE);
 
         // do we have a node with that id and property in the neo4j database?
-        Node foundNode = graphDb.getNodeById(vertexId);
-        assertEquals((Long) foundNode.getId(), vertexId);
+        Node foundNode = graphDb.getNodeById((Long) indexedVertex.getId());
+        assertEquals(foundNode.getId(), indexedVertex.getId());
         assertEquals((String) foundNode.getProperty(TEST_KEY), TEST_VALUE);
     }
 
@@ -121,8 +120,8 @@ public class EhriNeo4jBasicTest {
         assertFalse(hasRelationship(outV));
         assertFalse(hasRelationship(inV));
         
-        Edge relationship = helpers.createIndexedEdge((Long)outV.getId(),
-                (Long)inV.getId(), TEST_TYPE, createTestData(TEST_KEY, TEST_VALUE),
+        Edge relationship = helpers.createIndexedEdge(outV.getId(),
+                inV.getId(), TEST_TYPE, createTestData(TEST_KEY, TEST_VALUE),
                 TEST_EDGE_INDEX_NAME);
         Long id = (Long) relationship.getId();
 
@@ -151,8 +150,8 @@ public class EhriNeo4jBasicTest {
         final String TEST_TYPE = "testType";
 
         // create the Edge
-        Edge relationship = helpers.createIndexedEdge((Long) outV.getId(),
-                (Long) inV.getId(), TEST_TYPE,
+        Edge relationship = helpers.createIndexedEdge(outV.getId(),
+                inV.getId(), TEST_TYPE,
                 createTestData(TEST_KEY, TEST_VALUE), TEST_EDGE_INDEX_NAME);
         Long id = (Long) relationship.getId();
 
@@ -185,8 +184,8 @@ public class EhriNeo4jBasicTest {
         final String TEST_TYPE = "testType";
 
         // create the Edge
-        Edge relationship = helpers.createIndexedEdge((Long) outV.getId(),
-                (Long) inV.getId(), TEST_TYPE,
+        Edge relationship = helpers.createIndexedEdge(outV.getId(),
+                inV.getId(), TEST_TYPE,
                 createTestData(TEST_KEY, TEST_VALUE), TEST_EDGE_INDEX_NAME);
         Long id = (Long) relationship.getId();
 

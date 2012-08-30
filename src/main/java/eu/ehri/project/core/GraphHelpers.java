@@ -154,39 +154,6 @@ public class GraphHelpers {
     }
 
     /**
-     * Create an edge that is indexed using the given index.
-     * 
-     * @param src
-     * @param dst
-     * @param label
-     * @param data
-     * @param index
-     * @return
-     */
-    public Edge createIndexedEdge(Long src, Long dst, String label,
-            Map<String, Object> data, Index<Edge> index) {
-        return createIndexedEdge(graph.getVertex(src), graph.getVertex(dst), label,
-                data, index);
-    }
-
-    /**
-     * Create an edge that is indexed with an index of the same name
-     * as it's label.
-     * 
-     * @param src
-     * @param dst
-     * @param label
-     * @param data
-     * @return
-     * @throws IndexNotFoundException
-     */
-    public Edge createIndexedEdge(Long src, Long dst, String label,
-            Map<String, Object> data, String indexName) throws IndexNotFoundException {
-        return createIndexedEdge(graph.getVertex(src), graph.getVertex(dst), label,
-                data, indexName);
-    }
-
-    /**
      * Create an edge that is indexed with an index of the same name
      * as it's label.
      *  
@@ -301,7 +268,7 @@ public class GraphHelpers {
      * @return
      * @throws Exception
      */
-    public Edge updateIndexedEdge(Long id, Map<String, Object> data,
+    public Edge updateIndexedEdge(Object id, Map<String, Object> data,
             String indexName) throws IndexNotFoundException {
         try {
             Index<Edge> index = getIndex(indexName, Edge.class);
