@@ -33,6 +33,7 @@ case class InsertBundle(val id: Option[Long], val data: JObject, val relationshi
 class RepresentationConverter extends DataConverter {
   
   type JMap = java.util.Map[String, Object]
+  type JHMap = java.util.HashMap[String, Object]
 
   // Implicit necessary for lift-json to do it's work.
   implicit val formats = Serialization.formats(NoTypeHints)
@@ -72,22 +73,23 @@ class RepresentationConverter extends DataConverter {
     // convinced that writing it in Java would be too painful.
     try {
       val data = jdata.asScala
-      val id = data.get("id").map(_.asInstanceOf[Long]) // Optional!
+      val id = jdata.get("id")
       val props = data.get("data").map(_.asInstanceOf[JMap].asScala).getOrElse(
         throw new DeserializationError("No item data map found"))
       val isa: String = props.get(EntityType.KEY).map(_.asInstanceOf[String]).getOrElse(
         throw new DeserializationError("No '%s' attribute found in item data".format(EntityType.KEY)))
       val cls = classes.get(isa).map(_.asInstanceOf[Class[T]]).getOrElse(
         throw new DeserializationError("No class found for type %s type: '%s'".format(EntityType.KEY, isa)))
-      val relations: Map[String, Any] = data.get("relationships").map(_.asInstanceOf[Map[String, Any]]).getOrElse(
-        Map[String, Any]()) // Also Optional!
+      val relations: JMap = data.get("relationships").map(_.asInstanceOf[JHMap]).getOrElse(new JHMap()) // Also Optional!
 
       val m = new MultiValueMap()
-      for (r <- relations.keySet) {
-        m.putAll(r, relations.get(r).map(_.asInstanceOf[List[JMap]].map(dataToBundle[T])).getOrElse(List()))
+      for (entry <- relations.entrySet) {
+        for (item <- entry.getValue.asInstanceOf[java.util.List[JHMap]]) {
+          m.put(entry.getKey, dataToBundle[T](item));
+        }
       }
 
-      new EntityBundle[T](if (id.isDefined) id.get else null, props.asJava, cls, m)
+      new EntityBundle[T](if (id != null) id.asInstanceOf[Long] else null, props.asJava, cls, m)
     } catch {
       // We're highly liable to ClassCastExceptions here, in which case it must
       // be a problem with the underlying data. Bail out and throw a deserialisation
