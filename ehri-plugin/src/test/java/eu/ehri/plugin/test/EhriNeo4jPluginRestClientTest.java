@@ -19,7 +19,7 @@ import com.sun.jersey.api.client.WebResource;
  * The test by EhriNeo4jPluginRestClientTest will need to have a running neo4j server with the plugin installed. 
  * It will call the REST interface using the Jersey neo4j client, but the same could have been done using curl. 
  * However, we then would have shell scripts with curl calls, and having the test in Java is more portable. 
- * Also it shows how you can use the RERST api from your Java program. 
+ * Also it shows how you can use the REST api from your Java program. 
  * 
  */
 public class EhriNeo4jPluginRestClientTest {

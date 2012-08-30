@@ -211,4 +211,35 @@ public class EhriNeo4jPlugin extends ServerPlugin {
 			EhriNeo4j.updateIndexedEdge(graphDB, id, data, index)
 		);
 	}
+	
+	/*** Index ***/
+	
+	@Name("getVertexIndex")
+	@Description("get the vertex index")
+	@PluginTarget(GraphDatabaseService.class)
+	public Representation getVertexIndex(
+			@Source GraphDatabaseService graphDB,
+			@Description("Index name")
+			@Parameter(name = "index", optional = false) String index
+		) throws Exception {
+		return ObjectToRepresentationConverter.convert(
+			EhriNeo4j.getVertexIndex(graphDB, index)
+		);
+	}
+
+	@Name("getOrCreateVertexIndex")
+	@Description("get the vertex index or create it if it did not exist")
+	@PluginTarget(GraphDatabaseService.class)
+	public Representation getOrCreateVertexIndex(
+			@Source GraphDatabaseService graphDB,
+			@Description("Index name")
+			@Parameter(name = "index", optional = false) String index,
+			@Description("Parameters")
+			@Parameter(name = "parameters", optional = false) Map parameters
+		) throws Exception {
+		return ObjectToRepresentationConverter.convert(
+			EhriNeo4j.getOrCreateVertexIndex(graphDB, index, parameters)
+		);
+	}
+
 }

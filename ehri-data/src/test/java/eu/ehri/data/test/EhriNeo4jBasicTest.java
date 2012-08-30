@@ -15,6 +15,7 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.test.TestGraphDatabaseFactory;
 
+import com.tinkerpop.blueprints.pgm.Edge;
 import com.tinkerpop.blueprints.pgm.Index;
 import com.tinkerpop.blueprints.pgm.Vertex;
 
@@ -184,7 +185,8 @@ public class EhriNeo4jBasicTest {
 	    	String newValue = (String) updatedIndexedEdge.getProperty(NEW_TEST_KEY);
 	    	assertEquals(newValue, NEW_TEST_VALUE);
 	    }	    
-	    
+    
+	    /*** index ***/
 	    
 	    @Test
 	    public void testGetOrCreateVertexIndex() throws Exception
@@ -192,18 +194,36 @@ public class EhriNeo4jBasicTest {
 	    	final String NEW_INDEX_NAME = "newTestIndex";
 	    	
 	    	// make sure we don't have it
-	    	Index<Vertex> vertexIndex = EhriNeo4j.getVertexIndex(graphDb, NEW_INDEX_NAME);
-	    	assertEquals(vertexIndex, null);
+	    	Index<Vertex> index = EhriNeo4j.getVertexIndex(graphDb, NEW_INDEX_NAME);
+	    	assertEquals(index, null);
 	    	
 	    	// create it
-	    	vertexIndex = EhriNeo4j.getOrCreateVertexIndex(graphDb, NEW_INDEX_NAME, null);
-	    	assertFalse(vertexIndex == null);
+	    	index = EhriNeo4j.getOrCreateVertexIndex(graphDb, NEW_INDEX_NAME, null);
+	    	assertFalse(index == null);
 	    	
 	    	// and check if we can find it via get
-	    	vertexIndex = EhriNeo4j.getVertexIndex(graphDb, NEW_INDEX_NAME);
-	    	assertFalse(vertexIndex == null);
+	    	index = EhriNeo4j.getVertexIndex(graphDb, NEW_INDEX_NAME);
+	    	assertFalse(index == null);
 	    }
-	    
+
+	    @Test
+	    public void testGetOrCreateEdgeIndex() throws Exception
+	    {
+	    	final String NEW_INDEX_NAME = "newTestIndex";
+	    	
+	    	// make sure we don't have it
+	    	Index<Edge> index = EhriNeo4j.getEdgeIndex(graphDb, NEW_INDEX_NAME);
+	    	assertEquals(index, null);
+	    	
+	    	// create it
+	    	index = EhriNeo4j.getOrCreateEdgeIndex(graphDb, NEW_INDEX_NAME, null);
+	    	assertFalse(index == null);
+	    	
+	    	// and check if we can find it via get
+	    	index = EhriNeo4j.getEdgeIndex(graphDb, NEW_INDEX_NAME);
+	    	assertFalse(index == null);
+	    }
+
 	    /*** helpers ***/
 	    
 	    private Node createIndexedVertexWithProperty(String key, String value) throws Exception

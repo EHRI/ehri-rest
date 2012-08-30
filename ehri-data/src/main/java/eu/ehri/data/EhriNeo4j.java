@@ -13,6 +13,7 @@ import org.neo4j.graphdb.index.IndexManager;
 import org.neo4j.graphdb.index.RelationshipIndex;
 
 import com.tinkerpop.blueprints.pgm.Edge;
+import com.tinkerpop.blueprints.pgm.Element;
 import com.tinkerpop.blueprints.pgm.TransactionalGraph;
 import com.tinkerpop.blueprints.pgm.Vertex;
 import com.tinkerpop.blueprints.pgm.impls.neo4j.Neo4jGraph;
@@ -225,16 +226,20 @@ public class EhriNeo4j {
 	// update_indexed_vertex_with_subordinates(_id, data, index_name, subs) 
 	  
 	/*** index ***/
-	// NOTE Indexes
+	
+	// NOTE on Indexes
 	//
-	// Ehhh for non-default configs... using params, otherwise you don't need it
-	// so if we want lucene fulltext , we need to, because thatis not the default!
+	// For non-default configs... using params, otherwise you don't need it
+	// so if we want lucene fulltext  we need to, because that is not the default!
 	//
-	// Also note that now we have no deleteIndex...
-	//
-	// get_or_create_vertex_index(index_name, index_params)
-	// get_or_create_edge_index(index_name, index_params)
+	// Also note that now we have no deleteIndex.
 
+	/**
+	 * 
+	 * @param graphDb 		The graph database
+	 * @param indexName 	The name of the index
+	 * @return 				The index
+	 */
 	public static com.tinkerpop.blueprints.pgm.Index<Vertex> getVertexIndex(GraphDatabaseService graphDb, String indexName)
 	{		
 		Neo4jGraph graph = new Neo4jGraph(graphDb);
@@ -243,7 +248,57 @@ public class EhriNeo4j {
 		return index;
 	}	
 	
+	/**
+	 * 
+	 * @param graphDb 		The graph database
+	 * @param indexName 	The name of the index
+	 * @param parameters 	Index configuration parameters
+	 * @return 				The index
+	 * @throws Exception
+	 */
 	public static com.tinkerpop.blueprints.pgm.Index<Vertex> getOrCreateVertexIndex(GraphDatabaseService graphDb, String indexName, Map<String, Object> parameters) throws Exception
+	{
+		return getOrCreateIndex(graphDb, indexName, parameters, Vertex.class);
+	}
+	
+	/**
+	 * 
+	 * @param graphDb 		The graph database
+	 * @param indexName 	The name of the index
+	 * @return 				The index
+	 */
+	public static com.tinkerpop.blueprints.pgm.Index<Edge> getEdgeIndex(GraphDatabaseService graphDb, String indexName)
+	{		
+		Neo4jGraph graph = new Neo4jGraph(graphDb);
+		com.tinkerpop.blueprints.pgm.Index<Edge> index = graph.getIndex(indexName, Edge.class);
+		
+		return index;
+	}	
+	
+	/**
+	 * 
+	 * @param graphDb 		The graph database
+	 * @param indexName 	The name of the index
+	 * @param parameters 	Index configuration parameters
+	 * @return The index
+	 * @throws Exception
+	 */
+	public static com.tinkerpop.blueprints.pgm.Index<Edge> getOrCreateEdgeIndex(GraphDatabaseService graphDb, String indexName, Map<String, Object> parameters) throws Exception
+	{
+		return getOrCreateIndex(graphDb, indexName, parameters, Edge.class);
+	}
+	
+	/**
+	 * Generic version for Vertex and Edge classes
+	 * 
+	 * @param graphDb 		The graph database
+	 * @param indexName 	The name of the index
+	 * @param parameters 	Index configuration parameters
+	 * @param indexClass 	The class of the index elements; Vertex or Edge
+	 * @return 				The index
+	 * @throws Exception
+	 */
+	private static <T extends Element> com.tinkerpop.blueprints.pgm.Index<T> getOrCreateIndex(GraphDatabaseService graphDb, String indexName, Map<String, Object> parameters, Class<T> indexClass) throws Exception
 	{
 		Neo4jGraph graph = new Neo4jGraph(graphDb);
 		
@@ -251,14 +306,14 @@ public class EhriNeo4j {
 		graph.startTransaction();
 		
 		try {
-			com.tinkerpop.blueprints.pgm.Index<Vertex> vertexIndex = 
-					graph.getIndex(indexName, Vertex.class);
+			com.tinkerpop.blueprints.pgm.Index<T> index = 
+					graph.getIndex(indexName, indexClass);
 
-			if (vertexIndex == null) {
+			if (index == null) {
 				// create it
 				if (parameters == null || parameters.isEmpty()) {
 					// no parameters
-					vertexIndex = graph.createManualIndex(indexName, Vertex.class);
+					index = graph.createManualIndex(indexName, indexClass);
 				} else {
 					// construct List from parameter Map
 					// and then have the list in place of the varargs
@@ -269,12 +324,12 @@ public class EhriNeo4j {
 						parametersList.add(new Parameter<String, Object>(entry.getKey(), entry.getValue()));
 					}
 					
-					vertexIndex = graph.createManualIndex(indexName, Vertex.class, 
+					index = graph.createManualIndex(indexName, indexClass, 
 						parametersList.toArray(new Parameter[parametersList.size()]));
 				}
 			}
 			graph.stopTransaction(TransactionalGraph.Conclusion.SUCCESS);
-			return vertexIndex;
+			return index;
 		} catch (Exception e) {
 			graph.stopTransaction(TransactionalGraph.Conclusion.FAILURE);
 			throw e;
