@@ -81,6 +81,12 @@ public class ViewsTest {
         views.detail(itemId, invalidUserId);
     }
 
+    /**
+     * Test updating an item.
+     * 
+     * @throws PermissionDenied
+     * @throws ValidationError
+     */
     @Test
     public void testUpdate() throws PermissionDenied, ValidationError {
         Map<String,Object> bundle = getTestBundle();
@@ -107,14 +113,34 @@ public class ViewsTest {
         assertEquals(changedUnit.asVertex(), datePeriod.getEntity().asVertex());
     }
 
+    /**
+     * Test we can create a node and its subordinates from a set of data.
+     * 
+     * @throws ValidationError
+     * @throws PermissionDenied
+     */
     @Test
     public void testCreate() throws ValidationError, PermissionDenied {
+        Map<String,Object> bundle = getTestBundle();        
+        DocumentaryUnit unit = views.create(bundle, validUserId);
+        assertEquals(TEST_COLLECTION_NAME, unit.getName());
+    }
+
+    /**
+     * Test creating a view with invalid data throws a validationError
+     * 
+     * @throws ValidationError
+     * @throws PermissionDenied
+     */
+    @Test(expected=ValidationError.class)
+    public void testCreateWithError() throws ValidationError, PermissionDenied {
         Map<String,Object> bundle = getTestBundle();
         Map<String,Object> data = (Map<String, Object>) bundle.get("data");
-        String testName = (String) data.get("name");
+        data.remove("name");
         
+        // This should barf because the collection has no name.
         DocumentaryUnit unit = views.create(bundle, validUserId);
-        assertEquals(testName, unit.getName());
+        assertEquals(TEST_COLLECTION_NAME, unit.getName());
     }
 
     /**
