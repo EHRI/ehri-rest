@@ -149,6 +149,23 @@ public class ViewsTest {
     }
 
     /**
+     * Test creating a view with invalid data throws a validationError
+     * 
+     * @throws ValidationError
+     * @throws PermissionDenied
+     * @throws DeserializationError 
+     */
+    @Test(expected=DeserializationError.class)
+    public void testCreateWithDeserialisationError() throws ValidationError, PermissionDenied, DeserializationError {
+        Map<String,Object> bundle = getTestBundle();
+        bundle.remove("data");
+        
+        // This should barf because the collection has no name.
+        DocumentaryUnit unit = views.create(bundle, validUserId);
+        assertEquals(TEST_COLLECTION_NAME, unit.getName());
+    }
+
+    /**
      * Tests that deleting a collection will also delete
      * its dependent relations. NB: This test will break
      * of other @Dependent relations are added to
