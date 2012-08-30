@@ -158,9 +158,11 @@ public class ViewsTest {
                 put("describes", new LinkedList<HashMap<String,Object>>() {{
                     add(new HashMap<String,Object>() {{
                         put("id", null);
-                        put("data", new HashMap<String,Object>() {{ 
-                            put("name", "A brand new item description");
+                        put("data", new HashMap<String,Object>() {{
+                            put("identifier", "someid-01");
+                            put("title", "A brand new item description");
                             put("isA", EntityTypes.DOCUMENT_DESCRIPTION);
+                            put("languageOfDescription", "en");
                         }});
                     }});                                            
                 }});
@@ -169,6 +171,7 @@ public class ViewsTest {
                         put("id", null);
                         put("data", new HashMap<String,Object>() {{ 
                             put("startDate", TEST_START_DATE);
+                            put("endDate", TEST_START_DATE);
                             put("isA", EntityTypes.DATE_PERIOD);
                         }});
                     }});                                            
