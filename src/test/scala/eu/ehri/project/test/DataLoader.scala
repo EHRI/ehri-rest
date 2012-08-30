@@ -22,7 +22,7 @@ class DataLoader(val graph: FramedGraph[Neo4jGraph]) {
     helper.createIndexedEdge(
       src.getId().asInstanceOf[java.lang.Long],
       dst.getId().asInstanceOf[java.lang.Long],
-      label, data.asInstanceOf[Map[String, Object]])
+      label, data.asInstanceOf[Map[String, Object]], label)
   }
 
   /*

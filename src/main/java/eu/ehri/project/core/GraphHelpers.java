@@ -6,19 +6,14 @@ package eu.ehri.project.core;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Node;
-
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Element;
 import com.tinkerpop.blueprints.Index;
+import com.tinkerpop.blueprints.Parameter;
 import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.blueprints.Vertex;
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jEdge;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jVertex;
-
 import eu.ehri.project.exceptions.IndexNotFoundException;
 
 /**
@@ -59,8 +54,8 @@ public class GraphHelpers {
      * @param cls
      * @return
      */
-    public <T extends Element> Index<T> createIndex(String name, Class<T> cls) {
-        return graph.createIndex(name, cls);
+    public <T extends Element> Index<T> createIndex(String name, Class<T> cls, Parameter<?, ?>... parameters) {
+        return graph.createIndex(name, cls, parameters);
     }
 
     /**
@@ -71,11 +66,11 @@ public class GraphHelpers {
      * @return
      */
     public <T extends Element> Index<T> getOrCreateIndex(String name,
-            Class<T> cls) {
+            Class<T> cls, Parameter<?, ?>... parameters) {
         try {
             return getIndex(name, cls);
         } catch (IndexNotFoundException e) {
-            return graph.createIndex(name, cls);
+            return graph.createIndex(name, cls, parameters);
         }
     }
 
@@ -85,7 +80,7 @@ public class GraphHelpers {
      * @param name
      * @return
      */
-    public Index<Edge> createdEdgeIndex(String name) {
+    public Index<Edge> createEdgeIndex(String name) {
         return createIndex(name, Edge.class);
     }
 
@@ -170,8 +165,7 @@ public class GraphHelpers {
      */
     public Edge createIndexedEdge(Long src, Long dst, String label,
             Map<String, Object> data, Index<Edge> index) {
-        GraphDatabaseService g = graph.getRawGraph();
-        return createIndexedEdge(g.getNodeById(src), g.getNodeById(dst), label,
+        return createIndexedEdge(graph.getVertex(src), graph.getVertex(dst), label,
                 data, index);
     }
 
@@ -187,10 +181,9 @@ public class GraphHelpers {
      * @throws IndexNotFoundException
      */
     public Edge createIndexedEdge(Long src, Long dst, String label,
-            Map<String, Object> data) throws IndexNotFoundException {
-        GraphDatabaseService g = graph.getRawGraph();
-        return createIndexedEdge(g.getNodeById(src), g.getNodeById(dst), label,
-                data);
+            Map<String, Object> data, String indexName) throws IndexNotFoundException {
+        return createIndexedEdge(graph.getVertex(src), graph.getVertex(dst), label,
+                data, indexName);
     }
 
     /**
@@ -205,9 +198,9 @@ public class GraphHelpers {
      * @throws IndexNotFoundException
      */
     public Edge createIndexedEdge(Object src, Object dst, String label,
-            Map<String, Object> data) throws IndexNotFoundException {
+            Map<String, Object> data, String indexName) throws IndexNotFoundException {
         return createIndexedEdge(graph.getVertex(src), graph.getVertex(dst),
-                label, data);
+                label, data, indexName);
     }
     
     /**
@@ -218,30 +211,13 @@ public class GraphHelpers {
      * @param dst
      * @param label
      * @param data
+     * @param indexName
      * @return
      * @throws IndexNotFoundException
      */
-    public Edge createIndexedEdge(Neo4jVertex src, Neo4jVertex dst,
-            String label, Map<String, Object> data)
-            throws IndexNotFoundException {
-        return createIndexedEdge(src.getRawVertex(), dst.getRawVertex(), label,
-                data);
-    }
-    
-    /**
-     * Create an edge that is indexed with an index of the same name
-     * as it's label.
-     *  
-     * @param src
-     * @param dst
-     * @param label
-     * @param data
-     * @return
-     * @throws IndexNotFoundException
-     */
-    public Edge createIndexedEdge(Node src, Node dst, String label,
-            Map<String, Object> data) throws IndexNotFoundException {
-        Index<Edge> index = getIndex(label, Edge.class);
+    public Edge createIndexedEdge(Vertex src, Vertex dst, String label,
+            Map<String, Object> data, String indexName) throws IndexNotFoundException {
+        Index<Edge> index = getIndex(indexName, Edge.class);
         return createIndexedEdge(src, dst, label, data, index);
     }
 
@@ -255,15 +231,11 @@ public class GraphHelpers {
      * @param index
      * @return
      */
-    public Edge createIndexedEdge(Node src, Node dst, String label,
+    public Edge createIndexedEdge(Vertex src, Vertex dst, String label,
             Map<String, Object> data, Index<Edge> index) {
 
-        DynamicRelationshipType relationshipType = DynamicRelationshipType
-                .withName(label);
-
         try {
-            Edge edge = new Neo4jEdge(src.createRelationshipTo(dst,
-                    relationshipType), graph);
+            Edge edge = graph.addEdge(null, src, dst, label);
             for (Map.Entry<String, Object> entry : data.entrySet()) {
                 if (entry.getValue() == null)
                     continue;
@@ -316,6 +288,34 @@ public class GraphHelpers {
             throw new RuntimeException(e);
         }
     }
+    
+
+    /**
+     * Update Edge
+     * similar to update Vertex, because the Type cannot be changed
+     * 
+     * @param graphDb   The graph database
+     * @param id        The edge identifier
+     * @param data      The properties
+     * @param indexName The name of the index
+     * @return
+     * @throws Exception
+     */
+    public Edge updateIndexedEdge(Long id, Map<String, Object> data,
+            String indexName) throws IndexNotFoundException {
+        try {
+            Index<Edge> index = getIndex(indexName, Edge.class);
+            Edge relationship = graph.getEdge(id);
+
+            replaceProperties(index, relationship, data);
+
+            graph.stopTransaction(TransactionalGraph.Conclusion.SUCCESS);
+            return relationship;
+        } catch (Exception e) {
+            graph.stopTransaction(TransactionalGraph.Conclusion.FAILURE);
+            throw new RuntimeException(e);
+        }
+    }
 
     /*** helpers ***/
 
@@ -355,5 +355,31 @@ public class GraphHelpers {
             c.setProperty(entry.getKey(), entry.getValue());
             index.put(entry.getKey(), String.valueOf(entry.getValue()), c);
         }
+    }
+    
+    /**
+     * Delete Edge
+     * 
+     * @param graphDb   The graph database
+     * @param id        The edge identifier
+     */
+    public void deleteEdge(Long id) {
+        Edge edge = graph.getEdge(id);
+        graph.removeEdge(edge);
+        graph.stopTransaction(TransactionalGraph.Conclusion.SUCCESS);
+    }
+
+    /**
+     * Delete vertex with its edges
+     * Neo4j requires you delete all adjacent edges first. 
+     * Blueprints' removeVertex() method does that; the Neo4jServer DELETE URI does not.
+     * 
+     * @param graphDb   The graph database
+     * @param id        The vertex identifier
+     */
+    public void deleteVertex(Long id) {
+        Vertex vertex = graph.getVertex(id);
+        graph.removeVertex(vertex);
+        graph.stopTransaction(TransactionalGraph.Conclusion.SUCCESS);
     }
 }
