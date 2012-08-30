@@ -15,6 +15,8 @@ import org.neo4j.test.TestGraphDatabaseFactory;
 
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
+
+import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.DatePeriod;
@@ -86,9 +88,10 @@ public class ViewsTest {
      * 
      * @throws PermissionDenied
      * @throws ValidationError
+     * @throws DeserializationError 
      */
     @Test
-    public void testUpdate() throws PermissionDenied, ValidationError {
+    public void testUpdate() throws PermissionDenied, ValidationError, DeserializationError {
         Map<String,Object> bundle = getTestBundle();
         DocumentaryUnit unit = views.create(bundle, validUserId);
         assertEquals(TEST_COLLECTION_NAME, unit.getName());
@@ -118,9 +121,10 @@ public class ViewsTest {
      * 
      * @throws ValidationError
      * @throws PermissionDenied
+     * @throws DeserializationError 
      */
     @Test
-    public void testCreate() throws ValidationError, PermissionDenied {
+    public void testCreate() throws ValidationError, PermissionDenied, DeserializationError {
         Map<String,Object> bundle = getTestBundle();        
         DocumentaryUnit unit = views.create(bundle, validUserId);
         assertEquals(TEST_COLLECTION_NAME, unit.getName());
@@ -131,9 +135,10 @@ public class ViewsTest {
      * 
      * @throws ValidationError
      * @throws PermissionDenied
+     * @throws DeserializationError 
      */
     @Test(expected=ValidationError.class)
-    public void testCreateWithError() throws ValidationError, PermissionDenied {
+    public void testCreateWithError() throws ValidationError, PermissionDenied, DeserializationError {
         Map<String,Object> bundle = getTestBundle();
         Map<String,Object> data = (Map<String, Object>) bundle.get("data");
         data.remove("name");
