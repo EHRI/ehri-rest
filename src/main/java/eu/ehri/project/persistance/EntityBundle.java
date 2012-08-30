@@ -104,7 +104,7 @@ public class EntityBundle<T extends VertexFrame> {
 
     public void validateForInsert() throws ValidationError {
         if (id != null)
-            throw new ValidationError("Identifier is present but insert operation specified.");
+            throw new ValidationError(String.format("Identifier is present ('%s') but insert operation specified.", id));
         validate();
     }
     
