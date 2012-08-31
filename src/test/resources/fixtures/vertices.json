@@ -195,14 +195,14 @@
   }, 
   {
     "data": {
-      "body": "Hello Dolly!", 
+      "body": "Test Annotation", 
       "isA": "annotation"
     }, 
     "desc": "ann1"
   }, 
   {
     "data": {
-      "body": "Annotating my annotation!", 
+      "body": "Test Annotation of Annotation", 
       "isA": "annotation"
     }, 
     "desc": "ann2"
