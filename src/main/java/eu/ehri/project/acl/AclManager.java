@@ -11,6 +11,22 @@ import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.relationships.Access;
 
 public class AclManager {
+    
+    static class AccessComparator implements Comparator<Access> {
+        // FIXME: Find a better, more elegant way of doing this comparison
+        // between two access objects. We can't just implement a custom equals
+        // method because we might sometimes be comparing an Edge interface, and
+        // other times a synthetic factory-made object. Suggestions on a postcard.
+        public int compare(Access a, Access b) {
+            if (a.getWrite() == b.getWrite() && a.getRead() == b.getRead())
+                return 0;
+            else if (a.getWrite() && b.getWrite() && a.getRead() && !b.getRead())
+                return 1;
+            else if (a.getWrite() && !b.getWrite() && a.getRead() && !b.getRead())
+                return 1;
+            else return -1;             
+        }
+    }
 
     /*
      * Check if an accessor is admin or a member of Admin.
@@ -32,7 +48,7 @@ public class AclManager {
      */
     public static List<Access> searchPermissions(List<Accessor> accessing, List<Access> allowedCtrls, List<Accessor> allowedAccessors) {
         assert allowedCtrls.size() == allowedAccessors.size();
-        if (accessing.size() == 0) {
+        if (accessing.isEmpty()) {
             return new ArrayList<Access>();
         } else {
             List<Access> intersection = new ArrayList<Access>();
@@ -75,7 +91,7 @@ public class AclManager {
            accessors.add(access.getAccessor());
        }
            
-       if (accessCtrls.size() == 0) {
+       if (accessCtrls.isEmpty()) {
            return new EntityAccessFactory().buildReadOnly(entity, accessor);
        } else {
            // If there are, search the Group hierarchy and find the most
@@ -83,24 +99,10 @@ public class AclManager {
            List<Accessor> initial = new ArrayList<Accessor>();
            initial.add(accessor);
            List<Access> ctrls = searchPermissions(initial, accessCtrls, accessors);
-           if (ctrls.size() == 0) {
+           if (ctrls.isEmpty()) {
                return new EntityAccessFactory().buildNoAccess(entity, accessor);
            } else {
-               return Collections.max(ctrls, new Comparator<Access>() {
-                   // FIXME: Find a better, more elegant way of doing this comparison
-                   // between two access objects. We can't just implement a custom equals
-                   // method because we might sometimes be comparing an Edge interface, and
-                   // other times a synthetic factory-made object. Suggestions on a postcard.
-                   public int compare(Access a, Access b) {
-                       if (a.getWrite() == b.getWrite() && a.getRead() == b.getRead())
-                           return 0;
-                       else if (a.getWrite() && b.getWrite() && a.getRead() && !b.getRead())
-                           return 1;
-                       else if (a.getWrite() && !b.getWrite() && a.getRead() && !b.getRead())
-                           return 1;
-                       else return -1;             
-                   }
-               });
+               return Collections.max(ctrls, new AccessComparator());
            }
        }           
     }
