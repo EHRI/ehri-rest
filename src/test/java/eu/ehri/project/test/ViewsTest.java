@@ -25,7 +25,7 @@ import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityTypes;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.views.Views;
-import eu.ehri.project.test.DataLoader;
+import eu.ehri.project.test.utils.FixtureLoader;
 
 public class ViewsTest {
     
@@ -34,7 +34,7 @@ public class ViewsTest {
     
     protected FramedGraph<Neo4jGraph> graph;
     protected Views<DocumentaryUnit> views;
-    protected DataLoader helper;
+    protected FixtureLoader helper;
     
     // Members closely coupled to the test data!
     protected Long validUserId = 20L;
@@ -52,7 +52,7 @@ public class ViewsTest {
                         new TestGraphDatabaseFactory()
                             .newImpermanentDatabaseBuilder()
                             .newGraphDatabase()));
-        helper = new DataLoader(graph);
+        helper = new FixtureLoader(graph);
         helper.loadTestData();
         views = new Views<DocumentaryUnit>(
                 graph, DocumentaryUnit.class);   

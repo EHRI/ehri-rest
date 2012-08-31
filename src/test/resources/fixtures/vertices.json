@@ -1,0 +1,210 @@
+[
+  {
+    "data": {
+      "isA": "documentaryUnit", 
+      "identifier": "c1", 
+      "name": "Test Collection 1"
+    }, 
+    "desc": "c1"
+  }, 
+  {
+    "data": {
+      "languageOfDescription": "en", 
+      "isA": "documentDescription", 
+      "identifier": "c1", 
+      "title": "A Collection called 1"
+    }, 
+    "desc": "cd1"
+  }, 
+  {
+    "data": {
+      "isA": "documentaryUnit", 
+      "identifier": "c2", 
+      "name": "Test Collection 2"
+    }, 
+    "desc": "c2"
+  }, 
+  {
+    "data": {
+      "languageOfDescription": "en", 
+      "isA": "documentDescription", 
+      "identifier": "c2", 
+      "title": "A Collection called 2"
+    }, 
+    "desc": "cd2"
+  }, 
+  {
+    "data": {
+      "isA": "documentaryUnit", 
+      "identifier": "c3", 
+      "name": "Test Collection 3"
+    }, 
+    "desc": "c3"
+  }, 
+  {
+    "data": {
+      "languageOfDescription": "en", 
+      "isA": "documentDescription", 
+      "identifier": "c3", 
+      "title": "A Collection called 3"
+    }, 
+    "desc": "cd3"
+  }, 
+  {
+    "data": {
+      "isA": "documentaryUnit", 
+      "identifier": "c4", 
+      "name": "Test Collection 4"
+    }, 
+    "desc": "c4"
+  }, 
+  {
+    "data": {
+      "languageOfDescription": "en", 
+      "isA": "documentDescription", 
+      "identifier": "c4", 
+      "title": "A Collection called 4"
+    }, 
+    "desc": "cd4"
+  }, 
+  {
+    "data": {
+      "startDate": "1940-01-01T00:00:01Z", 
+      "isA": "datePeriod", 
+      "endDate": "1945-12-12T00:00:01Z"
+    }, 
+    "desc": "dp1"
+  }, 
+  {
+    "data": {
+      "startDate": "1943-01-01T00:00:01Z", 
+      "isA": "datePeriod", 
+      "endDate": "1945-12-12T00:00:01Z"
+    }, 
+    "desc": "dp2"
+  }, 
+  {
+    "data": {
+      "isA": "agent", 
+      "identifier": "r1", 
+      "name": "Repository 1"
+    }, 
+    "desc": "r1"
+  }, 
+  {
+    "data": {
+      "languageOfDescription": "en", 
+      "isA": "agentDescription", 
+      "title": "A Repository called 1"
+    }, 
+    "desc": "rd1"
+  }, 
+  {
+    "data": {
+      "isA": "authority", 
+      "identifier": "a1", 
+      "name": "Authority 1", 
+      "typeOfEntity": "person"
+    }, 
+    "desc": "a1"
+  }, 
+  {
+    "data": {
+      "languageOfDescription": "en", 
+      "isA": "authorityDescription", 
+      "title": "An Authority called 1"
+    }, 
+    "desc": "ad1"
+  }, 
+  {
+    "data": {
+      "isA": "authority", 
+      "identifier": "a2", 
+      "name": "Authority 2", 
+      "typeOfEntity": "person"
+    }, 
+    "desc": "a2"
+  }, 
+  {
+    "data": {
+      "languageOfDescription": "en", 
+      "isA": "authorityDescription", 
+      "title": "An Authority called 2"
+    }, 
+    "desc": "ad2"
+  }, 
+  {
+    "data": {
+      "isA": "group", 
+      "name": "admin"
+    }, 
+    "desc": "adminGroup"
+  }, 
+  {
+    "data": {
+      "isA": "group", 
+      "name": "niod"
+    }, 
+    "desc": "niodGroup"
+  }, 
+  {
+    "data": {
+      "isA": "group", 
+      "name": "kcl"
+    }, 
+    "desc": "kclGroup"
+  }, 
+  {
+    "data": {
+      "isA": "userProfile", 
+      "userId": 1, 
+      "name": "Mike"
+    }, 
+    "desc": "mike"
+  }, 
+  {
+    "data": {
+      "isA": "userProfile", 
+      "userId": 2, 
+      "name": "Reto"
+    }, 
+    "desc": "reto"
+  }, 
+  {
+    "data": {
+      "isA": "userProfile", 
+      "userId": 3, 
+      "name": "Tim"
+    }, 
+    "desc": "tim"
+  }, 
+  {
+    "data": {
+      "startDate": "1943", 
+      "isA": "datePeriod", 
+      "endDate": "1943"
+    }, 
+    "desc": "pd1"
+  }, 
+  {
+    "data": {
+      "isA": "address", 
+      "streetAddress": "London"
+    }, 
+    "desc": "ar1"
+  }, 
+  {
+    "data": {
+      "body": "Hello Dolly!", 
+      "isA": "annotation"
+    }, 
+    "desc": "ann1"
+  }, 
+  {
+    "data": {
+      "body": "Annotating my annotation!", 
+      "isA": "annotation"
+    }, 
+    "desc": "ann2"
+  }
+]

@@ -1,0 +1,215 @@
+[
+  {
+    "src": "r1", 
+    "dst": "c1", 
+    "data": {}, 
+    "label": "holds"
+  }, 
+  {
+    "src": "r1", 
+    "dst": "c2", 
+    "data": {}, 
+    "label": "holds"
+  }, 
+  {
+    "src": "r1", 
+    "dst": "c3", 
+    "data": {}, 
+    "label": "holds"
+  }, 
+  {
+    "src": "r1", 
+    "dst": "c4", 
+    "data": {}, 
+    "label": "holds"
+  }, 
+  {
+    "src": "c2", 
+    "dst": "c1", 
+    "data": {}, 
+    "label": "childOf"
+  }, 
+  {
+    "src": "c3", 
+    "dst": "c2", 
+    "data": {}, 
+    "label": "childOf"
+  }, 
+  {
+    "src": "r1", 
+    "dst": "ar1", 
+    "data": {}, 
+    "label": "hasAddress"
+  }, 
+  {
+    "src": "cd1", 
+    "dst": "c1", 
+    "data": {}, 
+    "label": "describes"
+  }, 
+  {
+    "src": "cd2", 
+    "dst": "c2", 
+    "data": {}, 
+    "label": "describes"
+  }, 
+  {
+    "src": "cd3", 
+    "dst": "c3", 
+    "data": {}, 
+    "label": "describes"
+  }, 
+  {
+    "src": "cd4", 
+    "dst": "c4", 
+    "data": {}, 
+    "label": "describes"
+  }, 
+  {
+    "src": "rd1", 
+    "dst": "r1", 
+    "data": {}, 
+    "label": "describes"
+  }, 
+  {
+    "src": "ad1", 
+    "dst": "a1", 
+    "data": {}, 
+    "label": "describes"
+  }, 
+  {
+    "src": "ad2", 
+    "dst": "a2", 
+    "data": {}, 
+    "label": "describes"
+  }, 
+  {
+    "src": "c1", 
+    "dst": "dp1", 
+    "data": {}, 
+    "label": "hasDate"
+  }, 
+  {
+    "src": "c1", 
+    "dst": "dp2", 
+    "data": {}, 
+    "label": "hasDate"
+  }, 
+  {
+    "src": "a1", 
+    "dst": "c1", 
+    "data": {}, 
+    "label": "created"
+  }, 
+  {
+    "src": "a2", 
+    "dst": "c1", 
+    "data": {}, 
+    "label": "mentionedIn"
+  }, 
+  {
+    "src": "mike", 
+    "dst": "adminGroup", 
+    "data": {}, 
+    "label": "belongsTo"
+  }, 
+  {
+    "src": "tim", 
+    "dst": "adminGroup", 
+    "data": {}, 
+    "label": "belongsTo"
+  }, 
+  {
+    "src": "mike", 
+    "dst": "kclGroup", 
+    "data": {}, 
+    "label": "belongsTo"
+  }, 
+  {
+    "src": "reto", 
+    "dst": "kclGroup", 
+    "data": {}, 
+    "label": "belongsTo"
+  }, 
+  {
+    "src": "tim", 
+    "dst": "niodGroup", 
+    "data": {}, 
+    "label": "belongsTo"
+  }, 
+  {
+    "src": "c1", 
+    "dst": "adminGroup", 
+    "data": {
+      "read": true, 
+      "write": true
+    }, 
+    "label": "access"
+  }, 
+  {
+    "src": "c2", 
+    "dst": "adminGroup", 
+    "data": {
+      "read": true, 
+      "write": true
+    }, 
+    "label": "access"
+  }, 
+  {
+    "src": "c1", 
+    "dst": "mike", 
+    "data": {
+      "read": true, 
+      "write": false
+    }, 
+    "label": "access"
+  }, 
+  {
+    "src": "c2", 
+    "dst": "tim", 
+    "data": {
+      "read": true, 
+      "write": false
+    }, 
+    "label": "access"
+  }, 
+  {
+    "src": "c3", 
+    "dst": "tim", 
+    "data": {
+      "read": true, 
+      "write": true
+    }, 
+    "label": "access"
+  }, 
+  {
+    "src": "mike", 
+    "dst": "ann1", 
+    "data": {}, 
+    "label": "hasAnnotation"
+  }, 
+  {
+    "src": "ann1", 
+    "dst": "c1", 
+    "data": {
+      "timestamp": "2012-08-08T00:00:00Z", 
+      "field": "scopeAndContent"
+    }, 
+    "label": "annotates"
+  }, 
+  {
+    "src": "tim", 
+    "dst": "ann2", 
+    "data": {}, 
+    "label": "hasAnnotation"
+  }, 
+  {
+    "src": "ann2", 
+    "dst": "ann1", 
+    "data": {
+      "timestamp": "2012-08-08T00:00:00Z", 
+      "field": "scopeAndContent"
+    }, 
+    "label": "annotates"
+  }
+]
