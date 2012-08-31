@@ -18,6 +18,7 @@ import com.tinkerpop.frames.FramedGraph;
 
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.PermissionDenied;
+import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.DocumentaryUnit;
@@ -173,9 +174,10 @@ public class ViewsTest {
      * 
      * @throws PermissionDenied
      * @throws ValidationError
+     * @throws SerializationError 
      */
     @Test
-    public void testDelete() throws PermissionDenied, ValidationError {
+    public void testDelete() throws PermissionDenied, ValidationError, SerializationError {
         Integer shouldDelete = 1;
         DocumentaryUnit unit = graph.getVertex(itemId, DocumentaryUnit.class);
         

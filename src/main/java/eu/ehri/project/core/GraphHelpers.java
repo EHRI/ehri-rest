@@ -228,7 +228,7 @@ public class GraphHelpers {
      * @return
      * @throws Exception
      */
-    public Vertex updateIndexedVertex(long id, Map<String, Object> data,
+    public Vertex updateIndexedVertex(Object id, Map<String, Object> data,
             String indexName) throws IndexNotFoundException {
         Index<Vertex> index = getIndex(indexName, Vertex.class);
         return updateIndexedVertex(id, data, index);
@@ -242,7 +242,7 @@ public class GraphHelpers {
      * @param index
      * @return
      */
-    public Vertex updateIndexedVertex(long id, Map<String, Object> data,
+    public Vertex updateIndexedVertex(Object id, Map<String, Object> data,
             Index<Vertex> index) {
         try {
             Vertex node = graph.getVertex(id);
@@ -330,7 +330,7 @@ public class GraphHelpers {
      * @param graphDb   The graph database
      * @param id        The edge identifier
      */
-    public void deleteEdge(Long id) {
+    public void deleteEdge(Object id) {
         Edge edge = graph.getEdge(id);
         graph.removeEdge(edge);
         graph.stopTransaction(TransactionalGraph.Conclusion.SUCCESS);
@@ -344,7 +344,7 @@ public class GraphHelpers {
      * @param graphDb   The graph database
      * @param id        The vertex identifier
      */
-    public void deleteVertex(Long id) {
+    public void deleteVertex(Object id) {
         Vertex vertex = graph.getVertex(id);
         graph.removeVertex(vertex);
         graph.stopTransaction(TransactionalGraph.Conclusion.SUCCESS);

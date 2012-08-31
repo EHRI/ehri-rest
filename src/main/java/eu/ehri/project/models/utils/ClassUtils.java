@@ -1,13 +1,25 @@
-package eu.ehri.project.core.utils;
+package eu.ehri.project.models.utils;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+
+import com.tinkerpop.frames.Adjacency;
+
+import eu.ehri.project.models.annotations.Dependent;
+import eu.ehri.project.models.annotations.Fetch;
 
 public class ClassUtils {
+    
+    public static final String FETCH_METHOD_PREFIX = "get";
+    
     /**
      * Scans all classes accessible from the context class loader which belong
      * to the given package and subpackages.
@@ -68,5 +80,53 @@ public class ClassUtils {
             }
         }
         return classes;
+    }
+
+    public static List<String> getDependentRelations(Class<?> cls) {
+        List<String> out = new LinkedList<String>();
+        for (Method method : cls.getMethods()) {
+            if (method.getAnnotation(Dependent.class) != null) {
+                Adjacency ann = method.getAnnotation(Adjacency.class);
+                if (ann != null)
+                    out.add(ann.label());
+            }
+        }
+        return out;
+    }
+    
+    public static List<String> getFetchedRelations(Class<?> cls) {
+        List<String> out = new LinkedList<String>();
+        for (Method method : cls.getMethods()) {
+            if (method.getAnnotation(Fetch.class) != null) {
+                Adjacency ann = method.getAnnotation(Adjacency.class);
+                if (ann != null)
+                    out.add(ann.label());
+            }
+        }
+        return out;
+    }
+
+    public static Map<String, Method> getFetchMethods(Class<?> cls) {
+        Map<String, Method> out = new HashMap<String, Method>();
+        for (Method method : cls.getMethods()) {
+            if (method.getAnnotation(Fetch.class) != null && method.getName().startsWith(FETCH_METHOD_PREFIX)) {
+                Adjacency ann = method.getAnnotation(Adjacency.class);
+                if (ann != null)
+                    out.put(ann.label(), method);
+            }
+        }
+        return out;
+    }
+    
+    public static Map<String, Method> getDependentMethods(Class<?> cls) {
+        Map<String, Method> out = new HashMap<String, Method>();
+        for (Method method : cls.getMethods()) {
+            if (method.getAnnotation(Dependent.class) != null && method.getName().startsWith(FETCH_METHOD_PREFIX)) {
+                Adjacency ann = method.getAnnotation(Adjacency.class);
+                if (ann != null)
+                    out.put(ann.label(), method);
+            }
+        }
+        return out;
     }
 }

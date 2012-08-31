@@ -19,14 +19,14 @@ public class EntityBundle<T extends VertexFrame> {
     private static final String EMPTY_VALUE = "No value given for mandatory field";
     private static final String INVALID_ENTITY = "No EntityType annotation";
 
-    protected final Long id;
+    protected final Object id;
     protected final Map<String, Object> data;
     protected final Class<T> cls;
     protected final MultiValueMap relations;
 
     private MultiValueMap errors = new MultiValueMap();
 
-    public EntityBundle(Long id, final Map<String, Object> data, Class<T> cls,
+    public EntityBundle(Object id, final Map<String, Object> data, Class<T> cls,
             final MultiValueMap relations) {
         this.id = id;
         this.data = new HashMap<String, Object>(data);
@@ -50,7 +50,7 @@ public class EntityBundle<T extends VertexFrame> {
         return ext;
     }
 
-    public Long getId() {
+    public Object getId() {
         return id;
     }
 
@@ -66,7 +66,7 @@ public class EntityBundle<T extends VertexFrame> {
         return errors;
     }
 
-    public Map<String, Object> getData() throws ValidationError {
+    public Map<String, Object> getData() {
         return extendData();
     }
 

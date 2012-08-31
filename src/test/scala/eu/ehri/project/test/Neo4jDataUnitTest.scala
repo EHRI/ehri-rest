@@ -21,7 +21,7 @@ import eu.ehri.project.models.DocumentaryUnit
 import eu.ehri.project.models.EntityTypes
 import eu.ehri.project.persistance.BundleFactory
 import eu.ehri.project.persistance.BundleDAO
-import eu.ehri.project.views.RepresentationConverter
+import eu.ehri.project.persistance.Converter
 import eu.ehri.project.models.DatePeriod
 import eu.ehri.project.models.DocumentaryUnit
 
@@ -32,7 +32,7 @@ trait DB extends After {
       new TestGraphDatabaseFactory().newImpermanentDatabaseBuilder().newGraphDatabase()))
 
   // Helper for converting between bundles and frames
-  val converter = new RepresentationConverter
+  val converter = new Converter
 
   def after = Unit //graph.shutdown, not needed on impermanentDatabase
 }
@@ -300,9 +300,9 @@ class GraphTest extends Specification {
   "Bundles" should {
     "be serialisable and deserializable" in new LoadedDB {
       val c1 = helper.findTestElement("c1", classOf[DocumentaryUnit])
-      val json = converter.convert(c1)
+      val json = converter.vertexFrameToJson(c1);
 
-      val bundle = converter.convert(json)
+      val bundle = converter.jsonToBundle(json)
       bundle.getId() mustEqual c1.asVertex().getId()
     }
 
@@ -320,13 +320,13 @@ class GraphTest extends Specification {
     "allow resaving with subordinate changes" in new LoadedDB {
       val c1 = helper.findTestElement("c1", classOf[DocumentaryUnit])
       // Save an object as JSON
-      val json = converter.convert(c1)
+      val json = converter.vertexFrameToJson(c1)
       // Now change the object...
       val cd1 = c1.getDescriptions.toList.head
       c1.removeDescription(cd1)
       c1.getDescriptions.toList.length mustEqual 0
       // And restore it again from the bundle.
-      val bundle = converter.convert[DocumentaryUnit](json)
+      val bundle = converter.jsonToBundle[DocumentaryUnit](json)
       val persister = new BundleDAO[DocumentaryUnit](graph);
       val c1redux = persister.update(bundle)
       // Tada: it's back again

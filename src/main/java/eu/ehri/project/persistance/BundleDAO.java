@@ -18,9 +18,9 @@ import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.frames.VertexFrame;
 
 import eu.ehri.project.core.GraphHelpers;
-import eu.ehri.project.core.utils.AnnotationUtils;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.annotations.Dependent;
+import eu.ehri.project.models.utils.ClassUtils;
 
 /**
  * Class responsible for persisting and deleting an
@@ -122,7 +122,7 @@ public class BundleDAO<T extends VertexFrame> {
             throws ValidationError {
         Integer c = count;
         MultiValueMap fetch = bundle.getRelations();
-        List<String> dependents = AnnotationUtils.getDependentRelations(bundle
+        List<String> dependents = ClassUtils.getDependentRelations(bundle
                 .getBundleClass());
         for (Object key : fetch.keySet()) {
             for (Object obj : fetch.getCollection(key)) {
@@ -222,7 +222,7 @@ public class BundleDAO<T extends VertexFrame> {
     private void saveDependents(Vertex master,
             Class<? extends VertexFrame> cls, MultiValueMap relations)
             throws ValidationError {
-        List<String> dependents = AnnotationUtils.getDependentRelations(cls);
+        List<String> dependents = ClassUtils.getDependentRelations(cls);
         Set<Long> existingDependents = new HashSet<Long>();
         Set<Long> refreshedDependents = new HashSet<Long>();
 

@@ -7,10 +7,12 @@ import com.tinkerpop.frames.FramedGraph;
 
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.PermissionDenied;
+import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistance.BundleDAO;
+import eu.ehri.project.persistance.Converter;
 import eu.ehri.project.persistance.EntityBundle;
 import eu.ehri.project.relationships.Access;
 import eu.ehri.project.acl.Acl;
@@ -19,7 +21,7 @@ public class Views <E extends AccessibleEntity> {
 
     private final FramedGraph<Neo4jGraph> graph;
     private final Class<E> cls;
-    private final RepresentationConverter converter = new RepresentationConverter();
+    private final Converter converter = new Converter();
 
     /**
      * @param graph
@@ -117,8 +119,9 @@ public class Views <E extends AccessibleEntity> {
      * @return
      * @throws PermissionDenied
      * @throws ValidationError
+     * @throws SerializationError 
      */
-    public Integer delete(Long item, Long user) throws PermissionDenied, ValidationError {
+    public Integer delete(Long item, Long user) throws PermissionDenied, ValidationError, SerializationError {
         E entity = graph.getVertex(item, cls);
         checkGlobalWriteAccess(user);
         checkWriteAccess(entity, user);
