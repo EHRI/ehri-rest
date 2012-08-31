@@ -8,186 +8,192 @@ import eu.ehri.project.models.base.Description
 import eu.ehri.project.relationships._
 
 object TestData {
+  
+  // Node data and associated descriptor
+  case class NN(desc: String, data: Map[String,Any])
+  
   val nodes = List(
-    ("c1",
+    NN("c1",
       Map(
         "isA" -> EntityTypes.DOCUMENTARY_UNIT,
         "identifier" -> "c1",
         "name" -> "Test Collection 1")),
-    ("cd1",
+    NN("cd1",
       Map(
         "isA" -> EntityTypes.DOCUMENT_DESCRIPTION,
         "identifier" -> "c1",
         "languageOfDescription" -> "en",
         "title" -> "A Collection called 1")),
-    ("c2",
+    NN("c2",
       Map(
         "isA" -> EntityTypes.DOCUMENTARY_UNIT,
         "identifier" -> "c2",
         "name" -> "Test Collection 2")),
-    ("cd2",
+    NN("cd2",
       Map(
         "isA" -> EntityTypes.DOCUMENT_DESCRIPTION,
         "identifier" -> "c2",
         "languageOfDescription" -> "en",
         "title" -> "A Collection called 2")),
-    ("c3",
+    NN("c3",
       Map(
         "isA" -> EntityTypes.DOCUMENTARY_UNIT,
         "identifier" -> "c3",
         "name" -> "Test Collection 3")),
-    ("cd3",
+    NN("cd3",
       Map(
         "isA" -> EntityTypes.DOCUMENT_DESCRIPTION,
         "identifier" -> "c3",
         "languageOfDescription" -> "en",
         "title" -> "A Collection called 3")),
-    ("c4",
+    NN("c4",
       Map(
         "isA" -> EntityTypes.DOCUMENTARY_UNIT,
         "identifier" -> "c4",
         "name" -> "Test Collection 4")),
-    ("cd4",
+    NN("cd4",
       Map(
         "isA" -> EntityTypes.DOCUMENT_DESCRIPTION,
         "identifier" -> "c4",
         "languageOfDescription" -> "en",
         "title" -> "A Collection called 4")),
-    ("dp1",
+    NN("dp1",
       Map(
         "isA" -> EntityTypes.DATE_PERIOD,
         "startDate" -> "1940-01-01T00:00:01Z",
         "endDate" -> "1945-12-12T00:00:01Z")),
-    ("dp2",
+    NN("dp2",
       Map(
         "isA" -> EntityTypes.DATE_PERIOD,
         "startDate" -> "1943-01-01T00:00:01Z",
         "endDate" -> "1945-12-12T00:00:01Z")),
-    ("r1",
+    NN("r1",
       Map(
         "isA" -> EntityTypes.AGENT,
         "identifier" -> "r1",
         "name" -> "Repository 1")),
-    ("rd1",
+    NN("rd1",
       Map(
         "isA" -> EntityTypes.AGENT_DESCRIPTION,
         "languageOfDescription" -> "en",
         "title" -> "A Repository called 1")),
-    ("a1",
+    NN("a1",
       Map(
         "isA" -> EntityTypes.AUTHORITY,
         "identifier" -> "a1",
         "typeOfEntity" -> "person",
         "name" -> "Authority 1")),
-    ("ad1",
+    NN("ad1",
       Map(
         "isA" -> EntityTypes.AUTHORITY_DESCRIPTION,
         "languageOfDescription" -> "en",
         "title" -> "An Authority called 1")),
-    ("a2",
+    NN("a2",
       Map(
         "isA" -> EntityTypes.AUTHORITY,
         "typeOfEntity" -> "person",
         "identifier" -> "a2",
         "name" -> "Authority 2")),
-    ("ad2",
+    NN("ad2",
       Map(
         "isA" -> EntityTypes.AUTHORITY_DESCRIPTION,
         "languageOfDescription" -> "en",
         "title" -> "An Authority called 2")),
-    ("adminGroup",
+    NN("adminGroup",
       Map(
         "isA" -> EntityTypes.GROUP,
         "name" -> Group.ADMIN_GROUP_NAME)),
-    ("niodGroup",
+    NN("niodGroup",
       Map(
         "isA" -> EntityTypes.GROUP,
         "name" -> "niod")),
-    ("kclGroup",
+    NN("kclGroup",
       Map(
         "isA" -> EntityTypes.GROUP,
         "name" -> "kcl")),
-    ("mike",
+    NN("mike",
       Map(
         "isA" -> EntityTypes.USER_PROFILE,
         "userId" -> 1,
         "name" -> "Mike")),
-    ("reto",
+    NN("reto",
       Map(
         "isA" -> EntityTypes.USER_PROFILE,
         "userId" -> 2,
         "name" -> "Reto")),
-    ("tim",
+    NN("tim",
       Map(
         "isA" -> EntityTypes.USER_PROFILE,
         "userId" -> 3,
         "name" -> "Tim")),
-    ("pd1",
+    NN("pd1",
       Map(
         "isA" -> EntityTypes.DATE_PERIOD,
         "startDate" -> "1943",
         "endDate" -> "1943")),
-    ("ar1",
+    NN("ar1",
       Map(
         "isA" -> EntityTypes.ADDRESS,
         "streetAddress" -> "London")),
-    ("ann1",
+    NN("ann1",
       Map(
         "isA" -> EntityTypes.ANNOTATION,
         "body" -> "Hello Dolly!")),
-    ("ann2",
+    NN("ann2",
       Map(
         "isA" -> EntityTypes.ANNOTATION,
         "body" -> "Annotating my annotation!")))
 
+  case class R(val src: String, val label: String, val dst: String, val data: Map[String,Any] = Map())
+        
   val edges = List(
     // Collections owned by repository
-    ("r1", Agent.HOLDS, "c1", Map()),
-    ("r1", Agent.HOLDS, "c2", Map()),
-    ("r1", Agent.HOLDS, "c3", Map()),
-    ("r1", Agent.HOLDS, "c4", Map()),
+    R("r1", Agent.HOLDS, "c1"),
+    R("r1", Agent.HOLDS, "c2"),
+    R("r1", Agent.HOLDS, "c3"),
+    R("r1", Agent.HOLDS, "c4"),
 
     // C3 is a child of C2 and C2 of C1
-    ("c2", DocumentaryUnit.CHILD_OF, "c1", Map()),
-    ("c3", DocumentaryUnit.CHILD_OF, "c2", Map()),
+    R("c2", DocumentaryUnit.CHILD_OF, "c1"),
+    R("c3", DocumentaryUnit.CHILD_OF, "c2"),
 
     // Repository has an address
-    ("r1", Agent.HAS_ADDRESS, "ar1", Map()),
+    R("r1", Agent.HAS_ADDRESS, "ar1"),
 
     // Descriptions describe entities
-    ("cd1", Description.DESCRIBES, "c1", Map()),
-    ("cd2", Description.DESCRIBES, "c2", Map()),
-    ("cd3", Description.DESCRIBES, "c3", Map()),
-    ("cd4", Description.DESCRIBES, "c4", Map()),
-    ("rd1", Description.DESCRIBES, "r1", Map()),
-    ("ad1", Description.DESCRIBES, "a1", Map()),
-    ("ad2", Description.DESCRIBES, "a2", Map()),
+    R("cd1", Description.DESCRIBES, "c1"),
+    R("cd2", Description.DESCRIBES, "c2"),
+    R("cd3", Description.DESCRIBES, "c3"),
+    R("cd4", Description.DESCRIBES, "c4"),
+    R("rd1", Description.DESCRIBES, "r1"),
+    R("ad1", Description.DESCRIBES, "a1"),
+    R("ad2", Description.DESCRIBES, "a2"),
 
     // Collections have dates
-    ("c1", TemporalEntity.HAS_DATE, "dp1", Map()),
-    ("c1", TemporalEntity.HAS_DATE, "dp2", Map()),
+    R("c1", TemporalEntity.HAS_DATE, "dp1"),
+    R("c1", TemporalEntity.HAS_DATE, "dp2"),
 
     // Authorities create and are mentionedIn collections
-    ("a1", Authority.CREATED, "c1", Map()),
-    ("a2", Authority.MENTIONED_IN, "c1", Map()),
+    R("a1", Authority.CREATED, "c1"),
+    R("a2", Authority.MENTIONED_IN, "c1"),
 
     // Users belong to groups
-    ("mike", UserProfile.BELONGS_TO, "adminGroup", Map()),
-    ("tim", UserProfile.BELONGS_TO, "adminGroup", Map()),
-    ("mike", UserProfile.BELONGS_TO, "kclGroup", Map()),
-    ("reto", UserProfile.BELONGS_TO, "kclGroup", Map()),
-    ("tim", UserProfile.BELONGS_TO, "niodGroup", Map()),
+    R("mike", UserProfile.BELONGS_TO, "adminGroup"),
+    R("tim", UserProfile.BELONGS_TO, "adminGroup"),
+    R("mike", UserProfile.BELONGS_TO, "kclGroup"),
+    R("reto", UserProfile.BELONGS_TO, "kclGroup"),
+    R("tim", UserProfile.BELONGS_TO, "niodGroup"),
 
     // Access control
-    ("c1", AccessibleEntity.ACCESS, "adminGroup", Map("read" -> true, "write" -> true)),
-    ("c2", AccessibleEntity.ACCESS, "adminGroup", Map("read" -> true, "write" -> true)),
-    ("c1", AccessibleEntity.ACCESS, "mike", Map("read" -> true, "write" -> false)),
-    ("c2", AccessibleEntity.ACCESS, "tim", Map("read" -> true, "write" -> false)),
-    ("c3", AccessibleEntity.ACCESS, "tim", Map("read" -> true, "write" -> true)),
+    R("c1", AccessibleEntity.ACCESS, "adminGroup", Map("read" -> true, "write" -> true)),
+    R("c2", AccessibleEntity.ACCESS, "adminGroup", Map("read" -> true, "write" -> true)),
+    R("c1", AccessibleEntity.ACCESS, "mike", Map("read" -> true, "write" -> false)),
+    R("c2", AccessibleEntity.ACCESS, "tim", Map("read" -> true, "write" -> false)),
+    R("c3", AccessibleEntity.ACCESS, "tim", Map("read" -> true, "write" -> true)),
 
     // Annotations
-    ("mike", Annotator.HAS_ANNOTATION, "ann1", Map()),
-    ("ann1", Annotation.ANNOTATES, "c1", Map("timestamp" -> "2012-08-08T00:00:00Z", "field" -> "scopeAndContent")),
-    ("tim", Annotator.HAS_ANNOTATION, "ann2", Map()),
-    ("ann2", Annotation.ANNOTATES, "ann1", Map("timestamp" -> "2012-08-08T00:00:00Z", "field" -> "scopeAndContent")))
+    R("mike", Annotator.HAS_ANNOTATION, "ann1"),
+    R("ann1", Annotation.ANNOTATES, "c1", Map("timestamp" -> "2012-08-08T00:00:00Z", "field" -> "scopeAndContent")),
+    R("tim", Annotator.HAS_ANNOTATION, "ann2"),
+    R("ann2", Annotation.ANNOTATES, "ann1", Map("timestamp" -> "2012-08-08T00:00:00Z", "field" -> "scopeAndContent")))
 }

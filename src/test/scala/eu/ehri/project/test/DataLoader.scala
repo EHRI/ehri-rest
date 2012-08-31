@@ -76,7 +76,7 @@ class DataLoader(val graph: FramedGraph[Neo4jGraph]) {
 
     // Create all the nodes
     TestData.nodes.foreach {
-      case (desc, node) =>
+      case TestData.NN(desc, node) =>
         node.get("isA").map {
           case (index: String) =>
             helper.getOrCreateIndex(index, classOf[Vertex])
@@ -87,8 +87,8 @@ class DataLoader(val graph: FramedGraph[Neo4jGraph]) {
 
     // Load edges using node descriptors to find source and target
     TestData.edges.foreach {
-      case (src, label, dst, data) =>
-        CR(src, dst, label, data.asInstanceOf[Map[String, Any]])
+      case TestData.R(src, label, dst, data) =>
+        CR(src, dst, label, data)
     }
 
     tx.success()
