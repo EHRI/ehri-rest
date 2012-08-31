@@ -15,7 +15,7 @@ import eu.ehri.project.persistance.BundleDAO;
 import eu.ehri.project.persistance.Converter;
 import eu.ehri.project.persistance.EntityBundle;
 import eu.ehri.project.relationships.Access;
-import eu.ehri.project.acl.Acl;
+import eu.ehri.project.acl.AclManager;
 
 public class Views <E extends AccessibleEntity> {
 
@@ -41,7 +41,7 @@ public class Views <E extends AccessibleEntity> {
      */
     private void checkReadAccess(AccessibleEntity entity, Long user) throws PermissionDenied {
         Accessor accessor = graph.getVertex(user, Accessor.class);
-        Access access = Acl.getAccessControl(entity, accessor);
+        Access access = AclManager.getAccessControl(accessor, entity);
         if (!access.getRead())
             throw new PermissionDenied(accessor, entity);        
     }
@@ -55,7 +55,7 @@ public class Views <E extends AccessibleEntity> {
      */
     private void checkWriteAccess(AccessibleEntity entity, Long user) throws PermissionDenied {
         Accessor accessor = graph.getVertex(user, Accessor.class);
-        Access access = Acl.getAccessControl(entity, accessor);
+        Access access = AclManager.getAccessControl(accessor, entity);
         if (!(access.getRead() && access.getWrite()))
             throw new PermissionDenied(accessor, entity);        
     }
