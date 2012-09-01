@@ -28,7 +28,7 @@ import eu.ehri.project.persistance.EntityBundle;
 public class BundleTest extends ModelTestBase {
 
     private Converter converter;
-    
+
     @Before
     public void setUp() {
         super.setUp();
@@ -40,55 +40,64 @@ public class BundleTest extends ModelTestBase {
         super.tearDown();
     }
 
-    
     @Test
-    public void testSerialisation() throws SerializationError, DeserializationError {
+    public void testSerialisation() throws SerializationError,
+            DeserializationError {
         DocumentaryUnit c1 = helper.getTestFrame("c1", DocumentaryUnit.class);
         String json = converter.vertexFrameToJson(c1);
         EntityBundle<DocumentaryUnit> bundle = converter.jsonToBundle(json);
-        // FIXME: Comparing ids fails because the deserialized on is an <int> instead
+        // FIXME: Comparing ids fails because the deserialized on is an <int>
+        // instead
         // of a long...
         assertEquals(c1.getName(), bundle.getData().get("name"));
     }
-    
+
     public void testSaving() throws SerializationError, ValidationError {
         DocumentaryUnit c1 = helper.getTestFrame("c1", DocumentaryUnit.class);
         assertEquals(1, toList(c1.getDescriptions()).size());
-        
-        EntityBundle<DocumentaryUnit> bundle = converter.vertexFrameToBundle(c1);
-        BundleDAO<DocumentaryUnit> persister = new BundleDAO<DocumentaryUnit>(graph);
+
+        EntityBundle<DocumentaryUnit> bundle = converter
+                .vertexFrameToBundle(c1);
+        BundleDAO<DocumentaryUnit> persister = new BundleDAO<DocumentaryUnit>(
+                graph);
         DocumentaryUnit c1redux = persister.update(bundle);
-        
-        assertEquals(toList(c1.getDescriptions()), toList(c1redux.getDescriptions()));                
+
+        assertEquals(toList(c1.getDescriptions()),
+                toList(c1redux.getDescriptions()));
     }
-    
+
     @Test
-    public void testSavingWithDependentChanges() throws SerializationError, DeserializationError, ValidationError {
+    public void testSavingWithDependentChanges() throws SerializationError,
+            DeserializationError, ValidationError {
         DocumentaryUnit c1 = helper.getTestFrame("c1", DocumentaryUnit.class);
         assertEquals(1, toList(c1.getDescriptions()).size());
         String json = converter.vertexFrameToJson(c1);
-        
+
         Description desc = toList(c1.getDescriptions()).get(0);
         c1.removeDescription(desc);
         assertEquals(0, toList(c1.getDescriptions()).size());
-        
+
         // Restore the item from JSON
         EntityBundle<DocumentaryUnit> bundle = converter.jsonToBundle(json);
-        BundleDAO<DocumentaryUnit> persister = new BundleDAO<DocumentaryUnit>(graph);
+        BundleDAO<DocumentaryUnit> persister = new BundleDAO<DocumentaryUnit>(
+                graph);
         DocumentaryUnit c1redux = persister.update(bundle);
-        
+
         // Our deleted description should have come back...
         assertEquals(1, toList(c1.getDescriptions()).size());
     }
-    
+
     @Test
-    public void testDeletingDependents() throws SerializationError, ValidationError {
+    public void testDeletingDependents() throws SerializationError,
+            ValidationError {
         DocumentaryUnit c1 = helper.getTestFrame("c1", DocumentaryUnit.class);
-        EntityBundle<DocumentaryUnit> bundle = converter.vertexFrameToBundle(c1);
+        EntityBundle<DocumentaryUnit> bundle = converter
+                .vertexFrameToBundle(c1);
         assertEquals(2, toList(c1.getDatePeriods()).size());
-        
-        Collection<EntityBundle<DatePeriod>> dates = bundle.getRelations().getCollection(TemporalEntity.HAS_DATE);
-        
+
+        Collection<EntityBundle<DatePeriod>> dates = bundle.getRelations()
+                .getCollection(TemporalEntity.HAS_DATE);
+
         // Dodginess! Manipulate the bundles relations directly
         // by replacing the hasDate collection with one consisting
         // of only one date.
@@ -96,23 +105,32 @@ public class BundleTest extends ModelTestBase {
         Collection<EntityBundle<DatePeriod>> newDates = new ArrayList<EntityBundle<DatePeriod>>();
         newDates.add(dates.iterator().next());
         bundle.getRelations().putAll(TemporalEntity.HAS_DATE, newDates);
-        
-        BundleDAO<DocumentaryUnit> persister = new BundleDAO<DocumentaryUnit>(graph);
+
+        BundleDAO<DocumentaryUnit> persister = new BundleDAO<DocumentaryUnit>(
+                graph);
         DocumentaryUnit c1redux = persister.update(bundle);
-        assertEquals(1, toList(c1.getDatePeriods()).size());                        
+        assertEquals(1, toList(c1.getDatePeriods()).size());
     }
-    
-    @Test(expected=NoSuchElementException.class)
-    public void testDeletingWholeBundle() throws SerializationError, ValidationError {
+
+    @Test(expected = NoSuchElementException.class)
+    public void testDeletingWholeBundle() throws SerializationError,
+            ValidationError {
         DocumentaryUnit c1 = helper.getTestFrame("c1", DocumentaryUnit.class);
-        EntityBundle<DocumentaryUnit> bundle = converter.vertexFrameToBundle(c1);
+        EntityBundle<DocumentaryUnit> bundle = converter
+                .vertexFrameToBundle(c1);
         assertEquals(2, toList(c1.getDatePeriods()).size());
-        List<DatePeriod> dates = toList(helper.getTestFrames(EntityTypes.DATE_PERIOD, DatePeriod.class));
-        
-        BundleDAO<DocumentaryUnit> persister = new BundleDAO<DocumentaryUnit>(graph);
+        List<DatePeriod> dates = toList(helper.getTestFrames(
+                EntityTypes.DATE_PERIOD, DatePeriod.class));
+
+        BundleDAO<DocumentaryUnit> persister = new BundleDAO<DocumentaryUnit>(
+                graph);
         Integer numDeleted = persister.delete(bundle);
         assertTrue(numDeleted > 0);
-        assertEquals(dates.size() - 2, toList(helper.getTestFrames(EntityTypes.DATE_PERIOD, DatePeriod.class)).size());
+        assertEquals(
+                dates.size() - 2,
+                toList(
+                        helper.getTestFrames(EntityTypes.DATE_PERIOD,
+                                DatePeriod.class)).size());
         // Should raise NoSuchElementException
         helper.getTestFrame("c1", DocumentaryUnit.class);
     }

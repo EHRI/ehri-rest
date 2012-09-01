@@ -23,11 +23,10 @@ import eu.ehri.project.models.annotations.Dependent;
 import eu.ehri.project.models.utils.ClassUtils;
 
 /**
- * Class responsible for persisting and deleting an
- * EntityBundle<T>, a data structure representing a
- * graph node and its relations to be updated in a
+ * Class responsible for persisting and deleting an EntityBundle<T>, a data
+ * structure representing a graph node and its relations to be updated in a
  * single batch.
- *
+ * 
  * @param <T>
  */
 public class BundleDAO<T extends VertexFrame> {

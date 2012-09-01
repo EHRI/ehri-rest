@@ -119,7 +119,7 @@ public class EhriNeo4jBasicTest {
         // check that vertices have no relations before creation
         assertFalse(hasRelationship(outV));
         assertFalse(hasRelationship(inV));
-        
+
         Edge relationship = helpers.createIndexedEdge(outV.getId(),
                 inV.getId(), TEST_TYPE, createTestData(TEST_KEY, TEST_VALUE),
                 TEST_EDGE_INDEX_NAME);
@@ -151,8 +151,8 @@ public class EhriNeo4jBasicTest {
 
         // create the Edge
         Edge relationship = helpers.createIndexedEdge(outV.getId(),
-                inV.getId(), TEST_TYPE,
-                createTestData(TEST_KEY, TEST_VALUE), TEST_EDGE_INDEX_NAME);
+                inV.getId(), TEST_TYPE, createTestData(TEST_KEY, TEST_VALUE),
+                TEST_EDGE_INDEX_NAME);
         Long id = (Long) relationship.getId();
 
         // check that vertices have relations before delete
@@ -185,8 +185,8 @@ public class EhriNeo4jBasicTest {
 
         // create the Edge
         Edge relationship = helpers.createIndexedEdge(outV.getId(),
-                inV.getId(), TEST_TYPE,
-                createTestData(TEST_KEY, TEST_VALUE), TEST_EDGE_INDEX_NAME);
+                inV.getId(), TEST_TYPE, createTestData(TEST_KEY, TEST_VALUE),
+                TEST_EDGE_INDEX_NAME);
         Long id = (Long) relationship.getId();
 
         Map<String, Object> data = new HashMap<String, Object>();
@@ -202,8 +202,11 @@ public class EhriNeo4jBasicTest {
         assertEquals(newValue, NEW_TEST_VALUE);
     }
 
-    /*** index 
-     * @throws IndexNotFoundException ***/
+    /***
+     * index
+     * 
+     * @throws IndexNotFoundException
+     ***/
 
     @Test
     public void testGetOrCreateVertexIndex() {
@@ -251,10 +254,14 @@ public class EhriNeo4jBasicTest {
         }
     }
 
-    /*** helpers 
-     * @throws IndexNotFoundException ***/
+    /***
+     * helpers
+     * 
+     * @throws IndexNotFoundException
+     ***/
 
-    private Vertex createIndexedVertexWithProperty(String key, String value) throws IndexNotFoundException {
+    private Vertex createIndexedVertexWithProperty(String key, String value)
+            throws IndexNotFoundException {
         return helpers.createIndexedVertex(createTestData(key, value),
                 TEST_VERTEX_INDEX_NAME);
     }

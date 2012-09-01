@@ -17,25 +17,27 @@ import eu.ehri.project.core.GraphHelpers;
 import eu.ehri.project.models.annotations.EntityType;
 
 public class FixtureLoader {
-    
+
     public static final String DESCRIPTOR_KEY = "_desc";
-    
+
     private FramedGraph<Neo4jGraph> graph;
     private GraphHelpers helpers;
-    
+
     public FixtureLoader(FramedGraph<Neo4jGraph> graph) {
         this.graph = graph;
         helpers = new GraphHelpers(graph.getBaseGraph().getRawGraph());
     }
-    
+
     public Vertex getTestVertex(String descriptor) {
-        return graph.getBaseGraph().getVertices(DESCRIPTOR_KEY, descriptor).iterator().next();        
+        return graph.getBaseGraph().getVertices(DESCRIPTOR_KEY, descriptor)
+                .iterator().next();
     }
-    
+
     public <T> T getTestFrame(String descriptor, Class<T> cls) {
-        return graph.getVertices(DESCRIPTOR_KEY, descriptor, cls).iterator().next();        
+        return graph.getVertices(DESCRIPTOR_KEY, descriptor, cls).iterator()
+                .next();
     }
-    
+
     public Iterable<Vertex> getTestVertices(String entityType) {
         return graph.getBaseGraph().getVertices(EntityType.KEY, entityType);
     }
@@ -45,36 +47,42 @@ public class FixtureLoader {
     }
 
     private void loadNodes() {
-        InputStream jsonStream = this.getClass().getClassLoader().getResourceAsStream("vertices.json");
+        InputStream jsonStream = this.getClass().getClassLoader()
+                .getResourceAsStream("vertices.json");
         try {
-            List<Map<String,Map<String,Object>>> nodes = new ObjectMapper().readValue(jsonStream, List.class);
-                        
-            for (Map<String,Map<String,Object>> namedNode : nodes) {
-                Map<String,Object> data = namedNode.get("data");
+            List<Map<String, Map<String, Object>>> nodes = new ObjectMapper()
+                    .readValue(jsonStream, List.class);
+
+            for (Map<String, Map<String, Object>> namedNode : nodes) {
+                Map<String, Object> data = namedNode.get("data");
                 data.put(DESCRIPTOR_KEY, namedNode.get("desc"));
-                String isa = (String)data.get(EntityType.KEY);
-                
-                Index<Vertex> index = helpers.getOrCreateIndex(isa, Vertex.class);
+                String isa = (String) data.get(EntityType.KEY);
+
+                Index<Vertex> index = helpers.getOrCreateIndex(isa,
+                        Vertex.class);
                 helpers.createIndexedVertex(data, index);
             }
         } catch (Exception e) {
             throw new RuntimeException("Error loading JSON fixture", e);
-        }        
+        }
     }
-    
+
     private void loadEdges() {
-        InputStream jsonStream = this.getClass().getClassLoader().getResourceAsStream("edges.json");
+        InputStream jsonStream = this.getClass().getClassLoader()
+                .getResourceAsStream("edges.json");
         try {
-            List<Map<String,Object>> edges = new ObjectMapper().readValue(jsonStream, List.class);            
-            for (Map<String,Object> edge : edges) {
-                String srcdesc = (String)edge.get("src");
-                String label = (String)edge.get("label");
-                String dstdesc = (String)edge.get("dst");
-                Map<String,Object> data = (Map<String, Object>) edge.get("data");
-                
+            List<Map<String, Object>> edges = new ObjectMapper().readValue(
+                    jsonStream, List.class);
+            for (Map<String, Object> edge : edges) {
+                String srcdesc = (String) edge.get("src");
+                String label = (String) edge.get("label");
+                String dstdesc = (String) edge.get("dst");
+                Map<String, Object> data = (Map<String, Object>) edge
+                        .get("data");
+
                 Index<Edge> index = helpers.getOrCreateIndex(label, Edge.class);
-                helpers.createIndexedEdge(
-                        getTestVertex(srcdesc), getTestVertex(dstdesc), label, data, index);
+                helpers.createIndexedEdge(getTestVertex(srcdesc),
+                        getTestVertex(dstdesc), label, data, index);
             }
         } catch (Exception e) {
             throw new RuntimeException("Error loading JSON fixture", e);
@@ -86,9 +94,9 @@ public class FixtureLoader {
                 e.printStackTrace();
             }
         }
-        
+
     }
-    
+
     public void loadTestData() {
         loadNodes();
         loadEdges();

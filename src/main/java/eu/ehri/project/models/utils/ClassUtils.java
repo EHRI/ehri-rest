@@ -17,9 +17,9 @@ import eu.ehri.project.models.annotations.Dependent;
 import eu.ehri.project.models.annotations.Fetch;
 
 public class ClassUtils {
-    
+
     public static final String FETCH_METHOD_PREFIX = "get";
-    
+
     /**
      * Scans all classes accessible from the context class loader which belong
      * to the given package and subpackages.
@@ -93,7 +93,7 @@ public class ClassUtils {
         }
         return out;
     }
-    
+
     public static List<String> getFetchedRelations(Class<?> cls) {
         List<String> out = new LinkedList<String>();
         for (Method method : cls.getMethods()) {
@@ -109,7 +109,8 @@ public class ClassUtils {
     public static Map<String, Method> getFetchMethods(Class<?> cls) {
         Map<String, Method> out = new HashMap<String, Method>();
         for (Method method : cls.getMethods()) {
-            if (method.getAnnotation(Fetch.class) != null && method.getName().startsWith(FETCH_METHOD_PREFIX)) {
+            if (method.getAnnotation(Fetch.class) != null
+                    && method.getName().startsWith(FETCH_METHOD_PREFIX)) {
                 Adjacency ann = method.getAnnotation(Adjacency.class);
                 if (ann != null)
                     out.put(ann.label(), method);
@@ -117,11 +118,12 @@ public class ClassUtils {
         }
         return out;
     }
-    
+
     public static Map<String, Method> getDependentMethods(Class<?> cls) {
         Map<String, Method> out = new HashMap<String, Method>();
         for (Method method : cls.getMethods()) {
-            if (method.getAnnotation(Dependent.class) != null && method.getName().startsWith(FETCH_METHOD_PREFIX)) {
+            if (method.getAnnotation(Dependent.class) != null
+                    && method.getName().startsWith(FETCH_METHOD_PREFIX)) {
                 Adjacency ann = method.getAnnotation(Adjacency.class);
                 if (ann != null)
                     out.put(ann.label(), method);

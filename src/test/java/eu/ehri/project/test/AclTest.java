@@ -42,7 +42,7 @@ public class AclTest extends ModelTestBase {
         // check we have some users
         assertTrue(admin.getUsers().iterator().hasNext());
     }
-    
+
     /**
      * Ensure user 'Reto' can't access collection 'c3'.
      */
@@ -53,13 +53,13 @@ public class AclTest extends ModelTestBase {
         DocumentaryUnit c3 = helper.getTestFrame("c3", DocumentaryUnit.class);
         Access adminAccess = AclManager.getAccessControl(admin, c3);
         Access retoAccess = AclManager.getAccessControl(reto, c3);
-        
+
         assertTrue(adminAccess.getRead());
         assertTrue(adminAccess.getWrite());
         assertFalse(retoAccess.getRead());
         assertFalse(retoAccess.getWrite());
     }
-    
+
     /**
      * Test NIOD group has no access to items with admin perms.
      */
@@ -70,14 +70,14 @@ public class AclTest extends ModelTestBase {
         Access access1 = AclManager.getAccessControl(niod, c1);
         assertFalse(access1.getRead());
         assertFalse(access1.getWrite());
-        
+
         // but we should have read-only access to items with no specified perms.
         DocumentaryUnit c4 = helper.getTestFrame("c4", DocumentaryUnit.class);
         Access access2 = AclManager.getAccessControl(niod, c4);
         assertTrue(access2.getRead());
-        assertFalse(access2.getWrite());        
+        assertFalse(access2.getWrite());
     }
-    
+
     /**
      * Group permissions override user permissions.
      */

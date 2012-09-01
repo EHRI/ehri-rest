@@ -17,11 +17,10 @@ import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import eu.ehri.project.exceptions.IndexNotFoundException;
 
 /**
- * Main purpose is to be used by the ehri-plugin to provide a REST API to the neo4j service
- * Adds functionality that would otherwise require several neo4j calls 
- * and when possible also hides neo4j specifics and use more generic GrapgDb names.
- * neo4j Node => Vertex
- * neo4j Relationship => Edge 
+ * Main purpose is to be used by the ehri-plugin to provide a REST API to the
+ * neo4j service Adds functionality that would otherwise require several neo4j
+ * calls and when possible also hides neo4j specifics and use more generic
+ * GrapgDb names. neo4j Node => Vertex neo4j Relationship => Edge
  * 
  */
 public class GraphHelpers {
@@ -54,7 +53,8 @@ public class GraphHelpers {
      * @param cls
      * @return
      */
-    public <T extends Element> Index<T> createIndex(String name, Class<T> cls, Parameter<?, ?>... parameters) {
+    public <T extends Element> Index<T> createIndex(String name, Class<T> cls,
+            Parameter<?, ?>... parameters) {
         return graph.createIndex(name, cls, parameters);
     }
 
@@ -123,7 +123,7 @@ public class GraphHelpers {
         Index<Vertex> index = getIndex(indexName, Vertex.class);
         return createIndexedVertex(data, index);
     }
-    
+
     /**
      * Create a vertex that is indexed using the given index.
      * 
@@ -154,9 +154,9 @@ public class GraphHelpers {
     }
 
     /**
-     * Create an edge that is indexed with an index of the same name
-     * as it's label.
-     *  
+     * Create an edge that is indexed with an index of the same name as it's
+     * label.
+     * 
      * @param src
      * @param dst
      * @param label
@@ -165,15 +165,16 @@ public class GraphHelpers {
      * @throws IndexNotFoundException
      */
     public Edge createIndexedEdge(Object src, Object dst, String label,
-            Map<String, Object> data, String indexName) throws IndexNotFoundException {
+            Map<String, Object> data, String indexName)
+            throws IndexNotFoundException {
         return createIndexedEdge(graph.getVertex(src), graph.getVertex(dst),
                 label, data, indexName);
     }
-    
+
     /**
-     * Create an edge that is indexed with an index of the same name
-     * as it's label.
-     *  
+     * Create an edge that is indexed with an index of the same name as it's
+     * label.
+     * 
      * @param src
      * @param dst
      * @param label
@@ -183,14 +184,15 @@ public class GraphHelpers {
      * @throws IndexNotFoundException
      */
     public Edge createIndexedEdge(Vertex src, Vertex dst, String label,
-            Map<String, Object> data, String indexName) throws IndexNotFoundException {
+            Map<String, Object> data, String indexName)
+            throws IndexNotFoundException {
         Index<Edge> index = getIndex(indexName, Edge.class);
         return createIndexedEdge(src, dst, label, data, index);
     }
 
-     /**
+    /**
      * Create an edge that is indexed with the given index.
-     *  
+     * 
      * @param src
      * @param dst
      * @param label
@@ -255,16 +257,18 @@ public class GraphHelpers {
             throw new RuntimeException(e);
         }
     }
-    
 
     /**
-     * Update Edge
-     * similar to update Vertex, because the Type cannot be changed
+     * Update Edge similar to update Vertex, because the Type cannot be changed
      * 
-     * @param graphDb   The graph database
-     * @param id        The edge identifier
-     * @param data      The properties
-     * @param indexName The name of the index
+     * @param graphDb
+     *            The graph database
+     * @param id
+     *            The edge identifier
+     * @param data
+     *            The properties
+     * @param indexName
+     *            The name of the index
      * @return
      * @throws Exception
      */
@@ -289,9 +293,12 @@ public class GraphHelpers {
     /**
      * Replace properties to a property container like vertex and edge
      * 
-     * @param index     The index of the container
-     * @param c         The container Edge or Vertex of type <code>T</code>
-     * @param data      The properties
+     * @param index
+     *            The index of the container
+     * @param c
+     *            The container Edge or Vertex of type <code>T</code>
+     * @param data
+     *            The properties
      */
     private <T extends Element> void replaceProperties(Index<T> index, T c,
             Map<String, Object> data) {
@@ -308,9 +315,12 @@ public class GraphHelpers {
     /**
      * Add properties to a property container like vertex and edge
      * 
-     * @param index The index of the container
-     * @param c     The container Edge or Vertex of type <code>T</code>
-     * @param data  The properties
+     * @param index
+     *            The index of the container
+     * @param c
+     *            The container Edge or Vertex of type <code>T</code>
+     * @param data
+     *            The properties
      */
     private <T extends Element> void addProperties(Index<T> index, T c,
             Map<String, Object> data) {
@@ -323,12 +333,14 @@ public class GraphHelpers {
             index.put(entry.getKey(), String.valueOf(entry.getValue()), c);
         }
     }
-    
+
     /**
      * Delete Edge
      * 
-     * @param graphDb   The graph database
-     * @param id        The edge identifier
+     * @param graphDb
+     *            The graph database
+     * @param id
+     *            The edge identifier
      */
     public void deleteEdge(Object id) {
         Edge edge = graph.getEdge(id);
@@ -337,12 +349,14 @@ public class GraphHelpers {
     }
 
     /**
-     * Delete vertex with its edges
-     * Neo4j requires you delete all adjacent edges first. 
-     * Blueprints' removeVertex() method does that; the Neo4jServer DELETE URI does not.
+     * Delete vertex with its edges Neo4j requires you delete all adjacent edges
+     * first. Blueprints' removeVertex() method does that; the Neo4jServer
+     * DELETE URI does not.
      * 
-     * @param graphDb   The graph database
-     * @param id        The vertex identifier
+     * @param graphDb
+     *            The graph database
+     * @param id
+     *            The vertex identifier
      */
     public void deleteVertex(Object id) {
         Vertex vertex = graph.getVertex(id);

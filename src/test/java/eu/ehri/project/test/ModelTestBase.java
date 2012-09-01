@@ -26,17 +26,15 @@ public class ModelTestBase {
             lst.add(it.next());
         return lst;
     }
-    
+
     public void setUp() {
-        graph = new FramedGraph<Neo4jGraph>(
-                new Neo4jGraph(
-                        new TestGraphDatabaseFactory()
-                            .newImpermanentDatabaseBuilder()
-                            .newGraphDatabase()));
+        graph = new FramedGraph<Neo4jGraph>(new Neo4jGraph(
+                new TestGraphDatabaseFactory().newImpermanentDatabaseBuilder()
+                        .newGraphDatabase()));
         helper = new FixtureLoader(graph);
         helper.loadTestData();
     }
-    
+
     public void tearDown() throws Exception {
         graph.shutdown();
     }

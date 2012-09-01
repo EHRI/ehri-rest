@@ -26,8 +26,8 @@ public class EntityBundle<T extends VertexFrame> {
 
     private MultiValueMap errors = new MultiValueMap();
 
-    public EntityBundle(Object id, final Map<String, Object> data, Class<T> cls,
-            final MultiValueMap relations) {
+    public EntityBundle(Object id, final Map<String, Object> data,
+            Class<T> cls, final MultiValueMap relations) {
         this.id = id;
         this.data = new HashMap<String, Object>(data);
         this.cls = cls;
@@ -95,19 +95,22 @@ public class EntityBundle<T extends VertexFrame> {
         return ann.value();
     }
 
-
     public void validateForUpdate() throws ValidationError {
         if (id == null)
-            throw new ValidationError("No identifier given for update operation.");
+            throw new ValidationError(
+                    "No identifier given for update operation.");
         validate();
     }
 
     public void validateForInsert() throws ValidationError {
         if (id != null)
-            throw new ValidationError(String.format("Identifier is present ('%s') but insert operation specified.", id));
+            throw new ValidationError(
+                    String.format(
+                            "Identifier is present ('%s') but insert operation specified.",
+                            id));
         validate();
     }
-    
+
     public void validate() throws ValidationError {
         checkFields();
         checkIsA();

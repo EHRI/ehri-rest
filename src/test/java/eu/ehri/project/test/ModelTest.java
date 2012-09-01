@@ -34,14 +34,15 @@ public class ModelTest extends ModelTestBase {
 
     @Test
     public void testTheGraphContainsGroups() {
-        List<Group> groups = toList(helper.getTestFrames(EntityTypes.GROUP, Group.class));
+        List<Group> groups = toList(helper.getTestFrames(EntityTypes.GROUP,
+                Group.class));
         assertFalse(groups.isEmpty());
-        
+
         // Check the first group has a user in it
         List<UserProfile> users = toList(groups.get(0).getUsers());
         assertFalse(users.isEmpty());
     }
-    
+
     @Test
     public void testCollectionHelpByRepo() {
         DocumentaryUnit unit = helper.getTestFrame("c1", DocumentaryUnit.class);
@@ -55,7 +56,7 @@ public class ModelTest extends ModelTestBase {
         DocumentaryUnit c1 = helper.getTestFrame("c1", DocumentaryUnit.class);
         Authority a2 = helper.getTestFrame("a2", Authority.class);
         assertTrue(toList(c1.getNameAccess()).contains(a2));
-        
+
         // The same should be true backwards
         assertTrue(toList(a2.getMentionedIn()).contains(c1));
     }

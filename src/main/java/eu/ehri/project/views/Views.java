@@ -17,7 +17,7 @@ import eu.ehri.project.persistance.EntityBundle;
 import eu.ehri.project.relationships.Access;
 import eu.ehri.project.acl.AclManager;
 
-public class Views <E extends AccessibleEntity> {
+public class Views<E extends AccessibleEntity> {
 
     private final FramedGraph<Neo4jGraph> graph;
     private final Class<E> cls;
@@ -31,7 +31,7 @@ public class Views <E extends AccessibleEntity> {
         this.graph = graph;
         this.cls = cls;
     }
-    
+
     /**
      * Ensure an item is readable by the given user
      * 
@@ -39,11 +39,12 @@ public class Views <E extends AccessibleEntity> {
      * @param user
      * @throws PermissionDenied
      */
-    private void checkReadAccess(AccessibleEntity entity, Long user) throws PermissionDenied {
+    private void checkReadAccess(AccessibleEntity entity, Long user)
+            throws PermissionDenied {
         Accessor accessor = graph.getVertex(user, Accessor.class);
         Access access = AclManager.getAccessControl(accessor, entity);
         if (!access.getRead())
-            throw new PermissionDenied(accessor, entity);        
+            throw new PermissionDenied(accessor, entity);
     }
 
     /**
@@ -53,13 +54,14 @@ public class Views <E extends AccessibleEntity> {
      * @param user
      * @throws PermissionDenied
      */
-    private void checkWriteAccess(AccessibleEntity entity, Long user) throws PermissionDenied {
+    private void checkWriteAccess(AccessibleEntity entity, Long user)
+            throws PermissionDenied {
         Accessor accessor = graph.getVertex(user, Accessor.class);
         Access access = AclManager.getAccessControl(accessor, entity);
         if (!(access.getRead() && access.getWrite()))
-            throw new PermissionDenied(accessor, entity);        
+            throw new PermissionDenied(accessor, entity);
     }
-    
+
     private void checkGlobalWriteAccess(Long user) throws PermissionDenied {
         // TODO: Stub
     }
@@ -87,7 +89,7 @@ public class Views <E extends AccessibleEntity> {
      * @throws PermissionDenied
      * @throws ValidationError
      */
-    public E update(Map<String,Object> data, Long user)
+    public E update(Map<String, Object> data, Long user)
             throws PermissionDenied, ValidationError, DeserializationError {
         EntityBundle<E> bundle = converter.dataToBundle(data);
         E entity = graph.getVertex(bundle.getId(), cls);
@@ -104,7 +106,7 @@ public class Views <E extends AccessibleEntity> {
      * @throws PermissionDenied
      * @throws ValidationError
      */
-    public E create(Map<String,Object> data, Long user)
+    public E create(Map<String, Object> data, Long user)
             throws PermissionDenied, ValidationError, DeserializationError {
         checkGlobalWriteAccess(user);
         EntityBundle<E> bundle = converter.dataToBundle(data);
@@ -119,12 +121,14 @@ public class Views <E extends AccessibleEntity> {
      * @return
      * @throws PermissionDenied
      * @throws ValidationError
-     * @throws SerializationError 
+     * @throws SerializationError
      */
-    public Integer delete(Long item, Long user) throws PermissionDenied, ValidationError, SerializationError {
+    public Integer delete(Long item, Long user) throws PermissionDenied,
+            ValidationError, SerializationError {
         E entity = graph.getVertex(item, cls);
         checkGlobalWriteAccess(user);
         checkWriteAccess(entity, user);
-        return new BundleDAO<E>(graph).delete(converter.vertexFrameToBundle(entity));
+        return new BundleDAO<E>(graph).delete(converter
+                .vertexFrameToBundle(entity));
     }
 }

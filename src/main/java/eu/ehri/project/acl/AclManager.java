@@ -11,20 +11,24 @@ import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.relationships.Access;
 
 public class AclManager {
-    
+
     static class AccessComparator implements Comparator<Access> {
         // FIXME: Find a better, more elegant way of doing this comparison
         // between two access objects. We can't just implement a custom equals
         // method because we might sometimes be comparing an Edge interface, and
-        // other times a synthetic factory-made object. Suggestions on a postcard.
+        // other times a synthetic factory-made object. Suggestions on a
+        // postcard.
         public int compare(Access a, Access b) {
             if (a.getWrite() == b.getWrite() && a.getRead() == b.getRead())
                 return 0;
-            else if (a.getWrite() && b.getWrite() && a.getRead() && !b.getRead())
+            else if (a.getWrite() && b.getWrite() && a.getRead()
+                    && !b.getRead())
                 return 1;
-            else if (a.getWrite() && !b.getWrite() && a.getRead() && !b.getRead())
+            else if (a.getWrite() && !b.getWrite() && a.getRead()
+                    && !b.getRead())
                 return 1;
-            else return -1;             
+            else
+                return -1;
         }
     }
 
@@ -40,13 +44,14 @@ public class AclManager {
         }
         return false;
     }
-    
-    /* We have to ascend the current accessors group
-     * hierarchy looking for a groups that are contained
-     * in the current entity's ACL list. Return the Access
-     * relationship objects and see which one is most liberal.
+
+    /*
+     * We have to ascend the current accessors group hierarchy looking for a
+     * groups that are contained in the current entity's ACL list. Return the
+     * Access relationship objects and see which one is most liberal.
      */
-    public static List<Access> searchPermissions(List<Accessor> accessing, List<Access> allowedCtrls, List<Accessor> allowedAccessors) {
+    public static List<Access> searchPermissions(List<Accessor> accessing,
+            List<Access> allowedCtrls, List<Accessor> allowedAccessors) {
         assert allowedCtrls.size() == allowedAccessors.size();
         if (accessing.isEmpty()) {
             return new ArrayList<Access>();
@@ -57,53 +62,58 @@ public class AclManager {
                     intersection.add(allowedCtrls.get(i));
                 }
             }
-            
+
             List<Access> parentPerms = new ArrayList<Access>();
             parentPerms.addAll(intersection);
             for (Accessor acc : accessing) {
                 List<Accessor> parents = new ArrayList<Accessor>();
                 for (Accessor parent : acc.getAllParents())
                     parents.add(parent);
-                parentPerms.addAll(searchPermissions(parents, allowedCtrls, allowedAccessors));
+                parentPerms.addAll(searchPermissions(parents, allowedCtrls,
+                        allowedAccessors));
             }
-            
+
             return parentPerms;
         }
     }
-    
+
     /**
-     * Find the access permissions for a given accessor and entity. 
+     * Find the access permissions for a given accessor and entity.
+     * 
      * @param accessor
      * @param entity
-     * @return 
+     * @return
      * @return
      */
-    public static Access getAccessControl(Accessor accessor, AccessibleEntity entity) {
+    public static Access getAccessControl(Accessor accessor,
+            AccessibleEntity entity) {
         // Admin can read/write everything
         if (isAdmin(accessor))
             return new EntityAccessFactory().buildReadWrite(entity, accessor);
-        
-       // Otherwise, check if there are specified permissions.
-       List<Access> accessCtrls = new ArrayList<Access>();
-       List<Accessor> accessors = new ArrayList<Accessor>();
-       for (Access access : entity.getAccess()) {
-           accessCtrls.add(access);
-           accessors.add(access.getAccessor());
-       }
-           
-       if (accessCtrls.isEmpty()) {
-           return new EntityAccessFactory().buildReadOnly(entity, accessor);
-       } else {
-           // If there are, search the Group hierarchy and find the most
-           // powerful set of permissions contained therein...
-           List<Accessor> initial = new ArrayList<Accessor>();
-           initial.add(accessor);
-           List<Access> ctrls = searchPermissions(initial, accessCtrls, accessors);
-           if (ctrls.isEmpty()) {
-               return new EntityAccessFactory().buildNoAccess(entity, accessor);
-           } else {
-               return Collections.max(ctrls, new AccessComparator());
-           }
-       }           
+
+        // Otherwise, check if there are specified permissions.
+        List<Access> accessCtrls = new ArrayList<Access>();
+        List<Accessor> accessors = new ArrayList<Accessor>();
+        for (Access access : entity.getAccess()) {
+            accessCtrls.add(access);
+            accessors.add(access.getAccessor());
+        }
+
+        if (accessCtrls.isEmpty()) {
+            return new EntityAccessFactory().buildReadOnly(entity, accessor);
+        } else {
+            // If there are, search the Group hierarchy and find the most
+            // powerful set of permissions contained therein...
+            List<Accessor> initial = new ArrayList<Accessor>();
+            initial.add(accessor);
+            List<Access> ctrls = searchPermissions(initial, accessCtrls,
+                    accessors);
+            if (ctrls.isEmpty()) {
+                return new EntityAccessFactory()
+                        .buildNoAccess(entity, accessor);
+            } else {
+                return Collections.max(ctrls, new AccessComparator());
+            }
+        }
     }
 }
