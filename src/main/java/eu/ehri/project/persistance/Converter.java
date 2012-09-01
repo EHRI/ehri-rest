@@ -106,7 +106,7 @@ public class Converter {
     public <T extends VertexFrame> EntityBundle<T> dataToBundle(
             Map<String, Object> data) throws DeserializationError {
         try {
-            Object id = data.get("id") == null ? null : data.get("id");
+            Object id = data.get("id");
             Map<String, Object> props = (Map<String, Object>) data.get("data");
             if (props == null)
                 throw new DeserializationError("No item data map found");
