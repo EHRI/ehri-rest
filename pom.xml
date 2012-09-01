@@ -10,6 +10,13 @@
     <organization>
         <name>EHRI</name>
     </organization>
+    <build>
+        <testResources>
+           <testResource>
+               <directory>${project.basedir}/src/test/resources/fixtures</directory>
+           </testResource>
+       </testResources>
+    </build>
     <dependencies>
         <dependency>
             <groupId>com.tinkerpop</groupId>
