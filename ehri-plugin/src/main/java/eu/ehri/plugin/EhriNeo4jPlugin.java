@@ -1,5 +1,6 @@
 package eu.ehri.plugin;
 
+import java.util.ArrayList;
 import java.util.Map;
 
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -12,7 +13,14 @@ import org.neo4j.server.plugins.Source;
 import org.neo4j.server.rest.repr.ObjectToRepresentationConverter;
 import org.neo4j.server.rest.repr.Representation;
 
-import eu.ehri.data.EhriNeo4j;
+import com.tinkerpop.blueprints.Edge;
+import com.tinkerpop.blueprints.Vertex;
+import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
+import com.tinkerpop.frames.FramedGraph;
+
+import eu.ehri.project.core.GraphHelpers;
+import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.views.Views;
 
 /*
  * The rest interface for neo4j needs to be extended with utilities that do some extra work for us.
@@ -40,7 +48,7 @@ public class EhriNeo4jPlugin extends ServerPlugin {
 	@Description("Fetch a collection with the given name.")
 	@PluginTarget(GraphDatabaseService.class)
 	public Representation simpleQuery(
-			@Source GraphDatabaseService graphDB,
+			@Source GraphDatabaseService graphDb,
 			@Description("Index to query")
 			@Parameter(name = "index", optional = false) String index,
 			@Description("Field to query on")
@@ -48,8 +56,9 @@ public class EhriNeo4jPlugin extends ServerPlugin {
 			@Description("The query string")
 			@Parameter(name = "query", optional = false) String query
 		) throws Exception {
+		GraphHelpers helpers = new GraphHelpers(graphDb);
 		return ObjectToRepresentationConverter.convert(
-			EhriNeo4j.simpleQuery(graphDB, index, field, query)
+				helpers.simpleQuery(index, field, query)
 		);
 	}
 	
@@ -69,14 +78,15 @@ public class EhriNeo4jPlugin extends ServerPlugin {
 	@Description("Create an indexed vertex")
 	@PluginTarget(GraphDatabaseService.class)
 	public Representation createIndexedVertex(
-			@Source GraphDatabaseService graphDB,
+			@Source GraphDatabaseService graphDb,
 			@Description("Data")
 			@Parameter(name = "data", optional = false) Map data,
 			@Description("Index name")
 			@Parameter(name = "index", optional = false) String index
 		) throws Exception {
+		GraphHelpers helpers = new GraphHelpers(graphDb);
 		return ObjectToRepresentationConverter.convert(
-			EhriNeo4j.createIndexedVertex(graphDB, data, index)
+				helpers.createIndexedVertex(data, index)
 		);
 	}
 	
@@ -93,11 +103,12 @@ public class EhriNeo4jPlugin extends ServerPlugin {
 	@Description("Delete a vertex")
 	@PluginTarget(GraphDatabaseService.class)
 	public Representation deleteVertex(
-			@Source GraphDatabaseService graphDB,
+			@Source GraphDatabaseService graphDb,
 			@Description("Vertex identifier")
 			@Parameter(name = "id", optional = false) long id
 		) throws Exception {
-		EhriNeo4j.deleteVertex(graphDB, id);
+		GraphHelpers helpers = new GraphHelpers(graphDb);
+		helpers.deleteVertex(id);
 		// TODO other results on failure
 		return ObjectToRepresentationConverter.convert(
 			"deleted"
@@ -117,7 +128,7 @@ public class EhriNeo4jPlugin extends ServerPlugin {
 	@Description("Update an indexed vertex")
 	@PluginTarget(GraphDatabaseService.class)
 	public Representation updateIndexedVertex(
-			@Source GraphDatabaseService graphDB,
+			@Source GraphDatabaseService graphDb,
 			@Description("Vertex identifier")
 			@Parameter(name = "id", optional = false) long id,
 			@Description("Data")
@@ -125,8 +136,9 @@ public class EhriNeo4jPlugin extends ServerPlugin {
 			@Description("Index name")
 			@Parameter(name = "index", optional = false) String index
 		) throws Exception {
+		GraphHelpers helpers = new GraphHelpers(graphDb);
 		return ObjectToRepresentationConverter.convert(
-			EhriNeo4j.updateIndexedVertex(graphDB, id, data, index)
+				helpers.updateIndexedVertex(id, data, index)
 		);
 	}
 
@@ -147,7 +159,7 @@ public class EhriNeo4jPlugin extends ServerPlugin {
 	@Description("Create an indexed edge")
 	@PluginTarget(GraphDatabaseService.class)
 	public Representation createIndexedEdge(
-			@Source GraphDatabaseService graphDB,
+			@Source GraphDatabaseService graphDb,
 			@Description("Outgoing vertex id")
 			@Parameter(name = "outV", optional = false) long outV, 
 			@Description("Edge type")
@@ -159,8 +171,9 @@ public class EhriNeo4jPlugin extends ServerPlugin {
 			@Description("Index name")
 			@Parameter(name = "index", optional = false) String index
 		) throws Exception {
+		GraphHelpers helpers = new GraphHelpers(graphDb);
 		return ObjectToRepresentationConverter.convert(
-			EhriNeo4j.createIndexedEdge(graphDB, outV, typeLabel, inV, data, index)
+				helpers.createIndexedEdge(outV, inV, typeLabel, data, index)
 		);
 	}
 
@@ -175,11 +188,12 @@ public class EhriNeo4jPlugin extends ServerPlugin {
 	@Description("Delete an edge")
 	@PluginTarget(GraphDatabaseService.class)
 	public Representation deleteEdge(
-			@Source GraphDatabaseService graphDB,
+			@Source GraphDatabaseService graphDb,
 			@Description("Edge identifier")
 			@Parameter(name = "id", optional = false) long id
 		) throws Exception {
-		EhriNeo4j.deleteEdge(graphDB, id);
+		GraphHelpers helpers = new GraphHelpers(graphDb);
+		helpers.deleteEdge(id);
 		// TODO other results on failure
 		return ObjectToRepresentationConverter.convert(
 			"deleted"
@@ -199,7 +213,7 @@ public class EhriNeo4jPlugin extends ServerPlugin {
 	@Description("update an indexed edge")
 	@PluginTarget(GraphDatabaseService.class)
 	public Representation updateIndexedEdge(
-			@Source GraphDatabaseService graphDB,
+			@Source GraphDatabaseService graphDb,
 			@Description("Edge identifier")
 			@Parameter(name = "id", optional = false) long id,
 			@Description("Data")
@@ -207,39 +221,109 @@ public class EhriNeo4jPlugin extends ServerPlugin {
 			@Description("Index name")
 			@Parameter(name = "index", optional = false) String index
 		) throws Exception {
+		GraphHelpers helpers = new GraphHelpers(graphDb);
 		return ObjectToRepresentationConverter.convert(
-			EhriNeo4j.updateIndexedEdge(graphDB, id, data, index)
+				helpers.updateIndexedEdge(id, data, index)
 		);
 	}
 	
 	/*** Index ***/
 	
 	@Name("getVertexIndex")
-	@Description("get the vertex index")
+	@Description("get the index")
 	@PluginTarget(GraphDatabaseService.class)
 	public Representation getVertexIndex(
-			@Source GraphDatabaseService graphDB,
+			@Source GraphDatabaseService graphDb,
 			@Description("Index name")
 			@Parameter(name = "index", optional = false) String index
 		) throws Exception {
+		GraphHelpers helpers = new GraphHelpers(graphDb);
 		return ObjectToRepresentationConverter.convert(
-			EhriNeo4j.getVertexIndex(graphDB, index)
+				helpers.getIndex(index, Vertex.class)
 		);
 	}
 
 	@Name("getOrCreateVertexIndex")
-	@Description("get the vertex index or create it if it did not exist")
+	@Description("get the index or create it if it did not exist")
 	@PluginTarget(GraphDatabaseService.class)
 	public Representation getOrCreateVertexIndex(
-			@Source GraphDatabaseService graphDB,
+			@Source GraphDatabaseService graphDb,
 			@Description("Index name")
 			@Parameter(name = "index", optional = false) String index,
 			@Description("Parameters")
 			@Parameter(name = "parameters", optional = false) Map parameters
 		) throws Exception {
+		GraphHelpers helpers = new GraphHelpers(graphDb);
 		return ObjectToRepresentationConverter.convert(
-			EhriNeo4j.getOrCreateVertexIndex(graphDB, index, parameters)
+				helpers.getOrCreateIndex(index, Vertex.class, getParametersAsArray(parameters))
+		);		
+	}
+
+	@Name("getEdgeIndex")
+	@Description("get the index")
+	@PluginTarget(GraphDatabaseService.class)
+	public Representation getEdgeIndex(
+			@Source GraphDatabaseService graphDb,
+			@Description("Index name")
+			@Parameter(name = "index", optional = false) String index
+		) throws Exception {
+		GraphHelpers helpers = new GraphHelpers(graphDb);
+		return ObjectToRepresentationConverter.convert(
+				helpers.getIndex(index, Edge.class)
 		);
 	}
 
+	@Name("getOrCreateEdgeIndex")
+	@Description("get the index or create it if it did not exist")
+	@PluginTarget(GraphDatabaseService.class)
+	public Representation getOrCreateEdgeIndex(
+			@Source GraphDatabaseService graphDb,
+			@Description("Index name")
+			@Parameter(name = "index", optional = false) String index,
+			@Description("Parameters")
+			@Parameter(name = "parameters", optional = false) Map parameters
+		) throws Exception {
+		GraphHelpers helpers = new GraphHelpers(graphDb);
+		return ObjectToRepresentationConverter.convert(
+				helpers.getOrCreateIndex(index, Edge.class, getParametersAsArray(parameters))
+		);		
+	}
+	
+	// convert the parameters map to an array of Parameters
+	// construct List from parameter Map
+	// and then have the list in place of the varargs
+	// Note that the server plugin has an abstract ParemeterList class
+	private com.tinkerpop.blueprints.Parameter[] getParametersAsArray(Map<String, Object> parameters)
+	{
+		ArrayList<com.tinkerpop.blueprints.Parameter> parametersList = new ArrayList<com.tinkerpop.blueprints.Parameter>();
+		for(Map.Entry<String, Object> entry : parameters.entrySet()) {
+			if (entry.getValue() == null)
+				continue;
+			parametersList.add(new com.tinkerpop.blueprints.Parameter<String, Object>(entry.getKey(), entry.getValue()));
+		}
+		return (com.tinkerpop.blueprints.Parameter[]) parametersList.toArray(new com.tinkerpop.blueprints.Parameter[parametersList.size()]);
+	}
+	
+	/*** ehri data frames ***/
+	
+	// get Item (entity) detail
+	@Name("getDocumentaryUnit")
+	@Description("get the item")
+	@PluginTarget(GraphDatabaseService.class)
+	public Representation getDocumentaryUnit(
+			@Source GraphDatabaseService graphDB,
+			@Description("item identifier")
+			@Parameter(name = "id", optional = false) Long id, 
+			@Description("user identifier")
+			@Parameter(name = "userId", optional = false) Long userId
+		) throws Exception {
+		// TEST
+	    FramedGraph<Neo4jGraph> graph = new FramedGraph<Neo4jGraph>(new Neo4jGraph(graphDB));
+	    Views<DocumentaryUnit> views = new Views<DocumentaryUnit>(graph, DocumentaryUnit.class);
+		return ObjectToRepresentationConverter.convert(
+				// Hmmm, must be longs instead of String, for userId String would be better
+			    views.detail(id, userId)
+		);
+	}
+	
 }

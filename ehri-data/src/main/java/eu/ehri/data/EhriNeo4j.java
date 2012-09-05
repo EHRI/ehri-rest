@@ -12,12 +12,12 @@ import org.neo4j.graphdb.index.Index;
 import org.neo4j.graphdb.index.IndexManager;
 import org.neo4j.graphdb.index.RelationshipIndex;
 
-import com.tinkerpop.blueprints.pgm.Edge;
-import com.tinkerpop.blueprints.pgm.Element;
-import com.tinkerpop.blueprints.pgm.TransactionalGraph;
-import com.tinkerpop.blueprints.pgm.Vertex;
-import com.tinkerpop.blueprints.pgm.impls.neo4j.Neo4jGraph;
-import com.tinkerpop.blueprints.pgm.impls.Parameter;
+import com.tinkerpop.blueprints.Edge;
+import com.tinkerpop.blueprints.Element;
+import com.tinkerpop.blueprints.TransactionalGraph;
+import com.tinkerpop.blueprints.Vertex;
+import com.tinkerpop.blueprints.Parameter;
+import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -72,8 +72,8 @@ public class EhriNeo4j {
 		Neo4jGraph graph = new Neo4jGraph(graphDb);
 		IndexManager manager = graphDb.index();
 		
-		graph.setMaxBufferSize(0);
-		graph.startTransaction();
+		//graph.setMaxBufferSize(0);
+		//graph.startTransaction();
 		try {
 			Index<Node> index = manager.forNodes(indexName);
 			Node node = graphDb.createNode();
@@ -119,8 +119,8 @@ public class EhriNeo4j {
 		Neo4jGraph graph = new Neo4jGraph(graphDb);
 		IndexManager manager = graphDb.index();
 		
-		graph.setMaxBufferSize(0);
-		graph.startTransaction();
+		//graph.setMaxBufferSize(0);
+		//graph.startTransaction();
 		try {
 			Index<Node> index = manager.forNodes(indexName);
 			Node node = graphDb.getNodeById(id);
@@ -156,8 +156,8 @@ public class EhriNeo4j {
 		// an enum needed here?
 		DynamicRelationshipType relationshipType = DynamicRelationshipType.withName(typeLabel); 
 		
-		graph.setMaxBufferSize(0);
-		graph.startTransaction();
+		//graph.setMaxBufferSize(0);
+		//graph.startTransaction();
 		try {
 			Node node = graphDb.getNodeById(outV);
 			
@@ -206,8 +206,8 @@ public class EhriNeo4j {
 		Neo4jGraph graph = new Neo4jGraph(graphDb);
 		IndexManager manager = graphDb.index();
 		
-		graph.setMaxBufferSize(0);
-		graph.startTransaction();
+		//graph.setMaxBufferSize(0);
+		//graph.startTransaction();
 		try {
 			RelationshipIndex index = manager.forRelationships(indexName);
 			Relationship relationship = graphDb.getRelationshipById(id);
@@ -240,10 +240,10 @@ public class EhriNeo4j {
 	 * @param indexName 	The name of the index
 	 * @return 				The index
 	 */
-	public static com.tinkerpop.blueprints.pgm.Index<Vertex> getVertexIndex(GraphDatabaseService graphDb, String indexName)
+	public static com.tinkerpop.blueprints.Index<Vertex> getVertexIndex(GraphDatabaseService graphDb, String indexName)
 	{		
 		Neo4jGraph graph = new Neo4jGraph(graphDb);
-		com.tinkerpop.blueprints.pgm.Index<Vertex> index = graph.getIndex(indexName, Vertex.class);
+		com.tinkerpop.blueprints.Index<Vertex> index = graph.getIndex(indexName, Vertex.class);
 		
 		return index;
 	}	
@@ -256,7 +256,7 @@ public class EhriNeo4j {
 	 * @return 				The index
 	 * @throws Exception
 	 */
-	public static com.tinkerpop.blueprints.pgm.Index<Vertex> getOrCreateVertexIndex(GraphDatabaseService graphDb, String indexName, Map<String, Object> parameters) throws Exception
+	public static com.tinkerpop.blueprints.Index<Vertex> getOrCreateVertexIndex(GraphDatabaseService graphDb, String indexName, Map<String, Object> parameters) throws Exception
 	{
 		return getOrCreateIndex(graphDb, indexName, parameters, Vertex.class);
 	}
@@ -267,10 +267,10 @@ public class EhriNeo4j {
 	 * @param indexName 	The name of the index
 	 * @return 				The index
 	 */
-	public static com.tinkerpop.blueprints.pgm.Index<Edge> getEdgeIndex(GraphDatabaseService graphDb, String indexName)
+	public static com.tinkerpop.blueprints.Index<Edge> getEdgeIndex(GraphDatabaseService graphDb, String indexName)
 	{		
 		Neo4jGraph graph = new Neo4jGraph(graphDb);
-		com.tinkerpop.blueprints.pgm.Index<Edge> index = graph.getIndex(indexName, Edge.class);
+		com.tinkerpop.blueprints.Index<Edge> index = graph.getIndex(indexName, Edge.class);
 		
 		return index;
 	}	
@@ -283,7 +283,7 @@ public class EhriNeo4j {
 	 * @return The index
 	 * @throws Exception
 	 */
-	public static com.tinkerpop.blueprints.pgm.Index<Edge> getOrCreateEdgeIndex(GraphDatabaseService graphDb, String indexName, Map<String, Object> parameters) throws Exception
+	public static com.tinkerpop.blueprints.Index<Edge> getOrCreateEdgeIndex(GraphDatabaseService graphDb, String indexName, Map<String, Object> parameters) throws Exception
 	{
 		return getOrCreateIndex(graphDb, indexName, parameters, Edge.class);
 	}
@@ -298,22 +298,22 @@ public class EhriNeo4j {
 	 * @return 				The index
 	 * @throws Exception
 	 */
-	private static <T extends Element> com.tinkerpop.blueprints.pgm.Index<T> getOrCreateIndex(GraphDatabaseService graphDb, String indexName, Map<String, Object> parameters, Class<T> indexClass) throws Exception
+	private static <T extends Element> com.tinkerpop.blueprints.Index<T> getOrCreateIndex(GraphDatabaseService graphDb, String indexName, Map<String, Object> parameters, Class<T> indexClass) throws Exception
 	{
 		Neo4jGraph graph = new Neo4jGraph(graphDb);
 		
-		graph.setMaxBufferSize(0);
-		graph.startTransaction();
+		//graph.setMaxBufferSize(0);
+		//graph.startTransaction();
 		
 		try {
-			com.tinkerpop.blueprints.pgm.Index<T> index = 
+			com.tinkerpop.blueprints.Index<T> index = 
 					graph.getIndex(indexName, indexClass);
 
 			if (index == null) {
 				// create it
 				if (parameters == null || parameters.isEmpty()) {
 					// no parameters
-					index = graph.createManualIndex(indexName, indexClass);
+					index = graph.createIndex(indexName, indexClass);
 				} else {
 					// construct List from parameter Map
 					// and then have the list in place of the varargs
@@ -324,7 +324,7 @@ public class EhriNeo4j {
 						parametersList.add(new Parameter<String, Object>(entry.getKey(), entry.getValue()));
 					}
 					
-					index = graph.createManualIndex(indexName, indexClass, 
+					index = graph.createIndex(indexName, indexClass, 
 						parametersList.toArray(new Parameter[parametersList.size()]));
 				}
 			}
