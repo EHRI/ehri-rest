@@ -306,6 +306,8 @@ public class EhriNeo4jPlugin extends ServerPlugin {
 	
 	/*** ehri data frames ***/
 	
+	/*** documentaryUnit ***/
+	
 	// get Item (entity) detail
 	@Name("getDocumentaryUnit")
 	@Description("get the item")
@@ -317,7 +319,6 @@ public class EhriNeo4jPlugin extends ServerPlugin {
 			@Description("user identifier")
 			@Parameter(name = "userId", optional = false) Long userId
 		) throws Exception {
-		// TEST
 	    FramedGraph<Neo4jGraph> graph = new FramedGraph<Neo4jGraph>(new Neo4jGraph(graphDB));
 	    Views<DocumentaryUnit> views = new Views<DocumentaryUnit>(graph, DocumentaryUnit.class);
 		return ObjectToRepresentationConverter.convert(
@@ -325,5 +326,83 @@ public class EhriNeo4jPlugin extends ServerPlugin {
 			    views.detail(id, userId)
 		);
 	}
+	
+	@Name("createDocumentaryUnit")
+	@Description("Create a DocumentaryUnit")
+	@PluginTarget(GraphDatabaseService.class)
+	public Representation createDocumentaryUnit(
+			@Source GraphDatabaseService graphDb,
+			@Description("Data")
+			@Parameter(name = "data", optional = false) Map data,
+			@Description("user identifier")
+			@Parameter(name = "userId", optional = false) Long userId
+		) throws Exception {
+	    FramedGraph<Neo4jGraph> graph = new FramedGraph<Neo4jGraph>(new Neo4jGraph(graphDb));
+	    Views<DocumentaryUnit> views = new Views<DocumentaryUnit>(graph, DocumentaryUnit.class);
+		return ObjectToRepresentationConverter.convert(
+				views.create(data, userId)
+		);
+	}
+
+	@Name("deleteDocumentaryUnit")
+	@Description("Delete a DocumentaryUnit")
+	@PluginTarget(GraphDatabaseService.class)
+	public Representation deleteDocumentaryUnit(
+			@Source GraphDatabaseService graphDb,
+			@Description("DocumentaryUnit identifier")
+			@Parameter(name = "id", optional = false) long id, 
+			@Description("user identifier")
+			@Parameter(name = "userId", optional = false) Long userId
+		) throws Exception {
+	    FramedGraph<Neo4jGraph> graph = new FramedGraph<Neo4jGraph>(new Neo4jGraph(graphDb));
+	    Views<DocumentaryUnit> views = new Views<DocumentaryUnit>(graph, DocumentaryUnit.class);
+	    views.delete(id, userId);
+	    // TODO other results on failure
+		return ObjectToRepresentationConverter.convert(
+			"deleted"
+		);
+	}
+
+	@Name("updateDocumentaryUnit")
+	@Description("Update a DocumentaryUnit")
+	@PluginTarget(GraphDatabaseService.class)
+	public Representation updateDocumentaryUnit(
+			@Source GraphDatabaseService graphDb,
+			@Description("Data")
+			@Parameter(name = "data", optional = false) Map data,
+			@Description("user identifier")
+			@Parameter(name = "userId", optional = false) Long userId
+		) throws Exception {
+	    FramedGraph<Neo4jGraph> graph = new FramedGraph<Neo4jGraph>(new Neo4jGraph(graphDb));
+	    Views<DocumentaryUnit> views = new Views<DocumentaryUnit>(graph, DocumentaryUnit.class);
+		return ObjectToRepresentationConverter.convert(
+				// Note that the id must be in the bundle data!
+				views.update(data, userId)
+		);
+	}
+
+	
+	/*** userProfile ***/
+	
+	/*
+	// get Item (entity) detail
+	@Name("getUserProfile")
+	@Description("get the item")
+	@PluginTarget(GraphDatabaseService.class)
+	public Representation getUserProfile(
+			@Source GraphDatabaseService graphDB,
+			@Description("item identifier")
+			@Parameter(name = "id", optional = false) Long id, 
+			@Description("user identifier")
+			@Parameter(name = "userId", optional = false) Long requestingUserId
+		) throws Exception {
+	    FramedGraph<Neo4jGraph> graph = new FramedGraph<Neo4jGraph>(new Neo4jGraph(graphDB));
+	    Views<UserProfile> views = new Views<UserProfile>(graph, UserProfile.class);
+		return ObjectToRepresentationConverter.convert(
+				// Hmmm, must be longs instead of String, for userId String would be better
+			    views.detail(id, requestingUserId)
+		);
+	}
+	*/
 	
 }

@@ -47,16 +47,40 @@
 			<version>0.1-SNAPSHOT</version>
 		</dependency>
 		
+		<!-- tinkerpop -->
 		<dependency>
 			<groupId>com.tinkerpop.blueprints</groupId>
 			<artifactId>blueprints-neo4j-graph</artifactId>
-			<version>2.1.0</version> <!-- was 1.2 -->
+			<version>${tinkerpop.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>com.tinkerpop</groupId>
+			<artifactId>frames</artifactId>
+			<version>${tinkerpop.version}</version>
+		</dependency>
+       <dependency>
+        	<groupId>com.tinkerpop.gremlin</groupId>
+        	<artifactId>gremlin-java</artifactId>
+        	<version>${tinkerpop.version}</version>
+       </dependency>
+        
+		<!-- neo4j -->
+       <dependency>
+            <groupId>org.neo4j</groupId>
+            <artifactId>neo4j</artifactId>
+            <version>${neo4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.neo4j</groupId>
+            <artifactId>neo4j-kernel</artifactId>
+            <version>${neo4j.version}</version>
+        </dependency>
 		<dependency>
 			<groupId>org.neo4j.app</groupId>
 			<artifactId>neo4j-server</artifactId>
 			<version>${neo4j.version}</version>
 		</dependency>
+		
 		
 		<!-- logging -->
 		<dependency>
@@ -79,7 +103,7 @@
 			<scope>test</scope>
 			<version>4.10</version>
 		</dependency>
-		<!-- Test the RESTfull api -->
+		<!-- test the RESTfull api -->
 		<dependency>
 			<groupId>com.sun.jersey</groupId>
 			<artifactId>jersey-client</artifactId>
@@ -103,7 +127,9 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<!-- Jar Versions -->
- 	    <neo4j.version>1.8-SNAPSHOT</neo4j.version>	
+		<!-- Jar Versions -->		
+		<!-- was 1.8-SNAPSHOT -->
+ 	    <neo4j.version>1.8.M07</neo4j.version>	
+ 	    <tinkerpop.version>2.1.0</tinkerpop.version>	
 	</properties>
 </project>
