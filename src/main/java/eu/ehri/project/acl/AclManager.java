@@ -87,8 +87,8 @@ public class AclManager {
      */
     public static Access getAccessControl(Accessor accessor,
             AccessibleEntity entity) {
-        // Admin can read/write everything
-        if (isAdmin(accessor))
+        // Admin can read/write everything and object can always read/write itself
+        if (isAdmin(accessor) || (accessor == entity))
             return new EntityAccessFactory().buildReadWrite(entity, accessor);
 
         // Otherwise, check if there are specified permissions.
