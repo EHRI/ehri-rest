@@ -89,4 +89,22 @@ public class AclTest extends ModelTestBase {
         assertTrue(access.getRead());
         assertTrue(access.getWrite());
     }
+    
+    @Test
+    public void testUserCanAccessOwnProfile() {
+        Accessor tim = helper.getTestFrame("tim", Accessor.class);
+        AccessibleEntity prof = helper.getTestFrame("tim", AccessibleEntity.class);
+        Access access = AclManager.getAccessControl(tim, prof);
+        assertTrue(access.getRead());
+        assertTrue(access.getWrite());        
+    }
+    
+    @Test
+    public void testUserCannotWriteOtherProfile() {
+        Accessor reto = helper.getTestFrame("reto", Accessor.class);
+        AccessibleEntity tim = helper.getTestFrame("tim", AccessibleEntity.class);
+        Access access = AclManager.getAccessControl(reto, tim);
+        assertTrue(access.getRead());
+        assertFalse(access.getWrite());        
+    }
 }
