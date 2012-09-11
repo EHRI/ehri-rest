@@ -1,6 +1,8 @@
 package eu.ehri.project.models.utils;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -10,6 +12,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.jar.JarEntry;
+import java.util.jar.JarInputStream;
 
 import com.tinkerpop.frames.Adjacency;
 
@@ -43,12 +47,91 @@ public class ClassUtils {
             dirs.add(new File(resource.getFile()));
         }
         ArrayList<Class<?>> classes = new ArrayList<Class<?>>();
-        for (File directory : dirs) {
-            classes.addAll(findClasses(directory, packageName));
+        for (File directory : dirs) {	       	
+			if (isJarfileResource(directory))
+			{
+				classes.addAll(findClassesInJarfileResource(directory));
+			} 
+			else
+			{	
+				classes.addAll(findClasses(directory, packageName));
+			}       
         }
         return classes.toArray(new Class[classes.size()]);
     }
 
+    /**
+     * Detects if a file points to a jar file resource
+     * example: "file:/path/to/file/MyJar.jar!/org/my/package"
+     * 
+     * @param file The file
+     * @return true if jar file resource, false otherwise
+     */
+    private static boolean isJarfileResource(File file)
+    {
+    	String path = file.getPath();
+    	
+    	return (path.startsWith("file:") && path.contains(".jar!"));
+    }
+    
+    /**
+     * Find the classes in the package in the jar
+     * 
+     * @see isJarfileResource
+     * 
+     * @param file a jar file resource 
+     * @return The classes
+     */
+    private static List<Class<?>> findClassesInJarfileResource(File file)
+    {
+        List<Class<?>> classes = new ArrayList<Class<?>>();
+        
+        String path = file.getPath();
+        
+        // get jar file part and also skip leading "file:"
+        String jarFilename = path.substring(path.indexOf(':')+1, path.indexOf('!'));
+        // get package part
+        String packageName = path.substring(path.indexOf('!')+1, path.length());
+        // remove leading slash
+        if (packageName.startsWith("/"))
+        	packageName = packageName.substring(1);
+        
+        JarInputStream jarFile = null;
+        try {
+			jarFile = new JarInputStream(new FileInputStream (jarFilename));
+
+			JarEntry jarEntry = jarFile.getNextJarEntry();
+            while (jarEntry != null) 
+            { 
+                if((jarEntry.getName ().startsWith (packageName)) &&
+                        (jarEntry.getName ().endsWith (".class")) ) {
+                	 String entryName = jarEntry.getName().replaceAll("/", "\\.");
+                	 String className = entryName.substring(0, entryName.length() - 6); 
+                	 classes.add(Class.forName(className));
+                }
+            	jarEntry = jarFile.getNextJarEntry();
+            }
+		} catch (FileNotFoundException e) {
+			// TODO log
+			return classes;
+		} catch (IOException e) {
+			// TODO log
+			return classes;
+		} catch (ClassNotFoundException e) {
+			// TODO log
+			return classes;
+		} finally {
+			if (jarFile != null)
+				try {
+					jarFile.close();
+				} catch (IOException e) {
+					//empty
+				}
+		}
+        
+        return classes;
+    }   
+    
     /**
      * Recursive method used to find all classes in a given directory and
      * subdirs.
