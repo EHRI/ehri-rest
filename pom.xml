@@ -11,8 +11,10 @@
     <name>neo4j EHRI Project</name>
 
     <modules>
+    <!-- 
         <module>ehri-data</module>
-        <module>ehri-plugin</module>
+     -->
+         <module>ehri-plugin</module>
     </modules>
 
 </project>

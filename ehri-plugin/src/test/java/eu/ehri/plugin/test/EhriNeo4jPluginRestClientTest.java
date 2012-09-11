@@ -59,7 +59,7 @@ public class EhriNeo4jPluginRestClientTest {
 		WebResource vertexResource = client.resource(vertexUri);
 		response = vertexResource.accept( MediaType.APPLICATION_JSON  )
 				.type( MediaType.APPLICATION_JSON  )
-		        .entity( "{\"index\":\"test\", \"data\": {\"name\": \"admin\"}}" )
+		        .entity( "{\"index\":\"group\", \"data\": {\"name\": \"admin\", \"isA\": \"group\"}}" )
 		        .post( ClientResponse.class );
 		assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
 		Long groupId = getIdFromResponseString(response.getEntity(String.class));
@@ -73,7 +73,7 @@ public class EhriNeo4jPluginRestClientTest {
 		assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
 		response = vertexResource.accept( MediaType.APPLICATION_JSON  )
 				.type( MediaType.APPLICATION_JSON  )
-		        .entity( "{\"index\":\"userProfile\", \"data\": {\"userId\": 0, \"name\": \"admin\"}}" )
+		        .entity( "{\"index\":\"userProfile\", \"data\": {\"userId\": 0, \"name\": \"admin\", \"isA\": \"userProfile\"}}" )
 		        .post( ClientResponse.class );
 		assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
 		Long userProfileId = getIdFromResponseString(response.getEntity(String.class));

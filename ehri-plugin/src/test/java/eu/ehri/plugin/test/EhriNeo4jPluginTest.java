@@ -15,6 +15,7 @@ import org.neo4j.test.TestGraphDatabaseFactory;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
+import eu.ehri.project.exceptions.IndexNotFoundException;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.views.Views;
@@ -56,8 +57,13 @@ public class EhriNeo4jPluginTest {
 		// graph.shutdown();
 	}
 
+    // lets simple things using the fixture
+    @Test(expected=IndexNotFoundException.class)
+    public void createIndexedVertex() throws Exception {
+    	Representation unit = plugin.getVertexIndex(db, "nonexistingindex");
+    }
+
 	// lets see If I can do the same details test as already done in the ehri-data-frames test 
-	//@Ignore
     @Test
     public void testDetail() throws PermissionDenied {
         DocumentaryUnit unit = views.detail(itemId, validUserId);
@@ -65,9 +71,12 @@ public class EhriNeo4jPluginTest {
     }
     
     // Then do the same but via the plugin
-	@Ignore
+	//@Ignore
     @Test
     public void testGetDocumentartyUnit() throws Exception {
-    	Representation unit = plugin.getDocumentaryUnit(db, itemId, validUserId);    	
+    	Representation unit = plugin.getDocumentaryUnit(db, itemId, validUserId);  
     }
+    
+
+    
 }

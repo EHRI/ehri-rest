@@ -12,12 +12,12 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<build>
 		<!-- resources for the test graph -->
-        <testResources>
-           <testResource>
-               <directory>${project.basedir}/src/test/resources/fixtures</directory>
-           </testResource>
-       </testResources>
-	 
+		<testResources>
+			<testResource>
+				<directory>${project.basedir}/src/test/resources/fixtures</directory>
+			</testResource>
+		</testResources>
+
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -39,14 +39,14 @@
 		</plugins>
 	</build>
 	<dependencies>
-		
+
 		<!-- was ehri-data, a sibling project -->
 		<dependency>
 			<groupId>EHRI</groupId>
 			<artifactId>ehri-data-frames</artifactId>
 			<version>0.1-SNAPSHOT</version>
 		</dependency>
-		
+
 		<!-- tinkerpop -->
 		<dependency>
 			<groupId>com.tinkerpop.blueprints</groupId>
@@ -57,46 +57,58 @@
 			<groupId>com.tinkerpop</groupId>
 			<artifactId>frames</artifactId>
 			<version>${tinkerpop.version}</version>
+			<scope>compile</scope>
 		</dependency>
-       <dependency>
-        	<groupId>com.tinkerpop.gremlin</groupId>
-        	<artifactId>gremlin-java</artifactId>
-        	<version>${tinkerpop.version}</version>
-       </dependency>
-        
+		<dependency>
+			<groupId>com.tinkerpop.gremlin</groupId>
+			<artifactId>gremlin-java</artifactId>
+			<version>${tinkerpop.version}</version>
+			<scope>compile</scope>
+		</dependency>
+
 		<!-- neo4j -->
-       <dependency>
-            <groupId>org.neo4j</groupId>
-            <artifactId>neo4j</artifactId>
-            <version>${neo4j.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.neo4j</groupId>
-            <artifactId>neo4j-kernel</artifactId>
-            <version>${neo4j.version}</version>
-        </dependency>
+		<dependency>
+			<groupId>org.neo4j</groupId>
+			<artifactId>neo4j</artifactId>
+			<version>${neo4j.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.neo4j</groupId>
+			<artifactId>neo4j-kernel</artifactId>
+			<version>${neo4j.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>org.neo4j.app</groupId>
 			<artifactId>neo4j-server</artifactId>
 			<version>${neo4j.version}</version>
+			<!-- NOTE somehow have it use the old tinkerpop blueprints-neo4j-graph 1.2 
+			by including it explicitely -->
+			
+			
 		</dependency>
-		
-		
+
+
 		<!-- logging -->
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
 			<version>1.6.6</version>
 		</dependency>
-		
+
 		<!-- testing -->
 		<dependency>
-            <groupId>org.neo4j</groupId>
-            <artifactId>neo4j-kernel</artifactId>
-            <version>${neo4j.version}</version>
-            <scope>test</scope>
-            <classifier>tests</classifier>
-        </dependency>
+			<groupId>org.neo4j</groupId>
+			<artifactId>neo4j-kernel</artifactId>
+			<version>${neo4j.version}</version>
+			<type>test-jar</type>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.neo4j</groupId>
+			<artifactId>neo4j-graphviz</artifactId>
+			<version>${neo4j.version}</version>
+			<scope>test</scope>
+		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
@@ -127,9 +139,9 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<!-- Jar Versions -->		
+		<!-- Jar Versions -->
 		<!-- was 1.8-SNAPSHOT -->
- 	    <neo4j.version>1.8.M07</neo4j.version>	
- 	    <tinkerpop.version>2.1.0</tinkerpop.version>	
+		<neo4j.version>1.8.M07</neo4j.version>
+		<tinkerpop.version>2.1.0</tinkerpop.version>
 	</properties>
 </project>

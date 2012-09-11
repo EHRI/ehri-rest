@@ -17,9 +17,11 @@ import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
+import com.tinkerpop.frames.VertexFrame;
 
 import eu.ehri.project.core.GraphHelpers;
 import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.persistance.Converter;
 import eu.ehri.project.views.Views;
 
 /*
@@ -321,10 +323,13 @@ public class EhriNeo4jPlugin extends ServerPlugin {
 		) throws Exception {
 	    FramedGraph<Neo4jGraph> graph = new FramedGraph<Neo4jGraph>(new Neo4jGraph(graphDB));
 	    Views<DocumentaryUnit> views = new Views<DocumentaryUnit>(graph, DocumentaryUnit.class);
+	    DocumentaryUnit unit = views.detail(id, userId);
+
+		// Hmmm, must be longs instead of String, for userId String would be better
 		return ObjectToRepresentationConverter.convert(
-				// Hmmm, must be longs instead of String, for userId String would be better
-			    views.detail(id, userId)
+			    unit.asVertex()	
 		);
+//		new Converter().vertexFrameToJson(unit);
 	}
 	
 	@Name("createDocumentaryUnit")
@@ -379,6 +384,7 @@ public class EhriNeo4jPlugin extends ServerPlugin {
 				// Note that the id must be in the bundle data!
 				views.update(data, userId)
 		);
+		
 	}
 
 	
