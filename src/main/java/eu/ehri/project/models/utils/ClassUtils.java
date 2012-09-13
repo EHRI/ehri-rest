@@ -47,15 +47,12 @@ public class ClassUtils {
             dirs.add(new File(resource.getFile()));
         }
         ArrayList<Class<?>> classes = new ArrayList<Class<?>>();
-        for (File directory : dirs) {	       	
-			if (isJarfileResource(directory))
-			{
-				classes.addAll(findClassesInJarfileResource(directory));
-			} 
-			else
-			{	
-				classes.addAll(findClasses(directory, packageName));
-			}       
+        for (File directory : dirs) {
+            if (isJarfileResource(directory)) {
+                classes.addAll(findClassesInJarfileResource(directory));
+            } else {
+                classes.addAll(findClasses(directory, packageName));
+            }
         }
         return classes.toArray(new Class[classes.size()]);
     }
