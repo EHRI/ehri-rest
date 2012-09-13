@@ -24,8 +24,8 @@ import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.WebResource;
 
 /**
- * The unit testing is done in the ehri-data project because  
- * the EhriNeo4jPlugin is just a thin wrapper around the EhriNeo4j class in the ehri-data project. 
+ * The unit testing is done in the ehri-data-frames project because  
+ * the EhriNeo4jPlugin is just a thin wrapper around the EhriNeo4j class in the ehri-data-frames project. 
  * 
  * The test by EhriNeo4jPluginRestClientTest will need to have a running neo4j server with the plugin installed. 
  * It will call the REST interface using the Jersey neo4j client, but the same could have been done using curl. 
