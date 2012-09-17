@@ -89,22 +89,45 @@ public class AclTest extends ModelTestBase {
         assertTrue(access.getRead());
         assertTrue(access.getWrite());
     }
-    
+
+    /**
+     * Test user accessing profile.
+     */
     @Test
     public void testUserCanAccessOwnProfile() {
         Accessor tim = helper.getTestFrame("tim", Accessor.class);
-        AccessibleEntity prof = helper.getTestFrame("tim", AccessibleEntity.class);
+        AccessibleEntity prof = helper.getTestFrame("tim",
+                AccessibleEntity.class);
         Access access = AclManager.getAccessControl(tim, prof);
         assertTrue(access.getRead());
-        assertTrue(access.getWrite());        
+        assertTrue(access.getWrite());
     }
-    
+
+    /**
+     * Test user accessing other profile.
+     */
     @Test
     public void testUserCannotWriteOtherProfile() {
         Accessor reto = helper.getTestFrame("reto", Accessor.class);
-        AccessibleEntity tim = helper.getTestFrame("tim", AccessibleEntity.class);
+        AccessibleEntity tim = helper.getTestFrame("tim",
+                AccessibleEntity.class);
         Access access = AclManager.getAccessControl(reto, tim);
         assertTrue(access.getRead());
-        assertFalse(access.getWrite());        
+        assertFalse(access.getWrite());
+    }
+
+    /**
+     * Test a member of a group DOES NOT have write access to the group.
+     */
+    @Test
+    public void testUserCannotChangeGroupJustByBeingAMemberOfIt() {
+        Accessor reto = helper.getTestFrame("reto", Accessor.class);
+        AccessibleEntity kcl = helper.getTestFrame("kclGroup",
+                AccessibleEntity.class);
+        Access access = AclManager.getAccessControl(reto, kcl);
+        // Admin can change anything, so ensure the user ISN'T a member of admin
+        assertFalse(AclManager.isAdmin(reto));
+        assertTrue(access.getRead());
+        assertFalse(access.getWrite());
     }
 }
