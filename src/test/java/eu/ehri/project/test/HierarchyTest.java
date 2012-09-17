@@ -1,6 +1,5 @@
 package eu.ehri.project.test;
 
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertEquals;
 
@@ -10,13 +9,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.models.DocumentaryUnit;
-import eu.ehri.project.models.Group;
-import eu.ehri.project.models.UserProfile;
-import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.relationships.Access;
 
 public class HierarchyTest extends ModelTestBase {
 

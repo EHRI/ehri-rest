@@ -22,6 +22,7 @@ public class Views<E extends AccessibleEntity> {
     private final FramedGraph<Neo4jGraph> graph;
     private final Class<E> cls;
     private final Converter converter = new Converter();
+    private final AclManager acl;
 
     /**
      * @param graph
@@ -30,6 +31,7 @@ public class Views<E extends AccessibleEntity> {
     public Views(FramedGraph<Neo4jGraph> graph, Class<E> cls) {
         this.graph = graph;
         this.cls = cls;
+        this.acl = new AclManager(graph);
     }
 
     /**
@@ -42,7 +44,7 @@ public class Views<E extends AccessibleEntity> {
     private void checkReadAccess(AccessibleEntity entity, Long user)
             throws PermissionDenied {
         Accessor accessor = graph.getVertex(user, Accessor.class);
-        Access access = AclManager.getAccessControl(accessor, entity);
+        Access access = acl.getAccessControl(entity, accessor);
         if (!access.getRead())
             throw new PermissionDenied(accessor, entity);
     }
@@ -57,7 +59,7 @@ public class Views<E extends AccessibleEntity> {
     private void checkWriteAccess(AccessibleEntity entity, Long user)
             throws PermissionDenied {
         Accessor accessor = graph.getVertex(user, Accessor.class);
-        Access access = AclManager.getAccessControl(accessor, entity);
+        Access access = acl.getAccessControl(entity, accessor);
         if (!(access.getRead() && access.getWrite()))
             throw new PermissionDenied(accessor, entity);
     }

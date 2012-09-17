@@ -30,7 +30,6 @@ public interface DocumentaryUnit extends VertexFrame, AccessibleEntity,
     @Property("identifier")
     public String setIdentifier();
 
-
     @Fetch
     @Adjacency(label = Agent.HOLDS, direction = Direction.IN)
     public Agent getAgent();

@@ -5,12 +5,23 @@ import java.util.List;
 import java.util.Comparator;
 import java.util.Collections;
 
+import com.tinkerpop.blueprints.Direction;
+import com.tinkerpop.blueprints.Edge;
+import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
+import com.tinkerpop.frames.FramedGraph;
+
 import eu.ehri.project.models.Group;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.relationships.Access;
 
 public class AclManager {
+
+    private FramedGraph<Neo4jGraph> graph;
+
+    public AclManager(FramedGraph<Neo4jGraph> graph) {
+        this.graph = graph;
+    }
 
     static class AccessComparator implements Comparator<Access> {
         // FIXME: Find a better, more elegant way of doing this comparison
@@ -80,16 +91,17 @@ public class AclManager {
     /**
      * Find the access permissions for a given accessor and entity.
      * 
-     * @param accessor
      * @param entity
+     * @param accessor
+     * 
      * @return
      * @return
      */
-    public static Access getAccessControl(Accessor accessor,
-            AccessibleEntity entity) {
+    public Access getAccessControl(AccessibleEntity entity, Accessor accessor) {
         // Admin can read/write everything and object can always read/write
         // itself
-        if (isAdmin(accessor) || (accessor.asVertex().equals(entity.asVertex())))
+        if (isAdmin(accessor)
+                || (accessor.asVertex().equals(entity.asVertex())))
             return new EntityAccessFactory().buildReadWrite(entity, accessor);
 
         // Otherwise, check if there are specified permissions.
@@ -116,5 +128,37 @@ public class AclManager {
                 return Collections.max(ctrls, new AccessComparator());
             }
         }
+    }
+
+    /**
+     * Set access control on an entity.
+     * 
+     * @param entity
+     * @param accessor
+     * @param canRead
+     * @param canWrite
+     */
+    public void setAccessControl(AccessibleEntity entity, Accessor accessor,
+            boolean canRead, boolean canWrite) {
+        // FIXME: There should be a better way of doing this...
+        Edge edge = graph.addEdge(null, entity.asVertex(), accessor.asVertex(),
+                AccessibleEntity.ACCESS);
+        Access access = graph.frame(edge, Direction.OUT, Access.class);
+        access.setRead(canRead);
+        access.setRead(canWrite);
+    }
+    
+    /**
+     * Set access control on an entity to several accessors.
+     * 
+     * @param entity
+     * @param accessors
+     * @param canRead
+     * @param canWrite
+     */
+    public void setAccessControl(AccessibleEntity entity, Accessor[] accessors,
+            boolean canRead, boolean canWrite) {
+        for (Accessor accessor : accessors)
+            setAccessControl(entity, accessor, canRead, canWrite);
     }
 }
