@@ -6,10 +6,11 @@ import com.tinkerpop.frames.Property;
 import com.tinkerpop.frames.VertexFrame;
 
 import eu.ehri.project.models.annotations.EntityType;
+import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 
 @EntityType(EntityTypes.GROUP)
-public interface Group extends VertexFrame, Accessor {
+public interface Group extends VertexFrame, Accessor, AccessibleEntity {
 
     public static final String isA = "group";
 
