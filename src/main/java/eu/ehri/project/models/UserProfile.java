@@ -11,7 +11,8 @@ import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.Annotator;
 
 @EntityType(EntityTypes.USER_PROFILE)
-public interface UserProfile extends VertexFrame, Accessor, AccessibleEntity, Annotator, Actioner {
+public interface UserProfile extends VertexFrame, Accessor, AccessibleEntity,
+        Annotator, Actioner {
 
     public static final String BELONGS_TO = "belongsTo";
 

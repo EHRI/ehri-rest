@@ -41,8 +41,9 @@ public class Converter {
     public Converter() {
         classes = getEntityClasses();
     }
-    
-    public <T extends VertexFrame> Map<String,Object> vertexFrameToData(VertexFrame item) throws SerializationError {
+
+    public <T extends VertexFrame> Map<String, Object> vertexFrameToData(
+            VertexFrame item) throws SerializationError {
         return bundleToData(vertexFrameToBundle(item));
     }
 

@@ -58,77 +58,80 @@ public class ClassUtils {
     }
 
     /**
-     * Detects if a file points to a jar file resource
-     * example: "file:/path/to/file/MyJar.jar!/org/my/package"
+     * Detects if a file points to a jar file resource example:
+     * "file:/path/to/file/MyJar.jar!/org/my/package"
      * 
-     * @param file The file
+     * @param file
+     *            The file
      * @return true if jar file resource, false otherwise
      */
-    private static boolean isJarfileResource(File file)
-    {
-    	String path = file.getPath();
-    	
-    	return (path.startsWith("file:") && path.contains(".jar!"));
+    private static boolean isJarfileResource(File file) {
+        String path = file.getPath();
+
+        return (path.startsWith("file:") && path.contains(".jar!"));
     }
-    
+
     /**
      * Find the classes in the package in the jar
      * 
      * @see isJarfileResource
      * 
-     * @param file a jar file resource 
+     * @param file
+     *            a jar file resource
      * @return The classes
      */
-    private static List<Class<?>> findClassesInJarfileResource(File file)
-    {
+    private static List<Class<?>> findClassesInJarfileResource(File file) {
         List<Class<?>> classes = new ArrayList<Class<?>>();
-        
+
         String path = file.getPath();
-        
+
         // get jar file part and also skip leading "file:"
-        String jarFilename = path.substring(path.indexOf(':')+1, path.indexOf('!'));
+        String jarFilename = path.substring(path.indexOf(':') + 1,
+                path.indexOf('!'));
         // get package part
-        String packageName = path.substring(path.indexOf('!')+1, path.length());
+        String packageName = path.substring(path.indexOf('!') + 1,
+                path.length());
         // remove leading slash
         if (packageName.startsWith("/"))
-        	packageName = packageName.substring(1);
-        
+            packageName = packageName.substring(1);
+
         JarInputStream jarFile = null;
         try {
-			jarFile = new JarInputStream(new FileInputStream (jarFilename));
+            jarFile = new JarInputStream(new FileInputStream(jarFilename));
 
-			JarEntry jarEntry = jarFile.getNextJarEntry();
-            while (jarEntry != null) 
-            { 
-                if((jarEntry.getName ().startsWith (packageName)) &&
-                        (jarEntry.getName ().endsWith (".class")) ) {
-                	 String entryName = jarEntry.getName().replaceAll("/", "\\.");
-                	 String className = entryName.substring(0, entryName.length() - 6); 
-                	 classes.add(Class.forName(className));
+            JarEntry jarEntry = jarFile.getNextJarEntry();
+            while (jarEntry != null) {
+                if ((jarEntry.getName().startsWith(packageName))
+                        && (jarEntry.getName().endsWith(".class"))) {
+                    String entryName = jarEntry.getName()
+                            .replaceAll("/", "\\.");
+                    String className = entryName.substring(0,
+                            entryName.length() - 6);
+                    classes.add(Class.forName(className));
                 }
-            	jarEntry = jarFile.getNextJarEntry();
+                jarEntry = jarFile.getNextJarEntry();
             }
-		} catch (FileNotFoundException e) {
-			// TODO log
-			return classes;
-		} catch (IOException e) {
-			// TODO log
-			return classes;
-		} catch (ClassNotFoundException e) {
-			// TODO log
-			return classes;
-		} finally {
-			if (jarFile != null)
-				try {
-					jarFile.close();
-				} catch (IOException e) {
-					//empty
-				}
-		}
-        
+        } catch (FileNotFoundException e) {
+            // TODO log
+            return classes;
+        } catch (IOException e) {
+            // TODO log
+            return classes;
+        } catch (ClassNotFoundException e) {
+            // TODO log
+            return classes;
+        } finally {
+            if (jarFile != null)
+                try {
+                    jarFile.close();
+                } catch (IOException e) {
+                    // empty
+                }
+        }
+
         return classes;
-    }   
-    
+    }
+
     /**
      * Recursive method used to find all classes in a given directory and
      * subdirs.
