@@ -89,7 +89,7 @@ public class AclManager {
             AccessibleEntity entity) {
         // Admin can read/write everything and object can always read/write
         // itself
-        if (isAdmin(accessor) || (accessor == entity))
+        if (isAdmin(accessor) || (accessor.asVertex().equals(entity.asVertex())))
             return new EntityAccessFactory().buildReadWrite(entity, accessor);
 
         // Otherwise, check if there are specified permissions.
