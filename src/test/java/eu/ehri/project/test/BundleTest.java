@@ -15,10 +15,8 @@ import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.DatePeriod;
-import eu.ehri.project.models.DocumentDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityTypes;
-import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.TemporalEntity;
 import eu.ehri.project.persistance.BundleDAO;
@@ -81,7 +79,7 @@ public class BundleTest extends ModelTestBase {
         EntityBundle<DocumentaryUnit> bundle = converter.jsonToBundle(json);
         BundleDAO<DocumentaryUnit> persister = new BundleDAO<DocumentaryUnit>(
                 graph);
-        DocumentaryUnit c1redux = persister.update(bundle);
+        persister.update(bundle);
 
         // Our deleted description should have come back...
         assertEquals(1, toList(c1.getDescriptions()).size());
@@ -108,7 +106,7 @@ public class BundleTest extends ModelTestBase {
 
         BundleDAO<DocumentaryUnit> persister = new BundleDAO<DocumentaryUnit>(
                 graph);
-        DocumentaryUnit c1redux = persister.update(bundle);
+        persister.update(bundle);
         assertEquals(1, toList(c1.getDatePeriods()).size());
     }
 

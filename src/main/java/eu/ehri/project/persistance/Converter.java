@@ -19,7 +19,6 @@ import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.utils.ClassUtils;
 
-import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
