@@ -17,5 +17,5 @@ public interface AccessibleEntity extends VertexFrame {
     public Iterable<Accessor> getAccessibleTo();
 
     @Adjacency(label = ACCESS)
-    public void addAccessor(final Accessor accessor);
+    public void removeAccessor(final Accessor accessor);
 }

@@ -32,6 +32,6 @@ public interface Accessor extends VertexFrame {
     public Iterable<AccessibleEntity> getAccessibleEntities();
 
     @Adjacency(label = AccessibleEntity.ACCESS, direction = Direction.IN)
-    public void addAccessibleEntity(final AccessibleEntity entity);
+    public void removeAccessibleEntity(final AccessibleEntity entity);
 
 }
