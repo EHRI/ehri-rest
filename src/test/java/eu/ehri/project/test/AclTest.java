@@ -95,10 +95,12 @@ public class AclTest extends ModelTestBase {
      */
     @Test
     public void testUserCanAccessOwnProfile() {
-        Accessor tim = helper.getTestFrame("tim", Accessor.class);
-        AccessibleEntity prof = helper.getTestFrame("tim",
+        Accessor reto = helper.getTestFrame("reto", Accessor.class);
+        AccessibleEntity prof = helper.getTestFrame("reto",
                 AccessibleEntity.class);
-        Access access = AclManager.getAccessControl(tim, prof);
+        Access access = AclManager.getAccessControl(reto, prof);
+        // Check user ISN'T admin (otherwise they'd be able to access anything)
+        assertFalse(AclManager.isAdmin(reto));
         assertTrue(access.getRead());
         assertTrue(access.getWrite());
     }
