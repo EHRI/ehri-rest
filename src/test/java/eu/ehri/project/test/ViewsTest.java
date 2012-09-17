@@ -30,225 +30,225 @@ import eu.ehri.project.test.utils.FixtureLoader;
 
 public class ViewsTest {
 
-    protected static final String TEST_COLLECTION_NAME = "A brand new collection";
-    protected static final String TEST_START_DATE = "1945-01-01T00:00:00Z";
-    protected static final String TEST_USER_NAME = "Joe Blogs";
+	protected static final String TEST_COLLECTION_NAME = "A brand new collection";
+	protected static final String TEST_START_DATE = "1945-01-01T00:00:00Z";
+	protected static final String TEST_USER_NAME = "Joe Blogs";
 
-    protected FramedGraph<Neo4jGraph> graph;
-    protected Views<DocumentaryUnit> docViews;
-    protected Views<UserProfile> userViews;
-    protected FixtureLoader helper;
+	protected FramedGraph<Neo4jGraph> graph;
+	protected Views<DocumentaryUnit> docViews;
+	protected Views<UserProfile> userViews;
+	protected FixtureLoader helper;
 
-    // Members closely coupled to the test data!
-    protected Long validUserId = 20L;
-    protected Long invalidUserId = 21L;
-    protected Long itemId = 1L;
+	// Members closely coupled to the test data!
+	protected Long validUserId = 20L;
+	protected Long invalidUserId = 21L;
+	protected Long itemId = 1L;
 
-    @BeforeClass
-    public static void setUpBeforeClass() throws Exception {
-    }
+	@BeforeClass
+	public static void setUpBeforeClass() throws Exception {
+	}
 
-    @Before
-    public void setUp() throws Exception {
-        graph = new FramedGraph<Neo4jGraph>(new Neo4jGraph(
-                new TestGraphDatabaseFactory().newImpermanentDatabaseBuilder()
-                        .newGraphDatabase()));
-        helper = new FixtureLoader(graph);
-        helper.loadTestData();
-        docViews = new Views<DocumentaryUnit>(graph, DocumentaryUnit.class);
-        userViews = new Views<UserProfile>(graph, UserProfile.class);
-    }
+	@Before
+	public void setUp() throws Exception {
+		graph = new FramedGraph<Neo4jGraph>(new Neo4jGraph(
+				new TestGraphDatabaseFactory().newImpermanentDatabaseBuilder()
+						.newGraphDatabase()));
+		helper = new FixtureLoader(graph);
+		helper.loadTestData();
+		docViews = new Views<DocumentaryUnit>(graph, DocumentaryUnit.class);
+		userViews = new Views<UserProfile>(graph, UserProfile.class);
+	}
 
-    @After
-    public void tearDown() throws Exception {
-        // graph.shutdown();
-    }
+	@After
+	public void tearDown() throws Exception {
+		// graph.shutdown();
+	}
 
-    /**
-     * Access an item 0 as user 20.
-     * 
-     * @throws PermissionDenied
-     */
-    @Test
-    public void testDetail() throws PermissionDenied {
-        DocumentaryUnit unit = docViews.detail(itemId, validUserId);
-        assertEquals(itemId, unit.asVertex().getId());
-    }
-    
-    /**
-     * Check we can access the user's own profile.
-     * 
-     * @throws PermissionDenied
-     */
-    @Test
-    public void testUserProfile() throws PermissionDenied {
-    	UserProfile user = userViews.detail(validUserId, validUserId);
-    	assertEquals(validUserId, user.asVertex().getId());
-    }
+	/**
+	 * Access an item 0 as user 20.
+	 * 
+	 * @throws PermissionDenied
+	 */
+	@Test
+	public void testDetail() throws PermissionDenied {
+		DocumentaryUnit unit = docViews.detail(itemId, validUserId);
+		assertEquals(itemId, unit.asVertex().getId());
+	}
 
-    /**
-     * Access an item as an invalid user. TODO: Check that this test fails if no
-     * exception is thrown.
-     * 
-     * @throws PermissionDenied
-     */
-    @Test(expected = PermissionDenied.class)
-    public void testDetailPermissionDenied() throws PermissionDenied {
-        docViews.detail(itemId, invalidUserId);
-    }
-    
-    /**
-     * Access the valid user's profile as an invalid users.
-     * 
-     * @throws PermissionDenied
-     */
-    @Test(expected = PermissionDenied.class)
-    public void testUserDetailPermissionDenied() throws PermissionDenied {
-        userViews.detail(validUserId, invalidUserId);
-    }    
+	/**
+	 * Check we can access the user's own profile.
+	 * 
+	 * @throws PermissionDenied
+	 */
+	@Test
+	public void testUserProfile() throws PermissionDenied {
+		UserProfile user = userViews.detail(validUserId, validUserId);
+		assertEquals(validUserId, user.asVertex().getId());
+	}
 
-    /**
-     * Test updating an item.
-     * 
-     * @throws PermissionDenied
-     * @throws ValidationError
-     * @throws DeserializationError
-     */
-    @Test
-    public void testUpdate() throws PermissionDenied, ValidationError,
-            DeserializationError {
-        Map<String, Object> bundle = getTestBundle();
-        DocumentaryUnit unit = docViews.create(bundle, validUserId);
-        assertEquals(TEST_COLLECTION_NAME, unit.getName());
+	/**
+	 * Access an item as an invalid user. TODO: Check that this test fails if no
+	 * exception is thrown.
+	 * 
+	 * @throws PermissionDenied
+	 */
+	@Test(expected = PermissionDenied.class)
+	public void testDetailPermissionDenied() throws PermissionDenied {
+		docViews.detail(itemId, invalidUserId);
+	}
 
-        // We could convert the FramedNode back into a bundle here,
-        // but let's instead just modify the initial data.
-        String newName = TEST_COLLECTION_NAME + " with new stuff";
-        bundle.put("id", unit.asVertex().getId());
+	/**
+	 * Access the valid user's profile as an invalid users.
+	 * 
+	 * @throws PermissionDenied
+	 */
+	@Test(expected = PermissionDenied.class)
+	public void testUserDetailPermissionDenied() throws PermissionDenied {
+		userViews.detail(validUserId, invalidUserId);
+	}
 
-        Map<String, Object> data = (Map<String, Object>) bundle.get("data");
-        data.put("name", newName);
+	/**
+	 * Test updating an item.
+	 * 
+	 * @throws PermissionDenied
+	 * @throws ValidationError
+	 * @throws DeserializationError
+	 */
+	@Test
+	public void testUpdate() throws PermissionDenied, ValidationError,
+			DeserializationError {
+		Map<String, Object> bundle = getTestBundle();
+		DocumentaryUnit unit = docViews.create(bundle, validUserId);
+		assertEquals(TEST_COLLECTION_NAME, unit.getName());
 
-        DocumentaryUnit changedUnit = docViews.update(bundle, validUserId);
-        assertEquals(newName, changedUnit.getName());
+		// We could convert the FramedNode back into a bundle here,
+		// but let's instead just modify the initial data.
+		String newName = TEST_COLLECTION_NAME + " with new stuff";
+		bundle.put("id", unit.asVertex().getId());
 
-        // Check the nested item was created correctly
-        DatePeriod datePeriod = changedUnit.getDatePeriods().iterator().next();
-        assertTrue(datePeriod != null);
-        assertEquals(TEST_START_DATE, datePeriod.getStartDate());
+		Map<String, Object> data = (Map<String, Object>) bundle.get("data");
+		data.put("name", newName);
 
-        // And that the reverse relationship works.
-        assertEquals(changedUnit.asVertex(), datePeriod.getEntity().asVertex());
-    }
+		DocumentaryUnit changedUnit = docViews.update(bundle, validUserId);
+		assertEquals(newName, changedUnit.getName());
 
-    /**
-     * Test updating an item.
-     * 
-     * @throws PermissionDenied
-     * @throws ValidationError
-     * @throws DeserializationError
-     */
-    @Test
-    public void testUserUpdate() throws PermissionDenied, ValidationError,
-            DeserializationError {
-        Map<String, Object> bundle = getTestUserBundle();
-        UserProfile user = userViews.create(bundle, validUserId);
-        assertEquals(TEST_USER_NAME, user.getName());
+		// Check the nested item was created correctly
+		DatePeriod datePeriod = changedUnit.getDatePeriods().iterator().next();
+		assertTrue(datePeriod != null);
+		assertEquals(TEST_START_DATE, datePeriod.getStartDate());
 
-        // We could convert the FramedNode back into a bundle here,
-        // but let's instead just modify the initial data.
-        String newName = TEST_USER_NAME + " with new stuff";
-        bundle.put("id", user.asVertex().getId());
+		// And that the reverse relationship works.
+		assertEquals(changedUnit.asVertex(), datePeriod.getEntity().asVertex());
+	}
 
-        Map<String, Object> data = (Map<String, Object>) bundle.get("data");
-        data.put("name", newName);
+	/**
+	 * Test updating an item.
+	 * 
+	 * @throws PermissionDenied
+	 * @throws ValidationError
+	 * @throws DeserializationError
+	 */
+	@Test
+	public void testUserUpdate() throws PermissionDenied, ValidationError,
+			DeserializationError {
+		Map<String, Object> bundle = getTestUserBundle();
+		UserProfile user = userViews.create(bundle, validUserId);
+		assertEquals(TEST_USER_NAME, user.getName());
 
-        UserProfile changedUser = userViews.update(bundle, validUserId);
-        assertEquals(newName, changedUser.getName());
-    }
+		// We could convert the FramedNode back into a bundle here,
+		// but let's instead just modify the initial data.
+		String newName = TEST_USER_NAME + " with new stuff";
+		bundle.put("id", user.asVertex().getId());
 
-    /**
-     * Test we can create a node and its subordinates from a set of data.
-     * 
-     * @throws ValidationError
-     * @throws PermissionDenied
-     * @throws DeserializationError
-     */
-    @Test
-    public void testCreate() throws ValidationError, PermissionDenied,
-            DeserializationError {
-        Map<String, Object> bundle = getTestBundle();
-        DocumentaryUnit unit = docViews.create(bundle, validUserId);
-        assertEquals(TEST_COLLECTION_NAME, unit.getName());
-    }
+		Map<String, Object> data = (Map<String, Object>) bundle.get("data");
+		data.put("name", newName);
 
-    /**
-     * Test creating a view with invalid data throws a validationError
-     * 
-     * @throws ValidationError
-     * @throws PermissionDenied
-     * @throws DeserializationError
-     */
-    @Test(expected = ValidationError.class)
-    public void testCreateWithError() throws ValidationError, PermissionDenied,
-            DeserializationError {
-        Map<String, Object> bundle = getTestBundle();
-        Map<String, Object> data = (Map<String, Object>) bundle.get("data");
-        data.remove("name");
+		UserProfile changedUser = userViews.update(bundle, validUserId);
+		assertEquals(newName, changedUser.getName());
+	}
 
-        // This should barf because the collection has no name.
-        DocumentaryUnit unit = docViews.create(bundle, validUserId);
-        assertEquals(TEST_COLLECTION_NAME, unit.getName());
-    }
+	/**
+	 * Test we can create a node and its subordinates from a set of data.
+	 * 
+	 * @throws ValidationError
+	 * @throws PermissionDenied
+	 * @throws DeserializationError
+	 */
+	@Test
+	public void testCreate() throws ValidationError, PermissionDenied,
+			DeserializationError {
+		Map<String, Object> bundle = getTestBundle();
+		DocumentaryUnit unit = docViews.create(bundle, validUserId);
+		assertEquals(TEST_COLLECTION_NAME, unit.getName());
+	}
 
-    /**
-     * Test creating a view with invalid data throws a validationError
-     * 
-     * @throws ValidationError
-     * @throws PermissionDenied
-     * @throws DeserializationError
-     */
-    @Test(expected = DeserializationError.class)
-    public void testCreateWithDeserialisationError() throws ValidationError,
-            PermissionDenied, DeserializationError {
-        Map<String, Object> bundle = getTestBundle();
-        bundle.remove("data");
+	/**
+	 * Test creating a view with invalid data throws a validationError
+	 * 
+	 * @throws ValidationError
+	 * @throws PermissionDenied
+	 * @throws DeserializationError
+	 */
+	@Test(expected = ValidationError.class)
+	public void testCreateWithError() throws ValidationError, PermissionDenied,
+			DeserializationError {
+		Map<String, Object> bundle = getTestBundle();
+		Map<String, Object> data = (Map<String, Object>) bundle.get("data");
+		data.remove("name");
 
-        // This should barf because the collection has no name.
-        DocumentaryUnit unit = docViews.create(bundle, validUserId);
-        assertEquals(TEST_COLLECTION_NAME, unit.getName());
-    }
+		// This should barf because the collection has no name.
+		DocumentaryUnit unit = docViews.create(bundle, validUserId);
+		assertEquals(TEST_COLLECTION_NAME, unit.getName());
+	}
 
-    /**
-     * Tests that deleting a collection will also delete its dependent
-     * relations. NB: This test will break of other @Dependent relations are
-     * added to DocumentaryUnit.
-     * 
-     * @throws PermissionDenied
-     * @throws ValidationError
-     * @throws SerializationError
-     */
-    @Test
-    public void testDelete() throws PermissionDenied, ValidationError,
-            SerializationError {
-        Integer shouldDelete = 1;
-        DocumentaryUnit unit = graph.getVertex(itemId, DocumentaryUnit.class);
+	/**
+	 * Test creating a view with invalid data throws a validationError
+	 * 
+	 * @throws ValidationError
+	 * @throws PermissionDenied
+	 * @throws DeserializationError
+	 */
+	@Test(expected = DeserializationError.class)
+	public void testCreateWithDeserialisationError() throws ValidationError,
+			PermissionDenied, DeserializationError {
+		Map<String, Object> bundle = getTestBundle();
+		bundle.remove("data");
 
-        // FIXME: Surely there's a better way of doing this???
-        Iterator<DatePeriod> dateIter = unit.getDatePeriods().iterator();
-        Iterator<Description> descIter = unit.getDescriptions().iterator();
-        for (; dateIter.hasNext(); shouldDelete++)
-            dateIter.next();
-        for (; descIter.hasNext(); shouldDelete++)
-            descIter.next();
+		// This should barf because the collection has no name.
+		DocumentaryUnit unit = docViews.create(bundle, validUserId);
+		assertEquals(TEST_COLLECTION_NAME, unit.getName());
+	}
 
-        Integer deleted = docViews.delete(itemId, validUserId);
-        assertEquals(shouldDelete, deleted);
-    }
+	/**
+	 * Tests that deleting a collection will also delete its dependent
+	 * relations. NB: This test will break of other @Dependent relations are
+	 * added to DocumentaryUnit.
+	 * 
+	 * @throws PermissionDenied
+	 * @throws ValidationError
+	 * @throws SerializationError
+	 */
+	@Test
+	public void testDelete() throws PermissionDenied, ValidationError,
+			SerializationError {
+		Integer shouldDelete = 1;
+		DocumentaryUnit unit = graph.getVertex(itemId, DocumentaryUnit.class);
 
-    // Helpers
+		// FIXME: Surely there's a better way of doing this???
+		Iterator<DatePeriod> dateIter = unit.getDatePeriods().iterator();
+		Iterator<Description> descIter = unit.getDescriptions().iterator();
+		for (; dateIter.hasNext(); shouldDelete++)
+			dateIter.next();
+		for (; descIter.hasNext(); shouldDelete++)
+			descIter.next();
 
-    // @formatter:off
+		Integer deleted = docViews.delete(itemId, validUserId);
+		assertEquals(shouldDelete, deleted);
+	}
+
+	// Helpers
+
+	// @formatter:off
     @SuppressWarnings("serial")
     private Map<String, Object> getTestBundle() {
         // Data structure representing a not-yet-created collection.
@@ -288,8 +288,7 @@ public class ViewsTest {
 
     @SuppressWarnings("serial")
     private Map<String, Object> getTestUserBundle() {
-        // Data structure representing a not-yet-created collection.
-        // Using double-brace initialization to ease the pain.
+        // Data structure representing a not-yet-created user.
         return new HashMap<String, Object>() {{
             put("id", null);
             put("data", new HashMap<String, Object>() {{
