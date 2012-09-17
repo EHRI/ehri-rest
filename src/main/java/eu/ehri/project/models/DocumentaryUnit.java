@@ -2,6 +2,7 @@ package eu.ehri.project.models;
 
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.frames.Adjacency;
+import com.tinkerpop.frames.Property;
 import com.tinkerpop.frames.VertexFrame;
 import com.tinkerpop.frames.annotations.gremlin.GremlinGroovy;
 
@@ -16,6 +17,19 @@ public interface DocumentaryUnit extends VertexFrame, AccessibleEntity,
         DescribedEntity, TemporalEntity {
 
     public static final String CHILD_OF = "childOf";
+
+    @Property("name")
+    public String getName();
+
+    @Property("name")
+    public void setName(String name);
+
+    @Property("identifier")
+    public String getIdentifier();
+
+    @Property("identifier")
+    public String setIdentifier();
+
 
     @Fetch
     @Adjacency(label = Agent.HOLDS, direction = Direction.IN)

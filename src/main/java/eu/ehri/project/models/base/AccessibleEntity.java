@@ -11,18 +11,6 @@ public interface AccessibleEntity extends VertexFrame {
 
     public static final String ACCESS = "access";
 
-    @Property("name")
-    public String getName();
-
-    @Property("name")
-    public void setName(String name);
-
-    @Property("identifier")
-    public String getIdentifier();
-
-    @Property("identifier")
-    public String setIdentifier();
-
     @Incidence(label = ACCESS)
     public Iterable<Access> getAccess();
 
