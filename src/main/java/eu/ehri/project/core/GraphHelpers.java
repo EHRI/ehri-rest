@@ -7,6 +7,8 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.neo4j.graphdb.GraphDatabaseService;
+
+import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Element;
 import com.tinkerpop.blueprints.Index;
@@ -219,6 +221,20 @@ public class GraphHelpers {
             throw new RuntimeException(e);
         }
     }
+    
+    public Edge createOrUpdateIndexedEdge(Vertex src, Vertex dst, String label,
+            Map<String,Object> data, Index<Edge> index) {
+        Edge edge = null;
+        for (Edge e : src.getEdges(Direction.OUT, label)) {
+            if (e.getVertex(Direction.IN).equals(dst))
+                edge = e;
+        }
+        if (edge == null) {
+            return createIndexedEdge(src, dst, label, data, index);
+        }
+        
+        return updateIndexedEdge(edge, data, index);            
+    }
 
     /**
      * Update a vertex
@@ -287,6 +303,31 @@ public class GraphHelpers {
             throw new RuntimeException(e);
         }
     }
+    
+    /**
+     * Update an indexed Edge.
+     * 
+     * @param id
+     * @param data
+     * @param index
+     * @return
+     */
+    public Edge updateIndexedEdge(Object id, Map<String, Object> data,
+            Index<Edge> index)  {
+        try {
+            Edge relationship = graph.getEdge(id);
+
+            replaceProperties(index, relationship, data);
+
+            graph.stopTransaction(TransactionalGraph.Conclusion.SUCCESS);
+            return relationship;
+        } catch (Exception e) {
+            graph.stopTransaction(TransactionalGraph.Conclusion.FAILURE);
+            throw new RuntimeException(e);
+        }
+    }
+    
+
 
     /*** helpers ***/
 
