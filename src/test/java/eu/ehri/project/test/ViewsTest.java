@@ -69,7 +69,8 @@ public class ViewsTest {
 	 */
 	@Test
 	public void testDetail() throws PermissionDenied {
-		Views<DocumentaryUnit> docViews = new Views<DocumentaryUnit>(graph, DocumentaryUnit.class);
+		Views<DocumentaryUnit> docViews = new Views<DocumentaryUnit>(graph,
+				DocumentaryUnit.class);
 		DocumentaryUnit unit = docViews.detail(itemId, validUserId);
 		assertEquals(itemId, unit.asVertex().getId());
 	}
@@ -81,7 +82,8 @@ public class ViewsTest {
 	 */
 	@Test
 	public void testUserProfile() throws PermissionDenied {
-		Views<UserProfile> userViews = new Views<UserProfile>(graph, UserProfile.class);
+		Views<UserProfile> userViews = new Views<UserProfile>(graph,
+				UserProfile.class);
 		UserProfile user = userViews.detail(validUserId, validUserId);
 		assertEquals(validUserId, user.asVertex().getId());
 	}
@@ -94,7 +96,8 @@ public class ViewsTest {
 	 */
 	@Test(expected = PermissionDenied.class)
 	public void testDetailPermissionDenied() throws PermissionDenied {
-		Views<DocumentaryUnit> docViews = new Views<DocumentaryUnit>(graph, DocumentaryUnit.class);
+		Views<DocumentaryUnit> docViews = new Views<DocumentaryUnit>(graph,
+				DocumentaryUnit.class);
 		docViews.detail(itemId, invalidUserId);
 	}
 
@@ -105,7 +108,8 @@ public class ViewsTest {
 	 */
 	@Test(expected = PermissionDenied.class)
 	public void testUserDetailPermissionDenied() throws PermissionDenied {
-		Views<UserProfile> userViews = new Views<UserProfile>(graph, UserProfile.class);
+		Views<UserProfile> userViews = new Views<UserProfile>(graph,
+				UserProfile.class);
 		userViews.detail(validUserId, invalidUserId);
 	}
 
@@ -119,7 +123,8 @@ public class ViewsTest {
 	@Test
 	public void testUpdate() throws PermissionDenied, ValidationError,
 			DeserializationError {
-		Views<DocumentaryUnit> docViews = new Views<DocumentaryUnit>(graph, DocumentaryUnit.class);
+		Views<DocumentaryUnit> docViews = new Views<DocumentaryUnit>(graph,
+				DocumentaryUnit.class);
 		Map<String, Object> bundle = getTestBundle();
 		DocumentaryUnit unit = docViews.create(bundle, validUserId);
 		assertEquals(TEST_COLLECTION_NAME, unit.getName());
@@ -154,7 +159,8 @@ public class ViewsTest {
 	@Test
 	public void testUserUpdate() throws PermissionDenied, ValidationError,
 			DeserializationError {
-		Views<UserProfile> userViews = new Views<UserProfile>(graph, UserProfile.class);
+		Views<UserProfile> userViews = new Views<UserProfile>(graph,
+				UserProfile.class);
 		Map<String, Object> bundle = getTestUserBundle();
 		UserProfile user = userViews.create(bundle, validUserId);
 		assertEquals(TEST_USER_NAME, user.getName());
@@ -181,7 +187,8 @@ public class ViewsTest {
 	@Test
 	public void testCreate() throws ValidationError, PermissionDenied,
 			DeserializationError {
-		Views<DocumentaryUnit> docViews = new Views<DocumentaryUnit>(graph, DocumentaryUnit.class);
+		Views<DocumentaryUnit> docViews = new Views<DocumentaryUnit>(graph,
+				DocumentaryUnit.class);
 		Map<String, Object> bundle = getTestBundle();
 		DocumentaryUnit unit = docViews.create(bundle, validUserId);
 		assertEquals(TEST_COLLECTION_NAME, unit.getName());
@@ -197,7 +204,8 @@ public class ViewsTest {
 	@Test
 	public void testUserCreate() throws ValidationError, PermissionDenied,
 			DeserializationError {
-		Views<UserProfile> userViews = new Views<UserProfile>(graph, UserProfile.class);
+		Views<UserProfile> userViews = new Views<UserProfile>(graph,
+				UserProfile.class);
 		Map<String, Object> bundle = getTestUserBundle();
 		UserProfile user = userViews.create(bundle, validUserId);
 		assertEquals(TEST_USER_NAME, user.getName());
@@ -229,7 +237,8 @@ public class ViewsTest {
 	@Test(expected = ValidationError.class)
 	public void testCreateWithError() throws ValidationError, PermissionDenied,
 			DeserializationError {
-		Views<DocumentaryUnit> docViews = new Views<DocumentaryUnit>(graph, DocumentaryUnit.class);
+		Views<DocumentaryUnit> docViews = new Views<DocumentaryUnit>(graph,
+				DocumentaryUnit.class);
 		Map<String, Object> bundle = getTestBundle();
 		Map<String, Object> data = (Map<String, Object>) bundle.get("data");
 		data.remove("name");
@@ -249,7 +258,8 @@ public class ViewsTest {
 	@Test(expected = DeserializationError.class)
 	public void testCreateWithDeserialisationError() throws ValidationError,
 			PermissionDenied, DeserializationError {
-		Views<DocumentaryUnit> docViews = new Views<DocumentaryUnit>(graph, DocumentaryUnit.class);
+		Views<DocumentaryUnit> docViews = new Views<DocumentaryUnit>(graph,
+				DocumentaryUnit.class);
 		Map<String, Object> bundle = getTestBundle();
 		bundle.remove("data");
 
@@ -270,7 +280,8 @@ public class ViewsTest {
 	@Test
 	public void testDelete() throws PermissionDenied, ValidationError,
 			SerializationError {
-		Views<DocumentaryUnit> docViews = new Views<DocumentaryUnit>(graph, DocumentaryUnit.class);
+		Views<DocumentaryUnit> docViews = new Views<DocumentaryUnit>(graph,
+				DocumentaryUnit.class);
 		Integer shouldDelete = 1;
 		DocumentaryUnit unit = graph.getVertex(itemId, DocumentaryUnit.class);
 
@@ -342,7 +353,7 @@ public class ViewsTest {
 
     @SuppressWarnings("serial")
     private Map<String, Object> getTestGroupBundle() {
-        // Data structure representing a not-yet-created user.
+        // Data structure representing a not-yet-created group.
         return new HashMap<String, Object>() {{
             put("id", null);
             put("data", new HashMap<String, Object>() {{
