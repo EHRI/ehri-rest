@@ -135,4 +135,52 @@ public class AclTest extends ModelTestBase {
         assertTrue(access.getRead());
         assertFalse(access.getWrite());
     }
+    
+    /**
+     * Test changing permissions on an item.
+     */
+    @Test
+    public void testChangingItemPermissions() {
+        Accessor reto = helper.getTestFrame("reto", Accessor.class);
+        AccessibleEntity kcl = helper.getTestFrame("kclGroup",
+                AccessibleEntity.class);
+        Access access = acl.getAccessControl(kcl, reto);
+        // Admin can change anything, so ensure the user ISN'T a member of admin
+        assertFalse(acl.isAdmin(reto));
+        assertTrue(access.getRead());
+        assertFalse(access.getWrite());
+
+        // Now set the access control on KCL so Reto can write to it...
+        acl.setAccessControl(kcl, reto, true, true);
+        access = acl.getAccessControl(kcl, reto);
+        assertTrue(access != null);
+        assertTrue(access.getWrite());
+    }
+    
+    /**
+     * Test removing permissions.
+     */
+    @Test
+    public void testRemovingItemPermissions() {
+        Accessor reto = helper.getTestFrame("reto", Accessor.class);
+        AccessibleEntity kcl = helper.getTestFrame("kclGroup",
+                AccessibleEntity.class);
+        Access access = acl.getAccessControl(kcl, reto);
+        // Admin can change anything, so ensure the user ISN'T a member of admin
+        assertFalse(acl.isAdmin(reto));
+        assertTrue(access.getRead());
+        assertFalse(access.getWrite());
+
+        // Now set the access control on KCL so Reto can write to it...
+        acl.setAccessControl(kcl, reto, true, true);
+        access = acl.getAccessControl(kcl, reto);
+        assertTrue(access != null);
+        assertTrue(access.getWrite());
+
+        // Now remove the access control...
+        acl.removeAccessControl(kcl, reto);
+        access = acl.getAccessControl(kcl, reto);
+        assertTrue(access != null);
+        assertFalse(access.getWrite());
+    }
 }

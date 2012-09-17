@@ -10,6 +10,7 @@ import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
+import eu.ehri.project.core.GraphHelpers;
 import eu.ehri.project.models.Group;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
@@ -18,9 +19,11 @@ import eu.ehri.project.relationships.Access;
 public class AclManager {
 
     private FramedGraph<Neo4jGraph> graph;
+    private GraphHelpers helpers;
 
     public AclManager(FramedGraph<Neo4jGraph> graph) {
         this.graph = graph;
+        helpers = new GraphHelpers(graph.getBaseGraph().getRawGraph());
     }
 
     static class AccessComparator implements Comparator<Access> {
@@ -141,11 +144,28 @@ public class AclManager {
     public void setAccessControl(AccessibleEntity entity, Accessor accessor,
             boolean canRead, boolean canWrite) {
         // FIXME: There should be a better way of doing this...
-        Edge edge = graph.addEdge(null, entity.asVertex(), accessor.asVertex(),
-                AccessibleEntity.ACCESS);
+        Edge edge = null;
+        for (Edge e: entity.asVertex().getEdges(Direction.OUT, AccessibleEntity.ACCESS)) {
+            if (e.getVertex(Direction.IN).equals(accessor.asVertex()))
+                edge = e;                    
+        }
+        if (edge == null) {
+            edge = graph.addEdge(null, entity.asVertex(), accessor.asVertex(),
+                    AccessibleEntity.ACCESS);
+        }
         Access access = graph.frame(edge, Direction.OUT, Access.class);
         access.setRead(canRead);
-        access.setRead(canWrite);
+        access.setWrite(canWrite);
+    }
+    
+    /**
+     * Revoke an accessors access to an entity.
+     * 
+     * @param entity
+     * @param accessor
+     */
+    public void removeAccessControl(AccessibleEntity entity, Accessor accessor) {
+        entity.removeAccessor(accessor);
     }
     
     /**
