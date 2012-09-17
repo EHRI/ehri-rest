@@ -23,6 +23,7 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityTypes;
+import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.views.Views;
 import eu.ehri.project.test.utils.FixtureLoader;
@@ -31,9 +32,11 @@ public class ViewsTest {
 
     protected static final String TEST_COLLECTION_NAME = "A brand new collection";
     protected static final String TEST_START_DATE = "1945-01-01T00:00:00Z";
+    protected static final String TEST_USER_NAME = "Joe Blogs";
 
     protected FramedGraph<Neo4jGraph> graph;
-    protected Views<DocumentaryUnit> views;
+    protected Views<DocumentaryUnit> docViews;
+    protected Views<UserProfile> userViews;
     protected FixtureLoader helper;
 
     // Members closely coupled to the test data!
@@ -52,7 +55,8 @@ public class ViewsTest {
                         .newGraphDatabase()));
         helper = new FixtureLoader(graph);
         helper.loadTestData();
-        views = new Views<DocumentaryUnit>(graph, DocumentaryUnit.class);
+        docViews = new Views<DocumentaryUnit>(graph, DocumentaryUnit.class);
+        userViews = new Views<UserProfile>(graph, UserProfile.class);
     }
 
     @After
@@ -67,8 +71,19 @@ public class ViewsTest {
      */
     @Test
     public void testDetail() throws PermissionDenied {
-        DocumentaryUnit unit = views.detail(itemId, validUserId);
+        DocumentaryUnit unit = docViews.detail(itemId, validUserId);
         assertEquals(itemId, unit.asVertex().getId());
+    }
+    
+    /**
+     * Check we can access the user's own profile.
+     * 
+     * @throws PermissionDenied
+     */
+    @Test
+    public void testUserProfile() throws PermissionDenied {
+    	UserProfile user = userViews.detail(validUserId, validUserId);
+    	assertEquals(validUserId, user.asVertex().getId());
     }
 
     /**
@@ -79,8 +94,18 @@ public class ViewsTest {
      */
     @Test(expected = PermissionDenied.class)
     public void testDetailPermissionDenied() throws PermissionDenied {
-        views.detail(itemId, invalidUserId);
+        docViews.detail(itemId, invalidUserId);
     }
+    
+    /**
+     * Access the valid user's profile as an invalid users.
+     * 
+     * @throws PermissionDenied
+     */
+    @Test(expected = PermissionDenied.class)
+    public void testUserDetailPermissionDenied() throws PermissionDenied {
+        userViews.detail(validUserId, invalidUserId);
+    }    
 
     /**
      * Test updating an item.
@@ -93,7 +118,7 @@ public class ViewsTest {
     public void testUpdate() throws PermissionDenied, ValidationError,
             DeserializationError {
         Map<String, Object> bundle = getTestBundle();
-        DocumentaryUnit unit = views.create(bundle, validUserId);
+        DocumentaryUnit unit = docViews.create(bundle, validUserId);
         assertEquals(TEST_COLLECTION_NAME, unit.getName());
 
         // We could convert the FramedNode back into a bundle here,
@@ -104,7 +129,7 @@ public class ViewsTest {
         Map<String, Object> data = (Map<String, Object>) bundle.get("data");
         data.put("name", newName);
 
-        DocumentaryUnit changedUnit = views.update(bundle, validUserId);
+        DocumentaryUnit changedUnit = docViews.update(bundle, validUserId);
         assertEquals(newName, changedUnit.getName());
 
         // Check the nested item was created correctly
@@ -114,6 +139,32 @@ public class ViewsTest {
 
         // And that the reverse relationship works.
         assertEquals(changedUnit.asVertex(), datePeriod.getEntity().asVertex());
+    }
+
+    /**
+     * Test updating an item.
+     * 
+     * @throws PermissionDenied
+     * @throws ValidationError
+     * @throws DeserializationError
+     */
+    @Test
+    public void testUserUpdate() throws PermissionDenied, ValidationError,
+            DeserializationError {
+        Map<String, Object> bundle = getTestUserBundle();
+        UserProfile user = userViews.create(bundle, validUserId);
+        assertEquals(TEST_USER_NAME, user.getName());
+
+        // We could convert the FramedNode back into a bundle here,
+        // but let's instead just modify the initial data.
+        String newName = TEST_USER_NAME + " with new stuff";
+        bundle.put("id", user.asVertex().getId());
+
+        Map<String, Object> data = (Map<String, Object>) bundle.get("data");
+        data.put("name", newName);
+
+        UserProfile changedUser = userViews.update(bundle, validUserId);
+        assertEquals(newName, changedUser.getName());
     }
 
     /**
@@ -127,7 +178,7 @@ public class ViewsTest {
     public void testCreate() throws ValidationError, PermissionDenied,
             DeserializationError {
         Map<String, Object> bundle = getTestBundle();
-        DocumentaryUnit unit = views.create(bundle, validUserId);
+        DocumentaryUnit unit = docViews.create(bundle, validUserId);
         assertEquals(TEST_COLLECTION_NAME, unit.getName());
     }
 
@@ -146,7 +197,7 @@ public class ViewsTest {
         data.remove("name");
 
         // This should barf because the collection has no name.
-        DocumentaryUnit unit = views.create(bundle, validUserId);
+        DocumentaryUnit unit = docViews.create(bundle, validUserId);
         assertEquals(TEST_COLLECTION_NAME, unit.getName());
     }
 
@@ -164,7 +215,7 @@ public class ViewsTest {
         bundle.remove("data");
 
         // This should barf because the collection has no name.
-        DocumentaryUnit unit = views.create(bundle, validUserId);
+        DocumentaryUnit unit = docViews.create(bundle, validUserId);
         assertEquals(TEST_COLLECTION_NAME, unit.getName());
     }
 
@@ -191,75 +242,64 @@ public class ViewsTest {
         for (; descIter.hasNext(); shouldDelete++)
             descIter.next();
 
-        Integer deleted = views.delete(itemId, validUserId);
+        Integer deleted = docViews.delete(itemId, validUserId);
         assertEquals(shouldDelete, deleted);
     }
 
     // Helpers
 
+    // @formatter:off
     @SuppressWarnings("serial")
     private Map<String, Object> getTestBundle() {
         // Data structure representing a not-yet-created collection.
         // Using double-brace initialization to ease the pain.
-        return new HashMap<String, Object>() {
-            {
-                put("id", null);
-                put("data", new HashMap<String, Object>() {
-                    {
-                        put("name", TEST_COLLECTION_NAME);
-                        put("identifier", "someid-01");
-                        put("isA", EntityTypes.DOCUMENTARY_UNIT);
-                    }
-                });
-                put("relationships", new HashMap<String, Object>() {
-                    {
-                        put("describes",
-                                new LinkedList<HashMap<String, Object>>() {
-                                    {
-                                        add(new HashMap<String, Object>() {
-                                            {
-                                                put("id", null);
-                                                put("data",
-                                                        new HashMap<String, Object>() {
-                                                            {
-                                                                put("identifier",
-                                                                        "someid-01");
-                                                                put("title",
-                                                                        "A brand new item description");
-                                                                put("isA",
-                                                                        EntityTypes.DOCUMENT_DESCRIPTION);
-                                                                put("languageOfDescription",
-                                                                        "en");
-                                                            }
-                                                        });
-                                            }
-                                        });
-                                    }
-                                });
-                        put("hasDate",
-                                new LinkedList<HashMap<String, Object>>() {
-                                    {
-                                        add(new HashMap<String, Object>() {
-                                            {
-                                                put("id", null);
-                                                put("data",
-                                                        new HashMap<String, Object>() {
-                                                            {
-                                                                put("startDate",
-                                                                        TEST_START_DATE);
-                                                                put("endDate",
-                                                                        TEST_START_DATE);
-                                                                put("isA",
-                                                                        EntityTypes.DATE_PERIOD);
-                                                            }
-                                                        });
-                                            }
-                                        });
-                                    }
-                                });
-                    }
-                });
-            }
-        };
+        return new HashMap<String, Object>() {{
+            put("id", null);
+            put("data", new HashMap<String, Object>() {{
+                put("name", TEST_COLLECTION_NAME);
+                put("identifier", "someid-01");
+                put("isA", EntityTypes.DOCUMENTARY_UNIT);
+            }});
+            put("relationships", new HashMap<String, Object>() {{
+                put("describes", new LinkedList<HashMap<String, Object>>() {{
+                    add(new HashMap<String, Object>() {{
+                        put("id", null);
+                        put("data", new HashMap<String, Object>() {{
+                            put("identifier", "someid-01");
+                            put("title", "A brand new item description");
+                            put("isA", EntityTypes.DOCUMENT_DESCRIPTION);
+                            put("languageOfDescription", "en");
+                        }});
+                    }});
+                }});
+                put("hasDate", new LinkedList<HashMap<String, Object>>() {{
+                    add(new HashMap<String, Object>() {{
+                        put("id", null);
+                        put("data", new HashMap<String, Object>() {{
+                            put("startDate", TEST_START_DATE);
+                            put("endDate", TEST_START_DATE);
+                            put("isA", EntityTypes.DATE_PERIOD);
+                        }});
+                    }});
+                }});
+            }});
+        }};
     }
+
+    @SuppressWarnings("serial")
+    private Map<String, Object> getTestUserBundle() {
+        // Data structure representing a not-yet-created collection.
+        // Using double-brace initialization to ease the pain.
+        return new HashMap<String, Object>() {{
+            put("id", null);
+            put("data", new HashMap<String, Object>() {{
+                put("name", TEST_USER_NAME);
+                put("identifier", "joe-blogs");
+                put("userId", 9999L);
+                put("isA", EntityTypes.USER_PROFILE);
+            }});
+        }};
+    }
+
+    // formatter:on
 }
