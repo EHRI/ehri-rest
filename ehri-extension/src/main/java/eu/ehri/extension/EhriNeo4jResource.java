@@ -9,6 +9,7 @@ import java.io.Writer;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -27,8 +28,6 @@ import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.core.Response.Status;
 
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
@@ -46,11 +45,18 @@ import eu.ehri.project.persistance.Converter;
 import eu.ehri.project.persistance.EntityBundle;
 import eu.ehri.project.views.Views;
 
+/**
+ * The EHRI internal API (RESTfull) 
+ * for the collection (docuemntary units) registration system. 
+ * Implemented as a neo4j unmanaged extension. 
+ * Makes use of the ehri-data-frames java project to persist data in a graphdatabase (neo4j). 
+ * More direct Vertex and Edge manipulation is provided by the ehri-plugin java project
+ */
 @Path("/ehri")
 public class EhriNeo4jResource {
-//	private static final Logger logger = LoggerFactory
-//			.getLogger(EhriNeo4jResource.class);
-// TODO Logging in the neo4j log?
+	//	private static final Logger logger = LoggerFactory.getLogger(EhriNeo4jResource.class);
+	// Logging in the neo4j log instead of org.slf4j.Logger
+	org.neo4j.server.logging.Logger logger = org.neo4j.server.logging.Logger.getLogger(EhriNeo4jResource.class);
 	
 	/**
 	 * With each request the headers of that request are injected into the
@@ -79,9 +85,9 @@ public class EhriNeo4jResource {
 	/*** DocumentaryUnit ***/
 
 	/**
+	 * Get the DocumentaryUnit
 	 * 
-	 * @param indexName
-	 * @param nodeId
+	 * @param id The vertex id of the DocumentaryUnit
 	 * @return The response
 	 */
 	@GET
@@ -91,13 +97,14 @@ public class EhriNeo4jResource {
 		Views<DocumentaryUnit> views = new Views<DocumentaryUnit>(graph,
 				DocumentaryUnit.class);
 		try {
-			DocumentaryUnit unit = views
+			DocumentaryUnit entity = views
 					.detail(id, getRequesterUserProfileId());
-			String jsonStr = new Converter().vertexFrameToJson(unit);
+			String jsonStr = new Converter().vertexFrameToJson(entity);
 
 			return Response.status(Status.OK).entity((jsonStr).getBytes())
 					.build();
 		} catch (PermissionDenied e) {
+			logger.warn("Unauthorized access attempted", e);
 			return Response.status(Status.UNAUTHORIZED).build();
 		} catch (SerializationError e) {
 			// Most likely there was no such item (wrong id)
@@ -110,8 +117,9 @@ public class EhriNeo4jResource {
 	}
 
 	/**
+	 * Create a DocumentaryUnit
 	 * 
-	 * @param json
+	 * @param json The data used to create
 	 * @return The response
 	 */
 	@POST
@@ -127,12 +135,12 @@ public class EhriNeo4jResource {
 			entityBundle = converter.jsonToBundle(json);
 		} catch (DeserializationError e1) {
 			return Response.status(Status.BAD_REQUEST)
-					.entity(getStackTrace(e1).getBytes()).build();
+					.entity(produceErrorMessageJson(e1).getBytes()).build();
 		}
 
-		DocumentaryUnit unit = null;
+		DocumentaryUnit enity = null;
 		try {
-			unit = views.create(converter.bundleToData(entityBundle),
+			enity = views.create(converter.bundleToData(entityBundle),
 					getRequesterUserProfileId());
 		} catch (PermissionDenied e) {
 			return Response.status(Status.UNAUTHORIZED)
@@ -149,7 +157,7 @@ public class EhriNeo4jResource {
 		// but what if it fails, the unit has already been created; no rollback!
 		String jsonStr;
 		try {
-			jsonStr = converter.vertexFrameToJson(unit);
+			jsonStr = converter.vertexFrameToJson(enity);
 		} catch (SerializationError e) {
 			return Response.status(Status.INTERNAL_SERVER_ERROR)
 					.entity((produceErrorMessageJson(e)).getBytes()).build();
@@ -161,15 +169,16 @@ public class EhriNeo4jResource {
 		// with a GET,
 		// otherwise we would have to add a 'uri' or 'self' field to the json?
 		UriBuilder ub = uriInfo.getAbsolutePathBuilder();
-		URI docUri = ub.path(unit.asVertex().getId().toString()).build();
+		URI docUri = ub.path(enity.asVertex().getId().toString()).build();
 
 		return Response.status(Status.OK).location(docUri)
 				.entity((jsonStr).getBytes()).build();
 	}
 
 	/**
+	 * Update the DocumentaryUnit
 	 * 
-	 * @param json
+	 * @param json of the new data
 	 * @return The response
 	 */
 	@PUT
@@ -185,7 +194,7 @@ public class EhriNeo4jResource {
 			entityBundle = converter.jsonToBundle(json);
 		} catch (DeserializationError e1) {
 			return Response.status(Status.BAD_REQUEST)
-					.entity(getStackTrace(e1).getBytes()).build();
+					.entity(produceErrorMessageJson(e1).getBytes()).build();
 		}
 
 		DocumentaryUnit unit = null;
@@ -207,8 +216,10 @@ public class EhriNeo4jResource {
 	}
 
 	/**
+	 * Delete a DocumentaryUnit 
+	 * (and what else?)
 	 * 
-	 * @param id
+	 * @param id The vertex id of the DocumentaryUnit to delete
 	 * @return The response
 	 */
 	@DELETE
@@ -238,12 +249,14 @@ public class EhriNeo4jResource {
 	/*
 	 * NOTE maybe in another resource class (UserProfileResource), but I am not sure the neo4j
 	 * extension mechanism allows that?
+	 * 
+	 * Also we could make an Abstract Base class that has template functions for the CRUD
 	 */
 
 	/**
+	 * Get the UserProfile 
 	 * 
-	 * @param id
-	 *            The id of the userProfile
+	 * @param id The vertex id of the UserProfile
 	 * @return The response
 	 */
 	@GET
@@ -271,10 +284,99 @@ public class EhriNeo4jResource {
 		}
 	}
 
+	/**
+	 * Create a UserProfile
+	 * 
+	 * @param json The data used to create
+	 * @return The response
+	 */
+	@POST
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("/userProfile")
+	public Response createUserProfile(String json) {
+		Views<UserProfile> views = new Views<UserProfile>(graph,
+				UserProfile.class);
+
+		EntityBundle<VertexFrame> entityBundle = null;
+		try {
+			entityBundle = converter.jsonToBundle(json);
+		} catch (DeserializationError e1) {
+			return Response.status(Status.BAD_REQUEST)
+					.entity(produceErrorMessageJson(e1).getBytes()).build();
+		}
+
+		UserProfile entity = null;
+		try {
+			entity = views.create(converter.bundleToData(entityBundle),
+					getRequesterUserProfileId());
+		} catch (PermissionDenied e) {
+			return Response.status(Status.UNAUTHORIZED)
+					.entity((produceErrorMessageJson(e)).getBytes()).build();
+		} catch (ValidationError e) {
+			return Response.status(Status.INTERNAL_SERVER_ERROR)
+					.entity((produceErrorMessageJson(e)).getBytes()).build();
+		} catch (DeserializationError e) {
+			return Response.status(Status.INTERNAL_SERVER_ERROR)
+					.entity((produceErrorMessageJson(e)).getBytes()).build();
+		}
+
+		// Return the json of the created entity,
+		// but what if it fails, the entity has already been created; no rollback!
+		String jsonStr;
+		try {
+			jsonStr = converter.vertexFrameToJson(entity);
+		} catch (SerializationError e) {
+			return Response.status(Status.INTERNAL_SERVER_ERROR)
+					.entity((produceErrorMessageJson(e)).getBytes()).build();
+		}
+
+		// The caller wants to know the id of the created vertex
+		// It is in the returned json but it is better if
+		// the loacation holds the url to the new resource so that can be used
+		// with a GET,
+		// otherwise we would have to add a 'uri' or 'self' field to the json?
+		UriBuilder ub = uriInfo.getAbsolutePathBuilder();
+		URI docUri = ub.path(entity.asVertex().getId().toString()).build();
+
+		return Response.status(Status.OK).location(docUri)
+				.entity((jsonStr).getBytes()).build();
+	}
+	
+	/**
+	 * Delete a UserProfile 
+	 * (and what else?)
+	 * 
+	 * @param id The vertex id of the UserProfile to delete
+	 * @return The response
+	 */
+	@DELETE
+	@Path("/userProfile/{id}")
+	public Response deleteUserProfile(@PathParam("id") long id) {
+		Views<UserProfile> views = new Views<UserProfile>(graph,
+				UserProfile.class);
+
+		try {
+			views.delete(id, getRequesterUserProfileId());
+			return Response.status(Status.OK).build();
+		} catch (PermissionDenied e) {
+			return Response.status(Status.UNAUTHORIZED)
+					.entity((produceErrorMessageJson(e)).getBytes()).build();
+		} catch (ValidationError e) {
+			return Response.status(Status.INTERNAL_SERVER_ERROR)
+					.entity((produceErrorMessageJson(e)).getBytes()).build();
+		} catch (SerializationError e) {
+			return Response.status(Status.INTERNAL_SERVER_ERROR)
+					.entity((produceErrorMessageJson(e)).getBytes()).build();
+		}
+	}
+	
+	
+	
 	/*** helpers ***/
 
 	/**
-	 * Retrieve the id of the userProfile of the requester
+	 * Retrieve the id of the UserProfile of the requester
 	 * 
 	 * @return The id
 	 * @throws PermissionDenied
@@ -300,8 +402,7 @@ public class EhriNeo4jResource {
 	/**
 	 * Produce json formatted ErrorMessage
 	 * 
-	 * @param e
-	 *            The exception
+	 * @param e The exception
 	 * @return The json string
 	 */
 	private String produceErrorMessageJson(Exception e) {
