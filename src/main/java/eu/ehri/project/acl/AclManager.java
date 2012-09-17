@@ -46,7 +46,7 @@ public class AclManager {
     /*
      * Check if an accessor is admin or a member of Admin.
      */
-    public static Boolean isAdmin(Accessor accessor) {
+    public Boolean isAdmin(Accessor accessor) {
         if (accessor.getName().equals(Group.ADMIN_GROUP_NAME))
             return true;
         for (Accessor acc : accessor.getAllParents()) {
@@ -55,13 +55,13 @@ public class AclManager {
         }
         return false;
     }
-
+    
     /*
      * We have to ascend the current accessors group hierarchy looking for a
      * groups that are contained in the current entity's ACL list. Return the
      * Access relationship objects and see which one is most liberal.
      */
-    public static List<Access> searchPermissions(List<Accessor> accessing,
+    public List<Access> searchPermissions(List<Accessor> accessing,
             List<Access> allowedCtrls, List<Accessor> allowedAccessors) {
         assert allowedCtrls.size() == allowedAccessors.size();
         if (accessing.isEmpty()) {

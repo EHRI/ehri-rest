@@ -103,7 +103,7 @@ public class AclTest extends ModelTestBase {
                 AccessibleEntity.class);
         Access access = acl.getAccessControl(prof, reto);
         // Check user ISN'T admin (otherwise they'd be able to access anything)
-        assertFalse(AclManager.isAdmin(reto));
+        assertFalse(acl.isAdmin(reto));
         assertTrue(access.getRead());
         assertTrue(access.getWrite());
     }
@@ -131,7 +131,7 @@ public class AclTest extends ModelTestBase {
                 AccessibleEntity.class);
         Access access = acl.getAccessControl(kcl, reto);
         // Admin can change anything, so ensure the user ISN'T a member of admin
-        assertFalse(AclManager.isAdmin(reto));
+        assertFalse(acl.isAdmin(reto));
         assertTrue(access.getRead());
         assertFalse(access.getWrite());
     }
