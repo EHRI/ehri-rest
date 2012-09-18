@@ -7,7 +7,8 @@ import com.tinkerpop.frames.VertexFrame;
 import eu.ehri.project.models.annotations.Dependent;
 import eu.ehri.project.models.annotations.Fetch;
 
-public interface DescribedEntity extends VertexFrame, AnnotatableEntity {
+public interface DescribedEntity extends VertexFrame, AnnotatableEntity,
+        VersionedEntity {
     @Fetch
     @Dependent
     @Adjacency(label = "describes", direction = Direction.IN)

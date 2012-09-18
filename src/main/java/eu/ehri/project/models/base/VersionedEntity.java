@@ -12,6 +12,9 @@ public interface VersionedEntity extends VertexFrame {
 
     @Adjacency(label = HAS_REVISION)
     public Iterable<Revision> getRevisions();
+    
+    @Adjacency(label = HAS_REVISION)
+    public void addRevision(final Revision revision);
 
     @Incidence(label = HAS_REVISION)
     public Iterable<RevisionContext> getRevisionContexts();

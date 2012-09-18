@@ -15,4 +15,5 @@ public class EntityTypes {
     public static final String DATE_PERIOD = "datePeriod";
     public static final String ANNOTATION = "annotation";
     public static final String ADDRESS = "address";
+    public static final String REVISION = "revision";
 }
