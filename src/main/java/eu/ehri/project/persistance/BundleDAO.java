@@ -1,14 +1,12 @@
 package eu.ehri.project.persistance;
 
 import java.lang.reflect.Method;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.collections.map.MultiValueMap;
-import org.neo4j.graphdb.Transaction;
 
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Index;
@@ -21,12 +19,7 @@ import com.tinkerpop.frames.VertexFrame;
 
 import eu.ehri.project.core.GraphHelpers;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.models.EntityTypes;
-import eu.ehri.project.models.Revision;
 import eu.ehri.project.models.annotations.Dependent;
-import eu.ehri.project.models.base.DescribedEntity;
-import eu.ehri.project.models.base.Description;
-import eu.ehri.project.models.base.VersionedEntity;
 import eu.ehri.project.models.utils.ClassUtils;
 
 /**
@@ -62,7 +55,6 @@ public class BundleDAO<T extends VertexFrame> {
             graph.getBaseGraph().stopTransaction(Conclusion.FAILURE);
             throw new ValidationError(err.getMessage());
         } catch (Exception err) {
-            err.printStackTrace();
             graph.getBaseGraph().stopTransaction(Conclusion.FAILURE);
             throw new RuntimeException(err);
         }
@@ -192,7 +184,7 @@ public class BundleDAO<T extends VertexFrame> {
      * @throws ValidationError
      */
     private Vertex insertInner(EntityBundle<T> bundle) throws ValidationError {
-        bundle.validateForInsert();        
+        bundle.validateForInsert();
         Index<Vertex> index = helpers.getOrCreateIndex(bundle.getEntityType(),
                 Vertex.class);
         Vertex node = helpers.createIndexedVertex(bundle.getData(), index);
@@ -209,42 +201,14 @@ public class BundleDAO<T extends VertexFrame> {
      */
     private Vertex updateInner(EntityBundle<T> bundle) throws ValidationError {
         bundle.validateForUpdate();
-        
         Index<Vertex> index = helpers.getOrCreateIndex(bundle.getEntityType(),
                 Vertex.class);
         Vertex node = helpers.updateIndexedVertex(bundle.getId(),
                 bundle.getData(), index);
-
-        // Save a version for objects that need it. TODO: Refactor this so
-        // versioning is less intrusive???
-        if (VersionedEntity.class.isAssignableFrom(bundle.getBundleClass())) {
-            Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
-            try {
-                
-                System.out.println("Updating versioned object! " + bundle.getBundleClass().getName() + " "+ node);
-                
-                Index<Vertex> rindex = helpers.getOrCreateIndex(EntityTypes.REVISION, Vertex.class);
-                Vertex rnode = helpers.createIndexedVertex(new HashMap<String,Object>(), rindex);
-                Revision revision = graph.frame(rnode, Revision.class);
-                revision.setType(bundle.getEntityType());
-                // TODO: Get some proper info!
-                revision.setLog("Vertex was updated, but we don't know anything else about that yet.");
-                System.out.println("Adding revision " + rnode + " to " + node);
-                //graph.frame(node, VersionedEntity.class).addRevision(revision);
-                graph.addEdge(null, node, rnode, VersionedEntity.HAS_REVISION);
-                graph.getBaseGraph().stopTransaction(Conclusion.SUCCESS);
-            } catch (Exception e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-                graph.getBaseGraph().stopTransaction(Conclusion.FAILURE);
-            }
-            
-        }
-        
         saveDependents(node, bundle.getBundleClass(), bundle.getRelations());
         return node;
     }
-    
+
     /**
      * Saves the dependent relations within a given bundle. Relations that are
      * not dependent are ignored.
@@ -258,8 +222,8 @@ public class BundleDAO<T extends VertexFrame> {
             Class<? extends VertexFrame> cls, MultiValueMap relations)
             throws ValidationError {
         List<String> dependents = ClassUtils.getDependentRelations(cls);
-        Set<Object> existingDependents = new HashSet<Object>();
-        Set<Object> refreshedDependents = new HashSet<Object>();
+        Set<Long> existingDependents = new HashSet<Long>();
+        Set<Long> refreshedDependents = new HashSet<Long>();
 
         for (Object key : relations.keySet()) {
             String relation = (String) key;
@@ -288,7 +252,7 @@ public class BundleDAO<T extends VertexFrame> {
         // Clean up dependent items that have not been saved in the
         // current operation, and are therefore assumed deleted.
         existingDependents.removeAll(refreshedDependents);
-        for (Object id : existingDependents) {
+        for (Long id : existingDependents) {
             graph.removeVertex(graph.getVertex(id));
         }
     }
