@@ -38,21 +38,15 @@
         <dependency>
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j</artifactId>
-            <version>1.8.M07</version>
-            <scope>compile</scope>
+            <version>${neo4j-version}</version>
         </dependency>
-        <dependency>
+         <dependency>
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j-kernel</artifactId>
-            <version>1.8.M07</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.neo4j</groupId>
-            <artifactId>neo4j-kernel</artifactId>
-            <version>1.8.M07</version>
-            <scope>test</scope>
+            <version>${neo4j-version}</version>
+      	      <type>test-jar</type>
             <classifier>tests</classifier>
+            <scope>test</scope>
         </dependency>
         <dependency>
         	<groupId>com.tinkerpop.gremlin</groupId>
@@ -84,4 +78,7 @@
             <layout>default</layout>
         </repository>
     </repositories>
+    <properties>
+    	<neo4j-version>1.8-SNAPSHOT</neo4j-version>
+    </properties>
 </project>
