@@ -22,6 +22,7 @@ import eu.ehri.project.models.utils.ClassUtils;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.ObjectWriter;
 
 /**
  * Class containing static methods to convert between FramedVertex instances,
@@ -92,7 +93,12 @@ public class Converter {
             throws SerializationError {
         Map<String, Object> data = bundleToData(bundle);
         try {
-            return new ObjectMapper().writeValueAsString(data);
+            ObjectMapper mapper = new ObjectMapper();
+            // Note: defaultPrettyPrintWriter has been replaced by
+            // writerWithDefaultPrettyPrinter in newer versions of 
+            // Jackson, though not the one available in Neo4j.
+            ObjectWriter writer = mapper.defaultPrettyPrintingWriter();
+            return writer.writeValueAsString(data);
         } catch (Exception e) {
             throw new SerializationError("Error writing bundle to JSON", e);
         }
