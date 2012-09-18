@@ -344,6 +344,46 @@ public class EhriNeo4jResource {
 	}
 	
 	/**
+	 * Update the DocumentaryUnit
+	 * 
+	 * @param json of the new data
+	 * @return The response
+	 */
+	@PUT
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("/userProfile")
+	public Response updateUserProfile(String json) {
+		Views<UserProfile> views = new Views<UserProfile>(graph,
+				UserProfile.class);
+
+		EntityBundle<VertexFrame> entityBundle = null;
+		try {
+			entityBundle = converter.jsonToBundle(json);
+		} catch (DeserializationError e1) {
+			return Response.status(Status.BAD_REQUEST)
+					.entity(produceErrorMessageJson(e1).getBytes()).build();
+		}
+
+		UserProfile entity = null;
+		try {
+			entity = views.update(converter.bundleToData(entityBundle),
+					getRequesterUserProfileId());
+		} catch (PermissionDenied e) {
+			return Response.status(Status.UNAUTHORIZED)
+					.entity((produceErrorMessageJson(e)).getBytes()).build();
+		} catch (ValidationError e) {
+			return Response.status(Status.INTERNAL_SERVER_ERROR)
+					.entity((produceErrorMessageJson(e)).getBytes()).build();
+		} catch (DeserializationError e) {
+			return Response.status(Status.INTERNAL_SERVER_ERROR)
+					.entity((produceErrorMessageJson(e)).getBytes()).build();
+		}
+
+		return Response.status(Status.OK).build();
+	}
+	
+	/**
 	 * Delete a UserProfile 
 	 * (and what else?)
 	 * 
