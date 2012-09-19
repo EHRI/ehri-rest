@@ -29,7 +29,8 @@
 				<version>2.12.3</version>
 				<configuration>
 					<excludes>
-						<exclude>**/EhriNeo4jExtensionRestClientTest.java</exclude>
+						<!-- skip all the REST client tests, that need a running server -->
+						<exclude>**/*RestClientTest.java</exclude>
 					</excludes>
 				</configuration>
 			</plugin>
