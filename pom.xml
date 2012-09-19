@@ -79,6 +79,6 @@
         </repository>
     </repositories>
     <properties>
-    	<neo4j-version>1.8-SNAPSHOT</neo4j-version>
+    	<neo4j-version>1.8-SNAPSHOT-EHRI</neo4j-version>
     </properties>
 </project>
