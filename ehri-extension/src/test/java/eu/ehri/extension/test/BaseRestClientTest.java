@@ -93,6 +93,9 @@ public class BaseRestClientTest {
 
 		WrappingNeoServerBootstrapper bootstrapper = new WrappingNeoServerBootstrapper(
 				graphDatabase, config);
+		// Attempt to ensure database is erased from the disk when
+		// the runtime shuts down. This improves repeatability, because
+		// if it is still there it'll be appended to on the next run.
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			@Override
 			public void run() {
@@ -160,7 +163,7 @@ public class BaseRestClientTest {
 
 		return fileData.toString();
 	}
-	
+
 	/**
 	 * Function for deleting an entire database folder. USE WITH CARE!!!
 	 * 
