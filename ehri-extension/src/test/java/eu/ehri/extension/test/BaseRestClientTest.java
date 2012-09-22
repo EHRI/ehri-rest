@@ -10,6 +10,8 @@ import java.net.URI;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import junit.extensions.TestSetup;
+
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -39,11 +41,12 @@ import eu.ehri.project.test.utils.FixtureLoader;
  * documentation of the neo4j server explains how to do this.
  */
 public class BaseRestClientTest {
-	final protected String baseUri = "http://localhost:7474";
-	final protected String extensionEntryPointUri = baseUri
+	final static protected String testServerPort = "7575";
+	final static protected String baseUri = "http://localhost:" + testServerPort;
+	final static protected String extensionEntryPointUri = baseUri
 			+ "/examples/unmanaged/ehri";
 
-	final protected String adminUserProfileId = "20"; // Depends on fixture
+	final static protected String adminUserProfileId = "20"; // Depends on fixture
 														// content.
 	protected static AbstractGraphDatabase graphDatabase;
 	protected static FixtureLoader loader;
@@ -65,6 +68,8 @@ public class BaseRestClientTest {
 		loader.loadTestData();
 
 		ServerConfigurator config = new ServerConfigurator(graphDatabase);
+		// Ensure test server starts on a non-standard port...
+		config.configuration().setProperty("org.neo4j.server.webserver.port", testServerPort);
 		config.getThirdpartyJaxRsClasses().add(
 				new ThirdPartyJaxRsPackage("eu.ehri.extension",
 						"/examples/unmanaged"));
