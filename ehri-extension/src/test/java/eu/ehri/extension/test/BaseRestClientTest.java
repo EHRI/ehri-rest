@@ -133,35 +133,6 @@ public class BaseRestClientTest {
 	/*** Helpers ***/
 
 	/**
-	 * Delete (remove) the given instance from the database, part of a test
-	 * clean-up.
-	 * 
-	 * @param location
-	 *            The URL of the resource (entity) to remove from the database.
-	 */
-	protected void delete(URI location) {
-		WebResource resource = client.resource(location);
-
-		// Delete
-		ClientResponse response = resource
-				.accept(MediaType.APPLICATION_JSON)
-				.header(EhriNeo4jFramedResource.AUTH_HEADER_NAME,
-						adminUserProfileId).delete(ClientResponse.class);
-		assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
-
-		// Get should fail now
-		resource = client.resource(location);
-		response = resource
-				.accept(MediaType.APPLICATION_JSON)
-				.header(EhriNeo4jFramedResource.AUTH_HEADER_NAME,
-						adminUserProfileId).get(ClientResponse.class);
-		// assertEquals(Response.Status.NOT_FOUND, response.getStatus());
-		// TODO fix it!
-		assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
-				response.getStatus());
-	}
-
-	/**
 	 * NOTE not sure how this handles UTF8
 	 * 
 	 * @param filePath
