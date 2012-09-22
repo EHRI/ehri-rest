@@ -41,13 +41,19 @@ import eu.ehri.project.test.utils.FixtureLoader;
  * documentation of the neo4j server explains how to do this.
  */
 public class BaseRestClientTest {
+	// Test server port - different from Neo4j default to prevent collisions.
 	final static protected String testServerPort = "7575";
-	final static protected String baseUri = "http://localhost:" + testServerPort;
-	final static protected String extensionEntryPointUri = baseUri
-			+ "/examples/unmanaged/ehri";
+	// Test server host
+	final static protected String baseUri = "http://localhost:"
+			+ testServerPort;
+	// Mount point for EHRI resources
+	final static protected String mountPoint = "/";
+	final static protected String extensionEntryPointUri = baseUri + mountPoint
+			+ "ehri";
 
-	final static protected String adminUserProfileId = "20"; // Depends on fixture
-														// content.
+	// Admin user prefix - depends on fixture data
+	final static protected String adminUserProfileId = "20";
+
 	protected static AbstractGraphDatabase graphDatabase;
 	protected static FixtureLoader loader;
 	protected static NeoServer neoServer;
@@ -60,19 +66,30 @@ public class BaseRestClientTest {
 		initializeTestDb(BaseRestClientTest.class.getName());
 	}
 
-	public static void initializeTestDb(String dbName) {
+	/**
+	 * Initialise a new graph database in a given location. This should be
+	 * unique for each superclass, because otherwise problems can be encountered
+	 * when another test suite starts up whilst a database is in the process of
+	 * shutting down.
+	 * 
+	 * @param dbName
+	 */
+	protected static void initializeTestDb(String dbName) {
 		final String dbPath = "target/tmpdb_" + dbName;
 		graphDatabase = new EmbeddedGraphDatabase(dbPath);
 		loader = new FixtureLoader(new FramedGraph<Neo4jGraph>(new Neo4jGraph(
 				graphDatabase)));
 		loader.loadTestData();
 
+		// Server configuration. TODO: Work out how to disable server startup
+		// and load logging so the test output isn't so noisy...
 		ServerConfigurator config = new ServerConfigurator(graphDatabase);
-		// Ensure test server starts on a non-standard port...
-		config.configuration().setProperty("org.neo4j.server.webserver.port", testServerPort);
+		config.configuration().setProperty("org.neo4j.server.webserver.port",
+				testServerPort);
+		// Add JAX-RS classes
 		config.getThirdpartyJaxRsClasses().add(
-				new ThirdPartyJaxRsPackage("eu.ehri.extension",
-						"/examples/unmanaged"));
+				new ThirdPartyJaxRsPackage(EhriNeo4jFramedResource.class
+						.getPackage().getName(), mountPoint));
 
 		WrappingNeoServerBootstrapper bootstrapper = new WrappingNeoServerBootstrapper(
 				graphDatabase, config);
@@ -86,23 +103,11 @@ public class BaseRestClientTest {
 		neoServer = bootstrapper.getServer();
 	}
 
-	/*
-	 * Function for deleting an entire database folder. USE WITH CARE!!!
+	/**
+	 * Shut down database when test suite has run.
+	 * 
+	 * @throws Exception
 	 */
-	protected static void deleteFolder(File folder) {
-		File[] files = folder.listFiles();
-		if (files != null) { // some JVMs return null for empty dirs
-			for (File f : files) {
-				if (f.isDirectory()) {
-					deleteFolder(f);
-				} else {
-					f.delete();
-				}
-			}
-		}
-		folder.delete();
-	}
-
 	@AfterClass
 	public static void shutdownDatabase() throws Exception {
 		neoServer.stop();
@@ -154,5 +159,24 @@ public class BaseRestClientTest {
 		reader.close();
 
 		return fileData.toString();
+	}
+	
+	/**
+	 * Function for deleting an entire database folder. USE WITH CARE!!!
+	 * 
+	 * @param folder
+	 */
+	protected static void deleteFolder(File folder) {
+		File[] files = folder.listFiles();
+		if (files != null) { // some JVMs return null for empty dirs
+			for (File f : files) {
+				if (f.isDirectory()) {
+					deleteFolder(f);
+				} else {
+					f.delete();
+				}
+			}
+		}
+		folder.delete();
 	}
 }
