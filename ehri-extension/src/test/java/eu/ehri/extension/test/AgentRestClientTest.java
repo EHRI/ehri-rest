@@ -8,6 +8,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.sun.jersey.api.client.ClientResponse;
@@ -20,6 +21,12 @@ public class AgentRestClientTest extends BaseRestClientTest {
 	static final String UPDATED_NAME = "UpdatedNameTEST";
 
 	private String jsonAgentTestString = "{\"data\":{\"isA\": \"agent\"}}";
+
+    @BeforeClass
+    public static void setUpBeforeClass() throws Exception {
+    	initializeTestDb(AgentRestClientTest.class.getName());
+    }
+    
 
 	@Before
 	public void setUp() throws Exception {

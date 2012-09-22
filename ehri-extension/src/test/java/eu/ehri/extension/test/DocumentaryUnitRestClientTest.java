@@ -9,10 +9,12 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
+import com.sun.research.ws.wadl.Doc;
 
 import eu.ehri.extension.EhriNeo4jFramedResource;
 import eu.ehri.project.models.DocumentaryUnit;
@@ -22,6 +24,11 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
 
 	private String jsonDocumentaryUnitTestStr; // test data to create a DocumentaryUnit
 	static final String UPDATED_NAME = "UpdatedNameTEST";
+
+    @BeforeClass
+    public static void setUpBeforeClass() throws Exception {
+    	initializeTestDb(DocumentaryUnitRestClientTest.class.getName());
+    }    
 
 	@Before
 	public void setUp() throws Exception {

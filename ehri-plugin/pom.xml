@@ -2,12 +2,12 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>eu.ehri.neo4j</groupId>
-		<artifactId>neo4j-ehri-plugin</artifactId>
-		<version>1.0</version>
+		<groupId>ehri-project</groupId>
+		<artifactId>ehri-data</artifactId>
+        <version>1.0</version>
+        <relativePath>../pom.xml</relativePath>
 	</parent>
 
-	<groupId>ehri-plugin</groupId>
 	<artifactId>ehri-plugin</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<build>
@@ -42,9 +42,9 @@
 
 		<!-- was ehri-data, a sibling project -->
 		<dependency>
-			<groupId>EHRI</groupId>
-			<artifactId>ehri-data-frames</artifactId>
-			<version>0.1-SNAPSHOT</version>
+			<groupId>ehri-project</groupId>
+			<artifactId>ehri-frames</artifactId>
+            <version>0.1-SNAPSHOT</version>
 		</dependency>
 
 		<!-- tinkerpop -->
@@ -119,7 +119,7 @@
 		<dependency>
 			<groupId>com.sun.jersey</groupId>
 			<artifactId>jersey-client</artifactId>
-			<version>1.13</version>
+			<version>1.9</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
@@ -141,7 +141,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<!-- Jar Versions -->
 		<!-- was 1.8-SNAPSHOT -->
-		<neo4j.version>1.8.M07</neo4j.version>
+		<neo4j.version>1.8-SNAPSHOT-EHRI</neo4j.version>
 		<tinkerpop.version>2.1.0</tinkerpop.version>
 	</properties>
 </project>

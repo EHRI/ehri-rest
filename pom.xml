@@ -4,15 +4,24 @@
                              http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>eu.ehri.neo4j</groupId>
-    <artifactId>neo4j-ehri-plugin</artifactId>
+    <groupId>ehri-project</groupId>
+    <artifactId>ehri-data</artifactId>
     <packaging>pom</packaging>
     <version>1.0</version>
-    <name>neo4j EHRI Project</name>
+    <name>Neo4j EHRI Project</name>
 
     <modules>
-         <module>ehri-extension</module>
+         <module>ehri-frames</module>
          <module>ehri-plugin</module>
+         <module>ehri-extension</module>
     </modules>
-
+    <dependencyManagement>
+    	<dependencies>
+    		<dependency>
+    			<groupId>junit</groupId>
+    			<artifactId>junit</artifactId>
+    			<version>4.10</version>
+    		</dependency>
+    	</dependencies>
+    </dependencyManagement>
 </project>

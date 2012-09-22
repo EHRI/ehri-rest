@@ -7,11 +7,11 @@
 		<version>1.0</version>
 	</parent>
     
-    <artifactId>ehri-data-frames</artifactId>
+    <artifactId>ehri-frames</artifactId>
     <packaging>jar</packaging>
-    <description>ehri-data-frames</description>
+    <description>ehri-frames</description>
     <version>0.1-SNAPSHOT</version>
-    <name>ehri-data-frames</name>
+    <name>ehri-frames</name>
     <organization>
         <name>EHRI</name>
     </organization>

@@ -63,7 +63,7 @@ public class EhriNeo4jPluginTest {
     	Representation unit = plugin.getVertexIndex(db, "nonexistingindex");
     }
 
-	// lets see If I can do the same details test as already done in the ehri-data-frames test 
+	// lets see If I can do the same details test as already done in the ehri-frames test 
     @Test
     public void testDetail() throws PermissionDenied {
         DocumentaryUnit unit = views.detail(itemId, validUserId);

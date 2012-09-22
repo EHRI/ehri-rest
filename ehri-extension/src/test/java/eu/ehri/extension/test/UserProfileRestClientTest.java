@@ -9,6 +9,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.sun.jersey.api.client.ClientResponse;
@@ -25,6 +26,11 @@ public class UserProfileRestClientTest  extends BaseRestClientTest {
 
 	private String jsonUserProfileTestString = "{\"data\":{\"userId\":-1,\"name\":\"testUserName1\",\"isA\":\"userProfile\"}}";
 
+    @BeforeClass
+    public static void setUpBeforeClass() throws Exception {
+    	initializeTestDb(UserProfileRestClientTest.class.getName());
+    }
+    
 	@Before
 	public void setUp() throws Exception {
 	}

@@ -9,14 +9,26 @@ import java.net.URI;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.neo4j.kernel.AbstractGraphDatabase;
+import org.neo4j.kernel.EmbeddedGraphDatabase;
+import org.neo4j.server.NeoServer;
+import org.neo4j.server.WrappingNeoServerBootstrapper;
+import org.neo4j.server.configuration.ServerConfigurator;
+import org.neo4j.server.configuration.ThirdPartyJaxRsPackage;
 
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
+import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
+import com.tinkerpop.frames.FramedGraph;
 
 import eu.ehri.extension.EhriNeo4jFramedResource;
 import eu.ehri.project.persistance.Converter;
+import eu.ehri.project.test.utils.FixtureLoader;
 
 /**
  * Base class for testing the REST interface on a neo4j server with the ehri extension deployed.
@@ -29,10 +41,41 @@ public class BaseRestClientTest {
 	final protected String baseUri = "http://localhost:7474";
 	final protected String extensionEntryPointUri = baseUri + "/examples/unmanaged/ehri";
 
-	final protected String adminUserProfileId = "80497"; // supply this, depends on your
-												// database content!
+	final protected String adminUserProfileId = "20"; // Depends on fixture content.
+    protected static AbstractGraphDatabase graphDatabase;
+    protected static FixtureLoader loader;
+    protected static NeoServer neoServer;
+    
 	protected Client client = Client.create();
 	protected Converter converter = new Converter();
+	
+    @BeforeClass
+    public static void setUpBeforeClass() throws Exception {
+    	initializeTestDb(BaseRestClientTest.class.getName());
+    }
+    
+    public static void initializeTestDb(String dbName) {
+        graphDatabase = new EmbeddedGraphDatabase("target/tmpdb_"
+                + dbName);
+        loader = new FixtureLoader(new FramedGraph<Neo4jGraph>(new Neo4jGraph(
+                graphDatabase)));
+        loader.loadTestData();
+
+        ServerConfigurator config = new ServerConfigurator(graphDatabase);
+        config.getThirdpartyJaxRsClasses().add(
+                new ThirdPartyJaxRsPackage("eu.ehri.extension",
+                        "/examples/unmanaged"));
+
+        WrappingNeoServerBootstrapper bootstrapper = new WrappingNeoServerBootstrapper(
+                graphDatabase, config);
+        bootstrapper.start();
+        neoServer = bootstrapper.getServer();
+    }
+
+    @AfterClass
+    public static void shutdownDatabase() throws Exception {
+        neoServer.stop();
+    }
 	
 	/**
 	 * Tests if we have an admin user, we need that user for doing all the other tests
