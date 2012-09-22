@@ -3,6 +3,7 @@ package eu.ehri.extension.test;
 import static org.junit.Assert.assertEquals;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.InputStreamReader;
 import java.net.URI;
 
@@ -55,8 +56,8 @@ public class BaseRestClientTest {
     }
     
     public static void initializeTestDb(String dbName) {
-        graphDatabase = new EmbeddedGraphDatabase("target/tmpdb_"
-                + dbName);
+    	final String dbPath = "target/tmpdb_" + dbName;
+        graphDatabase = new EmbeddedGraphDatabase(dbPath);
         loader = new FixtureLoader(new FramedGraph<Neo4jGraph>(new Neo4jGraph(
                 graphDatabase)));
         loader.loadTestData();
@@ -68,11 +69,35 @@ public class BaseRestClientTest {
 
         WrappingNeoServerBootstrapper bootstrapper = new WrappingNeoServerBootstrapper(
                 graphDatabase, config);
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+        	@Override
+        	public void run() {
+        		deleteFolder(new File(dbPath));
+        	}
+        });
         bootstrapper.start();
         neoServer = bootstrapper.getServer();
     }
 
-    @AfterClass
+    /*
+     * Function for deleting an entire database folder.
+     * USE WITH CARE!!!
+     */
+    protected static void deleteFolder(File folder) {
+    	File[] files = folder.listFiles();
+        if(files!=null) { //some JVMs return null for empty dirs
+            for(File f: files) {
+                if(f.isDirectory()) {
+                    deleteFolder(f);
+                } else {
+                    f.delete();
+                }
+            }
+        }
+        folder.delete();
+	}
+
+	@AfterClass
     public static void shutdownDatabase() throws Exception {
         neoServer.stop();
     }
