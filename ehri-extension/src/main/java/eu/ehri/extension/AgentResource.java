@@ -29,31 +29,27 @@ public class AgentResource extends EhriNeo4jFramedResource<Agent> {
 	@Path("/{id}")
 	public Response getAgent(@PathParam("id") long id) {
 		return retrieve(id);
-		//return Response.status(Status.OK).build();
 	}
-	
+
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("")
 	public Response createAgent(String json) {
 		return create(json);
-		//return Response.status(Status.OK).build();
 	}
-	
+
 	@PUT
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("")
 	public Response updateAgent(String json) {
 		return update(json);
-		//return Response.status(Status.OK).build();
 	}
-	
+
 	@DELETE
 	@Path("/{id}")
 	public Response deleteAgent(@PathParam("id") long id) {
 		return delete(id);
-		//return Response.status(Status.OK).build();
 	}
 }

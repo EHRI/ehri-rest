@@ -29,7 +29,7 @@ public class UserProfileResource extends EhriNeo4jFramedResource<UserProfile> {
 	public Response getUserProfile(@PathParam("id") long id) {
 		return retrieve(id);
 	}
-	
+
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
@@ -37,7 +37,7 @@ public class UserProfileResource extends EhriNeo4jFramedResource<UserProfile> {
 	public Response createUserProfile(String json) {
 		return create(json);
 	}
-	
+
 	@PUT
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
@@ -45,7 +45,7 @@ public class UserProfileResource extends EhriNeo4jFramedResource<UserProfile> {
 	public Response updateUserProfile(String json) {
 		return update(json);
 	}
-	
+
 	@DELETE
 	@Path("/{id}")
 	public Response deleteUserProfile(@PathParam("id") long id) {
