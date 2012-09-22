@@ -60,8 +60,6 @@ public class UserProfileRestClientTest  extends BaseRestClientTest {
 				.get(ClientResponse.class);
 		assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
 		// TODO again test json
-
-		delete(location);
 	}
 	
 	@Test
@@ -117,8 +115,6 @@ public class UserProfileRestClientTest  extends BaseRestClientTest {
 		EntityBundle<DocumentaryUnit> updatedEntityBundle = converter.jsonToBundle(updatedJson); 
 		Map<String, Object> updatedData = updatedEntityBundle.getData();
 		assertEquals(UPDATED_NAME, updatedData.get("name"));
-		
-		delete(location);
 	}
 	
 }

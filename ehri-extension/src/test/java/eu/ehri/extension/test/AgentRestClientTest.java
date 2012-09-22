@@ -54,7 +54,5 @@ public class AgentRestClientTest extends BaseRestClientTest {
 				.get(ClientResponse.class);
 		assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
 		// TODO again test json
-
-		delete(location);
 	}
 }
