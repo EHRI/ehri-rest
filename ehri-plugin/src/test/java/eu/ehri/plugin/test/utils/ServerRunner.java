@@ -13,17 +13,30 @@ import com.tinkerpop.frames.FramedGraph;
 
 import eu.ehri.project.test.utils.FixtureLoader;
 
+/**
+ * Class that handles running a test Neo4j server.
+ * 
+ */
 public class ServerRunner {
-	
+
 	protected AbstractGraphDatabase graphDatabase;
-	WrappingNeoServerBootstrapper bootstrapper;
+	protected WrappingNeoServerBootstrapper bootstrapper;
 	protected FixtureLoader loader;
 	protected NeoServer neoServer;
 	protected ServerConfigurator config;
 
+	/**
+	 * Initialise a new Neo4j Server with the given db name and port.
+	 * 
+	 * @param dbName
+	 * @param dbPort
+	 */
 	public ServerRunner(String dbName, Integer dbPort) {
+		// TODO: Work out a better way to configure the path
 		final String dbPath = "target/tmpdb_" + dbName;
 		graphDatabase = new EmbeddedGraphDatabase(dbPath);
+
+		// Initialize the fixture loader
 		loader = new FixtureLoader(new FramedGraph<Neo4jGraph>(new Neo4jGraph(
 				graphDatabase)));
 		loader.loadTestData();
@@ -34,8 +47,8 @@ public class ServerRunner {
 		config.configuration().setProperty("org.neo4j.server.webserver.port",
 				dbPort.toString());
 
-		bootstrapper = new WrappingNeoServerBootstrapper(
-				graphDatabase, config);
+		bootstrapper = new WrappingNeoServerBootstrapper(graphDatabase, config);
+
 		// Attempt to ensure database is erased from the disk when
 		// the runtime shuts down. This improves repeatability, because
 		// if it is still there it'll be appended to on the next run.
@@ -46,11 +59,17 @@ public class ServerRunner {
 			}
 		});
 	}
-	
+
+	/**
+	 * Get the configurator for the test db. This allows adjusting config before
+	 * starting it up.
+	 * 
+	 * @return
+	 */
 	public ServerConfigurator getConfigurator() {
 		return config;
 	}
-		
+
 	/**
 	 * Initialise a new graph database in a given location. This should be
 	 * unique for each superclass, because otherwise problems can be encountered
@@ -60,7 +79,7 @@ public class ServerRunner {
 	 */
 	public NeoServer initialize() {
 		bootstrapper.start();
-		return bootstrapper.getServer(); 
+		return bootstrapper.getServer();
 	}
 
 	/**
