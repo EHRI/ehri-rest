@@ -48,7 +48,7 @@
       		<type>test-jar</type>
       		<scope>test</scope>
 		</dependency>
-		
+
 		<!-- tinkerpop -->
 		<dependency>
 			<groupId>com.tinkerpop.blueprints</groupId>

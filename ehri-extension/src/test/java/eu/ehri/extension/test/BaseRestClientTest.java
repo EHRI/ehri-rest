@@ -30,6 +30,7 @@ import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
 import eu.ehri.extension.EhriNeo4jFramedResource;
+import eu.ehri.plugin.test.utils.ServerRunner;
 import eu.ehri.project.persistance.Converter;
 import eu.ehri.project.test.utils.FixtureLoader;
 
@@ -42,7 +43,7 @@ import eu.ehri.project.test.utils.FixtureLoader;
  */
 public class BaseRestClientTest {
 	// Test server port - different from Neo4j default to prevent collisions.
-	final static protected String testServerPort = "7575";
+	final static protected Integer testServerPort = 7575;
 	// Test server host
 	final static protected String baseUri = "http://localhost:"
 			+ testServerPort;
@@ -54,8 +55,6 @@ public class BaseRestClientTest {
 	// Admin user prefix - depends on fixture data
 	final static protected String adminUserProfileId = "20";
 
-	protected static AbstractGraphDatabase graphDatabase;
-	protected static FixtureLoader loader;
 	protected static NeoServer neoServer;
 
 	protected Client client = Client.create();
@@ -63,7 +62,7 @@ public class BaseRestClientTest {
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		initializeTestDb(BaseRestClientTest.class.getName());
+		initializeTestDb(BaseRestClientTest.class.getName());		
 	}
 
 	/**
@@ -75,35 +74,11 @@ public class BaseRestClientTest {
 	 * @param dbName
 	 */
 	protected static void initializeTestDb(String dbName) {
-		final String dbPath = "target/tmpdb_" + dbName;
-		graphDatabase = new EmbeddedGraphDatabase(dbPath);
-		loader = new FixtureLoader(new FramedGraph<Neo4jGraph>(new Neo4jGraph(
-				graphDatabase)));
-		loader.loadTestData();
-
-		// Server configuration. TODO: Work out how to disable server startup
-		// and load logging so the test output isn't so noisy...
-		ServerConfigurator config = new ServerConfigurator(graphDatabase);
-		config.configuration().setProperty("org.neo4j.server.webserver.port",
-				testServerPort);
-		// Add JAX-RS classes
-		config.getThirdpartyJaxRsClasses().add(
+		ServerRunner runner = new ServerRunner(dbName, testServerPort);
+		runner.getConfigurator().getThirdpartyJaxRsClasses().add(
 				new ThirdPartyJaxRsPackage(EhriNeo4jFramedResource.class
 						.getPackage().getName(), mountPoint));
-
-		WrappingNeoServerBootstrapper bootstrapper = new WrappingNeoServerBootstrapper(
-				graphDatabase, config);
-		// Attempt to ensure database is erased from the disk when
-		// the runtime shuts down. This improves repeatability, because
-		// if it is still there it'll be appended to on the next run.
-		Runtime.getRuntime().addShutdownHook(new Thread() {
-			@Override
-			public void run() {
-				deleteFolder(new File(dbPath));
-			}
-		});
-		bootstrapper.start();
-		neoServer = bootstrapper.getServer();
+		neoServer = runner.initialize();
 	}
 
 	/**

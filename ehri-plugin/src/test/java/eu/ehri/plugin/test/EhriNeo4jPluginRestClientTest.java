@@ -56,7 +56,7 @@ public class EhriNeo4jPluginRestClientTest {
 	@BeforeClass
 	public static void setupServer() {
 		ServerRunner runner = new ServerRunner(
-				EhriNeo4jPluginRestClientTest.class.getName(), 7575, null);
+				EhriNeo4jPluginRestClientTest.class.getName(), 7575);
 		neoServer = runner.initialize();
 	}
 

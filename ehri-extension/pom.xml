@@ -83,6 +83,15 @@
       		<type>test-jar</type>
       		<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>ehri-project</groupId>
+			<artifactId>ehri-plugin</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+      		<type>test-jar</type>
+      		<scope>test</scope>
+		</dependency>
+		
+		
 	
 		<!-- neo4j -->
 		<dependency>

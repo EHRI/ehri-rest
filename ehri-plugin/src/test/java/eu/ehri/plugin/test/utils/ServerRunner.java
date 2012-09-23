@@ -14,29 +14,14 @@ import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.test.utils.FixtureLoader;
 
 public class ServerRunner {
-
-	private Integer dbPort = 7575;
-	private String dbName = "tmpdb";
 	
 	protected AbstractGraphDatabase graphDatabase;
+	WrappingNeoServerBootstrapper bootstrapper;
 	protected FixtureLoader loader;
 	protected NeoServer neoServer;
 	protected ServerConfigurator config;
 
-	public ServerRunner(String dbName, Integer dbPort, ServerConfigurator config) {
-		this.dbPort = dbPort;
-		this.dbName = dbName;
-		this.config = config;
-	}
-	
-	/**
-	 * Initialise a new graph database in a given location. This should be
-	 * unique for each superclass, because otherwise problems can be encountered
-	 * when another test suite starts up whilst a database is in the process of
-	 * shutting down.
-	 * 
-	 */
-	public NeoServer initialize() {
+	public ServerRunner(String dbName, Integer dbPort) {
 		final String dbPath = "target/tmpdb_" + dbName;
 		graphDatabase = new EmbeddedGraphDatabase(dbPath);
 		loader = new FixtureLoader(new FramedGraph<Neo4jGraph>(new Neo4jGraph(
@@ -45,12 +30,11 @@ public class ServerRunner {
 
 		// Server configuration. TODO: Work out how to disable server startup
 		// and load logging so the test output isn't so noisy...
-		if (config == null)
-			config = new ServerConfigurator(graphDatabase);
+		config = new ServerConfigurator(graphDatabase);
 		config.configuration().setProperty("org.neo4j.server.webserver.port",
 				dbPort.toString());
 
-		WrappingNeoServerBootstrapper bootstrapper = new WrappingNeoServerBootstrapper(
+		bootstrapper = new WrappingNeoServerBootstrapper(
 				graphDatabase, config);
 		// Attempt to ensure database is erased from the disk when
 		// the runtime shuts down. This improves repeatability, because
@@ -61,6 +45,20 @@ public class ServerRunner {
 				deleteFolder(new File(dbPath));
 			}
 		});
+	}
+	
+	public ServerConfigurator getConfigurator() {
+		return config;
+	}
+		
+	/**
+	 * Initialise a new graph database in a given location. This should be
+	 * unique for each superclass, because otherwise problems can be encountered
+	 * when another test suite starts up whilst a database is in the process of
+	 * shutting down.
+	 * 
+	 */
+	public NeoServer initialize() {
 		bootstrapper.start();
 		return bootstrapper.getServer(); 
 	}
