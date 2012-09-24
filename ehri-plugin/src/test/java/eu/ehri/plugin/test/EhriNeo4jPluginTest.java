@@ -2,17 +2,12 @@ package eu.ehri.plugin.test;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.Map;
-
-import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.server.rest.repr.NodeRepresentation;
 import org.neo4j.server.rest.repr.Representation;
 import org.neo4j.test.TestGraphDatabaseFactory;
 

@@ -5,34 +5,20 @@ import static org.junit.Assert.assertEquals;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
-import java.net.URI;
-
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import junit.extensions.TestSetup;
-
 import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.neo4j.kernel.AbstractGraphDatabase;
-import org.neo4j.kernel.EmbeddedGraphDatabase;
-import org.neo4j.server.NeoServer;
-import org.neo4j.server.WrappingNeoServerBootstrapper;
-import org.neo4j.server.configuration.ServerConfigurator;
 import org.neo4j.server.configuration.ThirdPartyJaxRsPackage;
 
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
-import com.tinkerpop.frames.FramedGraph;
-
 import eu.ehri.extension.EhriNeo4jFramedResource;
 import eu.ehri.plugin.test.utils.ServerRunner;
 import eu.ehri.project.persistance.Converter;
-import eu.ehri.project.test.utils.FixtureLoader;
 
 /**
  * Base class for testing the REST interface on a neo4j server with the ehri
