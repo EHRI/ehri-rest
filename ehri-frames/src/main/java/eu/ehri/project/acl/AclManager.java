@@ -58,7 +58,7 @@ public class AclManager {
         }
         return false;
     }
-    
+
     /*
      * We have to ascend the current accessors group hierarchy looking for a
      * groups that are contained in the current entity's ACL list. Return the
@@ -145,9 +145,10 @@ public class AclManager {
             boolean canRead, boolean canWrite) {
         // FIXME: There should be a better way of doing this...
         Edge edge = null;
-        for (Edge e: entity.asVertex().getEdges(Direction.OUT, AccessibleEntity.ACCESS)) {
+        for (Edge e : entity.asVertex().getEdges(Direction.OUT,
+                AccessibleEntity.ACCESS)) {
             if (e.getVertex(Direction.IN).equals(accessor.asVertex()))
-                edge = e;                    
+                edge = e;
         }
         if (edge == null) {
             edge = graph.addEdge(null, entity.asVertex(), accessor.asVertex(),
@@ -157,7 +158,7 @@ public class AclManager {
         access.setRead(canRead);
         access.setWrite(canWrite);
     }
-    
+
     /**
      * Revoke an accessors access to an entity.
      * 
@@ -167,7 +168,7 @@ public class AclManager {
     public void removeAccessControl(AccessibleEntity entity, Accessor accessor) {
         entity.removeAccessor(accessor);
     }
-    
+
     /**
      * Set access control on an entity to several accessors.
      * 

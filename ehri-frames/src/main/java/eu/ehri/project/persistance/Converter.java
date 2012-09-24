@@ -95,7 +95,7 @@ public class Converter {
         try {
             ObjectMapper mapper = new ObjectMapper();
             // Note: defaultPrettyPrintWriter has been replaced by
-            // writerWithDefaultPrettyPrinter in newer versions of 
+            // writerWithDefaultPrettyPrinter in newer versions of
             // Jackson, though not the one available in Neo4j.
             ObjectWriter writer = mapper.defaultPrettyPrintingWriter();
             return writer.writeValueAsString(data);

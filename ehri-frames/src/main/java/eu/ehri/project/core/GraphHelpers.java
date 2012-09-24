@@ -221,9 +221,9 @@ public class GraphHelpers {
             throw new RuntimeException(e);
         }
     }
-    
+
     public Edge createOrUpdateIndexedEdge(Vertex src, Vertex dst, String label,
-            Map<String,Object> data, Index<Edge> index) {
+            Map<String, Object> data, Index<Edge> index) {
         Edge edge = null;
         for (Edge e : src.getEdges(Direction.OUT, label)) {
             if (e.getVertex(Direction.IN).equals(dst))
@@ -232,8 +232,8 @@ public class GraphHelpers {
         if (edge == null) {
             return createIndexedEdge(src, dst, label, data, index);
         }
-        
-        return updateIndexedEdge(edge, data, index);            
+
+        return updateIndexedEdge(edge, data, index);
     }
 
     /**
@@ -303,7 +303,7 @@ public class GraphHelpers {
             throw new RuntimeException(e);
         }
     }
-    
+
     /**
      * Update an indexed Edge.
      * 
@@ -313,7 +313,7 @@ public class GraphHelpers {
      * @return
      */
     public Edge updateIndexedEdge(Object id, Map<String, Object> data,
-            Index<Edge> index)  {
+            Index<Edge> index) {
         try {
             Edge relationship = graph.getEdge(id);
 
@@ -326,8 +326,6 @@ public class GraphHelpers {
             throw new RuntimeException(e);
         }
     }
-    
-
 
     /*** helpers ***/
 

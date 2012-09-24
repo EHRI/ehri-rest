@@ -42,119 +42,120 @@ import eu.ehri.project.test.utils.FixtureLoader;
  * documentation of the neo4j server explains how to do this.
  */
 public class BaseRestClientTest {
-	// Test server port - different from Neo4j default to prevent collisions.
-	final static protected Integer testServerPort = 7575;
-	// Test server host
-	final static protected String baseUri = "http://localhost:"
-			+ testServerPort;
-	// Mount point for EHRI resources
-	final static protected String mountPoint = "/";
-	final static protected String extensionEntryPointUri = baseUri + mountPoint
-			+ "ehri";
+    // Test server port - different from Neo4j default to prevent collisions.
+    final static protected Integer testServerPort = 7575;
+    // Test server host
+    final static protected String baseUri = "http://localhost:"
+            + testServerPort;
+    // Mount point for EHRI resources
+    final static protected String mountPoint = "/";
+    final static protected String extensionEntryPointUri = baseUri + mountPoint
+            + "ehri";
 
-	// Admin user prefix - depends on fixture data
-	final static protected String adminUserProfileId = "20";
+    // Admin user prefix - depends on fixture data
+    final static protected String adminUserProfileId = "20";
 
-	protected static ServerRunner runner;
+    protected static ServerRunner runner;
 
-	protected Client client = Client.create();
-	protected Converter converter = new Converter();
+    protected Client client = Client.create();
+    protected Converter converter = new Converter();
 
-	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
-		initializeTestDb(BaseRestClientTest.class.getName());		
-	}
+    @BeforeClass
+    public static void setUpBeforeClass() throws Exception {
+        initializeTestDb(BaseRestClientTest.class.getName());
+    }
 
-	/**
-	 * Initialise a new graph database in a given location. This should be
-	 * unique for each superclass, because otherwise problems can be encountered
-	 * when another test suite starts up whilst a database is in the process of
-	 * shutting down.
-	 * 
-	 * @param dbName
-	 */
-	protected static void initializeTestDb(String dbName) {
-		runner = new ServerRunner(dbName, testServerPort);
-		runner.getConfigurator().getThirdpartyJaxRsClasses().add(
-				new ThirdPartyJaxRsPackage(EhriNeo4jFramedResource.class
-						.getPackage().getName(), mountPoint));
-		runner.start();
-	}
+    /**
+     * Initialise a new graph database in a given location. This should be
+     * unique for each superclass, because otherwise problems can be encountered
+     * when another test suite starts up whilst a database is in the process of
+     * shutting down.
+     * 
+     * @param dbName
+     */
+    protected static void initializeTestDb(String dbName) {
+        runner = new ServerRunner(dbName, testServerPort);
+        runner.getConfigurator()
+                .getThirdpartyJaxRsClasses()
+                .add(new ThirdPartyJaxRsPackage(EhriNeo4jFramedResource.class
+                        .getPackage().getName(), mountPoint));
+        runner.start();
+    }
 
-	/**
-	 * Shut down database when test suite has run.
-	 * 
-	 * @throws Exception
-	 */
-	@AfterClass
-	public static void shutdownDatabase() throws Exception {
-		runner.stop();
-	}
+    /**
+     * Shut down database when test suite has run.
+     * 
+     * @throws Exception
+     */
+    @AfterClass
+    public static void shutdownDatabase() throws Exception {
+        runner.stop();
+    }
 
-	/**
-	 * Tests if we have an admin user, we need that user for doing all the other
-	 * tests
-	 * 
-	 * curl -v -X GET -H "Authorization: 80497" -H "Accept: application/json"
-	 * http://localhost:7474/examples/unmanaged/ehri/userProfile/80497
-	 * 
-	 */
-	@Test
-	public void testAdminGetUserProfile() throws Exception {
-		// get the admin user profile
-		WebResource resource = client.resource(extensionEntryPointUri
-				+ "/userProfile" + "/" + adminUserProfileId);
-		ClientResponse response = resource
-				.accept(MediaType.APPLICATION_JSON)
-				.header(EhriNeo4jFramedResource.AUTH_HEADER_NAME,
-						adminUserProfileId).get(ClientResponse.class);
-		assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+    /**
+     * Tests if we have an admin user, we need that user for doing all the other
+     * tests
+     * 
+     * curl -v -X GET -H "Authorization: 80497" -H "Accept: application/json"
+     * http://localhost:7474/examples/unmanaged/ehri/userProfile/80497
+     * 
+     */
+    @Test
+    public void testAdminGetUserProfile() throws Exception {
+        // get the admin user profile
+        WebResource resource = client.resource(extensionEntryPointUri
+                + "/userProfile" + "/" + adminUserProfileId);
+        ClientResponse response = resource
+                .accept(MediaType.APPLICATION_JSON)
+                .header(EhriNeo4jFramedResource.AUTH_HEADER_NAME,
+                        adminUserProfileId).get(ClientResponse.class);
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
 
-		// TODO check it has a group with 'admin' rights
-	}
+        // TODO check it has a group with 'admin' rights
+    }
 
-	/*** Helpers ***/
+    /*** Helpers ***/
 
-	/**
-	 * NOTE not sure how this handles UTF8
-	 * 
-	 * @param filePath
-	 * @return
-	 * @throws java.io.IOException
-	 */
-	protected String readFileAsString(String filePath)
-			throws java.io.IOException {
-		StringBuffer fileData = new StringBuffer(1024);
-		BufferedReader reader = new BufferedReader(new InputStreamReader(this
-				.getClass().getClassLoader().getResourceAsStream(filePath)));
-		char[] buf = new char[1024];
-		int numRead = 0;
-		while ((numRead = reader.read(buf)) != -1) {
-			String readData = String.valueOf(buf, 0, numRead);
-			fileData.append(readData);
-			buf = new char[1024];
-		}
-		reader.close();
+    /**
+     * NOTE not sure how this handles UTF8
+     * 
+     * @param filePath
+     * @return
+     * @throws java.io.IOException
+     */
+    protected String readFileAsString(String filePath)
+            throws java.io.IOException {
+        StringBuffer fileData = new StringBuffer(1024);
+        BufferedReader reader = new BufferedReader(new InputStreamReader(this
+                .getClass().getClassLoader().getResourceAsStream(filePath)));
+        char[] buf = new char[1024];
+        int numRead = 0;
+        while ((numRead = reader.read(buf)) != -1) {
+            String readData = String.valueOf(buf, 0, numRead);
+            fileData.append(readData);
+            buf = new char[1024];
+        }
+        reader.close();
 
-		return fileData.toString();
-	}
+        return fileData.toString();
+    }
 
-	/**
-	 * Function for deleting an entire database folder. USE WITH CARE!!!
-	 * 
-	 * @param folder
-	 */
-	protected static void deleteFolder(File folder) {
-		File[] files = folder.listFiles();
-		if (files != null) { // some JVMs return null for empty dirs
-			for (File f : files) {
-				if (f.isDirectory()) {
-					deleteFolder(f);
-				} else {
-					f.delete();
-				}
-			}
-		}
-		folder.delete();
-	}
+    /**
+     * Function for deleting an entire database folder. USE WITH CARE!!!
+     * 
+     * @param folder
+     */
+    protected static void deleteFolder(File folder) {
+        File[] files = folder.listFiles();
+        if (files != null) { // some JVMs return null for empty dirs
+            for (File f : files) {
+                if (f.isDirectory()) {
+                    deleteFolder(f);
+                } else {
+                    f.delete();
+                }
+            }
+        }
+        folder.delete();
+    }
 }

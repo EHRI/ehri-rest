@@ -18,41 +18,41 @@ import eu.ehri.extension.EhriNeo4jFramedResource;
 
 public class AgentRestClientTest extends BaseRestClientTest {
 
-	static final String UPDATED_NAME = "UpdatedNameTEST";
+    static final String UPDATED_NAME = "UpdatedNameTEST";
 
-	private String jsonAgentTestString = "{\"data\":{\"isA\": \"agent\"}}";
+    private String jsonAgentTestString = "{\"data\":{\"isA\": \"agent\"}}";
 
-	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
-		initializeTestDb(AgentRestClientTest.class.getName());
-	}
+    @BeforeClass
+    public static void setUpBeforeClass() throws Exception {
+        initializeTestDb(AgentRestClientTest.class.getName());
+    }
 
-	@Before
-	public void setUp() throws Exception {
-	}
+    @Before
+    public void setUp() throws Exception {
+    }
 
-	@Test
-	public void testCreateDeleteAgent() throws Exception {
-		// Create
-		WebResource resource = client.resource(extensionEntryPointUri
-				+ "/agent");
-		ClientResponse response = resource
-				.accept(MediaType.APPLICATION_JSON)
-				.type(MediaType.APPLICATION_JSON)
-				.header(EhriNeo4jFramedResource.AUTH_HEADER_NAME,
-						adminUserProfileId).entity(jsonAgentTestString)
-				.post(ClientResponse.class);
+    @Test
+    public void testCreateDeleteAgent() throws Exception {
+        // Create
+        WebResource resource = client.resource(extensionEntryPointUri
+                + "/agent");
+        ClientResponse response = resource
+                .accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .header(EhriNeo4jFramedResource.AUTH_HEADER_NAME,
+                        adminUserProfileId).entity(jsonAgentTestString)
+                .post(ClientResponse.class);
 
-		assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
 
-		// Get created doc via the response location?
-		URI location = response.getLocation();
+        // Get created doc via the response location?
+        URI location = response.getLocation();
 
-		resource = client.resource(location);
-		response = resource
-				.accept(MediaType.APPLICATION_JSON)
-				.header(EhriNeo4jFramedResource.AUTH_HEADER_NAME,
-						adminUserProfileId).get(ClientResponse.class);
-		assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
-	}
+        resource = client.resource(location);
+        response = resource
+                .accept(MediaType.APPLICATION_JSON)
+                .header(EhriNeo4jFramedResource.AUTH_HEADER_NAME,
+                        adminUserProfileId).get(ClientResponse.class);
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+    }
 }

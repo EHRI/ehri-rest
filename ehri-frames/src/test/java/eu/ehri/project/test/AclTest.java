@@ -135,7 +135,7 @@ public class AclTest extends ModelTestBase {
         assertTrue(access.getRead());
         assertFalse(access.getWrite());
     }
-    
+
     /**
      * Test changing permissions on an item.
      */
@@ -156,7 +156,7 @@ public class AclTest extends ModelTestBase {
         assertTrue(access != null);
         assertTrue(access.getWrite());
     }
-    
+
     /**
      * Test removing permissions.
      */

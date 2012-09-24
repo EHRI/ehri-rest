@@ -20,36 +20,36 @@ import eu.ehri.project.models.Agent;
 @Path("/ehri/agent")
 public class AgentResource extends EhriNeo4jFramedResource<Agent> {
 
-	public AgentResource(@Context GraphDatabaseService database) {
-		super(database, Agent.class);
-	}
+    public AgentResource(@Context GraphDatabaseService database) {
+        super(database, Agent.class);
+    }
 
-	@GET
-	@Produces(MediaType.APPLICATION_JSON)
-	@Path("/{id}")
-	public Response getAgent(@PathParam("id") long id) {
-		return retrieve(id);
-	}
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id}")
+    public Response getAgent(@PathParam("id") long id) {
+        return retrieve(id);
+    }
 
-	@POST
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	@Path("")
-	public Response createAgent(String json) {
-		return create(json);
-	}
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("")
+    public Response createAgent(String json) {
+        return create(json);
+    }
 
-	@PUT
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	@Path("")
-	public Response updateAgent(String json) {
-		return update(json);
-	}
+    @PUT
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("")
+    public Response updateAgent(String json) {
+        return update(json);
+    }
 
-	@DELETE
-	@Path("/{id}")
-	public Response deleteAgent(@PathParam("id") long id) {
-		return delete(id);
-	}
+    @DELETE
+    @Path("/{id}")
+    public Response deleteAgent(@PathParam("id") long id) {
+        return delete(id);
+    }
 }

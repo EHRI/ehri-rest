@@ -19,36 +19,36 @@ import eu.ehri.project.models.UserProfile;
 @Path("/ehri/userProfile")
 public class UserProfileResource extends EhriNeo4jFramedResource<UserProfile> {
 
-	public UserProfileResource(@Context GraphDatabaseService database) {
-		super(database, UserProfile.class);
-	}
+    public UserProfileResource(@Context GraphDatabaseService database) {
+        super(database, UserProfile.class);
+    }
 
-	@GET
-	@Produces(MediaType.APPLICATION_JSON)
-	@Path("/{id}")
-	public Response getUserProfile(@PathParam("id") long id) {
-		return retrieve(id);
-	}
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id}")
+    public Response getUserProfile(@PathParam("id") long id) {
+        return retrieve(id);
+    }
 
-	@POST
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	@Path("")
-	public Response createUserProfile(String json) {
-		return create(json);
-	}
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("")
+    public Response createUserProfile(String json) {
+        return create(json);
+    }
 
-	@PUT
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	@Path("")
-	public Response updateUserProfile(String json) {
-		return update(json);
-	}
+    @PUT
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("")
+    public Response updateUserProfile(String json) {
+        return update(json);
+    }
 
-	@DELETE
-	@Path("/{id}")
-	public Response deleteUserProfile(@PathParam("id") long id) {
-		return delete(id);
-	}
+    @DELETE
+    @Path("/{id}")
+    public Response deleteUserProfile(@PathParam("id") long id) {
+        return delete(id);
+    }
 }
