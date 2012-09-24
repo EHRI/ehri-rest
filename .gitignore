@@ -33,7 +33,7 @@ local.properties
 .buildpath
 
 # Ignore target
-**/target
+*/target/*
 
 # OS generated files #
 ######################
