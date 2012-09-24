@@ -21,6 +21,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
+import org.neo4j.graphdb.Transaction;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -128,7 +129,7 @@ public class EadImporter extends BaseImporter<Node> {
 
 		NodeList result = (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
 
-		
+		Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
 		try {
 			// Initialize the importer...
 			EadImporter importer = new EadImporter(graph, agent);
@@ -137,11 +138,14 @@ public class EadImporter extends BaseImporter<Node> {
 				importer.importDetails(result.item(i));
 			}
 			graph.getBaseGraph().stopTransaction(Conclusion.SUCCESS);
+			tx.success();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			graph.getBaseGraph().stopTransaction(Conclusion.FAILURE);
+			tx.failure();
 		} finally {
+			tx.finish();
 			graph.shutdown();
 		}
 	}
