@@ -75,7 +75,7 @@ public class BundleDAO<T extends VertexFrame> {
             tx.failure();
             throw new ValidationError(err.getMessage());
         } catch (Exception err) {
-            tx.failure();
+            tx.failure();	
             throw new RuntimeException(err);
         } finally {
         	tx.finish();
@@ -91,17 +91,20 @@ public class BundleDAO<T extends VertexFrame> {
      * @throws ValidationError
      */
     public Integer delete(EntityBundle<?> bundle) throws ValidationError {
+    	Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         // Recursively blast everything away! Use with caution.
         try {
             Integer count = deleteCount(bundle, 0);
-            graph.getBaseGraph().stopTransaction(Conclusion.SUCCESS);
+            tx.success();
             return count;
         } catch (ValidationError err) {
-            graph.getBaseGraph().stopTransaction(Conclusion.FAILURE);
+            tx.failure();
             throw new ValidationError(err.getMessage());
         } catch (Exception err) {
-            graph.getBaseGraph().stopTransaction(Conclusion.FAILURE);
+            tx.failure();
             throw new RuntimeException(err);
+        } finally {
+        	tx.finish();
         }
     }
 
