@@ -77,9 +77,15 @@ public class ServerRunner {
 	 * shutting down.
 	 * 
 	 */
-	public NeoServer initialize() {
+	public void start() {
 		bootstrapper.start();
-		return bootstrapper.getServer();
+	}
+	
+	/**
+	 * Stop the server
+	 */
+	public void stop() {
+		bootstrapper.stop();
 	}
 
 	/**

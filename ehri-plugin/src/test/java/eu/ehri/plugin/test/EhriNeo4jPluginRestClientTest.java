@@ -51,13 +51,13 @@ public class EhriNeo4jPluginRestClientTest {
 	final String baseUri = "http://localhost:7575";
 	final String pluginEntryPointUri = baseUri + "/db/data/ext/EhriNeo4jPlugin";
 
-	protected static NeoServer neoServer;
+	protected static ServerRunner runner;
 
 	@BeforeClass
 	public static void setupServer() {
-		ServerRunner runner = new ServerRunner(
+		runner = new ServerRunner(
 				EhriNeo4jPluginRestClientTest.class.getName(), 7575);
-		neoServer = runner.initialize();
+		runner.start();
 	}
 
 	/**
@@ -67,7 +67,7 @@ public class EhriNeo4jPluginRestClientTest {
 	 */
 	@AfterClass
 	public static void shutdownDatabase() throws Exception {
-		neoServer.stop();
+		runner.stop();
 	}
 
 	@Test

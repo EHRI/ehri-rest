@@ -55,7 +55,7 @@ public class BaseRestClientTest {
 	// Admin user prefix - depends on fixture data
 	final static protected String adminUserProfileId = "20";
 
-	protected static NeoServer neoServer;
+	protected static ServerRunner runner;
 
 	protected Client client = Client.create();
 	protected Converter converter = new Converter();
@@ -74,11 +74,11 @@ public class BaseRestClientTest {
 	 * @param dbName
 	 */
 	protected static void initializeTestDb(String dbName) {
-		ServerRunner runner = new ServerRunner(dbName, testServerPort);
+		runner = new ServerRunner(dbName, testServerPort);
 		runner.getConfigurator().getThirdpartyJaxRsClasses().add(
 				new ThirdPartyJaxRsPackage(EhriNeo4jFramedResource.class
 						.getPackage().getName(), mountPoint));
-		neoServer = runner.initialize();
+		runner.start();
 	}
 
 	/**
@@ -88,7 +88,7 @@ public class BaseRestClientTest {
 	 */
 	@AfterClass
 	public static void shutdownDatabase() throws Exception {
-		neoServer.stop();
+		runner.stop();
 	}
 
 	/**
