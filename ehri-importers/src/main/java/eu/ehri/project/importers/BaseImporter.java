@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
+import com.tinkerpop.blueprints.TransactionalGraph.Conclusion;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.exceptions.ValidationError;
@@ -34,7 +35,7 @@ public abstract class BaseImporter<T> implements Importer<T> {
 	}
 
 	public EntityBundle<DocumentaryUnit> extractDocumentaryUnit(T data)
-			throws ValidationError {
+			throws Exception {
 
 		EntityBundle<DocumentaryUnit> bundle = new BundleFactory<DocumentaryUnit>()
 				.buildBundle(new HashMap<String, Object>(),
@@ -98,7 +99,7 @@ public abstract class BaseImporter<T> implements Importer<T> {
 		for (T child : extractChildData(data)) {
 			importDetails(child, frame);
 		}
-
+		framedGraph.getBaseGraph().stopTransaction(Conclusion.SUCCESS);
 	}
 
 	/**
