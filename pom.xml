@@ -24,4 +24,8 @@
     		</dependency>
     	</dependencies>
     </dependencyManagement>
+    <properties>
+    	<neo4j-version>1.8-SNAPSHOT-EHRI</neo4j-version>
+    	<tinkerpop-version>2.1.0</tinkerpop-version>
+    </properties>
 </project>

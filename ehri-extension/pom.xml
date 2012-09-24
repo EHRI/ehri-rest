@@ -97,29 +97,29 @@
 		<dependency>
 			<groupId>org.neo4j</groupId>
 			<artifactId>neo4j</artifactId>
-			<version>${neo4j.version}</version>
+			<version>${neo4j-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.neo4j</groupId>
 			<artifactId>neo4j-kernel</artifactId>
-			<version>${neo4j.version}</version>
+			<version>${neo4j-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.neo4j.app</groupId>
 			<artifactId>neo4j-server</artifactId>
-			<version>${neo4j.version}</version>
+			<version>${neo4j-version}</version>
 		</dependency>
 		<dependency>
             <groupId>org.neo4j.app</groupId>
       		<artifactId>neo4j-server</artifactId>
-      		<version>${neo4j.version}</version>
+      		<version>${neo4j-version}</version>
       		<type>test-jar</type>
       		<scope>test</scope>
     	</dependency>
 		<dependency>
 			<groupId>org.neo4j</groupId>
 			<artifactId>neo4j-kernel</artifactId>
-			<version>${neo4j.version}</version>
+			<version>${neo4j-version}</version>
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
@@ -127,7 +127,7 @@
 		<dependency>
 			<groupId>com.tinkerpop.blueprints</groupId>
 			<artifactId>blueprints-neo4j-graph</artifactId>
-			<version>${tinkerpop.version}</version><!-- was 1.2 -->
+			<version>${tinkerpop-version}</version><!-- was 1.2 -->
 		</dependency>
 		
 		<!-- logging -->
@@ -175,9 +175,5 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<!-- Jar Versions -->
-		<!-- was 1.8-SNAPSHOT -->
-		<neo4j.version>1.8-SNAPSHOT-EHRI</neo4j.version>
-		<tinkerpop.version>2.1.0</tinkerpop.version>
 	</properties>
 </project>

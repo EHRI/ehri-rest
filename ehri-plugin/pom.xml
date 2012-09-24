@@ -4,8 +4,8 @@
 	<parent>
 		<groupId>ehri-project</groupId>
 		<artifactId>ehri-data</artifactId>
-        <version>1.0</version>
-        <relativePath>../pom.xml</relativePath>
+		<version>1.0</version>
+		<relativePath>../pom.xml</relativePath>
 	</parent>
 
 	<artifactId>ehri-plugin</artifactId>
@@ -35,36 +35,37 @@
 	</build>
 	<dependencies>
 
-		<!-- was ehri-data, a sibling project -->
-		<dependency>
-			<groupId>ehri-project</groupId>
-			<artifactId>ehri-frames</artifactId>
-            <version>0.1-SNAPSHOT</version>
-		</dependency>
 		<dependency>
 			<groupId>ehri-project</groupId>
 			<artifactId>ehri-frames</artifactId>
 			<version>0.1-SNAPSHOT</version>
-      		<type>test-jar</type>
-      		<scope>test</scope>
+			<scope>compile</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>ehri-project</groupId>
+			<artifactId>ehri-frames</artifactId>
+			<version>0.1-SNAPSHOT</version>
+			<type>test-jar</type>
+			<scope>test</scope>
 		</dependency>
 
 		<!-- tinkerpop -->
 		<dependency>
 			<groupId>com.tinkerpop.blueprints</groupId>
 			<artifactId>blueprints-neo4j-graph</artifactId>
-			<version>${tinkerpop.version}</version>
+			<version>${tinkerpop-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.tinkerpop</groupId>
 			<artifactId>frames</artifactId>
-			<version>${tinkerpop.version}</version>
+			<version>${tinkerpop-version}</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.tinkerpop.gremlin</groupId>
 			<artifactId>gremlin-java</artifactId>
-			<version>${tinkerpop.version}</version>
+			<version>${tinkerpop-version}</version>
 			<scope>compile</scope>
 		</dependency>
 
@@ -72,21 +73,21 @@
 		<dependency>
 			<groupId>org.neo4j</groupId>
 			<artifactId>neo4j</artifactId>
-			<version>${neo4j.version}</version>
+			<version>${neo4j-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.neo4j</groupId>
 			<artifactId>neo4j-kernel</artifactId>
-			<version>${neo4j.version}</version>
+			<version>${neo4j-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.neo4j.app</groupId>
 			<artifactId>neo4j-server</artifactId>
-			<version>${neo4j.version}</version>
-			<!-- NOTE somehow have it use the old tinkerpop blueprints-neo4j-graph 1.2 
-			by including it explicitely -->
-			
-			
+			<version>${neo4j-version}</version>
+			<!-- NOTE somehow have it use the old tinkerpop blueprints-neo4j-graph 
+				1.2 by including it explicitely -->
+
+
 		</dependency>
 
 
@@ -101,21 +102,20 @@
 		<dependency>
 			<groupId>org.neo4j</groupId>
 			<artifactId>neo4j-kernel</artifactId>
-			<version>${neo4j.version}</version>
+			<version>${neo4j-version}</version>
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.neo4j</groupId>
 			<artifactId>neo4j-graphviz</artifactId>
-			<version>${neo4j.version}</version>
+			<version>${neo4j-version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<scope>test</scope>
-			<version>4.10</version>
 		</dependency>
 		<!-- test the RESTfull api -->
 		<dependency>
@@ -141,9 +141,5 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<!-- Jar Versions -->
-		<!-- was 1.8-SNAPSHOT -->
-		<neo4j.version>1.8-SNAPSHOT-EHRI</neo4j.version>
-		<tinkerpop.version>2.1.0</tinkerpop.version>
 	</properties>
 </project>
