@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.collections.map.MultiValueMap;
+import org.neo4j.graphdb.Transaction;
 
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Index;
@@ -47,30 +48,37 @@ public class BundleDAO<T extends VertexFrame> {
      * @throws ValidationError
      */
     public T update(EntityBundle<T> bundle) throws ValidationError {
+    	Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
             Vertex node = updateInner(bundle);
-            graph.getBaseGraph().stopTransaction(Conclusion.SUCCESS);
+            tx.success();
             return graph.frame(node, bundle.getBundleClass());
         } catch (ValidationError err) {
-            graph.getBaseGraph().stopTransaction(Conclusion.FAILURE);
+            tx.failure();
             throw new ValidationError(err.getMessage());
         } catch (Exception err) {
-            graph.getBaseGraph().stopTransaction(Conclusion.FAILURE);
+            tx.failure();
             throw new RuntimeException(err);
+        } finally {
+        	tx.finish();
         }
+        
     }
 
     public T insert(EntityBundle<T> bundle) throws ValidationError {
+    	Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
             Vertex node = insertInner(bundle);
-            graph.getBaseGraph().stopTransaction(Conclusion.SUCCESS);
+            tx.success();
             return graph.frame(node, bundle.getBundleClass());
         } catch (ValidationError err) {
-            graph.getBaseGraph().stopTransaction(Conclusion.FAILURE);
+            tx.failure();
             throw new ValidationError(err.getMessage());
         } catch (Exception err) {
-            graph.getBaseGraph().stopTransaction(Conclusion.FAILURE);
+            tx.failure();
             throw new RuntimeException(err);
+        } finally {
+        	tx.finish();
         }
     }
 
