@@ -20,8 +20,8 @@ Also build and copy the extension jar:
 ehri-extension-0.0.1-SNAPSHOT.jar
 
 NOTES
-the plugin now depends on ehri-data-frames; 
-therefore you need to copy the ehri-data-frames-0.1-SNAPSHOT.jar into the 
+the plugin now depends on ehri-frames; 
+therefore you need to copy the ehri-frames-0.1-SNAPSHOT.jar into the 
 <neo4j-home>/system/lib
 Any jars that the ehri-data-frames uses also need to be placed into the 
 <neo4j-home>/system/lib
