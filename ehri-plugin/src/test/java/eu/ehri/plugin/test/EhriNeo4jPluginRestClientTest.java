@@ -78,6 +78,9 @@ public class EhriNeo4jPluginRestClientTest {
 		assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
 		Long userProfileId = getIdFromResponseString(response.getEntity(String.class));
 
+		// TODO log instead of sys.out
+		System.out.println("Admin user id: " + userProfileId);
+
 		// create a belongsTo edge from user to group
 		WebResource edgeIndexResource = client.resource(edgeIndexUri);
 		response = edgeIndexResource.accept( MediaType.APPLICATION_JSON  )

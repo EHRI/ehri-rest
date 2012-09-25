@@ -16,6 +16,9 @@ Neo4j server plugin for use by the EHRI project
   # curl localhost:7474/db/data/
   should mention the EhriNeo4jPlugin
 
+Also build and copy the extension jar:
+ehri-extension-0.0.1-SNAPSHOT.jar
+
 NOTES
 the plugin now depends on ehri-data-frames; 
 therefore you need to copy the ehri-data-frames-0.1-SNAPSHOT.jar into the 

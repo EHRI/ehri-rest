@@ -16,6 +16,9 @@ import org.neo4j.graphdb.GraphDatabaseService;
 
 import eu.ehri.project.models.DocumentaryUnit;
 
+/**
+ * Provides a RESTfull interface for the DocumentaryUnit 
+ */
 @Path("/ehri/documentaryUnit")
 public class DocumentaryUnitResource extends EhriNeo4jFramedResource<DocumentaryUnit> {
 

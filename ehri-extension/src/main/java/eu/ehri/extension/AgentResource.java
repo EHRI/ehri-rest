@@ -11,12 +11,14 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import eu.ehri.project.models.Agent;
 
+/**
+ * Provides a RESTfull interface for the Agent 
+ */
 @Path("/ehri/agent")
 public class AgentResource extends EhriNeo4jFramedResource<Agent> {
 

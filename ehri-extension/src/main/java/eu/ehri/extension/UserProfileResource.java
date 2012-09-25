@@ -16,6 +16,9 @@ import org.neo4j.graphdb.GraphDatabaseService;
 
 import eu.ehri.project.models.UserProfile;
 
+/**
+ * Provides a RESTfull interface for the UserProfile. 
+ */
 @Path("/ehri/userProfile")
 public class UserProfileResource extends EhriNeo4jFramedResource<UserProfile> {
 

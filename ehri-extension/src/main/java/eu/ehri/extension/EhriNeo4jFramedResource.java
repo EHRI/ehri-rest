@@ -33,7 +33,7 @@ import eu.ehri.project.views.Views;
  * by using the eu.ehri.project.views.Views class generic code.
  * Resources for specific entities can extend this class.   
  *
- * @param <E>
+ * @param <E> The specific AccesibleEntity derived class
  */
 public class EhriNeo4jFramedResource <E extends AccessibleEntity> {
 	/**
