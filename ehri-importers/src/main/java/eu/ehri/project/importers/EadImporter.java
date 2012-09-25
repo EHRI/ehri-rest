@@ -43,295 +43,295 @@ import eu.ehri.project.persistance.EntityBundle;
 
 public class EadImporter extends BaseImporter<Node> {
 
-    private static final Logger logger = LoggerFactory
-            .getLogger(EadImporter.class);
-    
-    private final XPath xpath;
-    private EadLanguageExtractor langHelper;
+	private static final Logger logger = LoggerFactory
+			.getLogger(EadImporter.class);
 
-    // List of XPaths against the final attribute names. This should probably be
-    // moved
-    // to external configuration...
-    @SuppressWarnings("serial")
-    public final Map<String, String> eadAttributeMap = new HashMap<String, String>() {
-        {
-            put("accruals", "accurals/p");
-            put("acquisition", "acqinfo/p");
-            put("appraisal", "appraisal/p");
-            put("archivalHistory", "custodhist/p");
-            put("conditionsOfAccess", "accessrestrict/p");
-            put("conditionsOfReproduction", "userestrict/p");
-            put("extentAndMedium", "did/physdesc/extent"); // Should be more
-                                                           // nuanced!
-            put("identifier", "did/unitid");
-            put("locationOfCopies", "altformavail/p");
-            put("locationOfOriginals", "originalsloc/p");
-            put("title", "did/unittitle");
-            put("physicalCharacteristics", "phystech/p");
-            put("scopeAndContent", "scopecontent/p");
-            put("systemOfArrangement", "arrangement/p");
-        }
-    };
+	private final XPath xpath;
+	private EadLanguageExtractor langHelper;
 
-    @SuppressWarnings("serial")
-    public final Map<String, String> eadControlaccessMap = new HashMap<String, String>() {
-        {
-            put("subjects", "controlaccess/subjects");
-            put("creators", "did/origination/persname");
-            put("creators", "did/origination/corpname");
-            put("nameAccess", "controlaccess/persname");
-            put("corporateBodies", "controlaccess/corpname");
-            put("places", "controlaccess/geogname");
-        }
-    };
+	// List of XPaths against the final attribute names. This should probably be
+	// moved
+	// to external configuration...
+	@SuppressWarnings("serial")
+	public final Map<String, String> eadAttributeMap = new HashMap<String, String>() {
+		{
+			put("accruals", "accurals/p");
+			put("acquisition", "acqinfo/p");
+			put("appraisal", "appraisal/p");
+			put("archivalHistory", "custodhist/p");
+			put("conditionsOfAccess", "accessrestrict/p");
+			put("conditionsOfReproduction", "userestrict/p");
+			put("extentAndMedium", "did/physdesc/extent"); // Should be more
+															// nuanced!
+			put("identifier", "did/unitid");
+			put("locationOfCopies", "altformavail/p");
+			put("locationOfOriginals", "originalsloc/p");
+			put("title", "did/unittitle");
+			put("physicalCharacteristics", "phystech/p");
+			put("scopeAndContent", "scopecontent/p");
+			put("systemOfArrangement", "arrangement/p");
+		}
+	};
 
-    /**
-     * Construct an EadImprter object.
-     * 
-     * @param framedGraph
-     * @param repository
-     * @param topLevelEad
-     */
-    public EadImporter(FramedGraph<Neo4jGraph> framedGraph, Agent repository,
-            Node topLevelEad) {
-           
-        super(framedGraph, repository);
-        xpath = XPathFactory.newInstance().newXPath();
-        langHelper = new EadLanguageExtractor(xpath, topLevelEad);
-    }
+	@SuppressWarnings("serial")
+	public final Map<String, String> eadControlaccessMap = new HashMap<String, String>() {
+		{
+			put("subjects", "controlaccess/subjects");
+			put("creators", "did/origination/persname");
+			put("creators", "did/origination/corpname");
+			put("nameAccess", "controlaccess/persname");
+			put("corporateBodies", "controlaccess/corpname");
+			put("places", "controlaccess/geogname");
+		}
+	};
 
-    // Pattern for EAD nodes that represent a child item
-    private Pattern childItemPattern = Pattern.compile("^c(?:\\d+)$");
+	/**
+	 * Construct an EadImprter object.
+	 * 
+	 * @param framedGraph
+	 * @param repository
+	 * @param topLevelEad
+	 */
+	public EadImporter(FramedGraph<Neo4jGraph> framedGraph, Agent repository,
+			Node topLevelEad) {
 
-    
-    public List<Node> extractChildData(Node data) {
-        List<Node> children = new LinkedList<Node>();
-        logger.debug("Extracting child data from: " + data);
-        for (int i = 0; i < data.getChildNodes().getLength(); i++) {
-            Node n = data.getChildNodes().item(i);
-            if (childItemPattern.matcher(n.getNodeName()).matches()) {
-                children.add(n);
-            }
-        }
-        return children;
-    }
+		super(framedGraph, repository);
+		xpath = XPathFactory.newInstance().newXPath();
+		langHelper = new EadLanguageExtractor(xpath, topLevelEad);
+	}
 
-    @Override
-    public EntityBundle<DocumentaryUnit> extractDocumentaryUnit(Node data)
-            throws Exception {
-        EntityBundle<DocumentaryUnit> unit = new BundleFactory<DocumentaryUnit>()
-                .buildBundle(new HashMap<String, Object>(),
-                        DocumentaryUnit.class);
+	// Pattern for EAD nodes that represent a child item
+	private Pattern childItemPattern = Pattern.compile("^c(?:\\d+)$");
 
-        unit = unit.setDataValue(
-                "identifier",
-                xpath.compile("did/unitid/text()").evaluate(data,
-                        XPathConstants.STRING));
-        unit = unit.setDataValue("name", xpath.compile("did/unittitle/text()")
-                .evaluate(data, XPathConstants.STRING));
+	public List<Node> extractChildData(Node data) {
+		List<Node> children = new LinkedList<Node>();
+		logger.debug("Extracting child data from: " + data);
+		for (int i = 0; i < data.getChildNodes().getLength(); i++) {
+			Node n = data.getChildNodes().item(i);
+			if (childItemPattern.matcher(n.getNodeName()).matches()) {
+				children.add(n);
+			}
+		}
+		return children;
+	}
 
-        // Add persname, origination etc
-        for (Entry<String, String> entry : eadControlaccessMap.entrySet()) {
-            List<String> vals = extractTextList(data, entry.getValue());
-            unit = unit.setDataValue(entry.getKey(),
-                    vals.toArray(new String[vals.size()]));
-        }
+	@Override
+	public EntityBundle<DocumentaryUnit> extractDocumentaryUnit(Node data)
+			throws Exception {
 
-        return unit;
-    }
+		Map<String, Object> dataMap = new HashMap<String, Object>();
+		dataMap.put(
+				"identifier",
+				xpath.compile("did/unitid/text()").evaluate(data,
+						XPathConstants.STRING));
+		dataMap.put(
+				"name",
+				xpath.compile("did/unittitle/text()").evaluate(data,
+						XPathConstants.STRING));
 
-    @Override
-    public void importItems(Node data, DocumentaryUnit parent) throws Exception {
-        XPathExpression expr = xpath.compile("did/unitid/text()");
+		// Add persname, origination etc
+		for (Entry<String, String> entry : eadControlaccessMap.entrySet()) {
+			List<String> vals = extractTextList(data, entry.getValue());
+			dataMap.put(entry.getKey(), vals.toArray(new String[vals.size()]));
+		}
 
-        String topLevelId = (String) expr.evaluate(data, XPathConstants.STRING);
-        // If we have a unitid at archdesc level, import that
-        if (!topLevelId.isEmpty()) {
-            logger.info("Extracting single item from archdesc... "
-                    + topLevelId);
-            importItem(data, parent);
-        } else {
-            // Otherwise, inspect the children of the archdesc/dsc
-            logger.info("Extracting multiple items from archdesc/dsc...");
-            NodeList dsc = (NodeList) xpath.compile("dsc").evaluate(data,
-                    XPathConstants.NODESET);
-            for (int i = 0; i < dsc.getLength(); i++) {
-                for (Node d : extractChildData(dsc.item(i))) {
-                    importItem(d, parent);
-                }
-            }
-        }
-    }
+		return new BundleFactory<DocumentaryUnit>().buildBundle(dataMap,
+				DocumentaryUnit.class);
+	}
 
-    public List<EntityBundle<DocumentDescription>> extractDocumentDescriptions(
-            Node data) throws Exception {
-        List<EntityBundle<DocumentDescription>> descs = new LinkedList<EntityBundle<DocumentDescription>>();
+	@Override
+	public void importItems(Node data, DocumentaryUnit parent) throws Exception {
+		XPathExpression expr = xpath.compile("did/unitid/text()");
 
-        // For EAD (and most other types) there will only be one description
-        // per logical object we create.
-        EntityBundle<DocumentDescription> desc = new BundleFactory<DocumentDescription>()
-                .buildBundle(new HashMap<String, Object>(),
-                        DocumentDescription.class);
-        for (Entry<String, String> entry : eadAttributeMap.entrySet()) {
-            desc = desc.setDataValue(entry.getKey(),
-                    getElementText(data, entry.getValue()));
-        }
+		String topLevelId = (String) expr.evaluate(data, XPathConstants.STRING);
+		// If we have a unitid at archdesc level, import that
+		if (!topLevelId.isEmpty()) {
+			logger.info("Extracting single item from archdesc... " + topLevelId);
+			importItem(data, parent);
+		} else {
+			// Otherwise, inspect the children of the archdesc/dsc
+			logger.info("Extracting multiple items from archdesc/dsc...");
+			NodeList dsc = (NodeList) xpath.compile("dsc").evaluate(data,
+					XPathConstants.NODESET);
+			for (int i = 0; i < dsc.getLength(); i++) {
+				for (Node d : extractChildData(dsc.item(i))) {
+					importItem(d, parent);
+				}
+			}
+		}
+	}
 
-        // FIXME: TODO: Actually detect correct language of description...
-        List<String> langCodes = langHelper.getLanguagesOfDescription(data);
-        langCodes.addAll(langHelper.getGlobalLanguagesOfDescription());
-        desc = desc.setDataValue("languageOfDescription",
-                getUniqueArray(langCodes));
+	public List<EntityBundle<DocumentDescription>> extractDocumentDescriptions(
+			Node data) throws Exception {
+		List<EntityBundle<DocumentDescription>> descs = new LinkedList<EntityBundle<DocumentDescription>>();
 
-        // Set language of materials
-        List<String> materialCodes = langHelper.getLanguagesOfMaterial(data);
-        materialCodes.addAll(langHelper.getGlobalLanguagesOfMaterial());
-        desc = desc.setDataValue("languageOfMaterial",
-                getUniqueArray(materialCodes));
+		Map<String, Object> dataMap = new HashMap<String, Object>();
+		
+		// For EAD (and most other types) there will only be one description
+		// per logical object we create.
+ 
+		for (Entry<String, String> entry : eadAttributeMap.entrySet()) {
+			dataMap.put(entry.getKey(),
+					getElementText(data, entry.getValue()));
+		}
 
-        descs.add(desc);
-        return descs;
-    }
+		// FIXME: TODO: Actually detect correct language of description...
+		List<String> langCodes = langHelper.getLanguagesOfDescription(data);
+		langCodes.addAll(langHelper.getGlobalLanguagesOfDescription());
+		dataMap.put("languageOfDescription",
+				getUniqueArray(langCodes));
 
-    // Helpers
+		// Set language of materials
+		List<String> materialCodes = langHelper.getLanguagesOfMaterial(data);
+		materialCodes.addAll(langHelper.getGlobalLanguagesOfMaterial());
+		dataMap.put("languageOfMaterial",
+				getUniqueArray(materialCodes));
 
-    /**
-     * Make a list unique.
-     * 
-     * @param list
-     * @return
-     */
-    private String[] getUniqueArray(List<String> list) {
-        HashSet<String> hs = new HashSet<String>();
-        hs.addAll(list);
-        return hs.toArray(new String[list.size()]);
-    }
+		descs.add(new BundleFactory<DocumentDescription>()
+				.buildBundle(dataMap,
+						DocumentDescription.class));
+		return descs;
+	}
 
-    /**
-     * Extract a list of strings from the specified element set.
-     * 
-     * @param data
-     * @param path
-     * @return
-     * @throws Exception
-     */
-    private List<String> extractTextList(Node data, String path)
-            throws XPathExpressionException {
-        List<String> names = new ArrayList<String>();
+	// Helpers
 
-        NodeList nodes = (NodeList) xpath.compile(path).evaluate(data,
-                XPathConstants.NODESET);
-        for (int i = 0; i < nodes.getLength(); i++) {
-            names.add(nodes.item(i).getTextContent());
-        }
-        return names;
-    }
+	/**
+	 * Make a list unique.
+	 * 
+	 * @param list
+	 * @return
+	 */
+	private String[] getUniqueArray(List<String> list) {
+		HashSet<String> hs = new HashSet<String>();
+		hs.addAll(list);
+		return hs.toArray(new String[list.size()]);
+	}
 
-    /**
-     * Fetch the element text from (possibly) multiple nodes, and join them with
-     * a double break.
-     * 
-     * @param data
-     * @param path
-     * @return
-     * @throws XPathExpressionException
-     */
-    private String getElementText(Node data, String path)
-            throws XPathExpressionException {
-        NodeList nodes = (NodeList) xpath.compile(path).evaluate(data,
-                XPathConstants.NODESET);
-        String out = "";
-        for (int i = 0; i < nodes.getLength(); i++) {
-            if (out.isEmpty()) {
-                out += nodes.item(i).getTextContent();
-            } else {
-                out += "\n\n" + nodes.item(i).getTextContent();
-            }
-        }
-        return out;
-    }
+	/**
+	 * Extract a list of strings from the specified element set.
+	 * 
+	 * @param data
+	 * @param path
+	 * @return
+	 * @throws Exception
+	 */
+	private List<String> extractTextList(Node data, String path)
+			throws XPathExpressionException {
+		List<String> names = new ArrayList<String>();
 
-    // Command line runner
-    public static void main(String[] args) throws Exception {
+		NodeList nodes = (NodeList) xpath.compile(path).evaluate(data,
+				XPathConstants.NODESET);
+		for (int i = 0; i < nodes.getLength(); i++) {
+			names.add(nodes.item(i).getTextContent());
+		}
+		return names;
+	}
 
-        Options options = new Options();
-        options.addOption(new Option("createrepo", false,
-                "Create agent with the given ID"));
-        CommandLineParser parser = new PosixParser();
-        CommandLine cmdLine = parser.parse(options, args);
+	/**
+	 * Fetch the element text from (possibly) multiple nodes, and join them with
+	 * a double break.
+	 * 
+	 * @param data
+	 * @param path
+	 * @return
+	 * @throws XPathExpressionException
+	 */
+	private String getElementText(Node data, String path)
+			throws XPathExpressionException {
+		NodeList nodes = (NodeList) xpath.compile(path).evaluate(data,
+				XPathConstants.NODESET);
+		String out = "";
+		for (int i = 0; i < nodes.getLength(); i++) {
+			if (out.isEmpty()) {
+				out += nodes.item(i).getTextContent();
+			} else {
+				out += "\n\n" + nodes.item(i).getTextContent();
+			}
+		}
+		return out;
+	}
 
-        if (cmdLine.getArgList().size() != 3)
-            throw new RuntimeException(
-                    "Usage: importer [OPTIONS] <agent-id> <ead.xml> <neo4j-graph-dir>");
-        
-        // Get the graph and search it for the required agent...
-        FramedGraph<Neo4jGraph> graph = new FramedGraph<Neo4jGraph>(
-                new Neo4jGraph((String) cmdLine.getArgList().get(2)));
+	// Command line runner
+	public static void main(String[] args) throws Exception {
 
-        Agent agent = null;
-        if (cmdLine.hasOption("createrepo")) {
-            try {
-                Map<String, Object> agentData = new HashMap<String, Object>();
-                agentData.put("identifier", cmdLine.getArgList().get(0));
-                agentData.put("name", cmdLine.getArgList().get(0));
-                EntityBundle<Agent> agb = new BundleFactory<Agent>()
-                        .buildBundle(agentData, Agent.class);
-                agent = new BundleDAO<Agent>(graph).insert(agb);
-            } catch (Exception e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        } else {
-            agent = graph
-                    .getVertices("identifier",
-                            (String) cmdLine.getArgList().get(0), Agent.class)
-                    .iterator().next();
-        }
+		Options options = new Options();
+		options.addOption(new Option("createrepo", false,
+				"Create agent with the given ID"));
+		CommandLineParser parser = new PosixParser();
+		CommandLine cmdLine = parser.parse(options, args);
 
-        // XML parsing boilerplate...
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        factory.setNamespaceAware(true);
-        DocumentBuilder builder = factory.newDocumentBuilder();
-        Document doc = builder.parse((String) cmdLine.getArgList().get(1));
+		if (cmdLine.getArgList().size() != 3)
+			throw new RuntimeException(
+					"Usage: importer [OPTIONS] <agent-id> <ead.xml> <neo4j-graph-dir>");
 
-        // Extract the EAD instances from the eadlist.
-        XPathFactory xfactory = XPathFactory.newInstance();
-        XPath xpath = xfactory.newXPath();
-        xpath.compile("//eadlist/ead");
+		// Get the graph and search it for the required agent...
+		FramedGraph<Neo4jGraph> graph = new FramedGraph<Neo4jGraph>(
+				new Neo4jGraph((String) cmdLine.getArgList().get(2)));
 
-        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
-        try {
-            // This handles either multiple EADs within a top-level
-            // eadlist node, or single EAD documents.
-            EadImporter importer;
-            NodeList result = (NodeList) xpath.compile("//eadlist/ead")
-                    .evaluate(doc, XPathConstants.NODESET);
-            if (result.getLength() > 0) {
-                for (int i = 0; i < result.getLength(); i++) {
-                    importer = new EadImporter(graph, agent, result.item(i));
-                    Node archDesc = (Node) xpath.compile("archdesc").evaluate(
-                            result.item(i), XPathConstants.NODE);
-                    // Initialize the importer...
-                    importer.importItems(archDesc);
-                }
-            } else {
-                Node ead = (Node) xpath.compile("//ead").evaluate(doc,
-                        XPathConstants.NODE);
-                importer = new EadImporter(graph, agent, ead);
-                Node archDesc = (Node) xpath.compile("//ead/archdesc")
-                        .evaluate(doc, XPathConstants.NODE);
-                importer.importItems(archDesc);
-            }
-            graph.getBaseGraph().stopTransaction(Conclusion.SUCCESS);
-            tx.success();
-        } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-            graph.getBaseGraph().stopTransaction(Conclusion.FAILURE);
-            tx.failure();
-        } finally {
-            tx.finish();
-            graph.shutdown();
-        }
-    }
+		Agent agent = null;
+		if (cmdLine.hasOption("createrepo")) {
+			try {
+				Map<String, Object> agentData = new HashMap<String, Object>();
+				agentData.put("identifier", cmdLine.getArgList().get(0));
+				agentData.put("name", cmdLine.getArgList().get(0));
+				EntityBundle<Agent> agb = new BundleFactory<Agent>()
+						.buildBundle(agentData, Agent.class);
+				agent = new BundleDAO<Agent>(graph).insert(agb);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} else {
+			agent = graph
+					.getVertices("identifier",
+							(String) cmdLine.getArgList().get(0), Agent.class)
+					.iterator().next();
+		}
+
+		// XML parsing boilerplate...
+		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+		factory.setNamespaceAware(true);
+		DocumentBuilder builder = factory.newDocumentBuilder();
+		Document doc = builder.parse((String) cmdLine.getArgList().get(1));
+
+		// Extract the EAD instances from the eadlist.
+		XPathFactory xfactory = XPathFactory.newInstance();
+		XPath xpath = xfactory.newXPath();
+		xpath.compile("//eadlist/ead");
+
+		Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
+		try {
+			// This handles either multiple EADs within a top-level
+			// eadlist node, or single EAD documents.
+			EadImporter importer;
+			NodeList result = (NodeList) xpath.compile("//eadlist/ead")
+					.evaluate(doc, XPathConstants.NODESET);
+			if (result.getLength() > 0) {
+				for (int i = 0; i < result.getLength(); i++) {
+					importer = new EadImporter(graph, agent, result.item(i));
+					Node archDesc = (Node) xpath.compile("archdesc").evaluate(
+							result.item(i), XPathConstants.NODE);
+					// Initialize the importer...
+					importer.importItems(archDesc);
+				}
+			} else {
+				Node ead = (Node) xpath.compile("//ead").evaluate(doc,
+						XPathConstants.NODE);
+				importer = new EadImporter(graph, agent, ead);
+				Node archDesc = (Node) xpath.compile("//ead/archdesc")
+						.evaluate(doc, XPathConstants.NODE);
+				importer.importItems(archDesc);
+			}
+			graph.getBaseGraph().stopTransaction(Conclusion.SUCCESS);
+			tx.success();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			graph.getBaseGraph().stopTransaction(Conclusion.FAILURE);
+			tx.failure();
+		} finally {
+			tx.finish();
+			graph.shutdown();
+		}
+	}
 }
