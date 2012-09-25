@@ -8,6 +8,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.sun.jersey.api.client.ClientResponse;
@@ -17,37 +18,41 @@ import eu.ehri.extension.EhriNeo4jFramedResource;
 
 public class AgentRestClientTest extends BaseRestClientTest {
 
-	static final String UPDATED_NAME = "UpdatedNameTEST";
+    static final String UPDATED_NAME = "UpdatedNameTEST";
 
-	private String jsonAgentTestString = "{\"data\":{\"isA\": \"agent\"}}";
+    private String jsonAgentTestString = "{\"data\":{\"isA\": \"agent\"}}";
 
-	@Before
-	public void setUp() throws Exception {
-	}
+    @BeforeClass
+    public static void setUpBeforeClass() throws Exception {
+        initializeTestDb(AgentRestClientTest.class.getName());
+    }
 
-	@Test
-	public void testCreateDeleteAgent() throws Exception {		
-		// Create
-		WebResource resource = client.resource(extensionEntryPointUri
-				+ "/agent");
-		ClientResponse response = resource.accept(MediaType.APPLICATION_JSON)
-				.type(MediaType.APPLICATION_JSON)
-				.header(EhriNeo4jFramedResource.AUTH_HEADER_NAME, adminUserProfileId)
-				.entity(jsonAgentTestString)
-				.post(ClientResponse.class);
+    @Before
+    public void setUp() throws Exception {
+    }
 
-		assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
-		
-		// Get created doc via the response location?
-		URI location = response.getLocation();
-	
-		resource = client.resource(location);
-		response = resource.accept(MediaType.APPLICATION_JSON)
-				.header(EhriNeo4jFramedResource.AUTH_HEADER_NAME, adminUserProfileId)
-				.get(ClientResponse.class);
-		assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
-		// TODO again test json
+    @Test
+    public void testCreateDeleteAgent() throws Exception {
+        // Create
+        WebResource resource = client.resource(extensionEntryPointUri
+                + "/agent");
+        ClientResponse response = resource
+                .accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .header(EhriNeo4jFramedResource.AUTH_HEADER_NAME,
+                        adminUserProfileId).entity(jsonAgentTestString)
+                .post(ClientResponse.class);
 
-		delete(location);
-	}
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+
+        // Get created doc via the response location?
+        URI location = response.getLocation();
+
+        resource = client.resource(location);
+        response = resource
+                .accept(MediaType.APPLICATION_JSON)
+                .header(EhriNeo4jFramedResource.AUTH_HEADER_NAME,
+                        adminUserProfileId).get(ClientResponse.class);
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+    }
 }

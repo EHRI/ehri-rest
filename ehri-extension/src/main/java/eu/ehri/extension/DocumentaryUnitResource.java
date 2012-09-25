@@ -20,38 +20,39 @@ import eu.ehri.project.models.DocumentaryUnit;
  * Provides a RESTfull interface for the DocumentaryUnit 
  */
 @Path("/ehri/documentaryUnit")
-public class DocumentaryUnitResource extends EhriNeo4jFramedResource<DocumentaryUnit> {
+public class DocumentaryUnitResource extends
+        EhriNeo4jFramedResource<DocumentaryUnit> {
 
-	public DocumentaryUnitResource(@Context GraphDatabaseService database) {
-		super(database, DocumentaryUnit.class);
-	}
+    public DocumentaryUnitResource(@Context GraphDatabaseService database) {
+        super(database, DocumentaryUnit.class);
+    }
 
-	@GET
-	@Produces(MediaType.APPLICATION_JSON)
-	@Path("/{id}")
-	public Response getDocumentaryUnit(@PathParam("id") long id) {
-		return retrieve(id);
-	}
-	
-	@POST
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	@Path("")
-	public Response createDocumentaryUnit(String json) {
-		return create(json);
-	}
-	
-	@PUT
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	@Path("")
-	public Response updateDocumentaryUnit(String json) {
-		return update(json);
-	}
-	
-	@DELETE
-	@Path("/{id}")
-	public Response deleteDocumentaryUnit(@PathParam("id") long id) {
-		return delete(id);
-	}
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id}")
+    public Response getDocumentaryUnit(@PathParam("id") long id) {
+        return retrieve(id);
+    }
+
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("")
+    public Response createDocumentaryUnit(String json) {
+        return create(json);
+    }
+
+    @PUT
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("")
+    public Response updateDocumentaryUnit(String json) {
+        return update(json);
+    }
+
+    @DELETE
+    @Path("/{id}")
+    public Response deleteDocumentaryUnit(@PathParam("id") long id) {
+        return delete(id);
+    }
 }

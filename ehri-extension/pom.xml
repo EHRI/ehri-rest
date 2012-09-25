@@ -3,12 +3,11 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>eu.ehri.neo4j</groupId>
-		<artifactId>neo4j-ehri-plugin</artifactId>
+		<groupId>ehri-project</groupId>
+		<artifactId>ehri-data</artifactId>
 		<version>1.0</version>
 	</parent>
 
-	<groupId>ehri-extension</groupId>
 	<artifactId>ehri-extension</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 
@@ -28,10 +27,10 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>2.12.3</version>
 				<configuration>
-					<excludes>
-						<!-- skip all the REST client tests, that need a running server -->
-						<exclude>**/*RestClientTest.java</exclude>
-					</excludes>
+                    <!--	<excludes>
+						<exclude>**/EhriNeo4jExtensionRestClientTest.java</exclude>
+                    </excludes>
+                    -->
 				</configuration>
 			</plugin>
 			
@@ -97,32 +96,62 @@
 	<dependencies>
 		<!-- the ehri data via tinkerpop frames project -->
 		<dependency>
-			<groupId>EHRI</groupId>
-			<artifactId>ehri-data-frames</artifactId>
+			<groupId>ehri-project</groupId>
+			<artifactId>ehri-frames</artifactId>
 			<version>0.1-SNAPSHOT</version>
 		</dependency>
+		<dependency>
+			<groupId>ehri-project</groupId>
+			<artifactId>ehri-frames</artifactId>
+			<version>0.1-SNAPSHOT</version>
+      		<type>test-jar</type>
+      		<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>ehri-project</groupId>
+			<artifactId>ehri-plugin</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+      		<type>test-jar</type>
+      		<scope>test</scope>
+		</dependency>
+		
+		
 	
 		<!-- neo4j -->
 		<dependency>
 			<groupId>org.neo4j</groupId>
 			<artifactId>neo4j</artifactId>
-			<version>${neo4j.version}</version>
+			<version>${neo4j-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.neo4j</groupId>
 			<artifactId>neo4j-kernel</artifactId>
-			<version>${neo4j.version}</version>
+			<version>${neo4j-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.neo4j.app</groupId>
 			<artifactId>neo4j-server</artifactId>
-			<version>${neo4j.version}</version>
+			<version>${neo4j-version}</version>
+		</dependency>
+		<dependency>
+            <groupId>org.neo4j.app</groupId>
+      		<artifactId>neo4j-server</artifactId>
+      		<version>${neo4j-version}</version>
+      		<type>test-jar</type>
+      		<scope>test</scope>
+    	</dependency>
+		<dependency>
+			<groupId>org.neo4j</groupId>
+			<artifactId>neo4j-kernel</artifactId>
+			<version>${neo4j-version}</version>
+			<type>test-jar</type>
+			<scope>test</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>com.tinkerpop.blueprints</groupId>
 			<artifactId>blueprints-neo4j-graph</artifactId>
-			<version>2.1.0</version><!-- was 1.2 -->
+			<version>${tinkerpop-version}</version><!-- was 1.2 -->
 		</dependency>
 		
 		<!-- logging -->
@@ -137,13 +166,12 @@
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<scope>test</scope>
-			<version>4.10</version>
 		</dependency>
 		<!-- test the RESTfull api -->
 		<dependency>
 			<groupId>com.sun.jersey</groupId>
 			<artifactId>jersey-client</artifactId>
-			<version>1.13</version>
+			<version>1.9</version>
 			<scope>test</scope>
 		</dependency>
 		<!-- <dependency> <groupId>org.jmock</groupId> <artifactId>jmock</artifactId> 
