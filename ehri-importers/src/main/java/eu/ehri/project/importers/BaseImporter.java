@@ -3,13 +3,9 @@ package eu.ehri.project.importers;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
-import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.Agent;
-import eu.ehri.project.models.Authority;
 import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.DocumentDescription;
 import eu.ehri.project.models.DocumentaryUnit;
@@ -92,7 +88,7 @@ public abstract class BaseImporter<T> implements Importer<T> {
     /**
      * Entry point for a top-level DocumentaryUnit item.
      */
-    public void importItem(T data) throws Exception {
+    protected void importItem(T data) throws Exception {
         importItem(data, null, 0);
     }
 
@@ -110,4 +106,10 @@ public abstract class BaseImporter<T> implements Importer<T> {
     public void importItems(T data) throws Exception {
         importItems(data, null, 0);
     }
+    
+    /**
+     * Main entry-point to trigger parsing.
+     * 
+     */
+    public abstract void importItems() throws Exception;
 }
