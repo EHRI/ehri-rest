@@ -6,7 +6,7 @@ import com.tinkerpop.frames.VertexFrame;
 
 import eu.ehri.project.persistance.EntityBundle;
 
-public class ValidationError extends Exception {
+public class ValidationError extends EhriBaseError {
 
     /**
      * 
