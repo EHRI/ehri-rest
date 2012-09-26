@@ -21,8 +21,8 @@ if [ ! -e $NEO4JPATH -o ! -d $NEO4JPATH ]; then
 fi
 
 
-if [ ! -e $NEO4JPATH/plugin -o ! -e $NEO4JPATH/system/lib ]; then
-    echo "Cannot detect 'plugin' or 'system/lib' directories in '$NEO4JPATH'. Are you sure this is the right dir?"
+if [ ! -e $NEO4JPATH/plugins -o ! -e $NEO4JPATH/system/lib ]; then
+    echo "Cannot detect 'plugins' or 'system/lib' directories in '$NEO4JPATH'. Are you sure this is the right dir?"
     exit 2
 fi
 
@@ -43,10 +43,24 @@ fi
 echo "Attempting package..."
 mvn clean test-compile package || { echo "Maven package exited with non-zero status, install aborted..."; exit 4; }
 
-echo "Copying `ls ehri-plugin/target/ehri*jar` to $NEO4JPATH/plugin" 
-cp ehri-plugin/target/ehri*jar $NEO4JPATH/plugin
+PLUGINJAR=`ls ehri-plugin/target/ehri-plugin*jar|grep -v test`
+EXTENSIONJAR=`ls ehri-extension/target/ehri-extension*jar|grep -v test`
+FRAMESJAR=`ls ehri-frames/target/ehri-frames*jar|grep -v test` 
+
+for jar in $FRAMESJAR $EXTENSIONJAR $PLUGINJAR; do
+    if [ $jar == '' ]; then
+        echo "Unable to find all jars, check build is correct."
+        exit 5
+    fi
+done
+
+echo "Copying $PLUGINJAR to $NEO4JPATH/plugin" 
+cp ehri-plugin/target/ehri*jar $NEO4JPATH/plugins
+echo "Copying $EXTENSIONJAR to $NEO4JPATH/plugin" 
 cp ehri-extension/target/ehri*jar $NEO4JPATH/plugin
+echo "Copying $EXTENSIONJAR to $NEO4JPATH/system/lib" 
 cp ehri-extension/target/ehri*jar $NEO4JPATH/system/lib
+echo "Copying $FRAMESJAR to $NEO4JPATH/system/lib" 
 cp ehri-frames/target/ehri*jar $NEO4JPATH/system/lib
 
 exit 0
