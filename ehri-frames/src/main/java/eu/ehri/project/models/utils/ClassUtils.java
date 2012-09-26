@@ -16,6 +16,7 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 
 import com.tinkerpop.frames.Adjacency;
+import com.tinkerpop.frames.Property;
 
 import eu.ehri.project.models.annotations.Dependent;
 import eu.ehri.project.models.annotations.Fetch;
@@ -211,6 +212,16 @@ public class ClassUtils {
                 if (ann != null)
                     out.put(ann.label(), method);
             }
+        }
+        return out;
+    }
+    
+    public static List<String> getPropertyKeys(Class<?> cls) {
+        List<String> out = new LinkedList<String>();
+        for (Method method : cls.getMethods()) {
+            Property ann = method.getAnnotation(Property.class);
+            if (ann != null)
+                out.add(ann.value());
         }
         return out;
     }

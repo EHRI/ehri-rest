@@ -3,15 +3,18 @@ package eu.ehri.project.persistance;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections.map.MultiValueMap;
+import org.codehaus.jackson.map.util.ClassUtil;
 
 import com.tinkerpop.frames.Property;
 import com.tinkerpop.frames.VertexFrame;
 
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.annotations.EntityType;
+import eu.ehri.project.models.utils.ClassUtils;
 
 public class EntityBundle<T extends VertexFrame> {
     private static final String GET = "get";
@@ -117,6 +120,10 @@ public class EntityBundle<T extends VertexFrame> {
         if (hasErrors())
             throw new ValidationError(cls, errors);
     }
+    
+    public List<String> getPropertyKeys() {
+    	return ClassUtils.getPropertyKeys(cls);
+    }
 
     /**
      * @param data
@@ -124,17 +131,12 @@ public class EntityBundle<T extends VertexFrame> {
      * @param errors
      */
     private void checkFields() {
-        for (Method method : cls.getMethods()) {
-            for (Annotation annotation : method.getAnnotations()) {
-                if (annotation instanceof Property
-                        && method.getName().startsWith(GET)) {
-                    checkField(((Property) annotation).value(), method);
-                }
-            }
+    	for (String key: ClassUtils.getPropertyKeys(cls)) {
+            checkField(key);
         }
     }
 
-    private void checkField(String name, Method method) {
+    private void checkField(String name) {
         if (!data.containsKey(name)) {
             errors.put(name, MISSING_PROPERTY);
         } else {

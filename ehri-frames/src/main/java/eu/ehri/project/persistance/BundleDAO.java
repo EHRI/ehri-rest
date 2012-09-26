@@ -198,7 +198,7 @@ public class BundleDAO<T extends VertexFrame> {
         bundle.validateForInsert();
         Index<Vertex> index = helpers.getOrCreateIndex(bundle.getEntityType(),
                 Vertex.class);
-        Vertex node = helpers.createIndexedVertex(bundle.getData(), index);
+        Vertex node = helpers.createIndexedVertex(bundle.getData(), index, bundle.getPropertyKeys());
         saveDependents(node, bundle.getBundleClass(), bundle.getRelations());
         return node;
     }
@@ -215,7 +215,7 @@ public class BundleDAO<T extends VertexFrame> {
         Index<Vertex> index = helpers.getOrCreateIndex(bundle.getEntityType(),
                 Vertex.class);
         Vertex node = helpers.updateIndexedVertex(bundle.getId(),
-                bundle.getData(), index);
+                bundle.getData(), index, bundle.getPropertyKeys());
         saveDependents(node, bundle.getBundleClass(), bundle.getRelations());
         return node;
     }
