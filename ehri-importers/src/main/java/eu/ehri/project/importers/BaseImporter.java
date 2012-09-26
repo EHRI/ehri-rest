@@ -25,16 +25,12 @@ public abstract class BaseImporter<T> implements Importer<T> {
         this.repository = repository;
         this.framedGraph = framedGraph;
     }
-
-    public void importDocumentaryUnit(T data) throws Exception {
-        // TODO Auto-generated method stub
-    }
-
+    
     public List<T> extractChildData(T data) {
         return new LinkedList<T>();
     }
 
-    public EntityBundle<DocumentaryUnit> extractDocumentaryUnit(T data)
+    protected EntityBundle<DocumentaryUnit> extractDocumentaryUnit(T data, int depth)
             throws Exception {
 
         EntityBundle<DocumentaryUnit> bundle = new BundleFactory<DocumentaryUnit>()
@@ -46,25 +42,15 @@ public abstract class BaseImporter<T> implements Importer<T> {
         return bundle;
     }
 
-    public abstract List<EntityBundle<DocumentDescription>> extractDocumentDescriptions(
-            T data) throws Exception;
-
-    public List<EntityBundle<DocumentaryUnit>> extractParent(T data)
-            throws Exception {
-        return new LinkedList<EntityBundle<DocumentaryUnit>>();
-    }
-
-    public List<EntityBundle<Authority>> extractAuthorities(T data)
-            throws Exception {
-        return new LinkedList<EntityBundle<Authority>>();
-    }
+    abstract List<EntityBundle<DocumentDescription>> extractDocumentDescriptions(
+            T data, int depth) throws Exception;
 
     public List<EntityBundle<DatePeriod>> extractDates(T data) throws Exception {
         return new LinkedList<EntityBundle<DatePeriod>>();
     }
 
-    public void importItem(T data, DocumentaryUnit parent) throws Exception {
-        EntityBundle<DocumentaryUnit> unit = extractDocumentaryUnit(data);
+    protected void importItem(T data, DocumentaryUnit parent, int depth) throws Exception {
+        EntityBundle<DocumentaryUnit> unit = extractDocumentaryUnit(data, depth);
         BundleDAO<DocumentaryUnit> persister = new BundleDAO<DocumentaryUnit>(
                 framedGraph);
         DocumentaryUnit frame = persister.insert(unit);
@@ -90,7 +76,7 @@ public abstract class BaseImporter<T> implements Importer<T> {
         {
             BundleDAO<DocumentDescription> descPersister = new BundleDAO<DocumentDescription>(
                     framedGraph);
-            for (EntityBundle<DocumentDescription> dpb : extractDocumentDescriptions(data)) {
+            for (EntityBundle<DocumentDescription> dpb : extractDocumentDescriptions(data, depth)) {
                 frame.addDescription(descPersister.insert(dpb));
             }
         }
@@ -98,7 +84,7 @@ public abstract class BaseImporter<T> implements Importer<T> {
         // Search through child parts and add them recursively...
         for (T child : extractChildData(data)) {
             System.out.println("Importing child item...");
-            importItems(child, frame);
+            importItems(child, frame, depth + 1);
         }
     }
 
@@ -107,7 +93,11 @@ public abstract class BaseImporter<T> implements Importer<T> {
      * Entry point for a top-level DocumentaryUnit item.
      */
     public void importItem(T data) throws Exception {
-        importItem(data, null);
+        importItem(data, null, 0);
+    }
+
+    protected void importItems(T data, DocumentaryUnit parent, int depth) throws Exception {
+        importItem(data, parent, depth);
     }
 
     /**
@@ -117,11 +107,7 @@ public abstract class BaseImporter<T> implements Importer<T> {
      * @param agent
      * @throws Exception
      */
-    public void importItems(T data, DocumentaryUnit parent) throws Exception {
-        importItem(data, parent);
-    }
-
     public void importItems(T data) throws Exception {
-        importItems(data, null);
+        importItems(data, null, 0);
     }
 }
