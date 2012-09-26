@@ -3,7 +3,7 @@ package eu.ehri.project.exceptions;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 
-public class PermissionDenied extends EhriBaseError {
+public class PermissionDenied extends Exception {
 
     private static final long serialVersionUID = -3948097018322416889L;
 

@@ -1,6 +1,6 @@
 package eu.ehri.project.exceptions;
 
-public class SerializationError extends EhriBaseError {
+public class SerializationError extends Exception {
 
     /**
      * Serialization was attempted with input that did not match the required

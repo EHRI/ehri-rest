@@ -1,6 +1,6 @@
 package eu.ehri.project.exceptions;
 
-public class IndexNotFoundException extends EhriBaseError {
+public class IndexNotFoundException extends Exception {
 
     /**
      * A query was attempted on an index that does not yet exist.
