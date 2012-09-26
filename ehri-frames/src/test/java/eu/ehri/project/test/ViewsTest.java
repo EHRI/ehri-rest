@@ -11,11 +11,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.neo4j.test.TestGraphDatabaseFactory;
-
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
-import com.tinkerpop.frames.FramedGraph;
-
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
@@ -27,17 +22,13 @@ import eu.ehri.project.models.Group;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.views.Views;
-import eu.ehri.project.test.utils.FixtureLoader;
 
-public class ViewsTest {
+public class ViewsTest extends ModelTestBase {
 
     protected static final String TEST_COLLECTION_NAME = "A brand new collection";
     protected static final String TEST_START_DATE = "1945-01-01T00:00:00Z";
     protected static final String TEST_USER_NAME = "Joe Blogs";
     protected static final String TEST_GROUP_NAME = "People";
-
-    protected FramedGraph<Neo4jGraph> graph;
-    protected FixtureLoader helper;
 
     // Members closely coupled to the test data!
     protected Long validUserId = 20L;
@@ -49,17 +40,13 @@ public class ViewsTest {
     }
 
     @Before
-    public void setUp() throws Exception {
-        graph = new FramedGraph<Neo4jGraph>(new Neo4jGraph(
-                new TestGraphDatabaseFactory().newImpermanentDatabaseBuilder()
-                        .newGraphDatabase()));
-        helper = new FixtureLoader(graph);
-        helper.loadTestData();
+    public void setUp() {
+        super.setUp();
     }
 
     @After
     public void tearDown() throws Exception {
-        // graph.shutdown();
+        super.tearDown();
     }
 
     /**

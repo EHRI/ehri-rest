@@ -8,11 +8,10 @@ import org.joda.time.format.ISODateTimeFormat;
 
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
-import com.tinkerpop.frames.VertexFrame;
-
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.Action;
-import eu.ehri.project.models.UserProfile;
+import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Actioner;
 
 /**
  * Class for dealing with actions.
@@ -41,7 +40,7 @@ public class ActionManager {
      * @param logMessage
      * @return
      */
-    public Action createAction(UserProfile user, String logMessage) {
+    public Action createAction(Actioner user, String logMessage) {
         Map<String,Object> actionData = new HashMap<String, Object>();
         actionData.put("timestamp", getTimestamp());
         actionData.put("logMessage", logMessage);
@@ -67,7 +66,7 @@ public class ActionManager {
      * @param logMessage
      * @return
      */
-    public Action createAction(VertexFrame subject, UserProfile user, String logMessage) {
+    public Action createAction(AccessibleEntity subject, Actioner user, String logMessage) {
         Action action = createAction(user, logMessage);
         action.setSubject(subject);
         return action;        

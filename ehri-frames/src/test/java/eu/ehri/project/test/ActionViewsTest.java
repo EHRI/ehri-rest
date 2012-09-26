@@ -3,35 +3,27 @@ package eu.ehri.project.test;
 import static org.junit.Assert.*;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
-import org.junit.After;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
-import org.neo4j.test.TestGraphDatabaseFactory;
 
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
-import com.tinkerpop.frames.FramedGraph;
+import com.tinkerpop.blueprints.Vertex;
 
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.models.Action;
 import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Group;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.views.ActionViews;
-import eu.ehri.project.test.utils.FixtureLoader;
 
-public class ActionViewsTest extends ViewsTest {
-
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-    }    
+public class ActionViewsTest extends ViewsTest {  
     
     /**
      * Test updating an item.
@@ -45,19 +37,19 @@ public class ActionViewsTest extends ViewsTest {
             DeserializationError {
         ActionViews<DocumentaryUnit> docViews = new ActionViews<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
-        Map<String, Object> bundle = getTestBundle();
-        DocumentaryUnit unit = docViews.create(bundle, validUserId);
+        Map<String, Object> testData = getTestBundle();
+        DocumentaryUnit unit = docViews.create(testData, validUserId);
         assertEquals(TEST_COLLECTION_NAME, unit.getName());
 
         // We could convert the FramedNode back into a bundle here,
         // but let's instead just modify the initial data.
         String newName = TEST_COLLECTION_NAME + " with new stuff";
-        bundle.put("id", unit.asVertex().getId());
+        testData.put("id", unit.asVertex().getId());
 
-        Map<String, Object> data = (Map<String, Object>) bundle.get("data");
+        Map<String, Object> data = (Map<String, Object>) testData.get("data");
         data.put("name", newName);
 
-        DocumentaryUnit changedUnit = docViews.update(bundle, validUserId);
+        DocumentaryUnit changedUnit = docViews.update(testData, validUserId);
         assertEquals(newName, changedUnit.getName());
 
         // Check the nested item was created correctly
@@ -81,114 +73,32 @@ public class ActionViewsTest extends ViewsTest {
             DeserializationError {
         ActionViews<UserProfile> userViews = new ActionViews<UserProfile>(graph,
                 UserProfile.class);
-        Map<String, Object> bundle = getTestUserBundle();
-        UserProfile user = userViews.create(bundle, validUserId);
+        Map<String, Object> userData = getTestUserBundle();
+        UserProfile user = userViews.create(userData, validUserId);
         assertEquals(TEST_USER_NAME, user.getName());
 
         // We could convert the FramedNode back into a bundle here,
         // but let's instead just modify the initial data.
         String newName = TEST_USER_NAME + " with new stuff";
-        bundle.put("id", user.asVertex().getId());
+        userData.put("id", user.asVertex().getId());
 
-        Map<String, Object> data = (Map<String, Object>) bundle.get("data");
+        Map<String, Object> data = (Map<String, Object>) userData.get("data");
         data.put("name", newName);
 
-        UserProfile changedUser = userViews.update(bundle, validUserId);
+        UserProfile changedUser = userViews.update(userData, validUserId);
         assertEquals(newName, changedUser.getName());
+         
+        // Check we have an audit action.
+        assertTrue(changedUser.getHistory().iterator().hasNext());
+        // We should have exactly two; one for create, one for update...
+        List<Action> actions = toList(changedUser.getHistory());
+        assertEquals(2, actions.size());
+        // They should have default log messages...
+        assertEquals(ActionViews.DEFAULT_CREATE_LOG, actions.get(0).getLogMessage());
+        assertEquals(ActionViews.DEFAULT_UPDATE_LOG, actions.get(1).getLogMessage());
     }
 
-    /**
-     * Test we can create a node and its subordinates from a set of data.
-     * 
-     * @throws ValidationError
-     * @throws PermissionDenied
-     * @throws DeserializationError
-     */
-    @Test
-    public void testCreate() throws ValidationError, PermissionDenied,
-            DeserializationError {
-        ActionViews<DocumentaryUnit> docViews = new ActionViews<DocumentaryUnit>(graph,
-                DocumentaryUnit.class);
-        Map<String, Object> bundle = getTestBundle();
-        DocumentaryUnit unit = docViews.create(bundle, validUserId);
-        assertEquals(TEST_COLLECTION_NAME, unit.getName());
-    }
-
-    /**
-     * Test we can create a new user.
-     * 
-     * @throws ValidationError
-     * @throws PermissionDenied
-     * @throws DeserializationError
-     */
-    @Test
-    public void testUserCreate() throws ValidationError, PermissionDenied,
-            DeserializationError {
-        ActionViews<UserProfile> userViews = new ActionViews<UserProfile>(graph,
-                UserProfile.class);
-        Map<String, Object> bundle = getTestUserBundle();
-        UserProfile user = userViews.create(bundle, validUserId);
-        assertEquals(TEST_USER_NAME, user.getName());
-    }
-
-    /**
-     * Test we can create a new group.
-     * 
-     * @throws ValidationError
-     * @throws PermissionDenied
-     * @throws DeserializationError
-     */
-    @Test
-    public void testGroupCreate() throws ValidationError, PermissionDenied,
-            DeserializationError {
-        ActionViews<Group> groupViews = new ActionViews<Group>(graph, Group.class);
-        Map<String, Object> bundle = getTestGroupBundle();
-        Group group = groupViews.create(bundle, validUserId);
-        assertEquals(TEST_GROUP_NAME, group.getName());
-    }
-
-    /**
-     * Test creating a view with invalid data throws a validationError
-     * 
-     * @throws ValidationError
-     * @throws PermissionDenied
-     * @throws DeserializationError
-     */
-    @Test(expected = ValidationError.class)
-    public void testCreateWithError() throws ValidationError, PermissionDenied,
-            DeserializationError {
-        ActionViews<DocumentaryUnit> docViews = new ActionViews<DocumentaryUnit>(graph,
-                DocumentaryUnit.class);
-        Map<String, Object> bundle = getTestBundle();
-        Map<String, Object> data = (Map<String, Object>) bundle.get("data");
-        data.remove("name");
-
-        // This should barf because the collection has no name.
-        DocumentaryUnit unit = docViews.create(bundle, validUserId);
-        assertEquals(TEST_COLLECTION_NAME, unit.getName());
-    }
-
-    /**
-     * Test creating a view with invalid data throws a validationError
-     * 
-     * @throws ValidationError
-     * @throws PermissionDenied
-     * @throws DeserializationError
-     */
-    @Test(expected = DeserializationError.class)
-    public void testCreateWithDeserialisationError() throws ValidationError,
-            PermissionDenied, DeserializationError {
-        ActionViews<DocumentaryUnit> docViews = new ActionViews<DocumentaryUnit>(graph,
-                DocumentaryUnit.class);
-        Map<String, Object> bundle = getTestBundle();
-        bundle.remove("data");
-
-        // This should barf because the collection has no name.
-        DocumentaryUnit unit = docViews.create(bundle, validUserId);
-        assertEquals(TEST_COLLECTION_NAME, unit.getName());
-    }
-
-    /**
+     /**
      * Tests that deleting a collection will also delete its dependent
      * relations. NB: This test will break of other @Dependent relations are
      * added to DocumentaryUnit.
@@ -205,6 +115,9 @@ public class ActionViewsTest extends ViewsTest {
         Integer shouldDelete = 1;
         DocumentaryUnit unit = graph.getVertex(itemId, DocumentaryUnit.class);
 
+        UserProfile user = graph.frame(graph.getVertex(validUserId), UserProfile.class);
+        int origActionCount = toList(user.getActions()).size();
+        
         // FIXME: Surely there's a better way of doing this???
         Iterator<DatePeriod> dateIter = unit.getDatePeriods().iterator();
         Iterator<Description> descIter = unit.getDescriptions().iterator();
@@ -215,5 +128,15 @@ public class ActionViewsTest extends ViewsTest {
 
         Integer deleted = docViews.delete(itemId, validUserId);
         assertEquals(shouldDelete, deleted);
+        
+        List<Action> actions = toList(user.getActions());        
+        
+        // Check there's an extra audit log for the user
+        assertEquals(origActionCount + 1, actions.size());
+        // Check the deletion log has a default label
+        // Assumes the action is the last in the list, 
+        // which it should be as the most recent.
+        Action deleteAction = actions.get(actions.size() - 1);
+        assertEquals(ActionViews.DEFAULT_DELETE_LOG, deleteAction.getLogMessage());
     }
 }

@@ -5,6 +5,8 @@ import com.tinkerpop.frames.Property;
 import com.tinkerpop.frames.VertexFrame;
 
 import eu.ehri.project.models.annotations.EntityType;
+import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Actioner;
 
 @EntityType(EntityTypes.ACTION)
 public interface Action extends VertexFrame {
@@ -27,14 +29,14 @@ public interface Action extends VertexFrame {
     public Iterable<VertexFrame> getSubjects();
     
     @Adjacency(label = HAS_SUBJECT)
-    public void addSubjects(final VertexFrame subject);
+    public void addSubjects(final AccessibleEntity subject);
     
     @Adjacency(label = HAS_SUBJECT)
-    public void setSubject(final VertexFrame subject);
+    public void setSubject(final AccessibleEntity subject);
     
     @Adjacency(label = HAS_ACTIONER)
     public UserProfile getActioner();
     
     @Adjacency(label = HAS_ACTIONER)
-    public void setActioner(final UserProfile user);
+    public void setActioner(final Actioner user);
 }

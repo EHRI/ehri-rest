@@ -6,8 +6,6 @@ import org.neo4j.graphdb.Transaction;
 
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
-import com.tinkerpop.frames.VertexFrame;
-
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
@@ -27,9 +25,9 @@ import eu.ehri.project.persistance.ActionManager;
 public class ActionViews<E extends AccessibleEntity> extends Views<E> implements IViews<E> {
 
     // Default log strings, needed for compatibility.
-    private static final String DEFAULT_CREATE_LOG = "Creating item";
-    private static final String DEFAULT_UPDATE_LOG = "Updating item";
-    private static final String DEFAULT_DELETE_LOG = "Deleting item";
+    public static final String DEFAULT_CREATE_LOG = "Creating item";
+    public static final String DEFAULT_UPDATE_LOG = "Updating item";
+    public static final String DEFAULT_DELETE_LOG = "Deleting item";
     
     private ActionManager actionManager;
 
@@ -189,7 +187,7 @@ public class ActionViews<E extends AccessibleEntity> extends Views<E> implements
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
 
-            actionManager.createAction(graph.frame(graph.getVertex(item), VertexFrame.class),
+            actionManager.createAction(graph.frame(graph.getVertex(item), AccessibleEntity.class),
                     graph.frame(graph.getVertex(user), UserProfile.class),
                     logMessage);
             Integer count = super.delete(item, user);
