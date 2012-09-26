@@ -6,6 +6,8 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.After;
@@ -16,6 +18,7 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.test.TestGraphDatabaseFactory;
 
+import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Index;
@@ -252,6 +255,39 @@ public class EhriNeo4jBasicTest {
         } catch (IndexNotFoundException e) {
             fail("Created index does not exist.");
         }
+    }
+    
+    @SuppressWarnings("serial")
+	@Test
+    public void testSelectiveIndexing() throws IndexNotFoundException {
+        // We need to create one first, sorry
+        Map<String, Object> data = new HashMap<String, Object>() {{
+        	put("name", "joe");
+        	put("age", 32);
+        	put("height", "5.11");
+        }};
+        List<String> keys = new LinkedList<String>() {{
+        	add("name");
+        	add("age");
+        }};
+        
+        Index<Vertex> index = helpers.createVertexIndex("people");        
+        Vertex joe = helpers.createIndexedVertex(data, index, keys);
+        
+        // try and find joe via name and age...
+        CloseableIterable<Vertex> query1 = index.query("name", data.get("name"));
+        assertTrue(query1.iterator().hasNext());
+        Vertex joe1 = query1.iterator().next();
+        assertEquals(joe, joe1);
+
+        CloseableIterable<Vertex> query2 = index.query("age", data.get("age"));
+        assertTrue(query2.iterator().hasNext());
+        Vertex joe2 = query2.iterator().next();
+        assertEquals(joe, joe2);
+        
+        // Query by height should fail...
+        CloseableIterable<Vertex> query3 = index.query("height", data.get("height"));
+        assertFalse(query3.iterator().hasNext());
     }
 
     /***
