@@ -4,6 +4,9 @@ import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Property;
 import com.tinkerpop.frames.VertexFrame;
 
+import eu.ehri.project.models.annotations.EntityType;
+
+@EntityType(EntityTypes.ACTION)
 public interface Action extends VertexFrame {
     public static final String HAS_SUBJECT = "hasSubject";
     public static final String HAS_ACTIONER = "hasActioner";

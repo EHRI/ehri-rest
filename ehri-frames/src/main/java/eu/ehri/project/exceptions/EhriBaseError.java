@@ -6,7 +6,7 @@ package eu.ehri.project.exceptions;
  * @author michaelb
  *
  */
-public class EhriBaseError extends Exception {
+public abstract class EhriBaseError extends Exception {
 
     public EhriBaseError(String message) {
         super(message);

@@ -2,9 +2,7 @@ package eu.ehri.project.test;
 
 import static org.junit.Assert.*;
 
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.Map;
 
 import org.junit.After;
@@ -22,97 +20,19 @@ import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.DocumentaryUnit;
-import eu.ehri.project.models.EntityTypes;
 import eu.ehri.project.models.Group;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.Description;
-import eu.ehri.project.views.Views;
+import eu.ehri.project.views.ActionViews;
 import eu.ehri.project.test.utils.FixtureLoader;
 
-public class ViewsTest {
-
-    protected static final String TEST_COLLECTION_NAME = "A brand new collection";
-    protected static final String TEST_START_DATE = "1945-01-01T00:00:00Z";
-    protected static final String TEST_USER_NAME = "Joe Blogs";
-    protected static final String TEST_GROUP_NAME = "People";
-
-    protected FramedGraph<Neo4jGraph> graph;
-    protected FixtureLoader helper;
-
-    // Members closely coupled to the test data!
-    protected Long validUserId = 20L;
-    protected Long invalidUserId = 21L;
-    protected Long itemId = 1L;
-
-    @BeforeClass
-    public static void setUpBeforeClass() throws Exception {
-    }
+public class ActionViewsTest extends ViewsTest {
 
     @Before
     public void setUp() throws Exception {
-        graph = new FramedGraph<Neo4jGraph>(new Neo4jGraph(
-                new TestGraphDatabaseFactory().newImpermanentDatabaseBuilder()
-                        .newGraphDatabase()));
-        helper = new FixtureLoader(graph);
-        helper.loadTestData();
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        // graph.shutdown();
-    }
-
-    /**
-     * Access an item 0 as user 20.
-     * 
-     * @throws PermissionDenied
-     */
-    @Test
-    public void testDetail() throws PermissionDenied {
-        Views<DocumentaryUnit> docViews = new Views<DocumentaryUnit>(graph,
-                DocumentaryUnit.class);
-        DocumentaryUnit unit = docViews.detail(itemId, validUserId);
-        assertEquals(itemId, unit.asVertex().getId());
-    }
-
-    /**
-     * Check we can access the user's own profile.
-     * 
-     * @throws PermissionDenied
-     */
-    @Test
-    public void testUserProfile() throws PermissionDenied {
-        Views<UserProfile> userViews = new Views<UserProfile>(graph,
-                UserProfile.class);
-        UserProfile user = userViews.detail(validUserId, validUserId);
-        assertEquals(validUserId, user.asVertex().getId());
-    }
-
-    /**
-     * Access an item as an invalid user. TODO: Check that this test fails if no
-     * exception is thrown.
-     * 
-     * @throws PermissionDenied
-     */
-    @Test(expected = PermissionDenied.class)
-    public void testDetailPermissionDenied() throws PermissionDenied {
-        Views<DocumentaryUnit> docViews = new Views<DocumentaryUnit>(graph,
-                DocumentaryUnit.class);
-        docViews.detail(itemId, invalidUserId);
-    }
-
-    /**
-     * Access the valid user's profile as an invalid users.
-     * 
-     * @throws PermissionDenied
-     */
-    @Test(expected = PermissionDenied.class)
-    public void testUserDetailPermissionDenied() throws PermissionDenied {
-        Views<UserProfile> userViews = new Views<UserProfile>(graph,
-                UserProfile.class);
-        userViews.detail(validUserId, invalidUserId);
-    }
-
+        super.setUp();
+    }    
+    
     /**
      * Test updating an item.
      * 
@@ -123,7 +43,7 @@ public class ViewsTest {
     @Test
     public void testUpdate() throws PermissionDenied, ValidationError,
             DeserializationError {
-        Views<DocumentaryUnit> docViews = new Views<DocumentaryUnit>(graph,
+        ActionViews<DocumentaryUnit> docViews = new ActionViews<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
         Map<String, Object> bundle = getTestBundle();
         DocumentaryUnit unit = docViews.create(bundle, validUserId);
@@ -159,7 +79,7 @@ public class ViewsTest {
     @Test
     public void testUserUpdate() throws PermissionDenied, ValidationError,
             DeserializationError {
-        Views<UserProfile> userViews = new Views<UserProfile>(graph,
+        ActionViews<UserProfile> userViews = new ActionViews<UserProfile>(graph,
                 UserProfile.class);
         Map<String, Object> bundle = getTestUserBundle();
         UserProfile user = userViews.create(bundle, validUserId);
@@ -187,7 +107,7 @@ public class ViewsTest {
     @Test
     public void testCreate() throws ValidationError, PermissionDenied,
             DeserializationError {
-        Views<DocumentaryUnit> docViews = new Views<DocumentaryUnit>(graph,
+        ActionViews<DocumentaryUnit> docViews = new ActionViews<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
         Map<String, Object> bundle = getTestBundle();
         DocumentaryUnit unit = docViews.create(bundle, validUserId);
@@ -204,7 +124,7 @@ public class ViewsTest {
     @Test
     public void testUserCreate() throws ValidationError, PermissionDenied,
             DeserializationError {
-        Views<UserProfile> userViews = new Views<UserProfile>(graph,
+        ActionViews<UserProfile> userViews = new ActionViews<UserProfile>(graph,
                 UserProfile.class);
         Map<String, Object> bundle = getTestUserBundle();
         UserProfile user = userViews.create(bundle, validUserId);
@@ -221,7 +141,7 @@ public class ViewsTest {
     @Test
     public void testGroupCreate() throws ValidationError, PermissionDenied,
             DeserializationError {
-        Views<Group> groupViews = new Views<Group>(graph, Group.class);
+        ActionViews<Group> groupViews = new ActionViews<Group>(graph, Group.class);
         Map<String, Object> bundle = getTestGroupBundle();
         Group group = groupViews.create(bundle, validUserId);
         assertEquals(TEST_GROUP_NAME, group.getName());
@@ -237,7 +157,7 @@ public class ViewsTest {
     @Test(expected = ValidationError.class)
     public void testCreateWithError() throws ValidationError, PermissionDenied,
             DeserializationError {
-        Views<DocumentaryUnit> docViews = new Views<DocumentaryUnit>(graph,
+        ActionViews<DocumentaryUnit> docViews = new ActionViews<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
         Map<String, Object> bundle = getTestBundle();
         Map<String, Object> data = (Map<String, Object>) bundle.get("data");
@@ -258,7 +178,7 @@ public class ViewsTest {
     @Test(expected = DeserializationError.class)
     public void testCreateWithDeserialisationError() throws ValidationError,
             PermissionDenied, DeserializationError {
-        Views<DocumentaryUnit> docViews = new Views<DocumentaryUnit>(graph,
+        ActionViews<DocumentaryUnit> docViews = new ActionViews<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
         Map<String, Object> bundle = getTestBundle();
         bundle.remove("data");
@@ -280,7 +200,7 @@ public class ViewsTest {
     @Test
     public void testDelete() throws PermissionDenied, ValidationError,
             SerializationError {
-        Views<DocumentaryUnit> docViews = new Views<DocumentaryUnit>(graph,
+        ActionViews<DocumentaryUnit> docViews = new ActionViews<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
         Integer shouldDelete = 1;
         DocumentaryUnit unit = graph.getVertex(itemId, DocumentaryUnit.class);
@@ -296,73 +216,4 @@ public class ViewsTest {
         Integer deleted = docViews.delete(itemId, validUserId);
         assertEquals(shouldDelete, deleted);
     }
-
-    // Helpers
-
-    // @formatter:off
-    @SuppressWarnings("serial")
-    protected Map<String, Object> getTestBundle() {
-        // Data structure representing a not-yet-created collection.
-        // Using double-brace initialization to ease the pain.
-        return new HashMap<String, Object>() {{
-            put("id", null);
-            put("data", new HashMap<String, Object>() {{
-                put("name", TEST_COLLECTION_NAME);
-                put("identifier", "someid-01");
-                put("isA", EntityTypes.DOCUMENTARY_UNIT);
-            }});
-            put("relationships", new HashMap<String, Object>() {{
-                put("describes", new LinkedList<HashMap<String, Object>>() {{
-                    add(new HashMap<String, Object>() {{
-                        put("id", null);
-                        put("data", new HashMap<String, Object>() {{
-                            put("identifier", "someid-01");
-                            put("title", "A brand new item description");
-                            put("isA", EntityTypes.DOCUMENT_DESCRIPTION);
-                            put("languageOfDescription", "en");
-                        }});
-                    }});
-                }});
-                put("hasDate", new LinkedList<HashMap<String, Object>>() {{
-                    add(new HashMap<String, Object>() {{
-                        put("id", null);
-                        put("data", new HashMap<String, Object>() {{
-                            put("startDate", TEST_START_DATE);
-                            put("endDate", TEST_START_DATE);
-                            put("isA", EntityTypes.DATE_PERIOD);
-                        }});
-                    }});
-                }});
-            }});
-        }};
-    }
-
-    @SuppressWarnings("serial")
-    protected Map<String, Object> getTestUserBundle() {
-        // Data structure representing a not-yet-created user.
-        return new HashMap<String, Object>() {{
-            put("id", null);
-            put("data", new HashMap<String, Object>() {{
-                put("name", TEST_USER_NAME);
-                put("identifier", "joe-blogs");
-                put("userId", 9999L);
-                put("isA", EntityTypes.USER_PROFILE);
-            }});
-        }};
-    }
-
-    @SuppressWarnings("serial")
-    protected Map<String, Object> getTestGroupBundle() {
-        // Data structure representing a not-yet-created group.
-        return new HashMap<String, Object>() {{
-            put("id", null);
-            put("data", new HashMap<String, Object>() {{
-                put("name", TEST_GROUP_NAME);
-                put("identifier", "people");
-                put("isA", EntityTypes.GROUP);
-            }});
-        }};
-    }
-
-    // formatter:on
 }

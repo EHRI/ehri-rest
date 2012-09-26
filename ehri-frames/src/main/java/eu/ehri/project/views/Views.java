@@ -17,12 +17,12 @@ import eu.ehri.project.persistance.EntityBundle;
 import eu.ehri.project.relationships.Access;
 import eu.ehri.project.acl.AclManager;
 
-public class Views<E extends AccessibleEntity> {
+public class Views<E extends AccessibleEntity> implements IViews<E> {
 
-    private final FramedGraph<Neo4jGraph> graph;
-    private final Class<E> cls;
-    private final Converter converter = new Converter();
-    private final AclManager acl;
+    protected final FramedGraph<Neo4jGraph> graph;
+    protected final Class<E> cls;
+    protected final Converter converter = new Converter();
+    protected final AclManager acl;
 
     /**
      * @param graph
@@ -41,7 +41,7 @@ public class Views<E extends AccessibleEntity> {
      * @param user
      * @throws PermissionDenied
      */
-    private void checkReadAccess(AccessibleEntity entity, Long user)
+    protected void checkReadAccess(AccessibleEntity entity, Long user)
             throws PermissionDenied {
         Accessor accessor = graph.getVertex(user, Accessor.class);
         Access access = acl.getAccessControl(entity, accessor);
@@ -56,7 +56,7 @@ public class Views<E extends AccessibleEntity> {
      * @param user
      * @throws PermissionDenied
      */
-    private void checkWriteAccess(AccessibleEntity entity, Long user)
+    protected void checkWriteAccess(AccessibleEntity entity, Long user)
             throws PermissionDenied {
         Accessor accessor = graph.getVertex(user, Accessor.class);
         Access access = acl.getAccessControl(entity, accessor);
@@ -64,7 +64,7 @@ public class Views<E extends AccessibleEntity> {
             throw new PermissionDenied(accessor, entity);
     }
 
-    private void checkGlobalWriteAccess(Long user) throws PermissionDenied {
+    protected void checkGlobalWriteAccess(Long user) throws PermissionDenied {
         // TODO: Stub
     }
 
