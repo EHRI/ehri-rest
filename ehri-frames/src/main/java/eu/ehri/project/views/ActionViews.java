@@ -78,7 +78,7 @@ public class ActionViews<E extends AccessibleEntity> extends Views<E> implements
         // http://docs.oracle.com/javase/7/docs/technotes/guides/language/catch-multiple.html
         try {
 
-            E out = super.update(data, user);
+            E out = super.create(data, user);
             actionManager.createAction(out,
                     graph.frame(graph.getVertex(user), UserProfile.class),
                     logMessage);
@@ -114,7 +114,7 @@ public class ActionViews<E extends AccessibleEntity> extends Views<E> implements
     @Override
     public E update(Map<String, Object> data, Long user)
             throws PermissionDenied, ValidationError, DeserializationError {
-        return create(data, user, DEFAULT_UPDATE_LOG);
+        return update(data, user, DEFAULT_UPDATE_LOG);
     }
 
     /**
@@ -133,7 +133,7 @@ public class ActionViews<E extends AccessibleEntity> extends Views<E> implements
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
 
-            E out = super.create(data, user);
+            E out = super.update(data, user);
             actionManager.createAction(out,
                     graph.frame(graph.getVertex(user), UserProfile.class),
                     logMessage);
