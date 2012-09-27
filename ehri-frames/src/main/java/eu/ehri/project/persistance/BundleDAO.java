@@ -9,6 +9,7 @@ import java.util.Set;
 import org.apache.commons.collections.map.MultiValueMap;
 import org.neo4j.graphdb.Transaction;
 
+import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Index;
 import com.tinkerpop.blueprints.TransactionalGraph.Conclusion;
@@ -65,10 +66,45 @@ public class BundleDAO<T extends VertexFrame> {
 
     }
 
+    /**
+     * Entry-point for updating a bundle.
+     * 
+     * @param bundle
+     * @return
+     * @throws ValidationError
+     */
+    public T createOrUpdate(String key, String value, EntityBundle<T> bundle) throws ValidationError {
+        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
+        try {
+            
+            Index<Vertex> index = helpers.getIndex(bundle.getEntityType(), Vertex.class);
+            if (index == null)
+                throw new ValidationError("Cannot find index or item type: " + bundle.getEntityType());
+            Vertex node = null;
+            CloseableIterable<Vertex> nodes = index.get(key, value);
+            if (nodes.iterator().hasNext()) {
+                node = updateInner(bundle);
+            } else {
+                node = createInner(bundle);
+            }
+            tx.success();
+            return graph.frame(node, bundle.getBundleClass());
+        } catch (ValidationError err) {
+            tx.failure();
+            throw new ValidationError(err.getMessage());
+        } catch (Exception err) {
+            tx.failure();
+            throw new RuntimeException(err);
+        } finally {
+            tx.finish();
+        }
+
+    }
+    
     public T create(EntityBundle<T> bundle) throws ValidationError {
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
-            Vertex node = insertInner(bundle);
+            Vertex node = createInner(bundle);
             tx.success();
             return graph.frame(node, bundle.getBundleClass());
         } catch (ValidationError err) {
@@ -183,7 +219,7 @@ public class BundleDAO<T extends VertexFrame> {
 
     private Vertex insertOrUpdate(EntityBundle<T> bundle)
             throws ValidationError {
-        return bundle.getId() == null ? insertInner(bundle)
+        return bundle.getId() == null ? createInner(bundle)
                 : updateInner(bundle);
     }
 
@@ -194,7 +230,7 @@ public class BundleDAO<T extends VertexFrame> {
      * @return
      * @throws ValidationError
      */
-    private Vertex insertInner(EntityBundle<T> bundle) throws ValidationError {
+    private Vertex createInner(EntityBundle<T> bundle) throws ValidationError {
         bundle.validateForInsert();
         Index<Vertex> index = helpers.getOrCreateIndex(bundle.getEntityType(),
                 Vertex.class);
