@@ -8,10 +8,10 @@ import eu.ehri.project.models.base.AccessibleEntity;
 
 @EntityType(EntityTypes.IMPORT)
 public interface Import extends Action, AccessibleEntity, VertexFrame {
-    
+
     @Adjacency(label = HAS_SUBJECT)
     public Iterable<AccessibleEntity> getItems();
-    
+
     @Adjacency(label = HAS_SUBJECT)
-    public void addItem(final AccessibleEntity item);    
+    public void addItem(final AccessibleEntity item);
 }

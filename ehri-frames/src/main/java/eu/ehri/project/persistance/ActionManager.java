@@ -17,10 +17,10 @@ import eu.ehri.project.models.base.Actioner;
  * Class for dealing with actions.
  * 
  * @author michaelb
- *
+ * 
  */
 public class ActionManager {
-    
+
     protected FramedGraph<Neo4jGraph> graph;
 
     /**
@@ -33,47 +33,48 @@ public class ActionManager {
     }
 
     /**
-     * Create an action node describing something that user U
-     * has done.
+     * Create an action node describing something that user U has done.
      * 
      * @param user
      * @param logMessage
      * @return
      */
     public Action createAction(Actioner user, String logMessage) {
-        Map<String,Object> actionData = new HashMap<String, Object>();
+        Map<String, Object> actionData = new HashMap<String, Object>();
         actionData.put("timestamp", getTimestamp());
         actionData.put("logMessage", logMessage);
-        
+
         BundleDAO<Action> persister = new BundleDAO<Action>(graph);
         Action action;
         try {
-            action = persister.insert(new BundleFactory<Action>().buildBundle(actionData, Action.class));
-        } catch (ValidationError e) {            
+            action = persister.insert(new BundleFactory<Action>().buildBundle(
+                    actionData, Action.class));
+        } catch (ValidationError e) {
             e.printStackTrace();
             throw new RuntimeException("Unexpected error creating action", e);
         }
         action.setActioner(user);
-        return action;        
+        return action;
     }
 
     /**
-     * Create an action node that describes what user U has done with
-     * subject S via logMessage log.
+     * Create an action node that describes what user U has done with subject S
+     * via logMessage log.
      * 
      * @param subject
      * @param user
      * @param logMessage
      * @return
      */
-    public Action createAction(AccessibleEntity subject, Actioner user, String logMessage) {
+    public Action createAction(AccessibleEntity subject, Actioner user,
+            String logMessage) {
         Action action = createAction(user, logMessage);
         action.setSubject(subject);
-        return action;        
+        return action;
     }
-    
+
     // Helpers.
-    
+
     private String getTimestamp() {
         DateTime dt = DateTime.now();
         return ISODateTimeFormat.dateTime().print(dt);

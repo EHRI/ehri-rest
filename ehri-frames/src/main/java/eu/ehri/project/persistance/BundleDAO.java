@@ -48,7 +48,7 @@ public class BundleDAO<T extends VertexFrame> {
      * @throws ValidationError
      */
     public T update(EntityBundle<T> bundle) throws ValidationError {
-    	Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
+        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
             Vertex node = updateInner(bundle);
             tx.success();
@@ -60,13 +60,13 @@ public class BundleDAO<T extends VertexFrame> {
             tx.failure();
             throw new RuntimeException(err);
         } finally {
-        	tx.finish();
+            tx.finish();
         }
-        
+
     }
 
     public T insert(EntityBundle<T> bundle) throws ValidationError {
-    	Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
+        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
             Vertex node = insertInner(bundle);
             tx.success();
@@ -75,10 +75,10 @@ public class BundleDAO<T extends VertexFrame> {
             tx.failure();
             throw new ValidationError(err.getMessage());
         } catch (Exception err) {
-            tx.failure();	
+            tx.failure();
             throw new RuntimeException(err);
         } finally {
-        	tx.finish();
+            tx.finish();
         }
     }
 
@@ -91,7 +91,7 @@ public class BundleDAO<T extends VertexFrame> {
      * @throws ValidationError
      */
     public Integer delete(EntityBundle<?> bundle) throws ValidationError {
-    	Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
+        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         // Recursively blast everything away! Use with caution.
         try {
             Integer count = deleteCount(bundle, 0);
@@ -104,7 +104,7 @@ public class BundleDAO<T extends VertexFrame> {
             tx.failure();
             throw new RuntimeException(err);
         } finally {
-        	tx.finish();
+            tx.finish();
         }
     }
 
@@ -198,7 +198,8 @@ public class BundleDAO<T extends VertexFrame> {
         bundle.validateForInsert();
         Index<Vertex> index = helpers.getOrCreateIndex(bundle.getEntityType(),
                 Vertex.class);
-        Vertex node = helpers.createIndexedVertex(bundle.getData(), index, bundle.getPropertyKeys());
+        Vertex node = helpers.createIndexedVertex(bundle.getData(), index,
+                bundle.getPropertyKeys());
         saveDependents(node, bundle.getBundleClass(), bundle.getRelations());
         return node;
     }

@@ -20,7 +20,7 @@ public interface AccessibleEntity extends VertexFrame {
 
     @Adjacency(label = ACCESS)
     public void removeAccessor(final Accessor accessor);
-    
+
     @Adjacency(label = Action.HAS_SUBJECT, direction = Direction.IN)
     public Iterable<Action> getHistory();
 }
