@@ -35,7 +35,6 @@ abstract public class AbstractFixtureTest extends ModelTestBase {
     public void tearDown() throws Exception {
         super.tearDown();
     }
-    
 
     // Helpers, additional test data
 
