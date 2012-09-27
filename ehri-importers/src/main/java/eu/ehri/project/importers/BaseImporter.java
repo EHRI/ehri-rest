@@ -17,17 +17,28 @@ public abstract class BaseImporter<T> implements Importer<T> {
     private Agent repository;
     private FramedGraph<Neo4jGraph> framedGraph;
 
+    private List<CreationCallback> callBacks = new LinkedList<CreationCallback>();
+
     public BaseImporter(FramedGraph<Neo4jGraph> framedGraph, Agent repository) {
         this.repository = repository;
         this.framedGraph = framedGraph;
     }
-    
+
+    /**
+     * Add a callback to run when an item is created.
+     * 
+     * @param cb
+     */
+    public void addCreationCallback(final CreationCallback cb) {
+        callBacks.add(cb);
+    }
+
     public List<T> extractChildData(T data) {
         return new LinkedList<T>();
     }
 
-    protected EntityBundle<DocumentaryUnit> extractDocumentaryUnit(T data, int depth)
-            throws Exception {
+    protected EntityBundle<DocumentaryUnit> extractDocumentaryUnit(T data,
+            int depth) throws Exception {
 
         EntityBundle<DocumentaryUnit> bundle = new BundleFactory<DocumentaryUnit>()
                 .buildBundle(new HashMap<String, Object>(),
@@ -45,7 +56,8 @@ public abstract class BaseImporter<T> implements Importer<T> {
         return new LinkedList<EntityBundle<DatePeriod>>();
     }
 
-    protected void importItem(T data, DocumentaryUnit parent, int depth) throws Exception {
+    protected void importItem(T data, DocumentaryUnit parent, int depth)
+            throws Exception {
         EntityBundle<DocumentaryUnit> unit = extractDocumentaryUnit(data, depth);
         BundleDAO<DocumentaryUnit> persister = new BundleDAO<DocumentaryUnit>(
                 framedGraph);
@@ -72,19 +84,23 @@ public abstract class BaseImporter<T> implements Importer<T> {
         {
             BundleDAO<DocumentDescription> descPersister = new BundleDAO<DocumentDescription>(
                     framedGraph);
-            for (EntityBundle<DocumentDescription> dpb : extractDocumentDescriptions(data, depth)) {
+            for (EntityBundle<DocumentDescription> dpb : extractDocumentDescriptions(
+                    data, depth)) {
                 frame.addDescription(descPersister.insert(dpb));
             }
         }
 
         // Search through child parts and add them recursively...
         for (T child : extractChildData(data)) {
-            System.out.println("Importing child item...");
             importItems(child, frame, depth + 1);
+        }
+
+        // Run creation callbacks for the new item...
+        for (CreationCallback cb : callBacks) {
+            cb.itemCreated(frame);
         }
     }
 
-    
     /**
      * Entry point for a top-level DocumentaryUnit item.
      */
@@ -92,7 +108,8 @@ public abstract class BaseImporter<T> implements Importer<T> {
         importItem(data, null, 0);
     }
 
-    protected void importItems(T data, DocumentaryUnit parent, int depth) throws Exception {
+    protected void importItems(T data, DocumentaryUnit parent, int depth)
+            throws Exception {
         importItem(data, parent, depth);
     }
 
@@ -106,7 +123,7 @@ public abstract class BaseImporter<T> implements Importer<T> {
     public void importItems(T data) throws Exception {
         importItems(data, null, 0);
     }
-    
+
     /**
      * Main entry-point to trigger parsing.
      * 

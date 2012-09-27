@@ -43,10 +43,14 @@ import com.tinkerpop.frames.FramedGraph;
 
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ead.EadLanguageExtractor;
+import eu.ehri.project.models.Action;
 import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.DocumentDescription;
 import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Actioner;
+import eu.ehri.project.persistance.ActionManager;
 import eu.ehri.project.persistance.BundleDAO;
 import eu.ehri.project.persistance.BundleFactory;
 import eu.ehri.project.persistance.EntityBundle;
@@ -143,15 +147,15 @@ public class EadImporter extends BaseImporter<Node> {
     public EadImporter(FramedGraph<Neo4jGraph> framedGraph, Agent repository,
             Node topLevelEad) {
         super(framedGraph, repository);
-        
+
         this.topLevelEad = topLevelEad;
         xpath = XPathFactory.newInstance().newXPath();
         langHelper = new EadLanguageExtractor(xpath, topLevelEad);
     }
 
     /**
-     * Extract a list of entity bundles for DatePeriods from the
-     * data, attempting to parse the unitdate attribute.
+     * Extract a list of entity bundles for DatePeriods from the data,
+     * attempting to parse the unitdate attribute.
      * 
      * @param data
      */
@@ -182,7 +186,6 @@ public class EadImporter extends BaseImporter<Node> {
     @Override
     protected EntityBundle<DocumentaryUnit> extractDocumentaryUnit(Node data,
             int depth) throws Exception {
-
         Map<String, Object> dataMap = new HashMap<String, Object>();
         dataMap.put(
                 "identifier",
@@ -192,6 +195,8 @@ public class EadImporter extends BaseImporter<Node> {
                 "name",
                 xpath.compile("did/unittitle/text()").evaluate(data,
                         XPathConstants.STRING));
+
+        logger.info("Importing item: %s at depth: %d", dataMap.get("identifier"), depth);
 
         // Add persname, origination etc
         for (Entry<String, String> entry : eadControlaccessMap.entrySet()) {
@@ -242,15 +247,15 @@ public class EadImporter extends BaseImporter<Node> {
         dataMap.put(LEVEL_ATTR, getLevelOfDescription(data));
         dataMap.put(DEPTH_ATTR, depth);
 
-        // FIXME: TODO: Actually detect correct language of description...
-        List<String> langCodes = langHelper.getLanguagesOfDescription(data);
-        langCodes.addAll(langHelper.getGlobalLanguagesOfDescription());
-        dataMap.put("languageOfDescription", getUniqueArray(langCodes));
+        // Get language of description... a single string code.
+        dataMap.put("languageOfDescription",
+                langHelper.getLanguageOfDescription(data));
 
         // Set language of materials
+        // FIXME: This is pretty horrible.
         List<String> materialCodes = langHelper.getLanguagesOfMaterial(data);
         materialCodes.addAll(langHelper.getGlobalLanguagesOfMaterial());
-        dataMap.put("languageOfMaterial", getUniqueArray(materialCodes));
+        dataMap.put("languagesOfMaterial", getUniqueArray(materialCodes));
 
         descs.add(new BundleFactory<DocumentDescription>().buildBundle(dataMap,
                 DocumentDescription.class));
@@ -323,8 +328,8 @@ public class EadImporter extends BaseImporter<Node> {
 
         return ok ? new BundleFactory<DatePeriod>().buildBundle(data,
                 DatePeriod.class) : null;
-    }    
-    
+    }
+
     /**
      * Fetch the element text from (possibly) multiple nodes, and join them with
      * a double break.
@@ -353,9 +358,10 @@ public class EadImporter extends BaseImporter<Node> {
      * Import an EAD via an URL.
      * 
      * @param address
-     * @throws Exception 
+     * @throws Exception
      */
-    public static void importUrl(FramedGraph<Neo4jGraph> graph, Agent agent, String address) throws Exception {
+    public static void importUrl(FramedGraph<Neo4jGraph> graph, Agent agent,
+            String address) throws Exception {
         URL url = new URL(address);
         InputStream ios = url.openStream();
         try {
@@ -363,15 +369,16 @@ public class EadImporter extends BaseImporter<Node> {
         } finally {
             ios.close();
         }
-    }    
-    
-    /** 
+    }
+
+    /**
      * Import an EAD file by specifying it's path.
      * 
      * @param filePath
-     * @throws Exception 
+     * @throws Exception
      */
-    public static void importFile(FramedGraph<Neo4jGraph> graph, Agent agent, String filePath) throws Exception {
+    public static void importFile(FramedGraph<Neo4jGraph> graph, Agent agent,
+            String filePath) throws Exception {
         FileInputStream ios = new FileInputStream(filePath);
         try {
             importFile(graph, agent, ios);
@@ -379,40 +386,78 @@ public class EadImporter extends BaseImporter<Node> {
             ios.close();
         }
     }
-    
+
     /**
      * Top-level entry point for importing some EAD.
      * 
      */
     public void importItems() throws Exception {
-        Node archDesc = (Node) xpath.compile("//ead/archdesc")
-                .evaluate(topLevelEad, XPathConstants.NODE);
+        Node archDesc = (Node) xpath.compile("//ead/archdesc").evaluate(
+                topLevelEad, XPathConstants.NODE);
         importItems(archDesc);
     }
-    
+
     /**
      * Import an EAD via arbitrary input stream.
      * 
      * @param ios
-     * @throws Exception 
+     * @throws Exception
      */
-    public static void importFile(FramedGraph<Neo4jGraph> graph, Agent agent, InputStream ios) throws Exception {
-        
+    public static void importFile(FramedGraph<Neo4jGraph> graph, Agent agent,
+            InputStream ios) throws Exception {
+
         // XML parsing boilerplate...
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         factory.setNamespaceAware(true);
         DocumentBuilder builder = factory.newDocumentBuilder();
         Document doc = builder.parse(ios);
-        
+
         if (doc.getDocumentElement().getNodeName() != "ead") {
             // FIXME: Handle this more elegantly...
             throw new IllegalArgumentException("Document is not an EAD file.");
         }
 
-        Importer importer = new EadImporter(graph, agent, (Node)doc.getDocumentElement());
+        Importer importer = new EadImporter(graph, agent,
+                (Node) doc.getDocumentElement());
         importer.importItems();
     }
 
+    public static void importFile(FramedGraph<Neo4jGraph> graph, Agent agent,
+            Actioner actioner, String logMessage, InputStream ios)
+            throws Exception {
+
+        // XML parsing boilerplate...
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        factory.setNamespaceAware(true);
+        DocumentBuilder builder = factory.newDocumentBuilder();
+        Document doc = builder.parse(ios);
+
+        if (doc.getDocumentElement().getNodeName() != "ead") {
+            // FIXME: Handle this more elegantly...
+            throw new IllegalArgumentException("Document is not an EAD file.");
+        }
+
+        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
+        try {
+            EadImporter importer = new EadImporter(graph, agent,
+                    (Node) doc.getDocumentElement());
+            // Create a new action for this import
+            final Action action = new ActionManager(graph).createAction(
+                    actioner, logMessage);
+            importer.addCreationCallback(new CreationCallback() {
+                public void itemCreated(AccessibleEntity item) {
+                    action.addSubjects(item);
+                }
+            });
+            importer.importItems();
+            tx.success();
+        } catch (Exception ex) {
+            tx.failure();
+            throw ex;
+        } finally {
+            tx.finish();
+        }
+    }
 
     // Command line runner
     public static void main(String[] args) throws Exception {
