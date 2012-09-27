@@ -3,17 +3,25 @@ package eu.ehri.project.importers;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+
+import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
+import com.tinkerpop.gremlin.java.GremlinPipeline;
+import com.tinkerpop.pipes.PipeFunction;
+import com.tinkerpop.pipes.util.iterators.SingleIterator;
+
 import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.DocumentDescription;
 import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.base.TemporalEntity;
 import eu.ehri.project.persistance.BundleDAO;
 import eu.ehri.project.persistance.BundleFactory;
 import eu.ehri.project.persistance.EntityBundle;
 
 public abstract class BaseImporter<T> implements Importer<T> {
+    private static final String IDENTITY_KEY = "identifier";
     private Agent repository;
     private FramedGraph<Neo4jGraph> framedGraph;
 
@@ -56,29 +64,42 @@ public abstract class BaseImporter<T> implements Importer<T> {
         return new LinkedList<EntityBundle<DatePeriod>>();
     }
 
+    /**
+     * Import a single archdesc or c01-12 item, keeping a reference to the
+     * hierarchical depth.
+     * 
+     * @param data
+     * @param parent
+     * @param depth
+     * @throws Exception
+     */
     protected void importItem(T data, DocumentaryUnit parent, int depth)
             throws Exception {
         EntityBundle<DocumentaryUnit> unit = extractDocumentaryUnit(data, depth);
         BundleDAO<DocumentaryUnit> persister = new BundleDAO<DocumentaryUnit>(
                 framedGraph);
-        DocumentaryUnit frame = persister.create(unit);
+
+        // Add dates to the bundle since they're @Dependent relations.
+        for (EntityBundle<DatePeriod> dpb : extractDates(data)) {
+            unit = unit.addRelation(TemporalEntity.HAS_DATE, dpb);
+        }
+
+        Object id = getExistingGraphId((String) unit.getData()
+                .get(IDENTITY_KEY));
+        DocumentaryUnit frame;
+        if (id != null) {
+            frame = persister.update(new EntityBundle<DocumentaryUnit>(id, unit
+                    .getData(), unit.getBundleClass(), unit.getRelations()));
+        } else {
+            frame = persister.create(unit);
+
+            // Set the repository/item relationship
+            repository.addCollection(frame);
+        }
 
         // Set the parent child relationship
         if (parent != null)
             parent.addChild(frame);
-
-        // Set the repository/item relationship
-        repository.addCollection(frame);
-
-        // Save DatePeriods... this is not an idempotent step, and will need
-        // to be radically altered when updating existing items...
-        {
-            BundleDAO<DatePeriod> datePersister = new BundleDAO<DatePeriod>(
-                    framedGraph);
-            for (EntityBundle<DatePeriod> dpb : extractDates(data)) {
-                frame.addDatePeriod(datePersister.create(dpb));
-            }
-        }
 
         // Save Descriptions
         {
@@ -97,7 +118,7 @@ public abstract class BaseImporter<T> implements Importer<T> {
 
         // Run creation callbacks for the new item...
         for (CreationCallback cb : callBacks) {
-            cb.itemCreated(frame);
+            cb.itemImported(frame);
         }
     }
 
@@ -129,4 +150,28 @@ public abstract class BaseImporter<T> implements Importer<T> {
      * 
      */
     public abstract void importItems() throws Exception;
+
+    // Helpers.
+
+    /**
+     * Lookup the graph ID of an existing object based on the IDENTITY_KEY
+     * 
+     * @param id
+     * @return
+     */
+    private Object getExistingGraphId(final String id) {
+        // Lookup the graph id of an object with the same
+        // identity key...
+        @SuppressWarnings({ "unchecked", "rawtypes" })
+        GremlinPipeline pipe = new GremlinPipeline(repository.asVertex())
+                .out(Agent.HOLDS).filter(new PipeFunction<Vertex, Boolean>() {
+                    public Boolean compute(Vertex item) {
+                        String vid = (String) item.getProperty(IDENTITY_KEY);
+                        if (vid != null)
+                            return vid == id;
+                        return false;
+                    }
+                }).id();
+        return pipe.hasNext() ? pipe.next() : null;
+    }
 }

@@ -9,5 +9,5 @@ import eu.ehri.project.models.base.AccessibleEntity;
  * 
  */
 public interface CreationCallback {
-    public void itemCreated(final AccessibleEntity item);
+    public void itemImported(final AccessibleEntity item);
 }
