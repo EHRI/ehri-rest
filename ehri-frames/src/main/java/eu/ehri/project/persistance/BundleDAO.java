@@ -65,7 +65,7 @@ public class BundleDAO<T extends VertexFrame> {
 
     }
 
-    public T insert(EntityBundle<T> bundle) throws ValidationError {
+    public T create(EntityBundle<T> bundle) throws ValidationError {
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
             Vertex node = insertInner(bundle);

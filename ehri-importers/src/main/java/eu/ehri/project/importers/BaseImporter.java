@@ -61,7 +61,7 @@ public abstract class BaseImporter<T> implements Importer<T> {
         EntityBundle<DocumentaryUnit> unit = extractDocumentaryUnit(data, depth);
         BundleDAO<DocumentaryUnit> persister = new BundleDAO<DocumentaryUnit>(
                 framedGraph);
-        DocumentaryUnit frame = persister.insert(unit);
+        DocumentaryUnit frame = persister.create(unit);
 
         // Set the parent child relationship
         if (parent != null)
@@ -76,7 +76,7 @@ public abstract class BaseImporter<T> implements Importer<T> {
             BundleDAO<DatePeriod> datePersister = new BundleDAO<DatePeriod>(
                     framedGraph);
             for (EntityBundle<DatePeriod> dpb : extractDates(data)) {
-                frame.addDatePeriod(datePersister.insert(dpb));
+                frame.addDatePeriod(datePersister.create(dpb));
             }
         }
 
@@ -86,7 +86,7 @@ public abstract class BaseImporter<T> implements Importer<T> {
                     framedGraph);
             for (EntityBundle<DocumentDescription> dpb : extractDocumentDescriptions(
                     data, depth)) {
-                frame.addDescription(descPersister.insert(dpb));
+                frame.addDescription(descPersister.create(dpb));
             }
         }
 

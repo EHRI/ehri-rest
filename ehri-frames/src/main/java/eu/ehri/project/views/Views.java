@@ -112,7 +112,7 @@ public class Views<E extends AccessibleEntity> implements IViews<E> {
             throws PermissionDenied, ValidationError, DeserializationError {
         checkGlobalWriteAccess(user);
         EntityBundle<E> bundle = converter.dataToBundle(data);
-        return new BundleDAO<E>(graph).insert(bundle);
+        return new BundleDAO<E>(graph).create(bundle);
     }
 
     /**
