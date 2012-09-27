@@ -15,18 +15,12 @@ import org.neo4j.server.rest.repr.Representation;
 
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Vertex;
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
-import com.tinkerpop.frames.FramedGraph;
-import com.tinkerpop.frames.VertexFrame;
 
 import eu.ehri.project.core.GraphHelpers;
-import eu.ehri.project.models.DocumentaryUnit;
-import eu.ehri.project.persistance.Converter;
-import eu.ehri.project.views.Views;
 
 /*
  * The rest interface for neo4j needs to be extended with utilities that do some extra work for us.
- * Those could be accompliced by several calls to the rest api, 
+ * Those could be accompliced by several calls to the rest API, 
  * but need to be atomic and therefore we like them to be new rest calls. 
  * 
  * Note that it is by no means intended as a 'public' REST interface, but only for out Ehri system. 
@@ -63,10 +57,6 @@ public class EhriNeo4jPlugin extends ServerPlugin {
     /*** Vertex ***/
 
     /**
-     * Example with curl: curl -X POST -H "Content-type: application/json"
-     * http:/
-     * /localhost:7474/db/data/ext/EhriNeo4jPlugin/graphdb/createIndexedVertex
-     * -d '{"index":"test", "data": {"name": "Test1"}}'
      * 
      * @param graphDB
      * @param data
@@ -88,9 +78,6 @@ public class EhriNeo4jPlugin extends ServerPlugin {
     }
 
     /**
-     * Example with curl: curl -X POST -H "Content-type: application/json"
-     * http://localhost:7474/db/data/ext/EhriNeo4jPlugin/graphdb/deleteVertex -d
-     * '{"id":"80449"}'
      * 
      * @param graphDB
      * @param id
@@ -277,110 +264,5 @@ public class EhriNeo4jPlugin extends ServerPlugin {
                 .toArray(new com.tinkerpop.blueprints.Parameter[parametersList
                         .size()]);
     }
-
-    /*** ehri data frames ***/
-
-    /*** documentaryUnit ***/
-
-    // get Item (entity) detail
-    @Name("getDocumentaryUnit")
-    @Description("get the item")
-    @PluginTarget(GraphDatabaseService.class)
-    public Representation getDocumentaryUnit(
-            @Source GraphDatabaseService graphDB,
-            @Description("item identifier") @Parameter(name = "id", optional = false) Long id,
-            @Description("user identifier") @Parameter(name = "userId", optional = false) Long userId)
-            throws Exception {
-        FramedGraph<Neo4jGraph> graph = new FramedGraph<Neo4jGraph>(
-                new Neo4jGraph(graphDB));
-        Views<DocumentaryUnit> views = new Views<DocumentaryUnit>(graph,
-                DocumentaryUnit.class);
-        DocumentaryUnit unit = views.detail(id, userId);
-
-        // Hmmm, must be longs instead of String, for userId String would be
-        // better
-        return ObjectToRepresentationConverter.convert(unit.asVertex());
-        // new Converter().vertexFrameToJson(unit);
-    }
-
-    @Name("createDocumentaryUnit")
-    @Description("Create a DocumentaryUnit")
-    @PluginTarget(GraphDatabaseService.class)
-    public Representation createDocumentaryUnit(
-            @Source GraphDatabaseService graphDb,
-            @Description("Data") @Parameter(name = "data", optional = false) Map data,
-            @Description("user identifier") @Parameter(name = "userId", optional = false) Long userId)
-            throws Exception {
-        FramedGraph<Neo4jGraph> graph = new FramedGraph<Neo4jGraph>(
-                new Neo4jGraph(graphDb));
-        Views<DocumentaryUnit> views = new Views<DocumentaryUnit>(graph,
-                DocumentaryUnit.class);
-        return ObjectToRepresentationConverter.convert(views.create(data,
-                userId));
-    }
-
-    @Name("deleteDocumentaryUnit")
-    @Description("Delete a DocumentaryUnit")
-    @PluginTarget(GraphDatabaseService.class)
-    public Representation deleteDocumentaryUnit(
-            @Source GraphDatabaseService graphDb,
-            @Description("DocumentaryUnit identifier") @Parameter(name = "id", optional = false) long id,
-            @Description("user identifier") @Parameter(name = "userId", optional = false) Long userId)
-            throws Exception {
-        FramedGraph<Neo4jGraph> graph = new FramedGraph<Neo4jGraph>(
-                new Neo4jGraph(graphDb));
-        Views<DocumentaryUnit> views = new Views<DocumentaryUnit>(graph,
-                DocumentaryUnit.class);
-        views.delete(id, userId);
-        // TODO other results on failure
-        return ObjectToRepresentationConverter.convert("deleted");
-    }
-
-    @Name("updateDocumentaryUnit")
-    @Description("Update a DocumentaryUnit")
-    @PluginTarget(GraphDatabaseService.class)
-    public Representation updateDocumentaryUnit(
-            @Source GraphDatabaseService graphDb,
-            @Description("Data") @Parameter(name = "data", optional = false) Map data,
-            @Description("user identifier") @Parameter(name = "userId", optional = false) Long userId)
-            throws Exception {
-        FramedGraph<Neo4jGraph> graph = new FramedGraph<Neo4jGraph>(
-                new Neo4jGraph(graphDb));
-        Views<DocumentaryUnit> views = new Views<DocumentaryUnit>(graph,
-                DocumentaryUnit.class);
-        return ObjectToRepresentationConverter.convert(
-        // Note that the id must be in the bundle data!
-                views.update(data, userId));
-
-    }
-
-    /*** userProfile ***/
-
-    /*
-     * // get Item (entity) detail
-     * 
-     * @Name("getUserProfile")
-     * 
-     * @Description("get the item")
-     * 
-     * @PluginTarget(GraphDatabaseService.class) public Representation
-     * getUserProfile(
-     * 
-     * @Source GraphDatabaseService graphDB,
-     * 
-     * @Description("item identifier")
-     * 
-     * @Parameter(name = "id", optional = false) Long id,
-     * 
-     * @Description("user identifier")
-     * 
-     * @Parameter(name = "userId", optional = false) Long requestingUserId )
-     * throws Exception { FramedGraph<Neo4jGraph> graph = new
-     * FramedGraph<Neo4jGraph>(new Neo4jGraph(graphDB)); Views<UserProfile>
-     * views = new Views<UserProfile>(graph, UserProfile.class); return
-     * ObjectToRepresentationConverter.convert( // Hmmm, must be longs instead
-     * of String, for userId String would be better views.detail(id,
-     * requestingUserId) ); }
-     */
 
 }
