@@ -23,7 +23,7 @@ import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.views.ActionViews;
 
-public class ActionViewsTest extends ViewsTest {
+public class ActionViewsTest extends AbstractFixtureTest {
 
     /**
      * Test updating an item.
