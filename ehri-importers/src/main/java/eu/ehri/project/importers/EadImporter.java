@@ -484,7 +484,7 @@ public class EadImporter extends BaseImporter<Node> {
                 agentData.put("name", cmdLine.getArgList().get(0));
                 EntityBundle<Agent> agb = new BundleFactory<Agent>()
                         .buildBundle(agentData, Agent.class);
-                agent = new BundleDAO<Agent>(graph).insert(agb);
+                agent = new BundleDAO<Agent>(graph).create(agb);
             } catch (Exception e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();

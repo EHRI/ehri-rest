@@ -47,7 +47,7 @@ public class ActionManager {
         BundleDAO<Action> persister = new BundleDAO<Action>(graph);
         Action action;
         try {
-            action = persister.insert(new BundleFactory<Action>().buildBundle(
+            action = persister.create(new BundleFactory<Action>().buildBundle(
                     actionData, Action.class));
         } catch (ValidationError e) {
             e.printStackTrace();
