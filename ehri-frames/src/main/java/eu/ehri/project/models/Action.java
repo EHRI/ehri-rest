@@ -26,7 +26,7 @@ public interface Action extends VertexFrame {
     public void setLogMessage(String message);
 
     @Adjacency(label = HAS_SUBJECT)
-    public Iterable<VertexFrame> getSubjects();
+    public Iterable<AccessibleEntity> getSubjects();
 
     @Adjacency(label = HAS_SUBJECT)
     public void addSubjects(final AccessibleEntity subject);
