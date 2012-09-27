@@ -445,7 +445,7 @@ public class EadImporter extends BaseImporter<Node> {
             final Action action = new ActionManager(graph).createAction(
                     actioner, logMessage);
             importer.addCreationCallback(new CreationCallback() {
-                public void itemCreated(AccessibleEntity item) {
+                public void itemImported(AccessibleEntity item) {
                     action.addSubjects(item);
                 }
             });
