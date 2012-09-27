@@ -14,7 +14,6 @@
          <module>ehri-frames</module>
          <module>ehri-plugin</module>
          <module>ehri-extension</module>
-         <module>ehri-importers</module>
     </modules>
     <dependencyManagement>
     	<dependencies>
