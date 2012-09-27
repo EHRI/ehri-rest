@@ -16,12 +16,11 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-
 public class EadLanguageExtractor {
-    
+
     private static final Logger logger = LoggerFactory
             .getLogger(EadLanguageExtractor.class);
-    
+
     public final Map<String, String> iso639BibTermLookup = new HashMap<String, String>() {
         {
             put("heb", "he");
@@ -35,20 +34,20 @@ public class EadLanguageExtractor {
             put("cze", "cs");
         }
     };
-    
-    public Map<String, Locale> threeLetterLanguageMap = new HashMap<String,Locale>();
-    public Map<String, Locale> nameLanguageMap = new HashMap<String,Locale>();
-    
+
+    public Map<String, Locale> threeLetterLanguageMap = new HashMap<String, Locale>();
+    public Map<String, Locale> nameLanguageMap = new HashMap<String, Locale>();
+
     protected List<String> languagesOfDescription;
     protected List<String> languagesOfMaterial;
-    
+
     private final XPath xpath;
     private final Node topLevelEad;
 
     public EadLanguageExtractor(XPath xpath, Node data) {
         this.topLevelEad = data;
         this.xpath = xpath;
-        
+
         // Initialise the locale map
         String[] languages = Locale.getISOLanguages();
         for (String language : languages) {
@@ -58,7 +57,7 @@ public class EadLanguageExtractor {
             nameLanguageMap.put(locale.getDisplayLanguage().toLowerCase(),
                     locale);
         }
-        
+
         // Hack: Add terminology codes for a few languages
 
         // Sniff the top-level language codes.
@@ -67,15 +66,21 @@ public class EadLanguageExtractor {
         languagesOfMaterial = getTopLevelLanguagesOfMaterial();
 
     }
-    
-    public List<String> getLanguagesOfDescription(Node data) throws Exception {
-        return getLanguageCodes(data, "langusage/language");
+
+    public String getLanguageOfDescription(Node data) throws Exception {
+        List<String> codes = getLanguageCodes(data, "langusage/language");
+        // TODO: Sanity check the results and handle if there's
+        // more than one language?
+        // Default to current locale?
+        if (codes.isEmpty())
+            return Locale.getDefault().getLanguage();
+        return codes.get(0);
     }
 
     public List<String> getLanguagesOfMaterial(Node data) throws Exception {
         return getLanguageCodes(data, "did/langmaterial/language");
     }
-    
+
     private List<String> getTopLevelLanguagesOfMaterial() {
         // Get the nearest archdesc node and search it for a langmaterial
         // attribute.
@@ -91,8 +96,7 @@ public class EadLanguageExtractor {
         if (node != null) {
             Node attr = node.getAttributes().getNamedItem("langmaterial");
             if (attr != null) {
-                logger.debug("Got langmaterial node: "
-                        + attr.getNodeValue());
+                logger.debug("Got langmaterial node: " + attr.getNodeValue());
                 Locale loc = threeLetterLanguageMap.get(attr.getNodeValue()
                         .toLowerCase());
 
@@ -120,7 +124,9 @@ public class EadLanguageExtractor {
             e.printStackTrace();
         }
         for (int i = 0; i < profDescLang.getLength(); i++) {
-            String langCode = getLanguageCodeFromLanguageNode(profDescLang.item(i));;
+            String langCode = getLanguageCodeFromLanguageNode(profDescLang
+                    .item(i));
+            ;
             if (langCode != null) {
                 langs.add(langCode);
                 logger.debug("Got top level lang: " + langCode);
@@ -129,7 +135,7 @@ public class EadLanguageExtractor {
         logger.debug("Got top level language of description: " + langs);
         return langs;
     }
-    
+
     /**
      * Try and match language material in the given path to an actual locale.
      * 
@@ -150,7 +156,7 @@ public class EadLanguageExtractor {
         for (int i = 0; i < langs.getLength(); i++) {
 
             String langCode = getLanguageCodeFromLanguageNode(langs.item(i));
-            if (langCode != null) {                
+            if (langCode != null) {
                 locList.add(langCode);
             }
         }
@@ -175,10 +181,12 @@ public class EadLanguageExtractor {
             Locale loc = threeLetterLanguageMap.get(codeNode.getNodeValue()
                     .toLowerCase());
             if (loc != null) {
-                logger.debug("Got language from node: " + loc.getLanguage() + " " + loc.getDisplayLanguage());                
+                logger.debug("Got language from node: " + loc.getLanguage()
+                        + " " + loc.getDisplayLanguage());
                 code = loc.getLanguage();
             } else {
-                code = iso639BibTermLookup.get(codeNode.getNodeValue().toLowerCase());                
+                code = iso639BibTermLookup.get(codeNode.getNodeValue()
+                        .toLowerCase());
             }
         } else if (!text.isEmpty()) {
             // FIXME: Do we need to
