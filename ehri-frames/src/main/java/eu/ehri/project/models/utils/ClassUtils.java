@@ -215,7 +215,7 @@ public class ClassUtils {
         }
         return out;
     }
-    
+
     public static List<String> getPropertyKeys(Class<?> cls) {
         List<String> out = new LinkedList<String>();
         for (Method method : cls.getMethods()) {

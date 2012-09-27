@@ -120,9 +120,9 @@ public class EntityBundle<T extends VertexFrame> {
         if (hasErrors())
             throw new ValidationError(cls, errors);
     }
-    
+
     public List<String> getPropertyKeys() {
-    	return ClassUtils.getPropertyKeys(cls);
+        return ClassUtils.getPropertyKeys(cls);
     }
 
     /**
@@ -131,7 +131,7 @@ public class EntityBundle<T extends VertexFrame> {
      * @param errors
      */
     private void checkFields() {
-    	for (String key: ClassUtils.getPropertyKeys(cls)) {
+        for (String key : ClassUtils.getPropertyKeys(cls)) {
             checkField(key);
         }
     }

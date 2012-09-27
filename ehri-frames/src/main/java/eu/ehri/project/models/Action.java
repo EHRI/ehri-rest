@@ -15,28 +15,28 @@ public interface Action extends VertexFrame {
 
     @Property("timestamp")
     public String getTimestamp();
-    
+
     @Property("timestamp")
     public void setTimestamp(String timestamp);
-    
+
     @Property("logMessage")
     public String getLogMessage();
-    
+
     @Property("logMessage")
-    public void setLogMessage(String message);    
-    
+    public void setLogMessage(String message);
+
     @Adjacency(label = HAS_SUBJECT)
     public Iterable<VertexFrame> getSubjects();
-    
+
     @Adjacency(label = HAS_SUBJECT)
     public void addSubjects(final AccessibleEntity subject);
-    
+
     @Adjacency(label = HAS_SUBJECT)
     public void setSubject(final AccessibleEntity subject);
-    
+
     @Adjacency(label = HAS_ACTIONER)
     public UserProfile getActioner();
-    
+
     @Adjacency(label = HAS_ACTIONER)
     public void setActioner(final Actioner user);
 }

@@ -40,7 +40,7 @@ public interface DocumentaryUnit extends VertexFrame, AccessibleEntity,
     @Fetch
     @Adjacency(label = DocumentaryUnit.CHILD_OF)
     public DocumentaryUnit getParent();
-    
+
     @Adjacency(label = DocumentaryUnit.CHILD_OF, direction = Direction.IN)
     public void addChild(final DocumentaryUnit child);
 

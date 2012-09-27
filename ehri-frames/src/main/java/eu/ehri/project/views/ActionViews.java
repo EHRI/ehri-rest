@@ -15,20 +15,21 @@ import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.persistance.ActionManager;
 
 /**
- * Views class that handles creating Action objects that
- * provide an audit log for CRUD actions.
+ * Views class that handles creating Action objects that provide an audit log
+ * for CRUD actions.
  * 
  * @author michaelb
- *
+ * 
  * @param <E>
  */
-public class ActionViews<E extends AccessibleEntity> extends Views<E> implements IViews<E> {
+public class ActionViews<E extends AccessibleEntity> extends Views<E> implements
+        IViews<E> {
 
     // Default log strings, needed for compatibility.
     public static final String DEFAULT_CREATE_LOG = "Creating item";
     public static final String DEFAULT_UPDATE_LOG = "Updating item";
     public static final String DEFAULT_DELETE_LOG = "Deleting item";
-    
+
     private ActionManager actionManager;
 
     /**
@@ -43,8 +44,8 @@ public class ActionViews<E extends AccessibleEntity> extends Views<E> implements
     }
 
     /**
-     * Create a new object of type `E` from the given data, saving
-     * an Action log with the default creation message.
+     * Create a new object of type `E` from the given data, saving an Action log
+     * with the default creation message.
      * 
      * @param data
      * @param user
@@ -59,8 +60,8 @@ public class ActionViews<E extends AccessibleEntity> extends Views<E> implements
     }
 
     /**
-     * Create a new object of type `E` from the given data, saving
-     * an Action log with the given log message.
+     * Create a new object of type `E` from the given data, saving an Action log
+     * with the given log message.
      * 
      * @param data
      * @param user
@@ -100,8 +101,8 @@ public class ActionViews<E extends AccessibleEntity> extends Views<E> implements
     }
 
     /**
-     * Update an object of type `E` from the given data, saving
-     * an Action log with the default update message.
+     * Update an object of type `E` from the given data, saving an Action log
+     * with the default update message.
      * 
      * @param data
      * @param user
@@ -116,8 +117,8 @@ public class ActionViews<E extends AccessibleEntity> extends Views<E> implements
     }
 
     /**
-     * Update an object of type `E` from the given data, saving
-     * an Action log with the given log message.
+     * Update an object of type `E` from the given data, saving an Action log
+     * with the given log message.
      * 
      * @param data
      * @param user
@@ -155,8 +156,8 @@ public class ActionViews<E extends AccessibleEntity> extends Views<E> implements
     }
 
     /**
-     * Delete an object bundle, following dependency cascades, saving
-     * an Action log with the default deletion message.
+     * Delete an object bundle, following dependency cascades, saving an Action
+     * log with the default deletion message.
      * 
      * @param item
      * @param user
@@ -165,14 +166,14 @@ public class ActionViews<E extends AccessibleEntity> extends Views<E> implements
      * @throws ValidationError
      * @throws SerializationError
      */
-    public Integer delete(Long item, Long user)
-            throws PermissionDenied, ValidationError, SerializationError {
+    public Integer delete(Long item, Long user) throws PermissionDenied,
+            ValidationError, SerializationError {
         return delete(item, user, DEFAULT_DELETE_LOG);
     }
-    
+
     /**
-     * Delete an object bundle, following dependency cascades, saving
-     * an Action log with the given deletion message.
+     * Delete an object bundle, following dependency cascades, saving an Action
+     * log with the given deletion message.
      * 
      * @param item
      * @param user
@@ -181,13 +182,14 @@ public class ActionViews<E extends AccessibleEntity> extends Views<E> implements
      * @throws PermissionDenied
      * @throws ValidationError
      * @throws SerializationError
-     */    
+     */
     public Integer delete(Long item, Long user, String logMessage)
             throws PermissionDenied, ValidationError, SerializationError {
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
 
-            actionManager.createAction(graph.frame(graph.getVertex(item), AccessibleEntity.class),
+            actionManager.createAction(
+                    graph.frame(graph.getVertex(item), AccessibleEntity.class),
                     graph.frame(graph.getVertex(user), UserProfile.class),
                     logMessage);
             Integer count = super.delete(item, user);
