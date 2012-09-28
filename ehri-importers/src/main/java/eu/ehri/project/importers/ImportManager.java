@@ -1,7 +1,11 @@
 package eu.ehri.project.importers;
 
-import eu.ehri.project.models.Action;
-
+/**
+ * Interface for import managers. Currently empty.
+ * 
+ * @author michaelb
+ *
+ */
 public interface ImportManager {
     
 }

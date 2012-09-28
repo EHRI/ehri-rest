@@ -12,7 +12,6 @@ import java.util.regex.Pattern;
 
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
@@ -45,7 +44,7 @@ import eu.ehri.project.persistance.EntityBundle;
  * @author michaelb
  * 
  */
-public class EadImporter extends BaseImporter<Node> {
+public class EadImporter extends AbstractRecursiveImporter<Node> {
 
     private static final Logger logger = LoggerFactory
             .getLogger(EadImporter.class);
@@ -199,11 +198,9 @@ public class EadImporter extends BaseImporter<Node> {
     }
 
     @Override
-    protected void importItems(Node data, DocumentaryUnit parent, int depth)
+    protected void importMultipleItemsAtDepth(Node data, DocumentaryUnit parent, int depth)
             throws ValidationError {
         try {
-            XPathExpression expr = xpath.compile("did/unittitle/text()");
-
             Node titleNode = (Node) xpath.compile("did/unittitle").evaluate(
                     data, XPathConstants.NODE);
             // If we have a unitid at archdesc level, import that
@@ -211,7 +208,7 @@ public class EadImporter extends BaseImporter<Node> {
                     && !titleNode.getTextContent().trim().isEmpty()) {
                 logger.info("Extracting single item from archdesc... "
                         + titleNode.getTextContent());
-                importItem(data, parent, depth);
+                importSingleItemAtDepth(data, parent, depth);
             } else {
                 // Otherwise, inspect the children of the archdesc/dsc
                 logger.info("Extracting multiple items from archdesc/dsc...");
@@ -219,7 +216,7 @@ public class EadImporter extends BaseImporter<Node> {
                         XPathConstants.NODESET);
                 for (int i = 0; i < dsc.getLength(); i++) {
                     for (Node d : extractChildData(dsc.item(i))) {
-                        importItem(d, parent, depth + 1);
+                        importSingleItemAtDepth(d, parent, depth + 1);
                     }
                 }
             }
@@ -277,7 +274,7 @@ public class EadImporter extends BaseImporter<Node> {
             throw new RuntimeException(e);
         }
         if (archDesc != null)
-            importItems(archDesc);
+            importItemsFromData(archDesc);
         else {
             throw new InvalidInputDataError("No 'archdesc' element found");
         }
