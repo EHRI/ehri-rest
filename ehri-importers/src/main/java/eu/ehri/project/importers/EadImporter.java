@@ -46,336 +46,336 @@ import eu.ehri.project.persistance.EntityBundle;
  */
 public class EadImporter extends AbstractRecursiveImporter<Node> {
 
-    private static final Logger logger = LoggerFactory
-            .getLogger(EadImporter.class);
+	private static final Logger logger = LoggerFactory
+			.getLogger(EadImporter.class);
 
-    private final XPath xpath;
-    private EadLanguageExtractor langHelper;
-    
-    // An integer that represents how far down the
-    // EAD heirarchy tree the current document is.
-    public final String DEPTH_ATTR = "depthOfDescription";
+	private final XPath xpath;
+	private EadLanguageExtractor langHelper;
 
-    // A (possibly arbitrary) string denoting what the
-    // describing body saw fit to name a documentary unit's
-    // level of description.
-    public final String LEVEL_ATTR = "levelOfDescription";
+	// An integer that represents how far down the
+	// EAD heirarchy tree the current document is.
+	public final String DEPTH_ATTR = "depthOfDescription";
 
-    // List of XPaths against the final attribute names. This should probably be
-    // moved
-    // to external configuration...
-    @SuppressWarnings("serial")
-    private final Map<String, String> eadAttributeMap = new HashMap<String, String>() {
-        {
-            put("accruals", "accurals/p");
-            put("acquisition", "acqinfo/p");
-            put("appraisal", "appraisal/p");
-            put("archivalHistory", "custodhist/p");
-            put("conditionsOfAccess", "accessrestrict/p");
-            put("conditionsOfReproduction", "userestrict/p");
-            put("extentAndMedium", "did/physdesc/extent"); // Should be more
-                                                           // nuanced!
-            put("identifier", "did/unitid");
-            put("locationOfCopies", "altformavail/p");
-            put("locationOfOriginals", "originalsloc/p");
-            put("title", "did/unittitle");
-            put("physicalCharacteristics", "phystech/p");
-            put("scopeAndContent", "scopecontent/p");
-            put("systemOfArrangement", "arrangement/p");
-        }
-    };
+	// A (possibly arbitrary) string denoting what the
+	// describing body saw fit to name a documentary unit's
+	// level of description.
+	public final String LEVEL_ATTR = "levelOfDescription";
 
-    @SuppressWarnings("serial")
-    private final Map<String, String> eadControlaccessMap = new HashMap<String, String>() {
-        {
-            put("subjects", "controlaccess/subjects");
-            put("creators", "did/origination/persname");
-            put("creators", "did/origination/corpname");
-            put("nameAccess", "controlaccess/persname");
-            put("corporateBodies", "controlaccess/corpname");
-            put("places", "controlaccess/geogname");
-            put("unitDates", "did/unitdate");
-        }
-    };
+	// List of XPaths against the final attribute names. This should probably be
+	// moved
+	// to external configuration...
+	@SuppressWarnings("serial")
+	private final Map<String, String> eadAttributeMap = new HashMap<String, String>() {
+		{
+			put("accruals", "accurals/p");
+			put("acquisition", "acqinfo/p");
+			put("appraisal", "appraisal/p");
+			put("archivalHistory", "custodhist/p");
+			put("conditionsOfAccess", "accessrestrict/p");
+			put("conditionsOfReproduction", "userestrict/p");
+			put("extentAndMedium", "did/physdesc/extent"); // Should be more
+															// nuanced!
+			put("identifier", "did/unitid");
+			put("locationOfCopies", "altformavail/p");
+			put("locationOfOriginals", "originalsloc/p");
+			put("title", "did/unittitle");
+			put("physicalCharacteristics", "phystech/p");
+			put("scopeAndContent", "scopecontent/p");
+			put("systemOfArrangement", "arrangement/p");
+		}
+	};
 
-    // Pattern for EAD nodes that represent a child item
-    private Pattern childItemPattern = Pattern.compile("^c(?:\\d+)$");
+	@SuppressWarnings("serial")
+	private final Map<String, String> eadControlaccessMap = new HashMap<String, String>() {
+		{
+			put("subjects", "controlaccess/subjects");
+			put("creators", "did/origination/persname");
+			put("creators", "did/origination/corpname");
+			put("nameAccess", "controlaccess/persname");
+			put("corporateBodies", "controlaccess/corpname");
+			put("places", "controlaccess/geogname");
+			put("unitDates", "did/unitdate");
+		}
+	};
 
-    // Various date patterns
-    private Pattern[] datePatterns = {
-            // Yad Vashem, ICA-Atom style: 1924-1-1 - 1947-12-31
-            Pattern.compile("^(\\d{4}-\\d{1,2}-\\d{1,2})\\s?-\\s?(\\d{4}-\\d{1,2}-\\d{1,2})$"),
-            Pattern.compile("^(\\d{4})\\s?-\\s?(\\d{4})$"),
-            Pattern.compile("^(\\d{4})-\\[(\\d{4})\\]$"),
-            Pattern.compile("^(\\d{4})-\\[(\\d{4})\\]$"),
-            Pattern.compile("^(\\d{4}s)-\\[(\\d{4}s)\\]$"),
-            Pattern.compile("^\\[(\\d{4})\\]$"), Pattern.compile("^(\\d{4})$"),
-            Pattern.compile("^(\\d{2})th century$") };
+	// Pattern for EAD nodes that represent a child item
+	private Pattern childItemPattern = Pattern.compile("^c(?:\\d+)$");
 
-    private Node topLevelEad;
+	// Various date patterns
+	private Pattern[] datePatterns = {
+			// Yad Vashem, ICA-Atom style: 1924-1-1 - 1947-12-31
+			Pattern.compile("^(\\d{4}-\\d{1,2}-\\d{1,2})\\s?-\\s?(\\d{4}-\\d{1,2}-\\d{1,2})$"),
+			Pattern.compile("^(\\d{4})\\s?-\\s?(\\d{4})$"),
+			Pattern.compile("^(\\d{4})-\\[(\\d{4})\\]$"),
+			Pattern.compile("^(\\d{4})-\\[(\\d{4})\\]$"),
+			Pattern.compile("^(\\d{4}s)-\\[(\\d{4}s)\\]$"),
+			Pattern.compile("^\\[(\\d{4})\\]$"), Pattern.compile("^(\\d{4})$"),
+			Pattern.compile("^(\\d{2})th century$") };
 
-    /**
-     * Construct an EadImporter object.
-     * 
-     * @param framedGraph
-     * @param repository
-     * @param topLevelEad
-     */
-    public EadImporter(FramedGraph<Neo4jGraph> framedGraph, Agent repository,
-            Node topLevelEad) {
-        super(framedGraph, repository);
+	private Node topLevelEad;
 
-        this.topLevelEad = topLevelEad;
-        xpath = XPathFactory.newInstance().newXPath();
-        langHelper = new EadLanguageExtractor(xpath, topLevelEad);
-    }
-    
-    /**
-     * Extract a list of entity bundles for DatePeriods from the data,
-     * attempting to parse the unitdate attribute.
-     * 
-     * @param data
-     */
-    @Override
-    public List<EntityBundle<DatePeriod>> extractDates(Node data) {
-        List<EntityBundle<DatePeriod>> dates = new LinkedList<EntityBundle<DatePeriod>>();
-        try {
-            for (String date : extractTextList(data, "did/unitdate")) {
-                EntityBundle<DatePeriod> dpb = extractDate(date);
-                if (dpb != null)
-                    dates.add(dpb);
-            }
-        } catch (XPathExpressionException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        } catch (ValidationError e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        }
-        return dates;
-    }
+	/**
+	 * Construct an EadImporter object.
+	 * 
+	 * @param framedGraph
+	 * @param repository
+	 * @param topLevelEad
+	 */
+	public EadImporter(FramedGraph<Neo4jGraph> framedGraph, Agent repository,
+			Node topLevelEad) {
+		super(framedGraph, repository);
 
-    public List<Node> extractChildData(Node data) {
-        List<Node> children = new LinkedList<Node>();
-        logger.debug("Extracting child data from: " + data);
-        for (int i = 0; i < data.getChildNodes().getLength(); i++) {
-            Node n = data.getChildNodes().item(i);
-            if (childItemPattern.matcher(n.getNodeName()).matches()) {
-                children.add(n);
-            }
-        }
-        return children;
-    }
+		this.topLevelEad = topLevelEad;
+		xpath = XPathFactory.newInstance().newXPath();
+		langHelper = new EadLanguageExtractor(xpath, topLevelEad);
+	}
 
-    @Override
-    protected EntityBundle<DocumentaryUnit> extractDocumentaryUnit(Node data,
-            int depth) throws ValidationError {
-        Map<String, Object> dataMap = new HashMap<String, Object>();
-        try {
-            dataMap.put("identifier", xpath.compile("did/unitid/text()")
-                    .evaluate(data, XPathConstants.STRING));
-            dataMap.put(
-                    "name",
-                    xpath.compile("did/unittitle/text()").evaluate(data,
-                            XPathConstants.STRING));
+	/**
+	 * Extract a list of entity bundles for DatePeriods from the data,
+	 * attempting to parse the unitdate attribute.
+	 * 
+	 * @param data
+	 */
+	@Override
+	public List<EntityBundle<DatePeriod>> extractDates(Node data) {
+		List<EntityBundle<DatePeriod>> dates = new LinkedList<EntityBundle<DatePeriod>>();
+		try {
+			for (String date : extractTextList(data, "did/unitdate")) {
+				EntityBundle<DatePeriod> dpb = extractDate(date);
+				if (dpb != null)
+					dates.add(dpb);
+			}
+		} catch (XPathExpressionException e) {
+			e.printStackTrace();
+			throw new RuntimeException(e);
+		} catch (ValidationError e) {
+			e.printStackTrace();
+			throw new RuntimeException(e);
+		}
+		return dates;
+	}
 
-            logger.info("Importing item: " + dataMap.get("identifier")
-                    + " at depth: " + depth);
+	public List<Node> extractChildData(Node data) {
+		List<Node> children = new LinkedList<Node>();
+		logger.debug("Extracting child data from: " + data);
+		for (int i = 0; i < data.getChildNodes().getLength(); i++) {
+			Node n = data.getChildNodes().item(i);
+			if (childItemPattern.matcher(n.getNodeName()).matches()) {
+				children.add(n);
+			}
+		}
+		return children;
+	}
 
-            // Add persname, origination etc
-            for (Entry<String, String> entry : eadControlaccessMap.entrySet()) {
-                List<String> vals = extractTextList(data, entry.getValue());
-                dataMap.put(entry.getKey(),
-                        vals.toArray(new String[vals.size()]));
-            }
-        } catch (XPathExpressionException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        }
+	@Override
+	protected EntityBundle<DocumentaryUnit> extractDocumentaryUnit(Node data,
+			int depth) throws ValidationError {
+		Map<String, Object> dataMap = new HashMap<String, Object>();
+		try {
+			dataMap.put("identifier", xpath.compile("did/unitid/text()")
+					.evaluate(data, XPathConstants.STRING));
+			dataMap.put(
+					"name",
+					xpath.compile("did/unittitle/text()").evaluate(data,
+							XPathConstants.STRING));
 
-        return new BundleFactory<DocumentaryUnit>().buildBundle(dataMap,
-                DocumentaryUnit.class);
-    }
+			logger.info("Importing item: " + dataMap.get("identifier")
+					+ " at depth: " + depth);
 
-    @Override
-    protected void importMultipleItemsAtDepth(Node data, DocumentaryUnit parent, int depth)
-            throws ValidationError {
-        try {
-            Node titleNode = (Node) xpath.compile("did/unittitle").evaluate(
-                    data, XPathConstants.NODE);
-            // If we have a unitid at archdesc level, import that
-            if (titleNode != null
-                    && !titleNode.getTextContent().trim().isEmpty()) {
-                logger.info("Extracting single item from archdesc... "
-                        + titleNode.getTextContent());
-                importSingleItemAtDepth(data, parent, depth);
-            } else {
-                // Otherwise, inspect the children of the archdesc/dsc
-                logger.info("Extracting multiple items from archdesc/dsc...");
-                NodeList dsc = (NodeList) xpath.compile("dsc").evaluate(data,
-                        XPathConstants.NODESET);
-                for (int i = 0; i < dsc.getLength(); i++) {
-                    for (Node d : extractChildData(dsc.item(i))) {
-                        importSingleItemAtDepth(d, parent, depth + 1);
-                    }
-                }
-            }
-        } catch (XPathExpressionException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        }
-    }
+			// Add persname, origination etc
+			for (Entry<String, String> entry : eadControlaccessMap.entrySet()) {
+				List<String> vals = extractTextList(data, entry.getValue());
+				dataMap.put(entry.getKey(),
+						vals.toArray(new String[vals.size()]));
+			}
+		} catch (XPathExpressionException e) {
+			e.printStackTrace();
+			throw new RuntimeException(e);
+		}
 
-    public List<EntityBundle<DocumentDescription>> extractDocumentDescriptions(
-            Node data, int depth) throws ValidationError {
-        List<EntityBundle<DocumentDescription>> descs = new LinkedList<EntityBundle<DocumentDescription>>();
+		return new BundleFactory<DocumentaryUnit>().buildBundle(dataMap,
+				DocumentaryUnit.class);
+	}
 
-        Map<String, Object> dataMap = new HashMap<String, Object>();
+	@Override
+	protected void importMultipleItemsAtDepth(Node data,
+			DocumentaryUnit parent, int depth) throws ValidationError {
+		try {
+			Node titleNode = (Node) xpath.compile("did/unittitle").evaluate(
+					data, XPathConstants.NODE);
+			// If we have a unitid at archdesc level, import that
+			if (titleNode != null
+					&& !titleNode.getTextContent().trim().isEmpty()) {
+				logger.info("Extracting single item from archdesc... "
+						+ titleNode.getTextContent());
+				importSingleItemAtDepth(data, parent, depth);
+			} else {
+				// Otherwise, inspect the children of the archdesc/dsc
+				logger.info("Extracting multiple items from archdesc/dsc...");
+				NodeList dsc = (NodeList) xpath.compile("dsc").evaluate(data,
+						XPathConstants.NODESET);
+				for (int i = 0; i < dsc.getLength(); i++) {
+					for (Node d : extractChildData(dsc.item(i))) {
+						importSingleItemAtDepth(d, parent, depth + 1);
+					}
+				}
+			}
+		} catch (XPathExpressionException e) {
+			e.printStackTrace();
+			throw new RuntimeException(e);
+		}
+	}
 
-        // For EAD (and most other types) there will only be one description
-        // per logical object we create.
-        for (Entry<String, String> entry : eadAttributeMap.entrySet()) {
-            dataMap.put(entry.getKey(), getElementText(data, entry.getValue()));
-        }
+	public List<EntityBundle<DocumentDescription>> extractDocumentDescriptions(
+			Node data, int depth) throws ValidationError {
+		List<EntityBundle<DocumentDescription>> descs = new LinkedList<EntityBundle<DocumentDescription>>();
 
-        // Set level of description and actual level of nesting
-        dataMap.put(LEVEL_ATTR, getLevelOfDescription(data));
-        dataMap.put(DEPTH_ATTR, depth);
+		Map<String, Object> dataMap = new HashMap<String, Object>();
 
-        // Get language of description... a single string code.
-        dataMap.put("languageOfDescription",
-                langHelper.getLanguageOfDescription(data));
+		// For EAD (and most other types) there will only be one description
+		// per logical object we create.
+		for (Entry<String, String> entry : eadAttributeMap.entrySet()) {
+			dataMap.put(entry.getKey(), getElementText(data, entry.getValue()));
+		}
 
-        // Set language of materials
-        // FIXME: This is pretty horrible.
-        List<String> materialCodes = langHelper.getLanguagesOfMaterial(data);
-        materialCodes.addAll(langHelper.getGlobalLanguagesOfMaterial());
-        dataMap.put("languagesOfMaterial", getUniqueArray(materialCodes));
+		// Set level of description and actual level of nesting
+		dataMap.put(LEVEL_ATTR, getLevelOfDescription(data));
+		dataMap.put(DEPTH_ATTR, depth);
 
-        descs.add(new BundleFactory<DocumentDescription>().buildBundle(dataMap,
-                DocumentDescription.class));
-        
-        return descs;
-    }
+		// Get language of description... a single string code.
+		dataMap.put("languageOfDescription",
+				langHelper.getLanguageOfDescription(data));
 
-    /**
-     * Top-level entry point for importing some EAD.
-     * 
-     * @throws ValidationError
-     * @throws InvalidInputDataError 
-     * 
-     */
-    public void importItems() throws ValidationError, InvalidInputDataError {
-    	
-        Node archDesc;
-        try {
-            archDesc = (Node) xpath.compile("archdesc").evaluate(
-                    topLevelEad, XPathConstants.NODE);
-        } catch (XPathExpressionException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        }
-        if (archDesc != null)
-            importItemsFromData(archDesc);
-        else {
-            throw new InvalidInputDataError("No 'archdesc' element found");
-        }
-    }
+		// Set language of materials
+		// FIXME: This is pretty horrible.
+		List<String> materialCodes = langHelper.getLanguagesOfMaterial(data);
+		materialCodes.addAll(langHelper.getGlobalLanguagesOfMaterial());
+		dataMap.put("languagesOfMaterial", getUniqueArray(materialCodes));
 
-    // Helpers
+		descs.add(new BundleFactory<DocumentDescription>().buildBundle(dataMap,
+				DocumentDescription.class));
 
-    /**
-     * Make a list unique.
-     * 
-     * @param list
-     * @return
-     */
-    private String[] getUniqueArray(List<String> list) {
-        HashSet<String> hs = new HashSet<String>();
-        hs.addAll(list);
-        return hs.toArray(new String[list.size()]);
-    }
+		return descs;
+	}
 
-    /**
-     * Extract a list of strings from the specified element set.
-     * 
-     * @param data
-     * @param path
-     * @return
-     * @throws XPathExpressionException
-     */
-    private List<String> extractTextList(Node data, String path)
-            throws XPathExpressionException {
-        List<String> names = new ArrayList<String>();
+	/**
+	 * Top-level entry point for importing some EAD.
+	 * 
+	 * @throws ValidationError
+	 * @throws InvalidInputDataError
+	 * 
+	 */
+	public void importItems() throws ValidationError, InvalidInputDataError {
 
-        NodeList nodes = (NodeList) xpath.compile(path).evaluate(data,
-                XPathConstants.NODESET);
-        for (int i = 0; i < nodes.getLength(); i++) {
-            names.add(nodes.item(i).getTextContent());
-        }
-        return names;
-    }
+		Node archDesc;
+		try {
+			archDesc = (Node) xpath.compile("archdesc").evaluate(topLevelEad,
+					XPathConstants.NODE);
+		} catch (XPathExpressionException e) {
+			e.printStackTrace();
+			throw new RuntimeException(e);
+		}
+		if (archDesc != null)
+			importItemsFromData(archDesc);
+		else {
+			throw new InvalidInputDataError("No 'archdesc' element found");
+		}
+	}
 
-    private String getLevelOfDescription(Node data) {
-        Node attr = data.getAttributes().getNamedItem("level");
-        if (attr != null)
-            return attr.getNodeValue();
-        return "";
-    }
+	// Helpers
 
-    /**
-     * Attempt to extract some date periods. This does not currently put the
-     * dates into ISO form.
-     * 
-     * @param date
-     * @return
-     * @throws ValidationError
-     */
-    private EntityBundle<DatePeriod> extractDate(String date)
-            throws ValidationError {
-        Map<String, Object> data = new HashMap<String, Object>();
-        boolean ok = false;
-        for (Pattern re : datePatterns) {
-            Matcher matcher = re.matcher(date);
-            if (matcher.matches()) {
-                data.put("startDate", matcher.group(1));
-                data.put("endDate",
-                        matcher.group(matcher.groupCount() > 1 ? 2 : 1));
-                ok = true;
-                break;
-            }
-        }
+	/**
+	 * Make a list unique.
+	 * 
+	 * @param list
+	 * @return
+	 */
+	private String[] getUniqueArray(List<String> list) {
+		HashSet<String> hs = new HashSet<String>();
+		hs.addAll(list);
+		return hs.toArray(new String[list.size()]);
+	}
 
-        return ok ? new BundleFactory<DatePeriod>().buildBundle(data,
-                DatePeriod.class) : null;
-    }
+	/**
+	 * Extract a list of strings from the specified element set.
+	 * 
+	 * @param data
+	 * @param path
+	 * @return
+	 * @throws XPathExpressionException
+	 */
+	private List<String> extractTextList(Node data, String path)
+			throws XPathExpressionException {
+		List<String> names = new ArrayList<String>();
 
-    /**
-     * Fetch the element text from (possibly) multiple nodes, and join them with
-     * a double break.
-     * 
-     * @param data
-     * @param path
-     * @return
-     * @throws XPathExpressionException
-     */
-    private String getElementText(Node data, String path) {
-        NodeList nodes;
-        try {
-            nodes = (NodeList) xpath.compile(path).evaluate(data,
-                    XPathConstants.NODESET);
-        } catch (XPathExpressionException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        }
-        String out = "";
-        for (int i = 0; i < nodes.getLength(); i++) {
-            if (out.isEmpty()) {
-                out += nodes.item(i).getTextContent();
-            } else {
-                out += "\n\n" + nodes.item(i).getTextContent();
-            }
-        }
-        return out;
-    }
+		NodeList nodes = (NodeList) xpath.compile(path).evaluate(data,
+				XPathConstants.NODESET);
+		for (int i = 0; i < nodes.getLength(); i++) {
+			names.add(nodes.item(i).getTextContent());
+		}
+		return names;
+	}
+
+	private String getLevelOfDescription(Node data) {
+		Node attr = data.getAttributes().getNamedItem("level");
+		if (attr != null)
+			return attr.getNodeValue();
+		return "";
+	}
+
+	/**
+	 * Attempt to extract some date periods. This does not currently put the
+	 * dates into ISO form.
+	 * 
+	 * @param date
+	 * @return
+	 * @throws ValidationError
+	 */
+	private EntityBundle<DatePeriod> extractDate(String date)
+			throws ValidationError {
+		Map<String, Object> data = new HashMap<String, Object>();
+		boolean ok = false;
+		for (Pattern re : datePatterns) {
+			Matcher matcher = re.matcher(date);
+			if (matcher.matches()) {
+				data.put("startDate", matcher.group(1));
+				data.put("endDate",
+						matcher.group(matcher.groupCount() > 1 ? 2 : 1));
+				ok = true;
+				break;
+			}
+		}
+
+		return ok ? new BundleFactory<DatePeriod>().buildBundle(data,
+				DatePeriod.class) : null;
+	}
+
+	/**
+	 * Fetch the element text from (possibly) multiple nodes, and join them with
+	 * a double break.
+	 * 
+	 * @param data
+	 * @param path
+	 * @return
+	 * @throws XPathExpressionException
+	 */
+	private String getElementText(Node data, String path) {
+		NodeList nodes;
+		try {
+			nodes = (NodeList) xpath.compile(path).evaluate(data,
+					XPathConstants.NODESET);
+		} catch (XPathExpressionException e) {
+			e.printStackTrace();
+			throw new RuntimeException(e);
+		}
+		String out = "";
+		for (int i = 0; i < nodes.getLength(); i++) {
+			if (out.isEmpty()) {
+				out += nodes.item(i).getTextContent();
+			} else {
+				out += "\n\n" + nodes.item(i).getTextContent();
+			}
+		}
+		return out;
+	}
 }
