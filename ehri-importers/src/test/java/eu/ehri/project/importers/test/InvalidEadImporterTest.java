@@ -38,7 +38,7 @@ public class InvalidEadImporterTest extends AbstractFixtureTest {
         InputStream ios = ClassLoader.getSystemResourceAsStream(INVALID_EAD);
         Action action;
         try {
-            action = new EadImportManager(graph, agent, user).importFile(logMessage, ios);
+            action = new EadImportManager(graph, agent, user).importFile(ios, logMessage);
         } finally {
             ios.close();
         }
@@ -55,7 +55,7 @@ public class InvalidEadImporterTest extends AbstractFixtureTest {
         manager.setTolerant(true);        
         InputStream ios = ClassLoader.getSystemResourceAsStream(INVALID_EAD);
         try {            
-            manager.importFile(logMessage, ios);
+            manager.importFile(ios, logMessage);
         } finally {
             ios.close();
         }
@@ -73,7 +73,7 @@ public class InvalidEadImporterTest extends AbstractFixtureTest {
         manager.setTolerant(true);        
         InputStream ios = ClassLoader.getSystemResourceAsStream(INVALID_EAD);
         try {            
-            manager.importFile(logMessage, ios);
+            manager.importFile(ios, logMessage);
         } catch (ValidationError e) {
             // we knew this would happen
         } finally {

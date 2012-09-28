@@ -15,23 +15,23 @@ abstract public class XmlImportManager implements ImportManager {
 
     /**
      * Import an EAD via an URL.
-     * 
+     * @param address
+     * @param logMessage
      * @param graph
      * @param agent
      * @param actioner
-     * @param logMessage
-     * @param address
+     * 
      * @throws IOException
      * @throws SAXException
      * @throws ValidationError
      * @throws NoItemsCreated 
      */
-    public Action importUrl(String logMessage, String address)
+    public Action importUrl(String address, String logMessage)
             throws IOException, SAXException, ValidationError, NoItemsCreated {
         URL url = new URL(address);
         InputStream ios = url.openStream();
         try {
-            return importFile(logMessage, ios);
+            return importFile(ios, logMessage);
         } finally {
             ios.close();
         }
@@ -39,27 +39,27 @@ abstract public class XmlImportManager implements ImportManager {
 
     /**
      * Import an EAD file by specifying it's path.
-     * 
+     * @param filePath
+     * @param logMessage
      * @param graph
      * @param agent
      * @param actioner
-     * @param logMessage
-     * @param filePath
+     * 
      * @throws IOException
      * @throws SAXException
      * @throws ValidationError
      * @throws NoItemsCreated 
      */
-    public Action importFile(String logMessage, String filePath)
+    public Action importFile(String filePath, String logMessage)
             throws IOException, SAXException, ValidationError, NoItemsCreated {
         FileInputStream ios = new FileInputStream(filePath);
         try {
-            return importFile(logMessage, ios);
+            return importFile(ios, logMessage);
         } finally {
             ios.close();
         }
     }
 
-    abstract public Action importFile(String logMessage, InputStream ios)
+    abstract public Action importFile(InputStream ios, String logMessage)
             throws SAXException, IOException, ValidationError, NoItemsCreated;
 }

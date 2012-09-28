@@ -104,17 +104,17 @@ public class EadImportManager extends XmlImportManager implements ImportManager 
 
     /**
      * Import EAD from the given InputStream.
-     * 
+     * @param ios
+     * @param logMessage
      * @param graph
      * @param agent
      * @param actioner
-     * @param logMessage
-     * @param ios
+     * 
      * @throws SAXException
      * @throws IOException
      * @throws ValidationError
      */
-    public Action importFile(String logMessage, InputStream ios)
+    public Action importFile(InputStream ios, String logMessage)
             throws SAXException, IOException, ValidationError, NoItemsCreated {
 
         // XML parsing boilerplate...
@@ -153,18 +153,18 @@ public class EadImportManager extends XmlImportManager implements ImportManager 
 
     /**
      * Import multiple files in the same batch/transaction.
-     * 
+     * @param paths
+     * @param logMessage
      * @param graph
      * @param agent
      * @param actioner
-     * @param logMessage
-     * @param paths
+     * 
      * @throws SAXException
      * @throws IOException
      * @throws ValidationError
      * @throws NoItemsCreated 
      */
-    public Action importFiles(String logMessage, List<String> paths)
+    public Action importFiles(List<String> paths, String logMessage)
             throws SAXException, IOException, ValidationError, NoItemsCreated {
 
         // XML parsing boilerplate...
@@ -369,7 +369,7 @@ public class EadImportManager extends XmlImportManager implements ImportManager 
 
             EadImportManager manager = new EadImportManager(graph, agent, user);
             manager.setTolerant(cmdLine.hasOption("tolerant"));
-            Action action = manager.importFiles(logMessage, filePaths);
+            Action action = manager.importFiles(filePaths, logMessage);
 
             int itemCount = 0;
             for (@SuppressWarnings("unused")

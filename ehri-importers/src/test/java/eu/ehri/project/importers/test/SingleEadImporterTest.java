@@ -36,7 +36,7 @@ public class SingleEadImporterTest extends AbstractFixtureTest {
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
         Action action;
         try {
-            action = new EadImportManager(graph, agent, user).importFile(logMessage, ios);
+            action = new EadImportManager(graph, agent, user).importFile(ios, logMessage);
         } catch (Exception e) {
             e.printStackTrace();
             throw e;
