@@ -385,9 +385,10 @@ public class EadImporter extends BaseImporter<Node> {
      * @param address
      * @throws IOException 
      * @throws SAXException 
+     * @throws ValidationError 
      */
     public static void importUrl(FramedGraph<Neo4jGraph> graph, Agent agent,
-            String address) throws IOException, SAXException {
+            String address) throws IOException, SAXException, ValidationError {
         URL url = new URL(address);
         InputStream ios = url.openStream();
         try {
@@ -403,9 +404,10 @@ public class EadImporter extends BaseImporter<Node> {
      * @param filePath
      * @throws IOException 
      * @throws SAXException 
+     * @throws ValidationError 
      */
     public static void importFile(FramedGraph<Neo4jGraph> graph, Agent agent,
-            String filePath) throws IOException, SAXException {
+            String filePath) throws IOException, SAXException, ValidationError {
         FileInputStream ios = new FileInputStream(filePath);
         try {
             importFile(graph, agent, ios);
