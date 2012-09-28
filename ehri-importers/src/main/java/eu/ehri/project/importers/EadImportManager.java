@@ -114,9 +114,10 @@ public class EadImportManager {
      * @throws IOException
      * @throws SAXException
      * @throws ValidationError
+     * @throws NoItemsCreated 
      */
     public Action importUrl(String logMessage, String address)
-            throws IOException, SAXException, ValidationError {
+            throws IOException, SAXException, ValidationError, NoItemsCreated {
         URL url = new URL(address);
         InputStream ios = url.openStream();
         try {
@@ -137,9 +138,10 @@ public class EadImportManager {
      * @throws IOException
      * @throws SAXException
      * @throws ValidationError
+     * @throws NoItemsCreated 
      */
     public Action importFile(String logMessage, String filePath)
-            throws IOException, SAXException, ValidationError {
+            throws IOException, SAXException, ValidationError, NoItemsCreated {
         FileInputStream ios = new FileInputStream(filePath);
         try {
             return importFile(logMessage, ios);
@@ -161,7 +163,7 @@ public class EadImportManager {
      * @throws ValidationError
      */
     public Action importFile(String logMessage, InputStream ios)
-            throws SAXException, IOException, ValidationError {
+            throws SAXException, IOException, ValidationError, NoItemsCreated {
 
         // XML parsing boilerplate...
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -179,9 +181,13 @@ public class EadImportManager {
             // Create a new action for this import
             final Action action = new ActionManager(framedGraph).createAction(
                     actioner, logMessage);
-            importWithAction(action, doc);
+            if (importWithAction(action, doc) == 0)
+                throw new NoItemsCreated();
             tx.success();
             return action;
+        } catch (NoItemsCreated e) {
+            tx.failure();
+            throw e;
         } catch (ValidationError e) {
             tx.failure();
             throw e;
@@ -204,9 +210,10 @@ public class EadImportManager {
      * @throws SAXException
      * @throws IOException
      * @throws ValidationError
+     * @throws NoItemsCreated 
      */
     public Action importFiles(String logMessage, List<String> paths)
-            throws SAXException, IOException, ValidationError {
+            throws SAXException, IOException, ValidationError, NoItemsCreated {
 
         // XML parsing boilerplate...
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -242,6 +249,9 @@ public class EadImportManager {
             
             tx.success();
             return action;
+        } catch (NoItemsCreated e) {
+            tx.failure();
+            throw e;
         } catch (ValidationError e) {
             tx.failure();
             throw e;
@@ -332,7 +342,17 @@ public class EadImportManager {
                 counter.count += 1;
             }
         });
-        importer.importItems();
+        try {
+            importer.importItems();
+        } catch (InvalidInputDataError e) {
+            logger.error(e.getMessage());
+            if (!tolerant)
+                throw e;
+        } catch (ValidationError e) {
+            logger.error(e.getMessage());
+            if (!tolerant)
+                throw e;
+        }
         return counter.count;
     }
 
