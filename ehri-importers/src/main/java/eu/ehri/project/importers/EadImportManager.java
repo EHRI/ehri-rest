@@ -12,21 +12,14 @@ import java.util.Map;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathFactory;
-
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
-import org.neo4j.com.RequestContext.Tx;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.kernel.AbstractGraphDatabase;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
@@ -253,7 +246,7 @@ public class EadImportManager {
     public static void main(String[] args) throws Exception {
 
         final String logMessage = "Imported from command-line";
-        
+
         Options options = new Options();
         options.addOption(new Option("createrepo", false,
                 "Create agent with the given ID"));
@@ -263,7 +256,7 @@ public class EadImportManager {
                 "Create user with the given ID"));
         options.addOption(new Option("user", true,
                 "Identifier of user to import as"));
-        
+
         CommandLineParser parser = new PosixParser();
         CommandLine cmdLine = parser.parse(options, args);
 
@@ -274,10 +267,10 @@ public class EadImportManager {
         // Get the graph and search it for the required agent...
         FramedGraph<Neo4jGraph> graph = new FramedGraph<Neo4jGraph>(
                 new Neo4jGraph((String) cmdLine.getArgList().get(0)));
-        
+
         List<String> filePaths = new LinkedList<String>();
         for (int i = 1; i < cmdLine.getArgList().size(); i++) {
-            filePaths.add((String)cmdLine.getArgList().get(i));
+            filePaths.add((String) cmdLine.getArgList().get(i));
         }
 
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
@@ -288,8 +281,8 @@ public class EadImportManager {
             } else {
                 agent = graph
                         .getVertices("identifier",
-                                (String) cmdLine.getArgList().get(0), Agent.class)
-                        .iterator().next();
+                                (String) cmdLine.getArgList().get(0),
+                                Agent.class).iterator().next();
             }
             UserProfile user = null;
             if (cmdLine.hasOption("createuser")) {
@@ -297,20 +290,21 @@ public class EadImportManager {
             } else {
                 user = graph
                         .getVertices("identifier",
-                                (String) cmdLine.getArgList().get(0), UserProfile.class)
-                        .iterator().next();
+                                (String) cmdLine.getArgList().get(0),
+                                UserProfile.class).iterator().next();
             }
 
             EadImportManager manager = new EadImportManager(graph, agent, user);
             Action action = manager.importFiles(logMessage, filePaths);
-            
+
             int itemCount = 0;
-            for (@SuppressWarnings("unused") AccessibleEntity ent : action.getSubjects()) {
-                itemCount++;                
+            for (@SuppressWarnings("unused")
+            AccessibleEntity ent : action.getSubjects()) {
+                itemCount++;
             }
-            
+
             System.out.println("Imported item count: " + itemCount);
-            
+
         } catch (Exception e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -320,8 +314,9 @@ public class EadImportManager {
             graph.shutdown();
         }
     }
-    
-    private static UserProfile createUser(FramedGraph<Neo4jGraph> graph, String name) throws ValidationError {
+
+    private static UserProfile createUser(FramedGraph<Neo4jGraph> graph,
+            String name) throws ValidationError {
         Map<String, Object> agentData = new HashMap<String, Object>();
         agentData.put("userId", name);
         agentData.put("name", name);
@@ -329,13 +324,14 @@ public class EadImportManager {
                 .buildBundle(agentData, UserProfile.class);
         return new BundleDAO<UserProfile>(graph).create(agb);
     }
-    
-    private static Agent createAgent(FramedGraph<Neo4jGraph> graph, String name) throws ValidationError {
-            Map<String, Object> agentData = new HashMap<String, Object>();
-            agentData.put("identifier", name);
-            agentData.put("name", name);
-            EntityBundle<Agent> agb = new BundleFactory<Agent>()
-                    .buildBundle(agentData, Agent.class);
-            return new BundleDAO<Agent>(graph).create(agb);
+
+    private static Agent createAgent(FramedGraph<Neo4jGraph> graph, String name)
+            throws ValidationError {
+        Map<String, Object> agentData = new HashMap<String, Object>();
+        agentData.put("identifier", name);
+        agentData.put("name", name);
+        EntityBundle<Agent> agb = new BundleFactory<Agent>().buildBundle(
+                agentData, Agent.class);
+        return new BundleDAO<Agent>(graph).create(agb);
     }
 }
