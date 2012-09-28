@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections.map.MultiValueMap;
-import org.hamcrest.core.IsInstanceOf;
 
 import com.tinkerpop.frames.VertexFrame;
 
@@ -75,7 +74,7 @@ public class EntityBundle<T extends VertexFrame> {
      * @return
      */
     public EntityBundle<T> setRelations(String relation,
-            Collection<EntityBundle<? extends VertexFrame>> others) {
+            List<EntityBundle<? extends VertexFrame>> others) {
         MultiValueMap tmp = new MultiValueMap();
         tmp.putAll(relation, others);
         for (Object key : relations.keySet()) {
