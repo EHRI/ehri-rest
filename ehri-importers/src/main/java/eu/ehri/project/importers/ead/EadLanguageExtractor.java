@@ -21,6 +21,7 @@ public class EadLanguageExtractor {
     private static final Logger logger = LoggerFactory
             .getLogger(EadLanguageExtractor.class);
 
+    @SuppressWarnings("serial")
     public final Map<String, String> iso639BibTermLookup = new HashMap<String, String>() {
         {
             put("heb", "he");
