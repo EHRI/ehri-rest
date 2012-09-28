@@ -1,11 +1,12 @@
 #!/bin/sh
 # Load an EAD file
 
-echo "Running '$@'"
 ARGS="$@"
 
-mvn -Dexec.classpathScope=test \
-    -pl ehri-importers \
+mvn -Dexec.classpathScope=compile \
+    -pl ehri-cmdline \
     -Dexec.mainClass="eu.ehri.project.commands.CmdEntryPoint" \
+    -Dlog4j.rootLogger=WARN \
+    -quiet \
     -Dexec.args="$ARGS" \
     exec:java
