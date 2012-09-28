@@ -7,14 +7,18 @@ import java.util.List;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
+import com.tinkerpop.frames.VertexFrame;
 import com.tinkerpop.gremlin.java.GremlinPipeline;
 import com.tinkerpop.pipes.PipeFunction;
 import com.tinkerpop.pipes.util.iterators.SingleIterator;
 
+import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.DocumentDescription;
 import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.base.DescribedEntity;
+import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.TemporalEntity;
 import eu.ehri.project.persistance.BundleDAO;
 import eu.ehri.project.persistance.BundleFactory;
@@ -46,7 +50,7 @@ public abstract class BaseImporter<T> implements Importer<T> {
     }
 
     protected EntityBundle<DocumentaryUnit> extractDocumentaryUnit(T data,
-            int depth) throws Exception {
+            int depth) throws ValidationError {
 
         EntityBundle<DocumentaryUnit> bundle = new BundleFactory<DocumentaryUnit>()
                 .buildBundle(new HashMap<String, Object>(),
@@ -57,12 +61,10 @@ public abstract class BaseImporter<T> implements Importer<T> {
         return bundle;
     }
 
-    abstract List<EntityBundle<DocumentDescription>> extractDocumentDescriptions(
-            T data, int depth) throws Exception;
+    public abstract List<EntityBundle<DocumentDescription>> extractDocumentDescriptions(
+            T data, int depth) throws ValidationError;
 
-    public List<EntityBundle<DatePeriod>> extractDates(T data) throws Exception {
-        return new LinkedList<EntityBundle<DatePeriod>>();
-    }
+    public abstract List<EntityBundle<DatePeriod>> extractDates(T data);
 
     /**
      * Import a single archdesc or c01-12 item, keeping a reference to the
@@ -71,24 +73,27 @@ public abstract class BaseImporter<T> implements Importer<T> {
      * @param data
      * @param parent
      * @param depth
-     * @throws Exception
+     * @throws ValidationError
      */
     protected void importItem(T data, DocumentaryUnit parent, int depth)
-            throws Exception {
+            throws ValidationError {
         EntityBundle<DocumentaryUnit> unit = extractDocumentaryUnit(data, depth);
         BundleDAO<DocumentaryUnit> persister = new BundleDAO<DocumentaryUnit>(
                 framedGraph);
-
-        // Add dates to the bundle since they're @Dependent relations.
+        
+        // Add dates and descriptions to the bundle since they're @Dependent relations.
         for (EntityBundle<DatePeriod> dpb : extractDates(data)) {
-            unit = unit.addRelation(TemporalEntity.HAS_DATE, dpb);
+            unit.addRelation(TemporalEntity.HAS_DATE, dpb);
+        }
+        for (EntityBundle<DocumentDescription> dpb : extractDocumentDescriptions(data, depth)) {
+            unit.addRelation(Description.DESCRIBES, dpb);
         }
 
-        Object id = getExistingGraphId((String) unit.getData()
-                .get(IDENTITY_KEY));
+        Object existingId = getExistingGraphId((String) unit.getData()
+                .get(IDENTITY_KEY));        
         DocumentaryUnit frame;
-        if (id != null) {
-            frame = persister.update(new EntityBundle<DocumentaryUnit>(id, unit
+        if (existingId != null) {
+            frame = persister.update(new EntityBundle<DocumentaryUnit>(existingId, unit
                     .getData(), unit.getBundleClass(), unit.getRelations()));
         } else {
             frame = persister.create(unit);
@@ -100,16 +105,6 @@ public abstract class BaseImporter<T> implements Importer<T> {
         // Set the parent child relationship
         if (parent != null)
             parent.addChild(frame);
-
-        // Save Descriptions
-        {
-            BundleDAO<DocumentDescription> descPersister = new BundleDAO<DocumentDescription>(
-                    framedGraph);
-            for (EntityBundle<DocumentDescription> dpb : extractDocumentDescriptions(
-                    data, depth)) {
-                frame.addDescription(descPersister.create(dpb));
-            }
-        }
 
         // Search through child parts and add them recursively...
         for (T child : extractChildData(data)) {
@@ -125,12 +120,12 @@ public abstract class BaseImporter<T> implements Importer<T> {
     /**
      * Entry point for a top-level DocumentaryUnit item.
      */
-    protected void importItem(T data) throws Exception {
+    protected void importItem(T data) throws ValidationError {
         importItem(data, null, 0);
     }
 
     protected void importItems(T data, DocumentaryUnit parent, int depth)
-            throws Exception {
+            throws ValidationError {
         importItem(data, parent, depth);
     }
 
@@ -139,9 +134,9 @@ public abstract class BaseImporter<T> implements Importer<T> {
      * 
      * @param data
      * @param agent
-     * @throws Exception
+     * @throws ValidationError 
      */
-    public void importItems(T data) throws Exception {
+    public void importItems(T data) throws ValidationError {
         importItems(data, null, 0);
     }
 
@@ -149,7 +144,7 @@ public abstract class BaseImporter<T> implements Importer<T> {
      * Main entry-point to trigger parsing.
      * 
      */
-    public abstract void importItems() throws Exception;
+    public abstract void importItems() throws ValidationError;
 
     // Helpers.
 

@@ -1,8 +1,10 @@
 package eu.ehri.project.importers;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,6 +16,7 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.management.RuntimeErrorException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -88,7 +91,7 @@ public class EadImporter extends BaseImporter<Node> {
     // moved
     // to external configuration...
     @SuppressWarnings("serial")
-    public final Map<String, String> eadAttributeMap = new HashMap<String, String>() {
+    private final Map<String, String> eadAttributeMap = new HashMap<String, String>() {
         {
             put("accruals", "accurals/p");
             put("acquisition", "acqinfo/p");
@@ -109,7 +112,7 @@ public class EadImporter extends BaseImporter<Node> {
     };
 
     @SuppressWarnings("serial")
-    public final Map<String, String> eadControlaccessMap = new HashMap<String, String>() {
+    private final Map<String, String> eadControlaccessMap = new HashMap<String, String>() {
         {
             put("subjects", "controlaccess/subjects");
             put("creators", "did/origination/persname");
@@ -160,13 +163,20 @@ public class EadImporter extends BaseImporter<Node> {
      * @param data
      */
     @Override
-    public List<EntityBundle<DatePeriod>> extractDates(Node data)
-            throws XPathExpressionException, ValidationError {
+    public List<EntityBundle<DatePeriod>> extractDates(Node data) {
         List<EntityBundle<DatePeriod>> dates = new LinkedList<EntityBundle<DatePeriod>>();
-        for (String date : extractTextList(data, "did/unitdate")) {
-            EntityBundle<DatePeriod> dpb = extractDate(date);
-            if (dpb != null)
-                dates.add(dpb);
+        try {
+            for (String date : extractTextList(data, "did/unitdate")) {
+                EntityBundle<DatePeriod> dpb = extractDate(date);
+                if (dpb != null)
+                    dates.add(dpb);
+            }
+        } catch (XPathExpressionException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        } catch (ValidationError e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
         }
         return dates;
     }
@@ -185,23 +195,28 @@ public class EadImporter extends BaseImporter<Node> {
 
     @Override
     protected EntityBundle<DocumentaryUnit> extractDocumentaryUnit(Node data,
-            int depth) throws Exception {
+            int depth) throws ValidationError {
         Map<String, Object> dataMap = new HashMap<String, Object>();
-        dataMap.put(
-                "identifier",
-                xpath.compile("did/unitid/text()").evaluate(data,
-                        XPathConstants.STRING));
-        dataMap.put(
-                "name",
-                xpath.compile("did/unittitle/text()").evaluate(data,
-                        XPathConstants.STRING));
+        try {
+            dataMap.put(
+                    "identifier",
+                    xpath.compile("did/unitid/text()").evaluate(data,
+                            XPathConstants.STRING));
+            dataMap.put(
+                    "name",
+                    xpath.compile("did/unittitle/text()").evaluate(data,
+                            XPathConstants.STRING));
 
-        logger.info("Importing item: %s at depth: %d", dataMap.get("identifier"), depth);
+            logger.info("Importing item: %s at depth: %d", dataMap.get("identifier"), depth);
 
-        // Add persname, origination etc
-        for (Entry<String, String> entry : eadControlaccessMap.entrySet()) {
-            List<String> vals = extractTextList(data, entry.getValue());
-            dataMap.put(entry.getKey(), vals.toArray(new String[vals.size()]));
+            // Add persname, origination etc
+            for (Entry<String, String> entry : eadControlaccessMap.entrySet()) {
+                List<String> vals = extractTextList(data, entry.getValue());
+                dataMap.put(entry.getKey(), vals.toArray(new String[vals.size()]));
+            }
+        } catch (XPathExpressionException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
         }
 
         return new BundleFactory<DocumentaryUnit>().buildBundle(dataMap,
@@ -210,29 +225,34 @@ public class EadImporter extends BaseImporter<Node> {
 
     @Override
     protected void importItems(Node data, DocumentaryUnit parent, int depth)
-            throws Exception {
-        XPathExpression expr = xpath.compile("did/unitid/text()");
+            throws ValidationError {
+        try {
+            XPathExpression expr = xpath.compile("did/unitid/text()");
 
-        String topLevelId = (String) expr.evaluate(data, XPathConstants.STRING);
-        // If we have a unitid at archdesc level, import that
-        if (!topLevelId.isEmpty()) {
-            logger.info("Extracting single item from archdesc... " + topLevelId);
-            importItem(data, parent, depth);
-        } else {
-            // Otherwise, inspect the children of the archdesc/dsc
-            logger.info("Extracting multiple items from archdesc/dsc...");
-            NodeList dsc = (NodeList) xpath.compile("dsc").evaluate(data,
-                    XPathConstants.NODESET);
-            for (int i = 0; i < dsc.getLength(); i++) {
-                for (Node d : extractChildData(dsc.item(i))) {
-                    importItem(d, parent, depth + 1);
+            String topLevelId = (String) expr.evaluate(data, XPathConstants.STRING);
+            // If we have a unitid at archdesc level, import that
+            if (!topLevelId.isEmpty()) {
+                logger.info("Extracting single item from archdesc... " + topLevelId);
+                importItem(data, parent, depth);
+            } else {
+                // Otherwise, inspect the children of the archdesc/dsc
+                logger.info("Extracting multiple items from archdesc/dsc...");
+                NodeList dsc = (NodeList) xpath.compile("dsc").evaluate(data,
+                        XPathConstants.NODESET);
+                for (int i = 0; i < dsc.getLength(); i++) {
+                    for (Node d : extractChildData(dsc.item(i))) {
+                        importItem(d, parent, depth + 1);
+                    }
                 }
             }
+        } catch (XPathExpressionException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 
     public List<EntityBundle<DocumentDescription>> extractDocumentDescriptions(
-            Node data, int depth) throws Exception {
+            Node data, int depth) throws ValidationError {
         List<EntityBundle<DocumentDescription>> descs = new LinkedList<EntityBundle<DocumentDescription>>();
 
         Map<String, Object> dataMap = new HashMap<String, Object>();
@@ -282,7 +302,7 @@ public class EadImporter extends BaseImporter<Node> {
      * @param data
      * @param path
      * @return
-     * @throws Exception
+     * @throws XPathExpressionException
      */
     private List<String> extractTextList(Node data, String path)
             throws XPathExpressionException {
@@ -339,10 +359,15 @@ public class EadImporter extends BaseImporter<Node> {
      * @return
      * @throws XPathExpressionException
      */
-    private String getElementText(Node data, String path)
-            throws XPathExpressionException {
-        NodeList nodes = (NodeList) xpath.compile(path).evaluate(data,
-                XPathConstants.NODESET);
+    private String getElementText(Node data, String path) {
+        NodeList nodes;
+        try {
+            nodes = (NodeList) xpath.compile(path).evaluate(data,
+                    XPathConstants.NODESET);
+        } catch (XPathExpressionException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
         String out = "";
         for (int i = 0; i < nodes.getLength(); i++) {
             if (out.isEmpty()) {
@@ -358,10 +383,11 @@ public class EadImporter extends BaseImporter<Node> {
      * Import an EAD via an URL.
      * 
      * @param address
-     * @throws Exception
+     * @throws IOException 
+     * @throws SAXException 
      */
     public static void importUrl(FramedGraph<Neo4jGraph> graph, Agent agent,
-            String address) throws Exception {
+            String address) throws IOException, SAXException {
         URL url = new URL(address);
         InputStream ios = url.openStream();
         try {
@@ -375,10 +401,11 @@ public class EadImporter extends BaseImporter<Node> {
      * Import an EAD file by specifying it's path.
      * 
      * @param filePath
-     * @throws Exception
+     * @throws IOException 
+     * @throws SAXException 
      */
     public static void importFile(FramedGraph<Neo4jGraph> graph, Agent agent,
-            String filePath) throws Exception {
+            String filePath) throws IOException, SAXException {
         FileInputStream ios = new FileInputStream(filePath);
         try {
             importFile(graph, agent, ios);
@@ -389,11 +416,18 @@ public class EadImporter extends BaseImporter<Node> {
 
     /**
      * Top-level entry point for importing some EAD.
+     * @throws ValidationError 
      * 
      */
-    public void importItems() throws Exception {
-        Node archDesc = (Node) xpath.compile("//ead/archdesc").evaluate(
-                topLevelEad, XPathConstants.NODE);
+    public void importItems() throws ValidationError {
+        Node archDesc;
+        try {
+            archDesc = (Node) xpath.compile("//ead/archdesc").evaluate(
+                    topLevelEad, XPathConstants.NODE);
+        } catch (XPathExpressionException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
         importItems(archDesc);
     }
 
@@ -401,15 +435,23 @@ public class EadImporter extends BaseImporter<Node> {
      * Import an EAD via arbitrary input stream.
      * 
      * @param ios
-     * @throws Exception
+     * @throws IOException 
+     * @throws SAXException 
+     * @throws ValidationError 
      */
     public static void importFile(FramedGraph<Neo4jGraph> graph, Agent agent,
-            InputStream ios) throws Exception {
+            InputStream ios) throws SAXException, IOException, ValidationError {
 
         // XML parsing boilerplate...
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         factory.setNamespaceAware(true);
-        DocumentBuilder builder = factory.newDocumentBuilder();
+        DocumentBuilder builder;
+        try {
+            builder = factory.newDocumentBuilder();
+        } catch (ParserConfigurationException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
         Document doc = builder.parse(ios);
 
         if (doc.getDocumentElement().getNodeName() != "ead") {
@@ -423,13 +465,18 @@ public class EadImporter extends BaseImporter<Node> {
     }
 
     public static void importFile(FramedGraph<Neo4jGraph> graph, Agent agent,
-            Actioner actioner, String logMessage, InputStream ios)
-            throws Exception {
+            Actioner actioner, String logMessage, InputStream ios) throws SAXException, IOException {
 
         // XML parsing boilerplate...
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         factory.setNamespaceAware(true);
-        DocumentBuilder builder = factory.newDocumentBuilder();
+        DocumentBuilder builder;
+        try {
+            builder = factory.newDocumentBuilder();
+        } catch (ParserConfigurationException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
         Document doc = builder.parse(ios);
 
         if (doc.getDocumentElement().getNodeName() != "ead") {
@@ -451,9 +498,9 @@ public class EadImporter extends BaseImporter<Node> {
             });
             importer.importItems();
             tx.success();
-        } catch (Exception ex) {
+        } catch (Exception e) {
             tx.failure();
-            throw ex;
+            throw new RuntimeException(e);
         } finally {
             tx.finish();
         }
@@ -486,8 +533,8 @@ public class EadImporter extends BaseImporter<Node> {
                         .buildBundle(agentData, Agent.class);
                 agent = new BundleDAO<Agent>(graph).create(agb);
             } catch (Exception e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
+                throw new RuntimeException(e);
             }
         } else {
             agent = graph
