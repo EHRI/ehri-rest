@@ -115,8 +115,7 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
         EntityBundle<DocumentaryUnit> entityBundle = converter
                 .jsonToBundle(json);
         Map<String, Object> data = entityBundle.getData();
-        data.put("name", UPDATED_NAME);
-        entityBundle = entityBundle.setData(data);
+        entityBundle.setDataValue("name", UPDATED_NAME);
         String toUpdateJson = converter.bundleToJson(entityBundle);
 
         // -update
