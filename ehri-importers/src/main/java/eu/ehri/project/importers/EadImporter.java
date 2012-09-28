@@ -254,6 +254,7 @@ public class EadImporter extends AbstractRecursiveImporter<Node> {
 
         descs.add(new BundleFactory<DocumentDescription>().buildBundle(dataMap,
                 DocumentDescription.class));
+        
         return descs;
     }
 
@@ -265,9 +266,10 @@ public class EadImporter extends AbstractRecursiveImporter<Node> {
      * 
      */
     public void importItems() throws ValidationError, InvalidInputDataError {
+    	
         Node archDesc;
         try {
-            archDesc = (Node) xpath.compile("//ead/archdesc").evaluate(
+            archDesc = (Node) xpath.compile("archdesc").evaluate(
                     topLevelEad, XPathConstants.NODE);
         } catch (XPathExpressionException e) {
             e.printStackTrace();

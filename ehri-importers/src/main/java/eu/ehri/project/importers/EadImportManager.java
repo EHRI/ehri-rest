@@ -120,7 +120,7 @@ public class EadImportManager extends XmlImportManager implements ImportManager 
             // Create a new action for this import
             final Action action = new ActionManager(framedGraph).createAction(
                     actioner, logMessage);
-            if (importWithAction(action, doc) == 0)
+            if (importDocWithAction(action, doc) == 0)
                 throw new NoItemsCreated();
             tx.success();
             return action;
@@ -170,12 +170,12 @@ public class EadImportManager extends XmlImportManager implements ImportManager 
 
             final Action action = new ActionManager(framedGraph).createAction(
                     actioner, logMessage);
-            Integer count = 0;
+            int count = 0;
             for (String path : paths) {
                 FileInputStream ios = new FileInputStream(path);
                 try {
                     logger.info("Importing file: " + path);
-                    count += importWithAction(action, builder.parse(ios));
+                    count += importDocWithAction(action, builder.parse(ios));
                 } finally {
                     ios.close();
                 }
@@ -212,13 +212,13 @@ public class EadImportManager extends XmlImportManager implements ImportManager 
      * @throws InvalidEadDocument 
      * @throws InvalidInputDataError 
      */
-    private Integer importWithAction(final Action action, Document doc)
+    private int importDocWithAction(final Action action, Document doc)
             throws ValidationError, InvalidEadDocument, InvalidInputDataError {
         
         // Check the various types of document we support. This
         // includes <eadgrp> or <eadlist> types.
         if (doc.getDocumentElement().getNodeName().equals("ead")) {
-            return importWithAction(action, (Node)doc.getDocumentElement());
+            return importNodeWithAction(action, (Node)doc.getDocumentElement());
         } else if (doc.getDocumentElement().getNodeName().equals("eadlist")) {
             return importNestedItems(action, doc, EADLIST_PATH);
         } else if (doc.getDocumentElement().getNodeName().equals("eadgrp")) {
@@ -236,7 +236,7 @@ public class EadImportManager extends XmlImportManager implements ImportManager 
      * @throws ValidationError
      * @throws InvalidInputDataError 
      */
-    private Integer importNestedItems(final Action action, Document doc,
+    private int importNestedItems(final Action action, Document doc,
             String path) throws ValidationError, InvalidInputDataError {
         XPath xpath = XPathFactory.newInstance().newXPath();
         NodeList eadList;
@@ -246,9 +246,10 @@ public class EadImportManager extends XmlImportManager implements ImportManager 
             e.printStackTrace();
             throw new RuntimeException(e);
         }
+        int count = 0;
         for (int i = 0; i < eadList.getLength(); i++) {
             try {
-                return importWithAction(action, eadList.item(i));
+                count += importNodeWithAction(action, eadList.item(i));
             } catch (InvalidInputDataError e) {
                 logger.error(e.getMessage());
                 if (!tolerant)
@@ -259,20 +260,21 @@ public class EadImportManager extends XmlImportManager implements ImportManager 
                     throw e;
             }
         }
-        return 0;
+        return count;
     }
     
     /**
      * Import a Node doc using the given action.
      * 
      * @param action
-     * @param doc
+     * @param node
      * @return 
      * @throws ValidationError 
      * @throws InvalidInputDataError 
      */
-    private Integer importWithAction(final Action action, Node doc) throws ValidationError, InvalidInputDataError {
-        EadImporter importer = new EadImporter(framedGraph, agent, doc);
+    private int importNodeWithAction(final Action action, Node node) throws ValidationError, InvalidInputDataError {
+    	
+        EadImporter importer = new EadImporter(framedGraph, agent, node);
         final ItemCounter counter = new ItemCounter();
         // Create a new action for this import
         importer.addCreationCallback(new CreationCallback() {

@@ -34,7 +34,8 @@ public abstract class AbstractRecursiveImporter<T> implements Importer<T> {
     private Agent repository;
     private FramedGraph<Neo4jGraph> framedGraph;
 
-    private List<CreationCallback> callBacks = new LinkedList<CreationCallback>();
+    private List<CreationCallback> createCallbacks = new LinkedList<CreationCallback>();
+    private List<CreationCallback> updateCallbacks = new LinkedList<CreationCallback>();
 
     public AbstractRecursiveImporter(FramedGraph<Neo4jGraph> framedGraph,
             Agent repository) {
@@ -48,7 +49,11 @@ public abstract class AbstractRecursiveImporter<T> implements Importer<T> {
      * @param cb
      */
     public void addCreationCallback(final CreationCallback cb) {
-        callBacks.add(cb);
+        createCallbacks.add(cb);
+    }
+    
+    public void addUpdateCallback(final CreationCallback cb) {
+    	updateCallbacks.add(cb);
     }
 
     /**
@@ -143,7 +148,7 @@ public abstract class AbstractRecursiveImporter<T> implements Importer<T> {
         }
 
         // Run creation callbacks for the new item...
-        for (CreationCallback cb : callBacks) {
+        for (CreationCallback cb : createCallbacks) {
             cb.itemImported(frame);
         }
     }
