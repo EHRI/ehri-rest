@@ -67,8 +67,14 @@ public class EadLanguageExtractor {
 
     }
 
-    public String getLanguageOfDescription(Node data) throws Exception {
-        List<String> codes = getLanguageCodes(data, "langusage/language");
+    public String getLanguageOfDescription(Node data) {
+        List<String> codes;
+        try {
+            codes = getLanguageCodes(data, "langusage/language");
+        } catch (XPathExpressionException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
         // TODO: Sanity check the results and handle if there's
         // more than one language?
         // Default to current locale?
@@ -77,8 +83,13 @@ public class EadLanguageExtractor {
         return codes.get(0);
     }
 
-    public List<String> getLanguagesOfMaterial(Node data) throws Exception {
-        return getLanguageCodes(data, "did/langmaterial/language");
+    public List<String> getLanguagesOfMaterial(Node data) {
+        try {
+            return getLanguageCodes(data, "did/langmaterial/language");
+        } catch (XPathExpressionException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
     }
 
     private List<String> getTopLevelLanguagesOfMaterial() {
