@@ -12,7 +12,6 @@ import org.neo4j.graphdb.Transaction;
 import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Index;
-import com.tinkerpop.blueprints.TransactionalGraph.Conclusion;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.Adjacency;
@@ -73,13 +72,16 @@ public class BundleDAO<T extends VertexFrame> {
      * @return
      * @throws ValidationError
      */
-    public T createOrUpdate(String key, String value, EntityBundle<T> bundle) throws ValidationError {
+    public T createOrUpdate(String key, String value, EntityBundle<T> bundle)
+            throws ValidationError {
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
-            
-            Index<Vertex> index = helpers.getIndex(bundle.getEntityType(), Vertex.class);
+
+            Index<Vertex> index = helpers.getIndex(bundle.getEntityType(),
+                    Vertex.class);
             if (index == null)
-                throw new ValidationError("Cannot find index or item type: " + bundle.getEntityType());
+                throw new ValidationError("Cannot find index or item type: "
+                        + bundle.getEntityType());
             Vertex node = null;
             CloseableIterable<Vertex> nodes = index.get(key, value);
             if (nodes.iterator().hasNext()) {
@@ -100,7 +102,7 @@ public class BundleDAO<T extends VertexFrame> {
         }
 
     }
-    
+
     public T create(EntityBundle<T> bundle) throws ValidationError {
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
