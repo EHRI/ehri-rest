@@ -179,7 +179,8 @@ public class EadImporter extends BaseImporter<Node> {
                     xpath.compile("did/unittitle/text()").evaluate(data,
                             XPathConstants.STRING));
 
-            logger.info("Importing item: " + dataMap.get("identifier") + " at depth: " + depth);
+            logger.info("Importing item: " + dataMap.get("identifier")
+                    + " at depth: " + depth);
 
             // Add persname, origination etc
             for (Entry<String, String> entry : eadControlaccessMap.entrySet()) {
@@ -256,7 +257,7 @@ public class EadImporter extends BaseImporter<Node> {
                 DocumentDescription.class));
         return descs;
     }
-    
+
     /**
      * Top-level entry point for importing some EAD.
      * 
@@ -274,7 +275,6 @@ public class EadImporter extends BaseImporter<Node> {
         }
         importItems(archDesc);
     }
-    
 
     // Helpers
 
