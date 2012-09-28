@@ -93,6 +93,15 @@ public class EadImportManager {
         logger.info("Setting importer to tolerant: " + tolerant);
         this.tolerant = tolerant;                
     }
+    
+    /**
+     * Helper class for counting within a closure.
+     * @author michaelb
+     *
+     */
+    class ItemCounter {
+        public int count = 0;        
+    }
 
     /**
      * Import an EAD via an URL.
@@ -315,17 +324,16 @@ public class EadImportManager {
      */
     private Integer importWithAction(final Action action, Node doc) throws ValidationError, InvalidInputDataError {
         EadImporter importer = new EadImporter(framedGraph, agent, doc);
-        final Map<String,Integer> counter = new HashMap<String,Integer>();
-        counter.put("counter", 0);
+        final ItemCounter counter = new ItemCounter();
         // Create a new action for this import
         importer.addCreationCallback(new CreationCallback() {
             public void itemImported(AccessibleEntity item) {
                 action.addSubjects(item);
-                counter.put("counter", counter.get("count") + 1);
+                counter.count += 1;
             }
         });
         importer.importItems();
-        return counter.get("counter");
+        return counter.count;
     }
 
     /**
