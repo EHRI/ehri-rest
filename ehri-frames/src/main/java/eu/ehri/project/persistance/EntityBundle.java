@@ -54,18 +54,12 @@ public class EntityBundle<T extends VertexFrame> {
      * 
      * @param relation
      * @param other
-     * @return
      */
-    public EntityBundle<T> addRelation(String relation,
+    public void addRelation(String relation,
             EntityBundle<? extends VertexFrame> other) {
-        MultiValueMap tmp = new MultiValueMap();
-        for (Object key : relations.keySet()) {
-            tmp.putAll(key, relations.getCollection(key));
-        }
-        tmp.put(relation, other);
-        return new EntityBundle<T>(id, data, cls, tmp);
+        relations.put(relation, other);
     }
-
+    
     /**
      * Set bundles for a particular relation.
      * 
@@ -73,15 +67,9 @@ public class EntityBundle<T extends VertexFrame> {
      * @param others
      * @return
      */
-    public EntityBundle<T> setRelations(String relation,
-            List<EntityBundle<? extends VertexFrame>> others) {
-        MultiValueMap tmp = new MultiValueMap();
-        tmp.putAll(relation, others);
-        for (Object key : relations.keySet()) {
-            if (!key.equals(relation))
-                tmp.putAll(key, relations.getCollection(key));
-        }
-        return new EntityBundle<T>(id, data, cls, tmp);
+    public void setRelations(String relation,
+        List<EntityBundle<? extends VertexFrame>> others) {
+        relations.putAll(relation, others);
     }
 
     /**
@@ -135,16 +123,11 @@ public class EntityBundle<T extends VertexFrame> {
      * 
      * @param key
      * @param value
-     * @return
      * @throws ValidationError
      */
-    public EntityBundle<T> setDataValue(String key, Object value)
+    public void setDataValue(String key, Object value)
             throws ValidationError {
-        // FIXME: Seems like too much work being done here to maintain
-        // immutability???
-        Map<String, Object> temp = new HashMap<String, Object>(data);
-        temp.put(key, value);
-        return new EntityBundle<T>(id, temp, cls, relations);
+        data.put(key, value);
     }
 
     public EntityBundle<T> setData(final Map<String, Object> data) {
