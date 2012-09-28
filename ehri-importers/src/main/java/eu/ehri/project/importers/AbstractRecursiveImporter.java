@@ -21,14 +21,23 @@ import eu.ehri.project.persistance.BundleDAO;
 import eu.ehri.project.persistance.BundleFactory;
 import eu.ehri.project.persistance.EntityBundle;
 
-public abstract class BaseImporter<T> implements Importer<T> {
+/**
+ * Abstract base class for importers that must descend a tree like structure
+ * such as EAD, where elements contain multiple child items.
+ * 
+ * @author michaelb
+ * 
+ * @param <T>
+ */
+public abstract class AbstractRecursiveImporter<T> implements Importer<T> {
     private static final String IDENTITY_KEY = "identifier";
     private Agent repository;
     private FramedGraph<Neo4jGraph> framedGraph;
 
     private List<CreationCallback> callBacks = new LinkedList<CreationCallback>();
 
-    public BaseImporter(FramedGraph<Neo4jGraph> framedGraph, Agent repository) {
+    public AbstractRecursiveImporter(FramedGraph<Neo4jGraph> framedGraph,
+            Agent repository) {
         this.repository = repository;
         this.framedGraph = framedGraph;
     }
@@ -42,10 +51,24 @@ public abstract class BaseImporter<T> implements Importer<T> {
         callBacks.add(cb);
     }
 
+    /**
+     * Extract child items.
+     * 
+     * @param data
+     * @return
+     */
     public List<T> extractChildData(T data) {
         return new LinkedList<T>();
     }
 
+    /**
+     * Extract the logical DocumentaryUnit at a given depth.
+     * 
+     * @param data
+     * @param depth
+     * @return
+     * @throws ValidationError
+     */
     protected EntityBundle<DocumentaryUnit> extractDocumentaryUnit(T data,
             int depth) throws ValidationError {
 
@@ -58,6 +81,14 @@ public abstract class BaseImporter<T> implements Importer<T> {
         return bundle;
     }
 
+    /**
+     * Extract DocumentDescriptions at a given depth from the input data.
+     * 
+     * @param data
+     * @param depth
+     * @return
+     * @throws ValidationError
+     */
     public abstract List<EntityBundle<DocumentDescription>> extractDocumentDescriptions(
             T data, int depth) throws ValidationError;
 
@@ -72,26 +103,29 @@ public abstract class BaseImporter<T> implements Importer<T> {
      * @param depth
      * @throws ValidationError
      */
-    protected void importItem(T data, DocumentaryUnit parent, int depth)
-            throws ValidationError {
+    protected void importSingleItemAtDepth(T data, DocumentaryUnit parent,
+            int depth) throws ValidationError {
         EntityBundle<DocumentaryUnit> unit = extractDocumentaryUnit(data, depth);
         BundleDAO<DocumentaryUnit> persister = new BundleDAO<DocumentaryUnit>(
                 framedGraph);
-        
-        // Add dates and descriptions to the bundle since they're @Dependent relations.
+
+        // Add dates and descriptions to the bundle since they're @Dependent
+        // relations.
         for (EntityBundle<DatePeriod> dpb : extractDates(data)) {
             unit.addRelation(TemporalEntity.HAS_DATE, dpb);
         }
-        for (EntityBundle<DocumentDescription> dpb : extractDocumentDescriptions(data, depth)) {
+        for (EntityBundle<DocumentDescription> dpb : extractDocumentDescriptions(
+                data, depth)) {
             unit.addRelation(Description.DESCRIBES, dpb);
         }
 
-        Object existingId = getExistingGraphId((String) unit.getData()
-                .get(IDENTITY_KEY));        
+        Object existingId = getExistingGraphId((String) unit.getData().get(
+                IDENTITY_KEY));
         DocumentaryUnit frame;
         if (existingId != null) {
-            frame = persister.update(new EntityBundle<DocumentaryUnit>(existingId, unit
-                    .getData(), unit.getBundleClass(), unit.getRelations()));
+            frame = persister.update(new EntityBundle<DocumentaryUnit>(
+                    existingId, unit.getData(), unit.getBundleClass(), unit
+                            .getRelations()));
         } else {
             frame = persister.create(unit);
 
@@ -105,7 +139,7 @@ public abstract class BaseImporter<T> implements Importer<T> {
 
         // Search through child parts and add them recursively...
         for (T child : extractChildData(data)) {
-            importItems(child, frame, depth + 1);
+            importMultipleItemsAtDepth(child, frame, depth + 1);
         }
 
         // Run creation callbacks for the new item...
@@ -118,31 +152,39 @@ public abstract class BaseImporter<T> implements Importer<T> {
      * Entry point for a top-level DocumentaryUnit item.
      */
     protected void importItem(T data) throws ValidationError {
-        importItem(data, null, 0);
+        importSingleItemAtDepth(data, null, 0);
     }
 
-    protected void importItems(T data, DocumentaryUnit parent, int depth)
-            throws ValidationError {
-        importItem(data, parent, depth);
-    }
+    /**
+     * Import multiple items with a given parent at a given depth.
+     * 
+     * @param data
+     * @param parent
+     * @param depth
+     * @throws ValidationError
+     */
+    protected abstract void importMultipleItemsAtDepth(T data,
+            DocumentaryUnit parent, int depth) throws ValidationError;
 
     /**
      * Import (multiple) items from the top-level data.
      * 
      * @param data
      * @param agent
-     * @throws ValidationError 
+     * @throws ValidationError
      */
-    public void importItems(T data) throws ValidationError {
-        importItems(data, null, 0);
+    public void importItemsFromData(T data) throws ValidationError {
+        importMultipleItemsAtDepth(data, null, 0);
     }
 
     /**
      * Main entry-point to trigger parsing.
-     * @throws InvalidInputDataError 
+     * 
+     * @throws InvalidInputDataError
      * 
      */
-    public abstract void importItems() throws ValidationError, InvalidInputDataError;
+    public abstract void importItems() throws ValidationError,
+            InvalidInputDataError;
 
     // Helpers.
 
