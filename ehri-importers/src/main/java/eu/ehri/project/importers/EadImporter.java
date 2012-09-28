@@ -25,6 +25,7 @@ import com.tinkerpop.frames.FramedGraph;
 
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ead.EadLanguageExtractor;
+import eu.ehri.project.importers.exceptions.InvalidInputDataError;
 import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.DocumentDescription;
@@ -51,7 +52,7 @@ public class EadImporter extends BaseImporter<Node> {
 
     private final XPath xpath;
     private EadLanguageExtractor langHelper;
-
+    
     // An integer that represents how far down the
     // EAD heirarchy tree the current document is.
     public final String DEPTH_ATTR = "depthOfDescription";
@@ -129,7 +130,7 @@ public class EadImporter extends BaseImporter<Node> {
         xpath = XPathFactory.newInstance().newXPath();
         langHelper = new EadLanguageExtractor(xpath, topLevelEad);
     }
-
+    
     /**
      * Extract a list of entity bundles for DatePeriods from the data,
      * attempting to parse the unitdate attribute.
@@ -203,12 +204,13 @@ public class EadImporter extends BaseImporter<Node> {
         try {
             XPathExpression expr = xpath.compile("did/unittitle/text()");
 
-            String topLevelId = (String) expr.evaluate(data,
-                    XPathConstants.STRING);
+            Node titleNode = (Node) xpath.compile("did/unittitle").evaluate(
+                    data, XPathConstants.NODE);
             // If we have a unitid at archdesc level, import that
-            if (!topLevelId.isEmpty()) {
+            if (titleNode != null
+                    && !titleNode.getTextContent().trim().isEmpty()) {
                 logger.info("Extracting single item from archdesc... "
-                        + topLevelId);
+                        + titleNode.getTextContent());
                 importItem(data, parent, depth);
             } else {
                 // Otherwise, inspect the children of the archdesc/dsc
@@ -262,9 +264,10 @@ public class EadImporter extends BaseImporter<Node> {
      * Top-level entry point for importing some EAD.
      * 
      * @throws ValidationError
+     * @throws InvalidInputDataError 
      * 
      */
-    public void importItems() throws ValidationError {
+    public void importItems() throws ValidationError, InvalidInputDataError {
         Node archDesc;
         try {
             archDesc = (Node) xpath.compile("//ead/archdesc").evaluate(
@@ -273,7 +276,11 @@ public class EadImporter extends BaseImporter<Node> {
             e.printStackTrace();
             throw new RuntimeException(e);
         }
-        importItems(archDesc);
+        if (archDesc != null)
+            importItems(archDesc);
+        else {
+            throw new InvalidInputDataError("No 'archdesc' element found");
+        }
     }
 
     // Helpers

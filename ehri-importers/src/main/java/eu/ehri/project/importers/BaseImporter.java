@@ -10,6 +10,7 @@ import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.gremlin.java.GremlinPipeline;
 import com.tinkerpop.pipes.PipeFunction;
 import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.importers.exceptions.InvalidInputDataError;
 import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.DocumentDescription;
@@ -138,9 +139,10 @@ public abstract class BaseImporter<T> implements Importer<T> {
 
     /**
      * Main entry-point to trigger parsing.
+     * @throws InvalidInputDataError 
      * 
      */
-    public abstract void importItems() throws ValidationError;
+    public abstract void importItems() throws ValidationError, InvalidInputDataError;
 
     // Helpers.
 

@@ -12,20 +12,31 @@ import java.util.Map;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
 import org.neo4j.graphdb.Transaction;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
 import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.importers.exceptions.InvalidEadDocument;
+import eu.ehri.project.importers.exceptions.InvalidInputDataError;
+import eu.ehri.project.importers.exceptions.NoItemsCreated;
 import eu.ehri.project.models.Action;
 import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.UserProfile;
@@ -45,6 +56,15 @@ import eu.ehri.project.persistance.EntityBundle;
  */
 public class EadImportManager {
 
+    private static final String EADGRP_PATH = "//eadgrp/archdescgrp/dscgrp/ead";
+
+    private static final String EADLIST_PATH = "//eadlist/ead";
+
+    private static final Logger logger = LoggerFactory
+            .getLogger(EadImportManager.class);
+    
+    private Boolean tolerant = false;
+
     protected final FramedGraph<Neo4jGraph> framedGraph;
     protected final Agent agent;
     protected final Actioner actioner;
@@ -61,6 +81,17 @@ public class EadImportManager {
         this.framedGraph = framedGraph;
         this.agent = agent;
         this.actioner = actioner;
+    }
+    
+    /**
+     * Tell the importer to simply skip invalid items
+     * rather than throwing an exception.
+     * 
+     * @param tolerant
+     */
+    public void setTolerant(Boolean tolerant) {
+        logger.info("Setting importer to tolerant: " + tolerant);
+        this.tolerant = tolerant;                
     }
 
     /**
@@ -134,12 +165,6 @@ public class EadImportManager {
             throw new RuntimeException(e);
         }
         Document doc = builder.parse(ios);
-
-        if (doc.getDocumentElement().getNodeName() != "ead") {
-            // FIXME: Handle this more elegantly...
-            throw new IllegalArgumentException("Document is not an EAD file.");
-        }
-
         Transaction tx = framedGraph.getBaseGraph().getRawGraph().beginTx();
         try {
             // Create a new action for this import
@@ -190,20 +215,22 @@ public class EadImportManager {
 
             final Action action = new ActionManager(framedGraph).createAction(
                     actioner, logMessage);
+            Integer count = 0;
             for (String path : paths) {
                 FileInputStream ios = new FileInputStream(path);
                 try {
-                    Document doc = builder.parse(ios);
-                    if (doc.getDocumentElement().getNodeName() != "ead") {
-                        // FIXME: Handle this more elegantly...
-                        throw new IllegalArgumentException(
-                                "Document is not an EAD file.");
-                    }
-                    importWithAction(action, doc);
+                    logger.info("Importing file: " + path);
+                    count += importWithAction(action, builder.parse(ios));
                 } finally {
                     ios.close();
                 }
             }
+            
+            // If nothing was created we don't want the pointless
+            // action hanging around, so barf...
+            if (count == 0)
+                throw new NoItemsCreated();            
+            
             tx.success();
             return action;
         } catch (ValidationError e) {
@@ -222,19 +249,83 @@ public class EadImportManager {
      * 
      * @param action
      * @param doc
+     * @return 
      * @throws ValidationError
+     * @throws InvalidEadDocument 
+     * @throws InvalidInputDataError 
      */
-    private void importWithAction(final Action action, Document doc)
-            throws ValidationError {
-        EadImporter importer = new EadImporter(framedGraph, agent,
-                (Node) doc.getDocumentElement());
+    private Integer importWithAction(final Action action, Document doc)
+            throws ValidationError, InvalidEadDocument, InvalidInputDataError {
+        
+        // Check the various types of document we support. This
+        // includes <eadgrp> or <eadlist> types.
+        if (doc.getDocumentElement().getNodeName().equals("ead")) {
+            return importWithAction(action, (Node)doc.getDocumentElement());
+        } else if (doc.getDocumentElement().getNodeName().equals("eadlist")) {
+            return importNestedItems(action, doc, EADLIST_PATH);
+        } else if (doc.getDocumentElement().getNodeName().equals("eadgrp")) {
+            return importNestedItems(action, doc, EADGRP_PATH);            
+        } else {
+            throw new InvalidEadDocument(doc.getDocumentElement().getNodeName());
+        }
+    }
+
+    /**
+     * @param action
+     * @param doc
+     * @param path
+     * @return 
+     * @throws ValidationError
+     * @throws InvalidInputDataError 
+     */
+    private Integer importNestedItems(final Action action, Document doc,
+            String path) throws ValidationError, InvalidInputDataError {
+        XPath xpath = XPathFactory.newInstance().newXPath();
+        NodeList eadList;
+        try {
+            eadList = (NodeList)xpath.compile(path).evaluate(doc, XPathConstants.NODESET);
+        } catch (XPathExpressionException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+        for (int i = 0; i < eadList.getLength(); i++) {
+            try {
+                return importWithAction(action, eadList.item(i));
+            } catch (InvalidInputDataError e) {
+                logger.error(e.getMessage());
+                if (!tolerant)
+                    throw e;
+            } catch (ValidationError e) {
+                logger.error(e.getMessage());
+                if (!tolerant)
+                    throw e;
+            }
+        }
+        return 0;
+    }
+    
+    /**
+     * Import a Node doc using the given action.
+     * 
+     * @param action
+     * @param doc
+     * @return 
+     * @throws ValidationError 
+     * @throws InvalidInputDataError 
+     */
+    private Integer importWithAction(final Action action, Node doc) throws ValidationError, InvalidInputDataError {
+        EadImporter importer = new EadImporter(framedGraph, agent, doc);
+        final Map<String,Integer> counter = new HashMap<String,Integer>();
+        counter.put("counter", 0);
         // Create a new action for this import
         importer.addCreationCallback(new CreationCallback() {
             public void itemImported(AccessibleEntity item) {
                 action.addSubjects(item);
+                counter.put("counter", counter.get("count") + 1);
             }
         });
         importer.importItems();
+        return counter.get("counter");
     }
 
     /**
@@ -256,6 +347,8 @@ public class EadImportManager {
                 "Create user with the given ID"));
         options.addOption(new Option("user", true,
                 "Identifier of user to import as"));
+        options.addOption(new Option("tolerant", false,
+                "Don't error if a file is not valid."));
 
         CommandLineParser parser = new PosixParser();
         CommandLine cmdLine = parser.parse(options, args);
@@ -295,6 +388,7 @@ public class EadImportManager {
             }
 
             EadImportManager manager = new EadImportManager(graph, agent, user);
+            manager.setTolerant(cmdLine.hasOption("tolerant"));
             Action action = manager.importFiles(logMessage, filePaths);
 
             int itemCount = 0;
