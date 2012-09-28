@@ -4,23 +4,15 @@ import static org.junit.Assert.*;
 
 import java.io.InputStream;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.tinkerpop.blueprints.Vertex;
-import com.tinkerpop.frames.FramedGraph;
-
-import eu.ehri.project.importers.EadImporter;
+import eu.ehri.project.importers.EadImportManager;
 import eu.ehri.project.models.Action;
 import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.test.AbstractFixtureTest;
-import eu.ehri.project.test.ModelTest;
-import eu.ehri.project.test.ModelTestBase;
-import eu.ehri.project.test.ViewsTest;
 
 public class SingleEadImporterTest extends AbstractFixtureTest {
 
@@ -42,8 +34,9 @@ public class SingleEadImporterTest extends AbstractFixtureTest {
         int count = getNodeCount();
 
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
+        Action action;
         try {
-            EadImporter.importFile(graph, agent, user, logMessage, ios);
+            action = new EadImportManager(graph, agent, user).importFile(logMessage, ios);
         } catch (Exception e) {
             e.printStackTrace();
             throw e;

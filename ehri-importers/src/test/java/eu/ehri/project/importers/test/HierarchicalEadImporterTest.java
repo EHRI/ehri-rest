@@ -5,24 +5,16 @@ import static org.junit.Assert.*;
 import java.io.InputStream;
 import java.util.List;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.tinkerpop.blueprints.Vertex;
-import com.tinkerpop.frames.FramedGraph;
-
-import eu.ehri.project.importers.EadImporter;
+import eu.ehri.project.importers.EadImportManager;
 import eu.ehri.project.models.Action;
 import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.test.AbstractFixtureTest;
-import eu.ehri.project.test.ModelTest;
-import eu.ehri.project.test.ModelTestBase;
-import eu.ehri.project.test.ViewsTest;
 
 public class HierarchicalEadImporterTest extends AbstractFixtureTest {
 
@@ -48,8 +40,9 @@ public class HierarchicalEadImporterTest extends AbstractFixtureTest {
 
         InputStream ios = ClassLoader
                 .getSystemResourceAsStream(HIERARCHICAL_EAD);
+        Action action;
         try {
-            EadImporter.importFile(graph, agent, user, logMessage, ios);
+            action = new EadImportManager(graph, agent, user).importFile(logMessage, ios);
         } catch (Exception e) {
             e.printStackTrace();
             throw e;
@@ -93,7 +86,6 @@ public class HierarchicalEadImporterTest extends AbstractFixtureTest {
 
         // Ensure the import action has the right number of subjects.
         Iterable<Action> actions = unit.getHistory();
-        Action action = toList(actions).get(0);
         // Check we've only got one action
         assertEquals(1, toList(actions).size());
         assertEquals(logMessage, action.getLogMessage());
@@ -114,5 +106,4 @@ public class HierarchicalEadImporterTest extends AbstractFixtureTest {
         // Note: deprecated use of getAllNodes...
         return toList(graph.getBaseGraph().getRawGraph().getAllNodes()).size();
     }
-
 }

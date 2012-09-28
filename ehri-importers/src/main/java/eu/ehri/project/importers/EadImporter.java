@@ -1,11 +1,5 @@
 package eu.ehri.project.importers;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -16,45 +10,25 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.management.RuntimeErrorException;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.PosixParser;
-import org.neo4j.graphdb.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
-
-import com.tinkerpop.blueprints.Graph;
-import com.tinkerpop.blueprints.TransactionalGraph.Conclusion;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ead.EadLanguageExtractor;
-import eu.ehri.project.models.Action;
 import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.DocumentDescription;
 import eu.ehri.project.models.DocumentaryUnit;
-import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.base.Actioner;
-import eu.ehri.project.persistance.ActionManager;
-import eu.ehri.project.persistance.BundleDAO;
 import eu.ehri.project.persistance.BundleFactory;
 import eu.ehri.project.persistance.EntityBundle;
 
@@ -198,21 +172,20 @@ public class EadImporter extends BaseImporter<Node> {
             int depth) throws ValidationError {
         Map<String, Object> dataMap = new HashMap<String, Object>();
         try {
-            dataMap.put(
-                    "identifier",
-                    xpath.compile("did/unitid/text()").evaluate(data,
-                            XPathConstants.STRING));
+            dataMap.put("identifier", xpath.compile("did/unitid/text()")
+                    .evaluate(data, XPathConstants.STRING));
             dataMap.put(
                     "name",
                     xpath.compile("did/unittitle/text()").evaluate(data,
                             XPathConstants.STRING));
 
-            logger.info("Importing item: %s at depth: %d", dataMap.get("identifier"), depth);
+            logger.info("Importing item: " + dataMap.get("identifier") + " at depth: " + depth);
 
             // Add persname, origination etc
             for (Entry<String, String> entry : eadControlaccessMap.entrySet()) {
                 List<String> vals = extractTextList(data, entry.getValue());
-                dataMap.put(entry.getKey(), vals.toArray(new String[vals.size()]));
+                dataMap.put(entry.getKey(),
+                        vals.toArray(new String[vals.size()]));
             }
         } catch (XPathExpressionException e) {
             e.printStackTrace();
@@ -227,12 +200,14 @@ public class EadImporter extends BaseImporter<Node> {
     protected void importItems(Node data, DocumentaryUnit parent, int depth)
             throws ValidationError {
         try {
-            XPathExpression expr = xpath.compile("did/unitid/text()");
+            XPathExpression expr = xpath.compile("did/unittitle/text()");
 
-            String topLevelId = (String) expr.evaluate(data, XPathConstants.STRING);
+            String topLevelId = (String) expr.evaluate(data,
+                    XPathConstants.STRING);
             // If we have a unitid at archdesc level, import that
             if (!topLevelId.isEmpty()) {
-                logger.info("Extracting single item from archdesc... " + topLevelId);
+                logger.info("Extracting single item from archdesc... "
+                        + topLevelId);
                 importItem(data, parent, depth);
             } else {
                 // Otherwise, inspect the children of the archdesc/dsc
@@ -281,6 +256,25 @@ public class EadImporter extends BaseImporter<Node> {
                 DocumentDescription.class));
         return descs;
     }
+    
+    /**
+     * Top-level entry point for importing some EAD.
+     * 
+     * @throws ValidationError
+     * 
+     */
+    public void importItems() throws ValidationError {
+        Node archDesc;
+        try {
+            archDesc = (Node) xpath.compile("//ead/archdesc").evaluate(
+                    topLevelEad, XPathConstants.NODE);
+        } catch (XPathExpressionException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+        importItems(archDesc);
+    }
+    
 
     // Helpers
 
@@ -377,211 +371,5 @@ public class EadImporter extends BaseImporter<Node> {
             }
         }
         return out;
-    }
-
-    /**
-     * Import an EAD via an URL.
-     * 
-     * @param address
-     * @throws IOException 
-     * @throws SAXException 
-     * @throws ValidationError 
-     */
-    public static void importUrl(FramedGraph<Neo4jGraph> graph, Agent agent,
-            String address) throws IOException, SAXException, ValidationError {
-        URL url = new URL(address);
-        InputStream ios = url.openStream();
-        try {
-            importFile(graph, agent, ios);
-        } finally {
-            ios.close();
-        }
-    }
-
-    /**
-     * Import an EAD file by specifying it's path.
-     * 
-     * @param filePath
-     * @throws IOException 
-     * @throws SAXException 
-     * @throws ValidationError 
-     */
-    public static void importFile(FramedGraph<Neo4jGraph> graph, Agent agent,
-            String filePath) throws IOException, SAXException, ValidationError {
-        FileInputStream ios = new FileInputStream(filePath);
-        try {
-            importFile(graph, agent, ios);
-        } finally {
-            ios.close();
-        }
-    }
-
-    /**
-     * Top-level entry point for importing some EAD.
-     * @throws ValidationError 
-     * 
-     */
-    public void importItems() throws ValidationError {
-        Node archDesc;
-        try {
-            archDesc = (Node) xpath.compile("//ead/archdesc").evaluate(
-                    topLevelEad, XPathConstants.NODE);
-        } catch (XPathExpressionException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        }
-        importItems(archDesc);
-    }
-
-    /**
-     * Import an EAD via arbitrary input stream.
-     * 
-     * @param ios
-     * @throws IOException 
-     * @throws SAXException 
-     * @throws ValidationError 
-     */
-    public static void importFile(FramedGraph<Neo4jGraph> graph, Agent agent,
-            InputStream ios) throws SAXException, IOException, ValidationError {
-
-        // XML parsing boilerplate...
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        factory.setNamespaceAware(true);
-        DocumentBuilder builder;
-        try {
-            builder = factory.newDocumentBuilder();
-        } catch (ParserConfigurationException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        }
-        Document doc = builder.parse(ios);
-
-        if (doc.getDocumentElement().getNodeName() != "ead") {
-            // FIXME: Handle this more elegantly...
-            throw new IllegalArgumentException("Document is not an EAD file.");
-        }
-
-        Importer importer = new EadImporter(graph, agent,
-                (Node) doc.getDocumentElement());
-        importer.importItems();
-    }
-
-    public static void importFile(FramedGraph<Neo4jGraph> graph, Agent agent,
-            Actioner actioner, String logMessage, InputStream ios) throws SAXException, IOException {
-
-        // XML parsing boilerplate...
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        factory.setNamespaceAware(true);
-        DocumentBuilder builder;
-        try {
-            builder = factory.newDocumentBuilder();
-        } catch (ParserConfigurationException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        }
-        Document doc = builder.parse(ios);
-
-        if (doc.getDocumentElement().getNodeName() != "ead") {
-            // FIXME: Handle this more elegantly...
-            throw new IllegalArgumentException("Document is not an EAD file.");
-        }
-
-        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
-        try {
-            EadImporter importer = new EadImporter(graph, agent,
-                    (Node) doc.getDocumentElement());
-            // Create a new action for this import
-            final Action action = new ActionManager(graph).createAction(
-                    actioner, logMessage);
-            importer.addCreationCallback(new CreationCallback() {
-                public void itemImported(AccessibleEntity item) {
-                    action.addSubjects(item);
-                }
-            });
-            importer.importItems();
-            tx.success();
-        } catch (Exception e) {
-            tx.failure();
-            throw new RuntimeException(e);
-        } finally {
-            tx.finish();
-        }
-    }
-
-    // Command line runner
-    public static void main(String[] args) throws Exception {
-
-        Options options = new Options();
-        options.addOption(new Option("createrepo", false,
-                "Create agent with the given ID"));
-        CommandLineParser parser = new PosixParser();
-        CommandLine cmdLine = parser.parse(options, args);
-
-        if (cmdLine.getArgList().size() != 3)
-            throw new RuntimeException(
-                    "Usage: importer [OPTIONS] <agent-id> <ead.xml> <neo4j-graph-dir>");
-
-        // Get the graph and search it for the required agent...
-        FramedGraph<Neo4jGraph> graph = new FramedGraph<Neo4jGraph>(
-                new Neo4jGraph((String) cmdLine.getArgList().get(2)));
-
-        Agent agent = null;
-        if (cmdLine.hasOption("createrepo")) {
-            try {
-                Map<String, Object> agentData = new HashMap<String, Object>();
-                agentData.put("identifier", cmdLine.getArgList().get(0));
-                agentData.put("name", cmdLine.getArgList().get(0));
-                EntityBundle<Agent> agb = new BundleFactory<Agent>()
-                        .buildBundle(agentData, Agent.class);
-                agent = new BundleDAO<Agent>(graph).create(agb);
-            } catch (Exception e) {
-                e.printStackTrace();
-                throw new RuntimeException(e);
-            }
-        } else {
-            agent = graph
-                    .getVertices("identifier",
-                            (String) cmdLine.getArgList().get(0), Agent.class)
-                    .iterator().next();
-        }
-
-        // XML parsing boilerplate...
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        factory.setNamespaceAware(true);
-        DocumentBuilder builder = factory.newDocumentBuilder();
-        Document doc = builder.parse((String) cmdLine.getArgList().get(1));
-
-        // Extract the EAD instances from the eadlist.
-        XPathFactory xfactory = XPathFactory.newInstance();
-        XPath xpath = xfactory.newXPath();
-        xpath.compile("//eadlist/ead");
-
-        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
-        try {
-            // This handles either multiple EADs within a top-level
-            // eadlist node, or single EAD documents.
-            EadImporter importer;
-            NodeList result = (NodeList) xpath.compile("//eadlist/ead")
-                    .evaluate(doc, XPathConstants.NODESET);
-            if (result.getLength() > 0) {
-                for (int i = 0; i < result.getLength(); i++) {
-                    importer = new EadImporter(graph, agent, result.item(i));
-                    importer.importItems();
-                }
-            } else {
-                Node ead = (Node) xpath.compile("//ead").evaluate(doc,
-                        XPathConstants.NODE);
-                importer = new EadImporter(graph, agent, ead);
-                importer.importItems();
-            }
-            tx.success();
-        } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-            tx.failure();
-        } finally {
-            tx.finish();
-            graph.shutdown();
-        }
     }
 }
