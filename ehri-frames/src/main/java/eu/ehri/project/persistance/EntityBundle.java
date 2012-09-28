@@ -1,23 +1,27 @@
 package eu.ehri.project.persistance;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections.map.MultiValueMap;
-import org.codehaus.jackson.map.util.ClassUtil;
+import org.hamcrest.core.IsInstanceOf;
 
-import com.tinkerpop.frames.Property;
 import com.tinkerpop.frames.VertexFrame;
 
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.utils.ClassUtils;
 
+/**
+ * Class that represents a graph entity and its set of relations.
+ * 
+ * @author michaelb
+ * 
+ * @param <T>
+ */
 public class EntityBundle<T extends VertexFrame> {
-    private static final String GET = "get";
     private static final String MISSING_PROPERTY = "Missing mandatory field";
     private static final String EMPTY_VALUE = "No value given for mandatory field";
     private static final String INVALID_ENTITY = "No EntityType annotation";
@@ -29,6 +33,15 @@ public class EntityBundle<T extends VertexFrame> {
 
     private MultiValueMap errors = new MultiValueMap();
 
+    /**
+     * Constructor.
+     * 
+     * @param id
+     * @param data
+     * @param cls
+     * @param relations
+     */
+
     public EntityBundle(Object id, final Map<String, Object> data,
             Class<T> cls, final MultiValueMap relations) {
         this.id = id;
@@ -37,6 +50,13 @@ public class EntityBundle<T extends VertexFrame> {
         this.relations = relations;
     }
 
+    /**
+     * Add a bundle for a particular relation.
+     * 
+     * @param relation
+     * @param other
+     * @return
+     */
     public EntityBundle<T> addRelation(String relation,
             EntityBundle<? extends VertexFrame> other) {
         MultiValueMap tmp = new MultiValueMap();
@@ -47,32 +67,78 @@ public class EntityBundle<T extends VertexFrame> {
         return new EntityBundle<T>(id, data, cls, tmp);
     }
 
-    private Map<String, Object> extendData() {
-        Map<String, Object> ext = new HashMap<String, Object>(data);
-        ext.put(EntityType.KEY, getEntityType());
-        return ext;
+    /**
+     * Set bundles for a particular relation.
+     * 
+     * @param relation
+     * @param others
+     * @return
+     */
+    public EntityBundle<T> setRelations(String relation,
+            Collection<EntityBundle<? extends VertexFrame>> others) {
+        MultiValueMap tmp = new MultiValueMap();
+        tmp.putAll(relation, others);
+        for (Object key : relations.keySet()) {
+            if (!key.equals(relation))
+                tmp.putAll(key, relations.getCollection(key));
+        }
+        return new EntityBundle<T>(id, data, cls, tmp);
     }
 
+    /**
+     * Get the id of the bundle's graph vertex (or null if it does not yet
+     * exist.
+     * 
+     * @return
+     */
     public Object getId() {
         return id;
     }
 
+    /**
+     * Determine if the bundle has errors after a validation operation.
+     * 
+     * @return
+     */
     public Boolean hasErrors() {
         return !errors.isEmpty();
     }
 
+    /**
+     * Get the bundle's relation bundles.
+     * 
+     * @return
+     */
     public MultiValueMap getRelations() {
         return relations;
     }
 
+    /**
+     * Get any validation errors that exist after a validation operation.
+     * 
+     * @return
+     */
     public MultiValueMap getValidationErrors() {
         return errors;
     }
 
+    /**
+     * Get the bundle data.
+     * 
+     * @return
+     */
     public Map<String, Object> getData() {
         return extendData();
     }
 
+    /**
+     * Set a value in the bundle's data.
+     * 
+     * @param key
+     * @param value
+     * @return
+     * @throws ValidationError
+     */
     public EntityBundle<T> setDataValue(String key, Object value)
             throws ValidationError {
         // FIXME: Seems like too much work being done here to maintain
@@ -86,10 +152,21 @@ public class EntityBundle<T extends VertexFrame> {
         return new EntityBundle<T>(id, data, cls, relations);
     }
 
+    /**
+     * Get the target class.
+     * 
+     * @return
+     */
     public Class<T> getBundleClass() {
         return cls;
     }
 
+    /**
+     * Get the type of entity this bundle represents as per the target class's
+     * entity type key.
+     * 
+     * @return
+     */
     public String getEntityType() {
         EntityType ann = cls.getAnnotation(EntityType.class);
         if (ann == null)
@@ -98,6 +175,12 @@ public class EntityBundle<T extends VertexFrame> {
         return ann.value();
     }
 
+    /**
+     * Validate the data in the bundle, according to the target class, and
+     * ensure it is fit for updating in the graph.
+     * 
+     * @throws ValidationError
+     */
     public void validateForUpdate() throws ValidationError {
         if (id == null)
             throw new ValidationError(
@@ -105,6 +188,12 @@ public class EntityBundle<T extends VertexFrame> {
         validate();
     }
 
+    /**
+     * Validate the data in the bundle, according to the target class, and
+     * ensure it is fit for insert into the graph.
+     * 
+     * @throws ValidationError
+     */
     public void validateForInsert() throws ValidationError {
         if (id != null)
             throw new ValidationError(
@@ -114,6 +203,11 @@ public class EntityBundle<T extends VertexFrame> {
         validate();
     }
 
+    /**
+     * Validate the data in the bundle, according to the target class.
+     * 
+     * @throws ValidationError
+     */
     public void validate() throws ValidationError {
         checkFields();
         checkIsA();
@@ -121,9 +215,22 @@ public class EntityBundle<T extends VertexFrame> {
             throw new ValidationError(cls, errors);
     }
 
+    /**
+     * Return a list of names for mandatory properties, as represented in the
+     * graph.
+     * 
+     * @return
+     */
     public List<String> getPropertyKeys() {
         return ClassUtils.getPropertyKeys(cls);
     }
+
+    @Override
+    public String toString() {
+        return String.format("<%s: %s>", cls.getName(), data);
+    }
+
+    // Helpers
 
     /**
      * @param data
@@ -136,6 +243,11 @@ public class EntityBundle<T extends VertexFrame> {
         }
     }
 
+    /**
+     * Check the data holds a given field, accounting for the
+     * 
+     * @param name
+     */
     private void checkField(String name) {
         if (!data.containsKey(name)) {
             errors.put(name, MISSING_PROPERTY);
@@ -143,8 +255,24 @@ public class EntityBundle<T extends VertexFrame> {
             Object value = data.get(name);
             if (value == null) {
                 errors.put(name, EMPTY_VALUE);
+            } else if (value instanceof String) {
+                if (((String) value).trim().isEmpty()) {
+                    errors.put(name, EMPTY_VALUE);
+                }
             }
         }
+    }
+
+    /**
+     * Ensure the returned data always contains an entity type key consistent
+     * with the current class.
+     * 
+     * @return
+     */
+    private Map<String, Object> extendData() {
+        Map<String, Object> ext = new HashMap<String, Object>(data);
+        ext.put(EntityType.KEY, getEntityType());
+        return ext;
     }
 
     /**
@@ -158,10 +286,5 @@ public class EntityBundle<T extends VertexFrame> {
             errors.put("class",
                     String.format("%s: '%s'", INVALID_ENTITY, cls.getName()));
         }
-    }
-
-    @Override
-    public String toString() {
-        return String.format("<%s: %s>", cls.getName(), data);
     }
 }
