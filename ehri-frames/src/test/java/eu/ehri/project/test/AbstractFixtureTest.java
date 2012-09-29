@@ -58,7 +58,7 @@ abstract public class AbstractFixtureTest extends ModelTestBase {
                             put("identifier", "someid-01");
                             put("title", "A brand new item description");
                             put("isA", EntityTypes.DOCUMENT_DESCRIPTION);
-                            put("languageOfDescription", "en");
+                            put("languageCode", "en");
                         }});
                     }});
                 }});

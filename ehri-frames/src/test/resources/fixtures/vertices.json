@@ -9,7 +9,7 @@
   }, 
   {
     "data": {
-      "languageOfDescription": "en", 
+      "languageCode": "en", 
       "isA": "documentDescription", 
       "identifier": "c1", 
       "title": "A Collection called 1"
@@ -26,7 +26,7 @@
   }, 
   {
     "data": {
-      "languageOfDescription": "en", 
+      "languageCode": "en", 
       "isA": "documentDescription", 
       "identifier": "c2", 
       "title": "A Collection called 2"
@@ -43,7 +43,7 @@
   }, 
   {
     "data": {
-      "languageOfDescription": "en", 
+      "languageCode": "en", 
       "isA": "documentDescription", 
       "identifier": "c3", 
       "title": "A Collection called 3"
@@ -60,7 +60,7 @@
   }, 
   {
     "data": {
-      "languageOfDescription": "en", 
+      "languageCode": "en", 
       "isA": "documentDescription", 
       "identifier": "c4", 
       "title": "A Collection called 4"
@@ -93,7 +93,7 @@
   }, 
   {
     "data": {
-      "languageOfDescription": "en", 
+      "languageCode": "en", 
       "isA": "agentDescription", 
       "title": "A Repository called 1"
     }, 
@@ -110,7 +110,7 @@
   }, 
   {
     "data": {
-      "languageOfDescription": "en", 
+      "languageCode": "en", 
       "isA": "authorityDescription", 
       "title": "An Authority called 1"
     }, 
@@ -127,7 +127,7 @@
   }, 
   {
     "data": {
-      "languageOfDescription": "en", 
+      "languageCode": "en", 
       "isA": "authorityDescription", 
       "title": "An Authority called 2"
     }, 

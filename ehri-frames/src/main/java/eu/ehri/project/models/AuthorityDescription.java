@@ -11,8 +11,4 @@ public interface AuthorityDescription extends VertexFrame, Description {
 
     @Property("title")
     public String getTitle();
-
-    @Property("languageOfDescription")
-    public String getLanguageOfDescription();
-
 }

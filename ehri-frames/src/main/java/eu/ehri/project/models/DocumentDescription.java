@@ -11,11 +11,4 @@ public interface DocumentDescription extends VertexFrame, Description {
 
     @Property("title")
     public String getTitle();
-
-    @Property("identifier")
-    public String getIdentifier();
-
-    @Property("languageOfDescription")
-    public String getLanguageOfDescription();
-
 }

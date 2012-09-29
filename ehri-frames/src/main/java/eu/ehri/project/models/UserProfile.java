@@ -21,9 +21,6 @@ public interface UserProfile extends VertexFrame, Accessor, AccessibleEntity,
     @Adjacency(label = BELONGS_TO)
     public Iterable<Group> getGroups();
 
-    @Property("userId")
-    public Long getUserId();
-
     @Property("name")
     public String getName();
 

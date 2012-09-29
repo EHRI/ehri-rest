@@ -9,6 +9,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -200,6 +201,11 @@ public class ClassUtils {
                     out.put(ann.label(), method);
             }
         }
+
+        for (Class<?> s : cls.getInterfaces()) {
+            out.putAll(getFetchMethods(s));
+        }
+
         return out;
     }
 
@@ -213,6 +219,11 @@ public class ClassUtils {
                     out.put(ann.label(), method);
             }
         }
+
+        for (Class<?> s : cls.getInterfaces()) {
+            out.putAll(getDependentMethods(s));
+        }
+
         return out;
     }
 
@@ -223,6 +234,25 @@ public class ClassUtils {
             if (ann != null)
                 out.add(ann.value());
         }
+
+        for (Class<?> s : cls.getInterfaces()) {
+            out.addAll(getPropertyKeys(s));
+        }
+
+        return makeUnique(out);
+    }
+
+    /**
+     * Another method to make a list unique. Sigh.
+     * 
+     * @param list
+     * @return
+     */
+    private static <T> List<T> makeUnique(List<T> list) {
+        List<T> out = new LinkedList<T>();
+        HashSet<T> set = new HashSet<T>();
+        set.addAll(list);
+        out.addAll(set);
         return out;
     }
 }
