@@ -243,7 +243,7 @@ public class EadImporter extends AbstractRecursiveImporter<Node> {
 		dataMap.put(DEPTH_ATTR, depth);
 
 		// Get language of description... a single string code.
-		dataMap.put("languageOfDescription",
+		dataMap.put("languageCode",
 				langHelper.getLanguageOfDescription(data));
 
 		// Set language of materials

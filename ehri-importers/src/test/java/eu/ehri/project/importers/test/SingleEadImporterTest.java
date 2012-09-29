@@ -8,6 +8,7 @@ import org.junit.Test;
 
 import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.importers.EadImportManager;
+import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.models.Action;
 import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.DocumentaryUnit;
@@ -34,22 +35,18 @@ public class SingleEadImporterTest extends AbstractFixtureTest {
         int count = getNodeCount();
 
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        Action action;
-        try {
-            action = new EadImportManager(graph, agent, user).importFile(ios, logMessage);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw e;
-        } finally {
-            ios.close();
-        }
+        ImportLog log = new EadImportManager(graph, agent, user).importFile(ios, logMessage);
 
         // How many new nodes will have been created? We should have
         // - 1 more DocumentaryUnit
         // - 1 more DocumentDescription
         // - 1 more DatePeriod
-        // - 1 more import Action
+        // - 1 more import Action        
         assertEquals(count + 4, getNodeCount());
+        
+        // Yet we've only created 1 *logical* item...
+        assertEquals(1, log.getSuccessful());
+        
         Iterable<Vertex> docs = graph.getVertices("identifier",
                 IMPORTED_ITEM_ID);
         assertTrue(docs.iterator().hasNext());

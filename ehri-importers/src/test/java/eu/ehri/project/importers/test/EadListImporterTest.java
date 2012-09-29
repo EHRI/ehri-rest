@@ -8,6 +8,7 @@ import org.junit.Test;
 
 import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.importers.EadImportManager;
+import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.models.Action;
 import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.DocumentaryUnit;
@@ -35,9 +36,9 @@ public class EadListImporterTest extends AbstractFixtureTest {
 		int count = getNodeCount();
 
 		InputStream ios = ClassLoader.getSystemResourceAsStream(EADLIST);
-		Action action;
+		ImportLog log;
 		try {
-			action = new EadImportManager(graph, agent, user).importFile(ios,
+			log = new EadImportManager(graph, agent, user).importFile(ios,
 					logMessage);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -61,7 +62,7 @@ public class EadListImporterTest extends AbstractFixtureTest {
 		Iterable<Action> actions = unit.getHistory();
 		// Check we've only got one action
 		assertEquals(1, toList(actions).size());
-		assertEquals(2, toList(action.getSubjects()).size());
+		assertEquals(2, toList(log.getAction().getSubjects()).size());
 		assertEquals(logMessage, toList(actions).get(0).getLogMessage());
 	}
 

@@ -10,6 +10,7 @@ import org.xml.sax.SAXException;
 
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.EadImportManager;
+import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.exceptions.NoItemsCreated;
 import eu.ehri.project.models.Action;
 import eu.ehri.project.models.Agent;
@@ -36,9 +37,9 @@ public class InvalidEadImporterTest extends AbstractFixtureTest {
         int count = getNodeCount();
 
         InputStream ios = ClassLoader.getSystemResourceAsStream(INVALID_EAD);
-        Action action;
+        ImportLog log;
         try {
-            action = new EadImportManager(graph, agent, user).importFile(ios, logMessage);
+            log = new EadImportManager(graph, agent, user).importFile(ios, logMessage);
         } finally {
             ios.close();
         }
@@ -72,15 +73,11 @@ public class InvalidEadImporterTest extends AbstractFixtureTest {
         EadImportManager manager = new EadImportManager(graph, agent, user);
         manager.setTolerant(true);        
         InputStream ios = ClassLoader.getSystemResourceAsStream(INVALID_EAD);
-        try {            
-            manager.importFile(ios, logMessage);
-        } catch (ValidationError e) {
-            // we knew this would happen
-        } finally {
-            ios.close();
-        }
+        ImportLog log = manager.importFile(ios, logMessage);
+
         // Check the state of the graph is the same...
         assertEquals(count, getNodeCount());
+        assertEquals(1, log.getErrored());
     }
     
     

@@ -26,7 +26,7 @@ abstract public class XmlImportManager implements ImportManager {
      * @throws ValidationError
      * @throws NoItemsCreated 
      */
-    public Action importUrl(String address, String logMessage)
+    public ImportLog importUrl(String address, String logMessage)
             throws IOException, SAXException, ValidationError, NoItemsCreated {
         URL url = new URL(address);
         InputStream ios = url.openStream();
@@ -50,7 +50,7 @@ abstract public class XmlImportManager implements ImportManager {
      * @throws ValidationError
      * @throws NoItemsCreated 
      */
-    public Action importFile(String filePath, String logMessage)
+    public ImportLog importFile(String filePath, String logMessage)
             throws IOException, SAXException, ValidationError, NoItemsCreated {
         FileInputStream ios = new FileInputStream(filePath);
         try {
@@ -60,6 +60,6 @@ abstract public class XmlImportManager implements ImportManager {
         }
     }
 
-    abstract public Action importFile(InputStream ios, String logMessage)
+    abstract public ImportLog importFile(InputStream ios, String logMessage)
             throws SAXException, IOException, ValidationError, NoItemsCreated;
 }
