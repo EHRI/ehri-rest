@@ -45,7 +45,7 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
      * "isA":"documentaryUnit"
      * },"relationships":{"describes":[{"data":{"identifier":"some id",
      * "title":"a description"
-     * ,"isA":"documentDescription","languageOfDescription":"en"}}],
+     * ,"isA":"documentDescription","languageCode":"en"}}],
      * "hasDate":[{"data":{"startDate":"1940-01-01T00:00:00Z","endDate":
      * "1945-01-01T00:00:00Z", "isA":"datePeriod"}}]}}'
      * 

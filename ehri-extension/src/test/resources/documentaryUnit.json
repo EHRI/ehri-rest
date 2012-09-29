@@ -8,7 +8,7 @@
     "describes": [
       {
         "data": {
-          "languageOfDescription": "en",
+          "languageCode": "en",
           "title": "a description",
           "isA": "documentDescription",
           "identifier": "some id"
