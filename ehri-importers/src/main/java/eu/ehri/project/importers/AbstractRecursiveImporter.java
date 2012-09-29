@@ -213,9 +213,7 @@ public abstract class AbstractRecursiveImporter<T> implements Importer<T> {
 				.out(Agent.HOLDS).filter(new PipeFunction<Vertex, Boolean>() {
 					public Boolean compute(Vertex item) {
 						String vid = (String) item.getProperty(IDENTITY_KEY);
-						if (vid != null)
-							return vid == id;
-						return false;
+						return (vid != null && vid.equals(id));
 					}
 				}).id();
 		return pipe.hasNext() ? pipe.next() : null;
