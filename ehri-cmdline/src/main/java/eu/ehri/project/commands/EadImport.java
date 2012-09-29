@@ -6,22 +6,20 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.Option;
-import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.apache.commons.cli.PosixParser;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
+import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.EadImportManager;
-import eu.ehri.project.models.Action;
+import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.UserProfile;
-import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.persistance.BundleDAO;
 import eu.ehri.project.persistance.BundleFactory;
 import eu.ehri.project.persistance.EntityBundle;
@@ -84,9 +82,11 @@ public class EadImport extends BaseCommand implements Command {
             throw new RuntimeException(
                     "Usage: importer [OPTIONS] -user <user-id> -repo <agent-id> <neo4j-graph-dir> <ead1.xml> <ead2.xml> ... <eadN.xml>");
 
+        GraphDatabaseService graphDb = new GraphDatabaseFactory()
+                .newEmbeddedDatabase((String) cmdLine.getArgList().get(0));
         // Get the graph and search it for the required agent...
         FramedGraph<Neo4jGraph> graph = new FramedGraph<Neo4jGraph>(
-                new Neo4jGraph((String) cmdLine.getArgList().get(0)));
+                new Neo4jGraph(graphDb));
 
         List<String> filePaths = new LinkedList<String>();
         for (int i = 1; i < cmdLine.getArgList().size(); i++) {
@@ -94,38 +94,48 @@ public class EadImport extends BaseCommand implements Command {
         }
 
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
+
         try {
+
+            // Find the agent
+            Iterable<Agent> agents = graph.getVertices("identifier",
+                    (String) cmdLine.getOptionValue("repo"), Agent.class);
+
             Agent agent = null;
             if (cmdLine.hasOption("createrepo")) {
-                agent = createAgent(graph, cmdLine.getOptionValue("repo"));
-            } else {
-                agent = graph
-                        .getVertices("identifier",
-                                (String) cmdLine.getArgList().get(0),
-                                Agent.class).iterator().next();
+                if (agents.iterator().hasNext())
+                    agent = agents.iterator().next();
+                else
+                    agent = createAgent(graph, cmdLine.getOptionValue("repo"));
             }
+
+            if (agent == null)
+                throw new RuntimeException("No item found for agent: "
+                        + cmdLine.getOptionValue("repo"));
+
+            // Find the user
+            Iterable<UserProfile> users = graph.getVertices("identifier",
+                    (String) cmdLine.getOptionValue("user"), UserProfile.class);
+
             UserProfile user = null;
             if (cmdLine.hasOption("createuser")) {
-                user = createUser(graph, cmdLine.getOptionValue("user"));
-            } else {
-                user = graph
-                        .getVertices("identifier",
-                                (String) cmdLine.getArgList().get(0),
-                                UserProfile.class).iterator().next();
+                if (users.iterator().hasNext())
+                    user = users.iterator().next();
+                else
+                    user = createUser(graph, cmdLine.getOptionValue("user"));
             }
+
+            if (user == null)
+                throw new RuntimeException("No item found for user: "
+                        + cmdLine.getOptionValue("user"));
 
             EadImportManager manager = new EadImportManager(graph, agent, user);
             manager.setTolerant(cmdLine.hasOption("tolerant"));
-            Action action = manager.importFiles(filePaths, logMessage);
+            ImportLog log = manager.importFiles(filePaths, logMessage);
 
-            int itemCount = 0;
-            for (@SuppressWarnings("unused")
-            AccessibleEntity ent : action.getSubjects()) {
-                itemCount++;
-            }
-
-            System.out.println("Imported item count: " + itemCount);
-
+            System.out.println("Import completed. Created: " + log.getCreated()
+                    + ", Updated: " + log.getUpdated());
+            tx.success();
         } catch (Exception e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -141,7 +151,7 @@ public class EadImport extends BaseCommand implements Command {
     private static UserProfile createUser(FramedGraph<Neo4jGraph> graph,
             String name) throws ValidationError {
         Map<String, Object> agentData = new HashMap<String, Object>();
-        agentData.put("userId", name);
+        agentData.put("identifier", name);
         agentData.put("name", name);
         EntityBundle<UserProfile> agb = new BundleFactory<UserProfile>()
                 .buildBundle(agentData, UserProfile.class);
