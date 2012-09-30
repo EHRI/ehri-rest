@@ -54,6 +54,13 @@
 			<artifactId>ehri-frames</artifactId>
 			<version>0.1-SNAPSHOT</version>
 		</dependency>
+
+		<dependency>
+			<groupId>ehri-project</groupId>
+			<artifactId>ehri-frames</artifactId>
+			<version>0.1-SNAPSHOT</version>
+			<type>test-jar</type>
+		</dependency>
 		<dependency>
 			<groupId>ehri-project</groupId>
 			<artifactId>ehri-importers</artifactId>
