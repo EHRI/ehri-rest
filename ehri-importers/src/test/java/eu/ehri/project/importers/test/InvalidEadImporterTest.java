@@ -11,6 +11,7 @@ import org.xml.sax.SAXException;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.EadImportManager;
 import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.exceptions.NoItemsCreated;
 import eu.ehri.project.models.Action;
 import eu.ehri.project.models.Agent;
@@ -28,25 +29,22 @@ public class InvalidEadImporterTest extends AbstractFixtureTest {
     protected final String IMPORTED_ITEM_ID = "C00001";
 
     @Test(expected=ValidationError.class)
-    public void testImportItemsT() throws ValidationError, SAXException, IOException, NoItemsCreated {
+    public void testImportItemsT() throws ValidationError, IOException, NoItemsCreated, InputParseError {
         UserProfile user = graph.frame(graph.getVertex(validUserId),
                 UserProfile.class);
         Agent agent = graph.frame(helper.getTestVertex(TEST_REPO), Agent.class);
         final String logMessage = "Importing an invalid EAD";
-
-        int count = getNodeCount();
-
         InputStream ios = ClassLoader.getSystemResourceAsStream(INVALID_EAD);
-        ImportLog log;
+
         try {
-            log = new EadImportManager(graph, agent, user).importFile(ios, logMessage);
+            new EadImportManager(graph, agent, user).importFile(ios, logMessage);
         } finally {
             ios.close();
         }
     }
 
     @Test(expected=NoItemsCreated.class)
-    public void testTolerantImport() throws ValidationError, SAXException, IOException, NoItemsCreated {
+    public void testTolerantImport() throws ValidationError, IOException, NoItemsCreated, InputParseError {
         UserProfile user = graph.frame(graph.getVertex(validUserId),
                 UserProfile.class);
         Agent agent = graph.frame(helper.getTestVertex(TEST_REPO), Agent.class);
@@ -63,7 +61,7 @@ public class InvalidEadImporterTest extends AbstractFixtureTest {
     }
 
     @Test(expected=NoItemsCreated.class)
-    public void testRollback() throws ValidationError, SAXException, IOException, NoItemsCreated {
+    public void testRollback() throws ValidationError, IOException, NoItemsCreated, InputParseError {
         UserProfile user = graph.frame(graph.getVertex(validUserId),
                 UserProfile.class);
         Agent agent = graph.frame(helper.getTestVertex(TEST_REPO), Agent.class);
