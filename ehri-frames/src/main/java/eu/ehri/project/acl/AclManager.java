@@ -187,6 +187,13 @@ public class AclManager {
             setAccessControl(entity, accessor, canRead, canWrite);
     }
 
+    /**
+     * Build a gremlin filter function that passes through
+     * items readable by a given accessor.
+     * 
+     * @param accessor
+     * @return
+     */
     public PipeFunction<Vertex, Boolean> getAclFilterFunction(Accessor accessor) {
         if (isAdmin(accessor))
             return noopFilterFunction();
