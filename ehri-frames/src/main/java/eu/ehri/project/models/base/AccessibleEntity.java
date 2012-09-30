@@ -12,8 +12,9 @@ import eu.ehri.project.relationships.Access;
 public interface AccessibleEntity extends VertexFrame {
 
     public static final String ACCESS = "access";
+    public static final String IDENTIFIER_KEY = "identifier";
 
-    @Property("identifier")
+    @Property(IDENTIFIER_KEY)
     public String getIdentifier();
 
     @Incidence(label = ACCESS)

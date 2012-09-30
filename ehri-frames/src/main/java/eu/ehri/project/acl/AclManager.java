@@ -1,14 +1,17 @@
 package eu.ehri.project.acl;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Comparator;
 import java.util.Collections;
 
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
+import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
+import com.tinkerpop.pipes.PipeFunction;
 
 import eu.ehri.project.core.GraphHelpers;
 import eu.ehri.project.models.Group;
@@ -19,11 +22,10 @@ import eu.ehri.project.relationships.Access;
 public class AclManager {
 
     private FramedGraph<Neo4jGraph> graph;
-    private GraphHelpers helpers;
 
     public AclManager(FramedGraph<Neo4jGraph> graph) {
         this.graph = graph;
-        helpers = new GraphHelpers(graph.getBaseGraph().getRawGraph());
+        new GraphHelpers(graph.getBaseGraph().getRawGraph());
     }
 
     static class AccessComparator implements Comparator<Access> {
@@ -183,5 +185,62 @@ public class AclManager {
             boolean canRead, boolean canWrite) {
         for (Accessor accessor : accessors)
             setAccessControl(entity, accessor, canRead, canWrite);
+    }
+
+    public PipeFunction<Vertex, Boolean> getAclFilterFunction(Accessor accessor) {
+        if (isAdmin(accessor))
+            return noopFilterFunction();
+
+        final HashSet<Object> all = getAllAccessors(accessor);
+        return new PipeFunction<Vertex, Boolean>() {
+            public Boolean compute(Vertex v) {
+                Iterable<Edge> edges = v.getEdges(Direction.OUT,
+                        AccessibleEntity.ACCESS);
+                // If there's no Access conditions, it's
+                // read-only...
+                if (!edges.iterator().hasNext())
+                    return true;
+                for (Edge e : edges) {
+                    // FIXME: Does not currently check the
+                    // actual permission property. This assumes
+                    // that if there's a permission, it means that
+                    // the subject can be read.
+                    Vertex other = e.getVertex(Direction.OUT);
+                    if (all.contains(other.getId()))
+                        return true;
+                }
+                return false;
+            }
+        };
+    }
+
+    /**
+     * Pipe filter function that passes through all items. TODO: Check if we
+     * actually need this???
+     * 
+     * @return
+     */
+    private PipeFunction<Vertex, Boolean> noopFilterFunction() {
+        return new PipeFunction<Vertex, Boolean>() {
+            public Boolean compute(Vertex v) {
+                return true;
+            }
+        };
+    }
+
+    /**
+     * For a given user, fetch a lookup of all the inherited accessors it
+     * belongs to.
+     * 
+     * @param user
+     * @return
+     */
+    private HashSet<Object> getAllAccessors(Accessor accessor) {
+        Iterable<Accessor> parents = accessor.getAllParents();
+        final HashSet<Object> all = new HashSet<Object>();
+        for (Accessor a : parents)
+            all.add(a.asVertex().getId());
+        all.add(accessor.asVertex().getId());
+        return all;
     }
 }
