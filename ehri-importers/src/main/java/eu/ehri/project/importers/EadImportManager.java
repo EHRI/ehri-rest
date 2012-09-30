@@ -54,6 +54,11 @@ public class EadImportManager extends XmlImportManager implements ImportManager 
     protected final FramedGraph<Neo4jGraph> framedGraph;
     protected final Agent agent;
     protected final Actioner actioner;
+    
+    // Ugly stateful variables for tracking import state
+    // and reporting errors usefully...
+    private String currentFile = null;
+    private Integer currentPosition = null;
 
     /**
      * Constructor.
@@ -141,6 +146,7 @@ public class EadImportManager extends XmlImportManager implements ImportManager 
                     actioner, logMessage);
             final ImportLog log = new ImportLog(action);
             for (String path : paths) {
+                currentFile = path;
                 FileInputStream ios = new FileInputStream(path);
                 try {
                     logger.info("Importing file: " + path);
@@ -251,6 +257,7 @@ public class EadImportManager extends XmlImportManager implements ImportManager 
             throw new RuntimeException(e);
         }
         for (int i = 0; i < eadList.getLength(); i++) {
+            currentPosition = i;
             importNodeWithAction(eadList.item(i), action, manifest);
         }
     }
@@ -287,14 +294,18 @@ public class EadImportManager extends XmlImportManager implements ImportManager 
             importer.importItems();
         } catch (InvalidInputFormatError e) {
             logger.error(e.getMessage());
-            log.setErrored(node.toString(), e.getMessage());
+            log.setErrored(formatErrorLocation(), e.getMessage());
             if (!tolerant)
                 throw e;
         } catch (ValidationError e) {
             logger.error(e.getMessage());
-            log.setErrored(node.toString(), e.getMessage());
+            log.setErrored(formatErrorLocation(), e.getMessage());
             if (!tolerant)
                 throw e;
         }
+    }
+    
+    private String formatErrorLocation() {
+        return String.format("File: %s, EAD document: %d", currentFile, currentPosition);
     }
 }
