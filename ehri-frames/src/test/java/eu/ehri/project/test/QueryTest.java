@@ -9,6 +9,8 @@ import org.junit.Test;
 import com.tinkerpop.blueprints.Vertex;
 
 import eu.ehri.project.acl.AclManager;
+import eu.ehri.project.exceptions.ItemNotFound;
+import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityTypes;
 import eu.ehri.project.models.annotations.EntityType;
@@ -95,5 +97,28 @@ public class QueryTest extends AbstractFixtureTest {
                 AccessibleEntity.IDENTIFIER_KEY, "__GONNAFAIL__", validUserId));
         assertTrue(list.isEmpty());
         assertEquals(0, list.size());
+    }
+    
+    @Test
+    public void testGet() throws PermissionDenied, ItemNotFound {
+        Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
+                DocumentaryUnit.class);
+        DocumentaryUnit doc = query.get(AccessibleEntity.IDENTIFIER_KEY, "c1", validUserId);
+        assertEquals("c1", doc.getIdentifier());
+    }
+    
+    @Test(expected=ItemNotFound.class)
+    public void testGetItemNotFound() throws PermissionDenied, ItemNotFound {
+        Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
+                DocumentaryUnit.class);
+        query.get(AccessibleEntity.IDENTIFIER_KEY, "IDONTEXIST", validUserId);
+    }
+    
+    @Test(expected=PermissionDenied.class)
+    public void testGetPermissionDenied() throws PermissionDenied, ItemNotFound {
+        Accessor accessor = helper.getTestFrame("reto", Accessor.class);
+        Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
+                DocumentaryUnit.class);
+        query.get(AccessibleEntity.IDENTIFIER_KEY, "c1", (Long)accessor.asVertex().getId());
     }
 }
