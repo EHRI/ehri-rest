@@ -10,14 +10,14 @@ import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 
 public interface IViews<E extends VertexFrame> {
-    public E detail(Long item, Long user) throws PermissionDenied;
+    public E detail(long item, long user) throws PermissionDenied;
 
-    public E update(Map<String, Object> data, Long user)
+    public E update(Map<String, Object> data, long user)
             throws PermissionDenied, ValidationError, DeserializationError;
 
-    public E create(Map<String, Object> data, Long user)
+    public E create(Map<String, Object> data, long user)
             throws PermissionDenied, ValidationError, DeserializationError;
 
-    public Integer delete(Long item, Long user) throws PermissionDenied,
+    public Integer delete(long item, long user) throws PermissionDenied,
             ValidationError, SerializationError;
 }

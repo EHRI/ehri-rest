@@ -46,8 +46,10 @@ public class AclManager {
         }
     }
 
-    /*
+    /**
      * Check if an accessor is admin or a member of Admin.
+     * 
+     * @param accessor
      */
     public Boolean isAdmin(Accessor accessor) {
         if (accessor.getName().equals(Group.ADMIN_GROUP_NAME))
