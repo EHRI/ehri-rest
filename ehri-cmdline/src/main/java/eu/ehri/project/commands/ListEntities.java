@@ -36,7 +36,7 @@ public class ListEntities extends BaseCommand implements Command {
 
     @Override
     public String getHelp() {
-        return "Usage: list [OPTIONS] <type>";
+        return "Usage: list [OPTIONS] <neo4j-graph-dir> <type> <query>";
     }
 
     @Override

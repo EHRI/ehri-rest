@@ -27,7 +27,6 @@ public class CmdEntryPoint extends BaseCommand {
         Map<String, Command> mmap = new HashMap<String, Command>();
         mmap.put("import-ead", new EadImport());
         mmap.put("list", new ListEntities());
-        mmap.put("load-fixtures", new LoadFixtures());
         COMMANDS = Collections.unmodifiableMap(mmap);
     };
 
@@ -71,11 +70,8 @@ public class CmdEntryPoint extends BaseCommand {
                 }
                 Command cmd = CmdEntryPoint.COMMANDS.get(args[1]);
                 
-                try {                    
+                try {
                     cmd.exec(graph, newArgs.toArray(new String[newArgs.size()]));
-                } catch(Exception e) {
-                    System.err.println("Error: " + e.getMessage());
-                    return 1;
                 } finally {
                     graph.shutdown();
                 }
