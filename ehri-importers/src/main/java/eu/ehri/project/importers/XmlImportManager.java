@@ -5,16 +5,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
-import org.xml.sax.SAXException;
-
 import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.exceptions.NoItemsCreated;
-import eu.ehri.project.models.Action;
 
 abstract public class XmlImportManager implements ImportManager {
 
     /**
      * Import an EAD via an URL.
+     * 
      * @param address
      * @param logMessage
      * @param graph
@@ -24,10 +23,11 @@ abstract public class XmlImportManager implements ImportManager {
      * @throws IOException
      * @throws SAXException
      * @throws ValidationError
-     * @throws NoItemsCreated 
+     * @throws NoItemsCreated
      */
     public ImportLog importUrl(String address, String logMessage)
-            throws IOException, SAXException, ValidationError, NoItemsCreated {
+            throws IOException, InputParseError, ValidationError,
+            NoItemsCreated {
         URL url = new URL(address);
         InputStream ios = url.openStream();
         try {
@@ -39,6 +39,7 @@ abstract public class XmlImportManager implements ImportManager {
 
     /**
      * Import an EAD file by specifying it's path.
+     * 
      * @param filePath
      * @param logMessage
      * @param graph
@@ -48,10 +49,11 @@ abstract public class XmlImportManager implements ImportManager {
      * @throws IOException
      * @throws SAXException
      * @throws ValidationError
-     * @throws NoItemsCreated 
+     * @throws NoItemsCreated
      */
     public ImportLog importFile(String filePath, String logMessage)
-            throws IOException, SAXException, ValidationError, NoItemsCreated {
+            throws IOException, InputParseError, ValidationError,
+            NoItemsCreated {
         FileInputStream ios = new FileInputStream(filePath);
         try {
             return importFile(ios, logMessage);
@@ -61,5 +63,6 @@ abstract public class XmlImportManager implements ImportManager {
     }
 
     abstract public ImportLog importFile(InputStream ios, String logMessage)
-            throws SAXException, IOException, ValidationError, NoItemsCreated;
+            throws IOException, ValidationError, NoItemsCreated,
+            InputParseError;
 }

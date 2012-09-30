@@ -24,8 +24,9 @@ import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
 import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.exceptions.InvalidEadDocument;
-import eu.ehri.project.importers.exceptions.InvalidInputDataError;
+import eu.ehri.project.importers.exceptions.InvalidInputFormatError;
 import eu.ehri.project.importers.exceptions.NoItemsCreated;
 import eu.ehri.project.models.Action;
 import eu.ehri.project.models.Agent;
@@ -108,21 +109,27 @@ public class EadImportManager extends XmlImportManager implements ImportManager 
      * @throws SAXException
      * @throws IOException
      * @throws ValidationError
+     * @throws InputParseError
      */
     public ImportLog importFile(InputStream ios, String logMessage)
-            throws SAXException, IOException, ValidationError, NoItemsCreated {
+            throws IOException, ValidationError, NoItemsCreated,
+            InputParseError {
 
         // XML parsing boilerplate...
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         factory.setNamespaceAware(true);
         DocumentBuilder builder;
+        Document doc;
         try {
             builder = factory.newDocumentBuilder();
+            doc = builder.parse(ios);
         } catch (ParserConfigurationException e) {
             e.printStackTrace();
             throw new RuntimeException(e);
+        } catch (SAXException e) {
+            throw new InputParseError(e);
         }
-        Document doc = builder.parse(ios);
+
         Transaction tx = framedGraph.getBaseGraph().getRawGraph().beginTx();
         try {
             // Create a new action for this import
@@ -170,7 +177,7 @@ public class EadImportManager extends XmlImportManager implements ImportManager 
      * @throws NoItemsCreated
      */
     public ImportLog importFiles(List<String> paths, String logMessage)
-            throws SAXException, IOException, ValidationError, NoItemsCreated {
+            throws IOException, ValidationError, NoItemsCreated {
 
         // XML parsing boilerplate...
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -228,11 +235,11 @@ public class EadImportManager extends XmlImportManager implements ImportManager 
      * @return
      * @throws ValidationError
      * @throws InvalidEadDocument
-     * @throws InvalidInputDataError
+     * @throws InvalidInputFormatError
      */
     private void importDocWithAction(final Action action, Document doc,
             final ImportLog manifest) throws ValidationError,
-            InvalidEadDocument, InvalidInputDataError {
+            InvalidEadDocument, InvalidInputFormatError {
 
         // Check the various types of document we support. This
         // includes <eadgrp> or <eadlist> types.
@@ -254,11 +261,11 @@ public class EadImportManager extends XmlImportManager implements ImportManager 
      * @param path
      * @return
      * @throws ValidationError
-     * @throws InvalidInputDataError
+     * @throws InvalidInputFormatError
      */
     private void importNestedItems(final Action action, Document doc,
             String path, final ImportLog manifest) throws ValidationError,
-            InvalidInputDataError {
+            InvalidInputFormatError {
         XPath xpath = XPathFactory.newInstance().newXPath();
         NodeList eadList;
         try {
@@ -271,7 +278,7 @@ public class EadImportManager extends XmlImportManager implements ImportManager 
         for (int i = 0; i < eadList.getLength(); i++) {
             try {
                 importNodeWithAction(action, eadList.item(i), manifest);
-            } catch (InvalidInputDataError e) {
+            } catch (InvalidInputFormatError e) {
                 logger.error(e.getMessage());
                 if (!tolerant)
                     throw e;
@@ -290,11 +297,11 @@ public class EadImportManager extends XmlImportManager implements ImportManager 
      * @param node
      * @return
      * @throws ValidationError
-     * @throws InvalidInputDataError
+     * @throws InvalidInputFormatError
      */
     private void importNodeWithAction(final Action action, Node node,
             final ImportLog manifest) throws ValidationError,
-            InvalidInputDataError {
+            InvalidInputFormatError {
 
         EadImporter importer = new EadImporter(framedGraph, agent, node);
         // Create a new action for this import
@@ -312,7 +319,7 @@ public class EadImportManager extends XmlImportManager implements ImportManager 
         });
         try {
             importer.importItems();
-        } catch (InvalidInputDataError e) {
+        } catch (InvalidInputFormatError e) {
             logger.error(e.getMessage());
             manifest.setErrored("node", e.getMessage());
             if (!tolerant)

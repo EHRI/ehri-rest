@@ -24,7 +24,7 @@ import com.tinkerpop.frames.FramedGraph;
 
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ead.EadLanguageExtractor;
-import eu.ehri.project.importers.exceptions.InvalidInputDataError;
+import eu.ehri.project.importers.exceptions.InvalidInputFormatError;
 import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.DocumentDescription;
@@ -262,10 +262,10 @@ public class EadImporter extends AbstractRecursiveImporter<Node> {
 	 * Top-level entry point for importing some EAD.
 	 * 
 	 * @throws ValidationError
-	 * @throws InvalidInputDataError
+	 * @throws InvalidInputFormatError
 	 * 
 	 */
-	public void importItems() throws ValidationError, InvalidInputDataError {
+	public void importItems() throws ValidationError, InvalidInputFormatError {
 
 		Node archDesc;
 		try {
@@ -278,7 +278,7 @@ public class EadImporter extends AbstractRecursiveImporter<Node> {
 		if (archDesc != null)
 			importItemsFromData(archDesc);
 		else {
-			throw new InvalidInputDataError("No 'archdesc' element found");
+			throw new InvalidInputFormatError("No 'archdesc' element found");
 		}
 	}
 
