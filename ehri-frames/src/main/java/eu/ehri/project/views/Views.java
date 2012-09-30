@@ -41,7 +41,7 @@ public class Views<E extends AccessibleEntity> implements IViews<E> {
      * @param user
      * @throws PermissionDenied
      */
-    protected void checkReadAccess(AccessibleEntity entity, Long user)
+    protected void checkReadAccess(AccessibleEntity entity, long user)
             throws PermissionDenied {
         Accessor accessor = graph.getVertex(user, Accessor.class);
         Access access = acl.getAccessControl(entity, accessor);
@@ -56,7 +56,7 @@ public class Views<E extends AccessibleEntity> implements IViews<E> {
      * @param user
      * @throws PermissionDenied
      */
-    protected void checkWriteAccess(AccessibleEntity entity, Long user)
+    protected void checkWriteAccess(AccessibleEntity entity, long user)
             throws PermissionDenied {
         Accessor accessor = graph.getVertex(user, Accessor.class);
         Access access = acl.getAccessControl(entity, accessor);
@@ -64,7 +64,7 @@ public class Views<E extends AccessibleEntity> implements IViews<E> {
             throw new PermissionDenied(accessor, entity);
     }
 
-    protected void checkGlobalWriteAccess(Long user) throws PermissionDenied {
+    protected void checkGlobalWriteAccess(long user) throws PermissionDenied {
         // TODO: Stub
     }
 
@@ -76,7 +76,7 @@ public class Views<E extends AccessibleEntity> implements IViews<E> {
      * @return
      * @throws PermissionDenied
      */
-    public E detail(Long item, Long user) throws PermissionDenied {
+    public E detail(long item, long user) throws PermissionDenied {
         E entity = graph.getVertex(item, cls);
         checkReadAccess(entity, user);
         return entity;
@@ -91,7 +91,7 @@ public class Views<E extends AccessibleEntity> implements IViews<E> {
      * @throws PermissionDenied
      * @throws ValidationError
      */
-    public E update(Map<String, Object> data, Long user)
+    public E update(Map<String, Object> data, long user)
             throws PermissionDenied, ValidationError, DeserializationError {
         EntityBundle<E> bundle = converter.dataToBundle(data);
         E entity = graph.getVertex(bundle.getId(), cls);
@@ -108,7 +108,7 @@ public class Views<E extends AccessibleEntity> implements IViews<E> {
      * @throws PermissionDenied
      * @throws ValidationError
      */
-    public E create(Map<String, Object> data, Long user)
+    public E create(Map<String, Object> data, long user)
             throws PermissionDenied, ValidationError, DeserializationError {
         checkGlobalWriteAccess(user);
         EntityBundle<E> bundle = converter.dataToBundle(data);
@@ -125,7 +125,7 @@ public class Views<E extends AccessibleEntity> implements IViews<E> {
      * @throws ValidationError
      * @throws SerializationError
      */
-    public Integer delete(Long item, Long user) throws PermissionDenied,
+    public Integer delete(long item, long user) throws PermissionDenied,
             ValidationError, SerializationError {
         E entity = graph.getVertex(item, cls);
         checkGlobalWriteAccess(user);
