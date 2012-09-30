@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
+import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
+import com.tinkerpop.frames.FramedGraph;
 
 public class CmdEntryPoint extends BaseCommand {
 
@@ -24,6 +26,7 @@ public class CmdEntryPoint extends BaseCommand {
     static {
         Map<String, Command> mmap = new HashMap<String, Command>();
         mmap.put("import-ead", new EadImport());
+        mmap.put("list", new ListEntities());
         COMMANDS = Collections.unmodifiableMap(mmap);
     };
 
@@ -41,28 +44,37 @@ public class CmdEntryPoint extends BaseCommand {
 
     @Override
     public String getUsage() {
-        return "Usage: ehri <command> <command-args ... >";
+        return "Usage: ehri <graph-db> <command> <command-args ... >";
     }
 
     @Override
-    public int execWithOptions(CommandLine cmdLine) throws Exception {
+    public int execWithOptions(FramedGraph<Neo4jGraph> graph, CommandLine cmdLine) throws Exception {
         System.err.println(getHelp());
         return 1;
     }
-    
+
     public static int main(String[] args) throws Exception {
-        
-        if (args.length < 1) {
-            CmdEntryPoint cmd = new CmdEntryPoint();
-            return cmd.exec(args);                        
+
+        if (args.length < 2) {
+            return new CmdEntryPoint().exec(null, args);
         } else {
-            if (CmdEntryPoint.COMMANDS.containsKey(args[0])) {
+            if (CmdEntryPoint.COMMANDS.containsKey(args[1])) {
+
+                // Get the graph
+                FramedGraph<Neo4jGraph> graph = new FramedGraph<Neo4jGraph>(
+                        new Neo4jGraph((String) args[0]));
+
                 List<String> newArgs = new LinkedList<String>();
-                for (int i = 1; i < args.length; i++) {
+                for (int i = 2; i < args.length; i++) {
                     newArgs.add(args[i]);
                 }
-                Command cmd = CmdEntryPoint.COMMANDS.get(args[0]);
-                cmd.exec(newArgs.toArray(new String[newArgs.size()]));
+                Command cmd = CmdEntryPoint.COMMANDS.get(args[1]);
+                
+                try {
+                    cmd.exec(graph, newArgs.toArray(new String[newArgs.size()]));
+                } finally {
+                    graph.shutdown();
+                }
             }
         }
         return 0;

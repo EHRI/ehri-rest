@@ -9,10 +9,7 @@ import java.util.Map.Entry;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.ParseException;
-import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.graphdb.factory.GraphDatabaseFactory;
-
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
@@ -75,22 +72,16 @@ public class EadImport extends BaseCommand implements Command {
      * @param args
      * @throws Exception
      */
-    public int execWithOptions(CommandLine cmdLine) throws Exception {
+    public int execWithOptions(final FramedGraph<Neo4jGraph> graph, CommandLine cmdLine) throws Exception {
 
         final String logMessage = "Imported from command-line";
 
         if (cmdLine.getArgList().size() < 1)
             throw new RuntimeException(
-                    "Usage: importer [OPTIONS] -user <user-id> -repo <agent-id> <neo4j-graph-dir> <ead1.xml> <ead2.xml> ... <eadN.xml>");
-
-        GraphDatabaseService graphDb = new GraphDatabaseFactory()
-                .newEmbeddedDatabase((String) cmdLine.getArgList().get(0));
-        // Get the graph and search it for the required agent...
-        FramedGraph<Neo4jGraph> graph = new FramedGraph<Neo4jGraph>(
-                new Neo4jGraph(graphDb));
+                    "Usage: importer [OPTIONS] -user <user-id> -repo <agent-id> <ead1.xml> <ead2.xml> ... <eadN.xml>");
 
         List<String> filePaths = new LinkedList<String>();
-        for (int i = 1; i < cmdLine.getArgList().size(); i++) {
+        for (int i = 0; i < cmdLine.getArgList().size(); i++) {
             filePaths.add((String) cmdLine.getArgList().get(i));
         }
 
@@ -144,13 +135,11 @@ public class EadImport extends BaseCommand implements Command {
             }
             tx.success();
         } catch (Exception e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
             tx.failure();
             return 1;
         } finally {
             tx.finish();
-            graph.shutdown();
         }
         return 0;
     }
