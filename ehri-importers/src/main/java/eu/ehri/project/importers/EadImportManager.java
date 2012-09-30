@@ -251,17 +251,7 @@ public class EadImportManager extends XmlImportManager implements ImportManager 
             throw new RuntimeException(e);
         }
         for (int i = 0; i < eadList.getLength(); i++) {
-            try {
-                importNodeWithAction(eadList.item(i), action, manifest);
-            } catch (InvalidInputFormatError e) {
-                logger.error(e.getMessage());
-                if (!tolerant)
-                    throw e;
-            } catch (ValidationError e) {
-                logger.error(e.getMessage());
-                if (!tolerant)
-                    throw e;
-            }
+            importNodeWithAction(eadList.item(i), action, manifest);
         }
     }
 
