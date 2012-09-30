@@ -39,7 +39,7 @@ public class Converter {
     private Map<String, Class<? extends VertexFrame>> classes;
 
     public Converter() {
-        classes = getEntityClasses();
+        classes = ClassUtils.getEntityClasses();
     }
 
     public <T extends VertexFrame> Map<String, Object> vertexFrameToData(
@@ -233,38 +233,5 @@ public class Converter {
             data.put(key, item.getProperty(key));
         }
         return data;
-    }
-
-    /**
-     * Load a lookup of entity type name against the corresponding class.
-     */
-    @SuppressWarnings("unchecked")
-    private Map<String, Class<? extends VertexFrame>> getEntityClasses() {
-        // iterate through all the classes in our models package
-        // and filter those that aren't extending VertexFrame
-        Map<String, Class<? extends VertexFrame>> entitycls = new HashMap<String, Class<? extends VertexFrame>>();
-        Class<?>[] classArray;
-        try {
-            classArray = ClassUtils.getClasses("eu.ehri.project.models");
-        } catch (Exception e) {
-            throw new RuntimeException(
-                    "Unrecoverable problem loading EntityType classes", e);
-        }
-        List<Class<? extends VertexFrame>> vframes = new ArrayList<Class<? extends VertexFrame>>();
-        for (Class<?> cls : classArray) {
-            if (VertexFrame.class.isAssignableFrom(cls)) {
-                // NB: This is the unchecked cast, but it should be safe due to
-                // the
-                // asAssignableFrom test.
-                vframes.add((Class<? extends VertexFrame>) cls);
-            }
-        }
-
-        for (Class<? extends VertexFrame> cls : vframes) {
-            EntityType ann = cls.getAnnotation(EntityType.class);
-            if (ann != null)
-                entitycls.put(ann.value(), cls);
-        }
-        return entitycls;
     }
 }

@@ -18,13 +18,49 @@ import java.util.jar.JarInputStream;
 
 import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Property;
+import com.tinkerpop.frames.VertexFrame;
 
+import eu.ehri.project.models.EntityTypes;
 import eu.ehri.project.models.annotations.Dependent;
+import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
 
 public class ClassUtils {
 
     public static final String FETCH_METHOD_PREFIX = "get";
+    
+    /**
+     * Load a lookup of entity type name against the corresponding class.
+     */
+    @SuppressWarnings({ "unchecked"})
+    public static Map<String, Class<? extends VertexFrame>> getEntityClasses() {
+        // iterate through all the classes in our models package
+        // and filter those that aren't extending VertexFrame
+        Map<String, Class<? extends VertexFrame>> entitycls = new HashMap<String, Class<? extends VertexFrame>>();
+        Class<?>[] classArray;
+        try {
+            classArray = ClassUtils.getClasses(EntityTypes.class.getPackage().getName());
+        } catch (Exception e) {
+            throw new RuntimeException(
+                    "Unrecoverable problem loading EntityType classes", e);
+        }
+        List<Class<? extends VertexFrame>> vframes = new ArrayList<Class<? extends VertexFrame>>();
+        for (Class<?> cls : classArray) {
+            if (VertexFrame.class.isAssignableFrom(cls)) {
+                // NB: This is the unchecked cast, but it should be safe due to
+                // the
+                // asAssignableFrom test.
+                vframes.add((Class<? extends VertexFrame>) cls);
+            }
+        }
+
+        for (Class<? extends VertexFrame> cls : vframes) {
+            EntityType ann = cls.getAnnotation(EntityType.class);
+            if (ann != null)
+                entitycls.put(ann.value(), cls);
+        }
+        return entitycls;
+    }
 
     /**
      * Scans all classes accessible from the context class loader which belong
