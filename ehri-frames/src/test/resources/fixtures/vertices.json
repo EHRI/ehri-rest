@@ -157,7 +157,7 @@
   {
     "data": {
       "isA": "userProfile", 
-      "identifier": 1, 
+      "identifier": "mike", 
       "name": "Mike"
     }, 
     "desc": "mike"
@@ -165,7 +165,7 @@
   {
     "data": {
       "isA": "userProfile", 
-      "identifier": 2, 
+      "identifier": "reto", 
       "name": "Reto"
     }, 
     "desc": "reto"
@@ -173,7 +173,7 @@
   {
     "data": {
       "isA": "userProfile", 
-      "identifier": 3, 
+      "identifier": "tim", 
       "name": "Tim"
     }, 
     "desc": "tim"

@@ -9,6 +9,7 @@ import org.junit.Test;
 import com.tinkerpop.blueprints.Vertex;
 
 import eu.ehri.project.acl.AclManager;
+import eu.ehri.project.exceptions.IndexNotFoundException;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.DocumentaryUnit;
@@ -21,7 +22,7 @@ import eu.ehri.project.views.Query;
 public class QueryTest extends AbstractFixtureTest {
 
     @Test
-    public void testAdminCanListEverything() {
+    public void testAdminCanListEverything() throws IndexNotFoundException {
         Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
 
@@ -42,7 +43,7 @@ public class QueryTest extends AbstractFixtureTest {
     }
 
     @Test
-    public void testUserCannotListPrivate() {
+    public void testUserCannotListPrivate() throws IndexNotFoundException {
         Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
 
@@ -59,7 +60,7 @@ public class QueryTest extends AbstractFixtureTest {
     }
 
     @Test
-    public void testListWithFilter() {
+    public void testListWithFilter() throws IndexNotFoundException {
         Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
 
@@ -71,7 +72,7 @@ public class QueryTest extends AbstractFixtureTest {
     }
 
     @Test
-    public void testListWithGlobFilter() {
+    public void testListWithGlobFilter() throws IndexNotFoundException {
         Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
 
@@ -88,7 +89,7 @@ public class QueryTest extends AbstractFixtureTest {
     }
 
     @Test
-    public void testListWithFailFilter() {
+    public void testListWithFailFilter() throws IndexNotFoundException {
         Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
 
@@ -100,7 +101,7 @@ public class QueryTest extends AbstractFixtureTest {
     }
     
     @Test
-    public void testGet() throws PermissionDenied, ItemNotFound {
+    public void testGet() throws PermissionDenied, ItemNotFound, IndexNotFoundException {
         Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
         DocumentaryUnit doc = query.get(AccessibleEntity.IDENTIFIER_KEY, "c1", validUserId);
@@ -108,14 +109,14 @@ public class QueryTest extends AbstractFixtureTest {
     }
     
     @Test(expected=ItemNotFound.class)
-    public void testGetItemNotFound() throws PermissionDenied, ItemNotFound {
+    public void testGetItemNotFound() throws PermissionDenied, ItemNotFound, IndexNotFoundException {
         Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
         query.get(AccessibleEntity.IDENTIFIER_KEY, "IDONTEXIST", validUserId);
     }
     
     @Test(expected=PermissionDenied.class)
-    public void testGetPermissionDenied() throws PermissionDenied, ItemNotFound {
+    public void testGetPermissionDenied() throws PermissionDenied, ItemNotFound, IndexNotFoundException {
         Accessor accessor = helper.getTestFrame("reto", Accessor.class);
         Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
