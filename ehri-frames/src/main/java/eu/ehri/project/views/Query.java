@@ -9,6 +9,7 @@ import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.gremlin.java.GremlinPipeline;
 import eu.ehri.project.acl.AclManager;
+import eu.ehri.project.exceptions.IndexNotFoundException;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.annotations.EntityType;
@@ -37,7 +38,8 @@ public class Query<E extends AccessibleEntity> extends AbstractViews<E> implemen
         super(graph, cls);
     }
     
-    public E get(String key, String value, long user) throws PermissionDenied, ItemNotFound {
+    public E get(String key, String value, long user) throws PermissionDenied,
+            ItemNotFound, IndexNotFoundException {
         CloseableIterable<Vertex> indexQuery = getIndexForClass(cls).get(key, value);
         try {
             E item = graph.frame(indexQuery.iterator().next(), cls);
@@ -55,8 +57,9 @@ public class Query<E extends AccessibleEntity> extends AbstractViews<E> implemen
      * 
      * @param user
      * @return
+     * @throws IndexNotFoundException 
      */
-    public Iterable<E> list(long user) {
+    public Iterable<E> list(long user) throws IndexNotFoundException {
         return list(AccessibleEntity.IDENTIFIER_KEY, QUERY_GLOB, user);
     }
 
@@ -66,14 +69,15 @@ public class Query<E extends AccessibleEntity> extends AbstractViews<E> implemen
      * @param user
      * 
      * @return
+     * @throws IndexNotFoundException 
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    public Iterable<E> list(String key, String query, long user) {
+    public Iterable<E> list(String key, String query, long user) throws IndexNotFoundException {
 
         // This function is optimised for ACL actions.
         Accessor accessor = graph.getVertex(user, Accessor.class);
         CloseableIterable<Vertex> indexQuery = getIndexForClass(cls).query(key, query);
-        try {
+        try {            
             GremlinPipeline filter = new GremlinPipeline(indexQuery)
                     .filter(new AclManager(graph)
                             .getAclFilterFunction(accessor));
@@ -83,9 +87,12 @@ public class Query<E extends AccessibleEntity> extends AbstractViews<E> implemen
         }
     }
     
-    private Index<Vertex> getIndexForClass(Class<E> cls) {
-        return graph.getBaseGraph().getIndex(
-                getEntityIndexName(cls), Vertex.class);        
+    private Index<Vertex> getIndexForClass(Class<E> cls) throws IndexNotFoundException {
+        Index<Vertex> index = graph.getBaseGraph().getIndex(
+                getEntityIndexName(cls), Vertex.class);
+        if (index == null)
+            throw new IndexNotFoundException(getEntityIndexName(cls));
+        return index;
     }
 
     /**

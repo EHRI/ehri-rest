@@ -136,21 +136,24 @@
   {
     "data": {
       "isA": "group", 
-      "name": "admin"
+      "name": "admin",
+      "identifier": "admin"
     }, 
     "desc": "adminGroup"
   }, 
   {
     "data": {
       "isA": "group", 
-      "name": "niod"
+      "name": "niod",
+      "identifier": "niod"
     }, 
     "desc": "niodGroup"
   }, 
   {
     "data": {
       "isA": "group", 
-      "name": "kcl"
+      "name": "kcl",
+      "identifier": "kcl"
     }, 
     "desc": "kclGroup"
   }, 
