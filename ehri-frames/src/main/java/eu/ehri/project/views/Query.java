@@ -1,5 +1,7 @@
 package eu.ehri.project.views;
 
+import java.util.NoSuchElementException;
+
 import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.Index;
 import com.tinkerpop.blueprints.Vertex;
@@ -7,10 +9,11 @@ import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.gremlin.java.GremlinPipeline;
 import eu.ehri.project.acl.AclManager;
+import eu.ehri.project.exceptions.ItemNotFound;
+import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.persistance.Converter;
 
 /**
  * Handles querying Accessible Entities, with ACL semantics.
@@ -21,12 +24,8 @@ import eu.ehri.project.persistance.Converter;
  * 
  * @param <E>
  */
-public class Query<E extends AccessibleEntity> implements IQuery<E> {
+public class Query<E extends AccessibleEntity> extends AbstractViews<E> implements IQuery<E> {
     private static final String QUERY_GLOB = "*";
-    protected final FramedGraph<Neo4jGraph> graph;
-    protected final Class<E> cls;
-    protected final Converter converter = new Converter();
-    protected final AclManager acl;
 
     /**
      * Constructor.
@@ -35,9 +34,20 @@ public class Query<E extends AccessibleEntity> implements IQuery<E> {
      * @param cls
      */
     public Query(FramedGraph<Neo4jGraph> graph, Class<E> cls) {
-        this.graph = graph;
-        this.cls = cls;
-        this.acl = new AclManager(graph);
+        super(graph, cls);
+    }
+    
+    public E get(String key, String value, long user) throws PermissionDenied, ItemNotFound {
+        CloseableIterable<Vertex> indexQuery = getIndexForClass(cls).get(key, value);
+        try {
+            E item = graph.frame(indexQuery.iterator().next(), cls);
+            checkReadAccess(item, user);
+            return item;            
+        } catch (NoSuchElementException e) {
+            throw new ItemNotFound(key, value);
+        } finally {
+            indexQuery.close();
+        }
     }
 
     /**
@@ -62,10 +72,7 @@ public class Query<E extends AccessibleEntity> implements IQuery<E> {
 
         // This function is optimised for ACL actions.
         Accessor accessor = graph.getVertex(user, Accessor.class);
-        Index<Vertex> index = graph.getBaseGraph().getIndex(
-                getEntityIndexName(cls), Vertex.class);
-        CloseableIterable<Vertex> indexQuery = index.query(key, query);
-
+        CloseableIterable<Vertex> indexQuery = getIndexForClass(cls).query(key, query);
         try {
             GremlinPipeline filter = new GremlinPipeline(indexQuery)
                     .filter(new AclManager(graph)
@@ -74,6 +81,11 @@ public class Query<E extends AccessibleEntity> implements IQuery<E> {
         } finally {
             indexQuery.close();
         }
+    }
+    
+    private Index<Vertex> getIndexForClass(Class<E> cls) {
+        return graph.getBaseGraph().getIndex(
+                getEntityIndexName(cls), Vertex.class);        
     }
 
     /**

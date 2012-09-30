@@ -10,62 +10,15 @@ import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistance.BundleDAO;
-import eu.ehri.project.persistance.Converter;
 import eu.ehri.project.persistance.EntityBundle;
-import eu.ehri.project.relationships.Access;
-import eu.ehri.project.acl.AclManager;
 
-public class Views<E extends AccessibleEntity> implements IViews<E> {
+public class Views<E extends AccessibleEntity> extends AbstractViews<E> implements IViews<E> {
 
-    protected final FramedGraph<Neo4jGraph> graph;
-    protected final Class<E> cls;
-    protected final Converter converter = new Converter();
-    protected final AclManager acl;
-
-    /**
-     * @param graph
-     * @param cls
-     */
+    
+    
     public Views(FramedGraph<Neo4jGraph> graph, Class<E> cls) {
-        this.graph = graph;
-        this.cls = cls;
-        this.acl = new AclManager(graph);
-    }
-
-    /**
-     * Ensure an item is readable by the given user
-     * 
-     * @param entity
-     * @param user
-     * @throws PermissionDenied
-     */
-    protected void checkReadAccess(AccessibleEntity entity, long user)
-            throws PermissionDenied {
-        Accessor accessor = graph.getVertex(user, Accessor.class);
-        Access access = acl.getAccessControl(entity, accessor);
-        if (!access.getRead())
-            throw new PermissionDenied(accessor, entity);
-    }
-
-    /**
-     * Ensure an item is writable by the given user
-     * 
-     * @param entity
-     * @param user
-     * @throws PermissionDenied
-     */
-    protected void checkWriteAccess(AccessibleEntity entity, long user)
-            throws PermissionDenied {
-        Accessor accessor = graph.getVertex(user, Accessor.class);
-        Access access = acl.getAccessControl(entity, accessor);
-        if (!(access.getRead() && access.getWrite()))
-            throw new PermissionDenied(accessor, entity);
-    }
-
-    protected void checkGlobalWriteAccess(long user) throws PermissionDenied {
-        // TODO: Stub
+        super(graph, cls);
     }
 
     /**
