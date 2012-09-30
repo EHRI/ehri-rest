@@ -1,5 +1,6 @@
 package eu.ehri.project.importers.test;
 
+import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
@@ -12,7 +13,6 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.EadImportManager;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.exceptions.InputParseError;
-import eu.ehri.project.importers.exceptions.NoItemsCreated;
 import eu.ehri.project.models.Action;
 import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.UserProfile;
@@ -29,7 +29,7 @@ public class InvalidEadImporterTest extends AbstractFixtureTest {
     protected final String IMPORTED_ITEM_ID = "C00001";
 
     @Test(expected=ValidationError.class)
-    public void testImportItemsT() throws ValidationError, IOException, NoItemsCreated, InputParseError {
+    public void testImportItemsT() throws ValidationError, IOException, InputParseError {
         UserProfile user = graph.frame(graph.getVertex(validUserId),
                 UserProfile.class);
         Agent agent = graph.frame(helper.getTestVertex(TEST_REPO), Agent.class);
@@ -43,8 +43,8 @@ public class InvalidEadImporterTest extends AbstractFixtureTest {
         }
     }
 
-    @Test(expected=NoItemsCreated.class)
-    public void testTolerantImport() throws ValidationError, IOException, NoItemsCreated, InputParseError {
+    @Test
+    public void testTolerantImport() throws ValidationError, IOException, InputParseError {
         UserProfile user = graph.frame(graph.getVertex(validUserId),
                 UserProfile.class);
         Agent agent = graph.frame(helper.getTestVertex(TEST_REPO), Agent.class);
@@ -54,14 +54,16 @@ public class InvalidEadImporterTest extends AbstractFixtureTest {
         manager.setTolerant(true);        
         InputStream ios = ClassLoader.getSystemResourceAsStream(INVALID_EAD);
         try {            
-            manager.importFile(ios, logMessage);
+            ImportLog log = manager.importFile(ios, logMessage);
+            assertFalse(log.isValid());
+            assertEquals(1, log.getErrored());
         } finally {
             ios.close();
         }
     }
 
-    @Test(expected=NoItemsCreated.class)
-    public void testRollback() throws ValidationError, IOException, NoItemsCreated, InputParseError {
+    @Test
+    public void testRollback() throws ValidationError, IOException, InputParseError {
         UserProfile user = graph.frame(graph.getVertex(validUserId),
                 UserProfile.class);
         Agent agent = graph.frame(helper.getTestVertex(TEST_REPO), Agent.class);

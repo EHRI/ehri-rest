@@ -7,7 +7,6 @@ import java.net.URL;
 
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.exceptions.InputParseError;
-import eu.ehri.project.importers.exceptions.NoItemsCreated;
 
 abstract public class XmlImportManager implements ImportManager {
 
@@ -26,8 +25,7 @@ abstract public class XmlImportManager implements ImportManager {
      * @throws NoItemsCreated
      */
     public ImportLog importUrl(String address, String logMessage)
-            throws IOException, InputParseError, ValidationError,
-            NoItemsCreated {
+            throws IOException, InputParseError, ValidationError {
         URL url = new URL(address);
         InputStream ios = url.openStream();
         try {
@@ -52,8 +50,7 @@ abstract public class XmlImportManager implements ImportManager {
      * @throws NoItemsCreated
      */
     public ImportLog importFile(String filePath, String logMessage)
-            throws IOException, InputParseError, ValidationError,
-            NoItemsCreated {
+            throws IOException, InputParseError, ValidationError {
         FileInputStream ios = new FileInputStream(filePath);
         try {
             return importFile(ios, logMessage);
@@ -63,6 +60,5 @@ abstract public class XmlImportManager implements ImportManager {
     }
 
     abstract public ImportLog importFile(InputStream ios, String logMessage)
-            throws IOException, ValidationError, NoItemsCreated,
-            InputParseError;
+            throws IOException, ValidationError, InputParseError;
 }
