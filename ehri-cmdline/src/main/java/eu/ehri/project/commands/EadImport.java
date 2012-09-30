@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
@@ -135,6 +136,12 @@ public class EadImport extends BaseCommand implements Command {
 
             System.out.println("Import completed. Created: " + log.getCreated()
                     + ", Updated: " + log.getUpdated());
+            if (log.getErrored() > 0) {
+                System.out.println("Errors:");
+                for (Entry<String, String> entry: log.getErrors().entrySet()) {
+                    System.out.printf(" - %-20s : %s\n", entry.getKey(), entry.getValue());
+                }
+            }
             tx.success();
         } catch (Exception e) {
             // TODO Auto-generated catch block
