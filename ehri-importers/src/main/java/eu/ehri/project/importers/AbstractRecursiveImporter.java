@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.neo4j.graphdb.Transaction;
+
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
@@ -31,17 +33,32 @@ import eu.ehri.project.persistance.EntityBundle;
  */
 public abstract class AbstractRecursiveImporter<T> implements Importer<T> {
     private static final String IDENTITY_KEY = "identifier";
-    private Agent repository;
-    private FramedGraph<Neo4jGraph> framedGraph;
+    private final Agent repository;
+    private final FramedGraph<Neo4jGraph> framedGraph;
+    private final ImportLog log;
+    private Boolean tolerant = false;
 
     private List<CreationCallback> createCallbacks = new LinkedList<CreationCallback>();
     private List<CreationCallback> updateCallbacks = new LinkedList<CreationCallback>();
 
     public AbstractRecursiveImporter(FramedGraph<Neo4jGraph> framedGraph,
-            Agent repository) {
+            Agent repository, ImportLog log) {
         this.repository = repository;
         this.framedGraph = framedGraph;
+        this.log = log;
     }
+    
+    /**
+     * Tell the importer to simply skip invalid items rather than throwing an
+     * exception.
+     * 
+     * @param tolerant
+     */
+    public void setTolerant(Boolean tolerant) {
+        this.tolerant = tolerant;
+    }
+    
+    
 
     /**
      * Add a callback to run when an item is created.
@@ -108,7 +125,7 @@ public abstract class AbstractRecursiveImporter<T> implements Importer<T> {
      * @param depth
      * @throws ValidationError
      */
-    protected void importSingleItemAtDepth(T data, DocumentaryUnit parent,
+    final void importSingleItemAtDepth(T data, DocumentaryUnit parent,
             int depth) throws ValidationError {
         EntityBundle<DocumentaryUnit> unit = extractDocumentaryUnit(data, depth);
         BundleDAO<DocumentaryUnit> persister = new BundleDAO<DocumentaryUnit>(
@@ -144,7 +161,19 @@ public abstract class AbstractRecursiveImporter<T> implements Importer<T> {
 
         // Search through child parts and add them recursively...
         for (T child : extractChildData(data)) {
-            importMultipleItemsAtDepth(child, frame, depth + 1);
+            // Begin a new transaction each time we descend...
+            Transaction tx = framedGraph.getBaseGraph().getRawGraph().beginTx();
+            try {
+                importMultipleItemsAtDepth(child, frame, depth + 1);
+                tx.success();
+            } catch (ValidationError e) {
+                log.setErrored("Item at depth: " + depth, e.getMessage());
+                tx.failure();
+                if (!tolerant)
+                    throw e;
+            } finally {
+                tx.finish();
+            }
         }
 
         // Run creation callbacks for the new item...

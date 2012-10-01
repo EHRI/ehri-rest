@@ -51,7 +51,7 @@ public class EadImporter extends AbstractRecursiveImporter<Node> {
 
 	private final XPath xpath;
 	private EadLanguageExtractor langHelper;
-
+	
 	// An integer that represents how far down the
 	// EAD heirarchy tree the current document is.
 	public final String DEPTH_ATTR = "depthOfDescription";
@@ -122,14 +122,14 @@ public class EadImporter extends AbstractRecursiveImporter<Node> {
 	 * @param topLevelEad
 	 */
 	public EadImporter(FramedGraph<Neo4jGraph> framedGraph, Agent repository,
-			Node topLevelEad) {
-		super(framedGraph, repository);
+			Node topLevelEad, ImportLog log) {
+		super(framedGraph, repository, log);
 
 		this.topLevelEad = topLevelEad;
 		xpath = XPathFactory.newInstance().newXPath();
 		langHelper = new EadLanguageExtractor(xpath, topLevelEad);
 	}
-
+	
 	/**
 	 * Extract a list of entity bundles for DatePeriods from the data,
 	 * attempting to parse the unitdate attribute.

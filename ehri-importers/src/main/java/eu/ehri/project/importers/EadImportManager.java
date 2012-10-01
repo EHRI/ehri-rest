@@ -276,7 +276,7 @@ public class EadImportManager extends XmlImportManager implements ImportManager 
             final ImportLog log) throws ValidationError,
             InvalidInputFormatError {
 
-        EadImporter importer = new EadImporter(framedGraph, agent, node);
+        EadImporter importer = new EadImporter(framedGraph, agent, node, log);
         // Create a new action for this import
         importer.addCreationCallback(new CreationCallback() {
             public void itemImported(AccessibleEntity item) {
