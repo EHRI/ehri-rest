@@ -277,13 +277,13 @@ public class EadImportManager extends XmlImportManager implements ImportManager 
         EadImporter importer = new EadImporter(framedGraph, agent, node, log);
         importer.setTolerant(tolerant);
         // Create a new action for this import
-        importer.addCreationCallback(new CreationCallback() {
+        importer.addCreationCallback(new ImportCallback() {
             public void itemImported(AccessibleEntity item) {
                 action.addSubjects(item);
                 log.addCreated();
             }
         });
-        importer.addUpdateCallback(new CreationCallback() {
+        importer.addUpdateCallback(new ImportCallback() {
             public void itemImported(AccessibleEntity item) {
                 action.addSubjects(item);
                 log.addUpdated();

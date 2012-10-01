@@ -6,5 +6,5 @@ import eu.ehri.project.importers.exceptions.InvalidInputFormatError;
 public interface Importer<T> {
     abstract void importItems() throws ValidationError, InvalidInputFormatError;
 
-    public void addCreationCallback(final CreationCallback cb);
+    public void addCreationCallback(final ImportCallback cb);
 }

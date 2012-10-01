@@ -8,6 +8,6 @@ import eu.ehri.project.models.base.AccessibleEntity;
  * @author michaelb
  * 
  */
-public interface CreationCallback {
+public interface ImportCallback {
     public void itemImported(final AccessibleEntity item);
 }
