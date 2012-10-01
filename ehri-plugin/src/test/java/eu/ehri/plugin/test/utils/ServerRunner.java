@@ -46,7 +46,7 @@ public class ServerRunner {
         config = new ServerConfigurator(graphDatabase);
         config.configuration().setProperty("org.neo4j.server.webserver.port",
                 dbPort.toString());
-
+        
         bootstrapper = new WrappingNeoServerBootstrapper(graphDatabase, config);
 
         // Attempt to ensure database is erased from the disk when

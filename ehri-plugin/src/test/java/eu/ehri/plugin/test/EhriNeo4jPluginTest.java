@@ -71,10 +71,4 @@ public class EhriNeo4jPluginTest {
         assertEquals(itemId, unit.asVertex().getId());
     }
 
-    // Then do the same but via the plugin
-    @Test
-    public void testGetDocumentartyUnit() throws Exception {
-        Representation unit = plugin
-                .getDocumentaryUnit(db, itemId, validUserId);
-    }
 }

@@ -37,18 +37,17 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
 
     /**
      * CR(U)D cycle
-     * 
      */
     @Test
     public void testCreateDeleteUserProfile() throws Exception {
         // Create
-        WebResource resource = client.resource(extensionEntryPointUri
+        WebResource resource = client.resource(getExtensionEntryPointUri()
                 + "/userProfile");
         ClientResponse response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
                 .header(EhriNeo4jFramedResource.AUTH_HEADER_NAME,
-                        adminUserProfileId).entity(jsonUserProfileTestString)
+                		getAdminUserProfileId()).entity(jsonUserProfileTestString)
                 .post(ClientResponse.class);
 
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
@@ -60,7 +59,7 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
         response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .header(EhriNeo4jFramedResource.AUTH_HEADER_NAME,
-                        adminUserProfileId).get(ClientResponse.class);
+                		getAdminUserProfileId()).get(ClientResponse.class);
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
         // TODO again test json
     }
@@ -69,13 +68,13 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
     public void testUpdateUserProfile() throws Exception {
 
         // -create data for testing
-        WebResource resource = client.resource(extensionEntryPointUri
+        WebResource resource = client.resource(getExtensionEntryPointUri()
                 + "/userProfile");
         ClientResponse response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
                 .header(EhriNeo4jFramedResource.AUTH_HEADER_NAME,
-                        adminUserProfileId).entity(jsonUserProfileTestString)
+                		getAdminUserProfileId()).entity(jsonUserProfileTestString)
                 .post(ClientResponse.class);
 
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
@@ -89,7 +88,7 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
         response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .header(EhriNeo4jFramedResource.AUTH_HEADER_NAME,
-                        adminUserProfileId).get(ClientResponse.class);
+                		getAdminUserProfileId()).get(ClientResponse.class);
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
 
         // -get the data and change it
@@ -101,12 +100,12 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
         String toUpdateJson = converter.bundleToJson(entityBundle);
 
         // -update
-        resource = client.resource(extensionEntryPointUri + "/userProfile");
+        resource = client.resource(getExtensionEntryPointUri() + "/userProfile");
         response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
                 .header(EhriNeo4jFramedResource.AUTH_HEADER_NAME,
-                        adminUserProfileId).entity(toUpdateJson)
+                		getAdminUserProfileId()).entity(toUpdateJson)
                 .put(ClientResponse.class);
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
 
@@ -115,7 +114,7 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
         response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .header(EhriNeo4jFramedResource.AUTH_HEADER_NAME,
-                        adminUserProfileId).get(ClientResponse.class);
+                		getAdminUserProfileId()).get(ClientResponse.class);
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
 
         // -get the data and convert to a bundle, is it OK?

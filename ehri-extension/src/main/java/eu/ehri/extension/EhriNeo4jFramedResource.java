@@ -29,11 +29,11 @@ import eu.ehri.project.persistance.EntityBundle;
 import eu.ehri.project.views.Views;
 
 /**
- * Handle CRUD operations on AccessibleEntity's by using the
- * eu.ehri.project.views.Views class generic code. Resources for specific
- * entities can extend this class.
- * 
- * @param <E>
+ * Handle CRUD operations on AccessibleEntity's
+ * by using the eu.ehri.project.views.Views class generic code.
+ * Resources for specific entities can extend this class.   
+ *
+ * @param <E> The specific AccesibleEntity derived class
  */
 public class EhriNeo4jFramedResource<E extends AccessibleEntity> {
     /**

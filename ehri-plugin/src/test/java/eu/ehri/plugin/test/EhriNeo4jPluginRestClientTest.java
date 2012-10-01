@@ -28,13 +28,6 @@ import eu.ehri.plugin.test.utils.ServerRunner;
  * EhriNeo4jPlugin is just a thin wrapper around the EhriNeo4j class in the
  * ehri-frames project.
  * 
- * The test by EhriNeo4jPluginRestClientTest will need to have a running neo4j
- * server with the plugin installed. It will call the REST interface using the
- * Jersey neo4j client, but the same could have been done using curl. However,
- * we then would have shell scripts with curl calls, and having the test in Java
- * is more portable. Also it shows how you can use the REST api from your Java
- * program.
- * 
  */
 public class EhriNeo4jPluginRestClientTest {
     private static final Logger logger = LoggerFactory
@@ -76,8 +69,8 @@ public class EhriNeo4jPluginRestClientTest {
         Client client = Client.create();
 
         // create an admin group vertex
-        WebResource vetrexIndexResource = client.resource(vertexIndexUri);
-        ClientResponse response = vetrexIndexResource
+        WebResource vertexIndexResource = client.resource(vertexIndexUri);
+        ClientResponse response = vertexIndexResource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
                 .entity("{\"index\":\"group\", \"parameters\": {}}")
@@ -93,8 +86,8 @@ public class EhriNeo4jPluginRestClientTest {
         Long groupId = getIdFromResponseString(response.getEntity(String.class));
 
         // create an admin userProfile vertex
-        vetrexIndexResource = client.resource(vertexIndexUri);
-        response = vetrexIndexResource.accept(MediaType.APPLICATION_JSON)
+        vertexIndexResource = client.resource(vertexIndexUri);
+        response = vertexIndexResource.accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
                 .entity("{\"index\":\"userProfile\", \"parameters\": {}}")
                 .post(ClientResponse.class);
@@ -145,11 +138,6 @@ public class EhriNeo4jPluginRestClientTest {
 
     /**
      * Test creation of an indexed Vertex (via the plugin)
-     * 
-     * Example with curl: curl -X POST -H "Content-type: application/json"
-     * http:/
-     * /localhost:7474/db/data/ext/EhriNeo4jPlugin/graphdb/createIndexedVertex
-     * -d '{"index":"test", "data": {"name": "Test1"}}'
      */
     @Test
     public void testCreateIndexedVertex() {
@@ -222,5 +210,4 @@ public class EhriNeo4jPluginRestClientTest {
 
         response.close();
     }
-
 }

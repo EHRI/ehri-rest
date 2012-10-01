@@ -34,13 +34,13 @@ public class AgentRestClientTest extends BaseRestClientTest {
     @Test
     public void testCreateDeleteAgent() throws Exception {
         // Create
-        WebResource resource = client.resource(extensionEntryPointUri
+        WebResource resource = client.resource(getExtensionEntryPointUri()
                 + "/agent");
         ClientResponse response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
                 .header(EhriNeo4jFramedResource.AUTH_HEADER_NAME,
-                        adminUserProfileId).entity(jsonAgentTestString)
+                		getAdminUserProfileId()).entity(jsonAgentTestString)
                 .post(ClientResponse.class);
 
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
@@ -52,7 +52,7 @@ public class AgentRestClientTest extends BaseRestClientTest {
         response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .header(EhriNeo4jFramedResource.AUTH_HEADER_NAME,
-                        adminUserProfileId).get(ClientResponse.class);
+                		getAdminUserProfileId()).get(ClientResponse.class);
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
     }
 }
