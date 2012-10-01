@@ -19,6 +19,7 @@ import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.frames.VertexFrame;
 
 import eu.ehri.project.core.GraphHelpers;
+import eu.ehri.project.exceptions.IndexNotFoundException;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.annotations.Dependent;
 import eu.ehri.project.models.utils.ClassUtils;
@@ -48,21 +49,7 @@ public class BundleDAO<T extends VertexFrame> {
      * @throws ValidationError
      */
     public T update(EntityBundle<T> bundle) throws ValidationError {
-        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
-        try {
-            Vertex node = updateInner(bundle);
-            tx.success();
-            return graph.frame(node, bundle.getBundleClass());
-        } catch (ValidationError err) {
-            tx.failure();
-            throw new ValidationError(err.getMessage());
-        } catch (Exception err) {
-            tx.failure();
-            throw new RuntimeException(err);
-        } finally {
-            tx.finish();
-        }
-
+        return graph.frame(updateInner(bundle), bundle.getBundleClass());
     }
 
     /**
@@ -71,53 +58,31 @@ public class BundleDAO<T extends VertexFrame> {
      * @param bundle
      * @return
      * @throws ValidationError
+     * @throws IndexNotFoundException 
      */
     public T createOrUpdate(String key, String value, EntityBundle<T> bundle)
-            throws ValidationError {
-        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
+        throws ValidationError, IndexNotFoundException {
+        Index<Vertex> index = helpers.getIndex(bundle.getEntityType(),
+                Vertex.class);
+        if (index == null)
+            throw new ValidationError("Cannot find index or item type: "
+                    + bundle.getEntityType());
+        Vertex node = null;
+        CloseableIterable<Vertex> nodes = index.get(key, value);
         try {
-
-            Index<Vertex> index = helpers.getIndex(bundle.getEntityType(),
-                    Vertex.class);
-            if (index == null)
-                throw new ValidationError("Cannot find index or item type: "
-                        + bundle.getEntityType());
-            Vertex node = null;
-            CloseableIterable<Vertex> nodes = index.get(key, value);
             if (nodes.iterator().hasNext()) {
                 node = updateInner(bundle);
             } else {
                 node = createInner(bundle);
             }
-            tx.success();
             return graph.frame(node, bundle.getBundleClass());
-        } catch (ValidationError err) {
-            tx.failure();
-            throw new ValidationError(err.getMessage());
-        } catch (Exception err) {
-            tx.failure();
-            throw new RuntimeException(err);
         } finally {
-            tx.finish();
+            nodes.close();
         }
-
     }
 
     public T create(EntityBundle<T> bundle) throws ValidationError {
-        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
-        try {
-            Vertex node = createInner(bundle);
-            tx.success();
-            return graph.frame(node, bundle.getBundleClass());
-        } catch (ValidationError err) {
-            tx.failure();
-            throw new ValidationError(err.getMessage());
-        } catch (Exception err) {
-            tx.failure();
-            throw new RuntimeException(err);
-        } finally {
-            tx.finish();
-        }
+        return graph.frame(createInner(bundle), bundle.getBundleClass());
     }
 
     /**
@@ -130,17 +95,13 @@ public class BundleDAO<T extends VertexFrame> {
      */
     public Integer delete(EntityBundle<?> bundle) throws ValidationError {
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
-        // Recursively blast everything away! Use with caution.
         try {
             Integer count = deleteCount(bundle, 0);
             tx.success();
             return count;
-        } catch (ValidationError err) {
+        } catch (Exception e) {
             tx.failure();
-            throw new ValidationError(err.getMessage());
-        } catch (Exception err) {
-            tx.failure();
-            throw new RuntimeException(err);
+            throw new RuntimeException(e);
         } finally {
             tx.finish();
         }
