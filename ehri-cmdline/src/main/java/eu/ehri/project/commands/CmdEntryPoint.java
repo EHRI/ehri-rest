@@ -22,12 +22,12 @@ public class CmdEntryPoint extends BaseCommand {
         super();
     }
 
-    private static final Map<String, Command> COMMANDS;
+    private static final Map<String, Class<? extends Command>> COMMANDS;
     static {
-        Map<String, Command> mmap = new HashMap<String, Command>();
-        mmap.put("import-ead", new EadImport());
-        mmap.put("list", new ListEntities());
-        mmap.put("load-fixtures", new LoadFixtures());
+        Map<String, Class<? extends Command>> mmap = new HashMap<String, Class<? extends Command>>();
+        mmap.put(EadImport.NAME, EadImport.class);
+        mmap.put(ListEntities.NAME, ListEntities.class);
+        mmap.put(LoadFixtures.NAME, LoadFixtures.class);
         COMMANDS = Collections.unmodifiableMap(mmap);
     };
 
@@ -69,7 +69,7 @@ public class CmdEntryPoint extends BaseCommand {
                 for (int i = 2; i < args.length; i++) {
                     newArgs.add(args[i]);
                 }
-                Command cmd = CmdEntryPoint.COMMANDS.get(args[1]);
+                Command cmd = CmdEntryPoint.COMMANDS.get(args[1]).getConstructor().newInstance();
                 
                 try {                    
                     cmd.exec(graph, newArgs.toArray(new String[newArgs.size()]));

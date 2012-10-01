@@ -18,6 +18,8 @@ import eu.ehri.project.views.Query;
  * 
  */
 public class ListEntities extends BaseCommand implements Command {
+    
+    final static String NAME = "list";
 
     /**
      * Constructor.

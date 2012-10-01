@@ -8,7 +8,7 @@ import org.apache.commons.cli.PosixParser;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
-public abstract class BaseCommand implements Command {
+public abstract class BaseCommand {
     
     Options options = new Options();
     CommandLineParser parser = new PosixParser();

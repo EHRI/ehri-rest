@@ -11,6 +11,8 @@ import eu.ehri.project.test.utils.FixtureLoader;
  * 
  */
 public class LoadFixtures extends BaseCommand implements Command {
+    
+    final static String NAME = "load-fixtures";
 
     /**
      * Constructor.

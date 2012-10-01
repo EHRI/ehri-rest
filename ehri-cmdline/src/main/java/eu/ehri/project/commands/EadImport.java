@@ -28,6 +28,8 @@ import eu.ehri.project.persistance.EntityBundle;
  */
 public class EadImport extends BaseCommand implements Command {
 
+    final static String NAME = "ead-import";
+    
     /**
      * Constructor.
      * 
