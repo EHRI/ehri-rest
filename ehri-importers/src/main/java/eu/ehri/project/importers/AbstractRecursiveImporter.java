@@ -1,10 +1,7 @@
 package eu.ehri.project.importers;
 
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-
-import org.neo4j.graphdb.Transaction;
 
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
@@ -17,10 +14,10 @@ import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.DocumentDescription;
 import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.TemporalEntity;
 import eu.ehri.project.persistance.BundleDAO;
-import eu.ehri.project.persistance.BundleFactory;
 import eu.ehri.project.persistance.EntityBundle;
 
 /**
@@ -31,23 +28,25 @@ import eu.ehri.project.persistance.EntityBundle;
  * 
  * @param <T>
  */
-public abstract class AbstractRecursiveImporter<T> implements Importer<T> {
-    private static final String IDENTITY_KEY = "identifier";
+public abstract class AbstractRecursiveImporter<T> implements Importer<T> {    
     private final Agent repository;
     private final FramedGraph<Neo4jGraph> framedGraph;
-    private final ImportLog log;
-    private Boolean tolerant = false;
+    
+    protected final ImportLog log;
+    protected final T documentContext;
+    protected Boolean tolerant = false;
 
     private List<CreationCallback> createCallbacks = new LinkedList<CreationCallback>();
     private List<CreationCallback> updateCallbacks = new LinkedList<CreationCallback>();
 
     public AbstractRecursiveImporter(FramedGraph<Neo4jGraph> framedGraph,
-            Agent repository, ImportLog log) {
+            Agent repository, ImportLog log, T documentContext) {
         this.repository = repository;
         this.framedGraph = framedGraph;
         this.log = log;
+        this.documentContext = documentContext;
     }
-    
+
     /**
      * Tell the importer to simply skip invalid items rather than throwing an
      * exception.
@@ -57,8 +56,6 @@ public abstract class AbstractRecursiveImporter<T> implements Importer<T> {
     public void setTolerant(Boolean tolerant) {
         this.tolerant = tolerant;
     }
-    
-    
 
     /**
      * Add a callback to run when an item is created.
@@ -74,75 +71,73 @@ public abstract class AbstractRecursiveImporter<T> implements Importer<T> {
     }
 
     /**
-     * Extract child items.
+     * Extract child items from an item node.
      * 
-     * @param data
+     * @param itemData
      * @return
      */
-    public List<T> extractChildData(T data) {
+    public List<T> extractChildItems(T itemData) {
         return new LinkedList<T>();
     }
 
     /**
      * Extract the logical DocumentaryUnit at a given depth.
      * 
-     * @param data
+     * @param itemData
      * @param depth
      * @return
      * @throws ValidationError
      */
-    protected EntityBundle<DocumentaryUnit> extractDocumentaryUnit(T data,
-            int depth) throws ValidationError {
-
-        EntityBundle<DocumentaryUnit> bundle = new BundleFactory<DocumentaryUnit>()
-                .buildBundle(new HashMap<String, Object>(),
-                        DocumentaryUnit.class);
-
-        // Extract details for the logical item here
-
-        return bundle;
-    }
+    protected abstract EntityBundle<DocumentaryUnit> extractDocumentaryUnit(
+            T itemData, int depth) throws ValidationError;
 
     /**
      * Extract DocumentDescriptions at a given depth from the input data.
      * 
-     * @param data
+     * @param itemData
      * @param depth
      * @return
      * @throws ValidationError
      */
-    public abstract List<EntityBundle<DocumentDescription>> extractDocumentDescriptions(
-            T data, int depth) throws ValidationError;
+    protected abstract List<EntityBundle<DocumentDescription>> extractDocumentDescriptions(
+            T itemData, int depth) throws ValidationError;
 
+    /**
+     * Extract a list of DatePeriod bundles from an item's data.
+     * 
+     * @param data
+     * @return
+     */
     public abstract List<EntityBundle<DatePeriod>> extractDates(T data);
 
     /**
      * Import a single archdesc or c01-12 item, keeping a reference to the
      * hierarchical depth.
      * 
-     * @param data
+     * @param itemData
      * @param parent
      * @param depth
      * @throws ValidationError
      */
-    final void importSingleItemAtDepth(T data, DocumentaryUnit parent,
-            int depth) throws ValidationError {
-        EntityBundle<DocumentaryUnit> unit = extractDocumentaryUnit(data, depth);
+    final void importItem(T itemData, DocumentaryUnit parent, int depth)
+            throws ValidationError {
+        EntityBundle<DocumentaryUnit> unit = extractDocumentaryUnit(itemData,
+                depth);
         BundleDAO<DocumentaryUnit> persister = new BundleDAO<DocumentaryUnit>(
                 framedGraph);
 
         // Add dates and descriptions to the bundle since they're @Dependent
         // relations.
-        for (EntityBundle<DatePeriod> dpb : extractDates(data)) {
+        for (EntityBundle<DatePeriod> dpb : extractDates(itemData)) {
             unit.addRelation(TemporalEntity.HAS_DATE, dpb);
         }
         for (EntityBundle<DocumentDescription> dpb : extractDocumentDescriptions(
-                data, depth)) {
+                itemData, depth)) {
             unit.addRelation(Description.DESCRIBES, dpb);
         }
 
         Object existingId = getExistingGraphId((String) unit.getData().get(
-                IDENTITY_KEY));
+                AccessibleEntity.IDENTIFIER_KEY));
         DocumentaryUnit frame;
         if (existingId != null) {
             frame = persister.update(new EntityBundle<DocumentaryUnit>(
@@ -160,19 +155,14 @@ public abstract class AbstractRecursiveImporter<T> implements Importer<T> {
             parent.addChild(frame);
 
         // Search through child parts and add them recursively...
-        for (T child : extractChildData(data)) {
-            // Begin a new transaction each time we descend...
-            Transaction tx = framedGraph.getBaseGraph().getRawGraph().beginTx();
+        for (T child : extractChildItems(itemData)) {
             try {
-                importMultipleItemsAtDepth(child, frame, depth + 1);
-                tx.success();
+                importItem(child, frame, depth + 1);
             } catch (ValidationError e) {
                 log.setErrored("Item at depth: " + depth, e.getMessage());
-                tx.failure();
-                if (!tolerant)
+                if (!tolerant) {
                     throw e;
-            } finally {
-                tx.finish();
+                }
             }
         }
 
@@ -189,42 +179,26 @@ public abstract class AbstractRecursiveImporter<T> implements Importer<T> {
     }
 
     /**
-     * Entry point for a top-level DocumentaryUnit item.
-     */
-    protected void importItem(T data) throws ValidationError {
-        importSingleItemAtDepth(data, null, 0);
-    }
-
-    /**
-     * Import multiple items with a given parent at a given depth.
+     * Get the entry point to the top level item data.
      * 
-     * @param data
-     * @param parent
-     * @param depth
+     * @param topLevelData
+     */
+    protected abstract List<T> getEntryPoints()
+            throws ValidationError, InvalidInputFormatError;
+    
+    /**
+     * Top-level entry point for importing some EAD.
+     * 
      * @throws ValidationError
-     */
-    protected abstract void importMultipleItemsAtDepth(T data,
-            DocumentaryUnit parent, int depth) throws ValidationError;
-
-    /**
-     * Import (multiple) items from the top-level data.
-     * 
-     * @param data
-     * @param agent
-     * @throws ValidationError
-     */
-    public void importItemsFromData(T data) throws ValidationError {
-        importMultipleItemsAtDepth(data, null, 0);
-    }
-
-    /**
-     * Main entry-point to trigger parsing.
-     * 
      * @throws InvalidInputFormatError
      * 
      */
-    public abstract void importItems() throws ValidationError,
-            InvalidInputFormatError;
+    public void importItems() throws ValidationError, InvalidInputFormatError {
+        for (T item : getEntryPoints()) {
+            importItem(item, null, 0);
+        }
+    }
+
 
     // Helpers.
 
@@ -241,7 +215,7 @@ public abstract class AbstractRecursiveImporter<T> implements Importer<T> {
         GremlinPipeline pipe = new GremlinPipeline(repository.asVertex())
                 .out(Agent.HOLDS).filter(new PipeFunction<Vertex, Boolean>() {
                     public Boolean compute(Vertex item) {
-                        String vid = (String) item.getProperty(IDENTITY_KEY);
+                        String vid = (String) item.getProperty(AccessibleEntity.IDENTIFIER_KEY);
                         return (vid != null && vid.equals(id));
                     }
                 }).id();

@@ -9,7 +9,6 @@ import java.util.Map.Entry;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.ParseException;
-import org.neo4j.graphdb.Transaction;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
@@ -87,8 +86,6 @@ public class EadImport extends BaseCommand implements Command {
             filePaths.add((String) cmdLine.getArgList().get(i));
         }
 
-        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
-
         try {
 
             // Find the agent
@@ -135,13 +132,11 @@ public class EadImport extends BaseCommand implements Command {
                     System.out.printf(" - %-20s : %s\n", entry.getKey(), entry.getValue());
                 }
             }
-            tx.success();
         } catch (Exception e) {
             e.printStackTrace();
-            tx.failure();
             return 1;
         } finally {
-            tx.finish();
+            graph.shutdown();
         }
         return 0;
     }

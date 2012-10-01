@@ -3,10 +3,10 @@
 
 ARGS="$@"
 
-mvn -Dexec.classpathScope=compile \
+mvn  -Dexec.classpathScope=compile \
+    -quiet \
     -pl ehri-cmdline \
     -Dexec.mainClass="eu.ehri.project.commands.CmdEntryPoint" \
     -Dlog4j.rootLogger=WARN \
     -Dexec.args="$ARGS" \
-    -quiet \
     exec:java

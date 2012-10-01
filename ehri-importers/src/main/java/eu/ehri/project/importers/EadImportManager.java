@@ -108,23 +108,19 @@ public class EadImportManager extends XmlImportManager implements ImportManager 
 
             // Do the import...
             importFile(ios, action, log);
-
             // If nothing was imported, remove the action...
-            if (log.isValid())
+            if (log.isValid()) {
                 tx.success();
-            else
-                tx.failure();
+            }
+            
             return log;
         } catch (ValidationError e) {
-            tx.failure();
             throw e;
         } catch (Exception e) {
-            tx.failure();
             throw new RuntimeException(e);
         } finally {
             tx.finish();
         }
-
     }
 
     /**
@@ -156,16 +152,18 @@ public class EadImportManager extends XmlImportManager implements ImportManager 
                 }
             }
 
-            // If nothing was imported, remove the action...
-            if (log.isValid())
+            // Only mark the transaction successful if we're
+            // actually accomplished something.
+            if (log.isValid()) {
                 tx.success();
-            else
-                tx.failure();
+            }
+
             return log;
         } catch (ValidationError e) {
             tx.failure();
             throw e;
         } catch (Exception e) {
+            e.printStackTrace();
             tx.failure();
             throw new RuntimeException(e);
         } finally {
@@ -197,7 +195,7 @@ public class EadImportManager extends XmlImportManager implements ImportManager 
         try {
             DocumentBuilder builder = factory.newDocumentBuilder();
             Document doc = builder.parse(ios);
-            importDocWithAction(doc, action, log);
+            importDocWithinAction(doc, action, log);
         } catch (ParserConfigurationException e) {
             e.printStackTrace();
             throw new RuntimeException(e);
@@ -218,19 +216,19 @@ public class EadImportManager extends XmlImportManager implements ImportManager 
      * @throws InvalidEadDocument
      * @throws InvalidInputFormatError
      */
-    private void importDocWithAction(Document doc, final Action action,
+    private void importDocWithinAction(Document doc, final Action action,
             final ImportLog manifest) throws ValidationError,
             InvalidEadDocument, InvalidInputFormatError {
 
         // Check the various types of document we support. This
         // includes <eadgrp> or <eadlist> types.
         if (doc.getDocumentElement().getNodeName().equals("ead")) {
-            importNodeWithAction((Node) doc.getDocumentElement(), action,
+            importNodeWithinAction((Node) doc.getDocumentElement(), action,
                     manifest);
         } else if (doc.getDocumentElement().getNodeName().equals("eadlist")) {
-            importNestedItems(doc, EADLIST_PATH, action, manifest);
+            importNestedItemsWithinAction(doc, EADLIST_PATH, action, manifest);
         } else if (doc.getDocumentElement().getNodeName().equals("eadgrp")) {
-            importNestedItems(doc, EADGRP_PATH, action, manifest);
+            importNestedItemsWithinAction(doc, EADGRP_PATH, action, manifest);
         } else {
             throw new InvalidEadDocument(doc.getDocumentElement().getNodeName());
         }
@@ -244,7 +242,7 @@ public class EadImportManager extends XmlImportManager implements ImportManager 
      * @throws ValidationError
      * @throws InvalidInputFormatError
      */
-    private void importNestedItems(Document doc, String path,
+    private void importNestedItemsWithinAction(Document doc, String path,
             final Action action, final ImportLog manifest)
             throws ValidationError, InvalidInputFormatError {
         XPath xpath = XPathFactory.newInstance().newXPath();
@@ -258,7 +256,7 @@ public class EadImportManager extends XmlImportManager implements ImportManager 
         }
         for (int i = 0; i < eadList.getLength(); i++) {
             currentPosition = i;
-            importNodeWithAction(eadList.item(i), action, manifest);
+            importNodeWithinAction(eadList.item(i), action, manifest);
         }
     }
 
@@ -272,11 +270,12 @@ public class EadImportManager extends XmlImportManager implements ImportManager 
      * @throws ValidationError
      * @throws InvalidInputFormatError
      */
-    private void importNodeWithAction(Node node, final Action action,
+    private void importNodeWithinAction(Node node, final Action action,
             final ImportLog log) throws ValidationError,
             InvalidInputFormatError {
-
+        
         EadImporter importer = new EadImporter(framedGraph, agent, node, log);
+        importer.setTolerant(tolerant);
         // Create a new action for this import
         importer.addCreationCallback(new CreationCallback() {
             public void itemImported(AccessibleEntity item) {
@@ -295,13 +294,15 @@ public class EadImportManager extends XmlImportManager implements ImportManager 
         } catch (InvalidInputFormatError e) {
             logger.error(e.getMessage());
             log.setErrored(formatErrorLocation(), e.getMessage());
-            if (!tolerant)
+            if (!tolerant){
                 throw e;
+            }
         } catch (ValidationError e) {
             logger.error(e.getMessage());
             log.setErrored(formatErrorLocation(), e.getMessage());
-            if (!tolerant)
-                throw e;
+            if (!tolerant) {
+                throw e;                
+            }
         }
     }
     
