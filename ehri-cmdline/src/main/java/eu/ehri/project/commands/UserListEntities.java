@@ -2,24 +2,25 @@ package eu.ehri.project.commands;
 
 import java.util.Map;
 import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.Option;
 import org.apache.commons.cli.ParseException;
-import com.tinkerpop.blueprints.CloseableIterable;
-import com.tinkerpop.blueprints.Index;
-import com.tinkerpop.blueprints.Vertex;
+
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.frames.VertexFrame;
 
+import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.utils.ClassUtils;
+import eu.ehri.project.views.Query;
 
 /**
  * Import EAD from the command line...
  * 
  */
-public class ListEntities extends BaseCommand implements Command {
+public class UserListEntities extends BaseCommand implements Command {
     
-    final static String NAME = "list";
+    final static String NAME = "user-list";
 
     /**
      * Constructor.
@@ -27,17 +28,23 @@ public class ListEntities extends BaseCommand implements Command {
      * @param args
      * @throws ParseException
      */
-    public ListEntities() {
+    public UserListEntities() {
+    }
+
+    @Override
+    protected void setCustomOptions() {
+        options.addOption(new Option("user", true,
+                "Identifier of user to import as"));
     }
 
     @Override
     public String getHelp() {
-        return "Usage: list [OPTIONS] <type>";
+        return "Usage: user-list [OPTIONS] <type>";
     }
 
     @Override
     public String getUsage() {
-        String help = "List entities of a given type.";
+        String help = "List entities of a given type as a given user.";
         return help;
     }
 
@@ -63,16 +70,16 @@ public class ListEntities extends BaseCommand implements Command {
         if (!AccessibleEntity.class.isAssignableFrom(cls))
             throw new RuntimeException("Unknown accessible entity: " + type);
 
-        Index<Vertex> index = graph.getBaseGraph().getIndex(type, Vertex.class);
-        CloseableIterable<Vertex> query = index.query(
-                AccessibleEntity.IDENTIFIER_KEY, "*");
-        try {
-            for (AccessibleEntity acc : graph.frameVertices(query,
-                    AccessibleEntity.class)) {
-                System.out.println(acc.getIdentifier());
-            }
-        } finally {
-            query.close();
+        UserProfile user = graph
+                .getVertices(AccessibleEntity.IDENTIFIER_KEY,
+                        (String) cmdLine.getOptionValue("user"),
+                        UserProfile.class).iterator().next();
+
+        @SuppressWarnings("unchecked")
+        Query<AccessibleEntity> query = new Query<AccessibleEntity>(graph,
+                (Class<AccessibleEntity>) cls);
+        for (AccessibleEntity acc : query.list((Long) user.asVertex().getId())) {
+            System.out.println(acc.getIdentifier());
         }
         
         return 0;

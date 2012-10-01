@@ -3,6 +3,7 @@ package eu.ehri.project.commands;
 import java.util.Map;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
+
 import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.Index;
 import com.tinkerpop.blueprints.Vertex;
@@ -12,14 +13,15 @@ import com.tinkerpop.frames.VertexFrame;
 
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.utils.ClassUtils;
+import eu.ehri.project.persistance.Converter;
 
 /**
  * Import EAD from the command line...
  * 
  */
-public class ListEntities extends BaseCommand implements Command {
-    
-    final static String NAME = "list";
+public class GetEntity extends BaseCommand implements Command {
+
+    final static String NAME = "get";
 
     /**
      * Constructor.
@@ -27,17 +29,17 @@ public class ListEntities extends BaseCommand implements Command {
      * @param args
      * @throws ParseException
      */
-    public ListEntities() {
+    public GetEntity() {
     }
 
     @Override
     public String getHelp() {
-        return "Usage: list [OPTIONS] <type>";
+        return "Usage: get [OPTIONS] <type> <identifier>";
     }
 
     @Override
     public String getUsage() {
-        String help = "List entities of a given type.";
+        String help = "Get an entity by its identifier.";
         return help;
     }
 
@@ -47,12 +49,14 @@ public class ListEntities extends BaseCommand implements Command {
      * @param args
      * @throws Exception
      */
-    public int execWithOptions(final FramedGraph<Neo4jGraph> graph, CommandLine cmdLine) throws Exception {
+    public int execWithOptions(final FramedGraph<Neo4jGraph> graph,
+            CommandLine cmdLine) throws Exception {
 
-        if (cmdLine.getArgList().size() < 1)
+        if (cmdLine.getArgList().size() < 2)
             throw new RuntimeException(getHelp());
 
         String type = cmdLine.getArgs()[0];
+        String id = cmdLine.getArgs()[1];
         Map<String, Class<? extends VertexFrame>> classes = ClassUtils
                 .getEntityClasses();
 
@@ -64,17 +68,17 @@ public class ListEntities extends BaseCommand implements Command {
             throw new RuntimeException("Unknown accessible entity: " + type);
 
         Index<Vertex> index = graph.getBaseGraph().getIndex(type, Vertex.class);
-        CloseableIterable<Vertex> query = index.query(
-                AccessibleEntity.IDENTIFIER_KEY, "*");
+        CloseableIterable<Vertex> query = index.get(
+                AccessibleEntity.IDENTIFIER_KEY, id);
         try {
-            for (AccessibleEntity acc : graph.frameVertices(query,
-                    AccessibleEntity.class)) {
-                System.out.println(acc.getIdentifier());
-            }
+            @SuppressWarnings("unchecked")
+            AccessibleEntity item = graph.frame(query.iterator().next(),
+                    (Class<AccessibleEntity>) cls);
+            System.out.println(new Converter().vertexFrameToJson(item));
         } finally {
             query.close();
         }
-        
+
         return 0;
     }
 }
