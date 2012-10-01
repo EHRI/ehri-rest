@@ -28,10 +28,10 @@ import eu.ehri.project.persistance.EntityBundle;
  * 
  * @param <T>
  */
-public abstract class AbstractRecursiveImporter<T> implements Importer<T> {    
+public abstract class AbstractRecursiveImporter<T> implements Importer<T> {
     private final Agent repository;
     private final FramedGraph<Neo4jGraph> framedGraph;
-    
+
     protected final ImportLog log;
     protected final T documentContext;
     protected Boolean tolerant = false;
@@ -66,6 +66,11 @@ public abstract class AbstractRecursiveImporter<T> implements Importer<T> {
         createCallbacks.add(cb);
     }
 
+    /**
+     * Add a callback to run when an item is updated.
+     * 
+     * @param cb
+     */
     public void addUpdateCallback(final ImportCallback cb) {
         updateCallbacks.add(cb);
     }
@@ -76,9 +81,7 @@ public abstract class AbstractRecursiveImporter<T> implements Importer<T> {
      * @param itemData
      * @return
      */
-    public List<T> extractChildItems(T itemData) {
-        return new LinkedList<T>();
-    }
+    protected abstract List<T> extractChildItems(T itemData);
 
     /**
      * Extract the logical DocumentaryUnit at a given depth.
@@ -183,9 +186,9 @@ public abstract class AbstractRecursiveImporter<T> implements Importer<T> {
      * 
      * @param topLevelData
      */
-    protected abstract List<T> getEntryPoints()
-            throws ValidationError, InvalidInputFormatError;
-    
+    protected abstract List<T> getEntryPoints() throws ValidationError,
+            InvalidInputFormatError;
+
     /**
      * Top-level entry point for importing some EAD.
      * 
@@ -198,7 +201,6 @@ public abstract class AbstractRecursiveImporter<T> implements Importer<T> {
             importItem(item, null, 0);
         }
     }
-
 
     // Helpers.
 
@@ -215,7 +217,8 @@ public abstract class AbstractRecursiveImporter<T> implements Importer<T> {
         GremlinPipeline pipe = new GremlinPipeline(repository.asVertex())
                 .out(Agent.HOLDS).filter(new PipeFunction<Vertex, Boolean>() {
                     public Boolean compute(Vertex item) {
-                        String vid = (String) item.getProperty(AccessibleEntity.IDENTIFIER_KEY);
+                        String vid = (String) item
+                                .getProperty(AccessibleEntity.IDENTIFIER_KEY);
                         return (vid != null && vid.equals(id));
                     }
                 }).id();
