@@ -119,7 +119,7 @@ public abstract class AbstractMultiItemRecursiveImporter<T> extends
             int depth) throws ValidationError {
 
         DocumentaryUnit frame = super.importItem(itemData, parent, depth);
-        
+
         // Search through child parts and add them recursively...
         for (T child : extractChildItems(itemData)) {
             try {

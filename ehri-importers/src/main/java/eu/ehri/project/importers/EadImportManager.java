@@ -54,7 +54,7 @@ public class EadImportManager extends XmlImportManager implements ImportManager 
     protected final FramedGraph<Neo4jGraph> framedGraph;
     protected final Agent agent;
     protected final Actioner actioner;
-    
+
     // Ugly stateful variables for tracking import state
     // and reporting errors usefully...
     private String currentFile = null;
@@ -112,7 +112,7 @@ public class EadImportManager extends XmlImportManager implements ImportManager 
             if (log.isValid()) {
                 tx.success();
             }
-            
+
             return log;
         } catch (ValidationError e) {
             throw e;
@@ -273,7 +273,7 @@ public class EadImportManager extends XmlImportManager implements ImportManager 
     private void importNodeWithinAction(Node node, final Action action,
             final ImportLog log) throws ValidationError,
             InvalidInputFormatError {
-        
+
         EadImporter importer = new EadImporter(framedGraph, agent, node, log);
         importer.setTolerant(tolerant);
         // Create a new action for this import
@@ -294,19 +294,20 @@ public class EadImportManager extends XmlImportManager implements ImportManager 
         } catch (InvalidInputFormatError e) {
             logger.error(e.getMessage());
             log.setErrored(formatErrorLocation(), e.getMessage());
-            if (!tolerant){
+            if (!tolerant) {
                 throw e;
             }
         } catch (ValidationError e) {
             logger.error(e.getMessage());
             log.setErrored(formatErrorLocation(), e.getMessage());
             if (!tolerant) {
-                throw e;                
+                throw e;
             }
         }
     }
-    
+
     private String formatErrorLocation() {
-        return String.format("File: %s, EAD document: %d", currentFile, currentPosition);
+        return String.format("File: %s, EAD document: %d", currentFile,
+                currentPosition);
     }
 }

@@ -161,8 +161,8 @@ public class EadImporter extends AbstractMultiItemRecursiveImporter<Node> {
     }
 
     @Override
-    protected Map<String, Object> extractDocumentaryUnit(Node data,
-            int depth) throws ValidationError {
+    protected Map<String, Object> extractDocumentaryUnit(Node data, int depth)
+            throws ValidationError {
         Map<String, Object> dataMap = new HashMap<String, Object>();
         try {
             dataMap.put("identifier", xpath.compile("did/unitid/text()")
@@ -198,8 +198,8 @@ public class EadImporter extends AbstractMultiItemRecursiveImporter<Node> {
      * @return
      */
     @Override
-    public List<Map<String, Object>> extractDocumentDescriptions(
-            Node data, int depth) throws ValidationError {
+    public List<Map<String, Object>> extractDocumentDescriptions(Node data,
+            int depth) throws ValidationError {
         List<Map<String, Object>> descs = new LinkedList<Map<String, Object>>();
 
         Map<String, Object> dataMap = new HashMap<String, Object>();
@@ -247,17 +247,18 @@ public class EadImporter extends AbstractMultiItemRecursiveImporter<Node> {
      * ... &lt;c01&gt; &lt;dsc&gt; &lt/archdesc&gt;
      * 
      */
-    protected List<Node> getEntryPoints() throws ValidationError, InvalidInputFormatError {
+    protected List<Node> getEntryPoints() throws ValidationError,
+            InvalidInputFormatError {
         List<Node> entryPoints = new LinkedList<Node>();
         try {
-            NodeList nodes = (NodeList) xpath.compile("archdesc").evaluate(documentContext,
-                    XPathConstants.NODESET);
+            NodeList nodes = (NodeList) xpath.compile("archdesc").evaluate(
+                    documentContext, XPathConstants.NODESET);
             for (int i = 0; i < nodes.getLength(); i++) {
                 Node archDescNode = nodes.item(i);
-                
+
                 try {
-                    Node titleNode = (Node) xpath.compile("did/unittitle").evaluate(
-                            archDescNode, XPathConstants.NODE);
+                    Node titleNode = (Node) xpath.compile("did/unittitle")
+                            .evaluate(archDescNode, XPathConstants.NODE);
                     // If we have a unitid at archdesc level, import that
                     if (titleNode != null
                             && !titleNode.getTextContent().trim().isEmpty()) {
@@ -267,8 +268,8 @@ public class EadImporter extends AbstractMultiItemRecursiveImporter<Node> {
                     } else {
                         // Otherwise, inspect the children of the archdesc/dsc
                         logger.info("Extracting multiple items from archdesc/dsc...");
-                        NodeList dsc = (NodeList) xpath.compile("dsc").evaluate(archDescNode,
-                                XPathConstants.NODESET);
+                        NodeList dsc = (NodeList) xpath.compile("dsc")
+                                .evaluate(archDescNode, XPathConstants.NODESET);
                         for (int j = 0; j < dsc.getLength(); j++) {
                             for (Node d : extractChildItems(dsc.item(j))) {
                                 entryPoints.add(d);
@@ -278,18 +279,19 @@ public class EadImporter extends AbstractMultiItemRecursiveImporter<Node> {
                 } catch (XPathExpressionException e) {
                     e.printStackTrace();
                     throw new RuntimeException(e);
-                }                
+                }
             }
         } catch (XPathExpressionException e) {
             e.printStackTrace();
             throw new RuntimeException(e);
         }
         if (entryPoints.size() == 0)
-            throw new InvalidInputFormatError("No archdesc/did or archdesc/dsc/c* elements found");
+            throw new InvalidInputFormatError(
+                    "No archdesc/did or archdesc/dsc/c* elements found");
 
-        return entryPoints;        
+        return entryPoints;
     }
-    
+
     // Helpers
 
     /**
@@ -346,8 +348,7 @@ public class EadImporter extends AbstractMultiItemRecursiveImporter<Node> {
      * @return
      * @throws ValidationError
      */
-    private Map<String, Object> extractDate(String date)
-            throws ValidationError {
+    private Map<String, Object> extractDate(String date) throws ValidationError {
         Map<String, Object> data = new HashMap<String, Object>();
         boolean ok = false;
         for (Pattern re : datePatterns) {
