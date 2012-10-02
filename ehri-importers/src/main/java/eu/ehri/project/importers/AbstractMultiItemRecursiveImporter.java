@@ -1,26 +1,13 @@
 package eu.ehri.project.importers;
 
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
-import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
-import com.tinkerpop.gremlin.java.GremlinPipeline;
-import com.tinkerpop.pipes.PipeFunction;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.exceptions.InvalidInputFormatError;
 import eu.ehri.project.models.Agent;
-import eu.ehri.project.models.DatePeriod;
-import eu.ehri.project.models.DocumentDescription;
 import eu.ehri.project.models.DocumentaryUnit;
-import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.base.Description;
-import eu.ehri.project.models.base.TemporalEntity;
-import eu.ehri.project.persistance.BundleDAO;
-import eu.ehri.project.persistance.BundleFactory;
-import eu.ehri.project.persistance.EntityBundle;
 
 /**
  * Abstract base class for importers that must descend a tree like structure
@@ -55,23 +42,16 @@ import eu.ehri.project.persistance.EntityBundle;
  * The data type T is, in the EAD example, an XML Node, but this depends on the
  * implementing class (it could just as well be a JsonTree object.) The importer
  * is initialised using the full document (i.e. the &lt;ead&gt; node), and
- * logical item data extraction is performed on &lt;archdesc&gt; or &lt;c0X&gt; 
+ * logical item data extraction is performed on &lt;archdesc&gt; or &lt;c0X&gt;
  * nodes.
  * 
  * @author michaelb
  * 
  * @param <T>
  */
-public abstract class AbstractMultiItemRecursiveImporter<T> {
-    private final Agent repository;
-    private final FramedGraph<Neo4jGraph> framedGraph;
-
-    protected final ImportLog log;
-    protected final T documentContext;
+public abstract class AbstractMultiItemRecursiveImporter<T> extends
+        AbstractImporter<T> {
     protected Boolean tolerant = false;
-
-    private List<ImportCallback> createCallbacks = new LinkedList<ImportCallback>();
-    private List<ImportCallback> updateCallbacks = new LinkedList<ImportCallback>();
 
     /**
      * Constructor.
@@ -84,10 +64,7 @@ public abstract class AbstractMultiItemRecursiveImporter<T> {
     public AbstractMultiItemRecursiveImporter(
             FramedGraph<Neo4jGraph> framedGraph, Agent repository,
             ImportLog log, T documentContext) {
-        this.repository = repository;
-        this.framedGraph = framedGraph;
-        this.log = log;
-        this.documentContext = documentContext;
+        super(framedGraph, repository, log, documentContext);
     }
 
     /**
@@ -101,134 +78,12 @@ public abstract class AbstractMultiItemRecursiveImporter<T> {
     }
 
     /**
-     * Add a callback to run when an item is created.
-     * 
-     * @param cb
-     */
-    public void addCreationCallback(final ImportCallback cb) {
-        createCallbacks.add(cb);
-    }
-
-    /**
-     * Add a callback to run when an item is updated.
-     * 
-     * @param cb
-     */
-    public void addUpdateCallback(final ImportCallback cb) {
-        updateCallbacks.add(cb);
-    }
-
-    /**
      * Extract child items from an item node.
      * 
      * @param itemData
      * @return
      */
     protected abstract List<T> extractChildItems(T itemData);
-
-    /**
-     * Extract the logical DocumentaryUnit at a given depth.
-     * 
-     * @param itemData
-     * @param depth
-     * @return
-     * @throws ValidationError
-     */
-    protected abstract Map<String, Object> extractDocumentaryUnit(T itemData,
-            int depth) throws ValidationError;
-
-    /**
-     * Extract DocumentDescriptions at a given depth from the input data.
-     * 
-     * @param itemData
-     * @param depth
-     * @return
-     * @throws ValidationError
-     */
-    protected abstract Iterable<Map<String, Object>> extractDocumentDescriptions(
-            T itemData, int depth) throws ValidationError;
-
-    /**
-     * Extract a list of DatePeriod bundles from an item's data.
-     * 
-     * @param data
-     * @return
-     */
-    public abstract Iterable<Map<String, Object>> extractDates(T data);
-
-    /**
-     * Import a single archdesc or c01-12 item, keeping a reference to the
-     * hierarchical depth.
-     * 
-     * @param itemData
-     * @param parent
-     * @param depth
-     * @throws ValidationError
-     */
-    final void importItem(T itemData, DocumentaryUnit parent, int depth)
-            throws ValidationError {
-        EntityBundle<DocumentaryUnit> unit = new BundleFactory<DocumentaryUnit>()
-                .buildBundle(extractDocumentaryUnit(itemData, depth),
-                        DocumentaryUnit.class);
-        BundleDAO<DocumentaryUnit> persister = new BundleDAO<DocumentaryUnit>(
-                framedGraph);
-
-        // Add dates and descriptions to the bundle since they're @Dependent
-        // relations.
-        for (Map<String, Object> dpb : extractDates(itemData)) {
-            unit.addRelation(TemporalEntity.HAS_DATE,
-                    new BundleFactory<DatePeriod>().buildBundle(dpb,
-                            DatePeriod.class));
-        }
-        for (Map<String, Object> dpb : extractDocumentDescriptions(itemData,
-                depth)) {
-            unit.addRelation(Description.DESCRIBES,
-                    new BundleFactory<DocumentDescription>().buildBundle(dpb,
-                            DocumentDescription.class));
-        }
-
-        Object existingId = getExistingGraphId((String) unit.getData().get(
-                AccessibleEntity.IDENTIFIER_KEY));
-        DocumentaryUnit frame;
-        if (existingId != null) {
-            frame = persister.update(new EntityBundle<DocumentaryUnit>(
-                    existingId, unit.getData(), unit.getBundleClass(), unit
-                            .getRelations()));
-        } else {
-            frame = persister.create(unit);
-
-            // Set the repository/item relationship
-            repository.addCollection(frame);
-        }
-
-        // Set the parent child relationship
-        if (parent != null)
-            parent.addChild(frame);
-
-        // Search through child parts and add them recursively...
-        for (T child : extractChildItems(itemData)) {
-            try {
-                importItem(child, frame, depth + 1);
-            } catch (ValidationError e) {
-                // TODO: Improve error context.
-                log.setErrored("Item at depth: " + depth, e.getMessage());
-                if (!tolerant) {
-                    throw e;
-                }
-            }
-        }
-
-        // Run creation callbacks for the new item...
-        if (existingId == null) {
-            for (ImportCallback cb : createCallbacks) {
-                cb.itemImported(frame);
-            }
-        } else {
-            for (ImportCallback cb : updateCallbacks) {
-                cb.itemImported(frame);
-            }
-        }
-    }
 
     /**
      * Get the entry point to the top level item data.
@@ -251,26 +106,33 @@ public abstract class AbstractMultiItemRecursiveImporter<T> {
         }
     }
 
-    // Helpers.
-
     /**
-     * Lookup the graph ID of an existing object based on the IDENTITY_KEY
+     * Import an item, and them recursively import its children.
      * 
-     * @param id
-     * @return
+     * @param itemData
+     * @param parent
+     * @param depth
+     * @throws ValidationError
      */
-    private Object getExistingGraphId(final String id) {
-        // Lookup the graph id of an object with the same
-        // identity key...
-        @SuppressWarnings({ "unchecked", "rawtypes" })
-        GremlinPipeline pipe = new GremlinPipeline(repository.asVertex())
-                .out(Agent.HOLDS).filter(new PipeFunction<Vertex, Boolean>() {
-                    public Boolean compute(Vertex item) {
-                        String vid = (String) item
-                                .getProperty(AccessibleEntity.IDENTIFIER_KEY);
-                        return (vid != null && vid.equals(id));
-                    }
-                }).id();
-        return pipe.hasNext() ? pipe.next() : null;
+    @Override
+    public DocumentaryUnit importItem(T itemData, DocumentaryUnit parent,
+            int depth) throws ValidationError {
+
+        DocumentaryUnit frame = super.importItem(itemData, parent, depth);
+        
+        // Search through child parts and add them recursively...
+        for (T child : extractChildItems(itemData)) {
+            try {
+                importItem(child, frame, depth + 1);
+            } catch (ValidationError e) {
+                // TODO: Improve error context.
+                log.setErrored("Item at depth: " + depth, e.getMessage());
+                if (!tolerant) {
+                    throw e;
+                }
+            }
+        }
+
+        return frame;
     }
 }

@@ -197,6 +197,7 @@ public class EadImporter extends AbstractMultiItemRecursiveImporter<Node> {
      * @param depth
      * @return
      */
+    @Override
     public List<Map<String, Object>> extractDocumentDescriptions(
             Node data, int depth) throws ValidationError {
         List<Map<String, Object>> descs = new LinkedList<Map<String, Object>>();
