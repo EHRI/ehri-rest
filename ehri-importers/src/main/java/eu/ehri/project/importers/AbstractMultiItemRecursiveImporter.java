@@ -45,9 +45,18 @@ import eu.ehri.project.persistance.EntityBundle;
  * structure and persisting the data. Implementing concrete classes must
  * implement:
  * 
- * - Extracting from document T the entry points for each top-level and
- * returning an iterable set of item nodes T1. - Extracting from item node T1 an
- * iterable set of child nodes T2. - Extracting the item data from node T1.
+ * 1. Extracting from document T the entry points for each top-level and
+ * returning an iterable set of item nodes T1.
+ * 
+ * 2. Extracting from item node T1 an iterable set of child nodes T2.
+ * 
+ * 3. Extracting the item data from node T1 (logical unit, descriptions, dates).
+ * 
+ * The data type T is, in the EAD example, an XML Node, but this depends on the
+ * implementing class (it could just as well be a JsonTree object.) The importer
+ * is initialised using the full document (i.e. the &lt;ead&gt; node), and
+ * logical item data extraction is performed on &lt;archdesc&gt; or &lt;c0X&gt; 
+ * nodes.
  * 
  * @author michaelb
  * 
