@@ -26,11 +26,6 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ead.EadLanguageExtractor;
 import eu.ehri.project.importers.exceptions.InvalidInputFormatError;
 import eu.ehri.project.models.Agent;
-import eu.ehri.project.models.DatePeriod;
-import eu.ehri.project.models.DocumentDescription;
-import eu.ehri.project.models.DocumentaryUnit;
-import eu.ehri.project.persistance.BundleFactory;
-import eu.ehri.project.persistance.EntityBundle;
 
 /**
  * Import EAD for a given repository into the database. Due to the laxness of
@@ -44,7 +39,7 @@ import eu.ehri.project.persistance.EntityBundle;
  * @author michaelb
  * 
  */
-public class EadImporter extends AbstractRecursiveImporter<Node> {
+public class EadImporter extends AbstractMultiItemRecursiveImporter<Node> {
 
     private static final Logger logger = LoggerFactory
             .getLogger(EadImporter.class);
@@ -134,11 +129,11 @@ public class EadImporter extends AbstractRecursiveImporter<Node> {
      * @param data
      */
     @Override
-    public List<EntityBundle<DatePeriod>> extractDates(Node data) {
-        List<EntityBundle<DatePeriod>> dates = new LinkedList<EntityBundle<DatePeriod>>();
+    public List<Map<String, Object>> extractDates(Node data) {
+        List<Map<String, Object>> dates = new LinkedList<Map<String, Object>>();
         try {
             for (String date : extractTextList(data, "did/unitdate")) {
-                EntityBundle<DatePeriod> dpb = extractDate(date);
+                Map<String, Object> dpb = extractDate(date);
                 if (dpb != null)
                     dates.add(dpb);
             }
@@ -166,7 +161,7 @@ public class EadImporter extends AbstractRecursiveImporter<Node> {
     }
 
     @Override
-    protected EntityBundle<DocumentaryUnit> extractDocumentaryUnit(Node data,
+    protected Map<String, Object> extractDocumentaryUnit(Node data,
             int depth) throws ValidationError {
         Map<String, Object> dataMap = new HashMap<String, Object>();
         try {
@@ -191,8 +186,7 @@ public class EadImporter extends AbstractRecursiveImporter<Node> {
             throw new RuntimeException(e);
         }
 
-        return new BundleFactory<DocumentaryUnit>().buildBundle(dataMap,
-                DocumentaryUnit.class);
+        return dataMap;
     }
 
     /**
@@ -203,9 +197,9 @@ public class EadImporter extends AbstractRecursiveImporter<Node> {
      * @param depth
      * @return
      */
-    public List<EntityBundle<DocumentDescription>> extractDocumentDescriptions(
+    public List<Map<String, Object>> extractDocumentDescriptions(
             Node data, int depth) throws ValidationError {
-        List<EntityBundle<DocumentDescription>> descs = new LinkedList<EntityBundle<DocumentDescription>>();
+        List<Map<String, Object>> descs = new LinkedList<Map<String, Object>>();
 
         Map<String, Object> dataMap = new HashMap<String, Object>();
 
@@ -228,8 +222,7 @@ public class EadImporter extends AbstractRecursiveImporter<Node> {
         materialCodes.addAll(langHelper.getGlobalLanguagesOfMaterial());
         dataMap.put("languagesOfMaterial", getUniqueArray(materialCodes));
 
-        descs.add(new BundleFactory<DocumentDescription>().buildBundle(dataMap,
-                DocumentDescription.class));
+        descs.add(dataMap);
 
         return descs;
     }
@@ -352,7 +345,7 @@ public class EadImporter extends AbstractRecursiveImporter<Node> {
      * @return
      * @throws ValidationError
      */
-    private EntityBundle<DatePeriod> extractDate(String date)
+    private Map<String, Object> extractDate(String date)
             throws ValidationError {
         Map<String, Object> data = new HashMap<String, Object>();
         boolean ok = false;
@@ -367,8 +360,7 @@ public class EadImporter extends AbstractRecursiveImporter<Node> {
             }
         }
 
-        return ok ? new BundleFactory<DatePeriod>().buildBundle(data,
-                DatePeriod.class) : null;
+        return ok ? data : null;
     }
 
     /**

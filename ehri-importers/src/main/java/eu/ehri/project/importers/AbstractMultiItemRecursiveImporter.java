@@ -2,6 +2,7 @@ package eu.ehri.project.importers;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
@@ -18,17 +19,41 @@ import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.TemporalEntity;
 import eu.ehri.project.persistance.BundleDAO;
+import eu.ehri.project.persistance.BundleFactory;
 import eu.ehri.project.persistance.EntityBundle;
 
 /**
  * Abstract base class for importers that must descend a tree like structure
  * such as EAD, where elements contain multiple child items.
  * 
+ * Mea culpa: it's likely that this will only be useful for EAD.
+ * 
+ * This abstract class handles importing documents of type T, which contain one
+ * or more logical documentary units, which may themselves contain multiple
+ * child items.
+ * 
+ * As expressed in EAD, this looks like:
+ * 
+ * ead archdesc <- logical item
+ * 
+ * or
+ * 
+ * ead archdesc dsc c01 <- logical item c01 <- logical item 2 c02 <- child of
+ * item 2
+ * 
+ * This abstract class handles the top-level logic of importing this type of
+ * structure and persisting the data. Implementing concrete classes must
+ * implement:
+ * 
+ * - Extracting from document T the entry points for each top-level and
+ * returning an iterable set of item nodes T1. - Extracting from item node T1 an
+ * iterable set of child nodes T2. - Extracting the item data from node T1.
+ * 
  * @author michaelb
  * 
  * @param <T>
  */
-public abstract class AbstractRecursiveImporter<T> implements Importer<T> {
+public abstract class AbstractMultiItemRecursiveImporter<T> {
     private final Agent repository;
     private final FramedGraph<Neo4jGraph> framedGraph;
 
@@ -39,8 +64,17 @@ public abstract class AbstractRecursiveImporter<T> implements Importer<T> {
     private List<ImportCallback> createCallbacks = new LinkedList<ImportCallback>();
     private List<ImportCallback> updateCallbacks = new LinkedList<ImportCallback>();
 
-    public AbstractRecursiveImporter(FramedGraph<Neo4jGraph> framedGraph,
-            Agent repository, ImportLog log, T documentContext) {
+    /**
+     * Constructor.
+     * 
+     * @param framedGraph
+     * @param repository
+     * @param log
+     * @param documentContext
+     */
+    public AbstractMultiItemRecursiveImporter(
+            FramedGraph<Neo4jGraph> framedGraph, Agent repository,
+            ImportLog log, T documentContext) {
         this.repository = repository;
         this.framedGraph = framedGraph;
         this.log = log;
@@ -91,8 +125,8 @@ public abstract class AbstractRecursiveImporter<T> implements Importer<T> {
      * @return
      * @throws ValidationError
      */
-    protected abstract EntityBundle<DocumentaryUnit> extractDocumentaryUnit(
-            T itemData, int depth) throws ValidationError;
+    protected abstract Map<String, Object> extractDocumentaryUnit(T itemData,
+            int depth) throws ValidationError;
 
     /**
      * Extract DocumentDescriptions at a given depth from the input data.
@@ -102,7 +136,7 @@ public abstract class AbstractRecursiveImporter<T> implements Importer<T> {
      * @return
      * @throws ValidationError
      */
-    protected abstract List<EntityBundle<DocumentDescription>> extractDocumentDescriptions(
+    protected abstract Iterable<Map<String, Object>> extractDocumentDescriptions(
             T itemData, int depth) throws ValidationError;
 
     /**
@@ -111,7 +145,7 @@ public abstract class AbstractRecursiveImporter<T> implements Importer<T> {
      * @param data
      * @return
      */
-    public abstract List<EntityBundle<DatePeriod>> extractDates(T data);
+    public abstract Iterable<Map<String, Object>> extractDates(T data);
 
     /**
      * Import a single archdesc or c01-12 item, keeping a reference to the
@@ -124,19 +158,24 @@ public abstract class AbstractRecursiveImporter<T> implements Importer<T> {
      */
     final void importItem(T itemData, DocumentaryUnit parent, int depth)
             throws ValidationError {
-        EntityBundle<DocumentaryUnit> unit = extractDocumentaryUnit(itemData,
-                depth);
+        EntityBundle<DocumentaryUnit> unit = new BundleFactory<DocumentaryUnit>()
+                .buildBundle(extractDocumentaryUnit(itemData, depth),
+                        DocumentaryUnit.class);
         BundleDAO<DocumentaryUnit> persister = new BundleDAO<DocumentaryUnit>(
                 framedGraph);
 
         // Add dates and descriptions to the bundle since they're @Dependent
         // relations.
-        for (EntityBundle<DatePeriod> dpb : extractDates(itemData)) {
-            unit.addRelation(TemporalEntity.HAS_DATE, dpb);
+        for (Map<String, Object> dpb : extractDates(itemData)) {
+            unit.addRelation(TemporalEntity.HAS_DATE,
+                    new BundleFactory<DatePeriod>().buildBundle(dpb,
+                            DatePeriod.class));
         }
-        for (EntityBundle<DocumentDescription> dpb : extractDocumentDescriptions(
-                itemData, depth)) {
-            unit.addRelation(Description.DESCRIBES, dpb);
+        for (Map<String, Object> dpb : extractDocumentDescriptions(itemData,
+                depth)) {
+            unit.addRelation(Description.DESCRIBES,
+                    new BundleFactory<DocumentDescription>().buildBundle(dpb,
+                            DocumentDescription.class));
         }
 
         Object existingId = getExistingGraphId((String) unit.getData().get(
@@ -162,6 +201,7 @@ public abstract class AbstractRecursiveImporter<T> implements Importer<T> {
             try {
                 importItem(child, frame, depth + 1);
             } catch (ValidationError e) {
+                // TODO: Improve error context.
                 log.setErrored("Item at depth: " + depth, e.getMessage());
                 if (!tolerant) {
                     throw e;
@@ -186,7 +226,7 @@ public abstract class AbstractRecursiveImporter<T> implements Importer<T> {
      * 
      * @param topLevelData
      */
-    protected abstract List<T> getEntryPoints() throws ValidationError,
+    protected abstract Iterable<T> getEntryPoints() throws ValidationError,
             InvalidInputFormatError;
 
     /**
