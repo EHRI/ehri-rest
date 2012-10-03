@@ -15,11 +15,12 @@ import javax.ws.rs.core.Response;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import eu.ehri.project.models.Agent;
+import eu.ehri.project.models.EntityTypes;
 
 /**
  * Provides a RESTfull interface for the Agent 
  */
-@Path("/ehri/agent")
+@Path(EhriNeo4jFramedResource.MOUNT_POINT + "/" + EntityTypes.AGENT)
 public class AgentResource extends EhriNeo4jFramedResource<Agent> {
 
     public AgentResource(@Context GraphDatabaseService database) {
