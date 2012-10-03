@@ -2,7 +2,7 @@
   "data": {
     "name": "a collection",
     "isA": "documentaryUnit",
-    "identifier": "some id"
+    "identifier": "some-id"
   },
   "relationships": {
     "describes": [
@@ -11,7 +11,7 @@
           "languageCode": "en",
           "title": "a description",
           "isA": "documentDescription",
-          "identifier": "some id"
+          "identifier": "some-id"
         }
       }
     ],

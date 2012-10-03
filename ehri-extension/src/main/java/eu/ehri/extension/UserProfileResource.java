@@ -14,12 +14,13 @@ import javax.ws.rs.core.Response;
 
 import org.neo4j.graphdb.GraphDatabaseService;
 
+import eu.ehri.project.models.EntityTypes;
 import eu.ehri.project.models.UserProfile;
 
 /**
  * Provides a RESTfull interface for the UserProfile. 
  */
-@Path("/ehri/userProfile")
+@Path(EhriNeo4jFramedResource.MOUNT_POINT + "/" + EntityTypes.USER_PROFILE)
 public class UserProfileResource extends EhriNeo4jFramedResource<UserProfile> {
 
     public UserProfileResource(@Context GraphDatabaseService database) {
