@@ -2,27 +2,28 @@ package eu.ehri.project.models;
 
 import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Property;
-import com.tinkerpop.frames.VertexFrame;
-
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Actioner;
 
 @EntityType(EntityTypes.ACTION)
-public interface Action extends VertexFrame {
+public interface Action extends AccessibleEntity {
     public static final String HAS_SUBJECT = "hasSubject";
     public static final String HAS_ACTIONER = "hasActioner";
+    
+    public final String TIMESTAMP = "timestamp";
+    public final String LOG_MESSAGE = "logMessage";
 
-    @Property("timestamp")
+    @Property(TIMESTAMP)
     public String getTimestamp();
 
-    @Property("timestamp")
+    @Property(TIMESTAMP)
     public void setTimestamp(String timestamp);
 
-    @Property("logMessage")
+    @Property(LOG_MESSAGE)
     public String getLogMessage();
 
-    @Property("logMessage")
+    @Property(LOG_MESSAGE)
     public void setLogMessage(String message);
 
     @Adjacency(label = HAS_SUBJECT)

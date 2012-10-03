@@ -2,6 +2,7 @@ package eu.ehri.project.persistance;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import org.joda.time.DateTime;
 import org.joda.time.format.ISODateTimeFormat;
@@ -41,8 +42,9 @@ public class ActionManager {
      */
     public Action createAction(Actioner user, String logMessage) {
         Map<String, Object> actionData = new HashMap<String, Object>();
-        actionData.put("timestamp", getTimestamp());
-        actionData.put("logMessage", logMessage);
+        actionData.put(Action.TIMESTAMP, getTimestamp());
+        actionData.put(Action.LOG_MESSAGE, logMessage);
+        actionData.put(AccessibleEntity.IDENTIFIER_KEY, UUID.randomUUID().toString());
 
         BundleDAO<Action> persister = new BundleDAO<Action>(graph);
         Action action;
