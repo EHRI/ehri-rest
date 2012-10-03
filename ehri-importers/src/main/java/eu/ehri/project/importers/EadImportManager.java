@@ -3,6 +3,7 @@ package eu.ehri.project.importers;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringReader;
 import java.util.List;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -18,6 +19,8 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.EntityResolver;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
@@ -61,6 +64,19 @@ public class EadImportManager extends XmlImportManager implements ImportManager 
     private Integer currentPosition = null;
 
     /**
+     * Dummy resolver that does nothing. This is used to ensure that, in
+     * tolerant mode, the EAD parser does not lookup the DTD and validate the
+     * document, which is both slow and error prone.
+     */
+    public class DummyEntityResolver implements EntityResolver {
+        public InputSource resolveEntity(String publicID, String systemID)
+                throws SAXException {
+
+            return new InputSource(new StringReader(""));
+        }
+    }
+
+    /**
      * Constructor.
      * 
      * @param framedGraph
@@ -94,6 +110,7 @@ public class EadImportManager extends XmlImportManager implements ImportManager 
      * 
      * @throws IOException
      * @throws ValidationError
+     * @throws InvalidEadDocument
      * @throw InputParseError
      */
     public ImportLog importFile(InputStream ios, String logMessage)
@@ -142,13 +159,19 @@ public class EadImportManager extends XmlImportManager implements ImportManager 
                     actioner, logMessage);
             final ImportLog log = new ImportLog(action);
             for (String path : paths) {
-                currentFile = path;
-                FileInputStream ios = new FileInputStream(path);
                 try {
-                    logger.info("Importing file: " + path);
-                    importFile(ios, action, log);
-                } finally {
-                    ios.close();
+                    currentFile = path;
+                    FileInputStream ios = new FileInputStream(path);
+                    try {
+                        logger.info("Importing file: " + path);
+                        importFile(ios, action, log);
+                    } finally {
+                        ios.close();
+                    }
+                } catch (InvalidEadDocument e) {
+                    log.setErrored(formatErrorLocation(), e.getMessage());
+                    if (!tolerant)
+                        throw e;
                 }
             }
 
@@ -191,9 +214,12 @@ public class EadImportManager extends XmlImportManager implements ImportManager 
         // XML parsing boilerplate...
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         factory.setNamespaceAware(true);
+        factory.setValidating(!tolerant);
 
         try {
             DocumentBuilder builder = factory.newDocumentBuilder();
+            if (tolerant)
+                builder.setEntityResolver(new DummyEntityResolver());
             Document doc = builder.parse(ios);
             importDocWithinAction(doc, action, log);
         } catch (ParserConfigurationException e) {
@@ -241,10 +267,11 @@ public class EadImportManager extends XmlImportManager implements ImportManager 
      * @return
      * @throws ValidationError
      * @throws InvalidInputFormatError
+     * @throws InvalidEadDocument
      */
     private void importNestedItemsWithinAction(Document doc, String path,
             final Action action, final ImportLog manifest)
-            throws ValidationError, InvalidInputFormatError {
+            throws ValidationError, InvalidInputFormatError, InvalidEadDocument {
         XPath xpath = XPathFactory.newInstance().newXPath();
         NodeList eadList;
         try {
@@ -269,10 +296,11 @@ public class EadImportManager extends XmlImportManager implements ImportManager 
      * @return
      * @throws ValidationError
      * @throws InvalidInputFormatError
+     * @throws InvalidEadDocument
      */
     private void importNodeWithinAction(Node node, final Action action,
             final ImportLog log) throws ValidationError,
-            InvalidInputFormatError {
+            InvalidInputFormatError, InvalidEadDocument {
 
         EadImporter importer = new EadImporter(framedGraph, agent, node, log);
         importer.setTolerant(tolerant);
