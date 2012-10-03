@@ -15,6 +15,9 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Node;
@@ -26,6 +29,9 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ead.EadLanguageExtractor;
 import eu.ehri.project.importers.exceptions.InvalidInputFormatError;
 import eu.ehri.project.models.Agent;
+import eu.ehri.project.models.DatePeriod;
+import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.base.AccessibleEntity;
 
 /**
  * Import EAD for a given repository into the database. Due to the laxness of
@@ -56,6 +62,17 @@ public class EadImporter extends AbstractMultiItemRecursiveImporter<Node> {
     // level of description.
     public final String LEVEL_ATTR = "levelOfDescription";
 
+    // Global EAD Attributes (stored in eadheader).
+    @SuppressWarnings("serial")
+    private final Map<String,String> eadGlobalAttributeMap = new HashMap<String, String>() {
+        {
+            put("publisher", "eadheader/filedesc/publicationstmt/publisher");
+            put("publicationDate", "eadheader/filedesc/date");
+            put("creationDate", "profiledesc/creation/date");
+            put("rules", "profiledesc/descrules");
+        }
+    };
+    
     // List of XPaths against the final attribute names. This should probably be
     // moved
     // to external configuration...
@@ -70,7 +87,7 @@ public class EadImporter extends AbstractMultiItemRecursiveImporter<Node> {
             put("conditionsOfReproduction", "userestrict/p");
             put("extentAndMedium", "did/physdesc/extent"); // Should be more
                                                            // nuanced!
-            put("identifier", "did/unitid");
+            put(AccessibleEntity.IDENTIFIER_KEY, "did/unitid");
             put("locationOfCopies", "altformavail/p");
             put("locationOfOriginals", "originalsloc/p");
             put("title", "did/unittitle");
@@ -165,10 +182,10 @@ public class EadImporter extends AbstractMultiItemRecursiveImporter<Node> {
             throws ValidationError {
         Map<String, Object> dataMap = new HashMap<String, Object>();
         try {
-            dataMap.put("identifier", xpath.compile("did/unitid/text()")
+            dataMap.put(AccessibleEntity.IDENTIFIER_KEY, xpath.compile("did/unitid/text()")
                     .evaluate(data, XPathConstants.STRING));
             dataMap.put(
-                    "name",
+                    DocumentaryUnit.NAME,
                     xpath.compile("did/unittitle/text()").evaluate(data,
                             XPathConstants.STRING));
 
@@ -206,6 +223,13 @@ public class EadImporter extends AbstractMultiItemRecursiveImporter<Node> {
 
         // For EAD (and most other types) there will only be one description
         // per logical object we create.
+        
+        // Extract global attributes from the document context
+        for (Entry<String, String> entry : eadGlobalAttributeMap.entrySet()) {
+            dataMap.put(entry.getKey(), getElementText(documentContext, entry.getValue()));
+        }
+        
+        // And body attrubutes from the archdesc/c01/c02/c node...
         for (Entry<String, String> entry : eadAttributeMap.entrySet()) {
             dataMap.put(entry.getKey(), getElementText(data, entry.getValue()));
         }
@@ -354,9 +378,9 @@ public class EadImporter extends AbstractMultiItemRecursiveImporter<Node> {
         for (Pattern re : datePatterns) {
             Matcher matcher = re.matcher(date);
             if (matcher.matches()) {
-                data.put("startDate", matcher.group(1));
-                data.put("endDate",
-                        matcher.group(matcher.groupCount() > 1 ? 2 : 1));
+                data.put(DatePeriod.START_DATE, normaliseDate(matcher.group(1)));
+                data.put(DatePeriod.END_DATE, normaliseDate(matcher.group(matcher
+                        .groupCount() > 1 ? 2 : 1)));
                 ok = true;
                 break;
             }
@@ -392,5 +416,10 @@ public class EadImporter extends AbstractMultiItemRecursiveImporter<Node> {
             }
         }
         return out;
+    }
+
+    private String normaliseDate(String date) {
+        DateTimeFormatter fmt = ISODateTimeFormat.date();
+        return fmt.print(DateTime.parse(date));
     }
 }
