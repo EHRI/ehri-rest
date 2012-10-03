@@ -17,18 +17,13 @@ public interface DocumentaryUnit extends VertexFrame, AccessibleEntity,
         DescribedEntity, TemporalEntity {
 
     public static final String CHILD_OF = "childOf";
+    public static final String NAME = "name";
 
-    @Property("name")
+    @Property(NAME)
     public String getName();
 
-    @Property("name")
+    @Property(NAME)
     public void setName(String name);
-
-    @Property("identifier")
-    public String getIdentifier();
-
-    @Property("identifier")
-    public String setIdentifier();
 
     @Fetch
     @Adjacency(label = Agent.HOLDS, direction = Direction.IN)
