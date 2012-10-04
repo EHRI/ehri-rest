@@ -9,6 +9,7 @@ import org.joda.time.format.ISODateTimeFormat;
 
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
+
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.Action;
 import eu.ehri.project.models.base.AccessibleEntity;
@@ -41,10 +42,12 @@ public class ActionManager {
      * @return
      */
     public Action createAction(Actioner user, String logMessage) {
+
         Map<String, Object> actionData = new HashMap<String, Object>();
         actionData.put(Action.TIMESTAMP, getTimestamp());
         actionData.put(Action.LOG_MESSAGE, logMessage);
-        actionData.put(AccessibleEntity.IDENTIFIER_KEY, UUID.randomUUID().toString());
+        actionData.put(AccessibleEntity.IDENTIFIER_KEY, UUID.randomUUID()
+                .toString());
 
         BundleDAO<Action> persister = new BundleDAO<Action>(graph);
         Action action;
