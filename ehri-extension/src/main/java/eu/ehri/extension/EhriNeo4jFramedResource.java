@@ -63,14 +63,14 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> {
      * With each request URI info is injected into the uriInfo parameter.
      */
     @Context
-    private UriInfo uriInfo;
+    protected UriInfo uriInfo;
 
-    private final GraphDatabaseService database;
-    private final FramedGraph<Neo4jGraph> graph;
-    private final IViews<E> views;
-    private final Query<E> querier;
-    private final Class<E> cls;
-    private final Converter converter = new Converter();
+    protected final GraphDatabaseService database;
+    protected final FramedGraph<Neo4jGraph> graph;
+    protected final IViews<E> views;
+    protected final Query<E> querier;
+    protected final Class<E> cls;
+    protected final Converter converter = new Converter();
 
     public final static String AUTH_HEADER_NAME = "Authorization";
 
@@ -91,7 +91,6 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> {
         querier = new Query<E>(graph, cls);
 
     }
-    
 
     /**
      * List all instances of the 'entity' accessible to the given user.
@@ -100,12 +99,14 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> {
      */
     public StreamingOutput list() {
         try {
-            
+
             final ObjectMapper mapper = new ObjectMapper();
-            final JsonFactory f = new JsonFactory();            
-            final Iterable<E> list = querier.list((long) getRequesterUserProfileId());
-            
-            // FIXME: I don't understand this streaming output system well enough
+            final JsonFactory f = new JsonFactory();
+            final Iterable<E> list = querier
+                    .list((long) getRequesterUserProfileId());
+
+            // FIXME: I don't understand this streaming output system well
+            // enough
             // to determine whether this actually streams or not. It certainly
             // doesn't look like it.
             return new StreamingOutput() {
@@ -114,21 +115,22 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> {
                         WebApplicationException {
                     JsonGenerator g = f.createJsonGenerator(arg0);
                     g.writeStartArray();
-                    for (E item: list) {
+                    for (E item : list) {
                         try {
-                            mapper.writeValue(g, converter.vertexFrameToData(item));
+                            mapper.writeValue(g,
+                                    converter.vertexFrameToData(item));
                         } catch (SerializationError e) {
                             throw new RuntimeException(e);
                         }
                     }
                     g.writeEndArray();
-                    g.close();                                        
-                }                
+                    g.close();
+                }
             };
         } catch (IndexNotFoundException e) {
-            throw new RuntimeException(e);
-         } catch (PermissionDenied e) {
-             throw new RuntimeException(e);
+            return streamingException(e);
+        } catch (PermissionDenied e) {
+            return streamingException(e);
         }
     }
 
@@ -143,50 +145,31 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> {
      */
     public Response create(String json) {
 
-        EntityBundle<VertexFrame> entityBundle = null;
         try {
-            entityBundle = converter.jsonToBundle(json);
-        } catch (DeserializationError e1) {
-            return Response.status(Status.BAD_REQUEST)
-                    .entity(produceErrorMessageJson(e1).getBytes()).build();
-        }
-
-        E entity = null;
-        try {
-            entity = views.create(converter.bundleToData(entityBundle),
+            EntityBundle<VertexFrame> entityBundle = converter
+                    .jsonToBundle(json);
+            E entity = views.create(converter.bundleToData(entityBundle),
                     getRequesterUserProfileId());
+            String jsonStr = converter.vertexFrameToJson(entity);
+            UriBuilder ub = uriInfo.getAbsolutePathBuilder();
+            URI docUri = ub.path(entity.asVertex().getId().toString()).build();
+
+            return Response.status(Status.OK).location(docUri)
+                    .entity((jsonStr).getBytes()).build();
+
         } catch (PermissionDenied e) {
             return Response.status(Status.UNAUTHORIZED)
                     .entity((produceErrorMessageJson(e)).getBytes()).build();
         } catch (ValidationError e) {
-            return Response.status(Status.INTERNAL_SERVER_ERROR)
+            return Response.status(Status.BAD_REQUEST)
                     .entity((produceErrorMessageJson(e)).getBytes()).build();
         } catch (DeserializationError e) {
-            return Response.status(Status.INTERNAL_SERVER_ERROR)
+            return Response.status(Status.BAD_REQUEST)
                     .entity((produceErrorMessageJson(e)).getBytes()).build();
-        }
-
-        // Return the json of the created entity,
-        // but what if it fails, the entity has already been created; no
-        // rollback!
-        String jsonStr;
-        try {
-            jsonStr = converter.vertexFrameToJson(entity);
         } catch (SerializationError e) {
             return Response.status(Status.INTERNAL_SERVER_ERROR)
                     .entity((produceErrorMessageJson(e)).getBytes()).build();
         }
-
-        // The caller wants to know the id of the created vertex
-        // It is in the returned json but it is better if
-        // the loacation holds the url to the new resource so that can be used
-        // with a GET,
-        // otherwise we would have to add a 'uri' or 'self' field to the json?
-        UriBuilder ub = uriInfo.getAbsolutePathBuilder();
-        URI docUri = ub.path(entity.asVertex().getId().toString()).build();
-
-        return Response.status(Status.OK).location(docUri)
-                .entity((jsonStr).getBytes()).build();
     }
 
     /**
@@ -277,7 +260,7 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> {
             return Response.status(Status.UNAUTHORIZED)
                     .entity((produceErrorMessageJson(e)).getBytes()).build();
         } catch (ValidationError e) {
-            return Response.status(Status.INTERNAL_SERVER_ERROR)
+            return Response.status(Status.BAD_REQUEST)
                     .entity((produceErrorMessageJson(e)).getBytes()).build();
         } catch (DeserializationError e) {
             return Response.status(Status.INTERNAL_SERVER_ERROR)
@@ -302,7 +285,7 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> {
             return Response.status(Status.UNAUTHORIZED)
                     .entity((produceErrorMessageJson(e)).getBytes()).build();
         } catch (ValidationError e) {
-            return Response.status(Status.INTERNAL_SERVER_ERROR)
+            return Response.status(Status.BAD_REQUEST)
                     .entity((produceErrorMessageJson(e)).getBytes()).build();
         } catch (SerializationError e) {
             return Response.status(Status.INTERNAL_SERVER_ERROR)
@@ -322,7 +305,7 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> {
         Long id;
         List<String> list = requestHeaders.getRequestHeader(AUTH_HEADER_NAME);
 
-        if (list.isEmpty()) {
+        if (list == null || list.isEmpty()) {
             throw new PermissionDenied("Authorization id missing");
         } else {
             // just take the first one and get the Long value
@@ -343,7 +326,7 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> {
      *            The exception
      * @return The json string
      */
-    protected String produceErrorMessageJson(Exception e) {
+    protected String produceErrorMessageJson(Throwable e) {
         // NOTE only put in a stacktrace when debugging??
         // or no stacktraces, only by logging!
 
@@ -351,6 +334,21 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> {
                 + ", stacktrace:  \"  " + getStackTrace(e) + "\"" + "}";
 
         return message;
+    }
+    
+    /**
+     * Wrap an exception in a StreamingOutput.
+     * @param e
+     * @return
+     */
+    protected StreamingOutput streamingException(final Throwable e) {
+        return new StreamingOutput() {            
+            @Override
+            public void write(OutputStream arg0) throws IOException,
+                    WebApplicationException {
+                arg0.write((produceErrorMessageJson(e)).getBytes());                
+            }
+        };        
     }
 
     // Use for testing

@@ -45,7 +45,7 @@ public class DocumentaryUnitResource extends
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/list") // add an 'S', for lists - dodgy!
+    @Path("/list")
     public StreamingOutput listDocumentaryUnits() {
         return list();
     }
