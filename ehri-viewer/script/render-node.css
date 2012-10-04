@@ -1,0 +1,29 @@
+#result table {
+	border-collapse:collapse;
+	margin: 3px;
+}
+#result table td, th {
+	border: solid 1px grey;
+	padding: 3px;
+}
+#result table th
+{
+    background-color:grey;
+    color:white;
+}
+#result table td {
+	vertical-align: top;
+}
+
+/* inline headings should be less prominent */
+.inlineNode > h2 {
+	display: inline;
+	font-size: 1.0em;
+}
+
+#controls {
+	border: solid 1px grey;
+	background-color: lightgrey;
+	padding: 3px;
+	margin: 3px;
+}
