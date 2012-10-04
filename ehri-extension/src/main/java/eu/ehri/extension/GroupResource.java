@@ -16,36 +16,36 @@ import javax.ws.rs.core.StreamingOutput;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import eu.ehri.project.models.EntityTypes;
-import eu.ehri.project.models.UserProfile;
+import eu.ehri.project.models.Group;
 
 /**
- * Provides a RESTfull interface for the UserProfile. 
+ * Provides a RESTfull interface for the Group class. 
  */
-@Path(EhriNeo4jFramedResource.MOUNT_POINT + "/" + EntityTypes.USER_PROFILE)
-public class UserProfileResource extends EhriNeo4jFramedResource<UserProfile> {
+@Path(EhriNeo4jFramedResource.MOUNT_POINT + "/" + EntityTypes.GROUP)
+public class GroupResource extends EhriNeo4jFramedResource<Group> {
 
-    public UserProfileResource(@Context GraphDatabaseService database) {
-        super(database, UserProfile.class);
+    public GroupResource(@Context GraphDatabaseService database) {
+        super(database, Group.class);
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:\\d+}")
-    public Response getUserProfile(@PathParam("id") long id) {
+    public Response getGroup(@PathParam("id") long id) {
         return retrieve(id);
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:[\\w-]+}")
-    public Response getUserProfile(@PathParam("id") String id) {
+    public Response getGroup(@PathParam("id") String id) {
         return retrieve(id);
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/list")
-    public StreamingOutput listUserProfiles() {
+    public StreamingOutput listGroups() {
         return list();
     }
 
@@ -53,7 +53,7 @@ public class UserProfileResource extends EhriNeo4jFramedResource<UserProfile> {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("")
-    public Response createUserProfile(String json) {
+    public Response createGroup(String json) {
         return create(json);
     }
 
@@ -61,13 +61,13 @@ public class UserProfileResource extends EhriNeo4jFramedResource<UserProfile> {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("")
-    public Response updateUserProfile(String json) {
+    public Response updateGroup(String json) {
         return update(json);
     }
 
     @DELETE
     @Path("/{id}")
-    public Response deleteUserProfile(@PathParam("id") long id) {
+    public Response deleteGroup(@PathParam("id") long id) {
         return delete(id);
     }
 }

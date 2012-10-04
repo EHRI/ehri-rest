@@ -19,6 +19,7 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import eu.ehri.extension.EhriNeo4jFramedResource;
 import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.EntityTypes;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.persistance.EntityBundle;
 
@@ -27,7 +28,7 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
     private String jsonDocumentaryUnitTestStr; // test data to create a
                                                // DocumentaryUnit
     static final String UPDATED_NAME = "UpdatedNameTEST";
-    static final String TEST_JSON_IDENTIFIER = "some-id";
+    static final String TEST_JSON_IDENTIFIER = "c1";
     static final String FIRST_DOC_ID = "c1";
 
     @BeforeClass
@@ -95,27 +96,16 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
 
     @Test
     public void testListDocumentaryUnit() throws Exception {
-        // Create
-        WebResource resource = client.resource(getExtensionEntryPointUri()
-                + "/documentaryUnit/list");
-        ClientResponse response = resource
-                .accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
-                .header(EhriNeo4jFramedResource.AUTH_HEADER_NAME,
-                        getAdminUserProfileId()).get(ClientResponse.class);
-
-        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
-        String json = response.getEntity(String.class);
-
-        ObjectMapper mapper = new ObjectMapper();
-        List<Map<String, Object>> data = mapper.readValue(json, List.class);
+        List<Map<String, Object>> data = getEntityList(
+                EntityTypes.DOCUMENTARY_UNIT, getAdminUserProfileId());
         assertTrue(data.size() > 0);
         // Extract the first documentary unit. According to the fixtures this
         // should be named 'c1'.
-        Map<String,Object> c1data = (Map<String, Object>) data.get(0).get("data");
+        Map<String, Object> c1data = (Map<String, Object>) data.get(0).get(
+                "data");
         assertEquals(FIRST_DOC_ID, c1data.get(AccessibleEntity.IDENTIFIER_KEY));
     }
-    
+
     @Test
     public void testUpdateDocumentaryUnit() throws Exception {
 

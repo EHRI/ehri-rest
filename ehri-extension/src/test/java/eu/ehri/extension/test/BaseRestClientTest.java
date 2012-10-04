@@ -1,10 +1,18 @@
 package eu.ehri.extension.test;
 
 import java.io.File;
+import java.util.List;
+import java.util.Map;
 
+import javax.ws.rs.core.MediaType;
+
+import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.neo4j.server.configuration.ThirdPartyJaxRsPackage;
+
+import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.WebResource;
 
 import eu.ehri.extension.EhriNeo4jFramedResource;
 import eu.ehri.plugin.test.utils.ServerRunner;
@@ -70,6 +78,22 @@ public class BaseRestClientTest extends AbstractRestClientTest {
     }
 
     /*** Helpers ***/
+
+    /**
+     * Function for fetching a list of entities with the given EntityType
+     */
+    protected List<Map<String, Object>> getEntityList(String entityType,
+            String userId) throws Exception {
+        WebResource resource = client.resource(getExtensionEntryPointUri()
+                + "/" + entityType + "/list");
+        ClientResponse response = resource.accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .header(EhriNeo4jFramedResource.AUTH_HEADER_NAME, userId)
+                .get(ClientResponse.class);
+        String json = response.getEntity(String.class);
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.readValue(json, List.class);
+    }
 
     /**
      * Function for deleting an entire database folder. USE WITH CARE!!!
