@@ -6,7 +6,8 @@
 #
 
 BLUEPRINTS_VERS="2.1.0"
-BLUEPRINTS_DEPS=( frames blueprints-core blueprints-neo4j-graph )
+BLUEPRINTS_DEPS=( frames blueprints-core blueprints-neo4j-graph pipes )
+EXTRA_DEP=( joda-time-2.1.jar )
 
 if [ $# -ne 1 ]; then
     echo "Usage: `basename $0` <NEO4JPATH>"
@@ -35,6 +36,14 @@ for dep in ${BLUEPRINTS_DEPS[@]}; do
         FLAG=1
     fi
 done
+for dep in ${EXTRA_DEPS[@]}; do
+    if [ ! -e $NEO4JPATH/system/lib/$dep ]; then
+        echo "Missing dependency: '$jar'. This must manually be installed in $NEO4JPATH/system/lib."
+        FLAG=1
+    fi
+done
+
+
 if [ $FLAG -eq 1 ] ; then
     echo "Missing manual dependencies."
     exit 3
@@ -62,5 +71,9 @@ echo "Copying $EXTENSIONJAR to $NEO4JPATH/system/lib"
 cp ehri-extension/target/ehri*jar $NEO4JPATH/system/lib
 echo "Copying $FRAMESJAR to $NEO4JPATH/system/lib" 
 cp ehri-frames/target/ehri*jar $NEO4JPATH/system/lib
+
+# Restart server...
+echo "Restarting server..."
+$NEO4JPATH/bin/neo4j restart
 
 exit 0
