@@ -12,7 +12,7 @@ Commands take the form:
 
 The few commands that are currently available are:
 
-	load-fixtures <entityType>
+	load-fixtures
 
 Load the fixtures into the specified DB. The fixtures are currently hard-coded as those used in the ehri-frames tests, but this will become more flexible.
 
