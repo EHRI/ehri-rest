@@ -94,7 +94,6 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     public void testListDocumentaryUnit() throws Exception {
         // Create
         WebResource resource = client.resource(getExtensionEntryPointUri()
