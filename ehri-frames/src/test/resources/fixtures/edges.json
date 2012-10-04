@@ -211,5 +211,11 @@
       "field": "scopeAndContent"
     }, 
     "label": "annotates"
+  },
+  {
+    "src": "action1",
+    "dst": "r1",
+    "data": {},
+    "label": "hasSubject"
   }
 ]
