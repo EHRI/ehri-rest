@@ -29,6 +29,8 @@ Building and deploying the plugin:
         - blueprints-core-2.1.0.jar
         - blueprints-neo4j-graph-2.1.0.jar
         - frames-2.1.0.jar
+        - pipes-2.1.0.jar
+        - joda-time-2.1.jar
 
 2. restart neo4j
     > cd {neo4j-home}/bin
@@ -116,7 +118,7 @@ Also no authentication, but you need to provide a valid user id with every call.
 Assume that we have an admin user with id 80497. 
 
 > curl -v -X POST -H "Authorization: 80497" -H "Accept: application/json" -H "Content-type: application/json"
-> http://localhost:7474/examples/unmanaged/ehri/documentaryUnit -d
+> http://localhost:7474/ehri/documentaryUnit -d
 >   '{"data":{"name":"a collection","identifier":"some id",
 >   "isA":"documentaryUnit"
 >   },"relationships":{"describes":[{"data":{"identifier":"some id",
@@ -128,7 +130,7 @@ Assume that we have an admin user with id 80497.
 And it's id is 80501.
 
 > curl -v -X GET -H "Authorization: 80497" -H "Accept: application/json"
->   http://localhost:7474/examples/unmanaged/ehri/documentaryUnit/80501
+>   http://localhost:7474/ehri/documentaryUnit/80501
 
 > curl -v -X DELETE -H "Authorization: 80497" -H "Accept: application/json"
->   http://localhost:7474/examples/unmanaged/ehri/documentaryUnit/80501
+>   http://localhost:7474/ehri/documentaryUnit/80501
