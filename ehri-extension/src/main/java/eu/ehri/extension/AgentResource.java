@@ -34,7 +34,7 @@ import eu.ehri.project.views.ActionViews;
 /**
  * Provides a RESTfull interface for the Agent
  */
-@Path(EhriNeo4jFramedResource.MOUNT_POINT + "/" + EntityTypes.AGENT)
+@Path(EntityTypes.AGENT)
 public class AgentResource extends EhriNeo4jFramedResource<Agent> {
 
     public AgentResource(@Context GraphDatabaseService database) {
