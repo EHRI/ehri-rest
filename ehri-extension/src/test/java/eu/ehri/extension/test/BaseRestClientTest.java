@@ -26,9 +26,8 @@ public class BaseRestClientTest extends AbstractRestClientTest {
     // Test server host
     final static private String baseUri = "http://localhost:" + testServerPort;
     // Mount point for EHRI resources
-    final static private String mountPoint = "/";
-    final static private String extensionEntryPointUri = baseUri + mountPoint
-            + EhriNeo4jFramedResource.MOUNT_POINT;
+    final static private String mountPoint = "/ehri";
+    final static private String extensionEntryPointUri = baseUri + mountPoint;
 
     // Admin user prefix - depends on fixture data
     final static private String adminUserProfileId = "20";

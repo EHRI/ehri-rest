@@ -21,7 +21,7 @@ import eu.ehri.project.models.Group;
 /**
  * Provides a RESTfull interface for the Group class. 
  */
-@Path(EhriNeo4jFramedResource.MOUNT_POINT + "/" + EntityTypes.GROUP)
+@Path(EntityTypes.GROUP)
 public class GroupResource extends EhriNeo4jFramedResource<Group> {
 
     public GroupResource(@Context GraphDatabaseService database) {

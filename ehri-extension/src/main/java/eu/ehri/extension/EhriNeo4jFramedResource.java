@@ -50,8 +50,6 @@ import eu.ehri.project.views.Query;
  */
 public class EhriNeo4jFramedResource<E extends AccessibleEntity> {
 
-    public static final String MOUNT_POINT = "ehri";
-
     /**
      * With each request the headers of that request are injected into the
      * requestHeaders parameter.
@@ -302,21 +300,17 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> {
      * @throws PermissionDenied
      */
     protected Long getRequesterUserProfileId() throws PermissionDenied {
-        Long id;
         List<String> list = requestHeaders.getRequestHeader(AUTH_HEADER_NAME);
-
         if (list == null || list.isEmpty()) {
             throw new PermissionDenied("Authorization id missing");
         } else {
             // just take the first one and get the Long value
             try {
-                id = Long.parseLong(list.get(0));
+                return Long.parseLong(list.get(0));
             } catch (NumberFormatException e) {
                 throw new PermissionDenied("Authorization id has wrong format");
             }
         }
-
-        return id;
     }
 
     /**
@@ -335,20 +329,21 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> {
 
         return message;
     }
-    
+
     /**
      * Wrap an exception in a StreamingOutput.
+     * 
      * @param e
      * @return
      */
     protected StreamingOutput streamingException(final Throwable e) {
-        return new StreamingOutput() {            
+        return new StreamingOutput() {
             @Override
             public void write(OutputStream arg0) throws IOException,
                     WebApplicationException {
-                arg0.write((produceErrorMessageJson(e)).getBytes());                
+                arg0.write((produceErrorMessageJson(e)).getBytes());
             }
-        };        
+        };
     }
 
     // Use for testing

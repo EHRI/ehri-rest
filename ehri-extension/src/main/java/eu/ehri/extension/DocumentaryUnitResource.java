@@ -21,7 +21,7 @@ import eu.ehri.project.models.EntityTypes;
 /**
  * Provides a RESTfull interface for the DocumentaryUnit 
  */
-@Path(EhriNeo4jFramedResource.MOUNT_POINT + "/" + EntityTypes.DOCUMENTARY_UNIT)
+@Path(EntityTypes.DOCUMENTARY_UNIT)
 public class DocumentaryUnitResource extends
         EhriNeo4jFramedResource<DocumentaryUnit> {
 

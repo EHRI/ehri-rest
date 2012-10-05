@@ -15,6 +15,7 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 
 import eu.ehri.extension.EhriNeo4jFramedResource;
+import eu.ehri.project.models.EntityTypes;
 import eu.ehri.project.persistance.Converter;
 
 /**
@@ -47,7 +48,7 @@ abstract public class AbstractRestClientTest {
     public void testAdminGetUserProfile() throws Exception {
         // get the admin user profile
         WebResource resource = client.resource(getExtensionEntryPointUri()
-                + "/userProfile" + "/" + getAdminUserProfileId());
+                + "/" + EntityTypes.USER_PROFILE + "/" + getAdminUserProfileId());
         ClientResponse response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .header(EhriNeo4jFramedResource.AUTH_HEADER_NAME,

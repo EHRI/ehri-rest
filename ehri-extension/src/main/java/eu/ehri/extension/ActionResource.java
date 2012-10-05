@@ -19,7 +19,7 @@ import eu.ehri.project.models.Action;
  * are created by the system, so we do not have create/update/delete methods
  * here.
  */
-@Path(EhriNeo4jFramedResource.MOUNT_POINT + "/" + EntityTypes.ACTION)
+@Path(EntityTypes.ACTION)
 public class ActionResource extends EhriNeo4jFramedResource<Action> {
 
     public ActionResource(@Context GraphDatabaseService database) {
