@@ -76,4 +76,9 @@ cp ehri-frames/target/ehri*jar $NEO4JPATH/system/lib
 echo "Restarting server..."
 $NEO4JPATH/bin/neo4j restart
 
+echo
+echo "IMPORTANT: You must manually ensure the $NEO4JPATH/conf/neo4j-server.properties configuration contains the line:"
+echo "   org.neo4j.server.thirdparty_jaxrs_classes=eu.ehri.extension=/ehri"
+echo
+
 exit 0
