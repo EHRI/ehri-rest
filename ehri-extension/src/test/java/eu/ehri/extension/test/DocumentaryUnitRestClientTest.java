@@ -167,5 +167,4 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
         Map<String, Object> updatedData = updatedEntityBundle.getData();
         assertEquals(UPDATED_NAME, updatedData.get("name"));
     }
-
 }
