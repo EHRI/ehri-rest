@@ -8,6 +8,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import eu.ehri.project.acl.AclManager;
+import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Group;
 import eu.ehri.project.models.UserProfile;
@@ -138,9 +139,10 @@ public class AclTest extends ModelTestBase {
 
     /**
      * Test changing permissions on an item.
+     * @throws PermissionDenied 
      */
     @Test
-    public void testChangingItemPermissions() {
+    public void testChangingItemPermissions() throws PermissionDenied {
         Accessor reto = helper.getTestFrame("reto", Accessor.class);
         AccessibleEntity kcl = helper.getTestFrame("kclGroup",
                 AccessibleEntity.class);
@@ -159,9 +161,10 @@ public class AclTest extends ModelTestBase {
 
     /**
      * Test removing permissions.
+     * @throws PermissionDenied 
      */
     @Test
-    public void testRemovingItemPermissions() {
+    public void testRemovingItemPermissions() throws PermissionDenied {
         Accessor reto = helper.getTestFrame("reto", Accessor.class);
         AccessibleEntity kcl = helper.getTestFrame("kclGroup",
                 AccessibleEntity.class);

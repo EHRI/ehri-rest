@@ -14,6 +14,7 @@ import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.pipes.PipeFunction;
 
 import eu.ehri.project.core.GraphHelpers;
+import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.Group;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
@@ -62,6 +63,16 @@ public class AclManager {
         }
         return false;
     }
+
+    /**
+     * Check if an accessor is admin or a member of Admin.
+     * 
+     * @param accessor
+     */
+    public Boolean isAnonymous(Accessor accessor) {
+        return accessor.getName().equals(Group.ANONYMOUS_GROUP_NAME);
+    }
+
 
     /*
      * We have to ascend the current accessors group hierarchy looking for a
@@ -144,9 +155,18 @@ public class AclManager {
      * @param accessor
      * @param canRead
      * @param canWrite
+     * @throws PermissionDenied 
      */
     public void setAccessControl(AccessibleEntity entity, Accessor accessor,
-            boolean canRead, boolean canWrite) {
+            boolean canRead, boolean canWrite) throws PermissionDenied {
+        
+        // Logic containment! Ensure people can't add write access 
+        // to the anonymous accessor
+        if (canWrite && isAnonymous(accessor)) {
+            throw new PermissionDenied("Cannot allow write access for anonymous user.");
+        }
+        
+        
         // FIXME: There should be a better way of doing this...
         Edge edge = null;
         for (Edge e : entity.asVertex().getEdges(Direction.OUT,
@@ -180,9 +200,10 @@ public class AclManager {
      * @param accessors
      * @param canRead
      * @param canWrite
+     * @throws PermissionDenied
      */
     public void setAccessControl(AccessibleEntity entity, Accessor[] accessors,
-            boolean canRead, boolean canWrite) {
+            boolean canRead, boolean canWrite) throws PermissionDenied {
         for (Accessor accessor : accessors)
             setAccessControl(entity, accessor, canRead, canWrite);
     }
