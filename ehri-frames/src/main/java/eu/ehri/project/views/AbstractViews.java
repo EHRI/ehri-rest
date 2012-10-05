@@ -61,6 +61,4 @@ abstract class AbstractViews<E extends AccessibleEntity> {
     protected void checkGlobalWriteAccess(long user) throws PermissionDenied {
         // TODO: Stub
     }
-
-
 }

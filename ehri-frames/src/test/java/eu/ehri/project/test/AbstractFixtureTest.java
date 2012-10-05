@@ -18,8 +18,8 @@ abstract public class AbstractFixtureTest extends ModelTestBase {
     protected static final String TEST_GROUP_NAME = "People";
 
     // Members closely coupled to the test data!
-    protected Long validUserId = 20L;
-    protected Long invalidUserId = 21L;
+    protected Long validUserId = 21L;
+    protected Long invalidUserId = 22L;
     protected Long itemId = 1L;
 
     @BeforeClass

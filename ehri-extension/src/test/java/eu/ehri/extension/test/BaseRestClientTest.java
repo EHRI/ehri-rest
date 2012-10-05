@@ -30,7 +30,7 @@ public class BaseRestClientTest extends AbstractRestClientTest {
     final static private String extensionEntryPointUri = baseUri + mountPoint;
 
     // Admin user prefix - depends on fixture data
-    final static private String adminUserProfileId = "20";
+    final static private String adminUserProfileId = "21";
 
     protected static ServerRunner runner;
 

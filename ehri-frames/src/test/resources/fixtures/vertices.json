@@ -144,6 +144,14 @@
   {
     "data": {
       "isA": "group", 
+      "name": "anonymous",
+      "identifier": "anonymous"
+    }, 
+    "desc": "anonGroup"
+  }, 
+  {
+    "data": {
+      "isA": "group", 
       "name": "niod",
       "identifier": "niod"
     }, 
