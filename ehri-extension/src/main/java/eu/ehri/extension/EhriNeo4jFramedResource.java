@@ -213,7 +213,6 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> {
         return retrieve(AccessibleEntity.IDENTIFIER_KEY, id);
     }
 
-    
     /**
      * Retieve (get) an instance of the 'entity' in the database
      * 
@@ -233,7 +232,8 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> {
             return Response.status(Status.OK).entity((jsonStr).getBytes())
                     .build();
         } catch (PermissionDenied e) {
-            return Response.status(Status.UNAUTHORIZED).build();
+            return Response.status(Status.UNAUTHORIZED)
+                    .entity((produceErrorMessageJson(e)).getBytes()).build();
         } catch (ItemNotFound e) {
             // Most likely there was no such item (wrong id)
             // BETTER get a different Exception for that?
@@ -337,41 +337,52 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> {
      * @param e
      *            The exception
      * @return The json string
-     * @throws IOException 
-     * @throws JsonMappingException 
-     * @throws JsonGenerationException 
+     * @throws IOException
+     * @throws JsonMappingException
+     * @throws JsonGenerationException
      */
     @SuppressWarnings("serial")
     protected String produceErrorMessageJson(final Throwable e) {
         // NOTE only put in a stacktrace when debugging??
         // or no stacktraces, only by logging!
-        
+
         // TODO: Fix up this mess... try and return a structured
         // JSON message for recognised error types.
         try {
             if (e instanceof PermissionDenied) {
-                Map<String,Object> out = new HashMap<String, Object>() {{
-                   put("error", PermissionDenied.class.getName());
-                   put("details", new HashMap<String,String>() {{
-                       put("message", e.getMessage());
-                       put("accessor", ((PermissionDenied) e).getAccessor().getName());
-                   }});
-                }};
+                Map<String, Object> out = new HashMap<String, Object>() {
+                    {
+                        put("error", PermissionDenied.class.getName());
+                        put("details", new HashMap<String, String>() {
+                            {
+                                put("message", e.getMessage());
+                                put("accessor", ((PermissionDenied) e)
+                                        .getAccessor().getName());
+                            }
+                        });
+                    }
+                };
                 return new ObjectMapper().writeValueAsString(out);
             } else if (e instanceof ValidationError) {
-                Map<String,Object> out = new HashMap<String, Object>() {{
-                    put("error", ValidationError.class.getName());
-                    put("details", ((ValidationError) e).getErrors());
-                 }};
-                 return new ObjectMapper().writeValueAsString(out);            
+                Map<String, Object> out = new HashMap<String, Object>() {
+                    {
+                        put("error", ValidationError.class.getName());
+                        put("details", ((ValidationError) e).getErrors());
+                    }
+                };
+                return new ObjectMapper().writeValueAsString(out);
             } else if (e instanceof ItemNotFound) {
-                Map<String,Object> out = new HashMap<String, Object>() {{
-                    put("error", ItemNotFound.class.getName());
-                    put("details", new HashMap<String,String>() {{
-                        put("message", e.getMessage());
-                    }});
-                 }};
-                 return new ObjectMapper().writeValueAsString(out);            
+                Map<String, Object> out = new HashMap<String, Object>() {
+                    {
+                        put("error", ItemNotFound.class.getName());
+                        put("details", new HashMap<String, String>() {
+                            {
+                                put("message", e.getMessage());
+                            }
+                        });
+                    }
+                };
+                return new ObjectMapper().writeValueAsString(out);
             }
         } catch (Exception e1) {
             e1.printStackTrace();
