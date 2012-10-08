@@ -83,6 +83,13 @@ public class AgentResource extends EhriNeo4jFramedResource<Agent> {
     public Response deleteAgent(@PathParam("id") long id) {
         return delete(id);
     }
+        
+    @DELETE
+    @Path("/{id:[\\w-]+}")
+    public Response deleteAgent(@PathParam("id") String id) {
+        return delete(id);
+    }
+
 
     /**
      * Create an instance of the 'entity' in the database

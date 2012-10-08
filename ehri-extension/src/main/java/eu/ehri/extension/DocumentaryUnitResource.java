@@ -71,4 +71,11 @@ public class DocumentaryUnitResource extends
     public Response deleteDocumentaryUnit(@PathParam("id") long id) {
         return delete(id);
     }
+        
+    @DELETE
+    @Path("/{id:[\\w-]+}")
+    public Response deleteDocumentaryUnit(@PathParam("id") String id) {
+        return delete(id);
+    }
+
 }

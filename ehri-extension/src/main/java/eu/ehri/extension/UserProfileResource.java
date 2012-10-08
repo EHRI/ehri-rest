@@ -75,8 +75,14 @@ public class UserProfileResource extends EhriNeo4jFramedResource<UserProfile> {
     }
 
     @DELETE
-    @Path("/{id}")
+    @Path("/{id:\\d+}")
     public Response deleteUserProfile(@PathParam("id") long id) {
         return delete(id);
     }
+    
+    @DELETE
+    @Path("/{id:[\\w-]+}")
+    public Response deleteUserProfile(@PathParam("id") String id) {
+        return delete(id);
+    }    
 }

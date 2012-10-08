@@ -70,4 +70,11 @@ public class GroupResource extends EhriNeo4jFramedResource<Group> {
     public Response deleteGroup(@PathParam("id") long id) {
         return delete(id);
     }
+    
+    
+    @DELETE
+    @Path("/{id:[\\w-]+}")
+    public Response deleteGroup(@PathParam("id") String id) {
+        return delete(id);
+    }    
 }
