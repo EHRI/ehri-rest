@@ -38,7 +38,7 @@ public class Query<E extends AccessibleEntity> extends AbstractViews<E> implemen
         super(graph, cls);
     }
     
-    public E get(String key, String value, long user) throws PermissionDenied,
+    public E get(String key, String value, Long user) throws PermissionDenied,
             ItemNotFound, IndexNotFoundException {
         CloseableIterable<Vertex> indexQuery = getIndexForClass(cls).get(key, value);
         try {
@@ -59,7 +59,7 @@ public class Query<E extends AccessibleEntity> extends AbstractViews<E> implemen
      * @return
      * @throws IndexNotFoundException 
      */
-    public Iterable<E> list(long user) throws IndexNotFoundException {
+    public Iterable<E> list(Long user) throws IndexNotFoundException {
         return list(AccessibleEntity.IDENTIFIER_KEY, QUERY_GLOB, user);
     }
 
@@ -72,10 +72,10 @@ public class Query<E extends AccessibleEntity> extends AbstractViews<E> implemen
      * @throws IndexNotFoundException 
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    public Iterable<E> list(String key, String query, long user) throws IndexNotFoundException {
+    public Iterable<E> list(String key, String query, Long user) throws IndexNotFoundException {
 
         // This function is optimised for ACL actions.
-        Accessor accessor = graph.getVertex(user, Accessor.class);
+        Accessor accessor = getAccessor(user);
         CloseableIterable<Vertex> indexQuery = getIndexForClass(cls).query(key, query);
         try {            
             GremlinPipeline filter = new GremlinPipeline(indexQuery)

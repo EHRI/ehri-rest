@@ -6,7 +6,9 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.net.URI;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
@@ -18,8 +20,9 @@ import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.core.Response.Status;
 
 import org.codehaus.jackson.JsonFactory;
+import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.ObjectCodec;
+import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.neo4j.graphdb.GraphDatabaseService;
 
@@ -101,7 +104,7 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> {
             final ObjectMapper mapper = new ObjectMapper();
             final JsonFactory f = new JsonFactory();
             final Iterable<E> list = querier
-                    .list((long) getRequesterUserProfileId());
+                    .list((Long) getRequesterUserProfileId());
 
             // FIXME: I don't understand this streaming output system well
             // enough
@@ -317,7 +320,7 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> {
     protected Long getRequesterUserProfileId() throws PermissionDenied {
         List<String> list = requestHeaders.getRequestHeader(AUTH_HEADER_NAME);
         if (list == null || list.isEmpty()) {
-            throw new PermissionDenied("Authorization id missing");
+            return null;
         } else {
             // just take the first one and get the Long value
             try {
@@ -334,10 +337,45 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> {
      * @param e
      *            The exception
      * @return The json string
+     * @throws IOException 
+     * @throws JsonMappingException 
+     * @throws JsonGenerationException 
      */
-    protected String produceErrorMessageJson(Throwable e) {
+    @SuppressWarnings("serial")
+    protected String produceErrorMessageJson(final Throwable e) {
         // NOTE only put in a stacktrace when debugging??
         // or no stacktraces, only by logging!
+        
+        // TODO: Fix up this mess... try and return a structured
+        // JSON message for recognised error types.
+        try {
+            if (e instanceof PermissionDenied) {
+                Map<String,Object> out = new HashMap<String, Object>() {{
+                   put("error", PermissionDenied.class.getName());
+                   put("details", new HashMap<String,String>() {{
+                       put("message", e.getMessage());
+                       put("accessor", ((PermissionDenied) e).getAccessor().getName());
+                   }});
+                }};
+                return new ObjectMapper().writeValueAsString(out);
+            } else if (e instanceof ValidationError) {
+                Map<String,Object> out = new HashMap<String, Object>() {{
+                    put("error", ValidationError.class.getName());
+                    put("details", ((ValidationError) e).getErrors());
+                 }};
+                 return new ObjectMapper().writeValueAsString(out);            
+            } else if (e instanceof ItemNotFound) {
+                Map<String,Object> out = new HashMap<String, Object>() {{
+                    put("error", ItemNotFound.class.getName());
+                    put("details", new HashMap<String,String>() {{
+                        put("message", e.getMessage());
+                    }});
+                 }};
+                 return new ObjectMapper().writeValueAsString(out);            
+            }
+        } catch (Exception e1) {
+            e1.printStackTrace();
+        }
 
         String message = "{errormessage: \"  " + e.getMessage() + "\""
                 + ", stacktrace:  \"  " + getStackTrace(e) + "\"" + "}";

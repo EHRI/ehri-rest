@@ -55,6 +55,7 @@ public class AclManager {
      * @param accessor
      */
     public Boolean isAdmin(Accessor accessor) {
+        assert accessor != null: "Accessor is null";
         if (accessor.getName().equals(Group.ADMIN_GROUP_NAME))
             return true;
         for (Accessor acc : accessor.getAllParents()) {
@@ -118,7 +119,8 @@ public class AclManager {
         // Admin can read/write everything and object can always read/write
         // itself
 
-        assert entity != null && accessor != null;
+        assert entity != null: "Entity is null";
+        assert accessor != null : "Accessor is null";
 
         // FIXME: Tidy up the logic here.
         if (isAdmin(accessor)
@@ -222,6 +224,7 @@ public class AclManager {
      * @return
      */
     public PipeFunction<Vertex, Boolean> getAclFilterFunction(Accessor accessor) {
+        assert accessor != null;
         if (isAdmin(accessor))
             return noopFilterFunction();
 
@@ -270,11 +273,14 @@ public class AclManager {
      * @return
      */
     private HashSet<Object> getAllAccessors(Accessor accessor) {
-        Iterable<Accessor> parents = accessor.getAllParents();
+        
         final HashSet<Object> all = new HashSet<Object>();
-        for (Accessor a : parents)
-            all.add(a.asVertex().getId());
-        all.add(accessor.asVertex().getId());
+        if (!isAnonymous(accessor)) {
+            Iterable<Accessor> parents = accessor.getAllParents();
+            for (Accessor a : parents)
+                all.add(a.asVertex().getId());
+            all.add(accessor.asVertex().getId());
+        }
         return all;
     }
 }
