@@ -9,6 +9,8 @@
  * NOTE we now have an index.html, but it might be better to have a server page index.jsp 
  * for example that takes the node id as get parameter, 
  * The loadNode is then not AJAX, but only the inline node properies loading is!
+ * In that case we have a bookmarkable (referable) page.
+ * 
  */
 
 
@@ -147,11 +149,15 @@
 		});
 
 		// NOTE just get the properties (AJAX) and expand it in the existing node's view
-		$(".inlineExpandingNodeLink").click(function(){
-			//console.log("nodelink: " + this.href);
-			loadNodeInline($(this), this.href)
-			return false;
+		$(".inlineExpandingNodeLink").toggle(function() {
+			loadNodeInline($(this), this.href);
+			$(this).text("- collapse");
+		}, function() {
+			// Note maybe not clean it, but hide instead?
+			$(this).next().empty();
+			$(this).text("+ expand");
 		});
+		
 	}
 
 	/**
