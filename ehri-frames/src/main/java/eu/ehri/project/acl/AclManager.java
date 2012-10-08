@@ -70,9 +70,8 @@ public class AclManager {
      * @param accessor
      */
     public Boolean isAnonymous(Accessor accessor) {
-        return accessor.getName().equals(Group.ANONYMOUS_GROUP_NAME);
+        return accessor instanceof AnonymousAccessor;
     }
-
 
     /*
      * We have to ascend the current accessors group hierarchy looking for a
@@ -118,8 +117,13 @@ public class AclManager {
     public Access getAccessControl(AccessibleEntity entity, Accessor accessor) {
         // Admin can read/write everything and object can always read/write
         // itself
+
+        assert entity != null && accessor != null;
+
+        // FIXME: Tidy up the logic here.
         if (isAdmin(accessor)
-                || (accessor.asVertex().equals(entity.asVertex())))
+                || (!isAnonymous(accessor) && accessor.asVertex().equals(
+                        entity.asVertex())))
             return new EntityAccessFactory().buildReadWrite(entity, accessor);
 
         // Otherwise, check if there are specified permissions.
@@ -132,6 +136,8 @@ public class AclManager {
 
         if (accessCtrls.isEmpty()) {
             return new EntityAccessFactory().buildReadOnly(entity, accessor);
+        } else if (isAnonymous(accessor)) {
+            return new EntityAccessFactory().buildNoAccess(entity, accessor);
         } else {
             // If there are, search the Group hierarchy and find the most
             // powerful set of permissions contained therein...
@@ -155,18 +161,18 @@ public class AclManager {
      * @param accessor
      * @param canRead
      * @param canWrite
-     * @throws PermissionDenied 
+     * @throws PermissionDenied
      */
     public void setAccessControl(AccessibleEntity entity, Accessor accessor,
             boolean canRead, boolean canWrite) throws PermissionDenied {
-        
-        // Logic containment! Ensure people can't add write access 
+
+        // Logic containment! Ensure people can't add write access
         // to the anonymous accessor
         if (canWrite && isAnonymous(accessor)) {
-            throw new PermissionDenied("Cannot allow write access for anonymous user.");
+            throw new PermissionDenied(
+                    "Cannot allow write access for anonymous user.");
         }
-        
-        
+
         // FIXME: There should be a better way of doing this...
         Edge edge = null;
         for (Edge e : entity.asVertex().getEdges(Direction.OUT,
@@ -209,8 +215,8 @@ public class AclManager {
     }
 
     /**
-     * Build a gremlin filter function that passes through
-     * items readable by a given accessor.
+     * Build a gremlin filter function that passes through items readable by a
+     * given accessor.
      * 
      * @param accessor
      * @return

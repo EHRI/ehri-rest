@@ -54,7 +54,7 @@ public class ActionViews<E extends AccessibleEntity> extends Views<E> implements
      * @throws ValidationError
      */
     @Override
-    public E create(Map<String, Object> data, long user)
+    public E create(Map<String, Object> data, Long user)
             throws PermissionDenied, ValidationError, DeserializationError {
         return create(data, user, DEFAULT_CREATE_LOG);
     }
@@ -111,7 +111,7 @@ public class ActionViews<E extends AccessibleEntity> extends Views<E> implements
      * @throws ValidationError
      */
     @Override
-    public E update(Map<String, Object> data, long user)
+    public E update(Map<String, Object> data, Long user)
             throws PermissionDenied, ValidationError, DeserializationError {
         return update(data, user, DEFAULT_UPDATE_LOG);
     }

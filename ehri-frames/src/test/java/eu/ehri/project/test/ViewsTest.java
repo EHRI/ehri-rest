@@ -46,6 +46,18 @@ public class ViewsTest extends AbstractFixtureTest {
     }
 
     /**
+     * Access an item as an anon user. This should throw PermissionDenied
+     * 
+     * @throws PermissionDenied
+     */
+    @Test(expected = PermissionDenied.class)
+    public void testDetailAnonymous() throws PermissionDenied {
+        Views<DocumentaryUnit> docViews = new Views<DocumentaryUnit>(graph,
+                DocumentaryUnit.class);
+        docViews.detail(itemId, null);
+    }
+
+    /**
      * Access an item as an invalid user. TODO: Check that this test fails if no
      * exception is thrown.
      * 

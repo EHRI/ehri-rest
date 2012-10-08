@@ -6,24 +6,33 @@ import com.tinkerpop.frames.VertexFrame;
 
 import eu.ehri.project.persistance.EntityBundle;
 
+/**
+ * Validation error. This exception holds a map
+ * of field=error(s) values.
+ *
+ * @author michaelb
+ *
+ */
 public class ValidationError extends Exception {
 
-    /**
-     * 
-     */
     private static final long serialVersionUID = 1L;
+    private MultiValueMap errors; 
 
-    public ValidationError(String message) {
+    public ValidationError(String message) {        
         super(message);
+        errors = new MultiValueMap();
+        errors.put("item", message);
     }
 
     public ValidationError(EntityBundle<? extends VertexFrame> bundle,
             MultiValueMap errors) {
         this(formatErrors(bundle.getClass().getName(), errors));
+        this.errors = errors;
     }
 
     public ValidationError(Class<?> cls, MultiValueMap errors) {
         this(formatErrors(cls.getName(), errors));
+        this.errors = errors;
     }
 
     private static String formatErrors(String clsName, MultiValueMap errors) {
@@ -35,5 +44,9 @@ public class ValidationError extends Exception {
             }
         }
         return buf.toString();
+    }
+    
+    public MultiValueMap getErrors() {
+        return errors;
     }
 }

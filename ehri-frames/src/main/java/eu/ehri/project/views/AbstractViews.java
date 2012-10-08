@@ -4,6 +4,7 @@ import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
 import eu.ehri.project.acl.AclManager;
+import eu.ehri.project.acl.AnonymousAccessor;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
@@ -35,9 +36,9 @@ abstract class AbstractViews<E extends AccessibleEntity> {
      * @param user
      * @throws PermissionDenied
      */
-    protected void checkReadAccess(AccessibleEntity entity, long user)
+    protected void checkReadAccess(AccessibleEntity entity, Long user)
             throws PermissionDenied {
-        Accessor accessor = graph.getVertex(user, Accessor.class);
+        Accessor accessor = getAccessor(user);
         Access access = acl.getAccessControl(entity, accessor);
         if (!access.getRead())
             throw new PermissionDenied(accessor, entity);
@@ -50,9 +51,9 @@ abstract class AbstractViews<E extends AccessibleEntity> {
      * @param user
      * @throws PermissionDenied
      */
-    protected void checkWriteAccess(AccessibleEntity entity, long user)
+    protected void checkWriteAccess(AccessibleEntity entity, Long user)
             throws PermissionDenied {
-        Accessor accessor = graph.getVertex(user, Accessor.class);
+        Accessor accessor = getAccessor(user);
         Access access = acl.getAccessControl(entity, accessor);
         if (!(access.getRead() && access.getWrite()))
             throw new PermissionDenied(accessor, entity);
@@ -60,5 +61,12 @@ abstract class AbstractViews<E extends AccessibleEntity> {
 
     protected void checkGlobalWriteAccess(long user) throws PermissionDenied {
         // TODO: Stub
+    }
+    
+    protected Accessor getAccessor(Long id) {
+        if (id == null)
+            return new AnonymousAccessor();
+        // FIXME: Ensure this item really is an accessor!
+        return graph.frame(graph.getVertex(id), Accessor.class);
     }
 }

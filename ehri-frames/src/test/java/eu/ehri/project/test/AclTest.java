@@ -8,6 +8,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import eu.ehri.project.acl.AclManager;
+import eu.ehri.project.acl.AnonymousAccessor;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Group;
@@ -122,6 +123,19 @@ public class AclTest extends ModelTestBase {
         assertFalse(access.getWrite());
     }
 
+    /**
+     * Test user accessing other profile as anonymous.
+     */
+    @Test
+    public void testUserAccessAsAnonymous() {
+        Accessor anon = new AnonymousAccessor();
+        AccessibleEntity tim = helper.getTestFrame("tim",
+                AccessibleEntity.class);
+        Access access = acl.getAccessControl(tim, anon);
+        assertTrue(access.getRead());
+        assertFalse(access.getWrite());
+    }
+    
     /**
      * Test a member of a group DOES NOT have write access to the group.
      */
