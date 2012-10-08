@@ -1,43 +1,49 @@
 package eu.ehri.extension.test;
 
 import java.io.File;
+import java.util.List;
+import java.util.Map;
 
+import javax.ws.rs.core.MediaType;
+
+import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.neo4j.server.configuration.ThirdPartyJaxRsPackage;
+
+import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.WebResource;
 
 import eu.ehri.extension.EhriNeo4jFramedResource;
 import eu.ehri.plugin.test.utils.ServerRunner;
 
 /**
- * Base class for testing the REST interface on a 'embedded' neo4j server. 
+ * Base class for testing the REST interface on a 'embedded' neo4j server.
  */
 public class BaseRestClientTest extends AbstractRestClientTest {
     // Test server port - different from Neo4j default to prevent collisions.
     final static private Integer testServerPort = 7575;
     // Test server host
-    final static private String baseUri = "http://localhost:"
-            + testServerPort;
+    final static private String baseUri = "http://localhost:" + testServerPort;
     // Mount point for EHRI resources
-    final static private String mountPoint = "/";
-    final static private String extensionEntryPointUri = baseUri + mountPoint
-            + "ehri";
+    final static private String mountPoint = "/ehri";
+    final static private String extensionEntryPointUri = baseUri + mountPoint;
 
     // Admin user prefix - depends on fixture data
     final static private String adminUserProfileId = "20";
 
     protected static ServerRunner runner;
 
-	@Override
-	String getExtensionEntryPointUri() {
-		return extensionEntryPointUri;
-	}
+    @Override
+    String getExtensionEntryPointUri() {
+        return extensionEntryPointUri;
+    }
 
-	@Override
-	String getAdminUserProfileId() {
-		return adminUserProfileId;
-	}
-	
+    @Override
+    String getAdminUserProfileId() {
+        return adminUserProfileId;
+    }
+
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
         initializeTestDb(BaseRestClientTest.class.getName());
@@ -45,8 +51,8 @@ public class BaseRestClientTest extends AbstractRestClientTest {
 
     /**
      * Initialise a new graph database in a given location. This should be
-     * unique for each class, because otherwise problems can be encountered
-     * when another test suite starts up whilst a database is in the process of
+     * unique for each class, because otherwise problems can be encountered when
+     * another test suite starts up whilst a database is in the process of
      * shutting down.
      * 
      * @param dbName
@@ -72,6 +78,21 @@ public class BaseRestClientTest extends AbstractRestClientTest {
 
     /*** Helpers ***/
 
+    /**
+     * Function for fetching a list of entities with the given EntityType
+     */
+    protected List<Map<String, Object>> getEntityList(String entityType,
+            String userId) throws Exception {
+        WebResource resource = client.resource(getExtensionEntryPointUri()
+                + "/" + entityType + "/list");
+        ClientResponse response = resource.accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .header(EhriNeo4jFramedResource.AUTH_HEADER_NAME, userId)
+                .get(ClientResponse.class);
+        String json = response.getEntity(String.class);
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.readValue(json, List.class);
+    }
 
     /**
      * Function for deleting an entire database folder. USE WITH CARE!!!
@@ -91,6 +112,5 @@ public class BaseRestClientTest extends AbstractRestClientTest {
         }
         folder.delete();
     }
-
 
 }

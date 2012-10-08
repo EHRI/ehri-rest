@@ -11,15 +11,17 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
 
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.EntityTypes;
 
 /**
  * Provides a RESTfull interface for the DocumentaryUnit 
  */
-@Path("/ehri/documentaryUnit")
+@Path(EntityTypes.DOCUMENTARY_UNIT)
 public class DocumentaryUnitResource extends
         EhriNeo4jFramedResource<DocumentaryUnit> {
 
@@ -29,9 +31,23 @@ public class DocumentaryUnitResource extends
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{id}")
+    @Path("/{id:\\d+}")
     public Response getDocumentaryUnit(@PathParam("id") long id) {
         return retrieve(id);
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id:[\\w-]+}")
+    public Response getDocumentaryUnit(@PathParam("id") String id) {
+        return retrieve(id);
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/list")
+    public StreamingOutput listDocumentaryUnits() {
+        return list();
     }
 
     @POST

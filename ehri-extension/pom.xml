@@ -15,6 +15,21 @@
 
 	<build>
 		<plugins>
+
+			<!-- Install test jar so it can be re-used by clients for testing -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.2</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>test-jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>2.3.2</version>
@@ -27,13 +42,11 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>2.12.3</version>
 				<configuration>
-                    <!--	<excludes>
-						<exclude>**/EhriNeo4jExtensionRestClientTest.java</exclude>
-                    </excludes>
-                    -->
+					<!-- <excludes> <exclude>**/EhriNeo4jExtensionRestClientTest.java</exclude> 
+						</excludes> -->
 				</configuration>
 			</plugin>
-			
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
@@ -51,44 +64,22 @@
 					<includePom>true</includePom>
 				</configuration>
 			</plugin>
-			
+
 			<!-- NOTE javadoc plug-in in profiles -->
-			
+
 			<!-- generates a 'site' with the javadocs as browsable html run 'mvn site' 
 				from the commandline inside the project directory and the sites files are 
 				placed in the target directory -->
-			<!-- 
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-site-plugin</artifactId>
-				<version>3.1</version>
-				<configuration>
-					<reportPlugins>
-						<plugin>
-							<groupId>org.apache.maven.plugins</groupId>
-							<artifactId>maven-project-info-reports-plugin</artifactId>
-							<version>2.2</version>
-							<configuration>
-								<dependencyDetailsEnabled>false</dependencyDetailsEnabled>
-								<dependencyLocationsEnabled>false</dependencyLocationsEnabled>
-							</configuration>
-							<reports>
-							</reports>
-						</plugin>
-						<plugin>
-							<groupId>org.apache.maven.plugins</groupId>
-							<artifactId>maven-javadoc-plugin</artifactId>
-							<version>2.7</version>
-							<configuration>
-								<doclet>ydoc.doclets.YStandard</doclet>
-								<docletPath>${yid}/lib/ydoc.jar:${yid}/lib/class2svg.jar:${yid}/resources</docletPath>
-								<additionalparam>-umlautogen</additionalparam>
-							</configuration>
-						</plugin>
-					</reportPlugins>
-				</configuration>
-			</plugin>
-			 -->
+			<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-site-plugin</artifactId> 
+				<version>3.1</version> <configuration> <reportPlugins> <plugin> <groupId>org.apache.maven.plugins</groupId> 
+				<artifactId>maven-project-info-reports-plugin</artifactId> <version>2.2</version> 
+				<configuration> <dependencyDetailsEnabled>false</dependencyDetailsEnabled> 
+				<dependencyLocationsEnabled>false</dependencyLocationsEnabled> </configuration> 
+				<reports> </reports> </plugin> <plugin> <groupId>org.apache.maven.plugins</groupId> 
+				<artifactId>maven-javadoc-plugin</artifactId> <version>2.7</version> <configuration> 
+				<doclet>ydoc.doclets.YStandard</doclet> <docletPath>${yid}/lib/ydoc.jar:${yid}/lib/class2svg.jar:${yid}/resources</docletPath> 
+				<additionalparam>-umlautogen</additionalparam> </configuration> </plugin> 
+				</reportPlugins> </configuration> </plugin> -->
 		</plugins>
 
 	</build>
@@ -104,19 +95,19 @@
 			<groupId>ehri-project</groupId>
 			<artifactId>ehri-frames</artifactId>
 			<version>0.1-SNAPSHOT</version>
-      		<type>test-jar</type>
-      		<scope>test</scope>
+			<type>test-jar</type>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>ehri-project</groupId>
 			<artifactId>ehri-plugin</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
-      		<type>test-jar</type>
-      		<scope>test</scope>
+			<type>test-jar</type>
+			<scope>test</scope>
 		</dependency>
-		
-		
-	
+
+
+
 		<!-- neo4j -->
 		<dependency>
 			<groupId>org.neo4j</groupId>
@@ -134,12 +125,12 @@
 			<version>${neo4j-version}</version>
 		</dependency>
 		<dependency>
-            <groupId>org.neo4j.app</groupId>
-      		<artifactId>neo4j-server</artifactId>
-      		<version>${neo4j-version}</version>
-      		<type>test-jar</type>
-      		<scope>test</scope>
-    	</dependency>
+			<groupId>org.neo4j.app</groupId>
+			<artifactId>neo4j-server</artifactId>
+			<version>${neo4j-version}</version>
+			<type>test-jar</type>
+			<scope>test</scope>
+		</dependency>
 		<dependency>
 			<groupId>org.neo4j</groupId>
 			<artifactId>neo4j-kernel</artifactId>
@@ -153,7 +144,7 @@
 			<artifactId>blueprints-neo4j-graph</artifactId>
 			<version>${tinkerpop-version}</version><!-- was 1.2 -->
 		</dependency>
-		
+
 		<!-- logging -->
 		<dependency>
 			<groupId>org.slf4j</groupId>
@@ -179,7 +170,7 @@
 			<artifactId>jmock-junit4</artifactId> <version>2.5.1</version> <scope>test</scope> 
 			</dependency> <dependency> <groupId>org.codehaus.jackson</groupId> <artifactId>jackson-jaxrs</artifactId> 
 			<version>1.8.3</version> </dependency> -->
-		
+
 	</dependencies>
 
 	<!-- Needed to put this in here explicitly for the neo4j snapshots -->
@@ -206,9 +197,9 @@
 		<!-- The directory where the yWorks doclet is installed -->
 		<yid>/Users/paulboon/Documents/Development/yworks-uml-doclet-3.0_02-jdk1.5</yid>
 	</properties>
-	
+
 	<profiles>
-			<profile>
+		<profile>
 			<id>plain-javadoc</id>
 			<activation>
 				<file>
@@ -241,7 +232,7 @@
 				</plugins>
 			</build>
 		</profile>
-		
+
 		<profile>
 			<id>yworks-uml-doclet</id>
 			<activation>
@@ -289,6 +280,6 @@
 				</plugins>
 			</build>
 		</profile>
-		
+
 	</profiles>
 </project>

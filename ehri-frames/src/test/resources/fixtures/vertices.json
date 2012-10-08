@@ -209,5 +209,14 @@
       "isA": "annotation"
     }, 
     "desc": "ann2"
+  },
+  {
+  	"data": {
+  	  "isA": "action",
+  	  "identifier": "8d1f81c0-0e24-11e2-892e-0800200c9a66",
+  	  "timestamp": "2012-10-03T00:00:00Z",
+  	  "logMessage": "Creating repository"
+  	},
+  	"desc": "action1"
   }
 ]

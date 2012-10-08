@@ -12,13 +12,13 @@ Commands take the form:
 
 The few commands that are currently available are:
 
-	load-fixtures <entityType>
+	load-fixtures
 
 Load the fixtures into the specified DB. The fixtures are currently hard-coded as those used in the ehri-frames tests, but this will become more flexible.
 
 	import-ead -user <user-id> -repo <repository-id> [-createuser] [-createrepo] <ead-file.xml>
 
-Import an EAD file into the specified database.
+Import an EAD file into the specified database. The `-repo <repo>` and `-user <user>` flags are mandatory, specifying which user performed the action, and which repository the created docs belong to. If `-createuser` and `-createrepo` flags are given, these will be created. The `-tolerant` flag tells the importer not to error if an individual document fails to import.
 
 	list <entityType>
 
