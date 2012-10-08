@@ -4,18 +4,23 @@
  * Needs a running neo4j server. 
  * Uses the jQuery javascript library   
  * 
- * Maybe make it to a jquery plugin?
+ * Maybe make it to a jquery plugin and have it work on a given DOM element?
+ * 
+ * NOTE we now have an index.html, but it might be better to have a server page index.jsp 
+ * for example that takes the node id as get parameter, 
+ * The loadNode is then not AJAX, but only the inline node properies loading is!
  */
 
+
 /**
- * neo4jViewer
+ * neo4jTabularNodeViewer
  * 
  * Using the Self-Executing Anonymous Function pattern
  * see: http://enterprisejquery.com/2010/10/how-good-c-habits-can-encourage-bad-javascript-habits-part-1/
  * 
  * still needs major refactoring
  */
-(function( neo4jViewer, $, undefined ) {
+(function( neo4jTabularNodeViewer, $, undefined ) {
 
 	/**
 	 * Note that it doesn't handle properties 
@@ -200,7 +205,7 @@
 
 	function updateView(url) {
 		$("#result").empty();
-		neo4jViewer.loadNode(url);
+		neo4jTabularNodeViewer.loadNode(url);
 	}
 
 	function setNodeIdInControls(id) {
@@ -226,7 +231,7 @@
 		return $.trim(url.substring(pos+1, url.length));
 	} 
 	
-	neo4jViewer.loadNode = function (url) {
+	neo4jTabularNodeViewer.loadNode = function (url) {
 		// assume valid node url; maybe check the id
 		setNodeIdInControls(extractIdFromNeo4jUrl(url));
 
@@ -249,7 +254,7 @@
 		});
 	}
 
-	neo4jViewer.initControls = function () {
+	neo4jTabularNodeViewer.initControls = function () {
 		// quick and dirty...
 		$("#controls").append("View node \n");
 		$("#controls").append("<input type='text' value='node id' />\n");
@@ -274,13 +279,13 @@
 		});
 	}
 
-}( window.neo4jViewer = window.neo4jViewer || {}, jQuery ));
+}( window.neo4jTabularNodeViewer = window.neo4jTabularNodeViewer || {}, jQuery ));
 
 
 
 // jQuery main entrance
 $(document).ready(function() {
-	neo4jViewer.initControls();
+	neo4jTabularNodeViewer.initControls();
 	// hardcoded initial node 0 !
-	neo4jViewer.loadNode("http://localhost:7474/db/data/node/0");
+	neo4jTabularNodeViewer.loadNode("http://localhost:7474/db/data/node/0");
 });
