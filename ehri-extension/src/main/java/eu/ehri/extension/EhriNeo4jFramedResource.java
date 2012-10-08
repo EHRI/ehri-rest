@@ -207,8 +207,23 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> {
      *         representation
      */
     public Response retrieve(String id) {
+        return retrieve(AccessibleEntity.IDENTIFIER_KEY, id);
+    }
+
+    
+    /**
+     * Retieve (get) an instance of the 'entity' in the database
+     * 
+     * @param key
+     *            The key to search
+     * @param value
+     *            The key's value
+     * @return The response of the request, which contains the json
+     *         representation
+     */
+    public Response retrieve(String key, String value) {
         try {
-            E entity = querier.get(AccessibleEntity.IDENTIFIER_KEY, id,
+            E entity = querier.get(key, value,
                     (long) getRequesterUserProfileId());
             String jsonStr = new Converter().vertexFrameToJson(entity);
 

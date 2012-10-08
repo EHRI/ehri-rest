@@ -6,6 +6,7 @@ import java.net.URI;
 import java.util.Map;
 
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
 import org.junit.Before;
@@ -14,14 +15,17 @@ import org.junit.Test;
 
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.core.util.MultivaluedMapImpl;
 
 import eu.ehri.extension.EhriNeo4jFramedResource;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.UserProfile;
+import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.persistance.EntityBundle;
 
 public class UserProfileRestClientTest extends BaseRestClientTest {
 
+    static final String FETCH_NAME = "mike";
     static final String UPDATED_NAME = "UpdatedNameTEST";
 
     private String jsonUserProfileTestString = "{\"data\":{\"identifier\": \"test-user\", \"name\":\"testUserName1\",\"isA\":\"userProfile\"}}";
@@ -62,6 +66,32 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
                 		getAdminUserProfileId()).get(ClientResponse.class);
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
         // TODO again test json
+    }
+    
+    @Test
+    public void testGetByKeyValue() throws Exception {
+        // -create data for testing
+        MultivaluedMap<String, String> queryParams = new MultivaluedMapImpl();
+        queryParams.add("key", AccessibleEntity.IDENTIFIER_KEY);
+        queryParams.add("value", FETCH_NAME);
+
+        WebResource resource = client.resource(getExtensionEntryPointUri()
+                + "/userProfile").queryParams(queryParams);        
+        
+
+        ClientResponse response = resource
+                .accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .header(EhriNeo4jFramedResource.AUTH_HEADER_NAME,
+                        getAdminUserProfileId()).entity(jsonUserProfileTestString)
+                .post(ClientResponse.class);
+
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        // TODO test if json is valid?
+        // response.getEntity(String.class)
+
+        // Get created doc via the response location?
+        URI location = response.getLocation();
     }
 
     @Test
