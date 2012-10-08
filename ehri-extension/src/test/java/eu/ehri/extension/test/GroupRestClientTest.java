@@ -43,7 +43,7 @@ public class GroupRestClientTest extends BaseRestClientTest {
                 		getAdminUserProfileId()).entity(jsonGroupTestString)
                 .post(ClientResponse.class);
         
-        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        assertEquals(Response.Status.CREATED.getStatusCode(), response.getStatus());
         // Get created doc via the response location?
         URI location = response.getLocation();
         resource = client.resource(location);

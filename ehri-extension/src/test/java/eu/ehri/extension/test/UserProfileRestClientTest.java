@@ -54,7 +54,7 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
                 		getAdminUserProfileId()).entity(jsonUserProfileTestString)
                 .post(ClientResponse.class);
 
-        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        assertEquals(Response.Status.CREATED.getStatusCode(), response.getStatus());
 
         // Get created entity via the response location?
         URI location = response.getLocation();
@@ -86,7 +86,7 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
                         getAdminUserProfileId()).entity(jsonUserProfileTestString)
                 .post(ClientResponse.class);
 
-        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        assertEquals(Response.Status.CREATED.getStatusCode(), response.getStatus());
         // TODO test if json is valid?
         // response.getEntity(String.class)
 
@@ -107,7 +107,7 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
                 		getAdminUserProfileId()).entity(jsonUserProfileTestString)
                 .post(ClientResponse.class);
 
-        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        assertEquals(Response.Status.CREATED.getStatusCode(), response.getStatus());
         // TODO test if json is valid?
         // response.getEntity(String.class)
 

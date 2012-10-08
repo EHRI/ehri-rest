@@ -43,7 +43,7 @@ public class AgentRestClientTest extends BaseRestClientTest {
                 		getAdminUserProfileId()).entity(jsonAgentTestString)
                 .post(ClientResponse.class);
 
-        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        assertEquals(Response.Status.CREATED.getStatusCode(), response.getStatus());
 
         // Get created doc via the response location?
         URI location = response.getLocation();

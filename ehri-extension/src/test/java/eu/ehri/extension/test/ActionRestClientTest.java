@@ -51,7 +51,7 @@ public class ActionRestClientTest extends BaseRestClientTest {
                         getAdminUserProfileId()).entity(jsonAgentTestString)
                 .post(ClientResponse.class);
 
-        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        assertEquals(Response.Status.CREATED.getStatusCode(), response.getStatus());
 
         List<Map<String, Object>> actionsAfter = getEntityList(
                 EntityTypes.ACTION, getAdminUserProfileId());

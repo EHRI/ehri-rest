@@ -56,7 +56,7 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
                         getAdminUserProfileId())
                 .entity(jsonDocumentaryUnitTestStr).post(ClientResponse.class);
 
-        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        assertEquals(Response.Status.CREATED.getStatusCode(), response.getStatus());
         // TODO test if json is valid?
         // response.getEntity(String.class)
 
@@ -119,7 +119,7 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
                         getAdminUserProfileId())
                 .entity(jsonDocumentaryUnitTestStr).post(ClientResponse.class);
 
-        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        assertEquals(Response.Status.CREATED.getStatusCode(), response.getStatus());
         // TODO test if json is valid?
         // response.getEntity(String.class)
 

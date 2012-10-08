@@ -155,7 +155,7 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> {
             UriBuilder ub = uriInfo.getAbsolutePathBuilder();
             URI docUri = ub.path(entity.asVertex().getId().toString()).build();
 
-            return Response.status(Status.OK).location(docUri)
+            return Response.status(Status.CREATED).location(docUri)
                     .entity((jsonStr).getBytes()).build();
 
         } catch (PermissionDenied e) {
