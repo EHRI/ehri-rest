@@ -261,29 +261,30 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> {
      * @return The response of the update request
      */
     public Response update(String json) {
-        EntityBundle<VertexFrame> entityBundle = null;
+        
         try {
-            entityBundle = converter.jsonToBundle(json);
-        } catch (DeserializationError e1) {
-            return Response.status(Status.BAD_REQUEST)
-                    .entity(produceErrorMessageJson(e1).getBytes()).build();
-        }
+            try {
+            	EntityBundle<VertexFrame> entityBundle = converter.jsonToBundle(json);
+                E update = views.update(converter.bundleToData(entityBundle),
+                        getRequesterUserProfileId());
+                String jsonStr = new Converter().vertexFrameToJson(update);
 
-        try {
-            views.update(converter.bundleToData(entityBundle),
-                    getRequesterUserProfileId());
+                return Response.status(Status.OK).entity((jsonStr).getBytes())
+                        .build();
+            } catch (DeserializationError e1) {
+                return Response.status(Status.BAD_REQUEST)
+                        .entity(produceErrorMessageJson(e1).getBytes()).build();
+            } catch (SerializationError e) {
+                return Response.status(Status.INTERNAL_SERVER_ERROR)
+                        .entity((produceErrorMessageJson(e)).getBytes()).build();
+			}
         } catch (PermissionDenied e) {
             return Response.status(Status.UNAUTHORIZED)
                     .entity((produceErrorMessageJson(e)).getBytes()).build();
         } catch (ValidationError e) {
             return Response.status(Status.BAD_REQUEST)
                     .entity((produceErrorMessageJson(e)).getBytes()).build();
-        } catch (DeserializationError e) {
-            return Response.status(Status.INTERNAL_SERVER_ERROR)
-                    .entity((produceErrorMessageJson(e)).getBytes()).build();
         }
-
-        return Response.status(Status.OK).build();
     }
 
     /**
