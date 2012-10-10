@@ -11,11 +11,13 @@ import eu.ehri.project.relationships.Access;
 
 public interface Accessor extends VertexFrame {
     public static final String BELONGS_TO = "belongsTo";
+    
+    public static final String NAME = "name";
 
-    @Property("name")
+    @Property(NAME)
     public String getName();
 
-    @Property("name")
+    @Property(NAME)
     public void setName();
 
     @Adjacency(label = BELONGS_TO)
