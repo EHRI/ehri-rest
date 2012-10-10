@@ -11,13 +11,10 @@ import org.junit.Test;
 
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
-import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.frames.VertexFrame;
 
 import eu.ehri.extension.AdminResource;
 import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.persistance.Converter;
 import eu.ehri.project.persistance.EntityBundle;
 
 public class AdminRestClientTest extends BaseRestClientTest {
