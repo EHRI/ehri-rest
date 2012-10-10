@@ -19,8 +19,6 @@ import javax.ws.rs.core.Response.Status;
 
 import org.neo4j.graphdb.GraphDatabaseService;
 
-import com.tinkerpop.frames.VertexFrame;
-
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
@@ -30,6 +28,8 @@ import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityTypes;
 import eu.ehri.project.persistance.EntityBundle;
 import eu.ehri.project.views.ActionViews;
+
+import static eu.ehri.extension.RestHelpers.*;
 
 /**
  * Provides a RESTfull interface for the Agent
@@ -83,13 +83,12 @@ public class AgentResource extends EhriNeo4jFramedResource<Agent> {
     public Response deleteAgent(@PathParam("id") long id) {
         return delete(id);
     }
-        
+
     @DELETE
     @Path("/{id:[\\w-]+}")
     public Response deleteAgent(@PathParam("id") String id) {
         return delete(id);
     }
-
 
     /**
      * Create an instance of the 'entity' in the database
@@ -109,21 +108,23 @@ public class AgentResource extends EhriNeo4jFramedResource<Agent> {
 
         try {
             Agent agent = views.detail(id, getRequesterUserProfileId());
-            EntityBundle<DocumentaryUnit> entityBundle = converter.jsonToBundle(json);
-            
-            DocumentaryUnit doc = new ActionViews<DocumentaryUnit>(graph, DocumentaryUnit.class)
-                    .create(converter.bundleToData(entityBundle),
-                            getRequesterUserProfileId());
+            EntityBundle<DocumentaryUnit> entityBundle = converter
+                    .jsonToBundle(json);
+
+            DocumentaryUnit doc = new ActionViews<DocumentaryUnit>(graph,
+                    DocumentaryUnit.class).create(
+                    converter.bundleToData(entityBundle),
+                    getRequesterUserProfileId());
             // Add it to this agent's collections
             agent.addCollection(doc);
-            
+
             String jsonStr = converter.vertexFrameToJson(doc);
             UriBuilder ub = uriInfo.getAbsolutePathBuilder();
             URI docUri = ub.path(doc.asVertex().getId().toString()).build();
-            
+
             return Response.status(Status.OK).location(docUri)
                     .entity((jsonStr).getBytes()).build();
-            
+
         } catch (PermissionDenied e) {
             return Response.status(Status.UNAUTHORIZED)
                     .entity((produceErrorMessageJson(e)).getBytes()).build();
