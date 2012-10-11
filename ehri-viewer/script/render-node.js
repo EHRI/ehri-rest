@@ -221,7 +221,20 @@
 
 	function getNodeIdInControls() {
 		// also trim the string
-		return $.trim($("#controls input").val());
+		var nodeId =  $.trim($("#controls input").val());
+		
+		// Should do nice validation, but do it quickly for now
+		// prevent XSS
+		if (!isInteger(nodeId))
+			nodeId="";
+
+		return nodeId;
+	}
+	
+	var reInteger = /^\d+$/;
+	function isInteger (s)
+	{    
+	    return reInteger.test(s)
 	}
 
 	/**
@@ -268,23 +281,24 @@
 
 		$("#controls button").click(function () {
 
-			var nodeId = $("#controls input:text").val();
+			var nodeId = getNodeIdInControls();
+			
 			console.log("input id: " + nodeId);
-			// Should do nice validation, but do it quickly for now
 			updateView("http://localhost:7474/db/data/node/"+ nodeId);
 		});
 		
 		$("#controls input:text").keypress(function(event){
 			var keycode = (event.keyCode ? event.keyCode : event.which);
 			if(keycode === 13) { // enter key
-				var nodeId = $("#controls input:text").val();
+				var nodeId = getNodeIdInControls();
+				
 				console.log("input id: " + nodeId);
-				// Should do nice validation, but do it quickly for now
 				updateView("http://localhost:7474/db/data/node/"+ nodeId);			
 			}
 		});
 	}
 
+	
 }( window.neo4jTabularNodeViewer = window.neo4jTabularNodeViewer || {}, jQuery ));
 
 
