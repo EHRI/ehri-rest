@@ -484,4 +484,5 @@ public class GraphHelpers {
         graph.removeVertex(vertex);
         graph.stopTransaction(TransactionalGraph.Conclusion.SUCCESS);
     }
+    
 }

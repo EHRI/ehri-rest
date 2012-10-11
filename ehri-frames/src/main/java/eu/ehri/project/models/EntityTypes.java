@@ -17,4 +17,7 @@ public class EntityTypes {
     public static final String ANNOTATION = "annotation";
     public static final String ADDRESS = "address";
     public static final String IMPORT = "import";
+    //
+    public static final String BASIC = "basic";
+    
 }
