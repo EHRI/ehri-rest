@@ -1,5 +1,8 @@
 package eu.ehri.extension;
 
+// Borrowed, temporarily, from Michael Hunger:
+// https://github.com/jexp/neo4j-clean-remote-db-addon
+
 import static eu.ehri.extension.RestHelpers.produceErrorMessageJson;
 
 import java.util.HashMap;
@@ -13,8 +16,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
+import org.neo4j.server.database.Database;
 
 import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.Index;
@@ -29,6 +32,8 @@ import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistance.BundleDAO;
 import eu.ehri.project.persistance.BundleFactory;
 import eu.ehri.project.persistance.Converter;
+import eu.ehri.project.test.utils.FixtureLoader;
+import eu.ehri.project.test.utils.Neo4jDatabaseCleaner;
 
 /**
  * Provides a RESTfull interface for the Action class. Note: Action instances
@@ -41,13 +46,13 @@ public class AdminResource {
     public static String DEFAULT_USER_ID_PREFIX = "user";
     public static String DEFAULT_USER_ID_FORMAT = "%s%06d";
 
-    private GraphDatabaseService database;
+    private Database database;
     private FramedGraph<Neo4jGraph> graph;
     private Converter converter;
 
-    public AdminResource(@Context GraphDatabaseService database) {
+    public AdminResource(@Context Database database) {
         this.database = database;
-        this.graph = new FramedGraph<Neo4jGraph>(new Neo4jGraph(database));
+        this.graph = new FramedGraph<Neo4jGraph>(new Neo4jGraph(database.getGraph()));
         converter = new Converter();
     }
 
@@ -60,7 +65,7 @@ public class AdminResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/createDefaultUserProfile")
     public Response createDefaultUserProfile() {
-        Transaction tx = database.beginTx();
+        Transaction tx = database.getGraph().beginTx();
         try {
             String ident = getNextDefaultUserName();
             Map<String, Object> data = new HashMap<String, Object>();
@@ -83,7 +88,7 @@ public class AdminResource {
             tx.success();
         }
     }
-
+    
     // Helpers...
     
     private String getNextDefaultUserName() {

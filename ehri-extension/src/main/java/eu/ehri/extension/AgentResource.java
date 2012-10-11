@@ -20,6 +20,7 @@ import javax.ws.rs.core.Response.Status;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import eu.ehri.project.exceptions.DeserializationError;
+import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
@@ -129,7 +130,10 @@ public class AgentResource extends EhriNeo4jFramedResource<Agent> {
             return Response.status(Status.UNAUTHORIZED)
                     .entity((produceErrorMessageJson(e)).getBytes()).build();
         } catch (ValidationError e) {
-            return Response.status(Status.INTERNAL_SERVER_ERROR)
+            return Response.status(Status.BAD_REQUEST)
+                    .entity((produceErrorMessageJson(e)).getBytes()).build();
+        } catch (IntegrityError e) {
+            return Response.status(Status.BAD_REQUEST)
                     .entity((produceErrorMessageJson(e)).getBytes()).build();
         } catch (SerializationError e) {
             return Response.status(Status.INTERNAL_SERVER_ERROR)

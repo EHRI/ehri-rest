@@ -7,6 +7,7 @@ import java.net.URI;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -25,10 +26,6 @@ public class GroupRestClientTest extends BaseRestClientTest {
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
         initializeTestDb(GroupRestClientTest.class.getName());
-    }
-
-    @Before
-    public void setUp() throws Exception {
     }
 
     @Test

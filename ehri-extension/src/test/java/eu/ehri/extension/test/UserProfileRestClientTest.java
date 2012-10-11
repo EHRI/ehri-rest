@@ -9,6 +9,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -33,10 +34,6 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
         initializeTestDb(UserProfileRestClientTest.class.getName());
-    }
-
-    @Before
-    public void setUp() throws Exception {
     }
 
     /**

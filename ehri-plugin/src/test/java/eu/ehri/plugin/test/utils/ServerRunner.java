@@ -2,6 +2,9 @@ package eu.ehri.plugin.test.utils;
 
 import java.io.File;
 
+import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Relationship;
+import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.AbstractGraphDatabase;
 import org.neo4j.kernel.EmbeddedGraphDatabase;
 import org.neo4j.server.NeoServer;
@@ -39,8 +42,7 @@ public class ServerRunner {
         // Initialize the fixture loader
         loader = new FixtureLoader(new FramedGraph<Neo4jGraph>(new Neo4jGraph(
                 graphDatabase)));
-        loader.loadTestData();
-
+        //loader.loadTestData();
         // Server configuration. TODO: Work out how to disable server startup
         // and load logging so the test output isn't so noisy...
         config = new ServerConfigurator(graphDatabase);
@@ -80,12 +82,45 @@ public class ServerRunner {
     public void start() {
         bootstrapper.start();
     }
+    
+    public void setUp() {
+        loader.loadTestData();
+    }
+    
+    public void tearDown() {
+        resetGraph();
+    }
 
     /**
      * Stop the server
      */
     public void stop() {
         bootstrapper.stop();
+    }
+    
+    /**
+     * Function for deleting all nodes in a database, restoring it
+     * to its initial state.
+     * 
+     */
+    protected long resetGraph() {
+        Transaction tx = graphDatabase.beginTx();
+        long deleted = 0;
+        try {
+            for (Node node :  graphDatabase.getAllNodes()) {
+                if ((long)node.getId() != 0L) {
+                    for (Relationship rel : node.getRelationships()) {
+                        rel.delete();
+                    }
+                    node.delete();
+                    deleted++;
+                }
+            }
+            tx.success();
+            return deleted;
+        } finally {
+            tx.finish();
+        }
     }
 
     /**

@@ -12,6 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import eu.ehri.project.exceptions.DeserializationError;
+import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.DatePeriod;
@@ -50,7 +51,7 @@ public class BundleTest extends ModelTestBase {
         assertEquals(c1.getName(), bundle.getData().get("name"));
     }
 
-    public void testSaving() throws SerializationError, ValidationError {
+    public void testSaving() throws SerializationError, ValidationError, IntegrityError {
         DocumentaryUnit c1 = helper.getTestFrame("c1", DocumentaryUnit.class);
         assertEquals(1, toList(c1.getDescriptions()).size());
 
@@ -66,7 +67,7 @@ public class BundleTest extends ModelTestBase {
 
     @Test
     public void testSavingWithDependentChanges() throws SerializationError,
-            DeserializationError, ValidationError {
+            DeserializationError, ValidationError, IntegrityError {
         DocumentaryUnit c1 = helper.getTestFrame("c1", DocumentaryUnit.class);
         assertEquals(1, toList(c1.getDescriptions()).size());
         String json = converter.vertexFrameToJson(c1);
@@ -87,7 +88,7 @@ public class BundleTest extends ModelTestBase {
 
     @Test
     public void testDeletingDependents() throws SerializationError,
-            ValidationError {
+            ValidationError, IntegrityError {
         DocumentaryUnit c1 = helper.getTestFrame("c1", DocumentaryUnit.class);
         EntityBundle<DocumentaryUnit> bundle = converter
                 .vertexFrameToBundle(c1);

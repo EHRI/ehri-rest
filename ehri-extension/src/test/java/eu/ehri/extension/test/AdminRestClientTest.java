@@ -6,6 +6,8 @@ import static org.junit.Assert.assertTrue;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -25,7 +27,7 @@ public class AdminRestClientTest extends BaseRestClientTest {
     public static void setUpBeforeClass() throws Exception {
         initializeTestDb(AdminRestClientTest.class.getName());
     }
-
+    
     @Test
     public void testCreateDefaultUser() throws Exception {
         // Create

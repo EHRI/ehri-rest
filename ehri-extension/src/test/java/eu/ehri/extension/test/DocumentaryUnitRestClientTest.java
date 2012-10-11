@@ -11,6 +11,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.codehaus.jackson.map.ObjectMapper;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -40,7 +41,7 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
     public void setUp() throws Exception {
         jsonDocumentaryUnitTestStr = readFileAsString("documentaryUnit.json");
     }
-
+    
     /**
      * CR(U)D cycle
      */

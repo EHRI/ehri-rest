@@ -7,6 +7,7 @@ import com.tinkerpop.frames.Property;
 import com.tinkerpop.frames.VertexFrame;
 
 import eu.ehri.project.models.Action;
+import eu.ehri.project.models.annotations.Unique;
 import eu.ehri.project.relationships.Access;
 
 public interface AccessibleEntity extends VertexFrame {
@@ -14,6 +15,7 @@ public interface AccessibleEntity extends VertexFrame {
     public static final String ACCESS = "access";
     public static final String IDENTIFIER_KEY = "identifier";
 
+    @Unique
     @Property(IDENTIFIER_KEY)
     public String getIdentifier();
 

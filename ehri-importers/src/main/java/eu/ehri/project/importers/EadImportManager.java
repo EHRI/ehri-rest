@@ -26,6 +26,7 @@ import org.xml.sax.SAXException;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
+import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.exceptions.InvalidEadDocument;
@@ -206,10 +207,11 @@ public class EadImportManager extends XmlImportManager implements ImportManager 
      * @throws InputParseError
      * @throws InvalidInputFormatError
      * @throws InvalidEadDocument
+     * @throws IntegrityError 
      */
     private void importFile(InputStream ios, final Action action,
             final ImportLog log) throws IOException, ValidationError,
-            InputParseError, InvalidEadDocument, InvalidInputFormatError {
+            InputParseError, InvalidEadDocument, InvalidInputFormatError, IntegrityError {
 
         // XML parsing boilerplate...
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -241,10 +243,11 @@ public class EadImportManager extends XmlImportManager implements ImportManager 
      * @throws ValidationError
      * @throws InvalidEadDocument
      * @throws InvalidInputFormatError
+     * @throws IntegrityError 
      */
     private void importDocWithinAction(Document doc, final Action action,
             final ImportLog manifest) throws ValidationError,
-            InvalidEadDocument, InvalidInputFormatError {
+            InvalidEadDocument, InvalidInputFormatError, IntegrityError {
 
         // Check the various types of document we support. This
         // includes <eadgrp> or <eadlist> types.
@@ -268,10 +271,11 @@ public class EadImportManager extends XmlImportManager implements ImportManager 
      * @throws ValidationError
      * @throws InvalidInputFormatError
      * @throws InvalidEadDocument
+     * @throws IntegrityError 
      */
     private void importNestedItemsWithinAction(Document doc, String path,
             final Action action, final ImportLog manifest)
-            throws ValidationError, InvalidInputFormatError, InvalidEadDocument {
+            throws ValidationError, InvalidInputFormatError, InvalidEadDocument, IntegrityError {
         XPath xpath = XPathFactory.newInstance().newXPath();
         NodeList eadList;
         try {
@@ -297,10 +301,11 @@ public class EadImportManager extends XmlImportManager implements ImportManager 
      * @throws ValidationError
      * @throws InvalidInputFormatError
      * @throws InvalidEadDocument
+     * @throws IntegrityError 
      */
     private void importNodeWithinAction(Node node, final Action action,
             final ImportLog log) throws ValidationError,
-            InvalidInputFormatError, InvalidEadDocument {
+            InvalidInputFormatError, InvalidEadDocument, IntegrityError {
 
         EadImporter importer = new EadImporter(framedGraph, agent, node, log);
         importer.setTolerant(tolerant);
