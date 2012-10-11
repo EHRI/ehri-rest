@@ -21,7 +21,7 @@ public class GroupRestClientTest extends BaseRestClientTest {
 
     static final String UPDATED_NAME = "UpdatedNameTEST";
 
-    private String jsonGroupTestString = "{\"data\":{\"isA\": \"group\", \"identifier\": \"niod\", \"name\": \"NIOD\"}}";
+    private String jsonGroupTestString = "{\"data\":{\"isA\": \"group\", \"identifier\": \"jmp\", \"name\": \"JMP\"}}";
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {

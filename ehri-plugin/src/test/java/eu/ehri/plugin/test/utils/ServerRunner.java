@@ -42,7 +42,7 @@ public class ServerRunner {
         // Initialize the fixture loader
         loader = new FixtureLoader(new FramedGraph<Neo4jGraph>(new Neo4jGraph(
                 graphDatabase)));
-        //loader.loadTestData();
+        loader.loadTestData();
         // Server configuration. TODO: Work out how to disable server startup
         // and load logging so the test output isn't so noisy...
         config = new ServerConfigurator(graphDatabase);

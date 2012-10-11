@@ -32,8 +32,6 @@ import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistance.BundleDAO;
 import eu.ehri.project.persistance.BundleFactory;
 import eu.ehri.project.persistance.Converter;
-import eu.ehri.project.test.utils.FixtureLoader;
-import eu.ehri.project.test.utils.Neo4jDatabaseCleaner;
 
 /**
  * Provides a RESTfull interface for the Action class. Note: Action instances
