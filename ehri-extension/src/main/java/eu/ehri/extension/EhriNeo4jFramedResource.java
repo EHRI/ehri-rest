@@ -206,8 +206,9 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> {
 	 *            The Entities identifier string
 	 * @return The response of the request, which contains the json
 	 *         representation
+	 * @throws ItemNotFound 
 	 */
-	public Response retrieve(String id) {
+	public Response retrieve(String id) throws ItemNotFound {
 		return retrieve(AccessibleEntity.IDENTIFIER_KEY, id);
 	}
 
@@ -220,8 +221,9 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> {
 	 *            The key's value
 	 * @return The response of the request, which contains the json
 	 *         representation
+	 * @throws ItemNotFound 
 	 */
-	public Response retrieve(String key, String value) {
+	public Response retrieve(String key, String value) throws ItemNotFound {
 		try {
 			E entity = querier.get(key, value,
 					(long) getRequesterUserProfileId());
@@ -231,14 +233,6 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> {
 					.build();
 		} catch (PermissionDenied e) {
 			return Response.status(Status.UNAUTHORIZED)
-					.entity((produceErrorMessageJson(e)).getBytes()).build();
-		} catch (ItemNotFound e) {
-			// Most likely there was no such item (wrong id)
-			// BETTER get a different Exception for that?
-			//
-			// so we would need to return a BADREQUEST, or NOTFOUND
-
-			return Response.status(Status.NOT_FOUND)
 					.entity((produceErrorMessageJson(e)).getBytes()).build();
 		} catch (IndexNotFoundException e) {
 			return Response.status(Status.INTERNAL_SERVER_ERROR)

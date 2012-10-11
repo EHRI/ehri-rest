@@ -15,67 +15,69 @@ import javax.ws.rs.core.StreamingOutput;
 
 import org.neo4j.graphdb.GraphDatabaseService;
 
+import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityTypes;
 
 /**
- * Provides a RESTfull interface for the DocumentaryUnit 
+ * Provides a RESTfull interface for the DocumentaryUnit
  */
 @Path(EntityTypes.DOCUMENTARY_UNIT)
 public class DocumentaryUnitResource extends
-        EhriNeo4jFramedResource<DocumentaryUnit> {
+		EhriNeo4jFramedResource<DocumentaryUnit> {
 
-    public DocumentaryUnitResource(@Context GraphDatabaseService database) {
-        super(database, DocumentaryUnit.class);
-    }
+	public DocumentaryUnitResource(@Context GraphDatabaseService database) {
+		super(database, DocumentaryUnit.class);
+	}
 
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{id:\\d+}")
-    public Response getDocumentaryUnit(@PathParam("id") long id) {
-        return retrieve(id);
-    }
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("/{id:\\d+}")
+	public Response getDocumentaryUnit(@PathParam("id") long id) {
+		return retrieve(id);
+	}
 
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{id:[\\w-]+}")
-    public Response getDocumentaryUnit(@PathParam("id") String id) {
-        return retrieve(id);
-    }
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("/{id:[\\w-]+}")
+	public Response getDocumentaryUnit(@PathParam("id") String id)
+			throws ItemNotFound {
+		return retrieve(id);
+	}
 
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("/list")
-    public StreamingOutput listDocumentaryUnits() {
-        return list();
-    }
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("/list")
+	public StreamingOutput listDocumentaryUnits() {
+		return list();
+	}
 
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("")
-    public Response createDocumentaryUnit(String json) {
-        return create(json);
-    }
+	@POST
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("")
+	public Response createDocumentaryUnit(String json) {
+		return create(json);
+	}
 
-    @PUT
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("")
-    public Response updateDocumentaryUnit(String json) {
-        return update(json);
-    }
+	@PUT
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("")
+	public Response updateDocumentaryUnit(String json) {
+		return update(json);
+	}
 
-    @DELETE
-    @Path("/{id}")
-    public Response deleteDocumentaryUnit(@PathParam("id") long id) {
-        return delete(id);
-    }
-        
-    @DELETE
-    @Path("/{id:[\\w-]+}")
-    public Response deleteDocumentaryUnit(@PathParam("id") String id) {
-        return delete(id);
-    }
+	@DELETE
+	@Path("/{id}")
+	public Response deleteDocumentaryUnit(@PathParam("id") long id) {
+		return delete(id);
+	}
+
+	@DELETE
+	@Path("/{id:[\\w-]+}")
+	public Response deleteDocumentaryUnit(@PathParam("id") String id) {
+		return delete(id);
+	}
 
 }

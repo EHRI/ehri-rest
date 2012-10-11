@@ -11,6 +11,7 @@ import javax.ws.rs.core.StreamingOutput;
 
 import org.neo4j.graphdb.GraphDatabaseService;
 
+import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.EntityTypes;
 import eu.ehri.project.models.Action;
 
@@ -22,28 +23,28 @@ import eu.ehri.project.models.Action;
 @Path(EntityTypes.ACTION)
 public class ActionResource extends EhriNeo4jFramedResource<Action> {
 
-    public ActionResource(@Context GraphDatabaseService database) {
-        super(database, Action.class);
-    }
+	public ActionResource(@Context GraphDatabaseService database) {
+		super(database, Action.class);
+	}
 
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{id:\\d+}")
-    public Response getAction(@PathParam("id") long id) {
-        return retrieve(id);
-    }
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("/{id:\\d+}")
+	public Response getAction(@PathParam("id") long id) {
+		return retrieve(id);
+	}
 
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{id:[\\w-]+}")
-    public Response getAction(@PathParam("id") String id) {
-        return retrieve(id);
-    }
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("/{id:[\\w-]+}")
+	public Response getAction(@PathParam("id") String id) throws ItemNotFound {
+		return retrieve(id);
+	}
 
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("/list")
-    public StreamingOutput listActions() {
-        return list();
-    }
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("/list")
+	public StreamingOutput listActions() {
+		return list();
+	}
 }

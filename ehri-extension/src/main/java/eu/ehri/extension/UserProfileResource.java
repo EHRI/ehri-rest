@@ -16,6 +16,7 @@ import javax.ws.rs.core.StreamingOutput;
 
 import org.neo4j.graphdb.GraphDatabaseService;
 
+import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.EntityTypes;
 import eu.ehri.project.models.UserProfile;
 
@@ -33,7 +34,7 @@ public class UserProfileResource extends EhriNeo4jFramedResource<UserProfile> {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("")
     public Response getUserProfile(@QueryParam("key") String key,
-            @QueryParam("value") String value) {
+            @QueryParam("value") String value) throws ItemNotFound {
         return retrieve(key, value);
     }
 
@@ -47,7 +48,7 @@ public class UserProfileResource extends EhriNeo4jFramedResource<UserProfile> {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:[\\w-]+}")
-    public Response getUserProfile(@PathParam("id") String id) {
+    public Response getUserProfile(@PathParam("id") String id) throws ItemNotFound {
         return retrieve(id);
     }
 
