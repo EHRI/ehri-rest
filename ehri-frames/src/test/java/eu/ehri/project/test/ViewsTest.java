@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.junit.Test;
 import eu.ehri.project.exceptions.DeserializationError;
+import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
@@ -88,10 +89,11 @@ public class ViewsTest extends AbstractFixtureTest {
      * @throws PermissionDenied
      * @throws ValidationError
      * @throws DeserializationError
+     * @throws IntegrityError 
      */
     @Test
     public void testUpdate() throws PermissionDenied, ValidationError,
-            DeserializationError {
+            DeserializationError, IntegrityError {
         Views<DocumentaryUnit> docViews = new Views<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
         Map<String, Object> bundle = getTestBundle();
@@ -124,10 +126,11 @@ public class ViewsTest extends AbstractFixtureTest {
      * @throws PermissionDenied
      * @throws ValidationError
      * @throws DeserializationError
+     * @throws IntegrityError 
      */
     @Test
     public void testUserUpdate() throws PermissionDenied, ValidationError,
-            DeserializationError {
+            DeserializationError, IntegrityError {
         Views<UserProfile> userViews = new Views<UserProfile>(graph,
                 UserProfile.class);
         Map<String, Object> bundle = getTestUserBundle();
@@ -152,10 +155,11 @@ public class ViewsTest extends AbstractFixtureTest {
      * @throws ValidationError
      * @throws PermissionDenied
      * @throws DeserializationError
+     * @throws IntegrityError 
      */
     @Test
     public void testCreate() throws ValidationError, PermissionDenied,
-            DeserializationError {
+            DeserializationError, IntegrityError {
         Views<DocumentaryUnit> docViews = new Views<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
         Map<String, Object> bundle = getTestBundle();
@@ -169,10 +173,11 @@ public class ViewsTest extends AbstractFixtureTest {
      * @throws ValidationError
      * @throws PermissionDenied
      * @throws DeserializationError
+     * @throws IntegrityError 
      */
     @Test
     public void testUserCreate() throws ValidationError, PermissionDenied,
-            DeserializationError {
+            DeserializationError, IntegrityError {
         Views<UserProfile> userViews = new Views<UserProfile>(graph,
                 UserProfile.class);
         Map<String, Object> bundle = getTestUserBundle();
@@ -186,10 +191,11 @@ public class ViewsTest extends AbstractFixtureTest {
      * @throws ValidationError
      * @throws PermissionDenied
      * @throws DeserializationError
+     * @throws IntegrityError 
      */
     @Test
     public void testGroupCreate() throws ValidationError, PermissionDenied,
-            DeserializationError {
+            DeserializationError, IntegrityError {
         Views<Group> groupViews = new Views<Group>(graph, Group.class);
         Map<String, Object> bundle = getTestGroupBundle();
         Group group = groupViews.create(bundle, validUserId);
@@ -202,10 +208,11 @@ public class ViewsTest extends AbstractFixtureTest {
      * @throws ValidationError
      * @throws PermissionDenied
      * @throws DeserializationError
+     * @throws IntegrityError 
      */
     @Test(expected = ValidationError.class)
     public void testCreateWithError() throws ValidationError, PermissionDenied,
-            DeserializationError {
+            DeserializationError, IntegrityError {
         Views<DocumentaryUnit> docViews = new Views<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
         Map<String, Object> bundle = getTestBundle();
@@ -223,10 +230,11 @@ public class ViewsTest extends AbstractFixtureTest {
      * @throws ValidationError
      * @throws PermissionDenied
      * @throws DeserializationError
+     * @throws IntegrityError 
      */
     @Test(expected = DeserializationError.class)
     public void testCreateWithDeserialisationError() throws ValidationError,
-            PermissionDenied, DeserializationError {
+            PermissionDenied, DeserializationError, IntegrityError {
         Views<DocumentaryUnit> docViews = new Views<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
         Map<String, Object> bundle = getTestBundle();

@@ -24,6 +24,7 @@ import com.tinkerpop.frames.VertexFrame;
 
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.IndexNotFoundException;
+import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
@@ -164,7 +165,10 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> {
 		} catch (SerializationError e) {
 			return Response.status(Status.INTERNAL_SERVER_ERROR)
 					.entity((produceErrorMessageJson(e)).getBytes()).build();
-		}
+		} catch (IntegrityError e) {
+            return Response.status(Status.BAD_REQUEST)
+                    .entity((produceErrorMessageJson(e)).getBytes()).build();
+        }
 	}
 
 	/**
@@ -273,7 +277,10 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> {
 				return Response.status(Status.INTERNAL_SERVER_ERROR)
 						.entity((produceErrorMessageJson(e)).getBytes())
 						.build();
-			}
+			} catch (IntegrityError e) {
+	            return Response.status(Status.BAD_REQUEST)
+	                    .entity((produceErrorMessageJson(e)).getBytes()).build();
+            }
 		} catch (PermissionDenied e) {
 			return Response.status(Status.UNAUTHORIZED)
 					.entity((produceErrorMessageJson(e)).getBytes()).build();

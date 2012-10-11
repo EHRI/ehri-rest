@@ -6,6 +6,7 @@ import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
 import eu.ehri.project.exceptions.DeserializationError;
+import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
@@ -43,9 +44,10 @@ public class Views<E extends AccessibleEntity> extends AbstractViews<E> implemen
      * @return
      * @throws PermissionDenied
      * @throws ValidationError
+     * @throws IntegrityError 
      */
     public E update(Map<String, Object> data, Long user)
-            throws PermissionDenied, ValidationError, DeserializationError {
+            throws PermissionDenied, ValidationError, DeserializationError, IntegrityError {
         EntityBundle<E> bundle = converter.dataToBundle(data);
         E entity = graph.getVertex(bundle.getId(), cls);
         checkWriteAccess(entity, user);
@@ -60,9 +62,10 @@ public class Views<E extends AccessibleEntity> extends AbstractViews<E> implemen
      * @return
      * @throws PermissionDenied
      * @throws ValidationError
+     * @throws IntegrityError 
      */
     public E create(Map<String, Object> data, Long user)
-            throws PermissionDenied, ValidationError, DeserializationError {
+            throws PermissionDenied, ValidationError, DeserializationError, IntegrityError {
         checkGlobalWriteAccess(user);
         EntityBundle<E> bundle = converter.dataToBundle(data);
         return new BundleDAO<E>(graph).create(bundle);

@@ -20,6 +20,7 @@ import com.tinkerpop.frames.VertexFrame;
 
 import eu.ehri.project.core.GraphHelpers;
 import eu.ehri.project.exceptions.IndexNotFoundException;
+import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.annotations.Dependent;
 import eu.ehri.project.models.utils.ClassUtils;
@@ -47,8 +48,9 @@ public class BundleDAO<T extends VertexFrame> {
      * @param bundle
      * @return
      * @throws ValidationError
+     * @throws IntegrityError 
      */
-    public T update(EntityBundle<T> bundle) throws ValidationError {
+    public T update(EntityBundle<T> bundle) throws ValidationError, IntegrityError {
         return graph.frame(updateInner(bundle), bundle.getBundleClass());
     }
 
@@ -59,9 +61,10 @@ public class BundleDAO<T extends VertexFrame> {
      * @return
      * @throws ValidationError
      * @throws IndexNotFoundException 
+     * @throws IntegrityError 
      */
     public T createOrUpdate(String key, String value, EntityBundle<T> bundle)
-        throws ValidationError, IndexNotFoundException {
+        throws ValidationError, IndexNotFoundException, IntegrityError {
         Index<Vertex> index = helpers.getIndex(bundle.getEntityType(),
                 Vertex.class);
         if (index == null)
@@ -81,7 +84,7 @@ public class BundleDAO<T extends VertexFrame> {
         }
     }
 
-    public T create(EntityBundle<T> bundle) throws ValidationError {
+    public T create(EntityBundle<T> bundle) throws ValidationError, IntegrityError {
         return graph.frame(createInner(bundle), bundle.getBundleClass());
     }
 
@@ -181,7 +184,7 @@ public class BundleDAO<T extends VertexFrame> {
     }
 
     private Vertex insertOrUpdate(EntityBundle<T> bundle)
-            throws ValidationError {
+            throws ValidationError, IntegrityError {
         return bundle.getId() == null ? createInner(bundle)
                 : updateInner(bundle);
     }
@@ -192,13 +195,14 @@ public class BundleDAO<T extends VertexFrame> {
      * @param bundle
      * @return
      * @throws ValidationError
+     * @throws IntegrityError 
      */
-    private Vertex createInner(EntityBundle<T> bundle) throws ValidationError {
+    private Vertex createInner(EntityBundle<T> bundle) throws ValidationError, IntegrityError {
         bundle.validateForInsert();
         Index<Vertex> index = helpers.getOrCreateIndex(bundle.getEntityType(),
                 Vertex.class);
         Vertex node = helpers.createIndexedVertex(bundle.getData(), index,
-                bundle.getPropertyKeys());
+                bundle.getPropertyKeys(), bundle.getUniquePropertyKeys());
         saveDependents(node, bundle.getBundleClass(), bundle.getRelations());
         return node;
     }
@@ -209,13 +213,14 @@ public class BundleDAO<T extends VertexFrame> {
      * @param bundle
      * @return
      * @throws ValidationError
+     * @throws IntegrityError 
      */
-    private Vertex updateInner(EntityBundle<T> bundle) throws ValidationError {
+    private Vertex updateInner(EntityBundle<T> bundle) throws ValidationError, IntegrityError {
         bundle.validateForUpdate();
         Index<Vertex> index = helpers.getOrCreateIndex(bundle.getEntityType(),
                 Vertex.class);
         Vertex node = helpers.updateIndexedVertex(bundle.getId(),
-                bundle.getData(), index, bundle.getPropertyKeys());
+                bundle.getData(), index, bundle.getPropertyKeys(), bundle.getUniquePropertyKeys());
         saveDependents(node, bundle.getBundleClass(), bundle.getRelations());
         return node;
     }
@@ -228,10 +233,11 @@ public class BundleDAO<T extends VertexFrame> {
      * @param cls
      * @param relations
      * @throws ValidationError
+     * @throws IntegrityError 
      */
     private void saveDependents(Vertex master,
             Class<? extends VertexFrame> cls, MultiValueMap relations)
-            throws ValidationError {
+            throws ValidationError, IntegrityError {
         List<String> dependents = ClassUtils.getDependentRelations(cls);
         Set<Long> existingDependents = new HashSet<Long>();
         Set<Long> refreshedDependents = new HashSet<Long>();

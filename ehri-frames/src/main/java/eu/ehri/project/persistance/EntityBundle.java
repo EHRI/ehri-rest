@@ -207,6 +207,16 @@ public class EntityBundle<T extends VertexFrame> {
         return ClassUtils.getPropertyKeys(cls);
     }
 
+    /**
+     * Return a list of property keys which must be unique.
+     * 
+     * @return
+     */
+    public List<String> getUniquePropertyKeys() {
+        // TODO Auto-generated method stub
+        return ClassUtils.getUniquePropertyKeys(cls);
+    }
+
     @Override
     public String toString() {
         return String.format("<%s: %s>", cls.getName(), data);

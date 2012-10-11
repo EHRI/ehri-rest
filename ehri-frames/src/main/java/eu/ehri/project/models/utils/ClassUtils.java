@@ -24,6 +24,7 @@ import eu.ehri.project.models.EntityTypes;
 import eu.ehri.project.models.annotations.Dependent;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
+import eu.ehri.project.models.annotations.Unique;
 
 public class ClassUtils {
 
@@ -277,6 +278,26 @@ public class ClassUtils {
 
         return makeUnique(out);
     }
+
+    public static List<String> getUniquePropertyKeys(Class<?> cls) {
+        List<String> out = new LinkedList<String>();
+        for (Method method : cls.getMethods()) {
+            Unique unique = method.getAnnotation(Unique.class);
+            if (unique != null ) {
+                Property ann = method.getAnnotation(Property.class);
+                if (ann != null)
+                    out.add(ann.value());                                
+            }
+                
+        }
+
+        for (Class<?> s : cls.getInterfaces()) {
+            out.addAll(getUniquePropertyKeys(s));
+        }
+
+        return makeUnique(out);
+    }
+
 
     /**
      * Another method to make a list unique. Sigh.

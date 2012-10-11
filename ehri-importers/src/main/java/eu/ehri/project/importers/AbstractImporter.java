@@ -10,6 +10,7 @@ import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.gremlin.java.GremlinPipeline;
 import com.tinkerpop.pipes.PipeFunction;
 
+import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.DatePeriod;
@@ -111,9 +112,10 @@ public abstract class AbstractImporter<T> {
      * @param parent
      * @param depth
      * @throws ValidationError
+     * @throws IntegrityError 
      */
     protected DocumentaryUnit importItem(T itemData, DocumentaryUnit parent,
-            int depth) throws ValidationError {
+            int depth) throws ValidationError, IntegrityError {
         EntityBundle<DocumentaryUnit> unit = new BundleFactory<DocumentaryUnit>()
                 .buildBundle(extractDocumentaryUnit(itemData, depth),
                         DocumentaryUnit.class);

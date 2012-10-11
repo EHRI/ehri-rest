@@ -9,6 +9,7 @@ import javax.management.RuntimeErrorException;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 
 import com.tinkerpop.blueprints.Edge;
@@ -102,8 +103,14 @@ public class FixtureLoader {
     }
 
     public void loadTestData() {
-        loadNodes();
-        loadEdges();
+        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
+        try {
+            loadNodes();
+            loadEdges();
+            tx.success();
+        } finally {
+            tx.finish();
+        }
     }
 
     private static void registerShutdownHook(final GraphDatabaseService graphDb) {

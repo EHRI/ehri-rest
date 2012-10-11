@@ -7,6 +7,7 @@ import org.neo4j.graphdb.Transaction;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.exceptions.DeserializationError;
+import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
@@ -52,10 +53,11 @@ public class ActionViews<E extends AccessibleEntity> extends Views<E> implements
      * @return
      * @throws PermissionDenied
      * @throws ValidationError
+     * @throws IntegrityError 
      */
     @Override
     public E create(Map<String, Object> data, Long user)
-            throws PermissionDenied, ValidationError, DeserializationError {
+            throws PermissionDenied, ValidationError, DeserializationError, IntegrityError {
         return create(data, user, DEFAULT_CREATE_LOG);
     }
 
@@ -69,9 +71,10 @@ public class ActionViews<E extends AccessibleEntity> extends Views<E> implements
      * @return
      * @throws PermissionDenied
      * @throws ValidationError
+     * @throws IntegrityError 
      */
     public E create(Map<String, Object> data, Long user, String logMessage)
-            throws PermissionDenied, ValidationError, DeserializationError {
+            throws PermissionDenied, ValidationError, DeserializationError, IntegrityError {
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         // Behold: A compelling reason to upgrade to Java 7
         // http://docs.oracle.com/javase/7/docs/technotes/guides/language/catch-multiple.html
@@ -83,6 +86,9 @@ public class ActionViews<E extends AccessibleEntity> extends Views<E> implements
                     logMessage);
             tx.success();
             return out;
+        } catch (IntegrityError ex) {
+            tx.failure();
+            throw ex;
         } catch (PermissionDenied ex) {
             tx.failure();
             throw ex;
@@ -109,10 +115,11 @@ public class ActionViews<E extends AccessibleEntity> extends Views<E> implements
      * @return
      * @throws PermissionDenied
      * @throws ValidationError
+     * @throws IntegrityError 
      */
     @Override
     public E update(Map<String, Object> data, Long user)
-            throws PermissionDenied, ValidationError, DeserializationError {
+            throws PermissionDenied, ValidationError, DeserializationError, IntegrityError {
         return update(data, user, DEFAULT_UPDATE_LOG);
     }
 
@@ -126,9 +133,10 @@ public class ActionViews<E extends AccessibleEntity> extends Views<E> implements
      * @return
      * @throws PermissionDenied
      * @throws ValidationError
+     * @throws IntegrityError 
      */
     public E update(Map<String, Object> data, Long user, String logMessage)
-            throws PermissionDenied, ValidationError, DeserializationError {
+            throws PermissionDenied, ValidationError, DeserializationError, IntegrityError {
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
 
@@ -138,6 +146,9 @@ public class ActionViews<E extends AccessibleEntity> extends Views<E> implements
                     logMessage);
             tx.success();
             return out;
+        } catch (IntegrityError ex) {
+            tx.failure();
+            throw ex;
         } catch (PermissionDenied ex) {
             tx.failure();
             throw ex;

@@ -12,6 +12,7 @@ import org.junit.Test;
 import com.tinkerpop.blueprints.Vertex;
 
 import eu.ehri.project.exceptions.DeserializationError;
+import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
@@ -31,10 +32,11 @@ public class ActionViewsTest extends AbstractFixtureTest {
      * @throws PermissionDenied
      * @throws ValidationError
      * @throws DeserializationError
+     * @throws IntegrityError 
      */
     @Test
     public void testUpdate() throws PermissionDenied, ValidationError,
-            DeserializationError {
+            DeserializationError, IntegrityError {
         ActionViews<DocumentaryUnit> docViews = new ActionViews<DocumentaryUnit>(
                 graph, DocumentaryUnit.class);
         Map<String, Object> testData = getTestBundle();
@@ -67,10 +69,11 @@ public class ActionViewsTest extends AbstractFixtureTest {
      * @throws PermissionDenied
      * @throws ValidationError
      * @throws DeserializationError
+     * @throws IntegrityError 
      */
     @Test
     public void testUserUpdate() throws PermissionDenied, ValidationError,
-            DeserializationError {
+            DeserializationError, IntegrityError {
         ActionViews<UserProfile> userViews = new ActionViews<UserProfile>(
                 graph, UserProfile.class);
         Map<String, Object> userData = getTestUserBundle();

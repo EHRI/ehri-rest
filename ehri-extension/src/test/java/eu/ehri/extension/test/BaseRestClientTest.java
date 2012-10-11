@@ -7,7 +7,9 @@ import java.util.Map;
 import javax.ws.rs.core.MediaType;
 
 import org.codehaus.jackson.map.ObjectMapper;
+import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.neo4j.server.configuration.ThirdPartyJaxRsPackage;
 
@@ -64,6 +66,16 @@ public class BaseRestClientTest extends AbstractRestClientTest {
                 .add(new ThirdPartyJaxRsPackage(EhriNeo4jFramedResource.class
                         .getPackage().getName(), mountPoint));
         runner.start();
+    }
+    
+    @Before
+    public void setupDatabase() {
+        runner.tearDown();
+    }
+    
+    @After
+    public void teardownDatabase() {
+        runner.setUp();
     }
 
     /**

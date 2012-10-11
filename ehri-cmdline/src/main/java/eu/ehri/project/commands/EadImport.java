@@ -12,6 +12,7 @@ import org.apache.commons.cli.ParseException;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
+import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.EadImportManager;
 import eu.ehri.project.importers.ImportLog;
@@ -142,7 +143,7 @@ public class EadImport extends BaseCommand implements Command {
     }
 
     private static UserProfile createUser(FramedGraph<Neo4jGraph> graph,
-            String name) throws ValidationError {
+            String name) throws ValidationError, IntegrityError {
         Map<String, Object> agentData = new HashMap<String, Object>();
         agentData.put("identifier", name);
         agentData.put("name", name);
@@ -152,7 +153,7 @@ public class EadImport extends BaseCommand implements Command {
     }
 
     private static Agent createAgent(FramedGraph<Neo4jGraph> graph, String name)
-            throws ValidationError {
+            throws ValidationError, IntegrityError {
         Map<String, Object> agentData = new HashMap<String, Object>();
         agentData.put("identifier", name);
         agentData.put("name", name);

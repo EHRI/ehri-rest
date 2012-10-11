@@ -10,6 +10,7 @@ import org.joda.time.format.ISODateTimeFormat;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
+import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.Action;
 import eu.ehri.project.models.base.AccessibleEntity;
@@ -56,7 +57,10 @@ public class ActionManager {
                     actionData, Action.class));
         } catch (ValidationError e) {
             e.printStackTrace();
-            throw new RuntimeException("Unexpected error creating action", e);
+            throw new RuntimeException("Unexpected validation error creating action", e);
+        } catch (IntegrityError e) {
+            e.printStackTrace();
+            throw new RuntimeException("Unexpected integrity error creating action", e);
         }
         action.setActioner(user);
         return action;
