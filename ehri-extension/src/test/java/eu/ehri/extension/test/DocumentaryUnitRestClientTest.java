@@ -26,8 +26,8 @@ import eu.ehri.project.persistance.EntityBundle;
 
 public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
 
-    private String jsonDocumentaryUnitTestStr; // test data to create a
-                                               // DocumentaryUnit
+    private String jsonDocumentaryUnitTestStr1; // test data to create a
+    private String jsonDocumentaryUnitTestStr2; // DocumentaryUnit
     static final String UPDATED_NAME = "UpdatedNameTEST";
     static final String TEST_JSON_IDENTIFIER = "c1";
     static final String FIRST_DOC_ID = "c1";
@@ -39,7 +39,8 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
 
     @Before
     public void setUp() throws Exception {
-        jsonDocumentaryUnitTestStr = readFileAsString("documentaryUnit.json");
+        jsonDocumentaryUnitTestStr1 = readFileAsString("documentaryUnit.json");
+        jsonDocumentaryUnitTestStr2 = readFileAsString("documentaryUnit2.json");
     }
     
     /**
@@ -55,7 +56,7 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
                 .type(MediaType.APPLICATION_JSON)
                 .header(EhriNeo4jFramedResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId())
-                .entity(jsonDocumentaryUnitTestStr).post(ClientResponse.class);
+                .entity(jsonDocumentaryUnitTestStr1).post(ClientResponse.class);
 
         assertEquals(Response.Status.CREATED.getStatusCode(), response.getStatus());
         // TODO test if json is valid?
@@ -118,7 +119,7 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
                 .type(MediaType.APPLICATION_JSON)
                 .header(EhriNeo4jFramedResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId())
-                .entity(jsonDocumentaryUnitTestStr).post(ClientResponse.class);
+                .entity(jsonDocumentaryUnitTestStr2).post(ClientResponse.class);
 
         assertEquals(Response.Status.CREATED.getStatusCode(), response.getStatus());
         // TODO test if json is valid?

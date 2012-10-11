@@ -29,7 +29,9 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
     static final String FETCH_NAME = "mike";
     static final String UPDATED_NAME = "UpdatedNameTEST";
 
-    private String jsonUserProfileTestString = "{\"data\":{\"identifier\": \"test-user\", \"name\":\"testUserName1\",\"isA\":\"userProfile\"}}";
+    private String jsonUserProfileTestString1 = "{\"data\":{\"identifier\": \"test-user\", \"name\":\"testUserName1\",\"isA\":\"userProfile\"}}";
+    private String jsonUserProfileTestString2 = "{\"data\":{\"identifier\": \"test-user-2\", \"name\":\"testUserName1\",\"isA\":\"userProfile\"}}";
+    private String jsonUserProfileTestString3 = "{\"data\":{\"identifier\": \"test-user-3\", \"name\":\"testUserName1\",\"isA\":\"userProfile\"}}";
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
@@ -48,7 +50,7 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
                 .header(EhriNeo4jFramedResource.AUTH_HEADER_NAME,
-                		getAdminUserProfileId()).entity(jsonUserProfileTestString)
+                		getAdminUserProfileId()).entity(jsonUserProfileTestString1)
                 .post(ClientResponse.class);
 
         assertEquals(Response.Status.CREATED.getStatusCode(), response.getStatus());
@@ -80,7 +82,7 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
                 .header(EhriNeo4jFramedResource.AUTH_HEADER_NAME,
-                        getAdminUserProfileId()).entity(jsonUserProfileTestString)
+                        getAdminUserProfileId()).entity(jsonUserProfileTestString2)
                 .post(ClientResponse.class);
 
         assertEquals(Response.Status.CREATED.getStatusCode(), response.getStatus());
@@ -101,7 +103,7 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
                 .header(EhriNeo4jFramedResource.AUTH_HEADER_NAME,
-                		getAdminUserProfileId()).entity(jsonUserProfileTestString)
+                		getAdminUserProfileId()).entity(jsonUserProfileTestString3)
                 .post(ClientResponse.class);
 
         assertEquals(Response.Status.CREATED.getStatusCode(), response.getStatus());
