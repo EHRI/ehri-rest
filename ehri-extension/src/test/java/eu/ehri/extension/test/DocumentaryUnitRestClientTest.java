@@ -2,6 +2,7 @@ package eu.ehri.extension.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 
 import java.net.URI;
 import java.util.Collections;
@@ -108,16 +109,9 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
         ObjectMapper mapper = new ObjectMapper();
         JsonNode rootNode = mapper.readValue(response.getEntity(String.class),
                 JsonNode.class);
-        assertTrue(rootNode.isContainerNode());
-        assertTrue(rootNode.has("details"));
-        assertTrue(rootNode.get("details").has("fields"));
-        assertTrue(rootNode.get("details").get("fields")
-                .has(AccessibleEntity.IDENTIFIER_KEY));
-        assertEquals(
-                CREATED_ID,
-                rootNode.get("details").get("fields")
-                        .get(AccessibleEntity.IDENTIFIER_KEY).getTextValue());
-
+        JsonNode errValue = rootNode.path("details").path("fields").path(AccessibleEntity.IDENTIFIER_KEY);
+        assertFalse(errValue.isMissingNode());
+        assertEquals(CREATED_ID, errValue.getTextValue());
     }
 
     @Test
@@ -132,14 +126,13 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
                         getAdminUserProfileId()).get(ClientResponse.class);
 
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
-        String json = response.getEntity(String.class);
 
         ObjectMapper mapper = new ObjectMapper();
-        Map<String, Object> data = mapper.readValue(json, Map.class);
-        assertTrue(data.get("data") != null);
-        assertEquals(TEST_JSON_IDENTIFIER,
-                ((Map<String, Object>) data.get("data"))
-                        .get(AccessibleEntity.IDENTIFIER_KEY));
+        JsonNode rootNode = mapper.readValue(response.getEntity(String.class),
+                JsonNode.class);
+        JsonNode errValue = rootNode.path("data").path(AccessibleEntity.IDENTIFIER_KEY);
+        assertFalse(errValue.isMissingNode());
+        assertEquals(TEST_JSON_IDENTIFIER, errValue.getTextValue());
     }
 
     @Test
@@ -155,6 +148,7 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
         });
         // Extract the first documentary unit. According to the fixtures this
         // should be named 'c1'.
+        @SuppressWarnings("unchecked")
         Map<String, Object> c1data = (Map<String, Object>) data.get(0).get(
                 "data");
         assertEquals(FIRST_DOC_ID, c1data.get(AccessibleEntity.IDENTIFIER_KEY));
@@ -192,7 +186,6 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
         String json = response.getEntity(String.class);
         EntityBundle<DocumentaryUnit> entityBundle = converter
                 .jsonToBundle(json);
-        Map<String, Object> data = entityBundle.getData();
         entityBundle.setDataValue("name", UPDATED_NAME);
         String toUpdateJson = converter.bundleToJson(entityBundle);
 
