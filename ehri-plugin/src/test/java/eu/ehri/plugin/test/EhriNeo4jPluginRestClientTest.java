@@ -76,6 +76,7 @@ public class EhriNeo4jPluginRestClientTest {
                 .entity("{\"index\":\"group\", \"parameters\": {}}")
                 .post(ClientResponse.class);
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+
         WebResource vertexResource = client.resource(vertexUri);
         response = vertexResource
                 .accept(MediaType.APPLICATION_JSON)

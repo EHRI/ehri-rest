@@ -83,7 +83,7 @@ public class ServerRunner {
         bootstrapper.start();
     }
 
-    public void setUp() {
+    public void setUp() throws Exception {
         loader.loadTestData();
     }
 
