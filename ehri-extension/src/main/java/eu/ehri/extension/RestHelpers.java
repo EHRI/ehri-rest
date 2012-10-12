@@ -5,19 +5,11 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.util.HashMap;
-import java.util.Map;
-
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.StreamingOutput;
 
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
-import org.codehaus.jackson.map.ObjectMapper;
-
-import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.exceptions.ValidationError;
 
 /**
  * Static helpers for dealing with REST conversions.
