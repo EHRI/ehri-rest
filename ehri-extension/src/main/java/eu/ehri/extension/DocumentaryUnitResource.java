@@ -59,7 +59,6 @@ public class DocumentaryUnitResource extends
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("")
     public Response createDocumentaryUnit(String json) throws PermissionDenied,
             ValidationError, IntegrityError {
         return create(json);
@@ -68,7 +67,6 @@ public class DocumentaryUnitResource extends
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("")
     public Response updateDocumentaryUnit(String json) throws PermissionDenied,
             IntegrityError, ValidationError {
         return update(json);

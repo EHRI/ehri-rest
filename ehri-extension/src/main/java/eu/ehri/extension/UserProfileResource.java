@@ -35,7 +35,6 @@ public class UserProfileResource extends EhriNeo4jFramedResource<UserProfile> {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("")
     public Response getUserProfile(@QueryParam("key") String key,
             @QueryParam("value") String value) throws ItemNotFound,
             PermissionDenied {
@@ -68,7 +67,6 @@ public class UserProfileResource extends EhriNeo4jFramedResource<UserProfile> {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("")
     public Response createUserProfile(String json) throws PermissionDenied,
             ValidationError, IntegrityError {
         return create(json);
@@ -77,7 +75,6 @@ public class UserProfileResource extends EhriNeo4jFramedResource<UserProfile> {
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("")
     public Response updateUserProfile(String json) throws PermissionDenied,
             IntegrityError, ValidationError {
         return update(json);

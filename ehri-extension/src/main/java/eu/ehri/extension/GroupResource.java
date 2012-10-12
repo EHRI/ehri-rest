@@ -57,7 +57,6 @@ public class GroupResource extends EhriNeo4jFramedResource<Group> {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("")
     public Response createGroup(String json) throws PermissionDenied,
             ValidationError, IntegrityError {
         return create(json);
@@ -66,7 +65,6 @@ public class GroupResource extends EhriNeo4jFramedResource<Group> {
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("")
     public Response updateGroup(String json) throws PermissionDenied,
             IntegrityError, ValidationError {
         return update(json);
