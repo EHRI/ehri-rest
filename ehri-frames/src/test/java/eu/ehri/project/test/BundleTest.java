@@ -7,7 +7,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -28,6 +27,7 @@ public class BundleTest extends ModelTestBase {
 
     private Converter converter;
 
+    @Override
     @Before
     public void setUp() {
         super.setUp();
