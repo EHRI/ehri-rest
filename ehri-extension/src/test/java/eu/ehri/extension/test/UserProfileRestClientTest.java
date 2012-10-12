@@ -9,8 +9,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -29,9 +27,7 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
     static final String FETCH_NAME = "mike";
     static final String UPDATED_NAME = "UpdatedNameTEST";
 
-    private String jsonUserProfileTestString1 = "{\"data\":{\"identifier\": \"test-user\", \"name\":\"testUserName1\",\"isA\":\"userProfile\"}}";
-    private String jsonUserProfileTestString2 = "{\"data\":{\"identifier\": \"test-user-2\", \"name\":\"testUserName1\",\"isA\":\"userProfile\"}}";
-    private String jsonUserProfileTestString3 = "{\"data\":{\"identifier\": \"test-user-3\", \"name\":\"testUserName1\",\"isA\":\"userProfile\"}}";
+    private String jsonUserProfileTestString = "{\"data\":{\"identifier\": \"test-user\", \"name\":\"testUserName1\",\"isA\":\"userProfile\"}}";
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
@@ -50,10 +46,11 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
                 .header(EhriNeo4jFramedResource.AUTH_HEADER_NAME,
-                		getAdminUserProfileId()).entity(jsonUserProfileTestString1)
-                .post(ClientResponse.class);
+                        getAdminUserProfileId())
+                .entity(jsonUserProfileTestString).post(ClientResponse.class);
 
-        assertEquals(Response.Status.CREATED.getStatusCode(), response.getStatus());
+        assertEquals(Response.Status.CREATED.getStatusCode(),
+                response.getStatus());
 
         // Get created entity via the response location?
         URI location = response.getLocation();
@@ -62,11 +59,11 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
         response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .header(EhriNeo4jFramedResource.AUTH_HEADER_NAME,
-                		getAdminUserProfileId()).get(ClientResponse.class);
+                        getAdminUserProfileId()).get(ClientResponse.class);
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
         // TODO again test json
     }
-    
+
     @Test
     public void testGetByKeyValue() throws Exception {
         // -create data for testing
@@ -74,18 +71,19 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
         queryParams.add("key", AccessibleEntity.IDENTIFIER_KEY);
         queryParams.add("value", FETCH_NAME);
 
-        WebResource resource = client.resource(getExtensionEntryPointUri()
-                + "/userProfile").queryParams(queryParams);        
-        
+        WebResource resource = client.resource(
+                getExtensionEntryPointUri() + "/userProfile").queryParams(
+                queryParams);
 
         ClientResponse response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
                 .header(EhriNeo4jFramedResource.AUTH_HEADER_NAME,
-                        getAdminUserProfileId()).entity(jsonUserProfileTestString2)
-                .post(ClientResponse.class);
+                        getAdminUserProfileId())
+                .entity(jsonUserProfileTestString).post(ClientResponse.class);
 
-        assertEquals(Response.Status.CREATED.getStatusCode(), response.getStatus());
+        assertEquals(Response.Status.CREATED.getStatusCode(),
+                response.getStatus());
         // TODO test if json is valid?
         // response.getEntity(String.class)
 
@@ -103,10 +101,11 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
                 .header(EhriNeo4jFramedResource.AUTH_HEADER_NAME,
-                		getAdminUserProfileId()).entity(jsonUserProfileTestString3)
-                .post(ClientResponse.class);
+                        getAdminUserProfileId())
+                .entity(jsonUserProfileTestString).post(ClientResponse.class);
 
-        assertEquals(Response.Status.CREATED.getStatusCode(), response.getStatus());
+        assertEquals(Response.Status.CREATED.getStatusCode(),
+                response.getStatus());
         // TODO test if json is valid?
         // response.getEntity(String.class)
 
@@ -117,7 +116,7 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
         response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .header(EhriNeo4jFramedResource.AUTH_HEADER_NAME,
-                		getAdminUserProfileId()).get(ClientResponse.class);
+                        getAdminUserProfileId()).get(ClientResponse.class);
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
 
         // -get the data and change it
@@ -129,12 +128,13 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
         String toUpdateJson = converter.bundleToJson(entityBundle);
 
         // -update
-        resource = client.resource(getExtensionEntryPointUri() + "/userProfile");
+        resource = client
+                .resource(getExtensionEntryPointUri() + "/userProfile");
         response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
                 .header(EhriNeo4jFramedResource.AUTH_HEADER_NAME,
-                		getAdminUserProfileId()).entity(toUpdateJson)
+                        getAdminUserProfileId()).entity(toUpdateJson)
                 .put(ClientResponse.class);
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
 
@@ -143,7 +143,7 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
         response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .header(EhriNeo4jFramedResource.AUTH_HEADER_NAME,
-                		getAdminUserProfileId()).get(ClientResponse.class);
+                        getAdminUserProfileId()).get(ClientResponse.class);
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
 
         // -get the data and convert to a bundle, is it OK?

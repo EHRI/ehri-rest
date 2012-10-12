@@ -7,8 +7,6 @@ import java.net.URI;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -37,10 +35,11 @@ public class AgentRestClientTest extends BaseRestClientTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
                 .header(EhriNeo4jFramedResource.AUTH_HEADER_NAME,
-                		getAdminUserProfileId()).entity(jsonAgentTestString)
+                        getAdminUserProfileId()).entity(jsonAgentTestString)
                 .post(ClientResponse.class);
 
-        assertEquals(Response.Status.CREATED.getStatusCode(), response.getStatus());
+        assertEquals(Response.Status.CREATED.getStatusCode(),
+                response.getStatus());
 
         // Get created doc via the response location?
         URI location = response.getLocation();
@@ -49,7 +48,7 @@ public class AgentRestClientTest extends BaseRestClientTest {
         response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .header(EhriNeo4jFramedResource.AUTH_HEADER_NAME,
-                		getAdminUserProfileId()).get(ClientResponse.class);
+                        getAdminUserProfileId()).get(ClientResponse.class);
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
     }
 }

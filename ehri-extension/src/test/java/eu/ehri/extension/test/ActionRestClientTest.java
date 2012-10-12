@@ -2,15 +2,12 @@ package eu.ehri.extension.test;
 
 import static org.junit.Assert.assertEquals;
 
-import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -48,7 +45,8 @@ public class ActionRestClientTest extends BaseRestClientTest {
                         getAdminUserProfileId()).entity(jsonAgentTestString)
                 .post(ClientResponse.class);
 
-        assertEquals(Response.Status.CREATED.getStatusCode(), response.getStatus());
+        assertEquals(Response.Status.CREATED.getStatusCode(),
+                response.getStatus());
 
         List<Map<String, Object>> actionsAfter = getEntityList(
                 EntityTypes.ACTION, getAdminUserProfileId());

@@ -39,109 +39,109 @@ import static eu.ehri.extension.RestHelpers.*;
 @Path(EntityTypes.AGENT)
 public class AgentResource extends EhriNeo4jFramedResource<Agent> {
 
-	public AgentResource(@Context GraphDatabaseService database) {
-		super(database, Agent.class);
-	}
+    public AgentResource(@Context GraphDatabaseService database) {
+        super(database, Agent.class);
+    }
 
-	@GET
-	@Produces(MediaType.APPLICATION_JSON)
-	@Path("/{id:\\d+}")
-	public Response getAgent(@PathParam("id") long id) {
-		return retrieve(id);
-	}
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id:\\d+}")
+    public Response getAgent(@PathParam("id") long id) throws PermissionDenied {
+        return retrieve(id);
+    }
 
-	@GET
-	@Produces(MediaType.APPLICATION_JSON)
-	@Path("/{id:[\\w-]+}")
-	public Response getAgent(@PathParam("id") String id) throws ItemNotFound {
-		return retrieve(id);
-	}
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id:[\\w-]+}")
+    public Response getAgent(@PathParam("id") String id) throws ItemNotFound,
+            PermissionDenied {
+        return retrieve(id);
+    }
 
-	@GET
-	@Produces(MediaType.APPLICATION_JSON)
-	@Path("/list")
-	public StreamingOutput listAgents() {
-		return list();
-	}
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/list")
+    public StreamingOutput listAgents() throws PermissionDenied {
+        return list();
+    }
 
-	@POST
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	@Path("")
-	public Response createAgent(String json) {
-		return create(json);
-	}
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("")
+    public Response createAgent(String json) throws PermissionDenied,
+            ValidationError, IntegrityError {
+        return create(json);
+    }
 
-	@PUT
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	@Path("")
-	public Response updateAgent(String json) {
-		return update(json);
-	}
+    @PUT
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("")
+    public Response updateAgent(String json) throws PermissionDenied,
+            IntegrityError, ValidationError {
+        return update(json);
+    }
 
-	@DELETE
-	@Path("/{id}")
-	public Response deleteAgent(@PathParam("id") long id) {
-		return delete(id);
-	}
+    @DELETE
+    @Path("/{id}")
+    public Response deleteAgent(@PathParam("id") long id)
+            throws PermissionDenied, ValidationError {
+        return delete(id);
+    }
 
-	@DELETE
-	@Path("/{id:[\\w-]+}")
-	public Response deleteAgent(@PathParam("id") String id) {
-		return delete(id);
-	}
+    @DELETE
+    @Path("/{id:[\\w-]+}")
+    public Response deleteAgent(@PathParam("id") String id)
+            throws PermissionDenied, ItemNotFound, ValidationError {
+        return delete(id);
+    }
 
-	/**
-	 * Create an instance of the 'entity' in the database
-	 * 
-	 * @param json
-	 *            The json representation of the entity to create (no vertex
-	 *            'id' fields)
-	 * @return The response of the create request, the 'location' will contain
-	 *         the url of the newly created instance.
-	 */
-	@POST
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	@Path("/{id:\\d+}")
-	public Response createAgentDocumentaryUnit(@PathParam("id") long id,
-			String json) {
+    /**
+     * Create an instance of the 'entity' in the database
+     * 
+     * @param json
+     *            The json representation of the entity to create (no vertex
+     *            'id' fields)
+     * @return The response of the create request, the 'location' will contain
+     *         the url of the newly created instance.
+     * @throws PermissionDenied
+     * @throws IntegrityError
+     * @throws ValidationError
+     */
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id:\\d+}")
+    public Response createAgentDocumentaryUnit(@PathParam("id") long id,
+            String json) throws PermissionDenied, ValidationError,
+            IntegrityError {
 
-		try {
-			Agent agent = views.detail(id, getRequesterUserProfileId());
-			EntityBundle<DocumentaryUnit> entityBundle = converter
-					.jsonToBundle(json);
+        try {
+            Agent agent = views.detail(id, getRequesterUserProfileId());
+            EntityBundle<DocumentaryUnit> entityBundle = converter
+                    .jsonToBundle(json);
 
-			DocumentaryUnit doc = new ActionViews<DocumentaryUnit>(graph,
-					DocumentaryUnit.class).create(
-					converter.bundleToData(entityBundle),
-					getRequesterUserProfileId());
-			// Add it to this agent's collections
-			agent.addCollection(doc);
+            DocumentaryUnit doc = new ActionViews<DocumentaryUnit>(graph,
+                    DocumentaryUnit.class).create(
+                    converter.bundleToData(entityBundle),
+                    getRequesterUserProfileId());
+            // Add it to this agent's collections
+            agent.addCollection(doc);
 
-			String jsonStr = converter.vertexFrameToJson(doc);
-			UriBuilder ub = uriInfo.getAbsolutePathBuilder();
-			URI docUri = ub.path(doc.asVertex().getId().toString()).build();
+            String jsonStr = converter.vertexFrameToJson(doc);
+            UriBuilder ub = uriInfo.getAbsolutePathBuilder();
+            URI docUri = ub.path(doc.asVertex().getId().toString()).build();
 
-			return Response.status(Status.OK).location(docUri)
-					.entity((jsonStr).getBytes()).build();
+            return Response.status(Status.OK).location(docUri)
+                    .entity((jsonStr).getBytes()).build();
 
-		} catch (PermissionDenied e) {
-			return Response.status(Status.UNAUTHORIZED)
-					.entity((produceErrorMessageJson(e)).getBytes()).build();
-		} catch (ValidationError e) {
-			return Response.status(Status.BAD_REQUEST)
-					.entity((produceErrorMessageJson(e)).getBytes()).build();
-		} catch (IntegrityError e) {
-			return Response.status(Status.BAD_REQUEST)
-					.entity((produceErrorMessageJson(e)).getBytes()).build();
-		} catch (SerializationError e) {
-			return Response.status(Status.INTERNAL_SERVER_ERROR)
-					.entity((produceErrorMessageJson(e)).getBytes()).build();
-		} catch (DeserializationError e) {
-			return Response.status(Status.INTERNAL_SERVER_ERROR)
-					.entity((produceErrorMessageJson(e)).getBytes()).build();
-		}
-	}
+        } catch (SerializationError e) {
+            return Response.status(Status.INTERNAL_SERVER_ERROR)
+                    .entity((produceErrorMessageJson(e)).getBytes()).build();
+        } catch (DeserializationError e) {
+            return Response.status(Status.INTERNAL_SERVER_ERROR)
+                    .entity((produceErrorMessageJson(e)).getBytes()).build();
+        }
+    }
 }

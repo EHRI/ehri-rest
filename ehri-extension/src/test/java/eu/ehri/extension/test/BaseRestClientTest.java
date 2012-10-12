@@ -7,9 +7,11 @@ import java.util.Map;
 import javax.ws.rs.core.MediaType;
 
 import org.codehaus.jackson.map.ObjectMapper;
+import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
-	import org.neo4j.server.configuration.ThirdPartyJaxRsPackage;
+import org.neo4j.server.configuration.ThirdPartyJaxRsPackage;
 
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
@@ -30,7 +32,7 @@ public class BaseRestClientTest extends AbstractRestClientTest {
     final static private String extensionEntryPointUri = baseUri + mountPoint;
 
     // Admin user prefix - depends on fixture data
-    final static private String adminUserProfileId = "21";
+    final static private String adminUserProfileId = "mike";
 
     protected static ServerRunner runner;
 
@@ -47,6 +49,16 @@ public class BaseRestClientTest extends AbstractRestClientTest {
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
         initializeTestDb(BaseRestClientTest.class.getName());
+    }
+
+    @Before
+    public void setupDb() throws Exception {
+        runner.setUp();
+    }
+
+    @After
+    public void resetDb() throws Exception {
+        runner.tearDown();
     }
 
     /**
