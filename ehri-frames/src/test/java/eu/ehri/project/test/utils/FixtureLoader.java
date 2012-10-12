@@ -5,13 +5,8 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
-import javax.management.RuntimeErrorException;
-
 import org.codehaus.jackson.map.ObjectMapper;
-import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.graphdb.factory.GraphDatabaseFactory;
-
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Index;
 import com.tinkerpop.blueprints.Vertex;
@@ -108,40 +103,11 @@ public class FixtureLoader {
             loadNodes();
             loadEdges();
             tx.success();
+        } catch (Exception e) {
+            tx.failure();
+            throw new RuntimeException(e);
         } finally {
             tx.finish();
         }
-    }
-
-    private static void registerShutdownHook(final GraphDatabaseService graphDb) {
-        // Registers a shutdown hook for the Neo4j instance so that it
-        // shuts down nicely when the VM exits (even if you "Ctrl-C" the
-        // running example before it's completed)
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            @Override
-            public void run() {
-                graphDb.shutdown();
-            }
-        });
-    }
-
-    public static void main(String[] args) {
-        if (args.length < 1) {
-            throw new RuntimeException("No Neo4j database specified.");
-        }
-
-        GraphDatabaseService db = new GraphDatabaseFactory()
-                .newEmbeddedDatabase(args[0]);
-        registerShutdownHook(db);
-        try {
-            FramedGraph<Neo4jGraph> graph = new FramedGraph<Neo4jGraph>(
-                    new Neo4jGraph(db));
-            FixtureLoader loader = new FixtureLoader(graph);
-            loader.loadTestData();
-        } catch (Error e) {
-            db.shutdown();
-            throw new RuntimeErrorException(e);
-        }
-        System.exit(0);
     }
 }

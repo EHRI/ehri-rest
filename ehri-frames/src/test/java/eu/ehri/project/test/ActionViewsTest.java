@@ -6,10 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Before;
 import org.junit.Test;
-
-import com.tinkerpop.blueprints.Vertex;
 
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.IntegrityError;
@@ -19,7 +16,6 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.Action;
 import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.DocumentaryUnit;
-import eu.ehri.project.models.Group;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.views.ActionViews;

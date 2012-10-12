@@ -34,11 +34,6 @@ public class BundleTest extends ModelTestBase {
         converter = new Converter();
     }
 
-    @After
-    public void tearDown() throws Exception {
-        super.tearDown();
-    }
-
     @Test
     public void testSerialisation() throws SerializationError,
             DeserializationError {
