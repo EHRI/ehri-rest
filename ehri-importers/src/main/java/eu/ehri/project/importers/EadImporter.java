@@ -165,6 +165,7 @@ public class EadImporter extends AbstractMultiItemRecursiveImporter<Node> {
         return dates;
     }
 
+    @Override
     public List<Node> extractChildItems(Node data) {
         List<Node> children = new LinkedList<Node>();
         logger.debug("Extracting child data from: " + data);
@@ -271,6 +272,7 @@ public class EadImporter extends AbstractMultiItemRecursiveImporter<Node> {
      * ... &lt;c01&gt; &lt;dsc&gt; &lt/archdesc&gt;
      * 
      */
+    @Override
     protected List<Node> getEntryPoints() throws ValidationError,
             InvalidInputFormatError {
         List<Node> entryPoints = new LinkedList<Node>();

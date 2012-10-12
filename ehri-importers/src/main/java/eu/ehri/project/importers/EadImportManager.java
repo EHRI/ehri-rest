@@ -114,6 +114,7 @@ public class EadImportManager extends XmlImportManager implements ImportManager 
      * @throws InvalidEadDocument
      * @throw InputParseError
      */
+    @Override
     public ImportLog importFile(InputStream ios, String logMessage)
             throws IOException, ValidationError, InputParseError {
         Transaction tx = framedGraph.getBaseGraph().getRawGraph().beginTx();
@@ -252,7 +253,7 @@ public class EadImportManager extends XmlImportManager implements ImportManager 
         // Check the various types of document we support. This
         // includes <eadgrp> or <eadlist> types.
         if (doc.getDocumentElement().getNodeName().equals("ead")) {
-            importNodeWithinAction((Node) doc.getDocumentElement(), action,
+            importNodeWithinAction(doc.getDocumentElement(), action,
                     manifest);
         } else if (doc.getDocumentElement().getNodeName().equals("eadlist")) {
             importNestedItemsWithinAction(doc, EADLIST_PATH, action, manifest);
