@@ -24,7 +24,7 @@ public class PermissionDeniedMapper implements ExceptionMapper<PermissionDenied>
                 put("details", new HashMap<String, String>() {
                     {
                         put("message", e.getMessage());
-                        put("accessor", ((PermissionDenied) e)
+                        put("accessor", e
                                 .getAccessor().getName());
                     }
                 });

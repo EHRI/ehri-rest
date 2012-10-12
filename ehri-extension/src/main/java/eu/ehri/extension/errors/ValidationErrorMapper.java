@@ -21,7 +21,7 @@ public class ValidationErrorMapper implements ExceptionMapper<ValidationError> {
         Map<String, Object> out = new HashMap<String, Object>() {
             {
                 put("error", ValidationError.class.getName());
-                put("details", ((ValidationError) e).getErrors());
+                put("details", e.getErrors());
             }
         };
         try {
