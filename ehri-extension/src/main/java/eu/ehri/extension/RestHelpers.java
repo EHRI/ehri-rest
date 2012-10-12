@@ -21,8 +21,9 @@ import eu.ehri.project.exceptions.ValidationError;
 
 /**
  * Static helpers for dealing with REST conversions.
+ * 
  * @author michaelb
- *
+ * 
  */
 public class RestHelpers {
     /**

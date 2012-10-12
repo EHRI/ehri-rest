@@ -3,8 +3,6 @@ package eu.ehri.extension;
 // Borrowed, temporarily, from Michael Hunger:
 // https://github.com/jexp/neo4j-clean-remote-db-addon
 
-import static eu.ehri.extension.RestHelpers.produceErrorMessageJson;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -50,7 +48,8 @@ public class AdminResource {
 
     public AdminResource(@Context Database database) {
         this.database = database;
-        this.graph = new FramedGraph<Neo4jGraph>(new Neo4jGraph(database.getGraph()));
+        this.graph = new FramedGraph<Neo4jGraph>(new Neo4jGraph(
+                database.getGraph()));
         converter = new Converter();
     }
 
@@ -58,11 +57,12 @@ public class AdminResource {
      * Create a new user with a default name and identifier.
      * 
      * @return
+     * @throws Exception
      */
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/createDefaultUserProfile")
-    public Response createDefaultUserProfile() {
+    public Response createDefaultUserProfile() throws Exception {
         Transaction tx = database.getGraph().beginTx();
         try {
             String ident = getNextDefaultUserName();
@@ -72,40 +72,42 @@ public class AdminResource {
 
             // TODO: Create an action for this with the system user...
             BundleDAO<UserProfile> persister = new BundleDAO<UserProfile>(graph);
-            UserProfile user = persister.create(new BundleFactory<UserProfile>()
-                    .buildBundle(data, UserProfile.class));
+            UserProfile user = persister
+                    .create(new BundleFactory<UserProfile>().buildBundle(data,
+                            UserProfile.class));
             String jsonStr = converter.vertexFrameToJson(user);
-            return Response.status(Status.CREATED)
-                    .entity((jsonStr).getBytes()).build();
-
+            tx.success();
+            return Response.status(Status.CREATED).entity((jsonStr).getBytes())
+                    .build();
         } catch (Exception e) {
             tx.failure();
-            return Response.status(Status.INTERNAL_SERVER_ERROR)
-                    .entity((produceErrorMessageJson(e)).getBytes()).build(); 
+            throw e;
         } finally {
-            tx.success();
+            tx.finish();
         }
     }
-    
+
     // Helpers...
-    
+
     private String getNextDefaultUserName() {
         Index<Vertex> index = graph.getBaseGraph().getIndex(
                 EntityTypes.USER_PROFILE, Vertex.class);
-        
+
         // FIXME: It's crappy to have to iterate all the items to count them...
         long userCount = 0;
-        CloseableIterable<Vertex> query = index.query(AccessibleEntity.IDENTIFIER_KEY, "*");
+        CloseableIterable<Vertex> query = index.query(
+                AccessibleEntity.IDENTIFIER_KEY, "*");
         try {
-            for (@SuppressWarnings("unused") Vertex _ : query) userCount++;
+            for (@SuppressWarnings("unused")
+            Vertex _ : query)
+                userCount++;
         } finally {
             query.close();
         }
         long start = userCount + 1;
-        while (index.count(
-                AccessibleEntity.IDENTIFIER_KEY, String.format(
-                        DEFAULT_USER_ID_FORMAT, DEFAULT_USER_ID_PREFIX,
-                        start)) > 0) start++;
+        while (index.count(AccessibleEntity.IDENTIFIER_KEY, String.format(
+                DEFAULT_USER_ID_FORMAT, DEFAULT_USER_ID_PREFIX, start)) > 0)
+            start++;
         return String.format(DEFAULT_USER_ID_FORMAT, DEFAULT_USER_ID_PREFIX,
                 start);
     }
