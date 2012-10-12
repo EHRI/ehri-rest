@@ -320,7 +320,7 @@ public class EhriNeo4jPlugin extends ServerPlugin {
                     .add(new com.tinkerpop.blueprints.Parameter<String, Object>(
                             entry.getKey(), entry.getValue()));
         }
-        return (com.tinkerpop.blueprints.Parameter[]) parametersList
+        return parametersList
                 .toArray(new com.tinkerpop.blueprints.Parameter[parametersList
                         .size()]);
     }
