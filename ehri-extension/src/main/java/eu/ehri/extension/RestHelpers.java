@@ -40,49 +40,6 @@ public class RestHelpers {
     static String produceErrorMessageJson(final Throwable e) {
         // NOTE only put in a stacktrace when debugging??
         // or no stacktraces, only by logging!
-
-        // TODO: Fix up this mess... try and return a structured
-        // JSON message for recognised error types.
-        try {
-            if (e instanceof PermissionDenied) {
-                Map<String, Object> out = new HashMap<String, Object>() {
-                    {
-                        put("error", PermissionDenied.class.getName());
-                        put("details", new HashMap<String, String>() {
-                            {
-                                put("message", e.getMessage());
-                                put("accessor", ((PermissionDenied) e)
-                                        .getAccessor().getName());
-                            }
-                        });
-                    }
-                };
-                return new ObjectMapper().writeValueAsString(out);
-            } else if (e instanceof ValidationError) {
-                Map<String, Object> out = new HashMap<String, Object>() {
-                    {
-                        put("error", ValidationError.class.getName());
-                        put("details", ((ValidationError) e).getErrors());
-                    }
-                };
-                return new ObjectMapper().writeValueAsString(out);
-            } else if (e instanceof ItemNotFound) {
-                Map<String, Object> out = new HashMap<String, Object>() {
-                    {
-                        put("error", ItemNotFound.class.getName());
-                        put("details", new HashMap<String, String>() {
-                            {
-                                put("message", e.getMessage());
-                            }
-                        });
-                    }
-                };
-                return new ObjectMapper().writeValueAsString(out);
-            }
-        } catch (Exception e1) {
-            e1.printStackTrace();
-        }
-
         String message = "{errormessage: \"  " + e.getMessage() + "\""
                 + ", stacktrace:  \"  " + getStackTrace(e) + "\"" + "}";
 

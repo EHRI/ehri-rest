@@ -68,7 +68,6 @@ public class AgentResource extends EhriNeo4jFramedResource<Agent> {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("")
     public Response createAgent(String json) throws PermissionDenied,
             ValidationError, IntegrityError {
         return create(json);
@@ -77,7 +76,6 @@ public class AgentResource extends EhriNeo4jFramedResource<Agent> {
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("")
     public Response updateAgent(String json) throws PermissionDenied,
             IntegrityError, ValidationError {
         return update(json);
