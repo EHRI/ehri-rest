@@ -177,6 +177,7 @@ public class ActionViews<E extends AccessibleEntity> extends Views<E> implements
      * @throws ValidationError
      * @throws SerializationError
      */
+    @Override
     public Integer delete(Long item, Long user) throws PermissionDenied,
             ValidationError, SerializationError {
         return delete(item, user, DEFAULT_DELETE_LOG);
