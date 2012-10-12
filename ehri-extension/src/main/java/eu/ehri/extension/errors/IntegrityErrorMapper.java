@@ -20,7 +20,7 @@ public class IntegrityErrorMapper implements ExceptionMapper<IntegrityError> {
 	public Response toResponse(final IntegrityError e) {
         Map<String, Object> out = new HashMap<String, Object>() {
             {
-                put("error", IntegrityError.class.getName());
+                put("error", IntegrityError.class.getSimpleName());
                 put("details", new HashMap<String, Object>() {
                     {
                         put("message", e.getMessage());

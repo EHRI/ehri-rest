@@ -20,7 +20,7 @@ public class PermissionDeniedMapper implements ExceptionMapper<PermissionDenied>
 	public Response toResponse(final PermissionDenied e) {
         Map<String, Object> out = new HashMap<String, Object>() {
             {
-                put("error", PermissionDenied.class.getName());
+                put("error", PermissionDenied.class.getSimpleName());
                 put("details", new HashMap<String, String>() {
                     {
                         put("message", e.getMessage());
