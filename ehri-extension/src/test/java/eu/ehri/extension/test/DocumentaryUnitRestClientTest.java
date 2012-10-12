@@ -12,6 +12,7 @@ import java.util.Map;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -28,6 +29,7 @@ import eu.ehri.project.persistance.EntityBundle;
 public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
 
     private String jsonDocumentaryUnitTestStr; // test data to create a
+    static final String CREATED_ID = "some-id";
     static final String UPDATED_NAME = "UpdatedNameTEST";
     static final String TEST_JSON_IDENTIFIER = "c1";
     static final String FIRST_DOC_ID = "c1";
@@ -72,6 +74,50 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
                         getAdminUserProfileId()).get(ClientResponse.class);
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
         // TODO again test json
+    }
+
+    @Test
+    public void testIntegrityError() throws Exception {
+        // Create
+        WebResource resource = client.resource(getExtensionEntryPointUri()
+                + "/documentaryUnit");
+        ClientResponse response = resource
+                .accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .header(EhriNeo4jFramedResource.AUTH_HEADER_NAME,
+                        getAdminUserProfileId())
+                .entity(jsonDocumentaryUnitTestStr).post(ClientResponse.class);
+
+        assertEquals(Response.Status.CREATED.getStatusCode(),
+                response.getStatus());
+
+        // Okay... now if we try and do the same things again we should
+        // get an integrity error because the identifiers are the same.
+        resource = client.resource(getExtensionEntryPointUri()
+                + "/documentaryUnit");
+        response = resource
+                .accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .header(EhriNeo4jFramedResource.AUTH_HEADER_NAME,
+                        getAdminUserProfileId())
+                .entity(jsonDocumentaryUnitTestStr).post(ClientResponse.class);
+        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(),
+                response.getStatus());
+
+        // Check the JSON gives use the correct error
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode rootNode = mapper.readValue(response.getEntity(String.class),
+                JsonNode.class);
+        assertTrue(rootNode.isContainerNode());
+        assertTrue(rootNode.has("details"));
+        assertTrue(rootNode.get("details").has("fields"));
+        assertTrue(rootNode.get("details").get("fields")
+                .has(AccessibleEntity.IDENTIFIER_KEY));
+        assertEquals(
+                CREATED_ID,
+                rootNode.get("details").get("fields")
+                        .get(AccessibleEntity.IDENTIFIER_KEY).getTextValue());
+
     }
 
     @Test
