@@ -4,8 +4,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.BeforeClass;
 
 import eu.ehri.project.models.EntityTypes;
@@ -24,16 +22,6 @@ abstract public class AbstractFixtureTest extends ModelTestBase {
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
-    }
-
-    @Before
-    public void setUp() {
-        super.setUp();
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        super.tearDown();
     }
 
     // Helpers, additional test data

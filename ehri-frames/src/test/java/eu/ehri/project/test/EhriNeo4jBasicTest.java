@@ -63,12 +63,12 @@ public class EhriNeo4jBasicTest {
 
         Vertex indexedVertex = createIndexedVertexWithProperty(TEST_KEY,
                 TEST_VALUE);
-        assertEquals((String) indexedVertex.getProperty(TEST_KEY), TEST_VALUE);
+        assertEquals(indexedVertex.getProperty(TEST_KEY), TEST_VALUE);
 
         // do we have a node with that id and property in the neo4j database?
         Node foundNode = graphDb.getNodeById((Long) indexedVertex.getId());
         assertEquals(foundNode.getId(), indexedVertex.getId());
-        assertEquals((String) foundNode.getProperty(TEST_KEY), TEST_VALUE);
+        assertEquals(foundNode.getProperty(TEST_KEY), TEST_VALUE);
     }
 
     @Test(expected = org.neo4j.graphdb.NotFoundException.class)
@@ -78,7 +78,7 @@ public class EhriNeo4jBasicTest {
                 TEST_VALUE);
         Long vertexId = (Long) indexedVertex.getId();
 
-        helpers.deleteVertex((Long) indexedVertex.getId());
+        helpers.deleteVertex(indexedVertex.getId());
 
         // we should not find the node in the neo4j database anymore
         graphDb.getNodeById(vertexId);
@@ -140,7 +140,7 @@ public class EhriNeo4jBasicTest {
         assertEquals(foundRelationship.getStartNode().getId(), outV.getId());
         assertEquals(foundRelationship.getEndNode().getId(), inV.getId());
         assertEquals(foundRelationship.getType().toString(), TEST_TYPE); // ?
-        assertEquals((String) foundRelationship.getProperty(TEST_KEY),
+        assertEquals(foundRelationship.getProperty(TEST_KEY),
                 TEST_VALUE);
     }
 

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.junit.Before;
 import org.neo4j.test.TestGraphDatabaseFactory;
 
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
@@ -27,6 +28,7 @@ public class ModelTestBase {
         return lst;
     }
 
+    @Before
     public void setUp() {
         graph = new FramedGraph<Neo4jGraph>(new Neo4jGraph(
                 new TestGraphDatabaseFactory().newImpermanentDatabaseBuilder()
@@ -34,8 +36,8 @@ public class ModelTestBase {
         helper = new FixtureLoader(graph);
         helper.loadTestData();
     }
-
-    public void tearDown() throws Exception {
+    
+    public void tearDown() {
         graph.shutdown();
     }
 }
