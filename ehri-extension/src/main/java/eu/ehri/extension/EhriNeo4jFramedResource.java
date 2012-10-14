@@ -227,7 +227,7 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> {
             PermissionDenied {
         try {
             E entity = querier.get(key, value,
-                    (long) getRequesterUserProfileId());
+                    (Long) getRequesterUserProfileId());
             String jsonStr = new Converter().vertexFrameToJson(entity);
 
             return Response.status(Status.OK).entity((jsonStr).getBytes())
