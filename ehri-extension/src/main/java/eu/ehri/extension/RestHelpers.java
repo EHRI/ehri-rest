@@ -28,7 +28,6 @@ public class RestHelpers {
      * @throws JsonMappingException
      * @throws JsonGenerationException
      */
-    @SuppressWarnings("serial")
     static String produceErrorMessageJson(final Throwable e) {
         // NOTE only put in a stacktrace when debugging??
         // or no stacktraces, only by logging!
