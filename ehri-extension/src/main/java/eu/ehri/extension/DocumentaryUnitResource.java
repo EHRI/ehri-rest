@@ -15,6 +15,7 @@ import javax.ws.rs.core.StreamingOutput;
 
 import org.neo4j.graphdb.GraphDatabaseService;
 
+import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
@@ -60,7 +61,7 @@ public class DocumentaryUnitResource extends
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response createDocumentaryUnit(String json) throws PermissionDenied,
-            ValidationError, IntegrityError {
+            ValidationError, IntegrityError, DeserializationError {
         return create(json);
     }
 
@@ -68,7 +69,7 @@ public class DocumentaryUnitResource extends
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response updateDocumentaryUnit(String json) throws PermissionDenied,
-            IntegrityError, ValidationError {
+			IntegrityError, ValidationError, DeserializationError {
         return update(json);
     }
 

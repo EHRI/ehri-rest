@@ -15,6 +15,7 @@ import javax.ws.rs.core.StreamingOutput;
 
 import org.neo4j.graphdb.GraphDatabaseService;
 
+import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
@@ -58,7 +59,7 @@ public class GroupResource extends EhriNeo4jFramedResource<Group> {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response createGroup(String json) throws PermissionDenied,
-            ValidationError, IntegrityError {
+            ValidationError, IntegrityError, DeserializationError {
         return create(json);
     }
 
@@ -66,7 +67,7 @@ public class GroupResource extends EhriNeo4jFramedResource<Group> {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response updateGroup(String json) throws PermissionDenied,
-            IntegrityError, ValidationError {
+			IntegrityError, ValidationError, DeserializationError {
         return update(json);
     }
 
