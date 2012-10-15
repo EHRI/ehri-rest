@@ -15,12 +15,17 @@ import javax.ws.rs.core.StreamingOutput;
 
 import org.neo4j.graphdb.GraphDatabaseService;
 
+import eu.ehri.project.exceptions.DeserializationError;
+import eu.ehri.project.exceptions.IntegrityError;
+import eu.ehri.project.exceptions.ItemNotFound;
+import eu.ehri.project.exceptions.PermissionDenied;
+import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.BasicFramedVertex;
 import eu.ehri.project.models.EntityTypes;
 
 /**
- * Just to see if it makes sense 
- *
+ * Just to see if it makes sense
+ * 
  */
 @Path(EntityTypes.BASIC)
 public class BasicFramedVertexResource extends
@@ -29,48 +34,55 @@ public class BasicFramedVertexResource extends
 	public BasicFramedVertexResource(@Context GraphDatabaseService database) {
 		super(database, BasicFramedVertex.class);
 	}
-	
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{id:\\d+}")
-    public Response getBasicFramedVertex(@PathParam("id") long id) {
-        return retrieve(id);
-    }
 
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{id:[\\w-]+}")
-    public Response getBasicFramedVertex(@PathParam("id") String id) {
-        return retrieve(id);
-    }
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("/{id:\\d+}")
+	public Response getBasicFramedVertex(@PathParam("id") long id)
+			throws PermissionDenied {
+		return retrieve(id);
+	}
 
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("/list")
-    public StreamingOutput listBasicFramedVertexs() {
-        return list();
-    }
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("/{id:[\\w-]+}")
+	public Response getBasicFramedVertex(@PathParam("id") String id)
+			throws ItemNotFound, PermissionDenied {
+		return retrieve(id);
+	}
 
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("")
-    public Response createBasicFramedVertex(String json) {
-        return create(json);
-    }
-    
-    @PUT
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("")
-    public Response updateBasicFramedVertex(String json) {
-        return update(json);
-    }
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("/list")
+	public StreamingOutput listBasicFramedVertexs() throws PermissionDenied {
+		return list();
+	}
 
-    @DELETE
-    @Path("/{id}")
-    public Response deleteBasicFramedVertex(@PathParam("id") long id) {
-        return delete(id);
-    }
+	@POST
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("")
+	public Response createBasicFramedVertex(String json)
+			throws PermissionDenied, ValidationError, IntegrityError,
+			DeserializationError {
+		return create(json);
+	}
+
+	@PUT
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("")
+	public Response updateBasicFramedVertex(String json)
+			throws PermissionDenied, IntegrityError, ValidationError,
+			DeserializationError {
+		return update(json);
+	}
+
+	@DELETE
+	@Path("/{id}")
+	public Response deleteBasicFramedVertex(@PathParam("id") long id)
+			throws PermissionDenied, ValidationError {
+		return delete(id);
+	}
 
 }
