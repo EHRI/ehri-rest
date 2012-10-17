@@ -115,7 +115,7 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
     }
 
     @Test
-    public void testGetDocumentaryUnitBySlug() throws Exception {
+    public void testGetDocumentaryUnitByIdentifier() throws Exception {
         // Create
         WebResource resource = client.resource(getExtensionEntryPointUri()
                 + "/documentaryUnit/" + TEST_JSON_IDENTIFIER);
@@ -133,6 +133,29 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
         JsonNode errValue = rootNode.path("data").path(AccessibleEntity.IDENTIFIER_KEY);
         assertFalse(errValue.isMissingNode());
         assertEquals(TEST_JSON_IDENTIFIER, errValue.getTextValue());
+    }
+
+    @Test
+    public void testUpdateDocumentaryUnitByIdentifier() throws Exception {
+        // Update doc unit c1 with the test json values, which should change
+        // its identifier to some-id
+        WebResource resource = client.resource(getExtensionEntryPointUri()
+                + "/documentaryUnit/" + TEST_JSON_IDENTIFIER);
+        ClientResponse response = resource
+                .accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .entity(jsonDocumentaryUnitTestStr)
+                .header(EhriNeo4jFramedResource.AUTH_HEADER_NAME,
+                        getAdminUserProfileId()).put(ClientResponse.class);
+
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode rootNode = mapper.readValue(response.getEntity(String.class),
+                JsonNode.class);
+        JsonNode errValue = rootNode.path("data").path(AccessibleEntity.IDENTIFIER_KEY);
+        assertFalse(errValue.isMissingNode());
+        assertEquals(CREATED_ID, errValue.getTextValue());
     }
 
     @Test

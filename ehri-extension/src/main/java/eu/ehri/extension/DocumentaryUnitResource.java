@@ -69,8 +69,18 @@ public class DocumentaryUnitResource extends
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response updateDocumentaryUnit(String json) throws PermissionDenied,
-			IntegrityError, ValidationError, DeserializationError {
+            IntegrityError, ValidationError, DeserializationError {
         return update(json);
+    }
+
+    @PUT
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id:[\\w-]+}")
+    public Response updateDocumentaryUnit(@PathParam("id") String id,
+            String json) throws PermissionDenied, IntegrityError,
+            ValidationError, DeserializationError, ItemNotFound {
+        return update(id, json);
     }
 
     @DELETE
