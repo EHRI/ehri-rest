@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
+import org.junit.Before;
 import org.junit.BeforeClass;
 
 import eu.ehri.project.models.EntityTypes;
@@ -16,12 +17,21 @@ abstract public class AbstractFixtureTest extends ModelTestBase {
     protected static final String TEST_GROUP_NAME = "People";
 
     // Members closely coupled to the test data!
-    protected Long validUserId = 21L;
-    protected Long invalidUserId = 22L;
-    protected Long itemId = 1L;
+    protected Long validUserId;
+    protected Long invalidUserId;
+    protected Long itemId;
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
+    }
+    
+    @Before
+    @Override
+    public void setUp() {
+        super.setUp();
+        itemId = (Long) helper.getTestVertex("c1").getId();
+        validUserId = (Long) helper.getTestVertex("mike").getId();
+        invalidUserId = (Long) helper.getTestVertex("reto").getId();
     }
 
     // Helpers, additional test data
