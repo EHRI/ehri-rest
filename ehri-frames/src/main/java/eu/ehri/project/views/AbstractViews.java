@@ -84,13 +84,16 @@ abstract class AbstractViews<E extends AccessibleEntity> {
     }
 
     /**
-     * Check permissions for a given type.
+     * Check permissions for a given entity.
      * 
      * @throws PermissionDenied
      */
     protected void checkEntityPermission(AccessibleEntity entity, Long user,
             Long scope, String permissionId) throws PermissionDenied {
 
+        // TODO: Determine behaviour for granular item-level
+        // attributes.
+        checkPermission(user, scope, permissionId);
     }
 
     private PermissionScope getPermissionScope(Long id) {
