@@ -19,7 +19,7 @@ import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.ContentType;
 import eu.ehri.project.models.Group;
 import eu.ehri.project.models.Permission;
-import eu.ehri.project.models.PermissionGrant;
+import eu.ehri.project.models.PermissionAssertion;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.utils.ClassUtils;
@@ -168,22 +168,21 @@ public class AclManager {
      * @param entity
      * @param permission
      */
-    public Iterable<PermissionGrant> getPermissions(Accessor accessor,
+    public Iterable<PermissionAssertion> getPermissions(Accessor accessor,
             ContentType contentType, Permission permission) {
-        List<PermissionGrant> grants = new LinkedList<PermissionGrant>();
-        for (PermissionGrant grant : accessor.getPermissionGrants()) {
-            if (grant.getContentType().equals(contentType))
-                grants.add(grant);
-        }
-            
+        List<PermissionAssertion> assertions = new LinkedList<PermissionAssertion>();
         for (Accessor parent : accessor.getParents()) {
-            for (PermissionGrant grant : getPermissions(parent, contentType,
+            for (PermissionAssertion pass : getPermissions(parent, contentType,
                     permission)) {
-                grants.add(grant);
+                assertions.add(pass);
             }
         }
+        for (PermissionAssertion pass : accessor.getPermissionGrants()) {
+            if (pass.getContentType().equals(contentType))
+                assertions.add(pass);
+        }
 
-        return ClassUtils.makeUnique(grants);
+        return ClassUtils.makeUnique(assertions);
     }
 
     /**

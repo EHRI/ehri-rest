@@ -19,7 +19,7 @@ public class EntityTypes {
     public static final String IMPORT = "import";
     public static final String PROPERTY = "property";
     public static final String PERMISSION = "permission";
-    public static final String PERMISSION_GRANT = "permissionGrant";
+    public static final String PERMISSION_ASSERTION = "permissionAssertion";
     public static final String CONTENT_TYPE = "contentType";
     
 }

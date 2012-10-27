@@ -317,7 +317,8 @@
   },
   {
   	"data": {
- 	  "isA": "permissionGrant" 	
+ 	  "isA": "permissionAssertion",
+ 	  "assertion": true 	
   	},
   	"desc": "retoKclWriteGrant"
   }
