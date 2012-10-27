@@ -47,29 +47,12 @@ abstract class AbstractViews<E extends AccessibleEntity> {
         PermissionScope permScope = getPermissionScope(scope);
         // If we're admin, the answer is always "no problem"!
         if (!acl.isAdmin(accessor)) {
-            String etype = ClassUtils.getEntityType(cls);
-            ContentType ctype;
-            try {
-                ctype = graph
-                        .getVertices(AccessibleEntity.IDENTIFIER_KEY, etype,
-                                ContentType.class).iterator().next();
-            } catch (NoSuchElementException e) {
-                throw new RuntimeException(String.format(
-                        "No content type node found for type: '%s'", etype), e);
-            }
-            Permission permission;
-            try {
-                permission = graph
-                        .getVertices(AccessibleEntity.IDENTIFIER_KEY,
-                                permissionId, Permission.class).iterator()
-                        .next();
-            } catch (NoSuchElementException e) {
-                throw new RuntimeException(String.format(
-                        "No permission found for name: '%s'", permissionId), e);
-            }
+            ContentType contentType = getContentType(ClassUtils
+                    .getEntityType(cls));
+            Permission permission = getPermission(permissionId);
             Iterable<PermissionGrant> perms = acl.getPermissions(accessor,
-                    ctype, permission);
-            
+                    contentType, permission);
+
             boolean found = false;
             for (PermissionGrant perm : perms) {
                 // If the permission has unscoped rights, the user is
@@ -94,6 +77,16 @@ abstract class AbstractViews<E extends AccessibleEntity> {
                         permScope));
             }
         }
+    }
+
+    /**
+     * Check permissions for a given type.
+     * 
+     * @throws PermissionDenied
+     */
+    protected void checkEntityPermission(AccessibleEntity entity, Long user,
+            Long scope, String permissionId) throws PermissionDenied {
+
     }
 
     private PermissionScope getPermissionScope(Long id) {
@@ -133,14 +126,51 @@ abstract class AbstractViews<E extends AccessibleEntity> {
             throw new PermissionDenied(accessor, entity);
     }
 
-    protected void checkGlobalWriteAccess(long user) throws PermissionDenied {
-        // TODO: Stub
-    }
-
+    /**
+     * Get the access with the given id, or the special
+     * anonymous access otherwise.
+     * 
+     * @param id
+     * @return
+     */
     protected Accessor getAccessor(Long id) {
         if (id == null)
             return new AnonymousAccessor();
         // FIXME: Ensure this item really is an accessor!
         return graph.frame(graph.getVertex(id), Accessor.class);
     }
+    
+    /**
+     * Get the content type with the given id.
+     * 
+     * @param typeName
+     * @return
+     */
+    private ContentType getContentType(String typeName) {        
+        try {
+            return graph
+                    .getVertices(AccessibleEntity.IDENTIFIER_KEY, typeName,
+                            ContentType.class).iterator().next();
+        } catch (NoSuchElementException e) {
+            throw new RuntimeException(String.format(
+                    "No content type node found for type: '%s'", typeName), e);
+        }
+    }
+
+    /**
+     * Get the permission with the given string.
+     * 
+     * @param permissionId
+     * @return
+     */
+    private Permission getPermission(String permissionId) {
+        try {
+            return graph
+                    .getVertices(AccessibleEntity.IDENTIFIER_KEY, permissionId,
+                            Permission.class).iterator().next();
+        } catch (NoSuchElementException e) {
+            throw new RuntimeException(String.format(
+                    "No permission found for name: '%s'", permissionId), e);
+        }
+    }    
 }

@@ -171,8 +171,11 @@ public class AclManager {
     public Iterable<PermissionGrant> getPermissions(Accessor accessor,
             ContentType contentType, Permission permission) {
         List<PermissionGrant> grants = new LinkedList<PermissionGrant>();
-        for (PermissionGrant grant : accessor.getPermissionGrants())
-            grants.add(grant);
+        for (PermissionGrant grant : accessor.getPermissionGrants()) {
+            if (grant.getContentType().equals(contentType))
+                grants.add(grant);
+        }
+            
         for (Accessor parent : accessor.getParents()) {
             for (PermissionGrant grant : getPermissions(parent, contentType,
                     permission)) {

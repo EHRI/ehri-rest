@@ -10,6 +10,14 @@
   {
     "data": {
       "isA": "permission", 
+      "identifier": "update", 
+      "name": "Edit"
+    }, 
+    "desc": "permUpdate"
+  },
+  {
+    "data": {
+      "isA": "permission", 
       "identifier": "create", 
       "name": "Create"
     }, 
@@ -30,6 +38,14 @@
       "name": "Grant"
     }, 
     "desc": "permGrant"
+  },
+  {
+    "data": {
+      "isA": "permission", 
+      "identifier": "annotate", 
+      "name": "Annotate"
+    }, 
+    "desc": "permAnnotate"
   },
   {
     "data": {
