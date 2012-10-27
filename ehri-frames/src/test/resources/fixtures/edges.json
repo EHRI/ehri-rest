@@ -217,5 +217,35 @@
     "dst": "r1",
     "data": {},
     "label": "hasSubject"
-  }
+  },
+  {
+    "src": "retoKclWriteGrant",
+    "dst": "permCreate",
+    "data": {},
+    "label": "hasPermission"
+  },
+  {
+    "src": "retoKclWriteGrant",
+    "dst": "documentaryUnitType",
+    "data": {},
+    "label": "hasContentType"
+  },
+  {
+    "src": "retoKclWriteGrant",
+    "dst": "r1",
+    "data": {},
+    "label": "hasScope"
+  },
+  {
+    "src": "retoKclWriteGrant",
+    "dst": "reto",
+    "data": {},
+    "label": "hasAccessor"
+  },
+  {
+    "src": "retoKclWriteGrant",
+    "dst": "mike",
+    "data": {},
+    "label": "hasGrantee"
+  }  
 ]

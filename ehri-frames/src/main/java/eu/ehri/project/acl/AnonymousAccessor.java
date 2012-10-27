@@ -3,6 +3,7 @@ package eu.ehri.project.acl;
 import com.tinkerpop.blueprints.Vertex;
 
 import eu.ehri.project.models.Group;
+import eu.ehri.project.models.PermissionGrant;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.utils.EmptyIterable;
@@ -45,6 +46,14 @@ public class AnonymousAccessor implements Accessor {
     }
 
     public void removeAccessibleEntity(AccessibleEntity entity) {
+        throw new UnsupportedOperationException();
+    }
+
+    public Iterable<PermissionGrant> getPermissionGrants() {
+        return new EmptyIterable<PermissionGrant>();
+    }
+
+    public void addPermissionGrant(PermissionGrant grant) {
         throw new UnsupportedOperationException();
     }
 }

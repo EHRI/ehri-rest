@@ -2,6 +2,7 @@ package eu.ehri.project.acl;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Comparator;
 import java.util.Collections;
@@ -15,9 +16,13 @@ import com.tinkerpop.pipes.PipeFunction;
 
 import eu.ehri.project.core.GraphHelpers;
 import eu.ehri.project.exceptions.PermissionDenied;
+import eu.ehri.project.models.ContentType;
 import eu.ehri.project.models.Group;
+import eu.ehri.project.models.Permission;
+import eu.ehri.project.models.PermissionGrant;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
+import eu.ehri.project.models.utils.ClassUtils;
 import eu.ehri.project.relationships.Access;
 
 public class AclManager {
@@ -55,7 +60,7 @@ public class AclManager {
      * @param accessor
      */
     public Boolean isAdmin(Accessor accessor) {
-        assert accessor != null: "Accessor is null";
+        assert accessor != null : "Accessor is null";
         if (accessor.getName().equals(Group.ADMIN_GROUP_NAME))
             return true;
         for (Accessor acc : accessor.getAllParents()) {
@@ -119,7 +124,7 @@ public class AclManager {
         // Admin can read/write everything and object can always read/write
         // itself
 
-        assert entity != null: "Entity is null";
+        assert entity != null : "Entity is null";
         assert accessor != null : "Accessor is null";
 
         // FIXME: Tidy up the logic here.
@@ -154,6 +159,28 @@ public class AclManager {
                 return Collections.max(ctrls, new AccessComparator());
             }
         }
+    }
+
+    /**
+     * Get the permissions for a given accessor on a given entity.
+     * 
+     * @param accessor
+     * @param entity
+     * @param permission
+     */
+    public Iterable<PermissionGrant> getPermissions(Accessor accessor,
+            ContentType contentType, Permission permission) {
+        List<PermissionGrant> grants = new LinkedList<PermissionGrant>();
+        for (PermissionGrant grant : accessor.getPermissionGrants())
+            grants.add(grant);
+        for (Accessor parent : accessor.getParents()) {
+            for (PermissionGrant grant : getPermissions(parent, contentType,
+                    permission)) {
+                grants.add(grant);
+            }
+        }
+
+        return ClassUtils.makeUnique(grants);
     }
 
     /**
@@ -273,7 +300,7 @@ public class AclManager {
      * @return
      */
     private HashSet<Object> getAllAccessors(Accessor accessor) {
-        
+
         final HashSet<Object> all = new HashSet<Object>();
         if (!isAnonymous(accessor)) {
             Iterable<Accessor> parents = accessor.getAllParents();

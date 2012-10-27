@@ -57,16 +57,15 @@ public class Converter {
      * @throws IOException
      * @throws DeserializationError
      */
+    @SuppressWarnings("unchecked")
     public <T extends VertexFrame> EntityBundle<T> jsonToBundle(String json)
             throws DeserializationError {
         ObjectMapper mapper = new ObjectMapper();
-        Map<String, Object> data;
         try {
-            data = mapper.readValue(json, Map.class);
+            return dataToBundle(mapper.readValue(json, Map.class));
         } catch (Exception e) {
             throw new DeserializationError("Error decoding JSON", e);
         }
-        return dataToBundle(data);
     }
 
     /**

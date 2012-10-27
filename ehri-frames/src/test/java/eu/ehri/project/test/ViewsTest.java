@@ -168,6 +168,46 @@ public class ViewsTest extends AbstractFixtureTest {
     }
 
     /**
+     * Test we can create a node and its subordinates from a set of data.
+     * 
+     * @throws ValidationError
+     * @throws PermissionDenied
+     * @throws DeserializationError
+     * @throws IntegrityError 
+     */
+    @Test(expected = PermissionDenied.class)
+    public void testCreateAsUnauthorized() throws ValidationError, PermissionDenied,
+            DeserializationError, IntegrityError {
+        Views<DocumentaryUnit> docViews = new Views<DocumentaryUnit>(graph,
+                DocumentaryUnit.class);
+        Map<String, Object> bundle = getTestBundle();
+        DocumentaryUnit unit = docViews.create(bundle, invalidUserId);
+        assertEquals(TEST_COLLECTION_NAME, unit.getName());
+    }
+
+    /**
+     * Test we can create a node and its subordinates from a set of data.
+     * 
+     * @throws ValidationError
+     * @throws PermissionDenied
+     * @throws DeserializationError
+     * @throws IntegrityError 
+     */
+    @Test
+    public void testCreateWithScope() throws ValidationError, PermissionDenied,
+            DeserializationError, IntegrityError {
+        Views<DocumentaryUnit> docViews = new Views<DocumentaryUnit>(graph,
+                DocumentaryUnit.class);
+        Map<String, Object> bundle = getTestBundle();
+        // In the fixtures, 'reto' should have a grant for 'CREATE'
+        // scoped to the 'r1' repository.
+        Long scopeId = (Long) helper.getTestVertex("r1").getId();
+        DocumentaryUnit unit = docViews.create(bundle, invalidUserId, scopeId);
+        assertEquals(TEST_COLLECTION_NAME, unit.getName());
+    }
+
+
+    /**
      * Test we can create a new user.
      * 
      * @throws ValidationError
