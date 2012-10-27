@@ -1,25 +1,21 @@
 package eu.ehri.project.models;
 
 import com.tinkerpop.frames.Adjacency;
-import com.tinkerpop.frames.Property;
 
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.PermissionScope;
 
-@EntityType(EntityTypes.PERMISSION_ASSERTION)
-public interface PermissionAssertion extends AccessibleEntity {
+@EntityType(EntityTypes.PERMISSION_GRANT)
+public interface PermissionGrant extends AccessibleEntity {
     public static final String HAS_GRANTEE = "hasGrantee";
     public static final String HAS_ACCESSOR = "hasAccessor";
     public static final String HAS_PERMISSION = "hasPermission";
     public static final String HAS_ENTITY = "hasEntity";
     public static final String HAS_CONTENT_TYPE = "hasContentType";
     public static final String HAS_SCOPE = "hasScope";
-    public static final String ASSERTION = "assertion";
     
-    @Property(ASSERTION)
-    public boolean getAssertion();
     
     @Adjacency(label = HAS_CONTENT_TYPE)
     public ContentType getContentType();

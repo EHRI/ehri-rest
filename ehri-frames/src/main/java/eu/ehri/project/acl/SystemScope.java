@@ -2,7 +2,7 @@ package eu.ehri.project.acl;
 
 import com.tinkerpop.blueprints.Vertex;
 
-import eu.ehri.project.models.PermissionAssertion;
+import eu.ehri.project.models.PermissionGrant;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.utils.EmptyIterable;
 
@@ -12,8 +12,8 @@ public class SystemScope implements PermissionScope {
         throw new UnsupportedOperationException();
     }
 
-    public Iterable<PermissionAssertion> getPermissions() {
-        return new EmptyIterable<PermissionAssertion>();
+    public Iterable<PermissionGrant> getPermissions() {
+        return new EmptyIterable<PermissionGrant>();
     }
 
 }

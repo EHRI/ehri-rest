@@ -7,7 +7,7 @@ import com.tinkerpop.frames.Property;
 import com.tinkerpop.frames.VertexFrame;
 import com.tinkerpop.frames.annotations.gremlin.GremlinGroovy;
 
-import eu.ehri.project.models.PermissionAssertion;
+import eu.ehri.project.models.PermissionGrant;
 import eu.ehri.project.relationships.Access;
 
 public interface Accessor extends VertexFrame {
@@ -37,9 +37,9 @@ public interface Accessor extends VertexFrame {
     @Adjacency(label = AccessibleEntity.ACCESS, direction = Direction.IN)
     public void removeAccessibleEntity(final AccessibleEntity entity);
     
-    @Adjacency(label = PermissionAssertion.HAS_ACCESSOR, direction=Direction.IN)
-    public Iterable<PermissionAssertion> getPermissionGrants();
+    @Adjacency(label = PermissionGrant.HAS_ACCESSOR, direction=Direction.IN)
+    public Iterable<PermissionGrant> getPermissionGrants();
 
-    @Adjacency(label = PermissionAssertion.HAS_ACCESSOR, direction=Direction.IN)
-    public void addPermissionGrant(final PermissionAssertion grant);
+    @Adjacency(label = PermissionGrant.HAS_ACCESSOR, direction=Direction.IN)
+    public void addPermissionGrant(final PermissionGrant grant);
 }

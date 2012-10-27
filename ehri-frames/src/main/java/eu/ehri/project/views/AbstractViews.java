@@ -11,7 +11,7 @@ import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.ContentType;
 import eu.ehri.project.models.Permission;
-import eu.ehri.project.models.PermissionAssertion;
+import eu.ehri.project.models.PermissionGrant;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.PermissionScope;
@@ -50,28 +50,24 @@ abstract class AbstractViews<E extends AccessibleEntity> {
             ContentType contentType = getContentType(ClassUtils
                     .getEntityType(cls));
             Permission permission = getPermission(permissionId);
-            Iterable<PermissionAssertion> perms = acl.getPermissions(accessor,
+            Iterable<PermissionGrant> perms = acl.getPermissions(accessor,
                     contentType, permission);
 
             boolean found = false;
-            for (PermissionAssertion perm : perms) {
+            for (PermissionGrant perm : perms) {
                 // If the permission has unscoped rights, the user is
                 // good to do whatever they want to do here.
                 Iterable<PermissionScope> scopes = perm.getScopes();
                 if (!scopes.iterator().hasNext()) {
-                    if (perm.getAssertion()) {
-                        found = true;
-                        break;
-                    }
+                    found = true;
+                    break;
                 }
 
                 // Otherwise, verify that the given scope is included.
                 for (PermissionScope s : scopes) {
                     if (s.equals(permScope)) {
-                        if (perm.getAssertion()) {
-                            found = true;
-                            break;
-                        }
+                        found = true;
+                        break;
                     }
                 }
             }
