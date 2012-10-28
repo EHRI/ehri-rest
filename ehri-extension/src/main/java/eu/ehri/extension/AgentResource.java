@@ -31,125 +31,116 @@ import eu.ehri.project.models.EntityTypes;
 import eu.ehri.project.persistance.EntityBundle;
 import eu.ehri.project.views.ActionViews;
 
-import static eu.ehri.extension.RestHelpers.*;
-
 /**
  * Provides a RESTfull interface for the Agent
  */
 @Path(EntityTypes.AGENT)
 public class AgentResource extends EhriNeo4jFramedResource<Agent> {
 
-    public AgentResource(@Context GraphDatabaseService database) {
-        super(database, Agent.class);
-    }
+	public AgentResource(@Context GraphDatabaseService database) {
+		super(database, Agent.class);
+	}
 
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{id:\\d+}")
-    public Response getAgent(@PathParam("id") long id) throws PermissionDenied {
-        return retrieve(id);
-    }
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("/{id:\\d+}")
+	public Response getAgent(@PathParam("id") long id) throws PermissionDenied {
+		return retrieve(id);
+	}
 
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{id:[\\w-]+}")
-    public Response getAgent(@PathParam("id") String id) throws ItemNotFound,
-            PermissionDenied {
-        return retrieve(id);
-    }
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("/{id:[\\w-]+}")
+	public Response getAgent(@PathParam("id") String id) throws ItemNotFound,
+			PermissionDenied {
+		return retrieve(id);
+	}
 
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("/list")
-    public StreamingOutput listAgents() throws PermissionDenied {
-        return list();
-    }
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("/list")
+	public StreamingOutput listAgents() throws PermissionDenied {
+		return list();
+	}
 
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response createAgent(String json) throws PermissionDenied,
-            ValidationError, IntegrityError, DeserializationError {
-        return create(json);
-    }
+	@POST
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response createAgent(String json) throws PermissionDenied,
+			ValidationError, IntegrityError, DeserializationError {
+		return create(json);
+	}
 
-    @PUT
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response updateAgent(String json) throws PermissionDenied,
-            IntegrityError, ValidationError, DeserializationError {
-        return update(json);
-    }
+	@PUT
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response updateAgent(String json) throws PermissionDenied,
+			IntegrityError, ValidationError, DeserializationError {
+		return update(json);
+	}
 
-    @PUT
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{id:[\\w-]+}")
-    public Response updateAgent(@PathParam("id") String id, String json)
-            throws PermissionDenied, IntegrityError, ValidationError,
-            DeserializationError, ItemNotFound {
-        return update(id, json);
-    }
+	@PUT
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("/{id:[\\w-]+}")
+	public Response updateAgent(@PathParam("id") String id, String json)
+			throws PermissionDenied, IntegrityError, ValidationError,
+			DeserializationError, ItemNotFound {
+		return update(id, json);
+	}
 
-    @DELETE
-    @Path("/{id}")
-    public Response deleteAgent(@PathParam("id") long id)
-            throws PermissionDenied, ValidationError {
-        return delete(id);
-    }
+	@DELETE
+	@Path("/{id}")
+	public Response deleteAgent(@PathParam("id") long id)
+			throws PermissionDenied, ValidationError {
+		return delete(id);
+	}
 
-    @DELETE
-    @Path("/{id:[\\w-]+}")
-    public Response deleteAgent(@PathParam("id") String id)
-            throws PermissionDenied, ItemNotFound, ValidationError {
-        return delete(id);
-    }
+	@DELETE
+	@Path("/{id:[\\w-]+}")
+	public Response deleteAgent(@PathParam("id") String id)
+			throws PermissionDenied, ItemNotFound, ValidationError {
+		return delete(id);
+	}
 
-    /**
-     * Create an instance of the 'entity' in the database
-     * 
-     * @param json
-     *            The json representation of the entity to create (no vertex
-     *            'id' fields)
-     * @return The response of the create request, the 'location' will contain
-     *         the url of the newly created instance.
-     * @throws PermissionDenied
-     * @throws IntegrityError
-     * @throws ValidationError
-     */
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{id:\\d+}")
-    public Response createAgentDocumentaryUnit(@PathParam("id") long id,
-            String json) throws PermissionDenied, ValidationError,
-            IntegrityError {
+	/**
+	 * Create an instance of the 'entity' in the database
+	 * 
+	 * @param json
+	 *            The json representation of the entity to create (no vertex
+	 *            'id' fields)
+	 * @return The response of the create request, the 'location' will contain
+	 *         the url of the newly created instance.
+	 * @throws PermissionDenied
+	 * @throws IntegrityError
+	 * @throws ValidationError
+	 * @throws DeserializationError
+	 * @throws SerializationError
+	 */
+	@POST
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("/{id:\\d+}")
+	public Response createAgentDocumentaryUnit(@PathParam("id") long id,
+			String json) throws PermissionDenied, ValidationError,
+			IntegrityError, DeserializationError, SerializationError {
 
-        try {
-            Agent agent = views.detail(id, getRequesterUserProfileId());
-            EntityBundle<DocumentaryUnit> entityBundle = converter
-                    .jsonToBundle(json);
+		Agent agent = views.detail(id, getRequesterUserProfileId());
+		EntityBundle<DocumentaryUnit> entityBundle = converter
+				.jsonToBundle(json);
 
-            DocumentaryUnit doc = new ActionViews<DocumentaryUnit>(graph,
-                    DocumentaryUnit.class).create(
-                    converter.bundleToData(entityBundle),
-                    getRequesterUserProfileId());
-            // Add it to this agent's collections
-            agent.addCollection(doc);
+		DocumentaryUnit doc = new ActionViews<DocumentaryUnit>(graph,
+				DocumentaryUnit.class).create(
+				converter.bundleToData(entityBundle),
+				getRequesterUserProfileId());
+		// Add it to this agent's collections
+		agent.addCollection(doc);
 
-            String jsonStr = converter.vertexFrameToJson(doc);
-            UriBuilder ub = uriInfo.getAbsolutePathBuilder();
-            URI docUri = ub.path(doc.asVertex().getId().toString()).build();
+		String jsonStr = converter.vertexFrameToJson(doc);
+		UriBuilder ub = uriInfo.getAbsolutePathBuilder();
+		URI docUri = ub.path(doc.asVertex().getId().toString()).build();
 
-            return Response.status(Status.OK).location(docUri)
-                    .entity((jsonStr).getBytes()).build();
-
-        } catch (SerializationError e) {
-            return Response.status(Status.INTERNAL_SERVER_ERROR)
-                    .entity((produceErrorMessageJson(e)).getBytes()).build();
-        } catch (DeserializationError e) {
-            return Response.status(Status.INTERNAL_SERVER_ERROR)
-                    .entity((produceErrorMessageJson(e)).getBytes()).build();
-        }
-    }
+		return Response.status(Status.OK).location(docUri)
+				.entity((jsonStr).getBytes()).build();
+	}
 }
