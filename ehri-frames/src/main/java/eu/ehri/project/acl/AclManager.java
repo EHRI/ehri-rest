@@ -18,11 +18,18 @@ import eu.ehri.project.models.Permission;
 import eu.ehri.project.models.PermissionGrant;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
+import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.utils.ClassUtils;
 
+/**
+ * Helper class for checking and asserting access and
+ * write permissions.
+ * 
+ * @author mike
+ *
+ */
 public class AclManager {
 
-    @SuppressWarnings("unused")
     private FramedGraph<Neo4jGraph> graph;
 
     public AclManager(FramedGraph<Neo4jGraph> graph) {
@@ -149,6 +156,41 @@ public class AclManager {
     }
 
     /**
+     * Grant a user permissions to a content type.
+     * 
+     * @param accessor
+     * @param contentType
+     * @param permission
+     * @return
+     */
+    public PermissionGrant grantPermissions(Accessor accessor,
+            ContentType contentType, Permission permission) {
+        PermissionGrant grant = graph.addVertex(null, PermissionGrant.class);
+        grant.addAccessor(accessor);
+        grant.setPermission(permission);
+        grant.setContentType(contentType);
+        return grant;
+    }
+
+    /**
+     * Grant a user permissions to a content type, with the given scope.
+     * 
+     * @param accessor
+     * @param contentType
+     * @param permission
+     * @param scope
+     * @return
+     */
+    public PermissionGrant grantPermissions(Accessor accessor,
+            ContentType contentType, Permission permission,
+            PermissionScope scope) {
+        PermissionGrant grant = grantPermissions(accessor, contentType,
+                permission);
+        grant.addScope(scope);
+        return grant;
+    }
+
+    /**
      * Set access control on an entity.
      * 
      * @param entity
@@ -181,7 +223,8 @@ public class AclManager {
      * @param canWrite
      * @throws PermissionDenied
      */
-    public void setAccessControl(AccessibleEntity entity, Accessor[] accessors) throws PermissionDenied {
+    public void setAccessControl(AccessibleEntity entity, Accessor[] accessors)
+            throws PermissionDenied {
         for (Accessor accessor : accessors)
             entity.addAccessor(accessor);
     }
