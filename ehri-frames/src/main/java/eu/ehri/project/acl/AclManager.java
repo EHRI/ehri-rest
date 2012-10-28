@@ -65,7 +65,7 @@ public class AclManager {
      * We have to ascend the current accessors group hierarchy looking for a
      * groups that are contained in the current entity's ACL list.
      */
-    public List<Accessor> searchPermissions(List<Accessor> accessing,
+    public List<Accessor> searchAccess(List<Accessor> accessing,
             List<Accessor> allowedAccessors) {
         if (accessing.isEmpty()) {
             return new ArrayList<Accessor>();
@@ -83,8 +83,7 @@ public class AclManager {
                 List<Accessor> parents = new ArrayList<Accessor>();
                 for (Accessor parent : acc.getAllParents())
                     parents.add(parent);
-                parentPerms
-                        .addAll(searchPermissions(parents, allowedAccessors));
+                parentPerms.addAll(searchAccess(parents, allowedAccessors));
             }
 
             return parentPerms;
@@ -125,7 +124,7 @@ public class AclManager {
         } else {
             List<Accessor> initial = new ArrayList<Accessor>();
             initial.add(accessor);
-            return !searchPermissions(initial, accessors).isEmpty();
+            return !searchAccess(initial, accessors).isEmpty();
         }
     }
 
@@ -141,7 +140,10 @@ public class AclManager {
         List<PermissionGrant> grants = new LinkedList<PermissionGrant>();
         for (PermissionGrant grant : accessor.getPermissionGrants()) {
             for (PermissionGrantTarget t : grant.getTargets()) {
-                if (target.asVertex().equals(t.asVertex())) {
+                // TODO: Make permissions a bitmask so that we can check
+                // if one implies another, e.g. OWNER -> UPDATE.
+                if (grant.getPermission().equals(permission)
+                        && target.asVertex().equals(t.asVertex())) {
                     grants.add(grant);
                 }
             }
@@ -186,8 +188,7 @@ public class AclManager {
     public PermissionGrant grantPermissions(Accessor accessor,
             PermissionGrantTarget target, Permission permission,
             PermissionScope scope) {
-        PermissionGrant grant = grantPermissions(accessor, target,
-                permission);
+        PermissionGrant grant = grantPermissions(accessor, target, permission);
         grant.addScope(scope);
         return grant;
     }
