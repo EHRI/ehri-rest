@@ -9,7 +9,7 @@ import eu.ehri.project.models.Action;
 import eu.ehri.project.models.PermissionGrant;
 import eu.ehri.project.models.annotations.Unique;
 
-public interface AccessibleEntity extends VertexFrame {
+public interface AccessibleEntity extends VertexFrame, PermissionGrantTarget {
 
     public static final String ACCESS = "access";
     public static final String IDENTIFIER_KEY = "identifier";

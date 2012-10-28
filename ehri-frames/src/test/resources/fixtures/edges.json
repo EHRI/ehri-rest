@@ -228,7 +228,7 @@
     "src": "retoKclWriteGrant",
     "dst": "documentaryUnitType",
     "data": {},
-    "label": "hasContentType"
+    "label": "hasTarget"
   },
   {
     "src": "retoKclWriteGrant",

@@ -18,15 +18,15 @@ import eu.ehri.project.models.Permission;
 import eu.ehri.project.models.PermissionGrant;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
+import eu.ehri.project.models.base.PermissionGrantTarget;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.utils.ClassUtils;
 
 /**
- * Helper class for checking and asserting access and
- * write permissions.
+ * Helper class for checking and asserting access and write permissions.
  * 
  * @author mike
- *
+ * 
  */
 public class AclManager {
 
@@ -138,15 +138,18 @@ public class AclManager {
      * @param permission
      */
     public Iterable<PermissionGrant> getPermissions(Accessor accessor,
-            ContentType contentType, Permission permission) {
+            PermissionGrantTarget target, Permission permission) {
         List<PermissionGrant> grants = new LinkedList<PermissionGrant>();
         for (PermissionGrant grant : accessor.getPermissionGrants()) {
-            if (grant.getContentType().equals(contentType))
-                grants.add(grant);
+            for (PermissionGrantTarget t : grant.getTargets()) {
+                if (target.asVertex().equals(t.asVertex())) {
+                    grants.add(grant);
+                }
+            }
         }
 
         for (Accessor parent : accessor.getParents()) {
-            for (PermissionGrant grant : getPermissions(parent, contentType,
+            for (PermissionGrant grant : getPermissions(parent, target,
                     permission)) {
                 grants.add(grant);
             }

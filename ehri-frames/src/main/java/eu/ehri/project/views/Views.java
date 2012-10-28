@@ -49,9 +49,27 @@ public class Views<E extends AccessibleEntity> extends AbstractViews<E>
     public E update(Map<String, Object> data, Long user)
             throws PermissionDenied, ValidationError, DeserializationError,
             IntegrityError {
+        return update(data, user, null);
+    }
+
+    /**
+     * Update an object bundle, also updating dependent items, with a given
+     * scope.
+     * 
+     * @param data
+     * @param user
+     * @param scope
+     * @return
+     * @throws PermissionDenied
+     * @throws ValidationError
+     * @throws IntegrityError
+     */
+    public E update(Map<String, Object> data, Long user, Long scope)
+            throws PermissionDenied, ValidationError, DeserializationError,
+            IntegrityError {
         EntityBundle<E> bundle = converter.dataToBundle(data);
         E entity = graph.getVertex(bundle.getId(), cls);
-        checkWriteAccess(entity, user);
+        checkEntityPermission(entity, user, scope, PermissionTypes.UPDATE);
         return new BundleDAO<E>(graph).update(bundle);
     }
 
@@ -109,8 +127,8 @@ public class Views<E extends AccessibleEntity> extends AbstractViews<E>
     }
 
     /**
-     * Delete an object bundle, following dependency cascades, within the
-     * scope of item `scope`.
+     * Delete an object bundle, following dependency cascades, within the scope
+     * of item `scope`.
      * 
      * @param item
      * @param user
@@ -119,8 +137,8 @@ public class Views<E extends AccessibleEntity> extends AbstractViews<E>
      * @throws ValidationError
      * @throws SerializationError
      */
-    public Integer delete(Long item, Long user, Long scope) throws PermissionDenied,
-            ValidationError, SerializationError {
+    public Integer delete(Long item, Long user, Long scope)
+            throws PermissionDenied, ValidationError, SerializationError {
         E entity = graph.getVertex(item, cls);
         checkEntityPermission(entity, user, scope, PermissionTypes.DELETE);
         checkWriteAccess(entity, user);

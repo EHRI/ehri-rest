@@ -5,6 +5,7 @@ import com.tinkerpop.frames.Adjacency;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
+import eu.ehri.project.models.base.PermissionGrantTarget;
 import eu.ehri.project.models.base.PermissionScope;
 
 @EntityType(EntityTypes.PERMISSION_GRANT)
@@ -15,6 +16,7 @@ public interface PermissionGrant extends AccessibleEntity {
     public static final String HAS_ENTITY = "hasEntity";
     public static final String HAS_CONTENT_TYPE = "hasContentType";
     public static final String HAS_SCOPE = "hasScope";
+    public static final String HAS_TARGET = "hasTarget";
     
     
     @Adjacency(label = HAS_CONTENT_TYPE)
@@ -31,6 +33,15 @@ public interface PermissionGrant extends AccessibleEntity {
 
     @Adjacency(label = HAS_ENTITY)
     public Iterable<AccessibleEntity> getEntities();
+
+    @Adjacency(label = HAS_TARGET)
+    public Iterable<PermissionGrantTarget> getTargets();
+
+    @Adjacency(label = HAS_TARGET)
+    public void addTarget(final PermissionGrantTarget target);
+
+    @Adjacency(label = HAS_TARGET)
+    public void removeTarget(final PermissionGrantTarget target);
 
     @Adjacency(label = HAS_PERMISSION)
     public Permission getPermission();

@@ -52,7 +52,6 @@ abstract class AbstractViews<E extends AccessibleEntity> {
             Permission permission = getPermission(permissionId);
             Iterable<PermissionGrant> perms = acl.getPermissions(accessor,
                     contentType, permission);
-
             boolean found = false;
             for (PermissionGrant perm : perms) {
                 // If the permission has unscoped rights, the user is
@@ -89,7 +88,17 @@ abstract class AbstractViews<E extends AccessibleEntity> {
 
         // TODO: Determine behaviour for granular item-level
         // attributes.
-        checkPermission(user, scope, permissionId);
+        try {
+            checkPermission(user, scope, permissionId);
+        } catch (PermissionDenied e) {
+            Accessor accessor = getAccessor(user);
+            Iterable<PermissionGrant> perms = acl.getPermissions(accessor,
+                    entity, getPermission(permissionId));
+            // Scopes do not apply to entity-level perms...
+            if (!perms.iterator().hasNext())
+                throw new PermissionDenied(accessor, entity);
+        }
+
     }
 
     private PermissionScope getPermissionScope(Long id) {
@@ -126,8 +135,8 @@ abstract class AbstractViews<E extends AccessibleEntity> {
     }
 
     /**
-     * Get the access with the given id, or the special
-     * anonymous access otherwise.
+     * Get the access with the given id, or the special anonymous access
+     * otherwise.
      * 
      * @param id
      * @return
@@ -138,14 +147,14 @@ abstract class AbstractViews<E extends AccessibleEntity> {
         // FIXME: Ensure this item really is an accessor!
         return graph.frame(graph.getVertex(id), Accessor.class);
     }
-    
+
     /**
      * Get the content type with the given id.
      * 
      * @param typeName
      * @return
      */
-    private ContentType getContentType(String typeName) {        
+    private ContentType getContentType(String typeName) {
         try {
             return graph
                     .getVertices(AccessibleEntity.IDENTIFIER_KEY, typeName,
@@ -171,5 +180,5 @@ abstract class AbstractViews<E extends AccessibleEntity> {
             throw new RuntimeException(String.format(
                     "No permission found for name: '%s'", permissionId), e);
         }
-    }    
+    }
 }
