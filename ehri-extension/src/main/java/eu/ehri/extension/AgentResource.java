@@ -10,6 +10,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -20,6 +21,7 @@ import javax.ws.rs.core.Response.Status;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import eu.ehri.project.exceptions.DeserializationError;
+import eu.ehri.project.exceptions.IndexNotFoundException;
 import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
@@ -28,8 +30,10 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityTypes;
+import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.persistance.EntityBundle;
 import eu.ehri.project.views.ActionViews;
+import eu.ehri.project.views.Query;
 
 /**
  * Provides a RESTfull interface for the Agent
@@ -124,8 +128,46 @@ public class AgentResource extends EhriNeo4jFramedResource<Agent> {
 	public Response createAgentDocumentaryUnit(@PathParam("id") long id,
 			String json) throws PermissionDenied, ValidationError,
 			IntegrityError, DeserializationError, SerializationError {
-
 		Agent agent = views.detail(id, getRequesterUserProfileId());
+		DocumentaryUnit doc = createDocumentaryUnit(json, agent);
+		return buildResponseFromDocumentaryUnit(doc);
+	}
+
+	@POST
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("/{id:[\\w-]+}")
+	public Response createAgentDocumentaryUnit(@PathParam("id") String id,
+			String json) throws PermissionDenied, ValidationError,
+			IntegrityError, DeserializationError, ItemNotFound {
+		try {
+			Agent agent = new Query<Agent>(graph, Agent.class).get(
+					AccessibleEntity.IDENTIFIER_KEY, id,
+					getRequesterUserProfileId());
+			DocumentaryUnit doc = createDocumentaryUnit(json, agent);
+			return buildResponseFromDocumentaryUnit(doc);
+		} catch (IndexNotFoundException e) {
+			throw new WebApplicationException(e);
+		} catch (SerializationError e) {
+			throw new WebApplicationException(e);
+		}
+	}
+	
+	// Helpers
+	
+	private Response buildResponseFromDocumentaryUnit(DocumentaryUnit doc)
+			throws SerializationError {
+		String jsonStr = converter.vertexFrameToJson(doc);
+		UriBuilder ub = uriInfo.getAbsolutePathBuilder();
+		URI docUri = ub.path(doc.asVertex().getId().toString()).build();
+
+		return Response.status(Status.CREATED).location(docUri)
+				.entity((jsonStr).getBytes()).build();
+	}
+
+	private DocumentaryUnit createDocumentaryUnit(String json, Agent agent)
+			throws DeserializationError, PermissionDenied, ValidationError,
+			IntegrityError {
 		EntityBundle<DocumentaryUnit> entityBundle = converter
 				.jsonToBundle(json);
 
@@ -135,12 +177,6 @@ public class AgentResource extends EhriNeo4jFramedResource<Agent> {
 				getRequesterUserProfileId());
 		// Add it to this agent's collections
 		agent.addCollection(doc);
-
-		String jsonStr = converter.vertexFrameToJson(doc);
-		UriBuilder ub = uriInfo.getAbsolutePathBuilder();
-		URI docUri = ub.path(doc.asVertex().getId().toString()).build();
-
-		return Response.status(Status.OK).location(docUri)
-				.entity((jsonStr).getBytes()).build();
-	}
+		return doc;
+	}	
 }
