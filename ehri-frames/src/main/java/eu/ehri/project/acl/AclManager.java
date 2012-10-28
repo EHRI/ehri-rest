@@ -140,8 +140,6 @@ public class AclManager {
         List<PermissionGrant> grants = new LinkedList<PermissionGrant>();
         for (PermissionGrant grant : accessor.getPermissionGrants()) {
             for (PermissionGrantTarget t : grant.getTargets()) {
-                // TODO: Make permissions a bitmask so that we can check
-                // if one implies another, e.g. OWNER -> UPDATE.
                 if (((grant.getPermission().getMask() & permission.getMask()) == permission
                         .getMask()) && target.asVertex().equals(t.asVertex())) {
                     grants.add(grant);
