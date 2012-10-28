@@ -197,7 +197,7 @@ public class BundleDAO<T extends VertexFrame> {
      * @throws ValidationError
      * @throws IntegrityError 
      */
-    private Vertex createInner(EntityBundle<T> bundle) throws ValidationError, IntegrityError {
+    private Vertex createInner(EntityBundle<T> bundle) throws ValidationError, IntegrityError {        
         bundle.validateForInsert();
         Index<Vertex> index = helpers.getOrCreateIndex(bundle.getEntityType(),
                 Vertex.class);

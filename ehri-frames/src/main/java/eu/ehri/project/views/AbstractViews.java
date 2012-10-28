@@ -153,7 +153,7 @@ abstract class AbstractViews<E extends AccessibleEntity> {
      * @param typeName
      * @return
      */
-    private ContentType getContentType(String typeName) {
+    public ContentType getContentType(String typeName) {
         try {
             return graph
                     .getVertices(AccessibleEntity.IDENTIFIER_KEY, typeName,
@@ -170,7 +170,7 @@ abstract class AbstractViews<E extends AccessibleEntity> {
      * @param permissionId
      * @return
      */
-    private Permission getPermission(String permissionId) {
+    public Permission getPermission(String permissionId) {
         try {
             return graph
                     .getVertices(AccessibleEntity.IDENTIFIER_KEY, permissionId,

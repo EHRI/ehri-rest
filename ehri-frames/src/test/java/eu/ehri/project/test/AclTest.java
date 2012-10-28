@@ -46,7 +46,7 @@ public class AclTest extends ModelTestBase {
      * Ensure user 'Reto' can't access collection 'c3'.
      */
     @Test
-    public void testAdminReadWrite() {
+    public void testAdminRead() {
         Group admin = helper.getTestFrame("adminGroup", Group.class);
         UserProfile reto = helper.getTestFrame("reto", UserProfile.class);
         DocumentaryUnit c3 = helper.getTestFrame("c3", DocumentaryUnit.class);
