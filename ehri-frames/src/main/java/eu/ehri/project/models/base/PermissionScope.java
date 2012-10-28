@@ -8,7 +8,7 @@ import eu.ehri.project.models.PermissionGrant;
 
 public interface PermissionScope {
     @Adjacency(label = PermissionGrant.HAS_SCOPE, direction = Direction.IN)
-    public Iterable<PermissionGrant> getPermissions();
+    public Iterable<PermissionGrant> getPermissionGrants();
 
     @Property(AccessibleEntity.IDENTIFIER_KEY)
     public String getIdentifier();

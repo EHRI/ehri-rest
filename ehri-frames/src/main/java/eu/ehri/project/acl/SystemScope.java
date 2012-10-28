@@ -17,7 +17,7 @@ public class SystemScope implements PermissionScope {
         throw new UnsupportedOperationException();
     }
 
-    public Iterable<PermissionGrant> getPermissions() {
+    public Iterable<PermissionGrant> getPermissionGrants() {
         return new EmptyIterable<PermissionGrant>();
     }
 

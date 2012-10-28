@@ -7,7 +7,6 @@ import eu.ehri.project.models.PermissionGrant;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.utils.EmptyIterable;
-import eu.ehri.project.relationships.Access;
 
 /**
  * Implementation of an anonymous user.
@@ -35,10 +34,6 @@ public class AnonymousAccessor implements Accessor {
 
     public Iterable<Accessor> getAllParents() {
         return new EmptyIterable<Accessor>();
-    }
-
-    public Iterable<Access> getAccess() {
-        return new EmptyIterable<Access>();
     }
 
     public Iterable<AccessibleEntity> getAccessibleEntities() {

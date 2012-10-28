@@ -14,7 +14,6 @@ import eu.ehri.project.models.Group;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.relationships.Access;
 
 public class AclTest extends ModelTestBase {
 
@@ -51,13 +50,8 @@ public class AclTest extends ModelTestBase {
         Group admin = helper.getTestFrame("adminGroup", Group.class);
         UserProfile reto = helper.getTestFrame("reto", UserProfile.class);
         DocumentaryUnit c3 = helper.getTestFrame("c3", DocumentaryUnit.class);
-        Access adminAccess = acl.getAccessControl(c3, admin);
-        Access retoAccess = acl.getAccessControl(c3, reto);
-
-        assertTrue(adminAccess.getRead());
-        assertTrue(adminAccess.getWrite());
-        assertFalse(retoAccess.getRead());
-        assertFalse(retoAccess.getWrite());
+        assertTrue(acl.getAccessControl(c3, admin));
+        assertFalse(acl.getAccessControl(c3, reto));
     }
 
     /**
@@ -67,15 +61,11 @@ public class AclTest extends ModelTestBase {
     public void testNiodGroup() {
         Group niod = helper.getTestFrame("niodGroup", Group.class);
         DocumentaryUnit c1 = helper.getTestFrame("c1", DocumentaryUnit.class);
-        Access access1 = acl.getAccessControl(c1, niod);
-        assertFalse(access1.getRead());
-        assertFalse(access1.getWrite());
+        assertFalse(acl.getAccessControl(c1, niod));
 
         // but we should have read-only access to items with no specified perms.
         DocumentaryUnit c4 = helper.getTestFrame("c4", DocumentaryUnit.class);
-        Access access2 = acl.getAccessControl(c4, niod);
-        assertTrue(access2.getRead());
-        assertFalse(access2.getWrite());
+        assertTrue(acl.getAccessControl(c4, niod));
     }
 
     /**
@@ -85,9 +75,7 @@ public class AclTest extends ModelTestBase {
     public void testUserGroupPermOverride() {
         Accessor tim = helper.getTestFrame("tim", Accessor.class);
         AccessibleEntity c3 = helper.getTestFrame("c3", AccessibleEntity.class);
-        Access access = acl.getAccessControl(c3, tim);
-        assertTrue(access.getRead());
-        assertTrue(access.getWrite());
+        assertTrue(acl.getAccessControl(c3, tim));
     }
 
     /**
@@ -98,11 +86,9 @@ public class AclTest extends ModelTestBase {
         Accessor reto = helper.getTestFrame("reto", Accessor.class);
         AccessibleEntity prof = helper.getTestFrame("reto",
                 AccessibleEntity.class);
-        Access access = acl.getAccessControl(prof, reto);
         // Check user ISN'T admin (otherwise they'd be able to access anything)
         assertFalse(acl.isAdmin(reto));
-        assertTrue(access.getRead());
-        assertTrue(access.getWrite());
+        assertTrue(acl.getAccessControl(prof, reto));
     }
 
     /**
@@ -113,9 +99,7 @@ public class AclTest extends ModelTestBase {
         Accessor reto = helper.getTestFrame("reto", Accessor.class);
         AccessibleEntity tim = helper.getTestFrame("tim",
                 AccessibleEntity.class);
-        Access access = acl.getAccessControl(tim, reto);
-        assertTrue(access.getRead());
-        assertFalse(access.getWrite());
+        assertTrue(acl.getAccessControl(tim, reto));
     }
 
     /**
@@ -126,9 +110,7 @@ public class AclTest extends ModelTestBase {
         Accessor anon = new AnonymousAccessor();
         AccessibleEntity tim = helper.getTestFrame("tim",
                 AccessibleEntity.class);
-        Access access = acl.getAccessControl(tim, anon);
-        assertTrue(access.getRead());
-        assertFalse(access.getWrite());
+        assertTrue(acl.getAccessControl(tim, anon));
     }
     
     /**
@@ -139,11 +121,9 @@ public class AclTest extends ModelTestBase {
         Accessor reto = helper.getTestFrame("reto", Accessor.class);
         AccessibleEntity kcl = helper.getTestFrame("kclGroup",
                 AccessibleEntity.class);
-        Access access = acl.getAccessControl(kcl, reto);
         // Admin can change anything, so ensure the user ISN'T a member of admin
         assertFalse(acl.isAdmin(reto));
-        assertTrue(access.getRead());
-        assertFalse(access.getWrite());
+        assertTrue(acl.getAccessControl(kcl, reto));
     }
 
     /**
@@ -155,17 +135,13 @@ public class AclTest extends ModelTestBase {
         Accessor reto = helper.getTestFrame("reto", Accessor.class);
         AccessibleEntity kcl = helper.getTestFrame("kclGroup",
                 AccessibleEntity.class);
-        Access access = acl.getAccessControl(kcl, reto);
         // Admin can change anything, so ensure the user ISN'T a member of admin
         assertFalse(acl.isAdmin(reto));
-        assertTrue(access.getRead());
-        assertFalse(access.getWrite());
+        assertTrue(acl.getAccessControl(kcl, reto));
 
         // Now set the access control on KCL so Reto can write to it...
-        acl.setAccessControl(kcl, reto, true, true);
-        access = acl.getAccessControl(kcl, reto);
-        assertTrue(access != null);
-        assertTrue(access.getWrite());
+        acl.setAccessControl(kcl, reto);
+        assertTrue(acl.getAccessControl(kcl, reto));
     }
 
     /**
@@ -177,22 +153,16 @@ public class AclTest extends ModelTestBase {
         Accessor reto = helper.getTestFrame("reto", Accessor.class);
         AccessibleEntity kcl = helper.getTestFrame("kclGroup",
                 AccessibleEntity.class);
-        Access access = acl.getAccessControl(kcl, reto);
         // Admin can change anything, so ensure the user ISN'T a member of admin
         assertFalse(acl.isAdmin(reto));
-        assertTrue(access.getRead());
-        assertFalse(access.getWrite());
+        assertTrue(acl.getAccessControl(kcl, reto));
 
         // Now set the access control on KCL so Reto can write to it...
-        acl.setAccessControl(kcl, reto, true, true);
-        access = acl.getAccessControl(kcl, reto);
-        assertTrue(access != null);
-        assertTrue(access.getWrite());
+        acl.setAccessControl(kcl, reto);
+        assertTrue(acl.getAccessControl(kcl, reto));
 
         // Now remove the access control...
         acl.removeAccessControl(kcl, reto);
-        access = acl.getAccessControl(kcl, reto);
-        assertTrue(access != null);
-        assertFalse(access.getWrite());
+        assertTrue(acl.getAccessControl(kcl, reto));
     }
 }

@@ -7,6 +7,7 @@ import com.tinkerpop.frames.FramedGraph;
 
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.acl.AnonymousAccessor;
+import eu.ehri.project.acl.PermissionTypes;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.ContentType;
@@ -17,7 +18,6 @@ import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.utils.ClassUtils;
 import eu.ehri.project.persistance.Converter;
-import eu.ehri.project.relationships.Access;
 
 abstract class AbstractViews<E extends AccessibleEntity> {
 
@@ -109,8 +109,7 @@ abstract class AbstractViews<E extends AccessibleEntity> {
     protected void checkReadAccess(AccessibleEntity entity, Long user)
             throws PermissionDenied {
         Accessor accessor = getAccessor(user);
-        Access access = acl.getAccessControl(entity, accessor);
-        if (!access.getRead())
+        if (!acl.getAccessControl(entity, accessor))
             throw new PermissionDenied(accessor, entity);
     }
 
@@ -123,10 +122,7 @@ abstract class AbstractViews<E extends AccessibleEntity> {
      */
     protected void checkWriteAccess(AccessibleEntity entity, Long user)
             throws PermissionDenied {
-        Accessor accessor = getAccessor(user);
-        Access access = acl.getAccessControl(entity, accessor);
-        if (!(access.getRead() && access.getWrite()))
-            throw new PermissionDenied(accessor, entity);
+        checkEntityPermission(entity, user, null, PermissionTypes.UPDATE);
     }
 
     /**

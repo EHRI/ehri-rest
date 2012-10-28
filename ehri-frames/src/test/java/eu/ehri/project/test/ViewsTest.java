@@ -59,8 +59,7 @@ public class ViewsTest extends AbstractFixtureTest {
     }
 
     /**
-     * Access an item as an invalid user. TODO: Check that this test fails if no
-     * exception is thrown.
+     * Access an item as an invalid user.
      * 
      * @throws PermissionDenied
      */
@@ -73,10 +72,9 @@ public class ViewsTest extends AbstractFixtureTest {
 
     /**
      * Access the valid user's profile as an invalid users.
-     * 
-     * @throws PermissionDenied
+     *
+     * TODO: Check write access!!!
      */
-    @Test(expected = PermissionDenied.class)
     public void testUserDetailPermissionDenied() throws PermissionDenied {
         Views<UserProfile> userViews = new Views<UserProfile>(graph,
                 UserProfile.class);

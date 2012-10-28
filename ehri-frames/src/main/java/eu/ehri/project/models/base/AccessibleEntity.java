@@ -2,14 +2,12 @@ package eu.ehri.project.models.base;
 
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.frames.Adjacency;
-import com.tinkerpop.frames.Incidence;
 import com.tinkerpop.frames.Property;
 import com.tinkerpop.frames.VertexFrame;
 
 import eu.ehri.project.models.Action;
 import eu.ehri.project.models.PermissionGrant;
 import eu.ehri.project.models.annotations.Unique;
-import eu.ehri.project.relationships.Access;
 
 public interface AccessibleEntity extends VertexFrame {
 
@@ -20,11 +18,11 @@ public interface AccessibleEntity extends VertexFrame {
     @Property(IDENTIFIER_KEY)
     public String getIdentifier();
 
-    @Incidence(label = ACCESS)
-    public Iterable<Access> getAccess();
+    @Adjacency(label = ACCESS)
+    public Iterable<Accessor> getAccessors();
 
     @Adjacency(label = ACCESS)
-    public Iterable<Accessor> getAccessibleTo();
+    public void addAccessor(final Accessor accessor);
 
     @Adjacency(label = ACCESS)
     public void removeAccessor(final Accessor accessor);
