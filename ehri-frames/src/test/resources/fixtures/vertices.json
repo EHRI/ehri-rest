@@ -181,6 +181,22 @@
   },
   {
     "data": {
+      "isA": "agent", 
+      "identifier": "r2", 
+      "name": "Repository 2"
+    },
+    "desc": "r2"
+  },
+  {
+    "data": {
+      "languageCode": "en", 
+      "isA": "agentDescription", 
+      "title": "A Repository called 2"
+    },
+    "desc": "rd2"
+  },
+  {
+    "data": {
       "isA": "authority", 
       "identifier": "a1", 
       "name": "Authority 1", 
