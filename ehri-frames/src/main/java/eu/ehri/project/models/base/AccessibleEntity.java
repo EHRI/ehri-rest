@@ -7,7 +7,7 @@ import com.tinkerpop.frames.Property;
 import com.tinkerpop.frames.VertexFrame;
 
 import eu.ehri.project.models.Action;
-import eu.ehri.project.models.PermissionAssertion;
+import eu.ehri.project.models.PermissionGrant;
 import eu.ehri.project.models.annotations.Unique;
 import eu.ehri.project.relationships.Access;
 
@@ -28,9 +28,9 @@ public interface AccessibleEntity extends VertexFrame {
 
     @Adjacency(label = ACCESS)
     public void removeAccessor(final Accessor accessor);
-    
-    @Adjacency(label = PermissionAssertion.HAS_ENTITY)
-    public Iterable<PermissionAssertion> getPermissionAssertions();    
+
+    @Adjacency(label = PermissionGrant.HAS_ENTITY)
+    public Iterable<PermissionGrant> getPermissionAssertions();
 
     @Adjacency(label = Action.HAS_SUBJECT, direction = Direction.IN)
     public Iterable<Action> getHistory();
