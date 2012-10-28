@@ -12,6 +12,7 @@ import eu.ehri.project.acl.PermissionTypes;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.PermissionDenied;
+import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.DocumentaryUnit;
@@ -89,4 +90,43 @@ public class PermissionsTest extends AbstractFixtureTest {
         assertNotNull(views.create(getTestBundle(), (Long) user.asVertex()
                 .getId(), (Long) badScope.asVertex().getId()));
     }
+    
+    @Test(expected = PermissionDenied.class)
+    public void testCreateAsUserWithDifferentPerms()
+            throws PermissionDenied, ValidationError, DeserializationError,
+            IntegrityError {
+        acl.grantPermissions(user,
+                views.getContentType(EntityTypes.DOCUMENTARY_UNIT),
+                views.getPermission(PermissionTypes.DELETE));
+        assertNotNull(views.create(getTestBundle(), (Long) user.asVertex()
+                .getId()));
+    }
+    
+    @Test(expected = PermissionDenied.class)
+    public void testDeleteAsUserWithDifferentPerms()
+            throws PermissionDenied, ValidationError, DeserializationError,
+            IntegrityError, SerializationError {
+        acl.grantPermissions(user,
+                views.getContentType(EntityTypes.DOCUMENTARY_UNIT),
+                views.getPermission(PermissionTypes.CREATE));
+        DocumentaryUnit unit = views.create(getTestBundle(), (Long) user.asVertex()
+                .getId());
+        assertNotNull(unit);
+        views.delete((Long)unit.asVertex().getId(), (Long)user.asVertex().getId());
+    }
+    
+    public void testDeleteAsUserWithGoodPerms()
+            throws PermissionDenied, ValidationError, DeserializationError,
+            IntegrityError, SerializationError {
+        acl.grantPermissions(user,
+                views.getContentType(EntityTypes.DOCUMENTARY_UNIT),
+                views.getPermission(PermissionTypes.CREATE));
+        acl.grantPermissions(user,
+                views.getContentType(EntityTypes.DOCUMENTARY_UNIT),
+                views.getPermission(PermissionTypes.DELETE));
+        DocumentaryUnit unit = views.create(getTestBundle(), (Long) user.asVertex()
+                .getId());
+        assertNotNull(unit);
+        views.delete((Long)unit.asVertex().getId(), (Long)user.asVertex().getId());
+    }    
 }
