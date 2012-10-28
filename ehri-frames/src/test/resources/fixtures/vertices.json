@@ -2,14 +2,6 @@
   {
     "data": {
       "isA": "permission", 
-      "identifier": "read", 
-      "name": "Read"
-    }, 
-    "desc": "permRead"
-  },
-  {
-    "data": {
-      "isA": "permission", 
       "identifier": "update", 
       "name": "Edit"
     }, 

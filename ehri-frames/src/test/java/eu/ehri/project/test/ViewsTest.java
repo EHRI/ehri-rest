@@ -6,16 +6,25 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.junit.Test;
+import org.neo4j.graphdb.Transaction;
+
+import eu.ehri.project.acl.AclManager;
+import eu.ehri.project.acl.PermissionTypes;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.models.ContentType;
 import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Group;
+import eu.ehri.project.models.Permission;
+import eu.ehri.project.models.PermissionGrant;
 import eu.ehri.project.models.UserProfile;
+import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Description;
+import eu.ehri.project.models.base.PermissionGrantTarget;
 import eu.ehri.project.views.Views;
 
 public class ViewsTest extends AbstractFixtureTest {
@@ -72,7 +81,7 @@ public class ViewsTest extends AbstractFixtureTest {
 
     /**
      * Access the valid user's profile as an invalid users.
-     *
+     * 
      * TODO: Check write access!!!
      */
     public void testUserDetailPermissionDenied() throws PermissionDenied {
@@ -87,7 +96,7 @@ public class ViewsTest extends AbstractFixtureTest {
      * @throws PermissionDenied
      * @throws ValidationError
      * @throws DeserializationError
-     * @throws IntegrityError 
+     * @throws IntegrityError
      */
     @Test
     public void testUpdate() throws PermissionDenied, ValidationError,
@@ -124,7 +133,7 @@ public class ViewsTest extends AbstractFixtureTest {
      * @throws PermissionDenied
      * @throws ValidationError
      * @throws DeserializationError
-     * @throws IntegrityError 
+     * @throws IntegrityError
      */
     @Test
     public void testUserUpdate() throws PermissionDenied, ValidationError,
@@ -153,7 +162,7 @@ public class ViewsTest extends AbstractFixtureTest {
      * @throws ValidationError
      * @throws PermissionDenied
      * @throws DeserializationError
-     * @throws IntegrityError 
+     * @throws IntegrityError
      */
     @Test
     public void testCreate() throws ValidationError, PermissionDenied,
@@ -171,11 +180,11 @@ public class ViewsTest extends AbstractFixtureTest {
      * @throws ValidationError
      * @throws PermissionDenied
      * @throws DeserializationError
-     * @throws IntegrityError 
+     * @throws IntegrityError
      */
     @Test(expected = PermissionDenied.class)
-    public void testCreateAsUnauthorized() throws ValidationError, PermissionDenied,
-            DeserializationError, IntegrityError {
+    public void testCreateAsUnauthorized() throws ValidationError,
+            PermissionDenied, DeserializationError, IntegrityError {
         Views<DocumentaryUnit> docViews = new Views<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
         Map<String, Object> bundle = getTestBundle();
@@ -189,7 +198,41 @@ public class ViewsTest extends AbstractFixtureTest {
      * @throws ValidationError
      * @throws PermissionDenied
      * @throws DeserializationError
-     * @throws IntegrityError 
+     * @throws IntegrityError
+     */
+    @Test
+    public void testCreateAsUnauthorizedAndThenGrant() throws ValidationError,
+            PermissionDenied, DeserializationError, IntegrityError {
+        Views<DocumentaryUnit> docViews = new Views<DocumentaryUnit>(graph,
+                DocumentaryUnit.class);
+        Map<String, Object> bundle = getTestBundle();
+
+        try {
+            docViews.create(bundle, invalidUserId);
+            fail("Creation should throw "
+                    + PermissionDenied.class.getSimpleName());
+        } catch (PermissionDenied e) {
+            // We expected that permission denied... now explicitely add
+            // permissions.
+            Accessor accessor = graph.frame(graph.getVertex(invalidUserId),
+                    Accessor.class);
+            PermissionGrantTarget target = helper.getTestFrame(
+                    "documentaryUnitType", PermissionGrantTarget.class);
+            Permission perm = helper.getTestFrame("permCreate",
+                    Permission.class);
+            new AclManager(graph).grantPermissions(accessor, target, perm);
+            DocumentaryUnit unit = docViews.create(bundle, invalidUserId);
+            assertEquals(TEST_COLLECTION_NAME, unit.getName());
+        }
+    }
+
+    /**
+     * Test we can create a node and its subordinates from a set of data.
+     * 
+     * @throws ValidationError
+     * @throws PermissionDenied
+     * @throws DeserializationError
+     * @throws IntegrityError
      */
     @Test
     public void testCreateWithScope() throws ValidationError, PermissionDenied,
@@ -204,14 +247,13 @@ public class ViewsTest extends AbstractFixtureTest {
         assertEquals(TEST_COLLECTION_NAME, unit.getName());
     }
 
-
     /**
      * Test we can create a new user.
      * 
      * @throws ValidationError
      * @throws PermissionDenied
      * @throws DeserializationError
-     * @throws IntegrityError 
+     * @throws IntegrityError
      */
     @Test
     public void testUserCreate() throws ValidationError, PermissionDenied,
@@ -229,7 +271,7 @@ public class ViewsTest extends AbstractFixtureTest {
      * @throws ValidationError
      * @throws PermissionDenied
      * @throws DeserializationError
-     * @throws IntegrityError 
+     * @throws IntegrityError
      */
     @Test
     public void testGroupCreate() throws ValidationError, PermissionDenied,
@@ -246,7 +288,7 @@ public class ViewsTest extends AbstractFixtureTest {
      * @throws ValidationError
      * @throws PermissionDenied
      * @throws DeserializationError
-     * @throws IntegrityError 
+     * @throws IntegrityError
      */
     @Test(expected = ValidationError.class)
     public void testCreateWithError() throws ValidationError, PermissionDenied,
@@ -268,7 +310,7 @@ public class ViewsTest extends AbstractFixtureTest {
      * @throws ValidationError
      * @throws PermissionDenied
      * @throws DeserializationError
-     * @throws IntegrityError 
+     * @throws IntegrityError
      */
     @Test(expected = DeserializationError.class)
     public void testCreateWithDeserialisationError() throws ValidationError,

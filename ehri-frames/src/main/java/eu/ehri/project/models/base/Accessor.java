@@ -32,9 +32,9 @@ public interface Accessor extends VertexFrame {
     @Adjacency(label = AccessibleEntity.ACCESS, direction = Direction.IN)
     public void removeAccessibleEntity(final AccessibleEntity entity);
     
-    @Adjacency(label = PermissionGrant.HAS_ACCESSOR, direction=Direction.IN)
+    @Adjacency(label = PermissionGrant.HAS_SUBJECT, direction=Direction.IN)
     public Iterable<PermissionGrant> getPermissionGrants();
 
-    @Adjacency(label = PermissionGrant.HAS_ACCESSOR, direction=Direction.IN)
+    @Adjacency(label = PermissionGrant.HAS_SUBJECT, direction=Direction.IN)
     public void addPermissionGrant(final PermissionGrant grant);
 }

@@ -1,6 +1,7 @@
 package eu.ehri.project.models;
 
 import com.tinkerpop.frames.Adjacency;
+import com.tinkerpop.frames.VertexFrame;
 
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.AccessibleEntity;
@@ -9,9 +10,9 @@ import eu.ehri.project.models.base.PermissionGrantTarget;
 import eu.ehri.project.models.base.PermissionScope;
 
 @EntityType(EntityTypes.PERMISSION_GRANT)
-public interface PermissionGrant extends AccessibleEntity {
+public interface PermissionGrant extends VertexFrame {
     public static final String HAS_GRANTEE = "hasGrantee";
-    public static final String HAS_ACCESSOR = "hasAccessor";
+    public static final String HAS_SUBJECT = "hasAccessor";
     public static final String HAS_PERMISSION = "hasPermission";
     public static final String HAS_ENTITY = "hasEntity";
     public static final String HAS_CONTENT_TYPE = "hasContentType";
@@ -22,11 +23,11 @@ public interface PermissionGrant extends AccessibleEntity {
     @Adjacency(label = HAS_CONTENT_TYPE)
     public ContentType getContentType();
     
-    @Adjacency(label = HAS_CONTENT_TYPE)
-    public void setContentType(final ContentType type);
-    
-    @Adjacency(label = HAS_ACCESSOR)
-    public Accessor getAccessor();
+    @Adjacency(label = HAS_SUBJECT)
+    public Accessor getSubject();
+
+    @Adjacency(label = HAS_SUBJECT)
+    public void setSubject(final Accessor accessor);
 
     @Adjacency(label = HAS_GRANTEE)
     public Accessor getGrantee();

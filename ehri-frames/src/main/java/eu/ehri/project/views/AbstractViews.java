@@ -61,7 +61,6 @@ abstract class AbstractViews<E extends AccessibleEntity> {
                     found = true;
                     break;
                 }
-
                 // Otherwise, verify that the given scope is included.
                 for (PermissionScope s : scopes) {
                     if (s.equals(permScope)) {
@@ -72,7 +71,7 @@ abstract class AbstractViews<E extends AccessibleEntity> {
             }
             if (!found) {
                 throw new PermissionDenied(String.format(
-                        "Permission '%s' denied with scope: '%s'", permission,
+                        "Permission '%s' denied with scope: '%s'", permission.getIdentifier(),
                         permScope));
             }
         }

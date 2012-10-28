@@ -12,7 +12,6 @@ import com.tinkerpop.pipes.PipeFunction;
 
 import eu.ehri.project.core.GraphHelpers;
 import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.models.ContentType;
 import eu.ehri.project.models.Group;
 import eu.ehri.project.models.Permission;
 import eu.ehri.project.models.PermissionGrant;
@@ -167,11 +166,11 @@ public class AclManager {
      * @return
      */
     public PermissionGrant grantPermissions(Accessor accessor,
-            ContentType contentType, Permission permission) {
+            PermissionGrantTarget target, Permission permission) {
         PermissionGrant grant = graph.addVertex(null, PermissionGrant.class);
-        grant.addAccessor(accessor);
+        accessor.addPermissionGrant(grant);
         grant.setPermission(permission);
-        grant.setContentType(contentType);
+        grant.addTarget(target);
         return grant;
     }
 
@@ -185,9 +184,9 @@ public class AclManager {
      * @return
      */
     public PermissionGrant grantPermissions(Accessor accessor,
-            ContentType contentType, Permission permission,
+            PermissionGrantTarget target, Permission permission,
             PermissionScope scope) {
-        PermissionGrant grant = grantPermissions(accessor, contentType,
+        PermissionGrant grant = grantPermissions(accessor, target,
                 permission);
         grant.addScope(scope);
         return grant;
