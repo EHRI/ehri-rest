@@ -2,24 +2,27 @@
   {
     "data": {
       "isA": "permission", 
-      "identifier": "update", 
-      "name": "Edit"
-    }, 
-    "desc": "permUpdate"
-  },
-  {
-    "data": {
-      "isA": "permission", 
       "identifier": "create", 
-      "name": "Create"
+      "name": "Create",
+      "mask": 1
     }, 
     "desc": "permCreate"
   },
   {
     "data": {
       "isA": "permission", 
+      "identifier": "update", 
+      "name": "Edit",
+      "mask": 2
+    }, 
+    "desc": "permUpdate"
+  },
+  {
+    "data": {
+      "isA": "permission", 
       "identifier": "delete", 
-      "name": "Delete"
+      "name": "Delete",
+      "mask": 4
     }, 
     "desc": "permDelete"
   },
@@ -27,7 +30,8 @@
     "data": {
       "isA": "permission", 
       "identifier": "grant", 
-      "name": "Grant"
+      "name": "Grant",
+      "mask": 8
     }, 
     "desc": "permGrant"
   },
@@ -35,9 +39,19 @@
     "data": {
       "isA": "permission", 
       "identifier": "annotate", 
-      "name": "Annotate"
+      "name": "Annotate",
+      "mask": 16
     }, 
     "desc": "permAnnotate"
+  },
+  {
+    "data": {
+      "isA": "permission", 
+      "identifier": "owner", 
+      "name": "Owner",
+      "mask": 23
+    }, 
+    "desc": "permOwner"
   },
   {
     "data": {

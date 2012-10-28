@@ -142,8 +142,8 @@ public class AclManager {
             for (PermissionGrantTarget t : grant.getTargets()) {
                 // TODO: Make permissions a bitmask so that we can check
                 // if one implies another, e.g. OWNER -> UPDATE.
-                if (grant.getPermission().equals(permission)
-                        && target.asVertex().equals(t.asVertex())) {
+                if (((grant.getPermission().getMask() & permission.getMask()) == permission
+                        .getMask()) && target.asVertex().equals(t.asVertex())) {
                     grants.add(grant);
                 }
             }
