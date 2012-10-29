@@ -161,4 +161,39 @@ public class PermissionsTest extends AbstractFixtureTest {
         views.delete((Long) unit.asVertex().getId(), (Long) user.asVertex()
                 .getId());
     }
+
+    @Test(expected = IntegrityError.class)
+    public void testCreateWithoutRevoke() throws PermissionDenied,
+            ValidationError, DeserializationError, IntegrityError,
+            SerializationError {
+        acl.grantPermissions(user,
+                views.getContentType(EntityTypes.DOCUMENTARY_UNIT),
+                views.getPermission(PermissionTypes.CREATE));
+        DocumentaryUnit unit = views.create(getTestBundle(), (Long) user
+                .asVertex().getId());
+        assertNotNull(unit);
+        // Should throw an integrity error
+        views.create(getTestBundle(), (Long) user
+                .asVertex().getId());
+        fail();
+    }
+    
+    @Test(expected = PermissionDenied.class)
+    public void testCreateAsUserThenRevoke() throws PermissionDenied,
+            ValidationError, DeserializationError, IntegrityError,
+            SerializationError {
+        acl.grantPermissions(user,
+                views.getContentType(EntityTypes.DOCUMENTARY_UNIT),
+                views.getPermission(PermissionTypes.CREATE));
+        DocumentaryUnit unit = views.create(getTestBundle(), (Long) user
+                .asVertex().getId());
+        assertNotNull(unit);
+        acl.revokePermissions(user,
+                views.getContentType(EntityTypes.DOCUMENTARY_UNIT),
+                views.getPermission(PermissionTypes.CREATE));
+        // Should throw an error
+        views.create(getTestBundle(), (Long) user
+                .asVertex().getId());
+        fail();
+    }    
 }
