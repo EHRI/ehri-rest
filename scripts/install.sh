@@ -50,7 +50,7 @@ if [ $FLAG -eq 1 ] ; then
 fi
 
 echo "Attempting package..."
-mvn clean test-compile package || { echo "Maven package exited with non-zero status, install aborted..."; exit 4; }
+mvn clean test-compile package -DskipTests || { echo "Maven package exited with non-zero status, install aborted..."; exit 4; }
 
 PLUGINJAR=`ls ehri-plugin/target/ehri-plugin*jar|grep -v test`
 EXTENSIONJAR=`ls ehri-extension/target/ehri-extension*jar|grep -v test`
