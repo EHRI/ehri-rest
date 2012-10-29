@@ -74,8 +74,9 @@ public class PermissionsTest extends AbstractFixtureTest {
         acl.grantPermissions(user,
                 views.getContentType(EntityTypes.DOCUMENTARY_UNIT),
                 views.getPermission(PermissionTypes.CREATE));
+        views.setScope(scope);
         assertNotNull(views.create(getTestBundle(), (Long) user.asVertex()
-                .getId(), (Long) scope.asVertex().getId()));
+                .getId()));
     }
 
     @Test(expected = PermissionDenied.class)
@@ -87,73 +88,77 @@ public class PermissionsTest extends AbstractFixtureTest {
         acl.grantPermissions(user,
                 views.getContentType(EntityTypes.DOCUMENTARY_UNIT),
                 views.getPermission(PermissionTypes.CREATE), scope);
+        views.setScope(badScope);
         assertNotNull(views.create(getTestBundle(), (Long) user.asVertex()
-                .getId(), (Long) badScope.asVertex().getId()));
+                .getId()));
     }
-    
+
     @Test(expected = PermissionDenied.class)
-    public void testCreateAsUserWithDifferentPerms()
-            throws PermissionDenied, ValidationError, DeserializationError,
-            IntegrityError {
+    public void testCreateAsUserWithDifferentPerms() throws PermissionDenied,
+            ValidationError, DeserializationError, IntegrityError {
         acl.grantPermissions(user,
                 views.getContentType(EntityTypes.DOCUMENTARY_UNIT),
                 views.getPermission(PermissionTypes.DELETE));
         assertNotNull(views.create(getTestBundle(), (Long) user.asVertex()
                 .getId()));
     }
-    
+
     @Test(expected = PermissionDenied.class)
-    public void testDeleteAsUserWithDifferentPerms()
-            throws PermissionDenied, ValidationError, DeserializationError,
-            IntegrityError, SerializationError {
+    public void testDeleteAsUserWithDifferentPerms() throws PermissionDenied,
+            ValidationError, DeserializationError, IntegrityError,
+            SerializationError {
         acl.grantPermissions(user,
                 views.getContentType(EntityTypes.DOCUMENTARY_UNIT),
                 views.getPermission(PermissionTypes.CREATE));
-        DocumentaryUnit unit = views.create(getTestBundle(), (Long) user.asVertex()
-                .getId());
+        DocumentaryUnit unit = views.create(getTestBundle(), (Long) user
+                .asVertex().getId());
         assertNotNull(unit);
-        views.delete((Long)unit.asVertex().getId(), (Long)user.asVertex().getId());
+        views.delete((Long) unit.asVertex().getId(), (Long) user.asVertex()
+                .getId());
     }
 
-    @Test    
-    public void testDeleteAsUserWithGoodPerms()
-            throws PermissionDenied, ValidationError, DeserializationError,
-            IntegrityError, SerializationError {
+    @Test
+    public void testDeleteAsUserWithGoodPerms() throws PermissionDenied,
+            ValidationError, DeserializationError, IntegrityError,
+            SerializationError {
         acl.grantPermissions(user,
                 views.getContentType(EntityTypes.DOCUMENTARY_UNIT),
                 views.getPermission(PermissionTypes.CREATE));
         acl.grantPermissions(user,
                 views.getContentType(EntityTypes.DOCUMENTARY_UNIT),
                 views.getPermission(PermissionTypes.DELETE));
-        DocumentaryUnit unit = views.create(getTestBundle(), (Long) user.asVertex()
-                .getId());
+        DocumentaryUnit unit = views.create(getTestBundle(), (Long) user
+                .asVertex().getId());
         assertNotNull(unit);
-        views.delete((Long)unit.asVertex().getId(), (Long)user.asVertex().getId());
+        views.delete((Long) unit.asVertex().getId(), (Long) user.asVertex()
+                .getId());
     }
-    
+
     @Test
-    public void testCreateDeleteAsUserWithOwnerPerms()
-            throws PermissionDenied, ValidationError, DeserializationError,
-            IntegrityError, SerializationError {
+    public void testCreateDeleteAsUserWithOwnerPerms() throws PermissionDenied,
+            ValidationError, DeserializationError, IntegrityError,
+            SerializationError {
         acl.grantPermissions(user,
                 views.getContentType(EntityTypes.DOCUMENTARY_UNIT),
                 views.getPermission(PermissionTypes.OWNER));
-        DocumentaryUnit unit = views.create(getTestBundle(), (Long) user.asVertex()
-                .getId());
+        DocumentaryUnit unit = views.create(getTestBundle(), (Long) user
+                .asVertex().getId());
         assertNotNull(unit);
-        views.delete((Long)unit.asVertex().getId(), (Long)user.asVertex().getId());
+        views.delete((Long) unit.asVertex().getId(), (Long) user.asVertex()
+                .getId());
     }
-    
+
     @Test(expected = PermissionDenied.class)
-    public void testCreateDeleteAsUserWithWrongPerms()
-            throws PermissionDenied, ValidationError, DeserializationError,
-            IntegrityError, SerializationError {
+    public void testCreateDeleteAsUserWithWrongPerms() throws PermissionDenied,
+            ValidationError, DeserializationError, IntegrityError,
+            SerializationError {
         acl.grantPermissions(user,
                 views.getContentType(EntityTypes.DOCUMENTARY_UNIT),
                 views.getPermission(PermissionTypes.ANNOTATE));
-        DocumentaryUnit unit = views.create(getTestBundle(), (Long) user.asVertex()
-                .getId());
+        DocumentaryUnit unit = views.create(getTestBundle(), (Long) user
+                .asVertex().getId());
         assertNotNull(unit);
-        views.delete((Long)unit.asVertex().getId(), (Long)user.asVertex().getId());
-    }    
+        views.delete((Long) unit.asVertex().getId(), (Long) user.asVertex()
+                .getId());
+    }
 }

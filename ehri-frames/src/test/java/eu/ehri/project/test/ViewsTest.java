@@ -6,25 +6,22 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.junit.Test;
-import org.neo4j.graphdb.Transaction;
-
 import eu.ehri.project.acl.AclManager;
-import eu.ehri.project.acl.PermissionTypes;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.models.ContentType;
+import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Group;
 import eu.ehri.project.models.Permission;
-import eu.ehri.project.models.PermissionGrant;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.PermissionGrantTarget;
+import eu.ehri.project.views.ActionViews;
 import eu.ehri.project.views.Views;
 
 public class ViewsTest extends AbstractFixtureTest {
@@ -237,13 +234,14 @@ public class ViewsTest extends AbstractFixtureTest {
     @Test
     public void testCreateWithScope() throws ValidationError, PermissionDenied,
             DeserializationError, IntegrityError {
-        Views<DocumentaryUnit> docViews = new Views<DocumentaryUnit>(graph,
+        Views<DocumentaryUnit> docViews = new ActionViews<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
         Map<String, Object> bundle = getTestBundle();
         // In the fixtures, 'reto' should have a grant for 'CREATE'
         // scoped to the 'r1' repository.
-        Long scopeId = (Long) helper.getTestVertex("r1").getId();
-        DocumentaryUnit unit = docViews.create(bundle, invalidUserId, scopeId);
+        Agent scope = helper.getTestFrame("r1", Agent.class);
+        docViews.setScope(scope);
+        DocumentaryUnit unit = docViews.create(bundle, invalidUserId);
         assertEquals(TEST_COLLECTION_NAME, unit.getName());
     }
 

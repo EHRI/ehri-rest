@@ -25,6 +25,11 @@ abstract class AbstractViews<E extends AccessibleEntity> {
     protected final Class<E> cls;
     protected final Converter converter = new Converter();
     protected final AclManager acl;
+    /**
+     * Default scope for Permission operations is the system,
+     * but this can be overridden.
+     */
+    protected AccessibleEntity scope = new SystemScope();
 
     /**
      * @param graph
@@ -41,10 +46,9 @@ abstract class AbstractViews<E extends AccessibleEntity> {
      * 
      * @throws PermissionDenied
      */
-    protected void checkPermission(Long user, Long scope, String permissionId)
+    protected void checkPermission(Long user, String permissionId)
             throws PermissionDenied {
         Accessor accessor = getAccessor(user);
-        PermissionScope permScope = getPermissionScope(scope);
         // If we're admin, the answer is always "no problem"!
         if (!acl.isAdmin(accessor)) {
             ContentType contentType = getContentType(ClassUtils
@@ -63,7 +67,7 @@ abstract class AbstractViews<E extends AccessibleEntity> {
                 }
                 // Otherwise, verify that the given scope is included.
                 for (PermissionScope s : scopes) {
-                    if (s.equals(permScope)) {
+                    if (s.equals(scope)) {
                         found = true;
                         break;
                     }
@@ -71,8 +75,8 @@ abstract class AbstractViews<E extends AccessibleEntity> {
             }
             if (!found) {
                 throw new PermissionDenied(String.format(
-                        "Permission '%s' denied with scope: '%s'", permission.getIdentifier(),
-                        permScope));
+                        "Permission '%s' denied with scope: '%s'",
+                        permission.getIdentifier(), scope));
             }
         }
     }
@@ -83,12 +87,12 @@ abstract class AbstractViews<E extends AccessibleEntity> {
      * @throws PermissionDenied
      */
     protected void checkEntityPermission(AccessibleEntity entity, Long user,
-            Long scope, String permissionId) throws PermissionDenied {
+            String permissionId) throws PermissionDenied {
 
         // TODO: Determine behaviour for granular item-level
         // attributes.
         try {
-            checkPermission(user, scope, permissionId);
+            checkPermission(user, permissionId);
         } catch (PermissionDenied e) {
             Accessor accessor = getAccessor(user);
             Iterable<PermissionGrant> perms = acl.getPermissions(accessor,
@@ -98,13 +102,6 @@ abstract class AbstractViews<E extends AccessibleEntity> {
                 throw new PermissionDenied(accessor, entity);
         }
 
-    }
-
-    private PermissionScope getPermissionScope(Long id) {
-        if (id == null)
-            return new SystemScope();
-        // FIXME: Ensure this item really is a permission scope!
-        return graph.frame(graph.getVertex(id), PermissionScope.class);
     }
 
     /**
@@ -130,7 +127,7 @@ abstract class AbstractViews<E extends AccessibleEntity> {
      */
     protected void checkWriteAccess(AccessibleEntity entity, Long user)
             throws PermissionDenied {
-        checkEntityPermission(entity, user, null, PermissionTypes.UPDATE);
+        checkEntityPermission(entity, user, PermissionTypes.UPDATE);
     }
 
     /**
@@ -179,5 +176,17 @@ abstract class AbstractViews<E extends AccessibleEntity> {
             throw new RuntimeException(String.format(
                     "No permission found for name: '%s'", permissionId), e);
         }
+    }
+
+    /**
+     * Set the scope under which ACL and permission operations will take place.
+     * This is, for example, an Agent instance, where the objects being
+     * manipulated are DocumentaryUnits. The given scope is used to compare
+     * against the scope relation on PermissionGrants.
+     * 
+     * @param scope
+     */
+    public void setScope(AccessibleEntity scope) {
+        this.scope = scope;
     }
 }
