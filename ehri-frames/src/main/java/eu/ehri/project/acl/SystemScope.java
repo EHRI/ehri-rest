@@ -18,7 +18,12 @@ public class SystemScope implements PermissionScope, AccessibleEntity {
     }
 
     public Vertex asVertex() {
-        throw new UnsupportedOperationException();
+        // TODO: Determine if there's a better approach to this.
+        // Since PermissionScope can be implemented by several
+        // types of node, comparing them by vertex is the only
+        // reliable approach. Really, this operation should
+        // throw an UnsupportedOperationException().
+        return null;
     }
 
     public Iterable<PermissionGrant> getPermissionGrants() {

@@ -153,7 +153,6 @@ public class AclManager {
                 grants.add(grant);
             }
         }
-
         return ClassUtils.makeUnique(grants);
     }
 

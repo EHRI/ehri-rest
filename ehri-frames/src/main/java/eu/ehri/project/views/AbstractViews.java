@@ -67,7 +67,7 @@ abstract class AbstractViews<E extends AccessibleEntity> {
                 }
                 // Otherwise, verify that the given scope is included.
                 for (PermissionScope s : scopes) {
-                    if (s.equals(scope)) {
+                    if (s.asVertex().equals(scope.asVertex())) {
                         found = true;
                         break;
                     }
