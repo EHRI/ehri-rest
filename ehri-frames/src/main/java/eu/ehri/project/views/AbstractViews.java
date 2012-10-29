@@ -29,7 +29,7 @@ abstract class AbstractViews<E extends AccessibleEntity> {
      * Default scope for Permission operations is the system,
      * but this can be overridden.
      */
-    protected AccessibleEntity scope = new SystemScope();
+    protected PermissionScope scope = new SystemScope();
 
     /**
      * @param graph
@@ -186,7 +186,7 @@ abstract class AbstractViews<E extends AccessibleEntity> {
      * 
      * @param scope
      */
-    public void setScope(AccessibleEntity scope) {
+    public void setScope(PermissionScope scope) {
         this.scope = scope;
     }
 }

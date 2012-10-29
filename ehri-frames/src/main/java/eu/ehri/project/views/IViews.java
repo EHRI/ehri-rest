@@ -8,9 +8,10 @@ import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.PermissionScope;
 
 public interface IViews<E extends AccessibleEntity> {
-    public void setScope(AccessibleEntity scope);
+    public void setScope(PermissionScope scope);
     
     public E detail(Long item, Long user) throws PermissionDenied;
 

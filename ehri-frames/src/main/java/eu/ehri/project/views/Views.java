@@ -86,11 +86,10 @@ public class Views<E extends AccessibleEntity> extends AbstractViews<E>
      * @throws ValidationError
      * @throws SerializationError
      */
-    public Integer delete(Long item, Long user)
-            throws PermissionDenied, ValidationError, SerializationError {
+    public Integer delete(Long item, Long user) throws PermissionDenied,
+            ValidationError, SerializationError {
         E entity = graph.getVertex(item, cls);
         checkEntityPermission(entity, user, PermissionTypes.DELETE);
-        checkWriteAccess(entity, user);
         return new BundleDAO<E>(graph).delete(converter
                 .vertexFrameToBundle(entity));
     }
