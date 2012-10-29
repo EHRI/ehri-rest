@@ -23,27 +23,22 @@ import eu.ehri.project.models.EntityTypes;
 import eu.ehri.project.models.Action;
 
 /**
- * Provides a RESTfull interface for the Action class. Note: Action instances
- * are created by the system, so we do not have create/update/delete methods
- * here.
+ * Provides a RESTfull(ish) interface for setting PermissionTarget perms.
  */
 @Path(EntityTypes.PERMISSION)
 public class Permissions extends EhriNeo4jFramedResource<Action> {
 
-    public Permissions(@Context GraphDatabaseService database) {
-        super(database, Action.class);
-    }
+	public Permissions(@Context GraphDatabaseService database) {
+		super(database, Action.class);
+	}
 
-    @POST
-    @Path("/set")
-    public Response getAction(
-    		@QueryParam("ctype") Set<String> ctypes,
-    		@QueryParam("perm") Set<Boolean> perms    		
-    		) throws PermissionDenied {
-    	System.out.println("CTYPES: " + ctypes);
-    	System.out.println("PERMSS: " + perms);
-    	String out = String.format("%s\n%s\n", ctypes, perms);
-    	return Response.status(Status.OK)
-                .entity((out).getBytes()).build();
-    }
+	@POST
+	@Path("/set")
+	public Response getAction(@QueryParam("ctype") Set<String> ctypes,
+			@QueryParam("perm") Set<Boolean> perms) throws PermissionDenied {
+		System.out.println("CTYPES: " + ctypes);
+		System.out.println("PERMSS: " + perms);
+		String out = String.format("%s\n%s\n", ctypes, perms);
+		return Response.status(Status.OK).entity((out).getBytes()).build();
+	}
 }
