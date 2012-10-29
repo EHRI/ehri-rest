@@ -186,8 +186,33 @@ public class AclManager {
             PermissionGrantTarget target, Permission permission,
             PermissionScope scope) {
         PermissionGrant grant = grantPermissions(accessor, target, permission);
-        grant.addScope(scope);
+        if (!scope.getIdentifier().equals(SystemScope.SYSTEM))
+            grant.addScope(scope);
         return grant;
+    }
+
+    /**
+     * Revoke a particular permission grant.
+     * 
+     * @param accessor
+     * @param target
+     * @param permission
+     */
+    public void revokePermissions(Accessor accessor,
+            PermissionGrantTarget target, Permission permission) {
+        for (PermissionGrant grant : accessor.getPermissionGrants()) {
+            if (grant.getPermission().equals(permission)) {
+                for (PermissionGrantTarget tg : grant.getTargets()) {
+                    if (tg.asVertex().equals(target.asVertex())) {
+                        grant.removeTarget(tg);
+                    }
+                }
+                // Clean up if there are no more targets...
+                if (!grant.getTargets().iterator().hasNext()) {
+                    graph.removeVertex(grant.asVertex());
+                }                
+            }
+        }
     }
 
     /**
