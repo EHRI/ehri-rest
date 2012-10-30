@@ -146,8 +146,15 @@ public class BundleDAO<T extends VertexFrame> {
                 }
             }
         }
-        if (bundle.id != null) {
-            graph.removeVertex(graph.getVertex(bundle.id));
+        if (bundle.id != null) {            
+            try {
+                Index<Vertex> index = helpers.getIndex(bundle.getEntityType(),
+                        Vertex.class);
+                helpers.deleteVertex(index, bundle.id, bundle.getPropertyKeys());
+            } catch (IndexNotFoundException e) {
+                // If there's no index, we can do things the simple way...
+                graph.removeVertex(graph.getVertex(bundle.id));
+            }
             c += 1;
         }
         return c;

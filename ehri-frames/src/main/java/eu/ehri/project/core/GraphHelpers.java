@@ -512,6 +512,41 @@ public class GraphHelpers {
      * @param id
      *            The edge identifier
      */
+    public void deleteEdge(Index<Edge> index, Object id, List<String> keys) {
+        Edge edge = graph.getEdge(id);
+        for (String key : keys) {
+            index.remove(key, edge.getProperty(key), edge);
+        }
+        graph.removeEdge(edge);
+        graph.stopTransaction(TransactionalGraph.Conclusion.SUCCESS);
+    }
+
+    /**
+     * Delete vertex with its edges Neo4j requires you delete all adjacent edges
+     * first. Blueprints' removeVertex() method does that; the Neo4jServer
+     * DELETE URI does not.
+     * 
+     * @param graphDb
+     *            The graph database
+     * @param id
+     *            The vertex identifier
+     */
+    public void deleteVertex(Index<Vertex> index, Object id, List<String> keys) {        
+        Vertex vertex = graph.getVertex(id);
+        for (String key : keys) {
+            index.remove(key, vertex.getProperty(key), vertex);
+        }        
+        graph.removeVertex(vertex);
+        graph.stopTransaction(TransactionalGraph.Conclusion.SUCCESS);
+    }
+    /**
+     * Delete Edge
+     * 
+     * @param graphDb
+     *            The graph database
+     * @param id
+     *            The edge identifier
+     */
     public void deleteEdge(Object id) {
         Edge edge = graph.getEdge(id);
         graph.removeEdge(edge);
