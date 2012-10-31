@@ -3,16 +3,12 @@ package eu.ehri.extension;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
-import java.util.List;
-import java.util.NoSuchElementException;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriBuilder;
-import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.core.Response.Status;
 
 import org.codehaus.jackson.JsonFactory;
@@ -20,11 +16,6 @@ import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.neo4j.graphdb.GraphDatabaseService;
 
-import com.tinkerpop.blueprints.CloseableIterable;
-import com.tinkerpop.blueprints.Index;
-import com.tinkerpop.blueprints.Vertex;
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
-import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.frames.VertexFrame;
 
 import eu.ehri.project.exceptions.DeserializationError;
@@ -34,7 +25,6 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.models.EntityTypes;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.persistance.Converter;
 import eu.ehri.project.persistance.EntityBundle;
@@ -52,29 +42,13 @@ import static eu.ehri.extension.RestHelpers.*;
  * @param <E>
  *            The specific AccesibleEntity derived class
  */
-public class EhriNeo4jFramedResource<E extends AccessibleEntity> {
+public class EhriNeo4jFramedResource<E extends AccessibleEntity> extends
+        AbstractRestResource {
 
-    /**
-     * With each request the headers of that request are injected into the
-     * requestHeaders parameter.
-     */
-    @Context
-    private HttpHeaders requestHeaders;
-
-    /**
-     * With each request URI info is injected into the uriInfo parameter.
-     */
-    @Context
-    protected UriInfo uriInfo;
-
-    protected final GraphDatabaseService database;
-    protected final FramedGraph<Neo4jGraph> graph;
     protected final IViews<E> views;
     protected final Query<E> querier;
     protected final Class<E> cls;
     protected final Converter converter = new Converter();
-
-    public final static String AUTH_HEADER_NAME = "Authorization";
 
     /**
      * Constructor
@@ -86,8 +60,7 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> {
      */
     public EhriNeo4jFramedResource(@Context GraphDatabaseService database,
             Class<E> cls) {
-        this.database = database;
-        graph = new FramedGraph<Neo4jGraph>(new Neo4jGraph(database));
+        super(database);
         this.cls = cls;
         views = new ActionViews<E>(graph, cls);
         querier = new Query<E>(graph, cls);
@@ -356,34 +329,6 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> {
             return delete((Long) entity.asVertex().getId());
         } catch (IndexNotFoundException e) {
             throw new WebApplicationException(e);
-        }
-    }
-
-    /*** helpers ***/
-
-    /**
-     * Retrieve the id of the UserProfile of the requester
-     * 
-     * @return The vertex id
-     * @throws PermissionDenied
-     */
-    protected Long getRequesterUserProfileId() throws PermissionDenied {
-        List<String> list = requestHeaders.getRequestHeader(AUTH_HEADER_NAME);
-        if (list == null || list.isEmpty()) {
-            return null;
-        } else {
-            // just take the first one and get the Long value
-            Index<Vertex> index = graph.getBaseGraph().getIndex(
-                    EntityTypes.USER_PROFILE, Vertex.class);
-            CloseableIterable<Vertex> query = index.get(
-                    AccessibleEntity.IDENTIFIER_KEY, list.get(0));
-            try {
-                return (Long) query.iterator().next().getId();
-            } catch (NoSuchElementException e) {
-                return null;
-            } finally {
-                query.close();
-            }
         }
     }
 }

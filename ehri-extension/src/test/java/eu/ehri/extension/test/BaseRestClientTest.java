@@ -16,6 +16,7 @@ import org.neo4j.server.configuration.ThirdPartyJaxRsPackage;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 
+import eu.ehri.extension.AbstractRestResource;
 import eu.ehri.extension.EhriNeo4jFramedResource;
 import eu.ehri.plugin.test.utils.ServerRunner;
 
@@ -99,7 +100,7 @@ public class BaseRestClientTest extends AbstractRestClientTest {
                 + "/" + entityType + "/list");
         ClientResponse response = resource.accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
-                .header(EhriNeo4jFramedResource.AUTH_HEADER_NAME, userId)
+                .header(AbstractRestResource.AUTH_HEADER_NAME, userId)
                 .get(ClientResponse.class);
         String json = response.getEntity(String.class);
         ObjectMapper mapper = new ObjectMapper();

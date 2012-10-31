@@ -139,11 +139,11 @@ public class AclManager {
             PermissionGrantTarget target, Permission permission) {
         List<PermissionGrant> grants = new LinkedList<PermissionGrant>();
         for (PermissionGrant grant : accessor.getPermissionGrants()) {
-            for (PermissionGrantTarget t : grant.getTargets()) {
+            if (target.asVertex().equals(grant.getTarget().asVertex())) {
                 if (((grant.getPermission().getMask() & permission.getMask()) == permission
-                        .getMask()) && target.asVertex().equals(t.asVertex())) {
+                        .getMask())) {
                     grants.add(grant);
-                }
+                }                
             }
         }
 
@@ -169,7 +169,7 @@ public class AclManager {
         PermissionGrant grant = graph.addVertex(null, PermissionGrant.class);
         accessor.addPermissionGrant(grant);
         grant.setPermission(permission);
-        grant.addTarget(target);
+        grant.setTarget(target);
         return grant;
     }
 
@@ -202,15 +202,7 @@ public class AclManager {
             PermissionGrantTarget target, Permission permission) {
         for (PermissionGrant grant : accessor.getPermissionGrants()) {
             if (grant.getPermission().equals(permission)) {
-                for (PermissionGrantTarget tg : grant.getTargets()) {
-                    if (tg.asVertex().equals(target.asVertex())) {
-                        grant.removeTarget(tg);
-                    }
-                }
-                // Clean up if there are no more targets...
-                if (!grant.getTargets().iterator().hasNext()) {
-                    graph.removeVertex(grant.asVertex());
-                }                
+                graph.removeVertex(grant.asVertex());
             }
         }
     }

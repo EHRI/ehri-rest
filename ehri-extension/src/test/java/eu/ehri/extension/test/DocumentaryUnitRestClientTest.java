@@ -21,7 +21,8 @@ import org.junit.Test;
 
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
-import eu.ehri.extension.EhriNeo4jFramedResource;
+
+import eu.ehri.extension.AbstractRestResource;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityTypes;
 import eu.ehri.project.models.base.AccessibleEntity;
@@ -56,7 +57,7 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
         ClientResponse response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
-                .header(EhriNeo4jFramedResource.AUTH_HEADER_NAME,
+                .header(AbstractRestResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId())
                 .entity(jsonDocumentaryUnitTestStr).post(ClientResponse.class);
 
@@ -71,7 +72,7 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
         resource = client.resource(location);
         response = resource
                 .accept(MediaType.APPLICATION_JSON)
-                .header(EhriNeo4jFramedResource.AUTH_HEADER_NAME,
+                .header(AbstractRestResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId()).get(ClientResponse.class);
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
         // TODO again test json
@@ -85,7 +86,7 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
         ClientResponse response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
-                .header(EhriNeo4jFramedResource.AUTH_HEADER_NAME,
+                .header(AbstractRestResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId())
                 .entity(jsonDocumentaryUnitTestStr).post(ClientResponse.class);
 
@@ -99,7 +100,7 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
         response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
-                .header(EhriNeo4jFramedResource.AUTH_HEADER_NAME,
+                .header(AbstractRestResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId())
                 .entity(jsonDocumentaryUnitTestStr).post(ClientResponse.class);
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(),
@@ -109,7 +110,8 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
         ObjectMapper mapper = new ObjectMapper();
         JsonNode rootNode = mapper.readValue(response.getEntity(String.class),
                 JsonNode.class);
-        JsonNode errValue = rootNode.path("details").path("fields").path(AccessibleEntity.IDENTIFIER_KEY);
+        JsonNode errValue = rootNode.path("details").path("fields")
+                .path(AccessibleEntity.IDENTIFIER_KEY);
         assertFalse(errValue.isMissingNode());
         assertEquals(CREATED_ID, errValue.getTextValue());
     }
@@ -122,7 +124,7 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
         ClientResponse response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
-                .header(EhriNeo4jFramedResource.AUTH_HEADER_NAME,
+                .header(AbstractRestResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId()).get(ClientResponse.class);
 
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
@@ -130,7 +132,8 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
         ObjectMapper mapper = new ObjectMapper();
         JsonNode rootNode = mapper.readValue(response.getEntity(String.class),
                 JsonNode.class);
-        JsonNode errValue = rootNode.path("data").path(AccessibleEntity.IDENTIFIER_KEY);
+        JsonNode errValue = rootNode.path("data").path(
+                AccessibleEntity.IDENTIFIER_KEY);
         assertFalse(errValue.isMissingNode());
         assertEquals(TEST_JSON_IDENTIFIER, errValue.getTextValue());
     }
@@ -145,7 +148,7 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
                 .entity(jsonDocumentaryUnitTestStr)
-                .header(EhriNeo4jFramedResource.AUTH_HEADER_NAME,
+                .header(AbstractRestResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId()).put(ClientResponse.class);
 
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
@@ -153,7 +156,8 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
         ObjectMapper mapper = new ObjectMapper();
         JsonNode rootNode = mapper.readValue(response.getEntity(String.class),
                 JsonNode.class);
-        JsonNode errValue = rootNode.path("data").path(AccessibleEntity.IDENTIFIER_KEY);
+        JsonNode errValue = rootNode.path("data").path(
+                AccessibleEntity.IDENTIFIER_KEY);
         assertFalse(errValue.isMissingNode());
         assertEquals(CREATED_ID, errValue.getTextValue());
     }
@@ -186,7 +190,7 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
         ClientResponse response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
-                .header(EhriNeo4jFramedResource.AUTH_HEADER_NAME,
+                .header(AbstractRestResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId())
                 .entity(jsonDocumentaryUnitTestStr).post(ClientResponse.class);
 
@@ -201,7 +205,7 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
         resource = client.resource(location);
         response = resource
                 .accept(MediaType.APPLICATION_JSON)
-                .header(EhriNeo4jFramedResource.AUTH_HEADER_NAME,
+                .header(AbstractRestResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId()).get(ClientResponse.class);
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
 
@@ -218,7 +222,7 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
         response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
-                .header(EhriNeo4jFramedResource.AUTH_HEADER_NAME,
+                .header(AbstractRestResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId()).entity(toUpdateJson)
                 .put(ClientResponse.class);
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
@@ -227,7 +231,7 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
         resource = client.resource(location);
         response = resource
                 .accept(MediaType.APPLICATION_JSON)
-                .header(EhriNeo4jFramedResource.AUTH_HEADER_NAME,
+                .header(AbstractRestResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId()).get(ClientResponse.class);
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
 

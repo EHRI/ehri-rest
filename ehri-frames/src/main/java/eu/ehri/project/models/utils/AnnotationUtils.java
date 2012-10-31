@@ -3,6 +3,9 @@ package eu.ehri.project.models.utils;
 import java.lang.reflect.Method;
 
 import com.tinkerpop.frames.Adjacency;
+import com.tinkerpop.frames.VertexFrame;
+
+import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
 
 public class AnnotationUtils {
@@ -16,5 +19,14 @@ public class AnnotationUtils {
         if (ann != null)
             return ann.label();
         return null; // Argh, unchecked nulls!
+    }
+    
+    public static boolean hasFramedInterface(VertexFrame frame, Class<? extends VertexFrame> cls) {
+        String type = ClassUtils.getEntityType(cls);
+        if (type != null) {
+            String isa = (String) frame.asVertex().getProperty(EntityType.KEY);
+            return isa.equals(type);
+        }
+        return false;            
     }
 }

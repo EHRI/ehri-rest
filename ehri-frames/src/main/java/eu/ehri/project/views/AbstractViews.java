@@ -46,7 +46,7 @@ abstract class AbstractViews<E extends AccessibleEntity> {
      * 
      * @throws PermissionDenied
      */
-    protected void checkPermission(Long user, String permissionId)
+    public void checkPermission(Long user, String permissionId)
             throws PermissionDenied {
         Accessor accessor = getAccessor(user);
         // If we're admin, the answer is always "no problem"!
@@ -86,7 +86,7 @@ abstract class AbstractViews<E extends AccessibleEntity> {
      * 
      * @throws PermissionDenied
      */
-    protected void checkEntityPermission(AccessibleEntity entity, Long user,
+    public void checkEntityPermission(AccessibleEntity entity, Long user,
             String permissionId) throws PermissionDenied {
 
         // TODO: Determine behaviour for granular item-level

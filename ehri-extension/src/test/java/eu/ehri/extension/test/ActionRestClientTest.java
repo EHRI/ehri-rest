@@ -14,7 +14,7 @@ import org.junit.Test;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 
-import eu.ehri.extension.EhriNeo4jFramedResource;
+import eu.ehri.extension.AbstractRestResource;
 import eu.ehri.project.models.EntityTypes;
 
 public class ActionRestClientTest extends BaseRestClientTest {
@@ -41,7 +41,7 @@ public class ActionRestClientTest extends BaseRestClientTest {
         ClientResponse response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
-                .header(EhriNeo4jFramedResource.AUTH_HEADER_NAME,
+                .header(AbstractRestResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId()).entity(jsonAgentTestString)
                 .post(ClientResponse.class);
 
