@@ -24,16 +24,9 @@ import eu.ehri.plugin.EhriNeo4jPlugin;
 
 public class EhriNeo4jPluginTest {
     protected FramedGraph<Neo4jGraph> graph;
-    protected Views<DocumentaryUnit> views;
     protected FixtureLoader helper;
     protected EhriNeo4jPlugin plugin;
     protected GraphDatabaseService db;
-
-    // Members closely coupled to the test data!
-    protected Long validUserId = 20L;
-    protected Long invalidUserId = 21L;
-    protected Long itemId = 1L;
-    protected String itemName = "Test Collection 1";
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
@@ -46,8 +39,6 @@ public class EhriNeo4jPluginTest {
                         .newGraphDatabase()));
         helper = new FixtureLoader(graph);
         helper.loadTestData();
-        views = new Views<DocumentaryUnit>(graph, DocumentaryUnit.class);
-
         plugin = new EhriNeo4jPlugin();
         db = graph.getBaseGraph().getRawGraph();
     }
@@ -60,15 +51,6 @@ public class EhriNeo4jPluginTest {
     // lets simple things using the fixture
     @Test(expected = IndexNotFoundException.class)
     public void createIndexedVertex() throws Exception {
-        Representation unit = plugin.getVertexIndex(db, "nonexistingindex");
+        plugin.getVertexIndex(db, "nonexistingindex");
     }
-
-    // lets see If I can do the same details test as already done in the
-    // ehri-frames test
-    @Test
-    public void testDetail() throws PermissionDenied {
-        DocumentaryUnit unit = views.detail(itemId, validUserId);
-        assertEquals(itemId, unit.asVertex().getId());
-    }
-
 }
