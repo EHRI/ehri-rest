@@ -41,6 +41,30 @@ public class GraphHelpers {
     protected Neo4jGraph graph;
 
     /**
+     * List the given property for objects within a given index.
+     * 
+     * @param indexName
+     * @param propertyName
+     * @return
+     */
+    public List<Object> getAllPropertiesOfType(String indexName,
+            String propertyName) {
+        List<Object> out = new LinkedList<Object>();
+        Index<Vertex> index = graph.getIndex(indexName, Vertex.class);
+        if (index != null) {
+            CloseableIterable<Vertex> query = index.query(propertyName, "*");
+            try {
+                for (Vertex v : query) {
+                    out.add(v.getProperty(propertyName));
+                }
+            } finally {
+                query.close();
+            }
+        }
+        return out;
+    }
+
+    /**
      * Get an index of type <code>T</code>.
      * 
      * @param name
@@ -128,7 +152,7 @@ public class GraphHelpers {
      * @param indexName
      * @return
      * @throws IndexNotFoundException
-     * @throws IntegrityError 
+     * @throws IntegrityError
      */
     public Vertex createIndexedVertex(Map<String, Object> data, String indexName)
             throws IndexNotFoundException, IntegrityError {
@@ -144,10 +168,11 @@ public class GraphHelpers {
      * @param keys
      * @return
      * @throws IndexNotFoundException
-     * @throws IntegrityError 
+     * @throws IntegrityError
      */
     public Vertex createIndexedVertex(Map<String, Object> data,
-            String indexName, List<String> keys) throws IndexNotFoundException, IntegrityError {
+            String indexName, List<String> keys) throws IndexNotFoundException,
+            IntegrityError {
         Index<Vertex> index = getIndex(indexName, Vertex.class);
         return createIndexedVertex(data, index, keys, null);
     }
@@ -159,7 +184,7 @@ public class GraphHelpers {
      * @param data
      * @param index
      * @return
-     * @throws IntegrityError 
+     * @throws IntegrityError
      */
     public Vertex createIndexedVertex(Map<String, Object> data,
             Index<Vertex> index) throws IntegrityError {
@@ -173,13 +198,14 @@ public class GraphHelpers {
      * @param index
      * @param keys
      * @return
-     * @throws IntegrityError 
+     * @throws IntegrityError
      */
     public Vertex createIndexedVertex(Map<String, Object> data,
-            Index<Vertex> index, List<String> keys, List<String> uniqueKeys) throws IntegrityError {        
+            Index<Vertex> index, List<String> keys, List<String> uniqueKeys)
+            throws IntegrityError {
         try {
             checkUniqueness(index, uniqueKeys, data, null);
-            Vertex node = graph.addVertex(null);            
+            Vertex node = graph.addVertex(null);
             for (Map.Entry<String, Object> entry : data.entrySet()) {
                 if (entry.getValue() == null)
                     continue;
@@ -210,10 +236,10 @@ public class GraphHelpers {
     private void checkUniqueness(Index<Vertex> index, List<String> uniqueKeys,
             Map<String, Object> data, Vertex current) throws IntegrityError {
         if (uniqueKeys != null && uniqueKeys.size() != 0) {
-            Map<String,String> clashes = new HashMap<String,String>();
+            Map<String, String> clashes = new HashMap<String, String>();
             for (String ukey : uniqueKeys) {
-                String uval = (String) data.get(ukey); 
-                if (index.count(ukey, uval) > 0) {                    
+                String uval = (String) data.get(ukey);
+                if (index.count(ukey, uval) > 0) {
                     CloseableIterable<Vertex> query = index.get(ukey, uval);
                     try {
                         Vertex other = query.iterator().next();
@@ -341,7 +367,7 @@ public class GraphHelpers {
      * @param data
      * @param indexName
      * @return
-     * @throws IntegrityError 
+     * @throws IntegrityError
      * @throws Exception
      */
     public Vertex updateIndexedVertex(Object id, Map<String, Object> data,
@@ -358,11 +384,12 @@ public class GraphHelpers {
      * @param indexName
      * @param keys
      * @return
-     * @throws IntegrityError 
+     * @throws IntegrityError
      * @throws Exception
      */
     public Vertex updateIndexedVertex(Object id, Map<String, Object> data,
-            String indexName, List<String> keys) throws IndexNotFoundException, IntegrityError {
+            String indexName, List<String> keys) throws IndexNotFoundException,
+            IntegrityError {
         Index<Vertex> index = getIndex(indexName, Vertex.class);
         return updateIndexedVertex(id, data, index, keys, null);
     }
@@ -374,10 +401,11 @@ public class GraphHelpers {
      * @param data
      * @param index
      * @return
-     * @throws IntegrityError 
+     * @throws IntegrityError
      */
     public Vertex updateIndexedVertex(Object id, Map<String, Object> data,
-            Index<Vertex> index, List<String> keys, List<String> uniqueKeys) throws IntegrityError {
+            Index<Vertex> index, List<String> keys, List<String> uniqueKeys)
+            throws IntegrityError {
         try {
             Vertex node = graph.getVertex(id);
             checkUniqueness(index, uniqueKeys, data, node);
@@ -531,14 +559,15 @@ public class GraphHelpers {
      * @param id
      *            The vertex identifier
      */
-    public void deleteVertex(Index<Vertex> index, Object id, List<String> keys) {        
+    public void deleteVertex(Index<Vertex> index, Object id, List<String> keys) {
         Vertex vertex = graph.getVertex(id);
         for (String key : keys) {
             index.remove(key, vertex.getProperty(key), vertex);
-        }        
+        }
         graph.removeVertex(vertex);
         graph.stopTransaction(TransactionalGraph.Conclusion.SUCCESS);
     }
+
     /**
      * Delete Edge
      * 
@@ -568,21 +597,22 @@ public class GraphHelpers {
         graph.removeVertex(vertex);
         graph.stopTransaction(TransactionalGraph.Conclusion.SUCCESS);
     }
-    
+
     // Helpers
-    
+
     /*
      * Create a compount property name for all the unique keys
      */
     private String getUniqueKey(List<String> uniqueKeys) {
-        Collections.sort(uniqueKeys);        
+        Collections.sort(uniqueKeys);
         return StringUtils.join(uniqueKeys, "-");
     }
-    
+
     /*
      * Create a compound property value for all the unique values.
      */
-    private String getUniqueValue(List<String> uniqueKeys, Map<String,Object> data) {
+    private String getUniqueValue(List<String> uniqueKeys,
+            Map<String, Object> data) {
         Collections.sort(uniqueKeys);
         List<String> values = new LinkedList<String>();
         for (String key : uniqueKeys) {

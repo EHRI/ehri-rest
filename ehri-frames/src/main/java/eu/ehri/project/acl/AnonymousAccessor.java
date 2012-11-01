@@ -20,8 +20,8 @@ public class AnonymousAccessor implements Accessor {
         throw new UnsupportedOperationException();
     }
 
-    public String getName() {
-        return Group.ANONYMOUS_GROUP_NAME;
+    public String getIdentifier() {
+        return Group.ANONYMOUS_GROUP_IDENTIFIER;
     }
 
     public void setName() {

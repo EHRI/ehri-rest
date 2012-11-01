@@ -16,7 +16,7 @@ public class PermissionDenied extends Exception {
 
     public PermissionDenied(Accessor accessor, String message) {
         super(String.format("Permission denied accessing resource as '%s': %s",
-                accessor.getName(), message));
+                accessor.getIdentifier(), message));
         this.accessor = accessor;
     }
 
@@ -36,9 +36,9 @@ public class PermissionDenied extends Exception {
             Permission permission, PermissionScope scope) {
         super(
                 String.format(
-                        "Permission denied for resource '%s': '%s' as '%s' with scope '%s'",
-                        entity.toString(), permission.getIdentifier(),
-                        accessor.toString(), scope.getIdentifier()));
+                        "Permission '%s' denied for resource '%s' as '%s' with scope '%s'",
+                        permission.getIdentifier(), entity.getIdentifier(),
+                        accessor.getIdentifier(), scope.getIdentifier()));
         this.accessor = accessor;
         this.entity = entity;
         this.scope = scope;

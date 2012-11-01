@@ -13,11 +13,8 @@ public interface Accessor extends VertexFrame {
     
     public static final String NAME = "name";
 
-    @Property(NAME)
-    public String getName();
-
-    @Property(NAME)
-    public void setName();
+    @Property(AccessibleEntity.IDENTIFIER_KEY)
+    public String getIdentifier();
 
     @Adjacency(label = BELONGS_TO)
     public Iterable<Accessor> getParents();

@@ -49,8 +49,8 @@ public interface PermissionGrant extends VertexFrame {
     public void setPermission(final Permission permission);
 
     @Adjacency(label = HAS_SCOPE)
-    public Iterable<PermissionScope> getScopes();
+    public PermissionScope getScope();
     
     @Adjacency(label = HAS_SCOPE)
-    public void addScope(final PermissionScope scope);
+    public void setScope(final PermissionScope scope);
 }

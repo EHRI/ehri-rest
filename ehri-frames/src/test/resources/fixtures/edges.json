@@ -247,5 +247,29 @@
     "dst": "mike",
     "data": {},
     "label": "hasGrantee"
-  }  
+  },
+  {
+    "src": "bobGlobalCreateGrant",
+    "dst": "permCreate",
+    "data": {},
+    "label": "hasPermission"
+  },
+  {
+    "src": "bobGlobalCreateGrant",
+    "dst": "documentaryUnitType",
+    "data": {},
+    "label": "hasTarget"
+  },
+  {
+    "src": "bobGlobalCreateGrant",
+    "dst": "bob",
+    "data": {},
+    "label": "hasAccessor"
+  },
+  {
+    "src": "bobGlobalCreateGrant",
+    "dst": "mike",
+    "data": {},
+    "label": "hasGrantee"
+  }    
 ]

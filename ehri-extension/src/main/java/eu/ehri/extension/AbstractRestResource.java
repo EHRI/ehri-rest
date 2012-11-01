@@ -48,15 +48,15 @@ public class AbstractRestResource {
      * @throws PermissionDenied
      */
     protected Long getRequesterUserProfileId() throws PermissionDenied {
-        List<String> list = requestHeaders.getRequestHeader(AUTH_HEADER_NAME);
-        if (list == null || list.isEmpty()) {
+        String id = getRequesterIdentifier();
+        if (id == null) {
             return null;
         } else {
             // just take the first one and get the Long value
             Index<Vertex> index = graph.getBaseGraph().getIndex(
                     EntityTypes.USER_PROFILE, Vertex.class);
             CloseableIterable<Vertex> query = index.get(
-                    AccessibleEntity.IDENTIFIER_KEY, list.get(0));
+                    AccessibleEntity.IDENTIFIER_KEY, id);
             try {
                 return (Long) query.iterator().next().getId();
             } catch (NoSuchElementException e) {
@@ -65,6 +65,14 @@ public class AbstractRestResource {
                 query.close();
             }
         }
+    }
+    
+    protected String getRequesterIdentifier() {
+        List<String> list = requestHeaders.getRequestHeader(AUTH_HEADER_NAME);
+        if (list != null && !list.isEmpty()) {
+            return list.get(0);
+        }
+        return null; 
     }
 
 }

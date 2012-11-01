@@ -301,6 +301,14 @@
   },
   {
     "data": {
+      "isA": "userProfile", 
+      "identifier": "bob", 
+      "name": "Bob"
+    }, 
+    "desc": "bob"
+  },
+  {
+    "data": {
       "startDate": "1943", 
       "isA": "datePeriod", 
       "endDate": "1943"
@@ -342,5 +350,11 @@
  	  "isA": "permissionGrant" 	
   	},
   	"desc": "retoKclWriteGrant"
-  }
+  },
+  {
+  	"data": {
+ 	  "isA": "permissionGrant" 	
+  	},
+  	"desc": "bobGlobalCreateGrant"
+  }  
 ]

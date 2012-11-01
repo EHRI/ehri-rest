@@ -2,6 +2,7 @@ package eu.ehri.project.test;
 
 import static org.junit.Assert.*;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Before;
@@ -173,11 +174,10 @@ public class PermissionsTest extends AbstractFixtureTest {
                 .asVertex().getId());
         assertNotNull(unit);
         // Should throw an integrity error
-        views.create(getTestBundle(), (Long) user
-                .asVertex().getId());
+        views.create(getTestBundle(), (Long) user.asVertex().getId());
         fail();
     }
-    
+
     @Test(expected = PermissionDenied.class)
     public void testCreateAsUserThenRevoke() throws PermissionDenied,
             ValidationError, DeserializationError, IntegrityError,
@@ -192,8 +192,35 @@ public class PermissionsTest extends AbstractFixtureTest {
                 views.getContentType(EntityTypes.DOCUMENTARY_UNIT),
                 views.getPermission(PermissionTypes.CREATE));
         // Should throw an error
-        views.create(getTestBundle(), (Long) user
-                .asVertex().getId());
+        views.create(getTestBundle(), (Long) user.asVertex().getId());
         fail();
-    }    
+    }
+
+    @SuppressWarnings("serial")
+    @Test
+    public void testSetPermissionMatrix() throws PermissionDenied,
+            ValidationError, DeserializationError, IntegrityError,
+            SerializationError {
+
+        // @formatter:off
+        Map<String,Map<String,Boolean>> matrix = new HashMap<String, Map<String,Boolean>>() {{
+            put(EntityTypes.DOCUMENTARY_UNIT, new HashMap<String,Boolean>() {{
+                put(PermissionTypes.CREATE, true);
+                put(PermissionTypes.DELETE, true);
+            }});
+        }};
+        // @formatter:on
+
+        try {
+            views.create(getTestBundle(), (Long) user.asVertex().getId());
+            fail();
+        } catch (PermissionDenied e) {
+            acl.setGlobalPermissionMatrix(user, matrix);
+            DocumentaryUnit unit = views.create(getTestBundle(), (Long) user
+                    .asVertex().getId());
+            assertNotNull(unit);
+            views.delete((Long) unit.asVertex().getId(), (Long) user.asVertex()
+                    .getId());
+        }
+    }
 }

@@ -60,23 +60,14 @@ abstract class AbstractViews<E extends AccessibleEntity> {
             for (PermissionGrant perm : perms) {
                 // If the permission has unscoped rights, the user is
                 // good to do whatever they want to do here.
-                Iterable<PermissionScope> scopes = perm.getScopes();
-                if (!scopes.iterator().hasNext()) {
+                PermissionScope permScope = perm.getScope();
+                if (permScope == null || permScope.asVertex().equals(scope.asVertex())) {
                     found = true;
                     break;
                 }
-                // Otherwise, verify that the given scope is included.
-                for (PermissionScope s : scopes) {
-                    if (s.asVertex().equals(scope.asVertex())) {
-                        found = true;
-                        break;
-                    }
-                }
             }
             if (!found) {
-                throw new PermissionDenied(String.format(
-                        "Permission '%s' denied with scope: '%s'",
-                        permission.getIdentifier(), scope));
+                throw new PermissionDenied(accessor, contentType, permission, scope);
             }
         }
     }

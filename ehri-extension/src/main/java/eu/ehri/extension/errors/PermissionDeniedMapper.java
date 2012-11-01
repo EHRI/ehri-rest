@@ -25,7 +25,7 @@ public class PermissionDeniedMapper implements ExceptionMapper<PermissionDenied>
                     {
                         put("message", e.getMessage());
                         put("accessor", e
-                                .getAccessor().getName());
+                                .getAccessor() != null ? e.getAccessor().getIdentifier() : "null");
                     }
                 });
             }

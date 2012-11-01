@@ -3,13 +3,17 @@ package eu.ehri.project.test;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Map;
+
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.acl.AnonymousAccessor;
+import eu.ehri.project.acl.PermissionTypes;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.EntityTypes;
 import eu.ehri.project.models.Group;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.AccessibleEntity;
@@ -165,4 +169,20 @@ public class AclTest extends ModelTestBase {
         acl.removeAccessControl(kcl, reto);
         assertTrue(acl.getAccessControl(kcl, reto));
     }
+    
+    /**
+     * Test the global permission matrix.
+     * @throws PermissionDenied 
+     */
+    @Test
+    public void testGlobalPermissionMatrix() throws PermissionDenied {
+        Accessor bob = helper.getTestFrame("bob", Accessor.class);
+        // Admin can change anything, so ensure the user ISN'T a member of admin
+        assertFalse(acl.isAdmin(bob));
+        
+        Map<String,Map<String,Boolean>> cmap = acl.getGlobalPermissionMatrix(bob);
+        // Bob has been granted CREATE access for documentaryUnits.
+        assertTrue(cmap.get(EntityTypes.DOCUMENTARY_UNIT).get(PermissionTypes.CREATE));
+    }
+    
 }
