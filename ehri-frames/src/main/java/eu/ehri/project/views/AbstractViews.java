@@ -50,7 +50,7 @@ abstract class AbstractViews<E extends AccessibleEntity> {
             throws PermissionDenied {
         Accessor accessor = getAccessor(user);
         // If we're admin, the answer is always "no problem"!
-        if (!acl.isAdmin(accessor)) {
+        if (!acl.belongsToAdmin(accessor)) {
             ContentType contentType = getContentType(ClassUtils
                     .getEntityType(cls));
             Permission permission = getPermission(permissionId);

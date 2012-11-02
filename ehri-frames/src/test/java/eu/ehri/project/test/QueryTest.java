@@ -29,7 +29,7 @@ public class QueryTest extends AbstractFixtureTest {
         // Check we're not admin
         Accessor accessor = graph.frame(graph.getVertex(validUserId),
                 Accessor.class);
-        assertTrue(new AclManager(graph).isAdmin(accessor));
+        assertTrue(new AclManager(graph).belongsToAdmin(accessor));
 
         // Get the total number of DocumentaryUnits the old-fashioned way
         Iterable<Vertex> allDocs = graph.getVertices(EntityType.KEY,
@@ -51,7 +51,7 @@ public class QueryTest extends AbstractFixtureTest {
         Accessor accessor = helper.getTestFrame("reto", Accessor.class);
         DocumentaryUnit cantRead = helper.getTestFrame("c1",
                 DocumentaryUnit.class);
-        assertFalse(new AclManager(graph).isAdmin(accessor));
+        assertFalse(new AclManager(graph).belongsToAdmin(accessor));
 
         List<DocumentaryUnit> list = toList(query.list((Long) accessor
                 .asVertex().getId()));

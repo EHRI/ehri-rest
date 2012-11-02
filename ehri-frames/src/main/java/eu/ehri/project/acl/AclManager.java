@@ -46,19 +46,30 @@ public class AclManager {
         this.graph = graph;
         this.helpers = new GraphHelpers(graph.getBaseGraph().getRawGraph());
     }
-
+    
     /**
-     * Check if an accessor is admin or a member of Admin.
+     * Check if the current accessor IS the admin group.
      * 
      * @param accessor
      */
     public Boolean isAdmin(Accessor accessor) {
         if (accessor == null)
             throw new RuntimeException("NULL accessor given.");
-        if (accessor.getIdentifier().equals(Group.ADMIN_GROUP_IDENTIFIER))
+        return accessor.getIdentifier().equals(Group.ADMIN_GROUP_IDENTIFIER);
+    }
+
+    /**
+     * Check if an accessor is admin or a member of Admin.
+     * 
+     * @param accessor
+     */
+    public Boolean belongsToAdmin(Accessor accessor) {
+        if (accessor == null)
+            throw new RuntimeException("NULL accessor given.");
+        if (isAdmin(accessor))
             return true;
-        for (Accessor acc : accessor.getAllParents()) {
-            if (acc.getIdentifier().equals(Group.ADMIN_GROUP_IDENTIFIER))
+        for (Accessor parent : accessor.getAllParents()) {
+            if (isAdmin(parent))
                 return true;
         }
         return false;
@@ -117,7 +128,7 @@ public class AclManager {
         assert entity != null : "Entity is null";
         assert accessor != null : "Accessor is null";
         // FIXME: Tidy up the logic here.
-        if (isAdmin(accessor)
+        if (belongsToAdmin(accessor)
                 || (!isAnonymous(accessor) && accessor.asVertex().equals(
                         entity.asVertex()))) {
             return true;
@@ -198,10 +209,7 @@ public class AclManager {
      * @param map
      */
     public Map<String, List<String>> getGlobalPermissions(Accessor accessor) {
-        if (accessor.getIdentifier().equals(Group.ADMIN_GROUP_IDENTIFIER)) {
-            return getAdminPermissions();
-        }
-        return getAccessorPermissions(accessor);
+        return isAdmin(accessor) ? getAdminPermissions() : getAccessorPermissions(accessor);
     }
 
     /**
@@ -302,43 +310,51 @@ public class AclManager {
     }
 
     /**
-     * Get a matrix of global permissions for a given accessor. Returns a map of
+     * Get a list of global permissions for a given accessor. Returns a map of
      * content types against the grant permissions. { "documentaryUnit" : {
      * "create" : false, "update" : false, "delete" : true } }
      * 
      * @param accessor
      */
-    public Map<String, Boolean> getEntityPermissionMatrix(Accessor accessor,
+    public List<Map<String, List<String>>> getInheritedEntityPermissions(Accessor accessor,
             PermissionGrantTarget entity) {
-        Map<String, Boolean> map = new HashMap<String, Boolean>();
-        Boolean defaultPerm = isAdmin(accessor);
-        for (Object pt : helpers.getAllPropertiesOfType(EntityTypes.PERMISSION,
-                AccessibleEntity.IDENTIFIER_KEY)) {
-            map.put((String) pt, defaultPerm);
+        List<Map<String, List<String>>> list = new LinkedList<Map<String, List<String>>>();
+        Map<String,List<String>> userMap = new HashMap<String, List<String>>();
+        userMap.put(accessor.getIdentifier(), getEntityPermissions(accessor, entity));
+        list.add(userMap);
+        for (Accessor parent : accessor.getAllParents()) {
+            Map<String,List<String>> parentMap = new HashMap<String, List<String>>();
+            list.add(parentMap);
+            parentMap.put(parent.getIdentifier(), getEntityPermissions(parent, entity));
         }
-        if (!defaultPerm)
-            buildEntityPermissionMatrix(accessor, entity, map);
-        return map;
+        return list;
     }
 
     /**
-     * Recursive helper function to ascend an accessor's groups and populate
-     * their global permissions.
+     * Get a list of global permissions for a given accessor. Returns a map of
+     * content types against the grant permissions. { "documentaryUnit" : {
+     * "create" : false, "update" : false, "delete" : true } }
      * 
      * @param accessor
-     * @param map
      */
-    private void buildEntityPermissionMatrix(Accessor accessor,
-            PermissionGrantTarget entity, Map<String, Boolean> map) {
-        for (PermissionGrant grant : accessor.getPermissionGrants()) {
-            if (grant.getTarget().asVertex().equals(entity.asVertex())) {
-                map.put(grant.getPermission().getIdentifier(), true);
+    public List<String> getEntityPermissions(Accessor accessor,
+            PermissionGrantTarget entity) {
+        // If we're admin, add it regardless.
+        List<String> list = new LinkedList<String>();
+        if (isAdmin(accessor)) {
+            for (Object s : helpers.getAllPropertiesOfType(
+                    EntityTypes.PERMISSION, AccessibleEntity.IDENTIFIER_KEY)) {
+                list.add((String)s);
             }
+        } else {
+            for (PermissionGrant grant : accessor.getPermissionGrants()) {
+                Permission perm = grant.getPermission();
+                // FIXME: Accomodate scope somehow...?
+                if (grant.getTarget().asVertex().equals(entity.asVertex()))
+                    list.add(perm.getIdentifier());
+            }        
         }
-
-        for (Accessor parent : accessor.getParents()) {
-            buildEntityPermissionMatrix(parent, entity, map);
-        }
+        return list;
     }
 
     /**
@@ -440,7 +456,7 @@ public class AclManager {
      */
     public PipeFunction<Vertex, Boolean> getAclFilterFunction(Accessor accessor) {
         assert accessor != null;
-        if (isAdmin(accessor))
+        if (belongsToAdmin(accessor))
             return noopFilterFunction();
 
         final HashSet<Object> all = getAllAccessors(accessor);

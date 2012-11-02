@@ -92,7 +92,7 @@ public class AclTest extends ModelTestBase {
         AccessibleEntity prof = helper.getTestFrame("reto",
                 AccessibleEntity.class);
         // Check user ISN'T admin (otherwise they'd be able to access anything)
-        assertFalse(acl.isAdmin(reto));
+        assertFalse(acl.belongsToAdmin(reto));
         assertTrue(acl.getAccessControl(prof, reto));
     }
 
@@ -127,7 +127,7 @@ public class AclTest extends ModelTestBase {
         AccessibleEntity kcl = helper.getTestFrame("kclGroup",
                 AccessibleEntity.class);
         // Admin can change anything, so ensure the user ISN'T a member of admin
-        assertFalse(acl.isAdmin(reto));
+        assertFalse(acl.belongsToAdmin(reto));
         assertTrue(acl.getAccessControl(kcl, reto));
     }
 
@@ -141,7 +141,7 @@ public class AclTest extends ModelTestBase {
         AccessibleEntity kcl = helper.getTestFrame("kclGroup",
                 AccessibleEntity.class);
         // Admin can change anything, so ensure the user ISN'T a member of admin
-        assertFalse(acl.isAdmin(reto));
+        assertFalse(acl.belongsToAdmin(reto));
         assertTrue(acl.getAccessControl(kcl, reto));
 
         // Now set the access control on KCL so Reto can write to it...
@@ -159,7 +159,7 @@ public class AclTest extends ModelTestBase {
         AccessibleEntity kcl = helper.getTestFrame("kclGroup",
                 AccessibleEntity.class);
         // Admin can change anything, so ensure the user ISN'T a member of admin
-        assertFalse(acl.isAdmin(reto));
+        assertFalse(acl.belongsToAdmin(reto));
         assertTrue(acl.getAccessControl(kcl, reto));
 
         // Now set the access control on KCL so Reto can write to it...
@@ -179,7 +179,7 @@ public class AclTest extends ModelTestBase {
     public void testGlobalPermissionMatrix() throws PermissionDenied {
         Accessor bob = helper.getTestFrame("bob", Accessor.class);
         // Admin can change anything, so ensure the user ISN'T a member of admin
-        assertFalse(acl.isAdmin(bob));
+        assertFalse(acl.belongsToAdmin(bob));
         
         Map<String,List<String>> cmap = acl.getGlobalPermissions(bob);
         // Bob has been granted CREATE access for documentaryUnits.

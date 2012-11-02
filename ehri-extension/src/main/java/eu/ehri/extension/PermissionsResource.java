@@ -178,7 +178,7 @@ public class PermissionsResource extends AbstractRestResource {
         return Response
                 .status(Status.OK)
                 .entity(new ObjectMapper().writeValueAsBytes(acl
-                        .getEntityPermissionMatrix(accessor, entity))).build();
+                        .getInheritedEntityPermissions(accessor, entity))).build();
     }
 
     private <E> E getEntity(String typeName, String name, Class<E> cls)
