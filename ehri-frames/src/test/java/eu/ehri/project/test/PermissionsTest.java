@@ -3,6 +3,8 @@ package eu.ehri.project.test;
 import static org.junit.Assert.*;
 
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.Before;
@@ -203,10 +205,10 @@ public class PermissionsTest extends AbstractFixtureTest {
             SerializationError {
 
         // @formatter:off
-        Map<String,Map<String,Boolean>> matrix = new HashMap<String, Map<String,Boolean>>() {{
-            put(EntityTypes.DOCUMENTARY_UNIT, new HashMap<String,Boolean>() {{
-                put(PermissionTypes.CREATE, true);
-                put(PermissionTypes.DELETE, true);
+        Map<String,List<String>> matrix = new HashMap<String, List<String>>() {{
+            put(EntityTypes.DOCUMENTARY_UNIT, new LinkedList<String>() {{
+                add(PermissionTypes.CREATE);
+                add(PermissionTypes.DELETE);
             }});
         }};
         // @formatter:on

@@ -45,9 +45,8 @@ public class AbstractRestResource {
      * Retrieve the id of the UserProfile of the requester
      * 
      * @return The vertex id
-     * @throws PermissionDenied
      */
-    protected Long getRequesterUserProfileId() throws PermissionDenied {
+    protected Long getRequesterUserProfileId() {
         String id = getRequesterIdentifier();
         if (id == null) {
             return null;
@@ -67,6 +66,11 @@ public class AbstractRestResource {
         }
     }
     
+    /**
+     * Retreive the id string of the requester's UserProfile.
+     * 
+     * @return
+     */
     protected String getRequesterIdentifier() {
         List<String> list = requestHeaders.getRequestHeader(AUTH_HEADER_NAME);
         if (list != null && !list.isEmpty()) {

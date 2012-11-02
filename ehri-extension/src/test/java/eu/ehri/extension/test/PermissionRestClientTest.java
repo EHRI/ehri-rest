@@ -4,6 +4,8 @@ import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import javax.ws.rs.core.MediaType;
@@ -48,22 +50,22 @@ public class PermissionRestClientTest extends BaseRestClientTest {
             UniformInterfaceException, IOException {
 
         WebResource resource = client.resource(getExtensionEntryPointUri()
-                + "/" + EntityTypes.PERMISSION + "/" + EntityTypes.USER_PROFILE + "/" + LIMITED_USER_NAME);
+                + "/" + EntityTypes.PERMISSION + "/" + EntityTypes.USER_PROFILE
+                + "/" + LIMITED_USER_NAME);
         ClientResponse response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
                 .header(AbstractRestResource.AUTH_HEADER_NAME,
-                        getAdminUserProfileId())
-                .get(ClientResponse.class);
+                        getAdminUserProfileId()).get(ClientResponse.class);
 
-        assertEquals(Response.Status.OK.getStatusCode(),
-                response.getStatus());
-        
-        Map<String, Map<String, Boolean>> currentMatrix = getMatrix(response.getEntity(String.class));
-        
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+
+        List<Map<String, Map<String, List<String>>>> currentMatrix = getInheritedMatrix(response
+                .getEntity(String.class));
+        System.out.println("CURRENT: " + currentMatrix);
         // Check we don't ALREADY have documentaryUnit -> create/delete perms
-        assertFalse(currentMatrix.get(EntityTypes.DOCUMENTARY_UNIT).get(PermissionTypes.CREATE));
-        assertFalse(currentMatrix.get(EntityTypes.DOCUMENTARY_UNIT).get(PermissionTypes.DELETE));
+        assertNull(currentMatrix.get(0).get(LIMITED_USER_NAME).get(EntityTypes.DOCUMENTARY_UNIT));
+        assertNull(currentMatrix.get(0).get(LIMITED_USER_NAME).get(EntityTypes.DOCUMENTARY_UNIT));
 
         // Set the permission via REST
         resource = client.resource(getExtensionEntryPointUri() + "/"
@@ -80,30 +82,31 @@ public class PermissionRestClientTest extends BaseRestClientTest {
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
 
         // Retry the create action
-        resource = client.resource(getExtensionEntryPointUri()
-                + "/" + EntityTypes.PERMISSION + "/" + EntityTypes.USER_PROFILE + "/" + LIMITED_USER_NAME);
+        resource = client.resource(getExtensionEntryPointUri() + "/"
+                + EntityTypes.PERMISSION + "/" + EntityTypes.USER_PROFILE + "/"
+                + LIMITED_USER_NAME);
         response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
                 .header(AbstractRestResource.AUTH_HEADER_NAME,
-                        getAdminUserProfileId())
-                .get(ClientResponse.class);
+                        getAdminUserProfileId()).get(ClientResponse.class);
 
-        assertEquals(Response.Status.OK.getStatusCode(),
-                response.getStatus());
-        
-        Map<String, Map<String, Boolean>> newMatrix = getMatrix(response.getEntity(String.class));
-        
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+
+        List<Map<String, Map<String, List<String>>>> newMatrix = getInheritedMatrix(response
+                .getEntity(String.class));
+
         // Check we don't ALREADY have documentaryUnit -> create/delete perms
-        assertTrue(newMatrix.get(EntityTypes.DOCUMENTARY_UNIT).get(PermissionTypes.CREATE));
-        assertTrue(newMatrix.get(EntityTypes.DOCUMENTARY_UNIT).get(PermissionTypes.DELETE));
+        assertTrue(newMatrix.get(0).get(LIMITED_USER_NAME).get(EntityTypes.DOCUMENTARY_UNIT).contains(
+                PermissionTypes.CREATE));
+        assertTrue(newMatrix.get(0).get(LIMITED_USER_NAME).get(EntityTypes.DOCUMENTARY_UNIT).contains(
+                PermissionTypes.DELETE));
     }
-
 
     @Test
     public void testSettingGlobalPermissions() throws JsonGenerationException,
             JsonMappingException, UniformInterfaceException, IOException {
-        
+
         WebResource resource = client.resource(getExtensionEntryPointUri()
                 + "/documentaryUnit");
         ClientResponse response = resource
@@ -162,25 +165,25 @@ public class PermissionRestClientTest extends BaseRestClientTest {
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
     }
 
-    private Map<String, Map<String, Boolean>> getMatrix(String json)
+    private List<Map<String, Map<String, List<String>>>> getInheritedMatrix(String json)
             throws JsonParseException, JsonMappingException, IOException {
         JsonFactory factory = new JsonFactory();
         ObjectMapper mapper = new ObjectMapper(factory);
-        TypeReference<HashMap<String, Map<String, Boolean>>> typeRef = new TypeReference<HashMap<String, Map<String, Boolean>>>() {
+        TypeReference<LinkedList<HashMap<String, Map<String, List<String>>>>> typeRef = new TypeReference<LinkedList<HashMap<String, Map<String, List<String>>>>>() {
         };
         return mapper.readValue(json, typeRef);
     }
-    
+
     @SuppressWarnings("serial")
-    private Map<String, Map<String, Boolean>> getTestMatrix() {
+    private Map<String, List<String>> getTestMatrix() {
         // @formatter:off
-        Map<String,Map<String,Boolean>> matrix = new HashMap<String, Map<String,Boolean>>() {{
-            put(EntityTypes.DOCUMENTARY_UNIT, new HashMap<String,Boolean>() {{
-                put(PermissionTypes.CREATE, true);
-                put(PermissionTypes.DELETE, true);
+        Map<String,List<String>> matrix = new HashMap<String, List<String>>() {{
+            put(EntityTypes.DOCUMENTARY_UNIT, new LinkedList<String>() {{
+                add(PermissionTypes.CREATE);
+                add(PermissionTypes.DELETE);
             }});
         }};
         // @formatter:on
         return matrix;
-    }    
+    }
 }

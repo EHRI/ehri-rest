@@ -22,9 +22,9 @@ import eu.ehri.project.views.AclViews;
  * Provides a RESTfull(ish) interface for setting PermissionTarget perms.
  */
 @Path("/access")
-public class Access extends EhriNeo4jFramedResource<AccessibleEntity> {
+public class AccessResource extends EhriNeo4jFramedResource<AccessibleEntity> {
 
-    public Access(@Context GraphDatabaseService database) {
+    public AccessResource(@Context GraphDatabaseService database) {
         super(database, AccessibleEntity.class);
     }
 

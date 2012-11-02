@@ -3,6 +3,7 @@ package eu.ehri.project.test;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.util.List;
 import java.util.Map;
 
 import org.junit.Before;
@@ -180,9 +181,9 @@ public class AclTest extends ModelTestBase {
         // Admin can change anything, so ensure the user ISN'T a member of admin
         assertFalse(acl.isAdmin(bob));
         
-        Map<String,Map<String,Boolean>> cmap = acl.getGlobalPermissionMatrix(bob);
+        Map<String,List<String>> cmap = acl.getGlobalPermissions(bob);
         // Bob has been granted CREATE access for documentaryUnits.
-        assertTrue(cmap.get(EntityTypes.DOCUMENTARY_UNIT).get(PermissionTypes.CREATE));
+        assertTrue(cmap.get(EntityTypes.DOCUMENTARY_UNIT).contains(PermissionTypes.CREATE));
     }
     
 }

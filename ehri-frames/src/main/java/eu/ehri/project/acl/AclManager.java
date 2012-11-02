@@ -169,28 +169,24 @@ public class AclManager {
     }
 
     /**
-     * Get a matrix of global permissions for a given accessor. Returns a map of
-     * content types against the grant permissions. { "documentaryUnit" : {
-     * "create" : false, "update" : false, "delete" : true } }
+     * Return a permission list for the given accessor and her inherited groups.
      * 
      * @param accessor
+     * @return
      */
-    public Map<String, Map<String, Boolean>> getGlobalPermissionMatrix(
+    public List<Map<String, Map<String, List<String>>>> getInheritedGlobalPermissions(
             Accessor accessor) {
-        Map<String, Map<String, Boolean>> globals = new HashMap<String, Map<String, Boolean>>();
-        Boolean defaultPerm = isAdmin(accessor);
-        // Initialize an array of negative permission grants - the default
-        for (Object ct : helpers.getAllPropertiesOfType(EntityTypes.CONTENT_TYPE,
-                AccessibleEntity.IDENTIFIER_KEY)) {
-            Map<String, Boolean> cmap = new HashMap<String, Boolean>();
-            for (Object pt : helpers.getAllPropertiesOfType(EntityTypes.PERMISSION,
-                    AccessibleEntity.IDENTIFIER_KEY)) {
-                cmap.put((String)pt, defaultPerm);
-            }
-            globals.put((String)ct, cmap);
+        // Help! I'm in Java Hell... Java really does not encourage
+        // programming with generic data types.
+        List<Map<String, Map<String, List<String>>>> globals = new LinkedList<Map<String, Map<String, List<String>>>>();
+        Map<String, Map<String, List<String>>> userMap = new HashMap<String, Map<String, List<String>>>();
+        userMap.put(accessor.getIdentifier(), getGlobalPermissions(accessor));
+        globals.add(userMap);
+        for (Accessor parent : accessor.getParents()) {
+            Map<String, Map<String, List<String>>> parentMap = new HashMap<String, Map<String, List<String>>>();
+            parentMap.put(parent.getIdentifier(), getGlobalPermissions(parent));
+            globals.add(parentMap);
         }
-        if (!defaultPerm)
-            buildGlobalPermissionMatrix(accessor, globals);
         return globals;
     }
 
@@ -201,8 +197,19 @@ public class AclManager {
      * @param accessor
      * @param map
      */
-    private void buildGlobalPermissionMatrix(Accessor accessor,
-            Map<String, Map<String, Boolean>> map) {
+    public Map<String, List<String>> getGlobalPermissions(Accessor accessor) {
+        if (accessor.getIdentifier().equals(Group.ADMIN_GROUP_IDENTIFIER)) {
+            return getAdminPermissions();
+        }
+        return getAccessorPermissions(accessor);
+    }
+
+    /**
+     * @param accessor
+     * @return
+     */
+    private Map<String, List<String>> getAccessorPermissions(Accessor accessor) {
+        Map<String, List<String>> perms = new HashMap<String, List<String>>();
         for (PermissionGrant grant : accessor.getPermissionGrants()) {
             // Since these are global perms only include those where the target
             // is a content type
@@ -212,71 +219,87 @@ public class AclManager {
                             ContentType.class)) {
                 ContentType ctype = graph.frame(target.asVertex(),
                         ContentType.class);
-                Map<String, Boolean> cmap = map.get(ctype.getIdentifier());
-                if (cmap == null)
-                    throw new RuntimeException(
-                            "Unexpected NULL content type (vertex: "
-                                    + ctype.asVertex() + ")");
-                cmap.put(grant.getPermission().getIdentifier(), true);
+                List<String> plist = perms.get(ctype.getIdentifier());
+                if (plist == null) {
+                    plist = new LinkedList<String>();
+                    perms.put(ctype.getIdentifier(), plist);
+                }
+                plist.add(grant.getPermission().getIdentifier());
             }
         }
-
-        for (Accessor parent : accessor.getParents()) {
-            buildGlobalPermissionMatrix(parent, map);
-        }
+        return perms;
     }
-    
-    public <E extends VertexFrame> Iterable<E> getVertices(String indexName, Class<E> cls) {
-        Index<Vertex> index = graph.getBaseGraph().getIndex(indexName, Vertex.class);
-        CloseableIterable<Vertex> query = index.query(AccessibleEntity.IDENTIFIER_KEY, "*");
+
+    /**
+     * @return
+     */
+    private Map<String, List<String>> getAdminPermissions() {
+        Map<String, List<String>> perms = new HashMap<String, List<String>>();
+        for (Object ct : helpers.getAllPropertiesOfType(
+                EntityTypes.CONTENT_TYPE, AccessibleEntity.IDENTIFIER_KEY)) {
+            List<String> clist = new LinkedList<String>();
+            for (Object pt : helpers.getAllPropertiesOfType(
+                    EntityTypes.PERMISSION, AccessibleEntity.IDENTIFIER_KEY)) {
+                clist.add((String) pt);
+            }
+            perms.put((String) ct, clist);
+        }
+        return perms;
+    }
+
+    public <E extends VertexFrame> Iterable<E> getVertices(String indexName,
+            Class<E> cls) {
+        Index<Vertex> index = graph.getBaseGraph().getIndex(indexName,
+                Vertex.class);
+        CloseableIterable<Vertex> query = index.query(
+                AccessibleEntity.IDENTIFIER_KEY, "*");
         try {
             return graph.frameVertices(query, cls);
         } finally {
             query.close();
         }
     }
-    
+
     /**
      * Set a matrix of global permissions for a given accessor.
      * 
      * @param accessor
      * @param globals
      */
-    public void setGlobalPermissionMatrix(
-            Accessor accessor, Map<String,Map<String,Boolean>> globals) {
+    public void setGlobalPermissionMatrix(Accessor accessor,
+            Map<String, List<String>> globals) {
         // Build a lookup of content types and permissions keyed by their
         // identifier.
-        Map<String,ContentType> cmap = new HashMap<String, ContentType>();
-        for (ContentType c : getVertices(EntityTypes.CONTENT_TYPE, ContentType.class)) {
+        Map<String, ContentType> cmap = new HashMap<String, ContentType>();
+        for (ContentType c : getVertices(EntityTypes.CONTENT_TYPE,
+                ContentType.class)) {
             cmap.put(c.getIdentifier(), c);
         }
-        Map<String,Permission> pmap = new HashMap<String, Permission>();
-        for (Permission p : getVertices(EntityTypes.PERMISSION, Permission.class)) {
+        Map<String, Permission> pmap = new HashMap<String, Permission>();
+        for (Permission p : getVertices(EntityTypes.PERMISSION,
+                Permission.class)) {
             pmap.put(p.getIdentifier(), p);
-        }        
-        
+        }
+
         // Don't set permissions for admin.
-        if (!isAdmin(accessor)) {
+        if (!accessor.getIdentifier().equals(Group.ADMIN_GROUP_IDENTIFIER)) {
             for (Entry<String, ContentType> centry : cmap.entrySet()) {
-                for (Entry<String,Permission> pentry : pmap.entrySet()) {
-                    ContentType target = centry.getValue();
-                    Permission permission = pentry.getValue();
-                    Map<String,Boolean> pset = globals.get(centry.getKey());
-                    if (pset != null) {
-                        Boolean set = pset.get(pentry.getKey());
-                        if (set != null) {
-                            if (set)
-                                grantPermissions(accessor, target, permission);
-                            else
-                                revokePermissions(accessor, target, permission);
-                        }
+                ContentType target = centry.getValue();
+                List<String> pset = globals.get(centry.getKey());
+                if (pset != null) {
+                    List<Object> perms = helpers.getAllPropertiesOfType(
+                            EntityTypes.PERMISSION, AccessibleEntity.IDENTIFIER_KEY);
+                    for (Object perm : perms) {
+                        Permission permission = pmap.get(perm);
+                        if (pset.contains((String) perm))
+                            grantPermissions(accessor, target, permission);                                
+                        else
+                            revokePermissions(accessor, target, permission);
                     }
                 }
             }
         }
     }
-
-    
 
     /**
      * Get a matrix of global permissions for a given accessor. Returns a map of
@@ -291,7 +314,7 @@ public class AclManager {
         Boolean defaultPerm = isAdmin(accessor);
         for (Object pt : helpers.getAllPropertiesOfType(EntityTypes.PERMISSION,
                 AccessibleEntity.IDENTIFIER_KEY)) {
-            map.put((String)pt, defaultPerm);
+            map.put((String) pt, defaultPerm);
         }
         if (!defaultPerm)
             buildEntityPermissionMatrix(accessor, entity, map);

@@ -2,6 +2,7 @@ package eu.ehri.extension;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
@@ -39,7 +40,6 @@ import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionGrantTarget;
 import eu.ehri.project.persistance.ActionManager;
-import eu.ehri.project.views.AclViews;
 
 /**
  * Provides a RESTfull(ish) interface for setting PermissionTarget perms.
@@ -50,9 +50,9 @@ import eu.ehri.project.views.AclViews;
  * 
  */
 @Path(EntityTypes.PERMISSION)
-public class Permissions extends AbstractRestResource {
+public class PermissionsResource extends AbstractRestResource {
 
-    public Permissions(@Context GraphDatabaseService database) {
+    public PermissionsResource(@Context GraphDatabaseService database) {
         super(database);
     }
 
@@ -65,9 +65,9 @@ public class Permissions extends AbstractRestResource {
 
         JsonFactory factory = new JsonFactory();
         ObjectMapper mapper = new ObjectMapper(factory);
-        TypeReference<HashMap<String, Map<String, Boolean>>> typeRef = 
-                new TypeReference<HashMap<String, Map<String, Boolean>>>() {};
-        HashMap<String, Map<String, Boolean>> globals = mapper.readValue(json,
+        TypeReference<HashMap<String, List<String>>> typeRef = 
+                new TypeReference<HashMap<String, List<String>>>() {};
+        HashMap<String, List<String>> globals = mapper.readValue(json,
                 typeRef);
 
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
@@ -122,7 +122,7 @@ public class Permissions extends AbstractRestResource {
         return Response
                 .status(Status.OK)
                 .entity(new ObjectMapper().writeValueAsBytes(acl
-                        .getGlobalPermissionMatrix(accessor))).build();
+                        .getInheritedGlobalPermissions(accessor))).build();
     }
 
     /**
