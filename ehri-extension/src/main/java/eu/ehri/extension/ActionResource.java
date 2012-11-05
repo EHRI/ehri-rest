@@ -39,7 +39,7 @@ public class ActionResource extends EhriNeo4jFramedResource<Action> {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{id:[^/]+}")
+    @Path("/{id:.+}")
     public Response getAction(@PathParam("id") String id) throws ItemNotFound,
             PermissionDenied {
         return retrieve(id);

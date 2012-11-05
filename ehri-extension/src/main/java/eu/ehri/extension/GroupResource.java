@@ -44,7 +44,7 @@ public class GroupResource extends EhriNeo4jFramedResource<Group> {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{id:[^/]+}")
+    @Path("/{id:.+}")
     public Response getGroup(@PathParam("id") String id) throws ItemNotFound,
             PermissionDenied {
         return retrieve(id);
@@ -78,7 +78,7 @@ public class GroupResource extends EhriNeo4jFramedResource<Group> {
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{id:[^/]+}")
+    @Path("/{id:.+}")
     public Response updateGroup(@PathParam("id") String id, String json)
             throws PermissionDenied, IntegrityError, ValidationError,
             DeserializationError, ItemNotFound {
@@ -93,7 +93,7 @@ public class GroupResource extends EhriNeo4jFramedResource<Group> {
     }
 
     @DELETE
-    @Path("/{id:[^/]+}")
+    @Path("/{id:.+}")
     public Response deleteGroup(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound, ValidationError {
         return delete(id);

@@ -46,7 +46,7 @@ public class DocumentaryUnitResource extends
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{id:[^/]+}")
+    @Path("/{id:.+}")
     public Response getDocumentaryUnit(@PathParam("id") String id)
             throws ItemNotFound, PermissionDenied {
         return retrieve(id);
@@ -80,7 +80,7 @@ public class DocumentaryUnitResource extends
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{id:[^/]+}")
+    @Path("/{id:.+}")
     public Response updateDocumentaryUnit(@PathParam("id") String id,
             String json) throws PermissionDenied, IntegrityError,
             ValidationError, DeserializationError, ItemNotFound {
@@ -95,7 +95,7 @@ public class DocumentaryUnitResource extends
     }
 
     @DELETE
-    @Path("/{id:[^/]+}")
+    @Path("/{id:.+}")
     public Response deleteDocumentaryUnit(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound, ValidationError {
         return delete(id);
