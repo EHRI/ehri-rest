@@ -57,10 +57,11 @@ public class PermissionsResource extends AbstractRestResource {
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("/{atype:[\\w-]+}/{id:[\\w-]+}")
     public Response setGlobalMatrix(@PathParam("atype") String atype,
             @PathParam("id") String id, String json) throws PermissionDenied,
-            JsonParseException, JsonMappingException, IOException {
+            JsonParseException, JsonMappingException, IOException, ItemNotFound {
 
         JsonFactory factory = new JsonFactory();
         ObjectMapper mapper = new ObjectMapper(factory);
@@ -92,7 +93,7 @@ public class PermissionsResource extends AbstractRestResource {
             tx.finish();
         }
 
-        return Response.status(Status.OK).build();
+        return getGlobalMatrix(atype, id);
     }
 
     /**
