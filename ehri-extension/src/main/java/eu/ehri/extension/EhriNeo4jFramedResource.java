@@ -19,7 +19,6 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import com.tinkerpop.frames.VertexFrame;
 
 import eu.ehri.project.exceptions.DeserializationError;
-import eu.ehri.project.exceptions.IndexNotFoundException;
 import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
@@ -45,6 +44,8 @@ import static eu.ehri.extension.RestHelpers.*;
 public class EhriNeo4jFramedResource<E extends AccessibleEntity> extends
         AbstractRestResource {
 
+    public static final int DEFAULT_LIST_LIMIT = 20;
+    
     protected final IViews<E> views;
     protected final Query<E> querier;
     protected final Class<E> cls;
@@ -66,45 +67,39 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> extends
         querier = new Query<E>(graph, cls);
 
     }
-
+    
     /**
      * List all instances of the 'entity' accessible to the given user.
      * 
      * @return
      * @throws PermissionDenied
      */
-    public StreamingOutput list() throws PermissionDenied {
-        try {
+    public StreamingOutput list(Integer offset, Integer limit) {
+        final ObjectMapper mapper = new ObjectMapper();
+        final JsonFactory f = new JsonFactory();
+        final Iterable<E> list = querier.list(offset, limit, getRequesterUserProfileId());
 
-            final ObjectMapper mapper = new ObjectMapper();
-            final JsonFactory f = new JsonFactory();
-            final Iterable<E> list = querier.list(getRequesterUserProfileId());
-
-            // FIXME: I don't understand this streaming output system well
-            // enough
-            // to determine whether this actually streams or not. It certainly
-            // doesn't look like it.
-            return new StreamingOutput() {
-                @Override
-                public void write(OutputStream arg0) throws IOException,
-                        WebApplicationException {
-                    JsonGenerator g = f.createJsonGenerator(arg0);
-                    g.writeStartArray();
-                    for (E item : list) {
-                        try {
-                            mapper.writeValue(g,
-                                    converter.vertexFrameToData(item));
-                        } catch (SerializationError e) {
-                            throw new RuntimeException(e);
-                        }
+        // FIXME: I don't understand this streaming output system well
+        // enough
+        // to determine whether this actually streams or not. It certainly
+        // doesn't look like it.
+        return new StreamingOutput() {
+            @Override
+            public void write(OutputStream arg0) throws IOException,
+                    WebApplicationException {
+                JsonGenerator g = f.createJsonGenerator(arg0);
+                g.writeStartArray();
+                for (E item : list) {
+                    try {
+                        mapper.writeValue(g, converter.vertexFrameToData(item));
+                    } catch (SerializationError e) {
+                        throw new RuntimeException(e);
                     }
-                    g.writeEndArray();
-                    g.close();
                 }
-            };
-        } catch (IndexNotFoundException e) {
-            return streamingException(e);
-        }
+                g.writeEndArray();
+                g.close();
+            }
+        };
     }
 
     /**
@@ -202,8 +197,6 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> extends
 
             return Response.status(Status.OK).entity((jsonStr).getBytes())
                     .build();
-        } catch (IndexNotFoundException e) {
-            throw new WebApplicationException(e);
         } catch (SerializationError e) {
             throw new WebApplicationException(e);
         }
@@ -286,8 +279,6 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> extends
                     .asVertex().getId(), rawBundle.getData(), cls,
                     rawBundle.getRelations());
             return update(converter.bundleToJson(entityBundle));
-        } catch (IndexNotFoundException e) {
-            throw new WebApplicationException(e);
         } catch (SerializationError e) {
             throw new WebApplicationException(e);
         }
@@ -323,12 +314,8 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> extends
      */
     protected Response delete(String id) throws PermissionDenied, ItemNotFound,
             ValidationError {
-        try {
-            E entity = querier.get(AccessibleEntity.IDENTIFIER_KEY, id,
-                    getRequesterUserProfileId());
-            return delete((Long) entity.asVertex().getId());
-        } catch (IndexNotFoundException e) {
-            throw new WebApplicationException(e);
-        }
+        E entity = querier.get(AccessibleEntity.IDENTIFIER_KEY, id,
+                getRequesterUserProfileId());
+        return delete((Long) entity.asVertex().getId());
     }
 }

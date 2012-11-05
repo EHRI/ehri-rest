@@ -2,6 +2,7 @@ package eu.ehri.extension;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -61,8 +62,10 @@ public class UserProfileResource extends EhriNeo4jFramedResource<UserProfile> {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/list")
-    public StreamingOutput listUserProfiles() throws PermissionDenied {
-        return list();
+    public StreamingOutput listUserProfiles(
+            @QueryParam("offset") @DefaultValue("0") int offset,
+            @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit) {
+        return list(offset, limit);
     }
 
     @POST

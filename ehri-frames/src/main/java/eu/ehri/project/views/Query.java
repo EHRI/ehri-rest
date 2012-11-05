@@ -2,6 +2,8 @@ package eu.ehri.project.views;
 
 import java.util.NoSuchElementException;
 
+import scala.Math;
+
 import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.Index;
 import com.tinkerpop.blueprints.Vertex;
@@ -25,7 +27,8 @@ import eu.ehri.project.models.base.Accessor;
  * 
  * @param <E>
  */
-public class Query<E extends AccessibleEntity> extends AbstractViews<E> implements IQuery<E> {
+public class Query<E extends AccessibleEntity> extends AbstractViews<E>
+        implements IQuery<E> {
     private static final String QUERY_GLOB = "*";
 
     /**
@@ -37,18 +40,23 @@ public class Query<E extends AccessibleEntity> extends AbstractViews<E> implemen
     public Query(FramedGraph<Neo4jGraph> graph, Class<E> cls) {
         super(graph, cls);
     }
-    
+
     public E get(String key, String value, Long user) throws PermissionDenied,
-            ItemNotFound, IndexNotFoundException {
-        CloseableIterable<Vertex> indexQuery = getIndexForClass(cls).get(key, value);
+            ItemNotFound {
         try {
-            E item = graph.frame(indexQuery.iterator().next(), cls);
-            checkReadAccess(item, user);
-            return item;            
-        } catch (NoSuchElementException e) {
-            throw new ItemNotFound(key, value);
-        } finally {
-            indexQuery.close();
+            CloseableIterable<Vertex> indexQuery = getIndexForClass(cls).get(
+                    key, value);
+            try {
+                E item = graph.frame(indexQuery.iterator().next(), cls);
+                checkReadAccess(item, user);
+                return item;
+            } catch (NoSuchElementException e) {
+                throw new ItemNotFound(key, value);
+            } finally {
+                indexQuery.close();
+            }
+        } catch (IndexNotFoundException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -57,10 +65,11 @@ public class Query<E extends AccessibleEntity> extends AbstractViews<E> implemen
      * 
      * @param user
      * @return
-     * @throws IndexNotFoundException 
+     * @throws IndexNotFoundException
      */
-    public Iterable<E> list(Long user) throws IndexNotFoundException {
-        return list(AccessibleEntity.IDENTIFIER_KEY, QUERY_GLOB, user);
+    public Iterable<E> list(Integer offset, Integer limit, Long user) {
+        return list(AccessibleEntity.IDENTIFIER_KEY, QUERY_GLOB, offset, limit,
+                user);
     }
 
     /**
@@ -69,25 +78,41 @@ public class Query<E extends AccessibleEntity> extends AbstractViews<E> implemen
      * @param user
      * 
      * @return
-     * @throws IndexNotFoundException 
+     * @throws IndexNotFoundException
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    public Iterable<E> list(String key, String query, Long user) throws IndexNotFoundException {
+    public Iterable<E> list(String key, String query, Integer offset,
+            Integer limit, Long user) {
 
         // This function is optimised for ACL actions.
-        Accessor accessor = getAccessor(user);
-        CloseableIterable<Vertex> indexQuery = getIndexForClass(cls).query(key, query);
-        try {            
-            GremlinPipeline filter = new GremlinPipeline(indexQuery)
-                    .filter(new AclManager(graph)
-                            .getAclFilterFunction(accessor));
-            return graph.frameVertices(filter, cls);
-        } finally {
-            indexQuery.close();
+        try {
+            Accessor accessor = getAccessor(user);
+            CloseableIterable<Vertex> indexQuery = getIndexForClass(cls).query(
+                    key, query);
+            try {
+                GremlinPipeline filter = new GremlinPipeline(indexQuery)
+                        .filter(new AclManager(graph)
+                                .getAclFilterFunction(accessor));
+                return graph.frameVertices(
+                        setPipelineRange(filter, offset, limit), cls);
+            } finally {
+                indexQuery.close();
+            }
+        } catch (IndexNotFoundException e) {
+            throw new RuntimeException(e);
         }
     }
-    
-    private Index<Vertex> getIndexForClass(Class<E> cls) throws IndexNotFoundException {
+
+    @SuppressWarnings("rawtypes")
+    private GremlinPipeline setPipelineRange(GremlinPipeline filter,
+            Integer offset, Integer limit) {
+        int low = offset == null ? 0 : Math.max(offset, 0);
+        int high = limit == null ? -1 : low + Math.max(limit, 0) - 1;
+        return filter.range(low, high);
+    }
+
+    private Index<Vertex> getIndexForClass(Class<E> cls)
+            throws IndexNotFoundException {
         Index<Vertex> index = graph.getBaseGraph().getIndex(
                 getEntityIndexName(cls), Vertex.class);
         if (index == null)
