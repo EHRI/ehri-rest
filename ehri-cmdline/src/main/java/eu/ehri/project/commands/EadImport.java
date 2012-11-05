@@ -29,7 +29,7 @@ import eu.ehri.project.persistance.EntityBundle;
 public class EadImport extends BaseCommand implements Command {
 
     final static String NAME = "ead-import";
-    
+
     /**
      * Constructor.
      * 
@@ -74,13 +74,13 @@ public class EadImport extends BaseCommand implements Command {
      * @param args
      * @throws Exception
      */
-    public int execWithOptions(final FramedGraph<Neo4jGraph> graph, CommandLine cmdLine) throws Exception {
+    public int execWithOptions(final FramedGraph<Neo4jGraph> graph,
+            CommandLine cmdLine) throws Exception {
 
         final String logMessage = "Imported from command-line";
 
         if (cmdLine.getArgList().size() < 1)
-            throw new RuntimeException(
-                    "Usage: importer [OPTIONS] -user <user-id> -repo <agent-id> <ead1.xml> <ead2.xml> ... <eadN.xml>");
+            throw new RuntimeException(getHelp());
 
         List<String> filePaths = new LinkedList<String>();
         for (int i = 0; i < cmdLine.getArgList().size(); i++) {
@@ -93,12 +93,10 @@ public class EadImport extends BaseCommand implements Command {
             Iterable<Agent> agents = graph.getVertices("identifier",
                     (String) cmdLine.getOptionValue("repo"), Agent.class);
 
-            Agent agent = null;
-            if (cmdLine.hasOption("createrepo")) {
-                if (agents.iterator().hasNext())
-                    agent = agents.iterator().next();
-                else
-                    agent = createAgent(graph, cmdLine.getOptionValue("repo"));
+            Agent agent = agents.iterator().hasNext() ? agents.iterator()
+                    .next() : null;
+            if (cmdLine.hasOption("createrepo") && agent == null) {
+                agent = createAgent(graph, cmdLine.getOptionValue("repo"));
             }
 
             if (agent == null)
@@ -109,12 +107,10 @@ public class EadImport extends BaseCommand implements Command {
             Iterable<UserProfile> users = graph.getVertices("identifier",
                     (String) cmdLine.getOptionValue("user"), UserProfile.class);
 
-            UserProfile user = null;
-            if (cmdLine.hasOption("createuser")) {
-                if (users.iterator().hasNext())
-                    user = users.iterator().next();
-                else
-                    user = createUser(graph, cmdLine.getOptionValue("user"));
+            UserProfile user = users.iterator().hasNext() ? users.iterator()
+                    .next() : null;
+            if (!cmdLine.hasOption("createuser") && user == null) {
+                user = createUser(graph, cmdLine.getOptionValue("user"));
             }
 
             if (user == null)
@@ -129,8 +125,9 @@ public class EadImport extends BaseCommand implements Command {
                     + ", Updated: " + log.getUpdated());
             if (log.getErrored() > 0) {
                 System.out.println("Errors:");
-                for (Entry<String, String> entry: log.getErrors().entrySet()) {
-                    System.out.printf(" - %-20s : %s\n", entry.getKey(), entry.getValue());
+                for (Entry<String, String> entry : log.getErrors().entrySet()) {
+                    System.out.printf(" - %-20s : %s\n", entry.getKey(),
+                            entry.getValue());
                 }
             }
         } catch (Exception e) {
