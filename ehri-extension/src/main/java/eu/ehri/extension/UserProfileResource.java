@@ -53,7 +53,7 @@ public class UserProfileResource extends EhriNeo4jFramedResource<UserProfile> {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{id:[\\w-]+}")
+    @Path("/{id:[^/]+}")
     public Response getUserProfile(@PathParam("id") String id)
             throws ItemNotFound, PermissionDenied {
         return retrieve(id);
@@ -87,7 +87,7 @@ public class UserProfileResource extends EhriNeo4jFramedResource<UserProfile> {
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{id:[\\w-]+}")
+    @Path("/{id:[^/]+}")
     public Response updateUserProfile(@PathParam("id") String id, String json)
             throws PermissionDenied, IntegrityError, ValidationError,
             DeserializationError, ItemNotFound {
@@ -102,7 +102,7 @@ public class UserProfileResource extends EhriNeo4jFramedResource<UserProfile> {
     }
 
     @DELETE
-    @Path("/{id:[\\w-]+}")
+    @Path("/{id:[^/]+}")
     public Response deleteUserProfile(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound, ValidationError {
         return delete(id);

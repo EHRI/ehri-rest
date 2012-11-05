@@ -58,7 +58,7 @@ public class PermissionsResource extends AbstractRestResource {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{atype:[\\w-]+}/{id:[\\w-]+}")
+    @Path("/{atype:[^/]+}/{id:[^/]+}")
     public Response setGlobalMatrix(@PathParam("atype") String atype,
             @PathParam("id") String id, String json) throws PermissionDenied,
             JsonParseException, JsonMappingException, IOException, ItemNotFound {
@@ -110,7 +110,7 @@ public class PermissionsResource extends AbstractRestResource {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{atype:[\\w-]+}/{id:[\\w-]+}")
+    @Path("/{atype:[^/]+}/{id:[^/]+}")
     public Response getGlobalMatrix(@PathParam("atype") String atype,
             @PathParam("id") String id) throws PermissionDenied,
             JsonGenerationException, JsonMappingException, IOException,
@@ -163,7 +163,7 @@ public class PermissionsResource extends AbstractRestResource {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{atype:[\\w-]+}/{userId:[\\w-]+}/{ctype:[\\w-]+}/{id:[\\w-]+}")
+    @Path("/{atype:[^/]+}/{userId:[^/]+}/{ctype:[^/]+}/{id:[^/]+}")
     public Response getEntityMatrix(@PathParam("atype") String atype,
             @PathParam("userId") String userId,
             @PathParam("ctype") String ctype, @PathParam("id") String id)

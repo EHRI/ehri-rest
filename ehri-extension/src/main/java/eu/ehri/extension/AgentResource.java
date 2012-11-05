@@ -55,7 +55,7 @@ public class AgentResource extends EhriNeo4jFramedResource<Agent> {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{id:[\\w-]+}")
+    @Path("/{id:[^/]+}")
     public Response getAgent(@PathParam("id") String id) throws ItemNotFound,
             PermissionDenied {
         return retrieve(id);
@@ -89,7 +89,7 @@ public class AgentResource extends EhriNeo4jFramedResource<Agent> {
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{id:[\\w-]+}")
+    @Path("/{id:[^/]+}")
     public Response updateAgent(@PathParam("id") String id, String json)
             throws PermissionDenied, IntegrityError, ValidationError,
             DeserializationError, ItemNotFound {
@@ -104,7 +104,7 @@ public class AgentResource extends EhriNeo4jFramedResource<Agent> {
     }
 
     @DELETE
-    @Path("/{id:[\\w-]+}")
+    @Path("/{id:[^/]+}")
     public Response deleteAgent(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound, ValidationError {
         return delete(id);
@@ -139,7 +139,7 @@ public class AgentResource extends EhriNeo4jFramedResource<Agent> {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{id:[\\w-]+}")
+    @Path("/{id:[^/]+}")
     public Response createAgentDocumentaryUnit(@PathParam("id") String id,
             String json) throws PermissionDenied, ValidationError,
             IntegrityError, DeserializationError, ItemNotFound {
