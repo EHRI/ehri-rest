@@ -32,12 +32,6 @@ public class UserListEntities extends BaseCommand implements Command {
     }
 
     @Override
-    protected void setCustomOptions() {
-        options.addOption(new Option("user", true,
-                "Identifier of user to import as"));
-    }
-
-    @Override
     public String getHelp() {
         return "Usage: user-list [OPTIONS] <type>";
     }
@@ -78,7 +72,7 @@ public class UserListEntities extends BaseCommand implements Command {
         @SuppressWarnings("unchecked")
         Query<AccessibleEntity> query = new Query<AccessibleEntity>(graph,
                 (Class<AccessibleEntity>) cls);
-        for (AccessibleEntity acc : query.list((Long) user.asVertex().getId())) {
+        for (AccessibleEntity acc : query.list(null, null, (Long) user.asVertex().getId())) {
             System.out.println(acc.getIdentifier());
         }
         
