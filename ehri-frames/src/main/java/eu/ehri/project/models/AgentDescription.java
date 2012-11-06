@@ -8,10 +8,7 @@ import eu.ehri.project.models.base.Description;
 @EntityType(EntityTypes.AGENT_DESCRIPTION)
 public interface AgentDescription extends Description {
 
-    @Property("identifier")
-    public String getIdentifier();
-
-    @Property("title")
+    @Property("name")
     public String getTitle();
 
     @Property("otherFormsOfName")
