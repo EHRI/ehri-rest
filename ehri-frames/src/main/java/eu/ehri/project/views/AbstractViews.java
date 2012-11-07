@@ -2,6 +2,9 @@ package eu.ehri.project.views;
 
 import java.util.NoSuchElementException;
 
+import com.tinkerpop.blueprints.CloseableIterable;
+import com.tinkerpop.blueprints.Index;
+import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
@@ -9,6 +12,7 @@ import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.acl.AnonymousAccessor;
 import eu.ehri.project.acl.PermissionTypes;
 import eu.ehri.project.acl.SystemScope;
+import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.ContentType;
 import eu.ehri.project.models.Permission;
@@ -151,6 +155,33 @@ abstract class AbstractViews<E extends AccessibleEntity> {
                     "No content type node found for type: '%s'", typeName), e);
         }
     }
+    
+
+    /**
+     * Fetch any item of a particular type by its identifier.
+     * 
+     * @param typeName
+     * @param name
+     * @param cls
+     * @return
+     * @throws ItemNotFound
+     */
+    public <T> T getEntity(String typeName, String name, Class<T> cls)
+            throws ItemNotFound {
+        // FIXME: Ensure index isn't null
+        Index<Vertex> index = graph.getBaseGraph().getIndex(typeName,
+                Vertex.class);
+
+        CloseableIterable<Vertex> query = index.get(
+                AccessibleEntity.IDENTIFIER_KEY, name);
+        try {
+            return graph.frame(query.iterator().next(), cls);
+        } catch (NoSuchElementException e) {
+            throw new ItemNotFound(AccessibleEntity.IDENTIFIER_KEY, name);
+        } finally {
+            query.close();
+        }
+    }    
 
     /**
      * Get the permission with the given string.
