@@ -77,7 +77,7 @@ public class PermissionRestClientTest extends BaseRestClientTest {
                         getAdminUserProfileId())
                 .entity(new ObjectMapper().writeValueAsBytes(getTestMatrix()))
                 .post(ClientResponse.class);
-
+        System.out.println("RESPONSE: " + response.getEntity(String.class));
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
 
         // Retry the create action
