@@ -34,13 +34,11 @@ import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.EntityTypes;
-import eu.ehri.project.models.Group;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionGrantTarget;
 import eu.ehri.project.persistance.ActionManager;
-import eu.ehri.project.views.AclViews;
 
 /**
  * Provides a RESTfull(ish) interface for setting PermissionTarget perms.
@@ -77,8 +75,8 @@ public class PermissionsResource extends AbstractRestResource {
             Accessor accessor = getEntity(atype, id, Accessor.class);
             Accessor grantee = getEntity(EntityTypes.USER_PROFILE,
                     getRequesterIdentifier(), Accessor.class);
-            AclViews<Group> acl = new AclViews<Group>(graph, Group.class);
-            acl.setGlobalPermissionMatrix(accessor, grantee, globals);
+            AclManager acl = new AclManager(graph);
+            acl.setGlobalPermissionMatrix(accessor, globals);
 
             // Log the action...
             new ActionManager(graph).createAction(
@@ -88,9 +86,6 @@ public class PermissionsResource extends AbstractRestResource {
 
             tx.success();
             return getGlobalMatrix(atype, id);
-        } catch (PermissionDenied e) {
-            tx.failure();
-            throw e;
         } catch (Exception e) {
             tx.failure();
             throw new WebApplicationException(e);
@@ -185,8 +180,6 @@ public class PermissionsResource extends AbstractRestResource {
                 .build();
     }
 
-    // FIXME: Copied and pasted this from the AbstractViews class.
-    // Need to work out a better place to put it.
     private <E> E getEntity(String typeName, String name, Class<E> cls)
             throws ItemNotFound {
         // FIXME: Ensure index isn't null
