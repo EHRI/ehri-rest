@@ -48,6 +48,15 @@ public class AclViews<E extends AccessibleEntity> extends AbstractViews<E> {
                 getPermission(permissionId), scope);
     }
 
+    public PermissionGrant setGlobalPermissionMatrix(Long item, Long user,
+            String permissionId) throws PermissionDenied, ValidationError,
+            SerializationError {
+        E entity = graph.getVertex(item, cls);
+        checkEntityPermission(entity, user, PermissionTypes.GRANT);
+        return acl.grantPermissions(getAccessor(user), entity,
+                getPermission(permissionId), scope);
+    }
+
     public void setAccessors(Long item, Set<Long> accessors, Long user)
             throws PermissionDenied {
         E entity = graph.getVertex(item, cls);

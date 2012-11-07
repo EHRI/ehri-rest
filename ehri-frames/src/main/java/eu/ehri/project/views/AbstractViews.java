@@ -54,7 +54,7 @@ abstract class AbstractViews<E extends AccessibleEntity> {
             ContentType contentType = getContentType(ClassUtils
                     .getEntityType(cls));
             Permission permission = getPermission(permissionId);
-            Iterable<PermissionGrant> perms = acl.getPermissions(accessor,
+            Iterable<PermissionGrant> perms = acl.getPermissionGrants(accessor,
                     contentType, permission);
             boolean found = false;
             for (PermissionGrant perm : perms) {
@@ -86,7 +86,7 @@ abstract class AbstractViews<E extends AccessibleEntity> {
             checkPermission(user, permissionId);
         } catch (PermissionDenied e) {
             Accessor accessor = getAccessor(user);
-            Iterable<PermissionGrant> perms = acl.getPermissions(accessor,
+            Iterable<PermissionGrant> perms = acl.getPermissionGrants(accessor,
                     entity, getPermission(permissionId));
             // Scopes do not apply to entity-level perms...
             if (!perms.iterator().hasNext())
