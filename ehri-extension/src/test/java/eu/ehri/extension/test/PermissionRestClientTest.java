@@ -62,7 +62,6 @@ public class PermissionRestClientTest extends BaseRestClientTest {
 
         List<Map<String, Map<String, List<String>>>> currentMatrix = getInheritedMatrix(response
                 .getEntity(String.class));
-        System.out.println("CURRENT: " + currentMatrix);
         // Check we don't ALREADY have documentaryUnit -> create/delete perms
         assertNull(currentMatrix.get(0).get(LIMITED_USER_NAME).get(EntityTypes.DOCUMENTARY_UNIT));
         assertNull(currentMatrix.get(0).get(LIMITED_USER_NAME).get(EntityTypes.DOCUMENTARY_UNIT));
@@ -181,6 +180,12 @@ public class PermissionRestClientTest extends BaseRestClientTest {
             put(EntityTypes.DOCUMENTARY_UNIT, new LinkedList<String>() {{
                 add(PermissionTypes.CREATE);
                 add(PermissionTypes.DELETE);
+                add(PermissionTypes.UPDATE);
+            }});
+            put(EntityTypes.AGENT, new LinkedList<String>() {{
+                add(PermissionTypes.CREATE);
+                add(PermissionTypes.DELETE);
+                add(PermissionTypes.UPDATE);
             }});
         }};
         // @formatter:on

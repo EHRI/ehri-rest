@@ -65,10 +65,9 @@ public class PermissionsResource extends AbstractRestResource {
 
         JsonFactory factory = new JsonFactory();
         ObjectMapper mapper = new ObjectMapper(factory);
-        TypeReference<HashMap<String, List<String>>> typeRef = 
-                new TypeReference<HashMap<String, List<String>>>() {};
-        HashMap<String, List<String>> globals = mapper.readValue(json,
-                typeRef);
+        TypeReference<HashMap<String, List<String>>> typeRef = new TypeReference<HashMap<String, List<String>>>() {
+        };
+        HashMap<String, List<String>> globals = mapper.readValue(json, typeRef);
 
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
@@ -76,7 +75,7 @@ public class PermissionsResource extends AbstractRestResource {
             Accessor accessor = getEntity(atype, id, Accessor.class);
             Accessor grantee = getEntity(EntityTypes.USER_PROFILE,
                     getRequesterIdentifier(), Accessor.class);
-            AclManager acl = new AclManager(graph);            
+            AclManager acl = new AclManager(graph);
             acl.setGlobalPermissionMatrix(accessor, globals);
 
             // Log the action...
@@ -86,14 +85,13 @@ public class PermissionsResource extends AbstractRestResource {
                     "Updated permissions");
 
             tx.success();
+            return getGlobalMatrix(atype, id);
         } catch (Exception e) {
             tx.failure();
             throw new WebApplicationException(e);
         } finally {
             tx.finish();
         }
-
-        return getGlobalMatrix(atype, id);
     }
 
     /**
@@ -178,7 +176,8 @@ public class PermissionsResource extends AbstractRestResource {
         return Response
                 .status(Status.OK)
                 .entity(new ObjectMapper().writeValueAsBytes(acl
-                        .getInheritedEntityPermissions(accessor, entity))).build();
+                        .getInheritedEntityPermissions(accessor, entity)))
+                .build();
     }
 
     private <E> E getEntity(String typeName, String name, Class<E> cls)
