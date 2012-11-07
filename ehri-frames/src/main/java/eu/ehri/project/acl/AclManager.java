@@ -63,8 +63,6 @@ public class AclManager {
      * @param accessor
      */
     public Boolean belongsToAdmin(Accessor accessor) {
-        if (accessor == null)
-            throw new RuntimeException("NULL accessor given.");
         if (isAdmin(accessor))
             return true;
         for (Accessor parent : accessor.getAllParents()) {
@@ -82,7 +80,9 @@ public class AclManager {
     public Boolean isAnonymous(Accessor accessor) {
         if (accessor == null)
             throw new RuntimeException("NULL accessor given.");
-        return accessor.getIdentifier().equals(Group.ADMIN_GROUP_IDENTIFIER);
+        return accessor instanceof AnonymousAccessor
+                || accessor.getIdentifier()
+                        .equals(Group.ADMIN_GROUP_IDENTIFIER);
     }
 
     /*
