@@ -80,7 +80,9 @@ public class AclManager {
      * @param accessor
      */
     public Boolean isAnonymous(Accessor accessor) {
-        return accessor instanceof AnonymousAccessor;
+        if (accessor == null)
+            throw new RuntimeException("NULL accessor given.");
+        return accessor.getIdentifier().equals(Group.ADMIN_GROUP_IDENTIFIER);
     }
 
     /*
