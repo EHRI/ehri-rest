@@ -14,7 +14,6 @@ import com.tinkerpop.blueprints.Index;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
-import com.tinkerpop.frames.VertexFrame;
 import com.tinkerpop.pipes.PipeFunction;
 
 import eu.ehri.project.core.GraphHelpers;
@@ -88,7 +87,7 @@ public class AclManager {
      * We have to ascend the current accessors group hierarchy looking for a
      * groups that are contained in the current entity's ACL list.
      */
-    public List<Accessor> searchAccess(List<Accessor> accessing,
+    private List<Accessor> searchAccess(List<Accessor> accessing,
             List<Accessor> allowedAccessors) {
         if (accessing.isEmpty()) {
             return new ArrayList<Accessor>();
@@ -152,13 +151,14 @@ public class AclManager {
     }
 
     /**
-     * Get the permissions for a given accessor on a given entity.
+     * Get a list of PermissionGrants for the given user on the given target.
+     * This list includes PermissionGrants inherited from parent groups.
      * 
      * @param accessor
      * @param entity
      * @param permission
      */
-    public Iterable<PermissionGrant> getPermissions(Accessor accessor,
+    public Iterable<PermissionGrant> getPermissionGrants(Accessor accessor,
             PermissionGrantTarget target, Permission permission) {
         List<PermissionGrant> grants = new LinkedList<PermissionGrant>();
         for (PermissionGrant grant : accessor.getPermissionGrants()) {
@@ -171,7 +171,7 @@ public class AclManager {
         }
 
         for (Accessor parent : accessor.getParents()) {
-            for (PermissionGrant grant : getPermissions(parent, target,
+            for (PermissionGrant grant : getPermissionGrants(parent, target,
                     permission)) {
                 grants.add(grant);
             }
@@ -214,59 +214,14 @@ public class AclManager {
     }
 
     /**
-     * @param accessor
-     * @return
-     */
-    private Map<String, List<String>> getAccessorPermissions(Accessor accessor) {
-        Map<String, List<String>> perms = new HashMap<String, List<String>>();
-        for (PermissionGrant grant : accessor.getPermissionGrants()) {
-            // Since these are global perms only include those where the target
-            // is a content type
-            PermissionGrantTarget target = grant.getTarget();
-            if (grant.getScope() == null
-                    && AnnotationUtils.hasFramedInterface(target,
-                            ContentType.class)) {
-                ContentType ctype = graph.frame(target.asVertex(),
-                        ContentType.class);
-                List<String> plist = perms.get(ctype.getIdentifier());
-                if (plist == null) {
-                    plist = new LinkedList<String>();
-                    perms.put(ctype.getIdentifier(), plist);
-                }
-                plist.add(grant.getPermission().getIdentifier());
-            }
-        }
-        return perms;
-    }
-
-    /**
-     * Get the data structure for admin permissions, which is
-     * basically all available permissions turned on.
-     * 
-     * @return
-     */
-    private Map<String, List<String>> getAdminPermissions() {
-        Map<String, List<String>> perms = new HashMap<String, List<String>>();
-        for (Object ct : helpers.getAllPropertiesOfType(
-                EntityTypes.CONTENT_TYPE, AccessibleEntity.IDENTIFIER_KEY)) {
-            List<String> clist = new LinkedList<String>();
-            for (Object pt : helpers.getAllPropertiesOfType(
-                    EntityTypes.PERMISSION, AccessibleEntity.IDENTIFIER_KEY)) {
-                clist.add((String) pt);
-            }
-            perms.put((String) ct, clist);
-        }
-        return perms;
-    }
-
-    /**
      * Set a matrix of global permissions for a given accessor.
      * 
      * @param accessor
      * @param globals
+     * @throws PermissionDenied
      */
     public void setGlobalPermissionMatrix(Accessor accessor,
-            Map<String, List<String>> globals) {
+            Map<String, List<String>> globals) throws PermissionDenied {
         // Build a lookup of content types and permissions keyed by their
         // identifier.
         Map<String, ContentType> cmap = new HashMap<String, ContentType>();
@@ -280,22 +235,25 @@ public class AclManager {
             pmap.put(p.getIdentifier(), p);
         }
 
-        // Don't set permissions for admin.
-        if (!accessor.getIdentifier().equals(Group.ADMIN_GROUP_IDENTIFIER)) {
-            for (Entry<String, ContentType> centry : cmap.entrySet()) {
-                ContentType target = centry.getValue();
-                List<String> pset = globals.get(centry.getKey());
-                if (pset != null) {
-                    List<Object> perms = helpers.getAllPropertiesOfType(
-                            EntityTypes.PERMISSION,
-                            AccessibleEntity.IDENTIFIER_KEY);
-                    for (Object perm : perms) {
-                        Permission permission = pmap.get(perm);
-                        if (pset.contains((String) perm))
-                            grantPermissions(accessor, target, permission);
-                        else
-                            revokePermissions(accessor, target, permission);
-                    }
+        // Quick sanity check to make sure we're not trying to add/remove
+        // permissions from the admin or the anonymous accounts.
+        if (isAdmin(accessor) || isAnonymous(accessor))
+            throw new PermissionDenied(
+                    "Unable to grant or revoke permissions to system accounts.");
+
+        for (Entry<String, ContentType> centry : cmap.entrySet()) {
+            ContentType target = centry.getValue();
+            List<String> pset = globals.get(centry.getKey());
+            if (pset == null)
+                continue;
+            List<Object> perms = helpers.getAllPropertiesOfType(
+                    EntityTypes.PERMISSION, AccessibleEntity.IDENTIFIER_KEY);
+            for (Object perm : perms) {
+                Permission permission = pmap.get(perm);
+                if (pset.contains(perm)) {
+                    grantPermissions(accessor, target, permission);
+                } else {
+                    revokePermissions(accessor, target, permission);
                 }
             }
         }
@@ -394,7 +352,8 @@ public class AclManager {
     public void revokePermissions(Accessor accessor,
             PermissionGrantTarget target, Permission permission) {
         for (PermissionGrant grant : accessor.getPermissionGrants()) {
-            if (grant.getPermission().equals(permission)) {
+            if (grant.getTarget().asVertex().equals(target.asVertex())
+                    && grant.getPermission().equals(permission)) {
                 graph.removeVertex(grant.asVertex());
             }
         }
@@ -501,17 +460,63 @@ public class AclManager {
         }
         return all;
     }
-    
+
     /**
-     * Helper function to convert a set of AccessibleEntity raw verices
-     * into the given parametised type.
+     * @param accessor
+     * @return
+     */
+    private Map<String, List<String>> getAccessorPermissions(Accessor accessor) {
+        Map<String, List<String>> perms = new HashMap<String, List<String>>();
+        for (PermissionGrant grant : accessor.getPermissionGrants()) {
+            // Since these are global perms only include those where the target
+            // is a content type
+            PermissionGrantTarget target = grant.getTarget();
+            if (grant.getScope() == null
+                    && AnnotationUtils.hasFramedInterface(target,
+                            ContentType.class)) {
+                ContentType ctype = graph.frame(target.asVertex(),
+                        ContentType.class);
+                List<String> plist = perms.get(ctype.getIdentifier());
+                if (plist == null) {
+                    plist = new LinkedList<String>();
+                    perms.put(ctype.getIdentifier(), plist);
+                }
+                plist.add(grant.getPermission().getIdentifier());
+            }
+        }
+        return perms;
+    }
+
+    /**
+     * Get the data structure for admin permissions, which is basically all
+     * available permissions turned on.
+     * 
+     * @return
+     */
+    private Map<String, List<String>> getAdminPermissions() {
+        Map<String, List<String>> perms = new HashMap<String, List<String>>();
+        for (Object ct : helpers.getAllPropertiesOfType(
+                EntityTypes.CONTENT_TYPE, AccessibleEntity.IDENTIFIER_KEY)) {
+            List<String> clist = new LinkedList<String>();
+            for (Object pt : helpers.getAllPropertiesOfType(
+                    EntityTypes.PERMISSION, AccessibleEntity.IDENTIFIER_KEY)) {
+                clist.add((String) pt);
+            }
+            perms.put((String) ct, clist);
+        }
+        return perms;
+    }
+
+    /**
+     * Helper function to convert a set of AccessibleEntity raw verices into the
+     * given parametised type.
      * 
      * @param indexName
      * @param cls
      * @return
      */
-    private <E extends AccessibleEntity> Iterable<E> getVertices(String indexName,
-            Class<E> cls) {
+    private <E extends AccessibleEntity> Iterable<E> getVertices(
+            String indexName, Class<E> cls) {
         Index<Vertex> index = graph.getBaseGraph().getIndex(indexName,
                 Vertex.class);
         CloseableIterable<Vertex> query = index.query(
@@ -521,5 +526,5 @@ public class AclManager {
         } finally {
             query.close();
         }
-    }    
+    }
 }
