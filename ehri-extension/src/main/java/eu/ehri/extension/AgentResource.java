@@ -23,6 +23,7 @@ import javax.ws.rs.core.Response.Status;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 
+import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
@@ -50,7 +51,8 @@ public class AgentResource extends EhriNeo4jFramedResource<Agent> {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:\\d+}")
-    public Response getAgent(@PathParam("id") long id) throws PermissionDenied {
+    public Response getAgent(@PathParam("id") long id) throws PermissionDenied,
+            BadRequester {
         return retrieve(id);
     }
 
@@ -58,7 +60,7 @@ public class AgentResource extends EhriNeo4jFramedResource<Agent> {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:.+}")
     public Response getAgent(@PathParam("id") String id) throws ItemNotFound,
-            PermissionDenied {
+            PermissionDenied, BadRequester {
         return retrieve(id);
     }
 
@@ -67,7 +69,8 @@ public class AgentResource extends EhriNeo4jFramedResource<Agent> {
     @Path("/list")
     public StreamingOutput listAgents(
             @QueryParam("offset") @DefaultValue("0") int offset,
-            @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit) {
+            @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit)
+            throws ItemNotFound, BadRequester {
         return list(offset, limit);
     }
 
@@ -75,7 +78,8 @@ public class AgentResource extends EhriNeo4jFramedResource<Agent> {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response createAgent(String json) throws PermissionDenied,
-            ValidationError, IntegrityError, DeserializationError {
+            ValidationError, IntegrityError, DeserializationError,
+            ItemNotFound, BadRequester {
         return create(json);
     }
 
@@ -83,7 +87,8 @@ public class AgentResource extends EhriNeo4jFramedResource<Agent> {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response updateAgent(String json) throws PermissionDenied,
-            IntegrityError, ValidationError, DeserializationError {
+            IntegrityError, ValidationError, DeserializationError,
+            ItemNotFound, BadRequester {
         return update(json);
     }
 
@@ -93,21 +98,23 @@ public class AgentResource extends EhriNeo4jFramedResource<Agent> {
     @Path("/{id:.+}")
     public Response updateAgent(@PathParam("id") String id, String json)
             throws PermissionDenied, IntegrityError, ValidationError,
-            DeserializationError, ItemNotFound {
+            DeserializationError, ItemNotFound, BadRequester {
         return update(id, json);
     }
 
     @DELETE
     @Path("/{id}")
     public Response deleteAgent(@PathParam("id") long id)
-            throws PermissionDenied, ValidationError {
+            throws PermissionDenied, ValidationError, ItemNotFound,
+            BadRequester {
         return delete(id);
     }
 
     @DELETE
     @Path("/{id:.+}")
     public Response deleteAgent(@PathParam("id") String id)
-            throws PermissionDenied, ItemNotFound, ValidationError {
+            throws PermissionDenied, ItemNotFound, ValidationError,
+            BadRequester {
         return delete(id);
     }
 
@@ -124,6 +131,7 @@ public class AgentResource extends EhriNeo4jFramedResource<Agent> {
      * @throws ValidationError
      * @throws DeserializationError
      * @throws SerializationError
+     * @throws BadRequester
      */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
@@ -131,8 +139,10 @@ public class AgentResource extends EhriNeo4jFramedResource<Agent> {
     @Path("/{id:\\d+}")
     public Response createAgentDocumentaryUnit(@PathParam("id") long id,
             String json) throws PermissionDenied, ValidationError,
-            IntegrityError, DeserializationError, SerializationError {
-        Agent agent = views.detail(id, getRequesterUserProfileId());
+            IntegrityError, DeserializationError, SerializationError,
+            BadRequester {
+        Agent agent = views.detail(graph.getVertex(id, cls),
+                getRequesterUserProfile());
         DocumentaryUnit doc = createDocumentaryUnit(json, agent);
         return buildResponseFromDocumentaryUnit(doc);
     }
@@ -143,12 +153,12 @@ public class AgentResource extends EhriNeo4jFramedResource<Agent> {
     @Path("/{id:.+}/" + EntityTypes.DOCUMENTARY_UNIT)
     public Response createAgentDocumentaryUnit(@PathParam("id") String id,
             String json) throws PermissionDenied, ValidationError,
-            IntegrityError, DeserializationError, ItemNotFound {
+            IntegrityError, DeserializationError, ItemNotFound, BadRequester {
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
             Agent agent = new Query<Agent>(graph, Agent.class).get(
                     AccessibleEntity.IDENTIFIER_KEY, id,
-                    getRequesterUserProfileId());
+                    getRequesterUserProfile());
             DocumentaryUnit doc = createDocumentaryUnit(json, agent);
             tx.success();
             return buildResponseFromDocumentaryUnit(doc);
@@ -175,14 +185,14 @@ public class AgentResource extends EhriNeo4jFramedResource<Agent> {
 
     private DocumentaryUnit createDocumentaryUnit(String json, Agent agent)
             throws DeserializationError, PermissionDenied, ValidationError,
-            IntegrityError {
+            IntegrityError, BadRequester {
         EntityBundle<DocumentaryUnit> entityBundle = converter
                 .jsonToBundle(json);
 
         DocumentaryUnit doc = new ActionViews<DocumentaryUnit>(graph,
-                DocumentaryUnit.class).create(
-                converter.bundleToData(entityBundle),
-                getRequesterUserProfileId());
+                DocumentaryUnit.class)
+                .create(converter.bundleToData(entityBundle),
+                        getRequesterUserProfile());
         // Add it to this agent's collections
         agent.addCollection(doc);
         return doc;

@@ -12,6 +12,7 @@ import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistance.BundleDAO;
 import eu.ehri.project.persistance.EntityBundle;
 
@@ -30,9 +31,8 @@ public class Views<E extends AccessibleEntity> extends AbstractViews<E>
      * @return
      * @throws PermissionDenied
      */
-    public E detail(Long item, Long user) throws PermissionDenied {
-        E entity = graph.getVertex(item, cls);
-        checkReadAccess(entity, user);
+    public E detail(E entity, Accessor user) throws PermissionDenied {
+        checkReadAccess(entity, getAccessor(user));
         return entity;
     }
 
@@ -46,12 +46,12 @@ public class Views<E extends AccessibleEntity> extends AbstractViews<E>
      * @throws ValidationError
      * @throws IntegrityError
      */
-    public E update(Map<String, Object> data, Long user)
+    public E update(Map<String, Object> data, Accessor user)
             throws PermissionDenied, ValidationError, DeserializationError,
             IntegrityError {
         EntityBundle<E> bundle = converter.dataToBundle(data);
         E entity = graph.getVertex(bundle.getId(), cls);
-        checkEntityPermission(entity, user, PermissionTypes.UPDATE);
+        checkEntityPermission(entity, getAccessor(user), getPermission(PermissionTypes.UPDATE));
         return new BundleDAO<E>(graph).update(bundle);
     }
 
@@ -67,10 +67,10 @@ public class Views<E extends AccessibleEntity> extends AbstractViews<E>
      * @throws ValidationError
      * @throws IntegrityError
      */
-    public E create(Map<String, Object> data, Long user)
+    public E create(Map<String, Object> data, Accessor user)
             throws PermissionDenied, ValidationError, DeserializationError,
             IntegrityError {
-        checkPermission(user, PermissionTypes.CREATE);
+        checkPermission(getAccessor(user), getPermission(PermissionTypes.CREATE));
         EntityBundle<E> bundle = converter.dataToBundle(data);
         return new BundleDAO<E>(graph).create(bundle);
     }
@@ -86,11 +86,10 @@ public class Views<E extends AccessibleEntity> extends AbstractViews<E>
      * @throws ValidationError
      * @throws SerializationError
      */
-    public Integer delete(Long item, Long user) throws PermissionDenied,
+    public Integer delete(E item, Accessor user) throws PermissionDenied,
             ValidationError, SerializationError {
-        E entity = graph.getVertex(item, cls);
-        checkEntityPermission(entity, user, PermissionTypes.DELETE);
+        checkEntityPermission(item, getAccessor(user), getPermission(PermissionTypes.DELETE));
         return new BundleDAO<E>(graph).delete(converter
-                .vertexFrameToBundle(entity));
+                .vertexFrameToBundle(item));
     }
 }

@@ -12,7 +12,6 @@ import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.models.Action;
 import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.DocumentaryUnit;
-import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.test.AbstractFixtureTest;
 
 public class EadUpdateImporterTest extends AbstractFixtureTest {
@@ -27,15 +26,13 @@ public class EadUpdateImporterTest extends AbstractFixtureTest {
 
     @Test
     public void testImportItemsT() throws Exception {
-        UserProfile user = graph.frame(graph.getVertex(validUserId),
-                UserProfile.class);
         Agent agent = graph.frame(helper.getTestVertex(TEST_REPO), Agent.class);
         final String logMessage = "Importing a single EAD";
 
         int count = getNodeCount();
 
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        ImportLog log = new EadImportManager(graph, agent, user).importFile(ios, logMessage);
+        ImportLog log = new EadImportManager(graph, agent, validUser).importFile(ios, logMessage);
 
         // How many new nodes will have been created? We should have
         // - 1 more DocumentaryUnit
@@ -59,7 +56,7 @@ public class EadUpdateImporterTest extends AbstractFixtureTest {
         
         // Now re-import the same file
         InputStream ios2 = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        ImportLog log2 = new EadImportManager(graph, agent, user).importFile(ios2, logMessage);
+        ImportLog log2 = new EadImportManager(graph, agent, validUser).importFile(ios2, logMessage);
         
         // We should only have one more node, for the action
         assertEquals(count + 5, getNodeCount());

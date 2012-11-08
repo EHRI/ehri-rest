@@ -84,11 +84,6 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
 
         assertEquals(Response.Status.CREATED.getStatusCode(),
                 response.getStatus());
-        // TODO test if json is valid?
-        // response.getEntity(String.class)
-
-        // Get created doc via the response location?
-        URI location = response.getLocation();
     }
 
     @Test

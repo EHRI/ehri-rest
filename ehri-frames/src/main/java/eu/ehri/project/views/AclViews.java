@@ -41,12 +41,11 @@ public class AclViews<E extends AccessibleEntity> extends AbstractViews<E> {
      * @throws ValidationError
      * @throws SerializationError
      */
-    public PermissionGrant setPermission(Long item, Long user,
+    public PermissionGrant setPermission(E entity, Accessor user,
             String permissionId) throws PermissionDenied, ValidationError,
             SerializationError {
-        E entity = graph.getVertex(item, cls);
-        checkEntityPermission(entity, user, PermissionTypes.GRANT);
-        return acl.grantPermissions(getAccessor(user), entity,
+        checkEntityPermission(entity, user, getPermission(PermissionTypes.GRANT));
+        return acl.grantPermissions(user, entity,
                 getPermission(permissionId), scope);
     }
 
@@ -78,18 +77,20 @@ public class AclViews<E extends AccessibleEntity> extends AbstractViews<E> {
         acl.setGlobalPermissionMatrix(accessor, permissionMap);
     }
 
-    public void setAccessors(Long item, Set<Long> accessors, Long user)
+    public void setAccessors(E entity, Set<Accessor> accessors, Accessor user)
             throws PermissionDenied {
-        E entity = graph.getVertex(item, cls);
-        checkEntityPermission(entity, user, PermissionTypes.UPDATE);
+        checkEntityPermission(entity, user, getPermission(PermissionTypes.UPDATE));
         // FIXME: Must be a more efficient way to do this, whilst
         // ensuring that superfluous double relationships don't get created?
+        Set<Long> accessorIds = new HashSet<Long>();
+        for (Accessor acc : accessors) accessorIds.add((Long)acc.asVertex().getId());
+        
         Set<Long> existing = new HashSet<Long>();
         Set<Long> remove = new HashSet<Long>();
         for (Accessor accessor : entity.getAccessors()) {
             Long id = (Long) accessor.asVertex().getId();
             existing.add(id);
-            if (!accessors.contains(id)) {
+            if (!accessorIds.contains(id)) {
                 remove.add(id);
             }
         }
@@ -100,9 +101,9 @@ public class AclViews<E extends AccessibleEntity> extends AbstractViews<E> {
             entity.removeAccessor(graph.getVertex(removeId, Accessor.class));
             graph.getBaseGraph().stopTransaction(Conclusion.SUCCESS);
         }
-        for (Long accessorId : accessors) {
-            if (!existing.contains(accessorId)) {
-                entity.addAccessor(graph.getVertex(accessorId, Accessor.class));
+        for (Accessor accessor : accessors) {
+            if (!existing.contains((Long)accessor.asVertex().getId())) {
+                entity.addAccessor(accessor);
             }
         }
     }

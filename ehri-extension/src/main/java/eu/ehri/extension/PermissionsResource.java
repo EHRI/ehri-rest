@@ -3,8 +3,6 @@ package eu.ehri.extension;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
-import java.util.NoSuchElementException;
-
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -25,10 +23,6 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
-
-import com.tinkerpop.blueprints.CloseableIterable;
-import com.tinkerpop.blueprints.Index;
-import com.tinkerpop.blueprints.Vertex;
 
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.exceptions.ItemNotFound;
@@ -178,22 +172,5 @@ public class PermissionsResource extends AbstractRestResource {
                 .entity(new ObjectMapper().writeValueAsBytes(acl
                         .getInheritedEntityPermissions(accessor, entity)))
                 .build();
-    }
-
-    private <E> E getEntity(String typeName, String name, Class<E> cls)
-            throws ItemNotFound {
-        // FIXME: Ensure index isn't null
-        Index<Vertex> index = graph.getBaseGraph().getIndex(typeName,
-                Vertex.class);
-
-        CloseableIterable<Vertex> query = index.get(
-                AccessibleEntity.IDENTIFIER_KEY, name);
-        try {
-            return graph.frame(query.iterator().next(), cls);
-        } catch (NoSuchElementException e) {
-            throw new ItemNotFound(AccessibleEntity.IDENTIFIER_KEY, name);
-        } finally {
-            query.close();
-        }
     }
 }

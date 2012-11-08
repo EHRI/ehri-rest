@@ -8,7 +8,9 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 
 import eu.ehri.project.models.DatePeriod;
+import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityTypes;
+import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
@@ -21,9 +23,9 @@ abstract public class AbstractFixtureTest extends ModelTestBase {
     protected static final String TEST_GROUP_NAME = "People";
 
     // Members closely coupled to the test data!
-    protected Long validUserId;
-    protected Long invalidUserId;
-    protected Long itemId;
+    protected UserProfile validUser;
+    protected UserProfile invalidUser;
+    protected DocumentaryUnit item;
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
@@ -33,9 +35,9 @@ abstract public class AbstractFixtureTest extends ModelTestBase {
     @Override
     public void setUp() {
         super.setUp();
-        itemId = (Long) helper.getTestVertex("c1").getId();
-        validUserId = (Long) helper.getTestVertex("mike").getId();
-        invalidUserId = (Long) helper.getTestVertex("reto").getId();
+        item = helper.getTestFrame("c1", DocumentaryUnit.class);
+        validUser = helper.getTestFrame("mike", UserProfile.class);
+        invalidUser = helper.getTestFrame("reto", UserProfile.class);
     }
 
     // Helpers, additional test data

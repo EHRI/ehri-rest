@@ -30,8 +30,8 @@ abstract class AbstractViews<E extends AccessibleEntity> {
     protected final Converter converter = new Converter();
     protected final AclManager acl;
     /**
-     * Default scope for Permission operations is the system,
-     * but this can be overridden.
+     * Default scope for Permission operations is the system, but this can be
+     * overridden.
      */
     protected PermissionScope scope = new SystemScope();
 
@@ -50,14 +50,12 @@ abstract class AbstractViews<E extends AccessibleEntity> {
      * 
      * @throws PermissionDenied
      */
-    public void checkPermission(Long user, String permissionId)
+    public void checkPermission(Accessor accessor, Permission permission)
             throws PermissionDenied {
-        Accessor accessor = getAccessor(user);
         // If we're admin, the answer is always "no problem"!
         if (!acl.belongsToAdmin(accessor)) {
             ContentType contentType = getContentType(ClassUtils
                     .getEntityType(cls));
-            Permission permission = getPermission(permissionId);
             Iterable<PermissionGrant> perms = acl.getPermissionGrants(accessor,
                     contentType, permission);
             boolean found = false;
@@ -65,13 +63,15 @@ abstract class AbstractViews<E extends AccessibleEntity> {
                 // If the permission has unscoped rights, the user is
                 // good to do whatever they want to do here.
                 PermissionScope permScope = perm.getScope();
-                if (permScope == null || permScope.asVertex().equals(scope.asVertex())) {
+                if (permScope == null
+                        || permScope.asVertex().equals(scope.asVertex())) {
                     found = true;
                     break;
                 }
             }
             if (!found) {
-                throw new PermissionDenied(accessor, contentType, permission, scope);
+                throw new PermissionDenied(accessor, contentType, permission,
+                        scope);
             }
         }
     }
@@ -81,17 +81,16 @@ abstract class AbstractViews<E extends AccessibleEntity> {
      * 
      * @throws PermissionDenied
      */
-    public void checkEntityPermission(AccessibleEntity entity, Long user,
-            String permissionId) throws PermissionDenied {
+    public void checkEntityPermission(AccessibleEntity entity,
+            Accessor accessor, Permission permission) throws PermissionDenied {
 
         // TODO: Determine behaviour for granular item-level
         // attributes.
         try {
-            checkPermission(user, permissionId);
+            checkPermission(accessor, permission);
         } catch (PermissionDenied e) {
-            Accessor accessor = getAccessor(user);
             Iterable<PermissionGrant> perms = acl.getPermissionGrants(accessor,
-                    entity, getPermission(permissionId));
+                    entity, permission);
             // Scopes do not apply to entity-level perms...
             if (!perms.iterator().hasNext())
                 throw new PermissionDenied(accessor, entity);
@@ -106,11 +105,10 @@ abstract class AbstractViews<E extends AccessibleEntity> {
      * @param user
      * @throws PermissionDenied
      */
-    protected void checkReadAccess(AccessibleEntity entity, Long user)
+    protected void checkReadAccess(AccessibleEntity entity, Accessor user)
             throws PermissionDenied {
-        Accessor accessor = getAccessor(user);
-        if (!acl.getAccessControl(entity, accessor))
-            throw new PermissionDenied(accessor, entity);
+        if (!acl.getAccessControl(entity, user))
+            throw new PermissionDenied(user, entity);
     }
 
     /**
@@ -120,9 +118,10 @@ abstract class AbstractViews<E extends AccessibleEntity> {
      * @param user
      * @throws PermissionDenied
      */
-    protected void checkWriteAccess(AccessibleEntity entity, Long user)
+    protected void checkWriteAccess(AccessibleEntity entity, Accessor accessor)
             throws PermissionDenied {
-        checkEntityPermission(entity, user, PermissionTypes.UPDATE);
+        checkEntityPermission(entity, accessor,
+                getPermission(PermissionTypes.UPDATE));
     }
 
     /**
@@ -132,11 +131,9 @@ abstract class AbstractViews<E extends AccessibleEntity> {
      * @param id
      * @return
      */
-    protected Accessor getAccessor(Long id) {
-        if (id == null)
-            return new AnonymousAccessor();
-        // FIXME: Ensure this item really is an accessor!
-        return graph.frame(graph.getVertex(id), Accessor.class);
+    protected Accessor getAccessor(Accessor accessor) {
+        return accessor != null ? graph.frame(accessor.asVertex(),
+                Accessor.class) : new AnonymousAccessor();
     }
 
     /**
@@ -155,7 +152,6 @@ abstract class AbstractViews<E extends AccessibleEntity> {
                     "No content type node found for type: '%s'", typeName), e);
         }
     }
-    
 
     /**
      * Fetch any item of a particular type by its identifier.
@@ -181,7 +177,7 @@ abstract class AbstractViews<E extends AccessibleEntity> {
         } finally {
             query.close();
         }
-    }    
+    }
 
     /**
      * Get the permission with the given string.

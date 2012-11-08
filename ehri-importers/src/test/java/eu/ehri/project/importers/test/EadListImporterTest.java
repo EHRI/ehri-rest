@@ -28,8 +28,6 @@ public class EadListImporterTest extends AbstractFixtureTest {
 
 	@Test
 	public void testImportItemsT() throws Exception {
-		UserProfile user = graph.frame(graph.getVertex(validUserId),
-				UserProfile.class);
 		Agent agent = graph.frame(helper.getTestVertex(TEST_REPO), Agent.class);
 		final String logMessage = "Importing a single EAD";
 
@@ -38,7 +36,7 @@ public class EadListImporterTest extends AbstractFixtureTest {
 		InputStream ios = ClassLoader.getSystemResourceAsStream(EADLIST);
 		ImportLog log;
 		try {
-			log = new EadImportManager(graph, agent, user).importFile(ios,
+			log = new EadImportManager(graph, agent, validUser).importFile(ios,
 					logMessage);
 		} catch (Exception e) {
 			e.printStackTrace();

@@ -13,6 +13,7 @@ import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistance.ActionManager;
 
 /**
@@ -53,11 +54,12 @@ public class ActionViews<E extends AccessibleEntity> extends Views<E> implements
      * @return
      * @throws PermissionDenied
      * @throws ValidationError
-     * @throws IntegrityError 
+     * @throws IntegrityError
      */
     @Override
-    public E create(Map<String, Object> data, Long user)
-            throws PermissionDenied, ValidationError, DeserializationError, IntegrityError {
+    public E create(Map<String, Object> data, Accessor user)
+            throws PermissionDenied, ValidationError, DeserializationError,
+            IntegrityError {
         return create(data, user, DEFAULT_CREATE_LOG);
     }
 
@@ -71,10 +73,11 @@ public class ActionViews<E extends AccessibleEntity> extends Views<E> implements
      * @return
      * @throws PermissionDenied
      * @throws ValidationError
-     * @throws IntegrityError 
+     * @throws IntegrityError
      */
-    public E create(Map<String, Object> data, Long user, String logMessage)
-            throws PermissionDenied, ValidationError, DeserializationError, IntegrityError {
+    public E create(Map<String, Object> data, Accessor user, String logMessage)
+            throws PermissionDenied, ValidationError, DeserializationError,
+            IntegrityError {
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         // Behold: A compelling reason to upgrade to Java 7
         // http://docs.oracle.com/javase/7/docs/technotes/guides/language/catch-multiple.html
@@ -82,7 +85,7 @@ public class ActionViews<E extends AccessibleEntity> extends Views<E> implements
 
             E out = super.create(data, user);
             actionManager.createAction(out,
-                    graph.frame(graph.getVertex(user), UserProfile.class),
+                    graph.frame(user.asVertex(), UserProfile.class),
                     logMessage);
             tx.success();
             return out;
@@ -115,11 +118,12 @@ public class ActionViews<E extends AccessibleEntity> extends Views<E> implements
      * @return
      * @throws PermissionDenied
      * @throws ValidationError
-     * @throws IntegrityError 
+     * @throws IntegrityError
      */
     @Override
-    public E update(Map<String, Object> data, Long user)
-            throws PermissionDenied, ValidationError, DeserializationError, IntegrityError {
+    public E update(Map<String, Object> data, Accessor user)
+            throws PermissionDenied, ValidationError, DeserializationError,
+            IntegrityError {
         return update(data, user, DEFAULT_UPDATE_LOG);
     }
 
@@ -133,17 +137,18 @@ public class ActionViews<E extends AccessibleEntity> extends Views<E> implements
      * @return
      * @throws PermissionDenied
      * @throws ValidationError
-     * @throws IntegrityError 
+     * @throws IntegrityError
      */
-    public E update(Map<String, Object> data, Long user, String logMessage)
-            throws PermissionDenied, ValidationError, DeserializationError, IntegrityError {
+    public E update(Map<String, Object> data, Accessor user, String logMessage)
+            throws PermissionDenied, ValidationError, DeserializationError,
+            IntegrityError {
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
-
             E out = super.update(data, user);
-            actionManager.createAction(out,
-                    graph.frame(graph.getVertex(user), UserProfile.class),
-                    logMessage);
+            actionManager
+                    .createAction(out,
+                            graph.frame(user.asVertex(), UserProfile.class),
+                            logMessage);
             tx.success();
             return out;
         } catch (IntegrityError ex) {
@@ -178,7 +183,7 @@ public class ActionViews<E extends AccessibleEntity> extends Views<E> implements
      * @throws SerializationError
      */
     @Override
-    public Integer delete(Long item, Long user) throws PermissionDenied,
+    public Integer delete(E item, Accessor user) throws PermissionDenied,
             ValidationError, SerializationError {
         return delete(item, user, DEFAULT_DELETE_LOG);
     }
@@ -195,15 +200,14 @@ public class ActionViews<E extends AccessibleEntity> extends Views<E> implements
      * @throws ValidationError
      * @throws SerializationError
      */
-    public Integer delete(Long item, Long user, String logMessage)
+    public Integer delete(E item, Accessor user, String logMessage)
             throws PermissionDenied, ValidationError, SerializationError {
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
-
-            actionManager.createAction(
-                    graph.frame(graph.getVertex(item), AccessibleEntity.class),
-                    graph.frame(graph.getVertex(user), UserProfile.class),
-                    logMessage);
+            actionManager
+                    .createAction(item,
+                            graph.frame(user.asVertex(), UserProfile.class),
+                            logMessage);
             Integer count = super.delete(item, user);
             tx.success();
             return count;

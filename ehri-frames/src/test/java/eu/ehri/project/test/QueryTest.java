@@ -27,26 +27,24 @@ public class QueryTest extends AbstractFixtureTest {
                 DocumentaryUnit.class);
 
         // Check we're not admin
-        Accessor accessor = graph.frame(graph.getVertex(validUserId),
-                Accessor.class);
-        assertTrue(new AclManager(graph).belongsToAdmin(accessor));
+        assertTrue(new AclManager(graph).belongsToAdmin(validUser));
 
         // Get the total number of DocumentaryUnits the old-fashioned way
         Iterable<Vertex> allDocs = graph.getVertices(EntityType.KEY,
                 EntityTypes.DOCUMENTARY_UNIT);
 
         // And the listing the ACL way...
-        List<DocumentaryUnit> list = toList(query.list(null, null, validUserId));
+        List<DocumentaryUnit> list = toList(query.list(null, null, validUser));
         assertFalse(list.isEmpty());
         assertEquals(toList(allDocs).size(), list.size());
 
         // Test the limit function
-        list = toList(query.list(0, 1, validUserId));
+        list = toList(query.list(0, 1, validUser));
         assertFalse(list.isEmpty());
         assertEquals(1, list.size());
 
         // Test the offset function
-        list = toList(query.list(1, 2, validUserId));
+        list = toList(query.list(1, 2, validUser));
         assertFalse(list.isEmpty());
         assertEquals(2, list.size());
     }
@@ -62,8 +60,7 @@ public class QueryTest extends AbstractFixtureTest {
                 DocumentaryUnit.class);
         assertFalse(new AclManager(graph).belongsToAdmin(accessor));
 
-        List<DocumentaryUnit> list = toList(query.list(null, null,
-                (Long) accessor.asVertex().getId()));
+        List<DocumentaryUnit> list = toList(query.list(null, null, accessor));
         assertFalse(list.isEmpty());
         assertFalse(list.contains(cantRead));
     }
@@ -75,7 +72,7 @@ public class QueryTest extends AbstractFixtureTest {
 
         // Query for document identifier c1.
         List<DocumentaryUnit> list = toList(query.list(
-                AccessibleEntity.IDENTIFIER_KEY, "c1", 0, 1, validUserId));
+                AccessibleEntity.IDENTIFIER_KEY, "c1", 0, 1, validUser));
         assertFalse(list.isEmpty());
         assertEquals(1, list.size());
     }
@@ -92,7 +89,7 @@ public class QueryTest extends AbstractFixtureTest {
         // Query for document identifier starting with 'c'.
         // In the fixtures this is ALL docs
         List<DocumentaryUnit> list = toList(query.list(
-                AccessibleEntity.IDENTIFIER_KEY, "c*", null, null, validUserId));
+                AccessibleEntity.IDENTIFIER_KEY, "c*", null, null, validUser));
         assertFalse(list.isEmpty());
         assertEquals(toList(allDocs).size(), list.size());
     }
@@ -104,8 +101,7 @@ public class QueryTest extends AbstractFixtureTest {
 
         // Do a query that won't match anything.
         List<DocumentaryUnit> list = toList(query.list(
-                AccessibleEntity.IDENTIFIER_KEY, "__GONNAFAIL__", null, null,
-                validUserId));
+                AccessibleEntity.IDENTIFIER_KEY, "__GONNAFAIL__", null, null, validUser));
         assertTrue(list.isEmpty());
         assertEquals(0, list.size());
     }
@@ -116,7 +112,7 @@ public class QueryTest extends AbstractFixtureTest {
         Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
         DocumentaryUnit doc = query.get(AccessibleEntity.IDENTIFIER_KEY, "c1",
-                validUserId);
+                validUser);
         assertEquals("c1", doc.getIdentifier());
     }
 
@@ -125,7 +121,7 @@ public class QueryTest extends AbstractFixtureTest {
             IndexNotFoundException {
         Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
-        query.get(AccessibleEntity.IDENTIFIER_KEY, "IDONTEXIST", validUserId);
+        query.get(AccessibleEntity.IDENTIFIER_KEY, "IDONTEXIST", validUser);
     }
 
     @Test(expected = PermissionDenied.class)
@@ -134,7 +130,6 @@ public class QueryTest extends AbstractFixtureTest {
         Accessor accessor = helper.getTestFrame("reto", Accessor.class);
         Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
-        query.get(AccessibleEntity.IDENTIFIER_KEY, "c1", (Long) accessor
-                .asVertex().getId());
+        query.get(AccessibleEntity.IDENTIFIER_KEY, "c1", accessor);
     }
 }

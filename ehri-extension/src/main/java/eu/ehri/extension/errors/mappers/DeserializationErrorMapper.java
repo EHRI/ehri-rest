@@ -1,4 +1,4 @@
-package eu.ehri.extension.errors;
+package eu.ehri.extension.errors.mappers;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -10,18 +10,18 @@ import javax.ws.rs.ext.Provider;
 
 import org.codehaus.jackson.map.ObjectMapper;
 
-import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.exceptions.DeserializationError;
 
 @Provider
-public class ValidationErrorMapper implements ExceptionMapper<ValidationError> {
+public class DeserializationErrorMapper implements ExceptionMapper<DeserializationError> {
 
 	@SuppressWarnings("serial")
     @Override
-	public Response toResponse(final ValidationError e) {
+	public Response toResponse(final DeserializationError e) {
         Map<String, Object> out = new HashMap<String, Object>() {
             {
-                put("error", ValidationError.class.getSimpleName());
-                put("details", e.getErrors());
+                put("error", DeserializationError.class.getSimpleName());
+                put("details", e.getMessage());
             }
         };
         try {

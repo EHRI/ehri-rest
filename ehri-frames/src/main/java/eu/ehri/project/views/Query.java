@@ -2,8 +2,6 @@ package eu.ehri.project.views;
 
 import java.util.NoSuchElementException;
 
-import scala.Math;
-
 import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.Index;
 import com.tinkerpop.blueprints.Vertex;
@@ -41,14 +39,14 @@ public class Query<E extends AccessibleEntity> extends AbstractViews<E>
         super(graph, cls);
     }
 
-    public E get(String key, String value, Long user) throws PermissionDenied,
+    public E get(String key, String value, Accessor user) throws PermissionDenied,
             ItemNotFound {
         try {
             CloseableIterable<Vertex> indexQuery = getIndexForClass(cls).get(
                     key, value);
             try {
                 E item = graph.frame(indexQuery.iterator().next(), cls);
-                checkReadAccess(item, user);
+                checkReadAccess(item, getAccessor(user));
                 return item;
             } catch (NoSuchElementException e) {
                 throw new ItemNotFound(key, value);
@@ -67,7 +65,7 @@ public class Query<E extends AccessibleEntity> extends AbstractViews<E>
      * @return
      * @throws IndexNotFoundException
      */
-    public Iterable<E> list(Integer offset, Integer limit, Long user) {
+    public Iterable<E> list(Integer offset, Integer limit, Accessor user) {
         return list(AccessibleEntity.IDENTIFIER_KEY, QUERY_GLOB, offset, limit,
                 user);
     }
@@ -82,17 +80,16 @@ public class Query<E extends AccessibleEntity> extends AbstractViews<E>
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public Iterable<E> list(String key, String query, Integer offset,
-            Integer limit, Long user) {
+            Integer limit, Accessor user) {
 
         // This function is optimised for ACL actions.
         try {
-            Accessor accessor = getAccessor(user);
             CloseableIterable<Vertex> indexQuery = getIndexForClass(cls).query(
                     key, query);
             try {
                 GremlinPipeline filter = new GremlinPipeline(indexQuery)
                         .filter(new AclManager(graph)
-                                .getAclFilterFunction(accessor));
+                                .getAclFilterFunction(user));
                 return graph.frameVertices(
                         setPipelineRange(filter, offset, limit), cls);
             } finally {
