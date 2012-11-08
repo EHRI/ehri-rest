@@ -21,5 +21,4 @@ public class EntityTypes {
     public static final String PERMISSION = "permission";
     public static final String PERMISSION_GRANT = "permissionGrant";
     public static final String CONTENT_TYPE = "contentType";
-    
 }
