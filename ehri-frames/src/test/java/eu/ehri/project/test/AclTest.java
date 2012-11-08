@@ -49,7 +49,7 @@ public class AclTest extends ModelTestBase {
     public void testTheAdminGroup() {
         Group admin = helper.getTestFrame("adminGroup", Group.class);
         // check we have some users
-        assertTrue(admin.getUsers().iterator().hasNext());
+        assertTrue(admin.getMembers().iterator().hasNext());
     }
 
     /**

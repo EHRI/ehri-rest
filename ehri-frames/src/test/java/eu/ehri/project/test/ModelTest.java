@@ -11,7 +11,7 @@ import eu.ehri.project.models.Authority;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityTypes;
 import eu.ehri.project.models.Group;
-import eu.ehri.project.models.UserProfile;
+import eu.ehri.project.models.base.Accessor;
 
 public class ModelTest extends ModelTestBase {
     @Test
@@ -26,7 +26,7 @@ public class ModelTest extends ModelTestBase {
         assertFalse(groups.isEmpty());
 
         // Check the first group has a user in it
-        List<UserProfile> users = toList(groups.get(0).getUsers());
+        List<Accessor> users = toList(groups.get(0).getMembers());
         assertFalse(users.isEmpty());
     }
 

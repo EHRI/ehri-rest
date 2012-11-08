@@ -15,13 +15,19 @@ public interface Group extends VertexFrame, Accessor, AccessibleEntity,
         PermissionScope {
 
     public static final String isA = "group";
-
+    
     public static final String ADMIN_GROUP_IDENTIFIER = "admin";
     public static final String ANONYMOUS_GROUP_IDENTIFIER = "anonymous";
 
-    @Adjacency(label = UserProfile.BELONGS_TO, direction = Direction.IN)
-    public Iterable<UserProfile> getUsers();
+    @Adjacency(label = BELONGS_TO, direction = Direction.IN)
+    public Iterable<Accessor> getMembers();
 
+    @Adjacency(label = BELONGS_TO, direction = Direction.IN)
+    public void addMember(final Accessor accessor);
+    
+    @Adjacency(label = BELONGS_TO, direction = Direction.IN)
+    public void removeMember(final Accessor accessor);
+    
     @Property("name")
     public String getName();
 

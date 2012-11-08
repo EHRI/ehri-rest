@@ -6,6 +6,7 @@ import java.net.URI;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriBuilder;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -14,10 +15,14 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 
 import eu.ehri.extension.AbstractRestResource;
+import eu.ehri.project.models.EntityTypes;
 
 public class GroupRestClientTest extends BaseRestClientTest {
 
     static final String UPDATED_NAME = "UpdatedNameTEST";
+    static final String TEST_GROUP_NAME = "admin";
+    static final String CURRENT_ADMIN_USER = "mike";
+    static final String NON_ADMIN_USER = "reto";
 
     private String jsonGroupTestString = "{\"data\":{\"isA\": \"group\", \"identifier\": \"jmp\", \"name\": \"JMP\"}}";
 
@@ -49,4 +54,40 @@ public class GroupRestClientTest extends BaseRestClientTest {
                         getAdminUserProfileId()).get(ClientResponse.class);
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
     }
+    
+    @Test
+    public void testAddUser() throws Exception {
+        // Create
+        WebResource resource = client.resource(
+                UriBuilder.fromPath(getExtensionEntryPointUri())
+                .segment(EntityTypes.GROUP).segment(TEST_GROUP_NAME)
+                .segment(EntityTypes.USER_PROFILE).segment(NON_ADMIN_USER).build());
+        ClientResponse response = resource
+                .accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                        getAdminUserProfileId())
+                .post(ClientResponse.class);
+
+        assertEquals(Response.Status.OK.getStatusCode(),
+                response.getStatus());
+    }
+
+    @Test
+    public void testRemoveUser() throws Exception {
+        // Create
+        WebResource resource = client.resource(
+                UriBuilder.fromPath(getExtensionEntryPointUri())
+                .segment(EntityTypes.GROUP).segment(TEST_GROUP_NAME)
+                .segment(EntityTypes.USER_PROFILE).segment(CURRENT_ADMIN_USER).build());
+        ClientResponse response = resource
+                .accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                        getAdminUserProfileId())
+                .delete(ClientResponse.class);
+
+        assertEquals(Response.Status.OK.getStatusCode(),
+                response.getStatus());
+    }    
 }

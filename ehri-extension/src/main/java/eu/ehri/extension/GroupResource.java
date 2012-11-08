@@ -14,8 +14,12 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
+import javax.ws.rs.core.Response.Status;
 
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Transaction;
+
+import com.tinkerpop.blueprints.TransactionalGraph.Conclusion;
 
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.exceptions.DeserializationError;
@@ -25,6 +29,7 @@ import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.EntityTypes;
 import eu.ehri.project.models.Group;
+import eu.ehri.project.models.base.Accessor;
 
 /**
  * Provides a RESTfull interface for the Group class.
@@ -90,6 +95,77 @@ public class GroupResource extends EhriNeo4jFramedResource<Group> {
         return update(id, json);
     }
 
+    /**
+     * Add an accessor to a group.
+     * 
+     * @param id
+     * @param atype
+     * @param aid
+     * @return
+     * @throws PermissionDenied
+     * @throws ItemNotFound
+     * @throws BadRequester
+     */
+    @POST
+    @Path("/{id:[^/]+}/{atype:[^/]+}/{aid:.+}")
+    public Response addAccessor(@PathParam("id") String id,
+            @PathParam("atype") String atype, @PathParam("aid") String aid)
+            throws PermissionDenied, ItemNotFound, BadRequester {
+        // FIXME: Add permission checks for this!!!
+        // TODO: Check existing membership?
+        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
+        try {
+            Group group = getEntity(EntityTypes.GROUP, id, Group.class);
+            Accessor accessor = getEntity(atype, aid, Accessor.class);
+            group.addAccessor(accessor);
+            tx.success();
+        } finally {
+            tx.finish();
+        }
+        // TODO: Is there anything worth return here except OK?
+        return Response.status(Status.OK).build();
+    }
+    
+    /**
+     * Remove an accessor from a group.
+     * 
+     * @param id
+     * @param atype
+     * @param aid
+     * @return
+     * @throws PermissionDenied
+     * @throws ItemNotFound
+     * @throws BadRequester
+     */
+    @DELETE
+    @Path("/{id:[^/]+}/{atype:[^/]+}/{aid:.+}")
+    public Response removeAccessor(@PathParam("id") String id,
+            @PathParam("atype") String atype, @PathParam("aid") String aid)
+            throws PermissionDenied, ItemNotFound, BadRequester {
+        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
+        try {
+            // FIXME: Add permission checks for this!!!
+            Group group = getEntity(EntityTypes.GROUP, id, Group.class);
+            Accessor accessor = getEntity(atype, aid, Accessor.class);
+            group.removeMember(accessor);
+            tx.success();
+        } finally {
+            tx.finish();
+        }
+        // TODO: Is there anything worth return here except OK?
+        return Response.status(Status.OK).build();
+    }    
+    
+    /**
+     * Delete a group with the given graph ID.
+     * 
+     * @param id
+     * @return
+     * @throws PermissionDenied
+     * @throws ValidationError
+     * @throws ItemNotFound
+     * @throws BadRequester
+     */
     @DELETE
     @Path("/{id}")
     public Response deleteGroup(@PathParam("id") long id)
@@ -98,6 +174,16 @@ public class GroupResource extends EhriNeo4jFramedResource<Group> {
         return delete(id);
     }
 
+    /**
+     * Delete a group with the given identifier string.
+     * 
+     * @param id
+     * @return
+     * @throws PermissionDenied
+     * @throws ItemNotFound
+     * @throws ValidationError
+     * @throws BadRequester
+     */
     @DELETE
     @Path("/{id:.+}")
     public Response deleteGroup(@PathParam("id") String id)
