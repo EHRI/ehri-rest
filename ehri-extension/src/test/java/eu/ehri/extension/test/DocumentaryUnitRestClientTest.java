@@ -12,7 +12,7 @@ import java.util.Map;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
+import javax.ws.rs.core.UriBuilder;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Before;
@@ -35,6 +35,7 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
     static final String UPDATED_NAME = "UpdatedNameTEST";
     static final String TEST_JSON_IDENTIFIER = "c1";
     static final String FIRST_DOC_ID = "c1";
+    static final String TEST_HOLDER_IDENTIFIER = "r1";
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
@@ -52,8 +53,7 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
     @Test
     public void testCreateDeleteDocumentaryUnit() throws Exception {
         // Create
-        WebResource resource = client.resource(getExtensionEntryPointUri()
-                + "/documentaryUnit");
+        WebResource resource = client.resource(getCreationUri());
         ClientResponse response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
@@ -81,8 +81,7 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
     @Test
     public void testIntegrityError() throws Exception {
         // Create
-        WebResource resource = client.resource(getExtensionEntryPointUri()
-                + "/documentaryUnit");
+        WebResource resource = client.resource(getCreationUri());
         ClientResponse response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
@@ -95,8 +94,7 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
 
         // Okay... now if we try and do the same things again we should
         // get an integrity error because the identifiers are the same.
-        resource = client.resource(getExtensionEntryPointUri()
-                + "/documentaryUnit");
+        resource = client.resource(getCreationUri());
         response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
@@ -184,9 +182,8 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
     @Test
     public void testUpdateDocumentaryUnit() throws Exception {
 
-        // -create data for testing
-        WebResource resource = client.resource(getExtensionEntryPointUri()
-                + "/documentaryUnit");
+        // -create data for testing, making this a child element of c1.
+        WebResource resource = client.resource(getCreationUri());
         ClientResponse response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
@@ -241,5 +238,11 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
                 .jsonToBundle(updatedJson);
         Map<String, Object> updatedData = updatedEntityBundle.getData();
         assertEquals(UPDATED_NAME, updatedData.get("name"));
+    }
+
+    private URI getCreationUri() {
+        return UriBuilder.fromPath(getExtensionEntryPointUri())
+                .segment(EntityTypes.AGENT).segment(TEST_HOLDER_IDENTIFIER)
+                .segment(EntityTypes.DOCUMENTARY_UNIT).build();
     }
 }

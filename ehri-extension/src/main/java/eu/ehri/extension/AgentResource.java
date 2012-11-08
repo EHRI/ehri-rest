@@ -21,6 +21,7 @@ import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.Response.Status;
 
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Transaction;
 
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.IntegrityError;
@@ -139,18 +140,23 @@ public class AgentResource extends EhriNeo4jFramedResource<Agent> {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{id:.+}")
+    @Path("/{id:.+}/" + EntityTypes.DOCUMENTARY_UNIT)
     public Response createAgentDocumentaryUnit(@PathParam("id") String id,
             String json) throws PermissionDenied, ValidationError,
             IntegrityError, DeserializationError, ItemNotFound {
+        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
             Agent agent = new Query<Agent>(graph, Agent.class).get(
                     AccessibleEntity.IDENTIFIER_KEY, id,
                     getRequesterUserProfileId());
             DocumentaryUnit doc = createDocumentaryUnit(json, agent);
+            tx.success();
             return buildResponseFromDocumentaryUnit(doc);
         } catch (SerializationError e) {
+            tx.failure();
             throw new WebApplicationException(e);
+        } finally {
+            tx.finish();
         }
     }
 
@@ -159,8 +165,9 @@ public class AgentResource extends EhriNeo4jFramedResource<Agent> {
     private Response buildResponseFromDocumentaryUnit(DocumentaryUnit doc)
             throws SerializationError {
         String jsonStr = converter.vertexFrameToJson(doc);
-        UriBuilder ub = uriInfo.getAbsolutePathBuilder();
-        URI docUri = ub.path(doc.asVertex().getId().toString()).build();
+        URI docUri = UriBuilder.fromUri(uriInfo.getBaseUri())
+                .segment(EntityTypes.DOCUMENTARY_UNIT)
+                .segment(doc.getIdentifier()).build();
 
         return Response.status(Status.CREATED).location(docUri)
                 .entity((jsonStr).getBytes()).build();
