@@ -125,18 +125,6 @@ abstract class AbstractViews<E extends AccessibleEntity> {
     }
 
     /**
-     * Get the access with the given id, or the special anonymous access
-     * otherwise.
-     * 
-     * @param id
-     * @return
-     */
-    protected Accessor getAccessor(Accessor accessor) {
-        return accessor != null ? graph.frame(accessor.asVertex(),
-                Accessor.class) : new AnonymousAccessor();
-    }
-
-    /**
      * Get the content type with the given id.
      * 
      * @param typeName

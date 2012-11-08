@@ -46,7 +46,7 @@ public class Query<E extends AccessibleEntity> extends AbstractViews<E>
                     key, value);
             try {
                 E item = graph.frame(indexQuery.iterator().next(), cls);
-                checkReadAccess(item, getAccessor(user));
+                checkReadAccess(item, user);
                 return item;
             } catch (NoSuchElementException e) {
                 throw new ItemNotFound(key, value);
