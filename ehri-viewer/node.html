@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>EHRI collection viewer</title>
+	<!-- css should be mede non-inline -->
+	<link rel="stylesheet" type="text/css" href="script/render-node.css" />
+	<!-- jquery -->
+	<script src="script/jquery-1.8.2.min.js"></script>
+	<!-- our code -->
+	<script src="script/node.js"></script>
+	<script>
+	// jQuery main entrance
+	$(document).ready(function() {
+		neo4jTabularNodeViewer.initControls();
+		// hardcoded initial node 0 !
+		neo4jTabularNodeViewer.loadNode(0);
+	});
+	</script>
+</head>
+<body>
+	<h1>EHRI collection viewer</h1>
+	<div id="controls"></div>
+	<div id="result"></div>
+</body>
+</html>
