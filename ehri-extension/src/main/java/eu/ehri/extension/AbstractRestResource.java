@@ -16,10 +16,11 @@ import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
 import eu.ehri.extension.errors.BadRequester;
+import eu.ehri.project.acl.AnonymousAccessor;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.EntityTypes;
-import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessor;
 
 public abstract class AbstractRestResource {
 
@@ -46,41 +47,16 @@ public abstract class AbstractRestResource {
     /**
      * Retrieve the id of the UserProfile of the requester
      * 
-     * @return The vertex id
-     */
-    protected Long getRequesterUserProfileId() {
-        String id = getRequesterIdentifier();
-        if (id == null) {
-            return null;
-        } else {
-            // just take the first one and get the Long value
-            Index<Vertex> index = graph.getBaseGraph().getIndex(
-                    EntityTypes.USER_PROFILE, Vertex.class);
-            CloseableIterable<Vertex> query = index.get(
-                    AccessibleEntity.IDENTIFIER_KEY, id);
-            try {
-                return (Long) query.iterator().next().getId();
-            } catch (NoSuchElementException e) {
-                return null;
-            } finally {
-                query.close();
-            }
-        }
-    }
-
-    /**
-     * Retrieve the id of the UserProfile of the requester
-     * 
      * @return The UserProfile
      * @throws BadRequester
      */
-    protected UserProfile getRequesterUserProfile() throws BadRequester {
+    protected Accessor getRequesterUserProfile() throws BadRequester {
         String id = getRequesterIdentifier();
         if (id == null) {
-            return null;
+            return new AnonymousAccessor();
         } else {
             try {
-                return getEntity(EntityTypes.USER_PROFILE, id, UserProfile.class);
+                return getEntity(EntityTypes.USER_PROFILE, id, Accessor.class);
             } catch (ItemNotFound e) {
                 throw new BadRequester(id);
             }
@@ -92,7 +68,7 @@ public abstract class AbstractRestResource {
      * 
      * @return
      */
-    protected String getRequesterIdentifier() {
+    private String getRequesterIdentifier() {
         List<String> list = requestHeaders.getRequestHeader(AUTH_HEADER_NAME);
         if (list != null && !list.isEmpty()) {
             return list.get(0);

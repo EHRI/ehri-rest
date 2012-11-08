@@ -24,6 +24,7 @@ import org.codehaus.jackson.type.TypeReference;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 
+import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
@@ -67,8 +68,7 @@ public class PermissionsResource extends AbstractRestResource {
         try {
             // remove all existing permission grants
             Accessor accessor = getEntity(atype, id, Accessor.class);
-            Accessor grantee = getEntity(EntityTypes.USER_PROFILE,
-                    getRequesterIdentifier(), Accessor.class);
+            Accessor grantee = getRequesterUserProfile();
             AclManager acl = new AclManager(graph);
             acl.setGlobalPermissionMatrix(accessor, globals);
 
@@ -127,16 +127,16 @@ public class PermissionsResource extends AbstractRestResource {
      * @throws JsonMappingException
      * @throws IOException
      * @throws ItemNotFound
+     * @throws BadRequester
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response getGlobalMatrix() throws PermissionDenied,
             JsonGenerationException, JsonMappingException, IOException,
-            ItemNotFound {
-        String reqId = getRequesterIdentifier();
-        if (reqId == null)
-            throw new WebApplicationException(Response.Status.BAD_REQUEST);
-        return getGlobalMatrix(EntityTypes.USER_PROFILE, reqId);
+            ItemNotFound, BadRequester {
+        Accessor accessor = getRequesterUserProfile();
+        return getGlobalMatrix(EntityTypes.USER_PROFILE,
+                accessor.getIdentifier());
     }
 
     /**
