@@ -4,6 +4,8 @@ import java.util.List;
 
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
+
+import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.exceptions.InvalidInputFormatError;
 import eu.ehri.project.models.Agent;
@@ -98,9 +100,10 @@ public abstract class AbstractMultiItemRecursiveImporter<T> extends
      * 
      * @throws ValidationError
      * @throws InvalidInputFormatError
+     * @throws IntegrityError 
      * 
      */
-    public void importItems() throws ValidationError, InvalidInputFormatError {
+    public void importItems() throws ValidationError, InvalidInputFormatError, IntegrityError {
         for (T item : getEntryPoints()) {
             importItem(item, null, 0);
         }
@@ -113,10 +116,11 @@ public abstract class AbstractMultiItemRecursiveImporter<T> extends
      * @param parent
      * @param depth
      * @throws ValidationError
+     * @throws IntegrityError 
      */
     @Override
     public DocumentaryUnit importItem(T itemData, DocumentaryUnit parent,
-            int depth) throws ValidationError {
+            int depth) throws ValidationError, IntegrityError {
 
         DocumentaryUnit frame = super.importItem(itemData, parent, depth);
 

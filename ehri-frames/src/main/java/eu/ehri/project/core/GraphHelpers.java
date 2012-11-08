@@ -3,12 +3,16 @@
  */
 package eu.ehri.project.core;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 import org.neo4j.graphdb.GraphDatabaseService;
 
+import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Element;
@@ -18,6 +22,9 @@ import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import eu.ehri.project.exceptions.IndexNotFoundException;
+import eu.ehri.project.exceptions.IntegrityError;
+
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Main purpose is to be used by the ehri-plugin to provide a REST API to the
@@ -32,6 +39,30 @@ public class GraphHelpers {
     }
 
     protected Neo4jGraph graph;
+
+    /**
+     * List the given property for objects within a given index.
+     * 
+     * @param indexName
+     * @param propertyName
+     * @return
+     */
+    public List<Object> getAllPropertiesOfType(String indexName,
+            String propertyName) {
+        List<Object> out = new LinkedList<Object>();
+        Index<Vertex> index = graph.getIndex(indexName, Vertex.class);
+        if (index != null) {
+            CloseableIterable<Vertex> query = index.query(propertyName, "*");
+            try {
+                for (Vertex v : query) {
+                    out.add(v.getProperty(propertyName));
+                }
+            } finally {
+                query.close();
+            }
+        }
+        return out;
+    }
 
     /**
      * Get an index of type <code>T</code>.
@@ -121,11 +152,12 @@ public class GraphHelpers {
      * @param indexName
      * @return
      * @throws IndexNotFoundException
+     * @throws IntegrityError
      */
     public Vertex createIndexedVertex(Map<String, Object> data, String indexName)
-            throws IndexNotFoundException {
+            throws IndexNotFoundException, IntegrityError {
         Index<Vertex> index = getIndex(indexName, Vertex.class);
-        return createIndexedVertex(data, index, null);
+        return createIndexedVertex(data, index, null, null);
     }
 
     /**
@@ -136,11 +168,13 @@ public class GraphHelpers {
      * @param keys
      * @return
      * @throws IndexNotFoundException
+     * @throws IntegrityError
      */
     public Vertex createIndexedVertex(Map<String, Object> data,
-            String indexName, List<String> keys) throws IndexNotFoundException {
+            String indexName, List<String> keys) throws IndexNotFoundException,
+            IntegrityError {
         Index<Vertex> index = getIndex(indexName, Vertex.class);
-        return createIndexedVertex(data, index, keys);
+        return createIndexedVertex(data, index, keys, null);
     }
 
     /**
@@ -150,10 +184,11 @@ public class GraphHelpers {
      * @param data
      * @param index
      * @return
+     * @throws IntegrityError
      */
     public Vertex createIndexedVertex(Map<String, Object> data,
-            Index<Vertex> index) {
-        return createIndexedVertex(data, index, null);
+            Index<Vertex> index) throws IntegrityError {
+        return createIndexedVertex(data, index, null, null);
     }
 
     /**
@@ -163,13 +198,14 @@ public class GraphHelpers {
      * @param index
      * @param keys
      * @return
+     * @throws IntegrityError
      */
     public Vertex createIndexedVertex(Map<String, Object> data,
-            Index<Vertex> index, List<String> keys) {
+            Index<Vertex> index, List<String> keys, List<String> uniqueKeys)
+            throws IntegrityError {
         try {
-
+            checkUniqueness(index, uniqueKeys, data, null);
             Vertex node = graph.addVertex(null);
-
             for (Map.Entry<String, Object> entry : data.entrySet()) {
                 if (entry.getValue() == null)
                     continue;
@@ -181,10 +217,43 @@ public class GraphHelpers {
             }
             graph.stopTransaction(TransactionalGraph.Conclusion.SUCCESS);
             return node;
+        } catch (IntegrityError e) {
+            graph.stopTransaction(TransactionalGraph.Conclusion.FAILURE);
+            throw e;
         } catch (Exception e) {
             graph.stopTransaction(TransactionalGraph.Conclusion.FAILURE);
             e.printStackTrace();
             throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * @param index
+     * @param uniqueKeys
+     * @param data
+     * @throws IntegrityError
+     */
+    private void checkUniqueness(Index<Vertex> index, List<String> uniqueKeys,
+            Map<String, Object> data, Vertex current) throws IntegrityError {
+        if (uniqueKeys != null && uniqueKeys.size() != 0) {
+            Map<String, String> clashes = new HashMap<String, String>();
+            for (String ukey : uniqueKeys) {
+                String uval = (String) data.get(ukey);
+                if (index.count(ukey, uval) > 0) {
+                    CloseableIterable<Vertex> query = index.get(ukey, uval);
+                    try {
+                        Vertex other = query.iterator().next();
+                        if (other != null && !other.equals(current)) {
+                            clashes.put(ukey, uval);
+                        }
+                    } finally {
+                        query.close();
+                    }
+                }
+            }
+            if (!clashes.isEmpty()) {
+                throw new IntegrityError(index.getIndexName(), clashes);
+            }
         }
     }
 
@@ -298,10 +367,11 @@ public class GraphHelpers {
      * @param data
      * @param indexName
      * @return
+     * @throws IntegrityError
      * @throws Exception
      */
     public Vertex updateIndexedVertex(Object id, Map<String, Object> data,
-            String indexName) throws IndexNotFoundException {
+            String indexName) throws IndexNotFoundException, IntegrityError {
         return updateIndexedVertex(id, data, indexName, null);
     }
 
@@ -314,12 +384,14 @@ public class GraphHelpers {
      * @param indexName
      * @param keys
      * @return
+     * @throws IntegrityError
      * @throws Exception
      */
     public Vertex updateIndexedVertex(Object id, Map<String, Object> data,
-            String indexName, List<String> keys) throws IndexNotFoundException {
+            String indexName, List<String> keys) throws IndexNotFoundException,
+            IntegrityError {
         Index<Vertex> index = getIndex(indexName, Vertex.class);
-        return updateIndexedVertex(id, data, index, keys);
+        return updateIndexedVertex(id, data, index, keys, null);
     }
 
     /**
@@ -329,15 +401,20 @@ public class GraphHelpers {
      * @param data
      * @param index
      * @return
+     * @throws IntegrityError
      */
     public Vertex updateIndexedVertex(Object id, Map<String, Object> data,
-            Index<Vertex> index, List<String> keys) {
+            Index<Vertex> index, List<String> keys, List<String> uniqueKeys)
+            throws IntegrityError {
         try {
             Vertex node = graph.getVertex(id);
+            checkUniqueness(index, uniqueKeys, data, node);
             replaceProperties(index, node, data, keys);
-
             graph.stopTransaction(TransactionalGraph.Conclusion.SUCCESS);
             return node;
+        } catch (IntegrityError e) {
+            graph.stopTransaction(TransactionalGraph.Conclusion.FAILURE);
+            throw e;
         } catch (Exception e) {
             graph.stopTransaction(TransactionalGraph.Conclusion.FAILURE);
             throw new RuntimeException(e);
@@ -463,6 +540,42 @@ public class GraphHelpers {
      * @param id
      *            The edge identifier
      */
+    public void deleteEdge(Index<Edge> index, Object id, List<String> keys) {
+        Edge edge = graph.getEdge(id);
+        for (String key : keys) {
+            index.remove(key, edge.getProperty(key), edge);
+        }
+        graph.removeEdge(edge);
+        graph.stopTransaction(TransactionalGraph.Conclusion.SUCCESS);
+    }
+
+    /**
+     * Delete vertex with its edges Neo4j requires you delete all adjacent edges
+     * first. Blueprints' removeVertex() method does that; the Neo4jServer
+     * DELETE URI does not.
+     * 
+     * @param graphDb
+     *            The graph database
+     * @param id
+     *            The vertex identifier
+     */
+    public void deleteVertex(Index<Vertex> index, Object id, List<String> keys) {
+        Vertex vertex = graph.getVertex(id);
+        for (String key : keys) {
+            index.remove(key, vertex.getProperty(key), vertex);
+        }
+        graph.removeVertex(vertex);
+        graph.stopTransaction(TransactionalGraph.Conclusion.SUCCESS);
+    }
+
+    /**
+     * Delete Edge
+     * 
+     * @param graphDb
+     *            The graph database
+     * @param id
+     *            The edge identifier
+     */
     public void deleteEdge(Object id) {
         Edge edge = graph.getEdge(id);
         graph.removeEdge(edge);
@@ -484,5 +597,29 @@ public class GraphHelpers {
         graph.removeVertex(vertex);
         graph.stopTransaction(TransactionalGraph.Conclusion.SUCCESS);
     }
-    
+
+    // Helpers
+
+    /*
+     * Create a compount property name for all the unique keys
+     */
+    private String getUniqueKey(List<String> uniqueKeys) {
+        Collections.sort(uniqueKeys);
+        return StringUtils.join(uniqueKeys, "-");
+    }
+
+    /*
+     * Create a compound property value for all the unique values.
+     */
+    private String getUniqueValue(List<String> uniqueKeys,
+            Map<String, Object> data) {
+        Collections.sort(uniqueKeys);
+        List<String> values = new LinkedList<String>();
+        for (String key : uniqueKeys) {
+            Object val = data.get(key);
+            if (val != null)
+                values.add(val.toString());
+        }
+        return StringUtils.join(values, "-");
+    }
 }

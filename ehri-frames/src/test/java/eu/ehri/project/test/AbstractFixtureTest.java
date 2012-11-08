@@ -4,11 +4,14 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 
+import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.EntityTypes;
+import eu.ehri.project.models.annotations.EntityType;
+import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessor;
 
 abstract public class AbstractFixtureTest extends ModelTestBase {
 
@@ -18,22 +21,21 @@ abstract public class AbstractFixtureTest extends ModelTestBase {
     protected static final String TEST_GROUP_NAME = "People";
 
     // Members closely coupled to the test data!
-    protected Long validUserId = 20L;
-    protected Long invalidUserId = 21L;
-    protected Long itemId = 1L;
+    protected Long validUserId;
+    protected Long invalidUserId;
+    protected Long itemId;
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
     }
-
+    
     @Before
+    @Override
     public void setUp() {
         super.setUp();
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        super.tearDown();
+        itemId = (Long) helper.getTestVertex("c1").getId();
+        validUserId = (Long) helper.getTestVertex("mike").getId();
+        invalidUserId = (Long) helper.getTestVertex("reto").getId();
     }
 
     // Helpers, additional test data
@@ -46,18 +48,18 @@ abstract public class AbstractFixtureTest extends ModelTestBase {
         return new HashMap<String, Object>() {{
             put("id", null);
             put("data", new HashMap<String, Object>() {{
-                put("name", TEST_COLLECTION_NAME);
-                put("identifier", "someid-01");
-                put("isA", EntityTypes.DOCUMENTARY_UNIT);
+                put(Accessor.NAME, TEST_COLLECTION_NAME);
+                put(AccessibleEntity.IDENTIFIER_KEY, "someid-01");
+                put(EntityType.KEY, EntityTypes.DOCUMENTARY_UNIT);
             }});
             put("relationships", new HashMap<String, Object>() {{
                 put("describes", new LinkedList<HashMap<String, Object>>() {{
                     add(new HashMap<String, Object>() {{
                         put("id", null);
                         put("data", new HashMap<String, Object>() {{
-                            put("identifier", "someid-01");
+                            put(AccessibleEntity.IDENTIFIER_KEY, "someid-01");
                             put("title", "A brand new item description");
-                            put("isA", EntityTypes.DOCUMENT_DESCRIPTION);
+                            put(EntityType.KEY, EntityTypes.DOCUMENT_DESCRIPTION);
                             put("languageCode", "en");
                         }});
                     }});
@@ -66,9 +68,9 @@ abstract public class AbstractFixtureTest extends ModelTestBase {
                     add(new HashMap<String, Object>() {{
                         put("id", null);
                         put("data", new HashMap<String, Object>() {{
-                            put("startDate", TEST_START_DATE);
-                            put("endDate", TEST_START_DATE);
-                            put("isA", EntityTypes.DATE_PERIOD);
+                            put(DatePeriod.START_DATE, TEST_START_DATE);
+                            put(DatePeriod.END_DATE, TEST_START_DATE);
+                            put(EntityType.KEY, EntityTypes.DATE_PERIOD);
                         }});
                     }});
                 }});
@@ -82,10 +84,9 @@ abstract public class AbstractFixtureTest extends ModelTestBase {
         return new HashMap<String, Object>() {{
             put("id", null);
             put("data", new HashMap<String, Object>() {{
-                put("name", TEST_USER_NAME);
-                put("identifier", "joe-blogs");
-                put("userId", 9999L);
-                put("isA", EntityTypes.USER_PROFILE);
+                put(Accessor.NAME, TEST_USER_NAME);
+                put(AccessibleEntity.IDENTIFIER_KEY, "joe-blogs");
+                put(EntityType.KEY, EntityTypes.USER_PROFILE);
             }});
         }};
     }
@@ -96,9 +97,9 @@ abstract public class AbstractFixtureTest extends ModelTestBase {
         return new HashMap<String, Object>() {{
             put("id", null);
             put("data", new HashMap<String, Object>() {{
-                put("name", TEST_GROUP_NAME);
-                put("identifier", "people");
-                put("isA", EntityTypes.GROUP);
+                put(Accessor.NAME, TEST_GROUP_NAME);
+                put(AccessibleEntity.IDENTIFIER_KEY, "people");
+                put(EntityType.KEY, EntityTypes.GROUP);
             }});
         }};
     }

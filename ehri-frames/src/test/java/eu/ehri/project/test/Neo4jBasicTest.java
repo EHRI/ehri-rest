@@ -89,7 +89,7 @@ public class Neo4jBasicTest {
         // assertThat( (String) foundNode.getProperty( "name" ), is( "Nancy" )
         // );
         assertEquals(foundNode.getId(), n.getId());
-        assertEquals((String) foundNode.getProperty("name"), "Nancy");
+        assertEquals(foundNode.getProperty("name"), "Nancy");
 
         // END SNIPPET: unitTest
     }

@@ -5,8 +5,6 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.List;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import eu.ehri.project.models.DocumentaryUnit;
@@ -15,16 +13,6 @@ public class HierarchyTest extends ModelTestBase {
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
-    }
-
-    @Before
-    public void setUp() {
-        super.setUp();
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        super.tearDown();
     }
 
     @Test

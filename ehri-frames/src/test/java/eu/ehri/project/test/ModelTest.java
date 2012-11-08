@@ -4,8 +4,6 @@ import static org.junit.Assert.*;
 
 import java.util.List;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import eu.ehri.project.models.Address;
 import eu.ehri.project.models.Agent;
@@ -16,17 +14,6 @@ import eu.ehri.project.models.Group;
 import eu.ehri.project.models.UserProfile;
 
 public class ModelTest extends ModelTestBase {
-
-    @Before
-    public void setUp() {
-        super.setUp();
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        super.tearDown();
-    }
-
     @Test
     public void testTheFixturesLoaded() {
         assertTrue(graph.getVertices().iterator().hasNext());

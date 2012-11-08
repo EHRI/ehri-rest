@@ -8,11 +8,12 @@ import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.AnnotatableEntity;
 import eu.ehri.project.models.base.DescribedEntity;
+import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.base.TemporalEntity;
 
 @EntityType(EntityTypes.AGENT)
 public interface Agent extends AccessibleEntity, DescribedEntity,
-        AnnotatableEntity {
+        AnnotatableEntity, PermissionScope {
 
     public static final String HOLDS = "holds";
     public static final String HAS_ADDRESS = "hasAddress";

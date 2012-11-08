@@ -14,7 +14,7 @@ import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 
-import eu.ehri.extension.EhriNeo4jFramedResource;
+import eu.ehri.extension.AbstractRestResource;
 import eu.ehri.project.models.EntityTypes;
 import eu.ehri.project.persistance.Converter;
 
@@ -23,22 +23,22 @@ import eu.ehri.project.persistance.Converter;
  */
 abstract public class AbstractRestClientTest {
 
-	/**
-	 * Get the URI of the extension, the base url of the RESTfull interface
-	 * 
-	 * @return The URI (url) as string
-	 */
-	abstract String getExtensionEntryPointUri();
-	
-	/**
-	 * Get the id of a userProfile with 'admin' privileges. 
-	 * 
-	 * @return The Id as a String
-	 */
-	abstract String getAdminUserProfileId();
+    /**
+     * Get the URI of the extension, the base url of the RESTfull interface
+     * 
+     * @return The URI (url) as string
+     */
+    abstract String getExtensionEntryPointUri();
 
-	protected Client client = Client.create();
-	protected Converter converter = new Converter();
+    /**
+     * Get the id of a userProfile with 'admin' privileges.
+     * 
+     * @return The Id as a String
+     */
+    abstract String getAdminUserProfileId();
+
+    protected Client client = Client.create();
+    protected Converter converter = new Converter();
 
     /**
      * Tests if we have an admin user, we need that user for doing all the other
@@ -48,14 +48,13 @@ abstract public class AbstractRestClientTest {
     public void testAdminGetUserProfile() throws Exception {
         // get the admin user profile
         WebResource resource = client.resource(getExtensionEntryPointUri()
-                + "/" + EntityTypes.USER_PROFILE + "/" + getAdminUserProfileId());
+                + "/" + EntityTypes.USER_PROFILE + "/"
+                + getAdminUserProfileId());
         ClientResponse response = resource
                 .accept(MediaType.APPLICATION_JSON)
-                .header(EhriNeo4jFramedResource.AUTH_HEADER_NAME,
-                		getAdminUserProfileId()).get(ClientResponse.class);
+                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                        getAdminUserProfileId()).get(ClientResponse.class);
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
-
-        // TODO check it has a group with 'admin' rights
     }
 
     /*** Helpers ***/

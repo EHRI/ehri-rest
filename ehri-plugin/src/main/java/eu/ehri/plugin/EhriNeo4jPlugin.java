@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Map;
 
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Transaction;
 import org.neo4j.server.plugins.Description;
 import org.neo4j.server.plugins.Name;
 import org.neo4j.server.plugins.Parameter;
@@ -72,9 +73,19 @@ public class EhriNeo4jPlugin extends ServerPlugin {
             @Description("Data") @Parameter(name = "data", optional = false) Map data,
             @Description("Index name") @Parameter(name = "index", optional = false) String index)
             throws Exception {
-        GraphHelpers helpers = new GraphHelpers(graphDb);
-        return ObjectToRepresentationConverter.convert(helpers
-                .createIndexedVertex(data, index));
+        Transaction tx = graphDb.beginTx();
+        try {
+            GraphHelpers helpers = new GraphHelpers(graphDb);
+            Vertex n = helpers.createIndexedVertex(data, index);
+            tx.success();
+            return ObjectToRepresentationConverter.convert(n);
+        } catch (Exception e) {
+            tx.failure();
+            e.printStackTrace();
+            throw e;
+        } finally {
+            tx.finish();
+        }
     }
 
     /**
@@ -91,10 +102,19 @@ public class EhriNeo4jPlugin extends ServerPlugin {
             @Source GraphDatabaseService graphDb,
             @Description("Vertex identifier") @Parameter(name = "id", optional = false) long id)
             throws Exception {
-        GraphHelpers helpers = new GraphHelpers(graphDb);
-        helpers.deleteVertex(id);
-        // TODO other results on failure
-        return ObjectToRepresentationConverter.convert("deleted");
+        Transaction tx = graphDb.beginTx();
+        try {
+            GraphHelpers helpers = new GraphHelpers(graphDb);
+            helpers.deleteVertex(id);
+            tx.success();
+            return ObjectToRepresentationConverter.convert("deleted");
+        } catch (Exception e) {
+            tx.failure();
+            e.printStackTrace();
+            throw e;
+        } finally {
+            tx.finish();
+        }
     }
 
     /**
@@ -115,9 +135,19 @@ public class EhriNeo4jPlugin extends ServerPlugin {
             @Description("Data") @Parameter(name = "data", optional = false) Map data,
             @Description("Index name") @Parameter(name = "index", optional = false) String index)
             throws Exception {
-        GraphHelpers helpers = new GraphHelpers(graphDb);
-        return ObjectToRepresentationConverter.convert(helpers
-                .updateIndexedVertex(id, data, index));
+        Transaction tx = graphDb.beginTx();
+        try {
+            GraphHelpers helpers = new GraphHelpers(graphDb);
+            Vertex v = helpers.updateIndexedVertex(id, data, index);
+            tx.success();
+            return ObjectToRepresentationConverter.convert(v);
+        } catch (Exception e) {
+            tx.failure();
+            e.printStackTrace();
+            throw e;
+        } finally {
+            tx.finish();
+        }
     }
 
     /*** Edge ***/
@@ -144,9 +174,20 @@ public class EhriNeo4jPlugin extends ServerPlugin {
             @Description("Data") @Parameter(name = "data", optional = false) Map data,
             @Description("Index name") @Parameter(name = "index", optional = false) String index)
             throws Exception {
-        GraphHelpers helpers = new GraphHelpers(graphDb);
-        return ObjectToRepresentationConverter.convert(helpers
-                .createIndexedEdge(outV, inV, typeLabel, data, index));
+        Transaction tx = graphDb.beginTx();
+        try {
+            GraphHelpers helpers = new GraphHelpers(graphDb);
+            Edge e = helpers.createIndexedEdge(outV, inV, typeLabel, data,
+                    index);
+            tx.success();
+            return ObjectToRepresentationConverter.convert(e);
+        } catch (Exception e) {
+            tx.failure();
+            e.printStackTrace();
+            throw e;
+        } finally {
+            tx.finish();
+        }
     }
 
     /**
@@ -163,10 +204,19 @@ public class EhriNeo4jPlugin extends ServerPlugin {
             @Source GraphDatabaseService graphDb,
             @Description("Edge identifier") @Parameter(name = "id", optional = false) long id)
             throws Exception {
-        GraphHelpers helpers = new GraphHelpers(graphDb);
-        helpers.deleteEdge(id);
-        // TODO other results on failure
-        return ObjectToRepresentationConverter.convert("deleted");
+        Transaction tx = graphDb.beginTx();
+        try {
+            GraphHelpers helpers = new GraphHelpers(graphDb);
+            helpers.deleteEdge(id);
+            tx.success();
+            return ObjectToRepresentationConverter.convert("deleted");
+        } catch (Exception e) {
+            tx.failure();
+            e.printStackTrace();
+            throw e;
+        } finally {
+            tx.finish();
+        }
     }
 
     /**
@@ -187,9 +237,19 @@ public class EhriNeo4jPlugin extends ServerPlugin {
             @Description("Data") @Parameter(name = "data", optional = false) Map data,
             @Description("Index name") @Parameter(name = "index", optional = false) String index)
             throws Exception {
-        GraphHelpers helpers = new GraphHelpers(graphDb);
-        return ObjectToRepresentationConverter.convert(helpers
-                .updateIndexedEdge(id, data, index));
+        Transaction tx = graphDb.beginTx();
+        try {
+            GraphHelpers helpers = new GraphHelpers(graphDb);
+            Edge e = helpers.updateIndexedEdge(id, data, index);
+            tx.success();
+            return ObjectToRepresentationConverter.convert(e);
+        } catch (Exception e) {
+            tx.failure();
+            e.printStackTrace();
+            throw e;
+        } finally {
+            tx.finish();
+        }
     }
 
     /*** Index ***/
@@ -260,7 +320,7 @@ public class EhriNeo4jPlugin extends ServerPlugin {
                     .add(new com.tinkerpop.blueprints.Parameter<String, Object>(
                             entry.getKey(), entry.getValue()));
         }
-        return (com.tinkerpop.blueprints.Parameter[]) parametersList
+        return parametersList
                 .toArray(new com.tinkerpop.blueprints.Parameter[parametersList
                         .size()]);
     }

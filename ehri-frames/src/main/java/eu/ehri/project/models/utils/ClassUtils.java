@@ -24,22 +24,35 @@ import eu.ehri.project.models.EntityTypes;
 import eu.ehri.project.models.annotations.Dependent;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
+import eu.ehri.project.models.annotations.Unique;
 
 public class ClassUtils {
 
     public static final String FETCH_METHOD_PREFIX = "get";
-    
+
+    /**
+     * Get the entity type string for a given class.
+     */
+    public static String getEntityType(Class<?> cls) {
+        EntityType ann = cls.getAnnotation(EntityType.class);
+        if (ann == null)
+            throw new RuntimeException(String.format(
+                    "Programming error! Bad bundle type: %s", cls.getName()));
+        return ann.value();
+    }
+
     /**
      * Load a lookup of entity type name against the corresponding class.
      */
-    @SuppressWarnings({ "unchecked"})
+    @SuppressWarnings({ "unchecked" })
     public static Map<String, Class<? extends VertexFrame>> getEntityClasses() {
         // iterate through all the classes in our models package
         // and filter those that aren't extending VertexFrame
         Map<String, Class<? extends VertexFrame>> entitycls = new HashMap<String, Class<? extends VertexFrame>>();
         Class<?>[] classArray;
         try {
-            classArray = ClassUtils.getClasses(EntityTypes.class.getPackage().getName());
+            classArray = ClassUtils.getClasses(EntityTypes.class.getPackage()
+                    .getName());
         } catch (Exception e) {
             throw new RuntimeException(
                     "Unrecoverable problem loading EntityType classes", e);
@@ -278,13 +291,32 @@ public class ClassUtils {
         return makeUnique(out);
     }
 
+    public static List<String> getUniquePropertyKeys(Class<?> cls) {
+        List<String> out = new LinkedList<String>();
+        for (Method method : cls.getMethods()) {
+            Unique unique = method.getAnnotation(Unique.class);
+            if (unique != null) {
+                Property ann = method.getAnnotation(Property.class);
+                if (ann != null)
+                    out.add(ann.value());
+            }
+
+        }
+
+        for (Class<?> s : cls.getInterfaces()) {
+            out.addAll(getUniquePropertyKeys(s));
+        }
+
+        return makeUnique(out);
+    }
+
     /**
      * Another method to make a list unique. Sigh.
      * 
      * @param list
      * @return
      */
-    private static <T> List<T> makeUnique(List<T> list) {
+    public static <T> List<T> makeUnique(List<T> list) {
         List<T> out = new LinkedList<T>();
         HashSet<T> set = new HashSet<T>();
         set.addAll(list);

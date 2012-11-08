@@ -5,7 +5,9 @@ import java.util.Map;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
+import eu.ehri.project.acl.PermissionTypes;
 import eu.ehri.project.exceptions.DeserializationError;
+import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
@@ -13,10 +15,9 @@ import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.persistance.BundleDAO;
 import eu.ehri.project.persistance.EntityBundle;
 
-public class Views<E extends AccessibleEntity> extends AbstractViews<E> implements IViews<E> {
+public class Views<E extends AccessibleEntity> extends AbstractViews<E>
+        implements IViews<E> {
 
-    
-    
     public Views(FramedGraph<Neo4jGraph> graph, Class<E> cls) {
         super(graph, cls);
     }
@@ -29,7 +30,7 @@ public class Views<E extends AccessibleEntity> extends AbstractViews<E> implemen
      * @return
      * @throws PermissionDenied
      */
-    public E detail(long item, long user) throws PermissionDenied {
+    public E detail(Long item, Long user) throws PermissionDenied {
         E entity = graph.getVertex(item, cls);
         checkReadAccess(entity, user);
         return entity;
@@ -43,33 +44,40 @@ public class Views<E extends AccessibleEntity> extends AbstractViews<E> implemen
      * @return
      * @throws PermissionDenied
      * @throws ValidationError
+     * @throws IntegrityError
      */
-    public E update(Map<String, Object> data, long user)
-            throws PermissionDenied, ValidationError, DeserializationError {
+    public E update(Map<String, Object> data, Long user)
+            throws PermissionDenied, ValidationError, DeserializationError,
+            IntegrityError {
         EntityBundle<E> bundle = converter.dataToBundle(data);
         E entity = graph.getVertex(bundle.getId(), cls);
-        checkWriteAccess(entity, user);
+        checkEntityPermission(entity, user, PermissionTypes.UPDATE);
         return new BundleDAO<E>(graph).update(bundle);
     }
 
     /**
-     * Create a new object of type `E` from the given data.
+     * Create a new object of type `E` from the given data, within the scope of
+     * `scope`.
      * 
      * @param data
      * @param user
      * @return
+     * @throws DeserializationError
      * @throws PermissionDenied
      * @throws ValidationError
+     * @throws IntegrityError
      */
-    public E create(Map<String, Object> data, long user)
-            throws PermissionDenied, ValidationError, DeserializationError {
-        checkGlobalWriteAccess(user);
+    public E create(Map<String, Object> data, Long user)
+            throws PermissionDenied, ValidationError, DeserializationError,
+            IntegrityError {
+        checkPermission(user, PermissionTypes.CREATE);
         EntityBundle<E> bundle = converter.dataToBundle(data);
         return new BundleDAO<E>(graph).create(bundle);
     }
 
     /**
-     * Delete an object bundle, following dependency cascades.
+     * Delete an object bundle, following dependency cascades, within the scope
+     * of item `scope`.
      * 
      * @param item
      * @param user
@@ -78,11 +86,10 @@ public class Views<E extends AccessibleEntity> extends AbstractViews<E> implemen
      * @throws ValidationError
      * @throws SerializationError
      */
-    public Integer delete(long item, long user) throws PermissionDenied,
+    public Integer delete(Long item, Long user) throws PermissionDenied,
             ValidationError, SerializationError {
         E entity = graph.getVertex(item, cls);
-        checkGlobalWriteAccess(user);
-        checkWriteAccess(entity, user);
+        checkEntityPermission(entity, user, PermissionTypes.DELETE);
         return new BundleDAO<E>(graph).delete(converter
                 .vertexFrameToBundle(entity));
     }

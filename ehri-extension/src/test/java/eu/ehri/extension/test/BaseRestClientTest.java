@@ -7,13 +7,16 @@ import java.util.Map;
 import javax.ws.rs.core.MediaType;
 
 import org.codehaus.jackson.map.ObjectMapper;
+import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.neo4j.server.configuration.ThirdPartyJaxRsPackage;
 
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 
+import eu.ehri.extension.AbstractRestResource;
 import eu.ehri.extension.EhriNeo4jFramedResource;
 import eu.ehri.plugin.test.utils.ServerRunner;
 
@@ -30,7 +33,7 @@ public class BaseRestClientTest extends AbstractRestClientTest {
     final static private String extensionEntryPointUri = baseUri + mountPoint;
 
     // Admin user prefix - depends on fixture data
-    final static private String adminUserProfileId = "20";
+    final static private String adminUserProfileId = "mike";
 
     protected static ServerRunner runner;
 
@@ -49,6 +52,16 @@ public class BaseRestClientTest extends AbstractRestClientTest {
         initializeTestDb(BaseRestClientTest.class.getName());
     }
 
+    @Before
+    public void setupDb() throws Exception {
+        runner.setUp();
+    }
+
+    @After
+    public void resetDb() throws Exception {
+        runner.tearDown();
+    }
+
     /**
      * Initialise a new graph database in a given location. This should be
      * unique for each class, because otherwise problems can be encountered when
@@ -57,7 +70,7 @@ public class BaseRestClientTest extends AbstractRestClientTest {
      * 
      * @param dbName
      */
-    protected static void initializeTestDb(String dbName) {
+    public static void initializeTestDb(String dbName) {
         runner = new ServerRunner(dbName, testServerPort);
         runner.getConfigurator()
                 .getThirdpartyJaxRsClasses()
@@ -87,7 +100,7 @@ public class BaseRestClientTest extends AbstractRestClientTest {
                 + "/" + entityType + "/list");
         ClientResponse response = resource.accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
-                .header(EhriNeo4jFramedResource.AUTH_HEADER_NAME, userId)
+                .header(AbstractRestResource.AUTH_HEADER_NAME, userId)
                 .get(ClientResponse.class);
         String json = response.getEntity(String.class);
         ObjectMapper mapper = new ObjectMapper();

@@ -1,6 +1,5 @@
 package eu.ehri.project.persistance;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -150,11 +149,7 @@ public class EntityBundle<T extends VertexFrame> {
      * @return
      */
     public String getEntityType() {
-        EntityType ann = cls.getAnnotation(EntityType.class);
-        if (ann == null)
-            throw new RuntimeException(String.format(
-                    "Programming error! Bad bundle type: %s", cls.getName()));
-        return ann.value();
+        return ClassUtils.getEntityType(cls);
     }
 
     /**
@@ -205,6 +200,16 @@ public class EntityBundle<T extends VertexFrame> {
      */
     public List<String> getPropertyKeys() {
         return ClassUtils.getPropertyKeys(cls);
+    }
+
+    /**
+     * Return a list of property keys which must be unique.
+     * 
+     * @return
+     */
+    public List<String> getUniquePropertyKeys() {
+        // TODO Auto-generated method stub
+        return ClassUtils.getUniquePropertyKeys(cls);
     }
 
     @Override

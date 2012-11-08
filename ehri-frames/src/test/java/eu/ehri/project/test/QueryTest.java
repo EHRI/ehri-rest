@@ -29,17 +29,26 @@ public class QueryTest extends AbstractFixtureTest {
         // Check we're not admin
         Accessor accessor = graph.frame(graph.getVertex(validUserId),
                 Accessor.class);
-        assertTrue(new AclManager(graph).isAdmin(accessor));
+        assertTrue(new AclManager(graph).belongsToAdmin(accessor));
 
         // Get the total number of DocumentaryUnits the old-fashioned way
         Iterable<Vertex> allDocs = graph.getVertices(EntityType.KEY,
                 EntityTypes.DOCUMENTARY_UNIT);
 
         // And the listing the ACL way...
-        List<DocumentaryUnit> list = toList(query.list(validUserId));
-
+        List<DocumentaryUnit> list = toList(query.list(null, null, validUserId));
         assertFalse(list.isEmpty());
         assertEquals(toList(allDocs).size(), list.size());
+
+        // Test the limit function
+        list = toList(query.list(0, 1, validUserId));
+        assertFalse(list.isEmpty());
+        assertEquals(1, list.size());
+
+        // Test the offset function
+        list = toList(query.list(1, 2, validUserId));
+        assertFalse(list.isEmpty());
+        assertEquals(2, list.size());
     }
 
     @Test
@@ -51,10 +60,10 @@ public class QueryTest extends AbstractFixtureTest {
         Accessor accessor = helper.getTestFrame("reto", Accessor.class);
         DocumentaryUnit cantRead = helper.getTestFrame("c1",
                 DocumentaryUnit.class);
-        assertFalse(new AclManager(graph).isAdmin(accessor));
+        assertFalse(new AclManager(graph).belongsToAdmin(accessor));
 
-        List<DocumentaryUnit> list = toList(query.list((Long) accessor
-                .asVertex().getId()));
+        List<DocumentaryUnit> list = toList(query.list(null, null,
+                (Long) accessor.asVertex().getId()));
         assertFalse(list.isEmpty());
         assertFalse(list.contains(cantRead));
     }
@@ -66,7 +75,7 @@ public class QueryTest extends AbstractFixtureTest {
 
         // Query for document identifier c1.
         List<DocumentaryUnit> list = toList(query.list(
-                AccessibleEntity.IDENTIFIER_KEY, "c1", validUserId));
+                AccessibleEntity.IDENTIFIER_KEY, "c1", 0, 1, validUserId));
         assertFalse(list.isEmpty());
         assertEquals(1, list.size());
     }
@@ -83,7 +92,7 @@ public class QueryTest extends AbstractFixtureTest {
         // Query for document identifier starting with 'c'.
         // In the fixtures this is ALL docs
         List<DocumentaryUnit> list = toList(query.list(
-                AccessibleEntity.IDENTIFIER_KEY, "c*", validUserId));
+                AccessibleEntity.IDENTIFIER_KEY, "c*", null, null, validUserId));
         assertFalse(list.isEmpty());
         assertEquals(toList(allDocs).size(), list.size());
     }
@@ -95,31 +104,37 @@ public class QueryTest extends AbstractFixtureTest {
 
         // Do a query that won't match anything.
         List<DocumentaryUnit> list = toList(query.list(
-                AccessibleEntity.IDENTIFIER_KEY, "__GONNAFAIL__", validUserId));
+                AccessibleEntity.IDENTIFIER_KEY, "__GONNAFAIL__", null, null,
+                validUserId));
         assertTrue(list.isEmpty());
         assertEquals(0, list.size());
     }
-    
+
     @Test
-    public void testGet() throws PermissionDenied, ItemNotFound, IndexNotFoundException {
+    public void testGet() throws PermissionDenied, ItemNotFound,
+            IndexNotFoundException {
         Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
-        DocumentaryUnit doc = query.get(AccessibleEntity.IDENTIFIER_KEY, "c1", validUserId);
+        DocumentaryUnit doc = query.get(AccessibleEntity.IDENTIFIER_KEY, "c1",
+                validUserId);
         assertEquals("c1", doc.getIdentifier());
     }
-    
-    @Test(expected=ItemNotFound.class)
-    public void testGetItemNotFound() throws PermissionDenied, ItemNotFound, IndexNotFoundException {
+
+    @Test(expected = ItemNotFound.class)
+    public void testGetItemNotFound() throws PermissionDenied, ItemNotFound,
+            IndexNotFoundException {
         Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
         query.get(AccessibleEntity.IDENTIFIER_KEY, "IDONTEXIST", validUserId);
     }
-    
-    @Test(expected=PermissionDenied.class)
-    public void testGetPermissionDenied() throws PermissionDenied, ItemNotFound, IndexNotFoundException {
+
+    @Test(expected = PermissionDenied.class)
+    public void testGetPermissionDenied() throws PermissionDenied,
+            ItemNotFound, IndexNotFoundException {
         Accessor accessor = helper.getTestFrame("reto", Accessor.class);
         Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
-        query.get(AccessibleEntity.IDENTIFIER_KEY, "c1", (Long)accessor.asVertex().getId());
+        query.get(AccessibleEntity.IDENTIFIER_KEY, "c1", (Long) accessor
+                .asVertex().getId());
     }
 }

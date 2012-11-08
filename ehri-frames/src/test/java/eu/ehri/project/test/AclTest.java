@@ -2,18 +2,28 @@ package eu.ehri.project.test;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 
-import org.junit.After;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import eu.ehri.project.acl.AclManager;
+import eu.ehri.project.acl.AnonymousAccessor;
+import eu.ehri.project.acl.PermissionTypes;
+import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.EntityTypes;
 import eu.ehri.project.models.Group;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.relationships.Access;
 
 public class AclTest extends ModelTestBase {
 
@@ -23,15 +33,11 @@ public class AclTest extends ModelTestBase {
     public static void setUpBeforeClass() throws Exception {
     }
 
+    @Override
     @Before
     public void setUp() {
         super.setUp();
         acl = new AclManager(graph);
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        super.tearDown();
     }
 
     @Test
@@ -50,17 +56,12 @@ public class AclTest extends ModelTestBase {
      * Ensure user 'Reto' can't access collection 'c3'.
      */
     @Test
-    public void testAdminReadWrite() {
+    public void testAdminRead() {
         Group admin = helper.getTestFrame("adminGroup", Group.class);
         UserProfile reto = helper.getTestFrame("reto", UserProfile.class);
         DocumentaryUnit c3 = helper.getTestFrame("c3", DocumentaryUnit.class);
-        Access adminAccess = acl.getAccessControl(c3, admin);
-        Access retoAccess = acl.getAccessControl(c3, reto);
-
-        assertTrue(adminAccess.getRead());
-        assertTrue(adminAccess.getWrite());
-        assertFalse(retoAccess.getRead());
-        assertFalse(retoAccess.getWrite());
+        assertTrue(acl.getAccessControl(c3, admin));
+        assertFalse(acl.getAccessControl(c3, reto));
     }
 
     /**
@@ -70,15 +71,11 @@ public class AclTest extends ModelTestBase {
     public void testNiodGroup() {
         Group niod = helper.getTestFrame("niodGroup", Group.class);
         DocumentaryUnit c1 = helper.getTestFrame("c1", DocumentaryUnit.class);
-        Access access1 = acl.getAccessControl(c1, niod);
-        assertFalse(access1.getRead());
-        assertFalse(access1.getWrite());
+        assertFalse(acl.getAccessControl(c1, niod));
 
         // but we should have read-only access to items with no specified perms.
         DocumentaryUnit c4 = helper.getTestFrame("c4", DocumentaryUnit.class);
-        Access access2 = acl.getAccessControl(c4, niod);
-        assertTrue(access2.getRead());
-        assertFalse(access2.getWrite());
+        assertTrue(acl.getAccessControl(c4, niod));
     }
 
     /**
@@ -88,9 +85,7 @@ public class AclTest extends ModelTestBase {
     public void testUserGroupPermOverride() {
         Accessor tim = helper.getTestFrame("tim", Accessor.class);
         AccessibleEntity c3 = helper.getTestFrame("c3", AccessibleEntity.class);
-        Access access = acl.getAccessControl(c3, tim);
-        assertTrue(access.getRead());
-        assertTrue(access.getWrite());
+        assertTrue(acl.getAccessControl(c3, tim));
     }
 
     /**
@@ -101,11 +96,9 @@ public class AclTest extends ModelTestBase {
         Accessor reto = helper.getTestFrame("reto", Accessor.class);
         AccessibleEntity prof = helper.getTestFrame("reto",
                 AccessibleEntity.class);
-        Access access = acl.getAccessControl(prof, reto);
         // Check user ISN'T admin (otherwise they'd be able to access anything)
-        assertFalse(acl.isAdmin(reto));
-        assertTrue(access.getRead());
-        assertTrue(access.getWrite());
+        assertFalse(acl.belongsToAdmin(reto));
+        assertTrue(acl.getAccessControl(prof, reto));
     }
 
     /**
@@ -116,9 +109,18 @@ public class AclTest extends ModelTestBase {
         Accessor reto = helper.getTestFrame("reto", Accessor.class);
         AccessibleEntity tim = helper.getTestFrame("tim",
                 AccessibleEntity.class);
-        Access access = acl.getAccessControl(tim, reto);
-        assertTrue(access.getRead());
-        assertFalse(access.getWrite());
+        assertTrue(acl.getAccessControl(tim, reto));
+    }
+
+    /**
+     * Test user accessing other profile as anonymous.
+     */
+    @Test
+    public void testUserAccessAsAnonymous() {
+        Accessor anon = new AnonymousAccessor();
+        AccessibleEntity tim = helper.getTestFrame("tim",
+                AccessibleEntity.class);
+        assertTrue(acl.getAccessControl(tim, anon));
     }
 
     /**
@@ -129,58 +131,139 @@ public class AclTest extends ModelTestBase {
         Accessor reto = helper.getTestFrame("reto", Accessor.class);
         AccessibleEntity kcl = helper.getTestFrame("kclGroup",
                 AccessibleEntity.class);
-        Access access = acl.getAccessControl(kcl, reto);
         // Admin can change anything, so ensure the user ISN'T a member of admin
-        assertFalse(acl.isAdmin(reto));
-        assertTrue(access.getRead());
-        assertFalse(access.getWrite());
+        assertFalse(acl.belongsToAdmin(reto));
+        assertTrue(acl.getAccessControl(kcl, reto));
     }
 
     /**
      * Test changing permissions on an item.
+     * 
+     * @throws PermissionDenied
      */
     @Test
-    public void testChangingItemPermissions() {
+    public void testChangingItemAccessibility() throws PermissionDenied {
         Accessor reto = helper.getTestFrame("reto", Accessor.class);
         AccessibleEntity kcl = helper.getTestFrame("kclGroup",
                 AccessibleEntity.class);
-        Access access = acl.getAccessControl(kcl, reto);
         // Admin can change anything, so ensure the user ISN'T a member of admin
-        assertFalse(acl.isAdmin(reto));
-        assertTrue(access.getRead());
-        assertFalse(access.getWrite());
+        assertFalse(acl.belongsToAdmin(reto));
+        assertTrue(acl.getAccessControl(kcl, reto));
 
         // Now set the access control on KCL so Reto can write to it...
-        acl.setAccessControl(kcl, reto, true, true);
-        access = acl.getAccessControl(kcl, reto);
-        assertTrue(access != null);
-        assertTrue(access.getWrite());
+        acl.setAccessControl(kcl, reto);
+        assertTrue(acl.getAccessControl(kcl, reto));
     }
 
     /**
      * Test removing permissions.
+     * 
+     * @throws PermissionDenied
      */
     @Test
-    public void testRemovingItemPermissions() {
+    public void testRemovingItemAccessibility() throws PermissionDenied {
         Accessor reto = helper.getTestFrame("reto", Accessor.class);
         AccessibleEntity kcl = helper.getTestFrame("kclGroup",
                 AccessibleEntity.class);
-        Access access = acl.getAccessControl(kcl, reto);
         // Admin can change anything, so ensure the user ISN'T a member of admin
-        assertFalse(acl.isAdmin(reto));
-        assertTrue(access.getRead());
-        assertFalse(access.getWrite());
+        assertFalse(acl.belongsToAdmin(reto));
+        assertTrue(acl.getAccessControl(kcl, reto));
 
         // Now set the access control on KCL so Reto can write to it...
-        acl.setAccessControl(kcl, reto, true, true);
-        access = acl.getAccessControl(kcl, reto);
-        assertTrue(access != null);
-        assertTrue(access.getWrite());
+        acl.setAccessControl(kcl, reto);
+        assertTrue(acl.getAccessControl(kcl, reto));
 
         // Now remove the access control...
         acl.removeAccessControl(kcl, reto);
-        access = acl.getAccessControl(kcl, reto);
-        assertTrue(access != null);
-        assertFalse(access.getWrite());
+        assertTrue(acl.getAccessControl(kcl, reto));
+    }
+
+    /**
+     * Test the global permission matrix.
+     * 
+     * @throws PermissionDenied
+     */
+    @Test
+    public void testGlobalPermissionMatrix() throws PermissionDenied {
+        Accessor bob = helper.getTestFrame("bob", Accessor.class);
+        // Admin can change anything, so ensure the user ISN'T a member of admin
+        assertFalse(acl.belongsToAdmin(bob));
+
+        Map<String, List<String>> cmap = acl.getGlobalPermissions(bob);
+        // Bob has been granted CREATE access for documentaryUnits.
+        assertTrue(cmap.get(EntityTypes.DOCUMENTARY_UNIT).contains(
+                PermissionTypes.CREATE));
+    }
+
+    @Test
+    public void testPermissionSet() throws PermissionDenied {
+
+        String[] perms = { PermissionTypes.CREATE, PermissionTypes.DELETE,
+                PermissionTypes.UPDATE, PermissionTypes.GRANT,
+                PermissionTypes.ANNOTATE };
+        String[] types = { EntityTypes.DOCUMENTARY_UNIT,
+                EntityTypes.USER_PROFILE, EntityTypes.AGENT, EntityTypes.GROUP };
+        Map<String, List<String>> matrix = new HashMap<String, List<String>>();
+        for (String type : types) {
+            matrix.put(type, new LinkedList<String>());
+            for (String perm : perms)
+                matrix.get(type).add(perm);
+        }
+
+        Accessor accessor = helper.getTestFrame("reto", Accessor.class);
+        // Admin can change anything, so ensure the user ISN'T a member of admin
+        assertFalse(acl.belongsToAdmin(accessor));
+
+        // Check initial perms are empty...
+        Map<String, List<String>> cmap = acl.getGlobalPermissions(accessor);
+        for (String type : types) {
+            assertNull(cmap.get(type));
+        }
+
+        AclManager acl = new AclManager(graph);
+        acl.setGlobalPermissionMatrix(accessor, matrix);
+
+        // Check that everything is still there...
+        cmap = acl.getGlobalPermissions(accessor);
+        for (String type : types) {
+            List<String> ps = cmap.get(type);
+            assertNotNull(ps);
+            for (String perm : perms) {
+                assertTrue(ps.contains(perm));
+            }
+        }
+    }
+
+    /**
+     * Test admin perms cannot be set.
+     * 
+     * @throws PermissionDenied
+     */
+    @Test(expected = PermissionDenied.class)
+    public void testPermissionSetForAdmin() throws PermissionDenied {
+
+        String[] perms = { PermissionTypes.CREATE };
+        String[] types = { EntityTypes.DOCUMENTARY_UNIT };
+        Map<String, List<String>> matrix = new HashMap<String, List<String>>();
+        for (String type : types) {
+            matrix.put(type, new LinkedList<String>());
+            for (String perm : perms)
+                matrix.get(type).add(perm);
+        }
+
+        Accessor accessor = helper.getTestFrame("adminGroup", Accessor.class);
+        // Admin can change anything, so ensure the user ISN'T a member of admin
+        assertTrue(acl.belongsToAdmin(accessor));
+
+        // Check initial perms are empty...
+        Map<String, List<String>> cmap = acl.getGlobalPermissions(accessor);
+        for (String type : types) {
+            assertNotNull(cmap.get(type));
+        }
+
+        AclManager acl = new AclManager(graph);
+        // This should throw PermissionDenied
+        acl.setGlobalPermissionMatrix(accessor, matrix);
+        fail();
     }
 }

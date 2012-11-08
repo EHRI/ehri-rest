@@ -2,22 +2,25 @@ package eu.ehri.project.views;
 
 import java.util.Map;
 
-import com.tinkerpop.frames.VertexFrame;
-
 import eu.ehri.project.exceptions.DeserializationError;
+import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.PermissionScope;
 
-public interface IViews<E extends VertexFrame> {
-    public E detail(long item, long user) throws PermissionDenied;
+public interface IViews<E extends AccessibleEntity> {
+    public void setScope(PermissionScope scope);
+    
+    public E detail(Long item, Long user) throws PermissionDenied;
 
-    public E update(Map<String, Object> data, long user)
-            throws PermissionDenied, ValidationError, DeserializationError;
+    public E update(Map<String, Object> data, Long user)
+            throws PermissionDenied, ValidationError, DeserializationError, IntegrityError;
 
-    public E create(Map<String, Object> data, long user)
-            throws PermissionDenied, ValidationError, DeserializationError;
+    public E create(Map<String, Object> data, Long user)
+            throws PermissionDenied, ValidationError, DeserializationError, IntegrityError;
 
-    public Integer delete(long item, long user) throws PermissionDenied,
+    public Integer delete(Long item, Long user) throws PermissionDenied,
             ValidationError, SerializationError;
 }

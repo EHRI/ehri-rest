@@ -1,19 +1,14 @@
 package eu.ehri.project.importers.test;
 
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
-
 import java.io.IOException;
 import java.io.InputStream;
 
 import org.junit.Test;
-import org.xml.sax.SAXException;
-
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.EadImportManager;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.exceptions.InputParseError;
-import eu.ehri.project.models.Action;
 import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.test.AbstractFixtureTest;

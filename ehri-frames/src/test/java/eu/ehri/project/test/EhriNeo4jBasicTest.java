@@ -26,6 +26,7 @@ import com.tinkerpop.blueprints.Vertex;
 
 import eu.ehri.project.core.GraphHelpers;
 import eu.ehri.project.exceptions.IndexNotFoundException;
+import eu.ehri.project.exceptions.IntegrityError;
 
 public class EhriNeo4jBasicTest {
     protected GraphDatabaseService graphDb;
@@ -57,27 +58,27 @@ public class EhriNeo4jBasicTest {
     }
 
     @Test
-    public void testCreateIndexedVertex() throws IndexNotFoundException {
+    public void testCreateIndexedVertex() throws IndexNotFoundException, IntegrityError {
         // TODO test if it handles null or empty strings etc.
 
         Vertex indexedVertex = createIndexedVertexWithProperty(TEST_KEY,
                 TEST_VALUE);
-        assertEquals((String) indexedVertex.getProperty(TEST_KEY), TEST_VALUE);
+        assertEquals(indexedVertex.getProperty(TEST_KEY), TEST_VALUE);
 
         // do we have a node with that id and property in the neo4j database?
         Node foundNode = graphDb.getNodeById((Long) indexedVertex.getId());
         assertEquals(foundNode.getId(), indexedVertex.getId());
-        assertEquals((String) foundNode.getProperty(TEST_KEY), TEST_VALUE);
+        assertEquals(foundNode.getProperty(TEST_KEY), TEST_VALUE);
     }
 
     @Test(expected = org.neo4j.graphdb.NotFoundException.class)
-    public void testDeleteIndexedVertex() throws IndexNotFoundException {
+    public void testDeleteIndexedVertex() throws IndexNotFoundException, IntegrityError {
         // We need to create one first, sorry
         Vertex indexedVertex = createIndexedVertexWithProperty(TEST_KEY,
                 TEST_VALUE);
         Long vertexId = (Long) indexedVertex.getId();
 
-        helpers.deleteVertex((Long) indexedVertex.getId());
+        helpers.deleteVertex(indexedVertex.getId());
 
         // we should not find the node in the neo4j database anymore
         graphDb.getNodeById(vertexId);
@@ -86,7 +87,7 @@ public class EhriNeo4jBasicTest {
     // TODO test deleting non-existing vertex, and other bad input
 
     @Test
-    public void testUpdateIndexedVertex() throws IndexNotFoundException {
+    public void testUpdateIndexedVertex() throws IndexNotFoundException, IntegrityError {
         // We need to create one first, sorry
         Vertex indexedVertex = createIndexedVertexWithProperty(TEST_KEY,
                 TEST_VALUE);
@@ -111,7 +112,7 @@ public class EhriNeo4jBasicTest {
     }
 
     @Test
-    public void testCreateIndexedEdge() throws IndexNotFoundException {
+    public void testCreateIndexedEdge() throws IndexNotFoundException, IntegrityError {
         // TODO test if it handles null or empty strings etc.
 
         // create two Vertices first
@@ -139,12 +140,12 @@ public class EhriNeo4jBasicTest {
         assertEquals(foundRelationship.getStartNode().getId(), outV.getId());
         assertEquals(foundRelationship.getEndNode().getId(), inV.getId());
         assertEquals(foundRelationship.getType().toString(), TEST_TYPE); // ?
-        assertEquals((String) foundRelationship.getProperty(TEST_KEY),
+        assertEquals(foundRelationship.getProperty(TEST_KEY),
                 TEST_VALUE);
     }
 
     @Test(expected = org.neo4j.graphdb.NotFoundException.class)
-    public void testDeleteIndexedEdge() throws IndexNotFoundException {
+    public void testDeleteIndexedEdge() throws IndexNotFoundException, IntegrityError {
         // TODO test if it handles null or empty strings etc.
 
         // create two Vertices first
@@ -175,7 +176,7 @@ public class EhriNeo4jBasicTest {
     }
 
     @Test
-    public void testUpdateIndexedEdge() throws IndexNotFoundException {
+    public void testUpdateIndexedEdge() throws IndexNotFoundException, IntegrityError {
         // TODO test if it handles null or empty strings etc.
 
         final String NEW_TEST_KEY = "newTestKey";
@@ -259,7 +260,7 @@ public class EhriNeo4jBasicTest {
 
     @SuppressWarnings("serial")
     @Test
-    public void testSelectiveIndexing() throws IndexNotFoundException {
+    public void testSelectiveIndexing() throws IndexNotFoundException, IntegrityError {
         // We need to create one first, sorry
         Map<String, Object> data = new HashMap<String, Object>() {
             {
@@ -276,7 +277,7 @@ public class EhriNeo4jBasicTest {
         };
 
         Index<Vertex> index = helpers.createVertexIndex("people");
-        Vertex joe = helpers.createIndexedVertex(data, index, keys);
+        Vertex joe = helpers.createIndexedVertex(data, index, keys, null);
 
         // try and find joe via name and age...
         CloseableIterable<Vertex> query1 = index
@@ -296,14 +297,92 @@ public class EhriNeo4jBasicTest {
         assertFalse(query3.iterator().hasNext());
     }
 
+    @SuppressWarnings("serial")
+    @Test(expected=IntegrityError.class)
+    public void testUniqueIndexingOnCreate() throws IndexNotFoundException, IntegrityError {
+        // Name must be unique
+        List<String> unique = new LinkedList<String>() {
+            {
+                add("name");
+            }
+        };
+        List<String> keys = new LinkedList<String>() {
+            {
+                add("name");
+                add("age");
+            }
+        };
+
+        Map<String, Object> data1 = new HashMap<String, Object>() {
+            {
+                put("name", "joe");
+                put("age", 32);
+                put("height", "5.11");
+            }
+        };
+        Map<String, Object> data2 = new HashMap<String, Object>() {
+            {
+                put("name", "joe");
+                put("age", 36);
+                put("height", "5.6");
+            }
+        };
+
+        Index<Vertex> index = helpers.createVertexIndex("people");        
+        helpers.createIndexedVertex(data1, index, keys, unique);
+        // This should throw an integrity error
+        helpers.createIndexedVertex(data2, index, keys, unique);
+    }
+
+    @SuppressWarnings("serial")
+    @Test(expected=IntegrityError.class)
+    public void testUniqueIndexingOnUpdate() throws IndexNotFoundException, IntegrityError {
+        // Name must be unique
+        List<String> unique = new LinkedList<String>() {
+            {
+                add("name");
+            }
+        };
+        List<String> keys = new LinkedList<String>() {
+            {
+                add("name");
+                add("age");
+            }
+        };
+
+        Map<String, Object> data1 = new HashMap<String, Object>() {
+            {
+                put("name", "joe");
+                put("age", 32);
+                put("height", "5.11");
+            }
+        };
+        Map<String, Object> data2 = new HashMap<String, Object>() {
+            {
+                put("name", "bob");
+                put("age", 36);
+                put("height", "5.6");
+            }
+        };
+
+        Index<Vertex> index = helpers.createVertexIndex("people");        
+        helpers.createIndexedVertex(data1, index, keys, unique);
+        Vertex bob = helpers.createIndexedVertex(data2, index, keys, unique);
+        
+        // Updating bob with Joe's name should throw an Integrity error...
+        data2.put("name", data1.get("name"));
+        helpers.updateIndexedVertex(bob.getId(), data2, index, keys, unique);
+    }
+    
     /***
      * helpers
      * 
      * @throws IndexNotFoundException
+     * @throws IntegrityError 
      ***/
 
     private Vertex createIndexedVertexWithProperty(String key, String value)
-            throws IndexNotFoundException {
+            throws IndexNotFoundException, IntegrityError {
         return helpers.createIndexedVertex(createTestData(key, value),
                 TEST_VERTEX_INDEX_NAME);
     }

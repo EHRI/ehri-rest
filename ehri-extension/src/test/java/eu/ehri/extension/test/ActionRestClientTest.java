@@ -2,21 +2,19 @@ package eu.ehri.extension.test;
 
 import static org.junit.Assert.assertEquals;
 
-import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 
-import eu.ehri.extension.EhriNeo4jFramedResource;
+import eu.ehri.extension.AbstractRestResource;
 import eu.ehri.project.models.EntityTypes;
 
 public class ActionRestClientTest extends BaseRestClientTest {
@@ -28,10 +26,6 @@ public class ActionRestClientTest extends BaseRestClientTest {
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
         initializeTestDb(ActionRestClientTest.class.getName());
-    }
-
-    @Before
-    public void setUp() throws Exception {
     }
 
     @Test
@@ -47,11 +41,12 @@ public class ActionRestClientTest extends BaseRestClientTest {
         ClientResponse response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
-                .header(EhriNeo4jFramedResource.AUTH_HEADER_NAME,
+                .header(AbstractRestResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId()).entity(jsonAgentTestString)
                 .post(ClientResponse.class);
 
-        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        assertEquals(Response.Status.CREATED.getStatusCode(),
+                response.getStatus());
 
         List<Map<String, Object>> actionsAfter = getEntityList(
                 EntityTypes.ACTION, getAdminUserProfileId());

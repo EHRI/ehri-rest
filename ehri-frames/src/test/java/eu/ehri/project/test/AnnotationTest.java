@@ -2,8 +2,6 @@ package eu.ehri.project.test;
 
 import static org.junit.Assert.*;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 import eu.ehri.project.models.Annotation;
@@ -18,16 +16,6 @@ public class AnnotationTest extends ModelTestBase {
     public static final String TEST_ANNOTATION_BODY = "Test Annotation";
     public static final String TEST_ANNOTATION_ANNOTATION_BODY = "Test Annotation of Annotation";
     private static final String TEST_ANNOTATION_CONTEXT_FIELD = "scopeAndContent";
-
-    @Before
-    public void setUp() {
-        super.setUp();
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        super.tearDown();
-    }
 
     @Test
     public void testUserHasAnnotation() {
