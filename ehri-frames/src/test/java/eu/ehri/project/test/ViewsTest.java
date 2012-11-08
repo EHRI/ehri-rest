@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.junit.Test;
 import eu.ehri.project.acl.AclManager;
+import eu.ehri.project.acl.AnonymousAccessor;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.PermissionDenied;
@@ -61,7 +62,7 @@ public class ViewsTest extends AbstractFixtureTest {
     public void testDetailAnonymous() throws PermissionDenied {
         Views<DocumentaryUnit> docViews = new Views<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
-        docViews.detail(item, null);
+        docViews.detail(item, new AnonymousAccessor());
     }
 
     /**
