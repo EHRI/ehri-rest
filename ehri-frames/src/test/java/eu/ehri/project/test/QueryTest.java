@@ -34,17 +34,17 @@ public class QueryTest extends AbstractFixtureTest {
                 EntityTypes.DOCUMENTARY_UNIT);
 
         // And the listing the ACL way...
-        List<DocumentaryUnit> list = toList(query.list(null, null, validUser));
+        List<DocumentaryUnit> list = toList(query.list(validUser));
         assertFalse(list.isEmpty());
         assertEquals(toList(allDocs).size(), list.size());
 
         // Test the limit function
-        list = toList(query.list(0, 1, validUser));
+        list = toList(query.setLimit(1).list(validUser));
         assertFalse(list.isEmpty());
         assertEquals(1, list.size());
 
         // Test the offset function
-        list = toList(query.list(1, 2, validUser));
+        list = toList(query.setLimit(2).setOffset(1).list(validUser));
         assertFalse(list.isEmpty());
         assertEquals(2, list.size());
     }
@@ -60,7 +60,7 @@ public class QueryTest extends AbstractFixtureTest {
                 DocumentaryUnit.class);
         assertFalse(new AclManager(graph).belongsToAdmin(accessor));
 
-        List<DocumentaryUnit> list = toList(query.list(null, null, accessor));
+        List<DocumentaryUnit> list = toList(query.list(accessor));
         assertFalse(list.isEmpty());
         assertFalse(list.contains(cantRead));
     }
@@ -71,8 +71,8 @@ public class QueryTest extends AbstractFixtureTest {
                 DocumentaryUnit.class);
 
         // Query for document identifier c1.
-        List<DocumentaryUnit> list = toList(query.list(
-                AccessibleEntity.IDENTIFIER_KEY, "c1", 0, 1, validUser));
+        List<DocumentaryUnit> list = toList(query.setLimit(1).list(
+                AccessibleEntity.IDENTIFIER_KEY, "c1", validUser));
         assertFalse(list.isEmpty());
         assertEquals(1, list.size());
     }
@@ -89,7 +89,7 @@ public class QueryTest extends AbstractFixtureTest {
         // Query for document identifier starting with 'c'.
         // In the fixtures this is ALL docs
         List<DocumentaryUnit> list = toList(query.list(
-                AccessibleEntity.IDENTIFIER_KEY, "c*", null, null, validUser));
+                AccessibleEntity.IDENTIFIER_KEY, "c*", validUser));
         assertFalse(list.isEmpty());
         assertEquals(toList(allDocs).size(), list.size());
     }
@@ -101,7 +101,7 @@ public class QueryTest extends AbstractFixtureTest {
 
         // Do a query that won't match anything.
         List<DocumentaryUnit> list = toList(query.list(
-                AccessibleEntity.IDENTIFIER_KEY, "__GONNAFAIL__", null, null, validUser));
+                AccessibleEntity.IDENTIFIER_KEY, "__GONNAFAIL__", validUser));
         assertTrue(list.isEmpty());
         assertEquals(0, list.size());
     }

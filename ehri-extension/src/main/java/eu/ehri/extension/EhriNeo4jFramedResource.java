@@ -81,8 +81,8 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> extends
             throws ItemNotFound, BadRequester {
         final ObjectMapper mapper = new ObjectMapper();
         final JsonFactory f = new JsonFactory();
-        final Iterable<E> list = querier.list(offset, limit,
-                getRequesterUserProfile());
+        final Iterable<E> list = querier.setOffset(offset).setLimit(limit)
+                .list(getRequesterUserProfile());
 
         // FIXME: I don't understand this streaming output system well
         // enough
