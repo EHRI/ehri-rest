@@ -1,8 +1,10 @@
 package eu.ehri.extension;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 import javax.ws.rs.Consumes;
@@ -22,7 +24,10 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
+
+import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
+import eu.ehri.project.models.EntityTypes;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.views.AclViews;
@@ -40,30 +45,16 @@ public class AccessResource extends EhriNeo4jFramedResource<AccessibleEntity> {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/{atype:[^/]+}/{id:[^/]+}")
-    public Response setVisibility(@PathParam("atype") String atype, @PathParam("id") String id,
-            String json)
-            throws PermissionDenied, JsonParseException, JsonMappingException, IOException {
-        
-        JsonFactory factory = new JsonFactory();
-        ObjectMapper mapper = new ObjectMapper(factory);
-        TypeReference<LinkedList<Long>> typeRef = new TypeReference<LinkedList<Long>>() {
-        };
-        LinkedList<Long> accessors = mapper.readValue(json, typeRef);
-        
+    public Response setVisibility(@PathParam("atype") String atype,
+            @PathParam("id") String id, String json) throws PermissionDenied,
+            JsonParseException, JsonMappingException, IOException {
+
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
-            AclViews<AccessibleEntity> acl = new AclViews<AccessibleEntity>(graph,
-                    cls);
-            
-            // FIXME: We don't really want to accept accessor IDs here, since
-            // the IDs shouldn't leak into the API usage. However, until there
-            // is some form of unified global index and id system it's difficult
-            // to know how else to do this, since the accessors here could either
-            // be users or groups.
-            Set<Accessor> accs = new HashSet<Accessor>();
-            for (Long aid : accessors) accs.add(graph.getVertex(aid, Accessor.class));
-
-            acl.setAccessors(getEntity(atype, id, AccessibleEntity.class), accs, getRequesterUserProfile());
+            AclViews<AccessibleEntity> acl = new AclViews<AccessibleEntity>(
+                    graph, cls);
+            acl.setAccessors(getEntity(atype, id, AccessibleEntity.class),
+                    extractAccessors(json), getRequesterUserProfile());
             tx.success();
             return Response.status(Status.OK).build();
         } catch (Exception e) {
@@ -71,7 +62,41 @@ public class AccessResource extends EhriNeo4jFramedResource<AccessibleEntity> {
             throw new WebApplicationException(e);
         } finally {
             tx.finish();
-        }        
+        }
+    }
+
+    /**
+     * Parse the incoming JSON describing which accessors can view the item. It
+     * should be in the format: { "userProfile": ["mike", "repo"], "group":
+     * ["kcl", "niod"] }
+     * 
+     * @param json
+     * @return
+     * @throws IOException
+     * @throws JsonParseException
+     * @throws JsonMappingException
+     * @throws ItemNotFound
+     */
+    private Set<Accessor> extractAccessors(String json) throws IOException,
+            JsonParseException, JsonMappingException, ItemNotFound {
+        JsonFactory factory = new JsonFactory();
+        ObjectMapper mapper = new ObjectMapper(factory);
+        TypeReference<HashMap<String, LinkedList<String>>> typeRef = new TypeReference<HashMap<String, LinkedList<String>>>() {
+        };
+        HashMap<String, LinkedList<String>> accessorMap = mapper.readValue(
+                json, typeRef);
+
+        Set<Accessor> accs = new HashSet<Accessor>();
+        String[] atypes = { EntityTypes.USER_PROFILE, EntityTypes.GROUP };
+        for (String at : atypes) {
+            List<String> ataccs = accessorMap.get(at);
+            if (ataccs != null) {
+                for (String accid : ataccs) {
+                    accs.add(getEntity(at, accid, Accessor.class));
+                }
+            }
+        }
+        return accs;
     }
 
 }

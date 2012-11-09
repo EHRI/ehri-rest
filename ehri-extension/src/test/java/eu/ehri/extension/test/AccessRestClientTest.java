@@ -55,21 +55,9 @@ public class AccessRestClientTest extends BaseRestClientTest {
         assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(),
                 response.getStatus());
 
-        // Laboriously fetch the ids of the user and the item, respectively
-        String userJson = client
-                .resource(
-                        getExtensionEntryPointUri() + "/userProfile/"
-                                + LIMITED_USER_NAME)
-                .accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME,
-                        getAdminUserProfileId()).get(String.class);
-        Long userId = new ObjectMapper().readValue(userJson, JsonNode.class)
-                .path("id").asLong();
-
         // Set the form data
-        List<Long> ids = new LinkedList<Long>();
-        ids.add(userId);
+        String accJson = "{\"userProfile\": [\"" + LIMITED_USER_NAME + "\"]}";
+
         resource = client.resource(getExtensionEntryPointUri()
                 + "/access/documentaryUnit/c1");
         response = resource
@@ -77,7 +65,7 @@ public class AccessRestClientTest extends BaseRestClientTest {
                 .type(MediaType.APPLICATION_JSON)
                 .header(AbstractRestResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId())
-                .entity(new ObjectMapper().writeValueAsBytes(ids))
+                .entity(accJson.getBytes())
                 .post(ClientResponse.class);
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
 
