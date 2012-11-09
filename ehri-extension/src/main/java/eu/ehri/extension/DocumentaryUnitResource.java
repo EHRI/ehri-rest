@@ -68,15 +68,27 @@ public class DocumentaryUnitResource extends
     @Path("/list")
     public StreamingOutput listDocumentaryUnits(
             @QueryParam("offset") @DefaultValue("0") int offset,
-            @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit) throws ItemNotFound, BadRequester {
+            @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit)
+            throws ItemNotFound, BadRequester {
         return list(offset, limit);
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/page")
+    public StreamingOutput pageDocumentaryUnits(
+            @QueryParam("offset") @DefaultValue("0") int offset,
+            @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit)
+            throws ItemNotFound, BadRequester {
+        return page(offset, limit);
     }
 
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response updateDocumentaryUnit(String json) throws PermissionDenied,
-            IntegrityError, ValidationError, DeserializationError, ItemNotFound, BadRequester {
+            IntegrityError, ValidationError, DeserializationError,
+            ItemNotFound, BadRequester {
         return update(json);
     }
 
@@ -93,7 +105,8 @@ public class DocumentaryUnitResource extends
     @DELETE
     @Path("/{id}")
     public Response deleteDocumentaryUnit(@PathParam("id") long id)
-            throws PermissionDenied, ValidationError, ItemNotFound, BadRequester {
+            throws PermissionDenied, ValidationError, ItemNotFound,
+            BadRequester {
         return delete(id);
     }
 
@@ -153,9 +166,9 @@ public class DocumentaryUnitResource extends
                 .jsonToBundle(json);
 
         DocumentaryUnit doc = new ActionViews<DocumentaryUnit>(graph,
-                DocumentaryUnit.class).create(
-                converter.bundleToData(entityBundle),
-                getRequesterUserProfile());
+                DocumentaryUnit.class)
+                .create(converter.bundleToData(entityBundle),
+                        getRequesterUserProfile());
         // Add it to this agent's collections
         parent.addChild(doc);
         parent.getAgent().addCollection(doc);

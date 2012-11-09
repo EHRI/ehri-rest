@@ -56,4 +56,14 @@ public class ActionResource extends EhriNeo4jFramedResource<Action> {
             throws ItemNotFound, BadRequester {
         return list(offset, limit);
     }
+    
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/page")
+    public StreamingOutput pageActions(
+            @QueryParam("offset") @DefaultValue("0") int offset,
+            @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit)
+            throws ItemNotFound, BadRequester {
+        return page(offset, limit);
+    }    
 }

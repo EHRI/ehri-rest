@@ -56,4 +56,14 @@ public class ContentTypeResource extends EhriNeo4jFramedResource<ContentType> {
             throws ItemNotFound, BadRequester {
         return list(offset, limit);
     }
+    
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/page")
+    public StreamingOutput pageContentTypes(
+            @QueryParam("offset") @DefaultValue("0") int offset,
+            @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit)
+            throws ItemNotFound, BadRequester {
+        return page(offset, limit);
+    }    
 }

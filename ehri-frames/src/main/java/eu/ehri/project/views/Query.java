@@ -11,6 +11,8 @@ import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.frames.FramedVertexIterable;
 import com.tinkerpop.frames.VertexFrame;
 import com.tinkerpop.gremlin.java.GremlinPipeline;
+import com.tinkerpop.pipes.PipeFunction;
+
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.exceptions.IndexNotFoundException;
 import eu.ehri.project.exceptions.ItemNotFound;
@@ -37,33 +39,77 @@ public class Query<E extends AccessibleEntity> extends AbstractViews<E>
     private boolean page = false;
 
     /**
-     * Wrapper method for FramedVertexIterables that converts a FramedVertexIterable<T>
-     * back into a plain Iterable<Vertex>.
+     * 
      * @author michaelb
-     *
+     * 
+     * @param <E>
+     */
+    public static class Page<E> {
+        private Iterable<E> iterable;
+        private long count;
+        private Integer offset;
+        private Integer limit;
+
+        Page(Iterable<E> iterable, long count, Integer offset, Integer limit) {
+            this.iterable = iterable;
+            this.count = count;
+            this.offset = offset;
+            this.limit = limit;
+        }
+
+        public Iterable<E> getIterable() {
+            return iterable;
+        }
+
+        public long getCount() {
+            return count;
+        }
+
+        public Integer getOffset() {
+            return offset;
+        }
+
+        public Integer getLimit() {
+            return limit;
+        }
+    }
+
+    /**
+     * Wrapper method for FramedVertexIterables that converts a
+     * FramedVertexIterable<T> back into a plain Iterable<Vertex>.
+     * 
+     * @author michaelb
+     * 
      * @param <T>
      */
-    public static class FramedVertexIterableAdaptor<T extends VertexFrame> implements Iterable<Vertex> {
+    public static class FramedVertexIterableAdaptor<T extends VertexFrame>
+            implements Iterable<Vertex> {
         FramedVertexIterable<T> iterable;
-        public FramedVertexIterableAdaptor(final FramedVertexIterable<T> iterable) {
+
+        public FramedVertexIterableAdaptor(
+                final FramedVertexIterable<T> iterable) {
             this.iterable = iterable;
         }
+
         public Iterator<Vertex> iterator() {
             return new Iterator<Vertex>() {
                 private Iterator<T> iterator = iterable.iterator();
+
                 public void remove() {
                     throw new UnsupportedOperationException();
                 }
+
                 public boolean hasNext() {
-                    return this.iterator.hasNext(); 
+                    return this.iterator.hasNext();
                 }
+
                 public Vertex next() {
                     return this.iterator.next().asVertex();
                 }
             };
         }
     }
-    
+
     /**
      * Constructor.
      * 
@@ -119,6 +165,57 @@ public class Query<E extends AccessibleEntity> extends AbstractViews<E>
     }
 
     /**
+     * Return an iterable for all items.
+     * 
+     * @param user
+     * @return
+     * @throws IndexNotFoundException
+     */
+    public Page<E> page(Accessor user) {
+        return page(AccessibleEntity.IDENTIFIER_KEY, QUERY_GLOB, user);
+    }
+
+    /**
+     * Count items accessible to a given user.
+     * 
+     * @param user
+     * 
+     * @return
+     * @throws IndexNotFoundException
+     */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public Page<E> page(String key, String query, Accessor user) {
+        // This function is optimised for ACL actions.
+        try {
+            // FIXME: Work out if there's any way of doing, in Gremlin or
+            // Cypher, a count that doesn't require re-iterating the results on
+            // a completely new index query. This seems stupid.
+            CloseableIterable<Vertex> countQuery = getIndexForClass(cls).query(
+                    key, query);
+            try {
+                CloseableIterable<Vertex> indexQuery = getIndexForClass(cls)
+                        .query(key, query);
+                try {
+                    PipeFunction<Vertex, Boolean> aclFilterFunction = new AclManager(
+                            graph).getAclFilterFunction(user);
+                    long count = new GremlinPipeline(countQuery).filter(
+                            aclFilterFunction).count();
+                    return new Page(graph.frameVertices(
+                            setPipelineRange(new GremlinPipeline(indexQuery)
+                                    .filter(aclFilterFunction)), cls), count,
+                            offset, limit);
+                } finally {
+                    indexQuery.close();
+                }
+            } finally {
+                countQuery.close();
+            }
+        } catch (IndexNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
      * List items accessible to a given user.
      * 
      * @param user
@@ -136,8 +233,7 @@ public class Query<E extends AccessibleEntity> extends AbstractViews<E>
                 GremlinPipeline filter = new GremlinPipeline(indexQuery)
                         .filter(new AclManager(graph)
                                 .getAclFilterFunction(user));
-                return graph.frameVertices(
-                        setPipelineRange(filter), cls);
+                return graph.frameVertices(setPipelineRange(filter), cls);
             } finally {
                 indexQuery.close();
             }

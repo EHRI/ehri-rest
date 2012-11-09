@@ -50,6 +50,26 @@ public class QueryTest extends AbstractFixtureTest {
     }
 
     @Test
+    public void testPage() throws IndexNotFoundException {
+        Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
+                DocumentaryUnit.class);
+
+        // Check we're not admin
+        assertTrue(new AclManager(graph).belongsToAdmin(validUser));
+
+        // Get the total number of DocumentaryUnits the old-fashioned way
+        Iterable<Vertex> allDocs = graph.getVertices(EntityType.KEY,
+                EntityTypes.DOCUMENTARY_UNIT);
+
+        // Test the limit function
+        Query.Page<DocumentaryUnit> page = query.setLimit(1).page(validUser);
+        List<DocumentaryUnit> list = toList(page.getIterable());
+        assertFalse(list.isEmpty());
+        assertEquals(1, list.size());
+        assertEquals(toList(allDocs).size(), page.getCount());
+    }
+    
+    @Test
     public void testUserCannotListPrivate() throws IndexNotFoundException {
         Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);

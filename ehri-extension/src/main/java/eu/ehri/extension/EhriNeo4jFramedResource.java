@@ -77,6 +77,50 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> extends
      * @throws BadRequester
      * @throws PermissionDenied
      */
+    public StreamingOutput page(Integer offset, Integer limit)
+            throws ItemNotFound, BadRequester {
+        final ObjectMapper mapper = new ObjectMapper();
+        final JsonFactory f = new JsonFactory();
+        final Query.Page<E> page = querier.setOffset(offset).setLimit(limit)
+                .page(getRequesterUserProfile());
+
+        // FIXME: I don't understand this streaming output system well
+        // enough
+        // to determine whether this actually streams or not. It certainly
+        // doesn't look like it.
+        return new StreamingOutput() {
+            @Override
+            public void write(OutputStream os) throws IOException,
+                    WebApplicationException {
+                JsonGenerator g = f.createJsonGenerator(os);
+                g.writeStartObject();
+                g.writeNumberField("total", page.getCount());
+                g.writeNumberField("offset", page.getOffset());
+                g.writeNumberField("limit", page.getLimit());
+                g.writeFieldName("values");                                
+                g.writeStartArray();
+                for (E item : page.getIterable()) {
+                    try {
+                        mapper.writeValue(g, converter.vertexFrameToData(item));
+                    } catch (SerializationError e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+                g.writeEndArray();
+                g.writeEndObject();
+                g.close();
+            }
+        };
+    }
+
+    /**
+     * List all instances of the 'entity' accessible to the given user.
+     * 
+     * @return
+     * @throws ItemNotFound
+     * @throws BadRequester
+     * @throws PermissionDenied
+     */
     public StreamingOutput list(Integer offset, Integer limit)
             throws ItemNotFound, BadRequester {
         final ObjectMapper mapper = new ObjectMapper();
