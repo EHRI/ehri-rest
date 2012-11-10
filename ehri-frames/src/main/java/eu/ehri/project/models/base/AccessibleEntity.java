@@ -7,6 +7,7 @@ import com.tinkerpop.frames.VertexFrame;
 
 import eu.ehri.project.models.Action;
 import eu.ehri.project.models.PermissionGrant;
+import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.annotations.Unique;
 
 public interface AccessibleEntity extends VertexFrame, PermissionGrantTarget {
@@ -18,6 +19,7 @@ public interface AccessibleEntity extends VertexFrame, PermissionGrantTarget {
     @Property(IDENTIFIER_KEY)
     public String getIdentifier();
 
+    @Fetch(depth=1)
     @Adjacency(label = ACCESS)
     public Iterable<Accessor> getAccessors();
 

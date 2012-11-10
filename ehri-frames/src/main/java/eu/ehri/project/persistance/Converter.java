@@ -17,6 +17,7 @@ import com.tinkerpop.frames.VertexFrame;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.models.annotations.EntityType;
+import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.utils.ClassUtils;
 
 import org.codehaus.jackson.JsonParseException;
@@ -37,11 +38,32 @@ public class Converter {
      * Lookup of entityType keys against their annotated class.
      */
     private Map<String, Class<? extends VertexFrame>> classes;
+    private int maxDepth = 5;
 
+    /**
+     * Constructor.
+     */
     public Converter() {
         classes = ClassUtils.getEntityClasses();
     }
 
+    /**
+     * Constructor which allows specifying depth of @Fetched traversals.
+     * 
+     * @param depth
+     */
+    public Converter(int depth) {
+        super();
+        this.maxDepth = depth;
+    }
+
+    /**
+     * Convert a vertex frame to a raw bundle of data.
+     * 
+     * @param item
+     * @return
+     * @throws SerializationError
+     */
     public <T extends VertexFrame> Map<String, Object> vertexFrameToData(
             VertexFrame item) throws SerializationError {
         return bundleToData(vertexFrameToBundle(item));
@@ -182,9 +204,23 @@ public class Converter {
      * @return
      * @throws SerializationError
      */
-    @SuppressWarnings("unchecked")
     public <T extends VertexFrame> EntityBundle<T> vertexFrameToBundle(
             VertexFrame item) throws SerializationError {
+        return vertexFrameToBundle(item, maxDepth);
+    }
+
+    /**
+     * Convert a VertexFrame into an EntityBundle that includes its @Fetch'd
+     * relations.
+     * 
+     * @param item
+     * @param depth
+     * @return
+     * @throws SerializationError
+     */
+    @SuppressWarnings("unchecked")
+    public <T extends VertexFrame> EntityBundle<T> vertexFrameToBundle(
+            VertexFrame item, int depth) throws SerializationError {
         String isa = (String) item.asVertex().getProperty(EntityType.KEY);
         if (isa == null)
             throw new SerializationError(String.format(
@@ -195,32 +231,57 @@ public class Converter {
             throw new SerializationError(String.format(
                     "No entity found for %s type '%s'", EntityType.KEY, isa));
 
-        MultiValueMap relations = new MultiValueMap();
-        Map<String, Method> fetchMethods = ClassUtils.getFetchMethods(cls);
-        for (Map.Entry<String, Method> entry : fetchMethods.entrySet()) {
-            try {
-                Object result = entry.getValue().invoke(item);
-                // The result of one of these fetchMethods should either be a
-                // single VertexFrame, or a Iterable<VertexFrame>.
-                if (result instanceof Iterable<?>) {
-                    for (Object d : (Iterable<?>) result) {
-                        relations.put(entry.getKey(),
-                                vertexFrameToBundle((VertexFrame) d));
-                    }
-                } else {
-                    // This relationship could be NULL if, e.g. a collection has
-                    // no holder.
-                    if (result != null)
-                        relations.put(entry.getKey(),
-                                vertexFrameToBundle((VertexFrame) result));
-                }
-            } catch (Exception e) {
-                throw new RuntimeException(
-                        "Unexpected error serializing VertexFrame", e);
-            }
-        }
+        MultiValueMap relations = getRelationData(item, depth, cls);
         return new EntityBundle<T>((Long) item.asVertex().getId(),
                 getVertexData(item.asVertex()), (Class<T>) cls, relations);
+    }
+
+    private MultiValueMap getRelationData(VertexFrame item, int depth,
+            Class<? extends VertexFrame> cls) {
+        MultiValueMap relations = new MultiValueMap();
+        if (depth > 0) {
+            Map<String, Method> fetchMethods = ClassUtils.getFetchMethods(cls);
+            for (Map.Entry<String, Method> entry : fetchMethods.entrySet()) {
+
+                // In order to avoid @Fetching the whole graph we track the
+                // maxDepth parameter and reduce it for every traversal.
+                // However the @Fetch annotation can also specify a non-default
+                // depth, so we need to determine whatever is lower - the
+                // current
+                // traversal count, or the annotation's count.
+                Method method = entry.getValue();
+                int nextDepth = Math.min(depth,
+                        method.getAnnotation(Fetch.class).depth()) - 1;
+
+                try {
+                    Object result = method.invoke(item);
+                    // The result of one of these fetchMethods should either be
+                    // a
+                    // single VertexFrame, or a Iterable<VertexFrame>.
+                    if (result instanceof Iterable<?>) {
+                        for (Object d : (Iterable<?>) result) {
+                            relations.put(
+                                    entry.getKey(),
+                                    vertexFrameToBundle((VertexFrame) d,
+                                            nextDepth));
+                        }
+                    } else {
+                        // This relationship could be NULL if, e.g. a collection
+                        // has
+                        // no holder.
+                        if (result != null)
+                            relations.put(
+                                    entry.getKey(),
+                                    vertexFrameToBundle((VertexFrame) result,
+                                            nextDepth));
+                    }
+                } catch (Exception e) {
+                    throw new RuntimeException(
+                            "Unexpected error serializing VertexFrame", e);
+                }
+            }
+        }
+        return relations;
     }
 
     /**

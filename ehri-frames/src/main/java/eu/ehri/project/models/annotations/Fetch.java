@@ -21,4 +21,9 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface Fetch {
+    /**
+     * Default number of traversals to make on @Fetch'ed relations. 
+     * @return
+     */
+    int depth() default 5;
 }
