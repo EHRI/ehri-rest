@@ -38,7 +38,7 @@ public class Converter {
      * Lookup of entityType keys against their annotated class.
      */
     private Map<String, Class<? extends VertexFrame>> classes;
-    private int maxTraversals = 5;
+    private int maxDepth = 5;
 
     /**
      * Constructor.
@@ -54,7 +54,7 @@ public class Converter {
      */
     public Converter(int depth) {
         super();
-        this.maxTraversals = depth;
+        this.maxDepth = depth;
     }
 
     /**
@@ -206,7 +206,7 @@ public class Converter {
      */
     public <T extends VertexFrame> EntityBundle<T> vertexFrameToBundle(
             VertexFrame item) throws SerializationError {
-        return vertexFrameToBundle(item, maxTraversals);
+        return vertexFrameToBundle(item, maxDepth);
     }
 
     /**
@@ -239,7 +239,7 @@ public class Converter {
     private MultiValueMap getRelationData(VertexFrame item, int depth,
             Class<? extends VertexFrame> cls) {
         MultiValueMap relations = new MultiValueMap();
-        if (depth == 0) {
+        if (depth > 0) {
             Map<String, Method> fetchMethods = ClassUtils.getFetchMethods(cls);
             for (Map.Entry<String, Method> entry : fetchMethods.entrySet()) {
 
@@ -256,7 +256,8 @@ public class Converter {
                 try {
                     Object result = method.invoke(item);
                     // The result of one of these fetchMethods should either be
-                    // a single VertexFrame, or a Iterable<VertexFrame>.
+                    // a
+                    // single VertexFrame, or a Iterable<VertexFrame>.
                     if (result instanceof Iterable<?>) {
                         for (Object d : (Iterable<?>) result) {
                             relations.put(
@@ -266,7 +267,8 @@ public class Converter {
                         }
                     } else {
                         // This relationship could be NULL if, e.g. a collection
-                        // has no holder.
+                        // has
+                        // no holder.
                         if (result != null)
                             relations.put(
                                     entry.getKey(),
