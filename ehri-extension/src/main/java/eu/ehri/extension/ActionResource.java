@@ -13,6 +13,7 @@ import javax.ws.rs.core.StreamingOutput;
 
 import org.neo4j.graphdb.GraphDatabaseService;
 
+import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.EntityTypes;
@@ -33,7 +34,8 @@ public class ActionResource extends EhriNeo4jFramedResource<Action> {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:\\d+}")
-    public Response getAction(@PathParam("id") long id) throws PermissionDenied {
+    public Response getAction(@PathParam("id") long id)
+            throws PermissionDenied, BadRequester {
         return retrieve(id);
     }
 
@@ -41,7 +43,7 @@ public class ActionResource extends EhriNeo4jFramedResource<Action> {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:.+}")
     public Response getAction(@PathParam("id") String id) throws ItemNotFound,
-            PermissionDenied {
+            PermissionDenied, BadRequester {
         return retrieve(id);
     }
 
@@ -50,7 +52,8 @@ public class ActionResource extends EhriNeo4jFramedResource<Action> {
     @Path("/list")
     public StreamingOutput listActions(
             @QueryParam("offset") @DefaultValue("0") int offset,
-            @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit) {
+            @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit)
+            throws ItemNotFound, BadRequester {
         return list(offset, limit);
     }
 }

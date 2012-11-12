@@ -25,14 +25,12 @@ public class InvalidEadImporterTest extends AbstractFixtureTest {
 
     @Test(expected=ValidationError.class)
     public void testImportItemsT() throws ValidationError, IOException, InputParseError {
-        UserProfile user = graph.frame(graph.getVertex(validUserId),
-                UserProfile.class);
         Agent agent = graph.frame(helper.getTestVertex(TEST_REPO), Agent.class);
         final String logMessage = "Importing an invalid EAD";
         InputStream ios = ClassLoader.getSystemResourceAsStream(INVALID_EAD);
 
         try {
-            new EadImportManager(graph, agent, user).importFile(ios, logMessage);
+            new EadImportManager(graph, agent, validUser).importFile(ios, logMessage);
         } finally {
             ios.close();
         }
@@ -40,12 +38,10 @@ public class InvalidEadImporterTest extends AbstractFixtureTest {
 
     @Test
     public void testTolerantImport() throws ValidationError, IOException, InputParseError {
-        UserProfile user = graph.frame(graph.getVertex(validUserId),
-                UserProfile.class);
         Agent agent = graph.frame(helper.getTestVertex(TEST_REPO), Agent.class);
         final String logMessage = "Importing an invalid EAD";
 
-        EadImportManager manager = new EadImportManager(graph, agent, user);
+        EadImportManager manager = new EadImportManager(graph, agent, validUser);
         manager.setTolerant(true);        
         InputStream ios = ClassLoader.getSystemResourceAsStream(INVALID_EAD);
         try {            
@@ -59,13 +55,11 @@ public class InvalidEadImporterTest extends AbstractFixtureTest {
 
     @Test
     public void testRollback() throws ValidationError, IOException, InputParseError {
-        UserProfile user = graph.frame(graph.getVertex(validUserId),
-                UserProfile.class);
         Agent agent = graph.frame(helper.getTestVertex(TEST_REPO), Agent.class);
         final String logMessage = "Importing an invalid EAD";
 
         int count = getNodeCount();
-        EadImportManager manager = new EadImportManager(graph, agent, user);
+        EadImportManager manager = new EadImportManager(graph, agent, validUser);
         manager.setTolerant(true);        
         InputStream ios = ClassLoader.getSystemResourceAsStream(INVALID_EAD);
         ImportLog log = manager.importFile(ios, logMessage);

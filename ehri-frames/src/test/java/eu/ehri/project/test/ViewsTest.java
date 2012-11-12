@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.junit.Test;
 import eu.ehri.project.acl.AclManager;
+import eu.ehri.project.acl.AnonymousAccessor;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.PermissionDenied;
@@ -35,8 +36,8 @@ public class ViewsTest extends AbstractFixtureTest {
     public void testDetail() throws PermissionDenied {
         Views<DocumentaryUnit> docViews = new Views<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
-        DocumentaryUnit unit = docViews.detail(itemId, validUserId);
-        assertEquals(itemId, unit.asVertex().getId());
+        DocumentaryUnit unit = docViews.detail(item, validUser);
+        assertEquals(item.asVertex(), unit.asVertex());
     }
 
     /**
@@ -48,8 +49,8 @@ public class ViewsTest extends AbstractFixtureTest {
     public void testUserProfile() throws PermissionDenied {
         Views<UserProfile> userViews = new Views<UserProfile>(graph,
                 UserProfile.class);
-        UserProfile user = userViews.detail(validUserId, validUserId);
-        assertEquals(validUserId, user.asVertex().getId());
+        UserProfile user = userViews.detail(validUser, validUser);
+        assertEquals(validUser.asVertex(), user.asVertex());
     }
 
     /**
@@ -61,7 +62,7 @@ public class ViewsTest extends AbstractFixtureTest {
     public void testDetailAnonymous() throws PermissionDenied {
         Views<DocumentaryUnit> docViews = new Views<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
-        docViews.detail(itemId, null);
+        docViews.detail(item, new AnonymousAccessor());
     }
 
     /**
@@ -73,7 +74,7 @@ public class ViewsTest extends AbstractFixtureTest {
     public void testDetailPermissionDenied() throws PermissionDenied {
         Views<DocumentaryUnit> docViews = new Views<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
-        docViews.detail(itemId, invalidUserId);
+        docViews.detail(item, invalidUser);
     }
 
     /**
@@ -84,7 +85,7 @@ public class ViewsTest extends AbstractFixtureTest {
     public void testUserDetailPermissionDenied() throws PermissionDenied {
         Views<UserProfile> userViews = new Views<UserProfile>(graph,
                 UserProfile.class);
-        userViews.detail(validUserId, invalidUserId);
+        userViews.detail(validUser, invalidUser);
     }
 
     /**
@@ -101,7 +102,7 @@ public class ViewsTest extends AbstractFixtureTest {
         Views<DocumentaryUnit> docViews = new Views<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
         Map<String, Object> bundle = getTestBundle();
-        DocumentaryUnit unit = docViews.create(bundle, validUserId);
+        DocumentaryUnit unit = docViews.create(bundle, validUser);
         assertEquals(TEST_COLLECTION_NAME, unit.getName());
 
         // We could convert the FramedNode back into a bundle here,
@@ -112,7 +113,7 @@ public class ViewsTest extends AbstractFixtureTest {
         Map<String, Object> data = (Map<String, Object>) bundle.get("data");
         data.put("name", newName);
 
-        DocumentaryUnit changedUnit = docViews.update(bundle, validUserId);
+        DocumentaryUnit changedUnit = docViews.update(bundle, validUser);
         assertEquals(newName, changedUnit.getName());
 
         // Check the nested item was created correctly
@@ -138,7 +139,7 @@ public class ViewsTest extends AbstractFixtureTest {
         Views<UserProfile> userViews = new Views<UserProfile>(graph,
                 UserProfile.class);
         Map<String, Object> bundle = getTestUserBundle();
-        UserProfile user = userViews.create(bundle, validUserId);
+        UserProfile user = userViews.create(bundle, validUser);
         assertEquals(TEST_USER_NAME, user.getName());
 
         // We could convert the FramedNode back into a bundle here,
@@ -149,7 +150,7 @@ public class ViewsTest extends AbstractFixtureTest {
         Map<String, Object> data = (Map<String, Object>) bundle.get("data");
         data.put("name", newName);
 
-        UserProfile changedUser = userViews.update(bundle, validUserId);
+        UserProfile changedUser = userViews.update(bundle, validUser);
         assertEquals(newName, changedUser.getName());
     }
 
@@ -167,7 +168,7 @@ public class ViewsTest extends AbstractFixtureTest {
         Views<DocumentaryUnit> docViews = new Views<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
         Map<String, Object> bundle = getTestBundle();
-        DocumentaryUnit unit = docViews.create(bundle, validUserId);
+        DocumentaryUnit unit = docViews.create(bundle, validUser);
         assertEquals(TEST_COLLECTION_NAME, unit.getName());
     }
 
@@ -185,7 +186,7 @@ public class ViewsTest extends AbstractFixtureTest {
         Views<DocumentaryUnit> docViews = new Views<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
         Map<String, Object> bundle = getTestBundle();
-        DocumentaryUnit unit = docViews.create(bundle, invalidUserId);
+        DocumentaryUnit unit = docViews.create(bundle, invalidUser);
         assertEquals(TEST_COLLECTION_NAME, unit.getName());
     }
 
@@ -205,20 +206,18 @@ public class ViewsTest extends AbstractFixtureTest {
         Map<String, Object> bundle = getTestBundle();
 
         try {
-            docViews.create(bundle, invalidUserId);
+            docViews.create(bundle, invalidUser);
             fail("Creation should throw "
                     + PermissionDenied.class.getSimpleName());
         } catch (PermissionDenied e) {
             // We expected that permission denied... now explicitely add
             // permissions.
-            Accessor accessor = graph.frame(graph.getVertex(invalidUserId),
-                    Accessor.class);
             PermissionGrantTarget target = helper.getTestFrame(
                     "documentaryUnitType", PermissionGrantTarget.class);
             Permission perm = helper.getTestFrame("permCreate",
                     Permission.class);
-            new AclManager(graph).grantPermissions(accessor, target, perm);
-            DocumentaryUnit unit = docViews.create(bundle, invalidUserId);
+            new AclManager(graph).grantPermissions(invalidUser, target, perm);
+            DocumentaryUnit unit = docViews.create(bundle, invalidUser);
             assertEquals(TEST_COLLECTION_NAME, unit.getName());
         }
     }
@@ -241,7 +240,7 @@ public class ViewsTest extends AbstractFixtureTest {
         // scoped to the 'r1' repository.
         Agent scope = helper.getTestFrame("r1", Agent.class);
         docViews.setScope(scope);
-        DocumentaryUnit unit = docViews.create(bundle, invalidUserId);
+        DocumentaryUnit unit = docViews.create(bundle, invalidUser);
         assertEquals(TEST_COLLECTION_NAME, unit.getName());
     }
 
@@ -259,7 +258,7 @@ public class ViewsTest extends AbstractFixtureTest {
         Views<UserProfile> userViews = new Views<UserProfile>(graph,
                 UserProfile.class);
         Map<String, Object> bundle = getTestUserBundle();
-        UserProfile user = userViews.create(bundle, validUserId);
+        UserProfile user = userViews.create(bundle, validUser);
         assertEquals(TEST_USER_NAME, user.getName());
     }
 
@@ -276,7 +275,7 @@ public class ViewsTest extends AbstractFixtureTest {
             DeserializationError, IntegrityError {
         Views<Group> groupViews = new Views<Group>(graph, Group.class);
         Map<String, Object> bundle = getTestGroupBundle();
-        Group group = groupViews.create(bundle, validUserId);
+        Group group = groupViews.create(bundle, validUser);
         assertEquals(TEST_GROUP_NAME, group.getName());
     }
 
@@ -298,7 +297,7 @@ public class ViewsTest extends AbstractFixtureTest {
         data.remove("name");
 
         // This should barf because the collection has no name.
-        DocumentaryUnit unit = docViews.create(bundle, validUserId);
+        DocumentaryUnit unit = docViews.create(bundle, validUser);
         assertEquals(TEST_COLLECTION_NAME, unit.getName());
     }
 
@@ -319,7 +318,7 @@ public class ViewsTest extends AbstractFixtureTest {
         bundle.remove("data");
 
         // This should barf because the collection has no name.
-        DocumentaryUnit unit = docViews.create(bundle, validUserId);
+        DocumentaryUnit unit = docViews.create(bundle, validUser);
         assertEquals(TEST_COLLECTION_NAME, unit.getName());
     }
 
@@ -338,17 +337,16 @@ public class ViewsTest extends AbstractFixtureTest {
         Views<DocumentaryUnit> docViews = new Views<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
         Integer shouldDelete = 1;
-        DocumentaryUnit unit = graph.getVertex(itemId, DocumentaryUnit.class);
 
         // FIXME: Surely there's a better way of doing this???
-        Iterator<DatePeriod> dateIter = unit.getDatePeriods().iterator();
-        Iterator<Description> descIter = unit.getDescriptions().iterator();
+        Iterator<DatePeriod> dateIter = item.getDatePeriods().iterator();
+        Iterator<Description> descIter = item.getDescriptions().iterator();
         for (; dateIter.hasNext(); shouldDelete++)
             dateIter.next();
         for (; descIter.hasNext(); shouldDelete++)
             descIter.next();
 
-        Integer deleted = docViews.delete(itemId, validUserId);
+        Integer deleted = docViews.delete(item, validUser);
         assertEquals(shouldDelete, deleted);
     }
 }

@@ -8,19 +8,20 @@ import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.PermissionScope;
 
 public interface IViews<E extends AccessibleEntity> {
     public void setScope(PermissionScope scope);
     
-    public E detail(Long item, Long user) throws PermissionDenied;
+    public E detail(E item, Accessor user) throws PermissionDenied;
 
-    public E update(Map<String, Object> data, Long user)
+    public E update(Map<String, Object> data, Accessor user)
             throws PermissionDenied, ValidationError, DeserializationError, IntegrityError;
 
-    public E create(Map<String, Object> data, Long user)
+    public E create(Map<String, Object> data, Accessor user)
             throws PermissionDenied, ValidationError, DeserializationError, IntegrityError;
 
-    public Integer delete(Long item, Long user) throws PermissionDenied,
+    public Integer delete(E item, Accessor user) throws PermissionDenied,
             ValidationError, SerializationError;
 }

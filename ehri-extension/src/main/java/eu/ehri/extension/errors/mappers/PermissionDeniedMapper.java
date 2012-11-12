@@ -1,4 +1,4 @@
-package eu.ehri.extension.errors;
+package eu.ehri.extension.errors.mappers;
 
 import java.util.HashMap;
 import java.util.Map;

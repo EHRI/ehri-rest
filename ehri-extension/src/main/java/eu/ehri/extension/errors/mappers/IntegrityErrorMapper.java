@@ -1,4 +1,4 @@
-package eu.ehri.extension.errors;
+package eu.ehri.extension.errors.mappers;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -10,32 +10,30 @@ import javax.ws.rs.ext.Provider;
 
 import org.codehaus.jackson.map.ObjectMapper;
 
-import eu.ehri.project.exceptions.ItemNotFound;
+import eu.ehri.project.exceptions.IntegrityError;
 
 @Provider
-public class ItemNotFoundMapper implements ExceptionMapper<ItemNotFound> {
+public class IntegrityErrorMapper implements ExceptionMapper<IntegrityError> {
 
 	@SuppressWarnings("serial")
     @Override
-	public Response toResponse(final ItemNotFound e) {
+	public Response toResponse(final IntegrityError e) {
         Map<String, Object> out = new HashMap<String, Object>() {
             {
-                put("error", ItemNotFound.class.getSimpleName());
+                put("error", IntegrityError.class.getSimpleName());
                 put("details", new HashMap<String, Object>() {
                     {
                         put("message", e.getMessage());
-                        put("key", e.getKey());
-                        put("value", e.getValue());
+                        put("fields", e.getFields());
                     }
                 });
             }
         };
         try {
-            return Response.status(Status.NOT_FOUND)
+            return Response.status(Status.BAD_REQUEST)
                 .entity(new ObjectMapper().writeValueAsString(out).getBytes()).build();
         } catch (Exception e1) {
             throw new RuntimeException(e1);
         }
 	}
-
 }

@@ -17,10 +17,12 @@ import javax.ws.rs.core.StreamingOutput;
 
 import org.neo4j.graphdb.GraphDatabaseService;
 
+import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
+import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.EntityTypes;
 import eu.ehri.project.models.UserProfile;
@@ -39,7 +41,7 @@ public class UserProfileResource extends EhriNeo4jFramedResource<UserProfile> {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getUserProfile(@QueryParam("key") String key,
             @QueryParam("value") String value) throws ItemNotFound,
-            PermissionDenied {
+            PermissionDenied, BadRequester {
         return retrieve(key, value);
     }
 
@@ -47,7 +49,7 @@ public class UserProfileResource extends EhriNeo4jFramedResource<UserProfile> {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:\\d+}")
     public Response getUserProfile(@PathParam("id") long id)
-            throws PermissionDenied {
+            throws PermissionDenied, BadRequester {
         return retrieve(id);
     }
 
@@ -55,7 +57,7 @@ public class UserProfileResource extends EhriNeo4jFramedResource<UserProfile> {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:.+}")
     public Response getUserProfile(@PathParam("id") String id)
-            throws ItemNotFound, PermissionDenied {
+            throws ItemNotFound, PermissionDenied, BadRequester {
         return retrieve(id);
     }
 
@@ -64,7 +66,8 @@ public class UserProfileResource extends EhriNeo4jFramedResource<UserProfile> {
     @Path("/list")
     public StreamingOutput listUserProfiles(
             @QueryParam("offset") @DefaultValue("0") int offset,
-            @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit) {
+            @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit)
+            throws ItemNotFound, BadRequester {
         return list(offset, limit);
     }
 
@@ -72,7 +75,8 @@ public class UserProfileResource extends EhriNeo4jFramedResource<UserProfile> {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response createUserProfile(String json) throws PermissionDenied,
-            ValidationError, IntegrityError, DeserializationError {
+            ValidationError, IntegrityError, DeserializationError,
+            ItemNotFound, BadRequester {
         return create(json);
     }
 
@@ -80,7 +84,8 @@ public class UserProfileResource extends EhriNeo4jFramedResource<UserProfile> {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response updateUserProfile(String json) throws PermissionDenied,
-            IntegrityError, ValidationError, DeserializationError {
+            IntegrityError, ValidationError, DeserializationError,
+            ItemNotFound, BadRequester {
         return update(json);
     }
 
@@ -90,21 +95,23 @@ public class UserProfileResource extends EhriNeo4jFramedResource<UserProfile> {
     @Path("/{id:.+}")
     public Response updateUserProfile(@PathParam("id") String id, String json)
             throws PermissionDenied, IntegrityError, ValidationError,
-            DeserializationError, ItemNotFound {
+            DeserializationError, ItemNotFound, BadRequester {
         return update(id, json);
     }
 
     @DELETE
     @Path("/{id:\\d+}")
     public Response deleteUserProfile(@PathParam("id") long id)
-            throws PermissionDenied, ValidationError {
+            throws PermissionDenied, ValidationError, ItemNotFound,
+            BadRequester {
         return delete(id);
     }
 
     @DELETE
     @Path("/{id:.+}")
     public Response deleteUserProfile(@PathParam("id") String id)
-            throws PermissionDenied, ItemNotFound, ValidationError {
+            throws PermissionDenied, ItemNotFound, ValidationError,
+            BadRequester {
         return delete(id);
     }
 }

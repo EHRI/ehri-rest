@@ -22,6 +22,7 @@ import javax.ws.rs.core.Response.Status;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 
+import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
@@ -50,7 +51,7 @@ public class DocumentaryUnitResource extends
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:\\d+}")
     public Response getDocumentaryUnit(@PathParam("id") long id)
-            throws PermissionDenied {
+            throws PermissionDenied, BadRequester {
         return retrieve(id);
     }
 
@@ -58,7 +59,7 @@ public class DocumentaryUnitResource extends
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:.+}")
     public Response getDocumentaryUnit(@PathParam("id") String id)
-            throws ItemNotFound, PermissionDenied {
+            throws ItemNotFound, PermissionDenied, BadRequester {
         return retrieve(id);
     }
 
@@ -67,7 +68,7 @@ public class DocumentaryUnitResource extends
     @Path("/list")
     public StreamingOutput listDocumentaryUnits(
             @QueryParam("offset") @DefaultValue("0") int offset,
-            @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit) {
+            @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit) throws ItemNotFound, BadRequester {
         return list(offset, limit);
     }
 
@@ -75,7 +76,7 @@ public class DocumentaryUnitResource extends
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response updateDocumentaryUnit(String json) throws PermissionDenied,
-            IntegrityError, ValidationError, DeserializationError {
+            IntegrityError, ValidationError, DeserializationError, ItemNotFound, BadRequester {
         return update(json);
     }
 
@@ -85,21 +86,22 @@ public class DocumentaryUnitResource extends
     @Path("/{id:.+}")
     public Response updateDocumentaryUnit(@PathParam("id") String id,
             String json) throws PermissionDenied, IntegrityError,
-            ValidationError, DeserializationError, ItemNotFound {
+            ValidationError, DeserializationError, ItemNotFound, BadRequester {
         return update(id, json);
     }
 
     @DELETE
     @Path("/{id}")
     public Response deleteDocumentaryUnit(@PathParam("id") long id)
-            throws PermissionDenied, ValidationError {
+            throws PermissionDenied, ValidationError, ItemNotFound, BadRequester {
         return delete(id);
     }
 
     @DELETE
     @Path("/{id:.+}")
     public Response deleteDocumentaryUnit(@PathParam("id") String id)
-            throws PermissionDenied, ItemNotFound, ValidationError {
+            throws PermissionDenied, ItemNotFound, ValidationError,
+            BadRequester, SerializationError {
         return delete(id);
     }
 
@@ -109,12 +111,12 @@ public class DocumentaryUnitResource extends
     @Path("/{id:.+}/" + EntityTypes.DOCUMENTARY_UNIT)
     public Response createAgentDocumentaryUnit(@PathParam("id") String id,
             String json) throws PermissionDenied, ValidationError,
-            IntegrityError, DeserializationError, ItemNotFound {
+            IntegrityError, DeserializationError, ItemNotFound, BadRequester {
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
             DocumentaryUnit parent = new Query<DocumentaryUnit>(graph,
                     DocumentaryUnit.class).get(AccessibleEntity.IDENTIFIER_KEY,
-                    id, getRequesterUserProfileId());
+                    id, getRequesterUserProfile());
             DocumentaryUnit doc = createDocumentaryUnit(json, parent);
             tx.success();
             return buildResponseFromDocumentaryUnit(doc);
@@ -146,14 +148,14 @@ public class DocumentaryUnitResource extends
 
     private DocumentaryUnit createDocumentaryUnit(String json,
             DocumentaryUnit parent) throws DeserializationError,
-            PermissionDenied, ValidationError, IntegrityError {
+            PermissionDenied, ValidationError, IntegrityError, BadRequester {
         EntityBundle<DocumentaryUnit> entityBundle = converter
                 .jsonToBundle(json);
 
         DocumentaryUnit doc = new ActionViews<DocumentaryUnit>(graph,
                 DocumentaryUnit.class).create(
                 converter.bundleToData(entityBundle),
-                getRequesterUserProfileId());
+                getRequesterUserProfile());
         // Add it to this agent's collections
         parent.addChild(doc);
         parent.getAgent().addCollection(doc);

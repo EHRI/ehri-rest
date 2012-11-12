@@ -36,7 +36,7 @@ public class ActionViewsTest extends AbstractFixtureTest {
         ActionViews<DocumentaryUnit> docViews = new ActionViews<DocumentaryUnit>(
                 graph, DocumentaryUnit.class);
         Map<String, Object> testData = getTestBundle();
-        DocumentaryUnit unit = docViews.create(testData, validUserId);
+        DocumentaryUnit unit = docViews.create(testData, validUser);
         assertEquals(TEST_COLLECTION_NAME, unit.getName());
 
         // We could convert the FramedNode back into a bundle here,
@@ -47,7 +47,7 @@ public class ActionViewsTest extends AbstractFixtureTest {
         Map<String, Object> data = (Map<String, Object>) testData.get("data");
         data.put("name", newName);
 
-        DocumentaryUnit changedUnit = docViews.update(testData, validUserId);
+        DocumentaryUnit changedUnit = docViews.update(testData, validUser);
         assertEquals(newName, changedUnit.getName());
 
         // Check the nested item was created correctly
@@ -73,7 +73,7 @@ public class ActionViewsTest extends AbstractFixtureTest {
         ActionViews<UserProfile> userViews = new ActionViews<UserProfile>(
                 graph, UserProfile.class);
         Map<String, Object> userData = getTestUserBundle();
-        UserProfile user = userViews.create(userData, validUserId);
+        UserProfile user = userViews.create(userData, validUser);
         assertEquals(TEST_USER_NAME, user.getName());
 
         // We could convert the FramedNode back into a bundle here,
@@ -84,7 +84,7 @@ public class ActionViewsTest extends AbstractFixtureTest {
         Map<String, Object> data = (Map<String, Object>) userData.get("data");
         data.put("name", newName);
 
-        UserProfile changedUser = userViews.update(userData, validUserId);
+        UserProfile changedUser = userViews.update(userData, validUser);
         assertEquals(newName, changedUser.getName());
 
         // Check we have an audit action.
@@ -114,24 +114,20 @@ public class ActionViewsTest extends AbstractFixtureTest {
         ActionViews<DocumentaryUnit> docViews = new ActionViews<DocumentaryUnit>(
                 graph, DocumentaryUnit.class);
         Integer shouldDelete = 1;
-        DocumentaryUnit unit = graph.getVertex(itemId, DocumentaryUnit.class);
-
-        UserProfile user = graph.frame(graph.getVertex(validUserId),
-                UserProfile.class);
-        int origActionCount = toList(user.getActions()).size();
+        int origActionCount = toList(validUser.getActions()).size();
 
         // FIXME: Surely there's a better way of doing this???
-        Iterator<DatePeriod> dateIter = unit.getDatePeriods().iterator();
-        Iterator<Description> descIter = unit.getDescriptions().iterator();
+        Iterator<DatePeriod> dateIter = item.getDatePeriods().iterator();
+        Iterator<Description> descIter = item.getDescriptions().iterator();
         for (; dateIter.hasNext(); shouldDelete++)
             dateIter.next();
         for (; descIter.hasNext(); shouldDelete++)
             descIter.next();
 
-        Integer deleted = docViews.delete(itemId, validUserId);
+        Integer deleted = docViews.delete(item, validUser);
         assertEquals(shouldDelete, deleted);
 
-        List<Action> actions = toList(user.getActions());
+        List<Action> actions = toList(validUser.getActions());
 
         // Check there's an extra audit log for the user
         assertEquals(origActionCount + 1, actions.size());

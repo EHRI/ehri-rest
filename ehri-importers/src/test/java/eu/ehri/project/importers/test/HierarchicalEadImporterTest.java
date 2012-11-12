@@ -32,8 +32,6 @@ public class HierarchicalEadImporterTest extends AbstractFixtureTest {
 
 	@Test
 	public void testImportItemsT() throws Exception {
-		UserProfile user = graph.frame(graph.getVertex(validUserId),
-				UserProfile.class);
 		Agent agent = graph.frame(helper.getTestVertex(TEST_REPO), Agent.class);
 		final String logMessage = "Importing a single EAD";
 
@@ -41,7 +39,7 @@ public class HierarchicalEadImporterTest extends AbstractFixtureTest {
 
 		InputStream ios = ClassLoader
 				.getSystemResourceAsStream(HIERARCHICAL_EAD);
-		ImportLog log = new EadImportManager(graph, agent, user).importFile(ios, logMessage);
+		ImportLog log = new EadImportManager(graph, agent, validUser).importFile(ios, logMessage);
 
 		// How many new nodes will have been created? We should have
 		// - 4 more DocumentaryUnits

@@ -13,6 +13,7 @@ import javax.ws.rs.core.StreamingOutput;
 
 import org.neo4j.graphdb.GraphDatabaseService;
 
+import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.ContentType;
@@ -34,7 +35,7 @@ public class ContentTypeResource extends EhriNeo4jFramedResource<ContentType> {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:\\d+}")
     public Response getContentType(@PathParam("id") long id)
-            throws PermissionDenied {
+            throws PermissionDenied, BadRequester {
         return retrieve(id);
     }
 
@@ -42,7 +43,7 @@ public class ContentTypeResource extends EhriNeo4jFramedResource<ContentType> {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:[\\w-]+}")
     public Response getContentType(@PathParam("id") String id)
-            throws ItemNotFound, PermissionDenied {
+            throws ItemNotFound, PermissionDenied, BadRequester {
         return retrieve(id);
     }
 
@@ -51,7 +52,8 @@ public class ContentTypeResource extends EhriNeo4jFramedResource<ContentType> {
     @Path("/list")
     public StreamingOutput listContentTypes(
             @QueryParam("offset") @DefaultValue("0") int offset,
-            @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit) {
+            @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit)
+            throws ItemNotFound, BadRequester {
         return list(offset, limit);
     }
 }

@@ -2,7 +2,6 @@ package eu.ehri.project.commands;
 
 import java.util.Map;
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.Option;
 import org.apache.commons.cli.ParseException;
 
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
@@ -72,7 +71,7 @@ public class UserListEntities extends BaseCommand implements Command {
         @SuppressWarnings("unchecked")
         Query<AccessibleEntity> query = new Query<AccessibleEntity>(graph,
                 (Class<AccessibleEntity>) cls);
-        for (AccessibleEntity acc : query.list(null, null, (Long) user.asVertex().getId())) {
+        for (AccessibleEntity acc : query.list(null, null, user)) {
             System.out.println(acc.getIdentifier());
         }
         
