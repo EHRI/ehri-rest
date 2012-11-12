@@ -37,6 +37,10 @@ public class BaseRestClientTest extends AbstractRestClientTest {
 
     protected static ServerRunner runner;
 
+    protected String getBaseUri() {
+        return baseUri;
+    }
+    
     @Override
     String getExtensionEntryPointUri() {
         return extensionEntryPointUri;
