@@ -36,7 +36,7 @@ public class CypherTest extends BaseRestClientTest {
     }
 
     @Test
-    public void testSettingGlobalPermissionMatrix()
+    public void testCypher()
             throws JsonGenerationException, JsonMappingException,
             UniformInterfaceException, IOException {
 
