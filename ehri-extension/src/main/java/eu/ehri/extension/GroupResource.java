@@ -27,7 +27,10 @@ import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.EntityTypes;
 import eu.ehri.project.models.Group;
+import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
+import eu.ehri.project.models.base.Actioner;
+import eu.ehri.project.persistance.ActionManager;
 
 /**
  * Provides a RESTfull interface for the Group class.
@@ -126,12 +129,20 @@ public class GroupResource extends EhriNeo4jFramedResource<Group> {
             Group group = getEntity(EntityTypes.GROUP, id, Group.class);
             Accessor accessor = getEntity(atype, aid, Accessor.class);
             group.addMember(accessor);
+            
+            // Log the action...
+            new ActionManager(graph).createAction(
+                    graph.frame(accessor.asVertex(), AccessibleEntity.class),
+                    graph.frame(getRequesterUserProfile().asVertex(), Actioner.class),
+                    "Added accessor to group").addSubjects(group);
+            
             tx.success();
+            
+            // TODO: Is there anything worth return here except OK?
+            return Response.status(Status.OK).build();
         } finally {
             tx.finish();
         }
-        // TODO: Is there anything worth return here except OK?
-        return Response.status(Status.OK).build();
     }
     
     /**
@@ -156,12 +167,19 @@ public class GroupResource extends EhriNeo4jFramedResource<Group> {
             Group group = getEntity(EntityTypes.GROUP, id, Group.class);
             Accessor accessor = getEntity(atype, aid, Accessor.class);
             group.removeMember(accessor);
+            // Log the action...
+            new ActionManager(graph).createAction(
+                    graph.frame(accessor.asVertex(), AccessibleEntity.class),
+                    graph.frame(getRequesterUserProfile().asVertex(), Actioner.class),
+                    "Removed accessor from group").addSubjects(group);
+            
             tx.success();
+            
+            // TODO: Is there anything worth return here except OK?
+            return Response.status(Status.OK).build();
         } finally {
             tx.finish();
         }
-        // TODO: Is there anything worth return here except OK?
-        return Response.status(Status.OK).build();
     }    
     
     /**
