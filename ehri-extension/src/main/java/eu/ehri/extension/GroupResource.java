@@ -125,7 +125,7 @@ public class GroupResource extends EhriNeo4jFramedResource<Group> {
         try {
             Group group = getEntity(EntityTypes.GROUP, id, Group.class);
             Accessor accessor = getEntity(atype, aid, Accessor.class);
-            group.addAccessor(accessor);
+            group.addMember(accessor);
             tx.success();
         } finally {
             tx.finish();
