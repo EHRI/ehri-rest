@@ -61,6 +61,7 @@ public class AclManager {
      * Check if an accessor is admin or a member of Admin.
      * 
      * @param accessor
+     * @return User belongs to the admin group
      */
     public Boolean belongsToAdmin(Accessor accessor) {
         if (isAdmin(accessor))
@@ -76,6 +77,7 @@ public class AclManager {
      * Check if an accessor is admin or a member of Admin.
      * 
      * @param accessor
+     * @return User is an anonymous accessor
      */
     public Boolean isAnonymous(Accessor accessor) {
         if (accessor == null)
@@ -85,9 +87,13 @@ public class AclManager {
                         .equals(Group.ADMIN_GROUP_IDENTIFIER);
     }
 
-    /*
-     * We have to ascend the current accessors group hierarchy looking for a
-     * groups that are contained in the current entity's ACL list.
+    /**
+     * Search the group hierarchy of the given accessors to find an intersection
+     * with those who can access a resource.
+     * 
+     * @param accessing
+     *            The user(s) accessing the resource
+     * @return The accessors in the given list able to access the resource
      */
     private List<Accessor> searchAccess(List<Accessor> accessing,
             List<Accessor> allowedAccessors) {
@@ -120,8 +126,7 @@ public class AclManager {
      * @param entity
      * @param accessor
      * 
-     * @return
-     * @return
+     * @return Whether or not the given accessor can access the entity
      */
     public boolean getAccessControl(AccessibleEntity entity, Accessor accessor) {
         // Admin can read/write everything and object can always read/write
@@ -159,6 +164,9 @@ public class AclManager {
      * @param accessor
      * @param entity
      * @param permission
+     * 
+     * @return Iterable of PermissionGrant instances for the given accessor,
+     *         target, and permission
      */
     public Iterable<PermissionGrant> getPermissionGrants(Accessor accessor,
             PermissionGrantTarget target, Permission permission) {
@@ -185,7 +193,8 @@ public class AclManager {
      * Return a permission list for the given accessor and her inherited groups.
      * 
      * @param accessor
-     * @return
+     * @return List of permission maps for the given accessor and his group
+     *         parents.
      */
     public List<Map<String, Map<String, List<String>>>> getInheritedGlobalPermissions(
             Accessor accessor) {
@@ -208,7 +217,7 @@ public class AclManager {
      * their global permissions.
      * 
      * @param accessor
-     * @param map
+     * @return Permission map for the given accessor
      */
     public Map<String, List<String>> getGlobalPermissions(Accessor accessor) {
         return isAdmin(accessor) ? getAdminPermissions()
@@ -220,6 +229,7 @@ public class AclManager {
      * 
      * @param accessor
      * @param globals
+     *            Global permission map
      * @throws PermissionDenied
      */
     public void setGlobalPermissionMatrix(Accessor accessor,
@@ -266,6 +276,7 @@ public class AclManager {
      * a map of content types against the grant permissions.
      * 
      * @param accessor
+     * @return List of permission maps for the given target
      */
     public List<Map<String, List<String>>> getInheritedEntityPermissions(
             Accessor accessor, PermissionGrantTarget entity) {
@@ -288,6 +299,8 @@ public class AclManager {
      * content types against the grant permissions.
      * 
      * @param accessor
+     * @return List of permission names for the given accessor on the given
+     *         target
      */
     public List<String> getEntityPermissions(Accessor accessor,
             PermissionGrantTarget entity) {
@@ -315,7 +328,7 @@ public class AclManager {
      * @param accessor
      * @param contentType
      * @param permission
-     * @return
+     * @return The permission grant given for this accessor and target
      */
     public PermissionGrant grantPermissions(Accessor accessor,
             PermissionGrantTarget target, Permission permission) {
@@ -333,7 +346,7 @@ public class AclManager {
      * @param contentType
      * @param permission
      * @param scope
-     * @return
+     * @return The permission grant given for this accessor, target, and scope
      */
     public PermissionGrant grantPermissions(Accessor accessor,
             PermissionGrantTarget target, Permission permission,
@@ -405,7 +418,7 @@ public class AclManager {
      * given accessor.
      * 
      * @param accessor
-     * @return
+     * @return A PipeFunction for filtering a set of vertices as the given user
      */
     public PipeFunction<Vertex, Boolean> getAclFilterFunction(Accessor accessor) {
         assert accessor != null;
@@ -434,7 +447,8 @@ public class AclManager {
      * Pipe filter function that passes through all items. TODO: Check if we
      * actually need this???
      * 
-     * @return
+     * @return A no-op PipeFunction for filtering a list of vertices as an admin
+     *         user
      */
     private PipeFunction<Vertex, Boolean> noopFilterFunction() {
         return new PipeFunction<Vertex, Boolean>() {
