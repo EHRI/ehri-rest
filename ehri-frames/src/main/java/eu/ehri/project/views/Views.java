@@ -28,7 +28,7 @@ public class Views<E extends AccessibleEntity> extends AbstractViews<E>
      * 
      * @param item
      * @param user
-     * @return
+     * @return The given framed vertex
      * @throws PermissionDenied
      */
     public E detail(E entity, Accessor user) throws PermissionDenied {
@@ -41,7 +41,7 @@ public class Views<E extends AccessibleEntity> extends AbstractViews<E>
      * 
      * @param data
      * @param user
-     * @return
+     * @return The updated framed vertex
      * @throws PermissionDenied
      * @throws ValidationError
      * @throws IntegrityError
@@ -61,7 +61,7 @@ public class Views<E extends AccessibleEntity> extends AbstractViews<E>
      * 
      * @param data
      * @param user
-     * @return
+     * @return The created framed vertex
      * @throws DeserializationError
      * @throws PermissionDenied
      * @throws ValidationError
@@ -81,7 +81,7 @@ public class Views<E extends AccessibleEntity> extends AbstractViews<E>
      * 
      * @param item
      * @param user
-     * @return
+     * @return The number of vertices deleted.
      * @throws PermissionDenied
      * @throws ValidationError
      * @throws SerializationError

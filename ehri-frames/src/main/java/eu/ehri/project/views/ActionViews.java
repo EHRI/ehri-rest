@@ -51,10 +51,11 @@ public class ActionViews<E extends AccessibleEntity> extends Views<E> implements
      * 
      * @param data
      * @param user
-     * @return
+     * @return The created framed vertex
      * @throws PermissionDenied
      * @throws ValidationError
      * @throws IntegrityError
+     * @throws DeserializationError
      */
     @Override
     public E create(Map<String, Object> data, Accessor user)
@@ -70,10 +71,11 @@ public class ActionViews<E extends AccessibleEntity> extends Views<E> implements
      * @param data
      * @param user
      * @param logMessage
-     * @return
+     * @return The created framed vertex
      * @throws PermissionDenied
      * @throws ValidationError
      * @throws IntegrityError
+     * @throw DeserializationError
      */
     public E create(Map<String, Object> data, Accessor user, String logMessage)
             throws PermissionDenied, ValidationError, DeserializationError,
@@ -115,10 +117,11 @@ public class ActionViews<E extends AccessibleEntity> extends Views<E> implements
      * 
      * @param data
      * @param user
-     * @return
+     * @return The updated framed vertex
      * @throws PermissionDenied
      * @throws ValidationError
      * @throws IntegrityError
+     * @throws DeserializationError
      */
     @Override
     public E update(Map<String, Object> data, Accessor user)
@@ -134,10 +137,11 @@ public class ActionViews<E extends AccessibleEntity> extends Views<E> implements
      * @param data
      * @param user
      * @param logMessage
-     * @return
+     * @return The updated framed vertex
      * @throws PermissionDenied
      * @throws ValidationError
      * @throws IntegrityError
+     * @throw DeserializationError
      */
     public E update(Map<String, Object> data, Accessor user, String logMessage)
             throws PermissionDenied, ValidationError, DeserializationError,
@@ -177,7 +181,7 @@ public class ActionViews<E extends AccessibleEntity> extends Views<E> implements
      * 
      * @param item
      * @param user
-     * @return
+     * @return The number of vertices deleted
      * @throws PermissionDenied
      * @throws ValidationError
      * @throws SerializationError
@@ -195,7 +199,7 @@ public class ActionViews<E extends AccessibleEntity> extends Views<E> implements
      * @param item
      * @param user
      * @param logMessage
-     * @return
+     * @return The number of vertices deleted
      * @throws PermissionDenied
      * @throws ValidationError
      * @throws SerializationError

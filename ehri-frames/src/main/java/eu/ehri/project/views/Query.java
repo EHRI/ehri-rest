@@ -134,6 +134,17 @@ public class Query<E extends AccessibleEntity> extends AbstractViews<E>
         this.page = other.page;
     }
 
+    /**
+     * Fetch an item by property key/value. The first matching item will be
+     * returned.
+     * 
+     * @param key
+     * @param value
+     * @param user
+     * @return The matching framed vertex.
+     * @throws PermissionDenied
+     * @throws ItemNotFound
+     */
     public E get(String key, String value, Accessor user)
             throws PermissionDenied, ItemNotFound {
         try {
@@ -154,10 +165,10 @@ public class Query<E extends AccessibleEntity> extends AbstractViews<E>
     }
 
     /**
-     * Return an iterable for all items.
+     * Return an iterable for all items accessible to the user.
      * 
      * @param user
-     * @return
+     * @return Iterable of framed vertices accessible to the given user
      * @throws IndexNotFoundException
      */
     public Iterable<E> list(Accessor user) {
@@ -165,10 +176,11 @@ public class Query<E extends AccessibleEntity> extends AbstractViews<E>
     }
 
     /**
-     * Return an iterable for all items.
+     * Return a Page instance containing a count of total items, and an iterable
+     * for the given offset/limit.
      * 
      * @param user
-     * @return
+     * @return Page instance
      * @throws IndexNotFoundException
      */
     public Page<E> page(Accessor user) {
@@ -176,11 +188,12 @@ public class Query<E extends AccessibleEntity> extends AbstractViews<E>
     }
 
     /**
-     * Count items accessible to a given user.
+     * Return a Page instance containing a count of total items, and an iterable
+     * for the given offset/limit.
      * 
      * @param user
      * 
-     * @return
+     * @return Page instance
      * @throws IndexNotFoundException
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -220,7 +233,7 @@ public class Query<E extends AccessibleEntity> extends AbstractViews<E>
      * 
      * @param user
      * 
-     * @return
+     * @return Iterable of items accessible to the given accessor
      * @throws IndexNotFoundException
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -242,35 +255,10 @@ public class Query<E extends AccessibleEntity> extends AbstractViews<E>
         }
     }
 
-    @SuppressWarnings("rawtypes")
-    private GremlinPipeline setPipelineRange(GremlinPipeline filter) {
-        int low = offset == null ? 0 : Math.max(offset, 0);
-        int high = limit == null ? -1 : low + Math.max(limit, 0) - 1;
-        return filter.range(low, high);
-    }
-
-    private Index<Vertex> getIndexForClass(Class<E> cls)
-            throws IndexNotFoundException {
-        Index<Vertex> index = graph.getBaseGraph().getIndex(
-                getEntityIndexName(cls), Vertex.class);
-        if (index == null)
-            throw new IndexNotFoundException(getEntityIndexName(cls));
-        return index;
-    }
-
     /**
-     * Get the Entity index type key...
      * 
-     * @param cls
      * @return
      */
-    private String getEntityIndexName(Class<E> cls) {
-        EntityType ann = cls.getAnnotation(EntityType.class);
-        if (ann != null)
-            return ann.value();
-        return null;
-    }
-
     public int getOffset() {
         return offset;
     }
@@ -297,4 +285,29 @@ public class Query<E extends AccessibleEntity> extends AbstractViews<E>
         this.sort = sort;
         return this;
     }
+    
+    // Helpers
+    
+    @SuppressWarnings("rawtypes")
+    private GremlinPipeline setPipelineRange(GremlinPipeline filter) {
+        int low = offset == null ? 0 : Math.max(offset, 0);
+        int high = limit == null ? -1 : low + Math.max(limit, 0) - 1;
+        return filter.range(low, high);
+    }
+
+    private Index<Vertex> getIndexForClass(Class<E> cls)
+            throws IndexNotFoundException {
+        Index<Vertex> index = graph.getBaseGraph().getIndex(
+                getEntityIndexName(cls), Vertex.class);
+        if (index == null)
+            throw new IndexNotFoundException(getEntityIndexName(cls));
+        return index;
+    }
+
+    private String getEntityIndexName(Class<E> cls) {
+        EntityType ann = cls.getAnnotation(EntityType.class);
+        if (ann != null)
+            return ann.value();
+        return null;
+    }    
 }
