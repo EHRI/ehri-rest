@@ -63,10 +63,10 @@ for jar in $FRAMESJAR $EXTENSIONJAR $PLUGINJAR; do
     fi
 done
 
-echo "Copying $PLUGINJAR to $NEO4JPATH/plugin" 
+echo "Copying $PLUGINJAR to $NEO4JPATH/plugins" 
 cp ehri-plugin/target/ehri*jar $NEO4JPATH/plugins
-echo "Copying $EXTENSIONJAR to $NEO4JPATH/plugin" 
-cp ehri-extension/target/ehri*jar $NEO4JPATH/plugin
+echo "Copying $EXTENSIONJAR to $NEO4JPATH/plugins" 
+cp ehri-extension/target/ehri*jar $NEO4JPATH/plugins
 echo "Copying $EXTENSIONJAR to $NEO4JPATH/system/lib" 
 cp ehri-extension/target/ehri*jar $NEO4JPATH/system/lib
 echo "Copying $FRAMESJAR to $NEO4JPATH/system/lib" 
