@@ -1,0 +1,108 @@
+#
+# This file provides a standard set of fixtures for the EHRI collection registry
+# database.
+#
+
+# Permissions - permissions are nodes within the system
+
+permission:
+  - create: &pc
+      data:
+        name: Create
+        mask: 1
+  - update: &pu
+      data:
+        name: Update
+        mask: 2
+  - delete: &pd
+      data:
+        name: Delete
+        mask: 4
+  - grant: &pg
+      data:
+        name: Grant
+        mask: 8
+  - annotate: &pa
+      data:
+        name: Annotate
+        mask: 16
+  - owner: &po
+      data:
+        name: Owner
+        mask: 23 # Mask denotes inclusion of create/update/delete  
+      
+# Content Types - also nodes within the system, which serve as permission targets
+
+contentType:
+  - documentaryUnit: &dut
+      data:
+        name: Documentary Unit
+  - authority: &aut
+      data:
+        name: Authority
+  - agent: &agt
+      data:
+        name: Agent
+  - action: &act
+      data:
+        name: Action
+  - userProfile: &upt
+      data:
+        name: User Profile
+  - group: &gt
+      data:
+        name: Group
+
+# Groups
+group:
+
+  # Admin and Anonymous are groups which have special behaviour within the system
+  - admin: &adminGroup
+      data:
+        name: Admin
+  - anonymous: &anonGroup
+      data:
+        name: Anonymous
+        
+  # These groups are examples
+  # NIOD - the NIOD group belongs to Admin        
+  - niod: &niodGroup
+      data:
+        name: NIOD
+      relationships:
+        belongsTo:
+          - *adminGroup
+  
+  # KCL does not
+  - kcl: &kclGroup
+      data:
+        name: King's College London
+        
+  - soma: &somaGroup
+      data:
+        name: CEGES SOMA
+  
+    
+# Users
+userProfile:
+
+  # The first user belongs to NIOD, and therefore Admin
+  - user1: &user1
+      data:
+        name: User 1
+      relationships:
+        belongsTo:
+          - *niodGroup
+  
+  - user2: &user2
+      data:
+        name: User 2
+      relationships:
+        belongsTo:
+          - *kclGroup
+          
+  - user3: &user3
+      data:
+        name: User 3
+      relationships:
+        
