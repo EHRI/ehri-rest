@@ -6,27 +6,27 @@
 # Permissions - permissions are nodes within the system
 
 permission:
-  - create: &pc
+  - create:
       data:
         name: Create
         mask: 1
-  - update: &pu
+  - update:
       data:
         name: Update
         mask: 2
-  - delete: &pd
+  - delete:
       data:
         name: Delete
         mask: 4
-  - grant: &pg
+  - grant:
       data:
         name: Grant
         mask: 8
-  - annotate: &pa
+  - annotate:
       data:
         name: Annotate
         mask: 16
-  - owner: &po
+  - owner:
       data:
         name: Owner
         mask: 23 # Mask denotes inclusion of create/update/delete  
@@ -34,22 +34,22 @@ permission:
 # Content Types - also nodes within the system, which serve as permission targets
 
 contentType:
-  - documentaryUnit: &dut
+  - documentaryUnit:
       data:
         name: Documentary Unit
-  - authority: &aut
+  - authority:
       data:
         name: Authority
-  - agent: &agt
+  - agent:
       data:
         name: Agent
-  - action: &act
+  - action:
       data:
         name: Action
-  - userProfile: &upt
+  - userProfile:
       data:
         name: User Profile
-  - group: &gt
+  - group:
       data:
         name: Group
 
@@ -57,28 +57,28 @@ contentType:
 group:
 
   # Admin and Anonymous are groups which have special behaviour within the system
-  - admin: &adminGroup
+  - admin:
       data:
         name: Admin
-  - anonymous: &anonGroup
+  - anonymous:
       data:
         name: Anonymous
         
   # These groups are examples
   # NIOD - the NIOD group belongs to Admin        
-  - niod: &niodGroup
+  - niod:
       data:
         name: NIOD
       relationships:
         belongsTo:
-          - *adminGroup
+          - admin
   
   # KCL does not
-  - kcl: &kclGroup
+  - kcl:
       data:
         name: King's College London
         
-  - soma: &somaGroup
+  - soma:
       data:
         name: CEGES SOMA
   
@@ -87,21 +87,21 @@ group:
 userProfile:
 
   # The first user belongs to NIOD, and therefore Admin
-  - user1: &user1
+  - user1:
       data:
         name: User 1
       relationships:
         belongsTo:
-          - *niodGroup
+          - niod
   
-  - user2: &user2
+  - user2:
       data:
         name: User 2
       relationships:
         belongsTo:
-          - *kclGroup
+          - kcl
           
-  - user3: &user3
+  - user3:
       data:
         name: User 3
       relationships:
