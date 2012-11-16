@@ -3,6 +3,25 @@
 # database.
 #
 
+# Relationship definitions. This allows us to refer to the same
+# string further down.
+__relationshipTypes:
+  belongsTo:      &belongsTo      belongsTo
+  childOf:        &childOf        childOf
+  heldBy:         &heldBy         holds
+  describes:      &describes      describes
+  hasSubject:     &hasSubject     hasSubject
+  access:         &access         access
+  annotates:      &annotates      annotates
+  hasAddress:     &hasAddress     hasAddress
+  hasPermission:  &hasPermission  hasPermission
+  hasTarget:      &hasTarget      hasTarget
+  hasGrantee:     &hasGrantee     hasGrantee
+  hasAccessor:    &hasAccessor    hasAccessor
+  hasScope:       &hasScope       hasScope
+  hasAnnotation:  &hasAnnotation  hasAnnotation
+  hasDate:        &hasDate        hasDate 
+  
 # Permissions - permissions are nodes within the system
 
 permission:
@@ -70,7 +89,7 @@ group:
       data:
         name: NIOD
       relationships:
-        belongsTo:
+        *belongsTo:
           - admin
   
   # KCL does not
@@ -91,14 +110,14 @@ userProfile:
       data:
         name: User 1
       relationships:
-        belongsTo:
+        *belongsTo:
           - niod
   
   - user2:
       data:
         name: User 2
       relationships:
-        belongsTo:
+        *belongsTo:
           - kcl
           
   - user3:
