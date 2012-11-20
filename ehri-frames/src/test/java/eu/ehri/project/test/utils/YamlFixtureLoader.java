@@ -47,7 +47,7 @@ public class YamlFixtureLoader {
         return graph.getVertices(EntityType.KEY, entityType, cls);
     }
 
-    private void loadNodes() {
+    private void loadFixtures() {
         InputStream yamlStream = this.getClass().getClassLoader()
                 .getResourceAsStream("test-graph.yaml");
         Yaml yaml = new Yaml();
@@ -69,15 +69,10 @@ public class YamlFixtureLoader {
         }
     }
 
-    private void loadEdges() {
-
-    }
-
     public void loadTestData() {
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
-            loadNodes();
-            loadEdges();
+            loadFixtures();
             tx.success();
         } catch (Exception e) {
             tx.failure();
