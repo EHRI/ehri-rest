@@ -2,6 +2,7 @@ package eu.ehri.extension;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.HashMap;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -24,9 +25,12 @@ import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Transaction;
 import org.neo4j.server.rest.repr.ObjectToRepresentationConverter;
 
 import com.tinkerpop.blueprints.Edge;
+import com.tinkerpop.blueprints.Index;
+import com.tinkerpop.blueprints.Vertex;
 
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.core.GraphHelpers;
@@ -36,9 +40,12 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityTypes;
 import eu.ehri.project.models.UserProfile;
+import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.cvoc.Concept;
+import eu.ehri.project.views.Query;
 
 /**
  * Provides a RESTfull interface for the cvoc.Concept.
@@ -141,8 +148,13 @@ public class CvocConceptResource extends EhriNeo4jFramedResource<Concept> {
     	return getListAsJson(concept.getNarrowerConcepts());
     }
 
+    /**
+     * Add an existing concept to the list of 'narrower' of this existing Concepts
+	 * The 'narrower' edge is created between the concept vertices. 
+	 * 
+	 * Note: the internal vertex id's are used now, but we want identifiers
+     */
     @POST
-    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:\\d+}/narrower/{id_narrower:\\d+}")
     public Response addNarrowerCvocConcept(String json, 
@@ -150,20 +162,23 @@ public class CvocConceptResource extends EhriNeo4jFramedResource<Concept> {
     		@PathParam("id_narrower") String id_narrower) throws PermissionDenied,
             ValidationError, IntegrityError, DeserializationError,
             ItemNotFound, BadRequester {
-    	
-    	Concept concept = views.detail(graph.getVertex(id, cls), getRequesterUserProfile());
-    	Concept narrowerConcept = views.detail(graph.getVertex(id_narrower, cls), getRequesterUserProfile());
+    	    	
+		Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
+		try {
+			Concept concept = views.detail(graph.getVertex(id, cls), getRequesterUserProfile());
+			Concept narrowerConcept = views.detail(graph.getVertex(id_narrower, cls), getRequesterUserProfile());
+			concept.addNarrowerConcept(narrowerConcept);
+			// return the json of the 'parent' of the 'narrower' concept
+		    String jsonStr = converter.vertexFrameToJson(concept);
 
-// The following seems to 'lockup' the server!    	
-//    	concept.addNarrowerConcept(narrowerConcept);
-//System.out.println("REST API: added narrower concept");
-    	
-    	// ehh, is this stored?
-    	// use low level graph stuff
-    	//graph.addEdge(null, graph.getVertex(id, cls).asVertex(), graph.getVertex(id_narrower, cls).asVertex(), "narrower");
-        // even lower level?
-    	
-    	return Response.status(Status.OK).build();
+		    tx.success();
+		    return Response.status(Status.OK).entity((jsonStr).getBytes()).build();
+		} catch (SerializationError e) {
+		    tx.failure();
+		    throw new WebApplicationException(e);
+		} finally {
+		    tx.finish();
+		}   	
     }
 
     @GET

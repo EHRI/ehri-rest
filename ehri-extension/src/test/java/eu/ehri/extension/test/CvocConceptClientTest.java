@@ -1,6 +1,7 @@
 package eu.ehri.extension.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.net.URI;
@@ -21,11 +22,14 @@ import org.junit.Test;
 
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
+import com.tinkerpop.blueprints.Vertex;
 
 import eu.ehri.extension.AbstractRestResource;
+import eu.ehri.project.core.GraphHelpers;
+import eu.ehri.project.models.EntityTypes;
 
 public class CvocConceptClientTest  extends BaseRestClientTest {
-
+	 
     private String jsonCvocConceptTestString = "{\"data\":{\"identifier\": \"apples\",\"isA\":\"cvocConcept\"}}";
     private String jsonApplesTestStr;
     
@@ -67,10 +71,26 @@ public class CvocConceptClientTest  extends BaseRestClientTest {
                         getAdminUserProfileId()).get(ClientResponse.class);
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
         // TODO again test json
+        System.out.println("Respons json: " + response.getEntity(String.class));
+        
+        // Where is my deletion test, I want to know if it works
+        resource = client.resource(location);
+        response = resource
+                .accept(MediaType.APPLICATION_JSON)
+                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                        getAdminUserProfileId()).delete(ClientResponse.class);
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+// NOTE FIX this, now we get an java.lang.IllegalArgumentException: Element can not be null
+//        response = resource
+//                .accept(MediaType.APPLICATION_JSON)
+//                .header(AbstractRestResource.AUTH_HEADER_NAME,
+//                        getAdminUserProfileId()).get(ClientResponse.class);
+//        assertEquals(Response.Status.NO_CONTENT.getStatusCode(), response.getStatus());
+        
     }
 
     @Test
-    public void testRelatedCvocConcepts() throws Exception {
+    public void testNarrowerCvocConcepts() throws Exception {
         String jsonFruitTestStr =  "{\"data\":{\"identifier\": \"fruit\",\"isA\":\"cvocConcept\"}}";
         //readFileAsString("fruit.json");
         String jsonAppleTestStr =  "{\"data\":{\"identifier\": \"apple\",\"isA\":\"cvocConcept\"}}";
@@ -99,37 +119,57 @@ public class CvocConceptClientTest  extends BaseRestClientTest {
                         getAdminUserProfileId())
                 .entity("").post(ClientResponse.class);
         // Hmm, it's a post request, but we don't create a vertex (but we do an edge...)
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());        
+        //System.out.println("add narrower Respons json: " + response.getEntity(String.class));
+
+        // get fruit's narrower concepts
+        resource = client.resource(fruitLocation + "/narrower/list");
+        response = resource
+                .accept(MediaType.APPLICATION_JSON)
+                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                        getAdminUserProfileId()).get(ClientResponse.class);
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        String json = response.getEntity(String.class);
+        //System.out.println("narrower list Response json: " + json);
         
-//        // get fruit's narrower concepts
-//        resource = client.resource(fruitLocation + "/narrower/list");
-//        response = resource
-//                .accept(MediaType.APPLICATION_JSON)
-//                .header(AbstractRestResource.AUTH_HEADER_NAME,
-//                        getAdminUserProfileId()).get(ClientResponse.class);
-//        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
-//        String json = response.getEntity(String.class);
-//        
-//        ObjectMapper mapper = new ObjectMapper();
-//        //List list = mapper.readValue(response.getEntity(String.class), List.class);
-//        JsonNode rootNode = mapper.readValue(json, JsonNode.class);
-//System.out.println("narrower list Response json string: " + json);
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode rootNode = mapper.readValue(json, JsonNode.class);
+        // check if apple is in there
+        assertTrue(containsIdentifier(rootNode.getElements(), "apple"));
         
-//        // ehh, is apple in there as a concept?
-//        resource = client.resource(getExtensionEntryPointUri()
-//                + "/cvocConcept/apple");
-//        response = resource
-//                .accept(MediaType.APPLICATION_JSON)
-//                .header(AbstractRestResource.AUTH_HEADER_NAME,
-//                        getAdminUserProfileId()).get(ClientResponse.class);
-//        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());       
+        // check if apple's broader is fruit
+        // get apple's broader concepts
+        resource = client.resource(getExtensionEntryPointUri()
+                + "/cvocConcept/" + appleIdStr + "/broader/list");
+        response = resource
+                .accept(MediaType.APPLICATION_JSON)
+                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                        getAdminUserProfileId()).get(ClientResponse.class);
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        json = response.getEntity(String.class);
+        //System.out.println("broader list Response json: " + json);
         
-        
-//        Iterator<JsonNode> elements = rootNode.getElements();
-//        while(elements.hasNext()) {
-//        	JsonNode node = elements.next();
-//        	System.out.println(node);
-//        }
+        rootNode = mapper.readValue(json, JsonNode.class);
+        // check if fruit is in there
+        assertTrue(containsIdentifier(rootNode.getElements(), "fruit"));
+    }
+    
+    public boolean containsIdentifier(final Iterator<JsonNode> elements, final String idStr) {
+		if (idStr == null || elements == null) return false;
+
+		boolean result = false;
+    	while (elements.hasNext()) {
+			JsonNode node = elements.next();
+			// assume only one 'identifier' field under the 'data' element
+			JsonNode idNode = node.findValue("identifier");
+			if (null==idNode) continue;
+			
+			if (0==idStr.compareTo(idNode.asText())) {
+				result = true;
+				break; // found!
+			}
+		}        
+    	return result;
     }
     
     public ClientResponse testCreateConcept(String json) {
@@ -147,22 +187,5 @@ public class CvocConceptClientTest  extends BaseRestClientTest {
                 response.getStatus());
     	
         return response;
-    }
-    
-    /**
-     * Get the id of a value from its JSON string representation.
-     * 
-     * @param responseStr
-     * @return
-     * @throws IOException
-     * @throws JsonMappingException
-     * @throws JsonParseException
-     */
-    private Long getIdFromResponseString(String responseStr)
-            throws JsonParseException, JsonMappingException, IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        Map<String, Object> data = mapper.readValue(responseStr, Map.class);
-        String self = (String) data.get("self");
-        return Long.valueOf(self.substring(self.lastIndexOf('/') + 1));
     }
 }
