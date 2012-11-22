@@ -1,0 +1,31 @@
+{
+  "data": {
+    "isA": "cvocConcept",
+    "identifier": "fruit"
+  },
+  "relationships": {
+    "prefLabel": [
+      {
+        "data": {
+          "isA": "cvocText",
+          "language": "en",
+          "content": "fruit"
+        }
+      }
+      ],
+      "narrower": [
+        {
+          "data": {
+          "isA": "cvocConcept",
+          "identifier": "apple"
+          }
+        },
+        {
+          "data": {
+          "isA": "cvocConcept",
+          "identifier": "banana"
+          }
+        }            
+    ]
+  }
+}
