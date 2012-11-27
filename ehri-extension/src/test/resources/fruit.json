@@ -8,7 +8,7 @@
       {
         "data": {
           "isA": "cvocText",
-          "language": "en",
+          "languageCode": "en",
           "content": "fruit"
         }
       }

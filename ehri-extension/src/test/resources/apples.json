@@ -7,29 +7,33 @@
     "prefLabel": [
       {
         "data": {
+          "identifier": "apple-someid1", 
           "isA": "cvocText",
-          "language": "en-US",
+          "languageCode": "en-US",
           "content": "apple"
         }
       },
       {
         "data": {
+          "identifier": "apple-someid2", 
           "isA": "cvocText",
-          "language": "nl-nl",
+          "languageCode": "nl-nl",
           "content": "appel"
         }
       },
       {
         "data": {
+          "identifier": "apple-someid3", 
           "isA": "cvocText",
-          "language": "du",
+          "languageCode": "du",
           "content": "Apfel"
         }
       },
       {
         "data": {
+          "identifier": "apple-someid4", 
           "isA": "cvocText",
-          "language": "fr",
+          "languageCode": "fr",
           "content": "pommier"
         }
       }
@@ -37,18 +41,20 @@
     "definition": [
       {
         "data": {
+          "identifier": "apple-someid5", 
           "isA": "cvocText",
           "content": "The apple is the pomaceous fruit of the apple tree, species Malus domestica in the rose family (Rosaceae).", 
-          "language":"en"
+          "languageCode":"en"
         }
       }
     ],
     "scopeNote": [
       {
         "data": {
+          "identifier": "apple-someid6", 
           "isA": "cvocText",
           "content": "De appel is de belangrijkste vrucht in de geschiedenis van legendes en sprookjes: de appel van Adam en Eva, de appel van Willem Tell en de appel van Sneeuwwitje zijn de belangrijkste voorbeelden.", 
-          "language":"nl"
+          "languageCode":"nl"
         }
       }
     ]

@@ -4,6 +4,7 @@ import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.frames.Adjacency;
 
 import eu.ehri.project.models.EntityTypes;
+import eu.ehri.project.models.annotations.Dependent;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.base.AccessibleEntity;
@@ -40,7 +41,7 @@ public interface Concept extends AccessibleEntity {
     //@Adjacency(label = BROADER)
     //public void addBroaderConcept(final Concept concept);
 
-    // NOTE: should we put a Fetch on it?
+    // NOTE: don't put a Fetch on it, because it can be a large tree of concepts
     @Adjacency(label = NARROWER)
     public Iterable<Concept> getNarrowerConcepts();
 
@@ -68,6 +69,7 @@ public interface Concept extends AccessibleEntity {
     // textual information
     
     @Fetch
+    @Dependent
     @Adjacency(label = PREFLABEL)
     public Iterable<Text> getPrefLabel();
 
@@ -79,6 +81,7 @@ public interface Concept extends AccessibleEntity {
     public void removePrefLabel(final Text prefLabel);
 
     @Fetch
+    @Dependent
     @Adjacency(label = ALTLABEL)
     public Iterable<Text> getAltLabels();
 
@@ -89,6 +92,7 @@ public interface Concept extends AccessibleEntity {
     public void removeAltLabel(final Text altLabel);
 
     @Fetch
+    @Dependent
     @Adjacency(label = DEFINITION)
     public Iterable<Text> getDefinitions();
 
@@ -102,6 +106,7 @@ public interface Concept extends AccessibleEntity {
     // scope notes seem to be used in a more flexible way 
     // and can contain some extra information besides describing the definition. 
     @Fetch
+    @Dependent
     @Adjacency(label = SCOPENOTE)
     public Iterable<Text> getScopeNotes();
 

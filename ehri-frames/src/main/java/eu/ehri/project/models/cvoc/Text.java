@@ -21,10 +21,10 @@ public interface Text extends AccessibleEntity {
 	// Note: if we don't need the identifier, permission and history, 
 	// we could just extend VertexFrame
     public static final String CONTENT = "content";
-    public static final String LANGUAGE = "language";
+    public static final String LANGUAGE = "languageCode";
 	
 	// textual value or content
-    @Property("CONTENT")
+    @Property(CONTENT)
     public String getContent();
     @Property(CONTENT)
     public void setContent(String content);
@@ -43,8 +43,8 @@ public interface Text extends AccessibleEntity {
      *   and case insensitive comparison must be used 
 	 *   and the first subtag is the "Primary Language"
      */    
-    @Property("LANGUAGE")
+    @Property(LANGUAGE)
     public String getLanguage();
-    @Property("LANGUAGE")
+    @Property(LANGUAGE)
     public String setLanguage(String language);
 }

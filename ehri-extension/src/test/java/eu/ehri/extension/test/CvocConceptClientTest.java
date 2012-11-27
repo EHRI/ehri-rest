@@ -3,18 +3,13 @@ package eu.ehri.extension.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.io.IOException;
 import java.net.URI;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -22,15 +17,12 @@ import org.junit.Test;
 
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
-import com.tinkerpop.blueprints.Vertex;
 
 import eu.ehri.extension.AbstractRestResource;
-import eu.ehri.project.core.GraphHelpers;
-import eu.ehri.project.models.EntityTypes;
 
 public class CvocConceptClientTest  extends BaseRestClientTest {
 	 
-    private String jsonCvocConceptTestString = "{\"data\":{\"identifier\": \"apples\",\"isA\":\"cvocConcept\"}}";
+    //private String jsonCvocConceptTestString = "{\"data\":{\"identifier\": \"apples\",\"isA\":\"cvocConcept\"}}";
     private String jsonApplesTestStr;
     
     @BeforeClass
@@ -56,10 +48,11 @@ public class CvocConceptClientTest  extends BaseRestClientTest {
                 .type(MediaType.APPLICATION_JSON)
                 .header(AbstractRestResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId())
-                .entity(jsonApplesTestStr/*jsonCvocConceptTestString*/).post(ClientResponse.class);
+                .entity(jsonApplesTestStr).post(ClientResponse.class);
 
         assertEquals(Response.Status.CREATED.getStatusCode(),
                 response.getStatus());
+        //System.out.println("POST Respons json: " + response.getEntity(String.class));
 
         // Get created entity via the response location?
         URI location = response.getLocation();
@@ -71,7 +64,7 @@ public class CvocConceptClientTest  extends BaseRestClientTest {
                         getAdminUserProfileId()).get(ClientResponse.class);
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
         // TODO again test json
-        System.out.println("Respons json: " + response.getEntity(String.class));
+        //System.out.println("GET Respons json: " + response.getEntity(String.class));
         
         // Where is my deletion test, I want to know if it works
         resource = client.resource(location);
