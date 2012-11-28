@@ -17,12 +17,6 @@ public interface AgentDescription extends Description {
     @Property("name")
     public String getTitle();
 
-    @Property("otherFormsOfName")
-    public String[] otherFormsOfName();
-
-    @Property("parallelFormsOfName")
-    public String[] parallelFormsOfName();
-
     @Fetch
     @Dependent
     @Adjacency(label = HAS_ADDRESS)
