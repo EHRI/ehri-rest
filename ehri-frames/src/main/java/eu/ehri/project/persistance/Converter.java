@@ -254,7 +254,15 @@ public class Converter {
                         method.getAnnotation(Fetch.class).depth()) - 1;
 
                 try {
-                    Object result = method.invoke(item);
+                    Object result;
+                    try {
+                        result = method.invoke(item);
+                    } catch (IllegalArgumentException e) {
+                        String message  = String.format(
+                                "When serializing a bundle, a method was called on an item it did not expect. Method name: %s, item class: %s", 
+                                method.getName(), item.asVertex().getProperty(EntityType.KEY));
+                        throw new RuntimeException(message, e);
+                    }
                     // The result of one of these fetchMethods should either be
                     // a single VertexFrame, or a Iterable<VertexFrame>.
                     if (result instanceof Iterable<?>) {

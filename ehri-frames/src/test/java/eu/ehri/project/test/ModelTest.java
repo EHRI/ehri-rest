@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.junit.Test;
 import eu.ehri.project.models.Address;
-import eu.ehri.project.models.Agent;
+import eu.ehri.project.models.AgentDescription;
 import eu.ehri.project.models.Authority;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityTypes;
@@ -50,9 +50,9 @@ public class ModelTest extends ModelTestBase {
 
     @Test
     public void testRepository() {
-        Agent r1 = helper.getTestFrame("r1", Agent.class);
+        AgentDescription rd1 = helper.getTestFrame("rd1", AgentDescription.class);
         Address ar1 = helper.getTestFrame("ar1", Address.class);
         // check we have an address
-        assertTrue(toList(r1.getAddresses()).contains(ar1));
+        assertTrue(toList(rd1.getAddresses()).contains(ar1));
     }
 }

@@ -36,9 +36,9 @@
     "label": "childOf"
   }, 
   {
-    "src": "r1", 
+    "src": "rd1", 
     "dst": "ar1", 
-    "data": {}, 
+    "data": {},
     "label": "hasAddress"
   }, 
   {
