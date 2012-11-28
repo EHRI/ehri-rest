@@ -10,8 +10,10 @@ import eu.ehri.project.models.base.VersionedEntity;
 @EntityType(EntityTypes.ADDRESS)
 public interface Address extends VersionedEntity {
 
-    @Adjacency(label = Agent.HAS_ADDRESS, direction = Direction.IN)
-    public Agent getAgent();
+    @Adjacency(label = AgentDescription.HAS_ADDRESS, direction = Direction.IN)
+    public AgentDescription getAgentDescription();
+    
+    // TODO: Break out property names into constants
 
     @Property("streetAddress")
     public String getStreetAddress();
