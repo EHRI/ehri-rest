@@ -15,6 +15,7 @@ import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.Action;
 import eu.ehri.project.models.DatePeriod;
+import eu.ehri.project.models.DocumentDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.Description;
@@ -118,7 +119,7 @@ public class ActionViewsTest extends AbstractFixtureTest {
 
         // FIXME: Surely there's a better way of doing this???
         Iterator<DatePeriod> dateIter = item.getDatePeriods().iterator();
-        Iterator<Description> descIter = item.getDescriptions().iterator();
+        Iterator<DocumentDescription> descIter = item.getDescriptions().iterator();
         for (; dateIter.hasNext(); shouldDelete++)
             dateIter.next();
         for (; descIter.hasNext(); shouldDelete++)
