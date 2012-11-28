@@ -1,8 +1,11 @@
 package eu.ehri.project.models.idgen;
 
-import com.tinkerpop.blueprints.Vertex;
+import java.util.Map;
 
+
+import eu.ehri.project.exceptions.IdGenerationError;
 import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.PermissionScope;
 
 /**
  * Generates an ID for nodes which represent AccessibleEntities.
@@ -16,9 +19,9 @@ public class AccessibleEntityIdGenerator implements IdGenerator {
      * Uses the items identifier and its entity type to generate a (supposedly)
      * unique ID.
      */
-    public String generateId(String entityTypePrefix, Vertex vertex) {
+    public String generateId(String entityTypePrefix, PermissionScope scope, Map<String,Object> data) throws IdGenerationError {
         return entityTypePrefix + SEPERATOR
-                + vertex.getProperty(AccessibleEntity.IDENTIFIER_KEY);
+                + data.get(AccessibleEntity.IDENTIFIER_KEY);
     }
 
 }

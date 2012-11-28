@@ -1,12 +1,10 @@
 package eu.ehri.project.models.idgen;
 
-import java.util.NoSuchElementException;
+import java.util.Map;
 
-import com.tinkerpop.blueprints.Direction;
-import com.tinkerpop.blueprints.Vertex;
-
-import eu.ehri.project.models.Agent;
+import eu.ehri.project.exceptions.IdGenerationError;
 import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.PermissionScope;
 
 /**
  * Generate an ID for the DocumentaryUnit type, which is scoped by its
@@ -17,17 +15,14 @@ import eu.ehri.project.models.base.AccessibleEntity;
  */
 public class DocumentaryUnitIdGenerator implements IdGenerator {
 
-    public String generateId(String entityTypePrefix, Vertex vertex) {
-        try {
-            Vertex holder = vertex.getVertices(Direction.IN, Agent.HOLDS)
-                    .iterator().next();
-            return entityTypePrefix + SEPERATOR
-                    + holder.getProperty(AccessibleEntity.IDENTIFIER_KEY)
-                    + SEPERATOR
-                    + vertex.getProperty(AccessibleEntity.IDENTIFIER_KEY);
-        } catch (NoSuchElementException e) {
-            throw new RuntimeException("No DocumentaryUnit holder found.", e);
-        }
+    public String generateId(String entityTypePrefix, PermissionScope scope,
+            Map<String, Object> data) throws IdGenerationError {
+        if (scope == null)
+            throw new IdGenerationError("Null or incorrect scope given for ID generation",
+                    entityTypePrefix, scope, data);
+        return entityTypePrefix + SEPERATOR
+                + scope.getIdentifier()
+                + SEPERATOR + data.get(AccessibleEntity.IDENTIFIER_KEY);
     }
 
 }

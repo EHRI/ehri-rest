@@ -4,7 +4,6 @@ import java.util.Map;
 
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
-
 import eu.ehri.project.acl.PermissionTypes;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.IntegrityError;
@@ -13,6 +12,7 @@ import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
+import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistance.BundleDAO;
 import eu.ehri.project.persistance.EntityBundle;
 
@@ -21,6 +21,12 @@ public class Views<E extends AccessibleEntity> extends AbstractViews<E>
 
     public Views(FramedGraph<Neo4jGraph> graph, Class<E> cls) {
         super(graph, cls);
+    }
+
+    public Views(FramedGraph<Neo4jGraph> graph, Class<E> cls,
+            PermissionScope scope) {
+        super(graph, cls);
+        this.scope = scope;
     }
 
     /**
@@ -51,7 +57,8 @@ public class Views<E extends AccessibleEntity> extends AbstractViews<E>
             IntegrityError {
         EntityBundle<E> bundle = converter.dataToBundle(data);
         E entity = graph.getVertex(bundle.getId(), cls);
-        checkEntityPermission(entity, user, getPermission(PermissionTypes.UPDATE));
+        checkEntityPermission(entity, user,
+                getPermission(PermissionTypes.UPDATE));
         return new BundleDAO<E>(graph, scope).update(bundle);
     }
 

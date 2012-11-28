@@ -1,7 +1,10 @@
 package eu.ehri.project.models.idgen;
 
-import com.tinkerpop.blueprints.Vertex;
 
+import eu.ehri.project.exceptions.IdGenerationError;
+import eu.ehri.project.models.base.PermissionScope;
+
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -15,7 +18,7 @@ public class GenericIdGenerator implements IdGenerator {
     /**
      * Generates a random string UUID.
      */
-    public String generateId(String entityTypePrefix, Vertex vertex) {
+    public String generateId(String entityTypePrefix, PermissionScope scope, Map<String,Object> data) throws IdGenerationError {
         return entityTypePrefix + SEPERATOR + UUID.randomUUID();
     }
 }

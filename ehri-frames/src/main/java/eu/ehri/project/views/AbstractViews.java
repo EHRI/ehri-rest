@@ -194,4 +194,8 @@ abstract class AbstractViews<E extends AccessibleEntity> {
     public void setScope(PermissionScope scope) {
         this.scope = scope;
     }
+    
+    public void resetScope() {
+        this.scope = new SystemScope();
+    }
 }

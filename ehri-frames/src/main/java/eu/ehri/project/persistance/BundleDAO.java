@@ -19,10 +19,17 @@ import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.frames.VertexFrame;
 
 import eu.ehri.project.core.GraphHelpers;
+import eu.ehri.project.exceptions.IdGenerationError;
 import eu.ehri.project.exceptions.IndexNotFoundException;
 import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.annotations.Dependent;
+import eu.ehri.project.models.base.PermissionScope;
+import eu.ehri.project.models.idgen.AccessibleEntityIdGenerator;
+import eu.ehri.project.models.idgen.DocumentaryUnitIdGenerator;
+import eu.ehri.project.models.idgen.GenericIdGenerator;
+import eu.ehri.project.models.idgen.IdGenerator;
 import eu.ehri.project.models.utils.ClassUtils;
 
 /**
@@ -36,10 +43,11 @@ public class BundleDAO<T extends VertexFrame> {
 
     private final FramedGraph<Neo4jGraph> graph;
     private final GraphHelpers helpers;
-    private final VertexFrame scope;
+    private final PermissionScope scope;
 
     /**
      * Constructor will null scope.
+     * 
      * @param graph
      */
     public BundleDAO(FramedGraph<Neo4jGraph> graph) {
@@ -54,7 +62,7 @@ public class BundleDAO<T extends VertexFrame> {
      * @param graph
      * @param scope
      */
-    public BundleDAO(FramedGraph<Neo4jGraph> graph, VertexFrame scope) {
+    public BundleDAO(FramedGraph<Neo4jGraph> graph, PermissionScope scope) {
         this.graph = graph;
         this.helpers = new GraphHelpers(graph.getBaseGraph().getRawGraph());
         this.scope = scope;
@@ -66,9 +74,10 @@ public class BundleDAO<T extends VertexFrame> {
      * @param bundle
      * @return
      * @throws ValidationError
-     * @throws IntegrityError 
+     * @throws IntegrityError
      */
-    public T update(EntityBundle<T> bundle) throws ValidationError, IntegrityError {
+    public T update(EntityBundle<T> bundle) throws ValidationError,
+            IntegrityError {
         return graph.frame(updateInner(bundle), bundle.getBundleClass());
     }
 
@@ -78,11 +87,11 @@ public class BundleDAO<T extends VertexFrame> {
      * @param bundle
      * @return
      * @throws ValidationError
-     * @throws IndexNotFoundException 
-     * @throws IntegrityError 
+     * @throws IndexNotFoundException
+     * @throws IntegrityError
      */
     public T createOrUpdate(String key, String value, EntityBundle<T> bundle)
-        throws ValidationError, IndexNotFoundException, IntegrityError {
+            throws ValidationError, IndexNotFoundException, IntegrityError {
         Index<Vertex> index = helpers.getIndex(bundle.getEntityType(),
                 Vertex.class);
         if (index == null)
@@ -102,7 +111,8 @@ public class BundleDAO<T extends VertexFrame> {
         }
     }
 
-    public T create(EntityBundle<T> bundle) throws ValidationError, IntegrityError {
+    public T create(EntityBundle<T> bundle) throws ValidationError,
+            IntegrityError {
         return graph.frame(createInner(bundle), bundle.getBundleClass());
     }
 
@@ -164,7 +174,7 @@ public class BundleDAO<T extends VertexFrame> {
                 }
             }
         }
-        if (bundle.id != null) {            
+        if (bundle.id != null) {
             try {
                 Index<Vertex> index = helpers.getIndex(bundle.getEntityType(),
                         Vertex.class);
@@ -220,16 +230,24 @@ public class BundleDAO<T extends VertexFrame> {
      * @param bundle
      * @return
      * @throws ValidationError
-     * @throws IntegrityError 
+     * @throws IntegrityError
      */
-    private Vertex createInner(EntityBundle<T> bundle) throws ValidationError, IntegrityError {        
-        bundle.validateForInsert();
-        Index<Vertex> index = helpers.getOrCreateIndex(bundle.getEntityType(),
-                Vertex.class);
-        Vertex node = helpers.createIndexedVertex(bundle.getData(), index,
-                bundle.getPropertyKeys(), bundle.getUniquePropertyKeys());
-        saveDependents(node, bundle.getBundleClass(), bundle.getRelations());
-        return node;
+    private Vertex createInner(EntityBundle<T> bundle) throws ValidationError,
+            IntegrityError {
+        try {
+            bundle.validateForInsert();
+            Index<Vertex> index = helpers.getOrCreateIndex(
+                    bundle.getEntityType(), Vertex.class);
+            String id = getIdGenerator(bundle).generateId(
+                    bundle.getEntityType(), scope, bundle.getData());
+            bundle.setDataValue("__ID", id);
+            Vertex node = helpers.createIndexedVertex(bundle.getData(), index,
+                    bundle.getPropertyKeys(), bundle.getUniquePropertyKeys());
+            saveDependents(node, bundle.getBundleClass(), bundle.getRelations());
+            return node;
+        } catch (IdGenerationError err) {
+            throw new ValidationError(err.getMessage());
+        }
     }
 
     /**
@@ -238,14 +256,16 @@ public class BundleDAO<T extends VertexFrame> {
      * @param bundle
      * @return
      * @throws ValidationError
-     * @throws IntegrityError 
+     * @throws IntegrityError
      */
-    private Vertex updateInner(EntityBundle<T> bundle) throws ValidationError, IntegrityError {
+    private Vertex updateInner(EntityBundle<T> bundle) throws ValidationError,
+            IntegrityError {
         bundle.validateForUpdate();
         Index<Vertex> index = helpers.getOrCreateIndex(bundle.getEntityType(),
                 Vertex.class);
         Vertex node = helpers.updateIndexedVertex(bundle.getId(),
-                bundle.getData(), index, bundle.getPropertyKeys(), bundle.getUniquePropertyKeys());
+                bundle.getData(), index, bundle.getPropertyKeys(),
+                bundle.getUniquePropertyKeys());
         saveDependents(node, bundle.getBundleClass(), bundle.getRelations());
         return node;
     }
@@ -258,7 +278,7 @@ public class BundleDAO<T extends VertexFrame> {
      * @param cls
      * @param relations
      * @throws ValidationError
-     * @throws IntegrityError 
+     * @throws IntegrityError
      */
     private void saveDependents(Vertex master,
             Class<? extends VertexFrame> cls, MultiValueMap relations)
@@ -313,6 +333,20 @@ public class BundleDAO<T extends VertexFrame> {
             graph.addEdge(null, master, child, label);
         } else {
             graph.addEdge(null, child, master, label);
+        }
+    }
+
+    // FIXME: Put this logic somewhere else. When EntityTypes is converted
+    // to an Enum we'll be able to associate an ID generator with a
+    // particular type, but for now do it the crappy hacky way.
+    private IdGenerator getIdGenerator(EntityBundle<T> bundle) {
+        if (DocumentaryUnit.class.isAssignableFrom(bundle.getBundleClass())) {
+            return new DocumentaryUnitIdGenerator();
+        } else if (AccessibleEntityIdGenerator.class.isAssignableFrom(bundle
+                .getBundleClass())) {
+            return new AccessibleEntityIdGenerator();
+        } else {
+            return new GenericIdGenerator();
         }
     }
 }

@@ -38,7 +38,8 @@ public class PermissionsTest extends AbstractFixtureTest {
                 .create(new BundleFactory<UserProfile>().buildBundle(
                         (Map<String, Object>) getTestUserBundle().get("data"),
                         UserProfile.class));
-        views = new Views<DocumentaryUnit>(graph, DocumentaryUnit.class);
+        views = new Views<DocumentaryUnit>(graph, DocumentaryUnit.class);        
+        views.setScope(helper.getTestFrame("r1", Agent.class));
         acl = new AclManager(graph);
     }
 
@@ -64,6 +65,7 @@ public class PermissionsTest extends AbstractFixtureTest {
                 views.getContentType(EntityTypes.DOCUMENTARY_UNIT),
                 views.getPermission(PermissionTypes.CREATE),
                 helper.getTestFrame("r1", Agent.class));
+        views.resetScope();
         assertNotNull(views.create(getTestBundle(), user));
     }
 
