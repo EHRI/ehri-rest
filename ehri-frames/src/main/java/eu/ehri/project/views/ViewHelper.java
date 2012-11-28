@@ -29,10 +29,7 @@ public final class ViewHelper {
     final AclManager acl;
     
     public ViewHelper(FramedGraph<Neo4jGraph> graph, Class<?> cls) {
-        this.graph = graph;
-        this.cls = cls;
-        this.acl = new AclManager(graph);
-        this.scope = new SystemScope();
+        this(graph, cls, SystemScope.getInstance());
     }
 
     public ViewHelper(FramedGraph<Neo4jGraph> graph, Class<?> cls, PermissionScope scope) {

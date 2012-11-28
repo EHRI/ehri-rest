@@ -46,7 +46,7 @@ public final class Views<E extends AccessibleEntity> implements IViews<E> {
      * @param cls
      */
     public Views(FramedGraph<Neo4jGraph> graph, Class<E> cls) {
-        this(graph, cls, new SystemScope());
+        this(graph, cls, SystemScope.getInstance());
     }
 
     /**

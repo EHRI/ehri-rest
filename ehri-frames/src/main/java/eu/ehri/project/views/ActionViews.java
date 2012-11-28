@@ -63,7 +63,7 @@ public class ActionViews<E extends AccessibleEntity> implements
      * @param cls
      */
     public ActionViews(FramedGraph<Neo4jGraph> graph, Class<E> cls) {
-        this(graph, cls, new SystemScope());
+        this(graph, cls, SystemScope.getInstance());
     }
 
     /**

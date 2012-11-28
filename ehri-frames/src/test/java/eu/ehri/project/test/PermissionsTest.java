@@ -69,7 +69,7 @@ public class PermissionsTest extends AbstractFixtureTest {
                 viewHelper.getContentType(EntityTypes.DOCUMENTARY_UNIT),
                 viewHelper.getPermission(PermissionTypes.CREATE),
                 helper.getTestFrame("r1", Agent.class));
-        assertNotNull(views.setScope(new SystemScope()).create(getTestBundle(),
+        assertNotNull(views.setScope(SystemScope.getInstance()).create(getTestBundle(),
                 user));
     }
 

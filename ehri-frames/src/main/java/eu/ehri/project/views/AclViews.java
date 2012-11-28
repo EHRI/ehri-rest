@@ -52,7 +52,7 @@ public final class AclViews<E extends AccessibleEntity> {
      * @param cls
      */
     public AclViews(FramedGraph<Neo4jGraph> graph, Class<E> cls) {
-        this(graph, cls, new SystemScope());
+        this(graph, cls, SystemScope.getInstance());
     }
 
     /**
@@ -93,7 +93,7 @@ public final class AclViews<E extends AccessibleEntity> {
                             grantee, target, grantPerm);
                     if (!grants.iterator().hasNext()) {
                         throw new PermissionDenied(grantee, target, grantPerm,
-                                new SystemScope());
+                                SystemScope.getInstance());
                     }
                 }
             } catch (ItemNotFound e) {

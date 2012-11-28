@@ -64,7 +64,7 @@ public class BundleDAO<T extends VertexFrame> {
      * @param graph
      */
     public BundleDAO(FramedGraph<Neo4jGraph> graph) {
-        this(graph, new SystemScope());
+        this(graph, SystemScope.getInstance());
     }
 
     /**

@@ -75,7 +75,7 @@ public final class Query<E extends AccessibleEntity> implements IQuery<E> {
      * @param cls
      */
     public Query(FramedGraph<Neo4jGraph> graph, Class<E> cls) {
-        this(graph, cls, new SystemScope(), null, null, null, false);
+        this(graph, cls, SystemScope.getInstance(), null, null, null, false);
     }
 
     /**
