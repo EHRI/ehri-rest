@@ -51,6 +51,11 @@ public class ClassUtils {
         Map<String, Class<? extends VertexFrame>> entitycls = new HashMap<String, Class<? extends VertexFrame>>();
         Class<?>[] classArray;
         try {
+            // FIXME: If we ever move EntityTypes out of the models package,
+            // this code will *mysteriously* fail to find any models. So we
+            // need to identify the models package a better way.
+            // TODO: Also provide a way of adding additional models, perhaps
+            // via a plugin interface (but that can wait)
             classArray = ClassUtils.getClasses(EntityTypes.class.getPackage()
                     .getName());
         } catch (Exception e) {
@@ -61,8 +66,7 @@ public class ClassUtils {
         for (Class<?> cls : classArray) {
             if (VertexFrame.class.isAssignableFrom(cls)) {
                 // NB: This is the unchecked cast, but it should be safe due to
-                // the
-                // asAssignableFrom test.
+                // the asAssignableFrom test.
                 vframes.add((Class<? extends VertexFrame>) cls);
             }
         }
