@@ -25,6 +25,7 @@ import com.sun.jersey.api.client.WebResource;
 import eu.ehri.extension.AbstractRestResource;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityTypes;
+import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.persistance.EntityBundle;
 
@@ -168,7 +169,7 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
         Collections.sort(data, new Comparator<Map<String, Object>>() {
             @Override
             public int compare(Map<String, Object> c1, Map<String, Object> c2) {
-                return (Integer) c1.get("id") - (Integer) c2.get("id");
+                return ((String)c1.get("id")).compareTo((String)c2.get("id"));
             }
         });
         // Extract the first documentary unit. According to the fixtures this

@@ -30,6 +30,7 @@ import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistance.BundleDAO;
 import eu.ehri.project.persistance.BundleFactory;
 import eu.ehri.project.persistance.Converter;
+import eu.ehri.project.persistance.GraphManager;
 
 /**
  * Provides a RESTfull interface for the Action class. Note: Action instances
@@ -45,12 +46,14 @@ public class AdminResource {
     private Database database;
     private FramedGraph<Neo4jGraph> graph;
     private Converter converter;
+    private GraphManager manager;
 
     public AdminResource(@Context Database database) {
         this.database = database;
         this.graph = new FramedGraph<Neo4jGraph>(new Neo4jGraph(
                 database.getGraph()));
         converter = new Converter();
+        manager = new GraphManager(graph);
     }
 
     /**
@@ -90,13 +93,11 @@ public class AdminResource {
     // Helpers...
 
     private String getNextDefaultUserName() {
-        Index<Vertex> index = graph.getBaseGraph().getIndex(
-                EntityTypes.USER_PROFILE, Vertex.class);
+        Index<Vertex> index = manager.getIndex();
 
         // FIXME: It's crappy to have to iterate all the items to count them...
         long userCount = 0;
-        CloseableIterable<Vertex> query = index.query(
-                AccessibleEntity.IDENTIFIER_KEY, "*");
+        CloseableIterable<Vertex> query = manager.getVertices(EntityTypes.USER_PROFILE);
         try {
             for (@SuppressWarnings("unused")
             Vertex _ : query)

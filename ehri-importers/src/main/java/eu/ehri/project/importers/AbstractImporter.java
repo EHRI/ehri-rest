@@ -16,6 +16,7 @@ import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.DocumentDescription;
 import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.TemporalEntity;
@@ -136,7 +137,7 @@ public abstract class AbstractImporter<T> {
                             DocumentDescription.class));
         }
 
-        Object existingId = getExistingGraphId((String) unit.getData().get(
+        String existingId = getExistingGraphId((String) unit.getData().get(
                 AccessibleEntity.IDENTIFIER_KEY));
         DocumentaryUnit frame;
         if (existingId != null) {
@@ -173,7 +174,7 @@ public abstract class AbstractImporter<T> {
      * @param id
      * @return
      */
-    private Object getExistingGraphId(final String id) {
+    private String getExistingGraphId(final String id) {
         // Lookup the graph id of an object with the same
         // identity key...
         @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -184,7 +185,7 @@ public abstract class AbstractImporter<T> {
                                 .getProperty(AccessibleEntity.IDENTIFIER_KEY);
                         return (vid != null && vid.equals(id));
                     }
-                }).id();
-        return pipe.hasNext() ? pipe.next() : null;
+                }).property(EntityType.ID_KEY);
+        return pipe.hasNext() ? (String)pipe.next() : null;
     }
 }

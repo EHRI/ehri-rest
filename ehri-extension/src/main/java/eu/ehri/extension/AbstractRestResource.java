@@ -21,6 +21,7 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.EntityTypes;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
+import eu.ehri.project.persistance.GraphManager;
 
 public abstract class AbstractRestResource {
 
@@ -37,11 +38,13 @@ public abstract class AbstractRestResource {
     protected UriInfo uriInfo;
     protected final GraphDatabaseService database;
     protected final FramedGraph<Neo4jGraph> graph;
+    protected final GraphManager manager;
     public static final String AUTH_HEADER_NAME = "Authorization";
 
     public AbstractRestResource(@Context GraphDatabaseService database) {
         this.database = database;
         graph = new FramedGraph<Neo4jGraph>(new Neo4jGraph(database));
+        manager = new GraphManager(graph);
     }
 
     /**
@@ -87,8 +90,9 @@ public abstract class AbstractRestResource {
      */
     protected <E> E getEntity(String typeName, String name, Class<E> cls)
             throws ItemNotFound {
+        return graph.frame(manager.getVertex(name), cls);
         // FIXME: Ensure index isn't null
-        Index<Vertex> index = graph.getBaseGraph().getIndex(typeName,
+/*        Index<Vertex> index = graph.getBaseGraph().getIndex(typeName,
                 Vertex.class);
 
         CloseableIterable<Vertex> query = index.get(
@@ -99,6 +103,8 @@ public abstract class AbstractRestResource {
             throw new ItemNotFound(AccessibleEntity.IDENTIFIER_KEY, name);
         } finally {
             query.close();
-        }
+        }*/
+        
+        
     }
 }

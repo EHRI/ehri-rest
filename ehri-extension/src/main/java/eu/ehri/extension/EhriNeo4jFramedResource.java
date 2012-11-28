@@ -25,6 +25,7 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.persistance.Converter;
 import eu.ehri.project.persistance.EntityBundle;
@@ -338,8 +339,8 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> extends
             // serialization/deserialization.
             E entity = querier.get(key, value, getRequesterUserProfile());
             EntityBundle<E> rawBundle = converter.jsonToBundle(json);
-            EntityBundle<E> entityBundle = new EntityBundle<E>(entity
-                    .asVertex().getId(), rawBundle.getData(), cls,
+            EntityBundle<E> entityBundle = new EntityBundle<E>((String)entity
+                    .asVertex().getProperty(EntityType.ID_KEY), rawBundle.getData(), cls,
                     rawBundle.getRelations());
             return update(converter.bundleToJson(entityBundle));
         } catch (SerializationError e) {
