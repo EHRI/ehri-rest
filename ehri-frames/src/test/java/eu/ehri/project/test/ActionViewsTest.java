@@ -18,6 +18,7 @@ import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.DocumentDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.UserProfile;
+import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.views.ActionViews;
 
@@ -42,11 +43,11 @@ public class ActionViewsTest extends AbstractFixtureTest {
 
         // We could convert the FramedNode back into a bundle here,
         // but let's instead just modify the initial data.
-        String newName = TEST_COLLECTION_NAME + " with new stuff";
-        testData.put("id", unit.asVertex().getId());
+        String newName = TEST_COLLECTION_NAME + " with new stuff";        
 
         Map<String, Object> data = (Map<String, Object>) testData.get("data");
         data.put("name", newName);
+        data.put(EntityType.ID_KEY, unit.asVertex().getProperty(EntityType.ID_KEY));
 
         DocumentaryUnit changedUnit = docViews.update(testData, validUser);
         assertEquals(newName, changedUnit.getName());
@@ -80,10 +81,10 @@ public class ActionViewsTest extends AbstractFixtureTest {
         // We could convert the FramedNode back into a bundle here,
         // but let's instead just modify the initial data.
         String newName = TEST_USER_NAME + " with new stuff";
-        userData.put("id", user.asVertex().getId());
 
         Map<String, Object> data = (Map<String, Object>) userData.get("data");
         data.put("name", newName);
+        data.put(EntityType.ID_KEY, user.asVertex().getProperty(EntityType.ID_KEY));
 
         UserProfile changedUser = userViews.update(userData, validUser);
         assertEquals(newName, changedUser.getName());

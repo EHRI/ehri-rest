@@ -8,7 +8,8 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface EntityType {
-    public static final String KEY = "isA";
+    public static final String TYPE_KEY = "isA";
+    public static final String ID_KEY = "__ID";
 
     public String value();
 }

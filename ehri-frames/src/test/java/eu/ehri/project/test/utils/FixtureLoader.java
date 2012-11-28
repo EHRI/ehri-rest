@@ -12,13 +12,18 @@ import com.tinkerpop.blueprints.Index;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
+import com.tinkerpop.frames.VertexFrame;
 
 import eu.ehri.project.core.GraphHelpers;
 import eu.ehri.project.models.annotations.EntityType;
+import eu.ehri.project.models.utils.ClassUtils;
+import eu.ehri.project.persistance.BundleFactory;
+import eu.ehri.project.persistance.EntityBundle;
+import eu.ehri.project.persistance.GraphManager;
 
 public class FixtureLoader {
 
-    public static final String DESCRIPTOR_KEY = "_desc";
+    public static final String DESCRIPTOR_KEY = EntityType.ID_KEY;
 
     private FramedGraph<Neo4jGraph> graph;
     private GraphHelpers helpers;
@@ -39,28 +44,32 @@ public class FixtureLoader {
     }
 
     public Iterable<Vertex> getTestVertices(String entityType) {
-        return graph.getBaseGraph().getVertices(EntityType.KEY, entityType);
+        return graph.getBaseGraph().getVertices(EntityType.TYPE_KEY, entityType);
     }
 
     public <T> Iterable<T> getTestFrames(String entityType, Class<T> cls) {
-        return graph.getVertices(EntityType.KEY, entityType, cls);
+        return graph.getVertices(EntityType.TYPE_KEY, entityType, cls);
     }
 
+    @SuppressWarnings("unchecked")
     private void loadNodes() {
         InputStream jsonStream = this.getClass().getClassLoader()
                 .getResourceAsStream("vertices.json");
+        
+        Map<String, Class<? extends VertexFrame>> entityClasses = ClassUtils.getEntityClasses();
+        GraphManager manager = new GraphManager(graph);
         try {
-            List<Map<String, Map<String, Object>>> nodes = new ObjectMapper()
+            List<Map<String, Object>> nodes = new ObjectMapper()
                     .readValue(jsonStream, List.class);
 
-            for (Map<String, Map<String, Object>> namedNode : nodes) {
-                Map<String, Object> data = namedNode.get("data");
-                data.put(DESCRIPTOR_KEY, namedNode.get("desc"));
-                String isa = (String) data.get(EntityType.KEY);
-
-                Index<Vertex> index = helpers.getOrCreateIndex(isa,
-                        Vertex.class);
-                helpers.createIndexedVertex(data, index);
+            for (Map<String, Object> namedNode : nodes) {
+                Map<String, Object> data = (Map<String,Object>)namedNode.get("data");
+                String id = (String)namedNode.get("desc");
+                String isa = (String) data.get(EntityType.TYPE_KEY);
+                Class<VertexFrame> cls = (Class<VertexFrame>) entityClasses.get(isa);
+                EntityBundle<VertexFrame> bundle = new BundleFactory<VertexFrame>().buildBundle(id, data, cls); 
+                
+                manager.createVertex(id, bundle);
             }
         } catch (Exception e) {
             throw new RuntimeException("Error loading JSON fixture", e);

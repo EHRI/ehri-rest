@@ -40,11 +40,11 @@ public class YamlFixtureLoader {
     }
 
     public Iterable<Vertex> getTestVertices(String entityType) {
-        return graph.getBaseGraph().getVertices(EntityType.KEY, entityType);
+        return graph.getBaseGraph().getVertices(EntityType.TYPE_KEY, entityType);
     }
 
     public <T> Iterable<T> getTestFrames(String entityType, Class<T> cls) {
-        return graph.getVertices(EntityType.KEY, entityType, cls);
+        return graph.getVertices(EntityType.TYPE_KEY, entityType, cls);
     }
 
     private void loadFixtures() {

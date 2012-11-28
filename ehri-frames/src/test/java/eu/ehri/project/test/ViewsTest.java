@@ -20,6 +20,7 @@ import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Group;
 import eu.ehri.project.models.Permission;
 import eu.ehri.project.models.UserProfile;
+import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.PermissionGrantTarget;
 import eu.ehri.project.views.ActionViews;
 import eu.ehri.project.views.IViews;
@@ -112,6 +113,7 @@ public class ViewsTest extends AbstractFixtureTest {
 
         Map<String, Object> data = (Map<String, Object>) bundle.get("data");
         data.put("name", newName);
+        data.put(EntityType.ID_KEY, unit.asVertex().getProperty(EntityType.ID_KEY));
 
         DocumentaryUnit changedUnit = docViews.update(bundle, validUser);
         assertEquals(newName, changedUnit.getName());
@@ -145,10 +147,9 @@ public class ViewsTest extends AbstractFixtureTest {
         // We could convert the FramedNode back into a bundle here,
         // but let's instead just modify the initial data.
         String newName = TEST_USER_NAME + " with new stuff";
-        bundle.put("id", user.asVertex().getId());
-
         Map<String, Object> data = (Map<String, Object>) bundle.get("data");
         data.put("name", newName);
+        data.put(EntityType.ID_KEY, user.asVertex().getProperty(EntityType.ID_KEY));
 
         UserProfile changedUser = userViews.update(bundle, validUser);
         assertEquals(newName, changedUser.getName());

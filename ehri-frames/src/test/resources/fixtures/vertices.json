@@ -249,7 +249,7 @@
       "name": "admin",
       "identifier": "admin"
     }, 
-    "desc": "adminGroup"
+    "desc": "admin"
   },
   {
     "data": {
@@ -257,7 +257,7 @@
       "name": "anonymous",
       "identifier": "anonymous"
     },
-    "desc": "anonGroup"
+    "desc": "anonymous"
   },
   {
     "data": {
@@ -265,7 +265,7 @@
       "name": "niod",
       "identifier": "niod"
     }, 
-    "desc": "niodGroup"
+    "desc": "niod"
   },
   {
     "data": {
@@ -273,7 +273,7 @@
       "name": "kcl",
       "identifier": "kcl"
     }, 
-    "desc": "kclGroup"
+    "desc": "kcl"
   },
   {
     "data": {

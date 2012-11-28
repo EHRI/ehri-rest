@@ -4,6 +4,7 @@ import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.collections.map.MultiValueMap;
@@ -12,6 +13,7 @@ import org.neo4j.graphdb.Transaction;
 import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Index;
+import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.Adjacency;
@@ -26,6 +28,7 @@ import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.annotations.Dependent;
+import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.idgen.AccessibleEntityIdGenerator;
 import eu.ehri.project.models.idgen.DocumentaryUnitIdGenerator;
@@ -40,11 +43,12 @@ import eu.ehri.project.models.utils.ClassUtils;
  * 
  * @param <T>
  */
-public class BundleDAO<T extends VertexFrame> {
+public final class BundleDAO<T extends VertexFrame> {
 
     private final FramedGraph<Neo4jGraph> graph;
     private final GraphHelpers helpers;
     private final PermissionScope scope;
+    private final GraphManager manager;
 
     /**
      * Constructor with a given scope.
@@ -54,6 +58,7 @@ public class BundleDAO<T extends VertexFrame> {
      */
     public BundleDAO(FramedGraph<Neo4jGraph> graph, PermissionScope scope) {
         this.graph = graph;
+        manager = new GraphManager(graph);
         this.helpers = new GraphHelpers(graph.getBaseGraph().getRawGraph());
         this.scope = scope;
     }
@@ -97,17 +102,12 @@ public class BundleDAO<T extends VertexFrame> {
             throw new ValidationError("Cannot find index or item type: "
                     + bundle.getEntityType());
         Vertex node = null;
-        CloseableIterable<Vertex> nodes = index.get(key, value);
-        try {
-            if (nodes.iterator().hasNext()) {
-                node = updateInner(bundle);
-            } else {
-                node = createInner(bundle);
-            }
-            return graph.frame(node, bundle.getBundleClass());
-        } finally {
-            nodes.close();
+        if (index.count(key, value) != 0) {
+            node = updateInner(bundle);
+        } else {
+            node = createInner(bundle);
         }
+        return graph.frame(node, bundle.getBundleClass());
     }
 
     public T create(EntityBundle<T> bundle) throws ValidationError,
@@ -174,14 +174,8 @@ public class BundleDAO<T extends VertexFrame> {
             }
         }
         if (bundle.id != null) {
-            try {
-                Index<Vertex> index = helpers.getIndex(bundle.getEntityType(),
-                        Vertex.class);
-                helpers.deleteVertex(index, bundle.id, bundle.getPropertyKeys());
-            } catch (IndexNotFoundException e) {
-                // If there's no index, we can do things the simple way...
-                graph.removeVertex(graph.getVertex(bundle.id));
-            }
+            Vertex v = manager.getVertex(bundle.id);
+            helpers.deleteVertex(manager.getIndex(), v.getId(), bundle.getPropertyKeys());
             c += 1;
         }
         return c;
@@ -235,13 +229,9 @@ public class BundleDAO<T extends VertexFrame> {
             IntegrityError {
         try {
             bundle.validateForInsert();
-            Index<Vertex> index = helpers.getOrCreateIndex(
-                    bundle.getEntityType(), Vertex.class);
             String id = getIdGenerator(bundle).generateId(
                     bundle.getEntityType(), scope, bundle.getData());
-            bundle.setDataValue("__ID", id);
-            Vertex node = helpers.createIndexedVertex(bundle.getData(), index,
-                    bundle.getPropertyKeys(), bundle.getUniquePropertyKeys());
+            Vertex node = manager.createVertex(id, bundle.withId(id));
             saveDependents(node, bundle.getBundleClass(), bundle.getRelations());
             return node;
         } catch (IdGenerationError err) {
@@ -260,11 +250,7 @@ public class BundleDAO<T extends VertexFrame> {
     private Vertex updateInner(EntityBundle<T> bundle) throws ValidationError,
             IntegrityError {
         bundle.validateForUpdate();
-        Index<Vertex> index = helpers.getOrCreateIndex(bundle.getEntityType(),
-                Vertex.class);
-        Vertex node = helpers.updateIndexedVertex(bundle.getId(),
-                bundle.getData(), index, bundle.getPropertyKeys(),
-                bundle.getUniquePropertyKeys());
+        Vertex node = manager.updateVertex(bundle);
         saveDependents(node, bundle.getBundleClass(), bundle.getRelations());
         return node;
     }

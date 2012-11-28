@@ -137,19 +137,19 @@ public class Converter {
     public <T extends VertexFrame> EntityBundle<T> dataToBundle(
             Map<String, Object> data) throws DeserializationError {
         try {
-            Object id = data.get("id");
             Map<String, Object> props = (Map<String, Object>) data.get("data");
             if (props == null)
                 throw new DeserializationError("No item data map found");
-            String isa = (String) props.get(EntityType.KEY);
+            String id = (String)props.get(EntityType.ID_KEY);
+            String isa = (String) props.get(EntityType.TYPE_KEY);
             if (isa == null)
                 throw new DeserializationError(String.format(
-                        "No '%s' attribute found in item data", EntityType.KEY));
+                        "No '%s' attribute found in item data", EntityType.TYPE_KEY));
             Class<T> cls = (Class<T>) classes.get(isa);
             if (cls == null)
                 throw new DeserializationError(String.format(
                         "No class found for type %s type: '%s'",
-                        EntityType.KEY, isa));
+                        EntityType.TYPE_KEY, isa));
             MultiValueMap relationbundles = new MultiValueMap();
 
             Map<String, List<Map<String, Object>>> relations = (Map<String, List<Map<String, Object>>>) data
@@ -221,18 +221,19 @@ public class Converter {
     @SuppressWarnings("unchecked")
     public <T extends VertexFrame> EntityBundle<T> vertexFrameToBundle(
             VertexFrame item, int depth) throws SerializationError {
-        String isa = (String) item.asVertex().getProperty(EntityType.KEY);
+        String id = (String) item.asVertex().getProperty(EntityType.ID_KEY);
+        String isa = (String) item.asVertex().getProperty(EntityType.TYPE_KEY);
         if (isa == null)
             throw new SerializationError(String.format(
                     "No %s key found in Vertex Properties to denote its type.",
-                    EntityType.KEY));
+                    EntityType.TYPE_KEY));
         Class<? extends VertexFrame> cls = classes.get(isa);
         if (cls == null)
             throw new SerializationError(String.format(
-                    "No entity found for %s type '%s'", EntityType.KEY, isa));
+                    "No entity found for %s type '%s'", EntityType.TYPE_KEY, isa));
 
         MultiValueMap relations = getRelationData(item, depth, cls);
-        return new EntityBundle<T>((Long) item.asVertex().getId(),
+        return new EntityBundle<T>(id,
                 getVertexData(item.asVertex()), (Class<T>) cls, relations);
     }
 
@@ -260,7 +261,7 @@ public class Converter {
                     } catch (IllegalArgumentException e) {
                         String message  = String.format(
                                 "When serializing a bundle, a method was called on an item it did not expect. Method name: %s, item class: %s", 
-                                method.getName(), item.asVertex().getProperty(EntityType.KEY));
+                                method.getName(), item.asVertex().getProperty(EntityType.TYPE_KEY));
                         throw new RuntimeException(message, e);
                     }
                     // The result of one of these fetchMethods should either be

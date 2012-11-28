@@ -24,7 +24,7 @@ public class AnnotationUtils {
     public static boolean hasFramedInterface(VertexFrame frame, Class<? extends VertexFrame> cls) {
         String type = ClassUtils.getEntityType(cls);
         if (type != null) {
-            String isa = (String) frame.asVertex().getProperty(EntityType.KEY);
+            String isa = (String) frame.asVertex().getProperty(EntityType.TYPE_KEY);
             return isa.equals(type);
         }
         return false;            

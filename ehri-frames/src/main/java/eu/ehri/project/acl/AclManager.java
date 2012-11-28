@@ -10,13 +10,11 @@ import java.util.Map.Entry;
 
 import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.Direction;
-import com.tinkerpop.blueprints.Index;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.pipes.PipeFunction;
 
-import eu.ehri.project.core.GraphHelpers;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.ContentType;
 import eu.ehri.project.models.EntityTypes;
@@ -29,6 +27,7 @@ import eu.ehri.project.models.base.PermissionGrantTarget;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.utils.AnnotationUtils;
 import eu.ehri.project.models.utils.ClassUtils;
+import eu.ehri.project.persistance.GraphManager;
 
 /**
  * Helper class for checking and asserting access and write permissions.
@@ -39,11 +38,11 @@ import eu.ehri.project.models.utils.ClassUtils;
 public class AclManager {
 
     private FramedGraph<Neo4jGraph> graph;
-    private GraphHelpers helpers;
+    private GraphManager manager;
 
     public AclManager(FramedGraph<Neo4jGraph> graph) {
         this.graph = graph;
-        this.helpers = new GraphHelpers(graph.getBaseGraph().getRawGraph());
+        this.manager = new GraphManager(graph);
     }
 
     /**
@@ -237,13 +236,11 @@ public class AclManager {
         // Build a lookup of content types and permissions keyed by their
         // identifier.
         Map<String, ContentType> cmap = new HashMap<String, ContentType>();
-        for (ContentType c : getVertices(EntityTypes.CONTENT_TYPE,
-                ContentType.class)) {
+        for (ContentType c : getVertices(ContentType.class)) {
             cmap.put(c.getIdentifier(), c);
         }
         Map<String, Permission> pmap = new HashMap<String, Permission>();
-        for (Permission p : getVertices(EntityTypes.PERMISSION,
-                Permission.class)) {
+        for (Permission p : getVertices(Permission.class)) {
             pmap.put(p.getIdentifier(), p);
         }
 
@@ -258,7 +255,7 @@ public class AclManager {
             List<String> pset = globals.get(centry.getKey());
             if (pset == null)
                 continue;
-            List<Object> perms = helpers.getAllPropertiesOfType(
+            List<Object> perms = manager.getAllPropertiesOfType(
                     EntityTypes.PERMISSION, AccessibleEntity.IDENTIFIER_KEY);
             for (Object perm : perms) {
                 Permission permission = pmap.get(perm);
@@ -307,7 +304,7 @@ public class AclManager {
         // If we're admin, add it regardless.
         List<String> list = new LinkedList<String>();
         if (isAdmin(accessor)) {
-            for (Object s : helpers.getAllPropertiesOfType(
+            for (Object s : manager.getAllPropertiesOfType(
                     EntityTypes.PERMISSION, AccessibleEntity.IDENTIFIER_KEY)) {
                 list.add((String) s);
             }
@@ -511,10 +508,10 @@ public class AclManager {
      */
     private Map<String, List<String>> getAdminPermissions() {
         Map<String, List<String>> perms = new HashMap<String, List<String>>();
-        for (Object ct : helpers.getAllPropertiesOfType(
+        for (Object ct : manager.getAllPropertiesOfType(
                 EntityTypes.CONTENT_TYPE, AccessibleEntity.IDENTIFIER_KEY)) {
             List<String> clist = new LinkedList<String>();
-            for (Object pt : helpers.getAllPropertiesOfType(
+            for (Object pt : manager.getAllPropertiesOfType(
                     EntityTypes.PERMISSION, AccessibleEntity.IDENTIFIER_KEY)) {
                 clist.add((String) pt);
             }
@@ -531,12 +528,9 @@ public class AclManager {
      * @param cls
      * @return
      */
-    private <E extends AccessibleEntity> Iterable<E> getVertices(
-            String indexName, Class<E> cls) {
-        Index<Vertex> index = graph.getBaseGraph().getIndex(indexName,
-                Vertex.class);
-        CloseableIterable<Vertex> query = index.query(
-                AccessibleEntity.IDENTIFIER_KEY, "*");
+    private <E extends AccessibleEntity> Iterable<E> getVertices(Class<E> cls) {
+        CloseableIterable<Vertex> query = manager.getVertices(ClassUtils
+                .getEntityType(cls));
         try {
             return graph.frameVertices(query, cls);
         } finally {

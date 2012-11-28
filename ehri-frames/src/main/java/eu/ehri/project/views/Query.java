@@ -3,10 +3,14 @@ package eu.ehri.project.views;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.index.Index;
+import org.neo4j.graphdb.index.IndexHits;
+
 import com.tinkerpop.blueprints.CloseableIterable;
-import com.tinkerpop.blueprints.Index;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
+import com.tinkerpop.blueprints.impls.neo4j.Neo4jVertexIterable;
 import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.frames.FramedVertexIterable;
 import com.tinkerpop.frames.VertexFrame;
@@ -22,6 +26,8 @@ import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.PermissionScope;
+import eu.ehri.project.models.utils.ClassUtils;
+import eu.ehri.project.persistance.GraphManager;
 
 /**
  * Handles querying Accessible Entities, with ACL semantics.
@@ -40,6 +46,7 @@ public final class Query<E extends AccessibleEntity> implements IQuery<E> {
     private final boolean page;
 
     private final FramedGraph<Neo4jGraph> graph;
+    private final GraphManager manager;
     private final Class<E> cls;
     private final ViewHelper helper;
     private final PermissionScope scope;
@@ -66,6 +73,7 @@ public final class Query<E extends AccessibleEntity> implements IQuery<E> {
         this.sort = sort;
         this.page = page;
         helper = new ViewHelper(graph, cls, scope);
+        manager = new GraphManager(graph);
     }
 
     /**
@@ -185,20 +193,16 @@ public final class Query<E extends AccessibleEntity> implements IQuery<E> {
      */
     public E get(String key, String value, Accessor user)
             throws PermissionDenied, ItemNotFound {
+        CloseableIterable<Vertex> indexQuery = manager.getIndex().get(key,
+                value);
         try {
-            CloseableIterable<Vertex> indexQuery = getIndexForClass(cls).get(
-                    key, value);
-            try {
-                E item = graph.frame(indexQuery.iterator().next(), cls);
-                helper.checkReadAccess(item, user);
-                return item;
-            } catch (NoSuchElementException e) {
-                throw new ItemNotFound(key, value);
-            } finally {
-                indexQuery.close();
-            }
-        } catch (IndexNotFoundException e) {
-            throw new RuntimeException(e);
+            E item = graph.frame(indexQuery.iterator().next(), cls);
+            helper.checkReadAccess(item, user);
+            return item;
+        } catch (NoSuchElementException e) {
+            throw new ItemNotFound(key, value);
+        } finally {
+            indexQuery.close();
         }
     }
 
@@ -210,7 +214,7 @@ public final class Query<E extends AccessibleEntity> implements IQuery<E> {
      * @throws IndexNotFoundException
      */
     public Iterable<E> list(Accessor user) {
-        return list(AccessibleEntity.IDENTIFIER_KEY, QUERY_GLOB, user);
+        return list(EntityType.ID_KEY, QUERY_GLOB, user);
     }
 
     /**
@@ -222,7 +226,7 @@ public final class Query<E extends AccessibleEntity> implements IQuery<E> {
      * @throws IndexNotFoundException
      */
     public Page<E> page(Accessor user) {
-        return page(AccessibleEntity.IDENTIFIER_KEY, QUERY_GLOB, user);
+        return page(EntityType.ID_KEY, QUERY_GLOB, user);
     }
 
     /**
@@ -237,32 +241,33 @@ public final class Query<E extends AccessibleEntity> implements IQuery<E> {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public Page<E> page(String key, String query, Accessor user) {
         // This function is optimised for ACL actions.
+        // FIXME: Work out if there's any way of doing, in Gremlin or
+        // Cypher, a count that doesn't require re-iterating the results on
+        // a completely new index query. This seems stupid.
+        // FIXME: Remove Neo4j direct wrangling.
+        String queryStr = getLuceneQuery(key, query);
+        Index<Node> rawIndex = manager.getRawIndex();
+        IndexHits<Node> rawCountQuery = rawIndex.query(queryStr);
+        IndexHits<Node> rawQuery = rawIndex.query(queryStr);
+        Neo4jVertexIterable<Vertex> countQuery = new Neo4jVertexIterable<Vertex>(
+                rawCountQuery, graph.getBaseGraph(), false);
         try {
-            // FIXME: Work out if there's any way of doing, in Gremlin or
-            // Cypher, a count that doesn't require re-iterating the results on
-            // a completely new index query. This seems stupid.
-            CloseableIterable<Vertex> countQuery = getIndexForClass(cls).query(
-                    key, query);
+            Neo4jVertexIterable<Vertex> indexQuery = new Neo4jVertexIterable<Vertex>(
+                    rawQuery, graph.getBaseGraph(), false);
             try {
-                CloseableIterable<Vertex> indexQuery = getIndexForClass(cls)
-                        .query(key, query);
-                try {
-                    PipeFunction<Vertex, Boolean> aclFilterFunction = new AclManager(
-                            graph).getAclFilterFunction(user);
-                    long count = new GremlinPipeline(countQuery).filter(
-                            aclFilterFunction).count();
-                    return new Page(graph.frameVertices(
-                            setPipelineRange(new GremlinPipeline(indexQuery)
-                                    .filter(aclFilterFunction)), cls), count,
-                            offset, limit);
-                } finally {
-                    indexQuery.close();
-                }
+                PipeFunction<Vertex, Boolean> aclFilterFunction = new AclManager(
+                        graph).getAclFilterFunction(user);
+                long count = new GremlinPipeline(countQuery).filter(
+                        aclFilterFunction).count();
+                return new Page(graph.frameVertices(
+                        setPipelineRange(new GremlinPipeline(indexQuery)
+                                .filter(aclFilterFunction)), cls), count,
+                        offset, limit);
             } finally {
-                countQuery.close();
+                indexQuery.close();
             }
-        } catch (IndexNotFoundException e) {
-            throw new RuntimeException(e);
+        } finally {
+            countQuery.close();
         }
     }
 
@@ -277,19 +282,18 @@ public final class Query<E extends AccessibleEntity> implements IQuery<E> {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public Iterable<E> list(String key, String query, Accessor user) {
         // This function is optimised for ACL actions.
+        // FIXME: Remove Neo4j direct wrangling.
+        String queryStr = getLuceneQuery(key, query);
+        Index<Node> rawIndex = manager.getRawIndex();
+        IndexHits<Node> rawQuery = rawIndex.query(queryStr);
+        Neo4jVertexIterable<Vertex> indexQuery = new Neo4jVertexIterable<Vertex>(
+                rawQuery, graph.getBaseGraph(), false);
         try {
-            CloseableIterable<Vertex> indexQuery = getIndexForClass(cls).query(
-                    key, query);
-            try {
-                GremlinPipeline filter = new GremlinPipeline(indexQuery)
-                        .filter(new AclManager(graph)
-                                .getAclFilterFunction(user));
-                return graph.frameVertices(setPipelineRange(filter), cls);
-            } finally {
-                indexQuery.close();
-            }
-        } catch (IndexNotFoundException e) {
-            throw new RuntimeException(e);
+            GremlinPipeline filter = new GremlinPipeline(indexQuery)
+                    .filter(new AclManager(graph).getAclFilterFunction(user));
+            return graph.frameVertices(setPipelineRange(filter), cls);
+        } finally {
+            indexQuery.close();
         }
     }
 
@@ -333,19 +337,8 @@ public final class Query<E extends AccessibleEntity> implements IQuery<E> {
         return filter.range(low, high);
     }
 
-    private Index<Vertex> getIndexForClass(Class<E> cls)
-            throws IndexNotFoundException {
-        Index<Vertex> index = graph.getBaseGraph().getIndex(
-                getEntityIndexName(cls), Vertex.class);
-        if (index == null)
-            throw new IndexNotFoundException(getEntityIndexName(cls));
-        return index;
-    }
-
-    private String getEntityIndexName(Class<E> cls) {
-        EntityType ann = cls.getAnnotation(EntityType.class);
-        if (ann != null)
-            return ann.value();
-        return null;
+    private String getLuceneQuery(String key, String value) {
+        return String.format("%s:%s AND %s:%s", key, value,
+                EntityType.TYPE_KEY, ClassUtils.getEntityType(cls));
     }
 }

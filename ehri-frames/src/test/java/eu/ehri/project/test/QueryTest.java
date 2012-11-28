@@ -30,7 +30,7 @@ public class QueryTest extends AbstractFixtureTest {
         assertTrue(new AclManager(graph).belongsToAdmin(validUser));
 
         // Get the total number of DocumentaryUnits the old-fashioned way
-        Iterable<Vertex> allDocs = graph.getVertices(EntityType.KEY,
+        Iterable<Vertex> allDocs = graph.getVertices(EntityType.TYPE_KEY,
                 EntityTypes.DOCUMENTARY_UNIT);
 
         // And the listing the ACL way...
@@ -58,7 +58,7 @@ public class QueryTest extends AbstractFixtureTest {
         assertTrue(new AclManager(graph).belongsToAdmin(validUser));
 
         // Get the total number of DocumentaryUnits the old-fashioned way
-        Iterable<Vertex> allDocs = graph.getVertices(EntityType.KEY,
+        Iterable<Vertex> allDocs = graph.getVertices(EntityType.TYPE_KEY,
                 EntityTypes.DOCUMENTARY_UNIT);
 
         // Test the limit function
@@ -103,7 +103,7 @@ public class QueryTest extends AbstractFixtureTest {
                 DocumentaryUnit.class);
 
         // Get the total number of DocumentaryUnits the old-fashioned way
-        Iterable<Vertex> allDocs = graph.getVertices(EntityType.KEY,
+        Iterable<Vertex> allDocs = graph.getVertices(EntityType.TYPE_KEY,
                 EntityTypes.DOCUMENTARY_UNIT);
 
         // Query for document identifier starting with 'c'.

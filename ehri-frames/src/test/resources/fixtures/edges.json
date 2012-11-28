@@ -109,37 +109,37 @@
   }, 
   {
     "src": "mike", 
-    "dst": "adminGroup", 
+    "dst": "admin", 
     "data": {}, 
     "label": "belongsTo"
   }, 
   {
     "src": "tim", 
-    "dst": "adminGroup", 
+    "dst": "admin", 
     "data": {}, 
     "label": "belongsTo"
   }, 
   {
     "src": "mike", 
-    "dst": "kclGroup", 
+    "dst": "kcl", 
     "data": {}, 
     "label": "belongsTo"
   }, 
   {
     "src": "reto", 
-    "dst": "kclGroup", 
+    "dst": "kcl", 
     "data": {}, 
     "label": "belongsTo"
   }, 
   {
     "src": "tim", 
-    "dst": "niodGroup", 
+    "dst": "niod", 
     "data": {}, 
     "label": "belongsTo"
   }, 
   {
     "src": "c1", 
-    "dst": "adminGroup", 
+    "dst": "admin", 
     "data": {
       "read": true, 
       "write": true
@@ -148,7 +148,7 @@
   }, 
   {
     "src": "c2", 
-    "dst": "adminGroup", 
+    "dst": "admin", 
     "data": {
       "read": true, 
       "write": true

@@ -17,11 +17,13 @@ import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistance.BundleDAO;
 import eu.ehri.project.persistance.Converter;
 import eu.ehri.project.persistance.EntityBundle;
+import eu.ehri.project.persistance.GraphManager;
 
 public final class Views<E extends AccessibleEntity> implements IViews<E> {
     private final FramedGraph<Neo4jGraph> graph;
     private final Class<E> cls;
     private final ViewHelper helper;
+    private final GraphManager manager;
     private final Converter converter;
     private final PermissionScope scope;
 
@@ -36,6 +38,7 @@ public final class Views<E extends AccessibleEntity> implements IViews<E> {
         this.cls = cls;
         this.scope = scope;
         helper = new ViewHelper(graph, cls, scope);
+        manager = new GraphManager(graph);
         converter = new Converter();
     }
 
@@ -76,7 +79,7 @@ public final class Views<E extends AccessibleEntity> implements IViews<E> {
             throws PermissionDenied, ValidationError, DeserializationError,
             IntegrityError {
         EntityBundle<E> bundle = converter.dataToBundle(data);
-        E entity = graph.getVertex(bundle.getId(), cls);
+        E entity = graph.frame(manager.getVertex(bundle.getId()), cls);
         helper.checkEntityPermission(entity, user,
                 helper.getPermission(PermissionTypes.UPDATE));
         return new BundleDAO<E>(graph, scope).update(bundle);

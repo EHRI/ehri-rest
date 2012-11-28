@@ -3,6 +3,7 @@ package eu.ehri.project.test;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.UUID;
 
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -48,31 +49,28 @@ abstract public class AbstractFixtureTest extends ModelTestBase {
         // Data structure representing a not-yet-created collection.
         // Using double-brace initialization to ease the pain.
         return new HashMap<String, Object>() {{
-            put("id", null);
             put("data", new HashMap<String, Object>() {{
                 put(Accessor.NAME, TEST_COLLECTION_NAME);
                 put(AccessibleEntity.IDENTIFIER_KEY, "someid-01");
-                put(EntityType.KEY, EntityTypes.DOCUMENTARY_UNIT);
+                put(EntityType.TYPE_KEY, EntityTypes.DOCUMENTARY_UNIT);
             }});
             put("relationships", new HashMap<String, Object>() {{
                 put("describes", new LinkedList<HashMap<String, Object>>() {{
                     add(new HashMap<String, Object>() {{
-                        put("id", null);
                         put("data", new HashMap<String, Object>() {{
                             put(AccessibleEntity.IDENTIFIER_KEY, "someid-01");
                             put("title", "A brand new item description");
-                            put(EntityType.KEY, EntityTypes.DOCUMENT_DESCRIPTION);
+                            put(EntityType.TYPE_KEY, EntityTypes.DOCUMENT_DESCRIPTION);
                             put("languageCode", "en");
                         }});
                     }});
                 }});
                 put("hasDate", new LinkedList<HashMap<String, Object>>() {{
                     add(new HashMap<String, Object>() {{
-                        put("id", null);
                         put("data", new HashMap<String, Object>() {{
                             put(DatePeriod.START_DATE, TEST_START_DATE);
                             put(DatePeriod.END_DATE, TEST_START_DATE);
-                            put(EntityType.KEY, EntityTypes.DATE_PERIOD);
+                            put(EntityType.TYPE_KEY, EntityTypes.DATE_PERIOD);
                         }});
                     }});
                 }});
@@ -84,11 +82,10 @@ abstract public class AbstractFixtureTest extends ModelTestBase {
     protected Map<String, Object> getTestUserBundle() {
         // Data structure representing a not-yet-created user.
         return new HashMap<String, Object>() {{
-            put("id", null);
             put("data", new HashMap<String, Object>() {{
                 put(Accessor.NAME, TEST_USER_NAME);
                 put(AccessibleEntity.IDENTIFIER_KEY, "joe-blogs");
-                put(EntityType.KEY, EntityTypes.USER_PROFILE);
+                put(EntityType.TYPE_KEY, EntityTypes.USER_PROFILE);
             }});
         }};
     }
@@ -101,7 +98,7 @@ abstract public class AbstractFixtureTest extends ModelTestBase {
             put("data", new HashMap<String, Object>() {{
                 put(Accessor.NAME, TEST_GROUP_NAME);
                 put(AccessibleEntity.IDENTIFIER_KEY, "people");
-                put(EntityType.KEY, EntityTypes.GROUP);
+                put(EntityType.TYPE_KEY, EntityTypes.GROUP);
             }});
         }};
     }
