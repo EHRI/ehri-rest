@@ -53,7 +53,7 @@ public abstract class AbstractRestResource {
     protected Accessor getRequesterUserProfile() throws BadRequester {
         String id = getRequesterIdentifier();
         if (id == null) {
-            return new AnonymousAccessor();
+            return AnonymousAccessor.getInstance();
         } else {
             try {
                 return getEntity(EntityTypes.USER_PROFILE, id, Accessor.class);

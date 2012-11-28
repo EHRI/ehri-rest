@@ -15,7 +15,21 @@ import eu.ehri.project.models.utils.EmptyIterable;
  *
  */
 public class AnonymousAccessor implements Accessor {
+
+    private AnonymousAccessor() {}
     
+    private static class AnonymousAccessorHolder {
+        public static final Accessor INSTANCE = new AnonymousAccessor();
+    }
+    
+    /**
+     * Obtain the shared instance of the Anonymous Accessor.
+     * @return
+     */
+    public static Accessor getInstance() {
+        return AnonymousAccessorHolder.INSTANCE;
+    }
+        
     public Vertex asVertex() {
         throw new UnsupportedOperationException();
     }

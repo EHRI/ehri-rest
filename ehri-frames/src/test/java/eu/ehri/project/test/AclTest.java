@@ -117,10 +117,9 @@ public class AclTest extends ModelTestBase {
      */
     @Test
     public void testUserAccessAsAnonymous() {
-        Accessor anon = new AnonymousAccessor();
         AccessibleEntity tim = helper.getTestFrame("tim",
                 AccessibleEntity.class);
-        assertTrue(acl.getAccessControl(tim, anon));
+        assertTrue(acl.getAccessControl(tim, AnonymousAccessor.getInstance()));
     }
 
     /**

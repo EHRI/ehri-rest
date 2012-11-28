@@ -62,7 +62,7 @@ public class ViewsTest extends AbstractFixtureTest {
     public void testDetailAnonymous() throws PermissionDenied {
         Views<DocumentaryUnit> docViews = new Views<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
-        docViews.detail(item, new AnonymousAccessor());
+        docViews.detail(item, AnonymousAccessor.getInstance());
     }
 
     /**
