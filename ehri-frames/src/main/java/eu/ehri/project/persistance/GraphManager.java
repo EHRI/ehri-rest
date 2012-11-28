@@ -18,7 +18,6 @@ import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.core.GraphHelpers;
 import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.models.annotations.EntityType;
-import eu.ehri.project.models.utils.ClassUtils;
 
 public final class GraphManager {
 
@@ -157,4 +156,26 @@ public final class GraphManager {
         }
         return index;
     }
+    
+    /**
+     * Delete vertex with its edges Neo4j requires you delete all adjacent edges
+     * first. Blueprints' removeVertex() method does that; the Neo4jServer
+     * DELETE URI does not.
+     * 
+     * @param graphDb
+     *            The graph database
+     * @param id
+     *            The vertex identifier
+     */
+    public void deleteVertex(EntityBundle<?> bundle) {
+        Vertex vertex = getVertex(bundle.getId());
+        Index<Vertex> index = getIndex();
+        for (String key : bundle.getPropertyKeys()) {
+            index.remove(key, vertex.getProperty(key), vertex);
+        }
+        index.remove(EntityType.ID_KEY, vertex.getProperty(EntityType.ID_KEY), vertex);
+        index.remove(EntityType.TYPE_KEY, vertex.getProperty(EntityType.TYPE_KEY), vertex);
+        graph.removeVertex(vertex);
+        graph.getBaseGraph().stopTransaction(TransactionalGraph.Conclusion.SUCCESS);
+    }    
 }
