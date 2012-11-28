@@ -1,5 +1,6 @@
 package eu.ehri.project.persistance;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -9,13 +10,13 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.index.IndexManager;
 
 import com.tinkerpop.blueprints.CloseableIterable;
+import com.tinkerpop.blueprints.Element;
 import com.tinkerpop.blueprints.Index;
 import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
-import eu.ehri.project.core.GraphHelpers;
 import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.models.annotations.EntityType;
 
@@ -24,18 +25,16 @@ public final class GraphManager {
     public static final String INDEX_NAME = "entities";
 
     private final FramedGraph<Neo4jGraph> graph;
-    private final GraphHelpers helpers;
 
     public GraphManager(FramedGraph<Neo4jGraph> graph) {
         this.graph = graph;
-        helpers = new GraphHelpers(graph.getBaseGraph().getRawGraph());
     }
 
     public Vertex createVertex(String id, EntityBundle<?> bundle)
             throws IntegrityError {
         Index<Vertex> index = getIndex();
         try {
-            helpers.checkUniqueness(index, bundle.getUniquePropertyKeys(),
+            checkUniqueness(index, bundle.getUniquePropertyKeys(),
                     bundle.getData(), null);
             List<String> keys = bundle.getPropertyKeys();
 
@@ -78,9 +77,9 @@ public final class GraphManager {
         try {
             try {
                 Vertex node = get.iterator().next();
-                helpers.checkUniqueness(index, bundle.getUniquePropertyKeys(),
+                checkUniqueness(index, bundle.getUniquePropertyKeys(),
                         bundle.getData(), node);
-                helpers.replaceProperties(index, node, bundle.getData(),
+                replaceProperties(index, node, bundle.getData(),
                         bundle.getPropertyKeys());
                 graph.getBaseGraph().stopTransaction(
                         TransactionalGraph.Conclusion.SUCCESS);
@@ -177,5 +176,82 @@ public final class GraphManager {
         index.remove(EntityType.TYPE_KEY, vertex.getProperty(EntityType.TYPE_KEY), vertex);
         graph.removeVertex(vertex);
         graph.getBaseGraph().stopTransaction(TransactionalGraph.Conclusion.SUCCESS);
+    }
+    
+    /**
+     * @param index
+     * @param uniqueKeys
+     * @param data
+     * @throws IntegrityError
+     */
+    public void checkUniqueness(Index<Vertex> index, List<String> uniqueKeys,
+            Map<String, Object> data, Vertex current) throws IntegrityError {
+        if (uniqueKeys != null && uniqueKeys.size() != 0) {
+            Map<String, String> clashes = new HashMap<String, String>();
+            for (String ukey : uniqueKeys) {
+                String uval = (String) data.get(ukey);
+                if (uval != null && index.count(ukey, uval) > 0) {
+                    CloseableIterable<Vertex> query = index.get(ukey, uval);
+                    try {
+                        Vertex other = query.iterator().next();
+                        if (other != null && !other.equals(current)) {
+                            clashes.put(ukey, uval);
+                        }
+                    } finally {
+                        query.close();
+                    }
+                }
+            }
+            if (!clashes.isEmpty()) {
+                throw new IntegrityError(index.getIndexName(), clashes);
+            }
+        }
+    }
+    
+    /**
+     * Replace properties to a property container like vertex and edge
+     * 
+     * @param index
+     *            The index of the container
+     * @param c
+     *            The container Edge or Vertex of type <code>T</code>
+     * @param data
+     *            The properties
+     */
+    public <T extends Element> void replaceProperties(Index<T> index, T c,
+            Map<String, Object> data, List<String> keys) {
+        // remove 'old' properties
+        for (String key : c.getPropertyKeys()) {
+            if (keys == null || keys.contains(key)) {
+                index.remove(key, c.getProperty(key), c);
+            }
+            c.removeProperty(key);
+        }
+
+        // add all 'new' properties to the relationship and index
+        addProperties(index, c, data, keys);
+    }
+
+    /**
+     * Add properties to a property container like vertex and edge
+     * 
+     * @param index
+     *            The index of the container
+     * @param c
+     *            The container Edge or Vertex of type <code>T</code>
+     * @param data
+     *            The properties
+     */
+    private <T extends Element> void addProperties(Index<T> index, T c,
+            Map<String, Object> data, List<String> keys) {
+        // TODO data cannot be null
+
+        for (Map.Entry<String, Object> entry : data.entrySet()) {
+            if (entry.getValue() == null)
+                continue;
+            c.setProperty(entry.getKey(), entry.getValue());
+            if (keys == null || keys.contains(entry.getKey()))
+                index.put(entry.getKey(), String.valueOf(entry.getValue()), c);
+        }
     }    
 }

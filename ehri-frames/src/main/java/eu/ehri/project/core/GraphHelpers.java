@@ -33,6 +33,7 @@ import org.apache.commons.lang3.StringUtils;
  * GrapgDb names. neo4j Node => Vertex neo4j Relationship => Edge
  * 
  */
+@Deprecated
 public class GraphHelpers {
     public GraphHelpers(GraphDatabaseService g) {
         graph = new Neo4jGraph(g);
