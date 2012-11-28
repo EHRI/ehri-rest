@@ -18,6 +18,7 @@ import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.frames.VertexFrame;
 
+import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.core.GraphHelpers;
 import eu.ehri.project.exceptions.IdGenerationError;
 import eu.ehri.project.exceptions.IndexNotFoundException;
@@ -46,17 +47,6 @@ public class BundleDAO<T extends VertexFrame> {
     private final PermissionScope scope;
 
     /**
-     * Constructor will null scope.
-     * 
-     * @param graph
-     */
-    public BundleDAO(FramedGraph<Neo4jGraph> graph) {
-        this.graph = graph;
-        this.helpers = new GraphHelpers(graph.getBaseGraph().getRawGraph());
-        this.scope = null;
-    }
-
-    /**
      * Constructor with a given scope.
      * 
      * @param graph
@@ -66,6 +56,15 @@ public class BundleDAO<T extends VertexFrame> {
         this.graph = graph;
         this.helpers = new GraphHelpers(graph.getBaseGraph().getRawGraph());
         this.scope = scope;
+    }
+
+    /**
+     * Constructor with system scope.
+     * 
+     * @param graph
+     */
+    public BundleDAO(FramedGraph<Neo4jGraph> graph) {
+        this(graph, new SystemScope());
     }
 
     /**
