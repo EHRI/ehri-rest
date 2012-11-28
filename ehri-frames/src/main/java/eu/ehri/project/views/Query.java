@@ -19,7 +19,6 @@ import com.tinkerpop.pipes.PipeFunction;
 
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.acl.SystemScope;
-import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.exceptions.IndexNotFoundException;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
@@ -28,6 +27,7 @@ import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.utils.ClassUtils;
+import eu.ehri.project.persistance.GraphManager;
 
 /**
  * Handles querying Accessible Entities, with ACL semantics.
