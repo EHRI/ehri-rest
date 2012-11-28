@@ -14,8 +14,6 @@ import eu.ehri.project.models.base.PermissionScope;
 @EntityType(EntityTypes.GROUP)
 public interface Group extends VertexFrame, Accessor, AccessibleEntity,
         PermissionScope {
-
-    public static final String isA = "group";
     
     public static final String ADMIN_GROUP_IDENTIFIER = "admin";
     public static final String ANONYMOUS_GROUP_IDENTIFIER = "anonymous";
