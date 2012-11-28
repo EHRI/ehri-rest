@@ -61,10 +61,10 @@ public class FixtureLoader {
                     jsonStream, List.class);
 
             for (Map<String, Object> namedNode : nodes) {
+                String id = (String) namedNode.get(EntityType.ID_KEY);
+                String isa = (String) namedNode.get(EntityType.TYPE_KEY);
                 Map<String, Object> data = (Map<String, Object>) namedNode
                         .get("data");
-                String id = (String) namedNode.get("desc");
-                String isa = (String) data.get(EntityType.TYPE_KEY);
                 Class<VertexFrame> cls = (Class<VertexFrame>) entityClasses
                         .get(isa);
                 EntityBundle<VertexFrame> bundle = new BundleFactory<VertexFrame>()

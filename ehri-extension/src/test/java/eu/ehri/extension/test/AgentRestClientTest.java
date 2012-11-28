@@ -23,8 +23,8 @@ public class AgentRestClientTest extends BaseRestClientTest {
 
     static final String UPDATED_NAME = "UpdatedNameTEST";
 
-    private String jsonAgentTestString = "{\"data\":{\"isA\": \"agent\", \"identifier\": \"jmp\"}}";
-    private String jsonUpdateAgentTestString = "{\"data\":{\"isA\": \"agent\", \"name\": \"JMP\", \"identifier\": \"jmp\"}}";
+    private String jsonAgentTestString = "{\"data\":{\"__ISA__\": \"agent\", \"identifier\": \"jmp\"}}";
+    private String jsonUpdateAgentTestString = "{\"data\":{\"__ISA__\": \"agent\", \"name\": \"JMP\", \"identifier\": \"jmp\"}}";
     private String badJsonAgentTestString = "{\"data\":{\"identifier\": \"jmp\"}}";
 
     @BeforeClass
