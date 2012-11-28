@@ -1,7 +1,7 @@
 {
   "data": {
     "name": "a collection",
-    "isA": "documentaryUnit",
+    "__ISA__": "documentaryUnit",
     "identifier": "some-id"
   },
   "relationships": {
@@ -10,7 +10,7 @@
         "data": {
           "languageCode": "en",
           "title": "a description",
-          "isA": "documentDescription",
+          "__ISA__": "documentDescription",
           "identifier": "some-id"
         }
       }
@@ -19,7 +19,7 @@
       {
         "data": {
           "startDate": "1940-01-01T00:00:00Z",
-          "isA": "datePeriod",
+          "__ISA__": "datePeriod",
           "endDate": "1945-01-01T00:00:00Z"
         }
       }

@@ -1,210 +1,360 @@
 [
   {
     "data": {
-      "isA": "documentaryUnit", 
+      "identifier": "create", 
+      "name": "Create",
+      "mask": 1
+    }, 
+    "__ISA__": "permission", 
+    "__ID__": "permCreate"
+  },
+  {
+    "data": {
+      "identifier": "update", 
+      "name": "Edit",
+      "mask": 2
+    }, 
+    "__ISA__": "permission", 
+    "__ID__": "permUpdate"
+  },
+  {
+    "data": {
+      "identifier": "delete", 
+      "name": "Delete",
+      "mask": 4
+    }, 
+    "__ISA__": "permission", 
+    "__ID__": "permDelete"
+  },
+  {
+    "data": {
+      "identifier": "grant", 
+      "name": "Grant",
+      "mask": 8
+    }, 
+    "__ISA__": "permission", 
+    "__ID__": "permGrant"
+  },
+  {
+    "data": {
+      "identifier": "annotate", 
+      "name": "Annotate",
+      "mask": 16
+    }, 
+    "__ISA__": "permission", 
+    "__ID__": "permAnnotate"
+  },
+  {
+    "data": {
+      "identifier": "owner", 
+      "name": "Owner",
+      "mask": 23
+    }, 
+    "__ISA__": "permission", 
+    "__ID__": "permOwner"
+  },
+  {
+    "data": {
+      "identifier": "documentaryUnit", 
+      "name": "Documentary Units"
+    }, 
+    "__ISA__": "contentType", 
+    "__ID__": "documentaryUnitType"
+  },
+  {
+    "data": {
+      "identifier": "agent", 
+      "name": "Repositories"
+    }, 
+    "__ISA__": "contentType", 
+    "__ID__": "agentType"
+  },
+  {
+    "data": {
+      "identifier": "authority", 
+      "name": "Authorities"
+    }, 
+    "__ISA__": "contentType", 
+    "__ID__": "authorityType"
+  },
+  {
+    "data": {
+      "identifier": "group", 
+      "name": "Groups"
+    }, 
+    "__ISA__": "contentType", 
+    "__ID__": "groupType"
+  },
+  {
+    "data": {
+      "identifier": "userProfile", 
+      "name": "Users"
+    }, 
+    "__ISA__": "contentType", 
+    "__ID__": "userProfileType"
+  },
+  {
+    "data": {
       "identifier": "c1", 
       "name": "Test Collection 1"
-    }, 
-    "desc": "c1"
-  }, 
+    },
+    "__ISA__": "documentaryUnit", 
+    "__ID__": "c1"
+  },
   {
     "data": {
-      "languageOfDescription": "en", 
-      "isA": "documentDescription", 
+      "languageCode": "en", 
       "identifier": "c1", 
       "title": "A Collection called 1"
-    }, 
-    "desc": "cd1"
-  }, 
+    },
+    "__ISA__": "documentDescription", 
+    "__ID__": "cd1"
+  },
   {
     "data": {
-      "isA": "documentaryUnit", 
       "identifier": "c2", 
       "name": "Test Collection 2"
-    }, 
-    "desc": "c2"
-  }, 
+    },
+    "__ISA__": "documentaryUnit", 
+    "__ID__": "c2"
+  },
   {
     "data": {
-      "languageOfDescription": "en", 
-      "isA": "documentDescription", 
+      "languageCode": "en", 
       "identifier": "c2", 
       "title": "A Collection called 2"
-    }, 
-    "desc": "cd2"
-  }, 
+    },
+    "__ISA__": "documentDescription", 
+    "__ID__": "cd2"
+  },
   {
     "data": {
-      "isA": "documentaryUnit", 
       "identifier": "c3", 
       "name": "Test Collection 3"
-    }, 
-    "desc": "c3"
-  }, 
+    },
+    "__ISA__": "documentaryUnit", 
+    "__ID__": "c3"
+  },
   {
     "data": {
-      "languageOfDescription": "en", 
-      "isA": "documentDescription", 
+      "languageCode": "en", 
       "identifier": "c3", 
       "title": "A Collection called 3"
-    }, 
-    "desc": "cd3"
-  }, 
+    },
+    "__ISA__": "documentDescription", 
+    "__ID__": "cd3"
+  },
   {
     "data": {
-      "isA": "documentaryUnit", 
       "identifier": "c4", 
       "name": "Test Collection 4"
-    }, 
-    "desc": "c4"
-  }, 
+    },
+    "__ISA__": "documentaryUnit", 
+    "__ID__": "c4"
+  },
   {
     "data": {
-      "languageOfDescription": "en", 
-      "isA": "documentDescription", 
+      "languageCode": "en", 
       "identifier": "c4", 
       "title": "A Collection called 4"
-    }, 
-    "desc": "cd4"
-  }, 
+    },
+    "__ISA__": "documentDescription", 
+    "__ID__": "cd4"
+  },
   {
     "data": {
       "startDate": "1940-01-01T00:00:01Z", 
-      "isA": "datePeriod", 
       "endDate": "1945-12-12T00:00:01Z"
-    }, 
-    "desc": "dp1"
-  }, 
+    },
+    "__ISA__": "datePeriod", 
+    "__ID__": "dp1"
+  },
   {
     "data": {
       "startDate": "1943-01-01T00:00:01Z", 
-      "isA": "datePeriod", 
       "endDate": "1945-12-12T00:00:01Z"
-    }, 
-    "desc": "dp2"
-  }, 
+    },
+    "__ISA__": "datePeriod", 
+    "__ID__": "dp2"
+  },
   {
     "data": {
-      "isA": "agent", 
       "identifier": "r1", 
       "name": "Repository 1"
-    }, 
-    "desc": "r1"
-  }, 
+    },
+    "__ISA__": "agent", 
+    "__ID__": "r1"
+  },
   {
     "data": {
-      "languageOfDescription": "en", 
-      "isA": "agentDescription", 
+      "languageCode": "en", 
       "title": "A Repository called 1"
-    }, 
-    "desc": "rd1"
-  }, 
+    },
+    "__ISA__": "agentDescription", 
+    "__ID__": "rd1"
+  },
   {
     "data": {
-      "isA": "authority", 
+      "identifier": "r2", 
+      "name": "Repository 2"
+    },
+    "__ISA__": "agent", 
+    "__ID__": "r2"
+  },
+  {
+    "data": {
+      "languageCode": "en", 
+      "title": "A Repository called 2"
+    },
+    "__ISA__": "agentDescription", 
+    "__ID__": "rd2"
+  },
+  {
+    "data": {
       "identifier": "a1", 
       "name": "Authority 1", 
       "typeOfEntity": "person"
-    }, 
-    "desc": "a1"
-  }, 
+    },
+    "__ISA__": "authority", 
+    "__ID__": "a1"
+  },
   {
     "data": {
-      "languageOfDescription": "en", 
-      "isA": "authorityDescription", 
+      "languageCode": "en", 
       "title": "An Authority called 1"
-    }, 
-    "desc": "ad1"
-  }, 
+    },
+    "__ISA__": "authorityDescription", 
+    "__ID__": "ad1"
+  },
   {
     "data": {
-      "isA": "authority", 
       "identifier": "a2", 
       "name": "Authority 2", 
       "typeOfEntity": "person"
     }, 
-    "desc": "a2"
-  }, 
+    "__ISA__": "authority", 
+    "__ID__": "a2"
+  },
   {
     "data": {
-      "languageOfDescription": "en", 
-      "isA": "authorityDescription", 
+      "languageCode": "en", 
       "title": "An Authority called 2"
     }, 
-    "desc": "ad2"
-  }, 
+    "__ISA__": "authorityDescription", 
+    "__ID__": "ad2"
+  },
   {
     "data": {
-      "isA": "group", 
-      "name": "admin"
+      "name": "admin",
+      "identifier": "admin"
     }, 
-    "desc": "adminGroup"
-  }, 
+    "__ISA__": "group", 
+    "__ID__": "admin"
+  },
   {
     "data": {
-      "isA": "group", 
-      "name": "niod"
+      "name": "anonymous",
+      "identifier": "anonymous"
+    },
+    "__ISA__": "group", 
+    "__ID__": "anonymous"
+  },
+  {
+    "data": {
+      "name": "niod",
+      "identifier": "niod"
     }, 
-    "desc": "niodGroup"
-  }, 
+    "__ISA__": "group", 
+    "__ID__": "niod"
+  },
   {
     "data": {
-      "isA": "group", 
-      "name": "kcl"
+      "name": "kcl",
+      "identifier": "kcl"
     }, 
-    "desc": "kclGroup"
-  }, 
+    "__ISA__": "group", 
+    "__ID__": "kcl"
+  },
   {
     "data": {
-      "isA": "userProfile", 
-      "userId": 1, 
+      "identifier": "mike", 
       "name": "Mike"
     }, 
-    "desc": "mike"
-  }, 
+    "__ISA__": "userProfile", 
+    "__ID__": "mike"
+  },
   {
     "data": {
-      "isA": "userProfile", 
-      "userId": 2, 
+      "identifier": "reto", 
       "name": "Reto"
     }, 
-    "desc": "reto"
-  }, 
+    "__ISA__": "userProfile", 
+    "__ID__": "reto"
+  },
   {
     "data": {
-      "isA": "userProfile", 
-      "userId": 3, 
+      "identifier": "tim", 
       "name": "Tim"
     }, 
-    "desc": "tim"
-  }, 
+    "__ISA__": "userProfile", 
+    "__ID__": "tim"
+  },
+  {
+    "data": {
+      "identifier": "bob", 
+      "name": "Bob"
+    }, 
+    "__ISA__": "userProfile", 
+    "__ID__": "bob"
+  },
   {
     "data": {
       "startDate": "1943", 
-      "isA": "datePeriod", 
       "endDate": "1943"
     }, 
-    "desc": "pd1"
-  }, 
+    "__ISA__": "datePeriod", 
+    "__ID__": "pd1"
+  },
   {
     "data": {
-      "isA": "address", 
       "streetAddress": "London"
     }, 
-    "desc": "ar1"
-  }, 
+    "__ISA__": "address", 
+    "__ID__": "ar1"
+  },
   {
     "data": {
-      "body": "Test Annotation", 
-      "isA": "annotation"
+      "body": "Test Annotation" 
     }, 
-    "desc": "ann1"
-  }, 
+    "__ISA__": "annotation",
+    "__ID__": "ann1"
+  },
   {
     "data": {
-      "body": "Test Annotation of Annotation", 
-      "isA": "annotation"
+      "body": "Test Annotation of Annotation" 
     }, 
-    "desc": "ann2"
-  }
+    "__ISA__": "annotation",
+    "__ID__": "ann2"
+  },
+  {
+  	"data": {
+  	  "identifier": "8d1f81c0-0e24-11e2-892e-0800200c9a66",
+  	  "timestamp": "2012-10-03T00:00:00Z",
+  	  "logMessage": "Creating repository"
+  	},
+   "__ISA__": "action",
+  	"__ID__": "action1"
+  },
+  {
+  	"data": {
+  	},
+  "__ISA__": "permissionGrant",
+  	"__ID__": "retoKclWriteGrant"
+  },
+  {
+  	"data": {
+  	},
+    "__ISA__": "permissionGrant", 	
+  	"__ID__": "bobGlobalCreateGrant"
+  }  
 ]

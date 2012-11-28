@@ -7,30 +7,26 @@ import java.util.Map;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.neo4j.graphdb.Transaction;
-import com.tinkerpop.blueprints.Edge;
-import com.tinkerpop.blueprints.Index;
+import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.frames.VertexFrame;
 
-import eu.ehri.project.core.GraphHelpers;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.utils.ClassUtils;
 import eu.ehri.project.persistance.BundleFactory;
 import eu.ehri.project.persistance.EntityBundle;
-import eu.ehri.project.persistance.GraphManager;
+import eu.ehri.project.core.GraphManager;
 
 public class FixtureLoader {
 
     public static final String DESCRIPTOR_KEY = EntityType.ID_KEY;
 
     private FramedGraph<Neo4jGraph> graph;
-    private GraphHelpers helpers;
 
     public FixtureLoader(FramedGraph<Neo4jGraph> graph) {
         this.graph = graph;
-        helpers = new GraphHelpers(graph.getBaseGraph().getRawGraph());
     }
 
     public Vertex getTestVertex(String descriptor) {
@@ -63,12 +59,15 @@ public class FixtureLoader {
                     .readValue(jsonStream, List.class);
 
             for (Map<String, Object> namedNode : nodes) {
-                Map<String, Object> data = (Map<String,Object>)namedNode.get("data");
-                String id = (String)namedNode.get("desc");
-                String isa = (String) data.get(EntityType.TYPE_KEY);
-                Class<VertexFrame> cls = (Class<VertexFrame>) entityClasses.get(isa);
-                EntityBundle<VertexFrame> bundle = new BundleFactory<VertexFrame>().buildBundle(id, data, cls); 
-                
+                String id = (String) namedNode.get(EntityType.ID_KEY);
+                String isa = (String) namedNode.get(EntityType.TYPE_KEY);
+                Map<String, Object> data = (Map<String, Object>) namedNode
+                        .get("data");
+                Class<VertexFrame> cls = (Class<VertexFrame>) entityClasses
+                        .get(isa);
+                EntityBundle<VertexFrame> bundle = new BundleFactory<VertexFrame>()
+                        .buildBundle(id, data, cls);
+
                 manager.createVertex(id, bundle);
             }
         } catch (Exception e) {
@@ -80,18 +79,20 @@ public class FixtureLoader {
         InputStream jsonStream = this.getClass().getClassLoader()
                 .getResourceAsStream("edges.json");
         try {
+            @SuppressWarnings("unchecked")
             List<Map<String, Object>> edges = new ObjectMapper().readValue(
                     jsonStream, List.class);
             for (Map<String, Object> edge : edges) {
                 String srcdesc = (String) edge.get("src");
                 String label = (String) edge.get("label");
                 String dstdesc = (String) edge.get("dst");
-                Map<String, Object> data = (Map<String, Object>) edge
-                        .get("data");
-
-                Index<Edge> index = helpers.getOrCreateIndex(label, Edge.class);
-                helpers.createIndexedEdge(getTestVertex(srcdesc),
-                        getTestVertex(dstdesc), label, data, index);
+                graph.addEdge(null, getTestVertex(srcdesc),
+                        getTestVertex(dstdesc), label);
+                // FIXME: Should we commit here? It seems to give a
+                // "org.neo4j.graphdb.TransactionFailureException: Failed to mark transaction as rollback only."
+                // exception otherwise.
+                graph.getBaseGraph().stopTransaction(
+                        TransactionalGraph.Conclusion.SUCCESS);
             }
         } catch (Exception e) {
             throw new RuntimeException("Error loading JSON fixture", e);
