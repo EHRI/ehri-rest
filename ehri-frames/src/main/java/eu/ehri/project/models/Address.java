@@ -13,54 +13,8 @@ public interface Address extends VersionedEntity {
     @Adjacency(label = AgentDescription.HAS_ADDRESS, direction = Direction.IN)
     public AgentDescription getAgentDescription();
     
-    // TODO: Break out property names into constants
-
-    @Property("streetAddress")
+    public static final String ADDRESS_NAME = "name";
+    
+    @Property(ADDRESS_NAME)
     public String getStreetAddress();
-
-    @Property("streetAddress")
-    public void setStreetAddress(String streetAddress);
-
-    @Property("region")
-    public String getRegion();
-
-    @Property("region")
-    public void setRegion(String region);
-
-    @Property("city")
-    public String getCity();
-
-    @Property("city")
-    public void setCity(String city);
-
-    @Property("countryCode")
-    public String getCountryCode();
-
-    @Property("countryCode")
-    public void setCountryCode(String countryCode);
-
-    @Property("telephone")
-    public String getTelephone();
-
-    @Property("telephone")
-    public void setTelephone(String telephone);
-
-    @Property("fax")
-    public String getFax();
-
-    @Property("fax")
-    public void setFax(String fax);
-
-    @Property("email")
-    public String getEmail();
-
-    @Property("email")
-    public void setEmail(String email);
-
-    @Property("url")
-    public String getUrl();
-
-    @Property("url")
-    public void setUrl(String url);
-
 }
