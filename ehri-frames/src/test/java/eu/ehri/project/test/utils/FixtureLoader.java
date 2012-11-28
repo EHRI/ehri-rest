@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.neo4j.graphdb.Transaction;
+import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
@@ -89,6 +90,11 @@ public class FixtureLoader {
                 String dstdesc = (String) edge.get("dst");
                 graph.addEdge(null, getTestVertex(srcdesc),
                         getTestVertex(dstdesc), label);
+                // FIXME: Should we commit here? It seems to give a
+                // "org.neo4j.graphdb.TransactionFailureException: Failed to mark transaction as rollback only."
+                // exception otherwise.
+                graph.getBaseGraph().stopTransaction(
+                        TransactionalGraph.Conclusion.SUCCESS);
             }
         } catch (Exception e) {
             throw new RuntimeException("Error loading JSON fixture", e);
