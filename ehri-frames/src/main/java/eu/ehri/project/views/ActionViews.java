@@ -6,6 +6,8 @@ import org.neo4j.graphdb.Transaction;
 
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
+
+import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.PermissionDenied;
@@ -14,6 +16,7 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
+import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistance.ActionManager;
 
 /**
@@ -24,7 +27,7 @@ import eu.ehri.project.persistance.ActionManager;
  * 
  * @param <E>
  */
-public class ActionViews<E extends AccessibleEntity> extends Views<E> implements
+public class ActionViews<E extends AccessibleEntity> implements
         IViews<E> {
 
     // Default log strings, needed for compatibility.
@@ -32,8 +35,27 @@ public class ActionViews<E extends AccessibleEntity> extends Views<E> implements
     public static final String DEFAULT_UPDATE_LOG = "Updating item";
     public static final String DEFAULT_DELETE_LOG = "Deleting item";
 
-    private ActionManager actionManager;
+    private final ActionManager actionManager;
+    private final Views<E> views;
+    private final FramedGraph<Neo4jGraph> graph;
+    private final Class<E> cls;
+    @SuppressWarnings("unused")
+    private final PermissionScope scope;
 
+    /**
+     * Scoped Constructor.
+     * 
+     * @param graph
+     * @param cls
+     */
+    public ActionViews(FramedGraph<Neo4jGraph> graph, Class<E> cls, PermissionScope scope) {
+        this.graph = graph;
+        this.cls = cls;
+        this.scope = scope;
+        actionManager = new ActionManager(graph);
+        views = new Views<E>(graph, cls, scope);
+    }
+    
     /**
      * Constructor.
      * 
@@ -41,8 +63,7 @@ public class ActionViews<E extends AccessibleEntity> extends Views<E> implements
      * @param cls
      */
     public ActionViews(FramedGraph<Neo4jGraph> graph, Class<E> cls) {
-        super(graph, cls);
-        actionManager = new ActionManager(graph);
+        this(graph, cls, new SystemScope());
     }
 
     /**
@@ -57,7 +78,6 @@ public class ActionViews<E extends AccessibleEntity> extends Views<E> implements
      * @throws IntegrityError
      * @throws DeserializationError
      */
-    @Override
     public E create(Map<String, Object> data, Accessor user)
             throws PermissionDenied, ValidationError, DeserializationError,
             IntegrityError {
@@ -85,7 +105,7 @@ public class ActionViews<E extends AccessibleEntity> extends Views<E> implements
         // http://docs.oracle.com/javase/7/docs/technotes/guides/language/catch-multiple.html
         try {
 
-            E out = super.create(data, user);
+            E out = views.create(data, user);
             actionManager.createAction(out,
                     graph.frame(user.asVertex(), UserProfile.class),
                     logMessage);
@@ -123,7 +143,6 @@ public class ActionViews<E extends AccessibleEntity> extends Views<E> implements
      * @throws IntegrityError
      * @throws DeserializationError
      */
-    @Override
     public E update(Map<String, Object> data, Accessor user)
             throws PermissionDenied, ValidationError, DeserializationError,
             IntegrityError {
@@ -148,7 +167,7 @@ public class ActionViews<E extends AccessibleEntity> extends Views<E> implements
             IntegrityError {
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
-            E out = super.update(data, user);
+            E out = views.update(data, user);
             actionManager
                     .createAction(out,
                             graph.frame(user.asVertex(), UserProfile.class),
@@ -186,7 +205,6 @@ public class ActionViews<E extends AccessibleEntity> extends Views<E> implements
      * @throws ValidationError
      * @throws SerializationError
      */
-    @Override
     public Integer delete(E item, Accessor user) throws PermissionDenied,
             ValidationError, SerializationError {
         return delete(item, user, DEFAULT_DELETE_LOG);
@@ -212,7 +230,7 @@ public class ActionViews<E extends AccessibleEntity> extends Views<E> implements
                     .createAction(item,
                             graph.frame(user.asVertex(), UserProfile.class),
                             logMessage);
-            Integer count = super.delete(item, user);
+            Integer count = views.delete(item, user);
             tx.success();
             return count;
         } catch (PermissionDenied ex) {
@@ -227,5 +245,13 @@ public class ActionViews<E extends AccessibleEntity> extends Views<E> implements
         } finally {
             tx.finish();
         }
+    }
+
+    public IViews<E> setScope(PermissionScope scope) {
+        return new ActionViews<E>(graph, cls, scope);
+    }
+
+    public E detail(E item, Accessor user) throws PermissionDenied {
+        return views.detail(item, user);
     }
 }

@@ -20,10 +20,9 @@ import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Group;
 import eu.ehri.project.models.Permission;
 import eu.ehri.project.models.UserProfile;
-import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.PermissionGrantTarget;
 import eu.ehri.project.views.ActionViews;
+import eu.ehri.project.views.IViews;
 import eu.ehri.project.views.Views;
 
 public class ViewsTest extends AbstractFixtureTest {
@@ -234,13 +233,11 @@ public class ViewsTest extends AbstractFixtureTest {
     @Test
     public void testCreateWithScope() throws ValidationError, PermissionDenied,
             DeserializationError, IntegrityError {
-        Views<DocumentaryUnit> docViews = new ActionViews<DocumentaryUnit>(graph,
-                DocumentaryUnit.class);
+        IViews<DocumentaryUnit> docViews = new ActionViews<DocumentaryUnit>(graph,
+                DocumentaryUnit.class, helper.getTestFrame("r1", Agent.class));
         Map<String, Object> bundle = getTestBundle();
         // In the fixtures, 'reto' should have a grant for 'CREATE'
         // scoped to the 'r1' repository.
-        Agent scope = helper.getTestFrame("r1", Agent.class);
-        docViews.setScope(scope);
         DocumentaryUnit unit = docViews.create(bundle, invalidUser);
         assertEquals(TEST_COLLECTION_NAME, unit.getName());
     }

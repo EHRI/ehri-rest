@@ -12,6 +12,7 @@ import org.junit.Test;
 
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.acl.PermissionTypes;
+import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.PermissionDenied;
@@ -23,12 +24,14 @@ import eu.ehri.project.models.EntityTypes;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.persistance.BundleDAO;
 import eu.ehri.project.persistance.BundleFactory;
+import eu.ehri.project.views.ViewHelper;
 import eu.ehri.project.views.Views;
 
 public class PermissionsTest extends AbstractFixtureTest {
 
     private UserProfile user;
     private AclManager acl;
+    private ViewHelper viewHelper;
 
     @SuppressWarnings("unchecked")
     @Before
@@ -38,8 +41,9 @@ public class PermissionsTest extends AbstractFixtureTest {
                 .create(new BundleFactory<UserProfile>().buildBundle(
                         (Map<String, Object>) getTestUserBundle().get("data"),
                         UserProfile.class));
-        views = new Views<DocumentaryUnit>(graph, DocumentaryUnit.class);        
-        views.setScope(helper.getTestFrame("r1", Agent.class));
+        views = new Views<DocumentaryUnit>(graph, DocumentaryUnit.class,
+                helper.getTestFrame("r1", Agent.class));
+        viewHelper = new ViewHelper(graph, DocumentaryUnit.class);
         acl = new AclManager(graph);
     }
 
@@ -53,8 +57,8 @@ public class PermissionsTest extends AbstractFixtureTest {
     public void testCreateAsUserWithNewPerms() throws PermissionDenied,
             ValidationError, DeserializationError, IntegrityError {
         acl.grantPermissions(user,
-                views.getContentType(EntityTypes.DOCUMENTARY_UNIT),
-                views.getPermission(PermissionTypes.CREATE));
+                viewHelper.getContentType(EntityTypes.DOCUMENTARY_UNIT),
+                viewHelper.getPermission(PermissionTypes.CREATE));
         assertNotNull(views.create(getTestBundle(), user));
     }
 
@@ -62,11 +66,11 @@ public class PermissionsTest extends AbstractFixtureTest {
     public void testCreateAsUserWithBadScopedPerms() throws PermissionDenied,
             ValidationError, DeserializationError, IntegrityError {
         acl.grantPermissions(user,
-                views.getContentType(EntityTypes.DOCUMENTARY_UNIT),
-                views.getPermission(PermissionTypes.CREATE),
+                viewHelper.getContentType(EntityTypes.DOCUMENTARY_UNIT),
+                viewHelper.getPermission(PermissionTypes.CREATE),
                 helper.getTestFrame("r1", Agent.class));
-        views.resetScope();
-        assertNotNull(views.create(getTestBundle(), user));
+        assertNotNull(views.setScope(new SystemScope()).create(getTestBundle(),
+                user));
     }
 
     @Test
@@ -74,10 +78,9 @@ public class PermissionsTest extends AbstractFixtureTest {
             ValidationError, DeserializationError, IntegrityError {
         Agent scope = helper.getTestFrame("r1", Agent.class);
         acl.grantPermissions(user,
-                views.getContentType(EntityTypes.DOCUMENTARY_UNIT),
-                views.getPermission(PermissionTypes.CREATE));
-        views.setScope(scope);
-        assertNotNull(views.create(getTestBundle(), user));
+                viewHelper.getContentType(EntityTypes.DOCUMENTARY_UNIT),
+                viewHelper.getPermission(PermissionTypes.CREATE));
+        assertNotNull(views.setScope(scope).create(getTestBundle(), user));
     }
 
     @Test(expected = PermissionDenied.class)
@@ -87,18 +90,17 @@ public class PermissionsTest extends AbstractFixtureTest {
         Agent scope = helper.getTestFrame("r1", Agent.class);
         Agent badScope = helper.getTestFrame("r2", Agent.class);
         acl.grantPermissions(user,
-                views.getContentType(EntityTypes.DOCUMENTARY_UNIT),
-                views.getPermission(PermissionTypes.CREATE), scope);
-        views.setScope(badScope);
-        assertNotNull(views.create(getTestBundle(), user));
+                viewHelper.getContentType(EntityTypes.DOCUMENTARY_UNIT),
+                viewHelper.getPermission(PermissionTypes.CREATE), scope);
+        assertNotNull(views.setScope(badScope).create(getTestBundle(), user));
     }
 
     @Test(expected = PermissionDenied.class)
     public void testCreateAsUserWithDifferentPerms() throws PermissionDenied,
             ValidationError, DeserializationError, IntegrityError {
         acl.grantPermissions(user,
-                views.getContentType(EntityTypes.DOCUMENTARY_UNIT),
-                views.getPermission(PermissionTypes.DELETE));
+                viewHelper.getContentType(EntityTypes.DOCUMENTARY_UNIT),
+                viewHelper.getPermission(PermissionTypes.DELETE));
         assertNotNull(views.create(getTestBundle(), user));
     }
 
@@ -107,8 +109,8 @@ public class PermissionsTest extends AbstractFixtureTest {
             ValidationError, DeserializationError, IntegrityError,
             SerializationError {
         acl.grantPermissions(user,
-                views.getContentType(EntityTypes.DOCUMENTARY_UNIT),
-                views.getPermission(PermissionTypes.CREATE));
+                viewHelper.getContentType(EntityTypes.DOCUMENTARY_UNIT),
+                viewHelper.getPermission(PermissionTypes.CREATE));
         DocumentaryUnit unit = views.create(getTestBundle(), user);
         assertNotNull(unit);
         views.delete(unit, user);
@@ -119,11 +121,11 @@ public class PermissionsTest extends AbstractFixtureTest {
             ValidationError, DeserializationError, IntegrityError,
             SerializationError {
         acl.grantPermissions(user,
-                views.getContentType(EntityTypes.DOCUMENTARY_UNIT),
-                views.getPermission(PermissionTypes.CREATE));
+                viewHelper.getContentType(EntityTypes.DOCUMENTARY_UNIT),
+                viewHelper.getPermission(PermissionTypes.CREATE));
         acl.grantPermissions(user,
-                views.getContentType(EntityTypes.DOCUMENTARY_UNIT),
-                views.getPermission(PermissionTypes.DELETE));
+                viewHelper.getContentType(EntityTypes.DOCUMENTARY_UNIT),
+                viewHelper.getPermission(PermissionTypes.DELETE));
         DocumentaryUnit unit = views.create(getTestBundle(), user);
         assertNotNull(unit);
         views.delete(unit, user);
@@ -134,8 +136,8 @@ public class PermissionsTest extends AbstractFixtureTest {
             ValidationError, DeserializationError, IntegrityError,
             SerializationError {
         acl.grantPermissions(user,
-                views.getContentType(EntityTypes.DOCUMENTARY_UNIT),
-                views.getPermission(PermissionTypes.OWNER));
+                viewHelper.getContentType(EntityTypes.DOCUMENTARY_UNIT),
+                viewHelper.getPermission(PermissionTypes.OWNER));
         DocumentaryUnit unit = views.create(getTestBundle(), user);
         assertNotNull(unit);
         views.delete(unit, user);
@@ -146,8 +148,8 @@ public class PermissionsTest extends AbstractFixtureTest {
             ValidationError, DeserializationError, IntegrityError,
             SerializationError {
         acl.grantPermissions(user,
-                views.getContentType(EntityTypes.DOCUMENTARY_UNIT),
-                views.getPermission(PermissionTypes.ANNOTATE));
+                viewHelper.getContentType(EntityTypes.DOCUMENTARY_UNIT),
+                viewHelper.getPermission(PermissionTypes.ANNOTATE));
         DocumentaryUnit unit = views.create(getTestBundle(), user);
         assertNotNull(unit);
         views.delete(unit, user);
@@ -158,8 +160,8 @@ public class PermissionsTest extends AbstractFixtureTest {
             ValidationError, DeserializationError, IntegrityError,
             SerializationError {
         acl.grantPermissions(user,
-                views.getContentType(EntityTypes.DOCUMENTARY_UNIT),
-                views.getPermission(PermissionTypes.CREATE));
+                viewHelper.getContentType(EntityTypes.DOCUMENTARY_UNIT),
+                viewHelper.getPermission(PermissionTypes.CREATE));
         DocumentaryUnit unit = views.create(getTestBundle(), user);
         assertNotNull(unit);
         // Should throw an integrity error
@@ -172,13 +174,13 @@ public class PermissionsTest extends AbstractFixtureTest {
             ValidationError, DeserializationError, IntegrityError,
             SerializationError {
         acl.grantPermissions(user,
-                views.getContentType(EntityTypes.DOCUMENTARY_UNIT),
-                views.getPermission(PermissionTypes.CREATE));
+                viewHelper.getContentType(EntityTypes.DOCUMENTARY_UNIT),
+                viewHelper.getPermission(PermissionTypes.CREATE));
         DocumentaryUnit unit = views.create(getTestBundle(), user);
         assertNotNull(unit);
         acl.revokePermissions(user,
-                views.getContentType(EntityTypes.DOCUMENTARY_UNIT),
-                views.getPermission(PermissionTypes.CREATE));
+                viewHelper.getContentType(EntityTypes.DOCUMENTARY_UNIT),
+                viewHelper.getPermission(PermissionTypes.CREATE));
         // Should throw an error
         views.create(getTestBundle(), user);
         fail();

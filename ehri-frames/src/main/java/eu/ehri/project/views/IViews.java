@@ -12,7 +12,7 @@ import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.PermissionScope;
 
 public interface IViews<E extends AccessibleEntity> {
-    public void setScope(PermissionScope scope);
+    public IViews<E> setScope(PermissionScope scope);
     
     public E detail(E item, Accessor user) throws PermissionDenied;
 

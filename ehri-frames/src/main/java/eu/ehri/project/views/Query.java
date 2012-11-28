@@ -14,12 +14,14 @@ import com.tinkerpop.gremlin.java.GremlinPipeline;
 import com.tinkerpop.pipes.PipeFunction;
 
 import eu.ehri.project.acl.AclManager;
+import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.exceptions.IndexNotFoundException;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
+import eu.ehri.project.models.base.PermissionScope;
 
 /**
  * Handles querying Accessible Entities, with ACL semantics.
@@ -30,13 +32,73 @@ import eu.ehri.project.models.base.Accessor;
  * 
  * @param <E>
  */
-public class Query<E extends AccessibleEntity> extends AbstractViews<E>
-        implements IQuery<E> {
+public final class Query<E extends AccessibleEntity> implements IQuery<E> {
     private static final String QUERY_GLOB = "*";
-    private Integer offset = null;
-    private Integer limit = null;
-    private String sort = null;
-    private boolean page = false;
+    private final Integer offset;
+    private final Integer limit;
+    private final String sort;
+    private final boolean page;
+
+    private final FramedGraph<Neo4jGraph> graph;
+    private final Class<E> cls;
+    private final ViewHelper helper;
+    private final PermissionScope scope;
+
+    /**
+     * Full Constructor.
+     * 
+     * @param graph
+     * @param cls
+     * @param scope
+     * @param offset
+     * @param limit
+     * @param sort
+     * @param page
+     */
+    public Query(FramedGraph<Neo4jGraph> graph, Class<E> cls,
+            PermissionScope scope, Integer offset, Integer limit, String sort,
+            Boolean page) {
+        this.graph = graph;
+        this.cls = cls;
+        this.scope = scope;
+        this.offset = offset;
+        this.limit = limit;
+        this.sort = sort;
+        this.page = page;
+        helper = new ViewHelper(graph, cls, scope);
+    }
+
+    /**
+     * Simple constructor.
+     * 
+     * @param graph
+     * @param cls
+     */
+    public Query(FramedGraph<Neo4jGraph> graph, Class<E> cls) {
+        this(graph, cls, new SystemScope(), null, null, null, false);
+    }
+
+    /**
+     * Scoped Constructor.
+     * 
+     * @param graph
+     * @param cls
+     * @param scope
+     */
+    public Query(FramedGraph<Neo4jGraph> graph, Class<E> cls,
+            PermissionScope scope) {
+        this(graph, cls, scope, null, null, null, false);
+    }
+
+    /**
+     * Copy constructor.
+     * 
+     * @param other
+     */
+    public Query<E> copy(Query<E> other) {
+        return new Query<E>(other.graph, other.cls, other.scope, other.offset,
+                other.limit, other.sort, other.page);
+    }
 
     /**
      * 
@@ -111,30 +173,6 @@ public class Query<E extends AccessibleEntity> extends AbstractViews<E>
     }
 
     /**
-     * Constructor.
-     * 
-     * @param graph
-     * @param cls
-     */
-    public Query(FramedGraph<Neo4jGraph> graph, Class<E> cls) {
-        super(graph, cls);
-    }
-
-    /**
-     * Copy constructor.
-     * 
-     * @param other
-     */
-    public Query(Query<E> other) {
-        super(other.graph, other.cls);
-        this.scope = other.scope;
-        this.offset = other.offset;
-        this.limit = other.limit;
-        this.sort = other.sort;
-        this.page = other.page;
-    }
-
-    /**
      * Fetch an item by property key/value. The first matching item will be
      * returned.
      * 
@@ -152,7 +190,7 @@ public class Query<E extends AccessibleEntity> extends AbstractViews<E>
                     key, value);
             try {
                 E item = graph.frame(indexQuery.iterator().next(), cls);
-                checkReadAccess(item, user);
+                helper.checkReadAccess(item, user);
                 return item;
             } catch (NoSuchElementException e) {
                 throw new ItemNotFound(key, value);
@@ -264,8 +302,8 @@ public class Query<E extends AccessibleEntity> extends AbstractViews<E>
     }
 
     public Query<E> setOffset(Integer offset) {
-        this.offset = offset;
-        return this;
+        return new Query<E>(this.graph, this.cls, this.scope, offset,
+                this.limit, this.sort, this.page);
     }
 
     public int getLimit() {
@@ -273,8 +311,8 @@ public class Query<E extends AccessibleEntity> extends AbstractViews<E>
     }
 
     public Query<E> setLimit(Integer limit) {
-        this.limit = limit;
-        return this;
+        return new Query<E>(this.graph, this.cls, this.scope, this.offset,
+                limit, this.sort, this.page);
     }
 
     public String getSort() {
@@ -282,12 +320,12 @@ public class Query<E extends AccessibleEntity> extends AbstractViews<E>
     }
 
     public Query<E> setSort(String sort) {
-        this.sort = sort;
-        return this;
+        return new Query<E>(this.graph, this.cls, this.scope, this.offset,
+                this.limit, sort, this.page);
     }
-    
+
     // Helpers
-    
+
     @SuppressWarnings("rawtypes")
     private GremlinPipeline setPipelineRange(GremlinPipeline filter) {
         int low = offset == null ? 0 : Math.max(offset, 0);
@@ -309,5 +347,5 @@ public class Query<E extends AccessibleEntity> extends AbstractViews<E>
         if (ann != null)
             return ann.value();
         return null;
-    }    
+    }
 }

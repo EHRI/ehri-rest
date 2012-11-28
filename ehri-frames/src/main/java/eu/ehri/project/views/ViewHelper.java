@@ -20,28 +20,26 @@ import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.utils.ClassUtils;
-import eu.ehri.project.persistance.Converter;
 
-abstract class AbstractViews<E extends AccessibleEntity> {
+public final class ViewHelper {
 
-    protected final FramedGraph<Neo4jGraph> graph;
-    protected final Class<E> cls;
-    protected final Converter converter = new Converter();
-    protected final AclManager acl;
-    /**
-     * Default scope for Permission operations is the system, but this can be
-     * overridden.
-     */
-    protected PermissionScope scope = new SystemScope();
-
-    /**
-     * @param graph
-     * @param cls
-     */
-    public AbstractViews(FramedGraph<Neo4jGraph> graph, Class<E> cls) {
+    final FramedGraph<Neo4jGraph> graph;
+    final Class<?> cls;
+    final PermissionScope scope;
+    final AclManager acl;
+    
+    public ViewHelper(FramedGraph<Neo4jGraph> graph, Class<?> cls) {
         this.graph = graph;
         this.cls = cls;
         this.acl = new AclManager(graph);
+        this.scope = new SystemScope();
+    }
+
+    public ViewHelper(FramedGraph<Neo4jGraph> graph, Class<?> cls, PermissionScope scope) {
+        this.graph = graph;
+        this.cls = cls;
+        this.acl = new AclManager(graph);
+        this.scope = scope;
     }
 
     /**
@@ -190,12 +188,8 @@ abstract class AbstractViews<E extends AccessibleEntity> {
      * against the scope relation on PermissionGrants.
      * 
      * @param scope
-     */
-    public void setScope(PermissionScope scope) {
-        this.scope = scope;
-    }
-    
-    public void resetScope() {
-        this.scope = new SystemScope();
+     */    
+    public ViewHelper setScope(PermissionScope scope) {
+        return new ViewHelper(graph, cls, scope);
     }
 }
