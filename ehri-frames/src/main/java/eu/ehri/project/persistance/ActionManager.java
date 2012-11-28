@@ -50,7 +50,7 @@ public class ActionManager {
         actionData.put(AccessibleEntity.IDENTIFIER_KEY, UUID.randomUUID()
                 .toString());
 
-        BundleDAO<Action> persister = new BundleDAO<Action>(graph);
+        BundleDAO<Action> persister = new BundleDAO<Action>(graph, null);
         Action action;
         try {
             action = persister.create(new BundleFactory<Action>().buildBundle(

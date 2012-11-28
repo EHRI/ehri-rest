@@ -52,7 +52,7 @@ public class Views<E extends AccessibleEntity> extends AbstractViews<E>
         EntityBundle<E> bundle = converter.dataToBundle(data);
         E entity = graph.getVertex(bundle.getId(), cls);
         checkEntityPermission(entity, user, getPermission(PermissionTypes.UPDATE));
-        return new BundleDAO<E>(graph).update(bundle);
+        return new BundleDAO<E>(graph, scope).update(bundle);
     }
 
     /**
@@ -72,7 +72,7 @@ public class Views<E extends AccessibleEntity> extends AbstractViews<E>
             IntegrityError {
         checkPermission(user, getPermission(PermissionTypes.CREATE));
         EntityBundle<E> bundle = converter.dataToBundle(data);
-        return new BundleDAO<E>(graph).create(bundle);
+        return new BundleDAO<E>(graph, scope).create(bundle);
     }
 
     /**
@@ -89,7 +89,7 @@ public class Views<E extends AccessibleEntity> extends AbstractViews<E>
     public Integer delete(E item, Accessor user) throws PermissionDenied,
             ValidationError, SerializationError {
         checkEntityPermission(item, user, getPermission(PermissionTypes.DELETE));
-        return new BundleDAO<E>(graph).delete(converter
+        return new BundleDAO<E>(graph, scope).delete(converter
                 .vertexFrameToBundle(item));
     }
 }
