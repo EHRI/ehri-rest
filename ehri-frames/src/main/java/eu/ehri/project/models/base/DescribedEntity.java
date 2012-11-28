@@ -4,18 +4,10 @@ import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.VertexFrame;
 
-import eu.ehri.project.models.annotations.Dependent;
-import eu.ehri.project.models.annotations.Fetch;
-
 public interface DescribedEntity extends VertexFrame, AnnotatableEntity {
     
     public static final String DESCRIBES = "describes";
     
-    @Fetch
-    @Dependent
-    @Adjacency(label = DESCRIBES, direction = Direction.IN)
-    public Iterable<Description> getDescriptions();
-
     @Adjacency(label = DESCRIBES, direction = Direction.IN)
     public void addDescription(final Description description);
 
