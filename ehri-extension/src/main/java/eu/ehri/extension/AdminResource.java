@@ -23,6 +23,7 @@ import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
+import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.models.EntityTypes;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.AccessibleEntity;
@@ -30,7 +31,6 @@ import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistance.BundleDAO;
 import eu.ehri.project.persistance.BundleFactory;
 import eu.ehri.project.persistance.Converter;
-import eu.ehri.project.persistance.GraphManager;
 
 /**
  * Provides a RESTfull interface for the Action class. Note: Action instances

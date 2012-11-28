@@ -17,6 +17,7 @@ import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.frames.VertexFrame;
 
 import eu.ehri.project.acl.SystemScope;
+import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.exceptions.IdGenerationError;
 import eu.ehri.project.exceptions.IndexNotFoundException;
 import eu.ehri.project.exceptions.IntegrityError;

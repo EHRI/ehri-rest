@@ -13,11 +13,11 @@ import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.frames.VertexFrame;
 
+import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.utils.ClassUtils;
 import eu.ehri.project.persistance.BundleFactory;
 import eu.ehri.project.persistance.EntityBundle;
-import eu.ehri.project.persistance.GraphManager;
 
 public class FixtureLoader {
 

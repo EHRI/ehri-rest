@@ -17,11 +17,11 @@ import com.tinkerpop.frames.FramedGraph;
 
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.acl.AnonymousAccessor;
+import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.EntityTypes;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.persistance.GraphManager;
 
 public abstract class AbstractRestResource {
 

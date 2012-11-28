@@ -1,4 +1,4 @@
-package eu.ehri.project.persistance;
+package eu.ehri.project.core;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -19,6 +19,7 @@ import com.tinkerpop.frames.FramedGraph;
 
 import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.models.annotations.EntityType;
+import eu.ehri.project.persistance.EntityBundle;
 
 public final class GraphManager {
 
