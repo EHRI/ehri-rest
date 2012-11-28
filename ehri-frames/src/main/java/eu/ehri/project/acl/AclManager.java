@@ -15,6 +15,7 @@ import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.pipes.PipeFunction;
 
+import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.ContentType;
 import eu.ehri.project.models.EntityTypes;
@@ -27,7 +28,6 @@ import eu.ehri.project.models.base.PermissionGrantTarget;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.utils.AnnotationUtils;
 import eu.ehri.project.models.utils.ClassUtils;
-import eu.ehri.project.persistance.GraphManager;
 
 /**
  * Helper class for checking and asserting access and write permissions.

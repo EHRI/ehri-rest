@@ -6,6 +6,7 @@ import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.PermissionTypes;
 import eu.ehri.project.acl.SystemScope;
+import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.PermissionDenied;
@@ -17,7 +18,6 @@ import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistance.BundleDAO;
 import eu.ehri.project.persistance.Converter;
 import eu.ehri.project.persistance.EntityBundle;
-import eu.ehri.project.persistance.GraphManager;
 
 public final class Views<E extends AccessibleEntity> implements IViews<E> {
     private final FramedGraph<Neo4jGraph> graph;

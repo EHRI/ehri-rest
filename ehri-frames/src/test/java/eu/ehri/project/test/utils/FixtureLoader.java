@@ -7,30 +7,25 @@ import java.util.Map;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.neo4j.graphdb.Transaction;
-import com.tinkerpop.blueprints.Edge;
-import com.tinkerpop.blueprints.Index;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.frames.VertexFrame;
 
-import eu.ehri.project.core.GraphHelpers;
+import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.utils.ClassUtils;
 import eu.ehri.project.persistance.BundleFactory;
 import eu.ehri.project.persistance.EntityBundle;
-import eu.ehri.project.persistance.GraphManager;
 
 public class FixtureLoader {
 
     public static final String DESCRIPTOR_KEY = EntityType.ID_KEY;
 
     private FramedGraph<Neo4jGraph> graph;
-    private GraphHelpers helpers;
 
     public FixtureLoader(FramedGraph<Neo4jGraph> graph) {
         this.graph = graph;
-        helpers = new GraphHelpers(graph.getBaseGraph().getRawGraph());
     }
 
     public Vertex getTestVertex(String descriptor) {
@@ -44,7 +39,8 @@ public class FixtureLoader {
     }
 
     public Iterable<Vertex> getTestVertices(String entityType) {
-        return graph.getBaseGraph().getVertices(EntityType.TYPE_KEY, entityType);
+        return graph.getBaseGraph()
+                .getVertices(EntityType.TYPE_KEY, entityType);
     }
 
     public <T> Iterable<T> getTestFrames(String entityType, Class<T> cls) {
@@ -55,20 +51,24 @@ public class FixtureLoader {
     private void loadNodes() {
         InputStream jsonStream = this.getClass().getClassLoader()
                 .getResourceAsStream("vertices.json");
-        
-        Map<String, Class<? extends VertexFrame>> entityClasses = ClassUtils.getEntityClasses();
+
+        Map<String, Class<? extends VertexFrame>> entityClasses = ClassUtils
+                .getEntityClasses();
         GraphManager manager = new GraphManager(graph);
         try {
-            List<Map<String, Object>> nodes = new ObjectMapper()
-                    .readValue(jsonStream, List.class);
+            List<Map<String, Object>> nodes = new ObjectMapper().readValue(
+                    jsonStream, List.class);
 
             for (Map<String, Object> namedNode : nodes) {
-                Map<String, Object> data = (Map<String,Object>)namedNode.get("data");
-                String id = (String)namedNode.get("desc");
+                Map<String, Object> data = (Map<String, Object>) namedNode
+                        .get("data");
+                String id = (String) namedNode.get("desc");
                 String isa = (String) data.get(EntityType.TYPE_KEY);
-                Class<VertexFrame> cls = (Class<VertexFrame>) entityClasses.get(isa);
-                EntityBundle<VertexFrame> bundle = new BundleFactory<VertexFrame>().buildBundle(id, data, cls); 
-                
+                Class<VertexFrame> cls = (Class<VertexFrame>) entityClasses
+                        .get(isa);
+                EntityBundle<VertexFrame> bundle = new BundleFactory<VertexFrame>()
+                        .buildBundle(id, data, cls);
+
                 manager.createVertex(id, bundle);
             }
         } catch (Exception e) {
@@ -80,18 +80,15 @@ public class FixtureLoader {
         InputStream jsonStream = this.getClass().getClassLoader()
                 .getResourceAsStream("edges.json");
         try {
+            @SuppressWarnings("unchecked")
             List<Map<String, Object>> edges = new ObjectMapper().readValue(
                     jsonStream, List.class);
             for (Map<String, Object> edge : edges) {
                 String srcdesc = (String) edge.get("src");
                 String label = (String) edge.get("label");
                 String dstdesc = (String) edge.get("dst");
-                Map<String, Object> data = (Map<String, Object>) edge
-                        .get("data");
-
-                Index<Edge> index = helpers.getOrCreateIndex(label, Edge.class);
-                helpers.createIndexedEdge(getTestVertex(srcdesc),
-                        getTestVertex(dstdesc), label, data, index);
+                graph.addEdge(null, getTestVertex(srcdesc),
+                        getTestVertex(dstdesc), label);
             }
         } catch (Exception e) {
             throw new RuntimeException("Error loading JSON fixture", e);
