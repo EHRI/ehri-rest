@@ -36,10 +36,28 @@ public class BundleDAO<T extends VertexFrame> {
 
     private final FramedGraph<Neo4jGraph> graph;
     private final GraphHelpers helpers;
+    private final VertexFrame scope;
 
+    /**
+     * Constructor will null scope.
+     * @param graph
+     */
     public BundleDAO(FramedGraph<Neo4jGraph> graph) {
         this.graph = graph;
         this.helpers = new GraphHelpers(graph.getBaseGraph().getRawGraph());
+        this.scope = null;
+    }
+
+    /**
+     * Constructor with a given scope.
+     * 
+     * @param graph
+     * @param scope
+     */
+    public BundleDAO(FramedGraph<Neo4jGraph> graph, VertexFrame scope) {
+        this.graph = graph;
+        this.helpers = new GraphHelpers(graph.getBaseGraph().getRawGraph());
+        this.scope = scope;
     }
 
     /**
