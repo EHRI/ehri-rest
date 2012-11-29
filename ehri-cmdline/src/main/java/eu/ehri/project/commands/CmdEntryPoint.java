@@ -47,7 +47,7 @@ public class CmdEntryPoint extends BaseCommand {
 
     @Override
     public String getUsage() {
-        return "Usage: ehri <graph-db> <command> <command-args ... >";
+        return "Usage: cmd <graph-db> <command> <command-args ... >";
     }
 
     @Override
@@ -81,6 +81,9 @@ public class CmdEntryPoint extends BaseCommand {
                 } finally {
                     graph.shutdown();
                 }
+            } else {
+                System.err.println("Unrecognised command: " + args[1]);
+                return 1;
             }
         }
         return 0;
