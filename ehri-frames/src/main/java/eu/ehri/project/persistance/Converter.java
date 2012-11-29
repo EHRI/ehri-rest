@@ -248,8 +248,7 @@ public class Converter {
                 // maxDepth parameter and reduce it for every traversal.
                 // However the @Fetch annotation can also specify a non-default
                 // depth, so we need to determine whatever is lower - the
-                // current
-                // traversal count, or the annotation's count.
+                // current traversal count, or the annotation's count.
                 Method method = entry.getValue();
                 int nextDepth = Math.min(depth,
                         method.getAnnotation(Fetch.class).depth()) - 1;
