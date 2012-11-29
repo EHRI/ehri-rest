@@ -52,8 +52,8 @@ public final class BundleDAO<T extends VertexFrame> {
      */
     public BundleDAO(FramedGraph<Neo4jGraph> graph, PermissionScope scope) {
         this.graph = graph;
-        manager = new GraphManager(graph);
         this.scope = scope;
+        manager = new GraphManager(graph);
     }
 
     /**
@@ -222,7 +222,7 @@ public final class BundleDAO<T extends VertexFrame> {
             saveDependents(node, bundle.getBundleClass(), bundle.getRelations());
             return node;
         } catch (IdGenerationError err) {
-            throw new ValidationError(err.getMessage());
+            throw new RuntimeException(err.getMessage());
         }
     }
 

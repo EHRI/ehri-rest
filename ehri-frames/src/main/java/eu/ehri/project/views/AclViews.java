@@ -46,7 +46,7 @@ public final class AclViews<E extends AccessibleEntity> {
     }
 
     /**
-     * Constructor.
+     * Constructor with system scope.
      * 
      * @param graph
      * @param cls
