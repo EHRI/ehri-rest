@@ -25,7 +25,7 @@ public class InvalidEadImporterTest extends AbstractFixtureTest {
 
     @Test(expected=ValidationError.class)
     public void testImportItemsT() throws ValidationError, IOException, InputParseError {
-        Agent agent = graph.frame(helper.getTestVertex(TEST_REPO), Agent.class);
+        Agent agent = manager.frame(TEST_REPO, Agent.class);
         final String logMessage = "Importing an invalid EAD";
         InputStream ios = ClassLoader.getSystemResourceAsStream(INVALID_EAD);
 
@@ -38,7 +38,7 @@ public class InvalidEadImporterTest extends AbstractFixtureTest {
 
     @Test
     public void testTolerantImport() throws ValidationError, IOException, InputParseError {
-        Agent agent = graph.frame(helper.getTestVertex(TEST_REPO), Agent.class);
+        Agent agent = manager.frame(TEST_REPO, Agent.class);
         final String logMessage = "Importing an invalid EAD";
 
         EadImportManager manager = new EadImportManager(graph, agent, validUser);
@@ -55,7 +55,7 @@ public class InvalidEadImporterTest extends AbstractFixtureTest {
 
     @Test
     public void testRollback() throws ValidationError, IOException, InputParseError {
-        Agent agent = graph.frame(helper.getTestVertex(TEST_REPO), Agent.class);
+        Agent agent = manager.frame(TEST_REPO, Agent.class);
         final String logMessage = "Importing an invalid EAD";
 
         int count = getNodeCount();
