@@ -52,7 +52,7 @@ public interface Concept extends AccessibleEntity {
     public void removeNarrowerConcept(final Concept concept);
 
     
-    // Related concepts, should be symetric associative link... 
+    // Related concepts, should be like a symmetric associative link... 
     @Adjacency(label = RELATED)
     public Iterable<Concept> getRelatedConcepts();
 

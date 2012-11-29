@@ -1,8 +1,10 @@
 package eu.ehri.extension.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
 import java.net.URI;
 import java.util.Iterator;
 
@@ -10,6 +12,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -73,6 +77,7 @@ public class CvocConceptClientTest  extends BaseRestClientTest {
                 .header(AbstractRestResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId()).delete(ClientResponse.class);
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        
 // NOTE FIX this, now we get an java.lang.IllegalArgumentException: Element can not be null
 //        response = resource
 //                .accept(MediaType.APPLICATION_JSON)
@@ -82,10 +87,14 @@ public class CvocConceptClientTest  extends BaseRestClientTest {
         
     }
 
+    /**
+     * Add and remove narrower concept
+     * 
+     * @throws Exception
+     */
     @Test
     public void testNarrowerCvocConcepts() throws Exception {
         String jsonFruitTestStr =  "{\"data\":{\"identifier\": \"fruit\",\"isA\":\"cvocConcept\"}}";
-        //readFileAsString("fruit.json");
         String jsonAppleTestStr =  "{\"data\":{\"identifier\": \"apple\",\"isA\":\"cvocConcept\"}}";
         
         ClientResponse response;
@@ -97,6 +106,7 @@ public class CvocConceptClientTest  extends BaseRestClientTest {
        
         // Create apple
         response = testCreateConcept(jsonAppleTestStr);
+        
         // Get created entity via the response location
         URI appleLocation = response.getLocation();
         //... ehh get the id number ... we need to fix this!
@@ -110,41 +120,135 @@ public class CvocConceptClientTest  extends BaseRestClientTest {
                 .type(MediaType.APPLICATION_JSON)
                 .header(AbstractRestResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId())
-                .entity("").post(ClientResponse.class);
+                .post(ClientResponse.class);
         // Hmm, it's a post request, but we don't create a vertex (but we do an edge...)
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());        
         //System.out.println("add narrower Respons json: " + response.getEntity(String.class));
 
         // get fruit's narrower concepts
-        resource = client.resource(fruitLocation + "/narrower/list");
-        response = resource
-                .accept(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME,
-                        getAdminUserProfileId()).get(ClientResponse.class);
-        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
-        String json = response.getEntity(String.class);
-        //System.out.println("narrower list Response json: " + json);
-        
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode rootNode = mapper.readValue(json, JsonNode.class);
+        response = testGet(fruitLocation + "/narrower/list");        
         // check if apple is in there
-        assertTrue(containsIdentifier(rootNode.getElements(), "apple"));
+        assertTrue(containsIdentifier(response, "apple"));
         
         // check if apple's broader is fruit
         // get apple's broader concepts
-        resource = client.resource(getExtensionEntryPointUri()
-                + "/cvocConcept/" + appleIdStr + "/broader/list");
+        response = testGet(getExtensionEntryPointUri()
+        					+ "/cvocConcept/" + appleIdStr + "/broader/list");        
+        // check if fruit is in there
+        assertTrue(containsIdentifier(response, "fruit"));
+        
+        // Test removal of one narrower concept
+        resource = client.resource(fruitLocation + "/narrower/" + appleIdStr);
         response = resource
+                .accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                        getAdminUserProfileId())
+                .delete(ClientResponse.class);
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());        
+        
+        // apple should still exist
+        response = testGet(getExtensionEntryPointUri()
+        					+ "/cvocConcept/" + appleIdStr);
+        
+        // but not as a narrower of fruit!
+        response = testGet(fruitLocation + "/narrower/list");  
+        // check if apple is NOT in there
+        assertFalse(containsIdentifier(response, "apple"));
+    }
+
+    /**
+     * Add and remove related concept
+     * Similar to the narrower/broader 'relationships'
+     * 
+     * @throws Exception
+     */
+    @Test
+    public void testRelatedCvocConcepts() throws Exception {
+        String jsonTreeTestStr =  "{\"data\":{\"identifier\": \"tree\",\"isA\":\"cvocConcept\"}}";
+        String jsonAppleTestStr =  "{\"data\":{\"identifier\": \"apple\",\"isA\":\"cvocConcept\"}}";
+        
+        ClientResponse response;
+        
+        // Create fruit
+        response = testCreateConcept(jsonTreeTestStr);
+        // Get created entity via the response location
+        URI treeLocation = response.getLocation();
+       
+        // Create apple
+        response = testCreateConcept(jsonAppleTestStr);
+        
+        // Get created entity via the response location
+        URI appleLocation = response.getLocation();
+        //... ehh get the id number ... we need to fix this!
+        String appleLocationStr = appleLocation.getPath();
+        String appleIdStr = appleLocationStr.substring(appleLocationStr.lastIndexOf('/') + 1);
+        
+        // make apple related of fruit
+        WebResource resource = client.resource(treeLocation + "/related/" + appleIdStr);
+        response = resource
+                .accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                        getAdminUserProfileId())
+                .post(ClientResponse.class);
+        // Hmm, it's a post request, but we don't create a vertex (but we do an edge...)
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());        
+        //System.out.println("add related Respons json: " + response.getEntity(String.class));
+
+        // get fruit's related concepts
+        response = testGet(treeLocation + "/related/list");        
+        // check if apple is in there
+        assertTrue(containsIdentifier(response, "apple"));
+        
+        // check if apple's relatedBy is tree
+        // get apple's broader concepts
+        response = testGet(getExtensionEntryPointUri()
+        					+ "/cvocConcept/" + appleIdStr + "/relatedBy/list");        
+        // check if tree is in there
+        assertTrue(containsIdentifier(response, "tree"));
+
+        
+        // Test removal of one related concept
+        resource = client.resource(treeLocation + "/related/" + appleIdStr);
+        response = resource
+                .accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                        getAdminUserProfileId())
+                .delete(ClientResponse.class);
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());        
+        
+        // apple should still exist
+        response = testGet(getExtensionEntryPointUri()
+        					+ "/cvocConcept/" + appleIdStr);
+        
+        // but not as a related of tree!
+        response = testGet(treeLocation + "/related/list");  
+        // check that apple is NOT in there
+        assertFalse(containsIdentifier(response, "apple"));
+    }
+    
+    /*** helpers ***/
+    
+    public ClientResponse testGet(String url) {
+    	WebResource resource = client.resource(url);
+    	ClientResponse response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .header(AbstractRestResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId()).get(ClientResponse.class);
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
-        json = response.getEntity(String.class);
-        //System.out.println("broader list Response json: " + json);
+     	
+        return response;
+    }
+    
+    public boolean containsIdentifier(final ClientResponse response, final String idStr) throws JsonParseException, JsonMappingException, IOException {
+        String json = response.getEntity(String.class);
+        //System.out.println("list Response json: " + json);
         
-        rootNode = mapper.readValue(json, JsonNode.class);
-        // check if fruit is in there
-        assertTrue(containsIdentifier(rootNode.getElements(), "fruit"));
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode rootNode = mapper.readValue(json, JsonNode.class);
+        return containsIdentifier(rootNode.getElements(), idStr);
     }
     
     public boolean containsIdentifier(final Iterator<JsonNode> elements, final String idStr) {

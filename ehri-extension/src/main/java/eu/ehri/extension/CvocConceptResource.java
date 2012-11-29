@@ -139,12 +139,11 @@ public class CvocConceptResource extends EhriNeo4jFramedResource<Concept> {
 
     /**
      * Add an existing concept to the list of 'narrower' of this existing Concepts
-	 * The 'narrower' edge is created between the concept vertices. 
+	 * No vertex is created, but the 'narrower' edge is created between the two concept vertices. 
 	 * 
 	 * Note: the internal vertex id's are used now, but we want identifiers
      */
     @POST
-    @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:\\d+}/narrower/{id_narrower:\\d+}")
     public Response addNarrowerCvocConcept(String json, 
     		@PathParam("id") String id,
@@ -157,12 +156,9 @@ public class CvocConceptResource extends EhriNeo4jFramedResource<Concept> {
 			Concept concept = views.detail(graph.getVertex(id, cls), getRequesterUserProfile());
 			Concept narrowerConcept = views.detail(graph.getVertex(id_narrower, cls), getRequesterUserProfile());
 			concept.addNarrowerConcept(narrowerConcept);
-			// return the json of the 'parent' of the 'narrower' concept
-		    String jsonStr = converter.vertexFrameToJson(concept);
-
 		    tx.success();
-		    return Response.status(Status.OK).entity((jsonStr).getBytes()).build();
-		} catch (SerializationError e) {
+		    return Response.status(Status.OK).build();
+		} catch (Exception e) {
 		    tx.failure();
 		    throw new WebApplicationException(e);
 		} finally {
@@ -170,6 +166,34 @@ public class CvocConceptResource extends EhriNeo4jFramedResource<Concept> {
 		}   	
     }
 
+    /**
+     *  Removing the narrower relation 
+     *  by deleting the edge, not the vertex of the narrower concept 
+     */
+    @DELETE
+    @Path("/{id:\\d+}/narrower/{id_narrower:\\d+}")
+    public Response removeNarrowerCvocConcept(String json, 
+    		@PathParam("id") String id,
+    		@PathParam("id_narrower") String id_narrower) throws PermissionDenied,
+            ValidationError, IntegrityError, DeserializationError,
+            ItemNotFound, BadRequester {
+    	    	
+		Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
+		try {
+			Concept concept = views.detail(graph.getVertex(id, cls), getRequesterUserProfile());
+			Concept narrowerConcept = views.detail(graph.getVertex(id_narrower, cls), getRequesterUserProfile());
+			concept.removeNarrowerConcept(narrowerConcept);
+
+		    tx.success();
+		    return Response.status(Status.OK).build();
+		} catch (Exception e) {
+		    tx.failure();
+		    throw new WebApplicationException(e);
+		} finally {
+		    tx.finish();
+		}   	
+    }
+    
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:.+}/broader/list")
@@ -181,7 +205,7 @@ public class CvocConceptResource extends EhriNeo4jFramedResource<Concept> {
     	return getListAsJson(concept.getBroaderConcepts());
     }
 
-    // NOTE: not the relatedBy !
+    // See the relatedBy for the 'reverse' relation
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:.+}/related/list")
@@ -191,6 +215,70 @@ public class CvocConceptResource extends EhriNeo4jFramedResource<Concept> {
     	Concept concept = views.detail(graph.getVertex(id, cls), getRequesterUserProfile());
 
     	return getListAsJson(concept.getRelatedConcepts());
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id:.+}/relatedBy/list")
+    public StreamingOutput getCvocRelatedByConcepts(@PathParam("id") String id)
+            throws ItemNotFound, PermissionDenied, BadRequester {
+    	
+    	Concept concept = views.detail(graph.getVertex(id, cls), getRequesterUserProfile());
+
+    	return getListAsJson(concept.getRelatedByConcepts());
+    }
+    
+    /**
+     * Add a relation by creating the 'related' edge between the two concepts, no vertex created 
+     */
+    @POST
+    @Path("/{id:\\d+}/related/{id_related:\\d+}")
+    public Response addRelatedCvocConcept(String json, 
+    		@PathParam("id") String id,
+    		@PathParam("id_related") String id_related) throws PermissionDenied,
+            ValidationError, IntegrityError, DeserializationError,
+            ItemNotFound, BadRequester {
+    	    	
+		Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
+		try {
+			Concept concept = views.detail(graph.getVertex(id, cls), getRequesterUserProfile());
+			Concept relatedConcept = views.detail(graph.getVertex(id_related, cls), getRequesterUserProfile());
+			concept.addRelatedConcept(relatedConcept);
+		    tx.success();
+		    return Response.status(Status.OK).build();
+		} catch (Exception e) {
+		    tx.failure();
+		    throw new WebApplicationException(e);
+		} finally {
+		    tx.finish();
+		}
+    }
+
+    /**
+     *  Remove a relation by deleting the edge, not the vertex of the related concept 
+     */
+    @DELETE
+    @Path("/{id:\\d+}/related/{id_related:\\d+}")
+    public Response removeRelatedCvocConcept(String json, 
+    		@PathParam("id") String id,
+    		@PathParam("id_related") String id_related) throws PermissionDenied,
+            ValidationError, IntegrityError, DeserializationError,
+            ItemNotFound, BadRequester {
+    	    	
+		Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
+		try {
+			Concept concept = views.detail(graph.getVertex(id, cls), getRequesterUserProfile());
+			Concept relatedConcept = views.detail(graph.getVertex(id_related, cls), getRequesterUserProfile());
+			concept.removeRelatedConcept(relatedConcept);
+
+		    tx.success();
+		    return Response.status(Status.OK).build();
+		} catch (Exception e) {
+		    tx.failure();
+		    throw new WebApplicationException(e);
+		} finally {
+		    tx.finish();
+		}   	
     }
     
     // TODO helper function 
