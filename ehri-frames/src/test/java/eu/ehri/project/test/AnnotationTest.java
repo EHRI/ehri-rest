@@ -17,7 +17,7 @@ public class AnnotationTest extends ModelTestBase {
 
     @Test
     public void testUserHasAnnotation() {
-        UserProfile mike = helper.getTestFrame("mike", UserProfile.class);
+        UserProfile mike = manager.frame("mike", UserProfile.class);
         assertTrue(mike.getAnnotations().iterator().hasNext());
         assertEquals(mike.getAnnotations().iterator().next().getBody(),
                 TEST_ANNOTATION_BODY);
@@ -25,8 +25,8 @@ public class AnnotationTest extends ModelTestBase {
 
     @Test
     public void testUserHasAnnotationWithTarget() {
-        UserProfile mike = helper.getTestFrame("mike", UserProfile.class);
-        DocumentaryUnit c1 = helper.getTestFrame("c1", DocumentaryUnit.class);
+        UserProfile mike = manager.frame("mike", UserProfile.class);
+        DocumentaryUnit c1 = manager.frame("c1", DocumentaryUnit.class);
         Annotation annotation = mike.getAnnotations().iterator().next();
         assertEquals(toList(mike.getAnnotations()).get(0), annotation);
         assertEquals(toList(c1.getAnnotations()).get(0), annotation);
@@ -38,9 +38,9 @@ public class AnnotationTest extends ModelTestBase {
 
     @Test
     public void testAnnotationAnnotation() {
-        AnnotatableEntity ann1 = helper.getTestFrame("ann1",
+        AnnotatableEntity ann1 = manager.frame("ann1",
                 AnnotatableEntity.class);
-        Annotation ann2 = helper.getTestFrame("ann2", Annotation.class);
+        Annotation ann2 = manager.frame("ann2", Annotation.class);
 
         assertEquals(ann2.getTarget(), ann1);
         assertEquals(ann1.getAnnotations().iterator().next().getBody(),

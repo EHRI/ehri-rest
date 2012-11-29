@@ -75,8 +75,8 @@ public class QueryTest extends AbstractFixtureTest {
                 DocumentaryUnit.class);
 
         // Check we're not admin
-        Accessor accessor = helper.getTestFrame("reto", Accessor.class);
-        DocumentaryUnit cantRead = helper.getTestFrame("c1",
+        Accessor accessor = manager.frame("reto", Accessor.class);
+        DocumentaryUnit cantRead = manager.frame("c1",
                 DocumentaryUnit.class);
         assertFalse(new AclManager(graph).belongsToAdmin(accessor));
 
@@ -147,7 +147,7 @@ public class QueryTest extends AbstractFixtureTest {
     @Test(expected = PermissionDenied.class)
     public void testGetPermissionDenied() throws PermissionDenied,
             ItemNotFound, IndexNotFoundException {
-        Accessor accessor = helper.getTestFrame("reto", Accessor.class);
+        Accessor accessor = manager.frame("reto", Accessor.class);
         Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
         query.get(AccessibleEntity.IDENTIFIER_KEY, "c1", accessor);

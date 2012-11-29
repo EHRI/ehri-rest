@@ -3,7 +3,6 @@ package eu.ehri.project.test;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.UUID;
 
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -12,7 +11,6 @@ import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityTypes;
 import eu.ehri.project.models.UserProfile;
-import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 
@@ -36,9 +34,9 @@ abstract public class AbstractFixtureTest extends ModelTestBase {
     @Override
     public void setUp() {
         super.setUp();
-        item = helper.getTestFrame("c1", DocumentaryUnit.class);
-        validUser = helper.getTestFrame("mike", UserProfile.class);
-        invalidUser = helper.getTestFrame("reto", UserProfile.class);
+        item = manager.frame("c1", DocumentaryUnit.class);
+        validUser = manager.frame("mike", UserProfile.class);
+        invalidUser = manager.frame("reto", UserProfile.class);
     }
 
     // Helpers, additional test data

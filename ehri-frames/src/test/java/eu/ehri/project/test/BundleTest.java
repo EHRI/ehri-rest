@@ -37,7 +37,7 @@ public class BundleTest extends ModelTestBase {
     @Test
     public void testSerialisation() throws SerializationError,
             DeserializationError {
-        DocumentaryUnit c1 = helper.getTestFrame("c1", DocumentaryUnit.class);
+        DocumentaryUnit c1 = manager.frame("c1", DocumentaryUnit.class);
         String json = converter.vertexFrameToJson(c1);
         EntityBundle<DocumentaryUnit> bundle = converter.jsonToBundle(json);
         // FIXME: Comparing ids fails because the deserialized on is an <int>
@@ -47,7 +47,7 @@ public class BundleTest extends ModelTestBase {
     }
 
     public void testSaving() throws SerializationError, ValidationError, IntegrityError {
-        DocumentaryUnit c1 = helper.getTestFrame("c1", DocumentaryUnit.class);
+        DocumentaryUnit c1 = manager.frame("c1", DocumentaryUnit.class);
         assertEquals(1, toList(c1.getDescriptions()).size());
 
         EntityBundle<DocumentaryUnit> bundle = converter
@@ -63,7 +63,7 @@ public class BundleTest extends ModelTestBase {
     @Test
     public void testSavingWithDependentChanges() throws SerializationError,
             DeserializationError, ValidationError, IntegrityError {
-        DocumentaryUnit c1 = helper.getTestFrame("c1", DocumentaryUnit.class);
+        DocumentaryUnit c1 = manager.frame("c1", DocumentaryUnit.class);
         assertEquals(1, toList(c1.getDescriptions()).size());
         String json = converter.vertexFrameToJson(c1);
 
@@ -84,7 +84,7 @@ public class BundleTest extends ModelTestBase {
     @Test
     public void testDeletingDependents() throws SerializationError,
             ValidationError, IntegrityError {
-        DocumentaryUnit c1 = helper.getTestFrame("c1", DocumentaryUnit.class);
+        DocumentaryUnit c1 = manager.frame("c1", DocumentaryUnit.class);
         EntityBundle<DocumentaryUnit> bundle = converter
                 .vertexFrameToBundle(c1);
         assertEquals(2, toList(c1.getDatePeriods()).size());
@@ -109,11 +109,11 @@ public class BundleTest extends ModelTestBase {
     @Test(expected = NoSuchElementException.class)
     public void testDeletingWholeBundle() throws SerializationError,
             ValidationError {
-        DocumentaryUnit c1 = helper.getTestFrame("c1", DocumentaryUnit.class);
+        DocumentaryUnit c1 = manager.frame("c1", DocumentaryUnit.class);
         EntityBundle<DocumentaryUnit> bundle = converter
                 .vertexFrameToBundle(c1);
         assertEquals(2, toList(c1.getDatePeriods()).size());
-        List<DatePeriod> dates = toList(helper.getTestFrames(
+        List<DatePeriod> dates = toList(manager.getFrames(
                 EntityTypes.DATE_PERIOD, DatePeriod.class));
 
         BundleDAO<DocumentaryUnit> persister = new BundleDAO<DocumentaryUnit>(
@@ -123,9 +123,9 @@ public class BundleTest extends ModelTestBase {
         assertEquals(
                 dates.size() - 2,
                 toList(
-                        helper.getTestFrames(EntityTypes.DATE_PERIOD,
+                        manager.getFrames(EntityTypes.DATE_PERIOD,
                                 DatePeriod.class)).size());
         // Should raise NoSuchElementException
-        helper.getTestFrame("c1", DocumentaryUnit.class);
+        manager.frame("c1", DocumentaryUnit.class);
     }
 }

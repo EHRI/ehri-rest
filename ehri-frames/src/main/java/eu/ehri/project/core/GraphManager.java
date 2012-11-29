@@ -30,6 +30,10 @@ public final class GraphManager {
     public GraphManager(FramedGraph<Neo4jGraph> graph) {
         this.graph = graph;
     }
+    
+    public <T> T frame(String id, Class<T> cls) {
+        return graph.frame(getVertex(id), cls);
+    }
 
     public Vertex createVertex(String id, EntityBundle<?> bundle)
             throws IntegrityError {
@@ -133,6 +137,15 @@ public final class GraphManager {
 
     public CloseableIterable<Vertex> getVertices(String type) {
         return getIndex().get(EntityType.TYPE_KEY, type);
+    }
+    
+    public <T> Iterable<T> getFrames(String type, Class<T> cls) {
+        CloseableIterable<Vertex> vertices = getVertices(type);
+        try {
+            return graph.frameVertices(getVertices(type), cls);            
+        } finally {
+            vertices.close();
+        }
     }
 
     public Vertex getVertex(String id) {

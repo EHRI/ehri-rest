@@ -216,9 +216,9 @@ public class ViewsTest extends AbstractFixtureTest {
         } catch (PermissionDenied e) {
             // We expected that permission denied... now explicitely add
             // permissions.
-            PermissionGrantTarget target = helper.getTestFrame(
+            PermissionGrantTarget target = manager.frame(
                     "documentaryUnitType", PermissionGrantTarget.class);
-            Permission perm = helper.getTestFrame("permCreate",
+            Permission perm = manager.frame("permCreate",
                     Permission.class);
             new AclManager(graph).grantPermissions(invalidUser, target, perm);
             DocumentaryUnit unit = docViews.create(bundle, invalidUser);
@@ -238,7 +238,7 @@ public class ViewsTest extends AbstractFixtureTest {
     public void testCreateWithScope() throws ValidationError, PermissionDenied,
             DeserializationError, IntegrityError {
         IViews<DocumentaryUnit> docViews = new ActionViews<DocumentaryUnit>(
-                graph, DocumentaryUnit.class, helper.getTestFrame("r1",
+                graph, DocumentaryUnit.class, manager.frame("r1",
                         Agent.class));
         Map<String, Object> bundle = getTestBundle();
         // In the fixtures, 'reto' should have a grant for 'CREATE'

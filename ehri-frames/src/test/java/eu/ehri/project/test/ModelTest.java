@@ -21,18 +21,20 @@ public class ModelTest extends ModelTestBase {
 
     @Test
     public void testTheGraphContainsGroups() {
-        List<Group> groups = toList(helper.getTestFrames(EntityTypes.GROUP,
-                Group.class));
+        Iterable<Group> frames = manager.getFrames(EntityTypes.GROUP,
+                Group.class);
+        List<Group> groups = toList(frames);
         assertFalse(groups.isEmpty());
 
-        // Check the first group has a user in it
-        List<Accessor> users = toList(groups.get(0).getMembers());
+        // Check the admin group has some members
+        List<Accessor> users = toList(manager.frame("admin", Group.class)
+                .getMembers());
         assertFalse(users.isEmpty());
     }
 
     @Test
     public void testCollectionHelpByRepo() {
-        DocumentaryUnit unit = helper.getTestFrame("c1", DocumentaryUnit.class);
+        DocumentaryUnit unit = manager.frame("c1", DocumentaryUnit.class);
         assertTrue(unit.getAgent() != null);
         // and have a description
         assertFalse(toList(unit.getDescriptions()).isEmpty());
@@ -40,8 +42,8 @@ public class ModelTest extends ModelTestBase {
 
     @Test
     public void testCollectionNameAccess() {
-        DocumentaryUnit c1 = helper.getTestFrame("c1", DocumentaryUnit.class);
-        Authority a2 = helper.getTestFrame("a2", Authority.class);
+        DocumentaryUnit c1 = manager.frame("c1", DocumentaryUnit.class);
+        Authority a2 = manager.frame("a2", Authority.class);
         assertTrue(toList(c1.getNameAccess()).contains(a2));
 
         // The same should be true backwards
@@ -50,8 +52,8 @@ public class ModelTest extends ModelTestBase {
 
     @Test
     public void testRepository() {
-        AgentDescription rd1 = helper.getTestFrame("rd1", AgentDescription.class);
-        Address ar1 = helper.getTestFrame("ar1", Address.class);
+        AgentDescription rd1 = manager.frame("rd1", AgentDescription.class);
+        Address ar1 = manager.frame("ar1", Address.class);
         // check we have an address
         assertTrue(toList(rd1.getAddresses()).contains(ar1));
     }

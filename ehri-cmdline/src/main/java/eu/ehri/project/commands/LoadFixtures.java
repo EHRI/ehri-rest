@@ -4,7 +4,9 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
-import eu.ehri.project.test.utils.FixtureLoader;
+
+import eu.ehri.project.test.utils.fixtures.FixtureLoader;
+import eu.ehri.project.test.utils.fixtures.FixtureLoaderFactory;
 
 /**
  * Import EAD from the command line...
@@ -45,7 +47,7 @@ public class LoadFixtures extends BaseCommand implements Command {
      * @throws Exception
      */
     public int execWithOptions(final FramedGraph<Neo4jGraph> graph, CommandLine cmdLine) throws Exception {
-        FixtureLoader loader = new FixtureLoader(graph);
+        FixtureLoader loader = new FixtureLoaderFactory().getInstance(graph);
         loader.loadTestData();
 
         return 0;

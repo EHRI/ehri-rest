@@ -42,7 +42,7 @@ public class PermissionsTest extends AbstractFixtureTest {
                         (Map<String, Object>) getTestUserBundle().get("data"),
                         UserProfile.class));
         views = new Views<DocumentaryUnit>(graph, DocumentaryUnit.class,
-                helper.getTestFrame("r1", Agent.class));
+                manager.frame("r1", Agent.class));
         viewHelper = new ViewHelper(graph, DocumentaryUnit.class);
         acl = new AclManager(graph);
     }
@@ -68,7 +68,7 @@ public class PermissionsTest extends AbstractFixtureTest {
         acl.grantPermissions(user,
                 viewHelper.getContentType(EntityTypes.DOCUMENTARY_UNIT),
                 viewHelper.getPermission(PermissionTypes.CREATE),
-                helper.getTestFrame("r1", Agent.class));
+                manager.frame("r1", Agent.class));
         assertNotNull(views.setScope(SystemScope.getInstance()).create(getTestBundle(),
                 user));
     }
@@ -76,7 +76,7 @@ public class PermissionsTest extends AbstractFixtureTest {
     @Test
     public void testCreateAsUserWithGoodScopedPerms() throws PermissionDenied,
             ValidationError, DeserializationError, IntegrityError {
-        Agent scope = helper.getTestFrame("r1", Agent.class);
+        Agent scope = manager.frame("r1", Agent.class);
         acl.grantPermissions(user,
                 viewHelper.getContentType(EntityTypes.DOCUMENTARY_UNIT),
                 viewHelper.getPermission(PermissionTypes.CREATE));
@@ -87,8 +87,8 @@ public class PermissionsTest extends AbstractFixtureTest {
     public void testCreateAsUserWithDifferentScopedPerms()
             throws PermissionDenied, ValidationError, DeserializationError,
             IntegrityError {
-        Agent scope = helper.getTestFrame("r1", Agent.class);
-        Agent badScope = helper.getTestFrame("r2", Agent.class);
+        Agent scope = manager.frame("r1", Agent.class);
+        Agent badScope = manager.frame("r2", Agent.class);
         acl.grantPermissions(user,
                 viewHelper.getContentType(EntityTypes.DOCUMENTARY_UNIT),
                 viewHelper.getPermission(PermissionTypes.CREATE), scope);

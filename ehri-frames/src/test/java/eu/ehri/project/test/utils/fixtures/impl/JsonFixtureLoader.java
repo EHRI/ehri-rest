@@ -1,4 +1,4 @@
-package eu.ehri.project.test.utils;
+package eu.ehri.project.test.utils.fixtures.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,33 +18,16 @@ import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.utils.ClassUtils;
 import eu.ehri.project.persistance.BundleFactory;
 import eu.ehri.project.persistance.EntityBundle;
+import eu.ehri.project.test.utils.fixtures.FixtureLoader;
 
-public class FixtureLoader {
+public class JsonFixtureLoader implements FixtureLoader {
 
     public static final String DESCRIPTOR_KEY = EntityType.ID_KEY;
 
     private FramedGraph<Neo4jGraph> graph;
 
-    public FixtureLoader(FramedGraph<Neo4jGraph> graph) {
+    public JsonFixtureLoader(FramedGraph<Neo4jGraph> graph) {
         this.graph = graph;
-    }
-
-    public Vertex getTestVertex(String descriptor) {
-        return graph.getBaseGraph().getVertices(DESCRIPTOR_KEY, descriptor)
-                .iterator().next();
-    }
-
-    public <T> T getTestFrame(String descriptor, Class<T> cls) {
-        return graph.getVertices(DESCRIPTOR_KEY, descriptor, cls).iterator()
-                .next();
-    }
-
-    public Iterable<Vertex> getTestVertices(String entityType) {
-        return graph.getBaseGraph().getVertices(EntityType.TYPE_KEY, entityType);
-    }
-
-    public <T> Iterable<T> getTestFrames(String entityType, Class<T> cls) {
-        return graph.getVertices(EntityType.TYPE_KEY, entityType, cls);
     }
 
     @SuppressWarnings("unchecked")
@@ -119,5 +102,11 @@ public class FixtureLoader {
         } finally {
             tx.finish();
         }
+    }
+    
+    // Helpers
+    private Vertex getTestVertex(String descriptor) {
+        return graph.getBaseGraph().getVertices(DESCRIPTOR_KEY, descriptor)
+                .iterator().next();
     }
 }

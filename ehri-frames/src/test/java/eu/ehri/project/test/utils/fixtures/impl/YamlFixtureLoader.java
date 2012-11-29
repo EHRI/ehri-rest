@@ -1,4 +1,4 @@
-package eu.ehri.project.test.utils;
+package eu.ehri.project.test.utils.fixtures.impl;
 
 import java.io.InputStream;
 import java.util.List;
