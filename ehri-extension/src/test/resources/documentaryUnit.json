@@ -1,25 +1,25 @@
 {
+  "type": "documentaryUnit",
   "data": {
     "name": "a collection",
-    "__ISA__": "documentaryUnit",
     "identifier": "some-id"
   },
   "relationships": {
     "describes": [
       {
+        "type": "documentDescription",
         "data": {
           "languageCode": "en",
           "title": "a description",
-          "__ISA__": "documentDescription",
           "identifier": "some-id"
         }
       }
     ],
     "hasDate": [
       {
+        "type": "datePeriod",
         "data": {
           "startDate": "1940-01-01T00:00:00Z",
-          "__ISA__": "datePeriod",
           "endDate": "1945-01-01T00:00:00Z"
         }
       }

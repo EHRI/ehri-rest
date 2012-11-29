@@ -45,8 +45,10 @@ public final class GraphManager {
                         "entities");
 
             Vertex node = graph.addVertex(null);
+            node.setProperty(EntityType.ID_KEY, id);
+            node.setProperty(EntityType.TYPE_KEY, bundle.getType());
             index.put(EntityType.ID_KEY, id, node);
-            index.put(EntityType.TYPE_KEY, bundle.getEntityType(), node);
+            index.put(EntityType.TYPE_KEY, bundle.getType(), node);
             for (Map.Entry<String, Object> entry : bundle.getData().entrySet()) {
                 if (entry.getValue() == null)
                     continue;
@@ -82,6 +84,8 @@ public final class GraphManager {
                         bundle.getData(), node);
                 replaceProperties(index, node, bundle.getData(),
                         bundle.getPropertyKeys());
+                node.setProperty(EntityType.ID_KEY, bundle.getId());
+                node.setProperty(EntityType.TYPE_KEY, bundle.getType());
                 graph.getBaseGraph().stopTransaction(
                         TransactionalGraph.Conclusion.SUCCESS);
                 return node;
@@ -156,7 +160,7 @@ public final class GraphManager {
         }
         return index;
     }
-    
+
     /**
      * Delete vertex with its edges Neo4j requires you delete all adjacent edges
      * first. Blueprints' removeVertex() method does that; the Neo4jServer
@@ -173,12 +177,15 @@ public final class GraphManager {
         for (String key : bundle.getPropertyKeys()) {
             index.remove(key, vertex.getProperty(key), vertex);
         }
-        index.remove(EntityType.ID_KEY, vertex.getProperty(EntityType.ID_KEY), vertex);
-        index.remove(EntityType.TYPE_KEY, vertex.getProperty(EntityType.TYPE_KEY), vertex);
+        index.remove(EntityType.ID_KEY, vertex.getProperty(EntityType.ID_KEY),
+                vertex);
+        index.remove(EntityType.TYPE_KEY,
+                vertex.getProperty(EntityType.TYPE_KEY), vertex);
         graph.removeVertex(vertex);
-        graph.getBaseGraph().stopTransaction(TransactionalGraph.Conclusion.SUCCESS);
+        graph.getBaseGraph().stopTransaction(
+                TransactionalGraph.Conclusion.SUCCESS);
     }
-    
+
     /**
      * @param index
      * @param uniqueKeys
@@ -208,7 +215,7 @@ public final class GraphManager {
             }
         }
     }
-    
+
     /**
      * Replace properties to a property container like vertex and edge
      * 
@@ -254,5 +261,5 @@ public final class GraphManager {
             if (keys == null || keys.contains(entry.getKey()))
                 index.put(entry.getKey(), String.valueOf(entry.getValue()), c);
         }
-    }    
+    }
 }

@@ -20,6 +20,7 @@ import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.Description;
+import eu.ehri.project.persistance.Converter;
 import eu.ehri.project.views.ActionViews;
 
 public class ActionViewsTest extends AbstractFixtureTest {
@@ -30,7 +31,7 @@ public class ActionViewsTest extends AbstractFixtureTest {
      * @throws PermissionDenied
      * @throws ValidationError
      * @throws DeserializationError
-     * @throws IntegrityError 
+     * @throws IntegrityError
      */
     @Test
     public void testUpdate() throws PermissionDenied, ValidationError,
@@ -40,14 +41,15 @@ public class ActionViewsTest extends AbstractFixtureTest {
         Map<String, Object> testData = getTestBundle();
         DocumentaryUnit unit = docViews.create(testData, validUser);
         assertEquals(TEST_COLLECTION_NAME, unit.getName());
+        testData.put(Converter.ID_KEY,
+                unit.asVertex().getProperty(EntityType.ID_KEY));
 
         // We could convert the FramedNode back into a bundle here,
         // but let's instead just modify the initial data.
-        String newName = TEST_COLLECTION_NAME + " with new stuff";        
+        String newName = TEST_COLLECTION_NAME + " with new stuff";
 
         Map<String, Object> data = (Map<String, Object>) testData.get("data");
         data.put("name", newName);
-        data.put(EntityType.ID_KEY, unit.asVertex().getProperty(EntityType.ID_KEY));
 
         DocumentaryUnit changedUnit = docViews.update(testData, validUser);
         assertEquals(newName, changedUnit.getName());
@@ -67,7 +69,7 @@ public class ActionViewsTest extends AbstractFixtureTest {
      * @throws PermissionDenied
      * @throws ValidationError
      * @throws DeserializationError
-     * @throws IntegrityError 
+     * @throws IntegrityError
      */
     @Test
     public void testUserUpdate() throws PermissionDenied, ValidationError,
@@ -77,6 +79,8 @@ public class ActionViewsTest extends AbstractFixtureTest {
         Map<String, Object> userData = getTestUserBundle();
         UserProfile user = userViews.create(userData, validUser);
         assertEquals(TEST_USER_NAME, user.getName());
+        userData.put(Converter.ID_KEY,
+                user.asVertex().getProperty(EntityType.ID_KEY));
 
         // We could convert the FramedNode back into a bundle here,
         // but let's instead just modify the initial data.
@@ -84,7 +88,6 @@ public class ActionViewsTest extends AbstractFixtureTest {
 
         Map<String, Object> data = (Map<String, Object>) userData.get("data");
         data.put("name", newName);
-        data.put(EntityType.ID_KEY, user.asVertex().getProperty(EntityType.ID_KEY));
 
         UserProfile changedUser = userViews.update(userData, validUser);
         assertEquals(newName, changedUser.getName());
@@ -120,7 +123,8 @@ public class ActionViewsTest extends AbstractFixtureTest {
 
         // FIXME: Surely there's a better way of doing this???
         Iterator<DatePeriod> dateIter = item.getDatePeriods().iterator();
-        Iterator<DocumentDescription> descIter = item.getDescriptions().iterator();
+        Iterator<DocumentDescription> descIter = item.getDescriptions()
+                .iterator();
         for (; dateIter.hasNext(); shouldDelete++)
             dateIter.next();
         for (; descIter.hasNext(); shouldDelete++)

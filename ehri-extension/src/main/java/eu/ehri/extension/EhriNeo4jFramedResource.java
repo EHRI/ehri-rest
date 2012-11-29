@@ -98,7 +98,7 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> extends
                 g.writeNumberField("total", page.getCount());
                 g.writeNumberField("offset", page.getOffset());
                 g.writeNumberField("limit", page.getLimit());
-                g.writeFieldName("values");                                
+                g.writeFieldName("values");
                 g.writeStartArray();
                 for (E item : page.getIterable()) {
                     try {
@@ -339,9 +339,9 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> extends
             // serialization/deserialization.
             E entity = querier.get(key, value, getRequesterUserProfile());
             EntityBundle<E> rawBundle = converter.jsonToBundle(json);
-            EntityBundle<E> entityBundle = new EntityBundle<E>((String)entity
-                    .asVertex().getProperty(EntityType.ID_KEY), rawBundle.getData(), cls,
-                    rawBundle.getRelations());
+            EntityBundle<E> entityBundle = new EntityBundle<E>((String) entity
+                    .asVertex().getProperty(EntityType.ID_KEY),
+                    rawBundle.getData(), cls, rawBundle.getRelations());
             return update(converter.bundleToJson(entityBundle));
         } catch (SerializationError e) {
             throw new WebApplicationException(e);

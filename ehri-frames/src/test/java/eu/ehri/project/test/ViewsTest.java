@@ -22,6 +22,7 @@ import eu.ehri.project.models.Permission;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.PermissionGrantTarget;
+import eu.ehri.project.persistance.Converter;
 import eu.ehri.project.views.ActionViews;
 import eu.ehri.project.views.IViews;
 import eu.ehri.project.views.Views;
@@ -109,11 +110,12 @@ public class ViewsTest extends AbstractFixtureTest {
         // We could convert the FramedNode back into a bundle here,
         // but let's instead just modify the initial data.
         String newName = TEST_COLLECTION_NAME + " with new stuff";
-        bundle.put("id", unit.asVertex().getId());
+        bundle.put(Converter.ID_KEY,
+                unit.asVertex().getProperty(EntityType.ID_KEY));
 
-        Map<String, Object> data = (Map<String, Object>) bundle.get("data");
+        Map<String, Object> data = (Map<String, Object>) bundle
+                .get(Converter.DATA_KEY);
         data.put("name", newName);
-        data.put(EntityType.ID_KEY, unit.asVertex().getProperty(EntityType.ID_KEY));
 
         DocumentaryUnit changedUnit = docViews.update(bundle, validUser);
         assertEquals(newName, changedUnit.getName());
@@ -143,13 +145,14 @@ public class ViewsTest extends AbstractFixtureTest {
         Map<String, Object> bundle = getTestUserBundle();
         UserProfile user = userViews.create(bundle, validUser);
         assertEquals(TEST_USER_NAME, user.getName());
-
+        bundle.put(Converter.ID_KEY,
+                user.asVertex().getProperty(EntityType.ID_KEY));
         // We could convert the FramedNode back into a bundle here,
         // but let's instead just modify the initial data.
         String newName = TEST_USER_NAME + " with new stuff";
-        Map<String, Object> data = (Map<String, Object>) bundle.get("data");
+        Map<String, Object> data = (Map<String, Object>) bundle
+                .get(Converter.DATA_KEY);
         data.put("name", newName);
-        data.put(EntityType.ID_KEY, user.asVertex().getProperty(EntityType.ID_KEY));
 
         UserProfile changedUser = userViews.update(bundle, validUser);
         assertEquals(newName, changedUser.getName());
@@ -234,8 +237,9 @@ public class ViewsTest extends AbstractFixtureTest {
     @Test
     public void testCreateWithScope() throws ValidationError, PermissionDenied,
             DeserializationError, IntegrityError {
-        IViews<DocumentaryUnit> docViews = new ActionViews<DocumentaryUnit>(graph,
-                DocumentaryUnit.class, helper.getTestFrame("r1", Agent.class));
+        IViews<DocumentaryUnit> docViews = new ActionViews<DocumentaryUnit>(
+                graph, DocumentaryUnit.class, helper.getTestFrame("r1",
+                        Agent.class));
         Map<String, Object> bundle = getTestBundle();
         // In the fixtures, 'reto' should have a grant for 'CREATE'
         // scoped to the 'r1' repository.
@@ -339,7 +343,8 @@ public class ViewsTest extends AbstractFixtureTest {
 
         // FIXME: Surely there's a better way of doing this???
         Iterator<DatePeriod> dateIter = item.getDatePeriods().iterator();
-        Iterator<DocumentDescription> descIter = item.getDescriptions().iterator();
+        Iterator<DocumentDescription> descIter = item.getDescriptions()
+                .iterator();
         for (; dateIter.hasNext(); shouldDelete++)
             dateIter.next();
         for (; descIter.hasNext(); shouldDelete++)

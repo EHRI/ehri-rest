@@ -27,7 +27,7 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
     static final String FETCH_NAME = "mike";
     static final String UPDATED_NAME = "UpdatedNameTEST";
 
-    private String jsonUserProfileTestString = "{\"data\":{\"identifier\": \"test-user\", \"name\":\"testUserName1\",\"__ISA__\":\"userProfile\"}}";
+    private String jsonUserProfileTestString = "{\"type\":\"userProfile\", \"data\":{\"identifier\": \"test-user\", \"name\":\"testUserName1\"}}";
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {

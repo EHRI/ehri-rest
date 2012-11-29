@@ -217,7 +217,7 @@ public final class BundleDAO<T extends VertexFrame> {
         try {
             bundle.validateForInsert();
             String id = getIdGenerator(bundle).generateId(
-                    bundle.getEntityType(), scope, bundle.getData());
+                    bundle.getType(), scope, bundle.getData());
             Vertex node = manager.createVertex(id, bundle.withId(id));
             saveDependents(node, bundle.getBundleClass(), bundle.getRelations());
             return node;

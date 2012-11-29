@@ -35,6 +35,14 @@ import org.codehaus.jackson.map.ObjectWriter;
 public class Converter {
 
     /**
+     * Constant definitions
+     */
+    public static final String ID_KEY = "id";
+    public static final String TYPE_KEY = "type";
+    public static final String DATA_KEY = "data";
+    public static final String REL_KEY = "relationships";
+
+    /**
      * Lookup of entityType keys against their annotated class.
      */
     private Map<String, Class<? extends VertexFrame>> classes;
@@ -137,14 +145,15 @@ public class Converter {
     public <T extends VertexFrame> EntityBundle<T> dataToBundle(
             Map<String, Object> data) throws DeserializationError {
         try {
-            Map<String, Object> props = (Map<String, Object>) data.get("data");
-            if (props == null)
-                throw new DeserializationError("No item data map found");
-            String id = (String)props.get(EntityType.ID_KEY);
-            String isa = (String) props.get(EntityType.TYPE_KEY);
+            String id = (String) data.get(ID_KEY);
+            String isa = (String) data.get(TYPE_KEY);
             if (isa == null)
                 throw new DeserializationError(String.format(
-                        "No '%s' attribute found in item data", EntityType.TYPE_KEY));
+                        "No '%s' attribute found in item data", TYPE_KEY));
+            Map<String, Object> props = (Map<String, Object>) data
+                    .get(DATA_KEY);
+            if (props == null)
+                throw new DeserializationError("No item data map found");
             Class<T> cls = (Class<T>) classes.get(isa);
             if (cls == null)
                 throw new DeserializationError(String.format(
@@ -153,7 +162,7 @@ public class Converter {
             MultiValueMap relationbundles = new MultiValueMap();
 
             Map<String, List<Map<String, Object>>> relations = (Map<String, List<Map<String, Object>>>) data
-                    .get("relationships");
+                    .get(REL_KEY);
             if (relations != null) {
                 for (Entry<String, List<Map<String, Object>>> entry : relations
                         .entrySet()) {
@@ -178,8 +187,9 @@ public class Converter {
      */
     public Map<String, Object> bundleToData(EntityBundle<?> bundle) {
         Map<String, Object> data = new HashMap<String, Object>();
-        data.put("id", bundle.getId());
-        data.put("data", bundle.getData());
+        data.put(ID_KEY, bundle.getId());
+        data.put(TYPE_KEY, bundle.getType());
+        data.put(DATA_KEY, bundle.getData());
 
         Map<String, List<Map<String, Object>>> relations = new HashMap<String, List<Map<String, Object>>>();
         for (Object key : bundle.getRelations().keySet()) {
@@ -192,7 +202,7 @@ public class Converter {
             }
             relations.put((String) key, rels);
         }
-        data.put("relationships", relations);
+        data.put(REL_KEY, relations);
         return data;
     }
 
@@ -230,11 +240,12 @@ public class Converter {
         Class<? extends VertexFrame> cls = classes.get(isa);
         if (cls == null)
             throw new SerializationError(String.format(
-                    "No entity found for %s type '%s'", EntityType.TYPE_KEY, isa));
+                    "No entity found for %s type '%s'", EntityType.TYPE_KEY,
+                    isa));
 
         MultiValueMap relations = getRelationData(item, depth, cls);
-        return new EntityBundle<T>(id,
-                getVertexData(item.asVertex()), (Class<T>) cls, relations);
+        return new EntityBundle<T>(id, getVertexData(item.asVertex()),
+                (Class<T>) cls, relations);
     }
 
     private MultiValueMap getRelationData(VertexFrame item, int depth,
@@ -258,9 +269,11 @@ public class Converter {
                     try {
                         result = method.invoke(item);
                     } catch (IllegalArgumentException e) {
-                        String message  = String.format(
-                                "When serializing a bundle, a method was called on an item it did not expect. Method name: %s, item class: %s", 
-                                method.getName(), item.asVertex().getProperty(EntityType.TYPE_KEY));
+                        String message = String
+                                .format("When serializing a bundle, a method was called on an item it did not expect. Method name: %s, item class: %s",
+                                        method.getName(),
+                                        item.asVertex().getProperty(
+                                                EntityType.TYPE_KEY));
                         throw new RuntimeException(message, e);
                     }
                     // The result of one of these fetchMethods should either be
@@ -297,6 +310,9 @@ public class Converter {
         Map<String, Object> data = new HashMap<String, Object>();
         for (String key : item.getPropertyKeys()) {
             data.put(key, item.getProperty(key));
+            if (!(key.equals(EntityType.ID_KEY) || key
+                    .equals(EntityType.TYPE_KEY)))
+                data.put(key, item.getProperty(key));
         }
         return data;
     }

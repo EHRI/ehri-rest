@@ -24,7 +24,7 @@ public class GroupRestClientTest extends BaseRestClientTest {
     static final String CURRENT_ADMIN_USER = "mike";
     static final String NON_ADMIN_USER = "reto";
 
-    private String jsonGroupTestString = "{\"data\":{\"__ISA__\": \"group\", \"identifier\": \"jmp\", \"name\": \"JMP\"}}";
+    private String jsonGroupTestString = "{\"type\": \"group\", \"data\":{\"identifier\": \"jmp\", \"name\": \"JMP\"}}";
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {

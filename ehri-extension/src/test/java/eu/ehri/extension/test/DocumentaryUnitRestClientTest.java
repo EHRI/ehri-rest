@@ -169,7 +169,7 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
         Collections.sort(data, new Comparator<Map<String, Object>>() {
             @Override
             public int compare(Map<String, Object> c1, Map<String, Object> c2) {
-                return ((String)c1.get("id")).compareTo((String)c2.get("id"));
+                return ((String) c1.get("id")).compareTo((String) c2.get("id"));
             }
         });
         // Extract the first documentary unit. According to the fixtures this

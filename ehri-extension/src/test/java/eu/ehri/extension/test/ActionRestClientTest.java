@@ -21,7 +21,7 @@ public class ActionRestClientTest extends BaseRestClientTest {
 
     static final String UPDATED_NAME = "UpdatedNameTEST";
 
-    private String jsonAgentTestString = "{\"data\":{\"__ISA__\": \"agent\", \"identifier\": \"jmp\"}}";
+    private String jsonAgentTestString = "{\"type\": \"agent\", \"data\":{\"identifier\": \"jmp\"}}";
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {

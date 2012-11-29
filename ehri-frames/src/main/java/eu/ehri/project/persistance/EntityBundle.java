@@ -122,7 +122,7 @@ public class EntityBundle<T extends VertexFrame> {
      * @return
      */
     public Map<String, Object> getData() {
-        return extendData();
+        return filterData();
     }
 
     /**
@@ -156,7 +156,7 @@ public class EntityBundle<T extends VertexFrame> {
      * 
      * @return
      */
-    public String getEntityType() {
+    public String getType() {
         return ClassUtils.getEntityType(cls);
     }
 
@@ -264,10 +264,12 @@ public class EntityBundle<T extends VertexFrame> {
      * 
      * @return
      */
-    private Map<String, Object> extendData() {
-        Map<String, Object> ext = new HashMap<String, Object>(data);
-        ext.put(EntityType.TYPE_KEY, getEntityType());
-        ext.put(EntityType.ID_KEY, id);
+    private Map<String, Object> filterData() {
+        Map<String, Object> ext = new HashMap<String, Object>();
+        for (String key : data.keySet()) {
+            if (!(key.equals(EntityType.ID_KEY) || key.equals(EntityType.TYPE_KEY)) )
+                ext.put(key, data.get(key));
+        }
         return ext;
     }
 
