@@ -24,6 +24,7 @@ import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.annotations.Dependent;
+import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.idgen.AccessibleEntityIdGenerator;
 import eu.ehri.project.models.idgen.DocumentaryUnitIdGenerator;
@@ -127,24 +128,6 @@ public final class BundleDAO<T extends VertexFrame> {
 
     // Helpers
 
-    /**
-     * Get the IDs of nodes that terminate a given relationship from a
-     * particular source node.
-     * 
-     * @param src
-     * @param direction
-     * @param label
-     * @return
-     */
-    private List<Long> getCurrentRelationships(final Vertex src,
-            Direction direction, String label) {
-        List<Long> out = new LinkedList<Long>();
-        for (Vertex end : src.getVertices(direction, label)) {
-            out.add((Long) end.getId());
-        }
-        return out;
-    }
-
     private Integer deleteCount(EntityBundle<?> bundle, Integer count)
             throws ValidationError {
         Integer c = count;
@@ -161,10 +144,8 @@ public final class BundleDAO<T extends VertexFrame> {
                 }
             }
         }
-        if (bundle.id != null) {
-            manager.deleteVertex(bundle);
-            c += 1;
-        }
+        manager.deleteVertex(bundle.getId());
+        c += 1;
         return c;
     }
 
@@ -256,27 +237,27 @@ public final class BundleDAO<T extends VertexFrame> {
             Class<? extends VertexFrame> cls, MultiValueMap relations)
             throws ValidationError, IntegrityError {
         List<String> dependents = ClassUtils.getDependentRelations(cls);
-        Set<Long> existingDependents = new HashSet<Long>();
-        Set<Long> refreshedDependents = new HashSet<Long>();
-
+        Set<Vertex> existingDependents = new HashSet<Vertex>();
+        Set<Vertex> refreshedDependents = new HashSet<Vertex>();
         for (Object key : relations.keySet()) {
             String relation = (String) key;
             if (dependents.contains(relation)) {
+                
                 for (Object obj : relations.getCollection(key)) {
                     EntityBundle<T> bundle = (EntityBundle<T>) obj;
                     Vertex child = insertOrUpdate(bundle);
-                    refreshedDependents.add((Long) child.getId());
+                    refreshedDependents.add(child);
                     Direction direction = getDirectionOfRelationship(cls,
                             bundle.getBundleClass(), relation);
 
                     // FIXME: Traversing all the current relations here (for
                     // every individual dependent) is very inefficient!
-                    List<Long> current = getCurrentRelationships(master,
+                    HashSet<Vertex> current = getCurrentRelationships(master,
                             direction, relation);
                     existingDependents.addAll(current);
 
                     // Create a relation if there isn't one already
-                    if (!current.contains(child.getId())) {
+                    if (!current.contains(child)) {
                         createChildRelationship(master, child, relation,
                                 direction);
                     }
@@ -286,10 +267,28 @@ public final class BundleDAO<T extends VertexFrame> {
         // Clean up dependent items that have not been saved in the
         // current operation, and are therefore assumed deleted.
         existingDependents.removeAll(refreshedDependents);
-        for (Long id : existingDependents) {
-            graph.removeVertex(graph.getVertex(id));
+        for (Vertex v : existingDependents) {
+            manager.deleteVertex(v);
         }
     }
+    
+    /**
+     * Get the IDs of nodes that terminate a given relationship from a
+     * particular source node.
+     * 
+     * @param src
+     * @param direction
+     * @param label
+     * @return
+     */
+    private HashSet<Vertex> getCurrentRelationships(final Vertex src,
+            Direction direction, String label) {
+        HashSet<Vertex> out = new HashSet<Vertex>();
+        for (Vertex end : src.getVertices(direction, label)) {
+            out.add(end);
+        }
+        return out;
+    }    
 
     /**
      * Create a
