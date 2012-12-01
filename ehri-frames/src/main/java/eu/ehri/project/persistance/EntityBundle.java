@@ -20,16 +20,10 @@ import eu.ehri.project.models.utils.ClassUtils;
  * @param <T>
  */
 public class EntityBundle<T extends VertexFrame> {
-    private static final String MISSING_PROPERTY = "Missing mandatory field";
-    private static final String EMPTY_VALUE = "No value given for mandatory field";
-    private static final String INVALID_ENTITY = "No EntityType annotation";
-
     protected final String id;
     protected final Map<String, Object> data;
     protected final Class<T> cls;
     protected final MultiValueMap relations;
-
-    private MultiValueMap errors = new MultiValueMap();
 
     /**
      * Constructor.
@@ -90,30 +84,12 @@ public class EntityBundle<T extends VertexFrame> {
     }
 
     /**
-     * Determine if the bundle has errors after a validation operation.
-     * 
-     * @return
-     */
-    public Boolean hasErrors() {
-        return !errors.isEmpty();
-    }
-
-    /**
      * Get the bundle's relation bundles.
      * 
      * @return
      */
     public MultiValueMap getRelations() {
         return relations;
-    }
-
-    /**
-     * Get any validation errors that exist after a validation operation.
-     * 
-     * @return
-     */
-    public MultiValueMap getValidationErrors() {
-        return errors;
     }
 
     /**
@@ -161,46 +137,6 @@ public class EntityBundle<T extends VertexFrame> {
     }
 
     /**
-     * Validate the data in the bundle, according to the target class, and
-     * ensure it is fit for updating in the graph.
-     * 
-     * @throws ValidationError
-     */
-    public void validateForUpdate() throws ValidationError {
-        if (id == null)
-            throw new ValidationError(
-                    "No identifier given for update operation.");
-        validate();
-    }
-
-    /**
-     * Validate the data in the bundle, according to the target class, and
-     * ensure it is fit for insert into the graph.
-     * 
-     * @throws ValidationError
-     */
-    public void validateForInsert() throws ValidationError {
-        if (id != null)
-            throw new ValidationError(
-                    String.format(
-                            "Identifier is present ('%s') but insert operation specified.",
-                            id));
-        validate();
-    }
-
-    /**
-     * Validate the data in the bundle, according to the target class.
-     * 
-     * @throws ValidationError
-     */
-    public void validate() throws ValidationError {
-        checkFields();
-        checkIsA();
-        if (hasErrors())
-            throw new ValidationError(cls, errors);
-    }
-
-    /**
      * Return a list of names for mandatory properties, as represented in the
      * graph.
      * 
@@ -228,37 +164,6 @@ public class EntityBundle<T extends VertexFrame> {
     // Helpers
 
     /**
-     * @param data
-     * @param cls
-     * @param errors
-     */
-    private void checkFields() {
-        for (String key : ClassUtils.getPropertyKeys(cls)) {
-            checkField(key);
-        }
-    }
-
-    /**
-     * Check the data holds a given field, accounting for the
-     * 
-     * @param name
-     */
-    private void checkField(String name) {
-        if (!data.containsKey(name)) {
-            errors.put(name, MISSING_PROPERTY);
-        } else {
-            Object value = data.get(name);
-            if (value == null) {
-                errors.put(name, EMPTY_VALUE);
-            } else if (value instanceof String) {
-                if (((String) value).trim().isEmpty()) {
-                    errors.put(name, EMPTY_VALUE);
-                }
-            }
-        }
-    }
-
-    /**
      * Ensure the returned data always contains an entity type key consistent
      * with the current class.
      * 
@@ -271,18 +176,5 @@ public class EntityBundle<T extends VertexFrame> {
                 ext.put(key, data.get(key));
         }
         return ext;
-    }
-
-    /**
-     * @param data
-     * @param cls
-     * @param errors
-     */
-    private void checkIsA() {
-        EntityType annotation = cls.getAnnotation(EntityType.class);
-        if (annotation == null) {
-            errors.put("class",
-                    String.format("%s: '%s'", INVALID_ENTITY, cls.getName()));
-        }
     }
 }

@@ -215,7 +215,7 @@ public final class BundleDAO<T extends VertexFrame> {
     private Vertex createInner(EntityBundle<T> bundle) throws ValidationError,
             IntegrityError {
         try {
-            bundle.validateForInsert();
+            BundleValidatorFactory.getInstance(bundle).validateForInsert();
             String id = getIdGenerator(bundle).generateId(
                     bundle.getType(), scope, bundle.getData());
             Vertex node = manager.createVertex(id, bundle.withId(id));
@@ -236,7 +236,7 @@ public final class BundleDAO<T extends VertexFrame> {
      */
     private Vertex updateInner(EntityBundle<T> bundle) throws ValidationError,
             IntegrityError {
-        bundle.validateForUpdate();
+        BundleValidatorFactory.getInstance(bundle).validateForUpdate();
         Vertex node = manager.updateVertex(bundle);
         saveDependents(node, bundle.getBundleClass(), bundle.getRelations());
         return node;
