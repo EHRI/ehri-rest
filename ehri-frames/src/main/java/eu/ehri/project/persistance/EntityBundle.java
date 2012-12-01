@@ -8,7 +8,6 @@ import org.apache.commons.collections.map.MultiValueMap;
 
 import com.tinkerpop.frames.VertexFrame;
 
-import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.utils.ClassUtils;
 
@@ -108,8 +107,7 @@ public class EntityBundle<T extends VertexFrame> {
      * @param value
      * @throws ValidationError
      */
-    public void setDataValue(String key, Object value)
-            throws ValidationError {
+    public void setDataValue(String key, Object value) {
         data.put(key, value);
     }
 
@@ -152,7 +150,6 @@ public class EntityBundle<T extends VertexFrame> {
      * @return
      */
     public List<String> getUniquePropertyKeys() {
-        // TODO Auto-generated method stub
         return ClassUtils.getUniquePropertyKeys(cls);
     }
 
