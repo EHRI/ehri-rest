@@ -31,6 +31,7 @@ import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityTypes;
+import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.persistance.EntityBundle;
 import eu.ehri.project.views.impl.LoggingCrudViews;
@@ -148,9 +149,11 @@ public class DocumentaryUnitResource extends
         String jsonStr = converter.vertexFrameToJson(doc);
 
         try {
+            // FIXME: Hide the details of building this path            
             URI docUri = UriBuilder.fromUri(uriInfo.getBaseUri())
                     .segment(EntityTypes.DOCUMENTARY_UNIT)
-                    .segment(doc.getIdentifier()).build();
+                    .segment((String) doc.asVertex().getProperty(EntityType.ID_KEY))
+                    .build();
             return Response.status(Status.CREATED).location(docUri)
                     .entity((jsonStr).getBytes()).build();
         } catch (Exception e) {

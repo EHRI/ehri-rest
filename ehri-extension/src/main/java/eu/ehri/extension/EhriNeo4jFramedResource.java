@@ -178,7 +178,10 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> extends
                     getRequesterUserProfile());
             String jsonStr = converter.vertexFrameToJson(entity);
             UriBuilder ub = uriInfo.getAbsolutePathBuilder();
-            URI docUri = ub.path(entity.asVertex().getId().toString()).build();
+            // FIXME: Hide the details of building this path
+            URI docUri = ub.path(
+                    (String) entity.asVertex().getProperty(EntityType.ID_KEY))
+                    .build();
 
             return Response.status(Status.CREATED).location(docUri)
                     .entity((jsonStr).getBytes()).build();
@@ -231,7 +234,15 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> extends
      */
     public Response retrieve(String id) throws PermissionDenied, ItemNotFound,
             BadRequester {
-        return retrieve(AccessibleEntity.IDENTIFIER_KEY, id);
+        try {
+            E entity = views.detail(manager.getFrame(id, cls),
+                    getRequesterUserProfile());
+            String jsonStr = new Converter().vertexFrameToJson(entity);
+            return Response.status(Status.OK).entity((jsonStr).getBytes())
+                    .build();
+        } catch (SerializationError e) {
+            throw new WebApplicationException(e);
+        }
     }
 
     /**
@@ -252,7 +263,6 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> extends
         try {
             E entity = querier.get(key, value, getRequesterUserProfile());
             String jsonStr = new Converter().vertexFrameToJson(entity);
-
             return Response.status(Status.OK).entity((jsonStr).getBytes())
                     .build();
         } catch (SerializationError e) {
@@ -309,35 +319,12 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> extends
     public Response update(String id, String json) throws PermissionDenied,
             IntegrityError, ValidationError, DeserializationError,
             ItemNotFound, BadRequester {
-        return update(AccessibleEntity.IDENTIFIER_KEY, id, json);
-    }
-
-    /**
-     * Update (change) an instance of the 'entity' in the database
-     * 
-     * @param key
-     *            The key to search
-     * @param value
-     *            The key's value
-     * @param json
-     *            The json
-     * @return The response of the update request
-     * @throws PermissionDenied
-     * @throws IntegrityError
-     * @throws ValidationError
-     * @throws DeserializationError
-     * @throws ItemNotFound
-     * @throws BadRequester
-     */
-    public Response update(String key, String value, String json)
-            throws PermissionDenied, IntegrityError, ValidationError,
-            DeserializationError, ItemNotFound, BadRequester {
         try {
             // FIXME: This is nasty because it searches for an item with the
             // specified key/value and constructs a new bundle containing the
             // item's graph id, which requires an extra
             // serialization/deserialization.
-            E entity = querier.get(key, value, getRequesterUserProfile());
+            E entity = views.detail(manager.getFrame(id, cls), getRequesterUserProfile());
             EntityBundle<E> rawBundle = converter.jsonToBundle(json);
             EntityBundle<E> entityBundle = new EntityBundle<E>((String) entity
                     .asVertex().getProperty(EntityType.ID_KEY),
@@ -384,7 +371,7 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> extends
     protected Response delete(String id) throws PermissionDenied, ItemNotFound,
             ValidationError, BadRequester {
         try {
-            E entity = querier.get(AccessibleEntity.IDENTIFIER_KEY, id,
+            E entity = views.detail(manager.getFrame(id, cls),
                     getRequesterUserProfile());
             views.delete(entity, getRequesterUserProfile());
             return Response.status(Status.OK).build();

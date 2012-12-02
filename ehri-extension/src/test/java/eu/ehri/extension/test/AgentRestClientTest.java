@@ -73,7 +73,7 @@ public class AgentRestClientTest extends BaseRestClientTest {
         assertEquals(Response.Status.CREATED.getStatusCode(),
                 response.getStatus());
 
-        resource = client.resource(getExtensionEntryPointUri() + "/agent/jmp");
+        resource = client.resource(response.getLocation());
         response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)

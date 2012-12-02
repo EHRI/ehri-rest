@@ -32,11 +32,13 @@ import eu.ehri.project.persistance.EntityBundle;
 public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
 
     private String jsonDocumentaryUnitTestStr; // test data to create a
-    static final String CREATED_ID = "some-id";
     static final String UPDATED_NAME = "UpdatedNameTEST";
     static final String TEST_JSON_IDENTIFIER = "c1";
     static final String FIRST_DOC_ID = "c1";
     static final String TEST_HOLDER_IDENTIFIER = "r1";
+    // FIXME: This ID is temporaty and will break when we decide on a proper
+    // prefix ID scheme
+    static final String CREATED_ID = "some-id";
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
@@ -69,7 +71,6 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
 
         // Get created doc via the response location?
         URI location = response.getLocation();
-
         resource = client.resource(location);
         response = resource
                 .accept(MediaType.APPLICATION_JSON)

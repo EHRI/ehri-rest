@@ -160,6 +160,7 @@ public class PermissionRestClientTest extends BaseRestClientTest {
                 response.getStatus());
 
         // Finally, delete the item
+        URI loc = response.getLocation();
         resource = client.resource(response.getLocation());
         response = resource
                 .accept(MediaType.APPLICATION_JSON)
