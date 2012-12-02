@@ -2,7 +2,6 @@ package eu.ehri.project.persistance;
 
 import java.lang.reflect.Method;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -18,13 +17,12 @@ import com.tinkerpop.frames.VertexFrame;
 
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.core.GraphManager;
+import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.exceptions.IdGenerationError;
-import eu.ehri.project.exceptions.IndexNotFoundException;
 import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.annotations.Dependent;
-import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.idgen.AccessibleEntityIdGenerator;
 import eu.ehri.project.models.idgen.DocumentaryUnitIdGenerator;
@@ -54,7 +52,7 @@ public final class BundleDAO<T extends VertexFrame> {
     public BundleDAO(FramedGraph<Neo4jGraph> graph, PermissionScope scope) {
         this.graph = graph;
         this.scope = scope;
-        manager = new GraphManager(graph);
+        manager = GraphManagerFactory.getInstance(graph);
     }
 
     /**
@@ -77,26 +75,6 @@ public final class BundleDAO<T extends VertexFrame> {
     public T update(EntityBundle<T> bundle) throws ValidationError,
             IntegrityError {
         return graph.frame(updateInner(bundle), bundle.getBundleClass());
-    }
-
-    /**
-     * Entry-point for updating a bundle.
-     * 
-     * @param bundle
-     * @return
-     * @throws ValidationError
-     * @throws IndexNotFoundException
-     * @throws IntegrityError
-     */
-    public T createOrUpdate(String key, String value, EntityBundle<T> bundle)
-            throws ValidationError, IndexNotFoundException, IntegrityError {
-        Vertex node = null;
-        if (manager.getIndex().count(key, value) != 0) {
-            node = updateInner(bundle);
-        } else {
-            node = createInner(bundle);
-        }
-        return graph.frame(node, bundle.getBundleClass());
     }
 
     public T create(EntityBundle<T> bundle) throws ValidationError,
@@ -197,9 +175,11 @@ public final class BundleDAO<T extends VertexFrame> {
             IntegrityError {
         try {
             BundleValidatorFactory.getInstance(bundle).validateForInsert();
-            String id = getIdGenerator(bundle).generateId(
-                    bundle.getType(), scope, bundle.getData());
-            Vertex node = manager.createVertex(id, bundle.withId(id));
+            String id = getIdGenerator(bundle).generateId(bundle.getType(),
+                    scope, bundle.getData());
+            Vertex node = manager.createVertex(id, bundle.getType(),
+                    bundle.getData(), bundle.getPropertyKeys(),
+                    bundle.getUniquePropertyKeys());
             saveDependents(node, bundle.getBundleClass(), bundle.getRelations());
             return node;
         } catch (IdGenerationError err) {
@@ -218,7 +198,9 @@ public final class BundleDAO<T extends VertexFrame> {
     private Vertex updateInner(EntityBundle<T> bundle) throws ValidationError,
             IntegrityError {
         BundleValidatorFactory.getInstance(bundle).validateForUpdate();
-        Vertex node = manager.updateVertex(bundle);
+        Vertex node = manager.updateVertex(bundle.getId(), bundle.getType(),
+                bundle.getData(), bundle.getPropertyKeys(),
+                bundle.getUniquePropertyKeys());
         saveDependents(node, bundle.getBundleClass(), bundle.getRelations());
         return node;
     }
@@ -242,7 +224,7 @@ public final class BundleDAO<T extends VertexFrame> {
         for (Object key : relations.keySet()) {
             String relation = (String) key;
             if (dependents.contains(relation)) {
-                
+
                 for (Object obj : relations.getCollection(key)) {
                     EntityBundle<T> bundle = (EntityBundle<T>) obj;
                     Vertex child = insertOrUpdate(bundle);
@@ -271,7 +253,7 @@ public final class BundleDAO<T extends VertexFrame> {
             manager.deleteVertex(v);
         }
     }
-    
+
     /**
      * Get the IDs of nodes that terminate a given relationship from a
      * particular source node.
@@ -288,7 +270,7 @@ public final class BundleDAO<T extends VertexFrame> {
             out.add(end);
         }
         return out;
-    }    
+    }
 
     /**
      * Create a

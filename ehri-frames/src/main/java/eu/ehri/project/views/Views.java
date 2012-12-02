@@ -7,6 +7,7 @@ import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.PermissionTypes;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.core.GraphManager;
+import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.PermissionDenied;
@@ -38,8 +39,8 @@ public final class Views<E extends AccessibleEntity> implements IViews<E> {
         this.cls = cls;
         this.scope = scope;
         helper = new ViewHelper(graph, cls, scope);
-        manager = new GraphManager(graph);
         converter = new Converter();
+        manager = GraphManagerFactory.getInstance(graph);
     }
 
     /**

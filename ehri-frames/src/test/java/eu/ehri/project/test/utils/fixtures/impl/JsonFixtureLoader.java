@@ -14,6 +14,7 @@ import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.frames.VertexFrame;
 
 import eu.ehri.project.core.GraphManager;
+import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.utils.ClassUtils;
 import eu.ehri.project.persistance.BundleFactory;
@@ -24,22 +25,24 @@ public class JsonFixtureLoader implements FixtureLoader {
 
     public static final String DESCRIPTOR_KEY = EntityType.ID_KEY;
 
-    private FramedGraph<Neo4jGraph> graph;
+    private final FramedGraph<Neo4jGraph> graph;
+    private final GraphManager manager;
 
     public JsonFixtureLoader(FramedGraph<Neo4jGraph> graph) {
         this.graph = graph;
+        manager = GraphManagerFactory.getInstance(graph);
     }
 
     @SuppressWarnings("unchecked")
     private void loadNodes() {
         InputStream jsonStream = this.getClass().getClassLoader()
                 .getResourceAsStream("vertices.json");
-        
-        Map<String, Class<? extends VertexFrame>> entityClasses = ClassUtils.getEntityClasses();
-        GraphManager manager = new GraphManager(graph);
+
+        Map<String, Class<? extends VertexFrame>> entityClasses = ClassUtils
+                .getEntityClasses();
         try {
-            List<Map<String, Object>> nodes = new ObjectMapper()
-                    .readValue(jsonStream, List.class);
+            List<Map<String, Object>> nodes = new ObjectMapper().readValue(
+                    jsonStream, List.class);
 
             for (Map<String, Object> namedNode : nodes) {
                 String id = (String) namedNode.get(EntityType.ID_KEY);
@@ -50,8 +53,9 @@ public class JsonFixtureLoader implements FixtureLoader {
                         .get(isa);
                 EntityBundle<VertexFrame> bundle = new BundleFactory<VertexFrame>()
                         .buildBundle(id, data, cls);
-
-                manager.createVertex(id, bundle);
+                manager.createVertex(id, bundle.getType(), bundle.getData(),
+                        bundle.getPropertyKeys(),
+                        bundle.getUniquePropertyKeys());
             }
         } catch (Exception e) {
             throw new RuntimeException("Error loading JSON fixture", e);
@@ -103,7 +107,7 @@ public class JsonFixtureLoader implements FixtureLoader {
             tx.finish();
         }
     }
-    
+
     // Helpers
     private Vertex getTestVertex(String descriptor) {
         return graph.getBaseGraph().getVertices(DESCRIPTOR_KEY, descriptor)

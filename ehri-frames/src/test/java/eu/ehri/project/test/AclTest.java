@@ -47,7 +47,7 @@ public class AclTest extends ModelTestBase {
 
     @Test
     public void testTheAdminGroup() {
-        Group admin = manager.frame("admin", Group.class);
+        Group admin = manager.getFrame("admin", Group.class);
         // check we have some users
         assertTrue(admin.getMembers().iterator().hasNext());
     }
@@ -57,9 +57,9 @@ public class AclTest extends ModelTestBase {
      */
     @Test
     public void testAdminRead() {
-        Group admin = manager.frame("admin", Group.class);
-        UserProfile reto = manager.frame("reto", UserProfile.class);
-        DocumentaryUnit c3 = manager.frame("c3", DocumentaryUnit.class);
+        Group admin = manager.getFrame("admin", Group.class);
+        UserProfile reto = manager.getFrame("reto", UserProfile.class);
+        DocumentaryUnit c3 = manager.getFrame("c3", DocumentaryUnit.class);
         assertTrue(acl.getAccessControl(c3, admin));
         assertFalse(acl.getAccessControl(c3, reto));
     }
@@ -69,12 +69,12 @@ public class AclTest extends ModelTestBase {
      */
     @Test
     public void testNiodGroup() {
-        Group niod = manager.frame("niod", Group.class);
-        DocumentaryUnit c1 = manager.frame("c1", DocumentaryUnit.class);
+        Group niod = manager.getFrame("niod", Group.class);
+        DocumentaryUnit c1 = manager.getFrame("c1", DocumentaryUnit.class);
         assertFalse(acl.getAccessControl(c1, niod));
 
         // but we should have read-only access to items with no specified perms.
-        DocumentaryUnit c4 = manager.frame("c4", DocumentaryUnit.class);
+        DocumentaryUnit c4 = manager.getFrame("c4", DocumentaryUnit.class);
         assertTrue(acl.getAccessControl(c4, niod));
     }
 
@@ -83,8 +83,8 @@ public class AclTest extends ModelTestBase {
      */
     @Test
     public void testUserGroupPermOverride() {
-        Accessor tim = manager.frame("tim", Accessor.class);
-        AccessibleEntity c3 = manager.frame("c3", AccessibleEntity.class);
+        Accessor tim = manager.getFrame("tim", Accessor.class);
+        AccessibleEntity c3 = manager.getFrame("c3", AccessibleEntity.class);
         assertTrue(acl.getAccessControl(c3, tim));
     }
 
@@ -93,8 +93,8 @@ public class AclTest extends ModelTestBase {
      */
     @Test
     public void testUserCanAccessOwnProfile() {
-        Accessor reto = manager.frame("reto", Accessor.class);
-        AccessibleEntity prof = manager.frame("reto",
+        Accessor reto = manager.getFrame("reto", Accessor.class);
+        AccessibleEntity prof = manager.getFrame("reto",
                 AccessibleEntity.class);
         // Check user ISN'T admin (otherwise they'd be able to access anything)
         assertFalse(acl.belongsToAdmin(reto));
@@ -106,8 +106,8 @@ public class AclTest extends ModelTestBase {
      */
     @Test
     public void testUserCannotWriteOtherProfile() {
-        Accessor reto = manager.frame("reto", Accessor.class);
-        AccessibleEntity tim = manager.frame("tim",
+        Accessor reto = manager.getFrame("reto", Accessor.class);
+        AccessibleEntity tim = manager.getFrame("tim",
                 AccessibleEntity.class);
         assertTrue(acl.getAccessControl(tim, reto));
     }
@@ -117,7 +117,7 @@ public class AclTest extends ModelTestBase {
      */
     @Test
     public void testUserAccessAsAnonymous() {
-        AccessibleEntity tim = manager.frame("tim",
+        AccessibleEntity tim = manager.getFrame("tim",
                 AccessibleEntity.class);
         assertTrue(acl.getAccessControl(tim, AnonymousAccessor.getInstance()));
     }
@@ -127,8 +127,8 @@ public class AclTest extends ModelTestBase {
      */
     @Test
     public void testUserCannotChangeGroupJustByBeingAMemberOfIt() {
-        Accessor reto = manager.frame("reto", Accessor.class);
-        AccessibleEntity kcl = manager.frame("kcl",
+        Accessor reto = manager.getFrame("reto", Accessor.class);
+        AccessibleEntity kcl = manager.getFrame("kcl",
                 AccessibleEntity.class);
         // Admin can change anything, so ensure the user ISN'T a member of admin
         assertFalse(acl.belongsToAdmin(reto));
@@ -142,8 +142,8 @@ public class AclTest extends ModelTestBase {
      */
     @Test
     public void testChangingItemAccessibility() throws PermissionDenied {
-        Accessor reto = manager.frame("reto", Accessor.class);
-        AccessibleEntity kcl = manager.frame("kcl",
+        Accessor reto = manager.getFrame("reto", Accessor.class);
+        AccessibleEntity kcl = manager.getFrame("kcl",
                 AccessibleEntity.class);
         // Admin can change anything, so ensure the user ISN'T a member of admin
         assertFalse(acl.belongsToAdmin(reto));
@@ -161,8 +161,8 @@ public class AclTest extends ModelTestBase {
      */
     @Test
     public void testRemovingItemAccessibility() throws PermissionDenied {
-        Accessor reto = manager.frame("reto", Accessor.class);
-        AccessibleEntity kcl = manager.frame("kcl",
+        Accessor reto = manager.getFrame("reto", Accessor.class);
+        AccessibleEntity kcl = manager.getFrame("kcl",
                 AccessibleEntity.class);
         // Admin can change anything, so ensure the user ISN'T a member of admin
         assertFalse(acl.belongsToAdmin(reto));
@@ -184,7 +184,7 @@ public class AclTest extends ModelTestBase {
      */
     @Test
     public void testGlobalPermissionMatrix() throws PermissionDenied {
-        Accessor bob = manager.frame("bob", Accessor.class);
+        Accessor bob = manager.getFrame("bob", Accessor.class);
         // Admin can change anything, so ensure the user ISN'T a member of admin
         assertFalse(acl.belongsToAdmin(bob));
 
@@ -209,7 +209,7 @@ public class AclTest extends ModelTestBase {
                 matrix.get(type).add(perm);
         }
 
-        Accessor accessor = manager.frame("reto", Accessor.class);
+        Accessor accessor = manager.getFrame("reto", Accessor.class);
         // Admin can change anything, so ensure the user ISN'T a member of admin
         assertFalse(acl.belongsToAdmin(accessor));
 
@@ -250,7 +250,7 @@ public class AclTest extends ModelTestBase {
                 matrix.get(type).add(perm);
         }
 
-        Accessor accessor = manager.frame("admin", Accessor.class);
+        Accessor accessor = manager.getFrame("admin", Accessor.class);
         // Admin can change anything, so ensure the user ISN'T a member of admin
         assertTrue(acl.belongsToAdmin(accessor));
 

@@ -16,6 +16,7 @@ import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.pipes.PipeFunction;
 
 import eu.ehri.project.core.GraphManager;
+import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.ContentType;
 import eu.ehri.project.models.EntityTypes;
@@ -42,7 +43,7 @@ public class AclManager {
 
     public AclManager(FramedGraph<Neo4jGraph> graph) {
         this.graph = graph;
-        this.manager = new GraphManager(graph);
+        this.manager = GraphManagerFactory.getInstance(graph);
     }
 
     /**

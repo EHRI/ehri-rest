@@ -18,12 +18,12 @@ import org.neo4j.graphdb.Transaction;
 import org.neo4j.server.database.Database;
 
 import com.tinkerpop.blueprints.CloseableIterable;
-import com.tinkerpop.blueprints.Index;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
 import eu.ehri.project.core.GraphManager;
+import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.models.EntityTypes;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.AccessibleEntity;
@@ -53,7 +53,7 @@ public class AdminResource {
         this.graph = new FramedGraph<Neo4jGraph>(new Neo4jGraph(
                 database.getGraph()));
         converter = new Converter();
-        manager = new GraphManager(graph);
+        manager = GraphManagerFactory.getInstance(graph);
     }
 
     /**
@@ -68,7 +68,7 @@ public class AdminResource {
     public Response createDefaultUserProfile() throws Exception {
         Transaction tx = database.getGraph().beginTx();
         try {
-            String ident = getNextDefaultUserName();
+            String ident = getNextDefaultUserId();
             Map<String, Object> data = new HashMap<String, Object>();
             data.put(AccessibleEntity.IDENTIFIER_KEY, ident);
             data.put(Accessor.NAME, ident);
@@ -92,9 +92,7 @@ public class AdminResource {
 
     // Helpers...
 
-    private String getNextDefaultUserName() {
-        Index<Vertex> index = manager.getIndex();
-
+    private String getNextDefaultUserId() {
         // FIXME: It's crappy to have to iterate all the items to count them...
         long userCount = 0;
         CloseableIterable<Vertex> query = manager.getVertices(EntityTypes.USER_PROFILE);
@@ -106,8 +104,8 @@ public class AdminResource {
             query.close();
         }
         long start = userCount + 1;
-        while (index.count(AccessibleEntity.IDENTIFIER_KEY, String.format(
-                DEFAULT_USER_ID_FORMAT, DEFAULT_USER_ID_PREFIX, start)) > 0)
+        while (manager.exists(String.format(
+                DEFAULT_USER_ID_FORMAT, DEFAULT_USER_ID_PREFIX, start)))
             start++;
         return String.format(DEFAULT_USER_ID_FORMAT, DEFAULT_USER_ID_PREFIX,
                 start);

@@ -47,7 +47,7 @@ public class LoadFixtures extends BaseCommand implements Command {
      * @throws Exception
      */
     public int execWithOptions(final FramedGraph<Neo4jGraph> graph, CommandLine cmdLine) throws Exception {
-        FixtureLoader loader = new FixtureLoaderFactory().getInstance(graph);
+        FixtureLoader loader = FixtureLoaderFactory.getInstance(graph);
         loader.loadTestData();
 
         return 0;

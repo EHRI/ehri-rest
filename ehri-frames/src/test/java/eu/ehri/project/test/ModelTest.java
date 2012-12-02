@@ -27,14 +27,14 @@ public class ModelTest extends ModelTestBase {
         assertFalse(groups.isEmpty());
 
         // Check the admin group has some members
-        List<Accessor> users = toList(manager.frame("admin", Group.class)
+        List<Accessor> users = toList(manager.getFrame("admin", Group.class)
                 .getMembers());
         assertFalse(users.isEmpty());
     }
 
     @Test
     public void testCollectionHelpByRepo() {
-        DocumentaryUnit unit = manager.frame("c1", DocumentaryUnit.class);
+        DocumentaryUnit unit = manager.getFrame("c1", DocumentaryUnit.class);
         assertTrue(unit.getAgent() != null);
         // and have a description
         assertFalse(toList(unit.getDescriptions()).isEmpty());
@@ -42,8 +42,8 @@ public class ModelTest extends ModelTestBase {
 
     @Test
     public void testCollectionNameAccess() {
-        DocumentaryUnit c1 = manager.frame("c1", DocumentaryUnit.class);
-        Authority a2 = manager.frame("a2", Authority.class);
+        DocumentaryUnit c1 = manager.getFrame("c1", DocumentaryUnit.class);
+        Authority a2 = manager.getFrame("a2", Authority.class);
         assertTrue(toList(c1.getNameAccess()).contains(a2));
 
         // The same should be true backwards
@@ -52,8 +52,8 @@ public class ModelTest extends ModelTestBase {
 
     @Test
     public void testRepository() {
-        AgentDescription rd1 = manager.frame("rd1", AgentDescription.class);
-        Address ar1 = manager.frame("ar1", Address.class);
+        AgentDescription rd1 = manager.getFrame("rd1", AgentDescription.class);
+        Address ar1 = manager.getFrame("ar1", Address.class);
         // check we have an address
         assertTrue(toList(rd1.getAddresses()).contains(ar1));
     }

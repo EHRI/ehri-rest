@@ -34,9 +34,9 @@ abstract public class AbstractFixtureTest extends ModelTestBase {
     @Override
     public void setUp() {
         super.setUp();
-        item = manager.frame("c1", DocumentaryUnit.class);
-        validUser = manager.frame("mike", UserProfile.class);
-        invalidUser = manager.frame("reto", UserProfile.class);
+        item = manager.getFrame("c1", DocumentaryUnit.class);
+        validUser = manager.getFrame("mike", UserProfile.class);
+        invalidUser = manager.getFrame("reto", UserProfile.class);
     }
 
     // Helpers, additional test data

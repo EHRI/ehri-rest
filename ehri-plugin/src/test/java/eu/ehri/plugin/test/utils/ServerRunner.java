@@ -41,7 +41,7 @@ public class ServerRunner {
         framedGraph = new FramedGraph<Neo4jGraph>(new Neo4jGraph(graphDatabase));
 
         // Initialize the fixture loader and cleaner
-        loader = new FixtureLoaderFactory().getInstance(framedGraph);
+        loader = FixtureLoaderFactory.getInstance(framedGraph);
         cleaner = new GraphCleaner(framedGraph);
 
         // Server configuration. TODO: Work out how to disable server startup

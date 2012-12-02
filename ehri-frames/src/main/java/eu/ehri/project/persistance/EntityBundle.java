@@ -145,6 +145,19 @@ public class EntityBundle<T extends VertexFrame> {
     }
 
     /**
+     * Return a list of names for mandatory properties, as represented in the
+     * graph.
+     * 
+     * @return
+     */
+    public List<String> getVertexPropertyKeys() {
+        List<String> keys = ClassUtils.getPropertyKeys(cls);
+        keys.add(EntityType.ID_KEY);
+        keys.add(EntityType.TYPE_KEY);
+        return keys;
+    }
+    
+    /**
      * Return a list of property keys which must be unique.
      * 
      * @return

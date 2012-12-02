@@ -19,7 +19,7 @@ public class FixtureLoaderFactory {
      * @param graph
      * @return
      */
-    public FixtureLoader getInstance(FramedGraph<Neo4jGraph> graph) {
+    public static FixtureLoader getInstance(FramedGraph<Neo4jGraph> graph) {
         return new JsonFixtureLoader(graph);
     }
 }

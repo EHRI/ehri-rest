@@ -12,6 +12,7 @@ import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
 import eu.ehri.project.core.GraphManager;
+import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.test.utils.fixtures.FixtureLoader;
 import eu.ehri.project.test.utils.fixtures.FixtureLoaderFactory;
@@ -37,8 +38,8 @@ public class ModelTestBase {
         graph = new FramedGraph<Neo4jGraph>(new Neo4jGraph(
                 new TestGraphDatabaseFactory().newImpermanentDatabaseBuilder()
                         .newGraphDatabase()));
-        manager = new GraphManager(graph);
-        helper = new FixtureLoaderFactory().getInstance(graph);
+        manager = GraphManagerFactory.getInstance(graph);
+        helper = FixtureLoaderFactory.getInstance(graph);
         helper.loadTestData();
     }
     
