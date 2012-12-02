@@ -19,7 +19,7 @@ import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.test.utils.fixtures.FixtureLoader;
 import eu.ehri.project.test.utils.fixtures.FixtureLoaderFactory;
-import eu.ehri.project.views.Views;
+import eu.ehri.project.views.impl.CrudViews;
 
 import eu.ehri.plugin.EhriNeo4jPlugin;
 

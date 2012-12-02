@@ -1,4 +1,4 @@
-package eu.ehri.project.views;
+package eu.ehri.project.views.impl;
 
 import java.util.Map;
 
@@ -18,6 +18,7 @@ import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistance.ActionManager;
+import eu.ehri.project.views.Crud;
 
 /**
  * Views class that handles creating Action objects that provide an audit log
@@ -27,8 +28,8 @@ import eu.ehri.project.persistance.ActionManager;
  * 
  * @param <E>
  */
-public class ActionViews<E extends AccessibleEntity> implements
-        IViews<E> {
+public class LoggingCrudViews<E extends AccessibleEntity> implements
+        Crud<E> {
 
     // Default log strings, needed for compatibility.
     public static final String DEFAULT_CREATE_LOG = "Creating item";
@@ -36,7 +37,7 @@ public class ActionViews<E extends AccessibleEntity> implements
     public static final String DEFAULT_DELETE_LOG = "Deleting item";
 
     private final ActionManager actionManager;
-    private final Views<E> views;
+    private final CrudViews<E> views;
     private final FramedGraph<Neo4jGraph> graph;
     private final Class<E> cls;
     @SuppressWarnings("unused")
@@ -48,12 +49,12 @@ public class ActionViews<E extends AccessibleEntity> implements
      * @param graph
      * @param cls
      */
-    public ActionViews(FramedGraph<Neo4jGraph> graph, Class<E> cls, PermissionScope scope) {
+    public LoggingCrudViews(FramedGraph<Neo4jGraph> graph, Class<E> cls, PermissionScope scope) {
         this.graph = graph;
         this.cls = cls;
         this.scope = scope;
         actionManager = new ActionManager(graph);
-        views = new Views<E>(graph, cls, scope);
+        views = new CrudViews<E>(graph, cls, scope);
     }
     
     /**
@@ -62,7 +63,7 @@ public class ActionViews<E extends AccessibleEntity> implements
      * @param graph
      * @param cls
      */
-    public ActionViews(FramedGraph<Neo4jGraph> graph, Class<E> cls) {
+    public LoggingCrudViews(FramedGraph<Neo4jGraph> graph, Class<E> cls) {
         this(graph, cls, SystemScope.getInstance());
     }
 
@@ -247,8 +248,8 @@ public class ActionViews<E extends AccessibleEntity> implements
         }
     }
 
-    public IViews<E> setScope(PermissionScope scope) {
-        return new ActionViews<E>(graph, cls, scope);
+    public Crud<E> setScope(PermissionScope scope) {
+        return new LoggingCrudViews<E>(graph, cls, scope);
     }
 
     public E detail(E item, Accessor user) throws PermissionDenied {

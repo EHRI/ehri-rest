@@ -21,7 +21,7 @@ import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.persistance.Converter;
-import eu.ehri.project.views.ActionViews;
+import eu.ehri.project.views.impl.LoggingCrudViews;
 
 public class ActionViewsTest extends AbstractFixtureTest {
 
@@ -36,7 +36,7 @@ public class ActionViewsTest extends AbstractFixtureTest {
     @Test
     public void testUpdate() throws PermissionDenied, ValidationError,
             DeserializationError, IntegrityError {
-        ActionViews<DocumentaryUnit> docViews = new ActionViews<DocumentaryUnit>(
+        LoggingCrudViews<DocumentaryUnit> docViews = new LoggingCrudViews<DocumentaryUnit>(
                 graph, DocumentaryUnit.class);
         Map<String, Object> testData = getTestBundle();
         DocumentaryUnit unit = docViews.create(testData, validUser);
@@ -74,7 +74,7 @@ public class ActionViewsTest extends AbstractFixtureTest {
     @Test
     public void testUserUpdate() throws PermissionDenied, ValidationError,
             DeserializationError, IntegrityError {
-        ActionViews<UserProfile> userViews = new ActionViews<UserProfile>(
+        LoggingCrudViews<UserProfile> userViews = new LoggingCrudViews<UserProfile>(
                 graph, UserProfile.class);
         Map<String, Object> userData = getTestUserBundle();
         UserProfile user = userViews.create(userData, validUser);
@@ -98,9 +98,9 @@ public class ActionViewsTest extends AbstractFixtureTest {
         List<Action> actions = toList(changedUser.getHistory());
         assertEquals(2, actions.size());
         // They should have default log messages...
-        assertEquals(ActionViews.DEFAULT_CREATE_LOG, actions.get(0)
+        assertEquals(LoggingCrudViews.DEFAULT_CREATE_LOG, actions.get(0)
                 .getLogMessage());
-        assertEquals(ActionViews.DEFAULT_UPDATE_LOG, actions.get(1)
+        assertEquals(LoggingCrudViews.DEFAULT_UPDATE_LOG, actions.get(1)
                 .getLogMessage());
     }
 
@@ -116,7 +116,7 @@ public class ActionViewsTest extends AbstractFixtureTest {
     @Test
     public void testDelete() throws PermissionDenied, ValidationError,
             SerializationError {
-        ActionViews<DocumentaryUnit> docViews = new ActionViews<DocumentaryUnit>(
+        LoggingCrudViews<DocumentaryUnit> docViews = new LoggingCrudViews<DocumentaryUnit>(
                 graph, DocumentaryUnit.class);
         Integer shouldDelete = 1;
         int origActionCount = toList(validUser.getActions()).size();
@@ -141,7 +141,7 @@ public class ActionViewsTest extends AbstractFixtureTest {
         // Assumes the action is the last in the list,
         // which it should be as the most recent.
         Action deleteAction = actions.get(actions.size() - 1);
-        assertEquals(ActionViews.DEFAULT_DELETE_LOG,
+        assertEquals(LoggingCrudViews.DEFAULT_DELETE_LOG,
                 deleteAction.getLogMessage());
     }
 }

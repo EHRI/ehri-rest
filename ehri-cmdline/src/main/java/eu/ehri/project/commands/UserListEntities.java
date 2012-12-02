@@ -11,7 +11,7 @@ import com.tinkerpop.frames.VertexFrame;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.utils.ClassUtils;
-import eu.ehri.project.views.Query;
+import eu.ehri.project.views.impl.Query;
 
 /**
  * Import EAD from the command line...

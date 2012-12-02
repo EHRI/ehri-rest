@@ -17,7 +17,7 @@ import eu.ehri.project.models.EntityTypes;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.views.Query;
+import eu.ehri.project.views.impl.Query;
 
 public class QueryTest extends AbstractFixtureTest {
 

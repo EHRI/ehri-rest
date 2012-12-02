@@ -99,7 +99,7 @@ public final class ViewHelper {
      * @param user
      * @throws PermissionDenied
      */
-    protected void checkReadAccess(AccessibleEntity entity, Accessor user)
+    public void checkReadAccess(AccessibleEntity entity, Accessor user)
             throws PermissionDenied {
         if (!acl.getAccessControl(entity, user))
             throw new PermissionDenied(user, entity);

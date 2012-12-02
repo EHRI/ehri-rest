@@ -29,9 +29,9 @@ import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.persistance.Converter;
 import eu.ehri.project.persistance.EntityBundle;
-import eu.ehri.project.views.ActionViews;
-import eu.ehri.project.views.IViews;
-import eu.ehri.project.views.Query;
+import eu.ehri.project.views.Crud;
+import eu.ehri.project.views.impl.LoggingCrudViews;
+import eu.ehri.project.views.impl.Query;
 
 import static eu.ehri.extension.RestHelpers.*;
 
@@ -48,7 +48,7 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> extends
 
     public static final int DEFAULT_LIST_LIMIT = 20;
 
-    protected final IViews<E> views;
+    protected final Crud<E> views;
     protected final Query<E> querier;
     protected final Class<E> cls;
     protected final Converter converter = new Converter();
@@ -65,7 +65,7 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> extends
             Class<E> cls) {
         super(database);
         this.cls = cls;
-        views = new ActionViews<E>(graph, cls);
+        views = new LoggingCrudViews<E>(graph, cls);
         querier = new Query<E>(graph, cls);
 
     }

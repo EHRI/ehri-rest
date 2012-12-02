@@ -35,8 +35,8 @@ import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityTypes;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.persistance.EntityBundle;
-import eu.ehri.project.views.ActionViews;
-import eu.ehri.project.views.Query;
+import eu.ehri.project.views.impl.LoggingCrudViews;
+import eu.ehri.project.views.impl.Query;
 
 /**
  * Provides a RESTfull interface for the Agent
@@ -199,7 +199,7 @@ public class AgentResource extends EhriNeo4jFramedResource<Agent> {
         EntityBundle<DocumentaryUnit> entityBundle = converter
                 .jsonToBundle(json);
 
-        DocumentaryUnit doc = new ActionViews<DocumentaryUnit>(graph,
+        DocumentaryUnit doc = new LoggingCrudViews<DocumentaryUnit>(graph,
                 DocumentaryUnit.class)
                 .create(converter.bundleToData(entityBundle),
                         getRequesterUserProfile());

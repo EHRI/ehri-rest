@@ -25,7 +25,7 @@ import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.persistance.BundleDAO;
 import eu.ehri.project.persistance.BundleFactory;
 import eu.ehri.project.views.ViewHelper;
-import eu.ehri.project.views.Views;
+import eu.ehri.project.views.impl.CrudViews;
 
 public class PermissionsTest extends AbstractFixtureTest {
 
@@ -41,7 +41,7 @@ public class PermissionsTest extends AbstractFixtureTest {
                 .create(new BundleFactory<UserProfile>().buildBundle(
                         (Map<String, Object>) getTestUserBundle().get("data"),
                         UserProfile.class));
-        views = new Views<DocumentaryUnit>(graph, DocumentaryUnit.class,
+        views = new CrudViews<DocumentaryUnit>(graph, DocumentaryUnit.class,
                 manager.getFrame("r1", Agent.class));
         viewHelper = new ViewHelper(graph, DocumentaryUnit.class);
         acl = new AclManager(graph);

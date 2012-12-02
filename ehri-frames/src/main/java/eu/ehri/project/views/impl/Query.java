@@ -1,4 +1,4 @@
-package eu.ehri.project.views;
+package eu.ehri.project.views.impl;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -25,6 +25,8 @@ import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.utils.ClassUtils;
+import eu.ehri.project.views.Search;
+import eu.ehri.project.views.ViewHelper;
 
 /**
  * Handles querying Accessible Entities, with ACL semantics.
@@ -35,7 +37,7 @@ import eu.ehri.project.models.utils.ClassUtils;
  * 
  * @param <E>
  */
-public final class Query<E extends AccessibleEntity> implements IQuery<E> {
+public final class Query<E extends AccessibleEntity> implements Search<E> {
     private static final String QUERY_GLOB = "*";
     private final Integer offset;
     private final Integer limit;

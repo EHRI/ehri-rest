@@ -1,4 +1,4 @@
-package eu.ehri.project.views;
+package eu.ehri.project.views.impl;
 
 import java.util.Map;
 
@@ -19,8 +19,10 @@ import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistance.BundleDAO;
 import eu.ehri.project.persistance.Converter;
 import eu.ehri.project.persistance.EntityBundle;
+import eu.ehri.project.views.Crud;
+import eu.ehri.project.views.ViewHelper;
 
-public final class Views<E extends AccessibleEntity> implements IViews<E> {
+public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
     private final FramedGraph<Neo4jGraph> graph;
     private final Class<E> cls;
     private final ViewHelper helper;
@@ -34,7 +36,7 @@ public final class Views<E extends AccessibleEntity> implements IViews<E> {
      * @param graph
      * @param cls
      */
-    public Views(FramedGraph<Neo4jGraph> graph, Class<E> cls, PermissionScope scope) {
+    public CrudViews(FramedGraph<Neo4jGraph> graph, Class<E> cls, PermissionScope scope) {
         this.graph = graph;
         this.cls = cls;
         this.scope = scope;
@@ -49,7 +51,7 @@ public final class Views<E extends AccessibleEntity> implements IViews<E> {
      * @param graph
      * @param cls
      */
-    public Views(FramedGraph<Neo4jGraph> graph, Class<E> cls) {
+    public CrudViews(FramedGraph<Neo4jGraph> graph, Class<E> cls) {
         this(graph, cls, SystemScope.getInstance());
     }
 
@@ -124,7 +126,7 @@ public final class Views<E extends AccessibleEntity> implements IViews<E> {
                 .vertexFrameToBundle(item));
     }
 
-    public IViews<E> setScope(PermissionScope scope) {
-        return new Views<E>(graph, cls, scope);
+    public Crud<E> setScope(PermissionScope scope) {
+        return new CrudViews<E>(graph, cls, scope);
     }
 }

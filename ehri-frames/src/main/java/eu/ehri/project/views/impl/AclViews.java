@@ -1,4 +1,4 @@
-package eu.ehri.project.views;
+package eu.ehri.project.views.impl;
 
 import java.util.HashSet;
 import java.util.List;
@@ -22,8 +22,10 @@ import eu.ehri.project.models.PermissionGrant;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.PermissionScope;
+import eu.ehri.project.views.Acl;
+import eu.ehri.project.views.ViewHelper;
 
-public final class AclViews<E extends AccessibleEntity> {
+public final class AclViews<E extends AccessibleEntity> implements Acl<E> {
 
     private final FramedGraph<Neo4jGraph> graph;
     private final AclManager acl;
