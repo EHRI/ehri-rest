@@ -10,41 +10,23 @@ import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.yaml.snakeyaml.Yaml;
 
-import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
-import eu.ehri.project.core.GraphHelpers;
-import eu.ehri.project.models.annotations.EntityType;
+import eu.ehri.project.core.GraphManager;
+import eu.ehri.project.core.GraphManagerFactory;
+import eu.ehri.project.test.utils.fixtures.FixtureLoader;
 
-public class YamlFixtureLoader {
+public class YamlFixtureLoader implements FixtureLoader {
 
     public static final String DESCRIPTOR_KEY = "_desc";
 
     private FramedGraph<Neo4jGraph> graph;
-    private GraphHelpers helpers;
+    private GraphManager manager;
 
     public YamlFixtureLoader(FramedGraph<Neo4jGraph> graph) {
         this.graph = graph;
-        helpers = new GraphHelpers(graph.getBaseGraph().getRawGraph());
-    }
-
-    public Vertex getTestVertex(String descriptor) {
-        return graph.getBaseGraph().getVertices(DESCRIPTOR_KEY, descriptor)
-                .iterator().next();
-    }
-
-    public <T> T getTestFrame(String descriptor, Class<T> cls) {
-        return graph.getVertices(DESCRIPTOR_KEY, descriptor, cls).iterator()
-                .next();
-    }
-
-    public Iterable<Vertex> getTestVertices(String entityType) {
-        return graph.getBaseGraph().getVertices(EntityType.TYPE_KEY, entityType);
-    }
-
-    public <T> Iterable<T> getTestFrames(String entityType, Class<T> cls) {
-        return graph.getVertices(EntityType.TYPE_KEY, entityType, cls);
+        manager = GraphManagerFactory.getInstance(graph);
     }
 
     private void loadFixtures() {
@@ -55,11 +37,13 @@ public class YamlFixtureLoader {
             
             for (Object data : yaml.loadAll(yamlStream)) {
                 for (Entry<String,Object> entry : ((Map<String,Object>)data).entrySet()) {
-                    System.out.println("TYPE: " + entry.getKey());
                     List<Map<String,Object>> items = (List<Map<String,Object>>)entry.getValue();
                     for (Map<String,Object> itemSets: items) {
                         for (Entry<String,Object> item : itemSets.entrySet()) {
-                            System.out.println(" - ITEM: " + item.getKey() + ": " + item.getValue());
+                            String id = item.getKey();
+                            String type = entry.getKey();
+                            Map<String,Object> itemData = (Map<String, Object>) item.getValue();
+                            System.out.println(String.format("Item: %s %s %s", id, type, itemData));
                         }
                     }
                 }
