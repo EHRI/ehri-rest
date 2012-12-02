@@ -23,6 +23,7 @@ import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.annotations.Dependent;
+import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.idgen.AccessibleEntityIdGenerator;
 import eu.ehri.project.models.idgen.DocumentaryUnitIdGenerator;
@@ -295,7 +296,7 @@ public final class BundleDAO<T extends VertexFrame> {
     private IdGenerator getIdGenerator(EntityBundle<T> bundle) {
         if (DocumentaryUnit.class.isAssignableFrom(bundle.getBundleClass())) {
             return new DocumentaryUnitIdGenerator();
-        } else if (AccessibleEntityIdGenerator.class.isAssignableFrom(bundle
+        } else if (AccessibleEntity.class.isAssignableFrom(bundle
                 .getBundleClass())) {
             return new AccessibleEntityIdGenerator();
         } else {
