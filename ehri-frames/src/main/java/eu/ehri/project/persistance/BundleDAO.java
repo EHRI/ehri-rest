@@ -50,11 +50,13 @@ public final class BundleDAO<T extends VertexFrame> {
      * 
      * @param graph
      * @param scope
-     * @param importMode   Sets a flag which alters the behaviour of the subtree loader
-     *                      to not error if a bundle item with an existing ID already
-     *                      does not already exist.
+     * @param importMode
+     *            Sets a flag which alters the behaviour of the subtree loader
+     *            to not error if a bundle item with an existing ID already does
+     *            not already exist.
      */
-    public BundleDAO(FramedGraph<Neo4jGraph> graph, PermissionScope scope, boolean importMode) {
+    public BundleDAO(FramedGraph<Neo4jGraph> graph, PermissionScope scope,
+            boolean importMode) {
         this.graph = graph;
         this.scope = scope;
         this.importMode = importMode;
@@ -174,9 +176,9 @@ public final class BundleDAO<T extends VertexFrame> {
     }
 
     /**
-     * Insert or update an item depending on a) whether it has an ID,
-     * and b) whether it has an ID and already exists. If import mode
-     * is not enabled an error will be thrown.
+     * Insert or update an item depending on a) whether it has an ID, and b)
+     * whether it has an ID and already exists. If import mode is not enabled an
+     * error will be thrown.
      * 
      * @param bundle
      * @return
@@ -188,14 +190,13 @@ public final class BundleDAO<T extends VertexFrame> {
         if (importMode) {
             if (bundle.getId() == null) {
                 return createInner(bundle);
-            } else if (bundle.getId() != null && !manager.exists(bundle.getId())) {
-                return createInner(bundle.getId(), bundle);
             } else {
-                return createInner(bundle);
+                return manager.exists(bundle.getId()) ? updateInner(bundle)
+                        : createInner(bundle.getId(), bundle);
             }
         } else {
             return bundle.getId() == null ? createInner(bundle)
-                    : updateInner(bundle);            
+                    : updateInner(bundle);
         }
     }
 
@@ -207,8 +208,8 @@ public final class BundleDAO<T extends VertexFrame> {
      * @throws ValidationError
      * @throws IntegrityError
      */
-    private Vertex createInner(String id, EntityBundle<T> bundle) throws ValidationError,
-            IntegrityError {
+    private Vertex createInner(String id, EntityBundle<T> bundle)
+            throws ValidationError, IntegrityError {
         Vertex node = manager.createVertex(id, bundle.getType(),
                 bundle.getData(), bundle.getPropertyKeys(),
                 bundle.getUniquePropertyKeys());
@@ -236,7 +237,6 @@ public final class BundleDAO<T extends VertexFrame> {
         }
     }
 
-    
     /**
      * Update a bundle and save its dependent items.
      * 
