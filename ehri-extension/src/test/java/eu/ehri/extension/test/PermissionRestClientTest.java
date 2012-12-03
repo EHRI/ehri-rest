@@ -41,7 +41,7 @@ import eu.ehri.project.models.EntityTypes;
 public class PermissionRestClientTest extends BaseRestClientTest {
 
     static final String LIMITED_USER_NAME = "reto";
-    static final String TEST_HOLDER_IDENTIFIER = "r1";
+    static final String TEST_HOLDER_IDENTIFIER = "r2";
 
     private String jsonDocumentaryUnitTestStr;
 
@@ -128,7 +128,6 @@ public class PermissionRestClientTest extends BaseRestClientTest {
                 .header(AbstractRestResource.AUTH_HEADER_NAME,
                         LIMITED_USER_NAME).entity(jsonDocumentaryUnitTestStr)
                 .post(ClientResponse.class);
-
         assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(),
                 response.getStatus());
 

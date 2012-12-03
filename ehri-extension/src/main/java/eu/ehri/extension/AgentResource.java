@@ -204,7 +204,7 @@ public class AgentResource extends EhriNeo4jFramedResource<Agent> {
                 .jsonToBundle(json);
 
         DocumentaryUnit doc = new LoggingCrudViews<DocumentaryUnit>(graph,
-                DocumentaryUnit.class)
+                DocumentaryUnit.class, agent)
                 .create(converter.bundleToData(entityBundle),
                         getRequesterUserProfile());
         // Add it to this agent's collections
