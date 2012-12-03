@@ -55,6 +55,10 @@ public final class SingleIndexGraphManager implements GraphManager {
         return graph.frame(getVertex(id), cls);
     }
     
+    public <T> T getFrame(String id, String type, Class<T> cls) {
+        return graph.frame(getVertex(id, type), cls);
+    }
+    
     public <T> Iterable<T> getFrames(String type, Class<T> cls) {
         CloseableIterable<Vertex> vertices = getVertices(type);
         try {
@@ -89,6 +93,11 @@ public final class SingleIndexGraphManager implements GraphManager {
         }
     }
     
+    public Vertex getVertex(String id, String type) {
+        String queryStr = getLuceneQuery(EntityType.ID_KEY, id, type);
+        IndexHits<Node> rawQuery = getRawIndex().query(queryStr);
+        return new Neo4jVertex(rawQuery.getSingle(), graph.getBaseGraph());
+    }
 
     /**
      * Create a vertex with no unique keys, indexing all items.

@@ -15,7 +15,7 @@ public interface GraphManager {
      * Check if a node with the given ID exists or not.
      */
     public boolean exists(String id);
-    
+
     /**
      * Get a node with the given ID.
      * 
@@ -23,6 +23,14 @@ public interface GraphManager {
      * @return
      */
     public Vertex getVertex(String id);
+
+    /**
+     * Get a node with the given ID and type.
+     * 
+     * @param id
+     * @return
+     */
+    public Vertex getVertex(String id, String type);
 
     /**
      * Get a node with the given ID, and frame it with the given interface
@@ -33,6 +41,17 @@ public interface GraphManager {
      * @return
      */
     public <T> T getFrame(String id, Class<T> cls);
+
+    /**
+     * Get a node with the given ID and type, framing it with the given
+     * interface class.
+     * 
+     * @param id
+     * @param type
+     * @param cls
+     * @return
+     */
+    public <T> T getFrame(String id, String type, Class<T> cls);
 
     /**
      * Get a CloseableIterable of vertices with the given type.
@@ -60,7 +79,7 @@ public interface GraphManager {
      * @return
      */
     public <T> Iterable<T> getFrames(String type, Class<T> cls);
-    
+
     /**
      * List the given property for objects of a given type.
      * 
@@ -68,8 +87,7 @@ public interface GraphManager {
      * @param propertyName
      * @return
      */
-    public List<Object> getAllPropertiesOfType(String type,
-            String propertyName);    
+    public List<Object> getAllPropertiesOfType(String type, String propertyName);
 
     // CRUD functions
 
@@ -128,7 +146,7 @@ public interface GraphManager {
     public Vertex updateVertex(String id, String type,
             Map<String, Object> data, Collection<String> keys,
             Collection<String> uniqueKeys) throws IntegrityError;
-    
+
     /**
      * Create a vertex with the given id, type, and data.
      * 
@@ -153,7 +171,8 @@ public interface GraphManager {
      * @throws IntegrityError
      */
     public Vertex updateVertex(String id, String type,
-            Map<String, Object> data, Collection<String> keys) throws IntegrityError;
+            Map<String, Object> data, Collection<String> keys)
+            throws IntegrityError;
 
     /**
      * Create a vertex with the given id, type, and data, specifying which
@@ -169,5 +188,5 @@ public interface GraphManager {
      */
     public Vertex createVertex(String id, String type,
             Map<String, Object> data, Collection<String> keys,
-            Collection<String> uniqueKeys) throws IntegrityError;    
+            Collection<String> uniqueKeys) throws IntegrityError;
 }

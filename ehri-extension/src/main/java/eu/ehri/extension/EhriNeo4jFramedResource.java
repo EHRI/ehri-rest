@@ -28,6 +28,7 @@ import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.utils.ClassUtils;
 import eu.ehri.project.persistance.Converter;
 import eu.ehri.project.persistance.EntityBundle;
 import eu.ehri.project.views.Crud;
@@ -236,7 +237,7 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> extends
     public Response retrieve(String id) throws PermissionDenied, ItemNotFound,
             BadRequester {
         try {
-            E entity = views.detail(manager.getFrame(id, cls),
+            E entity = views.detail(manager.getFrame(id, getEntityType(), cls),
                     getRequesterUserProfile());
             String jsonStr = new Converter().vertexFrameToJson(entity);
             return Response.status(Status.OK).entity((jsonStr).getBytes())
@@ -327,7 +328,7 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> extends
             // specified key/value and constructs a new bundle containing the
             // item's graph id, which requires an extra
             // serialization/deserialization.
-            E entity = views.detail(manager.getFrame(id, cls), getRequesterUserProfile());
+            E entity = views.detail(manager.getFrame(id, getEntityType(), cls), getRequesterUserProfile());
             EntityBundle<E> rawBundle = converter.jsonToBundle(json);
             EntityBundle<E> entityBundle = new EntityBundle<E>((String) entity
                     .asVertex().getProperty(EntityType.ID_KEY),
@@ -376,7 +377,7 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> extends
     protected Response delete(String id) throws PermissionDenied, ItemNotFound,
             ValidationError, BadRequester {
         try {
-            E entity = views.detail(manager.getFrame(id, cls),
+            E entity = views.detail(manager.getFrame(id, getEntityType(), cls),
                     getRequesterUserProfile());
             views.delete(entity, getRequesterUserProfile());
             return Response.status(Status.OK).build();
@@ -385,5 +386,11 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> extends
         } catch (SerializationError e) {
             throw new WebApplicationException(e);
         }
+    }
+    
+    // Helpers
+    
+    private String getEntityType() {
+        return ClassUtils.getEntityType(cls);
     }
 }
