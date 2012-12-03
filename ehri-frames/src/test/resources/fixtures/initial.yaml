@@ -1,0 +1,91 @@
+#
+# This file provides a standard set of initial fixtures for the EHRI collection registry
+# database.
+#
+
+--- # Content Types - also nodes within the system, which serve as permission targets
+- id: documentaryUnit
+  type: contentType
+  data:
+    identifier: documentaryUnit
+    name: DocumentaryUnit
+
+- id: documentaryUnit
+  type: contentType
+  data:
+    identifier: documentaryUnit
+    name: DocumentaryUnit
+    
+- id: userProfile
+  type: contentType
+  data:
+    identifier: userProfile
+    name: User Profile
+    
+- id: authority
+  type: contentType
+  data:
+    identifier: authority
+    name: Authority
+    
+- id: agent
+  type: contentType
+  data:
+    identifier: agent
+    name: Agent
+    
+- id: group
+  type: contentType
+  data:
+    identifier: group
+    name: Group
+    
+--- # Permissions, which carry a bitmask so they can be logically combined.
+- id: create
+  type: permission
+  data:
+    identifier: create
+    name: Create
+    mask: 1
+    
+- id: update
+  type: permission
+  data:
+    identifier: update
+    name: Update
+    mask: 2
+    
+- id: delete
+  type: permission
+  data:
+    identifier: delete
+    name: Delete
+    mask: 4
+    
+- id: grant
+  type: permission
+  data:
+    identifier: grant
+    name: Grant
+    mask: 8    
+    
+- id: annotate
+  type: permission
+  data:
+    identifier: annotate
+    name: Annotate
+    mask: 16
+    
+- id: owner
+  type: permission
+  data:
+    identifier: owner
+    name: Owner
+    mask: 23
+    
+--- # Groups - admin is the only mandatory group
+- id: admin
+  type: group
+  data:
+    identifier: admin
+    name: Admin

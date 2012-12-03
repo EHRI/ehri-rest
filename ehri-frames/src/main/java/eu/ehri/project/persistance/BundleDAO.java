@@ -43,6 +43,23 @@ public final class BundleDAO<T extends VertexFrame> {
     private final FramedGraph<Neo4jGraph> graph;
     private final PermissionScope scope;
     private final GraphManager manager;
+    private final boolean importMode;
+
+    /**
+     * Constructor with a given scope.
+     * 
+     * @param graph
+     * @param scope
+     * @param importMode   Sets a flag which alters the behaviour of the subtree loader
+     *                      to not error if a bundle item with an existing ID already
+     *                      does not already exist.
+     */
+    public BundleDAO(FramedGraph<Neo4jGraph> graph, PermissionScope scope, boolean importMode) {
+        this.graph = graph;
+        this.scope = scope;
+        this.importMode = importMode;
+        manager = GraphManagerFactory.getInstance(graph);
+    }
 
     /**
      * Constructor with a given scope.
@@ -51,9 +68,7 @@ public final class BundleDAO<T extends VertexFrame> {
      * @param scope
      */
     public BundleDAO(FramedGraph<Neo4jGraph> graph, PermissionScope scope) {
-        this.graph = graph;
-        this.scope = scope;
-        manager = GraphManagerFactory.getInstance(graph);
+        this(graph, scope, false);
     }
 
     /**
@@ -62,7 +77,7 @@ public final class BundleDAO<T extends VertexFrame> {
      * @param graph
      */
     public BundleDAO(FramedGraph<Neo4jGraph> graph) {
-        this(graph, SystemScope.getInstance());
+        this(graph, SystemScope.getInstance(), false);
     }
 
     /**
@@ -158,10 +173,47 @@ public final class BundleDAO<T extends VertexFrame> {
                         rel, classA.getName(), classB.getName()));
     }
 
+    /**
+     * Insert or update an item depending on a) whether it has an ID,
+     * and b) whether it has an ID and already exists. If import mode
+     * is not enabled an error will be thrown.
+     * 
+     * @param bundle
+     * @return
+     * @throws ValidationError
+     * @throws IntegrityError
+     */
     private Vertex insertOrUpdate(EntityBundle<T> bundle)
             throws ValidationError, IntegrityError {
-        return bundle.getId() == null ? createInner(bundle)
-                : updateInner(bundle);
+        if (importMode) {
+            if (bundle.getId() == null) {
+                return createInner(bundle);
+            } else if (bundle.getId() != null && !manager.exists(bundle.getId())) {
+                return createInner(bundle.getId(), bundle);
+            } else {
+                return createInner(bundle);
+            }
+        } else {
+            return bundle.getId() == null ? createInner(bundle)
+                    : updateInner(bundle);            
+        }
+    }
+
+    /**
+     * Insert a bundle and save it's dependent items.
+     * 
+     * @param bundle
+     * @return
+     * @throws ValidationError
+     * @throws IntegrityError
+     */
+    private Vertex createInner(String id, EntityBundle<T> bundle) throws ValidationError,
+            IntegrityError {
+        Vertex node = manager.createVertex(id, bundle.getType(),
+                bundle.getData(), bundle.getPropertyKeys(),
+                bundle.getUniquePropertyKeys());
+        saveDependents(node, bundle.getBundleClass(), bundle.getRelations());
+        return node;
     }
 
     /**
@@ -178,16 +230,13 @@ public final class BundleDAO<T extends VertexFrame> {
             BundleValidatorFactory.getInstance(bundle).validateForInsert();
             String id = getIdGenerator(bundle).generateId(bundle.getType(),
                     scope, bundle.getData());
-            Vertex node = manager.createVertex(id, bundle.getType(),
-                    bundle.getData(), bundle.getPropertyKeys(),
-                    bundle.getUniquePropertyKeys());
-            saveDependents(node, bundle.getBundleClass(), bundle.getRelations());
-            return node;
+            return createInner(id, bundle);
         } catch (IdGenerationError err) {
             throw new RuntimeException(err.getMessage());
         }
     }
 
+    
     /**
      * Update a bundle and save its dependent items.
      * 

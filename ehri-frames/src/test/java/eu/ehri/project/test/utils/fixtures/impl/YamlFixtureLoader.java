@@ -1,6 +1,9 @@
 package eu.ehri.project.test.utils.fixtures.impl;
 
 import java.io.InputStream;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -32,7 +35,7 @@ public class YamlFixtureLoader implements FixtureLoader {
 
     private void loadFixtures() {
         InputStream yamlStream = this.getClass().getClassLoader()
-                .getResourceAsStream("initial.yaml");
+                .getResourceAsStream("testdata.yaml");
         Yaml yaml = new Yaml();
         try {
             
@@ -41,7 +44,11 @@ public class YamlFixtureLoader implements FixtureLoader {
                     String id = (String)node.get(Converter.ID_KEY);
                     String type = (String)node.get(Converter.TYPE_KEY);
                     Map<String,Object> nodeData = (Map<String,Object>)node.get(Converter.DATA_KEY);
+                    Map<String,List<Object>> nodeRels = (Map<String,List<Object>>)node.get(Converter.REL_KEY);
                     System.out.println(String.format("Item: %s %s %s", id, type, nodeData));
+                    if (nodeRels != null && !getDependentRelations(nodeRels).isEmpty()) {
+                        System.out.println(" - RELS: " + getDependentRelations(nodeRels));
+                    }
                 }
             }            
         } catch (Exception e) {
@@ -60,6 +67,26 @@ public class YamlFixtureLoader implements FixtureLoader {
         } finally {
             tx.finish();
         }
+    }
+    
+    @SuppressWarnings("unchecked")
+    private Map<String,List<Object>> getDependentRelations(Map<String,List<Object>> data) {
+        Map<String,List<Object>> rels = new HashMap<String, List<Object>>();
+        for (Entry<String,List<Object>> entry : data.entrySet()) {
+            String relName = entry.getKey();
+            List<Object> relItems = entry.getValue();
+            for (Object relation : relItems) {
+                if (relation instanceof Map) {
+                    List<Object> relList = rels.get(relName);
+                    if (relList == null) {
+                        relList = new LinkedList<Object>();
+                        rels.put(relName, relList);
+                    }
+                    relList.add(relation);
+                }
+            }
+        }
+        return rels;
     }
     
 

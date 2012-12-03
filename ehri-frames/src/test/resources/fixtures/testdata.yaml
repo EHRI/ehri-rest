@@ -1,0 +1,104 @@
+#
+# This file provides a standard set of test fixtures for the EHRI collection registry
+# database.
+#
+
+# NIOD. NIOD belongs to admin, so everyone who belongs
+# to the NIOD group also belongs to admin by extension.
+- id: niod
+  type: group
+  data:
+    identifier: niod
+    name: NIOD
+  relationships:
+    belongsTo:
+      - admin
+      
+- id: kcl
+  type: group
+  data:
+    identifier: kcl
+    name: KCL
+    
+- id: dans
+  type: group
+  data:
+    identifier: dans
+    name: DANS    
+    
+- id: soma
+  type: group
+  data:
+    identifier: soma
+    name: CEGES-SOMA
+
+--- # Users Mike, Tim, Linda, and Reto
+
+# Mike is a member of the KCL group, but he is ALSO a member of Admin
+# separately
+- id: mike
+  type: userProfile
+  data:
+    identifier: mike
+    name: Mike
+  relationships:
+    belongsTo:
+      - kcl
+
+# Tim is a member of NIOD, which is itself a member of Admin, so Tim
+# belongs to Admin by extension
+- id: tim
+  type: userProfile
+  data:
+    identifier: tim
+    name: Tim
+  relationships:
+    belongsTo:
+      - niod
+      
+# Linda belongs to DANS
+- id: linda
+  type: userProfile
+  data:
+    identifier: linda
+    name: Linda
+  relationships:
+    belongsTo:
+      - dans
+
+# Veerle is a member of CEGES-SOMA, and also a member of Admin
+- id: veerle
+  type: userProfile
+  data:
+    identifier: veerle
+    name: Veerle
+  relationships:
+    belongsTo:
+      - soma
+      - admin
+
+# Institutions
+- id: r1
+  type: agent
+  data:
+    identifier: r1
+    name: Repository 1
+  relationships:
+    describes:
+      - id: rd1
+        type: agentDescription
+        data:
+          identifier: r1
+          name: Repository 1 Description
+        relationships:
+          hasAddress:
+            - id: ad1
+              type: address
+              data:
+                name: "An Address"
+                streetAddress: 1 Some St.
+                city: London
+                
+                         
+      
+      
