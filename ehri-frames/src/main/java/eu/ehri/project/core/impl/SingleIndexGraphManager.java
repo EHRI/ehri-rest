@@ -96,7 +96,9 @@ public final class SingleIndexGraphManager implements GraphManager {
     public Vertex getVertex(String id, String type) {
         String queryStr = getLuceneQuery(EntityType.ID_KEY, id, type);
         IndexHits<Node> rawQuery = getRawIndex().query(queryStr);
-        return new Neo4jVertex(rawQuery.getSingle(), graph.getBaseGraph());
+        // NB: Not using rawQuery.getSingle here so we throw NoSuchElement other than
+        // return null.
+        return new Neo4jVertex(rawQuery.iterator().next(), graph.getBaseGraph());
     }
 
     /**
