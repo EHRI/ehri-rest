@@ -78,6 +78,14 @@ public final class BundleDAO<T extends VertexFrame> {
         return graph.frame(updateInner(bundle), bundle.getBundleClass());
     }
 
+    /**
+     * Entry point for creating a bundle.
+     * 
+     * @param bundle
+     * @return
+     * @throws ValidationError
+     * @throws IntegrityError
+     */
     public T create(EntityBundle<T> bundle) throws ValidationError,
             IntegrityError {
         return graph.frame(createInner(bundle), bundle.getBundleClass());
