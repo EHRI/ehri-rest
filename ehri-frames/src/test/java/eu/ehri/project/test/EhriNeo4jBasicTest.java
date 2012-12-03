@@ -359,7 +359,7 @@ public class EhriNeo4jBasicTest {
         };
         Map<String, Object> data2 = new HashMap<String, Object>() {
             {
-                put("name", "bob");
+                put("name", "linda");
                 put("age", 36);
                 put("height", "5.6");
             }
@@ -367,11 +367,11 @@ public class EhriNeo4jBasicTest {
 
         Index<Vertex> index = helpers.createVertexIndex("people");        
         helpers.createIndexedVertex(data1, index, keys, unique);
-        Vertex bob = helpers.createIndexedVertex(data2, index, keys, unique);
+        Vertex linda = helpers.createIndexedVertex(data2, index, keys, unique);
         
-        // Updating bob with Joe's name should throw an Integrity error...
+        // Updating linda with Joe's name should throw an Integrity error...
         data2.put("name", data1.get("name"));
-        helpers.updateIndexedVertex(bob.getId(), data2, index, keys, unique);
+        helpers.updateIndexedVertex(linda.getId(), data2, index, keys, unique);
     }
     
     /***

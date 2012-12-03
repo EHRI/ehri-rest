@@ -184,12 +184,12 @@ public class AclTest extends ModelTestBase {
      */
     @Test
     public void testGlobalPermissionMatrix() throws PermissionDenied {
-        Accessor bob = manager.getFrame("bob", Accessor.class);
+        Accessor linda = manager.getFrame("linda", Accessor.class);
         // Admin can change anything, so ensure the user ISN'T a member of admin
-        assertFalse(acl.belongsToAdmin(bob));
+        assertFalse(acl.belongsToAdmin(linda));
 
-        Map<String, List<String>> cmap = acl.getGlobalPermissions(bob);
-        // Bob has been granted CREATE access for documentaryUnits.
+        Map<String, List<String>> cmap = acl.getGlobalPermissions(linda);
+        // linda has been granted CREATE access for documentaryUnits.
         assertTrue(cmap.get(EntityTypes.DOCUMENTARY_UNIT).contains(
                 PermissionTypes.CREATE));
     }

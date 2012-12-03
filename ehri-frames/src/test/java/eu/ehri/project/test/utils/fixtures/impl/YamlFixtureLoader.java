@@ -15,6 +15,7 @@ import com.tinkerpop.frames.FramedGraph;
 
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
+import eu.ehri.project.persistance.Converter;
 import eu.ehri.project.test.utils.fixtures.FixtureLoader;
 
 public class YamlFixtureLoader implements FixtureLoader {
@@ -31,21 +32,16 @@ public class YamlFixtureLoader implements FixtureLoader {
 
     private void loadFixtures() {
         InputStream yamlStream = this.getClass().getClassLoader()
-                .getResourceAsStream("test-graph.yaml");
+                .getResourceAsStream("initial.yaml");
         Yaml yaml = new Yaml();
         try {
             
             for (Object data : yaml.loadAll(yamlStream)) {
-                for (Entry<String,Object> entry : ((Map<String,Object>)data).entrySet()) {
-                    List<Map<String,Object>> items = (List<Map<String,Object>>)entry.getValue();
-                    for (Map<String,Object> itemSets: items) {
-                        for (Entry<String,Object> item : itemSets.entrySet()) {
-                            String id = item.getKey();
-                            String type = entry.getKey();
-                            Map<String,Object> itemData = (Map<String, Object>) item.getValue();
-                            System.out.println(String.format("Item: %s %s %s", id, type, itemData));
-                        }
-                    }
+                for (Map<String,Object> node : (List<Map<String,Object>>)data) {
+                    String id = (String)node.get(Converter.ID_KEY);
+                    String type = (String)node.get(Converter.TYPE_KEY);
+                    Map<String,Object> nodeData = (Map<String,Object>)node.get(Converter.DATA_KEY);
+                    System.out.println(String.format("Item: %s %s %s", id, type, nodeData));
                 }
             }            
         } catch (Exception e) {

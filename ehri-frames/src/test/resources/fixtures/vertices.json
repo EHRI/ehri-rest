@@ -301,11 +301,11 @@
   },
   {
     "data": {
-      "identifier": "bob", 
-      "name": "Bob"
+      "identifier": "linda", 
+      "name": "linda"
     }, 
     "__ISA__": "userProfile", 
-    "__ID__": "bob"
+    "__ID__": "linda"
   },
   {
     "data": {
@@ -355,6 +355,6 @@
   	"data": {
   	},
     "__ISA__": "permissionGrant", 	
-  	"__ID__": "bobGlobalCreateGrant"
+  	"__ID__": "lindaGlobalCreateGrant"
   }  
 ]

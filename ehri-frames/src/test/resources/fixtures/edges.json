@@ -194,22 +194,22 @@
     "label": "hasGrantee"
   },
   {
-    "src": "bobGlobalCreateGrant",
+    "src": "lindaGlobalCreateGrant",
     "dst": "permCreate",
     "label": "hasPermission"
   },
   {
-    "src": "bobGlobalCreateGrant",
+    "src": "lindaGlobalCreateGrant",
     "dst": "documentaryUnitType",
     "label": "hasTarget"
   },
   {
-    "src": "bobGlobalCreateGrant",
-    "dst": "bob",
+    "src": "lindaGlobalCreateGrant",
+    "dst": "linda",
     "label": "hasAccessor"
   },
   {
-    "src": "bobGlobalCreateGrant",
+    "src": "lindaGlobalCreateGrant",
     "dst": "mike",
     "label": "hasGrantee"
   }    
