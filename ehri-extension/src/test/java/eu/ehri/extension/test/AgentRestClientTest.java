@@ -33,7 +33,7 @@ public class AgentRestClientTest extends BaseRestClientTest {
     }
 
     @Test
-    public void testCreateDeleteAgent() throws Exception {
+    public void testCreateAgent() throws Exception {
         // Create
         WebResource resource = client.resource(getExtensionEntryPointUri()
                 + "/agent");
@@ -108,4 +108,25 @@ public class AgentRestClientTest extends BaseRestClientTest {
                 errValue.asText());
     }
 
+    @Test
+    public void testDeleteAgent() throws Exception {
+        // Create
+        WebResource resource = client.resource(getExtensionEntryPointUri()
+                + "/agent/r1");
+        ClientResponse response = resource.header(
+                AbstractRestResource.AUTH_HEADER_NAME, getAdminUserProfileId())
+                .delete(ClientResponse.class);
+
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+
+        // Check it's really gone...
+        response = resource
+                .accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                        getAdminUserProfileId()).get(ClientResponse.class);
+
+        assertEquals(Response.Status.NOT_FOUND.getStatusCode(),
+                response.getStatus());
+    }
 }
