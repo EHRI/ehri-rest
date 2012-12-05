@@ -94,7 +94,8 @@ public class YamlFixtureLoader implements FixtureLoader {
                                 .getCollection(relname);
                         for (Object target : targets) {
                             if (target instanceof String) {
-                                System.out.println(" - Linking: " + target);
+                                System.out.printf(" - %s -[%s]-> %s\n",
+                                        src.getProperty(EntityType.ID_KEY), relname, target);
                                 Vertex dst = manager.getVertex((String) target);
                                 addRelationship(src, dst, (String) relname);
                             }

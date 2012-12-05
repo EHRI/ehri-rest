@@ -213,6 +213,6 @@
           endDate: 1945-01-01!!str
     heldBy:
       - niod
-    hasParent:
+    childOf:
       - c1
         
