@@ -20,6 +20,7 @@ import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.exceptions.IdGenerationError;
 import eu.ehri.project.exceptions.IntegrityError;
+import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.annotations.Dependent;
@@ -89,15 +90,22 @@ public final class BundleDAO<T extends VertexFrame> {
      * @return
      * @throws ValidationError
      * @throws IntegrityError
+     * @throws ItemNotFound
      */
     public T update(EntityBundle<T> bundle) throws ValidationError,
-            IntegrityError {
+            IntegrityError, ItemNotFound {
         return graph.frame(updateInner(bundle), bundle.getBundleClass());
     }
 
     public T create(EntityBundle<T> bundle) throws ValidationError,
             IntegrityError {
         return graph.frame(createInner(bundle), bundle.getBundleClass());
+    }
+
+    public T createOrUpdate(EntityBundle<T> bundle) throws ValidationError,
+            IntegrityError, ItemNotFound {
+        return graph.frame(importMode ? createOrUpdateInner(bundle)
+                : createInner(bundle), bundle.getBundleClass());
     }
 
     /**
@@ -125,7 +133,7 @@ public final class BundleDAO<T extends VertexFrame> {
     // Helpers
 
     private Integer deleteCount(EntityBundle<?> bundle, Integer count)
-            throws ValidationError {
+            throws ValidationError, ItemNotFound {
         Integer c = count;
         MultiValueMap fetch = bundle.getRelations();
         List<String> dependents = ClassUtils.getDependentRelations(bundle
@@ -184,9 +192,10 @@ public final class BundleDAO<T extends VertexFrame> {
      * @return
      * @throws ValidationError
      * @throws IntegrityError
+     * @throws ItemNotFound
      */
-    private Vertex insertOrUpdate(EntityBundle<T> bundle)
-            throws ValidationError, IntegrityError {
+    private Vertex createOrUpdateInner(EntityBundle<T> bundle)
+            throws ValidationError, IntegrityError, ItemNotFound {
         if (importMode) {
             if (bundle.getId() == null) {
                 return createInner(bundle);
@@ -207,13 +216,14 @@ public final class BundleDAO<T extends VertexFrame> {
      * @return
      * @throws ValidationError
      * @throws IntegrityError
+     * @throws ItemNotFound
      */
     private Vertex createInner(String id, EntityBundle<T> bundle)
             throws ValidationError, IntegrityError {
         Vertex node = manager.createVertex(id, bundle.getType(),
                 bundle.getData(), bundle.getPropertyKeys(),
                 bundle.getUniquePropertyKeys());
-        saveDependents(node, bundle.getBundleClass(), bundle.getRelations());
+        createDependents(node, bundle.getBundleClass(), bundle.getRelations());
         return node;
     }
 
@@ -224,6 +234,7 @@ public final class BundleDAO<T extends VertexFrame> {
      * @return
      * @throws ValidationError
      * @throws IntegrityError
+     * @throws ItemNotFound
      */
     private Vertex createInner(EntityBundle<T> bundle) throws ValidationError,
             IntegrityError {
@@ -244,14 +255,15 @@ public final class BundleDAO<T extends VertexFrame> {
      * @return
      * @throws ValidationError
      * @throws IntegrityError
+     * @throws ItemNotFound
      */
     private Vertex updateInner(EntityBundle<T> bundle) throws ValidationError,
-            IntegrityError {
+            IntegrityError, ItemNotFound {
         BundleValidatorFactory.getInstance(bundle).validateForUpdate();
         Vertex node = manager.updateVertex(bundle.getId(), bundle.getType(),
                 bundle.getData(), bundle.getPropertyKeys(),
                 bundle.getUniquePropertyKeys());
-        saveDependents(node, bundle.getBundleClass(), bundle.getRelations());
+        updateDependents(node, bundle.getBundleClass(), bundle.getRelations());
         return node;
     }
 
@@ -264,11 +276,47 @@ public final class BundleDAO<T extends VertexFrame> {
      * @param relations
      * @throws ValidationError
      * @throws IntegrityError
+     * @throws ItemNotFound
      */
-    private void saveDependents(Vertex master,
+    private void createDependents(Vertex master,
             Class<? extends VertexFrame> cls, MultiValueMap relations)
             throws ValidationError, IntegrityError {
         List<String> dependents = ClassUtils.getDependentRelations(cls);
+        for (Object key : relations.keySet()) {
+            String relation = (String) key;
+            if (dependents.contains(relation)) {
+
+                for (Object obj : relations.getCollection(key)) {
+                    EntityBundle<T> bundle = (EntityBundle<T>) obj;
+                    Vertex child = createInner(bundle);
+                    Direction direction = getDirectionOfRelationship(cls,
+                            bundle.getBundleClass(), relation);
+
+                    // Create a relation if there isn't one already
+                    createChildRelationship(master, child, relation, direction);
+                }
+            }
+        }
+    }
+
+    /**
+     * Saves the dependent relations within a given bundle. Relations that are
+     * not dependent are ignored.
+     * 
+     * @param master
+     * @param cls
+     * @param relations
+     * @throws ValidationError
+     * @throws IntegrityError
+     * @throws ItemNotFound
+     */
+    private void updateDependents(Vertex master,
+            Class<? extends VertexFrame> cls, MultiValueMap relations)
+            throws ValidationError, IntegrityError, ItemNotFound {
+        List<String> dependents = ClassUtils.getDependentRelations(cls);
+        // FIXME: Delete defunk dependents before creating new ones, since
+        // that could otherwise erroneously cause uniqueness clashes. This
+        // will require some smarter handling of the dependency tree.
         Set<Vertex> existingDependents = new HashSet<Vertex>();
         Set<Vertex> refreshedDependents = new HashSet<Vertex>();
         for (Object key : relations.keySet()) {
@@ -277,7 +325,7 @@ public final class BundleDAO<T extends VertexFrame> {
 
                 for (Object obj : relations.getCollection(key)) {
                     EntityBundle<T> bundle = (EntityBundle<T>) obj;
-                    Vertex child = insertOrUpdate(bundle);
+                    Vertex child = createOrUpdateInner(bundle);
                     refreshedDependents.add(child);
                     Direction direction = getDirectionOfRelationship(cls,
                             bundle.getBundleClass(), relation);
