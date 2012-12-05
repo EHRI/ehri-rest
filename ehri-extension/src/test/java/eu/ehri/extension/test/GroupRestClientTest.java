@@ -61,7 +61,7 @@ public class GroupRestClientTest extends BaseRestClientTest {
         WebResource resource = client.resource(
                 UriBuilder.fromPath(getExtensionEntryPointUri())
                 .segment(EntityTypes.GROUP).segment(TEST_GROUP_NAME)
-                .segment(EntityTypes.USER_PROFILE).segment(NON_ADMIN_USER).build());
+                .segment(NON_ADMIN_USER).build());
         ClientResponse response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
@@ -79,7 +79,7 @@ public class GroupRestClientTest extends BaseRestClientTest {
         WebResource resource = client.resource(
                 UriBuilder.fromPath(getExtensionEntryPointUri())
                 .segment(EntityTypes.GROUP).segment(TEST_GROUP_NAME)
-                .segment(EntityTypes.USER_PROFILE).segment(CURRENT_ADMIN_USER).build());
+                .segment(CURRENT_ADMIN_USER).build());
         ClientResponse response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)

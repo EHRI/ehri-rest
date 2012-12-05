@@ -118,7 +118,7 @@ public class GroupResource extends EhriNeo4jFramedResource<Group> {
      * @throws BadRequester
      */
     @POST
-    @Path("/{id:[^/]+}/{atype:[^/]+}/{aid:.+}")
+    @Path("/{id:[^/]+}/{aid:.+}")
     public Response addAccessor(@PathParam("id") String id,
             @PathParam("atype") String atype, @PathParam("aid") String aid)
             throws PermissionDenied, ItemNotFound, BadRequester {
@@ -126,8 +126,8 @@ public class GroupResource extends EhriNeo4jFramedResource<Group> {
         // TODO: Check existing membership?
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
-            Group group = getEntity(EntityTypes.GROUP, id, Group.class);
-            Accessor accessor = getEntity(atype, aid, Accessor.class);
+            Group group = manager.getFrame(id, EntityTypes.GROUP, Group.class);
+            Accessor accessor = manager.getFrame(aid, Accessor.class);
             group.addMember(accessor);
             
             // Log the action...
@@ -157,15 +157,15 @@ public class GroupResource extends EhriNeo4jFramedResource<Group> {
      * @throws BadRequester
      */
     @DELETE
-    @Path("/{id:[^/]+}/{atype:[^/]+}/{aid:.+}")
+    @Path("/{id:[^/]+}/{aid:.+}")
     public Response removeAccessor(@PathParam("id") String id,
-            @PathParam("atype") String atype, @PathParam("aid") String aid)
+            @PathParam("aid") String aid)
             throws PermissionDenied, ItemNotFound, BadRequester {
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
             // FIXME: Add permission checks for this!!!
-            Group group = getEntity(EntityTypes.GROUP, id, Group.class);
-            Accessor accessor = getEntity(atype, aid, Accessor.class);
+            Group group = manager.getFrame(id, EntityTypes.GROUP, Group.class);
+            Accessor accessor = manager.getFrame(aid, Accessor.class);
             group.removeMember(accessor);
             // Log the action...
             new ActionManager(graph).createAction(
