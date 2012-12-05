@@ -44,25 +44,6 @@ public final class BundleDAO<T extends VertexFrame> {
     private final FramedGraph<Neo4jGraph> graph;
     private final PermissionScope scope;
     private final GraphManager manager;
-    private final boolean importMode;
-
-    /**
-     * Constructor with a given scope.
-     * 
-     * @param graph
-     * @param scope
-     * @param importMode
-     *            Sets a flag which alters the behaviour of the subtree loader
-     *            to not error if a bundle item with an existing ID already does
-     *            not already exist.
-     */
-    public BundleDAO(FramedGraph<Neo4jGraph> graph, PermissionScope scope,
-            boolean importMode) {
-        this.graph = graph;
-        this.scope = scope;
-        this.importMode = importMode;
-        manager = GraphManagerFactory.getInstance(graph);
-    }
 
     /**
      * Constructor with a given scope.
@@ -71,7 +52,9 @@ public final class BundleDAO<T extends VertexFrame> {
      * @param scope
      */
     public BundleDAO(FramedGraph<Neo4jGraph> graph, PermissionScope scope) {
-        this(graph, scope, false);
+        this.graph = graph;
+        this.scope = scope;
+        manager = GraphManagerFactory.getInstance(graph);
     }
 
     /**
@@ -80,7 +63,7 @@ public final class BundleDAO<T extends VertexFrame> {
      * @param graph
      */
     public BundleDAO(FramedGraph<Neo4jGraph> graph) {
-        this(graph, SystemScope.getInstance(), false);
+        this(graph, SystemScope.getInstance());
     }
 
     /**
@@ -103,9 +86,9 @@ public final class BundleDAO<T extends VertexFrame> {
     }
 
     public T createOrUpdate(EntityBundle<T> bundle) throws ValidationError,
-            IntegrityError, ItemNotFound {
-        return graph.frame(importMode ? createOrUpdateInner(bundle)
-                : createInner(bundle), bundle.getBundleClass());
+            IntegrityError {
+        return graph
+                .frame(createOrUpdateInner(bundle), bundle.getBundleClass());
     }
 
     /**
@@ -195,17 +178,18 @@ public final class BundleDAO<T extends VertexFrame> {
      * @throws ItemNotFound
      */
     private Vertex createOrUpdateInner(EntityBundle<T> bundle)
-            throws ValidationError, IntegrityError, ItemNotFound {
-        if (importMode) {
-            if (bundle.getId() == null) {
-                return createInner(bundle);
-            } else {
+            throws ValidationError, IntegrityError {
+        if (bundle.getId() == null) {
+            return createInner(bundle);
+        } else {
+            try {
                 return manager.exists(bundle.getId()) ? updateInner(bundle)
                         : createInner(bundle.getId(), bundle);
+            } catch (ItemNotFound e) {
+                throw new RuntimeException(
+                        "Create or update failed because ItemNotFound was thrown even though exists() was true",
+                        e);
             }
-        } else {
-            return bundle.getId() == null ? createInner(bundle)
-                    : updateInner(bundle);
         }
     }
 
