@@ -6,6 +6,7 @@ import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
 import eu.ehri.project.exceptions.IntegrityError;
+import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.exceptions.InvalidInputFormatError;
 import eu.ehri.project.models.Agent;
@@ -117,6 +118,7 @@ public abstract class AbstractMultiItemRecursiveImporter<T> extends
      * @param depth
      * @throws ValidationError
      * @throws IntegrityError 
+     * @throws ItemNotFound 
      */
     @Override
     public DocumentaryUnit importItem(T itemData, DocumentaryUnit parent,

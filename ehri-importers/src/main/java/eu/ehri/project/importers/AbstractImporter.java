@@ -4,22 +4,21 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
-import com.tinkerpop.gremlin.java.GremlinPipeline;
-import com.tinkerpop.pipes.PipeFunction;
-
+import eu.ehri.project.core.GraphManager;
+import eu.ehri.project.core.GraphManagerFactory;
+import eu.ehri.project.exceptions.IdGenerationError;
 import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.DocumentDescription;
 import eu.ehri.project.models.DocumentaryUnit;
-import eu.ehri.project.models.annotations.EntityType;
-import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.EntityTypes;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.TemporalEntity;
+import eu.ehri.project.models.idgen.DocumentaryUnitIdGenerator;
 import eu.ehri.project.persistance.BundleDAO;
 import eu.ehri.project.persistance.BundleFactory;
 import eu.ehri.project.persistance.EntityBundle;
@@ -36,6 +35,7 @@ public abstract class AbstractImporter<T> {
 
     protected final Agent repository;
     protected final FramedGraph<Neo4jGraph> framedGraph;
+    protected final GraphManager manager;
     protected final ImportLog log;
     protected final T documentContext;
     private List<ImportCallback> createCallbacks = new LinkedList<ImportCallback>();
@@ -55,6 +55,7 @@ public abstract class AbstractImporter<T> {
         this.framedGraph = framedGraph;
         this.log = log;
         this.documentContext = documentContext;
+        manager = GraphManagerFactory.getInstance(framedGraph);
     }
 
     /**
@@ -113,7 +114,7 @@ public abstract class AbstractImporter<T> {
      * @param parent
      * @param depth
      * @throws ValidationError
-     * @throws IntegrityError 
+     * @throws IntegrityError
      */
     protected DocumentaryUnit importItem(T itemData, DocumentaryUnit parent,
             int depth) throws ValidationError, IntegrityError {
@@ -121,7 +122,7 @@ public abstract class AbstractImporter<T> {
                 .buildBundle(extractDocumentaryUnit(itemData, depth),
                         DocumentaryUnit.class);
         BundleDAO<DocumentaryUnit> persister = new BundleDAO<DocumentaryUnit>(
-                framedGraph);
+                framedGraph, repository);
 
         // Add dates and descriptions to the bundle since they're @Dependent
         // relations.
@@ -137,55 +138,36 @@ public abstract class AbstractImporter<T> {
                             DocumentDescription.class));
         }
 
-        String existingId = getExistingGraphId((String) unit.getData().get(
-                AccessibleEntity.IDENTIFIER_KEY));
-        DocumentaryUnit frame;
-        if (existingId != null) {
-            frame = persister.update(new EntityBundle<DocumentaryUnit>(
-                    existingId, unit.getData(), unit.getBundleClass(), unit
-                            .getRelations()));
-        } else {
-            frame = persister.create(unit);
-
-            // Set the repository/item relationship
-            repository.addCollection(frame);
+        DocumentaryUnitIdGenerator generator = new DocumentaryUnitIdGenerator();
+        String id = null;
+        try {
+            id = generator.generateId(EntityTypes.DOCUMENTARY_UNIT, repository,
+                    unit.getData());
+        } catch (IdGenerationError e) {
+            throw new ValidationError("Bad data: " + unit.getData());
         }
+        boolean exists = manager.exists(id);
+        System.out.println("IMPORTING: " + unit.getData());
+        DocumentaryUnit frame = persister
+                .createOrUpdate(new EntityBundle<DocumentaryUnit>(id, unit
+                        .getData(), unit.getBundleClass(), unit.getRelations()));
 
+        // Set the repository/item relationship
+        repository.addCollection(frame);
         // Set the parent child relationship
         if (parent != null)
             parent.addChild(frame);
 
         // Run creation callbacks for the new item...
-        if (existingId == null) {
-            for (ImportCallback cb : createCallbacks) {
+        if (exists) {
+            for (ImportCallback cb : updateCallbacks) {
                 cb.itemImported(frame);
             }
         } else {
-            for (ImportCallback cb : updateCallbacks) {
+            for (ImportCallback cb : createCallbacks) {
                 cb.itemImported(frame);
             }
         }
         return frame;
-    }
-
-    /**
-     * Lookup the graph ID of an existing object based on the IDENTITY_KEY
-     * 
-     * @param id
-     * @return
-     */
-    private String getExistingGraphId(final String id) {
-        // Lookup the graph id of an object with the same
-        // identity key...
-        @SuppressWarnings({ "unchecked", "rawtypes" })
-        GremlinPipeline pipe = new GremlinPipeline(repository.asVertex())
-                .out(Agent.HOLDS).filter(new PipeFunction<Vertex, Boolean>() {
-                    public Boolean compute(Vertex item) {
-                        String vid = (String) item
-                                .getProperty(AccessibleEntity.IDENTIFIER_KEY);
-                        return (vid != null && vid.equals(id));
-                    }
-                }).property(EntityType.ID_KEY);
-        return pipe.hasNext() ? (String)pipe.next() : null;
     }
 }

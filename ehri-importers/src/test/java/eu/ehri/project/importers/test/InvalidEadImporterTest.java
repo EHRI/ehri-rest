@@ -5,12 +5,13 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.junit.Test;
+
+import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.EadImportManager;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.models.Agent;
-import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.test.AbstractFixtureTest;
 
 public class InvalidEadImporterTest extends AbstractFixtureTest {
@@ -24,7 +25,7 @@ public class InvalidEadImporterTest extends AbstractFixtureTest {
     protected final String IMPORTED_ITEM_ID = "C00001";
 
     @Test(expected=ValidationError.class)
-    public void testImportItemsT() throws ValidationError, IOException, InputParseError {
+    public void testImportItemsT() throws ValidationError, IOException, InputParseError, ItemNotFound {
         Agent agent = manager.getFrame(TEST_REPO, Agent.class);
         final String logMessage = "Importing an invalid EAD";
         InputStream ios = ClassLoader.getSystemResourceAsStream(INVALID_EAD);
@@ -37,7 +38,7 @@ public class InvalidEadImporterTest extends AbstractFixtureTest {
     }
 
     @Test
-    public void testTolerantImport() throws ValidationError, IOException, InputParseError {
+    public void testTolerantImport() throws ValidationError, IOException, InputParseError, ItemNotFound {
         Agent agent = manager.getFrame(TEST_REPO, Agent.class);
         final String logMessage = "Importing an invalid EAD";
 
@@ -54,7 +55,7 @@ public class InvalidEadImporterTest extends AbstractFixtureTest {
     }
 
     @Test
-    public void testRollback() throws ValidationError, IOException, InputParseError {
+    public void testRollback() throws ValidationError, IOException, InputParseError, ItemNotFound {
         Agent agent = manager.getFrame(TEST_REPO, Agent.class);
         final String logMessage = "Importing an invalid EAD";
 
