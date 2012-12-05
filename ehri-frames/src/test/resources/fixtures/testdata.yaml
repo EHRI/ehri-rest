@@ -89,7 +89,7 @@
         type: agentDescription
         data:
           identifier: niod-en
-          name: Repository 1 Description
+          name: NIOD Description
           languageCode: en
         relationships:
           hasAddress:
@@ -99,7 +99,120 @@
                 name: "An Address"
                 streetAddress: 1 Some St.
                 city: Amsterdam
-                
+
+- id: kcl
+  type: agent
+  data:
+    identifier: kcl
+    name: King's College London
+  relationships:
+    describes:
+      - id: kclDesc1
+        type: agentDescription
+        data:
+          identifier: kcl-en
+          name: KCL Description
+          languageCode: en
+        relationships:
+          hasAddress:
+            - id: kcl-address-1
+              type: address
+              data:
+                name: "An Address"
+                streetAddress: Strand
+                city: London
                          
+- id: dans
+  type: agent
+  data:
+    identifier: dans
+    name: DANS
+  relationships:
+    describes:
+      - id: dansDesc1
+        type: agentDescription
+        data:
+          identifier: dans-en
+          name: DANS Description
+          languageCode: en
+        relationships:
+          hasAddress:
+            - id: dans-address-1
+              type: address
+              data:
+                name: "An Address"
+                city: The Hague
+
+- id: soma
+  type: agent
+  data:
+    identifier: soma
+    name: CEGES SOMA
+  relationships:
+    describes:
+      - id: somaDesc1
+        type: agentDescription
+        data:
+          identifier: soma-en
+          name: SOMA Description
+          languageCode: en
+        relationships:
+          hasAddress:
+            - id: soma-address-1
+              type: address
+              data:
+                name: "An Address"
+                city: Brussels
       
       
+--- # Collections
+
+# C1 is a top-level documentary unit which, held by NIOD, which contains
+# child items.
+- id: c1
+  type: documentaryUnit
+  data:
+    identifier: c1
+    name: Collection 1
+  relationships:
+    describes:
+      - id: cd1
+        type: documentDescription
+        data:
+          identifier: c1-desc
+          title: Documentary Unit 1
+          languageCode: en
+    hasDate:
+      - id: c1-dp1
+        type: datePeriod
+        data:
+          startDate: 1939-01-01!!str
+          endDate: 1945-01-01!!str
+    heldBy:
+      - niod
+
+# C2 is also held by NIOD, and is a child item of C1
+- id: c2
+  type: documentaryUnit
+  data:
+    identifier: c2
+    name: Collection 2
+  relationships:
+    describes:
+      - id: cd2
+        type: documentDescription
+        data:
+          identifier: c2-desc
+          title: Documentary Unit 2
+          languageCode: en
+    hasDate:
+      - id: c2-dp1
+        type: datePeriod
+        data:
+          startDate: 1939-01-01!!str
+          endDate: 1945-01-01!!str
+    heldBy:
+      - niod
+    hasParent:
+      - c1
+        

@@ -19,6 +19,7 @@ import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.yaml.snakeyaml.Yaml;
 
+import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
@@ -45,17 +46,17 @@ public class YamlFixtureLoader implements FixtureLoader {
 
     private final FramedGraph<Neo4jGraph> graph;
     private final GraphManager manager;
-    
+
     public YamlFixtureLoader(FramedGraph<Neo4jGraph> graph) {
         this.graph = graph;
         manager = GraphManagerFactory.getInstance(graph);
     }
-    
+
     private void loadFixtures() {
         loadFixtureFile(this.getClass().getClassLoader()
                 .getResourceAsStream("initial.yaml"));
         loadFixtureFile(this.getClass().getClassLoader()
-                .getResourceAsStream("testdata.yaml"));        
+                .getResourceAsStream("testdata.yaml"));
     }
 
     private void loadFixtureFile(InputStream yamlStream) {
@@ -64,7 +65,7 @@ public class YamlFixtureLoader implements FixtureLoader {
             Map<Vertex, MultiValueMap> links = new HashMap<Vertex, MultiValueMap>();
 
             Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
-            for (Object data : yaml.loadAll(yamlStream)) {                
+            for (Object data : yaml.loadAll(yamlStream)) {
                 for (Map<String, Object> node : (List<Map<String, Object>>) data) {
                     importNode(links, node);
                 }
@@ -78,7 +79,8 @@ public class YamlFixtureLoader implements FixtureLoader {
             for (Node node : graph.getBaseGraph().getRawGraph().getAllNodes()) {
                 System.out.println(" - node: " + node);
                 for (String p : node.getPropertyKeys()) {
-                    System.out.println(String.format("  - %-20s : %s", p, node.getProperty(p)));
+                    System.out.println(String.format("  - %-20s : %s", p,
+                            node.getProperty(p)));
                 }
             }
             System.out.println();
@@ -93,8 +95,8 @@ public class YamlFixtureLoader implements FixtureLoader {
                         for (Object target : targets) {
                             if (target instanceof String) {
                                 System.out.println(" - Linking: " + target);
-                                Vertex dst = graph.getVertices(EntityType.ID_KEY, target).iterator().next();
-                                graph.addEdge(null, src, dst, (String) relname);
+                                Vertex dst = manager.getVertex((String) target);
+                                addRelationship(src, dst, (String) relname);
                             }
                         }
                     }
@@ -106,13 +108,25 @@ public class YamlFixtureLoader implements FixtureLoader {
         }
     }
 
+    private void addRelationship(Vertex src, Vertex dst, String relname) {
+        boolean found = false;
+        for (Vertex v : src.getVertices(Direction.OUT, relname)) {
+            if (v == dst) {
+                found = true;
+                break;
+            }
+        }
+        if (!found)
+            graph.addEdge(null, src, dst, (String) relname);
+    }
+
     /**
      * @param links
      * @param node
      * @throws DeserializationError
      * @throws ValidationError
      * @throws IntegrityError
-     * @throws ItemNotFound 
+     * @throws ItemNotFound
      */
     private void importNode(Map<Vertex, MultiValueMap> links,
             Map<String, Object> node) throws DeserializationError,
@@ -125,8 +139,7 @@ public class YamlFixtureLoader implements FixtureLoader {
         @SuppressWarnings("unchecked")
         Map<String, List<Object>> nodeRels = (Map<String, List<Object>>) node
                 .get(Converter.REL_KEY);
-        System.out.println(String.format("Item: %s %s %s", id,
-                type, nodeData));
+        System.out.println(String.format("Item: %s %s %s", id, type, nodeData));
 
         MultiValueMap rels = getDependentRelations(nodeRels);
         Map<String, Object> dataBundle = new HashMap<String, Object>();
@@ -136,8 +149,8 @@ public class YamlFixtureLoader implements FixtureLoader {
         dataBundle.put(Converter.REL_KEY, rels);
         EntityBundle<VertexFrame> entityBundle = new Converter()
                 .dataToBundle(dataBundle);
-        BundleDAO<VertexFrame> persister = new BundleDAO<VertexFrame>(
-                graph, SystemScope.getInstance());
+        BundleDAO<VertexFrame> persister = new BundleDAO<VertexFrame>(graph,
+                SystemScope.getInstance());
         System.out.println("CREATING NODE: " + id);
         VertexFrame frame = persister.createOrUpdate(entityBundle);
 
