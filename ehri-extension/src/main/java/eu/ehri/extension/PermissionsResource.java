@@ -3,6 +3,8 @@ package eu.ehri.extension;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.NoSuchElementException;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -34,6 +36,7 @@ import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionGrantTarget;
 import eu.ehri.project.persistance.ActionManager;
+import eu.ehri.project.persistance.Converter;
 
 /**
  * Provides a RESTfull(ish) interface for setting PermissionTarget perms.
@@ -53,10 +56,10 @@ public class PermissionsResource extends AbstractRestResource {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{atype:[^/]+}/{id:[^/]+}")
-    public Response setGlobalMatrix(@PathParam("atype") String atype,
-            @PathParam("id") String id, String json) throws PermissionDenied,
-            JsonParseException, JsonMappingException, IOException, ItemNotFound {
+    @Path("/{id:[^/]+}")
+    public Response setGlobalMatrix(@PathParam("id") String id, String json)
+            throws PermissionDenied, JsonParseException, JsonMappingException,
+            IOException, ItemNotFound {
 
         JsonFactory factory = new JsonFactory();
         ObjectMapper mapper = new ObjectMapper(factory);
@@ -67,7 +70,7 @@ public class PermissionsResource extends AbstractRestResource {
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
             // remove all existing permission grants
-            Accessor accessor = getEntity(atype, id, Accessor.class);
+            Accessor accessor = manager.getFrame(id, Accessor.class);
             Accessor grantee = getRequesterUserProfile();
             AclManager acl = new AclManager(graph);
             acl.setGlobalPermissionMatrix(accessor, globals);
@@ -79,7 +82,9 @@ public class PermissionsResource extends AbstractRestResource {
                     "Updated permissions");
 
             tx.success();
-            return getGlobalMatrix(atype, id);
+            return getGlobalMatrix(id);
+        } catch (NoSuchElementException e) {
+            throw new ItemNotFound(Converter.ID_KEY, id);
         } catch (Exception e) {
             tx.failure();
             throw new WebApplicationException(e);
@@ -91,7 +96,6 @@ public class PermissionsResource extends AbstractRestResource {
     /**
      * Get the global permission matrix for the given accessor.
      * 
-     * @param atype
      * @param id
      * @return
      * @throws PermissionDenied
@@ -102,13 +106,12 @@ public class PermissionsResource extends AbstractRestResource {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{atype:[^/]+}/{id:[^/]+}")
-    public Response getGlobalMatrix(@PathParam("atype") String atype,
-            @PathParam("id") String id) throws PermissionDenied,
-            JsonGenerationException, JsonMappingException, IOException,
-            ItemNotFound {
+    @Path("/{id:[^/]+}")
+    public Response getGlobalMatrix(@PathParam("id") String id)
+            throws PermissionDenied, JsonGenerationException,
+            JsonMappingException, IOException, ItemNotFound {
 
-        Accessor accessor = getEntity(atype, id, Accessor.class);
+        Accessor accessor = manager.getFrame(id, Accessor.class);
         AclManager acl = new AclManager(graph);
 
         return Response
@@ -135,16 +138,13 @@ public class PermissionsResource extends AbstractRestResource {
             JsonGenerationException, JsonMappingException, IOException,
             ItemNotFound, BadRequester {
         Accessor accessor = getRequesterUserProfile();
-        return getGlobalMatrix(EntityTypes.USER_PROFILE,
-                accessor.getIdentifier());
+        return getGlobalMatrix(accessor.getIdentifier());
     }
 
     /**
      * Get the permission matrix for a given user on the given entity.
      * 
-     * @param atype
      * @param userId
-     * @param ctype
      * @param id
      * @return
      * @throws PermissionDenied
@@ -155,15 +155,14 @@ public class PermissionsResource extends AbstractRestResource {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{atype:[^/]+}/{userId:[^/]+}/{ctype:[^/]+}/{id:[^/]+}")
-    public Response getEntityMatrix(@PathParam("atype") String atype,
-            @PathParam("userId") String userId,
-            @PathParam("ctype") String ctype, @PathParam("id") String id)
-            throws PermissionDenied, JsonGenerationException,
-            JsonMappingException, IOException, ItemNotFound {
+    @Path("/{userId:[^/]+}/{id:[^/]+}")
+    public Response getEntityMatrix(@PathParam("userId") String userId,
+            @PathParam("id") String id) throws PermissionDenied,
+            JsonGenerationException, JsonMappingException, IOException,
+            ItemNotFound {
 
-        Accessor accessor = getEntity(atype, userId, Accessor.class);
-        PermissionGrantTarget entity = getEntity(ctype, id,
+        Accessor accessor = manager.getFrame(userId, Accessor.class);
+        PermissionGrantTarget entity = manager.getFrame(id,
                 PermissionGrantTarget.class);
         AclManager acl = new AclManager(graph);
 

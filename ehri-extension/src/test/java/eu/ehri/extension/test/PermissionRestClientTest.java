@@ -61,8 +61,7 @@ public class PermissionRestClientTest extends BaseRestClientTest {
             UniformInterfaceException, IOException {
 
         WebResource resource = client.resource(getExtensionEntryPointUri()
-                + "/" + EntityTypes.PERMISSION + "/" + EntityTypes.USER_PROFILE
-                + "/" + LIMITED_USER_NAME);
+                + "/" + EntityTypes.PERMISSION + "/" + LIMITED_USER_NAME);
         ClientResponse response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
@@ -81,8 +80,7 @@ public class PermissionRestClientTest extends BaseRestClientTest {
 
         // Set the permission via REST
         resource = client.resource(getExtensionEntryPointUri() + "/"
-                + EntityTypes.PERMISSION + "/" + EntityTypes.USER_PROFILE + "/"
-                + LIMITED_USER_NAME);
+                + EntityTypes.PERMISSION + "/" + LIMITED_USER_NAME);
         response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
@@ -93,10 +91,8 @@ public class PermissionRestClientTest extends BaseRestClientTest {
 
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
 
-        // Retry the create action
         resource = client.resource(getExtensionEntryPointUri() + "/"
-                + EntityTypes.PERMISSION + "/" + EntityTypes.USER_PROFILE + "/"
-                + LIMITED_USER_NAME);
+                + EntityTypes.PERMISSION + "/" + LIMITED_USER_NAME);
         response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
@@ -133,8 +129,7 @@ public class PermissionRestClientTest extends BaseRestClientTest {
 
         // Set the permission via REST
         resource = client.resource(getExtensionEntryPointUri() + "/"
-                + EntityTypes.PERMISSION + "/" + EntityTypes.USER_PROFILE + "/"
-                + LIMITED_USER_NAME);
+                + EntityTypes.PERMISSION + "/" + LIMITED_USER_NAME);
         response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
