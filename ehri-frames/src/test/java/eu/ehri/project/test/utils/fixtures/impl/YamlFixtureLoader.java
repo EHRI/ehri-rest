@@ -1,18 +1,14 @@
 package eu.ehri.project.test.utils.fixtures.impl;
 
 import java.io.InputStream;
+import java.lang.reflect.Method;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import javax.management.RuntimeErrorException;
-
 import org.apache.commons.collections.map.MultiValueMap;
-import org.hamcrest.core.IsInstanceOf;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
@@ -22,6 +18,7 @@ import org.yaml.snakeyaml.Yaml;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
+import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.frames.VertexFrame;
 
@@ -35,21 +32,26 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.utils.ClassUtils;
 import eu.ehri.project.persistance.BundleDAO;
-import eu.ehri.project.persistance.BundleFactory;
 import eu.ehri.project.persistance.Converter;
 import eu.ehri.project.persistance.EntityBundle;
 import eu.ehri.project.test.utils.fixtures.FixtureLoader;
 
+/**
+ * Load data from YAML fixtures.
+ * 
+ * @author michaelb
+ *
+ */
 public class YamlFixtureLoader implements FixtureLoader {
-
-    public static final String DESCRIPTOR_KEY = "_desc";
 
     private final FramedGraph<Neo4jGraph> graph;
     private final GraphManager manager;
+    private final Map<String, Class<? extends VertexFrame>> classes;
 
     public YamlFixtureLoader(FramedGraph<Neo4jGraph> graph) {
         this.graph = graph;
         manager = GraphManagerFactory.getInstance(graph);
+        classes = ClassUtils.getEntityClasses();
     }
 
     private void loadFixtures() {
@@ -95,7 +97,8 @@ public class YamlFixtureLoader implements FixtureLoader {
                         for (Object target : targets) {
                             if (target instanceof String) {
                                 System.out.printf(" - %s -[%s]-> %s\n",
-                                        src.getProperty(EntityType.ID_KEY), relname, target);
+                                        src.getProperty(EntityType.ID_KEY),
+                                        relname, target);
                                 Vertex dst = manager.getVertex((String) target);
                                 addRelationship(src, dst, (String) relname);
                             }
@@ -111,14 +114,48 @@ public class YamlFixtureLoader implements FixtureLoader {
 
     private void addRelationship(Vertex src, Vertex dst, String relname) {
         boolean found = false;
-        for (Vertex v : src.getVertices(Direction.OUT, relname)) {
+        Direction direction = getDirectionOfRelationship(src, dst, relname);
+        for (Vertex v : src.getVertices(direction, relname)) {
             if (v == dst) {
                 found = true;
                 break;
             }
         }
-        if (!found)
-            graph.addEdge(null, src, dst, (String) relname);
+        if (!found) {
+            if (direction == Direction.OUT)
+                graph.addEdge(null, src, dst, (String) relname);
+            else
+                graph.addEdge(null, dst, src, (String) relname);
+        }
+    }
+
+    // Copied and pasted from BundleDAO for the moment...
+    private Direction getDirectionOfRelationship(Vertex a, Vertex b, String rel) {
+        Class<?> classA = getClassForVertex(a);
+        Class<?> classB = getClassForVertex(b);
+        for (Method method : classA.getMethods()) {
+            Adjacency adj = method.getAnnotation(Adjacency.class);
+            if (adj != null && adj.label().equals(rel)) {
+                return adj.direction();
+            }
+        }
+        for (Method method : classB.getMethods()) {
+            Adjacency adj = method.getAnnotation(Adjacency.class);
+            if (adj != null && adj.label().equals(rel)) {
+                return adj.direction();
+            }
+        }
+        // If we get here then something has gone badly wrong, because the
+        // correct direction could not be found. Maybe it's better to just
+        // ignore saving the dependency in the long run?
+        throw new RuntimeException(
+                String.format(
+                        "Unable to find the direction of relationship between dependent classes with relationship '%s': '%s', '%s'",
+                        rel, classA.getName(), classB.getName()));
+    }
+
+    private Class<?> getClassForVertex(Vertex a) {
+        return classes.get((String) a.getProperty(EntityType.TYPE_KEY));
     }
 
     /**
