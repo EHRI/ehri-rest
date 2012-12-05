@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
+import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.Annotation;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.UserProfile;
@@ -16,7 +17,7 @@ public class AnnotationTest extends ModelTestBase {
     public static final String TEST_ANNOTATION_ANNOTATION_BODY = "Test Annotation of Annotation";
 
     @Test
-    public void testUserHasAnnotation() {
+    public void testUserHasAnnotation() throws ItemNotFound {
         UserProfile mike = manager.getFrame("mike", UserProfile.class);
         assertTrue(mike.getAnnotations().iterator().hasNext());
         assertEquals(mike.getAnnotations().iterator().next().getBody(),
@@ -24,7 +25,7 @@ public class AnnotationTest extends ModelTestBase {
     }
 
     @Test
-    public void testUserHasAnnotationWithTarget() {
+    public void testUserHasAnnotationWithTarget() throws ItemNotFound {
         UserProfile mike = manager.getFrame("mike", UserProfile.class);
         DocumentaryUnit c1 = manager.getFrame("c1", DocumentaryUnit.class);
         Annotation annotation = mike.getAnnotations().iterator().next();
@@ -37,7 +38,7 @@ public class AnnotationTest extends ModelTestBase {
     }
 
     @Test
-    public void testAnnotationAnnotation() {
+    public void testAnnotationAnnotation() throws ItemNotFound {
         AnnotatableEntity ann1 = manager.getFrame("ann1",
                 AnnotatableEntity.class);
         Annotation ann2 = manager.getFrame("ann2", Annotation.class);

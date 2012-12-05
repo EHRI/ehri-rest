@@ -7,6 +7,8 @@ import java.util.List;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.DocumentaryUnit;
 
 public class HierarchyTest extends ModelTestBase {
@@ -16,7 +18,7 @@ public class HierarchyTest extends ModelTestBase {
     }
 
     @Test
-    public void testCollectionHierarchy() {
+    public void testCollectionHierarchy() throws ItemNotFound {
         DocumentaryUnit c1 = manager.getFrame("c1", DocumentaryUnit.class);
         DocumentaryUnit c2 = manager.getFrame("c2", DocumentaryUnit.class);
         assertTrue(toList(c1.getChildren()).contains(c2));
@@ -26,7 +28,7 @@ public class HierarchyTest extends ModelTestBase {
     }
 
     @Test
-    public void testCollectionAncestry() {
+    public void testCollectionAncestry() throws ItemNotFound {
         DocumentaryUnit c1 = manager.getFrame("c1", DocumentaryUnit.class);
         DocumentaryUnit c2 = manager.getFrame("c2", DocumentaryUnit.class);
         DocumentaryUnit c3 = manager.getFrame("c3", DocumentaryUnit.class);
@@ -38,7 +40,7 @@ public class HierarchyTest extends ModelTestBase {
     }
 
     @Test
-    public void testFullAncestry() {
+    public void testFullAncestry() throws ItemNotFound {
         DocumentaryUnit c1 = manager.getFrame("c1", DocumentaryUnit.class);
         DocumentaryUnit c2 = manager.getFrame("c2", DocumentaryUnit.class);
         DocumentaryUnit c3 = manager.getFrame("c3", DocumentaryUnit.class);

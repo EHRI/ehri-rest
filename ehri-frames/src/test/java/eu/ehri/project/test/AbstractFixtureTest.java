@@ -7,6 +7,7 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.BeforeClass;
 
+import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityTypes;
@@ -34,9 +35,13 @@ abstract public class AbstractFixtureTest extends ModelTestBase {
     @Override
     public void setUp() {
         super.setUp();
-        item = manager.getFrame("c1", DocumentaryUnit.class);
-        validUser = manager.getFrame("mike", UserProfile.class);
-        invalidUser = manager.getFrame("reto", UserProfile.class);
+        try {
+            item = manager.getFrame("c1", DocumentaryUnit.class);
+            validUser = manager.getFrame("mike", UserProfile.class);
+            invalidUser = manager.getFrame("reto", UserProfile.class);
+        } catch (ItemNotFound e) {
+            throw new RuntimeException(e);
+        }
     }
 
     // Helpers, additional test data

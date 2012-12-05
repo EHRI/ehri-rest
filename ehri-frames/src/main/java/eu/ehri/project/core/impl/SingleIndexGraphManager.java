@@ -23,6 +23,7 @@ import com.tinkerpop.frames.FramedGraph;
 
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.exceptions.IntegrityError;
+import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.annotations.EntityType;
 
 /**
@@ -51,14 +52,15 @@ public final class SingleIndexGraphManager implements GraphManager {
         return getIndex().count(EntityType.ID_KEY, id) > 0L;
     }
 
-    public <T> T getFrame(String id, Class<T> cls) {
+    public <T> T getFrame(String id, Class<T> cls) throws ItemNotFound {
         return graph.frame(getVertex(id), cls);
     }
-    
-    public <T> T getFrame(String id, String type, Class<T> cls) {
+
+    public <T> T getFrame(String id, String type, Class<T> cls)
+            throws ItemNotFound {
         return graph.frame(getVertex(id, type), cls);
     }
-    
+
     public <T> Iterable<T> getFrames(String type, Class<T> cls) {
         CloseableIterable<Vertex> vertices = getVertices(type);
         try {
@@ -81,24 +83,33 @@ public final class SingleIndexGraphManager implements GraphManager {
                 false);
     }
 
-    public Vertex getVertex(String id) {
+    public Vertex getVertex(String id) throws ItemNotFound {
         if (id == null)
             throw new IllegalArgumentException(
                     "Attempting to fetch vertex with null id");
         CloseableIterable<Vertex> query = getIndex().get(EntityType.ID_KEY, id);
         try {
             return query.iterator().next();
+        } catch (NoSuchElementException e) {
+            throw new ItemNotFound(id);
         } finally {
             query.close();
         }
     }
-    
-    public Vertex getVertex(String id, String type) {
+
+    public Vertex getVertex(String id, String type) throws ItemNotFound {
         String queryStr = getLuceneQuery(EntityType.ID_KEY, id, type);
         IndexHits<Node> rawQuery = getRawIndex().query(queryStr);
-        // NB: Not using rawQuery.getSingle here so we throw NoSuchElement other than
-        // return null.
-        return new Neo4jVertex(rawQuery.iterator().next(), graph.getBaseGraph());
+        // NB: Not using rawQuery.getSingle here so we throw NoSuchElement other
+        // than return null.
+        try {
+            return new Neo4jVertex(rawQuery.iterator().next(),
+                    graph.getBaseGraph());
+        } catch (NoSuchElementException e) {
+            throw new ItemNotFound(id);
+        } finally {
+            rawQuery.close();
+        }
     }
 
     /**
@@ -174,20 +185,20 @@ public final class SingleIndexGraphManager implements GraphManager {
     }
 
     public Vertex updateVertex(String id, String type, Map<String, Object> data)
-            throws IntegrityError {
+            throws IntegrityError, ItemNotFound {
         return updateVertex(id, type, data, data.keySet(),
                 new LinkedList<String>());
     }
 
     public Vertex updateVertex(String id, String type,
             Map<String, Object> data, Collection<String> keys)
-            throws IntegrityError {
+            throws IntegrityError, ItemNotFound {
         return updateVertex(id, type, data, keys, new LinkedList<String>());
     }
 
     public Vertex updateVertex(String id, String type,
             Map<String, Object> data, Collection<String> keys,
-            Collection<String> uniqueKeys) throws IntegrityError {
+            Collection<String> uniqueKeys) throws IntegrityError, ItemNotFound {
         Index<Vertex> index = getIndex();
         Map<String, Object> indexData = getVertexData(id, type, data);
         Collection<String> indexKeys = getVertexKeys(id, type, keys);
@@ -258,8 +269,9 @@ public final class SingleIndexGraphManager implements GraphManager {
      * 
      * @param id
      *            The vertex identifier
+     * @throws ItemNotFound
      */
-    public void deleteVertex(String id) {
+    public void deleteVertex(String id) throws ItemNotFound {
         deleteVertex(getVertex(id));
     }
 

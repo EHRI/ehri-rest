@@ -8,6 +8,7 @@ import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.Vertex;
 
 import eu.ehri.project.exceptions.IntegrityError;
+import eu.ehri.project.exceptions.ItemNotFound;
 
 public interface GraphManager {
 
@@ -22,7 +23,7 @@ public interface GraphManager {
      * @param id
      * @return
      */
-    public Vertex getVertex(String id);
+    public Vertex getVertex(String id) throws ItemNotFound;
 
     /**
      * Get a node with the given ID and type.
@@ -30,7 +31,7 @@ public interface GraphManager {
      * @param id
      * @return
      */
-    public Vertex getVertex(String id, String type);
+    public Vertex getVertex(String id, String type) throws ItemNotFound;
 
     /**
      * Get a node with the given ID, and frame it with the given interface
@@ -40,7 +41,7 @@ public interface GraphManager {
      * @param cls
      * @return
      */
-    public <T> T getFrame(String id, Class<T> cls);
+    public <T> T getFrame(String id, Class<T> cls) throws ItemNotFound;
 
     /**
      * Get a node with the given ID and type, framing it with the given
@@ -51,7 +52,7 @@ public interface GraphManager {
      * @param cls
      * @return
      */
-    public <T> T getFrame(String id, String type, Class<T> cls);
+    public <T> T getFrame(String id, String type, Class<T> cls) throws ItemNotFound;
 
     /**
      * Get a CloseableIterable of vertices with the given type.
@@ -96,7 +97,7 @@ public interface GraphManager {
      * 
      * @param id
      */
-    public void deleteVertex(String id);
+    public void deleteVertex(String id) throws ItemNotFound;
 
     /**
      * Delete the given vertex.
@@ -145,7 +146,7 @@ public interface GraphManager {
      */
     public Vertex updateVertex(String id, String type,
             Map<String, Object> data, Collection<String> keys,
-            Collection<String> uniqueKeys) throws IntegrityError;
+            Collection<String> uniqueKeys) throws IntegrityError, ItemNotFound;
 
     /**
      * Create a vertex with the given id, type, and data.
@@ -157,7 +158,7 @@ public interface GraphManager {
      * @throws IntegrityError
      */
     public Vertex updateVertex(String id, String type, Map<String, Object> data)
-            throws IntegrityError;
+            throws IntegrityError, ItemNotFound;
 
     /**
      * Create a vertex with the given id, type, and data, specifying which
@@ -172,7 +173,7 @@ public interface GraphManager {
      */
     public Vertex updateVertex(String id, String type,
             Map<String, Object> data, Collection<String> keys)
-            throws IntegrityError;
+            throws IntegrityError, ItemNotFound;
 
     /**
      * Create a vertex with the given id, type, and data, specifying which

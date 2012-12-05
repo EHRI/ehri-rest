@@ -10,12 +10,6 @@
     identifier: documentaryUnit
     name: DocumentaryUnit
 
-- id: documentaryUnit
-  type: contentType
-  data:
-    identifier: documentaryUnit
-    name: DocumentaryUnit
-    
 - id: userProfile
   type: contentType
   data:

@@ -70,7 +70,7 @@ public class QueryTest extends AbstractFixtureTest {
     }
     
     @Test
-    public void testUserCannotListPrivate() throws IndexNotFoundException {
+    public void testUserCannotListPrivate() throws IndexNotFoundException, ItemNotFound {
         Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
 

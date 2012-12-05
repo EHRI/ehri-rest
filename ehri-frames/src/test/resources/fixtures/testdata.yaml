@@ -8,7 +8,7 @@
 - id: niodGroup
   type: group
   data:
-    identifier: niod
+    identifier: niod-group
     name: NIOD
   relationships:
     belongsTo:
@@ -17,19 +17,19 @@
 - id: kclGroup
   type: group
   data:
-    identifier: kcl
+    identifier: kcl-group
     name: KCL
     
 - id: dansGroup
   type: group
   data:
-    identifier: dans
+    identifier: dans-group
     name: DANS    
     
 - id: somaGroup
   type: group
   data:
-    identifier: soma
+    identifier: soma-group
     name: CEGES-SOMA
 
 --- # Users Mike, Tim, Linda, and Reto

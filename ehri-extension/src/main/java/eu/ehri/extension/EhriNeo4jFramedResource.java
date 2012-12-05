@@ -3,8 +3,6 @@ package eu.ehri.extension;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
-import java.util.NoSuchElementException;
-
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
@@ -242,8 +240,6 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> extends
             String jsonStr = new Converter().vertexFrameToJson(entity);
             return Response.status(Status.OK).entity((jsonStr).getBytes())
                     .build();
-        } catch (NoSuchElementException e) {
-            throw new ItemNotFound("id", id);
         } catch (SerializationError e) {
             throw new WebApplicationException(e);
         }
@@ -334,8 +330,6 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> extends
                     .asVertex().getProperty(EntityType.ID_KEY),
                     rawBundle.getData(), cls, rawBundle.getRelations());
             return update(converter.bundleToJson(entityBundle));
-        } catch (NoSuchElementException e) {
-            throw new ItemNotFound("id", id);
         } catch (SerializationError e) {
             throw new WebApplicationException(e);
         }
@@ -381,8 +375,6 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> extends
                     getRequesterUserProfile());
             views.delete(entity, getRequesterUserProfile());
             return Response.status(Status.OK).build();
-        } catch (NoSuchElementException e) {
-            throw new ItemNotFound("id", id);
         } catch (SerializationError e) {
             throw new WebApplicationException(e);
         }

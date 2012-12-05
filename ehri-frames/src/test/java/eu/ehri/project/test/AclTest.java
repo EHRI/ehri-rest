@@ -17,6 +17,7 @@ import org.junit.Test;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.acl.AnonymousAccessor;
 import eu.ehri.project.acl.PermissionTypes;
+import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityTypes;
@@ -46,7 +47,7 @@ public class AclTest extends ModelTestBase {
     }
 
     @Test
-    public void testTheAdminGroup() {
+    public void testTheAdminGroup() throws ItemNotFound {
         Group admin = manager.getFrame("admin", Group.class);
         // check we have some users
         assertTrue(admin.getMembers().iterator().hasNext());
@@ -54,9 +55,10 @@ public class AclTest extends ModelTestBase {
 
     /**
      * Ensure user 'Reto' can't access collection 'c3'.
+     * @throws ItemNotFound 
      */
     @Test
-    public void testAdminRead() {
+    public void testAdminRead() throws ItemNotFound {
         Group admin = manager.getFrame("admin", Group.class);
         UserProfile reto = manager.getFrame("reto", UserProfile.class);
         DocumentaryUnit c3 = manager.getFrame("c3", DocumentaryUnit.class);
@@ -66,9 +68,10 @@ public class AclTest extends ModelTestBase {
 
     /**
      * Test NIOD group has no access to items with admin perms.
+     * @throws ItemNotFound 
      */
     @Test
-    public void testNiodGroup() {
+    public void testNiodGroup() throws ItemNotFound {
         Group niod = manager.getFrame("niod", Group.class);
         DocumentaryUnit c1 = manager.getFrame("c1", DocumentaryUnit.class);
         assertFalse(acl.getAccessControl(c1, niod));
@@ -80,9 +83,10 @@ public class AclTest extends ModelTestBase {
 
     /**
      * Group permissions override user permissions.
+     * @throws ItemNotFound 
      */
     @Test
-    public void testUserGroupPermOverride() {
+    public void testUserGroupPermOverride() throws ItemNotFound {
         Accessor tim = manager.getFrame("tim", Accessor.class);
         AccessibleEntity c3 = manager.getFrame("c3", AccessibleEntity.class);
         assertTrue(acl.getAccessControl(c3, tim));
@@ -90,9 +94,10 @@ public class AclTest extends ModelTestBase {
 
     /**
      * Test user accessing profile.
+     * @throws ItemNotFound 
      */
     @Test
-    public void testUserCanAccessOwnProfile() {
+    public void testUserCanAccessOwnProfile() throws ItemNotFound {
         Accessor reto = manager.getFrame("reto", Accessor.class);
         AccessibleEntity prof = manager.getFrame("reto",
                 AccessibleEntity.class);
@@ -103,9 +108,10 @@ public class AclTest extends ModelTestBase {
 
     /**
      * Test user accessing other profile.
+     * @throws ItemNotFound 
      */
     @Test
-    public void testUserCannotWriteOtherProfile() {
+    public void testUserCannotWriteOtherProfile() throws ItemNotFound {
         Accessor reto = manager.getFrame("reto", Accessor.class);
         AccessibleEntity tim = manager.getFrame("tim",
                 AccessibleEntity.class);
@@ -114,9 +120,10 @@ public class AclTest extends ModelTestBase {
 
     /**
      * Test user accessing other profile as anonymous.
+     * @throws ItemNotFound 
      */
     @Test
-    public void testUserAccessAsAnonymous() {
+    public void testUserAccessAsAnonymous() throws ItemNotFound {
         AccessibleEntity tim = manager.getFrame("tim",
                 AccessibleEntity.class);
         assertTrue(acl.getAccessControl(tim, AnonymousAccessor.getInstance()));
@@ -124,9 +131,10 @@ public class AclTest extends ModelTestBase {
 
     /**
      * Test a member of a group DOES NOT have write access to the group.
+     * @throws ItemNotFound 
      */
     @Test
-    public void testUserCannotChangeGroupJustByBeingAMemberOfIt() {
+    public void testUserCannotChangeGroupJustByBeingAMemberOfIt() throws ItemNotFound {
         Accessor reto = manager.getFrame("reto", Accessor.class);
         AccessibleEntity kcl = manager.getFrame("kcl",
                 AccessibleEntity.class);
@@ -139,9 +147,10 @@ public class AclTest extends ModelTestBase {
      * Test changing permissions on an item.
      * 
      * @throws PermissionDenied
+     * @throws ItemNotFound 
      */
     @Test
-    public void testChangingItemAccessibility() throws PermissionDenied {
+    public void testChangingItemAccessibility() throws PermissionDenied, ItemNotFound {
         Accessor reto = manager.getFrame("reto", Accessor.class);
         AccessibleEntity kcl = manager.getFrame("kcl",
                 AccessibleEntity.class);
@@ -158,9 +167,10 @@ public class AclTest extends ModelTestBase {
      * Test removing permissions.
      * 
      * @throws PermissionDenied
+     * @throws ItemNotFound 
      */
     @Test
-    public void testRemovingItemAccessibility() throws PermissionDenied {
+    public void testRemovingItemAccessibility() throws PermissionDenied, ItemNotFound {
         Accessor reto = manager.getFrame("reto", Accessor.class);
         AccessibleEntity kcl = manager.getFrame("kcl",
                 AccessibleEntity.class);
@@ -181,9 +191,10 @@ public class AclTest extends ModelTestBase {
      * Test the global permission matrix.
      * 
      * @throws PermissionDenied
+     * @throws ItemNotFound 
      */
     @Test
-    public void testGlobalPermissionMatrix() throws PermissionDenied {
+    public void testGlobalPermissionMatrix() throws PermissionDenied, ItemNotFound {
         Accessor linda = manager.getFrame("linda", Accessor.class);
         // Admin can change anything, so ensure the user ISN'T a member of admin
         assertFalse(acl.belongsToAdmin(linda));
@@ -195,7 +206,7 @@ public class AclTest extends ModelTestBase {
     }
 
     @Test
-    public void testPermissionSet() throws PermissionDenied {
+    public void testPermissionSet() throws PermissionDenied, ItemNotFound {
 
         String[] perms = { PermissionTypes.CREATE, PermissionTypes.DELETE,
                 PermissionTypes.UPDATE, PermissionTypes.GRANT,
@@ -237,9 +248,10 @@ public class AclTest extends ModelTestBase {
      * Test admin perms cannot be set.
      * 
      * @throws PermissionDenied
+     * @throws ItemNotFound
      */
     @Test(expected = PermissionDenied.class)
-    public void testPermissionSetForAdmin() throws PermissionDenied {
+    public void testPermissionSetForAdmin() throws PermissionDenied, ItemNotFound {
 
         String[] perms = { PermissionTypes.CREATE };
         String[] types = { EntityTypes.DOCUMENTARY_UNIT };

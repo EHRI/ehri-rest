@@ -14,7 +14,7 @@ public class IntegrityError extends Exception {
     }
     
     public IntegrityError(String index, Map<String,String> fields) {
-        super("Integity error for index: " + index);
+        super(String.format("Integity error for index: %s (%s)", index, fields));
         this.index = index;
         this.fields = fields;                
     }

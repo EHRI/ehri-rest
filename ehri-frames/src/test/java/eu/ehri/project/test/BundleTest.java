@@ -12,6 +12,7 @@ import org.junit.Test;
 
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.IntegrityError;
+import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.DatePeriod;
@@ -36,7 +37,7 @@ public class BundleTest extends ModelTestBase {
 
     @Test
     public void testSerialisation() throws SerializationError,
-            DeserializationError {
+            DeserializationError, ItemNotFound {
         DocumentaryUnit c1 = manager.getFrame("c1", DocumentaryUnit.class);
         String json = converter.vertexFrameToJson(c1);
         EntityBundle<DocumentaryUnit> bundle = converter.jsonToBundle(json);
@@ -46,7 +47,7 @@ public class BundleTest extends ModelTestBase {
         assertEquals(c1.getName(), bundle.getData().get("name"));
     }
 
-    public void testSaving() throws SerializationError, ValidationError, IntegrityError {
+    public void testSaving() throws SerializationError, ValidationError, IntegrityError, ItemNotFound {
         DocumentaryUnit c1 = manager.getFrame("c1", DocumentaryUnit.class);
         assertEquals(1, toList(c1.getDescriptions()).size());
 
@@ -62,7 +63,7 @@ public class BundleTest extends ModelTestBase {
 
     @Test
     public void testSavingWithDependentChanges() throws SerializationError,
-            DeserializationError, ValidationError, IntegrityError {
+            DeserializationError, ValidationError, IntegrityError, ItemNotFound {
         DocumentaryUnit c1 = manager.getFrame("c1", DocumentaryUnit.class);
         assertEquals(1, toList(c1.getDescriptions()).size());
         String json = converter.vertexFrameToJson(c1);
@@ -83,7 +84,7 @@ public class BundleTest extends ModelTestBase {
 
     @Test
     public void testDeletingDependents() throws SerializationError,
-            ValidationError, IntegrityError {
+            ValidationError, IntegrityError, ItemNotFound {
         DocumentaryUnit c1 = manager.getFrame("c1", DocumentaryUnit.class);
         EntityBundle<DocumentaryUnit> bundle = converter
                 .vertexFrameToBundle(c1);
@@ -106,9 +107,9 @@ public class BundleTest extends ModelTestBase {
         assertEquals(1, toList(c1.getDatePeriods()).size());
     }
 
-    @Test(expected = NoSuchElementException.class)
+    @Test(expected = ItemNotFound.class)
     public void testDeletingWholeBundle() throws SerializationError,
-            ValidationError {
+            ValidationError, ItemNotFound {
         DocumentaryUnit c1 = manager.getFrame("c1", DocumentaryUnit.class);
         EntityBundle<DocumentaryUnit> bundle = converter
                 .vertexFrameToBundle(c1);

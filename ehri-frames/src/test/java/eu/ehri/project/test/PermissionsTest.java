@@ -15,6 +15,7 @@ import eu.ehri.project.acl.PermissionTypes;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.IntegrityError;
+import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
@@ -35,7 +36,7 @@ public class PermissionsTest extends AbstractFixtureTest {
 
     @SuppressWarnings("unchecked")
     @Before
-    public void createTestUser() throws ValidationError, IntegrityError {
+    public void createTestUser() throws ValidationError, IntegrityError, ItemNotFound {
         // Add a new, fresh user with no perms to test with...
         user = new BundleDAO<UserProfile>(graph)
                 .create(new BundleFactory<UserProfile>().buildBundle(
@@ -64,7 +65,7 @@ public class PermissionsTest extends AbstractFixtureTest {
 
     @Test(expected = PermissionDenied.class)
     public void testCreateAsUserWithBadScopedPerms() throws PermissionDenied,
-            ValidationError, DeserializationError, IntegrityError {
+            ValidationError, DeserializationError, IntegrityError, ItemNotFound {
         acl.grantPermissions(user,
                 viewHelper.getContentType(EntityTypes.DOCUMENTARY_UNIT),
                 viewHelper.getPermission(PermissionTypes.CREATE),
@@ -75,7 +76,7 @@ public class PermissionsTest extends AbstractFixtureTest {
 
     @Test
     public void testCreateAsUserWithGoodScopedPerms() throws PermissionDenied,
-            ValidationError, DeserializationError, IntegrityError {
+            ValidationError, DeserializationError, IntegrityError, ItemNotFound {
         Agent scope = manager.getFrame("r1", Agent.class);
         acl.grantPermissions(user,
                 viewHelper.getContentType(EntityTypes.DOCUMENTARY_UNIT),
@@ -86,7 +87,7 @@ public class PermissionsTest extends AbstractFixtureTest {
     @Test(expected = PermissionDenied.class)
     public void testCreateAsUserWithDifferentScopedPerms()
             throws PermissionDenied, ValidationError, DeserializationError,
-            IntegrityError {
+            IntegrityError, ItemNotFound {
         Agent scope = manager.getFrame("r1", Agent.class);
         Agent badScope = manager.getFrame("r2", Agent.class);
         acl.grantPermissions(user,

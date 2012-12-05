@@ -10,6 +10,7 @@ import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.acl.AnonymousAccessor;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.IntegrityError;
+import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
@@ -97,10 +98,11 @@ public class ViewsTest extends AbstractFixtureTest {
      * @throws ValidationError
      * @throws DeserializationError
      * @throws IntegrityError
+     * @throws ItemNotFound 
      */
     @Test
     public void testUpdate() throws PermissionDenied, ValidationError,
-            DeserializationError, IntegrityError {
+            DeserializationError, IntegrityError, ItemNotFound {
         CrudViews<DocumentaryUnit> docViews = new CrudViews<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
         Map<String, Object> bundle = getTestBundle();
@@ -134,10 +136,11 @@ public class ViewsTest extends AbstractFixtureTest {
      * @throws ValidationError
      * @throws DeserializationError
      * @throws IntegrityError
+     * @throws ItemNotFound 
      */
     @Test
     public void testUserUpdate() throws PermissionDenied, ValidationError,
-            DeserializationError, IntegrityError {
+            DeserializationError, IntegrityError, ItemNotFound {
         CrudViews<UserProfile> userViews = new CrudViews<UserProfile>(graph,
                 UserProfile.class);
         Map<String, Object> bundle = getTestUserBundle();
@@ -199,10 +202,11 @@ public class ViewsTest extends AbstractFixtureTest {
      * @throws PermissionDenied
      * @throws DeserializationError
      * @throws IntegrityError
+     * @throws ItemNotFound 
      */
     @Test
     public void testCreateAsUnauthorizedAndThenGrant() throws ValidationError,
-            PermissionDenied, DeserializationError, IntegrityError {
+            PermissionDenied, DeserializationError, IntegrityError, ItemNotFound {
         CrudViews<DocumentaryUnit> docViews = new CrudViews<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
         Map<String, Object> bundle = getTestBundle();
@@ -231,10 +235,11 @@ public class ViewsTest extends AbstractFixtureTest {
      * @throws PermissionDenied
      * @throws DeserializationError
      * @throws IntegrityError
+     * @throws ItemNotFound 
      */
     @Test
     public void testCreateWithScope() throws ValidationError, PermissionDenied,
-            DeserializationError, IntegrityError {
+            DeserializationError, IntegrityError, ItemNotFound {
         Crud<DocumentaryUnit> docViews = new LoggingCrudViews<DocumentaryUnit>(
                 graph, DocumentaryUnit.class, manager.getFrame("r1",
                         Agent.class));

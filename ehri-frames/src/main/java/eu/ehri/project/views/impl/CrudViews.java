@@ -10,6 +10,7 @@ import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.IntegrityError;
+import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
@@ -77,10 +78,11 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws PermissionDenied
      * @throws ValidationError
      * @throws IntegrityError
+     * @throws ItemNotFound 
      */
     public E update(Map<String, Object> data, Accessor user)
             throws PermissionDenied, ValidationError, DeserializationError,
-            IntegrityError {
+            IntegrityError, ItemNotFound {
         EntityBundle<E> bundle = converter.dataToBundle(data);
         E entity = graph.frame(manager.getVertex(bundle.getId()), cls);
         helper.checkEntityPermission(entity, user,

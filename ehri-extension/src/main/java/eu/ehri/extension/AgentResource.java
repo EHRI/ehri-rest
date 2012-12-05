@@ -186,7 +186,7 @@ public class AgentResource extends EhriNeo4jFramedResource<Agent> {
     private Response buildResponseFromDocumentaryUnit(DocumentaryUnit doc)
             throws SerializationError {
         String jsonStr = converter.vertexFrameToJson(doc);
-        // FIXME: Hide the details of building this path        
+        // FIXME: Hide the details of building this path
         URI docUri = UriBuilder
                 .fromUri(uriInfo.getBaseUri())
                 .segment(EntityTypes.DOCUMENTARY_UNIT)

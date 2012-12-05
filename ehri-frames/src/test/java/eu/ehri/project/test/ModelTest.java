@@ -5,6 +5,8 @@ import static org.junit.Assert.*;
 import java.util.List;
 
 import org.junit.Test;
+
+import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.Address;
 import eu.ehri.project.models.AgentDescription;
 import eu.ehri.project.models.Authority;
@@ -20,7 +22,7 @@ public class ModelTest extends ModelTestBase {
     }
 
     @Test
-    public void testTheGraphContainsGroups() {
+    public void testTheGraphContainsGroups() throws ItemNotFound {
         Iterable<Group> frames = manager.getFrames(EntityTypes.GROUP,
                 Group.class);
         List<Group> groups = toList(frames);
@@ -33,7 +35,7 @@ public class ModelTest extends ModelTestBase {
     }
 
     @Test
-    public void testCollectionHelpByRepo() {
+    public void testCollectionHelpByRepo() throws ItemNotFound {
         DocumentaryUnit unit = manager.getFrame("c1", DocumentaryUnit.class);
         assertTrue(unit.getAgent() != null);
         // and have a description
@@ -41,7 +43,7 @@ public class ModelTest extends ModelTestBase {
     }
 
     @Test
-    public void testCollectionNameAccess() {
+    public void testCollectionNameAccess() throws ItemNotFound {
         DocumentaryUnit c1 = manager.getFrame("c1", DocumentaryUnit.class);
         Authority a2 = manager.getFrame("a2", Authority.class);
         assertTrue(toList(c1.getNameAccess()).contains(a2));
@@ -51,7 +53,7 @@ public class ModelTest extends ModelTestBase {
     }
 
     @Test
-    public void testRepository() {
+    public void testRepository() throws ItemNotFound {
         AgentDescription rd1 = manager.getFrame("rd1", AgentDescription.class);
         Address ar1 = manager.getFrame("ar1", Address.class);
         // check we have an address
