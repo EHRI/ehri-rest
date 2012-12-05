@@ -58,7 +58,7 @@ public final class BundleFieldValidator implements BundleValidator {
         validate();
     }    
     
-    private void validate() throws ValidationError {
+    public void validate() throws ValidationError {
         checkFields();
         checkIsA();
         if (!errors.isEmpty())

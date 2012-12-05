@@ -9,6 +9,7 @@ import eu.ehri.project.exceptions.ValidationError;
  *
  */
 public interface BundleValidator {
+    public void validate() throws ValidationError;
     public void validateForInsert() throws ValidationError;
     public void validateForUpdate() throws ValidationError;
 }

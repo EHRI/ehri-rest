@@ -80,11 +80,28 @@ public final class BundleDAO<T extends VertexFrame> {
         return graph.frame(updateInner(bundle), bundle.getBundleClass());
     }
 
+    /**
+     * Entry-point for creating a bundle.
+     * 
+     * @param bundle
+     * @return
+     * @throws ValidationError
+     * @throws IntegrityError
+     */
     public T create(EntityBundle<T> bundle) throws ValidationError,
             IntegrityError {
         return graph.frame(createInner(bundle), bundle.getBundleClass());
     }
 
+    /**
+     * Entry point for creating or updating a bundle, depending on whether it
+     * has a supplied id.
+     * 
+     * @param bundle
+     * @return
+     * @throws ValidationError
+     * @throws IntegrityError
+     */
     public T createOrUpdate(EntityBundle<T> bundle) throws ValidationError,
             IntegrityError {
         return graph
@@ -184,7 +201,7 @@ public final class BundleDAO<T extends VertexFrame> {
         } else {
             try {
                 return manager.exists(bundle.getId()) ? updateInner(bundle)
-                        : createInner(bundle.getId(), bundle);
+                        : createInner(bundle);
             } catch (ItemNotFound e) {
                 throw new RuntimeException(
                         "Create or update failed because ItemNotFound was thrown even though exists() was true",
@@ -202,31 +219,21 @@ public final class BundleDAO<T extends VertexFrame> {
      * @throws IntegrityError
      * @throws ItemNotFound
      */
-    private Vertex createInner(String id, EntityBundle<T> bundle)
-            throws ValidationError, IntegrityError {
-        Vertex node = manager.createVertex(id, bundle.getType(),
-                bundle.getData(), bundle.getPropertyKeys(),
-                bundle.getUniquePropertyKeys());
-        createDependents(node, bundle.getBundleClass(), bundle.getRelations());
-        return node;
-    }
-
-    /**
-     * Insert a bundle and save it's dependent items.
-     * 
-     * @param bundle
-     * @return
-     * @throws ValidationError
-     * @throws IntegrityError
-     * @throws ItemNotFound
-     */
     private Vertex createInner(EntityBundle<T> bundle) throws ValidationError,
             IntegrityError {
         try {
-            BundleValidatorFactory.getInstance(bundle).validateForInsert();
-            String id = getIdGenerator(bundle).generateId(bundle.getType(),
-                    scope, bundle.getData());
-            return createInner(id, bundle);
+            BundleValidatorFactory.getInstance(bundle).validate();
+            // If the bundle doesn't already have an ID, generate one using the
+            // (presently stopgap) type-dependent ID generator.
+            String id = bundle.getId() != null ? bundle.getId()
+                    : getIdGenerator(bundle).generateId(bundle.getType(),
+                            scope, bundle.getData());
+            Vertex node = manager.createVertex(id, bundle.getType(),
+                    bundle.getData(), bundle.getPropertyKeys(),
+                    bundle.getUniquePropertyKeys());
+            createDependents(node, bundle.getBundleClass(),
+                    bundle.getRelations());
+            return node;
         } catch (IdGenerationError err) {
             throw new RuntimeException(err.getMessage());
         }
