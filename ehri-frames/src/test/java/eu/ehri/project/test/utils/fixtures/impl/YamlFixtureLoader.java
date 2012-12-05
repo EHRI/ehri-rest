@@ -137,7 +137,7 @@ public class YamlFixtureLoader implements FixtureLoader {
         EntityBundle<VertexFrame> entityBundle = new Converter()
                 .dataToBundle(dataBundle);
         BundleDAO<VertexFrame> persister = new BundleDAO<VertexFrame>(
-                graph, SystemScope.getInstance(), true);
+                graph, SystemScope.getInstance());
         System.out.println("CREATING NODE: " + id);
         VertexFrame frame = persister.createOrUpdate(entityBundle);
 
