@@ -5,7 +5,7 @@
 
 # NIOD. NIOD belongs to admin, so everyone who belongs
 # to the NIOD group also belongs to admin by extension.
-- id: niod
+- id: niodGroup
   type: group
   data:
     identifier: niod
@@ -14,19 +14,19 @@
     belongsTo:
       - admin
       
-- id: kcl
+- id: kclGroup
   type: group
   data:
     identifier: kcl
     name: KCL
     
-- id: dans
+- id: dansGroup
   type: group
   data:
     identifier: dans
     name: DANS    
     
-- id: soma
+- id: somaGroup
   type: group
   data:
     identifier: soma
@@ -43,7 +43,7 @@
     name: Mike
   relationships:
     belongsTo:
-      - kcl
+      - kclGroup
 
 # Tim is a member of NIOD, which is itself a member of Admin, so Tim
 # belongs to Admin by extension
@@ -54,7 +54,7 @@
     name: Tim
   relationships:
     belongsTo:
-      - niod
+      - niodGroup
       
 # Linda belongs to DANS
 - id: linda
@@ -64,7 +64,7 @@
     name: Linda
   relationships:
     belongsTo:
-      - dans
+      - dansGroup
 
 # Veerle is a member of CEGES-SOMA, and also a member of Admin
 - id: veerle
@@ -74,30 +74,31 @@
     name: Veerle
   relationships:
     belongsTo:
-      - soma
+      - somaGroup
       - admin
 
 # Institutions
-- id: r1
+- id: niod
   type: agent
   data:
-    identifier: r1
+    identifier: niod
     name: Repository 1
   relationships:
     describes:
-      - id: rd1
+      - id: niodDesc1
         type: agentDescription
         data:
-          identifier: r1
+          identifier: niod-en
           name: Repository 1 Description
+          languageCode: en
         relationships:
           hasAddress:
-            - id: ad1
+            - id: niod-address-1
               type: address
               data:
                 name: "An Address"
                 streetAddress: 1 Some St.
-                city: London
+                city: Amsterdam
                 
                          
       
