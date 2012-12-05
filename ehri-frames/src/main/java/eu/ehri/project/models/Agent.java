@@ -16,12 +16,12 @@ import eu.ehri.project.models.base.TemporalEntity;
 public interface Agent extends AccessibleEntity, DescribedEntity,
         AnnotatableEntity, PermissionScope {
 
-    public static final String HOLDS = "holds";
+    public static final String HELDBY = "heldBy";
 
-    @Adjacency(label = HOLDS)
+    @Adjacency(label = HELDBY, direction = Direction.IN)
     public Iterable<DocumentaryUnit> getCollections();
 
-    @Adjacency(label = HOLDS)
+    @Adjacency(label = HELDBY, direction = Direction.IN)
     public void addCollection(final TemporalEntity collection);
     
     @Fetch

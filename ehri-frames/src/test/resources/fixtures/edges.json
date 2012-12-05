@@ -1,23 +1,23 @@
 [
   {
-    "src": "r1", 
-    "dst": "c1", 
-    "label": "holds"
+    "src": "c1", 
+    "dst": "r1", 
+    "label": "heldBy"
   }, 
   {
-    "src": "r1", 
-    "dst": "c2", 
-    "label": "holds"
+    "src": "c2", 
+    "dst": "r1", 
+    "label": "heldBy"
   }, 
   {
-    "src": "r1", 
-    "dst": "c3", 
-    "label": "holds"
+    "src": "c3", 
+    "dst": "r1", 
+    "label": "heldBy"
   }, 
   {
-    "src": "r1", 
-    "dst": "c4", 
-    "label": "holds"
+    "src": "c4", 
+    "dst": "r1", 
+    "label": "heldBy"
   }, 
   {
     "src": "c2", 

@@ -28,10 +28,10 @@ public interface DocumentaryUnit extends VertexFrame, AccessibleEntity,
     public void setName(String name);
 
     @Fetch
-    @Adjacency(label = Agent.HOLDS, direction = Direction.IN)
+    @Adjacency(label = Agent.HELDBY)
     public Agent getAgent();
 
-    @Adjacency(label = Agent.HOLDS, direction = Direction.IN)
+    @Adjacency(label = Agent.HELDBY)
     public void setAgent(final Agent institution);
 
     @Fetch
