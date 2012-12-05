@@ -24,6 +24,9 @@ public interface Crud<E extends AccessibleEntity> {
     public E create(Map<String, Object> data, Accessor user)
             throws PermissionDenied, ValidationError, DeserializationError, IntegrityError;
 
+    public E createOrUpdate(Map<String, Object> data, Accessor user)
+            throws PermissionDenied, ValidationError, DeserializationError, IntegrityError;
+
     public Integer delete(E item, Accessor user) throws PermissionDenied,
             ValidationError, SerializationError;
 }

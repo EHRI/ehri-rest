@@ -28,13 +28,13 @@ import eu.ehri.project.views.Crud;
  * 
  * @param <E>
  */
-public class LoggingCrudViews<E extends AccessibleEntity> implements
-        Crud<E> {
+public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
 
     // Default log strings, needed for compatibility.
     public static final String DEFAULT_CREATE_LOG = "Creating item";
     public static final String DEFAULT_UPDATE_LOG = "Updating item";
     public static final String DEFAULT_DELETE_LOG = "Deleting item";
+    public static final String DEFAULT_IMPORT_LOG = "Importing item";
 
     private final ActionManager actionManager;
     private final CrudViews<E> views;
@@ -49,14 +49,15 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements
      * @param graph
      * @param cls
      */
-    public LoggingCrudViews(FramedGraph<Neo4jGraph> graph, Class<E> cls, PermissionScope scope) {
+    public LoggingCrudViews(FramedGraph<Neo4jGraph> graph, Class<E> cls,
+            PermissionScope scope) {
         this.graph = graph;
         this.cls = cls;
         this.scope = scope;
         actionManager = new ActionManager(graph);
         views = new CrudViews<E>(graph, cls, scope);
     }
-    
+
     /**
      * Constructor.
      * 
@@ -107,9 +108,74 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements
         try {
 
             E out = views.create(data, user);
-            actionManager.createAction(out,
-                    graph.frame(user.asVertex(), UserProfile.class),
-                    logMessage);
+            actionManager
+                    .createAction(out,
+                            graph.frame(user.asVertex(), UserProfile.class),
+                            logMessage);
+            tx.success();
+            return out;
+        } catch (IntegrityError ex) {
+            tx.failure();
+            throw ex;
+        } catch (PermissionDenied ex) {
+            tx.failure();
+            throw ex;
+        } catch (ValidationError ex) {
+            tx.failure();
+            throw ex;
+        } catch (DeserializationError ex) {
+            tx.failure();
+            throw ex;
+        } catch (Exception ex) {
+            tx.failure();
+            throw new RuntimeException(ex);
+        } finally {
+            tx.finish();
+        }
+    }
+
+    /**
+     * Create or update a new object of type `E` from the given data, saving an
+     * Action log with the default creation message.
+     * 
+     * @param data
+     * @param user
+     * @return The created framed vertex
+     * @throws PermissionDenied
+     * @throws ValidationError
+     * @throws IntegrityError
+     * @throws DeserializationError
+     */
+    public E createOrUpdate(Map<String, Object> data, Accessor user)
+            throws PermissionDenied, ValidationError, DeserializationError,
+            IntegrityError {
+        return createOrUpdate(data, user, DEFAULT_IMPORT_LOG);
+    }
+
+    /**
+     * Create or update a new object of type `E` from the given data, saving an
+     * Action log with the given log message.
+     * 
+     * @param data
+     * @param user
+     * @param logMessage
+     * @return The created framed vertex
+     * @throws PermissionDenied
+     * @throws ValidationError
+     * @throws IntegrityError
+     * @throw DeserializationError
+     */
+    public E createOrUpdate(Map<String, Object> data, Accessor user,
+            String logMessage) throws PermissionDenied, ValidationError,
+            DeserializationError, IntegrityError {
+        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
+        try {
+
+            E out = views.createOrUpdate(data, user);
+            actionManager
+                    .createAction(out,
+                            graph.frame(user.asVertex(), UserProfile.class),
+                            logMessage);
             tx.success();
             return out;
         } catch (IntegrityError ex) {
