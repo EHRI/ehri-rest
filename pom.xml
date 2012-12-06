@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0                              http://maven.apache.org/maven-v4_0_0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0                              http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
 
-    <groupId>ehri-project</groupId>
-    <artifactId>ehri-data</artifactId>
-    <packaging>pom</packaging>
-    <version>1.0</version>
-    <name>Neo4j EHRI Project</name>
+	<groupId>ehri-project</groupId>
+	<artifactId>ehri-data</artifactId>
+	<packaging>pom</packaging>
+	<version>1.0</version>
+	<name>Neo4j EHRI Project</name>
 
 	<modules>
 		<module>ehri-frames</module>
@@ -15,38 +16,36 @@
 		<module>ehri-importers</module>
 		<module>ehri-cmdline</module>
 	</modules>
-    <dependencyManagement>
-    	<dependencies>
-    		<dependency>
-    			<groupId>junit</groupId>
-    			<artifactId>junit</artifactId>
-    			<version>4.10</version>
-    		</dependency>
-    	</dependencies>
-    </dependencyManagement>
-    <properties>
-    	<neo4j-version>1.9-SNAPSHOT-EHRI</neo4j-version>
-    	<tinkerpop-version>2.1.0</tinkerpop-version>
-    	
-    	<!-- The directory where the yWorks doclet (for uml schema's in javadoc) is installed 
-    	HOWEVER, we need to hardcode it into the profile in the missing and exists elements!
-    	-->
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>junit</groupId>
+				<artifactId>junit</artifactId>
+				<version>4.10</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+	<properties>
+		<neo4j-version>1.9-SNAPSHOT-EHRI</neo4j-version>
+		<tinkerpop-version>2.1.0</tinkerpop-version>
+
+		<!-- The directory where the yWorks doclet (for uml schema's in javadoc) 
+			is installed HOWEVER, we need to hardcode it into the profile in the missing 
+			and exists elements! -->
 		<yid>/Users/paulboon/Documents/Development/yworks-uml-doclet-3.0_02-jdk1.5</yid>
-  
-    </properties>
-    
-    <!-- PROFILES for javadoc stuff -->
-    <profiles>
+
+	</properties>
+
+	<!-- PROFILES for javadoc stuff -->
+	<profiles>
 		<profile>
 			<id>plain-javadoc</id>
 			<activation>
 				<file>
-				<!--  -->
+					<!-- -->
 					<missing>/Users/paulboon/Documents/Development/yworks-uml-doclet-3.0_02-jdk1.5/lib/ydoc.jar</missing>
-				<!-- -->
-				<!-- 
-					 <missing>${yid}/lib/ydoc.jar</missing>
-				-->
+					<!-- -->
+					<!-- <missing>${yid}/lib/ydoc.jar</missing> -->
 				</file>
 			</activation>
 			<build>
@@ -81,12 +80,10 @@
 			<activation>
 				<activeByDefault>true</activeByDefault>
 				<file>
-					<!--  -->
+					<!-- -->
 					<exists>/Users/paulboon/Documents/Development/yworks-uml-doclet-3.0_02-jdk1.5/lib/ydoc.jar</exists>
-					<!--  -->
-					 <!-- 
-					<exists>${yid}/lib/ydoc.jar</exists>
-					 -->
+					<!-- -->
+					<!-- <exists>${yid}/lib/ydoc.jar</exists> -->
 				</file>
 			</activation>
 			<build>
@@ -129,5 +126,5 @@
 			</build>
 		</profile>
 	</profiles>
-    
+
 </project>

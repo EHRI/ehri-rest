@@ -147,7 +147,6 @@ public abstract class AbstractImporter<T> {
             throw new ValidationError("Bad data: " + unit.getData());
         }
         boolean exists = manager.exists(id);
-        System.out.println("IMPORTING: " + unit.getData());
         DocumentaryUnit frame = persister
                 .createOrUpdate(new Bundle<DocumentaryUnit>(id, unit
                         .getData(), unit.getBundleClass(), unit.getRelations()));

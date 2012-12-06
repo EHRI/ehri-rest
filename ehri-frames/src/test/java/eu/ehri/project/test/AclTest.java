@@ -67,18 +67,18 @@ public class AclTest extends ModelTestBase {
     }
 
     /**
-     * Test NIOD group has no access to items with admin perms.
+     * Test KCL group has no access to items with admin perms.
      * @throws ItemNotFound 
      */
     @Test
     public void testNiodGroup() throws ItemNotFound {
-        Group niod = manager.getFrame("niod", Group.class);
+        Group kcl = manager.getFrame("kcl", Group.class);
         DocumentaryUnit c1 = manager.getFrame("c1", DocumentaryUnit.class);
-        assertFalse(acl.getAccessControl(c1, niod));
+        assertFalse(acl.getAccessControl(c1, kcl));
 
         // but we should have read-only access to items with no specified perms.
         DocumentaryUnit c4 = manager.getFrame("c4", DocumentaryUnit.class);
-        assertTrue(acl.getAccessControl(c4, niod));
+        assertTrue(acl.getAccessControl(c4, kcl));
     }
 
     /**
