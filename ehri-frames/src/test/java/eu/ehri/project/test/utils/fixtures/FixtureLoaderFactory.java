@@ -3,7 +3,7 @@ package eu.ehri.project.test.utils.fixtures;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
-import eu.ehri.project.test.utils.fixtures.impl.JsonFixtureLoader;
+import eu.ehri.project.test.utils.fixtures.impl.YamlFixtureLoader;
 
 /**
  * Factory class for concealing details of Fixture loading
@@ -20,6 +20,6 @@ public class FixtureLoaderFactory {
      * @return
      */
     public static FixtureLoader getInstance(FramedGraph<Neo4jGraph> graph) {
-        return new JsonFixtureLoader(graph);
+        return new YamlFixtureLoader(graph);
     }
 }

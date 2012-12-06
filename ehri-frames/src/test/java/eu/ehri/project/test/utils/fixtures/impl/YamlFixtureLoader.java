@@ -13,6 +13,8 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 
 import com.tinkerpop.blueprints.Direction;
@@ -41,13 +43,15 @@ import eu.ehri.project.test.utils.fixtures.FixtureLoader;
  * Load data from YAML fixtures.
  * 
  * @author michaelb
- *
+ * 
  */
 public class YamlFixtureLoader implements FixtureLoader {
 
     private final FramedGraph<Neo4jGraph> graph;
     private final GraphManager manager;
     private final Map<String, Class<? extends VertexFrame>> classes;
+    private static final Logger logger = LoggerFactory
+            .getLogger(YamlFixtureLoader.class);
 
     public YamlFixtureLoader(FramedGraph<Neo4jGraph> graph) {
         this.graph = graph;
@@ -67,28 +71,19 @@ public class YamlFixtureLoader implements FixtureLoader {
         try {
             Map<Vertex, MultiValueMap> links = new HashMap<Vertex, MultiValueMap>();
 
-            Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
             for (Object data : yaml.loadAll(yamlStream)) {
                 for (Map<String, Object> node : (List<Map<String, Object>>) data) {
+                    logger.debug("Importing node: {}", node);
                     importNode(links, node);
                 }
             }
-            tx.success();
 
             // Finally, go through and wire up all the non-dependent
             // relationships
             // Relationships always go from source to target...
-            System.out.println("LINKING... ");
-            for (Node node : graph.getBaseGraph().getRawGraph().getAllNodes()) {
-                System.out.println(" - node: " + node);
-                for (String p : node.getPropertyKeys()) {
-                    System.out.println(String.format("  - %-20s : %s", p,
-                            node.getProperty(p)));
-                }
-            }
-            System.out.println();
+            logger.debug("Linking data...");
             for (Entry<Vertex, MultiValueMap> entry : links.entrySet()) {
-                System.out.println("Setting links for: " + entry.getKey());
+                logger.debug("Setting links for: {}", entry.getKey());
                 Vertex src = entry.getKey();
                 MultiValueMap rels = entry.getValue();
                 for (Object relname : rels.keySet()) {
@@ -97,9 +92,6 @@ public class YamlFixtureLoader implements FixtureLoader {
                                 .getCollection(relname);
                         for (Object target : targets) {
                             if (target instanceof String) {
-                                System.out.printf(" - %s -[%s]-> %s\n",
-                                        src.getProperty(EntityType.ID_KEY),
-                                        relname, target);
                                 Vertex dst = manager.getVertex((String) target);
                                 addRelationship(src, dst, (String) relname);
                             }
@@ -123,12 +115,15 @@ public class YamlFixtureLoader implements FixtureLoader {
             }
         }
         if (!found) {
-            if (direction == Direction.OUT)
-                graph.addEdge(null, src, dst, (String) relname);
-            else
+            if (direction == Direction.OUT) {
+                logger.debug(String.format(" - %s -[%s]-> %s", src, dst, relname));
+                graph.addEdge(null, src, dst, (String) relname);                
+            } else {
+                logger.debug(String.format(" - %s -[%s]-> %s", dst, src, relname));
                 graph.addEdge(null, dst, src, (String) relname);
+            }
             graph.getBaseGraph().stopTransaction(
-                    TransactionalGraph.Conclusion.SUCCESS);            
+                    TransactionalGraph.Conclusion.SUCCESS);
         }
     }
 
@@ -182,8 +177,6 @@ public class YamlFixtureLoader implements FixtureLoader {
         @SuppressWarnings("unchecked")
         Map<String, Object> nodeRels = (Map<String, Object>) node
                 .get(Converter.REL_KEY);
-        System.out.println(String.format("Item: %s %s %s", id, type, nodeData));
-
         MultiValueMap rels = getDependentRelations(nodeRels);
         Map<String, Object> dataBundle = new HashMap<String, Object>();
         dataBundle.put(Converter.ID_KEY, id);
@@ -194,7 +187,7 @@ public class YamlFixtureLoader implements FixtureLoader {
                 .dataToBundle(dataBundle);
         BundleDAO<VertexFrame> persister = new BundleDAO<VertexFrame>(graph,
                 SystemScope.getInstance());
-        System.out.println("CREATING NODE: " + id);
+        logger.debug("Creating node with id: {}", id);
         VertexFrame frame = persister.createOrUpdate(entityBundle);
 
         MultiValueMap linkRels = getLinkedRelations(nodeRels);
@@ -229,11 +222,11 @@ public class YamlFixtureLoader implements FixtureLoader {
                 String relName = entry.getKey();
                 Object relValue = entry.getValue();
                 if (relValue instanceof List) {
-                    for (Object relation : (List<?>)relValue) {
+                    for (Object relation : (List<?>) relValue) {
                         if (relation instanceof String) {
                             rels.put(relName, relation);
                         }
-                    }                    
+                    }
                 } else if (relValue instanceof String) {
                     rels.put(relName, relValue);
                 }
@@ -255,13 +248,13 @@ public class YamlFixtureLoader implements FixtureLoader {
                 String relName = entry.getKey();
                 Object relValue = entry.getValue();
                 if (relValue instanceof List) {
-                    for (Object relation : (List<?>)relValue) {
+                    for (Object relation : (List<?>) relValue) {
                         if (relation instanceof Map) {
                             rels.put(relName, relation);
                         }
-                    }                    
+                    }
                 } else if (relValue instanceof Map) {
-                    rels.put(relName, relValue);                    
+                    rels.put(relName, relValue);
                 }
             }
         }
