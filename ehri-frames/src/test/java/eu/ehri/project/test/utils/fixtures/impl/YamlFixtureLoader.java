@@ -42,6 +42,22 @@ import eu.ehri.project.test.utils.fixtures.FixtureLoader;
 /**
  * Load data from YAML fixtures.
  * 
+ * FIXME: Try and clean up the rather horrible code in here.
+ * 
+ * The YAML fixture format is almost identical to the plain bundle format, but
+ * has some extensions to a) allow for creating non-dependent relationships, and
+ * b) allow for single relations to be more naturally expressed. For example,
+ * while, in the bundle format the relations for a given relation type is always
+ * a list (even if there is typically only one), the YAML format allows using a
+ * single item and it will be loaded as if it were a list containing just one
+ * item, i.e, instead of writing
+ * 
+ * relationships: heldBy: - some-repo
+ * 
+ * we can just write:
+ * 
+ * relationships: heldBy: some-repo
+ * 
  * @author michaelb
  * 
  */
@@ -72,15 +88,16 @@ public class YamlFixtureLoader implements FixtureLoader {
             Map<Vertex, MultiValueMap> links = new HashMap<Vertex, MultiValueMap>();
 
             for (Object data : yaml.loadAll(yamlStream)) {
-                for (Map<String, Object> node : (List<Map<String, Object>>) data) {
-                    logger.debug("Importing node: {}", node);
-                    importNode(links, node);
+                for (Object node : (List<?>) data) {
+                    if (node instanceof Map) {
+                        logger.debug("Importing node: {}", node);
+                        importNode(links, (Map<String, Object>) node);
+                    }
                 }
             }
 
             // Finally, go through and wire up all the non-dependent
             // relationships
-            // Relationships always go from source to target...
             logger.debug("Linking data...");
             for (Entry<Vertex, MultiValueMap> entry : links.entrySet()) {
                 logger.debug("Setting links for: {}", entry.getKey());
@@ -88,8 +105,7 @@ public class YamlFixtureLoader implements FixtureLoader {
                 MultiValueMap rels = entry.getValue();
                 for (Object relname : rels.keySet()) {
                     if (relname instanceof String) {
-                        Collection<Object> targets = rels
-                                .getCollection(relname);
+                        Collection<?> targets = rels.getCollection(relname);
                         for (Object target : targets) {
                             if (target instanceof String) {
                                 Vertex dst = manager.getVertex((String) target);
@@ -116,10 +132,12 @@ public class YamlFixtureLoader implements FixtureLoader {
         }
         if (!found) {
             if (direction == Direction.OUT) {
-                logger.debug(String.format(" - %s -[%s]-> %s", src, dst, relname));
-                graph.addEdge(null, src, dst, (String) relname);                
+                logger.debug(String.format(" - %s -[%s]-> %s", src, dst,
+                        relname));
+                graph.addEdge(null, src, dst, (String) relname);
             } else {
-                logger.debug(String.format(" - %s -[%s]-> %s", dst, src, relname));
+                logger.debug(String.format(" - %s -[%s]-> %s", dst, src,
+                        relname));
                 graph.addEdge(null, dst, src, (String) relname);
             }
             graph.getBaseGraph().stopTransaction(
@@ -177,14 +195,11 @@ public class YamlFixtureLoader implements FixtureLoader {
         @SuppressWarnings("unchecked")
         Map<String, Object> nodeRels = (Map<String, Object>) node
                 .get(Converter.REL_KEY);
-        MultiValueMap rels = getDependentRelations(nodeRels);
-        Map<String, Object> dataBundle = new HashMap<String, Object>();
-        dataBundle.put(Converter.ID_KEY, id);
-        dataBundle.put(Converter.TYPE_KEY, type);
-        dataBundle.put(Converter.DATA_KEY, nodeData);
-        dataBundle.put(Converter.REL_KEY, rels);
-        Bundle<VertexFrame> entityBundle = new Converter()
-                .dataToBundle(dataBundle);
+
+        // Since our data is written as a subgraph, we can use the
+        // bundle converter to load it.
+        Bundle<VertexFrame> entityBundle = createBundle(id, type, nodeData,
+                getDependentRelations(nodeRels));
         BundleDAO<VertexFrame> persister = new BundleDAO<VertexFrame>(graph,
                 SystemScope.getInstance());
         logger.debug("Creating node with id: {}", id);
@@ -196,17 +211,19 @@ public class YamlFixtureLoader implements FixtureLoader {
         }
     }
 
-    public void loadTestData() {
-        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
-        try {
-            loadFixtures();
-            tx.success();
-        } catch (Exception e) {
-            tx.failure();
-            throw new RuntimeException(e);
-        } finally {
-            tx.finish();
-        }
+    private Bundle<VertexFrame> createBundle(final String id,
+            final String type, final Map<String, Object> nodeData,
+            final MultiValueMap dependentRelations) throws DeserializationError {
+        @SuppressWarnings("serial")
+        Map<String, Object> data = new HashMap<String, Object>() {
+            {
+                put(Converter.ID_KEY, id);
+                put(Converter.TYPE_KEY, type);
+                put(Converter.DATA_KEY, nodeData);
+                put(Converter.REL_KEY, dependentRelations);
+            }
+        };
+        return new Converter().dataToBundle(data);
     }
 
     /**
@@ -271,6 +288,19 @@ public class YamlFixtureLoader implements FixtureLoader {
                 graphDb.shutdown();
             }
         });
+    }
+
+    public void loadTestData() {
+        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
+        try {
+            loadFixtures();
+            tx.success();
+        } catch (Exception e) {
+            tx.failure();
+            throw new RuntimeException(e);
+        } finally {
+            tx.finish();
+        }
     }
 
     public static void main(String[] args) {
