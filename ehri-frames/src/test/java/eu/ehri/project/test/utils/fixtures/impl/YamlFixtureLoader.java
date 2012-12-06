@@ -2,7 +2,6 @@ package eu.ehri.project.test.utils.fixtures.impl;
 
 import java.io.InputStream;
 import java.lang.reflect.Method;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,7 +9,6 @@ import java.util.Map.Entry;
 
 import org.apache.commons.collections.map.MultiValueMap;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.slf4j.Logger;
