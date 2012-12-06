@@ -2,8 +2,13 @@ package eu.ehri.project.persistance;
 
 import java.lang.reflect.Method;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+
+import javax.management.RuntimeErrorException;
 
 import org.apache.commons.collections.map.MultiValueMap;
 import org.neo4j.graphdb.Transaction;
@@ -21,9 +26,11 @@ import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.exceptions.IdGenerationError;
 import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
+import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.annotations.Dependent;
+import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.idgen.AccessibleEntityIdGenerator;
@@ -75,8 +82,8 @@ public final class BundleDAO<T extends VertexFrame> {
      * @throws IntegrityError
      * @throws ItemNotFound
      */
-    public T update(Bundle<T> bundle) throws ValidationError,
-            IntegrityError, ItemNotFound {
+    public T update(Bundle<T> bundle) throws ValidationError, IntegrityError,
+            ItemNotFound {
         return graph.frame(updateInner(bundle), bundle.getBundleClass());
     }
 
@@ -88,8 +95,7 @@ public final class BundleDAO<T extends VertexFrame> {
      * @throws ValidationError
      * @throws IntegrityError
      */
-    public T create(Bundle<T> bundle) throws ValidationError,
-            IntegrityError {
+    public T create(Bundle<T> bundle) throws ValidationError, IntegrityError {
         return graph.frame(createInner(bundle), bundle.getBundleClass());
     }
 
@@ -136,13 +142,13 @@ public final class BundleDAO<T extends VertexFrame> {
             throws ValidationError, ItemNotFound {
         Integer c = count;
         MultiValueMap fetch = bundle.getRelations();
-        List<String> dependents = ClassUtils.getDependentRelations(bundle
-                .getBundleClass());
+        Map<String, Direction> dependents = ClassUtils
+                .getDependentRelations(bundle.getBundleClass());
         for (Object key : fetch.keySet()) {
             for (Object obj : fetch.getCollection(key)) {
                 // FIXME: Make it so we don't typically do this check for
                 // Dependent relations
-                if (dependents.contains(key)) {
+                if (dependents.containsKey(key)) {
                     Bundle<?> sub = (Bundle<?>) obj;
                     c = deleteCount(sub, c);
                 }
@@ -151,36 +157,6 @@ public final class BundleDAO<T extends VertexFrame> {
         manager.deleteVertex(bundle.getId());
         c += 1;
         return c;
-    }
-
-    /**
-     * Get the direction of a given relationship between two FramedVertex
-     * classes.
-     * 
-     * @param classA
-     * @param classB
-     * @param rel
-     * @return
-     */
-    private Direction getDirectionOfRelationship(
-            Class<? extends VertexFrame> classA,
-            Class<? extends VertexFrame> classB, String rel) {
-        for (Method method : classA.getMethods()) {
-            Dependent dep = method.getAnnotation(Dependent.class);
-            if (dep != null) {
-                Adjacency adj = method.getAnnotation(Adjacency.class);
-                if (adj != null && adj.label().equals(rel)) {
-                    return adj.direction();
-                }
-            }
-        }
-        // If we get here then something has gone badly wrong, because the
-        // correct direction could not be found. Maybe it's better to just
-        // ignore saving the dependency in the long run?
-        throw new RuntimeException(
-                String.format(
-                        "Unable to find the direction of relationship between dependent classes with relationship '%s': '%s', '%s'",
-                        rel, classA.getName(), classB.getName()));
     }
 
     /**
@@ -272,19 +248,17 @@ public final class BundleDAO<T extends VertexFrame> {
     private void createDependents(Vertex master,
             Class<? extends VertexFrame> cls, MultiValueMap relations)
             throws ValidationError, IntegrityError {
-        List<String> dependents = ClassUtils.getDependentRelations(cls);
+        Map<String, Direction> dependents = ClassUtils
+                .getDependentRelations(cls);
         for (Object key : relations.keySet()) {
             String relation = (String) key;
-            if (dependents.contains(relation)) {
+            if (dependents.containsKey(relation)) {
 
                 for (Object obj : relations.getCollection(key)) {
                     Bundle<T> bundle = (Bundle<T>) obj;
                     Vertex child = createInner(bundle);
-                    Direction direction = getDirectionOfRelationship(cls,
-                            bundle.getBundleClass(), relation);
-
-                    // Create a relation if there isn't one already
-                    createChildRelationship(master, child, relation, direction);
+                    createChildRelationship(master, child, relation,
+                            dependents.get(relation));
                 }
             }
         }
@@ -304,42 +278,70 @@ public final class BundleDAO<T extends VertexFrame> {
     private void updateDependents(Vertex master,
             Class<? extends VertexFrame> cls, MultiValueMap relations)
             throws ValidationError, IntegrityError, ItemNotFound {
-        List<String> dependents = ClassUtils.getDependentRelations(cls);
-        // FIXME: Delete defunk dependents before creating new ones, since
-        // that could otherwise erroneously cause uniqueness clashes. This
-        // will require some smarter handling of the dependency tree.
-        Set<Vertex> existingDependents = new HashSet<Vertex>();
-        Set<Vertex> refreshedDependents = new HashSet<Vertex>();
+
+        // Get a list of dependent relationships for this class, and their
+        // directions.
+        Map<String, Direction> dependents = ClassUtils
+                .getDependentRelations(cls);
+        // Build a list of the IDs of existing dependents we're going to be
+        // updating.
+        Set<String> updating = getUpdateSet(relations);
+        // Any that we're not going to update can have their subtrees deleted.
+        deleteMissingFromUpdateSet(master, dependents, updating);
+
+        // Now go throw and create or update the new subtrees.
         for (Object key : relations.keySet()) {
             String relation = (String) key;
-            if (dependents.contains(relation)) {
+            if (dependents.containsKey(relation)) {
 
                 for (Object obj : relations.getCollection(key)) {
                     Bundle<T> bundle = (Bundle<T>) obj;
                     Vertex child = createOrUpdateInner(bundle);
-                    refreshedDependents.add(child);
-                    Direction direction = getDirectionOfRelationship(cls,
-                            bundle.getBundleClass(), relation);
+                    Direction direction = dependents.get(relation);
 
                     // FIXME: Traversing all the current relations here (for
                     // every individual dependent) is very inefficient!
-                    HashSet<Vertex> current = getCurrentRelationships(master,
-                            direction, relation);
-                    existingDependents.addAll(current);
+                    HashSet<Vertex> currentRels = getCurrentRelationships(
+                            master, direction, relation);
 
                     // Create a relation if there isn't one already
-                    if (!current.contains(child)) {
+                    if (!currentRels.contains(child)) {
                         createChildRelationship(master, child, relation,
                                 direction);
                     }
                 }
             }
         }
-        // Clean up dependent items that have not been saved in the
-        // current operation, and are therefore assumed deleted.
-        existingDependents.removeAll(refreshedDependents);
-        for (Vertex v : existingDependents) {
-            manager.deleteVertex(v);
+    }
+
+    private Set<String> getUpdateSet(MultiValueMap relations) {
+        Set<String> updating = new HashSet<String>();
+        for (Object relation : relations.keySet()) {
+            for (Object child : relations.getCollection(relation)) {
+                if (child instanceof Bundle<?>) {
+                    updating.add(((Bundle<?>) child).getId());
+                }
+            }
+        }
+        return updating;
+    }
+
+    private void deleteMissingFromUpdateSet(Vertex master,
+            Map<String, Direction> dependents, Set<String> updating)
+            throws ValidationError {
+        Converter converter = new Converter();
+        for (Entry<String, Direction> relEntry : dependents.entrySet()) {
+            for (Vertex v : getCurrentRelationships(master,
+                    relEntry.getValue(), relEntry.getKey())) {
+                if (!updating.contains(v.getProperty(EntityType.ID_KEY))) {
+                    try {
+                        delete(converter.vertexFrameToBundle(graph.frame(v,
+                                VertexFrame.class)));
+                    } catch (SerializationError e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
         }
     }
 
