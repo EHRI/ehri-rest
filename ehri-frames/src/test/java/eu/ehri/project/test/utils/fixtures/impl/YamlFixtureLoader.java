@@ -82,11 +82,11 @@ public class YamlFixtureLoader implements FixtureLoader {
                 .getResourceAsStream("testdata.yaml"));
     }
 
+    @SuppressWarnings("unchecked")
     private void loadFixtureFile(InputStream yamlStream) {
         Yaml yaml = new Yaml();
         try {
             Map<Vertex, MultiValueMap> links = new HashMap<Vertex, MultiValueMap>();
-
             for (Object data : yaml.loadAll(yamlStream)) {
                 for (Object node : (List<?>) data) {
                     if (node instanceof Map) {
@@ -104,16 +104,10 @@ public class YamlFixtureLoader implements FixtureLoader {
                 Vertex src = entry.getKey();
                 MultiValueMap rels = entry.getValue();
                 for (Object relname : rels.keySet()) {
-                    if (relname instanceof String) {
-                        Collection<?> targets = rels.getCollection(relname);
-                        for (Object target : targets) {
-                            if (target instanceof String) {
-                                Vertex dst = manager.getVertex((String) target);
-                                addRelationship(src, dst, (String) relname);
-                            }
-                        }
+                    for (Object target : rels.getCollection(relname)) {
+                        Vertex dst = manager.getVertex((String) target);
+                        addRelationship(src, dst, (String) relname);
                     }
-
                 }
             }
         } catch (Exception e) {
