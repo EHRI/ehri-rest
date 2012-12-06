@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 
+import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Property;
 import com.tinkerpop.frames.VertexFrame;
@@ -220,13 +221,13 @@ public class ClassUtils {
         return classes;
     }
 
-    public static List<String> getDependentRelations(Class<?> cls) {
-        List<String> out = new LinkedList<String>();
+    public static Map<String,Direction> getDependentRelations(Class<?> cls) {
+        Map<String,Direction> out = new HashMap<String,Direction>();
         for (Method method : cls.getMethods()) {
             if (method.getAnnotation(Dependent.class) != null) {
                 Adjacency ann = method.getAnnotation(Adjacency.class);
                 if (ann != null)
-                    out.add(ann.label());
+                    out.put(ann.label(), ann.direction());
             }
         }
         return out;
