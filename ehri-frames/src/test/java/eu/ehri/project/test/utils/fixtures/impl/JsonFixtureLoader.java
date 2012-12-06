@@ -18,7 +18,7 @@ import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.utils.ClassUtils;
 import eu.ehri.project.persistance.BundleFactory;
-import eu.ehri.project.persistance.EntityBundle;
+import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.test.utils.fixtures.FixtureLoader;
 
 public class JsonFixtureLoader implements FixtureLoader {
@@ -51,7 +51,7 @@ public class JsonFixtureLoader implements FixtureLoader {
                         .get("data");
                 Class<VertexFrame> cls = (Class<VertexFrame>) entityClasses
                         .get(isa);
-                EntityBundle<VertexFrame> bundle = new BundleFactory<VertexFrame>()
+                Bundle<VertexFrame> bundle = new BundleFactory<VertexFrame>()
                         .buildBundle(id, data, cls);
                 manager.createVertex(id, bundle.getType(), bundle.getData(),
                         bundle.getPropertyKeys(),

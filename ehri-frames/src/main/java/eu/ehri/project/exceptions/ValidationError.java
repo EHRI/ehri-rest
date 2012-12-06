@@ -4,7 +4,7 @@ import org.apache.commons.collections.map.MultiValueMap;
 
 import com.tinkerpop.frames.VertexFrame;
 
-import eu.ehri.project.persistance.EntityBundle;
+import eu.ehri.project.persistance.Bundle;
 
 /**
  * Validation error. This exception holds a map
@@ -24,7 +24,7 @@ public class ValidationError extends Exception {
         errors.put("item", message);
     }
 
-    public ValidationError(EntityBundle<? extends VertexFrame> bundle,
+    public ValidationError(Bundle<? extends VertexFrame> bundle,
             MultiValueMap errors) {
         this(formatErrors(bundle.getClass().getName(), errors));
         this.errors = errors;

@@ -33,7 +33,7 @@ import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.utils.ClassUtils;
 import eu.ehri.project.persistance.BundleDAO;
 import eu.ehri.project.persistance.Converter;
-import eu.ehri.project.persistance.EntityBundle;
+import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.test.utils.fixtures.FixtureLoader;
 
 /**
@@ -185,7 +185,7 @@ public class YamlFixtureLoader implements FixtureLoader {
         dataBundle.put(Converter.TYPE_KEY, type);
         dataBundle.put(Converter.DATA_KEY, nodeData);
         dataBundle.put(Converter.REL_KEY, rels);
-        EntityBundle<VertexFrame> entityBundle = new Converter()
+        Bundle<VertexFrame> entityBundle = new Converter()
                 .dataToBundle(dataBundle);
         BundleDAO<VertexFrame> persister = new BundleDAO<VertexFrame>(graph,
                 SystemScope.getInstance());

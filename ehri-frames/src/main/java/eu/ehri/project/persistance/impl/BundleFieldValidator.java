@@ -8,7 +8,7 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.utils.ClassUtils;
 import eu.ehri.project.persistance.BundleValidator;
-import eu.ehri.project.persistance.EntityBundle;
+import eu.ehri.project.persistance.Bundle;
 
 /**
  * Class responsible for validating bundles.
@@ -22,11 +22,11 @@ public final class BundleFieldValidator implements BundleValidator {
     private static final String EMPTY_VALUE = "No value given for mandatory field";
     private static final String INVALID_ENTITY = "No EntityType annotation";
 
-    private final EntityBundle<?> bundle;
+    private final Bundle<?> bundle;
 
     private final MultiValueMap errors = new MultiValueMap();
     
-    public BundleFieldValidator(EntityBundle<?> bundle) {
+    public BundleFieldValidator(Bundle<?> bundle) {
        this.bundle = bundle;
     }
     

@@ -28,7 +28,7 @@ import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.utils.ClassUtils;
 import eu.ehri.project.persistance.Converter;
-import eu.ehri.project.persistance.EntityBundle;
+import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.views.Crud;
 import eu.ehri.project.views.impl.LoggingCrudViews;
 import eu.ehri.project.views.impl.Query;
@@ -172,7 +172,7 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> extends
             ItemNotFound, BadRequester {
 
         try {
-            EntityBundle<VertexFrame> entityBundle = converter
+            Bundle<VertexFrame> entityBundle = converter
                     .jsonToBundle(json);
             E entity = views.create(converter.bundleToData(entityBundle),
                     getRequesterUserProfile());
@@ -288,7 +288,7 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> extends
             ItemNotFound, BadRequester {
 
         try {
-            EntityBundle<VertexFrame> entityBundle = converter
+            Bundle<VertexFrame> entityBundle = converter
                     .jsonToBundle(json);
             E update = views.update(converter.bundleToData(entityBundle),
                     getRequesterUserProfile());
@@ -325,8 +325,8 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> extends
             // item's graph id, which requires an extra
             // serialization/deserialization.
             E entity = views.detail(manager.getFrame(id, getEntityType(), cls), getRequesterUserProfile());
-            EntityBundle<E> rawBundle = converter.jsonToBundle(json);
-            EntityBundle<E> entityBundle = new EntityBundle<E>((String) entity
+            Bundle<E> rawBundle = converter.jsonToBundle(json);
+            Bundle<E> entityBundle = new Bundle<E>((String) entity
                     .asVertex().getProperty(EntityType.ID_KEY),
                     rawBundle.getData(), cls, rawBundle.getRelations());
             return update(converter.bundleToJson(entityBundle));

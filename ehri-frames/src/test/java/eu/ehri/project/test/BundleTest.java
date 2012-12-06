@@ -22,7 +22,7 @@ import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.TemporalEntity;
 import eu.ehri.project.persistance.BundleDAO;
 import eu.ehri.project.persistance.Converter;
-import eu.ehri.project.persistance.EntityBundle;
+import eu.ehri.project.persistance.Bundle;
 
 public class BundleTest extends ModelTestBase {
 
@@ -40,7 +40,7 @@ public class BundleTest extends ModelTestBase {
             DeserializationError, ItemNotFound {
         DocumentaryUnit c1 = manager.getFrame("c1", DocumentaryUnit.class);
         String json = converter.vertexFrameToJson(c1);
-        EntityBundle<DocumentaryUnit> bundle = converter.jsonToBundle(json);
+        Bundle<DocumentaryUnit> bundle = converter.jsonToBundle(json);
         // FIXME: Comparing ids fails because the deserialized on is an <int>
         // instead
         // of a long...
@@ -51,7 +51,7 @@ public class BundleTest extends ModelTestBase {
         DocumentaryUnit c1 = manager.getFrame("c1", DocumentaryUnit.class);
         assertEquals(1, toList(c1.getDescriptions()).size());
 
-        EntityBundle<DocumentaryUnit> bundle = converter
+        Bundle<DocumentaryUnit> bundle = converter
                 .vertexFrameToBundle(c1);
         BundleDAO<DocumentaryUnit> persister = new BundleDAO<DocumentaryUnit>(
                 graph);
@@ -73,7 +73,7 @@ public class BundleTest extends ModelTestBase {
         assertEquals(0, toList(c1.getDescriptions()).size());
 
         // Restore the item from JSON
-        EntityBundle<DocumentaryUnit> bundle = converter.jsonToBundle(json);
+        Bundle<DocumentaryUnit> bundle = converter.jsonToBundle(json);
         BundleDAO<DocumentaryUnit> persister = new BundleDAO<DocumentaryUnit>(
                 graph);
         persister.update(bundle);
@@ -86,18 +86,18 @@ public class BundleTest extends ModelTestBase {
     public void testDeletingDependents() throws SerializationError,
             ValidationError, IntegrityError, ItemNotFound {
         DocumentaryUnit c1 = manager.getFrame("c1", DocumentaryUnit.class);
-        EntityBundle<DocumentaryUnit> bundle = converter
+        Bundle<DocumentaryUnit> bundle = converter
                 .vertexFrameToBundle(c1);
         assertEquals(2, toList(c1.getDatePeriods()).size());
 
-        Collection<EntityBundle<DatePeriod>> dates = bundle.getRelations()
+        Collection<Bundle<DatePeriod>> dates = bundle.getRelations()
                 .getCollection(TemporalEntity.HAS_DATE);
 
         // Dodginess! Manipulate the bundles relations directly
         // by replacing the hasDate collection with one consisting
         // of only one date.
         bundle.getRelations().remove(TemporalEntity.HAS_DATE);
-        Collection<EntityBundle<DatePeriod>> newDates = new ArrayList<EntityBundle<DatePeriod>>();
+        Collection<Bundle<DatePeriod>> newDates = new ArrayList<Bundle<DatePeriod>>();
         newDates.add(dates.iterator().next());
         bundle.getRelations().putAll(TemporalEntity.HAS_DATE, newDates);
 
@@ -111,7 +111,7 @@ public class BundleTest extends ModelTestBase {
     public void testDeletingWholeBundle() throws SerializationError,
             ValidationError, ItemNotFound {
         DocumentaryUnit c1 = manager.getFrame("c1", DocumentaryUnit.class);
-        EntityBundle<DocumentaryUnit> bundle = converter
+        Bundle<DocumentaryUnit> bundle = converter
                 .vertexFrameToBundle(c1);
         assertEquals(2, toList(c1.getDatePeriods()).size());
         List<DatePeriod> dates = toList(manager.getFrames(

@@ -35,7 +35,7 @@ import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityTypes;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.persistance.EntityBundle;
+import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.views.impl.LoggingCrudViews;
 import eu.ehri.project.views.impl.Query;
 
@@ -200,7 +200,7 @@ public class AgentResource extends EhriNeo4jFramedResource<Agent> {
     private DocumentaryUnit createDocumentaryUnit(String json, Agent agent)
             throws DeserializationError, PermissionDenied, ValidationError,
             IntegrityError, BadRequester {
-        EntityBundle<DocumentaryUnit> entityBundle = converter
+        Bundle<DocumentaryUnit> entityBundle = converter
                 .jsonToBundle(json);
 
         DocumentaryUnit doc = new LoggingCrudViews<DocumentaryUnit>(graph,

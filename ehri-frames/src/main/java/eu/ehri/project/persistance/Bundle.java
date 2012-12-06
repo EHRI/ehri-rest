@@ -18,7 +18,7 @@ import eu.ehri.project.models.utils.ClassUtils;
  * 
  * @param <T>
  */
-public class EntityBundle<T extends VertexFrame> {
+public class Bundle<T extends VertexFrame> {
     protected final String id;
     protected final Map<String, Object> data;
     protected final Class<T> cls;
@@ -33,7 +33,7 @@ public class EntityBundle<T extends VertexFrame> {
      * @param relations
      */
 
-    public EntityBundle(String id, final Map<String, Object> data,
+    public Bundle(String id, final Map<String, Object> data,
             Class<T> cls, final MultiValueMap relations) {
         this.id = id;
         this.data = new HashMap<String, Object>(data);
@@ -48,7 +48,7 @@ public class EntityBundle<T extends VertexFrame> {
      * @param other
      */
     public void addRelation(String relation,
-            EntityBundle<? extends VertexFrame> other) {
+            Bundle<? extends VertexFrame> other) {
         relations.put(relation, other);
     }
     
@@ -60,7 +60,7 @@ public class EntityBundle<T extends VertexFrame> {
      * @return
      */
     public void setRelations(String relation,
-        List<EntityBundle<? extends VertexFrame>> others) {
+        List<Bundle<? extends VertexFrame>> others) {
         relations.putAll(relation, others);
     }
 
@@ -78,8 +78,8 @@ public class EntityBundle<T extends VertexFrame> {
      * Get a bundle with the given id.
      * @param id
      */
-    public EntityBundle<T> withId(String id) {
-        return new EntityBundle<T>(id, data, cls, relations);
+    public Bundle<T> withId(String id) {
+        return new Bundle<T>(id, data, cls, relations);
     }
 
     /**
@@ -111,8 +111,8 @@ public class EntityBundle<T extends VertexFrame> {
         data.put(key, value);
     }
 
-    public EntityBundle<T> setData(final Map<String, Object> data) {
-        return new EntityBundle<T>(id, data, cls, relations);
+    public Bundle<T> setData(final Map<String, Object> data) {
+        return new Bundle<T>(id, data, cls, relations);
     }
 
     /**

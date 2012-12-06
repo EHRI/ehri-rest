@@ -19,7 +19,7 @@ import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistance.BundleDAO;
 import eu.ehri.project.persistance.Converter;
-import eu.ehri.project.persistance.EntityBundle;
+import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.views.Crud;
 import eu.ehri.project.views.ViewHelper;
 
@@ -84,7 +84,7 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
     public E update(Map<String, Object> data, Accessor user)
             throws PermissionDenied, ValidationError, DeserializationError,
             IntegrityError, ItemNotFound {
-        EntityBundle<E> bundle = converter.dataToBundle(data);
+        Bundle<E> bundle = converter.dataToBundle(data);
         E entity = graph.frame(manager.getVertex(bundle.getId()), cls);
         helper.checkEntityPermission(entity, user,
                 helper.getPermission(PermissionTypes.UPDATE));
@@ -108,7 +108,7 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
             IntegrityError {
         helper.checkPermission(user,
                 helper.getPermission(PermissionTypes.CREATE));
-        EntityBundle<E> bundle = converter.dataToBundle(data);
+        Bundle<E> bundle = converter.dataToBundle(data);
         return new BundleDAO<E>(graph, scope).create(bundle);
     }
 
@@ -131,7 +131,7 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
                 helper.getPermission(PermissionTypes.CREATE));
         helper.checkPermission(user,
                 helper.getPermission(PermissionTypes.UPDATE));
-        EntityBundle<E> bundle = converter.dataToBundle(data);
+        Bundle<E> bundle = converter.dataToBundle(data);
         return new BundleDAO<E>(graph, scope).createOrUpdate(bundle);
     }
 

@@ -75,7 +75,7 @@ public final class BundleDAO<T extends VertexFrame> {
      * @throws IntegrityError
      * @throws ItemNotFound
      */
-    public T update(EntityBundle<T> bundle) throws ValidationError,
+    public T update(Bundle<T> bundle) throws ValidationError,
             IntegrityError, ItemNotFound {
         return graph.frame(updateInner(bundle), bundle.getBundleClass());
     }
@@ -88,7 +88,7 @@ public final class BundleDAO<T extends VertexFrame> {
      * @throws ValidationError
      * @throws IntegrityError
      */
-    public T create(EntityBundle<T> bundle) throws ValidationError,
+    public T create(Bundle<T> bundle) throws ValidationError,
             IntegrityError {
         return graph.frame(createInner(bundle), bundle.getBundleClass());
     }
@@ -102,7 +102,7 @@ public final class BundleDAO<T extends VertexFrame> {
      * @throws ValidationError
      * @throws IntegrityError
      */
-    public T createOrUpdate(EntityBundle<T> bundle) throws ValidationError,
+    public T createOrUpdate(Bundle<T> bundle) throws ValidationError,
             IntegrityError {
         return graph
                 .frame(createOrUpdateInner(bundle), bundle.getBundleClass());
@@ -116,7 +116,7 @@ public final class BundleDAO<T extends VertexFrame> {
      * @return
      * @throws ValidationError
      */
-    public Integer delete(EntityBundle<?> bundle) throws ValidationError {
+    public Integer delete(Bundle<?> bundle) throws ValidationError {
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
             Integer count = deleteCount(bundle, 0);
@@ -132,7 +132,7 @@ public final class BundleDAO<T extends VertexFrame> {
 
     // Helpers
 
-    private Integer deleteCount(EntityBundle<?> bundle, Integer count)
+    private Integer deleteCount(Bundle<?> bundle, Integer count)
             throws ValidationError, ItemNotFound {
         Integer c = count;
         MultiValueMap fetch = bundle.getRelations();
@@ -143,7 +143,7 @@ public final class BundleDAO<T extends VertexFrame> {
                 // FIXME: Make it so we don't typically do this check for
                 // Dependent relations
                 if (dependents.contains(key)) {
-                    EntityBundle<?> sub = (EntityBundle<?>) obj;
+                    Bundle<?> sub = (Bundle<?>) obj;
                     c = deleteCount(sub, c);
                 }
             }
@@ -194,7 +194,7 @@ public final class BundleDAO<T extends VertexFrame> {
      * @throws IntegrityError
      * @throws ItemNotFound
      */
-    private Vertex createOrUpdateInner(EntityBundle<T> bundle)
+    private Vertex createOrUpdateInner(Bundle<T> bundle)
             throws ValidationError, IntegrityError {
         if (bundle.getId() == null) {
             return createInner(bundle);
@@ -219,7 +219,7 @@ public final class BundleDAO<T extends VertexFrame> {
      * @throws IntegrityError
      * @throws ItemNotFound
      */
-    private Vertex createInner(EntityBundle<T> bundle) throws ValidationError,
+    private Vertex createInner(Bundle<T> bundle) throws ValidationError,
             IntegrityError {
         try {
             BundleValidatorFactory.getInstance(bundle).validate();
@@ -248,7 +248,7 @@ public final class BundleDAO<T extends VertexFrame> {
      * @throws IntegrityError
      * @throws ItemNotFound
      */
-    private Vertex updateInner(EntityBundle<T> bundle) throws ValidationError,
+    private Vertex updateInner(Bundle<T> bundle) throws ValidationError,
             IntegrityError, ItemNotFound {
         BundleValidatorFactory.getInstance(bundle).validateForUpdate();
         Vertex node = manager.updateVertex(bundle.getId(), bundle.getType(),
@@ -278,7 +278,7 @@ public final class BundleDAO<T extends VertexFrame> {
             if (dependents.contains(relation)) {
 
                 for (Object obj : relations.getCollection(key)) {
-                    EntityBundle<T> bundle = (EntityBundle<T>) obj;
+                    Bundle<T> bundle = (Bundle<T>) obj;
                     Vertex child = createInner(bundle);
                     Direction direction = getDirectionOfRelationship(cls,
                             bundle.getBundleClass(), relation);
@@ -315,7 +315,7 @@ public final class BundleDAO<T extends VertexFrame> {
             if (dependents.contains(relation)) {
 
                 for (Object obj : relations.getCollection(key)) {
-                    EntityBundle<T> bundle = (EntityBundle<T>) obj;
+                    Bundle<T> bundle = (Bundle<T>) obj;
                     Vertex child = createOrUpdateInner(bundle);
                     refreshedDependents.add(child);
                     Direction direction = getDirectionOfRelationship(cls,
@@ -381,7 +381,7 @@ public final class BundleDAO<T extends VertexFrame> {
     // FIXME: Put this logic somewhere else. When EntityTypes is converted
     // to an Enum we'll be able to associate an ID generator with a
     // particular type, but for now do it the crappy hacky way.
-    private IdGenerator getIdGenerator(EntityBundle<T> bundle) {
+    private IdGenerator getIdGenerator(Bundle<T> bundle) {
         if (DocumentaryUnit.class.isAssignableFrom(bundle.getBundleClass())) {
             return new DocumentaryUnitIdGenerator();
         } else if (AccessibleEntity.class.isAssignableFrom(bundle

@@ -21,7 +21,7 @@ import eu.ehri.project.models.base.TemporalEntity;
 import eu.ehri.project.models.idgen.DocumentaryUnitIdGenerator;
 import eu.ehri.project.persistance.BundleDAO;
 import eu.ehri.project.persistance.BundleFactory;
-import eu.ehri.project.persistance.EntityBundle;
+import eu.ehri.project.persistance.Bundle;
 
 /**
  * Base class for importers that import documentary units, with their
@@ -118,7 +118,7 @@ public abstract class AbstractImporter<T> {
      */
     protected DocumentaryUnit importItem(T itemData, DocumentaryUnit parent,
             int depth) throws ValidationError, IntegrityError {
-        EntityBundle<DocumentaryUnit> unit = new BundleFactory<DocumentaryUnit>()
+        Bundle<DocumentaryUnit> unit = new BundleFactory<DocumentaryUnit>()
                 .buildBundle(extractDocumentaryUnit(itemData, depth),
                         DocumentaryUnit.class);
         BundleDAO<DocumentaryUnit> persister = new BundleDAO<DocumentaryUnit>(
@@ -149,7 +149,7 @@ public abstract class AbstractImporter<T> {
         boolean exists = manager.exists(id);
         System.out.println("IMPORTING: " + unit.getData());
         DocumentaryUnit frame = persister
-                .createOrUpdate(new EntityBundle<DocumentaryUnit>(id, unit
+                .createOrUpdate(new Bundle<DocumentaryUnit>(id, unit
                         .getData(), unit.getBundleClass(), unit.getRelations()));
 
         // Set the repository/item relationship

@@ -27,7 +27,7 @@ import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityTypes;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.persistance.EntityBundle;
+import eu.ehri.project.persistance.Bundle;
 
 public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
 
@@ -210,7 +210,7 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
 
         // -get the data and change it
         String json = response.getEntity(String.class);
-        EntityBundle<DocumentaryUnit> entityBundle = converter
+        Bundle<DocumentaryUnit> entityBundle = converter
                 .jsonToBundle(json);
         entityBundle.setDataValue("name", UPDATED_NAME);
         String toUpdateJson = converter.bundleToJson(entityBundle);
@@ -236,7 +236,7 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
 
         // -get the data and convert to a bundle, is it OK?
         String updatedJson = response.getEntity(String.class);
-        EntityBundle<DocumentaryUnit> updatedEntityBundle = converter
+        Bundle<DocumentaryUnit> updatedEntityBundle = converter
                 .jsonToBundle(updatedJson);
         Map<String, Object> updatedData = updatedEntityBundle.getData();
         assertEquals(UPDATED_NAME, updatedData.get("name"));

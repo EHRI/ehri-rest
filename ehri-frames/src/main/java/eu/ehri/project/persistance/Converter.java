@@ -88,7 +88,7 @@ public class Converter {
      * @throws DeserializationError
      */
     @SuppressWarnings("unchecked")
-    public <T extends VertexFrame> EntityBundle<T> jsonToBundle(String json)
+    public <T extends VertexFrame> Bundle<T> jsonToBundle(String json)
             throws DeserializationError {
         ObjectMapper mapper = new ObjectMapper();
         try {
@@ -118,7 +118,7 @@ public class Converter {
      * @throws SerializationError
      * 
      */
-    public <T extends VertexFrame> String bundleToJson(EntityBundle<T> bundle)
+    public <T extends VertexFrame> String bundleToJson(Bundle<T> bundle)
             throws SerializationError {
         Map<String, Object> data = bundleToData(bundle);
         try {
@@ -142,7 +142,7 @@ public class Converter {
      * @throws DeserializationError
      */
     @SuppressWarnings("unchecked")
-    public <T extends VertexFrame> EntityBundle<T> dataToBundle(
+    public <T extends VertexFrame> Bundle<T> dataToBundle(
             Map<String, Object> data) throws DeserializationError {
         try {
             String id = (String) data.get(ID_KEY);
@@ -172,7 +172,7 @@ public class Converter {
                 }
             }
 
-            return new EntityBundle<T>(id, props, cls, relationbundles);
+            return new Bundle<T>(id, props, cls, relationbundles);
 
         } catch (ClassCastException e) {
             throw new DeserializationError("Error deserializing data", e);
@@ -185,7 +185,7 @@ public class Converter {
      * @param bundle
      * @return
      */
-    public Map<String, Object> bundleToData(EntityBundle<?> bundle) {
+    public Map<String, Object> bundleToData(Bundle<?> bundle) {
         Map<String, Object> data = new HashMap<String, Object>();
         data.put(ID_KEY, bundle.getId());
         data.put(TYPE_KEY, bundle.getType());
@@ -195,9 +195,9 @@ public class Converter {
         for (Object key : bundle.getRelations().keySet()) {
             List<Map<String, Object>> rels = new ArrayList<Map<String, Object>>();
             @SuppressWarnings("unchecked")
-            Collection<EntityBundle<?>> collection = bundle.getRelations()
+            Collection<Bundle<?>> collection = bundle.getRelations()
                     .getCollection(key);
-            for (EntityBundle<?> subbundle : collection) {
+            for (Bundle<?> subbundle : collection) {
                 rels.add(bundleToData(subbundle));
             }
             relations.put((String) key, rels);
@@ -214,7 +214,7 @@ public class Converter {
      * @return
      * @throws SerializationError
      */
-    public <T extends VertexFrame> EntityBundle<T> vertexFrameToBundle(
+    public <T extends VertexFrame> Bundle<T> vertexFrameToBundle(
             VertexFrame item) throws SerializationError {
         return vertexFrameToBundle(item, maxTraversals);
     }
@@ -229,7 +229,7 @@ public class Converter {
      * @throws SerializationError
      */
     @SuppressWarnings("unchecked")
-    public <T extends VertexFrame> EntityBundle<T> vertexFrameToBundle(
+    public <T extends VertexFrame> Bundle<T> vertexFrameToBundle(
             VertexFrame item, int depth) throws SerializationError {
         String id = (String) item.asVertex().getProperty(EntityType.ID_KEY);
         String isa = (String) item.asVertex().getProperty(EntityType.TYPE_KEY);
@@ -244,7 +244,7 @@ public class Converter {
                     isa));
 
         MultiValueMap relations = getRelationData(item, depth, cls);
-        return new EntityBundle<T>(id, getVertexData(item.asVertex()),
+        return new Bundle<T>(id, getVertexData(item.asVertex()),
                 (Class<T>) cls, relations);
     }
 

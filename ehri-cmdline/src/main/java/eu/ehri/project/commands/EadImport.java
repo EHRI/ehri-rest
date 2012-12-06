@@ -20,7 +20,7 @@ import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.persistance.BundleDAO;
 import eu.ehri.project.persistance.BundleFactory;
-import eu.ehri.project.persistance.EntityBundle;
+import eu.ehri.project.persistance.Bundle;
 
 /**
  * Import EAD from the command line...
@@ -144,7 +144,7 @@ public class EadImport extends BaseCommand implements Command {
         Map<String, Object> agentData = new HashMap<String, Object>();
         agentData.put("identifier", name);
         agentData.put("name", name);
-        EntityBundle<UserProfile> agb = new BundleFactory<UserProfile>()
+        Bundle<UserProfile> agb = new BundleFactory<UserProfile>()
                 .buildBundle(agentData, UserProfile.class);
         return new BundleDAO<UserProfile>(graph).create(agb);
     }
@@ -154,7 +154,7 @@ public class EadImport extends BaseCommand implements Command {
         Map<String, Object> agentData = new HashMap<String, Object>();
         agentData.put("identifier", name);
         agentData.put("name", name);
-        EntityBundle<Agent> agb = new BundleFactory<Agent>().buildBundle(
+        Bundle<Agent> agb = new BundleFactory<Agent>().buildBundle(
                 agentData, Agent.class);
         return new BundleDAO<Agent>(graph).create(agb);
     }
