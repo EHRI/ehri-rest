@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -30,23 +31,10 @@ import eu.ehri.project.models.annotations.Unique;
 public class ClassUtils {
 
     public static final String FETCH_METHOD_PREFIX = "get";
+    
+    private static final Map<String,Class<? extends VertexFrame>> entityClasses;
 
-    /**
-     * Get the entity type string for a given class.
-     */
-    public static String getEntityType(Class<?> cls) {
-        EntityType ann = cls.getAnnotation(EntityType.class);
-        if (ann == null)
-            throw new RuntimeException(String.format(
-                    "Programming error! Bad bundle type: %s", cls.getName()));
-        return ann.value();
-    }
-
-    /**
-     * Load a lookup of entity type name against the corresponding class.
-     */
-    @SuppressWarnings({ "unchecked" })
-    public static Map<String, Class<? extends VertexFrame>> getEntityClasses() {
+    static {
         // iterate through all the classes in our models package
         // and filter those that aren't extending VertexFrame
         Map<String, Class<? extends VertexFrame>> entitycls = new HashMap<String, Class<? extends VertexFrame>>();
@@ -63,23 +51,37 @@ public class ClassUtils {
             throw new RuntimeException(
                     "Unrecoverable problem loading EntityType classes", e);
         }
-        List<Class<? extends VertexFrame>> vframes = new ArrayList<Class<? extends VertexFrame>>();
         for (Class<?> cls : classArray) {
             if (VertexFrame.class.isAssignableFrom(cls)) {
                 // NB: This is the unchecked cast, but it should be safe due to
                 // the asAssignableFrom test.
-                vframes.add((Class<? extends VertexFrame>) cls);
+                
+                EntityType ann = cls.getAnnotation(EntityType.class);
+                if (ann != null)
+                    entitycls.put(ann.value(), (Class<? extends VertexFrame>) cls);
             }
         }
-
-        for (Class<? extends VertexFrame> cls : vframes) {
-            EntityType ann = cls.getAnnotation(EntityType.class);
-            if (ann != null)
-                entitycls.put(ann.value(), cls);
-        }
-        return entitycls;
+        entityClasses = Collections.unmodifiableMap(entitycls);
     }
 
+    /**
+     * Get the entity type string for a given class.
+     */
+    public static String getEntityType(Class<?> cls) {
+        EntityType ann = cls.getAnnotation(EntityType.class);
+        if (ann == null)
+            throw new RuntimeException(String.format(
+                    "Programming error! Bad bundle type: %s", cls.getName()));
+        return ann.value();
+    }
+
+    /**
+     * Load a lookup of entity type name against the corresponding class.
+     */
+    public static Map<String, Class<? extends VertexFrame>> getEntityClasses() {
+        return entityClasses;
+    }
+    
     /**
      * Scans all classes accessible from the context class loader which belong
      * to the given package and subpackages.
@@ -90,7 +92,7 @@ public class ClassUtils {
      * @throws ClassNotFoundException
      * @throws IOException
      */
-    public static Class<?>[] getClasses(String packageName)
+    private static Class<?>[] getClasses(String packageName)
             throws ClassNotFoundException, IOException {
         ClassLoader classLoader = Thread.currentThread()
                 .getContextClassLoader();
