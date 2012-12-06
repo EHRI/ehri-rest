@@ -170,12 +170,12 @@
   },
   {
     "src": "retoKclWriteGrant",
-    "dst": "permCreate",
+    "dst": "create",
     "label": "hasPermission"
   },
   {
     "src": "retoKclWriteGrant",
-    "dst": "documentaryUnitType",
+    "dst": "documentaryUnit",
     "label": "hasTarget"
   },
   {
@@ -195,12 +195,12 @@
   },
   {
     "src": "lindaGlobalCreateGrant",
-    "dst": "permCreate",
+    "dst": "create",
     "label": "hasPermission"
   },
   {
     "src": "lindaGlobalCreateGrant",
-    "dst": "documentaryUnitType",
+    "dst": "documentaryUnit",
     "label": "hasTarget"
   },
   {

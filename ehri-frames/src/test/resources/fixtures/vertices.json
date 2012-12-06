@@ -6,7 +6,7 @@
       "mask": 1
     }, 
     "__ISA__": "permission", 
-    "__ID__": "permCreate"
+    "__ID__": "create"
   },
   {
     "data": {
@@ -15,7 +15,7 @@
       "mask": 2
     }, 
     "__ISA__": "permission", 
-    "__ID__": "permUpdate"
+    "__ID__": "update"
   },
   {
     "data": {
@@ -24,7 +24,7 @@
       "mask": 4
     }, 
     "__ISA__": "permission", 
-    "__ID__": "permDelete"
+    "__ID__": "delete"
   },
   {
     "data": {
@@ -33,7 +33,7 @@
       "mask": 8
     }, 
     "__ISA__": "permission", 
-    "__ID__": "permGrant"
+    "__ID__": "grant"
   },
   {
     "data": {
@@ -42,7 +42,7 @@
       "mask": 16
     }, 
     "__ISA__": "permission", 
-    "__ID__": "permAnnotate"
+    "__ID__": "annotate"
   },
   {
     "data": {
@@ -51,7 +51,7 @@
       "mask": 23
     }, 
     "__ISA__": "permission", 
-    "__ID__": "permOwner"
+    "__ID__": "owner"
   },
   {
     "data": {
@@ -59,7 +59,7 @@
       "name": "Documentary Units"
     }, 
     "__ISA__": "contentType", 
-    "__ID__": "documentaryUnitType"
+    "__ID__": "documentaryUnit"
   },
   {
     "data": {
@@ -75,7 +75,7 @@
       "name": "Authorities"
     }, 
     "__ISA__": "contentType", 
-    "__ID__": "authorityType"
+    "__ID__": "authority"
   },
   {
     "data": {
@@ -83,7 +83,7 @@
       "name": "Groups"
     }, 
     "__ISA__": "contentType", 
-    "__ID__": "groupType"
+    "__ID__": "group"
   },
   {
     "data": {
@@ -91,7 +91,7 @@
       "name": "Users"
     }, 
     "__ISA__": "contentType", 
-    "__ID__": "userProfileType"
+    "__ID__": "userProfile"
   },
   {
     "data": {

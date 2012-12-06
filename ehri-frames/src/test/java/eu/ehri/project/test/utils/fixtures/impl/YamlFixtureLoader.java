@@ -16,6 +16,7 @@ import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.yaml.snakeyaml.Yaml;
 
 import com.tinkerpop.blueprints.Direction;
+import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.Adjacency;
@@ -126,6 +127,8 @@ public class YamlFixtureLoader implements FixtureLoader {
                 graph.addEdge(null, src, dst, (String) relname);
             else
                 graph.addEdge(null, dst, src, (String) relname);
+            graph.getBaseGraph().stopTransaction(
+                    TransactionalGraph.Conclusion.SUCCESS);            
         }
     }
 
@@ -174,8 +177,10 @@ public class YamlFixtureLoader implements FixtureLoader {
         @SuppressWarnings("unchecked")
         Map<String, Object> nodeData = (Map<String, Object>) node
                 .get(Converter.DATA_KEY);
+        if (nodeData == null)
+            nodeData = new HashMap<String, Object>();
         @SuppressWarnings("unchecked")
-        Map<String, List<Object>> nodeRels = (Map<String, List<Object>>) node
+        Map<String, Object> nodeRels = (Map<String, Object>) node
                 .get(Converter.REL_KEY);
         System.out.println(String.format("Item: %s %s %s", id, type, nodeData));
 
@@ -217,16 +222,20 @@ public class YamlFixtureLoader implements FixtureLoader {
      * @param data
      * @return
      */
-    private MultiValueMap getLinkedRelations(Map<String, List<Object>> data) {
+    private MultiValueMap getLinkedRelations(Map<String, Object> data) {
         MultiValueMap rels = new MultiValueMap();
         if (data != null) {
-            for (Entry<String, List<Object>> entry : data.entrySet()) {
+            for (Entry<String, Object> entry : data.entrySet()) {
                 String relName = entry.getKey();
-                List<Object> relItems = entry.getValue();
-                for (Object relation : relItems) {
-                    if (relation instanceof String) {
-                        rels.put(relName, relation);
-                    }
+                Object relValue = entry.getValue();
+                if (relValue instanceof List) {
+                    for (Object relation : (List<?>)relValue) {
+                        if (relation instanceof String) {
+                            rels.put(relName, relation);
+                        }
+                    }                    
+                } else if (relValue instanceof String) {
+                    rels.put(relName, relValue);
                 }
             }
         }
@@ -239,16 +248,20 @@ public class YamlFixtureLoader implements FixtureLoader {
      * @param data
      * @return
      */
-    private MultiValueMap getDependentRelations(Map<String, List<Object>> data) {
+    private MultiValueMap getDependentRelations(Map<String, Object> data) {
         MultiValueMap rels = new MultiValueMap();
         if (data != null) {
-            for (Entry<String, List<Object>> entry : data.entrySet()) {
+            for (Entry<String, Object> entry : data.entrySet()) {
                 String relName = entry.getKey();
-                List<Object> relItems = entry.getValue();
-                for (Object relation : relItems) {
-                    if (relation instanceof Map) {
-                        rels.put(relName, relation);
-                    }
+                Object relValue = entry.getValue();
+                if (relValue instanceof List) {
+                    for (Object relation : (List<?>)relValue) {
+                        if (relation instanceof Map) {
+                            rels.put(relName, relation);
+                        }
+                    }                    
+                } else if (relValue instanceof Map) {
+                    rels.put(relName, relValue);                    
                 }
             }
         }

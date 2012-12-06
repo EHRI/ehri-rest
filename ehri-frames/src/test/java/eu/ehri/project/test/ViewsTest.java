@@ -219,8 +219,8 @@ public class ViewsTest extends AbstractFixtureTest {
             // We expected that permission denied... now explicitely add
             // permissions.
             PermissionGrantTarget target = manager.getFrame(
-                    "documentaryUnitType", PermissionGrantTarget.class);
-            Permission perm = manager.getFrame("permCreate",
+                    "documentaryUnit", PermissionGrantTarget.class);
+            Permission perm = manager.getFrame("create",
                     Permission.class);
             new AclManager(graph).grantPermissions(invalidUser, target, perm);
             DocumentaryUnit unit = docViews.create(bundle, invalidUser);
