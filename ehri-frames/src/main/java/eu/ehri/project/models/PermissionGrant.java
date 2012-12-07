@@ -4,13 +4,11 @@ import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.VertexFrame;
 
 import eu.ehri.project.models.annotations.EntityEnumType;
-import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.PermissionGrantTarget;
 import eu.ehri.project.models.base.PermissionScope;
 
-@EntityType(EntityTypes.PERMISSION_GRANT)
 @EntityEnumType(EntityEnumTypes.PERMISSION_GRANT)
 public interface PermissionGrant extends VertexFrame {
     public static final String HAS_GRANTEE = "hasGrantee";

@@ -6,13 +6,11 @@ import com.tinkerpop.frames.Property;
 import com.tinkerpop.frames.VertexFrame;
 
 import eu.ehri.project.models.annotations.EntityEnumType;
-import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.PermissionScope;
 
-@EntityType(EntityTypes.GROUP)
 @EntityEnumType(EntityEnumTypes.GROUP)
 public interface Group extends VertexFrame, Accessor, AccessibleEntity,
         PermissionScope {

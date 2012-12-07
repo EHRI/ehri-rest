@@ -113,6 +113,11 @@
 			<artifactId>snakeyaml</artifactId>
 			<version>1.11</version>
 		</dependency>
+		<dependency>
+			<groupId>ehri-project</groupId>
+			<artifactId>ehri-definitions</artifactId>
+			<version>1.0</version>
+		</dependency>
 	</dependencies>
 	<repositories>
 		<repository>

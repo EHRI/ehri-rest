@@ -2,34 +2,42 @@ package eu.ehri.project.models;
 
 import com.tinkerpop.frames.VertexFrame;
 
+import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.models.idgen.AccessibleEntityIdGenerator;
 import eu.ehri.project.models.idgen.DocumentaryUnitIdGenerator;
 import eu.ehri.project.models.idgen.GenericIdGenerator;
 import eu.ehri.project.models.idgen.IdGenerator;
 
+/**
+ * Mapping of Entity type names to Frames interfaces classes and
+ * their associated IdGenerator functors.
+ * 
+ * @author michaelb
+ *
+ */
 public enum EntityEnumTypes {
 
     // @formatter:off
-    DOCUMENTARY_UNIT("documentaryUnit", "c", DocumentaryUnit.class, DocumentaryUnitIdGenerator.class),
-    AGENT("agent", "r", Agent.class, AccessibleEntityIdGenerator.class),
-    AUTHORITY("authority", "a", Authority.class, AccessibleEntityIdGenerator.class),
-    GROUP("group", "g", Group.class, AccessibleEntityIdGenerator.class),
-    USER_PROFILE("userProfile", "u", UserProfile.class, AccessibleEntityIdGenerator.class),
+    DOCUMENTARY_UNIT(Entities.DOCUMENTARY_UNIT, "c", DocumentaryUnit.class, DocumentaryUnitIdGenerator.class),
+    AGENT(Entities.AGENT, "r", Agent.class, AccessibleEntityIdGenerator.class),
+    AUTHORITY(Entities.AUTHORITY, "a", Authority.class, AccessibleEntityIdGenerator.class),
+    GROUP(Entities.GROUP, "g", Group.class, AccessibleEntityIdGenerator.class),
+    USER_PROFILE(Entities.USER_PROFILE, "u", UserProfile.class, AccessibleEntityIdGenerator.class),
     
     // Generic entities.
-    DOCUMENT_DESCRIPTION("documentDescription", "dd", DocumentDescription.class),
-    AGENT_DESCRIPTION("agentDescription", "rd", AgentDescription.class),
-    AUTHORITY_DESCRIPTION("authorityDescription", "ad", AuthorityDescription.class),
-    DATE_PERIOD("datePeriod", "dp", DatePeriod.class),
-    ANNOTATION("annotation", "ann", Annotation.class),
-    ADDRESS("address", "adr", Address.class),
-    ACTION("action", "act", Action.class),
-    IMPORT("import", "imp", Import.class),
-    PROPERTY("property", "p", Property.class),
-    PERMISSION("permission", "pm", Permission.class),
-    PERMISSION_GRANT("permissionGrant", "pmg", PermissionGrant.class),
-    CONTENT_TYPE("contentType", "ct", ContentType.class),
-    REVISION("revision", "rv", Revision.class);
+    DOCUMENT_DESCRIPTION(Entities.DOCUMENT_DESCRIPTION, "dd", DocumentDescription.class),
+    AGENT_DESCRIPTION(Entities.AGENT_DESCRIPTION, "rd", AgentDescription.class),
+    AUTHORITY_DESCRIPTION(Entities.AUTHORITY_DESCRIPTION, "ad", AuthorityDescription.class),
+    DATE_PERIOD(Entities.DATE_PERIOD, "dp", DatePeriod.class),
+    ANNOTATION(Entities.ANNOTATION, "ann", Annotation.class),
+    ADDRESS(Entities.ADDRESS, "adr", Address.class),
+    ACTION(Entities.ACTION, "act", Action.class),
+    IMPORT(Entities.IMPORT, "imp", Import.class),
+    PROPERTY(Entities.PROPERTY, "p", Property.class),
+    PERMISSION(Entities.PERMISSION, "pm", Permission.class),
+    PERMISSION_GRANT(Entities.PERMISSION_GRANT, "pmg", PermissionGrant.class),
+    CONTENT_TYPE(Entities.CONTENT_TYPE, "ct", ContentType.class),
+    REVISION(Entities.REVISION, "rv", Revision.class);
     // @formatter:on
 
     // Accessors.
@@ -69,7 +77,7 @@ public enum EntityEnumTypes {
     public Class<? extends IdGenerator> getIdgen() {
         return idgen;
     }
-    
+
     public static EntityEnumTypes withName(String name) {
         for (EntityEnumTypes et : EntityEnumTypes.values()) {
             if (et.getName().equals(name))
@@ -102,8 +110,9 @@ public enum EntityEnumTypes {
             Class<? extends VertexFrame> cls) {
         this(name, abbr, cls, GenericIdGenerator.class);
     }
-    
-    @Override public String toString() {
+
+    @Override
+    public String toString() {
         return name;
     }
 }

@@ -6,10 +6,8 @@ import com.tinkerpop.frames.Property;
 import com.tinkerpop.frames.VertexFrame;
 
 import eu.ehri.project.models.annotations.EntityEnumType;
-import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.TemporalEntity;
 
-@EntityType(EntityTypes.DATE_PERIOD)
 @EntityEnumType(EntityEnumTypes.DATE_PERIOD)
 public interface DatePeriod extends VertexFrame {
 

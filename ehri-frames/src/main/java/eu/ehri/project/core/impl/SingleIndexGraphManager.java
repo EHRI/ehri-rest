@@ -20,6 +20,7 @@ import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jVertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jVertexIterable;
 import com.tinkerpop.frames.FramedGraph;
+import com.tinkerpop.frames.VertexFrame;
 
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.exceptions.IntegrityError;
@@ -36,7 +37,7 @@ import eu.ehri.project.models.annotations.EntityType;
 public final class SingleIndexGraphManager implements GraphManager {
 
     public static final String INDEX_NAME = "entities";
-
+    
     private final FramedGraph<Neo4jGraph> graph;
 
     /**
@@ -49,6 +50,14 @@ public final class SingleIndexGraphManager implements GraphManager {
     }
 
     // Access functions
+    public String getId(Vertex vertex) {
+        return (String)vertex.getProperty(EntityType.ID_KEY);
+    }
+    
+    public String getId(VertexFrame vertex) {
+        return getId(vertex.asVertex());
+    }
+
     public boolean exists(String id) {
         return getIndex().count(EntityType.ID_KEY, id) > 0L;
     }

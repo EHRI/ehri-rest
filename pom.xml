@@ -15,6 +15,7 @@
 		<module>ehri-extension</module>
 		<module>ehri-importers</module>
 		<module>ehri-cmdline</module>
+		<module>ehri-definitions</module>
 	</modules>
 	<dependencyManagement>
 		<dependencies>

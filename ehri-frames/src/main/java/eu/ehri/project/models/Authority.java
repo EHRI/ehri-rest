@@ -7,13 +7,11 @@ import com.tinkerpop.frames.VertexFrame;
 
 import eu.ehri.project.models.annotations.Dependent;
 import eu.ehri.project.models.annotations.EntityEnumType;
-import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.AnnotatableEntity;
 import eu.ehri.project.models.base.DescribedEntity;
 
-@EntityType(EntityTypes.AUTHORITY)
 @EntityEnumType(EntityEnumTypes.AUTHORITY)
 public interface Authority extends VertexFrame, AccessibleEntity,
         DescribedEntity, AnnotatableEntity {

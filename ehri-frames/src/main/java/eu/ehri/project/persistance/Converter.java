@@ -36,7 +36,7 @@ import org.codehaus.jackson.map.ObjectWriter;
 public final class Converter {
 
     public static final int DEFAULT_TRAVERSALS = 5;
-    
+
     /**
      * Constant definitions
      */
@@ -73,8 +73,8 @@ public final class Converter {
      * @return
      * @throws SerializationError
      */
-    public <T extends VertexFrame> Map<String, Object> vertexFrameToData(
-            VertexFrame item) throws SerializationError {
+    public <T extends VertexFrame> Map<String, Object> vertexFrameToData(T item)
+            throws SerializationError {
         return bundleToData(vertexFrameToBundle(item));
     }
 
@@ -105,8 +105,7 @@ public final class Converter {
      * @return
      * @throws SerializationError
      */
-    public <T extends VertexFrame> String vertexFrameToJson(VertexFrame item)
-            throws SerializationError {
+    public <T extends VertexFrame> String vertexFrameToJson(T item) throws SerializationError {
         return bundleToJson(vertexFrameToBundle(item));
     }
 
@@ -210,7 +209,7 @@ public final class Converter {
      * @return
      * @throws SerializationError
      */
-    public Bundle vertexFrameToBundle(VertexFrame item)
+    public <T extends VertexFrame> Bundle vertexFrameToBundle(T item)
             throws SerializationError {
         return vertexFrameToBundle(item, maxTraversals);
     }
@@ -224,18 +223,19 @@ public final class Converter {
      * @return
      * @throws SerializationError
      */
-    public Bundle vertexFrameToBundle(VertexFrame item, int depth)
+    public <T extends VertexFrame> Bundle vertexFrameToBundle(T item, int depth)
             throws SerializationError {
         String id = (String) item.asVertex().getProperty(EntityType.ID_KEY);
         EntityEnumTypes isa = EntityEnumTypes.withName((String) item.asVertex()
                 .getProperty(EntityType.TYPE_KEY));
-        MultiValueMap relations = getRelationData(item, depth, isa.getEntityClass());
+        MultiValueMap relations = getRelationData(item, depth,
+                isa.getEntityClass());
         return new Bundle(id, getVertexData(item.asVertex()),
                 isa.getEntityClass(), relations);
     }
 
-    private MultiValueMap getRelationData(VertexFrame item, int depth,
-            Class<? extends VertexFrame> cls) {
+    private <T extends VertexFrame> MultiValueMap getRelationData(T item, int depth,
+            Class<?> cls) {
         MultiValueMap relations = new MultiValueMap();
         if (depth > 0) {
             Map<String, Method> fetchMethods = ClassUtils.getFetchMethods(cls);
@@ -281,6 +281,7 @@ public final class Converter {
                                             nextDepth));
                     }
                 } catch (Exception e) {
+                    e.printStackTrace();
                     throw new RuntimeException(
                             "Unexpected error serializing VertexFrame", e);
                 }

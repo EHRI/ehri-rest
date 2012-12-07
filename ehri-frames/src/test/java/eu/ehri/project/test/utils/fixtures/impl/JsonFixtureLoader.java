@@ -11,12 +11,10 @@ import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
-import com.tinkerpop.frames.VertexFrame;
-
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
+import eu.ehri.project.models.EntityEnumTypes;
 import eu.ehri.project.models.annotations.EntityType;
-import eu.ehri.project.models.utils.ClassUtils;
 import eu.ehri.project.persistance.BundleFactory;
 import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.test.utils.fixtures.FixtureLoader;
@@ -38,21 +36,17 @@ public class JsonFixtureLoader implements FixtureLoader {
         InputStream jsonStream = this.getClass().getClassLoader()
                 .getResourceAsStream("vertices.json");
 
-        Map<String, Class<? extends VertexFrame>> entityClasses = ClassUtils
-                .getEntityClasses();
         try {
             List<Map<String, Object>> nodes = new ObjectMapper().readValue(
                     jsonStream, List.class);
 
             for (Map<String, Object> namedNode : nodes) {
                 String id = (String) namedNode.get(EntityType.ID_KEY);
-                String isa = (String) namedNode.get(EntityType.TYPE_KEY);
+                EntityEnumTypes isa = EntityEnumTypes.withName((String) namedNode.get(EntityType.TYPE_KEY));
                 Map<String, Object> data = (Map<String, Object>) namedNode
                         .get("data");
-                Class<VertexFrame> cls = (Class<VertexFrame>) entityClasses
-                        .get(isa);
                 Bundle bundle = new BundleFactory()
-                        .buildBundle(id, data, cls);
+                        .buildBundle(id, data, isa.getEntityClass());
                 manager.createVertex(id, bundle.getType(), bundle.getData(),
                         bundle.getPropertyKeys(),
                         bundle.getUniquePropertyKeys());

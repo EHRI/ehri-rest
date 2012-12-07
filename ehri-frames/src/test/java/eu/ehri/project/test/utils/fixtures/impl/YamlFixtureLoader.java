@@ -30,8 +30,8 @@ import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.models.EntityEnumTypes;
 import eu.ehri.project.models.annotations.EntityType;
-import eu.ehri.project.models.utils.ClassUtils;
 import eu.ehri.project.persistance.BundleDAO;
 import eu.ehri.project.persistance.Converter;
 import eu.ehri.project.persistance.Bundle;
@@ -63,14 +63,12 @@ public class YamlFixtureLoader implements FixtureLoader {
 
     private final FramedGraph<Neo4jGraph> graph;
     private final GraphManager manager;
-    private final Map<String, Class<? extends VertexFrame>> classes;
     private static final Logger logger = LoggerFactory
             .getLogger(YamlFixtureLoader.class);
 
     public YamlFixtureLoader(FramedGraph<Neo4jGraph> graph) {
         this.graph = graph;
         manager = GraphManagerFactory.getInstance(graph);
-        classes = ClassUtils.getEntityClasses();
     }
 
     private void loadFixtures() {
@@ -163,7 +161,8 @@ public class YamlFixtureLoader implements FixtureLoader {
     }
 
     private Class<?> getClassForVertex(Vertex a) {
-        return classes.get((String) a.getProperty(EntityType.TYPE_KEY));
+        return EntityEnumTypes.withName(
+                (String) a.getProperty(EntityType.TYPE_KEY)).getEntityClass();
     }
 
     /**
@@ -178,7 +177,8 @@ public class YamlFixtureLoader implements FixtureLoader {
             Map<String, Object> node) throws DeserializationError,
             ValidationError, IntegrityError, ItemNotFound {
         String id = (String) node.get(Converter.ID_KEY);
-        String type = (String) node.get(Converter.TYPE_KEY);
+        EntityEnumTypes isa = EntityEnumTypes.withName((String) node
+                .get(Converter.TYPE_KEY));
         @SuppressWarnings("unchecked")
         Map<String, Object> nodeData = (Map<String, Object>) node
                 .get(Converter.DATA_KEY);
@@ -190,12 +190,12 @@ public class YamlFixtureLoader implements FixtureLoader {
 
         // Since our data is written as a subgraph, we can use the
         // bundle converter to load it.
-        Bundle entityBundle = createBundle(id, type, nodeData,
+        Bundle entityBundle = createBundle(id, isa, nodeData,
                 getDependentRelations(nodeRels));
-        BundleDAO persister = new BundleDAO(graph,
-                SystemScope.getInstance());
+        BundleDAO persister = new BundleDAO(graph, SystemScope.getInstance());
         logger.debug("Creating node with id: {}", id);
-        VertexFrame frame = persister.createOrUpdate(entityBundle, VertexFrame.class);
+        VertexFrame frame = persister.createOrUpdate(entityBundle,
+                VertexFrame.class);
 
         MultiValueMap linkRels = getLinkedRelations(nodeRels);
         if (!linkRels.isEmpty()) {
@@ -203,14 +203,14 @@ public class YamlFixtureLoader implements FixtureLoader {
         }
     }
 
-    private Bundle createBundle(final String id,
-            final String type, final Map<String, Object> nodeData,
+    private Bundle createBundle(final String id, final EntityEnumTypes type,
+            final Map<String, Object> nodeData,
             final MultiValueMap dependentRelations) throws DeserializationError {
         @SuppressWarnings("serial")
         Map<String, Object> data = new HashMap<String, Object>() {
             {
                 put(Converter.ID_KEY, id);
-                put(Converter.TYPE_KEY, type);
+                put(Converter.TYPE_KEY, type.getName());
                 put(Converter.DATA_KEY, nodeData);
                 put(Converter.REL_KEY, dependentRelations);
             }
