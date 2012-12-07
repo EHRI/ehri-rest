@@ -3,7 +3,7 @@ package eu.ehri.project.models.idgen;
 import java.util.Map;
 
 import eu.ehri.project.exceptions.IdGenerationError;
-import eu.ehri.project.models.EntityEnumTypes;
+import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.PermissionScope;
 
@@ -14,9 +14,11 @@ import eu.ehri.project.models.base.PermissionScope;
  * @author michaelb
  * 
  */
-public class DocumentaryUnitIdGenerator implements IdGenerator {
+public enum DocumentaryUnitIdGenerator implements IdGenerator {
+    
+    INSTANCE;
 
-    public String generateId(EntityEnumTypes type, PermissionScope scope,
+    public String generateId(EntityClass type, PermissionScope scope,
             Map<String, Object> data) throws IdGenerationError {
         if (scope == null)
             throw new IdGenerationError(

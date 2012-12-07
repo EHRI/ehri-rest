@@ -4,12 +4,12 @@ import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Property;
 
 import eu.ehri.project.models.annotations.Dependent;
-import eu.ehri.project.models.annotations.EntityEnumType;
+import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.Address;
 
-@EntityEnumType(EntityEnumTypes.AGENT_DESCRIPTION)
+@EntityType(EntityClass.AGENT_DESCRIPTION)
 public interface AgentDescription extends Description {
 
     public static final String HAS_ADDRESS = "hasAddress";

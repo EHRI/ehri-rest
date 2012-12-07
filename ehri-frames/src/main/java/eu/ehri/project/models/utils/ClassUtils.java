@@ -9,9 +9,9 @@ import java.util.Map;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Property;
-import eu.ehri.project.models.EntityEnumTypes;
+import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.Dependent;
-import eu.ehri.project.models.annotations.EntityEnumType;
+import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.annotations.Unique;
 
@@ -31,8 +31,8 @@ public class ClassUtils {
      * @param cls
      * @return
      */
-    public static EntityEnumTypes getEntityType(Class<?> cls) {
-        EntityEnumType ann = cls.getAnnotation(EntityEnumType.class);
+    public static EntityClass getEntityType(Class<?> cls) {
+        EntityType ann = cls.getAnnotation(EntityType.class);
         if (ann == null)
             throw new RuntimeException(String.format(
                     "Programming error! Bad bundle type: %s", cls.getName()));

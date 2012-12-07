@@ -23,7 +23,7 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 
 import eu.ehri.extension.AbstractRestResource;
-import eu.ehri.project.models.EntityTypes;
+import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.persistance.Bundle;
 
@@ -163,7 +163,7 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
     @Test
     public void testListDocumentaryUnit() throws Exception {
         List<Map<String, Object>> data = getEntityList(
-                EntityTypes.DOCUMENTARY_UNIT, getAdminUserProfileId());
+                Entities.DOCUMENTARY_UNIT, getAdminUserProfileId());
         assertTrue(data.size() > 0);
         Collections.sort(data, new Comparator<Map<String, Object>>() {
             @Override
@@ -242,7 +242,7 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
 
     private URI getCreationUri() {
         return UriBuilder.fromPath(getExtensionEntryPointUri())
-                .segment(EntityTypes.AGENT).segment(TEST_HOLDER_IDENTIFIER)
-                .segment(EntityTypes.DOCUMENTARY_UNIT).build();
+                .segment(Entities.AGENT).segment(TEST_HOLDER_IDENTIFIER)
+                .segment(Entities.DOCUMENTARY_UNIT).build();
     }
 }

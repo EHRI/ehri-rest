@@ -15,7 +15,6 @@ import eu.ehri.project.acl.AnonymousAccessor;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.models.EntityTypes;
 import eu.ehri.project.models.base.Accessor;
 
 public abstract class AbstractRestResource {
@@ -54,7 +53,7 @@ public abstract class AbstractRestResource {
             return AnonymousAccessor.getInstance();
         } else {
             try {
-                return getEntity(EntityTypes.USER_PROFILE, id, Accessor.class);
+                return manager.getFrame(id, Accessor.class);
             } catch (ItemNotFound e) {
                 throw new BadRequester(id);
             }

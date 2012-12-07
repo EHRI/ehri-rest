@@ -13,7 +13,7 @@ import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
-import eu.ehri.project.models.EntityEnumTypes;
+import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.persistance.BundleFactory;
 import eu.ehri.project.persistance.Bundle;
@@ -42,7 +42,7 @@ public class JsonFixtureLoader implements FixtureLoader {
 
             for (Map<String, Object> namedNode : nodes) {
                 String id = (String) namedNode.get(EntityType.ID_KEY);
-                EntityEnumTypes isa = EntityEnumTypes.withName((String) namedNode.get(EntityType.TYPE_KEY));
+                EntityClass isa = EntityClass.withName((String) namedNode.get(EntityType.TYPE_KEY));
                 Map<String, Object> data = (Map<String, Object>) namedNode
                         .get("data");
                 Bundle bundle = new BundleFactory()

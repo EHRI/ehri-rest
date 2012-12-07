@@ -30,7 +30,7 @@ import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.models.EntityEnumTypes;
+import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.persistance.BundleDAO;
 import eu.ehri.project.persistance.Converter;
@@ -161,7 +161,7 @@ public class YamlFixtureLoader implements FixtureLoader {
     }
 
     private Class<?> getClassForVertex(Vertex a) {
-        return EntityEnumTypes.withName(
+        return EntityClass.withName(
                 (String) a.getProperty(EntityType.TYPE_KEY)).getEntityClass();
     }
 
@@ -177,7 +177,7 @@ public class YamlFixtureLoader implements FixtureLoader {
             Map<String, Object> node) throws DeserializationError,
             ValidationError, IntegrityError, ItemNotFound {
         String id = (String) node.get(Converter.ID_KEY);
-        EntityEnumTypes isa = EntityEnumTypes.withName((String) node
+        EntityClass isa = EntityClass.withName((String) node
                 .get(Converter.TYPE_KEY));
         @SuppressWarnings("unchecked")
         Map<String, Object> nodeData = (Map<String, Object>) node
@@ -203,7 +203,7 @@ public class YamlFixtureLoader implements FixtureLoader {
         }
     }
 
-    private Bundle createBundle(final String id, final EntityEnumTypes type,
+    private Bundle createBundle(final String id, final EntityClass type,
             final Map<String, Object> nodeData,
             final MultiValueMap dependentRelations) throws DeserializationError {
         @SuppressWarnings("serial")

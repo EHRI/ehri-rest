@@ -9,7 +9,7 @@ import com.tinkerpop.frames.VertexFrame;
 
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
-import eu.ehri.project.models.EntityEnumTypes;
+import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.persistance.Converter;
 
@@ -56,7 +56,7 @@ public class GetEntity extends BaseCommand implements Command {
         if (cmdLine.getArgList().size() < 2)
             throw new RuntimeException(getHelp());
 
-        EntityEnumTypes type = EntityEnumTypes.withName(cmdLine.getArgs()[0]);
+        EntityClass type = EntityClass.withName(cmdLine.getArgs()[0]);
         String id = cmdLine.getArgs()[1];
         Class<?> cls = type.getEntityClass();
 

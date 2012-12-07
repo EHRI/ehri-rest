@@ -11,8 +11,7 @@ import eu.ehri.project.models.Address;
 import eu.ehri.project.models.AgentDescription;
 import eu.ehri.project.models.Authority;
 import eu.ehri.project.models.DocumentaryUnit;
-import eu.ehri.project.models.EntityEnumTypes;
-import eu.ehri.project.models.EntityTypes;
+import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Group;
 import eu.ehri.project.models.base.Accessor;
 
@@ -24,7 +23,7 @@ public class ModelTest extends ModelTestBase {
 
     @Test
     public void testTheGraphContainsGroups() throws ItemNotFound {
-        Iterable<Group> frames = manager.getFrames(EntityEnumTypes.GROUP,
+        Iterable<Group> frames = manager.getFrames(EntityClass.GROUP,
                 Group.class);
         List<Group> groups = toList(frames);
         assertFalse(groups.isEmpty());

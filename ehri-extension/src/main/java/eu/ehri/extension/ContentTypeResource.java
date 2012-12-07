@@ -14,17 +14,17 @@ import javax.ws.rs.core.StreamingOutput;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import eu.ehri.extension.errors.BadRequester;
+import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.ContentType;
-import eu.ehri.project.models.EntityTypes;
 
 /**
  * Provides a RESTfull interface for the Action class. Note: Action instances
  * are created by the system, so we do not have create/update/delete methods
  * here.
  */
-@Path(EntityTypes.CONTENT_TYPE)
+@Path(Entities.CONTENT_TYPE)
 public class ContentTypeResource extends EhriNeo4jFramedResource<ContentType> {
 
     public ContentTypeResource(@Context GraphDatabaseService database) {

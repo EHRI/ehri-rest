@@ -15,14 +15,14 @@ import eu.ehri.project.models.idgen.IdGenerator;
  * @author michaelb
  *
  */
-public enum EntityEnumTypes {
+public enum EntityClass {
 
     // @formatter:off
-    DOCUMENTARY_UNIT(Entities.DOCUMENTARY_UNIT, "c", DocumentaryUnit.class, DocumentaryUnitIdGenerator.class),
-    AGENT(Entities.AGENT, "r", Agent.class, AccessibleEntityIdGenerator.class),
-    AUTHORITY(Entities.AUTHORITY, "a", Authority.class, AccessibleEntityIdGenerator.class),
-    GROUP(Entities.GROUP, "g", Group.class, AccessibleEntityIdGenerator.class),
-    USER_PROFILE(Entities.USER_PROFILE, "u", UserProfile.class, AccessibleEntityIdGenerator.class),
+    DOCUMENTARY_UNIT(Entities.DOCUMENTARY_UNIT, "c", DocumentaryUnit.class, DocumentaryUnitIdGenerator.INSTANCE),
+    AGENT(Entities.AGENT, "r", Agent.class, AccessibleEntityIdGenerator.INSTANCE),
+    AUTHORITY(Entities.AUTHORITY, "a", Authority.class, AccessibleEntityIdGenerator.INSTANCE),
+    GROUP(Entities.GROUP, "g", Group.class, AccessibleEntityIdGenerator.INSTANCE),
+    USER_PROFILE(Entities.USER_PROFILE, "u", UserProfile.class, AccessibleEntityIdGenerator.INSTANCE),
     
     // Generic entities.
     DOCUMENT_DESCRIPTION(Entities.DOCUMENT_DESCRIPTION, "dd", DocumentDescription.class),
@@ -74,12 +74,12 @@ public enum EntityEnumTypes {
      * 
      * @return
      */
-    public Class<? extends IdGenerator> getIdgen() {
+    public IdGenerator getIdgen() {
         return idgen;
     }
 
-    public static EntityEnumTypes withName(String name) {
-        for (EntityEnumTypes et : EntityEnumTypes.values()) {
+    public static EntityClass withName(String name) {
+        for (EntityClass et : EntityClass.values()) {
             if (et.getName().equals(name))
                 return et;
         }
@@ -89,10 +89,10 @@ public enum EntityEnumTypes {
     private final String name;
     private final String abbr;
     private final Class<? extends VertexFrame> cls;
-    private final Class<? extends IdGenerator> idgen;
+    private final IdGenerator idgen;
 
-    private EntityEnumTypes(String name, String abbr,
-            Class<? extends VertexFrame> cls, Class<? extends IdGenerator> idgen) {
+    private EntityClass(String name, String abbr,
+            Class<? extends VertexFrame> cls, IdGenerator idgen) {
         this.name = name;
         this.abbr = abbr;
         this.cls = cls;
@@ -106,9 +106,9 @@ public enum EntityEnumTypes {
      * @param abbr
      * @param cls
      */
-    private EntityEnumTypes(String name, String abbr,
+    private EntityClass(String name, String abbr,
             Class<? extends VertexFrame> cls) {
-        this(name, abbr, cls, GenericIdGenerator.class);
+        this(name, abbr, cls, GenericIdGenerator.INSTANCE);
     }
 
     @Override

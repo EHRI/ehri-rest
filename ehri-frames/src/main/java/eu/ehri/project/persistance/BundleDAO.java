@@ -188,18 +188,9 @@ public final class BundleDAO {
             BundleValidatorFactory.getInstance(bundle).validate();
             // If the bundle doesn't already have an ID, generate one using the
             // (presently stopgap) type-dependent ID generator.
-            String id = null;
-            try {
-                id = bundle.getId() != null ? bundle.getId()
-                        : bundle.getType().getIdgen().newInstance().generateId(bundle.getType(),
-                                scope, bundle.getData());
-            } catch (InstantiationException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (IllegalAccessException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
+            String id = bundle.getId() != null ? bundle.getId() : bundle
+                    .getType().getIdgen()
+                    .generateId(bundle.getType(), scope, bundle.getData());
             Vertex node = manager.createVertex(id, bundle.getType(),
                     bundle.getData(), bundle.getPropertyKeys(),
                     bundle.getUniquePropertyKeys());

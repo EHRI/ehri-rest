@@ -2,7 +2,10 @@ package eu.ehri.extension;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 
 import javax.ws.rs.Consumes;
@@ -28,9 +31,11 @@ import org.neo4j.graphdb.Transaction;
 
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.acl.AclManager;
+import eu.ehri.project.acl.ContentTypes;
+import eu.ehri.project.acl.PermissionType;
+import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.models.EntityTypes;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Actioner;
@@ -46,7 +51,7 @@ import eu.ehri.project.persistance.Converter;
  * permissions.
  * 
  */
-@Path(EntityTypes.PERMISSION)
+@Path(Entities.PERMISSION)
 public class PermissionsResource extends AbstractRestResource {
 
     public PermissionsResource(@Context GraphDatabaseService database) {
@@ -73,7 +78,7 @@ public class PermissionsResource extends AbstractRestResource {
             Accessor accessor = manager.getFrame(id, Accessor.class);
             Accessor grantee = getRequesterUserProfile();
             AclManager acl = new AclManager(graph);
-            acl.setGlobalPermissionMatrix(accessor, globals);
+            acl.setGlobalPermissionMatrix(accessor, enumifyMatrix(globals));
 
             // Log the action...
             new ActionManager(graph).createAction(
@@ -116,8 +121,8 @@ public class PermissionsResource extends AbstractRestResource {
 
         return Response
                 .status(Status.OK)
-                .entity(new ObjectMapper().writeValueAsBytes(acl
-                        .getInheritedGlobalPermissions(accessor))).build();
+                .entity(new ObjectMapper().writeValueAsBytes(stringifyInheritedGlobalMatrix(acl
+                        .getInheritedGlobalPermissions(accessor)))).build();
     }
 
     /**
@@ -138,7 +143,7 @@ public class PermissionsResource extends AbstractRestResource {
             JsonGenerationException, JsonMappingException, IOException,
             ItemNotFound, BadRequester {
         Accessor accessor = getRequesterUserProfile();
-        return getGlobalMatrix(accessor.getIdentifier());
+        return getGlobalMatrix(manager.getId(accessor));
     }
 
     /**
@@ -168,8 +173,73 @@ public class PermissionsResource extends AbstractRestResource {
 
         return Response
                 .status(Status.OK)
-                .entity(new ObjectMapper().writeValueAsBytes(acl
-                        .getInheritedEntityPermissions(accessor, entity)))
+                .entity(new ObjectMapper().writeValueAsBytes(stringifyInheritedMatrix(acl
+                        .getInheritedEntityPermissions(accessor, entity))))
                 .build();
+    }
+
+    // Helpers. These just convert from string to internal enum representations
+    // of the various permissions-related data structures. 
+    // TODO: There's probably a way to get Jackson to do that automatically.
+    // This was why scala was invented...
+
+    private List<Map<String,Map<String, List<String>>>> stringifyInheritedGlobalMatrix(
+            List<Map<String,Map<ContentTypes, List<PermissionType>>>> matrix) {
+        List<Map<String,Map<String, List<String>>>> list = new LinkedList<Map<String,Map<String, List<String>>>>();
+        for (Map<String,Map<ContentTypes, List<PermissionType>>> item : matrix) {
+            Map<String,Map<String, List<String>>> tmp = new HashMap<String,Map<String, List<String>>>();
+            for (Entry<String,Map<ContentTypes, List<PermissionType>>> entry : item.entrySet()) {
+                tmp.put(entry.getKey(), stringifyGlobalMatrix(entry.getValue()));
+            }
+            list.add(tmp);
+        }
+        return list;
+    }
+    
+    private Map<String,List<String>> stringifyGlobalMatrix(Map<ContentTypes,List<PermissionType>> matrix) {
+        Map<String, List<String>> tmp = new HashMap<String, List<String>>();
+        for (Entry<ContentTypes,List<PermissionType>> entry : matrix.entrySet()) {
+            List<String> ptmp = new LinkedList<String>();
+            for (PermissionType pt : entry.getValue()) {
+                ptmp.add(pt.getName());
+            }
+            tmp.put(entry.getKey().getName(), ptmp);
+        }
+        return tmp;
+    }
+
+    private List<Map<String, List<String>>> stringifyInheritedMatrix(
+            List<Map<String, List<PermissionType>>> matrix) {
+        List<Map<String, List<String>>> tmp = new LinkedList<Map<String, List<String>>>();
+        for (Map<String, List<PermissionType>> item : matrix) {
+            tmp.add(stringifyMatrix(item));
+        }
+        return tmp;
+    }
+
+    private Map<String, List<String>> stringifyMatrix(
+            Map<String, List<PermissionType>> matrix) {
+        Map<String, List<String>> out = new HashMap<String, List<String>>();
+        for (Entry<String, List<PermissionType>> entry : matrix.entrySet()) {
+            List<String> tmp = new LinkedList<String>();
+            for (PermissionType t : entry.getValue()) {
+                tmp.add(t.getName());
+            }
+            out.put(entry.getKey(), tmp);
+        }
+        return out;
+    }
+
+    private Map<ContentTypes, List<PermissionType>> enumifyMatrix(
+            Map<String, List<String>> matrix) {
+        Map<ContentTypes, List<PermissionType>> out = new HashMap<ContentTypes, List<PermissionType>>();
+        for (Entry<String, List<String>> entry : matrix.entrySet()) {
+            List<PermissionType> tmp = new LinkedList<PermissionType>();
+            for (String t : entry.getValue()) {
+                tmp.add(PermissionType.withName(t));
+            }
+            out.put(ContentTypes.withName(entry.getKey()), tmp);
+        }
+        return out;
     }
 }

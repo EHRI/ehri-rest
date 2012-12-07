@@ -9,14 +9,17 @@ import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
 import eu.ehri.project.acl.AclManager;
-import eu.ehri.project.acl.PermissionTypes;
+import eu.ehri.project.acl.ContentTypes;
+import eu.ehri.project.acl.PermissionType;
 import eu.ehri.project.acl.SystemScope;
+import eu.ehri.project.core.GraphManager;
+import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.ContentType;
-import eu.ehri.project.models.EntityEnumTypes;
+import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Permission;
 import eu.ehri.project.models.PermissionGrant;
 import eu.ehri.project.models.base.AccessibleEntity;
@@ -31,6 +34,7 @@ public final class AclViews<E extends AccessibleEntity> implements Acl<E> {
     private final AclManager acl;
     private final ViewHelper helper;
     private final PermissionScope scope;
+    private final GraphManager manager;
 
     /**
      * Scoped constructor.
@@ -45,6 +49,7 @@ public final class AclViews<E extends AccessibleEntity> implements Acl<E> {
         this.scope = scope;
         acl = new AclManager(graph);
         helper = new ViewHelper(graph, cls, scope);
+        manager = GraphManagerFactory.getInstance(graph);
     }
 
     /**
@@ -72,26 +77,25 @@ public final class AclViews<E extends AccessibleEntity> implements Acl<E> {
      * @throws SerializationError
      */
     public PermissionGrant setPermission(E entity, Accessor user,
-            String permissionId) throws PermissionDenied, ValidationError,
+            PermissionType perm) throws PermissionDenied, ValidationError,
             SerializationError {
         helper.checkEntityPermission(entity, user,
-                helper.getPermission(PermissionTypes.GRANT));
+                helper.getPermission(PermissionType.GRANT));
         return acl.grantPermissions(user, entity,
-                helper.getPermission(permissionId), scope);
+                helper.getPermission(perm), scope);
     }
 
     public void setGlobalPermissionMatrix(Accessor accessor, Accessor grantee,
-            Map<String, List<String>> permissionMap) throws PermissionDenied,
+            Map<ContentTypes, List<PermissionType>> permissionMap) throws PermissionDenied,
             ValidationError, SerializationError {
 
         // Check we have grant permissions for the requested content types
         if (!acl.belongsToAdmin(grantee)) {
             try {
-                Permission grantPerm = helper.getEntity(EntityEnumTypes.PERMISSION,
-                        PermissionTypes.GRANT, Permission.class);
-                for (String ctype : permissionMap.keySet()) {
-                    ContentType target = helper.getContentType(EntityEnumTypes
-                            .withName(ctype));
+                Permission grantPerm = helper.getEntity(EntityClass.PERMISSION,
+                        PermissionType.GRANT.getName(), Permission.class);
+                for (ContentTypes ctype : permissionMap.keySet()) {
+                    ContentType target = manager.getFrame(ctype.getName(), ContentType.class);
                     Iterable<PermissionGrant> grants = acl.getPermissionGrants(
                             grantee, target, grantPerm);
                     if (!grants.iterator().hasNext()) {
@@ -102,7 +106,7 @@ public final class AclViews<E extends AccessibleEntity> implements Acl<E> {
             } catch (ItemNotFound e) {
                 throw new RuntimeException(
                         "Unable to get node for permission type '"
-                                + PermissionTypes.GRANT + "'", e);
+                                + PermissionType.GRANT + "'", e);
             }
         }
 
@@ -112,7 +116,7 @@ public final class AclViews<E extends AccessibleEntity> implements Acl<E> {
     public void setAccessors(E entity, Set<Accessor> accessors, Accessor user)
             throws PermissionDenied {
         helper.checkEntityPermission(entity, user,
-                helper.getPermission(PermissionTypes.UPDATE));
+                helper.getPermission(PermissionType.UPDATE));
         // FIXME: Must be a more efficient way to do this, whilst
         // ensuring that superfluous double relationships don't get created?
         Set<Long> accessorIds = new HashSet<Long>();

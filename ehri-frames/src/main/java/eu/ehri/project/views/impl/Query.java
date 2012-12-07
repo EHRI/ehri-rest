@@ -180,6 +180,24 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
     }
 
     /**
+     * Fetch an item by property id. The first matching item will be
+     * returned.
+     * 
+     * @param key
+     * @param value
+     * @param user
+     * @return The matching framed vertex.
+     * @throws PermissionDenied
+     * @throws ItemNotFound
+     */
+    public E get(String id, Accessor user)
+            throws PermissionDenied, ItemNotFound {
+        E item = manager.getFrame(id, cls);
+        helper.checkReadAccess(item, user);
+        return item;
+    }
+
+    /**
      * Fetch an item by property key/value. The first matching item will be
      * returned.
      * 

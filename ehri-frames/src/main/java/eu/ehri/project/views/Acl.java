@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import eu.ehri.project.acl.ContentTypes;
+import eu.ehri.project.acl.PermissionType;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
@@ -21,11 +23,11 @@ import eu.ehri.project.models.base.Accessor;
 public interface Acl<E extends AccessibleEntity> {
 
     public PermissionGrant setPermission(E entity, Accessor user,
-            String permissionId) throws PermissionDenied, ValidationError,
+            PermissionType permission) throws PermissionDenied, ValidationError,
             SerializationError;
     
     public void setGlobalPermissionMatrix(Accessor accessor, Accessor grantee,
-            Map<String, List<String>> permissionMap) throws PermissionDenied,
+            Map<ContentTypes, List<PermissionType>> permissionMap) throws PermissionDenied,
             ValidationError, SerializationError;
     
     public void setAccessors(E entity, Set<Accessor> accessors, Accessor user)

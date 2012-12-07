@@ -6,7 +6,7 @@ import java.util.Map;
 
 import org.apache.commons.collections.map.MultiValueMap;
 
-import eu.ehri.project.models.EntityEnumTypes;
+import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.utils.ClassUtils;
 
@@ -19,7 +19,7 @@ import eu.ehri.project.models.utils.ClassUtils;
  */
 public class Bundle {
     protected final String id;
-    protected final EntityEnumTypes type;
+    protected final EntityClass type;
     protected final Map<String, Object> data;
     protected final MultiValueMap relations;
 
@@ -129,7 +129,7 @@ public class Bundle {
      * 
      * @return
      */
-    public EntityEnumTypes getType() {
+    public EntityClass getType() {
         return type;
     }
 

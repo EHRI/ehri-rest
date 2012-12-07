@@ -25,7 +25,7 @@ import com.tinkerpop.frames.VertexFrame;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.models.EntityEnumTypes;
+import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
 
 /**
@@ -66,12 +66,12 @@ public final class SingleIndexGraphManager implements GraphManager {
         return graph.frame(getVertex(id), cls);
     }
 
-    public <T> T getFrame(String id, EntityEnumTypes type, Class<T> cls)
+    public <T> T getFrame(String id, EntityClass type, Class<T> cls)
             throws ItemNotFound {
         return graph.frame(getVertex(id, type), cls);
     }
 
-    public <T> Iterable<T> getFrames(EntityEnumTypes type, Class<T> cls) {
+    public <T> Iterable<T> getFrames(EntityClass type, Class<T> cls) {
         CloseableIterable<Vertex> vertices = getVertices(type);
         try {
             return graph.frameVertices(getVertices(type), cls);
@@ -80,13 +80,13 @@ public final class SingleIndexGraphManager implements GraphManager {
         }
     }
 
-    public CloseableIterable<Vertex> getVertices(EntityEnumTypes type) {
+    public CloseableIterable<Vertex> getVertices(EntityClass type) {
         return getIndex().get(EntityType.TYPE_KEY, type.getName());
     }
 
     @SuppressWarnings("unchecked")
     public CloseableIterable<Neo4jVertex> getVertices(String key, Object value,
-            EntityEnumTypes type) {
+            EntityClass type) {
         String queryStr = getLuceneQuery(key, value, type.getName());
         IndexHits<Node> rawQuery = getRawIndex().query(queryStr);
         return new Neo4jVertexIterable<Vertex>(rawQuery, graph.getBaseGraph(),
@@ -107,7 +107,7 @@ public final class SingleIndexGraphManager implements GraphManager {
         }
     }
 
-    public Vertex getVertex(String id, EntityEnumTypes type)
+    public Vertex getVertex(String id, EntityClass type)
             throws ItemNotFound {
         String queryStr = getLuceneQuery(EntityType.ID_KEY, id, type.getName());
         IndexHits<Node> rawQuery = getRawIndex().query(queryStr);
@@ -131,7 +131,7 @@ public final class SingleIndexGraphManager implements GraphManager {
      * @return
      * @throws IntegrityError
      */
-    public Vertex createVertex(String id, EntityEnumTypes type,
+    public Vertex createVertex(String id, EntityClass type,
             Map<String, Object> data) throws IntegrityError {
         return createVertex(id, type, data, data.keySet(),
                 new LinkedList<String>());
@@ -146,7 +146,7 @@ public final class SingleIndexGraphManager implements GraphManager {
      * @return
      * @throws IntegrityError
      */
-    public Vertex createVertex(String id, EntityEnumTypes type,
+    public Vertex createVertex(String id, EntityClass type,
             Map<String, Object> data, List<String> keys) throws IntegrityError {
         return createVertex(id, type, data, keys, new LinkedList<String>());
     }
@@ -161,7 +161,7 @@ public final class SingleIndexGraphManager implements GraphManager {
      * @return
      * @throws IntegrityError
      */
-    public Vertex createVertex(String id, EntityEnumTypes type,
+    public Vertex createVertex(String id, EntityClass type,
             Map<String, Object> data, Collection<String> keys,
             Collection<String> uniqueKeys) throws IntegrityError {
         Index<Vertex> index = getIndex();
@@ -195,19 +195,19 @@ public final class SingleIndexGraphManager implements GraphManager {
         }
     }
 
-    public Vertex updateVertex(String id, EntityEnumTypes type,
+    public Vertex updateVertex(String id, EntityClass type,
             Map<String, Object> data) throws IntegrityError, ItemNotFound {
         return updateVertex(id, type, data, data.keySet(),
                 new LinkedList<String>());
     }
 
-    public Vertex updateVertex(String id, EntityEnumTypes type,
+    public Vertex updateVertex(String id, EntityClass type,
             Map<String, Object> data, Collection<String> keys)
             throws IntegrityError, ItemNotFound {
         return updateVertex(id, type, data, keys, new LinkedList<String>());
     }
 
-    public Vertex updateVertex(String id, EntityEnumTypes type,
+    public Vertex updateVertex(String id, EntityClass type,
             Map<String, Object> data, Collection<String> keys,
             Collection<String> uniqueKeys) throws IntegrityError, ItemNotFound {
         Index<Vertex> index = getIndex();
@@ -250,7 +250,7 @@ public final class SingleIndexGraphManager implements GraphManager {
      * @param propertyName
      * @return
      */
-    public List<Object> getAllPropertiesOfType(EntityEnumTypes typeName,
+    public List<Object> getAllPropertiesOfType(EntityClass typeName,
             String propertyName) {
         List<Object> out = new LinkedList<Object>();
         CloseableIterable<Vertex> query = getVertices(typeName);
@@ -389,7 +389,7 @@ public final class SingleIndexGraphManager implements GraphManager {
             throw new IntegrityError("Item exists with ID: " + id, "entities");
     }
 
-    private Map<String, Object> getVertexData(String id, EntityEnumTypes type,
+    private Map<String, Object> getVertexData(String id, EntityClass type,
             Map<String, Object> data) {
         Map<String, Object> vdata = new HashMap<String, Object>(data);
         vdata.put(EntityType.ID_KEY, id);
@@ -397,7 +397,7 @@ public final class SingleIndexGraphManager implements GraphManager {
         return vdata;
     }
 
-    private Collection<String> getVertexKeys(String id, EntityEnumTypes type,
+    private Collection<String> getVertexKeys(String id, EntityClass type,
             Collection<String> keys) {
         List<String> vkeys = new LinkedList<String>(keys);
         vkeys.add(EntityType.ID_KEY);

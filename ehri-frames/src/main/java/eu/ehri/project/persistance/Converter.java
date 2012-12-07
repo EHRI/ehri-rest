@@ -16,7 +16,7 @@ import com.tinkerpop.frames.VertexFrame;
 
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.SerializationError;
-import eu.ehri.project.models.EntityEnumTypes;
+import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.utils.ClassUtils;
@@ -145,7 +145,7 @@ public final class Converter {
             throws DeserializationError {
         try {
             String id = (String) data.get(ID_KEY);
-            EntityEnumTypes isa = EntityEnumTypes.withName((String) data
+            EntityClass isa = EntityClass.withName((String) data
                     .get(TYPE_KEY));
             if (isa == null)
                 throw new DeserializationError(String.format(
@@ -226,7 +226,7 @@ public final class Converter {
     public <T extends VertexFrame> Bundle vertexFrameToBundle(T item, int depth)
             throws SerializationError {
         String id = (String) item.asVertex().getProperty(EntityType.ID_KEY);
-        EntityEnumTypes isa = EntityEnumTypes.withName((String) item.asVertex()
+        EntityClass isa = EntityClass.withName((String) item.asVertex()
                 .getProperty(EntityType.TYPE_KEY));
         MultiValueMap relations = getRelationData(item, depth,
                 isa.getEntityClass());

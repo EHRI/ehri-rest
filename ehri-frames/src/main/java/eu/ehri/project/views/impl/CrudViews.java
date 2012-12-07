@@ -4,7 +4,7 @@ import java.util.Map;
 
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
-import eu.ehri.project.acl.PermissionTypes;
+import eu.ehri.project.acl.PermissionType;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
@@ -87,7 +87,7 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
         Bundle bundle = converter.dataToBundle(data);
         E entity = graph.frame(manager.getVertex(bundle.getId()), cls);
         helper.checkEntityPermission(entity, user,
-                helper.getPermission(PermissionTypes.UPDATE));
+                helper.getPermission(PermissionType.UPDATE));
         return new BundleDAO(graph, scope).update(bundle, cls);
     }
 
@@ -107,7 +107,7 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
             throws PermissionDenied, ValidationError, DeserializationError,
             IntegrityError {
         helper.checkPermission(user,
-                helper.getPermission(PermissionTypes.CREATE));
+                helper.getPermission(PermissionType.CREATE));
         Bundle bundle = converter.dataToBundle(data);
         return new BundleDAO(graph, scope).create(bundle, cls);
     }
@@ -128,9 +128,9 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
             throws PermissionDenied, ValidationError, DeserializationError,
             IntegrityError {
         helper.checkPermission(user,
-                helper.getPermission(PermissionTypes.CREATE));
+                helper.getPermission(PermissionType.CREATE));
         helper.checkPermission(user,
-                helper.getPermission(PermissionTypes.UPDATE));
+                helper.getPermission(PermissionType.UPDATE));
         Bundle bundle = converter.dataToBundle(data);
         return new BundleDAO(graph, scope).createOrUpdate(bundle, cls);
     }
@@ -149,7 +149,7 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
     public Integer delete(E item, Accessor user) throws PermissionDenied,
             ValidationError, SerializationError {
         helper.checkEntityPermission(item, user,
-                helper.getPermission(PermissionTypes.DELETE));
+                helper.getPermission(PermissionType.DELETE));
         return new BundleDAO(graph, scope).delete(converter
                 .vertexFrameToBundle(item));
     }

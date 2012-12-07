@@ -1,6 +1,8 @@
 package eu.ehri.project.acl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -18,7 +20,7 @@ import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.ContentType;
-import eu.ehri.project.models.EntityEnumTypes;
+import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Group;
 import eu.ehri.project.models.Permission;
 import eu.ehri.project.models.PermissionGrant;
@@ -195,17 +197,17 @@ public class AclManager {
      * @return List of permission maps for the given accessor and his group
      *         parents.
      */
-    public List<Map<String, Map<String, List<String>>>> getInheritedGlobalPermissions(
+    public List<Map<String, Map<ContentTypes, List<PermissionType>>>> getInheritedGlobalPermissions(
             Accessor accessor) {
         // Help! I'm in Java Hell... Java really does not encourage
         // programming with generic data types.
-        List<Map<String, Map<String, List<String>>>> globals = new LinkedList<Map<String, Map<String, List<String>>>>();
-        Map<String, Map<String, List<String>>> userMap = new HashMap<String, Map<String, List<String>>>();
-        userMap.put(accessor.getIdentifier(), getGlobalPermissions(accessor));
+        List<Map<String, Map<ContentTypes, List<PermissionType>>>> globals = new LinkedList<Map<String, Map<ContentTypes, List<PermissionType>>>>();
+        Map<String, Map<ContentTypes, List<PermissionType>>> userMap = new HashMap<String, Map<ContentTypes, List<PermissionType>>>();
+        userMap.put(manager.getId(accessor), getGlobalPermissions(accessor));
         globals.add(userMap);
         for (Accessor parent : accessor.getParents()) {
-            Map<String, Map<String, List<String>>> parentMap = new HashMap<String, Map<String, List<String>>>();
-            parentMap.put(parent.getIdentifier(), getGlobalPermissions(parent));
+            Map<String, Map<ContentTypes, List<PermissionType>>> parentMap = new HashMap<String, Map<ContentTypes, List<PermissionType>>>();
+            parentMap.put(manager.getId(parent), getGlobalPermissions(parent));
             globals.add(parentMap);
         }
         return globals;
@@ -218,7 +220,8 @@ public class AclManager {
      * @param accessor
      * @return Permission map for the given accessor
      */
-    public Map<String, List<String>> getGlobalPermissions(Accessor accessor) {
+    public Map<ContentTypes, List<PermissionType>> getGlobalPermissions(
+            Accessor accessor) {
         return isAdmin(accessor) ? getAdminPermissions()
                 : getAccessorPermissions(accessor);
     }
@@ -232,16 +235,19 @@ public class AclManager {
      * @throws PermissionDenied
      */
     public void setGlobalPermissionMatrix(Accessor accessor,
-            Map<String, List<String>> globals) throws PermissionDenied {
+            Map<ContentTypes, List<PermissionType>> globals)
+            throws PermissionDenied {
         // Build a lookup of content types and permissions keyed by their
         // identifier.
-        Map<String, ContentType> cmap = new HashMap<String, ContentType>();
-        for (ContentType c : manager.getFrames(EntityEnumTypes.CONTENT_TYPE, ContentType.class)) {
-            cmap.put(c.getIdentifier(), c);
+        Map<ContentTypes, ContentType> cmap = new HashMap<ContentTypes, ContentType>();
+        for (ContentType c : manager.getFrames(EntityClass.CONTENT_TYPE,
+                ContentType.class)) {
+            cmap.put(ContentTypes.withName(manager.getId(c)), c);
         }
-        Map<String, Permission> pmap = new HashMap<String, Permission>();
-        for (Permission p : manager.getFrames(EntityEnumTypes.PERMISSION, Permission.class)) {
-            pmap.put(p.getIdentifier(), p);
+        Map<PermissionType, Permission> pmap = new HashMap<PermissionType, Permission>();
+        for (Permission p : manager.getFrames(EntityClass.PERMISSION,
+                Permission.class)) {
+            pmap.put(PermissionType.withName(manager.getId(p)), p);
         }
 
         // Quick sanity check to make sure we're not trying to add/remove
@@ -250,14 +256,12 @@ public class AclManager {
             throw new PermissionDenied(
                     "Unable to grant or revoke permissions to system accounts.");
 
-        for (Entry<String, ContentType> centry : cmap.entrySet()) {
+        for (Entry<ContentTypes, ContentType> centry : cmap.entrySet()) {
             ContentType target = centry.getValue();
-            List<String> pset = globals.get(centry.getKey());
+            List<PermissionType> pset = globals.get(centry.getKey());
             if (pset == null)
                 continue;
-            List<Object> perms = manager.getAllPropertiesOfType(
-                    EntityEnumTypes.PERMISSION, AccessibleEntity.IDENTIFIER_KEY);
-            for (Object perm : perms) {
+            for (PermissionType perm : PermissionType.values()) {
                 Permission permission = pmap.get(perm);
                 if (pset.contains(perm)) {
                     grantPermissions(accessor, target, permission);
@@ -275,15 +279,15 @@ public class AclManager {
      * @param accessor
      * @return List of permission maps for the given target
      */
-    public List<Map<String, List<String>>> getInheritedEntityPermissions(
+    public List<Map<String, List<PermissionType>>> getInheritedEntityPermissions(
             Accessor accessor, PermissionGrantTarget entity) {
-        List<Map<String, List<String>>> list = new LinkedList<Map<String, List<String>>>();
-        Map<String, List<String>> userMap = new HashMap<String, List<String>>();
-        userMap.put(accessor.getIdentifier(),
+        List<Map<String, List<PermissionType>>> list = new LinkedList<Map<String, List<PermissionType>>>();
+        Map<String, List<PermissionType>> userMap = new HashMap<String, List<PermissionType>>();
+        userMap.put(manager.getId(accessor),
                 getEntityPermissions(accessor, entity));
         list.add(userMap);
         for (Accessor parent : accessor.getAllParents()) {
-            Map<String, List<String>> parentMap = new HashMap<String, List<String>>();
+            Map<String, List<PermissionType>> parentMap = new HashMap<String, List<PermissionType>>();
             list.add(parentMap);
             parentMap.put(parent.getIdentifier(),
                     getEntityPermissions(parent, entity));
@@ -299,21 +303,18 @@ public class AclManager {
      * @return List of permission names for the given accessor on the given
      *         target
      */
-    public List<String> getEntityPermissions(Accessor accessor,
+    public List<PermissionType> getEntityPermissions(Accessor accessor,
             PermissionGrantTarget entity) {
         // If we're admin, add it regardless.
-        List<String> list = new LinkedList<String>();
+        List<PermissionType> list = new LinkedList<PermissionType>();
         if (isAdmin(accessor)) {
-            for (Object s : manager.getAllPropertiesOfType(
-                    EntityEnumTypes.PERMISSION, AccessibleEntity.IDENTIFIER_KEY)) {
-                list.add((String) s);
+            for (PermissionType p : PermissionType.values()) {
+                list.add(p);
             }
         } else {
             for (PermissionGrant grant : accessor.getPermissionGrants()) {
-                Permission perm = grant.getPermission();
-                // FIXME: Accomodate scope somehow...?
-                if (grant.getTarget().asVertex().equals(entity.asVertex()))
-                    list.add(perm.getIdentifier());
+                list.add(PermissionType.withName(manager.getId(grant
+                        .getPermission())));
             }
         }
         return list;
@@ -478,8 +479,9 @@ public class AclManager {
      * @param accessor
      * @return
      */
-    private Map<String, List<String>> getAccessorPermissions(Accessor accessor) {
-        Map<String, List<String>> perms = new HashMap<String, List<String>>();
+    private Map<ContentTypes, List<PermissionType>> getAccessorPermissions(
+            Accessor accessor) {
+        Map<ContentTypes, List<PermissionType>> perms = new HashMap<ContentTypes, List<PermissionType>>();
         for (PermissionGrant grant : accessor.getPermissionGrants()) {
             // Since these are global perms only include those where the target
             // is a content type
@@ -487,14 +489,15 @@ public class AclManager {
             if (grant.getScope() == null
                     && AnnotationUtils.hasFramedInterface(target,
                             ContentType.class)) {
-                ContentType ctype = graph.frame(target.asVertex(),
-                        ContentType.class);
-                List<String> plist = perms.get(ctype.getIdentifier());
+                ContentTypes ctype = ContentTypes.withName(manager
+                        .getId(target));
+                List<PermissionType> plist = perms.get(ctype);
                 if (plist == null) {
-                    plist = new LinkedList<String>();
-                    perms.put(ctype.getIdentifier(), plist);
+                    plist = new LinkedList<PermissionType>();
+                    perms.put(ctype, plist);
                 }
-                plist.add(grant.getPermission().getIdentifier());
+                plist.add(PermissionType.withName(manager.getId(grant
+                        .getPermission())));
             }
         }
         return perms;
@@ -506,16 +509,11 @@ public class AclManager {
      * 
      * @return
      */
-    private Map<String, List<String>> getAdminPermissions() {
-        Map<String, List<String>> perms = new HashMap<String, List<String>>();
-        for (Object ct : manager.getAllPropertiesOfType(
-                EntityEnumTypes.CONTENT_TYPE, AccessibleEntity.IDENTIFIER_KEY)) {
-            List<String> clist = new LinkedList<String>();
-            for (Object pt : manager.getAllPropertiesOfType(
-                    EntityEnumTypes.PERMISSION, AccessibleEntity.IDENTIFIER_KEY)) {
-                clist.add((String) pt);
-            }
-            perms.put((String) ct, clist);
+    private Map<ContentTypes, List<PermissionType>> getAdminPermissions() {
+        Map<ContentTypes, List<PermissionType>> perms = new HashMap<ContentTypes, List<PermissionType>>();
+        for (ContentTypes ct : ContentTypes.values()) {
+            perms.put(ct, Collections.unmodifiableList(Arrays
+                    .asList(PermissionType.values())));
         }
         return perms;
     }

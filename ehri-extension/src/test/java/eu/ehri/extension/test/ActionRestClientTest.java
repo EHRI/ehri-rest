@@ -15,7 +15,7 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 
 import eu.ehri.extension.AbstractRestResource;
-import eu.ehri.project.models.EntityTypes;
+import eu.ehri.project.definitions.Entities;
 
 public class ActionRestClientTest extends BaseRestClientTest {
 
@@ -34,7 +34,7 @@ public class ActionRestClientTest extends BaseRestClientTest {
         // a corresponding action.
 
         List<Map<String, Object>> actionsBefore = getEntityList(
-                EntityTypes.ACTION, getAdminUserProfileId());
+                Entities.ACTION, getAdminUserProfileId());
 
         WebResource resource = client.resource(getExtensionEntryPointUri()
                 + "/agent");
@@ -49,7 +49,7 @@ public class ActionRestClientTest extends BaseRestClientTest {
                 response.getStatus());
 
         List<Map<String, Object>> actionsAfter = getEntityList(
-                EntityTypes.ACTION, getAdminUserProfileId());
+                Entities.ACTION, getAdminUserProfileId());
 
         // Having created a new Agent, we should have at least one Action.
         assertEquals(actionsBefore.size() + 1, actionsAfter.size());

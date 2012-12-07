@@ -5,7 +5,7 @@ import java.util.Map;
 import org.apache.commons.collections.map.MultiValueMap;
 
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.models.annotations.EntityEnumType;
+import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.utils.ClassUtils;
 import eu.ehri.project.persistance.BundleValidator;
 import eu.ehri.project.persistance.Bundle;
@@ -103,7 +103,7 @@ public final class BundleFieldValidator implements BundleValidator {
      * @param errors
      */
     private void checkIsA() {
-        EntityEnumType annotation = bundle.getBundleClass().getAnnotation(EntityEnumType.class);
+        EntityType annotation = bundle.getBundleClass().getAnnotation(EntityType.class);
         if (annotation == null) {
             errors.put("class",
                     String.format("%s: '%s'", INVALID_ENTITY, bundle.getBundleClass().getName()));

@@ -10,7 +10,7 @@ import com.tinkerpop.frames.VertexFrame;
 
 import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.models.EntityEnumTypes;
+import eu.ehri.project.models.EntityClass;
 
 public interface GraphManager {
 
@@ -44,7 +44,7 @@ public interface GraphManager {
      * @param id
      * @return
      */
-    public Vertex getVertex(String id, EntityEnumTypes type) throws ItemNotFound;
+    public Vertex getVertex(String id, EntityClass type) throws ItemNotFound;
 
     /**
      * Get a node with the given ID, and frame it with the given interface
@@ -65,7 +65,7 @@ public interface GraphManager {
      * @param cls
      * @return
      */
-    public <T> T getFrame(String id, EntityEnumTypes type, Class<T> cls) throws ItemNotFound;
+    public <T> T getFrame(String id, EntityClass type, Class<T> cls) throws ItemNotFound;
 
     /**
      * Get a CloseableIterable of vertices with the given type.
@@ -73,7 +73,7 @@ public interface GraphManager {
      * @param type
      * @return
      */
-    public CloseableIterable<Vertex> getVertices(EntityEnumTypes type);
+    public CloseableIterable<Vertex> getVertices(EntityClass type);
 
     /**
      * Get a CloseableIterable of vertices with the given type, and the given
@@ -83,7 +83,7 @@ public interface GraphManager {
      * @return
      */
     public <T extends Vertex> CloseableIterable<T> getVertices(String key,
-            Object value, EntityEnumTypes type);
+            Object value, EntityClass type);
 
     /**
      * Get an Iterable of vertices of the given type, frames with the given
@@ -92,7 +92,7 @@ public interface GraphManager {
      * @param type
      * @return
      */
-    public <T> Iterable<T> getFrames(EntityEnumTypes type, Class<T> cls);
+    public <T> Iterable<T> getFrames(EntityClass type, Class<T> cls);
 
     /**
      * List the given property for objects of a given type.
@@ -101,7 +101,7 @@ public interface GraphManager {
      * @param propertyName
      * @return
      */
-    public List<Object> getAllPropertiesOfType(EntityEnumTypes type, String propertyName);
+    public List<Object> getAllPropertiesOfType(EntityClass type, String propertyName);
 
     // CRUD functions
 
@@ -128,7 +128,7 @@ public interface GraphManager {
      * @return
      * @throws IntegrityError
      */
-    public Vertex createVertex(String id, EntityEnumTypes type, Map<String, Object> data)
+    public Vertex createVertex(String id, EntityClass type, Map<String, Object> data)
             throws IntegrityError;
 
     /**
@@ -142,7 +142,7 @@ public interface GraphManager {
      * @return
      * @throws IntegrityError
      */
-    public Vertex createVertex(String id, EntityEnumTypes type,
+    public Vertex createVertex(String id, EntityClass type,
             Map<String, Object> data, List<String> keys) throws IntegrityError;
 
     /**
@@ -157,7 +157,7 @@ public interface GraphManager {
      * @return
      * @throws IntegrityError
      */
-    public Vertex updateVertex(String id, EntityEnumTypes type,
+    public Vertex updateVertex(String id, EntityClass type,
             Map<String, Object> data, Collection<String> keys,
             Collection<String> uniqueKeys) throws IntegrityError, ItemNotFound;
 
@@ -170,7 +170,7 @@ public interface GraphManager {
      * @return
      * @throws IntegrityError
      */
-    public Vertex updateVertex(String id, EntityEnumTypes type, Map<String, Object> data)
+    public Vertex updateVertex(String id, EntityClass type, Map<String, Object> data)
             throws IntegrityError, ItemNotFound;
 
     /**
@@ -184,7 +184,7 @@ public interface GraphManager {
      * @return
      * @throws IntegrityError
      */
-    public Vertex updateVertex(String id, EntityEnumTypes type,
+    public Vertex updateVertex(String id, EntityClass type,
             Map<String, Object> data, Collection<String> keys)
             throws IntegrityError, ItemNotFound;
 
@@ -200,7 +200,7 @@ public interface GraphManager {
      * @return
      * @throws IntegrityError
      */
-    public Vertex createVertex(String id, EntityEnumTypes type,
+    public Vertex createVertex(String id, EntityClass type,
             Map<String, Object> data, Collection<String> keys,
             Collection<String> uniqueKeys) throws IntegrityError;
 }

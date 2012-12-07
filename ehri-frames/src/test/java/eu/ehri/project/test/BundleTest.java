@@ -17,8 +17,7 @@ import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.DocumentaryUnit;
-import eu.ehri.project.models.EntityEnumTypes;
-import eu.ehri.project.models.EntityTypes;
+import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.TemporalEntity;
@@ -134,7 +133,7 @@ public class BundleTest extends ModelTestBase {
         Bundle bundle = converter.vertexFrameToBundle(c1);
         assertEquals(2, toList(c1.getDatePeriods()).size());
         List<DatePeriod> dates = toList(manager.getFrames(
-                EntityEnumTypes.DATE_PERIOD, DatePeriod.class));
+                EntityClass.DATE_PERIOD, DatePeriod.class));
 
         BundleDAO persister = new BundleDAO(graph);
         Integer numDeleted = persister.delete(bundle);
@@ -142,7 +141,7 @@ public class BundleTest extends ModelTestBase {
         assertEquals(
                 dates.size() - 2,
                 toList(
-                        manager.getFrames(EntityEnumTypes.DATE_PERIOD,
+                        manager.getFrames(EntityClass.DATE_PERIOD,
                                 DatePeriod.class)).size());
         // Should raise NoSuchElementException
         manager.getFrame("c1", DocumentaryUnit.class);

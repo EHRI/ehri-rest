@@ -6,7 +6,7 @@ import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
-import eu.ehri.project.models.EntityEnumTypes;
+import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.AccessibleEntity;
 
 /**
@@ -49,7 +49,7 @@ public class ListEntities extends BaseCommand implements Command {
             throw new RuntimeException(getHelp());
 
         GraphManager manager = GraphManagerFactory.getInstance(graph);        
-        EntityEnumTypes type = EntityEnumTypes.withName(cmdLine.getArgs()[0]);
+        EntityClass type = EntityClass.withName(cmdLine.getArgs()[0]);
         Class<?> cls = type.getEntityClass();
 
         if (!AccessibleEntity.class.isAssignableFrom(cls))

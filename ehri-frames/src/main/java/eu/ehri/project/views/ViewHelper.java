@@ -4,14 +4,14 @@ import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
 import eu.ehri.project.acl.AclManager;
-import eu.ehri.project.acl.PermissionTypes;
+import eu.ehri.project.acl.PermissionType;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.ContentType;
-import eu.ehri.project.models.EntityEnumTypes;
+import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Permission;
 import eu.ehri.project.models.PermissionGrant;
 import eu.ehri.project.models.base.AccessibleEntity;
@@ -116,7 +116,7 @@ public final class ViewHelper {
     protected void checkWriteAccess(AccessibleEntity entity, Accessor accessor)
             throws PermissionDenied {
         checkEntityPermission(entity, accessor,
-                getPermission(PermissionTypes.UPDATE));
+                getPermission(PermissionType.UPDATE));
     }
 
     /**
@@ -125,7 +125,7 @@ public final class ViewHelper {
      * @param typeName
      * @return
      */
-    public ContentType getContentType(EntityEnumTypes type) {
+    public ContentType getContentType(EntityClass type) {
         try {
             return manager.getFrame(type.getName(), ContentType.class);
         } catch (ItemNotFound e) {
@@ -144,7 +144,7 @@ public final class ViewHelper {
      * @return
      * @throws ItemNotFound
      */
-    public <T> T getEntity(EntityEnumTypes type, String name, Class<T> cls)
+    public <T> T getEntity(EntityClass type, String name, Class<T> cls)
             throws ItemNotFound {
         return manager.getFrame(name, type, cls);
     }
@@ -155,13 +155,13 @@ public final class ViewHelper {
      * @param permissionId
      * @return
      */
-    public Permission getPermission(String permissionId) {
+    public Permission getPermission(PermissionType perm) {
         try {
-            return manager.getFrame(permissionId, EntityEnumTypes.PERMISSION,
+            return manager.getFrame(perm.getName(), EntityClass.PERMISSION,
                     Permission.class);
         } catch (ItemNotFound e) {
             throw new RuntimeException(String.format(
-                    "No permission found for name: '%s'", permissionId), e);
+                    "No permission found for name: '%s'", perm.getName()), e);
         }
     }
 

@@ -15,7 +15,7 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 
 import eu.ehri.extension.AbstractRestResource;
-import eu.ehri.project.models.EntityTypes;
+import eu.ehri.project.definitions.Entities;
 
 public class GroupRestClientTest extends BaseRestClientTest {
 
@@ -60,7 +60,7 @@ public class GroupRestClientTest extends BaseRestClientTest {
         // Create
         WebResource resource = client.resource(
                 UriBuilder.fromPath(getExtensionEntryPointUri())
-                .segment(EntityTypes.GROUP).segment(TEST_GROUP_NAME)
+                .segment(Entities.GROUP).segment(TEST_GROUP_NAME)
                 .segment(NON_ADMIN_USER).build());
         ClientResponse response = resource
                 .accept(MediaType.APPLICATION_JSON)
@@ -78,7 +78,7 @@ public class GroupRestClientTest extends BaseRestClientTest {
         // Create
         WebResource resource = client.resource(
                 UriBuilder.fromPath(getExtensionEntryPointUri())
-                .segment(EntityTypes.GROUP).segment(TEST_GROUP_NAME)
+                .segment(Entities.GROUP).segment(TEST_GROUP_NAME)
                 .segment(CURRENT_ADMIN_USER).build());
         ClientResponse response = resource
                 .accept(MediaType.APPLICATION_JSON)

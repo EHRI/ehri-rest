@@ -19,7 +19,6 @@ import eu.ehri.project.models.DocumentDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.annotations.EntityType;
-import eu.ehri.project.models.base.Description;
 import eu.ehri.project.persistance.Converter;
 import eu.ehri.project.views.impl.LoggingCrudViews;
 

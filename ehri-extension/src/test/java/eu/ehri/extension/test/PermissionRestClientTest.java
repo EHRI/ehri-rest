@@ -27,8 +27,9 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.WebResource;
 import eu.ehri.extension.AbstractRestResource;
-import eu.ehri.project.acl.PermissionTypes;
-import eu.ehri.project.models.EntityTypes;
+import eu.ehri.project.acl.ContentTypes;
+import eu.ehri.project.acl.PermissionType;
+import eu.ehri.project.definitions.Entities;
 
 /**
  * Test Permissions resource.
@@ -61,7 +62,7 @@ public class PermissionRestClientTest extends BaseRestClientTest {
             UniformInterfaceException, IOException {
 
         WebResource resource = client.resource(getExtensionEntryPointUri()
-                + "/" + EntityTypes.PERMISSION + "/" + LIMITED_USER_NAME);
+                + "/" + Entities.PERMISSION + "/" + LIMITED_USER_NAME);
         ClientResponse response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
@@ -74,13 +75,13 @@ public class PermissionRestClientTest extends BaseRestClientTest {
                 .getEntity(String.class));
         // Check we don't ALREADY have documentaryUnit -> create/delete perms
         assertNull(currentMatrix.get(0).get(LIMITED_USER_NAME)
-                .get(EntityTypes.DOCUMENTARY_UNIT));
+                .get(ContentTypes.DOCUMENTARY_UNIT.getName()));
         assertNull(currentMatrix.get(0).get(LIMITED_USER_NAME)
-                .get(EntityTypes.DOCUMENTARY_UNIT));
+                .get(ContentTypes.DOCUMENTARY_UNIT.getName()));
 
         // Set the permission via REST
         resource = client.resource(getExtensionEntryPointUri() + "/"
-                + EntityTypes.PERMISSION + "/" + LIMITED_USER_NAME);
+                + Entities.PERMISSION + "/" + LIMITED_USER_NAME);
         response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
@@ -92,7 +93,7 @@ public class PermissionRestClientTest extends BaseRestClientTest {
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
 
         resource = client.resource(getExtensionEntryPointUri() + "/"
-                + EntityTypes.PERMISSION + "/" + LIMITED_USER_NAME);
+                + Entities.PERMISSION + "/" + LIMITED_USER_NAME);
         response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
@@ -106,11 +107,11 @@ public class PermissionRestClientTest extends BaseRestClientTest {
 
         // Check we don't ALREADY have documentaryUnit -> create/delete perms
         assertTrue(newMatrix.get(0).get(LIMITED_USER_NAME)
-                .get(EntityTypes.DOCUMENTARY_UNIT)
-                .contains(PermissionTypes.CREATE));
+                .get(ContentTypes.DOCUMENTARY_UNIT.getName())
+                .contains(PermissionType.CREATE.getName()));
         assertTrue(newMatrix.get(0).get(LIMITED_USER_NAME)
-                .get(EntityTypes.DOCUMENTARY_UNIT)
-                .contains(PermissionTypes.DELETE));
+                .get(ContentTypes.DOCUMENTARY_UNIT.getName())
+                .contains(PermissionType.DELETE.getName()));
     }
 
     @Test
@@ -129,7 +130,7 @@ public class PermissionRestClientTest extends BaseRestClientTest {
 
         // Set the permission via REST
         resource = client.resource(getExtensionEntryPointUri() + "/"
-                + EntityTypes.PERMISSION + "/" + LIMITED_USER_NAME);
+                + Entities.PERMISSION + "/" + LIMITED_USER_NAME);
         response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
@@ -179,15 +180,15 @@ public class PermissionRestClientTest extends BaseRestClientTest {
     private Map<String, List<String>> getTestMatrix() {
         // @formatter:off
         Map<String,List<String>> matrix = new HashMap<String, List<String>>() {{
-            put(EntityTypes.DOCUMENTARY_UNIT, new LinkedList<String>() {{
-                add(PermissionTypes.CREATE);
-                add(PermissionTypes.DELETE);
-                add(PermissionTypes.UPDATE);
+            put(ContentTypes.DOCUMENTARY_UNIT.getName(), new LinkedList<String>() {{
+                add(PermissionType.CREATE.getName());
+                add(PermissionType.DELETE.getName());
+                add(PermissionType.UPDATE.getName());
             }});
-            put(EntityTypes.AGENT, new LinkedList<String>() {{
-                add(PermissionTypes.CREATE);
-                add(PermissionTypes.DELETE);
-                add(PermissionTypes.UPDATE);
+            put(ContentTypes.AGENT.getName(), new LinkedList<String>() {{
+                add(PermissionType.CREATE.getName());
+                add(PermissionType.DELETE.getName());
+                add(PermissionType.UPDATE.getName());
             }});
         }};
         // @formatter:on
@@ -196,7 +197,7 @@ public class PermissionRestClientTest extends BaseRestClientTest {
 
     private URI getCreationUri() {
         return UriBuilder.fromPath(getExtensionEntryPointUri())
-                .segment(EntityTypes.AGENT).segment(TEST_HOLDER_IDENTIFIER)
-                .segment(EntityTypes.DOCUMENTARY_UNIT).build();
+                .segment(Entities.AGENT).segment(TEST_HOLDER_IDENTIFIER)
+                .segment(Entities.DOCUMENTARY_UNIT).build();
     }
 }
