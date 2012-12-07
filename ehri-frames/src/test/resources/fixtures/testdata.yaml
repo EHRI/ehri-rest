@@ -202,13 +202,13 @@
       - id: c1-dp1
         type: datePeriod
         data:
-          startDate: 1939-01-01!!str
-          endDate: 1945-01-01!!str
+          startDate: !!str 1939-01-01
+          endDate: !!str 1945-01-01
       - id: c1-dp2
         type: datePeriod
         data:
-          startDate: 1939-01-01!!str
-          endDate: 1945-01-01!!str
+          startDate: !!str 1939-01-01
+          endDate: !!str 1945-01-01
     heldBy: r1
     access:
       - mike
@@ -232,8 +232,8 @@
       - id: c2-dp1
         type: datePeriod
         data:
-          startDate: 1939-01-01!!str
-          endDate: 1945-01-01!!str
+          startDate: !!str 1939-01-01
+          endDate: !!str 1945-01-01
     heldBy: r1
     childOf: c1
     access:
@@ -258,8 +258,8 @@
       - id: c3-dp1
         type: datePeriod
         data:
-          startDate: 1939-01-01!!str
-          endDate: 1945-01-01!!str
+          startDate: !!str 1939-01-01
+          endDate: !!str 1945-01-01
     heldBy: r1
     childOf: c2
     access:
@@ -283,8 +283,8 @@
       - id: c4-dp1
         type: datePeriod
         data:
-          startDate: 1939-01-01!!str
-          endDate: 1945-01-01!!str
+          startDate: !!str 1939-01-01
+          endDate: !!str 1945-01-01
     heldBy: r1
     
 --- # Authorities
