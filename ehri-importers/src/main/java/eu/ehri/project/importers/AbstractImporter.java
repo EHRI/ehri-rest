@@ -12,8 +12,6 @@ import eu.ehri.project.exceptions.IdGenerationError;
 import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.Agent;
-import eu.ehri.project.models.DatePeriod;
-import eu.ehri.project.models.DocumentDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.Description;
@@ -21,7 +19,6 @@ import eu.ehri.project.models.base.TemporalEntity;
 import eu.ehri.project.models.idgen.DocumentaryUnitIdGenerator;
 import eu.ehri.project.models.idgen.IdGenerator;
 import eu.ehri.project.persistance.BundleDAO;
-import eu.ehri.project.persistance.BundleFactory;
 import eu.ehri.project.persistance.Bundle;
 
 /**
@@ -119,20 +116,20 @@ public abstract class AbstractImporter<T> {
      */
     protected DocumentaryUnit importItem(T itemData, DocumentaryUnit parent,
             int depth) throws ValidationError, IntegrityError {
-        Bundle unit = new BundleFactory().buildBundle(
-                extractDocumentaryUnit(itemData, depth), DocumentaryUnit.class);
+        Bundle unit = new Bundle(EntityClass.DOCUMENTARY_UNIT,
+                extractDocumentaryUnit(itemData, depth));
         BundleDAO persister = new BundleDAO(framedGraph, repository);
 
         // Add dates and descriptions to the bundle since they're @Dependent
         // relations.
         for (Map<String, Object> dpb : extractDates(itemData)) {
-            unit.addRelation(TemporalEntity.HAS_DATE,
-                    new BundleFactory().buildBundle(dpb, DatePeriod.class));
+            unit.addRelation(TemporalEntity.HAS_DATE, new Bundle(
+                    EntityClass.DATE_PERIOD, dpb));
         }
         for (Map<String, Object> dpb : extractDocumentDescriptions(itemData,
                 depth)) {
-            unit.addRelation(Description.DESCRIBES, new BundleFactory()
-                    .buildBundle(dpb, DocumentDescription.class));
+            unit.addRelation(Description.DESCRIBES, new Bundle(
+                    EntityClass.DOCUMENT_DESCRIPTION, dpb));
         }
 
         IdGenerator generator = DocumentaryUnitIdGenerator.INSTANCE;
@@ -145,8 +142,8 @@ public abstract class AbstractImporter<T> {
         }
         boolean exists = manager.exists(id);
         DocumentaryUnit frame = persister.createOrUpdate(
-                new Bundle(id, unit.getData(), unit.getBundleClass(), unit
-                        .getRelations()), DocumentaryUnit.class);
+                new Bundle(id, EntityClass.DOCUMENTARY_UNIT, unit.getData(),
+                        unit.getRelations()), DocumentaryUnit.class);
 
         // Set the repository/item relationship
         repository.addCollection(frame);

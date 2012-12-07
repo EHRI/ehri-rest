@@ -24,8 +24,8 @@ import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.UserProfile;
+import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.persistance.BundleDAO;
-import eu.ehri.project.persistance.BundleFactory;
 import eu.ehri.project.views.ViewHelper;
 import eu.ehri.project.views.impl.CrudViews;
 
@@ -37,12 +37,12 @@ public class PermissionsTest extends AbstractFixtureTest {
 
     @SuppressWarnings("unchecked")
     @Before
-    public void createTestUser() throws ValidationError, IntegrityError, ItemNotFound {
+    public void createTestUser() throws ValidationError, IntegrityError,
+            ItemNotFound {
         // Add a new, fresh user with no perms to test with...
-        user = new BundleDAO(graph)
-                .create(new BundleFactory().buildBundle(
-                        (Map<String, Object>) getTestUserBundle().get("data"),
-                        UserProfile.class), UserProfile.class);
+        user = new BundleDAO(graph).create(new Bundle(EntityClass.USER_PROFILE,
+                (Map<String, Object>) getTestUserBundle().get("data")),
+                UserProfile.class);
         views = new CrudViews<DocumentaryUnit>(graph, DocumentaryUnit.class,
                 manager.getFrame("r1", Agent.class));
         viewHelper = new ViewHelper(graph, DocumentaryUnit.class);
@@ -71,8 +71,8 @@ public class PermissionsTest extends AbstractFixtureTest {
                 viewHelper.getContentType(EntityClass.DOCUMENTARY_UNIT),
                 viewHelper.getPermission(PermissionType.CREATE),
                 manager.getFrame("r1", Agent.class));
-        assertNotNull(views.setScope(SystemScope.getInstance()).create(getTestBundle(),
-                user));
+        assertNotNull(views.setScope(SystemScope.getInstance()).create(
+                getTestBundle(), user));
     }
 
     @Test

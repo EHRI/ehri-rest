@@ -171,8 +171,7 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> extends
             ItemNotFound, BadRequester {
 
         try {
-            Bundle entityBundle = converter
-                    .jsonToBundle(json);
+            Bundle entityBundle = converter.jsonToBundle(json);
             E entity = views.create(converter.bundleToData(entityBundle),
                     getRequesterUserProfile());
             String jsonStr = converter.vertexFrameToJson(entity);
@@ -287,8 +286,7 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> extends
             ItemNotFound, BadRequester {
 
         try {
-            Bundle entityBundle = converter
-                    .jsonToBundle(json);
+            Bundle entityBundle = converter.jsonToBundle(json);
             E update = views.update(converter.bundleToData(entityBundle),
                     getRequesterUserProfile());
             String jsonStr = new Converter().vertexFrameToJson(update);
@@ -323,11 +321,12 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> extends
             // specified key/value and constructs a new bundle containing the
             // item's graph id, which requires an extra
             // serialization/deserialization.
-            E entity = views.detail(manager.getFrame(id, getEntityType(), cls), getRequesterUserProfile());
+            E entity = views.detail(manager.getFrame(id, getEntityType(), cls),
+                    getRequesterUserProfile());
             Bundle rawBundle = converter.jsonToBundle(json);
-            Bundle entityBundle = new Bundle((String) entity
-                    .asVertex().getProperty(EntityType.ID_KEY),
-                    rawBundle.getData(), cls, rawBundle.getRelations());
+            Bundle entityBundle = new Bundle(manager.getId(entity),
+                    getEntityType(), rawBundle.getData(),
+                    rawBundle.getRelations());
             return update(converter.bundleToJson(entityBundle));
         } catch (SerializationError e) {
             throw new WebApplicationException(e);
@@ -378,9 +377,9 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> extends
             throw new WebApplicationException(e);
         }
     }
-    
+
     // Helpers
-    
+
     private EntityClass getEntityType() {
         return ClassUtils.getEntityType(cls);
     }

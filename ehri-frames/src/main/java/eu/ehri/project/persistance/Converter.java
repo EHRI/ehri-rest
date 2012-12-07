@@ -88,10 +88,12 @@ public final class Converter {
      * @throws IOException
      * @throws DeserializationError
      */
-    @SuppressWarnings("unchecked")
     public Bundle jsonToBundle(String json) throws DeserializationError {
-        ObjectMapper mapper = new ObjectMapper();
         try {
+            // FIXME: For some reason I can't fathom, a type reference is not working here.
+            // When I add one in for HashMap<String,Object>, the return value of readValue
+            // just seems to be Object ???
+            ObjectMapper mapper = new ObjectMapper();
             return dataToBundle(mapper.readValue(json, Map.class));
         } catch (Exception e) {
             throw new DeserializationError("Error decoding JSON", e);
@@ -140,16 +142,12 @@ public final class Converter {
      * 
      * @throws DeserializationError
      */
-    @SuppressWarnings("unchecked")
     public Bundle dataToBundle(Map<String, Object> data)
             throws DeserializationError {
         try {
             String id = (String) data.get(ID_KEY);
-            EntityClass isa = EntityClass.withName((String) data
+            EntityClass type = EntityClass.withName((String) data
                     .get(TYPE_KEY));
-            if (isa == null)
-                throw new DeserializationError(String.format(
-                        "No '%s' attribute found in item data", TYPE_KEY));
             Map<String, Object> props = (Map<String, Object>) data
                     .get(DATA_KEY);
             if (props == null)
@@ -167,7 +165,7 @@ public final class Converter {
                 }
             }
 
-            return new Bundle(id, props, isa.getEntityClass(), relationbundles);
+            return new Bundle(id, type, props, relationbundles);
 
         } catch (ClassCastException e) {
             throw new DeserializationError("Error deserializing data", e);
@@ -226,12 +224,12 @@ public final class Converter {
     public <T extends VertexFrame> Bundle vertexFrameToBundle(T item, int depth)
             throws SerializationError {
         String id = (String) item.asVertex().getProperty(EntityType.ID_KEY);
-        EntityClass isa = EntityClass.withName((String) item.asVertex()
+        EntityClass type = EntityClass.withName((String) item.asVertex()
                 .getProperty(EntityType.TYPE_KEY));
         MultiValueMap relations = getRelationData(item, depth,
-                isa.getEntityClass());
-        return new Bundle(id, getVertexData(item.asVertex()),
-                isa.getEntityClass(), relations);
+                type.getEntityClass());
+        return new Bundle(id, type,
+                getVertexData(item.asVertex()), relations);
     }
 
     private <T extends VertexFrame> MultiValueMap getRelationData(T item, int depth,

@@ -47,6 +47,7 @@ public class ActionViewsTest extends AbstractFixtureTest {
         // but let's instead just modify the initial data.
         String newName = TEST_COLLECTION_NAME + " with new stuff";
 
+        @SuppressWarnings("unchecked")
         Map<String, Object> data = (Map<String, Object>) testData.get("data");
         data.put("name", newName);
 
@@ -85,6 +86,7 @@ public class ActionViewsTest extends AbstractFixtureTest {
         // but let's instead just modify the initial data.
         String newName = TEST_USER_NAME + " with new stuff";
 
+        @SuppressWarnings("unchecked")
         Map<String, Object> data = (Map<String, Object>) userData.get("data");
         data.put("name", newName);
 

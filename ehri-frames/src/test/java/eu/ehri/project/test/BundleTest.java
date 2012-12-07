@@ -96,7 +96,7 @@ public class BundleTest extends ModelTestBase {
                     + "' not found in index before delete test.");
         }
 
-        Collection<Bundle> dates = bundle.getRelations().getCollection(
+        Collection<?> dates = bundle.getRelations().getCollection(
                 TemporalEntity.HAS_DATE);
 
         // Dodginess! Manipulate the bundles relations directly
@@ -104,7 +104,7 @@ public class BundleTest extends ModelTestBase {
         // of only one date.
         bundle.getRelations().remove(TemporalEntity.HAS_DATE);
         Collection<Bundle> newDates = new ArrayList<Bundle>();
-        newDates.add(dates.iterator().next());
+        newDates.add((Bundle)dates.iterator().next());
         bundle.getRelations().putAll(TemporalEntity.HAS_DATE, newDates);
 
         BundleDAO persister = new BundleDAO(graph);

@@ -28,8 +28,8 @@ import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
+import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.persistance.BundleDAO;
-import eu.ehri.project.persistance.BundleFactory;
 import eu.ehri.project.persistance.Converter;
 
 /**
@@ -75,9 +75,8 @@ public class AdminResource {
 
             // TODO: Create an action for this with the system user...
             BundleDAO persister = new BundleDAO(graph);
-            UserProfile user = persister
-                    .create(new BundleFactory().buildBundle(data,
-                            UserProfile.class), UserProfile.class);
+            UserProfile user = persister.create(new Bundle(
+                    EntityClass.USER_PROFILE, data), UserProfile.class);
             String jsonStr = converter.vertexFrameToJson(user);
             tx.success();
             return Response.status(Status.CREATED).entity((jsonStr).getBytes())
@@ -95,7 +94,8 @@ public class AdminResource {
     private String getNextDefaultUserId() {
         // FIXME: It's crappy to have to iterate all the items to count them...
         long userCount = 0;
-        CloseableIterable<Vertex> query = manager.getVertices(EntityClass.USER_PROFILE);
+        CloseableIterable<Vertex> query = manager
+                .getVertices(EntityClass.USER_PROFILE);
         try {
             for (@SuppressWarnings("unused")
             Vertex _ : query)
@@ -104,8 +104,8 @@ public class AdminResource {
             query.close();
         }
         long start = userCount + 1;
-        while (manager.exists(String.format(
-                DEFAULT_USER_ID_FORMAT, DEFAULT_USER_ID_PREFIX, start)))
+        while (manager.exists(String.format(DEFAULT_USER_ID_FORMAT,
+                DEFAULT_USER_ID_PREFIX, start)))
             start++;
         return String.format(DEFAULT_USER_ID_FORMAT, DEFAULT_USER_ID_PREFIX,
                 start);

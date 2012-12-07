@@ -27,17 +27,39 @@ public class Bundle {
      * Constructor.
      * 
      * @param id
-     * @param data
      * @param cls
+     * @param data
      * @param relations
      */
-
-    public Bundle(String id, final Map<String, Object> data,
-            Class<?> cls, final MultiValueMap relations) {
+    public Bundle(String id, EntityClass type, final Map<String, Object> data,
+            final MultiValueMap relations) {
         this.id = id;
         this.data = new HashMap<String, Object>(data);
-        this.type = ClassUtils.getEntityType(cls);
+        this.type = type;
         this.relations = relations;
+    }
+
+    /**
+     * Constructor for bundle without existing id.
+     * 
+     * @param cls
+     * @param data
+     * @param relations
+     */
+    public Bundle(EntityClass type, final Map<String, Object> data,
+            final MultiValueMap relations) {
+        this(null, type, data, relations);
+    }
+
+    /**
+     * Constructor for bundle without existing id or relations.
+     * 
+     * @param cls
+     * @param data
+     * @param relations
+     */
+    public Bundle(EntityClass type, final Map<String, Object> data) {
+        this(null, type, data, new MultiValueMap());
     }
 
     /**
@@ -46,11 +68,10 @@ public class Bundle {
      * @param relation
      * @param other
      */
-    public void addRelation(String relation,
-            Bundle other) {
+    public void addRelation(String relation, Bundle other) {
         relations.put(relation, other);
     }
-    
+
     /**
      * Set bundles for a particular relation.
      * 
@@ -58,8 +79,7 @@ public class Bundle {
      * @param others
      * @return
      */
-    public void setRelations(String relation,
-        List<Bundle> others) {
+    public void setRelations(String relation, List<Bundle> others) {
         relations.putAll(relation, others);
     }
 
@@ -72,13 +92,14 @@ public class Bundle {
     public String getId() {
         return id;
     }
-    
+
     /**
      * Get a bundle with the given id.
+     * 
      * @param id
      */
     public Bundle withId(String id) {
-        return new Bundle(id, data, type.getEntityClass(), relations);
+        return new Bundle(id, type, data, relations);
     }
 
     /**
@@ -111,7 +132,7 @@ public class Bundle {
     }
 
     public Bundle setData(final Map<String, Object> data) {
-        return new Bundle(id, data, type.getEntityClass(), relations);
+        return new Bundle(id, type, data, relations);
     }
 
     /**
@@ -155,7 +176,7 @@ public class Bundle {
         keys.add(EntityType.TYPE_KEY);
         return keys;
     }
-    
+
     /**
      * Return a list of property keys which must be unique.
      * 
@@ -181,7 +202,8 @@ public class Bundle {
     private Map<String, Object> filterData() {
         Map<String, Object> ext = new HashMap<String, Object>();
         for (String key : data.keySet()) {
-            if (!(key.equals(EntityType.ID_KEY) || key.equals(EntityType.TYPE_KEY)) )
+            if (!(key.equals(EntityType.ID_KEY) || key
+                    .equals(EntityType.TYPE_KEY)))
                 ext.put(key, data.get(key));
         }
         return ext;

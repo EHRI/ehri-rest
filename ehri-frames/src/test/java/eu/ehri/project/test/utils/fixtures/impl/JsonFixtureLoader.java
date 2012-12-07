@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections.map.MultiValueMap;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.neo4j.graphdb.Transaction;
 import com.tinkerpop.blueprints.TransactionalGraph;
@@ -15,7 +16,6 @@ import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
-import eu.ehri.project.persistance.BundleFactory;
 import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.test.utils.fixtures.FixtureLoader;
 
@@ -45,8 +45,7 @@ public class JsonFixtureLoader implements FixtureLoader {
                 EntityClass isa = EntityClass.withName((String) namedNode.get(EntityType.TYPE_KEY));
                 Map<String, Object> data = (Map<String, Object>) namedNode
                         .get("data");
-                Bundle bundle = new BundleFactory()
-                        .buildBundle(id, data, isa.getEntityClass());
+                Bundle bundle = new Bundle(id, isa, data, new MultiValueMap());
                 manager.createVertex(id, bundle.getType(), bundle.getData(),
                         bundle.getPropertyKeys(),
                         bundle.getUniquePropertyKeys());

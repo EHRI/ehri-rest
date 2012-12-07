@@ -14,6 +14,7 @@ import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.Action;
+import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Actioner;
 
@@ -42,9 +43,10 @@ public class ActionManager {
      * @param user
      * @param logMessage
      * @return
-     * @throws ItemNotFound 
+     * @throws ItemNotFound
      */
-    public Action createAction(Actioner user, String logMessage) throws ItemNotFound {
+    public Action createAction(Actioner user, String logMessage)
+            throws ItemNotFound {
 
         Map<String, Object> actionData = new HashMap<String, Object>();
         actionData.put(Action.TIMESTAMP, getTimestamp());
@@ -53,19 +55,20 @@ public class ActionManager {
                 .toString());
 
         BundleDAO persister = new BundleDAO(graph, null);
-        Action action;
         try {
-            action = persister.create(new BundleFactory().buildBundle(
-                    actionData, Action.class), Action.class);
+            Action action = persister.create(new Bundle(EntityClass.ACTION,
+                    actionData), Action.class);
+            action.setActioner(user);
+            return action;
         } catch (ValidationError e) {
             e.printStackTrace();
-            throw new RuntimeException("Unexpected validation error creating action", e);
+            throw new RuntimeException(
+                    "Unexpected validation error creating action", e);
         } catch (IntegrityError e) {
             e.printStackTrace();
-            throw new RuntimeException("Unexpected integrity error creating action", e);
+            throw new RuntimeException(
+                    "Unexpected integrity error creating action", e);
         }
-        action.setActioner(user);
-        return action;
     }
 
     /**

@@ -9,8 +9,6 @@ import java.util.Map.Entry;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.ParseException;
-import org.neo4j.graphdb.Transaction;
-
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
@@ -22,9 +20,9 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.EadImportManager;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.models.Agent;
+import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.persistance.BundleDAO;
-import eu.ehri.project.persistance.BundleFactory;
 import eu.ehri.project.persistance.Bundle;
 
 /**
@@ -98,7 +96,8 @@ public class EadImport extends BaseCommand implements Command {
             // Find the agent
             Agent agent;
             try {
-                agent = manager.getFrame((String) cmdLine.getOptionValue("repo"), Agent.class);
+                agent = manager.getFrame(
+                        (String) cmdLine.getOptionValue("repo"), Agent.class);
             } catch (ItemNotFound e) {
                 if (cmdLine.hasOption("createrepo")) {
                     agent = createAgent(graph, cmdLine.getOptionValue("repo"));
@@ -106,12 +105,13 @@ public class EadImport extends BaseCommand implements Command {
                     throw e;
                 }
             }
-            
 
             // Find the user
             UserProfile user;
             try {
-                user = manager.getFrame((String) cmdLine.getOptionValue("user"), UserProfile.class);
+                user = manager.getFrame(
+                        (String) cmdLine.getOptionValue("user"),
+                        UserProfile.class);
             } catch (ItemNotFound e) {
                 if (cmdLine.hasOption("createuser")) {
                     user = createUser(graph, cmdLine.getOptionValue("user"));
@@ -144,12 +144,11 @@ public class EadImport extends BaseCommand implements Command {
 
     private static UserProfile createUser(FramedGraph<Neo4jGraph> graph,
             String name) throws ValidationError, IntegrityError {
-        Map<String, Object> agentData = new HashMap<String, Object>();
-        agentData.put("identifier", name);
-        agentData.put("name", name);
-        Bundle agb = new BundleFactory().buildBundle(agentData,
-                UserProfile.class);
-        return new BundleDAO(graph).create(agb, UserProfile.class);
+        Map<String, Object> userData = new HashMap<String, Object>();
+        userData.put("identifier", name);
+        userData.put("name", name);
+        return new BundleDAO(graph).create(new Bundle(EntityClass.USER_PROFILE,
+                userData), UserProfile.class);
     }
 
     private static Agent createAgent(FramedGraph<Neo4jGraph> graph, String name)
@@ -157,7 +156,7 @@ public class EadImport extends BaseCommand implements Command {
         Map<String, Object> agentData = new HashMap<String, Object>();
         agentData.put("identifier", name);
         agentData.put("name", name);
-        Bundle agb = new BundleFactory().buildBundle(agentData, Agent.class);
-        return new BundleDAO(graph).create(agb, Agent.class);
+        return new BundleDAO(graph).create(new Bundle(EntityClass.AGENT,
+                agentData), Agent.class);
     }
 }

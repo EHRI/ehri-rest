@@ -1,12 +1,15 @@
 package eu.ehri.extension.test;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 import javax.ws.rs.core.MediaType;
 
 import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.type.TypeReference;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -108,7 +111,9 @@ public class BaseRestClientTest extends AbstractRestClientTest {
                 .get(ClientResponse.class);
         String json = response.getEntity(String.class);
         ObjectMapper mapper = new ObjectMapper();
-        return mapper.readValue(json, List.class);
+        TypeReference<LinkedList<HashMap<String, Object>>> typeRef = new TypeReference<LinkedList<HashMap<String, Object>>>() {
+        };
+        return mapper.readValue(json, typeRef);
     }
 
     /**
