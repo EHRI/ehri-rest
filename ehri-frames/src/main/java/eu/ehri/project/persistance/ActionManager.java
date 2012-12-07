@@ -52,11 +52,11 @@ public class ActionManager {
         actionData.put(AccessibleEntity.IDENTIFIER_KEY, UUID.randomUUID()
                 .toString());
 
-        BundleDAO<Action> persister = new BundleDAO<Action>(graph, null);
+        BundleDAO persister = new BundleDAO(graph, null);
         Action action;
         try {
-            action = persister.create(new BundleFactory<Action>().buildBundle(
-                    actionData, Action.class));
+            action = persister.create(new BundleFactory().buildBundle(
+                    actionData, Action.class), Action.class);
         } catch (ValidationError e) {
             e.printStackTrace();
             throw new RuntimeException("Unexpected validation error creating action", e);

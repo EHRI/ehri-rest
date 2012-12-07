@@ -41,7 +41,7 @@ public class BundleTest extends ModelTestBase {
             DeserializationError, ItemNotFound {
         DocumentaryUnit c1 = manager.getFrame("c1", DocumentaryUnit.class);
         String json = converter.vertexFrameToJson(c1);
-        Bundle<DocumentaryUnit> bundle = converter.jsonToBundle(json);
+        Bundle bundle = converter.jsonToBundle(json);
         // FIXME: Comparing ids fails because the deserialized on is an <int>
         // instead
         // of a long...
@@ -53,10 +53,10 @@ public class BundleTest extends ModelTestBase {
         DocumentaryUnit c1 = manager.getFrame("c1", DocumentaryUnit.class);
         assertEquals(1, toList(c1.getDescriptions()).size());
 
-        Bundle<DocumentaryUnit> bundle = converter.vertexFrameToBundle(c1);
-        BundleDAO<DocumentaryUnit> persister = new BundleDAO<DocumentaryUnit>(
-                graph);
-        DocumentaryUnit c1redux = persister.update(bundle);
+        Bundle bundle = converter.vertexFrameToBundle(c1);
+        BundleDAO persister = new BundleDAO(graph);
+        DocumentaryUnit c1redux = persister.update(bundle,
+                DocumentaryUnit.class);
 
         assertEquals(toList(c1.getDescriptions()),
                 toList(c1redux.getDescriptions()));
@@ -74,10 +74,9 @@ public class BundleTest extends ModelTestBase {
         assertEquals(0, toList(c1.getDescriptions()).size());
 
         // Restore the item from JSON
-        Bundle<DocumentaryUnit> bundle = converter.jsonToBundle(json);
-        BundleDAO<DocumentaryUnit> persister = new BundleDAO<DocumentaryUnit>(
-                graph);
-        persister.update(bundle);
+        Bundle bundle = converter.jsonToBundle(json);
+        BundleDAO persister = new BundleDAO(graph);
+        persister.update(bundle, DocumentaryUnit.class);
 
         // Our deleted description should have come back...
         assertEquals(1, toList(c1.getDescriptions()).size());
@@ -87,7 +86,7 @@ public class BundleTest extends ModelTestBase {
     public void testDeletingDependents() throws SerializationError,
             ValidationError, IntegrityError, ItemNotFound {
         DocumentaryUnit c1 = manager.getFrame("c1", DocumentaryUnit.class);
-        Bundle<DocumentaryUnit> bundle = converter.vertexFrameToBundle(c1);
+        Bundle bundle = converter.vertexFrameToBundle(c1);
         assertEquals(2, toList(c1.getDatePeriods()).size());
         String dpid = "c1-dp2";
         try {
@@ -97,20 +96,19 @@ public class BundleTest extends ModelTestBase {
                     + "' not found in index before delete test.");
         }
 
-        Collection<Bundle<DatePeriod>> dates = bundle.getRelations()
-                .getCollection(TemporalEntity.HAS_DATE);
+        Collection<Bundle> dates = bundle.getRelations().getCollection(
+                TemporalEntity.HAS_DATE);
 
         // Dodginess! Manipulate the bundles relations directly
         // by replacing the hasDate collection with one consisting
         // of only one date.
         bundle.getRelations().remove(TemporalEntity.HAS_DATE);
-        Collection<Bundle<DatePeriod>> newDates = new ArrayList<Bundle<DatePeriod>>();
+        Collection<Bundle> newDates = new ArrayList<Bundle>();
         newDates.add(dates.iterator().next());
         bundle.getRelations().putAll(TemporalEntity.HAS_DATE, newDates);
 
-        BundleDAO<DocumentaryUnit> persister = new BundleDAO<DocumentaryUnit>(
-                graph);
-        persister.update(bundle);
+        BundleDAO persister = new BundleDAO(graph);
+        persister.update(bundle, DocumentaryUnit.class);
         assertEquals(1, toList(c1.getDatePeriods()).size());
 
         // The second date period should be gone from the index
@@ -132,13 +130,12 @@ public class BundleTest extends ModelTestBase {
     public void testDeletingWholeBundle() throws SerializationError,
             ValidationError, ItemNotFound {
         DocumentaryUnit c1 = manager.getFrame("c1", DocumentaryUnit.class);
-        Bundle<DocumentaryUnit> bundle = converter.vertexFrameToBundle(c1);
+        Bundle bundle = converter.vertexFrameToBundle(c1);
         assertEquals(2, toList(c1.getDatePeriods()).size());
         List<DatePeriod> dates = toList(manager.getFrames(
                 EntityTypes.DATE_PERIOD, DatePeriod.class));
 
-        BundleDAO<DocumentaryUnit> persister = new BundleDAO<DocumentaryUnit>(
-                graph);
+        BundleDAO persister = new BundleDAO(graph);
         Integer numDeleted = persister.delete(bundle);
         assertTrue(numDeleted > 0);
         assertEquals(

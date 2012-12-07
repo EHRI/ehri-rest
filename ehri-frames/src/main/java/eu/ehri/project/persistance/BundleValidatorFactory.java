@@ -9,7 +9,7 @@ import eu.ehri.project.persistance.impl.BundleFieldValidator;
  *
  */
 public class BundleValidatorFactory {
-    public static BundleValidator getInstance(Bundle<?> bundle) {
+    public static BundleValidator getInstance(Bundle bundle) {
         return new BundleFieldValidator(bundle);
     }
 }

@@ -84,11 +84,11 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
     public E update(Map<String, Object> data, Accessor user)
             throws PermissionDenied, ValidationError, DeserializationError,
             IntegrityError, ItemNotFound {
-        Bundle<E> bundle = converter.dataToBundle(data);
+        Bundle bundle = converter.dataToBundle(data);
         E entity = graph.frame(manager.getVertex(bundle.getId()), cls);
         helper.checkEntityPermission(entity, user,
                 helper.getPermission(PermissionTypes.UPDATE));
-        return new BundleDAO<E>(graph, scope).update(bundle);
+        return new BundleDAO(graph, scope).update(bundle, cls);
     }
 
     /**
@@ -108,8 +108,8 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
             IntegrityError {
         helper.checkPermission(user,
                 helper.getPermission(PermissionTypes.CREATE));
-        Bundle<E> bundle = converter.dataToBundle(data);
-        return new BundleDAO<E>(graph, scope).create(bundle);
+        Bundle bundle = converter.dataToBundle(data);
+        return new BundleDAO(graph, scope).create(bundle, cls);
     }
 
     /**
@@ -131,8 +131,8 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
                 helper.getPermission(PermissionTypes.CREATE));
         helper.checkPermission(user,
                 helper.getPermission(PermissionTypes.UPDATE));
-        Bundle<E> bundle = converter.dataToBundle(data);
-        return new BundleDAO<E>(graph, scope).createOrUpdate(bundle);
+        Bundle bundle = converter.dataToBundle(data);
+        return new BundleDAO(graph, scope).createOrUpdate(bundle, cls);
     }
 
     /**
@@ -150,7 +150,7 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
             ValidationError, SerializationError {
         helper.checkEntityPermission(item, user,
                 helper.getPermission(PermissionTypes.DELETE));
-        return new BundleDAO<E>(graph, scope).delete(converter
+        return new BundleDAO(graph, scope).delete(converter
                 .vertexFrameToBundle(item));
     }
 

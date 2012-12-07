@@ -144,9 +144,9 @@ public class EadImport extends BaseCommand implements Command {
         Map<String, Object> agentData = new HashMap<String, Object>();
         agentData.put("identifier", name);
         agentData.put("name", name);
-        Bundle<UserProfile> agb = new BundleFactory<UserProfile>()
-                .buildBundle(agentData, UserProfile.class);
-        return new BundleDAO<UserProfile>(graph).create(agb);
+        Bundle agb = new BundleFactory().buildBundle(agentData,
+                UserProfile.class);
+        return new BundleDAO(graph).create(agb, UserProfile.class);
     }
 
     private static Agent createAgent(FramedGraph<Neo4jGraph> graph, String name)
@@ -154,8 +154,7 @@ public class EadImport extends BaseCommand implements Command {
         Map<String, Object> agentData = new HashMap<String, Object>();
         agentData.put("identifier", name);
         agentData.put("name", name);
-        Bundle<Agent> agb = new BundleFactory<Agent>().buildBundle(
-                agentData, Agent.class);
-        return new BundleDAO<Agent>(graph).create(agb);
+        Bundle agb = new BundleFactory().buildBundle(agentData, Agent.class);
+        return new BundleDAO(graph).create(agb, Agent.class);
     }
 }

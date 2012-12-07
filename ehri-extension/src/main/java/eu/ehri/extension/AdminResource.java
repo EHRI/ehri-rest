@@ -74,10 +74,10 @@ public class AdminResource {
             data.put(Accessor.NAME, ident);
 
             // TODO: Create an action for this with the system user...
-            BundleDAO<UserProfile> persister = new BundleDAO<UserProfile>(graph);
+            BundleDAO persister = new BundleDAO(graph);
             UserProfile user = persister
-                    .create(new BundleFactory<UserProfile>().buildBundle(data,
-                            UserProfile.class));
+                    .create(new BundleFactory().buildBundle(data,
+                            UserProfile.class), UserProfile.class);
             String jsonStr = converter.vertexFrameToJson(user);
             tx.success();
             return Response.status(Status.CREATED).entity((jsonStr).getBytes())

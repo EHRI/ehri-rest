@@ -38,10 +38,10 @@ public class PermissionsTest extends AbstractFixtureTest {
     @Before
     public void createTestUser() throws ValidationError, IntegrityError, ItemNotFound {
         // Add a new, fresh user with no perms to test with...
-        user = new BundleDAO<UserProfile>(graph)
-                .create(new BundleFactory<UserProfile>().buildBundle(
+        user = new BundleDAO(graph)
+                .create(new BundleFactory().buildBundle(
                         (Map<String, Object>) getTestUserBundle().get("data"),
-                        UserProfile.class));
+                        UserProfile.class), UserProfile.class);
         views = new CrudViews<DocumentaryUnit>(graph, DocumentaryUnit.class,
                 manager.getFrame("r1", Agent.class));
         viewHelper = new ViewHelper(graph, DocumentaryUnit.class);

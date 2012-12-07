@@ -149,11 +149,13 @@ public class DocumentaryUnitResource extends
         String jsonStr = converter.vertexFrameToJson(doc);
 
         try {
-            // FIXME: Hide the details of building this path            
-            URI docUri = UriBuilder.fromUri(uriInfo.getBaseUri())
+            // FIXME: Hide the details of building this path
+            URI docUri = UriBuilder
+                    .fromUri(uriInfo.getBaseUri())
                     .segment(EntityTypes.DOCUMENTARY_UNIT)
-                    .segment((String) doc.asVertex().getProperty(EntityType.ID_KEY))
-                    .build();
+                    .segment(
+                            (String) doc.asVertex().getProperty(
+                                    EntityType.ID_KEY)).build();
             return Response.status(Status.CREATED).location(docUri)
                     .entity((jsonStr).getBytes()).build();
         } catch (Exception e) {
@@ -165,8 +167,7 @@ public class DocumentaryUnitResource extends
     private DocumentaryUnit createDocumentaryUnit(String json,
             DocumentaryUnit parent) throws DeserializationError,
             PermissionDenied, ValidationError, IntegrityError, BadRequester {
-        Bundle<DocumentaryUnit> entityBundle = converter
-                .jsonToBundle(json);
+        Bundle entityBundle = converter.jsonToBundle(json);
 
         DocumentaryUnit doc = new LoggingCrudViews<DocumentaryUnit>(graph,
                 DocumentaryUnit.class, parent.getAgent())

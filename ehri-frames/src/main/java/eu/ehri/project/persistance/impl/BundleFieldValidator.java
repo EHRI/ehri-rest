@@ -22,11 +22,11 @@ public final class BundleFieldValidator implements BundleValidator {
     private static final String EMPTY_VALUE = "No value given for mandatory field";
     private static final String INVALID_ENTITY = "No EntityType annotation";
 
-    private final Bundle<?> bundle;
+    private final Bundle bundle;
 
     private final MultiValueMap errors = new MultiValueMap();
     
-    public BundleFieldValidator(Bundle<?> bundle) {
+    public BundleFieldValidator(Bundle bundle) {
        this.bundle = bundle;
     }
     

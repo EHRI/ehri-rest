@@ -6,8 +6,6 @@ import java.util.Map;
 
 import org.apache.commons.collections.map.MultiValueMap;
 
-import com.tinkerpop.frames.VertexFrame;
-
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.utils.ClassUtils;
 
@@ -18,10 +16,10 @@ import eu.ehri.project.models.utils.ClassUtils;
  * 
  * @param <T>
  */
-public class Bundle<T extends VertexFrame> {
+public class Bundle {
     protected final String id;
     protected final Map<String, Object> data;
-    protected final Class<T> cls;
+    protected final Class<?> cls;
     protected final MultiValueMap relations;
 
     /**
@@ -34,7 +32,7 @@ public class Bundle<T extends VertexFrame> {
      */
 
     public Bundle(String id, final Map<String, Object> data,
-            Class<T> cls, final MultiValueMap relations) {
+            Class<?> cls, final MultiValueMap relations) {
         this.id = id;
         this.data = new HashMap<String, Object>(data);
         this.cls = cls;
@@ -48,7 +46,7 @@ public class Bundle<T extends VertexFrame> {
      * @param other
      */
     public void addRelation(String relation,
-            Bundle<? extends VertexFrame> other) {
+            Bundle other) {
         relations.put(relation, other);
     }
     
@@ -60,7 +58,7 @@ public class Bundle<T extends VertexFrame> {
      * @return
      */
     public void setRelations(String relation,
-        List<Bundle<? extends VertexFrame>> others) {
+        List<Bundle> others) {
         relations.putAll(relation, others);
     }
 
@@ -78,8 +76,8 @@ public class Bundle<T extends VertexFrame> {
      * Get a bundle with the given id.
      * @param id
      */
-    public Bundle<T> withId(String id) {
-        return new Bundle<T>(id, data, cls, relations);
+    public Bundle withId(String id) {
+        return new Bundle(id, data, cls, relations);
     }
 
     /**
@@ -111,8 +109,8 @@ public class Bundle<T extends VertexFrame> {
         data.put(key, value);
     }
 
-    public Bundle<T> setData(final Map<String, Object> data) {
-        return new Bundle<T>(id, data, cls, relations);
+    public Bundle setData(final Map<String, Object> data) {
+        return new Bundle(id, data, cls, relations);
     }
 
     /**
@@ -120,7 +118,7 @@ public class Bundle<T extends VertexFrame> {
      * 
      * @return
      */
-    public Class<T> getBundleClass() {
+    public Class<?> getBundleClass() {
         return cls;
     }
 

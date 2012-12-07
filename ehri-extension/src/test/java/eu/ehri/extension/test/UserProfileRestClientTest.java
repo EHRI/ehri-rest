@@ -17,8 +17,6 @@ import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 
 import eu.ehri.extension.AbstractRestResource;
-import eu.ehri.project.models.DocumentaryUnit;
-import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.persistance.Bundle;
 
@@ -116,7 +114,7 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
 
         // -get the data and change it
         String json = response.getEntity(String.class);
-        Bundle<UserProfile> entityBundle = converter.jsonToBundle(json);
+        Bundle entityBundle = converter.jsonToBundle(json);
         Map<String, Object> data = entityBundle.getData();
         data.put("name", UPDATED_NAME);
         entityBundle = entityBundle.setData(data);
@@ -143,8 +141,7 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
 
         // -get the data and convert to a bundle, is it OK?
         String updatedJson = response.getEntity(String.class);
-        Bundle<DocumentaryUnit> updatedEntityBundle = converter
-                .jsonToBundle(updatedJson);
+        Bundle updatedEntityBundle = converter.jsonToBundle(updatedJson);
         Map<String, Object> updatedData = updatedEntityBundle.getData();
         assertEquals(UPDATED_NAME, updatedData.get("name"));
     }

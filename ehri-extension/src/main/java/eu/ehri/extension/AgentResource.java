@@ -200,8 +200,7 @@ public class AgentResource extends EhriNeo4jFramedResource<Agent> {
     private DocumentaryUnit createDocumentaryUnit(String json, Agent agent)
             throws DeserializationError, PermissionDenied, ValidationError,
             IntegrityError, BadRequester {
-        Bundle<DocumentaryUnit> entityBundle = converter
-                .jsonToBundle(json);
+        Bundle entityBundle = converter.jsonToBundle(json);
 
         DocumentaryUnit doc = new LoggingCrudViews<DocumentaryUnit>(graph,
                 DocumentaryUnit.class, agent)

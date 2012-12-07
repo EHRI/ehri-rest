@@ -2,8 +2,6 @@ package eu.ehri.project.exceptions;
 
 import org.apache.commons.collections.map.MultiValueMap;
 
-import com.tinkerpop.frames.VertexFrame;
-
 import eu.ehri.project.persistance.Bundle;
 
 /**
@@ -24,7 +22,7 @@ public class ValidationError extends Exception {
         errors.put("item", message);
     }
 
-    public ValidationError(Bundle<? extends VertexFrame> bundle,
+    public ValidationError(Bundle bundle,
             MultiValueMap errors) {
         this(formatErrors(bundle.getClass().getName(), errors));
         this.errors = errors;

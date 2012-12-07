@@ -190,12 +190,12 @@ public class YamlFixtureLoader implements FixtureLoader {
 
         // Since our data is written as a subgraph, we can use the
         // bundle converter to load it.
-        Bundle<VertexFrame> entityBundle = createBundle(id, type, nodeData,
+        Bundle entityBundle = createBundle(id, type, nodeData,
                 getDependentRelations(nodeRels));
-        BundleDAO<VertexFrame> persister = new BundleDAO<VertexFrame>(graph,
+        BundleDAO persister = new BundleDAO(graph,
                 SystemScope.getInstance());
         logger.debug("Creating node with id: {}", id);
-        VertexFrame frame = persister.createOrUpdate(entityBundle);
+        VertexFrame frame = persister.createOrUpdate(entityBundle, VertexFrame.class);
 
         MultiValueMap linkRels = getLinkedRelations(nodeRels);
         if (!linkRels.isEmpty()) {
@@ -203,7 +203,7 @@ public class YamlFixtureLoader implements FixtureLoader {
         }
     }
 
-    private Bundle<VertexFrame> createBundle(final String id,
+    private Bundle createBundle(final String id,
             final String type, final Map<String, Object> nodeData,
             final MultiValueMap dependentRelations) throws DeserializationError {
         @SuppressWarnings("serial")

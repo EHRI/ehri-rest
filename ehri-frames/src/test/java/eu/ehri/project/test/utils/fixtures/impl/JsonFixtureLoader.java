@@ -51,7 +51,7 @@ public class JsonFixtureLoader implements FixtureLoader {
                         .get("data");
                 Class<VertexFrame> cls = (Class<VertexFrame>) entityClasses
                         .get(isa);
-                Bundle<VertexFrame> bundle = new BundleFactory<VertexFrame>()
+                Bundle bundle = new BundleFactory()
                         .buildBundle(id, data, cls);
                 manager.createVertex(id, bundle.getType(), bundle.getData(),
                         bundle.getPropertyKeys(),

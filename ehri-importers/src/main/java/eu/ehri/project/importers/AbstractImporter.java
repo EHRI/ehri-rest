@@ -118,24 +118,20 @@ public abstract class AbstractImporter<T> {
      */
     protected DocumentaryUnit importItem(T itemData, DocumentaryUnit parent,
             int depth) throws ValidationError, IntegrityError {
-        Bundle<DocumentaryUnit> unit = new BundleFactory<DocumentaryUnit>()
-                .buildBundle(extractDocumentaryUnit(itemData, depth),
-                        DocumentaryUnit.class);
-        BundleDAO<DocumentaryUnit> persister = new BundleDAO<DocumentaryUnit>(
-                framedGraph, repository);
+        Bundle unit = new BundleFactory().buildBundle(
+                extractDocumentaryUnit(itemData, depth), DocumentaryUnit.class);
+        BundleDAO persister = new BundleDAO(framedGraph, repository);
 
         // Add dates and descriptions to the bundle since they're @Dependent
         // relations.
         for (Map<String, Object> dpb : extractDates(itemData)) {
             unit.addRelation(TemporalEntity.HAS_DATE,
-                    new BundleFactory<DatePeriod>().buildBundle(dpb,
-                            DatePeriod.class));
+                    new BundleFactory().buildBundle(dpb, DatePeriod.class));
         }
         for (Map<String, Object> dpb : extractDocumentDescriptions(itemData,
                 depth)) {
-            unit.addRelation(Description.DESCRIBES,
-                    new BundleFactory<DocumentDescription>().buildBundle(dpb,
-                            DocumentDescription.class));
+            unit.addRelation(Description.DESCRIBES, new BundleFactory()
+                    .buildBundle(dpb, DocumentDescription.class));
         }
 
         DocumentaryUnitIdGenerator generator = new DocumentaryUnitIdGenerator();
@@ -147,9 +143,9 @@ public abstract class AbstractImporter<T> {
             throw new ValidationError("Bad data: " + unit.getData());
         }
         boolean exists = manager.exists(id);
-        DocumentaryUnit frame = persister
-                .createOrUpdate(new Bundle<DocumentaryUnit>(id, unit
-                        .getData(), unit.getBundleClass(), unit.getRelations()));
+        DocumentaryUnit frame = persister.createOrUpdate(
+                new Bundle(id, unit.getData(), unit.getBundleClass(), unit
+                        .getRelations()), DocumentaryUnit.class);
 
         // Set the repository/item relationship
         repository.addCollection(frame);

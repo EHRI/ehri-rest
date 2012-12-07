@@ -15,8 +15,6 @@ import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.neo4j.graphdb.GraphDatabaseService;
 
-import com.tinkerpop.frames.VertexFrame;
-
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.IntegrityError;
@@ -172,7 +170,7 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> extends
             ItemNotFound, BadRequester {
 
         try {
-            Bundle<VertexFrame> entityBundle = converter
+            Bundle entityBundle = converter
                     .jsonToBundle(json);
             E entity = views.create(converter.bundleToData(entityBundle),
                     getRequesterUserProfile());
@@ -288,7 +286,7 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> extends
             ItemNotFound, BadRequester {
 
         try {
-            Bundle<VertexFrame> entityBundle = converter
+            Bundle entityBundle = converter
                     .jsonToBundle(json);
             E update = views.update(converter.bundleToData(entityBundle),
                     getRequesterUserProfile());
@@ -325,8 +323,8 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> extends
             // item's graph id, which requires an extra
             // serialization/deserialization.
             E entity = views.detail(manager.getFrame(id, getEntityType(), cls), getRequesterUserProfile());
-            Bundle<E> rawBundle = converter.jsonToBundle(json);
-            Bundle<E> entityBundle = new Bundle<E>((String) entity
+            Bundle rawBundle = converter.jsonToBundle(json);
+            Bundle entityBundle = new Bundle((String) entity
                     .asVertex().getProperty(EntityType.ID_KEY),
                     rawBundle.getData(), cls, rawBundle.getRelations());
             return update(converter.bundleToJson(entityBundle));
