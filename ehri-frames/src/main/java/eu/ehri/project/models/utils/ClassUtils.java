@@ -28,12 +28,22 @@ import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.annotations.Unique;
 
+/**
+ * Helper functions for managing EntityType classes.
+ * 
+ * @author mike
+ *
+ */
 public class ClassUtils {
 
     public static final String FETCH_METHOD_PREFIX = "get";
     
     private static final Map<String,Class<? extends VertexFrame>> entityClasses;
 
+    /**
+     * Statically initialise a lookup of Name -> Class. This is currently
+     * done by introspecting the package structure.
+     */
     static {
         // iterate through all the classes in our models package
         // and filter those that aren't extending VertexFrame
@@ -66,6 +76,9 @@ public class ClassUtils {
 
     /**
      * Get the entity type string for a given class.
+     * 
+     * @param cls
+     * @return
      */
     public static String getEntityType(Class<?> cls) {
         EntityType ann = cls.getAnnotation(EntityType.class);
@@ -77,6 +90,8 @@ public class ClassUtils {
 
     /**
      * Load a lookup of entity type name against the corresponding class.
+     * 
+     * @return
      */
     public static Map<String, Class<? extends VertexFrame>> getEntityClasses() {
         return entityClasses;
