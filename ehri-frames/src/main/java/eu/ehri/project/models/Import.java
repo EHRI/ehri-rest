@@ -6,7 +6,7 @@ import com.tinkerpop.frames.VertexFrame;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.AccessibleEntity;
 
-@EntityType(EntityTypes.IMPORT)
+@EntityType(EntityClass.IMPORT)
 public interface Import extends Action, AccessibleEntity, VertexFrame {
 
     @Adjacency(label = HAS_SUBJECT)

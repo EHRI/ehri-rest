@@ -1,12 +1,12 @@
-package eu.ehri.project.views;
+package eu.ehri.project.views.impl;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 import com.tinkerpop.blueprints.CloseableIterable;
-import com.tinkerpop.blueprints.Index;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
+import com.tinkerpop.blueprints.impls.neo4j.Neo4jVertex;
 import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.frames.FramedVertexIterable;
 import com.tinkerpop.frames.VertexFrame;
@@ -14,12 +14,19 @@ import com.tinkerpop.gremlin.java.GremlinPipeline;
 import com.tinkerpop.pipes.PipeFunction;
 
 import eu.ehri.project.acl.AclManager;
+import eu.ehri.project.acl.SystemScope;
+import eu.ehri.project.core.GraphManager;
+import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.exceptions.IndexNotFoundException;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
+import eu.ehri.project.models.base.PermissionScope;
+import eu.ehri.project.models.utils.ClassUtils;
+import eu.ehri.project.views.Search;
+import eu.ehri.project.views.ViewHelper;
 
 /**
  * Handles querying Accessible Entities, with ACL semantics.
@@ -30,13 +37,75 @@ import eu.ehri.project.models.base.Accessor;
  * 
  * @param <E>
  */
-public class Query<E extends AccessibleEntity> extends AbstractViews<E>
-        implements IQuery<E> {
+public final class Query<E extends AccessibleEntity> implements Search<E> {
     private static final String QUERY_GLOB = "*";
-    private Integer offset = null;
-    private Integer limit = null;
-    private String sort = null;
-    private boolean page = false;
+    private final Integer offset;
+    private final Integer limit;
+    private final String sort;
+    private final boolean page;
+
+    private final FramedGraph<Neo4jGraph> graph;
+    private final GraphManager manager;
+    private final Class<E> cls;
+    private final ViewHelper helper;
+    private final PermissionScope scope;
+
+    /**
+     * Full Constructor.
+     * 
+     * @param graph
+     * @param cls
+     * @param scope
+     * @param offset
+     * @param limit
+     * @param sort
+     * @param page
+     */
+    public Query(FramedGraph<Neo4jGraph> graph, Class<E> cls,
+            PermissionScope scope, Integer offset, Integer limit, String sort,
+            Boolean page) {
+        this.graph = graph;
+        this.cls = cls;
+        this.scope = scope;
+        this.offset = offset;
+        this.limit = limit;
+        this.sort = sort;
+        this.page = page;
+        helper = new ViewHelper(graph, cls, scope);
+        manager = GraphManagerFactory.getInstance(graph);
+    }
+
+    /**
+     * Simple constructor.
+     * 
+     * @param graph
+     * @param cls
+     */
+    public Query(FramedGraph<Neo4jGraph> graph, Class<E> cls) {
+        this(graph, cls, SystemScope.getInstance(), null, null, null, false);
+    }
+
+    /**
+     * Scoped Constructor.
+     * 
+     * @param graph
+     * @param cls
+     * @param scope
+     */
+    public Query(FramedGraph<Neo4jGraph> graph, Class<E> cls,
+            PermissionScope scope) {
+        this(graph, cls, scope, null, null, null, false);
+    }
+
+    /**
+     * Copy constructor.
+     * 
+     * @param other
+     */
+    public Query<E> copy(Query<E> other) {
+        return new Query<E>(other.graph, other.cls, other.scope, other.offset,
+                other.limit, other.sort, other.page);
+    }
 
     /**
      * 
@@ -111,27 +180,21 @@ public class Query<E extends AccessibleEntity> extends AbstractViews<E>
     }
 
     /**
-     * Constructor.
+     * Fetch an item by property id. The first matching item will be
+     * returned.
      * 
-     * @param graph
-     * @param cls
+     * @param key
+     * @param value
+     * @param user
+     * @return The matching framed vertex.
+     * @throws PermissionDenied
+     * @throws ItemNotFound
      */
-    public Query(FramedGraph<Neo4jGraph> graph, Class<E> cls) {
-        super(graph, cls);
-    }
-
-    /**
-     * Copy constructor.
-     * 
-     * @param other
-     */
-    public Query(Query<E> other) {
-        super(other.graph, other.cls);
-        this.scope = other.scope;
-        this.offset = other.offset;
-        this.limit = other.limit;
-        this.sort = other.sort;
-        this.page = other.page;
+    public E get(String id, Accessor user)
+            throws PermissionDenied, ItemNotFound {
+        E item = manager.getFrame(id, cls);
+        helper.checkReadAccess(item, user);
+        return item;
     }
 
     /**
@@ -147,20 +210,16 @@ public class Query<E extends AccessibleEntity> extends AbstractViews<E>
      */
     public E get(String key, String value, Accessor user)
             throws PermissionDenied, ItemNotFound {
+        CloseableIterable<Vertex> indexQuery = manager.getVertices(key, value,
+                ClassUtils.getEntityType(cls));
         try {
-            CloseableIterable<Vertex> indexQuery = getIndexForClass(cls).get(
-                    key, value);
-            try {
-                E item = graph.frame(indexQuery.iterator().next(), cls);
-                checkReadAccess(item, user);
-                return item;
-            } catch (NoSuchElementException e) {
-                throw new ItemNotFound(key, value);
-            } finally {
-                indexQuery.close();
-            }
-        } catch (IndexNotFoundException e) {
-            throw new RuntimeException(e);
+            E item = graph.frame(indexQuery.iterator().next(), cls);
+            helper.checkReadAccess(item, user);
+            return item;
+        } catch (NoSuchElementException e) {
+            throw new ItemNotFound(key, value);
+        } finally {
+            indexQuery.close();
         }
     }
 
@@ -172,7 +231,7 @@ public class Query<E extends AccessibleEntity> extends AbstractViews<E>
      * @throws IndexNotFoundException
      */
     public Iterable<E> list(Accessor user) {
-        return list(AccessibleEntity.IDENTIFIER_KEY, QUERY_GLOB, user);
+        return list(EntityType.ID_KEY, QUERY_GLOB, user);
     }
 
     /**
@@ -184,7 +243,7 @@ public class Query<E extends AccessibleEntity> extends AbstractViews<E>
      * @throws IndexNotFoundException
      */
     public Page<E> page(Accessor user) {
-        return page(AccessibleEntity.IDENTIFIER_KEY, QUERY_GLOB, user);
+        return page(EntityType.ID_KEY, QUERY_GLOB, user);
     }
 
     /**
@@ -199,32 +258,28 @@ public class Query<E extends AccessibleEntity> extends AbstractViews<E>
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public Page<E> page(String key, String query, Accessor user) {
         // This function is optimised for ACL actions.
+        // FIXME: Work out if there's any way of doing, in Gremlin or
+        // Cypher, a count that doesn't require re-iterating the results on
+        // a completely new index query. This seems stupid.
+        CloseableIterable<Neo4jVertex> countQ = manager.getVertices(key, query,
+                ClassUtils.getEntityType(cls));
         try {
-            // FIXME: Work out if there's any way of doing, in Gremlin or
-            // Cypher, a count that doesn't require re-iterating the results on
-            // a completely new index query. This seems stupid.
-            CloseableIterable<Vertex> countQuery = getIndexForClass(cls).query(
-                    key, query);
+            CloseableIterable<Neo4jVertex> indexQ = manager.getVertices(key,
+                    query, ClassUtils.getEntityType(cls));
             try {
-                CloseableIterable<Vertex> indexQuery = getIndexForClass(cls)
-                        .query(key, query);
-                try {
-                    PipeFunction<Vertex, Boolean> aclFilterFunction = new AclManager(
-                            graph).getAclFilterFunction(user);
-                    long count = new GremlinPipeline(countQuery).filter(
-                            aclFilterFunction).count();
-                    return new Page(graph.frameVertices(
-                            setPipelineRange(new GremlinPipeline(indexQuery)
-                                    .filter(aclFilterFunction)), cls), count,
-                            offset, limit);
-                } finally {
-                    indexQuery.close();
-                }
+                PipeFunction<Vertex, Boolean> aclFilterFunction = new AclManager(
+                        graph).getAclFilterFunction(user);
+                long count = new GremlinPipeline(countQ).filter(
+                        aclFilterFunction).count();
+                return new Page(graph.frameVertices(
+                        setPipelineRange(new GremlinPipeline(indexQ)
+                                .filter(aclFilterFunction)), cls), count,
+                        offset, limit);
             } finally {
-                countQuery.close();
+                indexQ.close();
             }
-        } catch (IndexNotFoundException e) {
-            throw new RuntimeException(e);
+        } finally {
+            countQ.close();
         }
     }
 
@@ -239,19 +294,14 @@ public class Query<E extends AccessibleEntity> extends AbstractViews<E>
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public Iterable<E> list(String key, String query, Accessor user) {
         // This function is optimised for ACL actions.
+        CloseableIterable<Neo4jVertex> vertices = manager.getVertices(key,
+                query, ClassUtils.getEntityType(cls));
         try {
-            CloseableIterable<Vertex> indexQuery = getIndexForClass(cls).query(
-                    key, query);
-            try {
-                GremlinPipeline filter = new GremlinPipeline(indexQuery)
-                        .filter(new AclManager(graph)
-                                .getAclFilterFunction(user));
-                return graph.frameVertices(setPipelineRange(filter), cls);
-            } finally {
-                indexQuery.close();
-            }
-        } catch (IndexNotFoundException e) {
-            throw new RuntimeException(e);
+            GremlinPipeline filter = new GremlinPipeline(vertices)
+                    .filter(new AclManager(graph).getAclFilterFunction(user));
+            return graph.frameVertices(setPipelineRange(filter), cls);
+        } finally {
+            vertices.close();
         }
     }
 
@@ -264,8 +314,8 @@ public class Query<E extends AccessibleEntity> extends AbstractViews<E>
     }
 
     public Query<E> setOffset(Integer offset) {
-        this.offset = offset;
-        return this;
+        return new Query<E>(this.graph, this.cls, this.scope, offset,
+                this.limit, this.sort, this.page);
     }
 
     public int getLimit() {
@@ -273,8 +323,8 @@ public class Query<E extends AccessibleEntity> extends AbstractViews<E>
     }
 
     public Query<E> setLimit(Integer limit) {
-        this.limit = limit;
-        return this;
+        return new Query<E>(this.graph, this.cls, this.scope, this.offset,
+                limit, this.sort, this.page);
     }
 
     public String getSort() {
@@ -282,32 +332,16 @@ public class Query<E extends AccessibleEntity> extends AbstractViews<E>
     }
 
     public Query<E> setSort(String sort) {
-        this.sort = sort;
-        return this;
+        return new Query<E>(this.graph, this.cls, this.scope, this.offset,
+                this.limit, sort, this.page);
     }
-    
+
     // Helpers
-    
+
     @SuppressWarnings("rawtypes")
     private GremlinPipeline setPipelineRange(GremlinPipeline filter) {
         int low = offset == null ? 0 : Math.max(offset, 0);
         int high = limit == null ? -1 : low + Math.max(limit, 0) - 1;
         return filter.range(low, high);
     }
-
-    private Index<Vertex> getIndexForClass(Class<E> cls)
-            throws IndexNotFoundException {
-        Index<Vertex> index = graph.getBaseGraph().getIndex(
-                getEntityIndexName(cls), Vertex.class);
-        if (index == null)
-            throw new IndexNotFoundException(getEntityIndexName(cls));
-        return index;
-    }
-
-    private String getEntityIndexName(Class<E> cls) {
-        EntityType ann = cls.getAnnotation(EntityType.class);
-        if (ann != null)
-            return ann.value();
-        return null;
-    }    
 }

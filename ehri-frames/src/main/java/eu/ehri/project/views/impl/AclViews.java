@@ -1,4 +1,4 @@
-package eu.ehri.project.views;
+package eu.ehri.project.views.impl;
 
 import java.util.HashSet;
 import java.util.List;
@@ -8,23 +8,58 @@ import com.tinkerpop.blueprints.TransactionalGraph.Conclusion;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
-import eu.ehri.project.acl.PermissionTypes;
+import eu.ehri.project.acl.AclManager;
+import eu.ehri.project.acl.ContentTypes;
+import eu.ehri.project.acl.PermissionType;
 import eu.ehri.project.acl.SystemScope;
+import eu.ehri.project.core.GraphManager;
+import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.ContentType;
-import eu.ehri.project.models.EntityTypes;
+import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Permission;
 import eu.ehri.project.models.PermissionGrant;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
+import eu.ehri.project.models.base.PermissionScope;
+import eu.ehri.project.views.Acl;
+import eu.ehri.project.views.ViewHelper;
 
-public class AclViews<E extends AccessibleEntity> extends AbstractViews<E> {
+public final class AclViews<E extends AccessibleEntity> implements Acl<E> {
 
+    private final FramedGraph<Neo4jGraph> graph;
+    private final AclManager acl;
+    private final ViewHelper helper;
+    private final PermissionScope scope;
+    private final GraphManager manager;
+
+    /**
+     * Scoped constructor.
+     * 
+     * @param graph
+     * @param cls
+     * @param scope
+     */
+    public AclViews(FramedGraph<Neo4jGraph> graph, Class<E> cls,
+            PermissionScope scope) {
+        this.graph = graph;
+        this.scope = scope;
+        acl = new AclManager(graph);
+        helper = new ViewHelper(graph, cls, scope);
+        manager = GraphManagerFactory.getInstance(graph);
+    }
+
+    /**
+     * Constructor with system scope.
+     * 
+     * @param graph
+     * @param cls
+     */
     public AclViews(FramedGraph<Neo4jGraph> graph, Class<E> cls) {
-        super(graph, cls);
+        this(graph, cls, SystemScope.getInstance());
     }
 
     /**
@@ -42,35 +77,36 @@ public class AclViews<E extends AccessibleEntity> extends AbstractViews<E> {
      * @throws SerializationError
      */
     public PermissionGrant setPermission(E entity, Accessor user,
-            String permissionId) throws PermissionDenied, ValidationError,
+            PermissionType perm) throws PermissionDenied, ValidationError,
             SerializationError {
-        checkEntityPermission(entity, user, getPermission(PermissionTypes.GRANT));
+        helper.checkEntityPermission(entity, user,
+                helper.getPermission(PermissionType.GRANT));
         return acl.grantPermissions(user, entity,
-                getPermission(permissionId), scope);
+                helper.getPermission(perm), scope);
     }
 
     public void setGlobalPermissionMatrix(Accessor accessor, Accessor grantee,
-            Map<String, List<String>> permissionMap) throws PermissionDenied,
+            Map<ContentTypes, List<PermissionType>> permissionMap) throws PermissionDenied,
             ValidationError, SerializationError {
 
         // Check we have grant permissions for the requested content types
         if (!acl.belongsToAdmin(grantee)) {
             try {
-                Permission grantPerm = getEntity(EntityTypes.PERMISSION,
-                        PermissionTypes.GRANT, Permission.class);
-                for (String ctype : permissionMap.keySet()) {
-                    ContentType target = getContentType(ctype);
+                Permission grantPerm = helper.getEntity(EntityClass.PERMISSION,
+                        PermissionType.GRANT.getName(), Permission.class);
+                for (ContentTypes ctype : permissionMap.keySet()) {
+                    ContentType target = manager.getFrame(ctype.getName(), ContentType.class);
                     Iterable<PermissionGrant> grants = acl.getPermissionGrants(
                             grantee, target, grantPerm);
                     if (!grants.iterator().hasNext()) {
                         throw new PermissionDenied(grantee, target, grantPerm,
-                                new SystemScope());
+                                SystemScope.getInstance());
                     }
                 }
             } catch (ItemNotFound e) {
                 throw new RuntimeException(
                         "Unable to get node for permission type '"
-                                + PermissionTypes.GRANT + "'", e);
+                                + PermissionType.GRANT + "'", e);
             }
         }
 
@@ -79,12 +115,14 @@ public class AclViews<E extends AccessibleEntity> extends AbstractViews<E> {
 
     public void setAccessors(E entity, Set<Accessor> accessors, Accessor user)
             throws PermissionDenied {
-        checkEntityPermission(entity, user, getPermission(PermissionTypes.UPDATE));
+        helper.checkEntityPermission(entity, user,
+                helper.getPermission(PermissionType.UPDATE));
         // FIXME: Must be a more efficient way to do this, whilst
         // ensuring that superfluous double relationships don't get created?
         Set<Long> accessorIds = new HashSet<Long>();
-        for (Accessor acc : accessors) accessorIds.add((Long)acc.asVertex().getId());
-        
+        for (Accessor acc : accessors)
+            accessorIds.add((Long) acc.asVertex().getId());
+
         Set<Long> existing = new HashSet<Long>();
         Set<Long> remove = new HashSet<Long>();
         for (Accessor accessor : entity.getAccessors()) {
@@ -102,7 +140,7 @@ public class AclViews<E extends AccessibleEntity> extends AbstractViews<E> {
             graph.getBaseGraph().stopTransaction(Conclusion.SUCCESS);
         }
         for (Accessor accessor : accessors) {
-            if (!existing.contains((Long)accessor.asVertex().getId())) {
+            if (!existing.contains((Long) accessor.asVertex().getId())) {
                 entity.addAccessor(accessor);
             }
         }

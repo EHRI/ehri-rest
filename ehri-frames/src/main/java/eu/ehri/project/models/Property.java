@@ -9,6 +9,6 @@ import eu.ehri.project.models.annotations.EntityType;
  * but we don't specify (in the database) what it exactly means. 
  *
  */
-@EntityType(EntityTypes.PROPERTY)
+@EntityType(EntityClass.PROPERTY)
 public interface Property extends VertexFrame { 
 }

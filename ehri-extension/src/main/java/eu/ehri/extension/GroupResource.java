@@ -20,12 +20,13 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 
 import eu.ehri.extension.errors.BadRequester;
+import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.models.EntityTypes;
+import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Group;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
@@ -35,7 +36,7 @@ import eu.ehri.project.persistance.ActionManager;
 /**
  * Provides a RESTfull interface for the Group class.
  */
-@Path(EntityTypes.GROUP)
+@Path(Entities.GROUP)
 public class GroupResource extends EhriNeo4jFramedResource<Group> {
 
     public GroupResource(@Context GraphDatabaseService database) {
@@ -118,7 +119,7 @@ public class GroupResource extends EhriNeo4jFramedResource<Group> {
      * @throws BadRequester
      */
     @POST
-    @Path("/{id:[^/]+}/{atype:[^/]+}/{aid:.+}")
+    @Path("/{id:[^/]+}/{aid:.+}")
     public Response addAccessor(@PathParam("id") String id,
             @PathParam("atype") String atype, @PathParam("aid") String aid)
             throws PermissionDenied, ItemNotFound, BadRequester {
@@ -126,8 +127,8 @@ public class GroupResource extends EhriNeo4jFramedResource<Group> {
         // TODO: Check existing membership?
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
-            Group group = getEntity(EntityTypes.GROUP, id, Group.class);
-            Accessor accessor = getEntity(atype, aid, Accessor.class);
+            Group group = manager.getFrame(id, EntityClass.GROUP, Group.class);
+            Accessor accessor = manager.getFrame(aid, Accessor.class);
             group.addMember(accessor);
             
             // Log the action...
@@ -157,15 +158,15 @@ public class GroupResource extends EhriNeo4jFramedResource<Group> {
      * @throws BadRequester
      */
     @DELETE
-    @Path("/{id:[^/]+}/{atype:[^/]+}/{aid:.+}")
+    @Path("/{id:[^/]+}/{aid:.+}")
     public Response removeAccessor(@PathParam("id") String id,
-            @PathParam("atype") String atype, @PathParam("aid") String aid)
+            @PathParam("aid") String aid)
             throws PermissionDenied, ItemNotFound, BadRequester {
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
             // FIXME: Add permission checks for this!!!
-            Group group = getEntity(EntityTypes.GROUP, id, Group.class);
-            Accessor accessor = getEntity(atype, aid, Accessor.class);
+            Group group = manager.getFrame(id, EntityClass.GROUP, Group.class);
+            Accessor accessor = manager.getFrame(aid, Accessor.class);
             group.removeMember(accessor);
             // Log the action...
             new ActionManager(graph).createAction(

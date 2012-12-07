@@ -11,7 +11,7 @@ import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.Annotator;
 
-@EntityType(EntityTypes.USER_PROFILE)
+@EntityType(EntityClass.USER_PROFILE)
 public interface UserProfile extends VertexFrame, Accessor, AccessibleEntity,
         Annotator, Actioner {
 

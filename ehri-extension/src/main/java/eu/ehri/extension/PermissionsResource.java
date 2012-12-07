@@ -2,7 +2,12 @@ package eu.ehri.extension;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.NoSuchElementException;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -26,14 +31,17 @@ import org.neo4j.graphdb.Transaction;
 
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.acl.AclManager;
+import eu.ehri.project.acl.ContentTypes;
+import eu.ehri.project.acl.PermissionType;
+import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.models.EntityTypes;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionGrantTarget;
 import eu.ehri.project.persistance.ActionManager;
+import eu.ehri.project.persistance.Converter;
 
 /**
  * Provides a RESTfull(ish) interface for setting PermissionTarget perms.
@@ -43,7 +51,7 @@ import eu.ehri.project.persistance.ActionManager;
  * permissions.
  * 
  */
-@Path(EntityTypes.PERMISSION)
+@Path(Entities.PERMISSION)
 public class PermissionsResource extends AbstractRestResource {
 
     public PermissionsResource(@Context GraphDatabaseService database) {
@@ -53,10 +61,10 @@ public class PermissionsResource extends AbstractRestResource {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{atype:[^/]+}/{id:[^/]+}")
-    public Response setGlobalMatrix(@PathParam("atype") String atype,
-            @PathParam("id") String id, String json) throws PermissionDenied,
-            JsonParseException, JsonMappingException, IOException, ItemNotFound {
+    @Path("/{id:[^/]+}")
+    public Response setGlobalMatrix(@PathParam("id") String id, String json)
+            throws PermissionDenied, JsonParseException, JsonMappingException,
+            IOException, ItemNotFound {
 
         JsonFactory factory = new JsonFactory();
         ObjectMapper mapper = new ObjectMapper(factory);
@@ -67,10 +75,10 @@ public class PermissionsResource extends AbstractRestResource {
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
             // remove all existing permission grants
-            Accessor accessor = getEntity(atype, id, Accessor.class);
+            Accessor accessor = manager.getFrame(id, Accessor.class);
             Accessor grantee = getRequesterUserProfile();
             AclManager acl = new AclManager(graph);
-            acl.setGlobalPermissionMatrix(accessor, globals);
+            acl.setGlobalPermissionMatrix(accessor, enumifyMatrix(globals));
 
             // Log the action...
             new ActionManager(graph).createAction(
@@ -79,7 +87,9 @@ public class PermissionsResource extends AbstractRestResource {
                     "Updated permissions");
 
             tx.success();
-            return getGlobalMatrix(atype, id);
+            return getGlobalMatrix(id);
+        } catch (NoSuchElementException e) {
+            throw new ItemNotFound(Converter.ID_KEY, id);
         } catch (Exception e) {
             tx.failure();
             throw new WebApplicationException(e);
@@ -91,7 +101,6 @@ public class PermissionsResource extends AbstractRestResource {
     /**
      * Get the global permission matrix for the given accessor.
      * 
-     * @param atype
      * @param id
      * @return
      * @throws PermissionDenied
@@ -102,19 +111,18 @@ public class PermissionsResource extends AbstractRestResource {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{atype:[^/]+}/{id:[^/]+}")
-    public Response getGlobalMatrix(@PathParam("atype") String atype,
-            @PathParam("id") String id) throws PermissionDenied,
-            JsonGenerationException, JsonMappingException, IOException,
-            ItemNotFound {
+    @Path("/{id:[^/]+}")
+    public Response getGlobalMatrix(@PathParam("id") String id)
+            throws PermissionDenied, JsonGenerationException,
+            JsonMappingException, IOException, ItemNotFound {
 
-        Accessor accessor = getEntity(atype, id, Accessor.class);
+        Accessor accessor = manager.getFrame(id, Accessor.class);
         AclManager acl = new AclManager(graph);
 
         return Response
                 .status(Status.OK)
-                .entity(new ObjectMapper().writeValueAsBytes(acl
-                        .getInheritedGlobalPermissions(accessor))).build();
+                .entity(new ObjectMapper().writeValueAsBytes(stringifyInheritedGlobalMatrix(acl
+                        .getInheritedGlobalPermissions(accessor)))).build();
     }
 
     /**
@@ -135,16 +143,13 @@ public class PermissionsResource extends AbstractRestResource {
             JsonGenerationException, JsonMappingException, IOException,
             ItemNotFound, BadRequester {
         Accessor accessor = getRequesterUserProfile();
-        return getGlobalMatrix(EntityTypes.USER_PROFILE,
-                accessor.getIdentifier());
+        return getGlobalMatrix(manager.getId(accessor));
     }
 
     /**
      * Get the permission matrix for a given user on the given entity.
      * 
-     * @param atype
      * @param userId
-     * @param ctype
      * @param id
      * @return
      * @throws PermissionDenied
@@ -155,22 +160,86 @@ public class PermissionsResource extends AbstractRestResource {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{atype:[^/]+}/{userId:[^/]+}/{ctype:[^/]+}/{id:[^/]+}")
-    public Response getEntityMatrix(@PathParam("atype") String atype,
-            @PathParam("userId") String userId,
-            @PathParam("ctype") String ctype, @PathParam("id") String id)
-            throws PermissionDenied, JsonGenerationException,
-            JsonMappingException, IOException, ItemNotFound {
+    @Path("/{userId:[^/]+}/{id:[^/]+}")
+    public Response getEntityMatrix(@PathParam("userId") String userId,
+            @PathParam("id") String id) throws PermissionDenied,
+            JsonGenerationException, JsonMappingException, IOException,
+            ItemNotFound {
 
-        Accessor accessor = getEntity(atype, userId, Accessor.class);
-        PermissionGrantTarget entity = getEntity(ctype, id,
+        Accessor accessor = manager.getFrame(userId, Accessor.class);
+        PermissionGrantTarget entity = manager.getFrame(id,
                 PermissionGrantTarget.class);
         AclManager acl = new AclManager(graph);
 
         return Response
                 .status(Status.OK)
-                .entity(new ObjectMapper().writeValueAsBytes(acl
-                        .getInheritedEntityPermissions(accessor, entity)))
+                .entity(new ObjectMapper().writeValueAsBytes(stringifyInheritedMatrix(acl
+                        .getInheritedEntityPermissions(accessor, entity))))
                 .build();
+    }
+
+    // Helpers. These just convert from string to internal enum representations
+    // of the various permissions-related data structures. 
+    // TODO: There's probably a way to get Jackson to do that automatically.
+    // This was why scala was invented...
+
+    private List<Map<String,Map<String, List<String>>>> stringifyInheritedGlobalMatrix(
+            List<Map<String,Map<ContentTypes, List<PermissionType>>>> matrix) {
+        List<Map<String,Map<String, List<String>>>> list = new LinkedList<Map<String,Map<String, List<String>>>>();
+        for (Map<String,Map<ContentTypes, List<PermissionType>>> item : matrix) {
+            Map<String,Map<String, List<String>>> tmp = new HashMap<String,Map<String, List<String>>>();
+            for (Entry<String,Map<ContentTypes, List<PermissionType>>> entry : item.entrySet()) {
+                tmp.put(entry.getKey(), stringifyGlobalMatrix(entry.getValue()));
+            }
+            list.add(tmp);
+        }
+        return list;
+    }
+    
+    private Map<String,List<String>> stringifyGlobalMatrix(Map<ContentTypes,List<PermissionType>> matrix) {
+        Map<String, List<String>> tmp = new HashMap<String, List<String>>();
+        for (Entry<ContentTypes,List<PermissionType>> entry : matrix.entrySet()) {
+            List<String> ptmp = new LinkedList<String>();
+            for (PermissionType pt : entry.getValue()) {
+                ptmp.add(pt.getName());
+            }
+            tmp.put(entry.getKey().getName(), ptmp);
+        }
+        return tmp;
+    }
+
+    private List<Map<String, List<String>>> stringifyInheritedMatrix(
+            List<Map<String, List<PermissionType>>> matrix) {
+        List<Map<String, List<String>>> tmp = new LinkedList<Map<String, List<String>>>();
+        for (Map<String, List<PermissionType>> item : matrix) {
+            tmp.add(stringifyMatrix(item));
+        }
+        return tmp;
+    }
+
+    private Map<String, List<String>> stringifyMatrix(
+            Map<String, List<PermissionType>> matrix) {
+        Map<String, List<String>> out = new HashMap<String, List<String>>();
+        for (Entry<String, List<PermissionType>> entry : matrix.entrySet()) {
+            List<String> tmp = new LinkedList<String>();
+            for (PermissionType t : entry.getValue()) {
+                tmp.add(t.getName());
+            }
+            out.put(entry.getKey(), tmp);
+        }
+        return out;
+    }
+
+    private Map<ContentTypes, List<PermissionType>> enumifyMatrix(
+            Map<String, List<String>> matrix) {
+        Map<ContentTypes, List<PermissionType>> out = new HashMap<ContentTypes, List<PermissionType>>();
+        for (Entry<String, List<String>> entry : matrix.entrySet()) {
+            List<PermissionType> tmp = new LinkedList<PermissionType>();
+            for (String t : entry.getValue()) {
+                tmp.add(PermissionType.withName(t));
+            }
+            out.put(ContentTypes.withName(entry.getKey()), tmp);
+        }
+        return out;
     }
 }

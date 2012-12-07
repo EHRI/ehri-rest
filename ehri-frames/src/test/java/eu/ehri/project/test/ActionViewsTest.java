@@ -15,10 +15,12 @@ import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.Action;
 import eu.ehri.project.models.DatePeriod;
+import eu.ehri.project.models.DocumentDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.UserProfile;
-import eu.ehri.project.models.base.Description;
-import eu.ehri.project.views.ActionViews;
+import eu.ehri.project.models.annotations.EntityType;
+import eu.ehri.project.persistance.Converter;
+import eu.ehri.project.views.impl.LoggingCrudViews;
 
 public class ActionViewsTest extends AbstractFixtureTest {
 
@@ -28,21 +30,22 @@ public class ActionViewsTest extends AbstractFixtureTest {
      * @throws PermissionDenied
      * @throws ValidationError
      * @throws DeserializationError
-     * @throws IntegrityError 
+     * @throws IntegrityError
      */
     @Test
     public void testUpdate() throws PermissionDenied, ValidationError,
             DeserializationError, IntegrityError {
-        ActionViews<DocumentaryUnit> docViews = new ActionViews<DocumentaryUnit>(
+        LoggingCrudViews<DocumentaryUnit> docViews = new LoggingCrudViews<DocumentaryUnit>(
                 graph, DocumentaryUnit.class);
         Map<String, Object> testData = getTestBundle();
         DocumentaryUnit unit = docViews.create(testData, validUser);
         assertEquals(TEST_COLLECTION_NAME, unit.getName());
+        testData.put(Converter.ID_KEY,
+                unit.asVertex().getProperty(EntityType.ID_KEY));
 
         // We could convert the FramedNode back into a bundle here,
         // but let's instead just modify the initial data.
         String newName = TEST_COLLECTION_NAME + " with new stuff";
-        testData.put("id", unit.asVertex().getId());
 
         Map<String, Object> data = (Map<String, Object>) testData.get("data");
         data.put("name", newName);
@@ -65,21 +68,22 @@ public class ActionViewsTest extends AbstractFixtureTest {
      * @throws PermissionDenied
      * @throws ValidationError
      * @throws DeserializationError
-     * @throws IntegrityError 
+     * @throws IntegrityError
      */
     @Test
     public void testUserUpdate() throws PermissionDenied, ValidationError,
             DeserializationError, IntegrityError {
-        ActionViews<UserProfile> userViews = new ActionViews<UserProfile>(
+        LoggingCrudViews<UserProfile> userViews = new LoggingCrudViews<UserProfile>(
                 graph, UserProfile.class);
         Map<String, Object> userData = getTestUserBundle();
         UserProfile user = userViews.create(userData, validUser);
         assertEquals(TEST_USER_NAME, user.getName());
+        userData.put(Converter.ID_KEY,
+                user.asVertex().getProperty(EntityType.ID_KEY));
 
         // We could convert the FramedNode back into a bundle here,
         // but let's instead just modify the initial data.
         String newName = TEST_USER_NAME + " with new stuff";
-        userData.put("id", user.asVertex().getId());
 
         Map<String, Object> data = (Map<String, Object>) userData.get("data");
         data.put("name", newName);
@@ -93,9 +97,9 @@ public class ActionViewsTest extends AbstractFixtureTest {
         List<Action> actions = toList(changedUser.getHistory());
         assertEquals(2, actions.size());
         // They should have default log messages...
-        assertEquals(ActionViews.DEFAULT_CREATE_LOG, actions.get(0)
+        assertEquals(LoggingCrudViews.DEFAULT_CREATE_LOG, actions.get(0)
                 .getLogMessage());
-        assertEquals(ActionViews.DEFAULT_UPDATE_LOG, actions.get(1)
+        assertEquals(LoggingCrudViews.DEFAULT_UPDATE_LOG, actions.get(1)
                 .getLogMessage());
     }
 
@@ -111,14 +115,15 @@ public class ActionViewsTest extends AbstractFixtureTest {
     @Test
     public void testDelete() throws PermissionDenied, ValidationError,
             SerializationError {
-        ActionViews<DocumentaryUnit> docViews = new ActionViews<DocumentaryUnit>(
+        LoggingCrudViews<DocumentaryUnit> docViews = new LoggingCrudViews<DocumentaryUnit>(
                 graph, DocumentaryUnit.class);
         Integer shouldDelete = 1;
         int origActionCount = toList(validUser.getActions()).size();
 
         // FIXME: Surely there's a better way of doing this???
         Iterator<DatePeriod> dateIter = item.getDatePeriods().iterator();
-        Iterator<Description> descIter = item.getDescriptions().iterator();
+        Iterator<DocumentDescription> descIter = item.getDescriptions()
+                .iterator();
         for (; dateIter.hasNext(); shouldDelete++)
             dateIter.next();
         for (; descIter.hasNext(); shouldDelete++)
@@ -135,7 +140,7 @@ public class ActionViewsTest extends AbstractFixtureTest {
         // Assumes the action is the last in the list,
         // which it should be as the most recent.
         Action deleteAction = actions.get(actions.size() - 1);
-        assertEquals(ActionViews.DEFAULT_DELETE_LOG,
+        assertEquals(LoggingCrudViews.DEFAULT_DELETE_LOG,
                 deleteAction.getLogMessage());
     }
 }

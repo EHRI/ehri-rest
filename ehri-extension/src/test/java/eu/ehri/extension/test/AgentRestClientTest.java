@@ -23,8 +23,8 @@ public class AgentRestClientTest extends BaseRestClientTest {
 
     static final String UPDATED_NAME = "UpdatedNameTEST";
 
-    private String jsonAgentTestString = "{\"data\":{\"isA\": \"agent\", \"identifier\": \"jmp\"}}";
-    private String jsonUpdateAgentTestString = "{\"data\":{\"isA\": \"agent\", \"name\": \"JMP\", \"identifier\": \"jmp\"}}";
+    private String jsonAgentTestString = "{\"type\": \"agent\", \"data\":{\"identifier\": \"jmp\"}}";
+    private String jsonUpdateAgentTestString = "{\"type\": \"agent\", \"data\":{\"name\": \"JMP\", \"identifier\": \"jmp\"}}";
     private String badJsonAgentTestString = "{\"data\":{\"identifier\": \"jmp\"}}";
 
     @BeforeClass
@@ -33,7 +33,7 @@ public class AgentRestClientTest extends BaseRestClientTest {
     }
 
     @Test
-    public void testCreateDeleteAgent() throws Exception {
+    public void testCreateAgent() throws Exception {
         // Create
         WebResource resource = client.resource(getExtensionEntryPointUri()
                 + "/agent");
@@ -73,7 +73,7 @@ public class AgentRestClientTest extends BaseRestClientTest {
         assertEquals(Response.Status.CREATED.getStatusCode(),
                 response.getStatus());
 
-        resource = client.resource(getExtensionEntryPointUri() + "/agent/jmp");
+        resource = client.resource(response.getLocation());
         response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
@@ -108,4 +108,25 @@ public class AgentRestClientTest extends BaseRestClientTest {
                 errValue.asText());
     }
 
+    @Test
+    public void testDeleteAgent() throws Exception {
+        // Create
+        WebResource resource = client.resource(getExtensionEntryPointUri()
+                + "/agent/r1");
+        ClientResponse response = resource.header(
+                AbstractRestResource.AUTH_HEADER_NAME, getAdminUserProfileId())
+                .delete(ClientResponse.class);
+
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+
+        // Check it's really gone...
+        response = resource
+                .accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                        getAdminUserProfileId()).get(ClientResponse.class);
+
+        assertEquals(Response.Status.NOT_FOUND.getStatusCode(),
+                response.getStatus());
+    }
 }

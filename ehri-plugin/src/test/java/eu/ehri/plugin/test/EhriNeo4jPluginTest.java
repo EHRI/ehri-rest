@@ -17,8 +17,9 @@ import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.exceptions.IndexNotFoundException;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.DocumentaryUnit;
-import eu.ehri.project.test.utils.FixtureLoader;
-import eu.ehri.project.views.Views;
+import eu.ehri.project.test.utils.fixtures.FixtureLoader;
+import eu.ehri.project.test.utils.fixtures.FixtureLoaderFactory;
+import eu.ehri.project.views.impl.CrudViews;
 
 import eu.ehri.plugin.EhriNeo4jPlugin;
 
@@ -37,7 +38,7 @@ public class EhriNeo4jPluginTest {
         graph = new FramedGraph<Neo4jGraph>(new Neo4jGraph(
                 new TestGraphDatabaseFactory().newImpermanentDatabaseBuilder()
                         .newGraphDatabase()));
-        helper = new FixtureLoader(graph);
+        helper = new FixtureLoaderFactory().getInstance(graph);
         helper.loadTestData();
         plugin = new EhriNeo4jPlugin();
         db = graph.getBaseGraph().getRawGraph();

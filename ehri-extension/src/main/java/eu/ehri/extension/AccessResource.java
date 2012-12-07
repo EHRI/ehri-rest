@@ -1,10 +1,8 @@
 package eu.ehri.extension;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
 
 import javax.ws.rs.Consumes;
@@ -27,15 +25,14 @@ import org.neo4j.graphdb.Transaction;
 
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.models.EntityTypes;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.views.AclViews;
+import eu.ehri.project.views.impl.AclViews;
 
 /**
  * Provides a RESTfull(ish) interface for setting PermissionTarget perms.
  */
-@Path("/access")
+@Path("access")
 public class AccessResource extends EhriNeo4jFramedResource<AccessibleEntity> {
 
     public AccessResource(@Context GraphDatabaseService database) {
@@ -44,16 +41,16 @@ public class AccessResource extends EhriNeo4jFramedResource<AccessibleEntity> {
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    @Path("/{atype:[^/]+}/{id:[^/]+}")
-    public Response setVisibility(@PathParam("atype") String atype,
-            @PathParam("id") String id, String json) throws PermissionDenied,
-            JsonParseException, JsonMappingException, IOException {
+    @Path("/{id:[^/]+}")
+    public Response setVisibility(@PathParam("id") String id, String json)
+            throws PermissionDenied, JsonParseException, JsonMappingException,
+            IOException {
 
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
             AclViews<AccessibleEntity> acl = new AclViews<AccessibleEntity>(
                     graph, cls);
-            acl.setAccessors(getEntity(atype, id, AccessibleEntity.class),
+            acl.setAccessors(manager.getFrame(id, AccessibleEntity.class),
                     extractAccessors(json), getRequesterUserProfile());
             tx.success();
             return Response.status(Status.OK).build();
@@ -81,20 +78,13 @@ public class AccessResource extends EhriNeo4jFramedResource<AccessibleEntity> {
             JsonParseException, JsonMappingException, ItemNotFound {
         JsonFactory factory = new JsonFactory();
         ObjectMapper mapper = new ObjectMapper(factory);
-        TypeReference<HashMap<String, LinkedList<String>>> typeRef = new TypeReference<HashMap<String, LinkedList<String>>>() {
+        TypeReference<LinkedList<String>> typeRef = new TypeReference<LinkedList<String>>() {
         };
-        HashMap<String, LinkedList<String>> accessorMap = mapper.readValue(
-                json, typeRef);
+        LinkedList<String> accessorList = mapper.readValue(json, typeRef);
 
         Set<Accessor> accs = new HashSet<Accessor>();
-        String[] atypes = { EntityTypes.USER_PROFILE, EntityTypes.GROUP };
-        for (String at : atypes) {
-            List<String> ataccs = accessorMap.get(at);
-            if (ataccs != null) {
-                for (String accid : ataccs) {
-                    accs.add(getEntity(at, accid, Accessor.class));
-                }
-            }
+        for (String at : accessorList) {
+            accs.add(manager.getFrame(at, Accessor.class));
         }
         return accs;
     }

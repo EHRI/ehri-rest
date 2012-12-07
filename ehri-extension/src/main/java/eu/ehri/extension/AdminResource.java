@@ -18,12 +18,13 @@ import org.neo4j.graphdb.Transaction;
 import org.neo4j.server.database.Database;
 
 import com.tinkerpop.blueprints.CloseableIterable;
-import com.tinkerpop.blueprints.Index;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
-import eu.ehri.project.models.EntityTypes;
+import eu.ehri.project.core.GraphManager;
+import eu.ehri.project.core.GraphManagerFactory;
+import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
@@ -45,12 +46,14 @@ public class AdminResource {
     private Database database;
     private FramedGraph<Neo4jGraph> graph;
     private Converter converter;
+    private GraphManager manager;
 
     public AdminResource(@Context Database database) {
         this.database = database;
         this.graph = new FramedGraph<Neo4jGraph>(new Neo4jGraph(
                 database.getGraph()));
         converter = new Converter();
+        manager = GraphManagerFactory.getInstance(graph);
     }
 
     /**
@@ -65,16 +68,16 @@ public class AdminResource {
     public Response createDefaultUserProfile() throws Exception {
         Transaction tx = database.getGraph().beginTx();
         try {
-            String ident = getNextDefaultUserName();
+            String ident = getNextDefaultUserId();
             Map<String, Object> data = new HashMap<String, Object>();
             data.put(AccessibleEntity.IDENTIFIER_KEY, ident);
             data.put(Accessor.NAME, ident);
 
             // TODO: Create an action for this with the system user...
-            BundleDAO<UserProfile> persister = new BundleDAO<UserProfile>(graph);
+            BundleDAO persister = new BundleDAO(graph);
             UserProfile user = persister
-                    .create(new BundleFactory<UserProfile>().buildBundle(data,
-                            UserProfile.class));
+                    .create(new BundleFactory().buildBundle(data,
+                            UserProfile.class), UserProfile.class);
             String jsonStr = converter.vertexFrameToJson(user);
             tx.success();
             return Response.status(Status.CREATED).entity((jsonStr).getBytes())
@@ -89,14 +92,10 @@ public class AdminResource {
 
     // Helpers...
 
-    private String getNextDefaultUserName() {
-        Index<Vertex> index = graph.getBaseGraph().getIndex(
-                EntityTypes.USER_PROFILE, Vertex.class);
-
+    private String getNextDefaultUserId() {
         // FIXME: It's crappy to have to iterate all the items to count them...
         long userCount = 0;
-        CloseableIterable<Vertex> query = index.query(
-                AccessibleEntity.IDENTIFIER_KEY, "*");
+        CloseableIterable<Vertex> query = manager.getVertices(EntityClass.USER_PROFILE);
         try {
             for (@SuppressWarnings("unused")
             Vertex _ : query)
@@ -105,8 +104,8 @@ public class AdminResource {
             query.close();
         }
         long start = userCount + 1;
-        while (index.count(AccessibleEntity.IDENTIFIER_KEY, String.format(
-                DEFAULT_USER_ID_FORMAT, DEFAULT_USER_ID_PREFIX, start)) > 0)
+        while (manager.exists(String.format(
+                DEFAULT_USER_ID_FORMAT, DEFAULT_USER_ID_PREFIX, start)))
             start++;
         return String.format(DEFAULT_USER_ID_FORMAT, DEFAULT_USER_ID_PREFIX,
                 start);

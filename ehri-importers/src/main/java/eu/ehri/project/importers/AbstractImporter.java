@@ -4,24 +4,25 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
-import com.tinkerpop.gremlin.java.GremlinPipeline;
-import com.tinkerpop.pipes.PipeFunction;
-
+import eu.ehri.project.core.GraphManager;
+import eu.ehri.project.core.GraphManagerFactory;
+import eu.ehri.project.exceptions.IdGenerationError;
 import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.DocumentDescription;
 import eu.ehri.project.models.DocumentaryUnit;
-import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.TemporalEntity;
+import eu.ehri.project.models.idgen.DocumentaryUnitIdGenerator;
+import eu.ehri.project.models.idgen.IdGenerator;
 import eu.ehri.project.persistance.BundleDAO;
 import eu.ehri.project.persistance.BundleFactory;
-import eu.ehri.project.persistance.EntityBundle;
+import eu.ehri.project.persistance.Bundle;
 
 /**
  * Base class for importers that import documentary units, with their
@@ -35,6 +36,7 @@ public abstract class AbstractImporter<T> {
 
     protected final Agent repository;
     protected final FramedGraph<Neo4jGraph> framedGraph;
+    protected final GraphManager manager;
     protected final ImportLog log;
     protected final T documentContext;
     private List<ImportCallback> createCallbacks = new LinkedList<ImportCallback>();
@@ -54,6 +56,7 @@ public abstract class AbstractImporter<T> {
         this.framedGraph = framedGraph;
         this.log = log;
         this.documentContext = documentContext;
+        manager = GraphManagerFactory.getInstance(framedGraph);
     }
 
     /**
@@ -112,79 +115,55 @@ public abstract class AbstractImporter<T> {
      * @param parent
      * @param depth
      * @throws ValidationError
-     * @throws IntegrityError 
+     * @throws IntegrityError
      */
     protected DocumentaryUnit importItem(T itemData, DocumentaryUnit parent,
             int depth) throws ValidationError, IntegrityError {
-        EntityBundle<DocumentaryUnit> unit = new BundleFactory<DocumentaryUnit>()
-                .buildBundle(extractDocumentaryUnit(itemData, depth),
-                        DocumentaryUnit.class);
-        BundleDAO<DocumentaryUnit> persister = new BundleDAO<DocumentaryUnit>(
-                framedGraph);
+        Bundle unit = new BundleFactory().buildBundle(
+                extractDocumentaryUnit(itemData, depth), DocumentaryUnit.class);
+        BundleDAO persister = new BundleDAO(framedGraph, repository);
 
         // Add dates and descriptions to the bundle since they're @Dependent
         // relations.
         for (Map<String, Object> dpb : extractDates(itemData)) {
             unit.addRelation(TemporalEntity.HAS_DATE,
-                    new BundleFactory<DatePeriod>().buildBundle(dpb,
-                            DatePeriod.class));
+                    new BundleFactory().buildBundle(dpb, DatePeriod.class));
         }
         for (Map<String, Object> dpb : extractDocumentDescriptions(itemData,
                 depth)) {
-            unit.addRelation(Description.DESCRIBES,
-                    new BundleFactory<DocumentDescription>().buildBundle(dpb,
-                            DocumentDescription.class));
+            unit.addRelation(Description.DESCRIBES, new BundleFactory()
+                    .buildBundle(dpb, DocumentDescription.class));
         }
 
-        Object existingId = getExistingGraphId((String) unit.getData().get(
-                AccessibleEntity.IDENTIFIER_KEY));
-        DocumentaryUnit frame;
-        if (existingId != null) {
-            frame = persister.update(new EntityBundle<DocumentaryUnit>(
-                    existingId, unit.getData(), unit.getBundleClass(), unit
-                            .getRelations()));
-        } else {
-            frame = persister.create(unit);
-
-            // Set the repository/item relationship
-            repository.addCollection(frame);
+        IdGenerator generator = DocumentaryUnitIdGenerator.INSTANCE;
+        String id = null;
+        try {
+            id = generator.generateId(EntityClass.DOCUMENTARY_UNIT, repository,
+                    unit.getData());
+        } catch (IdGenerationError e) {
+            throw new ValidationError("Bad data: " + unit.getData());
         }
+        boolean exists = manager.exists(id);
+        DocumentaryUnit frame = persister.createOrUpdate(
+                new Bundle(id, unit.getData(), unit.getBundleClass(), unit
+                        .getRelations()), DocumentaryUnit.class);
 
+        // Set the repository/item relationship
+        repository.addCollection(frame);
         // Set the parent child relationship
         if (parent != null)
             parent.addChild(frame);
 
         // Run creation callbacks for the new item...
-        if (existingId == null) {
-            for (ImportCallback cb : createCallbacks) {
+        if (exists) {
+            for (ImportCallback cb : updateCallbacks) {
                 cb.itemImported(frame);
             }
         } else {
-            for (ImportCallback cb : updateCallbacks) {
+            for (ImportCallback cb : createCallbacks) {
                 cb.itemImported(frame);
             }
         }
         return frame;
-    }
-
-    /**
-     * Lookup the graph ID of an existing object based on the IDENTITY_KEY
-     * 
-     * @param id
-     * @return
-     */
-    private Object getExistingGraphId(final String id) {
-        // Lookup the graph id of an object with the same
-        // identity key...
-        @SuppressWarnings({ "unchecked", "rawtypes" })
-        GremlinPipeline pipe = new GremlinPipeline(repository.asVertex())
-                .out(Agent.HOLDS).filter(new PipeFunction<Vertex, Boolean>() {
-                    public Boolean compute(Vertex item) {
-                        String vid = (String) item
-                                .getProperty(AccessibleEntity.IDENTIFIER_KEY);
-                        return (vid != null && vid.equals(id));
-                    }
-                }).id();
-        return pipe.hasNext() ? pipe.next() : null;
     }
 }

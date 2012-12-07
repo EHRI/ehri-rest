@@ -10,8 +10,9 @@ import org.neo4j.server.configuration.ServerConfigurator;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
-import eu.ehri.project.test.utils.FixtureLoader;
 import eu.ehri.project.test.utils.GraphCleaner;
+import eu.ehri.project.test.utils.fixtures.FixtureLoader;
+import eu.ehri.project.test.utils.fixtures.FixtureLoaderFactory;
 
 /**
  * Class that handles running a test Neo4j server.
@@ -40,7 +41,7 @@ public class ServerRunner {
         framedGraph = new FramedGraph<Neo4jGraph>(new Neo4jGraph(graphDatabase));
 
         // Initialize the fixture loader and cleaner
-        loader = new FixtureLoader(framedGraph);
+        loader = FixtureLoaderFactory.getInstance(framedGraph);
         cleaner = new GraphCleaner(framedGraph);
 
         // Server configuration. TODO: Work out how to disable server startup

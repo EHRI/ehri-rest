@@ -5,11 +5,13 @@ import static org.junit.Assert.*;
 import java.util.List;
 
 import org.junit.Test;
+
+import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.Address;
-import eu.ehri.project.models.Agent;
+import eu.ehri.project.models.AgentDescription;
 import eu.ehri.project.models.Authority;
 import eu.ehri.project.models.DocumentaryUnit;
-import eu.ehri.project.models.EntityTypes;
+import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Group;
 import eu.ehri.project.models.base.Accessor;
 
@@ -20,28 +22,30 @@ public class ModelTest extends ModelTestBase {
     }
 
     @Test
-    public void testTheGraphContainsGroups() {
-        List<Group> groups = toList(helper.getTestFrames(EntityTypes.GROUP,
-                Group.class));
+    public void testTheGraphContainsGroups() throws ItemNotFound {
+        Iterable<Group> frames = manager.getFrames(EntityClass.GROUP,
+                Group.class);
+        List<Group> groups = toList(frames);
         assertFalse(groups.isEmpty());
 
-        // Check the first group has a user in it
-        List<Accessor> users = toList(groups.get(0).getMembers());
+        // Check the admin group has some members
+        List<Accessor> users = toList(manager.getFrame("admin", Group.class)
+                .getMembers());
         assertFalse(users.isEmpty());
     }
 
     @Test
-    public void testCollectionHelpByRepo() {
-        DocumentaryUnit unit = helper.getTestFrame("c1", DocumentaryUnit.class);
+    public void testCollectionHelpByRepo() throws ItemNotFound {
+        DocumentaryUnit unit = manager.getFrame("c1", DocumentaryUnit.class);
         assertTrue(unit.getAgent() != null);
         // and have a description
         assertFalse(toList(unit.getDescriptions()).isEmpty());
     }
 
     @Test
-    public void testCollectionNameAccess() {
-        DocumentaryUnit c1 = helper.getTestFrame("c1", DocumentaryUnit.class);
-        Authority a2 = helper.getTestFrame("a2", Authority.class);
+    public void testCollectionNameAccess() throws ItemNotFound {
+        DocumentaryUnit c1 = manager.getFrame("c1", DocumentaryUnit.class);
+        Authority a2 = manager.getFrame("a2", Authority.class);
         assertTrue(toList(c1.getNameAccess()).contains(a2));
 
         // The same should be true backwards
@@ -49,10 +53,10 @@ public class ModelTest extends ModelTestBase {
     }
 
     @Test
-    public void testRepository() {
-        Agent r1 = helper.getTestFrame("r1", Agent.class);
-        Address ar1 = helper.getTestFrame("ar1", Address.class);
+    public void testRepository() throws ItemNotFound {
+        AgentDescription rd1 = manager.getFrame("rd1", AgentDescription.class);
+        Address ar1 = manager.getFrame("ar1", Address.class);
         // check we have an address
-        assertTrue(toList(r1.getAddresses()).contains(ar1));
+        assertTrue(toList(rd1.getAddresses()).contains(ar1));
     }
 }

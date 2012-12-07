@@ -26,7 +26,7 @@ public class EadUpdateImporterTest extends AbstractFixtureTest {
 
     @Test
     public void testImportItemsT() throws Exception {
-        Agent agent = graph.frame(helper.getTestVertex(TEST_REPO), Agent.class);
+        Agent agent = manager.getFrame(TEST_REPO, Agent.class);
         final String logMessage = "Importing a single EAD";
 
         int count = getNodeCount();

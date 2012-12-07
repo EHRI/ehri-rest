@@ -5,7 +5,7 @@ import com.tinkerpop.frames.Property;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.AccessibleEntity;
 
-@EntityType(EntityTypes.PERMISSION)
+@EntityType(EntityClass.PERMISSION)
 public interface Permission extends AccessibleEntity {
     public static final String MASK = "mask";
     

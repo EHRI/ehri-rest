@@ -11,6 +11,7 @@ import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
 import eu.ehri.project.exceptions.IntegrityError;
+import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.Action;
 import eu.ehri.project.models.base.AccessibleEntity;
@@ -41,8 +42,9 @@ public class ActionManager {
      * @param user
      * @param logMessage
      * @return
+     * @throws ItemNotFound 
      */
-    public Action createAction(Actioner user, String logMessage) {
+    public Action createAction(Actioner user, String logMessage) throws ItemNotFound {
 
         Map<String, Object> actionData = new HashMap<String, Object>();
         actionData.put(Action.TIMESTAMP, getTimestamp());
@@ -50,11 +52,11 @@ public class ActionManager {
         actionData.put(AccessibleEntity.IDENTIFIER_KEY, UUID.randomUUID()
                 .toString());
 
-        BundleDAO<Action> persister = new BundleDAO<Action>(graph);
+        BundleDAO persister = new BundleDAO(graph, null);
         Action action;
         try {
-            action = persister.create(new BundleFactory<Action>().buildBundle(
-                    actionData, Action.class));
+            action = persister.create(new BundleFactory().buildBundle(
+                    actionData, Action.class), Action.class);
         } catch (ValidationError e) {
             e.printStackTrace();
             throw new RuntimeException("Unexpected validation error creating action", e);
@@ -74,9 +76,10 @@ public class ActionManager {
      * @param user
      * @param logMessage
      * @return
+     * @throws ItemNotFound
      */
     public Action createAction(AccessibleEntity subject, Actioner user,
-            String logMessage) {
+            String logMessage) throws ItemNotFound {
         Action action = createAction(user, logMessage);
         action.setSubject(subject);
         return action;

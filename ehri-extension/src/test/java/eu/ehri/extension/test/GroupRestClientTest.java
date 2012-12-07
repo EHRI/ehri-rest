@@ -15,7 +15,7 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 
 import eu.ehri.extension.AbstractRestResource;
-import eu.ehri.project.models.EntityTypes;
+import eu.ehri.project.definitions.Entities;
 
 public class GroupRestClientTest extends BaseRestClientTest {
 
@@ -24,7 +24,7 @@ public class GroupRestClientTest extends BaseRestClientTest {
     static final String CURRENT_ADMIN_USER = "mike";
     static final String NON_ADMIN_USER = "reto";
 
-    private String jsonGroupTestString = "{\"data\":{\"isA\": \"group\", \"identifier\": \"jmp\", \"name\": \"JMP\"}}";
+    private String jsonGroupTestString = "{\"type\": \"group\", \"data\":{\"identifier\": \"jmp\", \"name\": \"JMP\"}}";
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
@@ -60,8 +60,8 @@ public class GroupRestClientTest extends BaseRestClientTest {
         // Create
         WebResource resource = client.resource(
                 UriBuilder.fromPath(getExtensionEntryPointUri())
-                .segment(EntityTypes.GROUP).segment(TEST_GROUP_NAME)
-                .segment(EntityTypes.USER_PROFILE).segment(NON_ADMIN_USER).build());
+                .segment(Entities.GROUP).segment(TEST_GROUP_NAME)
+                .segment(NON_ADMIN_USER).build());
         ClientResponse response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
@@ -78,8 +78,8 @@ public class GroupRestClientTest extends BaseRestClientTest {
         // Create
         WebResource resource = client.resource(
                 UriBuilder.fromPath(getExtensionEntryPointUri())
-                .segment(EntityTypes.GROUP).segment(TEST_GROUP_NAME)
-                .segment(EntityTypes.USER_PROFILE).segment(CURRENT_ADMIN_USER).build());
+                .segment(Entities.GROUP).segment(TEST_GROUP_NAME)
+                .segment(CURRENT_ADMIN_USER).build());
         ClientResponse response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)

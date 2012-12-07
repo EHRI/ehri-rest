@@ -3,7 +3,6 @@ package eu.ehri.extension;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
-
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
@@ -16,8 +15,6 @@ import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.neo4j.graphdb.GraphDatabaseService;
 
-import com.tinkerpop.frames.VertexFrame;
-
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.IntegrityError;
@@ -25,12 +22,15 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.models.EntityClass;
+import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.utils.ClassUtils;
 import eu.ehri.project.persistance.Converter;
-import eu.ehri.project.persistance.EntityBundle;
-import eu.ehri.project.views.ActionViews;
-import eu.ehri.project.views.IViews;
-import eu.ehri.project.views.Query;
+import eu.ehri.project.persistance.Bundle;
+import eu.ehri.project.views.Crud;
+import eu.ehri.project.views.impl.LoggingCrudViews;
+import eu.ehri.project.views.impl.Query;
 
 import static eu.ehri.extension.RestHelpers.*;
 
@@ -47,7 +47,7 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> extends
 
     public static final int DEFAULT_LIST_LIMIT = 20;
 
-    protected final IViews<E> views;
+    protected final Crud<E> views;
     protected final Query<E> querier;
     protected final Class<E> cls;
     protected final Converter converter = new Converter();
@@ -64,7 +64,7 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> extends
             Class<E> cls) {
         super(database);
         this.cls = cls;
-        views = new ActionViews<E>(graph, cls);
+        views = new LoggingCrudViews<E>(graph, cls);
         querier = new Query<E>(graph, cls);
 
     }
@@ -97,7 +97,7 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> extends
                 g.writeNumberField("total", page.getCount());
                 g.writeNumberField("offset", page.getOffset());
                 g.writeNumberField("limit", page.getLimit());
-                g.writeFieldName("values");                                
+                g.writeFieldName("values");
                 g.writeStartArray();
                 for (E item : page.getIterable()) {
                     try {
@@ -171,13 +171,16 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> extends
             ItemNotFound, BadRequester {
 
         try {
-            EntityBundle<VertexFrame> entityBundle = converter
+            Bundle entityBundle = converter
                     .jsonToBundle(json);
             E entity = views.create(converter.bundleToData(entityBundle),
                     getRequesterUserProfile());
             String jsonStr = converter.vertexFrameToJson(entity);
             UriBuilder ub = uriInfo.getAbsolutePathBuilder();
-            URI docUri = ub.path(entity.asVertex().getId().toString()).build();
+            // FIXME: Hide the details of building this path
+            URI docUri = ub.path(
+                    (String) entity.asVertex().getProperty(EntityType.ID_KEY))
+                    .build();
 
             return Response.status(Status.CREATED).location(docUri)
                     .entity((jsonStr).getBytes()).build();
@@ -230,7 +233,15 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> extends
      */
     public Response retrieve(String id) throws PermissionDenied, ItemNotFound,
             BadRequester {
-        return retrieve(AccessibleEntity.IDENTIFIER_KEY, id);
+        try {
+            E entity = views.detail(manager.getFrame(id, getEntityType(), cls),
+                    getRequesterUserProfile());
+            String jsonStr = new Converter().vertexFrameToJson(entity);
+            return Response.status(Status.OK).entity((jsonStr).getBytes())
+                    .build();
+        } catch (SerializationError e) {
+            throw new WebApplicationException(e);
+        }
     }
 
     /**
@@ -251,7 +262,6 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> extends
         try {
             E entity = querier.get(key, value, getRequesterUserProfile());
             String jsonStr = new Converter().vertexFrameToJson(entity);
-
             return Response.status(Status.OK).entity((jsonStr).getBytes())
                     .build();
         } catch (SerializationError e) {
@@ -277,7 +287,7 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> extends
             ItemNotFound, BadRequester {
 
         try {
-            EntityBundle<VertexFrame> entityBundle = converter
+            Bundle entityBundle = converter
                     .jsonToBundle(json);
             E update = views.update(converter.bundleToData(entityBundle),
                     getRequesterUserProfile());
@@ -308,39 +318,16 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> extends
     public Response update(String id, String json) throws PermissionDenied,
             IntegrityError, ValidationError, DeserializationError,
             ItemNotFound, BadRequester {
-        return update(AccessibleEntity.IDENTIFIER_KEY, id, json);
-    }
-
-    /**
-     * Update (change) an instance of the 'entity' in the database
-     * 
-     * @param key
-     *            The key to search
-     * @param value
-     *            The key's value
-     * @param json
-     *            The json
-     * @return The response of the update request
-     * @throws PermissionDenied
-     * @throws IntegrityError
-     * @throws ValidationError
-     * @throws DeserializationError
-     * @throws ItemNotFound
-     * @throws BadRequester
-     */
-    public Response update(String key, String value, String json)
-            throws PermissionDenied, IntegrityError, ValidationError,
-            DeserializationError, ItemNotFound, BadRequester {
         try {
             // FIXME: This is nasty because it searches for an item with the
             // specified key/value and constructs a new bundle containing the
             // item's graph id, which requires an extra
             // serialization/deserialization.
-            E entity = querier.get(key, value, getRequesterUserProfile());
-            EntityBundle<E> rawBundle = converter.jsonToBundle(json);
-            EntityBundle<E> entityBundle = new EntityBundle<E>(entity
-                    .asVertex().getId(), rawBundle.getData(), cls,
-                    rawBundle.getRelations());
+            E entity = views.detail(manager.getFrame(id, getEntityType(), cls), getRequesterUserProfile());
+            Bundle rawBundle = converter.jsonToBundle(json);
+            Bundle entityBundle = new Bundle((String) entity
+                    .asVertex().getProperty(EntityType.ID_KEY),
+                    rawBundle.getData(), cls, rawBundle.getRelations());
             return update(converter.bundleToJson(entityBundle));
         } catch (SerializationError e) {
             throw new WebApplicationException(e);
@@ -383,12 +370,18 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> extends
     protected Response delete(String id) throws PermissionDenied, ItemNotFound,
             ValidationError, BadRequester {
         try {
-            E entity = querier.get(AccessibleEntity.IDENTIFIER_KEY, id,
+            E entity = views.detail(manager.getFrame(id, getEntityType(), cls),
                     getRequesterUserProfile());
             views.delete(entity, getRequesterUserProfile());
             return Response.status(Status.OK).build();
         } catch (SerializationError e) {
             throw new WebApplicationException(e);
         }
+    }
+    
+    // Helpers
+    
+    private EntityClass getEntityType() {
+        return ClassUtils.getEntityType(cls);
     }
 }

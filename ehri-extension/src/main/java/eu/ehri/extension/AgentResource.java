@@ -24,6 +24,7 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 
 import eu.ehri.extension.errors.BadRequester;
+import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
@@ -32,16 +33,14 @@ import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.DocumentaryUnit;
-import eu.ehri.project.models.EntityTypes;
-import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.persistance.EntityBundle;
-import eu.ehri.project.views.ActionViews;
-import eu.ehri.project.views.Query;
+import eu.ehri.project.persistance.Bundle;
+import eu.ehri.project.views.impl.LoggingCrudViews;
+import eu.ehri.project.views.impl.Query;
 
 /**
  * Provides a RESTfull interface for the Agent
  */
-@Path(EntityTypes.AGENT)
+@Path(Entities.AGENT)
 public class AgentResource extends EhriNeo4jFramedResource<Agent> {
 
     public AgentResource(@Context GraphDatabaseService database) {
@@ -160,14 +159,13 @@ public class AgentResource extends EhriNeo4jFramedResource<Agent> {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{id:.+}/" + EntityTypes.DOCUMENTARY_UNIT)
+    @Path("/{id:.+}/" + Entities.DOCUMENTARY_UNIT)
     public Response createAgentDocumentaryUnit(@PathParam("id") String id,
             String json) throws PermissionDenied, ValidationError,
             IntegrityError, DeserializationError, ItemNotFound, BadRequester {
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
-            Agent agent = new Query<Agent>(graph, Agent.class).get(
-                    AccessibleEntity.IDENTIFIER_KEY, id,
+            Agent agent = new Query<Agent>(graph, Agent.class).get(id,
                     getRequesterUserProfile());
             DocumentaryUnit doc = createDocumentaryUnit(json, agent);
             tx.success();
@@ -185,9 +183,12 @@ public class AgentResource extends EhriNeo4jFramedResource<Agent> {
     private Response buildResponseFromDocumentaryUnit(DocumentaryUnit doc)
             throws SerializationError {
         String jsonStr = converter.vertexFrameToJson(doc);
-        URI docUri = UriBuilder.fromUri(uriInfo.getBaseUri())
-                .segment(EntityTypes.DOCUMENTARY_UNIT)
-                .segment(doc.getIdentifier()).build();
+        // FIXME: Hide the details of building this path
+        URI docUri = UriBuilder
+                .fromUri(uriInfo.getBaseUri())
+                .segment(Entities.DOCUMENTARY_UNIT)
+                .segment(manager.getId(doc))
+                .build();
 
         return Response.status(Status.CREATED).location(docUri)
                 .entity((jsonStr).getBytes()).build();
@@ -196,11 +197,10 @@ public class AgentResource extends EhriNeo4jFramedResource<Agent> {
     private DocumentaryUnit createDocumentaryUnit(String json, Agent agent)
             throws DeserializationError, PermissionDenied, ValidationError,
             IntegrityError, BadRequester {
-        EntityBundle<DocumentaryUnit> entityBundle = converter
-                .jsonToBundle(json);
+        Bundle entityBundle = converter.jsonToBundle(json);
 
-        DocumentaryUnit doc = new ActionViews<DocumentaryUnit>(graph,
-                DocumentaryUnit.class)
+        DocumentaryUnit doc = new LoggingCrudViews<DocumentaryUnit>(graph,
+                DocumentaryUnit.class, agent)
                 .create(converter.bundleToData(entityBundle),
                         getRequesterUserProfile());
         // Add it to this agent's collections

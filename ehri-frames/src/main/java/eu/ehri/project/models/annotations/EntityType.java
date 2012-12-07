@@ -5,10 +5,13 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import eu.ehri.project.models.EntityClass;
+
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface EntityType {
-    public static final String KEY = "isA";
+    public static final String TYPE_KEY = "__ISA__";
+    public static final String ID_KEY = "__ID__";
 
-    public String value();
+    public EntityClass value();
 }

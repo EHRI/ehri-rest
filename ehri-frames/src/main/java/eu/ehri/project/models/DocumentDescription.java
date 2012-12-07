@@ -6,7 +6,7 @@ import com.tinkerpop.frames.VertexFrame;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.Description;
 
-@EntityType(EntityTypes.DOCUMENT_DESCRIPTION)
+@EntityType(EntityClass.DOCUMENT_DESCRIPTION)
 public interface DocumentDescription extends VertexFrame, Description {
 
     @Property("title")

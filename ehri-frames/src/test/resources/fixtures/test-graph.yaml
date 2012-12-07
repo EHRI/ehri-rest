@@ -1,0 +1,105 @@
+#
+# This file provides a standard set of fixtures for the EHRI collection registry
+# database.
+#
+  
+--- # Permissions - permissions are nodes within the system
+permission:
+  - create:
+      data:
+        name: Create
+        mask: 1
+  - update:
+      data:
+        name: Update
+        mask: 2
+  - delete:
+      data:
+        name: Delete
+        mask: 4
+  - grant:
+      data:
+        name: Grant
+        mask: 8
+  - annotate:
+      data:
+        name: Annotate
+        mask: 16
+  - owner:
+      data:
+        name: Owner
+        mask: 23 # Mask denotes inclusion of create/update/delete  
+      
+--- # Content Types - also nodes within the system, which serve as permission targets
+contentType:
+  - documentaryUnit:
+      data:
+        name: Documentary Unit
+  - authority:
+      data:
+        name: Authority
+  - agent:
+      data:
+        name: Agent
+  - action:
+      data:
+        name: Action
+  - userProfile:
+      data:
+        name: User Profile
+  - group:
+      data:
+        name: Group
+
+--- # Groups
+group:
+
+  # Admin and Anonymous are groups which have special behaviour within the system
+  - admin:
+      data:
+        name: Admin
+  - anonymous:
+      data:
+        name: Anonymous
+        
+  # These groups are examples
+  # NIOD - the NIOD group belongs to Admin        
+  - niod:
+      data:
+        name: NIOD
+      relationships:
+        belongsTo:
+          - admin
+  
+  # KCL does not
+  - kcl:
+      data:
+        name: King's College London
+        
+  - soma:
+      data:
+        name: CEGES SOMA
+    
+--- # Users
+userProfile:
+
+  # The first user belongs to NIOD, and therefore Admin
+  - user1:
+      data:
+        name: User 1
+      relationships:
+        belongsTo:
+          - niod
+  
+  - user2:
+      data:
+        name: User 2
+      relationships:
+        belongsTo:
+          - kcl
+          
+  - user3:
+      data:
+        name: User 3
+      relationships:
+        

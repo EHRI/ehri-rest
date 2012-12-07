@@ -23,6 +23,7 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 
 import eu.ehri.extension.errors.BadRequester;
+import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
@@ -30,16 +31,14 @@ import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.DocumentaryUnit;
-import eu.ehri.project.models.EntityTypes;
-import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.persistance.EntityBundle;
-import eu.ehri.project.views.ActionViews;
-import eu.ehri.project.views.Query;
+import eu.ehri.project.persistance.Bundle;
+import eu.ehri.project.views.impl.LoggingCrudViews;
+import eu.ehri.project.views.impl.Query;
 
 /**
  * Provides a RESTfull interface for the DocumentaryUnit
  */
-@Path(EntityTypes.DOCUMENTARY_UNIT)
+@Path(Entities.DOCUMENTARY_UNIT)
 public class DocumentaryUnitResource extends
         EhriNeo4jFramedResource<DocumentaryUnit> {
 
@@ -121,15 +120,14 @@ public class DocumentaryUnitResource extends
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{id:.+}/" + EntityTypes.DOCUMENTARY_UNIT)
+    @Path("/{id:.+}/" + Entities.DOCUMENTARY_UNIT)
     public Response createAgentDocumentaryUnit(@PathParam("id") String id,
             String json) throws PermissionDenied, ValidationError,
             IntegrityError, DeserializationError, ItemNotFound, BadRequester {
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
             DocumentaryUnit parent = new Query<DocumentaryUnit>(graph,
-                    DocumentaryUnit.class).get(AccessibleEntity.IDENTIFIER_KEY,
-                    id, getRequesterUserProfile());
+                    DocumentaryUnit.class).get(id, getRequesterUserProfile());
             DocumentaryUnit doc = createDocumentaryUnit(json, parent);
             tx.success();
             return buildResponseFromDocumentaryUnit(doc);
@@ -148,9 +146,10 @@ public class DocumentaryUnitResource extends
         String jsonStr = converter.vertexFrameToJson(doc);
 
         try {
+            // FIXME: Hide the details of building this path
             URI docUri = UriBuilder.fromUri(uriInfo.getBaseUri())
-                    .segment(EntityTypes.DOCUMENTARY_UNIT)
-                    .segment(doc.getIdentifier()).build();
+                    .segment(Entities.DOCUMENTARY_UNIT)
+                    .segment(manager.getId(doc)).build();
             return Response.status(Status.CREATED).location(docUri)
                     .entity((jsonStr).getBytes()).build();
         } catch (Exception e) {
@@ -162,11 +161,10 @@ public class DocumentaryUnitResource extends
     private DocumentaryUnit createDocumentaryUnit(String json,
             DocumentaryUnit parent) throws DeserializationError,
             PermissionDenied, ValidationError, IntegrityError, BadRequester {
-        EntityBundle<DocumentaryUnit> entityBundle = converter
-                .jsonToBundle(json);
+        Bundle entityBundle = converter.jsonToBundle(json);
 
-        DocumentaryUnit doc = new ActionViews<DocumentaryUnit>(graph,
-                DocumentaryUnit.class)
+        DocumentaryUnit doc = new LoggingCrudViews<DocumentaryUnit>(graph,
+                DocumentaryUnit.class, parent.getAgent())
                 .create(converter.bundleToData(entityBundle),
                         getRequesterUserProfile());
         // Add it to this agent's collections

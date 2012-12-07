@@ -12,7 +12,6 @@ import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.models.Action;
 import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.DocumentaryUnit;
-import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.test.AbstractFixtureTest;
 
 public class EadListImporterTest extends AbstractFixtureTest {
@@ -28,7 +27,7 @@ public class EadListImporterTest extends AbstractFixtureTest {
 
 	@Test
 	public void testImportItemsT() throws Exception {
-		Agent agent = graph.frame(helper.getTestVertex(TEST_REPO), Agent.class);
+		Agent agent = manager.getFrame(TEST_REPO, Agent.class);
 		final String logMessage = "Importing a single EAD";
 
 		int count = getNodeCount();

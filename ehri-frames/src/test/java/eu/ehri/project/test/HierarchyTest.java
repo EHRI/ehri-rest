@@ -7,6 +7,8 @@ import java.util.List;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.DocumentaryUnit;
 
 public class HierarchyTest extends ModelTestBase {
@@ -16,9 +18,9 @@ public class HierarchyTest extends ModelTestBase {
     }
 
     @Test
-    public void testCollectionHierarchy() {
-        DocumentaryUnit c1 = helper.getTestFrame("c1", DocumentaryUnit.class);
-        DocumentaryUnit c2 = helper.getTestFrame("c2", DocumentaryUnit.class);
+    public void testCollectionHierarchy() throws ItemNotFound {
+        DocumentaryUnit c1 = manager.getFrame("c1", DocumentaryUnit.class);
+        DocumentaryUnit c2 = manager.getFrame("c2", DocumentaryUnit.class);
         assertTrue(toList(c1.getChildren()).contains(c2));
 
         // check reverse
@@ -26,10 +28,10 @@ public class HierarchyTest extends ModelTestBase {
     }
 
     @Test
-    public void testCollectionAncestry() {
-        DocumentaryUnit c1 = helper.getTestFrame("c1", DocumentaryUnit.class);
-        DocumentaryUnit c2 = helper.getTestFrame("c2", DocumentaryUnit.class);
-        DocumentaryUnit c3 = helper.getTestFrame("c3", DocumentaryUnit.class);
+    public void testCollectionAncestry() throws ItemNotFound {
+        DocumentaryUnit c1 = manager.getFrame("c1", DocumentaryUnit.class);
+        DocumentaryUnit c2 = manager.getFrame("c2", DocumentaryUnit.class);
+        DocumentaryUnit c3 = manager.getFrame("c3", DocumentaryUnit.class);
         // should be the first ancestor of c2
         assertEquals(toList(c2.getAncestors()).get(0), (c1));
 
@@ -38,10 +40,10 @@ public class HierarchyTest extends ModelTestBase {
     }
 
     @Test
-    public void testFullAncestry() {
-        DocumentaryUnit c1 = helper.getTestFrame("c1", DocumentaryUnit.class);
-        DocumentaryUnit c2 = helper.getTestFrame("c2", DocumentaryUnit.class);
-        DocumentaryUnit c3 = helper.getTestFrame("c3", DocumentaryUnit.class);
+    public void testFullAncestry() throws ItemNotFound {
+        DocumentaryUnit c1 = manager.getFrame("c1", DocumentaryUnit.class);
+        DocumentaryUnit c2 = manager.getFrame("c2", DocumentaryUnit.class);
+        DocumentaryUnit c3 = manager.getFrame("c3", DocumentaryUnit.class);
 
         List<DocumentaryUnit> ancestors = toList(c3.getAncestors());
         assertEquals(2, ancestors.size());

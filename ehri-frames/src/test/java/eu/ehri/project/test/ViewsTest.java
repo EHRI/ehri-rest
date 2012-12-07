@@ -10,20 +10,23 @@ import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.acl.AnonymousAccessor;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.IntegrityError;
+import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.DatePeriod;
+import eu.ehri.project.models.DocumentDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Group;
 import eu.ehri.project.models.Permission;
 import eu.ehri.project.models.UserProfile;
-import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.models.base.Description;
+import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.PermissionGrantTarget;
-import eu.ehri.project.views.ActionViews;
-import eu.ehri.project.views.Views;
+import eu.ehri.project.persistance.Converter;
+import eu.ehri.project.views.Crud;
+import eu.ehri.project.views.impl.LoggingCrudViews;
+import eu.ehri.project.views.impl.CrudViews;
 
 public class ViewsTest extends AbstractFixtureTest {
 
@@ -34,7 +37,7 @@ public class ViewsTest extends AbstractFixtureTest {
      */
     @Test
     public void testDetail() throws PermissionDenied {
-        Views<DocumentaryUnit> docViews = new Views<DocumentaryUnit>(graph,
+        Crud<DocumentaryUnit> docViews = new CrudViews<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
         DocumentaryUnit unit = docViews.detail(item, validUser);
         assertEquals(item.asVertex(), unit.asVertex());
@@ -47,7 +50,7 @@ public class ViewsTest extends AbstractFixtureTest {
      */
     @Test
     public void testUserProfile() throws PermissionDenied {
-        Views<UserProfile> userViews = new Views<UserProfile>(graph,
+        CrudViews<UserProfile> userViews = new CrudViews<UserProfile>(graph,
                 UserProfile.class);
         UserProfile user = userViews.detail(validUser, validUser);
         assertEquals(validUser.asVertex(), user.asVertex());
@@ -60,9 +63,9 @@ public class ViewsTest extends AbstractFixtureTest {
      */
     @Test(expected = PermissionDenied.class)
     public void testDetailAnonymous() throws PermissionDenied {
-        Views<DocumentaryUnit> docViews = new Views<DocumentaryUnit>(graph,
+        CrudViews<DocumentaryUnit> docViews = new CrudViews<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
-        docViews.detail(item, new AnonymousAccessor());
+        docViews.detail(item, AnonymousAccessor.getInstance());
     }
 
     /**
@@ -72,7 +75,7 @@ public class ViewsTest extends AbstractFixtureTest {
      */
     @Test(expected = PermissionDenied.class)
     public void testDetailPermissionDenied() throws PermissionDenied {
-        Views<DocumentaryUnit> docViews = new Views<DocumentaryUnit>(graph,
+        CrudViews<DocumentaryUnit> docViews = new CrudViews<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
         docViews.detail(item, invalidUser);
     }
@@ -83,7 +86,7 @@ public class ViewsTest extends AbstractFixtureTest {
      * TODO: Check write access!!!
      */
     public void testUserDetailPermissionDenied() throws PermissionDenied {
-        Views<UserProfile> userViews = new Views<UserProfile>(graph,
+        CrudViews<UserProfile> userViews = new CrudViews<UserProfile>(graph,
                 UserProfile.class);
         userViews.detail(validUser, invalidUser);
     }
@@ -95,11 +98,12 @@ public class ViewsTest extends AbstractFixtureTest {
      * @throws ValidationError
      * @throws DeserializationError
      * @throws IntegrityError
+     * @throws ItemNotFound 
      */
     @Test
     public void testUpdate() throws PermissionDenied, ValidationError,
-            DeserializationError, IntegrityError {
-        Views<DocumentaryUnit> docViews = new Views<DocumentaryUnit>(graph,
+            DeserializationError, IntegrityError, ItemNotFound {
+        CrudViews<DocumentaryUnit> docViews = new CrudViews<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
         Map<String, Object> bundle = getTestBundle();
         DocumentaryUnit unit = docViews.create(bundle, validUser);
@@ -108,11 +112,11 @@ public class ViewsTest extends AbstractFixtureTest {
         // We could convert the FramedNode back into a bundle here,
         // but let's instead just modify the initial data.
         String newName = TEST_COLLECTION_NAME + " with new stuff";
-        bundle.put("id", unit.asVertex().getId());
-
-        Map<String, Object> data = (Map<String, Object>) bundle.get("data");
+        bundle.put(Converter.ID_KEY,
+                unit.asVertex().getProperty(EntityType.ID_KEY));
+        Map<String, Object> data = (Map<String, Object>) bundle
+                .get(Converter.DATA_KEY);
         data.put("name", newName);
-
         DocumentaryUnit changedUnit = docViews.update(bundle, validUser);
         assertEquals(newName, changedUnit.getName());
 
@@ -132,22 +136,23 @@ public class ViewsTest extends AbstractFixtureTest {
      * @throws ValidationError
      * @throws DeserializationError
      * @throws IntegrityError
+     * @throws ItemNotFound 
      */
     @Test
     public void testUserUpdate() throws PermissionDenied, ValidationError,
-            DeserializationError, IntegrityError {
-        Views<UserProfile> userViews = new Views<UserProfile>(graph,
+            DeserializationError, IntegrityError, ItemNotFound {
+        CrudViews<UserProfile> userViews = new CrudViews<UserProfile>(graph,
                 UserProfile.class);
         Map<String, Object> bundle = getTestUserBundle();
         UserProfile user = userViews.create(bundle, validUser);
         assertEquals(TEST_USER_NAME, user.getName());
-
+        bundle.put(Converter.ID_KEY,
+                user.asVertex().getProperty(EntityType.ID_KEY));
         // We could convert the FramedNode back into a bundle here,
         // but let's instead just modify the initial data.
         String newName = TEST_USER_NAME + " with new stuff";
-        bundle.put("id", user.asVertex().getId());
-
-        Map<String, Object> data = (Map<String, Object>) bundle.get("data");
+        Map<String, Object> data = (Map<String, Object>) bundle
+                .get(Converter.DATA_KEY);
         data.put("name", newName);
 
         UserProfile changedUser = userViews.update(bundle, validUser);
@@ -165,7 +170,7 @@ public class ViewsTest extends AbstractFixtureTest {
     @Test
     public void testCreate() throws ValidationError, PermissionDenied,
             DeserializationError, IntegrityError {
-        Views<DocumentaryUnit> docViews = new Views<DocumentaryUnit>(graph,
+        CrudViews<DocumentaryUnit> docViews = new CrudViews<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
         Map<String, Object> bundle = getTestBundle();
         DocumentaryUnit unit = docViews.create(bundle, validUser);
@@ -183,7 +188,7 @@ public class ViewsTest extends AbstractFixtureTest {
     @Test(expected = PermissionDenied.class)
     public void testCreateAsUnauthorized() throws ValidationError,
             PermissionDenied, DeserializationError, IntegrityError {
-        Views<DocumentaryUnit> docViews = new Views<DocumentaryUnit>(graph,
+        CrudViews<DocumentaryUnit> docViews = new CrudViews<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
         Map<String, Object> bundle = getTestBundle();
         DocumentaryUnit unit = docViews.create(bundle, invalidUser);
@@ -197,11 +202,12 @@ public class ViewsTest extends AbstractFixtureTest {
      * @throws PermissionDenied
      * @throws DeserializationError
      * @throws IntegrityError
+     * @throws ItemNotFound 
      */
     @Test
     public void testCreateAsUnauthorizedAndThenGrant() throws ValidationError,
-            PermissionDenied, DeserializationError, IntegrityError {
-        Views<DocumentaryUnit> docViews = new Views<DocumentaryUnit>(graph,
+            PermissionDenied, DeserializationError, IntegrityError, ItemNotFound {
+        CrudViews<DocumentaryUnit> docViews = new CrudViews<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
         Map<String, Object> bundle = getTestBundle();
 
@@ -212,9 +218,9 @@ public class ViewsTest extends AbstractFixtureTest {
         } catch (PermissionDenied e) {
             // We expected that permission denied... now explicitely add
             // permissions.
-            PermissionGrantTarget target = helper.getTestFrame(
-                    "documentaryUnitType", PermissionGrantTarget.class);
-            Permission perm = helper.getTestFrame("permCreate",
+            PermissionGrantTarget target = manager.getFrame(
+                    "documentaryUnit", PermissionGrantTarget.class);
+            Permission perm = manager.getFrame("create",
                     Permission.class);
             new AclManager(graph).grantPermissions(invalidUser, target, perm);
             DocumentaryUnit unit = docViews.create(bundle, invalidUser);
@@ -229,17 +235,17 @@ public class ViewsTest extends AbstractFixtureTest {
      * @throws PermissionDenied
      * @throws DeserializationError
      * @throws IntegrityError
+     * @throws ItemNotFound 
      */
     @Test
     public void testCreateWithScope() throws ValidationError, PermissionDenied,
-            DeserializationError, IntegrityError {
-        Views<DocumentaryUnit> docViews = new ActionViews<DocumentaryUnit>(graph,
-                DocumentaryUnit.class);
+            DeserializationError, IntegrityError, ItemNotFound {
+        Crud<DocumentaryUnit> docViews = new LoggingCrudViews<DocumentaryUnit>(
+                graph, DocumentaryUnit.class, manager.getFrame("r1",
+                        Agent.class));
         Map<String, Object> bundle = getTestBundle();
         // In the fixtures, 'reto' should have a grant for 'CREATE'
         // scoped to the 'r1' repository.
-        Agent scope = helper.getTestFrame("r1", Agent.class);
-        docViews.setScope(scope);
         DocumentaryUnit unit = docViews.create(bundle, invalidUser);
         assertEquals(TEST_COLLECTION_NAME, unit.getName());
     }
@@ -255,7 +261,7 @@ public class ViewsTest extends AbstractFixtureTest {
     @Test
     public void testUserCreate() throws ValidationError, PermissionDenied,
             DeserializationError, IntegrityError {
-        Views<UserProfile> userViews = new Views<UserProfile>(graph,
+        CrudViews<UserProfile> userViews = new CrudViews<UserProfile>(graph,
                 UserProfile.class);
         Map<String, Object> bundle = getTestUserBundle();
         UserProfile user = userViews.create(bundle, validUser);
@@ -273,7 +279,7 @@ public class ViewsTest extends AbstractFixtureTest {
     @Test
     public void testGroupCreate() throws ValidationError, PermissionDenied,
             DeserializationError, IntegrityError {
-        Views<Group> groupViews = new Views<Group>(graph, Group.class);
+        CrudViews<Group> groupViews = new CrudViews<Group>(graph, Group.class);
         Map<String, Object> bundle = getTestGroupBundle();
         Group group = groupViews.create(bundle, validUser);
         assertEquals(TEST_GROUP_NAME, group.getName());
@@ -290,7 +296,7 @@ public class ViewsTest extends AbstractFixtureTest {
     @Test(expected = ValidationError.class)
     public void testCreateWithError() throws ValidationError, PermissionDenied,
             DeserializationError, IntegrityError {
-        Views<DocumentaryUnit> docViews = new Views<DocumentaryUnit>(graph,
+        CrudViews<DocumentaryUnit> docViews = new CrudViews<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
         Map<String, Object> bundle = getTestBundle();
         Map<String, Object> data = (Map<String, Object>) bundle.get("data");
@@ -312,7 +318,7 @@ public class ViewsTest extends AbstractFixtureTest {
     @Test(expected = DeserializationError.class)
     public void testCreateWithDeserialisationError() throws ValidationError,
             PermissionDenied, DeserializationError, IntegrityError {
-        Views<DocumentaryUnit> docViews = new Views<DocumentaryUnit>(graph,
+        CrudViews<DocumentaryUnit> docViews = new CrudViews<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
         Map<String, Object> bundle = getTestBundle();
         bundle.remove("data");
@@ -334,13 +340,14 @@ public class ViewsTest extends AbstractFixtureTest {
     @Test
     public void testDelete() throws PermissionDenied, ValidationError,
             SerializationError {
-        Views<DocumentaryUnit> docViews = new Views<DocumentaryUnit>(graph,
+        CrudViews<DocumentaryUnit> docViews = new CrudViews<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
         Integer shouldDelete = 1;
 
         // FIXME: Surely there's a better way of doing this???
         Iterator<DatePeriod> dateIter = item.getDatePeriods().iterator();
-        Iterator<Description> descIter = item.getDescriptions().iterator();
+        Iterator<DocumentDescription> descIter = item.getDescriptions()
+                .iterator();
         for (; dateIter.hasNext(); shouldDelete++)
             dateIter.next();
         for (; descIter.hasNext(); shouldDelete++)

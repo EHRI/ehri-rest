@@ -33,6 +33,7 @@ import org.apache.commons.lang3.StringUtils;
  * GrapgDb names. neo4j Node => Vertex neo4j Relationship => Edge
  * 
  */
+@Deprecated
 public class GraphHelpers {
     public GraphHelpers(GraphDatabaseService g) {
         graph = new Neo4jGraph(g);
@@ -233,13 +234,13 @@ public class GraphHelpers {
      * @param data
      * @throws IntegrityError
      */
-    private void checkUniqueness(Index<Vertex> index, List<String> uniqueKeys,
+    public void checkUniqueness(Index<Vertex> index, List<String> uniqueKeys,
             Map<String, Object> data, Vertex current) throws IntegrityError {
         if (uniqueKeys != null && uniqueKeys.size() != 0) {
             Map<String, String> clashes = new HashMap<String, String>();
             for (String ukey : uniqueKeys) {
                 String uval = (String) data.get(ukey);
-                if (index.count(ukey, uval) > 0) {
+                if (uval != null && index.count(ukey, uval) > 0) {
                     CloseableIterable<Vertex> query = index.get(ukey, uval);
                     try {
                         Vertex other = query.iterator().next();
@@ -495,7 +496,7 @@ public class GraphHelpers {
      * @param data
      *            The properties
      */
-    private <T extends Element> void replaceProperties(Index<T> index, T c,
+    public <T extends Element> void replaceProperties(Index<T> index, T c,
             Map<String, Object> data, List<String> keys) {
         // remove 'old' properties
         for (String key : c.getPropertyKeys()) {

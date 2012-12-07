@@ -16,6 +16,7 @@ import com.tinkerpop.frames.VertexFrame;
 
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.SerializationError;
+import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.utils.ClassUtils;
@@ -32,19 +33,28 @@ import org.codehaus.jackson.map.ObjectWriter;
  * @author michaelb
  * 
  */
-public class Converter {
+public final class Converter {
+
+    public static final int DEFAULT_TRAVERSALS = 5;
+
+    /**
+     * Constant definitions
+     */
+    public static final String ID_KEY = "id";
+    public static final String TYPE_KEY = "type";
+    public static final String DATA_KEY = "data";
+    public static final String REL_KEY = "relationships";
 
     /**
      * Lookup of entityType keys against their annotated class.
      */
-    private Map<String, Class<? extends VertexFrame>> classes;
-    private int maxTraversals = 5;
+    private final int maxTraversals;
 
     /**
      * Constructor.
      */
     public Converter() {
-        classes = ClassUtils.getEntityClasses();
+        this(DEFAULT_TRAVERSALS);
     }
 
     /**
@@ -53,7 +63,6 @@ public class Converter {
      * @param depth
      */
     public Converter(int depth) {
-        super();
         this.maxTraversals = depth;
     }
 
@@ -64,8 +73,8 @@ public class Converter {
      * @return
      * @throws SerializationError
      */
-    public <T extends VertexFrame> Map<String, Object> vertexFrameToData(
-            VertexFrame item) throws SerializationError {
+    public <T extends VertexFrame> Map<String, Object> vertexFrameToData(T item)
+            throws SerializationError {
         return bundleToData(vertexFrameToBundle(item));
     }
 
@@ -80,8 +89,7 @@ public class Converter {
      * @throws DeserializationError
      */
     @SuppressWarnings("unchecked")
-    public <T extends VertexFrame> EntityBundle<T> jsonToBundle(String json)
-            throws DeserializationError {
+    public Bundle jsonToBundle(String json) throws DeserializationError {
         ObjectMapper mapper = new ObjectMapper();
         try {
             return dataToBundle(mapper.readValue(json, Map.class));
@@ -97,8 +105,7 @@ public class Converter {
      * @return
      * @throws SerializationError
      */
-    public <T extends VertexFrame> String vertexFrameToJson(VertexFrame item)
-            throws SerializationError {
+    public <T extends VertexFrame> String vertexFrameToJson(T item) throws SerializationError {
         return bundleToJson(vertexFrameToBundle(item));
     }
 
@@ -110,14 +117,14 @@ public class Converter {
      * @throws SerializationError
      * 
      */
-    public <T extends VertexFrame> String bundleToJson(EntityBundle<T> bundle)
-            throws SerializationError {
+    public String bundleToJson(Bundle bundle) throws SerializationError {
         Map<String, Object> data = bundleToData(bundle);
         try {
             ObjectMapper mapper = new ObjectMapper();
             // Note: defaultPrettyPrintWriter has been replaced by
             // writerWithDefaultPrettyPrinter in newer versions of
             // Jackson, though not the one available in Neo4j.
+            @SuppressWarnings("deprecation")
             ObjectWriter writer = mapper.defaultPrettyPrintingWriter();
             return writer.writeValueAsString(data);
         } catch (Exception e) {
@@ -134,26 +141,23 @@ public class Converter {
      * @throws DeserializationError
      */
     @SuppressWarnings("unchecked")
-    public <T extends VertexFrame> EntityBundle<T> dataToBundle(
-            Map<String, Object> data) throws DeserializationError {
+    public Bundle dataToBundle(Map<String, Object> data)
+            throws DeserializationError {
         try {
-            Object id = data.get("id");
-            Map<String, Object> props = (Map<String, Object>) data.get("data");
-            if (props == null)
-                throw new DeserializationError("No item data map found");
-            String isa = (String) props.get(EntityType.KEY);
+            String id = (String) data.get(ID_KEY);
+            EntityClass isa = EntityClass.withName((String) data
+                    .get(TYPE_KEY));
             if (isa == null)
                 throw new DeserializationError(String.format(
-                        "No '%s' attribute found in item data", EntityType.KEY));
-            Class<T> cls = (Class<T>) classes.get(isa);
-            if (cls == null)
-                throw new DeserializationError(String.format(
-                        "No class found for type %s type: '%s'",
-                        EntityType.KEY, isa));
+                        "No '%s' attribute found in item data", TYPE_KEY));
+            Map<String, Object> props = (Map<String, Object>) data
+                    .get(DATA_KEY);
+            if (props == null)
+                throw new DeserializationError("No item data map found");
             MultiValueMap relationbundles = new MultiValueMap();
 
             Map<String, List<Map<String, Object>>> relations = (Map<String, List<Map<String, Object>>>) data
-                    .get("relationships");
+                    .get(REL_KEY);
             if (relations != null) {
                 for (Entry<String, List<Map<String, Object>>> entry : relations
                         .entrySet()) {
@@ -163,7 +167,7 @@ public class Converter {
                 }
             }
 
-            return new EntityBundle<T>(id, props, cls, relationbundles);
+            return new Bundle(id, props, isa.getEntityClass(), relationbundles);
 
         } catch (ClassCastException e) {
             throw new DeserializationError("Error deserializing data", e);
@@ -176,23 +180,24 @@ public class Converter {
      * @param bundle
      * @return
      */
-    public Map<String, Object> bundleToData(EntityBundle<?> bundle) {
+    public Map<String, Object> bundleToData(Bundle bundle) {
         Map<String, Object> data = new HashMap<String, Object>();
-        data.put("id", bundle.getId());
-        data.put("data", bundle.getData());
+        data.put(ID_KEY, bundle.getId());
+        data.put(TYPE_KEY, bundle.getType().getName());
+        data.put(DATA_KEY, bundle.getData());
 
         Map<String, List<Map<String, Object>>> relations = new HashMap<String, List<Map<String, Object>>>();
         for (Object key : bundle.getRelations().keySet()) {
             List<Map<String, Object>> rels = new ArrayList<Map<String, Object>>();
             @SuppressWarnings("unchecked")
-            Collection<EntityBundle<?>> collection = bundle.getRelations()
+            Collection<Bundle> collection = bundle.getRelations()
                     .getCollection(key);
-            for (EntityBundle<?> subbundle : collection) {
+            for (Bundle subbundle : collection) {
                 rels.add(bundleToData(subbundle));
             }
             relations.put((String) key, rels);
         }
-        data.put("relationships", relations);
+        data.put(REL_KEY, relations);
         return data;
     }
 
@@ -204,8 +209,8 @@ public class Converter {
      * @return
      * @throws SerializationError
      */
-    public <T extends VertexFrame> EntityBundle<T> vertexFrameToBundle(
-            VertexFrame item) throws SerializationError {
+    public <T extends VertexFrame> Bundle vertexFrameToBundle(T item)
+            throws SerializationError {
         return vertexFrameToBundle(item, maxTraversals);
     }
 
@@ -218,26 +223,19 @@ public class Converter {
      * @return
      * @throws SerializationError
      */
-    @SuppressWarnings("unchecked")
-    public <T extends VertexFrame> EntityBundle<T> vertexFrameToBundle(
-            VertexFrame item, int depth) throws SerializationError {
-        String isa = (String) item.asVertex().getProperty(EntityType.KEY);
-        if (isa == null)
-            throw new SerializationError(String.format(
-                    "No %s key found in Vertex Properties to denote its type.",
-                    EntityType.KEY));
-        Class<? extends VertexFrame> cls = classes.get(isa);
-        if (cls == null)
-            throw new SerializationError(String.format(
-                    "No entity found for %s type '%s'", EntityType.KEY, isa));
-
-        MultiValueMap relations = getRelationData(item, depth, cls);
-        return new EntityBundle<T>((Long) item.asVertex().getId(),
-                getVertexData(item.asVertex()), (Class<T>) cls, relations);
+    public <T extends VertexFrame> Bundle vertexFrameToBundle(T item, int depth)
+            throws SerializationError {
+        String id = (String) item.asVertex().getProperty(EntityType.ID_KEY);
+        EntityClass isa = EntityClass.withName((String) item.asVertex()
+                .getProperty(EntityType.TYPE_KEY));
+        MultiValueMap relations = getRelationData(item, depth,
+                isa.getEntityClass());
+        return new Bundle(id, getVertexData(item.asVertex()),
+                isa.getEntityClass(), relations);
     }
 
-    private MultiValueMap getRelationData(VertexFrame item, int depth,
-            Class<? extends VertexFrame> cls) {
+    private <T extends VertexFrame> MultiValueMap getRelationData(T item, int depth,
+            Class<?> cls) {
         MultiValueMap relations = new MultiValueMap();
         if (depth > 0) {
             Map<String, Method> fetchMethods = ClassUtils.getFetchMethods(cls);
@@ -247,14 +245,23 @@ public class Converter {
                 // maxDepth parameter and reduce it for every traversal.
                 // However the @Fetch annotation can also specify a non-default
                 // depth, so we need to determine whatever is lower - the
-                // current
-                // traversal count, or the annotation's count.
+                // current traversal count, or the annotation's count.
                 Method method = entry.getValue();
                 int nextDepth = Math.min(depth,
                         method.getAnnotation(Fetch.class).depth()) - 1;
 
                 try {
-                    Object result = method.invoke(item);
+                    Object result;
+                    try {
+                        result = method.invoke(item);
+                    } catch (IllegalArgumentException e) {
+                        String message = String
+                                .format("When serializing a bundle, a method was called on an item it did not expect. Method name: %s, item class: %s",
+                                        method.getName(),
+                                        item.asVertex().getProperty(
+                                                EntityType.TYPE_KEY));
+                        throw new RuntimeException(message, e);
+                    }
                     // The result of one of these fetchMethods should either be
                     // a single VertexFrame, or a Iterable<VertexFrame>.
                     if (result instanceof Iterable<?>) {
@@ -274,6 +281,7 @@ public class Converter {
                                             nextDepth));
                     }
                 } catch (Exception e) {
+                    e.printStackTrace();
                     throw new RuntimeException(
                             "Unexpected error serializing VertexFrame", e);
                 }
@@ -289,6 +297,9 @@ public class Converter {
         Map<String, Object> data = new HashMap<String, Object>();
         for (String key : item.getPropertyKeys()) {
             data.put(key, item.getProperty(key));
+            if (!(key.equals(EntityType.ID_KEY) || key
+                    .equals(EntityType.TYPE_KEY)))
+                data.put(key, item.getProperty(key));
         }
         return data;
     }

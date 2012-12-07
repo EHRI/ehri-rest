@@ -1,47 +1,43 @@
 package eu.ehri.project.views;
 
-import java.util.NoSuchElementException;
-
-import com.tinkerpop.blueprints.CloseableIterable;
-import com.tinkerpop.blueprints.Index;
-import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
 import eu.ehri.project.acl.AclManager;
-import eu.ehri.project.acl.PermissionTypes;
+import eu.ehri.project.acl.PermissionType;
 import eu.ehri.project.acl.SystemScope;
+import eu.ehri.project.core.GraphManager;
+import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.ContentType;
+import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Permission;
 import eu.ehri.project.models.PermissionGrant;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.utils.ClassUtils;
-import eu.ehri.project.persistance.Converter;
 
-abstract class AbstractViews<E extends AccessibleEntity> {
+public final class ViewHelper {
 
-    protected final FramedGraph<Neo4jGraph> graph;
-    protected final Class<E> cls;
-    protected final Converter converter = new Converter();
-    protected final AclManager acl;
-    /**
-     * Default scope for Permission operations is the system, but this can be
-     * overridden.
-     */
-    protected PermissionScope scope = new SystemScope();
+    private final FramedGraph<Neo4jGraph> graph;
+    private final Class<?> cls;
+    private final PermissionScope scope;
+    private final AclManager acl;
+    private final GraphManager manager;
 
-    /**
-     * @param graph
-     * @param cls
-     */
-    public AbstractViews(FramedGraph<Neo4jGraph> graph, Class<E> cls) {
+    public ViewHelper(FramedGraph<Neo4jGraph> graph, Class<?> cls) {
+        this(graph, cls, SystemScope.getInstance());
+    }
+
+    public ViewHelper(FramedGraph<Neo4jGraph> graph, Class<?> cls,
+            PermissionScope scope) {
         this.graph = graph;
         this.cls = cls;
         this.acl = new AclManager(graph);
+        this.scope = scope;
+        this.manager = GraphManagerFactory.getInstance(graph);
     }
 
     /**
@@ -104,7 +100,7 @@ abstract class AbstractViews<E extends AccessibleEntity> {
      * @param user
      * @throws PermissionDenied
      */
-    protected void checkReadAccess(AccessibleEntity entity, Accessor user)
+    public void checkReadAccess(AccessibleEntity entity, Accessor user)
             throws PermissionDenied {
         if (!acl.getAccessControl(entity, user))
             throw new PermissionDenied(user, entity);
@@ -120,7 +116,7 @@ abstract class AbstractViews<E extends AccessibleEntity> {
     protected void checkWriteAccess(AccessibleEntity entity, Accessor accessor)
             throws PermissionDenied {
         checkEntityPermission(entity, accessor,
-                getPermission(PermissionTypes.UPDATE));
+                getPermission(PermissionType.UPDATE));
     }
 
     /**
@@ -129,14 +125,13 @@ abstract class AbstractViews<E extends AccessibleEntity> {
      * @param typeName
      * @return
      */
-    public ContentType getContentType(String typeName) {
+    public ContentType getContentType(EntityClass type) {
         try {
-            return graph
-                    .getVertices(AccessibleEntity.IDENTIFIER_KEY, typeName,
-                            ContentType.class).iterator().next();
-        } catch (NoSuchElementException e) {
-            throw new RuntimeException(String.format(
-                    "No content type node found for type: '%s'", typeName), e);
+            return manager.getFrame(type.getName(), ContentType.class);
+        } catch (ItemNotFound e) {
+            throw new RuntimeException(
+                    String.format("No content type node found for type: '%s'",
+                            type.getName()), e);
         }
     }
 
@@ -149,21 +144,9 @@ abstract class AbstractViews<E extends AccessibleEntity> {
      * @return
      * @throws ItemNotFound
      */
-    public <T> T getEntity(String typeName, String name, Class<T> cls)
+    public <T> T getEntity(EntityClass type, String name, Class<T> cls)
             throws ItemNotFound {
-        // FIXME: Ensure index isn't null
-        Index<Vertex> index = graph.getBaseGraph().getIndex(typeName,
-                Vertex.class);
-
-        CloseableIterable<Vertex> query = index.get(
-                AccessibleEntity.IDENTIFIER_KEY, name);
-        try {
-            return graph.frame(query.iterator().next(), cls);
-        } catch (NoSuchElementException e) {
-            throw new ItemNotFound(AccessibleEntity.IDENTIFIER_KEY, name);
-        } finally {
-            query.close();
-        }
+        return manager.getFrame(name, type, cls);
     }
 
     /**
@@ -172,14 +155,13 @@ abstract class AbstractViews<E extends AccessibleEntity> {
      * @param permissionId
      * @return
      */
-    public Permission getPermission(String permissionId) {
+    public Permission getPermission(PermissionType perm) {
         try {
-            return graph
-                    .getVertices(AccessibleEntity.IDENTIFIER_KEY, permissionId,
-                            Permission.class).iterator().next();
-        } catch (NoSuchElementException e) {
+            return manager.getFrame(perm.getName(), EntityClass.PERMISSION,
+                    Permission.class);
+        } catch (ItemNotFound e) {
             throw new RuntimeException(String.format(
-                    "No permission found for name: '%s'", permissionId), e);
+                    "No permission found for name: '%s'", perm.getName()), e);
         }
     }
 
@@ -191,7 +173,7 @@ abstract class AbstractViews<E extends AccessibleEntity> {
      * 
      * @param scope
      */
-    public void setScope(PermissionScope scope) {
-        this.scope = scope;
+    public ViewHelper setScope(PermissionScope scope) {
+        return new ViewHelper(graph, cls, scope);
     }
 }

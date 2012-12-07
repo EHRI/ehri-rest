@@ -1,9 +1,6 @@
-package eu.ehri.project.models;
+package eu.ehri.project.definitions;
 
-/*
- * Set of entity types. TODO: Perhaps convert this to an enum?
- */
-public class EntityTypes {
+public class Entities {
     public static final String ACTION = "action";
     public static final String AGENT = "agent";
     public static final String AUTHORITY = "authority";
@@ -21,5 +18,6 @@ public class EntityTypes {
     public static final String PERMISSION = "permission";
     public static final String PERMISSION_GRANT = "permissionGrant";
     public static final String CONTENT_TYPE = "contentType";
+    public static final String REVISION = "revision";
     
 }

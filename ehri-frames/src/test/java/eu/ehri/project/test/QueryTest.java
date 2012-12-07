@@ -13,11 +13,10 @@ import eu.ehri.project.exceptions.IndexNotFoundException;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.DocumentaryUnit;
-import eu.ehri.project.models.EntityTypes;
-import eu.ehri.project.models.annotations.EntityType;
+import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.views.Query;
+import eu.ehri.project.views.impl.Query;
 
 public class QueryTest extends AbstractFixtureTest {
 
@@ -30,8 +29,8 @@ public class QueryTest extends AbstractFixtureTest {
         assertTrue(new AclManager(graph).belongsToAdmin(validUser));
 
         // Get the total number of DocumentaryUnits the old-fashioned way
-        Iterable<Vertex> allDocs = graph.getVertices(EntityType.KEY,
-                EntityTypes.DOCUMENTARY_UNIT);
+        Iterable<Vertex> allDocs = manager
+                .getVertices(EntityClass.DOCUMENTARY_UNIT);
 
         // And the listing the ACL way...
         List<DocumentaryUnit> list = toList(query.list(validUser));
@@ -58,8 +57,8 @@ public class QueryTest extends AbstractFixtureTest {
         assertTrue(new AclManager(graph).belongsToAdmin(validUser));
 
         // Get the total number of DocumentaryUnits the old-fashioned way
-        Iterable<Vertex> allDocs = graph.getVertices(EntityType.KEY,
-                EntityTypes.DOCUMENTARY_UNIT);
+        Iterable<Vertex> allDocs = manager
+                .getVertices(EntityClass.DOCUMENTARY_UNIT);
 
         // Test the limit function
         Query.Page<DocumentaryUnit> page = query.setLimit(1).page(validUser);
@@ -68,16 +67,17 @@ public class QueryTest extends AbstractFixtureTest {
         assertEquals(1, list.size());
         assertEquals(toList(allDocs).size(), page.getCount());
     }
-    
+
     @Test
-    public void testUserCannotListPrivate() throws IndexNotFoundException {
+    public void testUserCannotListPrivate() throws IndexNotFoundException,
+            ItemNotFound {
         Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
 
         // Check we're not admin
-        Accessor accessor = helper.getTestFrame("reto", Accessor.class);
-        DocumentaryUnit cantRead = helper.getTestFrame("c1",
-                DocumentaryUnit.class);
+        Accessor accessor = manager.getFrame("reto", Accessor.class);
+        DocumentaryUnit cantRead = manager
+                .getFrame("c1", DocumentaryUnit.class);
         assertFalse(new AclManager(graph).belongsToAdmin(accessor));
 
         List<DocumentaryUnit> list = toList(query.list(accessor));
@@ -103,8 +103,8 @@ public class QueryTest extends AbstractFixtureTest {
                 DocumentaryUnit.class);
 
         // Get the total number of DocumentaryUnits the old-fashioned way
-        Iterable<Vertex> allDocs = graph.getVertices(EntityType.KEY,
-                EntityTypes.DOCUMENTARY_UNIT);
+        Iterable<Vertex> allDocs = manager
+                .getVertices(EntityClass.DOCUMENTARY_UNIT);
 
         // Query for document identifier starting with 'c'.
         // In the fixtures this is ALL docs
@@ -147,7 +147,7 @@ public class QueryTest extends AbstractFixtureTest {
     @Test(expected = PermissionDenied.class)
     public void testGetPermissionDenied() throws PermissionDenied,
             ItemNotFound, IndexNotFoundException {
-        Accessor accessor = helper.getTestFrame("reto", Accessor.class);
+        Accessor accessor = manager.getFrame("reto", Accessor.class);
         Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
         query.get(AccessibleEntity.IDENTIFIER_KEY, "c1", accessor);

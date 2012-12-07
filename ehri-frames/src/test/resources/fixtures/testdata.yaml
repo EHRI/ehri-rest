@@ -1,0 +1,358 @@
+#
+# This file provides a standard set of test fixtures for the EHRI collection registry
+# database.
+#
+
+# NIOD. NIOD belongs to admin, so everyone who belongs
+# to the NIOD group also belongs to admin by extension.
+- id: niod
+  type: group
+  data:
+    identifier: niod-group
+    name: NIOD
+  relationships:
+    belongsTo:
+      - admin
+      
+- id: kcl
+  type: group
+  data:
+    identifier: kcl-group
+    name: KCL
+    
+- id: dans
+  type: group
+  data:
+    identifier: dans-group
+    name: DANS    
+    
+- id: soma
+  type: group
+  data:
+    identifier: soma-group
+    name: CEGES-SOMA
+
+--- # Users Mike, Tim, Linda, and Reto
+
+# Mike is a member of the KCL group, but he is ALSO a member of Admin
+# separately
+- id: mike
+  type: userProfile
+  data:
+    identifier: mike
+    name: Mike
+  relationships:
+    belongsTo:
+      - admin
+      - kcl
+    hasAnnotation:
+      - ann1
+
+# Reto is a member of the KCL group
+# separately
+- id: reto
+  type: userProfile
+  data:
+    identifier: reto
+    name: Reto
+  relationships:
+    belongsTo:
+      - kcl
+
+# Tim is a member of NIOD, which is itself a member of Admin, so Tim
+# belongs to Admin by extension
+- id: tim
+  type: userProfile
+  data:
+    identifier: tim
+    name: Tim
+  relationships:
+    belongsTo:
+      - niod
+    hasAnnotation:
+      - ann2
+      
+# Linda belongs to DANS
+- id: linda
+  type: userProfile
+  data:
+    identifier: linda
+    name: Linda
+  relationships:
+    belongsTo:
+      - dans
+
+# Veerle is a member of CEGES-SOMA, and also a member of Admin
+- id: veerle
+  type: userProfile
+  data:
+    identifier: veerle
+    name: Veerle
+  relationships:
+    belongsTo:
+      - soma
+      - admin
+
+# Institutions
+- id: r1 # should be renamed niod
+  type: agent
+  data:
+    identifier: r1
+    name: Repository 1
+  relationships:
+    describes:
+      - id: rd1
+        type: agentDescription
+        data:
+          identifier: niod-en
+          name: NIOD Description
+          languageCode: en
+        relationships:
+          hasAddress:
+            - id: ar1
+              type: address
+              data:
+                name: "An Address"
+                streetAddress: 1 Some St.
+                city: Amsterdam
+
+- id: r2 # should be named kcl
+  type: agent
+  data:
+    identifier: r2
+    name: King's College London
+  relationships:
+    describes:
+      - id: rd2
+        type: agentDescription
+        data:
+          identifier: kcl-en
+          name: KCL Description
+          languageCode: en
+        relationships:
+          hasAddress:
+            - id: ar2
+              type: address
+              data:
+                name: "An Address"
+                streetAddress: Strand
+                city: London
+                         
+- id: r3 # should be dans
+  type: agent
+  data:
+    identifier: r3
+    name: DANS
+  relationships:
+    describes:
+      - id: rd3
+        type: agentDescription
+        data:
+          identifier: dans-en
+          name: DANS Description
+          languageCode: en
+        relationships:
+          hasAddress:
+            - id: ar3
+              type: address
+              data:
+                name: "An Address"
+                city: The Hague
+
+- id: r4 # should be soma
+  type: agent
+  data:
+    identifier: r4
+    name: CEGES SOMA
+  relationships:
+    describes:
+      - id: rd4
+        type: agentDescription
+        data:
+          identifier: soma-en
+          name: SOMA Description
+          languageCode: en
+        relationships:
+          hasAddress:
+            - id: ar4
+              type: address
+              data:
+                name: "An Address"
+                city: Brussels
+      
+      
+--- # Collections
+
+# C1 is a top-level documentary unit which, held by NIOD, which contains
+# child items.
+- id: c1
+  type: documentaryUnit
+  data:
+    identifier: c1
+    name: Collection 1
+  relationships:
+    describes:
+      - id: cd1
+        type: documentDescription
+        data:
+          identifier: c1-desc
+          title: Documentary Unit 1
+          languageCode: en
+    hasDate:
+      - id: c1-dp1
+        type: datePeriod
+        data:
+          startDate: !!str 1939-01-01
+          endDate: !!str 1945-01-01
+      - id: c1-dp2
+        type: datePeriod
+        data:
+          startDate: !!str 1939-01-01
+          endDate: !!str 1945-01-01
+    heldBy: r1
+    access:
+      - mike
+      - admin
+
+# C2 is also held by NIOD, and is a child item of C1
+- id: c2
+  type: documentaryUnit
+  data:
+    identifier: c2
+    name: Collection 2
+  relationships:
+    describes:
+      - id: cd2
+        type: documentDescription
+        data:
+          identifier: c2-desc
+          title: Documentary Unit 2
+          languageCode: en
+    hasDate:
+      - id: c2-dp1
+        type: datePeriod
+        data:
+          startDate: !!str 1939-01-01
+          endDate: !!str 1945-01-01
+    heldBy: r1
+    childOf: c1
+    access:
+      - tim
+      - admin
+
+# C3 is also held by NIOD, and is a child item of C2
+- id: c3
+  type: documentaryUnit
+  data:
+    identifier: c3
+    name: Collection 3
+  relationships:
+    describes:
+      - id: cd3
+        type: documentDescription
+        data:
+          identifier: c3-desc
+          title: Documentary Unit 3
+          languageCode: en
+    hasDate:
+      - id: c3-dp1
+        type: datePeriod
+        data:
+          startDate: !!str 1939-01-01
+          endDate: !!str 1945-01-01
+    heldBy: r1
+    childOf: c2
+    access:
+      - tim
+
+# C4 is a standalone item
+- id: c4
+  type: documentaryUnit
+  data:
+    identifier: c4
+    name: Collection 4
+  relationships:
+    describes:
+      - id: cd4
+        type: documentDescription
+        data:
+          identifier: c4-desc
+          title: Documentary Unit 4
+          languageCode: en
+    hasDate:
+      - id: c4-dp1
+        type: datePeriod
+        data:
+          startDate: !!str 1939-01-01
+          endDate: !!str 1945-01-01
+    heldBy: r1
+    
+--- # Authorities
+- id: a1
+  type: authority
+  data:
+    identifier: a1
+    typeOfEntity: person
+  relationships:
+    describes:
+      - id: ad1
+        type: authorityDescription
+        data:
+          title: An Authority 1
+          languageCode: en
+    created: c1
+    
+- id: a2
+  type: authority
+  data:
+    identifier: a2
+    typeOfEntity: person
+  relationships:
+    describes:
+      - id: ad2
+        type: authorityDescription
+        data:
+          title: An Authority 2
+          languageCode: en
+    mentionedIn: c1
+    
+
+--- # Annotations
+- id: ann1
+  type: annotation
+  data:
+    identifier: ann1
+    body: Test Annotation
+  relationships:
+    annotates: c1
+    
+- id: ann2
+  type: annotation
+  data:
+    identifier: ann2
+    body: Test Annotation of Annotation
+  relationships:
+    annotates: ann1
+
+--- # Permission grants
+
+# Allow user Reto to create doc units within r1 scope
+- id: retoKclWriteGrant
+  type: permissionGrant
+  relationships:
+    hasPermission: create
+    hasTarget: documentaryUnit
+    hasScope: r1 # need to change this so reto belongs to kcl/r2
+    hasAccessor: reto
+    hasGrantee: mike
+    
+# Allow user Linda to create doc units anywhere
+- id: lindaGlobalWriteGrant
+  type: permissionGrant
+  relationships:
+    hasPermission: create
+    hasTarget: documentaryUnit
+    hasAccessor: linda
+    hasGrantee: mike
+
+    

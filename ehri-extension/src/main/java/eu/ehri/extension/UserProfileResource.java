@@ -18,18 +18,18 @@ import javax.ws.rs.core.StreamingOutput;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import eu.ehri.extension.errors.BadRequester;
+import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.models.EntityTypes;
 import eu.ehri.project.models.UserProfile;
 
 /**
  * Provides a RESTfull interface for the UserProfile.
  */
-@Path(EntityTypes.USER_PROFILE)
+@Path(Entities.USER_PROFILE)
 public class UserProfileResource extends EhriNeo4jFramedResource<UserProfile> {
 
     public UserProfileResource(@Context GraphDatabaseService database) {

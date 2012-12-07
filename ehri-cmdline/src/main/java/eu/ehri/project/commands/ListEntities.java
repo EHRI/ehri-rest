@@ -1,17 +1,13 @@
 package eu.ehri.project.commands;
 
-import java.util.Map;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
-import com.tinkerpop.blueprints.CloseableIterable;
-import com.tinkerpop.blueprints.Index;
-import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
-import com.tinkerpop.frames.VertexFrame;
-
+import eu.ehri.project.core.GraphManager;
+import eu.ehri.project.core.GraphManagerFactory;
+import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.utils.ClassUtils;
 
 /**
  * Import EAD from the command line...
@@ -52,29 +48,16 @@ public class ListEntities extends BaseCommand implements Command {
         if (cmdLine.getArgList().size() < 1)
             throw new RuntimeException(getHelp());
 
-        String type = cmdLine.getArgs()[0];
-        Map<String, Class<? extends VertexFrame>> classes = ClassUtils
-                .getEntityClasses();
-
-        Class<?> cls = classes.get(type);
-        if (cls == null)
-            throw new RuntimeException("Unknown entity: " + type);
+        GraphManager manager = GraphManagerFactory.getInstance(graph);        
+        EntityClass type = EntityClass.withName(cmdLine.getArgs()[0]);
+        Class<?> cls = type.getEntityClass();
 
         if (!AccessibleEntity.class.isAssignableFrom(cls))
             throw new RuntimeException("Unknown accessible entity: " + type);
 
-        Index<Vertex> index = graph.getBaseGraph().getIndex(type, Vertex.class);
-        CloseableIterable<Vertex> query = index.query(
-                AccessibleEntity.IDENTIFIER_KEY, "*");
-        try {
-            for (AccessibleEntity acc : graph.frameVertices(query,
-                    AccessibleEntity.class)) {
-                System.out.println(acc.getIdentifier());
-            }
-        } finally {
-            query.close();
+        for (AccessibleEntity acc : manager.getFrames(type, AccessibleEntity.class)) {
+            System.out.println(manager.getId(acc));
         }
-        
         return 0;
     }
 }

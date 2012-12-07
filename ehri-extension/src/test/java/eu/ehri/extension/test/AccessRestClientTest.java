@@ -51,10 +51,10 @@ public class AccessRestClientTest extends BaseRestClientTest {
                 response.getStatus());
 
         // Set the form data
-        String accJson = "{\"userProfile\": [\"" + LIMITED_USER_NAME + "\"]}";
+        String accJson = "[\"" + LIMITED_USER_NAME + "\"]}";
 
         resource = client.resource(getExtensionEntryPointUri()
-                + "/access/documentaryUnit/c1");
+                + "/access/c1");
         response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)

@@ -2,8 +2,8 @@ package eu.ehri.project.views;
 
 import eu.ehri.project.models.base.Accessor;
 
-public interface IQuery<E> {
+public interface Search<E> {
     public Iterable<E> list(Accessor user);
-    public IQuery<E> setLimit(Integer limit);
-    public IQuery<E> setOffset(Integer offset);
+    public Search<E> setLimit(Integer limit);
+    public Search<E> setOffset(Integer offset);
 }

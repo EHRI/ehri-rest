@@ -1,28 +1,29 @@
 package eu.ehri.project.persistance;
 
-import java.lang.reflect.Method;
 import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.commons.collections.map.MultiValueMap;
 import org.neo4j.graphdb.Transaction;
 
-import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.Direction;
-import com.tinkerpop.blueprints.Index;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
-import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.frames.VertexFrame;
 
-import eu.ehri.project.core.GraphHelpers;
-import eu.ehri.project.exceptions.IndexNotFoundException;
+import eu.ehri.project.acl.SystemScope;
+import eu.ehri.project.core.GraphManager;
+import eu.ehri.project.core.GraphManagerFactory;
+import eu.ehri.project.exceptions.IdGenerationError;
 import eu.ehri.project.exceptions.IntegrityError;
+import eu.ehri.project.exceptions.ItemNotFound;
+import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.models.annotations.Dependent;
+import eu.ehri.project.models.annotations.EntityType;
+import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.utils.ClassUtils;
 
 /**
@@ -32,14 +33,31 @@ import eu.ehri.project.models.utils.ClassUtils;
  * 
  * @param <T>
  */
-public class BundleDAO<T extends VertexFrame> {
+public final class BundleDAO {
 
     private final FramedGraph<Neo4jGraph> graph;
-    private final GraphHelpers helpers;
+    private final PermissionScope scope;
+    private final GraphManager manager;
 
-    public BundleDAO(FramedGraph<Neo4jGraph> graph) {
+    /**
+     * Constructor with a given scope.
+     * 
+     * @param graph
+     * @param scope
+     */
+    public BundleDAO(FramedGraph<Neo4jGraph> graph, PermissionScope scope) {
         this.graph = graph;
-        this.helpers = new GraphHelpers(graph.getBaseGraph().getRawGraph());
+        this.scope = scope;
+        manager = GraphManagerFactory.getInstance(graph);
+    }
+
+    /**
+     * Constructor with system scope.
+     * 
+     * @param graph
+     */
+    public BundleDAO(FramedGraph<Neo4jGraph> graph) {
+        this(graph, SystemScope.getInstance());
     }
 
     /**
@@ -48,44 +66,39 @@ public class BundleDAO<T extends VertexFrame> {
      * @param bundle
      * @return
      * @throws ValidationError
-     * @throws IntegrityError 
+     * @throws IntegrityError
+     * @throws ItemNotFound
      */
-    public T update(EntityBundle<T> bundle) throws ValidationError, IntegrityError {
-        return graph.frame(updateInner(bundle), bundle.getBundleClass());
+    public <T extends VertexFrame> T update(Bundle bundle, Class<T> cls)
+            throws ValidationError, IntegrityError, ItemNotFound {
+        return graph.frame(updateInner(bundle), cls);
     }
 
     /**
-     * Entry-point for updating a bundle.
+     * Entry-point for creating a bundle.
      * 
      * @param bundle
      * @return
      * @throws ValidationError
-     * @throws IndexNotFoundException 
-     * @throws IntegrityError 
+     * @throws IntegrityError
      */
-    public T createOrUpdate(String key, String value, EntityBundle<T> bundle)
-        throws ValidationError, IndexNotFoundException, IntegrityError {
-        Index<Vertex> index = helpers.getIndex(bundle.getEntityType(),
-                Vertex.class);
-        if (index == null)
-            throw new ValidationError("Cannot find index or item type: "
-                    + bundle.getEntityType());
-        Vertex node = null;
-        CloseableIterable<Vertex> nodes = index.get(key, value);
-        try {
-            if (nodes.iterator().hasNext()) {
-                node = updateInner(bundle);
-            } else {
-                node = createInner(bundle);
-            }
-            return graph.frame(node, bundle.getBundleClass());
-        } finally {
-            nodes.close();
-        }
+    public <T extends VertexFrame> T create(Bundle bundle, Class<T> cls)
+            throws ValidationError, IntegrityError {
+        return graph.frame(createInner(bundle), cls);
     }
 
-    public T create(EntityBundle<T> bundle) throws ValidationError, IntegrityError {
-        return graph.frame(createInner(bundle), bundle.getBundleClass());
+    /**
+     * Entry point for creating or updating a bundle, depending on whether it
+     * has a supplied id.
+     * 
+     * @param bundle
+     * @return
+     * @throws ValidationError
+     * @throws IntegrityError
+     */
+    public <T extends VertexFrame> T createOrUpdate(Bundle bundle, Class<T> cls)
+            throws ValidationError, IntegrityError {
+        return graph.frame(createOrUpdateInner(bundle), cls);
     }
 
     /**
@@ -96,7 +109,7 @@ public class BundleDAO<T extends VertexFrame> {
      * @return
      * @throws ValidationError
      */
-    public Integer delete(EntityBundle<?> bundle) throws ValidationError {
+    public Integer delete(Bundle bundle) throws ValidationError {
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
             Integer count = deleteCount(bundle, 0);
@@ -112,88 +125,52 @@ public class BundleDAO<T extends VertexFrame> {
 
     // Helpers
 
-    /**
-     * Get the IDs of nodes that terminate a given relationship from a
-     * particular source node.
-     * 
-     * @param src
-     * @param direction
-     * @param label
-     * @return
-     */
-    private List<Long> getCurrentRelationships(final Vertex src,
-            Direction direction, String label) {
-        List<Long> out = new LinkedList<Long>();
-        for (Vertex end : src.getVertices(direction, label)) {
-            out.add((Long) end.getId());
-        }
-        return out;
-    }
-
-    private Integer deleteCount(EntityBundle<?> bundle, Integer count)
-            throws ValidationError {
+    private Integer deleteCount(Bundle bundle, Integer count)
+            throws ValidationError, ItemNotFound {
         Integer c = count;
         MultiValueMap fetch = bundle.getRelations();
-        List<String> dependents = ClassUtils.getDependentRelations(bundle
-                .getBundleClass());
+        Map<String, Direction> dependents = ClassUtils
+                .getDependentRelations(bundle.getBundleClass());
         for (Object key : fetch.keySet()) {
             for (Object obj : fetch.getCollection(key)) {
                 // FIXME: Make it so we don't typically do this check for
                 // Dependent relations
-                if (dependents.contains(key)) {
-                    EntityBundle<?> sub = (EntityBundle<?>) obj;
+                if (dependents.containsKey(key)) {
+                    Bundle sub = (Bundle) obj;
                     c = deleteCount(sub, c);
                 }
             }
         }
-        if (bundle.id != null) {            
-            try {
-                Index<Vertex> index = helpers.getIndex(bundle.getEntityType(),
-                        Vertex.class);
-                helpers.deleteVertex(index, bundle.id, bundle.getPropertyKeys());
-            } catch (IndexNotFoundException e) {
-                // If there's no index, we can do things the simple way...
-                graph.removeVertex(graph.getVertex(bundle.id));
-            }
-            c += 1;
-        }
+        manager.deleteVertex(bundle.getId());
+        c += 1;
         return c;
     }
 
     /**
-     * Get the direction of a given relationship between two FramedVertex
-     * classes.
+     * Insert or update an item depending on a) whether it has an ID, and b)
+     * whether it has an ID and already exists. If import mode is not enabled an
+     * error will be thrown.
      * 
-     * @param classA
-     * @param classB
-     * @param rel
+     * @param bundle
      * @return
+     * @throws ValidationError
+     * @throws IntegrityError
+     * @throws ItemNotFound
      */
-    private Direction getDirectionOfRelationship(
-            Class<? extends VertexFrame> classA,
-            Class<? extends VertexFrame> classB, String rel) {
-        for (Method method : classA.getMethods()) {
-            Dependent dep = method.getAnnotation(Dependent.class);
-            if (dep != null) {
-                Adjacency adj = method.getAnnotation(Adjacency.class);
-                if (adj != null && adj.label().equals(rel)) {
-                    return adj.direction();
-                }
+    private Vertex createOrUpdateInner(Bundle bundle) throws ValidationError,
+            IntegrityError {
+        if (bundle.getId() == null) {
+            return createInner(bundle);
+        } else {
+            try {
+                return manager.exists(bundle.getId()) ? updateInner(bundle)
+                        : createInner(bundle);
+            } catch (ItemNotFound e) {
+                throw new RuntimeException(
+                        "Create or update failed because ItemNotFound was thrown even though exists() was true",
+                        e);
             }
         }
-        // If we get here then something has gone badly wrong, because the
-        // correct direction could not be found. Maybe it's better to just
-        // ignore saving the dependency in the long run?
-        throw new RuntimeException(
-                String.format(
-                        "Unable to find the direction of relationship between dependent classes with relationship '%s': '%s', '%s'",
-                        rel, classA.getName(), classB.getName()));
-    }
-
-    private Vertex insertOrUpdate(EntityBundle<T> bundle)
-            throws ValidationError, IntegrityError {
-        return bundle.getId() == null ? createInner(bundle)
-                : updateInner(bundle);
     }
 
     /**
@@ -202,16 +179,27 @@ public class BundleDAO<T extends VertexFrame> {
      * @param bundle
      * @return
      * @throws ValidationError
-     * @throws IntegrityError 
+     * @throws IntegrityError
+     * @throws ItemNotFound
      */
-    private Vertex createInner(EntityBundle<T> bundle) throws ValidationError, IntegrityError {        
-        bundle.validateForInsert();
-        Index<Vertex> index = helpers.getOrCreateIndex(bundle.getEntityType(),
-                Vertex.class);
-        Vertex node = helpers.createIndexedVertex(bundle.getData(), index,
-                bundle.getPropertyKeys(), bundle.getUniquePropertyKeys());
-        saveDependents(node, bundle.getBundleClass(), bundle.getRelations());
-        return node;
+    private Vertex createInner(Bundle bundle) throws ValidationError,
+            IntegrityError {
+        try {
+            BundleValidatorFactory.getInstance(bundle).validate();
+            // If the bundle doesn't already have an ID, generate one using the
+            // (presently stopgap) type-dependent ID generator.
+            String id = bundle.getId() != null ? bundle.getId() : bundle
+                    .getType().getIdgen()
+                    .generateId(bundle.getType(), scope, bundle.getData());
+            Vertex node = manager.createVertex(id, bundle.getType(),
+                    bundle.getData(), bundle.getPropertyKeys(),
+                    bundle.getUniquePropertyKeys());
+            createDependents(node, bundle.getBundleClass(),
+                    bundle.getRelations());
+            return node;
+        } catch (IdGenerationError err) {
+            throw new RuntimeException(err.getMessage());
+        }
     }
 
     /**
@@ -220,15 +208,16 @@ public class BundleDAO<T extends VertexFrame> {
      * @param bundle
      * @return
      * @throws ValidationError
-     * @throws IntegrityError 
+     * @throws IntegrityError
+     * @throws ItemNotFound
      */
-    private Vertex updateInner(EntityBundle<T> bundle) throws ValidationError, IntegrityError {
-        bundle.validateForUpdate();
-        Index<Vertex> index = helpers.getOrCreateIndex(bundle.getEntityType(),
-                Vertex.class);
-        Vertex node = helpers.updateIndexedVertex(bundle.getId(),
-                bundle.getData(), index, bundle.getPropertyKeys(), bundle.getUniquePropertyKeys());
-        saveDependents(node, bundle.getBundleClass(), bundle.getRelations());
+    private Vertex updateInner(Bundle bundle) throws ValidationError,
+            IntegrityError, ItemNotFound {
+        BundleValidatorFactory.getInstance(bundle).validateForUpdate();
+        Vertex node = manager.updateVertex(bundle.getId(), bundle.getType(),
+                bundle.getData(), bundle.getPropertyKeys(),
+                bundle.getUniquePropertyKeys());
+        updateDependents(node, bundle.getBundleClass(), bundle.getRelations());
         return node;
     }
 
@@ -240,45 +229,124 @@ public class BundleDAO<T extends VertexFrame> {
      * @param cls
      * @param relations
      * @throws ValidationError
-     * @throws IntegrityError 
+     * @throws IntegrityError
+     * @throws ItemNotFound
      */
-    private void saveDependents(Vertex master,
-            Class<? extends VertexFrame> cls, MultiValueMap relations)
-            throws ValidationError, IntegrityError {
-        List<String> dependents = ClassUtils.getDependentRelations(cls);
-        Set<Long> existingDependents = new HashSet<Long>();
-        Set<Long> refreshedDependents = new HashSet<Long>();
-
+    private void createDependents(Vertex master, Class<?> cls,
+            MultiValueMap relations) throws ValidationError, IntegrityError {
+        Map<String, Direction> dependents = ClassUtils
+                .getDependentRelations(cls);
         for (Object key : relations.keySet()) {
             String relation = (String) key;
-            if (dependents.contains(relation)) {
+            if (dependents.containsKey(relation)) {
+
                 for (Object obj : relations.getCollection(key)) {
-                    EntityBundle<T> bundle = (EntityBundle<T>) obj;
-                    Vertex child = insertOrUpdate(bundle);
-                    refreshedDependents.add((Long) child.getId());
-                    Direction direction = getDirectionOfRelationship(cls,
-                            bundle.getBundleClass(), relation);
+                    Bundle bundle = (Bundle) obj;
+                    Vertex child = createInner(bundle);
+                    createChildRelationship(master, child, relation,
+                            dependents.get(relation));
+                }
+            }
+        }
+    }
+
+    /**
+     * Saves the dependent relations within a given bundle. Relations that are
+     * not dependent are ignored.
+     * 
+     * @param master
+     * @param cls
+     * @param relations
+     * @throws ValidationError
+     * @throws IntegrityError
+     * @throws ItemNotFound
+     */
+    private void updateDependents(Vertex master, Class<?> cls,
+            MultiValueMap relations) throws ValidationError, IntegrityError,
+            ItemNotFound {
+
+        // Get a list of dependent relationships for this class, and their
+        // directions.
+        Map<String, Direction> dependents = ClassUtils
+                .getDependentRelations(cls);
+        // Build a list of the IDs of existing dependents we're going to be
+        // updating.
+        Set<String> updating = getUpdateSet(relations);
+        // Any that we're not going to update can have their subtrees deleted.
+        deleteMissingFromUpdateSet(master, dependents, updating);
+
+        // Now go throw and create or update the new subtrees.
+        for (Object key : relations.keySet()) {
+            String relation = (String) key;
+            if (dependents.containsKey(relation)) {
+
+                for (Object obj : relations.getCollection(key)) {
+                    Bundle bundle = (Bundle) obj;
+                    Vertex child = createOrUpdateInner(bundle);
+                    Direction direction = dependents.get(relation);
 
                     // FIXME: Traversing all the current relations here (for
                     // every individual dependent) is very inefficient!
-                    List<Long> current = getCurrentRelationships(master,
-                            direction, relation);
-                    existingDependents.addAll(current);
+                    HashSet<Vertex> currentRels = getCurrentRelationships(
+                            master, direction, relation);
 
                     // Create a relation if there isn't one already
-                    if (!current.contains(child.getId())) {
+                    if (!currentRels.contains(child)) {
                         createChildRelationship(master, child, relation,
                                 direction);
                     }
                 }
             }
         }
-        // Clean up dependent items that have not been saved in the
-        // current operation, and are therefore assumed deleted.
-        existingDependents.removeAll(refreshedDependents);
-        for (Long id : existingDependents) {
-            graph.removeVertex(graph.getVertex(id));
+    }
+
+    private Set<String> getUpdateSet(MultiValueMap relations) {
+        Set<String> updating = new HashSet<String>();
+        for (Object relation : relations.keySet()) {
+            for (Object child : relations.getCollection(relation)) {
+                if (child instanceof Bundle) {
+                    updating.add(((Bundle) child).getId());
+                }
+            }
         }
+        return updating;
+    }
+
+    private void deleteMissingFromUpdateSet(Vertex master,
+            Map<String, Direction> dependents, Set<String> updating)
+            throws ValidationError {
+        Converter converter = new Converter();
+        for (Entry<String, Direction> relEntry : dependents.entrySet()) {
+            for (Vertex v : getCurrentRelationships(master,
+                    relEntry.getValue(), relEntry.getKey())) {
+                if (!updating.contains(v.getProperty(EntityType.ID_KEY))) {
+                    try {
+                        delete(converter.vertexFrameToBundle(graph.frame(v,
+                                manager.getType(v).getEntityClass())));
+                    } catch (SerializationError e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Get the IDs of nodes that terminate a given relationship from a
+     * particular source node.
+     * 
+     * @param src
+     * @param direction
+     * @param label
+     * @return
+     */
+    private HashSet<Vertex> getCurrentRelationships(final Vertex src,
+            Direction direction, String label) {
+        HashSet<Vertex> out = new HashSet<Vertex>();
+        for (Vertex end : src.getVertices(direction, label)) {
+            out.add(end);
+        }
+        return out;
     }
 
     /**

@@ -9,8 +9,25 @@ import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.utils.EmptyIterable;
 
-public class SystemScope implements PermissionScope, AccessibleEntity {
+/**
+ * Singleton class representing the system scope for
+ * permissions and ID namespaces.
+ * 
+ * @author mike
+ *
+ */
+public enum SystemScope implements PermissionScope, AccessibleEntity {
+    
+    INSTANCE;
 
+    /**
+     * Obtain the shared instance of SystemScope.
+     * @return
+     */
+    public static PermissionScope getInstance() {
+        return INSTANCE;
+    }
+    
     public static final String SYSTEM = "system";
 
     public String getIdentifier() {

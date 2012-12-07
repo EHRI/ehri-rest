@@ -9,7 +9,7 @@ import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.PermissionGrantTarget;
 import eu.ehri.project.models.base.PermissionScope;
 
-@EntityType(EntityTypes.PERMISSION_GRANT)
+@EntityType(EntityClass.PERMISSION_GRANT)
 public interface PermissionGrant extends VertexFrame {
     public static final String HAS_GRANTEE = "hasGrantee";
     public static final String HAS_SUBJECT = "hasAccessor";
