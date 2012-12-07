@@ -16,20 +16,16 @@ import eu.ehri.project.models.utils.EmptyIterable;
  * @author mike
  *
  */
-public class SystemScope implements PermissionScope, AccessibleEntity {
+public enum SystemScope implements PermissionScope, AccessibleEntity {
+    
+    INSTANCE;
 
-    private SystemScope() {}
-    
-    private static class SystemScopeHolder {
-        public static final PermissionScope INSTANCE = new SystemScope();
-    }
-    
     /**
      * Obtain the shared instance of SystemScope.
      * @return
      */
     public static PermissionScope getInstance() {
-        return SystemScopeHolder.INSTANCE;
+        return INSTANCE;
     }
     
     public static final String SYSTEM = "system";

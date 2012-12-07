@@ -14,20 +14,18 @@ import eu.ehri.project.models.utils.EmptyIterable;
  * @author michaelb
  *
  */
-public class AnonymousAccessor implements Accessor {
+public enum AnonymousAccessor implements Accessor {
+    
+    INSTANCE;
 
     private AnonymousAccessor() {}
-    
-    private static class AnonymousAccessorHolder {
-        public static final Accessor INSTANCE = new AnonymousAccessor();
-    }
     
     /**
      * Obtain the shared instance of the Anonymous Accessor.
      * @return
      */
     public static Accessor getInstance() {
-        return AnonymousAccessorHolder.INSTANCE;
+        return INSTANCE;
     }
         
     public Vertex asVertex() {
