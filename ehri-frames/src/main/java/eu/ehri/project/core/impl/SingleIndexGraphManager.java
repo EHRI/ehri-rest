@@ -37,7 +37,7 @@ import eu.ehri.project.models.annotations.EntityType;
 public final class SingleIndexGraphManager implements GraphManager {
 
     public static final String INDEX_NAME = "entities";
-    
+
     private final FramedGraph<Neo4jGraph> graph;
 
     /**
@@ -51,11 +51,20 @@ public final class SingleIndexGraphManager implements GraphManager {
 
     // Access functions
     public String getId(Vertex vertex) {
-        return (String)vertex.getProperty(EntityType.ID_KEY);
+        return (String) vertex.getProperty(EntityType.ID_KEY);
     }
-    
+
     public String getId(VertexFrame vertex) {
         return getId(vertex.asVertex());
+    }
+
+    public EntityClass getType(Vertex vertex) {
+        return EntityClass.withName((String) vertex
+                .getProperty(EntityType.TYPE_KEY));
+    }
+
+    public EntityClass getType(VertexFrame vertex) {
+        return getType(vertex.asVertex());
     }
 
     public boolean exists(String id) {
@@ -107,8 +116,7 @@ public final class SingleIndexGraphManager implements GraphManager {
         }
     }
 
-    public Vertex getVertex(String id, EntityClass type)
-            throws ItemNotFound {
+    public Vertex getVertex(String id, EntityClass type) throws ItemNotFound {
         String queryStr = getLuceneQuery(EntityType.ID_KEY, id, type.getName());
         IndexHits<Node> rawQuery = getRawIndex().query(queryStr);
         // NB: Not using rawQuery.getSingle here so we throw NoSuchElement other

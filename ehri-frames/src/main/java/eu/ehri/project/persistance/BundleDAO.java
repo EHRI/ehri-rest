@@ -322,7 +322,7 @@ public final class BundleDAO {
                 if (!updating.contains(v.getProperty(EntityType.ID_KEY))) {
                     try {
                         delete(converter.vertexFrameToBundle(graph.frame(v,
-                                VertexFrame.class)));
+                                manager.getType(v).getEntityClass())));
                     } catch (SerializationError e) {
                         throw new RuntimeException(e);
                     }

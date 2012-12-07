@@ -24,6 +24,15 @@ public interface GraphManager {
      */
     public String getId(VertexFrame vertex);
     
+    /**
+     * Get the type of an arbitrary vertex.
+     */
+    public EntityClass getType(Vertex vertex);
+
+    /**
+     * Get the type of an arbitrary vertex.
+     */
+    public EntityClass getType(VertexFrame vertex);
     
     /**
      * Check if a node with the given ID exists or not.
