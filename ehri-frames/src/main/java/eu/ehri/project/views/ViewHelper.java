@@ -1,19 +1,17 @@
 package eu.ehri.project.views;
 
-import java.util.NoSuchElementException;
-
-import com.tinkerpop.blueprints.CloseableIterable;
-import com.tinkerpop.blueprints.Index;
-import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.acl.PermissionTypes;
 import eu.ehri.project.acl.SystemScope;
+import eu.ehri.project.core.GraphManager;
+import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.ContentType;
+import eu.ehri.project.models.EntityEnumTypes;
 import eu.ehri.project.models.Permission;
 import eu.ehri.project.models.PermissionGrant;
 import eu.ehri.project.models.base.AccessibleEntity;
@@ -23,20 +21,23 @@ import eu.ehri.project.models.utils.ClassUtils;
 
 public final class ViewHelper {
 
-    final FramedGraph<Neo4jGraph> graph;
-    final Class<?> cls;
-    final PermissionScope scope;
-    final AclManager acl;
-    
+    private final FramedGraph<Neo4jGraph> graph;
+    private final Class<?> cls;
+    private final PermissionScope scope;
+    private final AclManager acl;
+    private final GraphManager manager;
+
     public ViewHelper(FramedGraph<Neo4jGraph> graph, Class<?> cls) {
         this(graph, cls, SystemScope.getInstance());
     }
 
-    public ViewHelper(FramedGraph<Neo4jGraph> graph, Class<?> cls, PermissionScope scope) {
+    public ViewHelper(FramedGraph<Neo4jGraph> graph, Class<?> cls,
+            PermissionScope scope) {
         this.graph = graph;
         this.cls = cls;
         this.acl = new AclManager(graph);
         this.scope = scope;
+        this.manager = GraphManagerFactory.getInstance(graph);
     }
 
     /**
@@ -124,14 +125,13 @@ public final class ViewHelper {
      * @param typeName
      * @return
      */
-    public ContentType getContentType(String typeName) {
+    public ContentType getContentType(EntityEnumTypes type) {
         try {
-            return graph
-                    .getVertices(AccessibleEntity.IDENTIFIER_KEY, typeName,
-                            ContentType.class).iterator().next();
-        } catch (NoSuchElementException e) {
-            throw new RuntimeException(String.format(
-                    "No content type node found for type: '%s'", typeName), e);
+            return manager.getFrame(type.getName(), ContentType.class);
+        } catch (ItemNotFound e) {
+            throw new RuntimeException(
+                    String.format("No content type node found for type: '%s'",
+                            type.getName()), e);
         }
     }
 
@@ -144,21 +144,9 @@ public final class ViewHelper {
      * @return
      * @throws ItemNotFound
      */
-    public <T> T getEntity(String typeName, String name, Class<T> cls)
+    public <T> T getEntity(EntityEnumTypes type, String name, Class<T> cls)
             throws ItemNotFound {
-        // FIXME: Ensure index isn't null
-        Index<Vertex> index = graph.getBaseGraph().getIndex(typeName,
-                Vertex.class);
-
-        CloseableIterable<Vertex> query = index.get(
-                AccessibleEntity.IDENTIFIER_KEY, name);
-        try {
-            return graph.frame(query.iterator().next(), cls);
-        } catch (NoSuchElementException e) {
-            throw new ItemNotFound(AccessibleEntity.IDENTIFIER_KEY, name);
-        } finally {
-            query.close();
-        }
+        return manager.getFrame(name, type, cls);
     }
 
     /**
@@ -169,10 +157,9 @@ public final class ViewHelper {
      */
     public Permission getPermission(String permissionId) {
         try {
-            return graph
-                    .getVertices(AccessibleEntity.IDENTIFIER_KEY, permissionId,
-                            Permission.class).iterator().next();
-        } catch (NoSuchElementException e) {
+            return manager.getFrame(permissionId, EntityEnumTypes.PERMISSION,
+                    Permission.class);
+        } catch (ItemNotFound e) {
             throw new RuntimeException(String.format(
                     "No permission found for name: '%s'", permissionId), e);
         }
@@ -185,7 +172,7 @@ public final class ViewHelper {
      * against the scope relation on PermissionGrants.
      * 
      * @param scope
-     */    
+     */
     public ViewHelper setScope(PermissionScope scope) {
         return new ViewHelper(graph, cls, scope);
     }

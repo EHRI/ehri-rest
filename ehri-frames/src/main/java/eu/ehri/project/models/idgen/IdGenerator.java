@@ -4,6 +4,7 @@ import java.util.Map;
 
 
 import eu.ehri.project.exceptions.IdGenerationError;
+import eu.ehri.project.models.EntityEnumTypes;
 import eu.ehri.project.models.base.PermissionScope;
 
 /**
@@ -22,13 +23,13 @@ public interface IdGenerator {
     /**
      * Generate an ID given an entity type prefix and a vertex.
      * 
-     * @param entityTypePrefix
+     * @param type
      * @param scope
      * @param data
      * @return
      * @throws IdGenerationError
      *             TODO
      */
-    public String generateId(String entityTypePrefix, PermissionScope scope,
+    public String generateId(EntityEnumTypes type, PermissionScope scope,
             Map<String, Object> data) throws IdGenerationError;
 }

@@ -22,6 +22,7 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.models.EntityEnumTypes;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.utils.ClassUtils;
@@ -380,7 +381,7 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> extends
     
     // Helpers
     
-    private String getEntityType() {
+    private EntityEnumTypes getEntityType() {
         return ClassUtils.getEntityType(cls);
     }
 }

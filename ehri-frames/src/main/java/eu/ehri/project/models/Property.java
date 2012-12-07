@@ -2,6 +2,7 @@ package eu.ehri.project.models;
 
 import com.tinkerpop.frames.VertexFrame;
 
+import eu.ehri.project.models.annotations.EntityEnumType;
 import eu.ehri.project.models.annotations.EntityType;
 
 /**
@@ -10,5 +11,6 @@ import eu.ehri.project.models.annotations.EntityType;
  *
  */
 @EntityType(EntityTypes.PROPERTY)
+@EntityEnumType(EntityEnumTypes.PROPERTY)
 public interface Property extends VertexFrame { 
 }

@@ -4,6 +4,7 @@ import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.frames.Adjacency;
 
 import eu.ehri.project.models.annotations.Dependent;
+import eu.ehri.project.models.annotations.EntityEnumType;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.base.AccessibleEntity;
@@ -13,6 +14,7 @@ import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.base.TemporalEntity;
 
 @EntityType(EntityTypes.AGENT)
+@EntityEnumType(EntityEnumTypes.AGENT)
 public interface Agent extends AccessibleEntity, DescribedEntity,
         AnnotatableEntity, PermissionScope {
 

@@ -22,14 +22,8 @@ import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.annotations.EntityType;
-import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.PermissionScope;
-import eu.ehri.project.models.idgen.AccessibleEntityIdGenerator;
-import eu.ehri.project.models.idgen.DocumentaryUnitIdGenerator;
-import eu.ehri.project.models.idgen.GenericIdGenerator;
-import eu.ehri.project.models.idgen.IdGenerator;
 import eu.ehri.project.models.utils.ClassUtils;
 
 /**
@@ -194,9 +188,18 @@ public final class BundleDAO {
             BundleValidatorFactory.getInstance(bundle).validate();
             // If the bundle doesn't already have an ID, generate one using the
             // (presently stopgap) type-dependent ID generator.
-            String id = bundle.getId() != null ? bundle.getId()
-                    : getIdGenerator(bundle).generateId(bundle.getType(),
-                            scope, bundle.getData());
+            String id = null;
+            try {
+                id = bundle.getId() != null ? bundle.getId()
+                        : bundle.getType().getIdgen().newInstance().generateId(bundle.getType(),
+                                scope, bundle.getData());
+            } catch (InstantiationException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (IllegalAccessException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
             Vertex node = manager.createVertex(id, bundle.getType(),
                     bundle.getData(), bundle.getPropertyKeys(),
                     bundle.getUniquePropertyKeys());
@@ -369,20 +372,6 @@ public final class BundleDAO {
             graph.addEdge(null, master, child, label);
         } else {
             graph.addEdge(null, child, master, label);
-        }
-    }
-
-    // FIXME: Put this logic somewhere else. When EntityTypes is converted
-    // to an Enum we'll be able to associate an ID generator with a
-    // particular type, but for now do it the crappy hacky way.
-    private IdGenerator getIdGenerator(Bundle bundle) {
-        if (DocumentaryUnit.class.isAssignableFrom(bundle.getBundleClass())) {
-            return new DocumentaryUnitIdGenerator();
-        } else if (AccessibleEntity.class.isAssignableFrom(bundle
-                .getBundleClass())) {
-            return new AccessibleEntityIdGenerator();
-        } else {
-            return new GenericIdGenerator();
         }
     }
 }

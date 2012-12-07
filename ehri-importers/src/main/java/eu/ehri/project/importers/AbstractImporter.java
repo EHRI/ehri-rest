@@ -15,10 +15,11 @@ import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.DocumentDescription;
 import eu.ehri.project.models.DocumentaryUnit;
-import eu.ehri.project.models.EntityTypes;
+import eu.ehri.project.models.EntityEnumTypes;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.TemporalEntity;
 import eu.ehri.project.models.idgen.DocumentaryUnitIdGenerator;
+import eu.ehri.project.models.idgen.IdGenerator;
 import eu.ehri.project.persistance.BundleDAO;
 import eu.ehri.project.persistance.BundleFactory;
 import eu.ehri.project.persistance.Bundle;
@@ -134,10 +135,10 @@ public abstract class AbstractImporter<T> {
                     .buildBundle(dpb, DocumentDescription.class));
         }
 
-        DocumentaryUnitIdGenerator generator = new DocumentaryUnitIdGenerator();
+        IdGenerator generator = new DocumentaryUnitIdGenerator();
         String id = null;
         try {
-            id = generator.generateId(EntityTypes.DOCUMENTARY_UNIT, repository,
+            id = generator.generateId(EntityEnumTypes.DOCUMENTARY_UNIT, repository,
                     unit.getData());
         } catch (IdGenerationError e) {
             throw new ValidationError("Bad data: " + unit.getData());

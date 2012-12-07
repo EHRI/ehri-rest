@@ -25,6 +25,7 @@ import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.models.EntityEnumTypes;
 import eu.ehri.project.models.EntityTypes;
 import eu.ehri.project.models.Group;
 import eu.ehri.project.models.base.AccessibleEntity;
@@ -126,7 +127,7 @@ public class GroupResource extends EhriNeo4jFramedResource<Group> {
         // TODO: Check existing membership?
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
-            Group group = manager.getFrame(id, EntityTypes.GROUP, Group.class);
+            Group group = manager.getFrame(id, EntityEnumTypes.GROUP, Group.class);
             Accessor accessor = manager.getFrame(aid, Accessor.class);
             group.addMember(accessor);
             
@@ -164,7 +165,7 @@ public class GroupResource extends EhriNeo4jFramedResource<Group> {
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
             // FIXME: Add permission checks for this!!!
-            Group group = manager.getFrame(id, EntityTypes.GROUP, Group.class);
+            Group group = manager.getFrame(id, EntityEnumTypes.GROUP, Group.class);
             Accessor accessor = manager.getFrame(aid, Accessor.class);
             group.removeMember(accessor);
             // Log the action...

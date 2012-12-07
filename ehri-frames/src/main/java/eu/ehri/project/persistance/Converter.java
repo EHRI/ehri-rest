@@ -16,6 +16,7 @@ import com.tinkerpop.frames.VertexFrame;
 
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.SerializationError;
+import eu.ehri.project.models.EntityEnumTypes;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.utils.ClassUtils;
@@ -32,8 +33,10 @@ import org.codehaus.jackson.map.ObjectWriter;
  * @author michaelb
  * 
  */
-public class Converter {
+public final class Converter {
 
+    public static final int DEFAULT_TRAVERSALS = 5;
+    
     /**
      * Constant definitions
      */
@@ -45,14 +48,13 @@ public class Converter {
     /**
      * Lookup of entityType keys against their annotated class.
      */
-    private Map<String, Class<? extends VertexFrame>> classes;
-    private int maxTraversals = 5;
+    private final int maxTraversals;
 
     /**
      * Constructor.
      */
     public Converter() {
-        classes = ClassUtils.getEntityClasses();
+        this(DEFAULT_TRAVERSALS);
     }
 
     /**
@@ -61,7 +63,6 @@ public class Converter {
      * @param depth
      */
     public Converter(int depth) {
-        super();
         this.maxTraversals = depth;
     }
 
@@ -88,8 +89,7 @@ public class Converter {
      * @throws DeserializationError
      */
     @SuppressWarnings("unchecked")
-    public Bundle jsonToBundle(String json)
-            throws DeserializationError {
+    public Bundle jsonToBundle(String json) throws DeserializationError {
         ObjectMapper mapper = new ObjectMapper();
         try {
             return dataToBundle(mapper.readValue(json, Map.class));
@@ -118,8 +118,7 @@ public class Converter {
      * @throws SerializationError
      * 
      */
-    public String bundleToJson(Bundle bundle)
-            throws SerializationError {
+    public String bundleToJson(Bundle bundle) throws SerializationError {
         Map<String, Object> data = bundleToData(bundle);
         try {
             ObjectMapper mapper = new ObjectMapper();
@@ -143,11 +142,12 @@ public class Converter {
      * @throws DeserializationError
      */
     @SuppressWarnings("unchecked")
-    public Bundle dataToBundle(
-            Map<String, Object> data) throws DeserializationError {
+    public Bundle dataToBundle(Map<String, Object> data)
+            throws DeserializationError {
         try {
             String id = (String) data.get(ID_KEY);
-            String isa = (String) data.get(TYPE_KEY);
+            EntityEnumTypes isa = EntityEnumTypes.withName((String) data
+                    .get(TYPE_KEY));
             if (isa == null)
                 throw new DeserializationError(String.format(
                         "No '%s' attribute found in item data", TYPE_KEY));
@@ -155,11 +155,6 @@ public class Converter {
                     .get(DATA_KEY);
             if (props == null)
                 throw new DeserializationError("No item data map found");
-            Class<?> cls = (Class<?>) classes.get(isa);
-            if (cls == null)
-                throw new DeserializationError(String.format(
-                        "No class found for type %s type: '%s'",
-                        EntityType.TYPE_KEY, isa));
             MultiValueMap relationbundles = new MultiValueMap();
 
             Map<String, List<Map<String, Object>>> relations = (Map<String, List<Map<String, Object>>>) data
@@ -173,7 +168,7 @@ public class Converter {
                 }
             }
 
-            return new Bundle(id, props, cls, relationbundles);
+            return new Bundle(id, props, isa.getEntityClass(), relationbundles);
 
         } catch (ClassCastException e) {
             throw new DeserializationError("Error deserializing data", e);
@@ -189,7 +184,7 @@ public class Converter {
     public Map<String, Object> bundleToData(Bundle bundle) {
         Map<String, Object> data = new HashMap<String, Object>();
         data.put(ID_KEY, bundle.getId());
-        data.put(TYPE_KEY, bundle.getType());
+        data.put(TYPE_KEY, bundle.getType().getName());
         data.put(DATA_KEY, bundle.getData());
 
         Map<String, List<Map<String, Object>>> relations = new HashMap<String, List<Map<String, Object>>>();
@@ -215,8 +210,8 @@ public class Converter {
      * @return
      * @throws SerializationError
      */
-    public Bundle vertexFrameToBundle(
-            VertexFrame item) throws SerializationError {
+    public Bundle vertexFrameToBundle(VertexFrame item)
+            throws SerializationError {
         return vertexFrameToBundle(item, maxTraversals);
     }
 
@@ -229,23 +224,14 @@ public class Converter {
      * @return
      * @throws SerializationError
      */
-    public Bundle vertexFrameToBundle(
-            VertexFrame item, int depth) throws SerializationError {
+    public Bundle vertexFrameToBundle(VertexFrame item, int depth)
+            throws SerializationError {
         String id = (String) item.asVertex().getProperty(EntityType.ID_KEY);
-        String isa = (String) item.asVertex().getProperty(EntityType.TYPE_KEY);
-        if (isa == null)
-            throw new SerializationError(String.format(
-                    "No %s key found in Vertex Properties to denote its type.",
-                    EntityType.TYPE_KEY));
-        Class<? extends VertexFrame> cls = classes.get(isa);
-        if (cls == null)
-            throw new SerializationError(String.format(
-                    "No entity found for %s type '%s'", EntityType.TYPE_KEY,
-                    isa));
-
-        MultiValueMap relations = getRelationData(item, depth, cls);
+        EntityEnumTypes isa = EntityEnumTypes.withName((String) item.asVertex()
+                .getProperty(EntityType.TYPE_KEY));
+        MultiValueMap relations = getRelationData(item, depth, isa.getEntityClass());
         return new Bundle(id, getVertexData(item.asVertex()),
-                (Class<?>) cls, relations);
+                isa.getEntityClass(), relations);
     }
 
     private MultiValueMap getRelationData(VertexFrame item, int depth,

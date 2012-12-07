@@ -24,6 +24,7 @@ import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
+import eu.ehri.project.models.EntityEnumTypes;
 import eu.ehri.project.models.annotations.EntityType;
 
 /**
@@ -56,12 +57,12 @@ public final class SingleIndexGraphManager implements GraphManager {
         return graph.frame(getVertex(id), cls);
     }
 
-    public <T> T getFrame(String id, String type, Class<T> cls)
+    public <T> T getFrame(String id, EntityEnumTypes type, Class<T> cls)
             throws ItemNotFound {
         return graph.frame(getVertex(id, type), cls);
     }
 
-    public <T> Iterable<T> getFrames(String type, Class<T> cls) {
+    public <T> Iterable<T> getFrames(EntityEnumTypes type, Class<T> cls) {
         CloseableIterable<Vertex> vertices = getVertices(type);
         try {
             return graph.frameVertices(getVertices(type), cls);
@@ -70,14 +71,14 @@ public final class SingleIndexGraphManager implements GraphManager {
         }
     }
 
-    public CloseableIterable<Vertex> getVertices(String type) {
-        return getIndex().get(EntityType.TYPE_KEY, type);
+    public CloseableIterable<Vertex> getVertices(EntityEnumTypes type) {
+        return getIndex().get(EntityType.TYPE_KEY, type.getName());
     }
 
     @SuppressWarnings("unchecked")
     public CloseableIterable<Neo4jVertex> getVertices(String key, Object value,
-            String type) {
-        String queryStr = getLuceneQuery(key, value, type);
+            EntityEnumTypes type) {
+        String queryStr = getLuceneQuery(key, value, type.getName());
         IndexHits<Node> rawQuery = getRawIndex().query(queryStr);
         return new Neo4jVertexIterable<Vertex>(rawQuery, graph.getBaseGraph(),
                 false);
@@ -97,8 +98,9 @@ public final class SingleIndexGraphManager implements GraphManager {
         }
     }
 
-    public Vertex getVertex(String id, String type) throws ItemNotFound {
-        String queryStr = getLuceneQuery(EntityType.ID_KEY, id, type);
+    public Vertex getVertex(String id, EntityEnumTypes type)
+            throws ItemNotFound {
+        String queryStr = getLuceneQuery(EntityType.ID_KEY, id, type.getName());
         IndexHits<Node> rawQuery = getRawIndex().query(queryStr);
         // NB: Not using rawQuery.getSingle here so we throw NoSuchElement other
         // than return null.
@@ -120,8 +122,8 @@ public final class SingleIndexGraphManager implements GraphManager {
      * @return
      * @throws IntegrityError
      */
-    public Vertex createVertex(String id, String type, Map<String, Object> data)
-            throws IntegrityError {
+    public Vertex createVertex(String id, EntityEnumTypes type,
+            Map<String, Object> data) throws IntegrityError {
         return createVertex(id, type, data, data.keySet(),
                 new LinkedList<String>());
     }
@@ -135,7 +137,7 @@ public final class SingleIndexGraphManager implements GraphManager {
      * @return
      * @throws IntegrityError
      */
-    public Vertex createVertex(String id, String type,
+    public Vertex createVertex(String id, EntityEnumTypes type,
             Map<String, Object> data, List<String> keys) throws IntegrityError {
         return createVertex(id, type, data, keys, new LinkedList<String>());
     }
@@ -150,7 +152,7 @@ public final class SingleIndexGraphManager implements GraphManager {
      * @return
      * @throws IntegrityError
      */
-    public Vertex createVertex(String id, String type,
+    public Vertex createVertex(String id, EntityEnumTypes type,
             Map<String, Object> data, Collection<String> keys,
             Collection<String> uniqueKeys) throws IntegrityError {
         Index<Vertex> index = getIndex();
@@ -184,19 +186,19 @@ public final class SingleIndexGraphManager implements GraphManager {
         }
     }
 
-    public Vertex updateVertex(String id, String type, Map<String, Object> data)
-            throws IntegrityError, ItemNotFound {
+    public Vertex updateVertex(String id, EntityEnumTypes type,
+            Map<String, Object> data) throws IntegrityError, ItemNotFound {
         return updateVertex(id, type, data, data.keySet(),
                 new LinkedList<String>());
     }
 
-    public Vertex updateVertex(String id, String type,
+    public Vertex updateVertex(String id, EntityEnumTypes type,
             Map<String, Object> data, Collection<String> keys)
             throws IntegrityError, ItemNotFound {
         return updateVertex(id, type, data, keys, new LinkedList<String>());
     }
 
-    public Vertex updateVertex(String id, String type,
+    public Vertex updateVertex(String id, EntityEnumTypes type,
             Map<String, Object> data, Collection<String> keys,
             Collection<String> uniqueKeys) throws IntegrityError, ItemNotFound {
         Index<Vertex> index = getIndex();
@@ -239,7 +241,7 @@ public final class SingleIndexGraphManager implements GraphManager {
      * @param propertyName
      * @return
      */
-    public List<Object> getAllPropertiesOfType(String typeName,
+    public List<Object> getAllPropertiesOfType(EntityEnumTypes typeName,
             String propertyName) {
         List<Object> out = new LinkedList<Object>();
         CloseableIterable<Vertex> query = getVertices(typeName);
@@ -378,15 +380,15 @@ public final class SingleIndexGraphManager implements GraphManager {
             throw new IntegrityError("Item exists with ID: " + id, "entities");
     }
 
-    private Map<String, Object> getVertexData(String id, String type,
+    private Map<String, Object> getVertexData(String id, EntityEnumTypes type,
             Map<String, Object> data) {
         Map<String, Object> vdata = new HashMap<String, Object>(data);
         vdata.put(EntityType.ID_KEY, id);
-        vdata.put(EntityType.TYPE_KEY, type);
+        vdata.put(EntityType.TYPE_KEY, type.getName());
         return vdata;
     }
 
-    private Collection<String> getVertexKeys(String id, String type,
+    private Collection<String> getVertexKeys(String id, EntityEnumTypes type,
             Collection<String> keys) {
         List<String> vkeys = new LinkedList<String>(keys);
         vkeys.add(EntityType.ID_KEY);

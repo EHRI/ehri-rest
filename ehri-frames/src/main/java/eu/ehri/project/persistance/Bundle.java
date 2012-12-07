@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.apache.commons.collections.map.MultiValueMap;
 
+import eu.ehri.project.models.EntityEnumTypes;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.utils.ClassUtils;
 
@@ -18,8 +19,8 @@ import eu.ehri.project.models.utils.ClassUtils;
  */
 public class Bundle {
     protected final String id;
+    protected final EntityEnumTypes type;
     protected final Map<String, Object> data;
-    protected final Class<?> cls;
     protected final MultiValueMap relations;
 
     /**
@@ -35,7 +36,7 @@ public class Bundle {
             Class<?> cls, final MultiValueMap relations) {
         this.id = id;
         this.data = new HashMap<String, Object>(data);
-        this.cls = cls;
+        this.type = ClassUtils.getEntityType(cls);
         this.relations = relations;
     }
 
@@ -77,7 +78,7 @@ public class Bundle {
      * @param id
      */
     public Bundle withId(String id) {
-        return new Bundle(id, data, cls, relations);
+        return new Bundle(id, data, type.getEntityClass(), relations);
     }
 
     /**
@@ -110,7 +111,7 @@ public class Bundle {
     }
 
     public Bundle setData(final Map<String, Object> data) {
-        return new Bundle(id, data, cls, relations);
+        return new Bundle(id, data, type.getEntityClass(), relations);
     }
 
     /**
@@ -119,7 +120,7 @@ public class Bundle {
      * @return
      */
     public Class<?> getBundleClass() {
-        return cls;
+        return type.getEntityClass();
     }
 
     /**
@@ -128,8 +129,8 @@ public class Bundle {
      * 
      * @return
      */
-    public String getType() {
-        return ClassUtils.getEntityType(cls);
+    public EntityEnumTypes getType() {
+        return type;
     }
 
     /**
@@ -139,7 +140,7 @@ public class Bundle {
      * @return
      */
     public List<String> getPropertyKeys() {
-        return ClassUtils.getPropertyKeys(cls);
+        return ClassUtils.getPropertyKeys(type.getEntityClass());
     }
 
     /**
@@ -149,7 +150,7 @@ public class Bundle {
      * @return
      */
     public List<String> getVertexPropertyKeys() {
-        List<String> keys = ClassUtils.getPropertyKeys(cls);
+        List<String> keys = ClassUtils.getPropertyKeys(type.getEntityClass());
         keys.add(EntityType.ID_KEY);
         keys.add(EntityType.TYPE_KEY);
         return keys;
@@ -161,12 +162,12 @@ public class Bundle {
      * @return
      */
     public List<String> getUniquePropertyKeys() {
-        return ClassUtils.getUniquePropertyKeys(cls);
+        return ClassUtils.getUniquePropertyKeys(type.getEntityClass());
     }
 
     @Override
     public String toString() {
-        return String.format("<%s: %s>", cls.getName(), data);
+        return String.format("<%s: %s>", type.getName(), data);
     }
 
     // Helpers

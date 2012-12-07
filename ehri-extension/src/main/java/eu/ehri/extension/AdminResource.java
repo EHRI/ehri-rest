@@ -24,7 +24,7 @@ import com.tinkerpop.frames.FramedGraph;
 
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
-import eu.ehri.project.models.EntityTypes;
+import eu.ehri.project.models.EntityEnumTypes;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
@@ -95,7 +95,7 @@ public class AdminResource {
     private String getNextDefaultUserId() {
         // FIXME: It's crappy to have to iterate all the items to count them...
         long userCount = 0;
-        CloseableIterable<Vertex> query = manager.getVertices(EntityTypes.USER_PROFILE);
+        CloseableIterable<Vertex> query = manager.getVertices(EntityEnumTypes.USER_PROFILE);
         try {
             for (@SuppressWarnings("unused")
             Vertex _ : query)

@@ -16,8 +16,8 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.models.EntityTypes;
 import eu.ehri.project.models.Action;
+import eu.ehri.project.models.EntityTypes;
 
 /**
  * Provides a RESTfull interface for the Action class. Note: Action instances

@@ -7,6 +7,7 @@ import com.tinkerpop.frames.VertexFrame;
 import com.tinkerpop.frames.annotations.gremlin.GremlinGroovy;
 
 import eu.ehri.project.models.annotations.Dependent;
+import eu.ehri.project.models.annotations.EntityEnumType;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.base.AccessibleEntity;
@@ -15,6 +16,7 @@ import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.base.TemporalEntity;
 
 @EntityType(EntityTypes.DOCUMENTARY_UNIT)
+@EntityEnumType(EntityEnumTypes.DOCUMENTARY_UNIT)
 public interface DocumentaryUnit extends VertexFrame, AccessibleEntity,
         DescribedEntity, TemporalEntity, PermissionScope {
 

@@ -16,7 +16,7 @@ import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.ContentType;
-import eu.ehri.project.models.EntityTypes;
+import eu.ehri.project.models.EntityEnumTypes;
 import eu.ehri.project.models.Permission;
 import eu.ehri.project.models.PermissionGrant;
 import eu.ehri.project.models.base.AccessibleEntity;
@@ -87,10 +87,11 @@ public final class AclViews<E extends AccessibleEntity> implements Acl<E> {
         // Check we have grant permissions for the requested content types
         if (!acl.belongsToAdmin(grantee)) {
             try {
-                Permission grantPerm = helper.getEntity(EntityTypes.PERMISSION,
+                Permission grantPerm = helper.getEntity(EntityEnumTypes.PERMISSION,
                         PermissionTypes.GRANT, Permission.class);
                 for (String ctype : permissionMap.keySet()) {
-                    ContentType target = helper.getContentType(ctype);
+                    ContentType target = helper.getContentType(EntityEnumTypes
+                            .withName(ctype));
                     Iterable<PermissionGrant> grants = acl.getPermissionGrants(
                             grantee, target, grantPerm);
                     if (!grants.iterator().hasNext()) {

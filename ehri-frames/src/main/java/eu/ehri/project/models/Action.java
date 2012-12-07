@@ -2,12 +2,15 @@ package eu.ehri.project.models;
 
 import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Property;
+
+import eu.ehri.project.models.annotations.EntityEnumType;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Actioner;
 
 @EntityType(EntityTypes.ACTION)
+@EntityEnumType(EntityEnumTypes.ACTION)
 public interface Action extends AccessibleEntity {
     public static final String HAS_SUBJECT = "hasSubject";
     public static final String HAS_ACTIONER = "hasActioner";

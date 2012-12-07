@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
@@ -19,7 +18,7 @@ import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.ContentType;
-import eu.ehri.project.models.EntityTypes;
+import eu.ehri.project.models.EntityEnumTypes;
 import eu.ehri.project.models.Group;
 import eu.ehri.project.models.Permission;
 import eu.ehri.project.models.PermissionGrant;
@@ -237,11 +236,11 @@ public class AclManager {
         // Build a lookup of content types and permissions keyed by their
         // identifier.
         Map<String, ContentType> cmap = new HashMap<String, ContentType>();
-        for (ContentType c : getVertices(ContentType.class)) {
+        for (ContentType c : manager.getFrames(EntityEnumTypes.CONTENT_TYPE, ContentType.class)) {
             cmap.put(c.getIdentifier(), c);
         }
         Map<String, Permission> pmap = new HashMap<String, Permission>();
-        for (Permission p : getVertices(Permission.class)) {
+        for (Permission p : manager.getFrames(EntityEnumTypes.PERMISSION, Permission.class)) {
             pmap.put(p.getIdentifier(), p);
         }
 
@@ -257,7 +256,7 @@ public class AclManager {
             if (pset == null)
                 continue;
             List<Object> perms = manager.getAllPropertiesOfType(
-                    EntityTypes.PERMISSION, AccessibleEntity.IDENTIFIER_KEY);
+                    EntityEnumTypes.PERMISSION, AccessibleEntity.IDENTIFIER_KEY);
             for (Object perm : perms) {
                 Permission permission = pmap.get(perm);
                 if (pset.contains(perm)) {
@@ -306,7 +305,7 @@ public class AclManager {
         List<String> list = new LinkedList<String>();
         if (isAdmin(accessor)) {
             for (Object s : manager.getAllPropertiesOfType(
-                    EntityTypes.PERMISSION, AccessibleEntity.IDENTIFIER_KEY)) {
+                    EntityEnumTypes.PERMISSION, AccessibleEntity.IDENTIFIER_KEY)) {
                 list.add((String) s);
             }
         } else {
@@ -510,32 +509,14 @@ public class AclManager {
     private Map<String, List<String>> getAdminPermissions() {
         Map<String, List<String>> perms = new HashMap<String, List<String>>();
         for (Object ct : manager.getAllPropertiesOfType(
-                EntityTypes.CONTENT_TYPE, AccessibleEntity.IDENTIFIER_KEY)) {
+                EntityEnumTypes.CONTENT_TYPE, AccessibleEntity.IDENTIFIER_KEY)) {
             List<String> clist = new LinkedList<String>();
             for (Object pt : manager.getAllPropertiesOfType(
-                    EntityTypes.PERMISSION, AccessibleEntity.IDENTIFIER_KEY)) {
+                    EntityEnumTypes.PERMISSION, AccessibleEntity.IDENTIFIER_KEY)) {
                 clist.add((String) pt);
             }
             perms.put((String) ct, clist);
         }
         return perms;
-    }
-
-    /**
-     * Helper function to convert a set of AccessibleEntity raw verices into the
-     * given parametised type.
-     * 
-     * @param indexName
-     * @param cls
-     * @return
-     */
-    private <E extends AccessibleEntity> Iterable<E> getVertices(Class<E> cls) {
-        CloseableIterable<Vertex> query = manager.getVertices(ClassUtils
-                .getEntityType(cls));
-        try {
-            return graph.frameVertices(query, cls);
-        } finally {
-            query.close();
-        }
     }
 }

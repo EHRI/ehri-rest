@@ -1,7 +1,7 @@
 package eu.ehri.project.models.idgen;
 
-
 import eu.ehri.project.exceptions.IdGenerationError;
+import eu.ehri.project.models.EntityEnumTypes;
 import eu.ehri.project.models.base.PermissionScope;
 
 import java.util.Map;
@@ -18,7 +18,8 @@ public class GenericIdGenerator implements IdGenerator {
     /**
      * Generates a random string UUID.
      */
-    public String generateId(String entityTypePrefix, PermissionScope scope, Map<String,Object> data) throws IdGenerationError {
-        return entityTypePrefix + SEPERATOR + UUID.randomUUID();
+    public String generateId(EntityEnumTypes type, PermissionScope scope,
+            Map<String, Object> data) throws IdGenerationError {
+        return type.getAbbreviation() + SEPERATOR + UUID.randomUUID();
     }
 }
