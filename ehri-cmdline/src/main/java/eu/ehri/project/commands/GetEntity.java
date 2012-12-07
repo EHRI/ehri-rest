@@ -1,18 +1,16 @@
 package eu.ehri.project.commands;
 
-import java.util.Map;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 
-import com.tinkerpop.blueprints.CloseableIterable;
-import com.tinkerpop.blueprints.Index;
-import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.frames.VertexFrame;
 
+import eu.ehri.project.core.GraphManager;
+import eu.ehri.project.core.GraphManagerFactory;
+import eu.ehri.project.models.EntityEnumTypes;
 import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.utils.ClassUtils;
 import eu.ehri.project.persistance.Converter;
 
 /**
@@ -52,33 +50,21 @@ public class GetEntity extends BaseCommand implements Command {
     public int execWithOptions(final FramedGraph<Neo4jGraph> graph,
             CommandLine cmdLine) throws Exception {
 
+        GraphManager manager = GraphManagerFactory.getInstance(graph);
+        Converter converter = new Converter();
+
         if (cmdLine.getArgList().size() < 2)
             throw new RuntimeException(getHelp());
 
-        String type = cmdLine.getArgs()[0];
+        EntityEnumTypes type = EntityEnumTypes.withName(cmdLine.getArgs()[0]);
         String id = cmdLine.getArgs()[1];
-        Map<String, Class<? extends VertexFrame>> classes = ClassUtils
-                .getEntityClasses();
-
-        Class<?> cls = classes.get(type);
-        if (cls == null)
-            throw new RuntimeException("Unknown entity: " + type);
+        Class<?> cls = type.getEntityClass();
 
         if (!AccessibleEntity.class.isAssignableFrom(cls))
             throw new RuntimeException("Unknown accessible entity: " + type);
 
-        Index<Vertex> index = graph.getBaseGraph().getIndex(type, Vertex.class);
-        CloseableIterable<Vertex> query = index.get(
-                AccessibleEntity.IDENTIFIER_KEY, id);
-        try {
-            @SuppressWarnings("unchecked")
-            AccessibleEntity item = graph.frame(query.iterator().next(),
-                    (Class<AccessibleEntity>) cls);
-            System.out.println(new Converter().vertexFrameToJson(item));
-        } finally {
-            query.close();
-        }
-
+        System.out.println(converter.vertexFrameToJson(manager.getFrame(id,
+                type, (Class<AccessibleEntity>)cls)));
         return 0;
     }
 }

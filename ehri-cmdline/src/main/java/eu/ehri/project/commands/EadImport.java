@@ -9,10 +9,15 @@ import java.util.Map.Entry;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.ParseException;
+import org.neo4j.graphdb.Transaction;
+
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
+import eu.ehri.project.core.GraphManager;
+import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.exceptions.IntegrityError;
+import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.EadImportManager;
 import eu.ehri.project.importers.ImportLog;
@@ -77,6 +82,7 @@ public class EadImport extends BaseCommand implements Command {
     public int execWithOptions(final FramedGraph<Neo4jGraph> graph,
             CommandLine cmdLine) throws Exception {
 
+        GraphManager manager = GraphManagerFactory.getInstance(graph);
         final String logMessage = "Imported from command-line";
 
         if (cmdLine.getArgList().size() < 1)
@@ -90,36 +96,33 @@ public class EadImport extends BaseCommand implements Command {
         try {
 
             // Find the agent
-            Iterable<Agent> agents = graph.getVertices("identifier",
-                    (String) cmdLine.getOptionValue("repo"), Agent.class);
-
-            Agent agent = agents.iterator().hasNext() ? agents.iterator()
-                    .next() : null;
-            if (cmdLine.hasOption("createrepo") && agent == null) {
-                agent = createAgent(graph, cmdLine.getOptionValue("repo"));
+            Agent agent;
+            try {
+                agent = manager.getFrame((String) cmdLine.getOptionValue("repo"), Agent.class);
+            } catch (ItemNotFound e) {
+                if (cmdLine.hasOption("createrepo")) {
+                    agent = createAgent(graph, cmdLine.getOptionValue("repo"));
+                } else {
+                    throw e;
+                }
             }
-
-            if (agent == null)
-                throw new RuntimeException("No item found for agent: "
-                        + cmdLine.getOptionValue("repo"));
+            
 
             // Find the user
-            Iterable<UserProfile> users = graph.getVertices("identifier",
-                    (String) cmdLine.getOptionValue("user"), UserProfile.class);
-
-            UserProfile user = users.iterator().hasNext() ? users.iterator()
-                    .next() : null;
-            if (!cmdLine.hasOption("createuser") && user == null) {
-                user = createUser(graph, cmdLine.getOptionValue("user"));
+            UserProfile user;
+            try {
+                user = manager.getFrame((String) cmdLine.getOptionValue("user"), UserProfile.class);
+            } catch (ItemNotFound e) {
+                if (cmdLine.hasOption("createuser")) {
+                    user = createUser(graph, cmdLine.getOptionValue("user"));
+                } else {
+                    throw e;
+                }
             }
 
-            if (user == null)
-                throw new RuntimeException("No item found for user: "
-                        + cmdLine.getOptionValue("user"));
-
-            EadImportManager manager = new EadImportManager(graph, agent, user);
-            manager.setTolerant(cmdLine.hasOption("tolerant"));
-            ImportLog log = manager.importFiles(filePaths, logMessage);
+            EadImportManager importer = new EadImportManager(graph, agent, user);
+            importer.setTolerant(cmdLine.hasOption("tolerant"));
+            ImportLog log = importer.importFiles(filePaths, logMessage);
 
             System.out.println("Import completed. Created: " + log.getCreated()
                     + ", Updated: " + log.getUpdated());
