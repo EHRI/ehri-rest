@@ -250,6 +250,8 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      * Return a Page instance containing a count of total items, and an iterable
      * for the given offset/limit.
      * 
+     * @param key
+     * @param query
      * @param user
      * 
      * @return Page instance
@@ -282,7 +284,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
             countQ.close();
         }
     }
-
+    
     /**
      * List items accessible to a given user.
      * 
@@ -296,6 +298,26 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
         // This function is optimised for ACL actions.
         CloseableIterable<Neo4jVertex> vertices = manager.getVertices(key,
                 query, ClassUtils.getEntityType(cls));
+        try {
+            GremlinPipeline filter = new GremlinPipeline(vertices)
+                    .filter(new AclManager(graph).getAclFilterFunction(user));
+            return graph.frameVertices(setPipelineRange(filter), cls);
+        } finally {
+            vertices.close();
+        }
+    }
+    
+    /**
+     * List items accessible to a given user.
+     * 
+     * @param vertices
+     * @param user
+     * 
+     * @return Iterable of items accessible to the given accessor
+     * @throws IndexNotFoundException
+     */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public Iterable<E> list(CloseableIterable<E> vertices, Accessor user) {
         try {
             GremlinPipeline filter = new GremlinPipeline(vertices)
                     .filter(new AclManager(graph).getAclFilterFunction(user));
