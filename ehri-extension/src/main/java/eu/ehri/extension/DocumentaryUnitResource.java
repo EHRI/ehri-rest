@@ -74,6 +74,19 @@ public class DocumentaryUnitResource extends
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id:.+}/list")
+    public StreamingOutput listAgentDocumentaryUnits(
+            @PathParam("id") String id,
+            @QueryParam("offset") @DefaultValue("0") int offset,
+            @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit)
+            throws ItemNotFound, BadRequester, PermissionDenied {
+        DocumentaryUnit parent = new Query<DocumentaryUnit>(graph,
+                DocumentaryUnit.class).get(id, getRequesterUserProfile());
+        return list(parent.getChildren(), offset, limit);
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("/page")
     public StreamingOutput pageDocumentaryUnits(
             @QueryParam("offset") @DefaultValue("0") int offset,

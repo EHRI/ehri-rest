@@ -75,6 +75,19 @@ public class AgentResource extends EhriNeo4jFramedResource<Agent> {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id:.+}/list")
+    public StreamingOutput listAgentDocumentaryUnits(
+            @PathParam("id") String id,
+            @QueryParam("offset") @DefaultValue("0") int offset,
+            @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit)
+            throws ItemNotFound, BadRequester, PermissionDenied {
+        Agent agent = new Query<Agent>(graph, Agent.class).get(id,
+                getRequesterUserProfile());
+        return list(agent.getCollections(), offset, limit);
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("/page")
     public StreamingOutput pageAgents(
             @QueryParam("offset") @DefaultValue("0") int offset,

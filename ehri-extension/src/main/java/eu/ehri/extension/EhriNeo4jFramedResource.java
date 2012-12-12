@@ -14,6 +14,7 @@ import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.neo4j.graphdb.GraphDatabaseService;
+import com.tinkerpop.frames.VertexFrame;
 
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.exceptions.DeserializationError;
@@ -123,11 +124,35 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> extends
      */
     public StreamingOutput list(Integer offset, Integer limit)
             throws ItemNotFound, BadRequester {
-        final ObjectMapper mapper = new ObjectMapper();
-        final JsonFactory f = new JsonFactory();
         final Iterable<E> list = querier.setOffset(offset).setLimit(limit)
                 .list(getRequesterUserProfile());
+        return streamingResponse(list);
+    }
 
+    /**
+     * List all instances of the 'entity' accessible to the given user.
+     * 
+     * @return
+     * @throws ItemNotFound
+     * @throws BadRequester
+     * @throws PermissionDenied
+     */
+    public <T extends VertexFrame> StreamingOutput list(Iterable<T> iter,
+            Integer offset, Integer limit) throws ItemNotFound, BadRequester {
+        return streamingResponse(iter);
+    }
+
+    /**
+     * Return a streaming response from an iterable.
+     * 
+     * @param list
+     * @return
+     */
+    private <T extends VertexFrame> StreamingOutput streamingResponse(
+            final Iterable<T> list) {
+        final ObjectMapper mapper = new ObjectMapper();
+        final JsonFactory f = new JsonFactory();
+        final Converter converter = new Converter();
         // FIXME: I don't understand this streaming output system well
         // enough
         // to determine whether this actually streams or not. It certainly
@@ -138,7 +163,7 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> extends
                     WebApplicationException {
                 JsonGenerator g = f.createJsonGenerator(arg0);
                 g.writeStartArray();
-                for (E item : list) {
+                for (T item : list) {
                     try {
                         mapper.writeValue(g, converter.vertexFrameToData(item));
                     } catch (SerializationError e) {
