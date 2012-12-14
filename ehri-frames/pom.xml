@@ -8,7 +8,6 @@
 		<artifactId>ehri-data</artifactId>
 		<version>1.0</version>
 	</parent>
-
 	<artifactId>ehri-frames</artifactId>
 	<packaging>jar</packaging>
 	<description>ehri-frames</description>
@@ -39,7 +38,6 @@
 		</plugins>
 	</build>
 	<dependencies>
-
 		<!-- date time -->
 		<dependency>
 			<groupId>joda-time</groupId>

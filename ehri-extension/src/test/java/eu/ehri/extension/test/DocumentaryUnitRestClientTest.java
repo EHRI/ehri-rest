@@ -66,6 +66,7 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
                 response.getStatus());
         // TODO test if json is valid?
         // response.getEntity(String.class)
+        //System.out.println("POST Respons json: " + response.getEntity(String.class));
 
         // Get created doc via the response location?
         URI location = response.getLocation();

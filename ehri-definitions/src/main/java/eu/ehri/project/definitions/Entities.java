@@ -19,5 +19,6 @@ public class Entities {
     public static final String PERMISSION_GRANT = "permissionGrant";
     public static final String CONTENT_TYPE = "contentType";
     public static final String REVISION = "revision";
-    
+    public static final String CVOC_CONCEPT = "cvocConcept";
+    public static final String CVOC_TEXT = "cvocText";
 }
