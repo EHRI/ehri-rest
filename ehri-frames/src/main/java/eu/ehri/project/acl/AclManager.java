@@ -174,8 +174,16 @@ public class AclManager {
         List<PermissionGrant> grants = new LinkedList<PermissionGrant>();
         for (PermissionGrant grant : accessor.getPermissionGrants()) {
             if (target.asVertex().equals(grant.getTarget().asVertex())) {
-                if (((grant.getPermission().getMask() & permission.getMask()) == permission
-                        .getMask())) {
+
+                // Fetch the permission types corresponding to the nodes.
+                // FIXME: The identifier might not be the most stable way of
+                // id'ing a permission type.
+                PermissionType gt = PermissionType.withName(grant
+                        .getPermission().getIdentifier());
+                PermissionType pt = PermissionType.withName(permission
+                        .getIdentifier());
+
+                if (((gt.getMask() & pt.getMask()) == pt.getMask())) {
                     grants.add(grant);
                 }
             }

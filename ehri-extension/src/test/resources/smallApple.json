@@ -1,14 +1,14 @@
 {
+  "type": "cvocConcept",
   "data": {
-    "isA": "cvocConcept",
     "identifier": "apple"
   },
   "relationships": {
     "prefLabel": [
       {
+        "type": "cvocText",
         "data": {
           "identifier": "apple-someid", 
-          "isA": "cvocText",
           "languageCode": "en-US",
           "content": "apple"
         }

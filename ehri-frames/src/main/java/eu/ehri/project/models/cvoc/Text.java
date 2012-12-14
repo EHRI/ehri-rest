@@ -2,7 +2,7 @@ package eu.ehri.project.models.cvoc;
 
 import com.tinkerpop.frames.Property;
 
-import eu.ehri.project.models.EntityTypes;
+import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.AccessibleEntity;
 
@@ -16,7 +16,7 @@ import eu.ehri.project.models.base.AccessibleEntity;
  * @author paulboon
  *
  */
-@EntityType(EntityTypes.CVOC_TEXT)
+@EntityType(EntityClass.CVOC_TEXT)
 public interface Text extends AccessibleEntity {
 	// Note: if we don't need the identifier, permission and history, 
 	// we could just extend VertexFrame

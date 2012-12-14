@@ -27,19 +27,19 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 
 import eu.ehri.extension.errors.BadRequester;
+import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.models.EntityTypes;
 import eu.ehri.project.models.cvoc.Concept;
 
 /**
  * Provides a RESTfull interface for the cvoc.Concept.
  */
-@Path(EntityTypes.CVOC_CONCEPT)
+@Path(Entities.CVOC_CONCEPT)
 public class CvocConceptResource extends EhriNeo4jFramedResource<Concept> {
 
     public CvocConceptResource(@Context GraphDatabaseService database) {
@@ -132,7 +132,7 @@ public class CvocConceptResource extends EhriNeo4jFramedResource<Concept> {
     public StreamingOutput getCvocNarrowerConcepts(@PathParam("id") String id)
             throws ItemNotFound, PermissionDenied, BadRequester {
 
-    	Concept concept = views.detail(graph.getVertex(id, cls), getRequesterUserProfile());
+    	Concept concept = views.detail(manager.getFrame(id, cls), getRequesterUserProfile());
  
     	return getListAsJson(concept.getNarrowerConcepts());
     }
@@ -144,7 +144,7 @@ public class CvocConceptResource extends EhriNeo4jFramedResource<Concept> {
 	 * Note: the internal vertex id's are used now, but we want identifiers
      */
     @POST
-    @Path("/{id:\\d+}/narrower/{id_narrower:\\d+}")
+    @Path("/{id:.+}/narrower/{id_narrower:.+}")
     public Response addNarrowerCvocConcept(String json, 
     		@PathParam("id") String id,
     		@PathParam("id_narrower") String id_narrower) throws PermissionDenied,
@@ -153,8 +153,8 @@ public class CvocConceptResource extends EhriNeo4jFramedResource<Concept> {
     	    	
 		Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
 		try {
-			Concept concept = views.detail(graph.getVertex(id, cls), getRequesterUserProfile());
-			Concept narrowerConcept = views.detail(graph.getVertex(id_narrower, cls), getRequesterUserProfile());
+			Concept concept = views.detail(manager.getFrame(id, cls), getRequesterUserProfile());
+			Concept narrowerConcept = views.detail(manager.getFrame(id_narrower, cls), getRequesterUserProfile());
 			concept.addNarrowerConcept(narrowerConcept);
 		    tx.success();
 		    return Response.status(Status.OK).build();
@@ -171,7 +171,7 @@ public class CvocConceptResource extends EhriNeo4jFramedResource<Concept> {
      *  by deleting the edge, not the vertex of the narrower concept 
      */
     @DELETE
-    @Path("/{id:\\d+}/narrower/{id_narrower:\\d+}")
+    @Path("/{id:.+}/narrower/{id_narrower:.+}")
     public Response removeNarrowerCvocConcept(String json, 
     		@PathParam("id") String id,
     		@PathParam("id_narrower") String id_narrower) throws PermissionDenied,
@@ -180,8 +180,8 @@ public class CvocConceptResource extends EhriNeo4jFramedResource<Concept> {
     	    	
 		Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
 		try {
-			Concept concept = views.detail(graph.getVertex(id, cls), getRequesterUserProfile());
-			Concept narrowerConcept = views.detail(graph.getVertex(id_narrower, cls), getRequesterUserProfile());
+			Concept concept = views.detail(manager.getFrame(id, cls), getRequesterUserProfile());
+			Concept narrowerConcept = views.detail(manager.getFrame(id_narrower, cls), getRequesterUserProfile());
 			concept.removeNarrowerConcept(narrowerConcept);
 
 		    tx.success();
@@ -200,7 +200,7 @@ public class CvocConceptResource extends EhriNeo4jFramedResource<Concept> {
     public StreamingOutput getCvocBroaderConcepts(@PathParam("id") String id)
             throws ItemNotFound, PermissionDenied, BadRequester {
     	
-    	Concept concept = views.detail(graph.getVertex(id, cls), getRequesterUserProfile());
+    	Concept concept = views.detail(manager.getFrame(id, cls), getRequesterUserProfile());
 
     	return getListAsJson(concept.getBroaderConcepts());
     }
@@ -212,7 +212,7 @@ public class CvocConceptResource extends EhriNeo4jFramedResource<Concept> {
     public StreamingOutput getCvocRelatedConcepts(@PathParam("id") String id)
             throws ItemNotFound, PermissionDenied, BadRequester {
     	
-    	Concept concept = views.detail(graph.getVertex(id, cls), getRequesterUserProfile());
+    	Concept concept = views.detail(manager.getFrame(id, cls), getRequesterUserProfile());
 
     	return getListAsJson(concept.getRelatedConcepts());
     }
@@ -223,7 +223,7 @@ public class CvocConceptResource extends EhriNeo4jFramedResource<Concept> {
     public StreamingOutput getCvocRelatedByConcepts(@PathParam("id") String id)
             throws ItemNotFound, PermissionDenied, BadRequester {
     	
-    	Concept concept = views.detail(graph.getVertex(id, cls), getRequesterUserProfile());
+    	Concept concept = views.detail(manager.getFrame(id, cls), getRequesterUserProfile());
 
     	return getListAsJson(concept.getRelatedByConcepts());
     }
@@ -232,7 +232,7 @@ public class CvocConceptResource extends EhriNeo4jFramedResource<Concept> {
      * Add a relation by creating the 'related' edge between the two concepts, no vertex created 
      */
     @POST
-    @Path("/{id:\\d+}/related/{id_related:\\d+}")
+    @Path("/{id:.+}/related/{id_related:.+}")
     public Response addRelatedCvocConcept(String json, 
     		@PathParam("id") String id,
     		@PathParam("id_related") String id_related) throws PermissionDenied,
@@ -241,8 +241,8 @@ public class CvocConceptResource extends EhriNeo4jFramedResource<Concept> {
     	    	
 		Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
 		try {
-			Concept concept = views.detail(graph.getVertex(id, cls), getRequesterUserProfile());
-			Concept relatedConcept = views.detail(graph.getVertex(id_related, cls), getRequesterUserProfile());
+			Concept concept = views.detail(manager.getFrame(id, cls), getRequesterUserProfile());
+			Concept relatedConcept = views.detail(manager.getFrame(id_related, cls), getRequesterUserProfile());
 			concept.addRelatedConcept(relatedConcept);
 		    tx.success();
 		    return Response.status(Status.OK).build();
@@ -258,7 +258,7 @@ public class CvocConceptResource extends EhriNeo4jFramedResource<Concept> {
      *  Remove a relation by deleting the edge, not the vertex of the related concept 
      */
     @DELETE
-    @Path("/{id:\\d+}/related/{id_related:\\d+}")
+    @Path("/{id:.+}/related/{id_related:.+}")
     public Response removeRelatedCvocConcept(String json, 
     		@PathParam("id") String id,
     		@PathParam("id_related") String id_related) throws PermissionDenied,
@@ -267,8 +267,8 @@ public class CvocConceptResource extends EhriNeo4jFramedResource<Concept> {
     	    	
 		Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
 		try {
-			Concept concept = views.detail(graph.getVertex(id, cls), getRequesterUserProfile());
-			Concept relatedConcept = views.detail(graph.getVertex(id_related, cls), getRequesterUserProfile());
+			Concept concept = views.detail(manager.getFrame(id, cls), getRequesterUserProfile());
+			Concept relatedConcept = views.detail(manager.getFrame(id_related, cls), getRequesterUserProfile());
 			concept.removeRelatedConcept(relatedConcept);
 
 		    tx.success();

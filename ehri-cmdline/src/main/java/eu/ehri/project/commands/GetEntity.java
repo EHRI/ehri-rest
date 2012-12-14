@@ -5,8 +5,6 @@ import org.apache.commons.cli.ParseException;
 
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
-import com.tinkerpop.frames.VertexFrame;
-
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.models.EntityClass;
@@ -47,6 +45,7 @@ public class GetEntity extends BaseCommand implements Command {
      * @param args
      * @throws Exception
      */
+    @SuppressWarnings("unchecked")
     public int execWithOptions(final FramedGraph<Neo4jGraph> graph,
             CommandLine cmdLine) throws Exception {
 

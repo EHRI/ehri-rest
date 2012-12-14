@@ -11,19 +11,20 @@ import org.junit.Test;
 import org.neo4j.graphdb.Transaction;
 
 import com.tinkerpop.blueprints.Vertex;
+import com.tinkerpop.blueprints.TransactionalGraph.Conclusion;
 
-import eu.ehri.project.core.GraphHelpers;
-import eu.ehri.project.models.EntityTypes;
+import eu.ehri.project.definitions.Entities;
+import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.UserProfile;
-import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Text;
-import eu.ehri.project.views.Views;
+import eu.ehri.project.persistance.Converter;
+import eu.ehri.project.views.Crud;
+import eu.ehri.project.views.impl.CrudViews;
 
 public class CvocTest extends ModelTestBase {
-   
-	
+   	
 	/**
 	 * Just play a bit with a small 'graph' of concepts. 
 	 * 
@@ -36,21 +37,18 @@ public class CvocTest extends ModelTestBase {
 	@Test
 	public void testConceptHierarchy() throws Exception {
 		// Fruit, Apples and Bananas etc.
-		
-		GraphHelpers helpers = new GraphHelpers(this.graph.getBaseGraph().getRawGraph());
-		helpers.createIndex(EntityTypes.CVOC_CONCEPT, Vertex.class);
-		
+				
 	    Map<String, Object> data = new HashMap<String, Object>() {{put(AccessibleEntity.IDENTIFIER_KEY, "fruit");}};
-		Vertex v_fruit = helpers.createIndexedVertex(data, EntityTypes.CVOC_CONCEPT);
+	    Vertex v_fruit = manager.createVertex("fruit_id", EntityClass.CVOC_CONCEPT, data);
 
 	    data = new HashMap<String, Object>() {{put(AccessibleEntity.IDENTIFIER_KEY, "apples");}};
-	    Vertex v_apples = helpers.createIndexedVertex(data, EntityTypes.CVOC_CONCEPT);
+	    Vertex v_apples = manager.createVertex("applies_id", EntityClass.CVOC_CONCEPT, data);
 
 	    data = new HashMap<String, Object>() {{put(AccessibleEntity.IDENTIFIER_KEY, "bananas");}};
-	    Vertex v_bananas = helpers.createIndexedVertex(data, EntityTypes.CVOC_CONCEPT);
+	    Vertex v_bananas = manager.createVertex("bananas_id", EntityClass.CVOC_CONCEPT, data);
 
 	    data = new HashMap<String, Object>() {{put(AccessibleEntity.IDENTIFIER_KEY, "trees");}};
-	    Vertex v_trees = helpers.createIndexedVertex(data, EntityTypes.CVOC_CONCEPT);
+	    Vertex v_trees = manager.createVertex("trees_id", EntityClass.CVOC_CONCEPT, data);
 
 		// OK, so now we have fruit and more....
 		// See if we can frame them
@@ -100,18 +98,18 @@ public class CvocTest extends ModelTestBase {
         // Data structure representing a not-yet-created collection.
         // Using double-brace initialization to ease the pain.
         return new HashMap<String, Object>() {{
-            put("id", null);
-            put("data", new HashMap<String, Object>() {{
+            put(Converter.ID_KEY, null);
+            put(Converter.TYPE_KEY, Entities.CVOC_CONCEPT);
+            put(Converter.DATA_KEY, new HashMap<String, Object>() {{
                 put(AccessibleEntity.IDENTIFIER_KEY, "apple");
-                put(EntityType.KEY, EntityTypes.CVOC_CONCEPT);
             }});
-            put("relationships", new HashMap<String, Object>() {{
+            put(Converter.REL_KEY, new HashMap<String, Object>() {{
                 put("prefLabel", new LinkedList<HashMap<String, Object>>() {{
                     add(new HashMap<String, Object>() {{
-                        put("id", null);
-                        put("data", new HashMap<String, Object>() {{
+                        put(Converter.ID_KEY, null);
+                        put(Converter.TYPE_KEY, Entities.CVOC_TEXT);
+                        put(Converter.DATA_KEY, new HashMap<String, Object>() {{
                             put(AccessibleEntity.IDENTIFIER_KEY, "apple-someid");
-                            put(EntityType.KEY, EntityTypes.CVOC_TEXT);
                             put(Text.LANGUAGE, TEST_LABEL_LANG);
                             put(Text.CONTENT, TEST_LABEL_CONTENT);
                         }});
@@ -124,21 +122,14 @@ public class CvocTest extends ModelTestBase {
     
 	@Test
 	public void testCreateConceptWithLabel() throws Exception {
-		UserProfile validUser = helper.getTestFrame("mike", UserProfile.class);
-        Views<Concept> conceptViews = new Views<Concept>(graph,
+		UserProfile validUser = manager.getFrame("mike", UserProfile.class);
+        Crud<Concept> conceptViews = new CrudViews<Concept>(graph,
         		Concept.class);
         Map<String, Object> bundle = getAppleTestBundle();
  
         Concept concept = null;
-		Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
-		try {
-	        concept = conceptViews.create(bundle, validUser);
-			tx.success();
-		} catch (Exception e) {
-			tx.failure();
-		} finally {
-			tx.finish();
-		}
+        concept = conceptViews.create(bundle, validUser);
+        graph.getBaseGraph().stopTransaction(Conclusion.SUCCESS);
 
 		// Does the label have the correct properties
 		assertNotNull(concept);

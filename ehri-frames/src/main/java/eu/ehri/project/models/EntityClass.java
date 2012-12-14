@@ -3,6 +3,8 @@ package eu.ehri.project.models;
 import com.tinkerpop.frames.VertexFrame;
 
 import eu.ehri.project.definitions.Entities;
+import eu.ehri.project.models.cvoc.Concept;
+import eu.ehri.project.models.cvoc.Text;
 import eu.ehri.project.models.idgen.AccessibleEntityIdGenerator;
 import eu.ehri.project.models.idgen.DocumentaryUnitIdGenerator;
 import eu.ehri.project.models.idgen.GenericIdGenerator;
@@ -37,7 +39,9 @@ public enum EntityClass {
     PERMISSION(Entities.PERMISSION, "pm", Permission.class),
     PERMISSION_GRANT(Entities.PERMISSION_GRANT, "pmg", PermissionGrant.class),
     CONTENT_TYPE(Entities.CONTENT_TYPE, "ct", ContentType.class),
-    REVISION(Entities.REVISION, "rv", Revision.class);
+    REVISION(Entities.REVISION, "rv", Revision.class),
+    CVOC_CONCEPT(Entities.CVOC_CONCEPT, "cv", Concept.class),
+    CVOC_TEXT(Entities.CVOC_TEXT, "cvt", Text.class);
     // @formatter:on
 
     // Accessors.

@@ -3,7 +3,7 @@ package eu.ehri.project.models.cvoc;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.frames.Adjacency;
 
-import eu.ehri.project.models.EntityTypes;
+import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.Dependent;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
@@ -21,7 +21,7 @@ import eu.ehri.project.models.base.AccessibleEntity;
  * @author paulboon
  *
  */
-@EntityType(EntityTypes.CVOC_CONCEPT)
+@EntityType(EntityClass.CVOC_CONCEPT)
 public interface Concept extends AccessibleEntity {
     //public static final String BROADER = "broader";
     public static final String NARROWER = "narrower";

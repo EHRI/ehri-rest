@@ -30,6 +30,7 @@ public class CmdEntryPoint extends BaseCommand {
         mmap.put(ListEntities.NAME, ListEntities.class);
         mmap.put(GetEntity.NAME, GetEntity.class);
         mmap.put(LoadFixtures.NAME, LoadFixtures.class);
+        mmap.put(Initialize.NAME, Initialize.class);
         COMMANDS = Collections.unmodifiableMap(mmap);
     };
 

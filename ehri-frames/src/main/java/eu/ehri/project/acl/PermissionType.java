@@ -1,12 +1,12 @@
 package eu.ehri.project.acl;
 
 public enum PermissionType {
-    CREATE("create", 0x1),
-    UPDATE("update", 0x2),
-    DELETE("delete", 0x4),
-    GRANT("grant", 0x8),
-    ANNOTATE("annotate", 0x16),
-    OWNER("owner", 0x23);
+    CREATE("create", 1),
+    UPDATE("update", 2),
+    DELETE("delete", 4),
+    ANNOTATE("annotate", 8),
+    OWNER("owner", 15), // Implies C,U,D,A
+    GRANT("grant", 16);
     
     private final String name;
     private final int mask;

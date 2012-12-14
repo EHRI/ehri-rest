@@ -1,13 +1,13 @@
 {
+  "type": "cvocConcept",
   "data": {
-    "isA": "cvocConcept",
     "identifier": "fruit"
   },
   "relationships": {
     "prefLabel": [
       {
+        "type": "cvocText",
         "data": {
-          "isA": "cvocText",
           "languageCode": "en",
           "content": "fruit"
         }
@@ -15,15 +15,15 @@
       ],
       "narrower": [
         {
+          "type": "cvocConcept",
           "data": {
-          "isA": "cvocConcept",
-          "identifier": "apple"
+            "identifier": "apple"
           }
         },
         {
+          "type": "cvocConcept",
           "data": {
-          "isA": "cvocConcept",
-          "identifier": "banana"
+            "identifier": "banana"
           }
         }            
     ]

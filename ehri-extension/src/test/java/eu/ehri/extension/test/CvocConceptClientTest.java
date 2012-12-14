@@ -94,8 +94,8 @@ public class CvocConceptClientTest  extends BaseRestClientTest {
      */
     @Test
     public void testNarrowerCvocConcepts() throws Exception {
-        String jsonFruitTestStr =  "{\"data\":{\"identifier\": \"fruit\",\"isA\":\"cvocConcept\"}}";
-        String jsonAppleTestStr =  "{\"data\":{\"identifier\": \"apple\",\"isA\":\"cvocConcept\"}}";
+        String jsonFruitTestStr =  "{\"type\":\"cvocConcept\", \"data\":{\"identifier\": \"fruit\"}}";
+        String jsonAppleTestStr =  "{\"type\":\"cvocConcept\", \"data\":{\"identifier\": \"apple\"}}";
         
         ClientResponse response;
         
@@ -165,8 +165,8 @@ public class CvocConceptClientTest  extends BaseRestClientTest {
      */
     @Test
     public void testRelatedCvocConcepts() throws Exception {
-        String jsonTreeTestStr =  "{\"data\":{\"identifier\": \"tree\",\"isA\":\"cvocConcept\"}}";
-        String jsonAppleTestStr =  "{\"data\":{\"identifier\": \"apple\",\"isA\":\"cvocConcept\"}}";
+        String jsonTreeTestStr =  "{\"type\":\"cvocConcept\", \"data\":{\"identifier\": \"tree\"}}";
+        String jsonAppleTestStr =  "{\"type\":\"cvocConcept\", \"data\":{\"identifier\": \"apple\"}}";
         
         ClientResponse response;
         

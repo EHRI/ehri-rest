@@ -36,6 +36,7 @@ import eu.ehri.project.persistance.BundleDAO;
 import eu.ehri.project.persistance.Converter;
 import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.test.utils.fixtures.FixtureLoader;
+import eu.ehri.project.utils.GraphInitializer;
 
 /**
  * Load data from YAML fixtures.
@@ -72,8 +73,8 @@ public class YamlFixtureLoader implements FixtureLoader {
     }
 
     private void loadFixtures() {
-        loadFixtureFile(this.getClass().getClassLoader()
-                .getResourceAsStream("initial.yaml"));
+        // Initialize the DB
+        new GraphInitializer(graph).initialize();
         loadFixtureFile(this.getClass().getClassLoader()
                 .getResourceAsStream("testdata.yaml"));
     }
