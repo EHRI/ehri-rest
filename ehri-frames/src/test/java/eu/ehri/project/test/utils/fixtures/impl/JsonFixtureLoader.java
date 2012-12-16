@@ -5,9 +5,10 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.collections.map.MultiValueMap;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.neo4j.graphdb.Transaction;
+
+import com.google.common.collect.LinkedListMultimap;
 import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
@@ -45,7 +46,7 @@ public class JsonFixtureLoader implements FixtureLoader {
                 EntityClass isa = EntityClass.withName((String) namedNode.get(EntityType.TYPE_KEY));
                 Map<String, Object> data = (Map<String, Object>) namedNode
                         .get("data");
-                Bundle bundle = new Bundle(id, isa, data, new MultiValueMap());
+                Bundle bundle = new Bundle(id, isa, data, LinkedListMultimap.<String,Bundle>create());
                 manager.createVertex(id, bundle.getType(), bundle.getData(),
                         bundle.getPropertyKeys(),
                         bundle.getUniquePropertyKeys());

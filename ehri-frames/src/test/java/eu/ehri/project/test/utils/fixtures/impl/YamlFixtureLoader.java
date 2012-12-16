@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.commons.collections.map.MultiValueMap;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
@@ -15,6 +14,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 
+import com.google.common.collect.LinkedListMultimap;
+import com.google.common.collect.ListMultimap;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.blueprints.Vertex;
@@ -83,7 +84,7 @@ public class YamlFixtureLoader implements FixtureLoader {
     private void loadFixtureFile(InputStream yamlStream) {
         Yaml yaml = new Yaml();
         try {
-            Map<Vertex, MultiValueMap> links = new HashMap<Vertex, MultiValueMap>();
+            Map<Vertex, ListMultimap<String,String>> links = new HashMap<Vertex, ListMultimap<String,String>>();
             for (Object data : yaml.loadAll(yamlStream)) {
                 for (Object node : (List<?>) data) {
                     if (node instanceof Map) {
@@ -96,12 +97,12 @@ public class YamlFixtureLoader implements FixtureLoader {
             // Finally, go through and wire up all the non-dependent
             // relationships
             logger.debug("Linking data...");
-            for (Entry<Vertex, MultiValueMap> entry : links.entrySet()) {
+            for (Entry<Vertex, ListMultimap<String,String>> entry : links.entrySet()) {
                 logger.debug("Setting links for: {}", entry.getKey());
                 Vertex src = entry.getKey();
-                MultiValueMap rels = entry.getValue();
-                for (Object relname : rels.keySet()) {
-                    for (Object target : rels.getCollection(relname)) {
+                ListMultimap<String,String> rels = entry.getValue();
+                for (String relname : rels.keySet()) {
+                    for (String target : rels.get(relname)) {
                         Vertex dst = manager.getVertex((String) target);
                         addRelationship(src, dst, (String) relname);
                     }
@@ -174,7 +175,7 @@ public class YamlFixtureLoader implements FixtureLoader {
      * @throws IntegrityError
      * @throws ItemNotFound
      */
-    private void importNode(Map<Vertex, MultiValueMap> links,
+    private void importNode(Map<Vertex, ListMultimap<String,String>> links,
             Map<String, Object> node) throws DeserializationError,
             ValidationError, IntegrityError, ItemNotFound {
         String id = (String) node.get(Converter.ID_KEY);
@@ -198,7 +199,7 @@ public class YamlFixtureLoader implements FixtureLoader {
         VertexFrame frame = persister.createOrUpdate(entityBundle,
                 VertexFrame.class);
 
-        MultiValueMap linkRels = getLinkedRelations(nodeRels);
+        ListMultimap<String,String> linkRels = getLinkedRelations(nodeRels);
         if (!linkRels.isEmpty()) {
             links.put(frame.asVertex(), linkRels);
         }
@@ -206,14 +207,14 @@ public class YamlFixtureLoader implements FixtureLoader {
 
     private Bundle createBundle(final String id, final EntityClass type,
             final Map<String, Object> nodeData,
-            final MultiValueMap dependentRelations) throws DeserializationError {
+            final ListMultimap<String,Map<?,?>> dependentRelations) throws DeserializationError {
         @SuppressWarnings("serial")
         Map<String, Object> data = new HashMap<String, Object>() {
             {
                 put(Converter.ID_KEY, id);
                 put(Converter.TYPE_KEY, type.getName());
                 put(Converter.DATA_KEY, nodeData);
-                put(Converter.REL_KEY, dependentRelations);
+                put(Converter.REL_KEY, dependentRelations.asMap());
             }
         };
         return new Converter().dataToBundle(data);
@@ -225,8 +226,8 @@ public class YamlFixtureLoader implements FixtureLoader {
      * @param data
      * @return
      */
-    private MultiValueMap getLinkedRelations(Map<String, Object> data) {
-        MultiValueMap rels = new MultiValueMap();
+    private ListMultimap<String,String> getLinkedRelations(Map<String, Object> data) {
+        ListMultimap<String,String> rels = LinkedListMultimap.create();
         if (data != null) {
             for (Entry<String, Object> entry : data.entrySet()) {
                 String relName = entry.getKey();
@@ -234,11 +235,11 @@ public class YamlFixtureLoader implements FixtureLoader {
                 if (relValue instanceof List) {
                     for (Object relation : (List<?>) relValue) {
                         if (relation instanceof String) {
-                            rels.put(relName, relation);
+                            rels.put(relName, (String)relation);
                         }
                     }
                 } else if (relValue instanceof String) {
-                    rels.put(relName, relValue);
+                    rels.put(relName, (String)relValue);
                 }
             }
         }
@@ -251,8 +252,8 @@ public class YamlFixtureLoader implements FixtureLoader {
      * @param data
      * @return
      */
-    private MultiValueMap getDependentRelations(Map<String, Object> data) {
-        MultiValueMap rels = new MultiValueMap();
+    private ListMultimap<String,Map<?,?>> getDependentRelations(Map<String, Object> data) {
+        ListMultimap<String,Map<?,?>> rels = LinkedListMultimap.create();
         if (data != null) {
             for (Entry<String, Object> entry : data.entrySet()) {
                 String relName = entry.getKey();
@@ -260,11 +261,11 @@ public class YamlFixtureLoader implements FixtureLoader {
                 if (relValue instanceof List) {
                     for (Object relation : (List<?>) relValue) {
                         if (relation instanceof Map) {
-                            rels.put(relName, relation);
+                            rels.put(relName, (Map<?,?>)relation);
                         }
                     }
                 } else if (relValue instanceof Map) {
-                    rels.put(relName, relValue);
+                    rels.put(relName, (Map<?,?>)relValue);
                 }
             }
         }

@@ -4,7 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.collections.map.MultiValueMap;
+import com.google.common.collect.LinkedListMultimap;
+import com.google.common.collect.ListMultimap;
 
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
@@ -21,7 +22,7 @@ public class Bundle {
     protected final String id;
     protected final EntityClass type;
     protected final Map<String, Object> data;
-    protected final MultiValueMap relations;
+    protected final ListMultimap<String,Bundle> relations;
 
     /**
      * Constructor.
@@ -32,7 +33,7 @@ public class Bundle {
      * @param relations
      */
     public Bundle(String id, EntityClass type, final Map<String, Object> data,
-            final MultiValueMap relations) {
+            final ListMultimap<String,Bundle> relations) {
         this.id = id;
         this.data = new HashMap<String, Object>(data);
         this.type = type;
@@ -47,7 +48,7 @@ public class Bundle {
      * @param relations
      */
     public Bundle(EntityClass type, final Map<String, Object> data,
-            final MultiValueMap relations) {
+            final ListMultimap<String,Bundle> relations) {
         this(null, type, data, relations);
     }
 
@@ -59,7 +60,7 @@ public class Bundle {
      * @param relations
      */
     public Bundle(EntityClass type, final Map<String, Object> data) {
-        this(null, type, data, new MultiValueMap());
+        this(null, type, data, LinkedListMultimap.<String,Bundle>create());
     }
 
     /**
@@ -107,7 +108,7 @@ public class Bundle {
      * 
      * @return
      */
-    public MultiValueMap getRelations() {
+    public ListMultimap<String,Bundle> getRelations() {
         return relations;
     }
 

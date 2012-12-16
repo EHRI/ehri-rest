@@ -2,7 +2,8 @@ package eu.ehri.project.persistance.impl;
 
 import java.util.Map;
 
-import org.apache.commons.collections.map.MultiValueMap;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
 
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.annotations.EntityType;
@@ -14,7 +15,7 @@ import eu.ehri.project.persistance.Bundle;
  * Class responsible for validating bundles.
  * 
  * @author mike
- *
+ * 
  */
 public final class BundleFieldValidator implements BundleValidator {
 
@@ -24,12 +25,13 @@ public final class BundleFieldValidator implements BundleValidator {
 
     private final Bundle bundle;
 
-    private final MultiValueMap errors = new MultiValueMap();
-    
+    private final ListMultimap<String, String> errors = ArrayListMultimap
+            .create();
+
     public BundleFieldValidator(Bundle bundle) {
-       this.bundle = bundle;
+        this.bundle = bundle;
     }
-    
+
     /**
      * Validate the data in the bundle, according to the target class, and
      * ensure it is fit for updating in the graph.
@@ -56,13 +58,13 @@ public final class BundleFieldValidator implements BundleValidator {
                             "Identifier is present ('%s') but insert operation specified.",
                             bundle.getId()));
         validate();
-    }    
-    
+    }
+
     public void validate() throws ValidationError {
         checkFields();
         checkIsA();
         if (!errors.isEmpty())
-            throw new ValidationError(bundle.getBundleClass(), errors);        
+            throw new ValidationError(bundle.getBundleClass(), errors);
     }
 
     /**
@@ -75,7 +77,7 @@ public final class BundleFieldValidator implements BundleValidator {
             checkField(key);
         }
     }
-    
+
     /**
      * Check the data holds a given field, accounting for the
      * 
@@ -95,7 +97,7 @@ public final class BundleFieldValidator implements BundleValidator {
                 }
             }
         }
-    }    
+    }
 
     /**
      * @param data
@@ -103,11 +105,12 @@ public final class BundleFieldValidator implements BundleValidator {
      * @param errors
      */
     private void checkIsA() {
-        EntityType annotation = bundle.getBundleClass().getAnnotation(EntityType.class);
+        EntityType annotation = bundle.getBundleClass().getAnnotation(
+                EntityType.class);
         if (annotation == null) {
-            errors.put("class",
-                    String.format("%s: '%s'", INVALID_ENTITY, bundle.getBundleClass().getName()));
+            errors.put("class", String.format("%s: '%s'", INVALID_ENTITY,
+                    bundle.getBundleClass().getName()));
         }
     }
-    
+
 }

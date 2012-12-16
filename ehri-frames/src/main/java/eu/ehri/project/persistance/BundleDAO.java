@@ -5,9 +5,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.apache.commons.collections.map.MultiValueMap;
 import org.neo4j.graphdb.Transaction;
 
+import com.google.common.collect.ListMultimap;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
@@ -128,15 +128,14 @@ public final class BundleDAO {
     private Integer deleteCount(Bundle bundle, Integer count)
             throws ValidationError, ItemNotFound {
         Integer c = count;
-        MultiValueMap fetch = bundle.getRelations();
+        ListMultimap<String,Bundle> fetch = bundle.getRelations();
         Map<String, Direction> dependents = ClassUtils
                 .getDependentRelations(bundle.getBundleClass());
-        for (Object key : fetch.keySet()) {
-            for (Object obj : fetch.getCollection(key)) {
+        for (String key : fetch.keySet()) {
+            for (Bundle sub : fetch.get(key)) {
                 // FIXME: Make it so we don't typically do this check for
                 // Dependent relations
                 if (dependents.containsKey(key)) {
-                    Bundle sub = (Bundle) obj;
                     c = deleteCount(sub, c);
                 }
             }
@@ -233,15 +232,13 @@ public final class BundleDAO {
      * @throws ItemNotFound
      */
     private void createDependents(Vertex master, Class<?> cls,
-            MultiValueMap relations) throws ValidationError, IntegrityError {
+            ListMultimap<String,Bundle> relations) throws ValidationError, IntegrityError {
         Map<String, Direction> dependents = ClassUtils
                 .getDependentRelations(cls);
-        for (Object key : relations.keySet()) {
+        for (String key : relations.keySet()) {
             String relation = (String) key;
             if (dependents.containsKey(relation)) {
-
-                for (Object obj : relations.getCollection(key)) {
-                    Bundle bundle = (Bundle) obj;
+                for (Bundle bundle : relations.get(key)) {
                     Vertex child = createInner(bundle);
                     createChildRelationship(master, child, relation,
                             dependents.get(relation));
@@ -262,7 +259,7 @@ public final class BundleDAO {
      * @throws ItemNotFound
      */
     private void updateDependents(Vertex master, Class<?> cls,
-            MultiValueMap relations) throws ValidationError, IntegrityError,
+            ListMultimap<String,Bundle> relations) throws ValidationError, IntegrityError,
             ItemNotFound {
 
         // Get a list of dependent relationships for this class, and their
@@ -276,12 +273,11 @@ public final class BundleDAO {
         deleteMissingFromUpdateSet(master, dependents, updating);
 
         // Now go throw and create or update the new subtrees.
-        for (Object key : relations.keySet()) {
+        for (String key : relations.keySet()) {
             String relation = (String) key;
             if (dependents.containsKey(relation)) {
 
-                for (Object obj : relations.getCollection(key)) {
-                    Bundle bundle = (Bundle) obj;
+                for (Bundle bundle : relations.get(key)) {
                     Vertex child = createOrUpdateInner(bundle);
                     Direction direction = dependents.get(relation);
 
@@ -300,13 +296,11 @@ public final class BundleDAO {
         }
     }
 
-    private Set<String> getUpdateSet(MultiValueMap relations) {
+    private Set<String> getUpdateSet(ListMultimap<String,Bundle> relations) {
         Set<String> updating = new HashSet<String>();
-        for (Object relation : relations.keySet()) {
-            for (Object child : relations.getCollection(relation)) {
-                if (child instanceof Bundle) {
-                    updating.add(((Bundle) child).getId());
-                }
+        for (String relation : relations.keySet()) {
+            for (Bundle child : relations.get(relation)) {
+                updating.add(child.getId());
             }
         }
         return updating;

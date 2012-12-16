@@ -3,14 +3,13 @@ package eu.ehri.project.persistance;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.commons.collections.map.MultiValueMap;
-
+import com.google.common.collect.LinkedListMultimap;
+import com.google.common.collect.ListMultimap;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.VertexFrame;
 
@@ -152,7 +151,7 @@ public final class Converter {
                     .get(DATA_KEY);
             if (props == null)
                 throw new DeserializationError("No item data map found");
-            MultiValueMap relationbundles = new MultiValueMap();
+            ListMultimap<String,Bundle> relationbundles = LinkedListMultimap.create();
 
             Map<String, List<Map<String, Object>>> relations = (Map<String, List<Map<String, Object>>>) data
                     .get(REL_KEY);
@@ -185,12 +184,10 @@ public final class Converter {
         data.put(DATA_KEY, bundle.getData());
 
         Map<String, List<Map<String, Object>>> relations = new HashMap<String, List<Map<String, Object>>>();
-        for (Object key : bundle.getRelations().keySet()) {
+        ListMultimap<String,Bundle> crelations = bundle.getRelations();
+        for (String key : crelations.keySet()) {
             List<Map<String, Object>> rels = new ArrayList<Map<String, Object>>();
-            @SuppressWarnings("unchecked")
-            Collection<Bundle> collection = bundle.getRelations()
-                    .getCollection(key);
-            for (Bundle subbundle : collection) {
+            for (Bundle subbundle : crelations.get(key)) {
                 rels.add(bundleToData(subbundle));
             }
             relations.put((String) key, rels);
@@ -226,15 +223,15 @@ public final class Converter {
         String id = (String) item.asVertex().getProperty(EntityType.ID_KEY);
         EntityClass type = EntityClass.withName((String) item.asVertex()
                 .getProperty(EntityType.TYPE_KEY));
-        MultiValueMap relations = getRelationData(item, depth,
+        ListMultimap<String,Bundle> relations = getRelationData(item, depth,
                 type.getEntityClass());
         return new Bundle(id, type,
                 getVertexData(item.asVertex()), relations);
     }
 
-    private <T extends VertexFrame> MultiValueMap getRelationData(T item, int depth,
+    private <T extends VertexFrame> ListMultimap<String,Bundle> getRelationData(T item, int depth,
             Class<?> cls) {
-        MultiValueMap relations = new MultiValueMap();
+        ListMultimap<String,Bundle> relations = LinkedListMultimap.create();
         if (depth > 0) {
             Map<String, Method> fetchMethods = ClassUtils.getFetchMethods(cls);
             for (Map.Entry<String, Method> entry : fetchMethods.entrySet()) {

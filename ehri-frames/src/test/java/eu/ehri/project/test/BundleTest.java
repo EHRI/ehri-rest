@@ -2,8 +2,6 @@ package eu.ehri.project.test;
 
 import static org.junit.Assert.*;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -96,16 +94,8 @@ public class BundleTest extends ModelTestBase {
                     + "' not found in index before delete test.");
         }
 
-        Collection<?> dates = bundle.getRelations().getCollection(
-                TemporalEntity.HAS_DATE);
-
-        // Dodginess! Manipulate the bundles relations directly
-        // by replacing the hasDate collection with one consisting
-        // of only one date.
-        bundle.getRelations().remove(TemporalEntity.HAS_DATE);
-        Collection<Bundle> newDates = new ArrayList<Bundle>();
-        newDates.add((Bundle)dates.iterator().next());
-        bundle.getRelations().putAll(TemporalEntity.HAS_DATE, newDates);
+        List<Bundle> dates = bundle.getRelations().removeAll(TemporalEntity.HAS_DATE);
+        bundle.getRelations().put(TemporalEntity.HAS_DATE, dates.get(0));
 
         BundleDAO persister = new BundleDAO(graph);
         persister.update(bundle, DocumentaryUnit.class);
