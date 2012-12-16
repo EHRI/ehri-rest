@@ -11,6 +11,7 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.index.IndexHits;
 import org.neo4j.graphdb.index.IndexManager;
 
+import com.google.common.base.Preconditions;
 import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.Element;
 import com.tinkerpop.blueprints.Index;
@@ -68,6 +69,8 @@ public final class SingleIndexGraphManager implements GraphManager {
     }
 
     public boolean exists(String id) {
+        Preconditions.checkNotNull(id,
+                "attempt determine existence of a vertex with a null id");
         return getIndex().count(EntityType.ID_KEY, id) > 0L;
     }
 
@@ -103,9 +106,8 @@ public final class SingleIndexGraphManager implements GraphManager {
     }
 
     public Vertex getVertex(String id) throws ItemNotFound {
-        if (id == null)
-            throw new IllegalArgumentException(
-                    "Attempting to fetch vertex with null id");
+        Preconditions
+                .checkNotNull(id, "attempt to fetch vertex with a null id");
         CloseableIterable<Vertex> query = getIndex().get(EntityType.ID_KEY, id);
         try {
             return query.iterator().next();
@@ -117,6 +119,8 @@ public final class SingleIndexGraphManager implements GraphManager {
     }
 
     public Vertex getVertex(String id, EntityClass type) throws ItemNotFound {
+        Preconditions
+                .checkNotNull(id, "attempt to fetch vertex with a null id");
         String queryStr = getLuceneQuery(EntityType.ID_KEY, id, type.getName());
         IndexHits<Node> rawQuery = getRawIndex().query(queryStr);
         // NB: Not using rawQuery.getSingle here so we throw NoSuchElement other
@@ -172,9 +176,11 @@ public final class SingleIndexGraphManager implements GraphManager {
     public Vertex createVertex(String id, EntityClass type,
             Map<String, Object> data, Collection<String> keys,
             Collection<String> uniqueKeys) throws IntegrityError {
+        Preconditions
+                .checkNotNull(id, "null vertex ID given for item creation");
         Index<Vertex> index = getIndex();
         Map<String, Object> indexData = getVertexData(id, type, data);
-        Collection<String> indexKeys = getVertexKeys(id, type, keys);
+        Collection<String> indexKeys = getVertexKeys(keys);
         try {
             checkUniqueness(index, uniqueKeys, data, null);
             checkExists(index, id);
@@ -218,9 +224,10 @@ public final class SingleIndexGraphManager implements GraphManager {
     public Vertex updateVertex(String id, EntityClass type,
             Map<String, Object> data, Collection<String> keys,
             Collection<String> uniqueKeys) throws IntegrityError, ItemNotFound {
+        Preconditions.checkNotNull(id, "null vertex ID given for item update");
         Index<Vertex> index = getIndex();
         Map<String, Object> indexData = getVertexData(id, type, data);
-        Collection<String> indexKeys = getVertexKeys(id, type, keys);
+        Collection<String> indexKeys = getVertexKeys(keys);
         CloseableIterable<Vertex> get = getIndex().get(EntityType.ID_KEY, id);
         try {
             try {
@@ -270,15 +277,6 @@ public final class SingleIndexGraphManager implements GraphManager {
             query.close();
         }
         return out;
-    }
-
-    private Index<Vertex> getIndex() {
-        Index<Vertex> index = graph.getBaseGraph().getIndex(INDEX_NAME,
-                Vertex.class);
-        if (index == null) {
-            index = graph.getBaseGraph().createIndex(INDEX_NAME, Vertex.class);
-        }
-        return index;
     }
 
     /**
@@ -405,8 +403,7 @@ public final class SingleIndexGraphManager implements GraphManager {
         return vdata;
     }
 
-    private Collection<String> getVertexKeys(String id, EntityClass type,
-            Collection<String> keys) {
+    private Collection<String> getVertexKeys(Collection<String> keys) {
         List<String> vkeys = new LinkedList<String>(keys);
         vkeys.add(EntityType.ID_KEY);
         vkeys.add(EntityType.TYPE_KEY);
@@ -421,5 +418,14 @@ public final class SingleIndexGraphManager implements GraphManager {
     private org.neo4j.graphdb.index.Index<Node> getRawIndex() {
         IndexManager index = graph.getBaseGraph().getRawGraph().index();
         return index.forNodes(INDEX_NAME);
+    }
+
+    private Index<Vertex> getIndex() {
+        Index<Vertex> index = graph.getBaseGraph().getIndex(INDEX_NAME,
+                Vertex.class);
+        if (index == null) {
+            index = graph.getBaseGraph().createIndex(INDEX_NAME, Vertex.class);
+        }
+        return index;
     }
 }
