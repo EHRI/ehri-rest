@@ -25,6 +25,8 @@ import eu.ehri.project.persistance.Bundle;
 
 public class BundleTest extends ModelTestBase {
 
+    private static final String ID = "c1";
+    
     private Converter converter;
 
     @Override
@@ -37,18 +39,15 @@ public class BundleTest extends ModelTestBase {
     @Test
     public void testSerialisation() throws SerializationError,
             DeserializationError, ItemNotFound {
-        DocumentaryUnit c1 = manager.getFrame("c1", DocumentaryUnit.class);
+        DocumentaryUnit c1 = manager.getFrame(ID, DocumentaryUnit.class);
         String json = converter.vertexFrameToJson(c1);
         Bundle bundle = converter.jsonToBundle(json);
-        // FIXME: Comparing ids fails because the deserialized on is an <int>
-        // instead
-        // of a long...
-        assertEquals(c1.getName(), bundle.getData().get("name"));
+        assertEquals(ID, bundle.getId());
     }
 
     public void testSaving() throws SerializationError, ValidationError,
             IntegrityError, ItemNotFound {
-        DocumentaryUnit c1 = manager.getFrame("c1", DocumentaryUnit.class);
+        DocumentaryUnit c1 = manager.getFrame(ID, DocumentaryUnit.class);
         assertEquals(1, toList(c1.getDescriptions()).size());
 
         Bundle bundle = converter.vertexFrameToBundle(c1);
@@ -63,7 +62,7 @@ public class BundleTest extends ModelTestBase {
     @Test
     public void testSavingWithDependentChanges() throws SerializationError,
             DeserializationError, ValidationError, IntegrityError, ItemNotFound {
-        DocumentaryUnit c1 = manager.getFrame("c1", DocumentaryUnit.class);
+        DocumentaryUnit c1 = manager.getFrame(ID, DocumentaryUnit.class);
         assertEquals(1, toList(c1.getDescriptions()).size());
         String json = converter.vertexFrameToJson(c1);
 
@@ -83,7 +82,7 @@ public class BundleTest extends ModelTestBase {
     @Test
     public void testDeletingDependents() throws SerializationError,
             ValidationError, IntegrityError, ItemNotFound {
-        DocumentaryUnit c1 = manager.getFrame("c1", DocumentaryUnit.class);
+        DocumentaryUnit c1 = manager.getFrame(ID, DocumentaryUnit.class);
         Bundle bundle = converter.vertexFrameToBundle(c1);
         assertEquals(2, toList(c1.getDatePeriods()).size());
         String dpid = "c1-dp2";
@@ -119,7 +118,7 @@ public class BundleTest extends ModelTestBase {
     @Test(expected = ItemNotFound.class)
     public void testDeletingWholeBundle() throws SerializationError,
             ValidationError, ItemNotFound {
-        DocumentaryUnit c1 = manager.getFrame("c1", DocumentaryUnit.class);
+        DocumentaryUnit c1 = manager.getFrame(ID, DocumentaryUnit.class);
         Bundle bundle = converter.vertexFrameToBundle(c1);
         assertEquals(2, toList(c1.getDatePeriods()).size());
         List<DatePeriod> dates = toList(manager.getFrames(
@@ -134,6 +133,6 @@ public class BundleTest extends ModelTestBase {
                         manager.getFrames(EntityClass.DATE_PERIOD,
                                 DatePeriod.class)).size());
         // Should raise NoSuchElementException
-        manager.getFrame("c1", DocumentaryUnit.class);
+        manager.getFrame(ID, DocumentaryUnit.class);
     }
 }
