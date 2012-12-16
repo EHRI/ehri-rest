@@ -10,6 +10,8 @@ import java.util.Map.Entry;
 
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.VertexFrame;
 
@@ -178,15 +180,15 @@ public final class Converter {
      * @return
      */
     public Map<String, Object> bundleToData(Bundle bundle) {
-        Map<String, Object> data = new HashMap<String, Object>();
+        Map<String, Object> data = Maps.newHashMap();
         data.put(ID_KEY, bundle.getId());
         data.put(TYPE_KEY, bundle.getType().getName());
         data.put(DATA_KEY, bundle.getData());
 
-        Map<String, List<Map<String, Object>>> relations = new HashMap<String, List<Map<String, Object>>>();
+        Map<String, List<Map<String, Object>>> relations = Maps.newHashMap();
         ListMultimap<String,Bundle> crelations = bundle.getRelations();
         for (String key : crelations.keySet()) {
-            List<Map<String, Object>> rels = new ArrayList<Map<String, Object>>();
+            List<Map<String, Object>> rels = Lists.newArrayList();
             for (Bundle subbundle : crelations.get(key)) {
                 rels.add(bundleToData(subbundle));
             }
@@ -220,6 +222,7 @@ public final class Converter {
      */
     public <T extends VertexFrame> Bundle vertexFrameToBundle(T item, int depth)
             throws SerializationError {
+        // FIXME: Try and move the logic for accessing id and type elsewhere.
         String id = (String) item.asVertex().getProperty(EntityType.ID_KEY);
         EntityClass type = EntityClass.withName((String) item.asVertex()
                 .getProperty(EntityType.TYPE_KEY));
@@ -289,9 +292,8 @@ public final class Converter {
      * Fetch a map of data from a vertex.
      */
     private Map<String, Object> getVertexData(Vertex item) {
-        Map<String, Object> data = new HashMap<String, Object>();
+        Map<String, Object> data = Maps.newHashMap();
         for (String key : item.getPropertyKeys()) {
-            data.put(key, item.getProperty(key));
             if (!(key.equals(EntityType.ID_KEY) || key
                     .equals(EntityType.TYPE_KEY)))
                 data.put(key, item.getProperty(key));

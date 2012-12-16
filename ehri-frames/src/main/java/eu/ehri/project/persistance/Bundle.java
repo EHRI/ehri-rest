@@ -1,5 +1,7 @@
 package eu.ehri.project.persistance;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -7,8 +9,8 @@ import java.util.Map;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
 
+import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.utils.ClassUtils;
 
 /**
@@ -19,10 +21,10 @@ import eu.ehri.project.models.utils.ClassUtils;
  * @param <T>
  */
 public class Bundle {
-    protected final String id;
-    protected final EntityClass type;
-    protected final Map<String, Object> data;
-    protected final ListMultimap<String,Bundle> relations;
+    private final String id;
+    private final EntityClass type;
+    private final Map<String, Object> data;
+    private final ListMultimap<String,Bundle> relations;
 
     /**
      * Constructor.
@@ -100,6 +102,7 @@ public class Bundle {
      * @param id
      */
     public Bundle withId(String id) {
+        checkNotNull(id);
         return new Bundle(id, type, data, relations);
     }
 
@@ -118,7 +121,7 @@ public class Bundle {
      * @return
      */
     public Map<String, Object> getData() {
-        return filterData();
+        return data;
     }
 
     /**
@@ -166,19 +169,6 @@ public class Bundle {
     }
 
     /**
-     * Return a list of names for mandatory properties, as represented in the
-     * graph.
-     * 
-     * @return
-     */
-    public List<String> getVertexPropertyKeys() {
-        List<String> keys = ClassUtils.getPropertyKeys(type.getEntityClass());
-        keys.add(EntityType.ID_KEY);
-        keys.add(EntityType.TYPE_KEY);
-        return keys;
-    }
-
-    /**
      * Return a list of property keys which must be unique.
      * 
      * @return
@@ -190,23 +180,5 @@ public class Bundle {
     @Override
     public String toString() {
         return String.format("<%s: %s>", type.getName(), data);
-    }
-
-    // Helpers
-
-    /**
-     * Ensure the returned data always contains an entity type key consistent
-     * with the current class.
-     * 
-     * @return
-     */
-    private Map<String, Object> filterData() {
-        Map<String, Object> ext = new HashMap<String, Object>();
-        for (String key : data.keySet()) {
-            if (!(key.equals(EntityType.ID_KEY) || key
-                    .equals(EntityType.TYPE_KEY)))
-                ext.put(key, data.get(key));
-        }
-        return ext;
     }
 }
