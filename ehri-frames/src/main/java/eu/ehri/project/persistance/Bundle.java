@@ -18,7 +18,6 @@ import eu.ehri.project.models.utils.ClassUtils;
  * 
  * @author michaelb
  * 
- * @param <T>
  */
 public class Bundle {
     private final String id;
