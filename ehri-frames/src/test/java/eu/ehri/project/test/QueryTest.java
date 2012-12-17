@@ -109,7 +109,7 @@ public class QueryTest extends AbstractFixtureTest {
         // Query for document identifier starting with 'c'.
         // In the fixtures this is ALL docs
         List<DocumentaryUnit> list = toList(query.list(
-                AccessibleEntity.IDENTIFIER_KEY, "c*", validUser));
+                EntityClass.DOCUMENTARY_UNIT, validUser));
         assertFalse(list.isEmpty());
         assertEquals(toList(allDocs).size(), list.size());
     }

@@ -6,7 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-
+import org.apache.lucene.queryParser.QueryParser;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.index.IndexHits;
 import org.neo4j.graphdb.index.IndexManager;
@@ -122,16 +122,20 @@ public final class SingleIndexGraphManager implements GraphManager {
         Preconditions
                 .checkNotNull(id, "attempt to fetch vertex with a null id");
         String queryStr = getLuceneQuery(EntityType.ID_KEY, id, type.getName());
-        IndexHits<Node> rawQuery = getRawIndex().query(queryStr);
-        // NB: Not using rawQuery.getSingle here so we throw NoSuchElement other
-        // than return null.
         try {
-            return new Neo4jVertex(rawQuery.iterator().next(),
-                    graph.getBaseGraph());
-        } catch (NoSuchElementException e) {
-            throw new ItemNotFound(id);
-        } finally {
-            rawQuery.close();
+            IndexHits<Node> rawQuery = getRawIndex().query(queryStr);
+            // NB: Not using rawQuery.getSingle here so we throw NoSuchElement other
+            // than return null.
+            try {
+                return new Neo4jVertex(rawQuery.iterator().next(),
+                        graph.getBaseGraph());
+            } catch (NoSuchElementException e) {
+                throw new ItemNotFound(id);
+            } finally {
+                rawQuery.close();
+            }
+        } catch (NullPointerException e) {
+            throw new RuntimeException(String.format("Error running Lucene query: '%s'", queryStr), e);
         }
     }
 
@@ -410,10 +414,6 @@ public final class SingleIndexGraphManager implements GraphManager {
         return vkeys;
     }
 
-    private String getLuceneQuery(String key, Object value, String type) {
-        return String.format("%s:%s AND %s:%s", key, String.valueOf(value),
-                EntityType.TYPE_KEY, type);
-    }
 
     private org.neo4j.graphdb.index.Index<Node> getRawIndex() {
         IndexManager index = graph.getBaseGraph().getRawGraph().index();
@@ -427,5 +427,11 @@ public final class SingleIndexGraphManager implements GraphManager {
             index = graph.getBaseGraph().createIndex(INDEX_NAME, Vertex.class);
         }
         return index;
+    }
+
+    private String getLuceneQuery(String key, Object value, String type) {
+        return String.format("%s:\"%s\" AND %s:\"%s\"", 
+                QueryParser.escape(key), QueryParser.escape(String.valueOf(value)),
+                QueryParser.escape(EntityType.TYPE_KEY), QueryParser.escape(type));
     }
 }

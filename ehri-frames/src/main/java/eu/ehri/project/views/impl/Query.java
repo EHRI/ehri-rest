@@ -20,6 +20,7 @@ import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.exceptions.IndexNotFoundException;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
+import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
@@ -38,7 +39,6 @@ import eu.ehri.project.views.ViewHelper;
  * @param <E>
  */
 public final class Query<E extends AccessibleEntity> implements Search<E> {
-    private static final String QUERY_GLOB = "*";
     private final Integer offset;
     private final Integer limit;
     private final String sort;
@@ -228,10 +228,36 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      * 
      * @param user
      * @return Iterable of framed vertices accessible to the given user
-     * @throws IndexNotFoundException
      */
     public Iterable<E> list(Accessor user) {
-        return list(EntityType.ID_KEY, QUERY_GLOB, user);
+        return list(ClassUtils.getEntityType(cls), user);
+    }
+
+    /**
+     * Return a Page instance containing a count of total items, and an iterable
+     * for the given offset/limit.
+     * 
+     * @param user
+     * @return Page instance
+     */
+    public Page<E> page(Accessor user) {
+        return page(ClassUtils.getEntityType(cls), user);
+    }
+
+    /**
+     * Return an iterable for all items accessible to the user.
+     * 
+     * @param user
+     * @return Iterable of framed vertices accessible to the given user
+     * @throws IndexNotFoundException
+     */
+    public Iterable<E> list(EntityClass type, Accessor user) {
+        // FIXME: Grotesque and fragile hack using the type key
+        // Breaks encapsulation of graph implementation.
+        // This should instead call a dedicated method of the graph
+        // manager to return a framed iterable of all nodes of a 
+        // given class.
+        return list(EntityType.TYPE_KEY, type.toString(), user);
     }
 
     /**
@@ -242,8 +268,13 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      * @return Page instance
      * @throws IndexNotFoundException
      */
-    public Page<E> page(Accessor user) {
-        return page(EntityType.ID_KEY, QUERY_GLOB, user);
+    public Page<E> page(EntityClass type, Accessor user) {
+        // FIXME: Grotesque and fragile hack using the type key
+        // Breaks encapsulation of graph implementation.
+        // This should instead call a dedicated method of the graph
+        // manager to return a framed iterable of all nodes of a 
+        // given class.
+        return page(EntityType.TYPE_KEY, type.toString(), user);
     }
 
     /**
