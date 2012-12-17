@@ -24,12 +24,15 @@ import com.sun.jersey.api.client.WebResource;
 
 import eu.ehri.extension.AbstractRestResource;
 import eu.ehri.project.definitions.Entities;
+import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.TemporalEntity;
 import eu.ehri.project.persistance.Bundle;
 
 public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
 
-    private String jsonDocumentaryUnitTestStr; // test data to create a
+    private String jsonDocumentaryUnitTestStr;
+    private String invalidJsonDocumentaryUnitTestStr;
     static final String UPDATED_NAME = "UpdatedNameTEST";
     static final String TEST_JSON_IDENTIFIER = "c1";
     static final String FIRST_DOC_ID = "c1";
@@ -46,6 +49,7 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
     @Before
     public void setUp() throws Exception {
         jsonDocumentaryUnitTestStr = readFileAsString("documentaryUnit.json");
+        invalidJsonDocumentaryUnitTestStr = readFileAsString("invalidDocumentaryUnit.json");
     }
 
     /**
@@ -115,6 +119,36 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
         assertEquals(CREATED_ID, errValue.getTextValue());
     }
 
+    @Test
+    public void testValidationError() throws Exception {
+        // Create
+        WebResource resource = client.resource(getCreationUri());
+        ClientResponse response = resource
+                .accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                        getAdminUserProfileId())
+                .entity(invalidJsonDocumentaryUnitTestStr).post(ClientResponse.class);
+
+        String errorJson = response.getEntity(String.class);
+        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(),
+                response.getStatus());
+
+        // Check the JSON gives use the correct error
+        // In this case the start and end dates for the
+        // first date relation should be missing
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode rootNode = mapper.readValue(errorJson,
+                JsonNode.class);
+        JsonNode errValue1 = rootNode
+                    .path("relations")
+                    .path("hasDate")
+                    .path(0)
+                    .path("errors")
+                    .path(DatePeriod.START_DATE);
+        assertFalse(errValue1.isMissingNode());
+    }
+    
     @Test
     public void testGetDocumentaryUnitByIdentifier() throws Exception {
         // Create

@@ -1,0 +1,26 @@
+{
+  "type": "documentaryUnit",
+  "data": {
+    "name": "a collection",
+    "identifier": "some-id"
+  },
+  "relationships": {
+    "describes": [
+      {
+        "type": "documentDescription",
+        "data": {
+          "languageCode": "en",
+          "title": "a description",
+          "identifier": "some-id"
+        }
+      }
+    ],
+    "hasDate": [
+      {
+        "type": "datePeriod",
+        "data": {
+        }
+      }
+    ]
+  }
+}

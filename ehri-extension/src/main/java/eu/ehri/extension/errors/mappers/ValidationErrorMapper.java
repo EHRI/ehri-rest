@@ -1,6 +1,7 @@
 package eu.ehri.extension.errors.mappers;
 
-import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import javax.ws.rs.core.Response;
@@ -10,25 +11,70 @@ import javax.ws.rs.ext.Provider;
 
 import org.codehaus.jackson.map.ObjectMapper;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+
 import eu.ehri.project.exceptions.ValidationError;
 
+/**
+ * Serialize a tree of validation errors to JSON. Like bundles,
+ * ValidationErrors are a recursive structure with a 'relations'
+ * map that contains lists of the errors found in each top-level
+ * item's children. The end result should look like:
+ * 
+ * {
+ *   "errors":{},
+ *   "relations":{
+ *      "describes":[
+ *          {}
+ *      ],
+ *      "hasDate":[
+ *          {
+ *              "errors":{
+ *                  "startDate":["Missing mandatory field"],
+ *                  "endDate":["Missing mandatory field"]
+ *              },
+ *              "relations":{}
+ *           }
+ *      ]
+ *   }
+ * }
+ * 
+ * @author michaelb
+ *
+ */
 @Provider
 public class ValidationErrorMapper implements ExceptionMapper<ValidationError> {
 
-	@SuppressWarnings("serial")
-    @Override
-	public Response toResponse(final ValidationError e) {
-        Map<String, Object> out = new HashMap<String, Object>() {
-            {
-                put("error", ValidationError.class.getSimpleName());
-                put("details", e.getErrors());
+    private Map<String, List<Object>> getRelations(
+            ListMultimap<String, ValidationError> rels) {
+        Map<String, List<Object>> out = Maps.newHashMap();
+        for (String relation : rels.keys()) {
+            LinkedList<Object> errList = Lists.newLinkedList();
+            for (ValidationError e : rels.get(relation)) {
+                errList.add(e == null ? Maps.newHashMap() : getErrorTree(e));
             }
-        };
+            out.put(relation, errList);
+        }
+        return out;
+    }
+
+    private Map<String, Object> getErrorTree(ValidationError e) {
+        return Maps.newHashMap(new ImmutableMap.Builder<String, Object>()
+                .put("errors", e.getErrors().asMap())
+                .put("relations", getRelations(e.getRelations())).build());
+    }
+
+    @Override
+    public Response toResponse(final ValidationError e) {
+        Map<String, Object> out = getErrorTree(e);
         try {
             return Response.status(Status.BAD_REQUEST)
-                .entity(new ObjectMapper().writeValueAsString(out).getBytes()).build();
+                    .entity(new ObjectMapper().writeValueAsBytes(out)).build();
         } catch (Exception e1) {
             throw new RuntimeException(e1);
         }
-	}
+    }
 }
