@@ -5,7 +5,6 @@ import java.util.Map;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 
-import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.utils.ClassUtils;
 import eu.ehri.project.persistance.BundleValidator;
@@ -36,35 +35,41 @@ public final class BundleFieldValidator implements BundleValidator {
      * Validate the data in the bundle, according to the target class, and
      * ensure it is fit for updating in the graph.
      * 
-     * @throws ValidationError
+     * @return errors 
+     * 
      */
-    public void validateForUpdate() throws ValidationError {
+    public ListMultimap<String, String> validateForUpdate() {
         if (bundle.getId() == null)
-            throw new ValidationError(
+            errors.put("id", 
                     "No identifier given for update operation.");
-        validate();
+        return validate();
     }
 
     /**
      * Validate the data in the bundle, according to the target class, and
      * ensure it is fit for insert into the graph.
      * 
-     * @throws ValidationError
+     * @return errors 
+     * 
      */
-    public void validateForInsert() throws ValidationError {
+    public ListMultimap<String, String> validateForInsert() {
         if (bundle.getId() != null)
-            throw new ValidationError(
+            errors.put("id",
                     String.format(
                             "Identifier is present ('%s') but insert operation specified.",
                             bundle.getId()));
-        validate();
+        return validate();
     }
 
-    public void validate() throws ValidationError {
+    /**
+     * Validate bundle fields.
+     * 
+     * @return errors
+     */
+    public ListMultimap<String, String> validate() {
         checkFields();
         checkIsA();
-        if (!errors.isEmpty())
-            throw new ValidationError(bundle.getBundleClass(), errors);
+        return errors;
     }
 
     /**

@@ -1,29 +1,43 @@
 package eu.ehri.project.exceptions;
 
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
 
 import eu.ehri.project.persistance.Bundle;
 
 /**
- * Validation error. This exception holds a map
- * of field=error(s) values.
- *
+ * Validation error. This exception holds a map of field=error(s) values.
+ * 
  * @author michaelb
- *
+ * 
  */
 public class ValidationError extends Exception {
 
     private static final long serialVersionUID = 1L;
-    private ListMultimap<String, String> errors; 
+    private ListMultimap<String, String> errors;
+    private ListMultimap<String, ValidationError> relations;
 
-    public ValidationError(String message) {        
+    public ValidationError(String message) {
         super(message);
         errors = ArrayListMultimap.create();
         errors.put("item", message);
     }
 
-    public ValidationError(Bundle bundle,
+    public ValidationError(Bundle bundle, ListMultimap<String, String> errors) {
+        this(formatErrors(bundle.getClass().getName(), errors));
+        this.errors = errors;
+        this.relations = LinkedListMultimap.create();
+    }
+
+    public ValidationError(Bundle bundle, ListMultimap<String, String> errors,
+            ListMultimap<String, ValidationError> relations) {
+        this(formatErrors(bundle.getClass().getName(), errors));
+        this.errors = errors;
+        this.relations = relations;
+    }
+
+    public ValidationError(String relation, Integer count, Bundle bundle,
             ListMultimap<String, String> errors) {
         this(formatErrors(bundle.getClass().getName(), errors));
         this.errors = errors;
@@ -34,7 +48,8 @@ public class ValidationError extends Exception {
         this.errors = errors;
     }
 
-    private static String formatErrors(String clsName, ListMultimap<String, String> errors) {
+    private static String formatErrors(String clsName,
+            ListMultimap<String, String> errors) {
         StringBuilder buf = new StringBuilder(String.format(
                 "A validation error occurred building %s:\n", clsName));
         for (String key : errors.keySet()) {
@@ -44,8 +59,12 @@ public class ValidationError extends Exception {
         }
         return buf.toString();
     }
-    
+
     public ListMultimap<String, String> getErrors() {
         return errors;
+    }
+
+    public ListMultimap<String, ValidationError> getRelations() {
+        return relations;
     }
 }

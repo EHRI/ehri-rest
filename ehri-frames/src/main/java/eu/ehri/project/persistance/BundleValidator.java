@@ -1,6 +1,6 @@
 package eu.ehri.project.persistance;
 
-import eu.ehri.project.exceptions.ValidationError;
+import com.google.common.collect.ListMultimap;
 
 /**
  * Interface for Bundle Validation classes.
@@ -9,7 +9,7 @@ import eu.ehri.project.exceptions.ValidationError;
  *
  */
 public interface BundleValidator {
-    public void validate() throws ValidationError;
-    public void validateForInsert() throws ValidationError;
-    public void validateForUpdate() throws ValidationError;
+    public ListMultimap<String, String> validate();
+    public ListMultimap<String, String> validateForInsert();
+    public ListMultimap<String, String> validateForUpdate();
 }

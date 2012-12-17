@@ -8,6 +8,8 @@ import java.util.NoSuchElementException;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.google.common.collect.Maps;
+
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
@@ -95,7 +97,6 @@ public class BundleTest extends ModelTestBase {
 
         List<Bundle> dates = bundle.getRelations().removeAll(TemporalEntity.HAS_DATE);
         bundle.getRelations().put(TemporalEntity.HAS_DATE, dates.get(0));
-
         BundleDAO persister = new BundleDAO(graph);
         persister.update(bundle, DocumentaryUnit.class);
         assertEquals(1, toList(c1.getDatePeriods()).size());
@@ -135,4 +136,20 @@ public class BundleTest extends ModelTestBase {
         // Should raise NoSuchElementException
         manager.getFrame(ID, DocumentaryUnit.class);
     }
+    
+    @Test(expected = ValidationError.class)
+    public void testValidationError() throws SerializationError,
+            ValidationError, ItemNotFound, IntegrityError {
+        DocumentaryUnit c1 = manager.getFrame(ID, DocumentaryUnit.class);
+        Bundle bundle = converter.vertexFrameToBundle(c1);
+
+        List<Bundle> dates = bundle.getRelations().removeAll(TemporalEntity.HAS_DATE);
+        // remove the start date key from a date
+        Bundle invalidDate = dates.get(0).setData(Maps.<String,Object>newHashMap());
+        bundle.addRelation(TemporalEntity.HAS_DATE, invalidDate);
+
+        BundleDAO persister = new BundleDAO(graph);
+        persister.update(bundle, DocumentaryUnit.class);
+        fail("Bundle with invalid dates did not throw a ValidationError");
+    }    
 }
