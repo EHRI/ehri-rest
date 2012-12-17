@@ -7,7 +7,7 @@
 
 BLUEPRINTS_VERS="2.1.0"
 BLUEPRINTS_DEPS=( frames blueprints-core blueprints-neo4j-graph pipes )
-EXTRA_DEP=( joda-time-2.1.jar )
+EXTRA_DEPS=( guava-10.0.1.jar joda-time-2.1.jar )
 
 if [ $# -ne 1 ]; then
     echo "Usage: `basename $0` <NEO4JPATH>"
