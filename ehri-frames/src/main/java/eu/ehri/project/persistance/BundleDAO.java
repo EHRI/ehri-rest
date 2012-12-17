@@ -18,6 +18,7 @@ import com.tinkerpop.frames.VertexFrame;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
+import eu.ehri.project.exceptions.BundleError;
 import eu.ehri.project.exceptions.IdGenerationError;
 import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
@@ -183,23 +184,33 @@ public final class BundleDAO {
      * @throws IntegrityError
      * @throws ItemNotFound
      */
-    private Vertex createInner(Bundle bundle) throws ValidationError,
-            IntegrityError {
+    private Vertex createInner(Bundle bundle) throws ValidationError {
         try {
             ListMultimap<String, String> errors = BundleValidatorFactory
                     .getInstance(bundle).validate();
-            // If the bundle doesn't already have an ID, generate one using the
-            // (presently stopgap) type-dependent ID generator.
-            String id = bundle.getId() != null ? bundle.getId() : bundle
-                    .getType().getIdgen()
-                    .generateId(bundle.getType(), scope, bundle.getData());
-            Vertex node = manager.createVertex(id, bundle.getType(),
-                    bundle.getData(), bundle.getPropertyKeys(),
-                    bundle.getUniquePropertyKeys());
-            ListMultimap<String, ValidationError> nestedErrors = createDependents(
-                    node, bundle.getBundleClass(), bundle.getRelations());
+            Vertex node = null;
+            ListMultimap<String, BundleError> nestedErrors = null;
+            try {
+                // If the bundle doesn't already have an ID, generate one using
+                // the
+                // (presently stopgap) type-dependent ID generator.
+                String id = bundle.getId() != null ? bundle.getId() : bundle
+                        .getType().getIdgen()
+                        .generateId(bundle.getType(), scope, bundle.getData());
+                node = manager.createVertex(id, bundle.getType(),
+                        bundle.getData(), bundle.getPropertyKeys(),
+                        bundle.getUniquePropertyKeys());
+                nestedErrors = createDependents(node, bundle.getBundleClass(),
+                        bundle.getRelations());
+            } catch (IntegrityError e) {
+                for (Entry<String, String> entry : e.getFields().entrySet()) {
+                    errors.put(entry.getKey(), String.format(
+                            "Value '%s' exists and must be unique.",
+                            entry.getValue()));
+                }
+            }
 
-            if (!errors.isEmpty() || hasNestedErrors(nestedErrors)) {
+            if (!errors.isEmpty() || (nestedErrors != null && hasNestedErrors(nestedErrors))) {
                 throw new ValidationError(bundle, errors, nestedErrors);
             }
             return node;
@@ -214,8 +225,8 @@ public final class BundleDAO {
      * @param errors
      * @return
      */
-    private boolean hasNestedErrors(ListMultimap<String, ValidationError> errors) {
-        for (ValidationError e : errors.values()) {
+    private boolean hasNestedErrors(ListMultimap<String, BundleError> errors) {
+        for (BundleError e : errors.values()) {
             if (e != null)
                 return true;
         }
@@ -238,7 +249,7 @@ public final class BundleDAO {
         Vertex node = manager.updateVertex(bundle.getId(), bundle.getType(),
                 bundle.getData(), bundle.getPropertyKeys(),
                 bundle.getUniquePropertyKeys());
-        ListMultimap<String, ValidationError> nestedErrors = updateDependents(
+        ListMultimap<String, BundleError> nestedErrors = updateDependents(
                 node, bundle.getBundleClass(), bundle.getRelations());
         if (!errors.isEmpty() || hasNestedErrors(nestedErrors)) {
             throw new ValidationError(bundle, errors, nestedErrors);
@@ -259,14 +270,14 @@ public final class BundleDAO {
      * 
      * @return errors
      */
-    private ListMultimap<String, ValidationError> createDependents(
+    private ListMultimap<String, BundleError> createDependents(
             Vertex master, Class<?> cls, ListMultimap<String, Bundle> relations)
             throws IntegrityError {
         Map<String, Direction> dependents = ClassUtils
                 .getDependentRelations(cls);
 
         // Accumulate child errors before re-throwing...
-        ListMultimap<String, ValidationError> errors = LinkedListMultimap
+        ListMultimap<String, BundleError> errors = LinkedListMultimap
                 .create();
 
         for (String key : relations.keySet()) {
@@ -302,7 +313,7 @@ public final class BundleDAO {
      * 
      * @return errors
      */
-    private ListMultimap<String, ValidationError> updateDependents(
+    private ListMultimap<String, BundleError> updateDependents(
             Vertex master, Class<?> cls, ListMultimap<String, Bundle> relations)
             throws IntegrityError, ItemNotFound {
 
@@ -317,7 +328,7 @@ public final class BundleDAO {
         deleteMissingFromUpdateSet(master, dependents, updating);
 
         // Accumulate child errors before re-throwing...
-        ListMultimap<String, ValidationError> errors = LinkedListMultimap
+        ListMultimap<String, BundleError> errors = LinkedListMultimap
                 .create();
 
         // Now go throw and create or update the new subtrees.

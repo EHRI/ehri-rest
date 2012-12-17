@@ -157,7 +157,7 @@ public class PermissionsTest extends AbstractFixtureTest {
         views.delete(unit, user);
     }
 
-    @Test(expected = IntegrityError.class)
+    @Test(expected = ValidationError.class)
     public void testCreateWithoutRevoke() throws PermissionDenied,
             ValidationError, DeserializationError, IntegrityError,
             SerializationError {

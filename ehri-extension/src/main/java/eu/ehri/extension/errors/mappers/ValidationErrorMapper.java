@@ -16,7 +16,7 @@ import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
-import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.exceptions.BundleError;
 
 /**
  * Serialize a tree of validation errors to JSON. Like bundles,
@@ -46,29 +46,31 @@ import eu.ehri.project.exceptions.ValidationError;
  *
  */
 @Provider
-public class ValidationErrorMapper implements ExceptionMapper<ValidationError> {
+public class ValidationErrorMapper implements ExceptionMapper<BundleError> {
 
     private Map<String, List<Object>> getRelations(
-            ListMultimap<String, ValidationError> rels) {
+            ListMultimap<String, BundleError> rels) {
         Map<String, List<Object>> out = Maps.newHashMap();
-        for (String relation : rels.keys()) {
-            LinkedList<Object> errList = Lists.newLinkedList();
-            for (ValidationError e : rels.get(relation)) {
-                errList.add(e == null ? Maps.newHashMap() : getErrorTree(e));
-            }
-            out.put(relation, errList);
+        if (rels != null) {
+            for (String relation : rels.keys()) {
+                LinkedList<Object> errList = Lists.newLinkedList();
+                for (BundleError e : rels.get(relation)) {
+                    errList.add(e == null ? Maps.newHashMap() : getErrorTree(e));
+                }
+                out.put(relation, errList);
+            }            
         }
         return out;
     }
 
-    private Map<String, Object> getErrorTree(ValidationError e) {
+    private Map<String, Object> getErrorTree(BundleError e) {
         return Maps.newHashMap(new ImmutableMap.Builder<String, Object>()
                 .put("errors", e.getErrors().asMap())
                 .put("relations", getRelations(e.getRelations())).build());
     }
 
     @Override
-    public Response toResponse(final ValidationError e) {
+    public Response toResponse(final BundleError e) {
         Map<String, Object> out = getErrorTree(e);
         try {
             return Response.status(Status.BAD_REQUEST)

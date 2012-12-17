@@ -12,11 +12,11 @@ import eu.ehri.project.persistance.Bundle;
  * @author michaelb
  * 
  */
-public class ValidationError extends Exception {
+public class ValidationError extends BundleError {
 
     private static final long serialVersionUID = 1L;
     private ListMultimap<String, String> errors;
-    private ListMultimap<String, ValidationError> relations;
+    private ListMultimap<String, BundleError> relations;
 
     public ValidationError(String message) {
         super(message);
@@ -31,7 +31,7 @@ public class ValidationError extends Exception {
     }
 
     public ValidationError(Bundle bundle, ListMultimap<String, String> errors,
-            ListMultimap<String, ValidationError> relations) {
+            ListMultimap<String, BundleError> relations) {
         this(formatErrors(bundle.getClass().getName(), errors));
         this.errors = errors;
         this.relations = relations;
@@ -64,7 +64,7 @@ public class ValidationError extends Exception {
         return errors;
     }
 
-    public ListMultimap<String, ValidationError> getRelations() {
+    public ListMultimap<String, BundleError> getRelations() {
         return relations;
     }
 }

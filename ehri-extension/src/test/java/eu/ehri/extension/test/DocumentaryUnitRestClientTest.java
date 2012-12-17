@@ -26,7 +26,6 @@ import eu.ehri.extension.AbstractRestResource;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.base.TemporalEntity;
 import eu.ehri.project.persistance.Bundle;
 
 public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
@@ -106,17 +105,18 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
                 .header(AbstractRestResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId())
                 .entity(jsonDocumentaryUnitTestStr).post(ClientResponse.class);
+        // Check the JSON gives use the correct error
+        String errString = response.getEntity(String.class);
+        
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(),
                 response.getStatus());
 
-        // Check the JSON gives use the correct error
         ObjectMapper mapper = new ObjectMapper();
-        JsonNode rootNode = mapper.readValue(response.getEntity(String.class),
+        JsonNode rootNode = mapper.readValue(errString,
                 JsonNode.class);
-        JsonNode errValue = rootNode.path("details").path("fields")
+        JsonNode errValue = rootNode.path("errors")
                 .path(AccessibleEntity.IDENTIFIER_KEY);
         assertFalse(errValue.isMissingNode());
-        assertEquals(CREATED_ID, errValue.getTextValue());
     }
 
     @Test
