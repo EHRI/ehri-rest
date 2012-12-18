@@ -141,7 +141,7 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
         JsonNode rootNode = mapper.readValue(errorJson,
                 JsonNode.class);
         JsonNode errValue1 = rootNode
-                    .path("relations")
+                    .path("relationships")
                     .path("hasDate")
                     .path(0)
                     .path("errors")

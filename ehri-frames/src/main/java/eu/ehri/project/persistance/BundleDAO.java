@@ -28,12 +28,13 @@ import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.utils.ClassUtils;
 
 /**
- * Class responsible for persisting and deleting an EntityBundle<T>, a data
- * structure representing a graph node and its relations to be updated in a
- * single batch.
+ * Class responsible for persisting and deleting a Bundle - a data structure
+ * representing a graph node and its relations to be updated in a single batch.
  * 
  * NB: This is complicated considerably because we need to catch, accumulate,
  * and rethrow exceptions in the context of the subtree to which they belong.
+ * 
+ * TODO: Extensive clean-up of error-handing.
  * 
  */
 public final class BundleDAO {
@@ -110,9 +111,8 @@ public final class BundleDAO {
      * 
      * @param bundle
      * @return
-     * @throws ValidationError
      */
-    public Integer delete(Bundle bundle) throws ValidationError {
+    public Integer delete(Bundle bundle) {
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
             Integer count = deleteCount(bundle, 0);
@@ -156,11 +156,8 @@ public final class BundleDAO {
      * @param bundle
      * @return
      * @throws ValidationError
-     * @throws IntegrityError
-     * @throws ItemNotFound
      */
-    private Vertex createOrUpdateInner(Bundle bundle) throws ValidationError,
-            IntegrityError {
+    private Vertex createOrUpdateInner(Bundle bundle) throws ValidationError {
         if (bundle.getId() == null) {
             return createInner(bundle);
         } else {
@@ -181,15 +178,14 @@ public final class BundleDAO {
      * @param bundle
      * @return
      * @throws ValidationError
-     * @throws IntegrityError
-     * @throws ItemNotFound
      */
     private Vertex createInner(Bundle bundle) throws ValidationError {
         try {
             ListMultimap<String, String> errors = BundleValidatorFactory
                     .getInstance(bundle).validate();
             Vertex node = null;
-            ListMultimap<String, BundleError> nestedErrors = null;
+            ListMultimap<String, BundleError> nestedErrors = LinkedListMultimap
+                    .create();
             try {
                 // If the bundle doesn't already have an ID, generate one using
                 // the
@@ -203,6 +199,7 @@ public final class BundleDAO {
                 nestedErrors = createDependents(node, bundle.getBundleClass(),
                         bundle.getRelations());
             } catch (IntegrityError e) {
+                // Convert integrity errors to validation errors
                 for (Entry<String, String> entry : e.getFields().entrySet()) {
                     errors.put(entry.getKey(), String.format(
                             "Value '%s' exists and must be unique.",
@@ -210,27 +207,13 @@ public final class BundleDAO {
                 }
             }
 
-            if (!errors.isEmpty() || (nestedErrors != null && hasNestedErrors(nestedErrors))) {
+            if (!errors.isEmpty()|| hasNestedErrors(nestedErrors)) {
                 throw new ValidationError(bundle, errors, nestedErrors);
             }
             return node;
         } catch (IdGenerationError err) {
             throw new RuntimeException(err.getMessage());
         }
-    }
-
-    /**
-     * Search a tree of errors and determine if there's anything in it.
-     * 
-     * @param errors
-     * @return
-     */
-    private boolean hasNestedErrors(ListMultimap<String, BundleError> errors) {
-        for (BundleError e : errors.values()) {
-            if (e != null)
-                return true;
-        }
-        return false;
     }
 
     /**
@@ -243,14 +226,25 @@ public final class BundleDAO {
      * @throws ItemNotFound
      */
     private Vertex updateInner(Bundle bundle) throws ValidationError,
-            IntegrityError, ItemNotFound {
+            ItemNotFound {
         ListMultimap<String, String> errors = BundleValidatorFactory
                 .getInstance(bundle).validateForUpdate();
-        Vertex node = manager.updateVertex(bundle.getId(), bundle.getType(),
-                bundle.getData(), bundle.getPropertyKeys(),
-                bundle.getUniquePropertyKeys());
-        ListMultimap<String, BundleError> nestedErrors = updateDependents(
-                node, bundle.getBundleClass(), bundle.getRelations());
+        Vertex node = null;
+        ListMultimap<String, BundleError> nestedErrors = LinkedListMultimap
+                .create();
+        try {
+            node = manager.updateVertex(bundle.getId(), bundle.getType(),
+                    bundle.getData(), bundle.getPropertyKeys(),
+                    bundle.getUniquePropertyKeys());
+            nestedErrors = updateDependents(node, bundle.getBundleClass(),
+                    bundle.getRelations());
+        } catch (IntegrityError e) {
+            for (Entry<String, String> entry : e.getFields().entrySet()) {
+                errors.put(entry.getKey(), String.format(
+                        "Value '%s' exists and must be unique.",
+                        entry.getValue()));
+            }
+        }
         if (!errors.isEmpty() || hasNestedErrors(nestedErrors)) {
             throw new ValidationError(bundle, errors, nestedErrors);
         }
@@ -270,15 +264,14 @@ public final class BundleDAO {
      * 
      * @return errors
      */
-    private ListMultimap<String, BundleError> createDependents(
-            Vertex master, Class<?> cls, ListMultimap<String, Bundle> relations)
+    private ListMultimap<String, BundleError> createDependents(Vertex master,
+            Class<?> cls, ListMultimap<String, Bundle> relations)
             throws IntegrityError {
         Map<String, Direction> dependents = ClassUtils
                 .getDependentRelations(cls);
 
         // Accumulate child errors before re-throwing...
-        ListMultimap<String, BundleError> errors = LinkedListMultimap
-                .create();
+        ListMultimap<String, BundleError> errors = LinkedListMultimap.create();
 
         for (String key : relations.keySet()) {
             String relation = (String) key;
@@ -313,8 +306,8 @@ public final class BundleDAO {
      * 
      * @return errors
      */
-    private ListMultimap<String, BundleError> updateDependents(
-            Vertex master, Class<?> cls, ListMultimap<String, Bundle> relations)
+    private ListMultimap<String, BundleError> updateDependents(Vertex master,
+            Class<?> cls, ListMultimap<String, Bundle> relations)
             throws IntegrityError, ItemNotFound {
 
         // Get a list of dependent relationships for this class, and their
@@ -328,8 +321,7 @@ public final class BundleDAO {
         deleteMissingFromUpdateSet(master, dependents, updating);
 
         // Accumulate child errors before re-throwing...
-        ListMultimap<String, BundleError> errors = LinkedListMultimap
-                .create();
+        ListMultimap<String, BundleError> errors = LinkedListMultimap.create();
 
         // Now go throw and create or update the new subtrees.
         for (String key : relations.keySet()) {
@@ -339,9 +331,8 @@ public final class BundleDAO {
 
                 // FIXME: Assuming all dependents have the same direction of
                 // relationship. This is *should* be safe, but could easily
-                // break
-                // if the model ontology is altered without this assumption in
-                // mind.
+                // break if the model ontology is altered without this
+                // assumption in mind.
                 HashSet<Vertex> currentRels = getCurrentRelationships(master,
                         direction, relation);
 
@@ -386,12 +377,6 @@ public final class BundleDAO {
                                 manager.getType(v).getEntityClass())));
                     } catch (SerializationError e) {
                         throw new RuntimeException(e);
-                    } catch (ValidationError e) {
-                        throw new RuntimeException(
-                                "Unexpected validation error deleting update set. "
-                                        + " The bundle data should have been generated internally, so this"
-                                        + " is probably a programming error: "
-                                        + e.getErrors(), e);
                     }
                 }
             }
@@ -431,5 +416,21 @@ public final class BundleDAO {
         } else {
             graph.addEdge(null, child, master, label);
         }
+    }
+
+    /**
+     * Search a tree of errors and determine if there's anything in it
+     * except for null values, which have to be there to maintain item
+     * ordering.
+     * 
+     * @param errors
+     * @return
+     */
+    private boolean hasNestedErrors(ListMultimap<String, BundleError> errors) {
+        for (BundleError e : errors.values()) {
+            if (e != null)
+                return true;
+        }
+        return false;
     }
 }
