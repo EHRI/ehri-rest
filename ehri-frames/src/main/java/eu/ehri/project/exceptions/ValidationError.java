@@ -1,6 +1,5 @@
 package eu.ehri.project.exceptions;
 
-import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
 
@@ -18,34 +17,20 @@ public class ValidationError extends BundleError {
     private ListMultimap<String, String> errors;
     private ListMultimap<String, BundleError> relations;
 
-    public ValidationError(String message) {
-        super(message);
-        errors = ArrayListMultimap.create();
-        errors.put("item", message);
-    }
-
-    public ValidationError(Bundle bundle, ListMultimap<String, String> errors) {
-        this(formatErrors(bundle.getClass().getName(), errors));
-        this.errors = errors;
-        this.relations = LinkedListMultimap.create();
-    }
-
     public ValidationError(Bundle bundle, ListMultimap<String, String> errors,
             ListMultimap<String, BundleError> relations) {
-        this(formatErrors(bundle.getClass().getName(), errors));
+        super(formatErrors(bundle.getClass().getName(), errors));
         this.errors = errors;
         this.relations = relations;
     }
 
-    public ValidationError(String relation, Integer count, Bundle bundle,
-            ListMultimap<String, String> errors) {
-        this(formatErrors(bundle.getClass().getName(), errors));
-        this.errors = errors;
+    public ValidationError(Bundle bundle, String key, String error) {        
+        this(bundle, errorsFromKeyValue(key, error));
     }
 
-    public ValidationError(Class<?> cls, ListMultimap<String, String> errors) {
-        this(formatErrors(cls.getName(), errors));
-        this.errors = errors;
+    public ValidationError(Bundle bundle,
+            ListMultimap<String, String> errors) {
+        this(bundle, errors, LinkedListMultimap.<String,BundleError>create());
     }
 
     private static String formatErrors(String clsName,
@@ -66,5 +51,11 @@ public class ValidationError extends BundleError {
 
     public ListMultimap<String, BundleError> getRelations() {
         return relations;
+    }
+    
+    private static ListMultimap<String, String> errorsFromKeyValue(String key, String value) {
+        ListMultimap<String, String> errors = LinkedListMultimap.create();
+        errors.put(key, value);
+        return errors;
     }
 }

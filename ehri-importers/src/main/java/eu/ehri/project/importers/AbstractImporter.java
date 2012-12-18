@@ -138,7 +138,8 @@ public abstract class AbstractImporter<T> {
             id = generator.generateId(EntityClass.DOCUMENTARY_UNIT, repository,
                     unit.getData());
         } catch (IdGenerationError e) {
-            throw new ValidationError("Bad data: " + unit.getData());
+            throw new ValidationError(unit, DocumentaryUnit.IDENTIFIER_KEY,
+                    (String) unit.getData().get(DocumentaryUnit.IDENTIFIER_KEY));
         }
         boolean exists = manager.exists(id);
         DocumentaryUnit frame = persister.createOrUpdate(
