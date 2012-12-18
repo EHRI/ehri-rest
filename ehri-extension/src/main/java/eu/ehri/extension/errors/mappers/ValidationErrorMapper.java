@@ -65,8 +65,8 @@ public class ValidationErrorMapper implements ExceptionMapper<BundleError> {
 
     private Map<String, Object> getErrorTree(BundleError e) {
         return Maps.newHashMap(new ImmutableMap.Builder<String, Object>()
-                .put("errors", e.getErrors().asMap())
-                .put("relationships", getRelations(e.getRelations())).build());
+                .put(BundleError.ERROR_KEY, e.getErrors().asMap())
+                .put(BundleError.REL_KEY, getRelations(e.getRelations())).build());
     }
 
     @Override

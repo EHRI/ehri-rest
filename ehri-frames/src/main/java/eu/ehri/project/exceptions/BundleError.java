@@ -12,6 +12,9 @@ import com.google.common.collect.ListMultimap;
 @SuppressWarnings("serial")
 public abstract class BundleError extends Exception {
     
+    public static final String ERROR_KEY = "errors";
+    public static final String REL_KEY = "relationships";
+    
     public BundleError(String message) {
         super(message);
     }

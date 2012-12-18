@@ -24,8 +24,10 @@ import com.sun.jersey.api.client.WebResource;
 
 import eu.ehri.extension.AbstractRestResource;
 import eu.ehri.project.definitions.Entities;
+import eu.ehri.project.exceptions.BundleError;
 import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.TemporalEntity;
 import eu.ehri.project.persistance.Bundle;
 
 public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
@@ -114,7 +116,7 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
         ObjectMapper mapper = new ObjectMapper();
         JsonNode rootNode = mapper.readValue(errString,
                 JsonNode.class);
-        JsonNode errValue = rootNode.path("errors")
+        JsonNode errValue = rootNode.path(BundleError.ERROR_KEY)
                 .path(AccessibleEntity.IDENTIFIER_KEY);
         assertFalse(errValue.isMissingNode());
     }
@@ -141,10 +143,10 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
         JsonNode rootNode = mapper.readValue(errorJson,
                 JsonNode.class);
         JsonNode errValue1 = rootNode
-                    .path("relationships")
-                    .path("hasDate")
+                    .path(BundleError.REL_KEY)
+                    .path(TemporalEntity.HAS_DATE)
                     .path(0)
-                    .path("errors")
+                    .path(BundleError.ERROR_KEY)
                     .path(DatePeriod.START_DATE);
         assertFalse(errValue1.isMissingNode());
     }
