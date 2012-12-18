@@ -38,7 +38,7 @@ for dep in ${BLUEPRINTS_DEPS[@]}; do
 done
 for dep in ${EXTRA_DEPS[@]}; do
     if [ ! -e $NEO4JPATH/system/lib/$dep ]; then
-        echo "Missing dependency: '$jar'. This must manually be installed in $NEO4JPATH/system/lib."
+        echo "Missing dependency: '$dep'. This must manually be installed in $NEO4JPATH/system/lib."
         FLAG=1
     fi
 done
