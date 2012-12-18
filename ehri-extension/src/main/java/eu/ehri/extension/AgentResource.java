@@ -217,7 +217,8 @@ public class AgentResource extends EhriNeo4jFramedResource<Agent> {
                 .create(converter.bundleToData(entityBundle),
                         getRequesterUserProfile());
         // Add it to this agent's collections
-        agent.addCollection(doc);
+        doc.setAgent(agent);
+        doc.setScope(agent);
         return doc;
     }
 }

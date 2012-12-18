@@ -14,6 +14,7 @@ public interface AccessibleEntity extends VertexFrame, PermissionGrantTarget {
 
     public static final String ACCESS = "access";
     public static final String IDENTIFIER_KEY = "identifier";
+    public static final String SCOPE = "hasScope";
 
     @Unique
     @Property(IDENTIFIER_KEY)
@@ -34,4 +35,10 @@ public interface AccessibleEntity extends VertexFrame, PermissionGrantTarget {
 
     @Adjacency(label = Action.HAS_SUBJECT, direction = Direction.IN)
     public Iterable<Action> getHistory();
+    
+    @Adjacency(label = SCOPE)
+    public PermissionScope getScope();
+    
+    @Adjacency(label = SCOPE)
+    public void setScope(final PermissionScope scope);
 }

@@ -147,7 +147,8 @@ public abstract class AbstractImporter<T> {
                         unit.getRelations()), DocumentaryUnit.class);
 
         // Set the repository/item relationship
-        repository.addCollection(frame);
+        frame.setAgent(repository);
+        frame.setScope(repository);
         // Set the parent child relationship
         if (parent != null)
             parent.addChild(frame);

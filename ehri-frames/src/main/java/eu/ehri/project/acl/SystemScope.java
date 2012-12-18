@@ -69,4 +69,12 @@ public enum SystemScope implements PermissionScope, AccessibleEntity {
         return new EmptyIterable<Action>();
     }
 
+    public PermissionScope getScope() {
+        return null;
+    }
+
+    public void setScope(PermissionScope scope) {
+        throw new UnsupportedOperationException();
+    }
+
 }

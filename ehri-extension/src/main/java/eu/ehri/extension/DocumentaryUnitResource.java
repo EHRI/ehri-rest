@@ -182,7 +182,8 @@ public class DocumentaryUnitResource extends
                         getRequesterUserProfile());
         // Add it to this agent's collections
         parent.addChild(doc);
-        parent.getAgent().addCollection(doc);
+        doc.setAgent(parent.getAgent());
+        doc.setScope(parent.getScope());
         return doc;
     }
 }
