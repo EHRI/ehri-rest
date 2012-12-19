@@ -1,6 +1,5 @@
 package eu.ehri.project.views.impl;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -120,16 +119,16 @@ public final class AclViews<E extends AccessibleEntity> implements Acl<E> {
         helper.checkEntityPermission(entity, user, PermissionType.UPDATE);
         // FIXME: Must be a more efficient way to do this, whilst
         // ensuring that superfluous double relationships don't get created?
-        Set<Vertex> accessorIds = new HashSet<Vertex>();
+        Set<Vertex> accessorVertices = Sets.newHashSet();
         for (Accessor acc : accessors)
-            accessorIds.add(acc.asVertex());
+            accessorVertices.add(acc.asVertex());
 
         Set<Vertex> existing = Sets.newHashSet();
         Set<Vertex> remove = Sets.newHashSet();
         for (Accessor accessor : entity.getAccessors()) {
             Vertex v = accessor.asVertex();
             existing.add(v);
-            if (!accessorIds.contains(v)) {
+            if (!accessorVertices.contains(v)) {
                 remove.add(v);
             }
         }
