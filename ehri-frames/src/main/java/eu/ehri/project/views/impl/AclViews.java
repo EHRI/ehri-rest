@@ -4,7 +4,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import com.google.common.collect.Sets;
 import com.tinkerpop.blueprints.TransactionalGraph.Conclusion;
+import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
@@ -117,28 +120,28 @@ public final class AclViews<E extends AccessibleEntity> implements Acl<E> {
         helper.checkEntityPermission(entity, user, PermissionType.UPDATE);
         // FIXME: Must be a more efficient way to do this, whilst
         // ensuring that superfluous double relationships don't get created?
-        Set<Long> accessorIds = new HashSet<Long>();
+        Set<Vertex> accessorIds = new HashSet<Vertex>();
         for (Accessor acc : accessors)
-            accessorIds.add((Long) acc.asVertex().getId());
+            accessorIds.add(acc.asVertex());
 
-        Set<Long> existing = new HashSet<Long>();
-        Set<Long> remove = new HashSet<Long>();
+        Set<Vertex> existing = Sets.newHashSet();
+        Set<Vertex> remove = Sets.newHashSet();
         for (Accessor accessor : entity.getAccessors()) {
-            Long id = (Long) accessor.asVertex().getId();
-            existing.add(id);
-            if (!accessorIds.contains(id)) {
-                remove.add(id);
+            Vertex v = accessor.asVertex();
+            existing.add(v);
+            if (!accessorIds.contains(v)) {
+                remove.add(v);
             }
         }
-        for (Object removeId : remove) {
+        for (Vertex v : remove) {
             // FIXME: The Blueprints remove behaviour is strange. It seems
             // to open a new transaction for every delete operation, which
             // then requires closing explicitly. Check this out.
-            entity.removeAccessor(graph.getVertex(removeId, Accessor.class));
+            entity.removeAccessor(graph.frame(v, Accessor.class));
             graph.getBaseGraph().stopTransaction(Conclusion.SUCCESS);
         }
         for (Accessor accessor : accessors) {
-            if (!existing.contains(accessor.asVertex().getId())) {
+            if (!existing.contains(accessor.asVertex())) {
                 entity.addAccessor(accessor);
             }
         }
