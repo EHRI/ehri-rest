@@ -91,6 +91,8 @@ public class PermissionsResource extends AbstractRestResource {
             throw new ItemNotFound(Converter.ID_KEY, id);
         } catch (DeserializationError e) {
             throw e;
+        } catch (PermissionDenied e) {
+            throw e;
         } catch (Exception e) {
             tx.failure();
             throw new WebApplicationException(e);
