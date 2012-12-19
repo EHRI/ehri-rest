@@ -8,6 +8,8 @@ import java.util.Map;
 import org.junit.Test;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.acl.AnonymousAccessor;
+import eu.ehri.project.acl.ContentTypes;
+import eu.ehri.project.acl.PermissionType;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
@@ -19,7 +21,6 @@ import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.DocumentDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Group;
-import eu.ehri.project.models.Permission;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.PermissionGrantTarget;
@@ -105,21 +106,21 @@ public class ViewsTest extends AbstractFixtureTest {
             DeserializationError, IntegrityError, ItemNotFound {
         CrudViews<DocumentaryUnit> docViews = new CrudViews<DocumentaryUnit>(
                 graph, DocumentaryUnit.class);
-        Map<String, Object> bundle = getTestBundle();
-        DocumentaryUnit unit = docViews.create(bundle, validUser);
+        Map<String, Object> bundleData = getTestBundle();
+        DocumentaryUnit unit = docViews.create(bundleData, validUser);
         assertEquals(TEST_COLLECTION_NAME, unit.getName());
 
         // We could convert the FramedNode back into a bundle here,
         // but let's instead just modify the initial data.
         String newName = TEST_COLLECTION_NAME + " with new stuff";
-        bundle.put(Converter.ID_KEY,
+        bundleData.put(Converter.ID_KEY,
                 unit.asVertex().getProperty(EntityType.ID_KEY));
 
         @SuppressWarnings("unchecked")
-        Map<String, Object> data = (Map<String, Object>) bundle
+        Map<String, Object> data = (Map<String, Object>) bundleData
                 .get(Converter.DATA_KEY);
         data.put("name", newName);
-        DocumentaryUnit changedUnit = docViews.update(bundle, validUser);
+        DocumentaryUnit changedUnit = docViews.update(bundleData, validUser);
         assertEquals(newName, changedUnit.getName());
 
         // Check the nested item was created correctly
@@ -223,10 +224,11 @@ public class ViewsTest extends AbstractFixtureTest {
         } catch (PermissionDenied e) {
             // We expected that permission denied... now explicitely add
             // permissions.
-            PermissionGrantTarget target = manager.getFrame("documentaryUnit",
+            PermissionGrantTarget target = manager.getFrame(
+                    ContentTypes.DOCUMENTARY_UNIT.getName(),
                     PermissionGrantTarget.class);
-            Permission perm = manager.getFrame("create", Permission.class);
-            new AclManager(graph).grantPermissions(invalidUser, target, perm);
+            new AclManager(graph).grantPermissions(invalidUser, target,
+                    PermissionType.CREATE);
             DocumentaryUnit unit = docViews.create(bundle, invalidUser);
             assertEquals(TEST_COLLECTION_NAME, unit.getName());
         }

@@ -1,5 +1,8 @@
 package eu.ehri.project.views;
 
+import java.util.Collection;
+import com.google.common.collect.Lists;
+import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
@@ -24,6 +27,7 @@ public final class ViewHelper {
     private final FramedGraph<Neo4jGraph> graph;
     private final Class<?> cls;
     private final PermissionScope scope;
+    private final Collection<Vertex> scopes;
     private final AclManager acl;
     private final GraphManager manager;
 
@@ -37,6 +41,7 @@ public final class ViewHelper {
         this.cls = cls;
         this.acl = new AclManager(graph);
         this.scope = scope;
+        this.scopes = getAllScopes(scope);
         this.manager = GraphManagerFactory.getInstance(graph);
     }
 
@@ -45,21 +50,22 @@ public final class ViewHelper {
      * 
      * @throws PermissionDenied
      */
-    public void checkPermission(Accessor accessor, Permission permission)
+    public void checkPermission(Accessor accessor, PermissionType permType)
             throws PermissionDenied {
         // If we're admin, the answer is always "no problem"!
         if (!acl.belongsToAdmin(accessor)) {
+            Permission permission = getPermission(permType);
             ContentType contentType = getContentType(ClassUtils
                     .getEntityType(cls));
             Iterable<PermissionGrant> perms = acl.getPermissionGrants(accessor,
                     contentType, permission);
             boolean found = false;
             for (PermissionGrant perm : perms) {
-                // If the permission has unscoped rights, the user is
-                // good to do whatever they want to do here.
+                // If the permission has unscoped rights, or the
+                // current scope contains the permission scope, the
+                // user can proceed.
                 PermissionScope permScope = perm.getScope();
-                if (permScope == null
-                        || permScope.asVertex().equals(scope.asVertex())) {
+                if (permScope == null || scopes.contains(permScope.asVertex())) {
                     found = true;
                     break;
                 }
@@ -77,15 +83,15 @@ public final class ViewHelper {
      * @throws PermissionDenied
      */
     public void checkEntityPermission(AccessibleEntity entity,
-            Accessor accessor, Permission permission) throws PermissionDenied {
+            Accessor accessor, PermissionType permType) throws PermissionDenied {
 
         // TODO: Determine behaviour for granular item-level
         // attributes.
         try {
-            checkPermission(accessor, permission);
+            checkPermission(accessor, permType);
         } catch (PermissionDenied e) {
             Iterable<PermissionGrant> perms = acl.getPermissionGrants(accessor,
-                    entity, permission);
+                    entity, getPermission(permType));
             // Scopes do not apply to entity-level perms...
             if (!perms.iterator().hasNext())
                 throw new PermissionDenied(accessor, entity);
@@ -115,8 +121,7 @@ public final class ViewHelper {
      */
     protected void checkWriteAccess(AccessibleEntity entity, Accessor accessor)
             throws PermissionDenied {
-        checkEntityPermission(entity, accessor,
-                getPermission(PermissionType.UPDATE));
+        checkEntityPermission(entity, accessor, PermissionType.UPDATE);
     }
 
     /**
@@ -175,5 +180,13 @@ public final class ViewHelper {
      */
     public ViewHelper setScope(PermissionScope scope) {
         return new ViewHelper(graph, cls, scope);
+    }
+
+    // Get a list of the current scope and its parents
+    public static Collection<Vertex> getAllScopes(PermissionScope scope) {
+        Collection<Vertex> all = Lists.newArrayList();
+        for (PermissionScope s : scope.getScopes()) all.add(s.asVertex());
+        all.add(scope.asVertex());
+        return all;
     }
 }

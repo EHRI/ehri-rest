@@ -79,15 +79,13 @@ public final class AclViews<E extends AccessibleEntity> implements Acl<E> {
     public PermissionGrant setPermission(E entity, Accessor user,
             PermissionType perm) throws PermissionDenied, ValidationError,
             SerializationError {
-        helper.checkEntityPermission(entity, user,
-                helper.getPermission(PermissionType.GRANT));
-        return acl.grantPermissions(user, entity,
-                helper.getPermission(perm), scope);
+        helper.checkEntityPermission(entity, user, PermissionType.GRANT);
+        return acl.grantPermissions(user, entity, perm, scope);
     }
 
     public void setGlobalPermissionMatrix(Accessor accessor, Accessor grantee,
-            Map<ContentTypes, List<PermissionType>> permissionMap) throws PermissionDenied,
-            ValidationError, SerializationError {
+            Map<ContentTypes, List<PermissionType>> permissionMap)
+            throws PermissionDenied, ValidationError, SerializationError {
 
         // Check we have grant permissions for the requested content types
         if (!acl.belongsToAdmin(grantee)) {
@@ -95,7 +93,8 @@ public final class AclViews<E extends AccessibleEntity> implements Acl<E> {
                 Permission grantPerm = helper.getEntity(EntityClass.PERMISSION,
                         PermissionType.GRANT.getName(), Permission.class);
                 for (ContentTypes ctype : permissionMap.keySet()) {
-                    ContentType target = manager.getFrame(ctype.getName(), ContentType.class);
+                    ContentType target = manager.getFrame(ctype.getName(),
+                            ContentType.class);
                     Iterable<PermissionGrant> grants = acl.getPermissionGrants(
                             grantee, target, grantPerm);
                     if (!grants.iterator().hasNext()) {
@@ -115,8 +114,7 @@ public final class AclViews<E extends AccessibleEntity> implements Acl<E> {
 
     public void setAccessors(E entity, Set<Accessor> accessors, Accessor user)
             throws PermissionDenied {
-        helper.checkEntityPermission(entity, user,
-                helper.getPermission(PermissionType.UPDATE));
+        helper.checkEntityPermission(entity, user, PermissionType.UPDATE);
         // FIXME: Must be a more efficient way to do this, whilst
         // ensuring that superfluous double relationships don't get created?
         Set<Long> accessorIds = new HashSet<Long>();
@@ -132,7 +130,7 @@ public final class AclViews<E extends AccessibleEntity> implements Acl<E> {
                 remove.add(id);
             }
         }
-        for (Long removeId : remove) {
+        for (Object removeId : remove) {
             // FIXME: The Blueprints remove behaviour is strange. It seems
             // to open a new transaction for every delete operation, which
             // then requires closing explicitly. Check this out.
@@ -140,7 +138,7 @@ public final class AclViews<E extends AccessibleEntity> implements Acl<E> {
             graph.getBaseGraph().stopTransaction(Conclusion.SUCCESS);
         }
         for (Accessor accessor : accessors) {
-            if (!existing.contains((Long) accessor.asVertex().getId())) {
+            if (!existing.contains(accessor.asVertex().getId())) {
                 entity.addAccessor(accessor);
             }
         }

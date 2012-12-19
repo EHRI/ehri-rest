@@ -42,7 +42,6 @@ import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Actioner;
-import eu.ehri.project.models.base.PermissionGrantTarget;
 import eu.ehri.project.persistance.ActionManager;
 import eu.ehri.project.persistance.Converter;
 
@@ -170,8 +169,8 @@ public class PermissionsResource extends AbstractRestResource {
             ItemNotFound {
 
         Accessor accessor = manager.getFrame(userId, Accessor.class);
-        PermissionGrantTarget entity = manager.getFrame(id,
-                PermissionGrantTarget.class);
+        AccessibleEntity entity = manager.getFrame(id,
+                AccessibleEntity.class);
         AclManager acl = new AclManager(graph);
 
         return Response

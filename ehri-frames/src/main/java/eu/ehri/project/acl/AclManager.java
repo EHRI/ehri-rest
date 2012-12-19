@@ -22,6 +22,7 @@ import com.tinkerpop.pipes.PipeFunction;
 
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
+import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.ContentType;
 import eu.ehri.project.models.EntityClass;
@@ -275,11 +276,10 @@ public class AclManager {
             if (pset == null)
                 continue;
             for (PermissionType perm : PermissionType.values()) {
-                Permission permission = pmap.get(perm);
                 if (pset.contains(perm)) {
-                    grantPermissions(accessor, target, permission);
+                    grantPermissions(accessor, target, perm);
                 } else {
-                    revokePermissions(accessor, target, permission);
+                    revokePermissions(accessor, target, perm);
                 }
             }
         }
@@ -293,7 +293,7 @@ public class AclManager {
      * @return List of permission maps for the given target
      */
     public List<Map<String, List<PermissionType>>> getInheritedEntityPermissions(
-            Accessor accessor, PermissionGrantTarget entity) {
+            Accessor accessor, AccessibleEntity entity) {
         List<Map<String, List<PermissionType>>> list = Lists.newLinkedList();
         Map<String, List<PermissionType>> userMap = Maps.newHashMap();
         userMap.put(manager.getId(accessor),
@@ -302,7 +302,7 @@ public class AclManager {
         for (Accessor parent : accessor.getAllParents()) {
             Map<String, List<PermissionType>> parentMap = Maps.newHashMap();
             list.add(parentMap);
-            parentMap.put(parent.getIdentifier(),
+            parentMap.put(manager.getId(parent),
                     getEntityPermissions(parent, entity));
         }
         return list;
@@ -317,20 +317,37 @@ public class AclManager {
      *         target
      */
     public List<PermissionType> getEntityPermissions(Accessor accessor,
-            PermissionGrantTarget entity) {
+            AccessibleEntity entity) {
         // If we're admin, add it regardless.
-        List<PermissionType> list = Lists.newLinkedList();
         if (isAdmin(accessor)) {
-            for (PermissionType p : PermissionType.values()) {
-                list.add(p);
-            }
+            return Lists.newArrayList(PermissionType.values());
         } else {
+            List<PermissionType> list = Lists.newLinkedList();
+            // Cache a set of permission scopes. This is the hierarchy on which
+            // permissions are granted. For most items it will contain zero
+            // entries
+            // and thus be pretty fast, but for deeply nested documentary units
+            // there might be quite a few.
+            HashSet<Object> scopes = Sets.newHashSet();
+            for (PermissionScope scope : entity.getScopes())
+                scopes.add(scope.asVertex().getId());
+
             for (PermissionGrant grant : accessor.getPermissionGrants()) {
-                list.add(PermissionType.withName(manager.getId(grant
-                        .getPermission())));
+                if (entity.asVertex().getId()
+                        .equals(grant.getTarget().asVertex().getId())) {
+                    list.add(PermissionType.withName(manager.getId(grant
+                            .getPermission())));
+                } else if (grant.getScope() != null) {
+                    // If there isn't a direct grant to the entity, search its
+                    // parent scopes for an appropriate scoped permission
+                    if (scopes.contains(grant.getScope().asVertex().getId())) {
+                        list.add(PermissionType.withName(manager.getId(grant
+                                .getPermission())));
+                    }
+                }
             }
+            return list;
         }
-        return list;
     }
 
     /**
@@ -338,14 +355,14 @@ public class AclManager {
      * 
      * @param accessor
      * @param contentType
-     * @param permission
+     * @param permType
      * @return The permission grant given for this accessor and target
      */
     public PermissionGrant grantPermissions(Accessor accessor,
-            PermissionGrantTarget target, Permission permission) {
+            PermissionGrantTarget target, PermissionType permType) {
         PermissionGrant grant = graph.addVertex(null, PermissionGrant.class);
         accessor.addPermissionGrant(grant);
-        grant.setPermission(permission);
+        grant.setPermission(getPermission(permType));
         grant.setTarget(target);
         return grant;
     }
@@ -360,7 +377,7 @@ public class AclManager {
      * @return The permission grant given for this accessor, target, and scope
      */
     public PermissionGrant grantPermissions(Accessor accessor,
-            PermissionGrantTarget target, Permission permission,
+            PermissionGrantTarget target, PermissionType permission,
             PermissionScope scope) {
         PermissionGrant grant = grantPermissions(accessor, target, permission);
         if (!scope.getIdentifier().equals(SystemScope.SYSTEM))
@@ -373,13 +390,14 @@ public class AclManager {
      * 
      * @param accessor
      * @param target
-     * @param permission
+     * @param permType
      */
     public void revokePermissions(Accessor accessor,
-            PermissionGrantTarget target, Permission permission) {
+            PermissionGrantTarget target, PermissionType permType) {
+        Permission perm = getPermission(permType);
         for (PermissionGrant grant : accessor.getPermissionGrants()) {
             if (grant.getTarget().asVertex().equals(target.asVertex())
-                    && grant.getPermission().equals(permission)) {
+                    && grant.getPermission().equals(perm)) {
                 graph.removeVertex(grant.asVertex());
             }
         }
@@ -436,7 +454,7 @@ public class AclManager {
         if (belongsToAdmin(accessor))
             return noopFilterFunction();
 
-        final HashSet<Object> all = getAllAccessors(accessor);
+        final HashSet<Vertex> all = getAllAccessors(accessor);
         return new PipeFunction<Vertex, Boolean>() {
             public Boolean compute(Vertex v) {
                 Iterable<Vertex> verts = v.getVertices(Direction.OUT,
@@ -446,7 +464,7 @@ public class AclManager {
                 if (!verts.iterator().hasNext())
                     return true;
                 for (Vertex other : verts) {
-                    if (all.contains(other.getId()))
+                    if (all.contains(other))
                         return true;
                 }
                 return false;
@@ -476,14 +494,14 @@ public class AclManager {
      * @param user
      * @return
      */
-    private HashSet<Object> getAllAccessors(Accessor accessor) {
+    private HashSet<Vertex> getAllAccessors(Accessor accessor) {
 
-        final HashSet<Object> all = Sets.newHashSet();
+        final HashSet<Vertex> all = Sets.newHashSet();
         if (!isAnonymous(accessor)) {
             Iterable<Accessor> parents = accessor.getAllParents();
             for (Accessor a : parents)
-                all.add(a.asVertex().getId());
-            all.add(accessor.asVertex().getId());
+                all.add(a.asVertex());
+            all.add(accessor.asVertex());
         }
         return all;
     }
@@ -519,11 +537,28 @@ public class AclManager {
      * @return
      */
     private Map<ContentTypes, Collection<PermissionType>> getAdminPermissions() {
-        Multimap<ContentTypes,PermissionType> perms = LinkedListMultimap.create(); 
+        Multimap<ContentTypes, PermissionType> perms = LinkedListMultimap
+                .create();
         for (ContentTypes ct : ContentTypes.values()) {
             perms.putAll(ct, Collections.unmodifiableList(Arrays
                     .asList(PermissionType.values())));
         }
         return perms.asMap();
+    }
+
+    /**
+     * Get the permission with the given string.
+     * 
+     * @param permissionId
+     * @return
+     */
+    public Permission getPermission(PermissionType perm) {
+        try {
+            return manager.getFrame(perm.getName(), EntityClass.PERMISSION,
+                    Permission.class);
+        } catch (ItemNotFound e) {
+            throw new RuntimeException(String.format(
+                    "No permission found for name: '%s'", perm.getName()), e);
+        }
     }
 }
