@@ -8,7 +8,8 @@ public enum ContentTypes {
     AUTHORITY(Entities.AUTHORITY),
     GROUP(Entities.GROUP),
     USER_PROFILE(Entities.USER_PROFILE),
-    ANNOTATION(Entities.ANNOTATION);
+    ANNOTATION(Entities.ANNOTATION),
+    ACTION(Entities.ACTION);
     
     private final String name;
     
