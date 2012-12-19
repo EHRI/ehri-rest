@@ -1,8 +1,8 @@
 package eu.ehri.extension;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -28,6 +28,9 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.acl.AclManager;
@@ -184,11 +187,11 @@ public class PermissionsResource extends AbstractRestResource {
     // This was why scala was invented...
 
     private List<Map<String,Map<String, List<String>>>> stringifyInheritedGlobalMatrix(
-            List<Map<String,Map<ContentTypes, List<PermissionType>>>> matrix) {
-        List<Map<String,Map<String, List<String>>>> list = new LinkedList<Map<String,Map<String, List<String>>>>();
-        for (Map<String,Map<ContentTypes, List<PermissionType>>> item : matrix) {
-            Map<String,Map<String, List<String>>> tmp = new HashMap<String,Map<String, List<String>>>();
-            for (Entry<String,Map<ContentTypes, List<PermissionType>>> entry : item.entrySet()) {
+            List<Map<String, Map<ContentTypes, Collection<PermissionType>>>> list2) {
+        List<Map<String,Map<String, List<String>>>> list = Lists.newLinkedList();
+        for (Map<String, Map<ContentTypes, Collection<PermissionType>>> item : list2) {
+            Map<String,Map<String, List<String>>> tmp = Maps.newHashMap();
+            for (Entry<String, Map<ContentTypes, Collection<PermissionType>>> entry : item.entrySet()) {
                 tmp.put(entry.getKey(), stringifyGlobalMatrix(entry.getValue()));
             }
             list.add(tmp);
@@ -196,10 +199,10 @@ public class PermissionsResource extends AbstractRestResource {
         return list;
     }
     
-    private Map<String,List<String>> stringifyGlobalMatrix(Map<ContentTypes,List<PermissionType>> matrix) {
-        Map<String, List<String>> tmp = new HashMap<String, List<String>>();
-        for (Entry<ContentTypes,List<PermissionType>> entry : matrix.entrySet()) {
-            List<String> ptmp = new LinkedList<String>();
+    private Map<String,List<String>> stringifyGlobalMatrix(Map<ContentTypes, Collection<PermissionType>> map) {
+        Map<String, List<String>> tmp = Maps.newHashMap();
+        for (Entry<ContentTypes, Collection<PermissionType>> entry : map.entrySet()) {
+            List<String> ptmp = Lists.newLinkedList();
             for (PermissionType pt : entry.getValue()) {
                 ptmp.add(pt.getName());
             }
@@ -210,7 +213,7 @@ public class PermissionsResource extends AbstractRestResource {
 
     private List<Map<String, List<String>>> stringifyInheritedMatrix(
             List<Map<String, List<PermissionType>>> matrix) {
-        List<Map<String, List<String>>> tmp = new LinkedList<Map<String, List<String>>>();
+        List<Map<String, List<String>>> tmp = Lists.newLinkedList();
         for (Map<String, List<PermissionType>> item : matrix) {
             tmp.add(stringifyMatrix(item));
         }
@@ -219,9 +222,9 @@ public class PermissionsResource extends AbstractRestResource {
 
     private Map<String, List<String>> stringifyMatrix(
             Map<String, List<PermissionType>> matrix) {
-        Map<String, List<String>> out = new HashMap<String, List<String>>();
+        Map<String, List<String>> out = Maps.newHashMap();
         for (Entry<String, List<PermissionType>> entry : matrix.entrySet()) {
-            List<String> tmp = new LinkedList<String>();
+            List<String> tmp = Lists.newLinkedList();
             for (PermissionType t : entry.getValue()) {
                 tmp.add(t.getName());
             }
@@ -232,9 +235,9 @@ public class PermissionsResource extends AbstractRestResource {
 
     private Map<ContentTypes, List<PermissionType>> enumifyMatrix(
             Map<String, List<String>> matrix) {
-        Map<ContentTypes, List<PermissionType>> out = new HashMap<ContentTypes, List<PermissionType>>();
+        Map<ContentTypes, List<PermissionType>> out = Maps.newHashMap();
         for (Entry<String, List<String>> entry : matrix.entrySet()) {
-            List<PermissionType> tmp = new LinkedList<PermissionType>();
+            List<PermissionType> tmp = Lists.newLinkedList();
             for (String t : entry.getValue()) {
                 tmp.add(PermissionType.withName(t));
             }

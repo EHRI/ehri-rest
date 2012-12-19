@@ -6,7 +6,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
-import java.util.HashMap;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +14,9 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import com.google.common.collect.Maps;
+
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.acl.AnonymousAccessor;
 import eu.ehri.project.acl.ContentTypes;
@@ -205,7 +208,8 @@ public class AclTest extends ModelTestBase {
         // Admin can change anything, so ensure the user ISN'T a member of admin
         assertFalse(acl.belongsToAdmin(linda));
 
-        Map<ContentTypes, List<PermissionType>> cmap = acl.getGlobalPermissions(linda);
+        Map<ContentTypes, Collection<PermissionType>> cmap = acl
+                .getGlobalPermissions(linda);
         // linda has been granted CREATE access for documentaryUnits.
         assertTrue(cmap.get(ContentTypes.DOCUMENTARY_UNIT).contains(
                 PermissionType.CREATE));
@@ -220,9 +224,9 @@ public class AclTest extends ModelTestBase {
         ContentTypes[] types = { ContentTypes.DOCUMENTARY_UNIT,
                 ContentTypes.USER_PROFILE, ContentTypes.AGENT,
                 ContentTypes.GROUP };
-        Map<ContentTypes, List<PermissionType>> matrix = new HashMap<ContentTypes, List<PermissionType>>();
+        Map<ContentTypes, List<PermissionType>> matrix = Maps.newHashMap();
         for (ContentTypes type : types) {
-            if (matrix.get(type) == null)                
+            if (matrix.get(type) == null)
                 matrix.put(type, new LinkedList<PermissionType>());
             for (PermissionType perm : perms)
                 matrix.get(type).add(perm);
@@ -232,7 +236,8 @@ public class AclTest extends ModelTestBase {
         assertFalse(acl.belongsToAdmin(accessor));
 
         // Check initial perms are empty...
-        Map<ContentTypes, List<PermissionType>> cmap = acl.getGlobalPermissions(accessor);
+        Map<ContentTypes, Collection<PermissionType>> cmap = acl
+                .getGlobalPermissions(accessor);
         for (ContentTypes type : types) {
             assertNull(cmap.get(type));
         }
@@ -243,7 +248,7 @@ public class AclTest extends ModelTestBase {
         // Check that everything is still there...
         cmap = acl.getGlobalPermissions(accessor);
         for (ContentTypes type : types) {
-            List<PermissionType> ps = cmap.get(type);
+            Collection<PermissionType> ps = cmap.get(type);
             assertNotNull(ps);
             for (PermissionType perm : perms) {
                 assertTrue(ps.contains(perm));
@@ -263,7 +268,7 @@ public class AclTest extends ModelTestBase {
 
         PermissionType[] perms = { PermissionType.CREATE };
         ContentTypes[] types = { ContentTypes.DOCUMENTARY_UNIT };
-        Map<ContentTypes, List<PermissionType>> matrix = new HashMap<ContentTypes, List<PermissionType>>();
+        Map<ContentTypes, List<PermissionType>> matrix = Maps.newHashMap();
         for (ContentTypes type : types) {
             matrix.put(type, new LinkedList<PermissionType>());
             for (PermissionType perm : perms)
@@ -275,7 +280,8 @@ public class AclTest extends ModelTestBase {
         assertTrue(acl.belongsToAdmin(accessor));
 
         // Check initial perms are empty...
-        Map<ContentTypes, List<PermissionType>> cmap = acl.getGlobalPermissions(accessor);
+        Map<ContentTypes, Collection<PermissionType>> cmap = acl
+                .getGlobalPermissions(accessor);
         for (ContentTypes type : types) {
             assertNotNull(cmap.get(type));
         }

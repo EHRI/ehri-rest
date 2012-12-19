@@ -2,14 +2,18 @@ package eu.ehri.project.acl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.google.common.collect.LinkedListMultimap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Sets;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
@@ -171,7 +175,7 @@ public class AclManager {
      */
     public Iterable<PermissionGrant> getPermissionGrants(Accessor accessor,
             PermissionGrantTarget target, Permission permission) {
-        List<PermissionGrant> grants = new LinkedList<PermissionGrant>();
+        List<PermissionGrant> grants = Lists.newLinkedList();
         for (PermissionGrant grant : accessor.getPermissionGrants()) {
             if (target.asVertex().equals(grant.getTarget().asVertex())) {
 
@@ -205,16 +209,17 @@ public class AclManager {
      * @return List of permission maps for the given accessor and his group
      *         parents.
      */
-    public List<Map<String, Map<ContentTypes, List<PermissionType>>>> getInheritedGlobalPermissions(
+    public List<Map<String, Map<ContentTypes, Collection<PermissionType>>>> getInheritedGlobalPermissions(
             Accessor accessor) {
-        // Help! I'm in Java Hell... Java really does not encourage
-        // programming with generic data types.
-        List<Map<String, Map<ContentTypes, List<PermissionType>>>> globals = new LinkedList<Map<String, Map<ContentTypes, List<PermissionType>>>>();
-        Map<String, Map<ContentTypes, List<PermissionType>>> userMap = new HashMap<String, Map<ContentTypes, List<PermissionType>>>();
+        List<Map<String, Map<ContentTypes, Collection<PermissionType>>>> globals = Lists
+                .newLinkedList();
+        Map<String, Map<ContentTypes, Collection<PermissionType>>> userMap = Maps
+                .newHashMap();
         userMap.put(manager.getId(accessor), getGlobalPermissions(accessor));
         globals.add(userMap);
         for (Accessor parent : accessor.getParents()) {
-            Map<String, Map<ContentTypes, List<PermissionType>>> parentMap = new HashMap<String, Map<ContentTypes, List<PermissionType>>>();
+            Map<String, Map<ContentTypes, Collection<PermissionType>>> parentMap = Maps
+                    .newHashMap();
             parentMap.put(manager.getId(parent), getGlobalPermissions(parent));
             globals.add(parentMap);
         }
@@ -228,7 +233,7 @@ public class AclManager {
      * @param accessor
      * @return Permission map for the given accessor
      */
-    public Map<ContentTypes, List<PermissionType>> getGlobalPermissions(
+    public Map<ContentTypes, Collection<PermissionType>> getGlobalPermissions(
             Accessor accessor) {
         return isAdmin(accessor) ? getAdminPermissions()
                 : getAccessorPermissions(accessor);
@@ -247,12 +252,12 @@ public class AclManager {
             throws PermissionDenied {
         // Build a lookup of content types and permissions keyed by their
         // identifier.
-        Map<ContentTypes, ContentType> cmap = new HashMap<ContentTypes, ContentType>();
+        Map<ContentTypes, ContentType> cmap = Maps.newHashMap();
         for (ContentType c : manager.getFrames(EntityClass.CONTENT_TYPE,
                 ContentType.class)) {
             cmap.put(ContentTypes.withName(manager.getId(c)), c);
         }
-        Map<PermissionType, Permission> pmap = new HashMap<PermissionType, Permission>();
+        Map<PermissionType, Permission> pmap = Maps.newHashMap();
         for (Permission p : manager.getFrames(EntityClass.PERMISSION,
                 Permission.class)) {
             pmap.put(PermissionType.withName(manager.getId(p)), p);
@@ -289,13 +294,13 @@ public class AclManager {
      */
     public List<Map<String, List<PermissionType>>> getInheritedEntityPermissions(
             Accessor accessor, PermissionGrantTarget entity) {
-        List<Map<String, List<PermissionType>>> list = new LinkedList<Map<String, List<PermissionType>>>();
-        Map<String, List<PermissionType>> userMap = new HashMap<String, List<PermissionType>>();
+        List<Map<String, List<PermissionType>>> list = Lists.newLinkedList();
+        Map<String, List<PermissionType>> userMap = Maps.newHashMap();
         userMap.put(manager.getId(accessor),
                 getEntityPermissions(accessor, entity));
         list.add(userMap);
         for (Accessor parent : accessor.getAllParents()) {
-            Map<String, List<PermissionType>> parentMap = new HashMap<String, List<PermissionType>>();
+            Map<String, List<PermissionType>> parentMap = Maps.newHashMap();
             list.add(parentMap);
             parentMap.put(parent.getIdentifier(),
                     getEntityPermissions(parent, entity));
@@ -314,7 +319,7 @@ public class AclManager {
     public List<PermissionType> getEntityPermissions(Accessor accessor,
             PermissionGrantTarget entity) {
         // If we're admin, add it regardless.
-        List<PermissionType> list = new LinkedList<PermissionType>();
+        List<PermissionType> list = Lists.newLinkedList();
         if (isAdmin(accessor)) {
             for (PermissionType p : PermissionType.values()) {
                 list.add(p);
@@ -473,7 +478,7 @@ public class AclManager {
      */
     private HashSet<Object> getAllAccessors(Accessor accessor) {
 
-        final HashSet<Object> all = new HashSet<Object>();
+        final HashSet<Object> all = Sets.newHashSet();
         if (!isAnonymous(accessor)) {
             Iterable<Accessor> parents = accessor.getAllParents();
             for (Accessor a : parents)
@@ -487,9 +492,10 @@ public class AclManager {
      * @param accessor
      * @return
      */
-    private Map<ContentTypes, List<PermissionType>> getAccessorPermissions(
+    private Map<ContentTypes, Collection<PermissionType>> getAccessorPermissions(
             Accessor accessor) {
-        Map<ContentTypes, List<PermissionType>> perms = new HashMap<ContentTypes, List<PermissionType>>();
+        Multimap<ContentTypes, PermissionType> permmap = LinkedListMultimap
+                .create();
         for (PermissionGrant grant : accessor.getPermissionGrants()) {
             // Since these are global perms only include those where the target
             // is a content type
@@ -499,16 +505,11 @@ public class AclManager {
                             ContentType.class)) {
                 ContentTypes ctype = ContentTypes.withName(manager
                         .getId(target));
-                List<PermissionType> plist = perms.get(ctype);
-                if (plist == null) {
-                    plist = new LinkedList<PermissionType>();
-                    perms.put(ctype, plist);
-                }
-                plist.add(PermissionType.withName(manager.getId(grant
+                permmap.put(ctype, PermissionType.withName(manager.getId(grant
                         .getPermission())));
             }
         }
-        return perms;
+        return permmap.asMap();
     }
 
     /**
@@ -517,12 +518,12 @@ public class AclManager {
      * 
      * @return
      */
-    private Map<ContentTypes, List<PermissionType>> getAdminPermissions() {
-        Map<ContentTypes, List<PermissionType>> perms = new HashMap<ContentTypes, List<PermissionType>>();
+    private Map<ContentTypes, Collection<PermissionType>> getAdminPermissions() {
+        Multimap<ContentTypes,PermissionType> perms = LinkedListMultimap.create(); 
         for (ContentTypes ct : ContentTypes.values()) {
-            perms.put(ct, Collections.unmodifiableList(Arrays
+            perms.putAll(ct, Collections.unmodifiableList(Arrays
                     .asList(PermissionType.values())));
         }
-        return perms;
+        return perms.asMap();
     }
 }

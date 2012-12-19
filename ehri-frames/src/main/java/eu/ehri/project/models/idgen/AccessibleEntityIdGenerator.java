@@ -32,7 +32,9 @@ public enum AccessibleEntityIdGenerator implements IdGenerator {
             scopeIds.addFirst(s.getIdentifier());
         scopeIds.add(scope.getIdentifier());
         // TODO: Should be slugify IDs? This would make relating items to
-        // their ID a bit harder but lead to cleaner IDs.
+        // their ID a bit harder but lead to cleaner IDs. Not doing this now
+        // because having dirty IDs is an effective way of debugging (via
+        // breakage) other parts of the system.
         scopeIds.add((String) data.get(AccessibleEntity.IDENTIFIER_KEY));
         return Joiner.on(SEPERATOR).skipNulls().join(scopeIds);
     }
