@@ -4,6 +4,7 @@ import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Property;
 import com.tinkerpop.frames.VertexFrame;
+import com.tinkerpop.frames.annotations.gremlin.GremlinGroovy;
 
 import eu.ehri.project.models.Action;
 import eu.ehri.project.models.PermissionGrant;
@@ -14,7 +15,7 @@ public interface AccessibleEntity extends VertexFrame, PermissionGrantTarget {
 
     public static final String ACCESS = "access";
     public static final String IDENTIFIER_KEY = "identifier";
-    public static final String SCOPE = "hasScope";
+    public static final String HAS_SCOPE = "hasScope";
 
     @Unique
     @Property(IDENTIFIER_KEY)
@@ -36,9 +37,15 @@ public interface AccessibleEntity extends VertexFrame, PermissionGrantTarget {
     @Adjacency(label = Action.HAS_SUBJECT, direction = Direction.IN)
     public Iterable<Action> getHistory();
     
-    @Adjacency(label = SCOPE)
+    @Adjacency(label = HAS_SCOPE)
     public PermissionScope getScope();
     
-    @Adjacency(label = SCOPE)
+    @Adjacency(label = HAS_SCOPE)
     public void setScope(final PermissionScope scope);
+    
+    
+    
+    @GremlinGroovy("_().as('n').out('" + HAS_SCOPE
+            + "').loop('n'){it.loops < 20}{true}")
+    public Iterable<PermissionScope> getScopes();    
 }

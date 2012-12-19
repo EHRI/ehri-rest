@@ -6,7 +6,6 @@ import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Text;
 import eu.ehri.project.models.idgen.AccessibleEntityIdGenerator;
-import eu.ehri.project.models.idgen.DocumentaryUnitIdGenerator;
 import eu.ehri.project.models.idgen.GenericIdGenerator;
 import eu.ehri.project.models.idgen.IdGenerator;
 
@@ -20,7 +19,7 @@ import eu.ehri.project.models.idgen.IdGenerator;
 public enum EntityClass {
 
     // @formatter:off
-    DOCUMENTARY_UNIT(Entities.DOCUMENTARY_UNIT, "c", DocumentaryUnit.class, DocumentaryUnitIdGenerator.INSTANCE),
+    DOCUMENTARY_UNIT(Entities.DOCUMENTARY_UNIT, "c", DocumentaryUnit.class, AccessibleEntityIdGenerator.INSTANCE),
     AGENT(Entities.AGENT, "r", Agent.class, AccessibleEntityIdGenerator.INSTANCE),
     AUTHORITY(Entities.AUTHORITY, "a", Authority.class, AccessibleEntityIdGenerator.INSTANCE),
     GROUP(Entities.GROUP, "g", Group.class, AccessibleEntityIdGenerator.INSTANCE),

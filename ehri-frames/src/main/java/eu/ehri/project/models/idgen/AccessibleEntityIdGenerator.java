@@ -1,6 +1,10 @@
 package eu.ehri.project.models.idgen;
 
+import java.util.LinkedList;
 import java.util.Map;
+
+import com.google.common.base.Joiner;
+import com.google.common.collect.Lists;
 
 import eu.ehri.project.exceptions.IdGenerationError;
 import eu.ehri.project.models.EntityClass;
@@ -14,7 +18,7 @@ import eu.ehri.project.models.base.PermissionScope;
  * 
  */
 public enum AccessibleEntityIdGenerator implements IdGenerator {
-    
+
     INSTANCE;
 
     /**
@@ -23,8 +27,13 @@ public enum AccessibleEntityIdGenerator implements IdGenerator {
      */
     public String generateId(EntityClass type, PermissionScope scope,
             Map<String, Object> data) throws IdGenerationError {
-        return type.getAbbreviation() + SEPERATOR
-                + data.get(AccessibleEntity.IDENTIFIER_KEY);
+        LinkedList<String> scopeIds = Lists.newLinkedList();
+        for (PermissionScope s : scope.getScopes())
+            scopeIds.addFirst(s.getIdentifier());
+        scopeIds.add(scope.getIdentifier());
+        // TODO: Should be slugify IDs? This would make relating items to
+        // their ID a bit harder but lead to cleaner IDs.
+        scopeIds.add((String) data.get(AccessibleEntity.IDENTIFIER_KEY));
+        return Joiner.on(SEPERATOR).skipNulls().join(scopeIds);
     }
-
 }

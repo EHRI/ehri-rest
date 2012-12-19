@@ -177,13 +177,13 @@ public class DocumentaryUnitResource extends
         Bundle entityBundle = converter.jsonToBundle(json);
 
         DocumentaryUnit doc = new LoggingCrudViews<DocumentaryUnit>(graph,
-                DocumentaryUnit.class, parent.getAgent())
+                DocumentaryUnit.class, parent)
                 .create(converter.bundleToData(entityBundle),
                         getRequesterUserProfile());
         // Add it to this agent's collections
         parent.addChild(doc);
         doc.setAgent(parent.getAgent());
-        doc.setScope(parent.getScope());
+        doc.setScope(parent);
         return doc;
     }
 }

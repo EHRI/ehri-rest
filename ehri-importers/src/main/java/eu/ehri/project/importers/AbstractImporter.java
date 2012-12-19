@@ -15,8 +15,9 @@ import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.Description;
+import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.base.TemporalEntity;
-import eu.ehri.project.models.idgen.DocumentaryUnitIdGenerator;
+import eu.ehri.project.models.idgen.AccessibleEntityIdGenerator;
 import eu.ehri.project.models.idgen.IdGenerator;
 import eu.ehri.project.persistance.BundleDAO;
 import eu.ehri.project.persistance.Bundle;
@@ -132,10 +133,11 @@ public abstract class AbstractImporter<T> {
                     EntityClass.DOCUMENT_DESCRIPTION, dpb));
         }
 
-        IdGenerator generator = DocumentaryUnitIdGenerator.INSTANCE;
+        PermissionScope scope = parent != null ? parent : repository;
+        IdGenerator generator = AccessibleEntityIdGenerator.INSTANCE;
         String id = null;
         try {
-            id = generator.generateId(EntityClass.DOCUMENTARY_UNIT, repository,
+            id = generator.generateId(EntityClass.DOCUMENTARY_UNIT, scope,
                     unit.getData());
         } catch (IdGenerationError e) {
             throw new ValidationError(unit, DocumentaryUnit.IDENTIFIER_KEY,
@@ -148,7 +150,7 @@ public abstract class AbstractImporter<T> {
 
         // Set the repository/item relationship
         frame.setAgent(repository);
-        frame.setScope(repository);
+        frame.setScope(scope);
         // Set the parent child relationship
         if (parent != null)
             parent.addChild(frame);
