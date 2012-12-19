@@ -131,6 +131,7 @@ public class PermissionRestClientTest extends BaseRestClientTest {
                 .entity(new ObjectMapper().writeValueAsBytes(getTestMatrix()))
                 .post(ClientResponse.class);
         assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), response.getStatus());
+        // TODO: Figure out why no content ever seems to be returned here?
     }
     
     @Test
