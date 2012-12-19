@@ -28,7 +28,6 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
-
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
@@ -37,6 +36,7 @@ import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.acl.ContentTypes;
 import eu.ehri.project.acl.PermissionType;
 import eu.ehri.project.definitions.Entities;
+import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.base.AccessibleEntity;
@@ -63,25 +63,22 @@ public class PermissionsResource extends AbstractRestResource {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{id:[^/]+}")
+    @Path("/{id:.+}")
     public Response setGlobalMatrix(@PathParam("id") String id, String json)
             throws PermissionDenied, JsonParseException, JsonMappingException,
-            IOException, ItemNotFound {
+            IOException, ItemNotFound, DeserializationError {
 
         JsonFactory factory = new JsonFactory();
         ObjectMapper mapper = new ObjectMapper(factory);
         TypeReference<HashMap<String, List<String>>> typeRef = new TypeReference<HashMap<String, List<String>>>() {
         };
         HashMap<String, List<String>> globals = mapper.readValue(json, typeRef);
-
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
-            // remove all existing permission grants
             Accessor accessor = manager.getFrame(id, Accessor.class);
             Accessor grantee = getRequesterUserProfile();
             AclManager acl = new AclManager(graph);
             acl.setGlobalPermissionMatrix(accessor, enumifyMatrix(globals));
-
             // Log the action...
             new ActionManager(graph).createAction(
                     graph.frame(accessor.asVertex(), AccessibleEntity.class),
@@ -113,7 +110,7 @@ public class PermissionsResource extends AbstractRestResource {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{id:[^/]+}")
+    @Path("/{id:.+}")
     public Response getGlobalMatrix(@PathParam("id") String id)
             throws PermissionDenied, JsonGenerationException,
             JsonMappingException, IOException, ItemNotFound {
@@ -162,7 +159,7 @@ public class PermissionsResource extends AbstractRestResource {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{userId:[^/]+}/{id:[^/]+}")
+    @Path("/{userId:.+}/{id:.+}")
     public Response getEntityMatrix(@PathParam("userId") String userId,
             @PathParam("id") String id) throws PermissionDenied,
             JsonGenerationException, JsonMappingException, IOException,
@@ -233,15 +230,19 @@ public class PermissionsResource extends AbstractRestResource {
     }
 
     private Map<ContentTypes, List<PermissionType>> enumifyMatrix(
-            Map<String, List<String>> matrix) {
-        Map<ContentTypes, List<PermissionType>> out = Maps.newHashMap();
-        for (Entry<String, List<String>> entry : matrix.entrySet()) {
-            List<PermissionType> tmp = Lists.newLinkedList();
-            for (String t : entry.getValue()) {
-                tmp.add(PermissionType.withName(t));
+            Map<String, List<String>> matrix) throws DeserializationError {
+        try {
+            Map<ContentTypes, List<PermissionType>> out = Maps.newHashMap();
+            for (Entry<String, List<String>> entry : matrix.entrySet()) {
+                List<PermissionType> tmp = Lists.newLinkedList();
+                for (String t : entry.getValue()) {
+                    tmp.add(PermissionType.withName(t));
+                }
+                out.put(ContentTypes.withName(entry.getKey()), tmp);
             }
-            out.put(ContentTypes.withName(entry.getKey()), tmp);
+            return out;
+        } catch (IllegalArgumentException e) {
+            throw new DeserializationError(e.getMessage());
         }
-        return out;
     }
 }
