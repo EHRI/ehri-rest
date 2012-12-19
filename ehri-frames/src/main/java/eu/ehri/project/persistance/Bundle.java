@@ -8,6 +8,7 @@ import java.util.Map;
 
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Maps;
 
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.EntityClass;
@@ -128,10 +129,13 @@ public class Bundle {
      * 
      * @param key
      * @param value
+     * @return 
      * @throws ValidationError
      */
-    public void setDataValue(String key, Object value) {
-        data.put(key, value);
+    public Bundle setDataValue(String key, Object value) {
+        Map<String,Object> newData = Maps.newHashMap(data);
+        newData.put(key, value);
+        return setData(newData);
     }
 
     public Bundle setData(final Map<String, Object> data) {
