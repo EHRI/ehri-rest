@@ -89,6 +89,8 @@ public class PermissionsResource extends AbstractRestResource {
             return getGlobalMatrix(id);
         } catch (NoSuchElementException e) {
             throw new ItemNotFound(Converter.ID_KEY, id);
+        } catch (DeserializationError e) {
+            throw e;
         } catch (Exception e) {
             tx.failure();
             throw new WebApplicationException(e);
@@ -120,8 +122,10 @@ public class PermissionsResource extends AbstractRestResource {
 
         return Response
                 .status(Status.OK)
-                .entity(new ObjectMapper().writeValueAsBytes(stringifyInheritedGlobalMatrix(acl
-                        .getInheritedGlobalPermissions(accessor)))).build();
+                .entity(new ObjectMapper()
+                        .writeValueAsBytes(stringifyInheritedGlobalMatrix(acl
+                                .getInheritedGlobalPermissions(accessor))))
+                .build();
     }
 
     /**
@@ -166,8 +170,7 @@ public class PermissionsResource extends AbstractRestResource {
             ItemNotFound {
 
         Accessor accessor = manager.getFrame(userId, Accessor.class);
-        AccessibleEntity entity = manager.getFrame(id,
-                AccessibleEntity.class);
+        AccessibleEntity entity = manager.getFrame(id, AccessibleEntity.class);
         AclManager acl = new AclManager(graph);
 
         return Response
@@ -178,26 +181,30 @@ public class PermissionsResource extends AbstractRestResource {
     }
 
     // Helpers. These just convert from string to internal enum representations
-    // of the various permissions-related data structures. 
+    // of the various permissions-related data structures.
     // TODO: There's probably a way to get Jackson to do that automatically.
     // This was why scala was invented...
 
-    private List<Map<String,Map<String, List<String>>>> stringifyInheritedGlobalMatrix(
+    private List<Map<String, Map<String, List<String>>>> stringifyInheritedGlobalMatrix(
             List<Map<String, Map<ContentTypes, Collection<PermissionType>>>> list2) {
-        List<Map<String,Map<String, List<String>>>> list = Lists.newLinkedList();
+        List<Map<String, Map<String, List<String>>>> list = Lists
+                .newLinkedList();
         for (Map<String, Map<ContentTypes, Collection<PermissionType>>> item : list2) {
-            Map<String,Map<String, List<String>>> tmp = Maps.newHashMap();
-            for (Entry<String, Map<ContentTypes, Collection<PermissionType>>> entry : item.entrySet()) {
+            Map<String, Map<String, List<String>>> tmp = Maps.newHashMap();
+            for (Entry<String, Map<ContentTypes, Collection<PermissionType>>> entry : item
+                    .entrySet()) {
                 tmp.put(entry.getKey(), stringifyGlobalMatrix(entry.getValue()));
             }
             list.add(tmp);
         }
         return list;
     }
-    
-    private Map<String,List<String>> stringifyGlobalMatrix(Map<ContentTypes, Collection<PermissionType>> map) {
+
+    private Map<String, List<String>> stringifyGlobalMatrix(
+            Map<ContentTypes, Collection<PermissionType>> map) {
         Map<String, List<String>> tmp = Maps.newHashMap();
-        for (Entry<ContentTypes, Collection<PermissionType>> entry : map.entrySet()) {
+        for (Entry<ContentTypes, Collection<PermissionType>> entry : map
+                .entrySet()) {
             List<String> ptmp = Lists.newLinkedList();
             for (PermissionType pt : entry.getValue()) {
                 ptmp.add(pt.getName());

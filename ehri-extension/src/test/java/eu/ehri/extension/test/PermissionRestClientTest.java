@@ -23,6 +23,8 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.WebResource;
@@ -114,6 +116,29 @@ public class PermissionRestClientTest extends BaseRestClientTest {
                 .contains(PermissionType.DELETE.getName()));
     }
 
+    @Test
+    public void testGivingBadPermsErrorsCorrectly() throws JsonGenerationException,
+            JsonMappingException, UniformInterfaceException, IOException {
+
+        // If we give a permission matrix for a content type that doesn't
+        // exist we should get a DeserializationError in return.
+        Map<String, List<String>> testMatrix = getTestMatrix();
+        testMatrix.put("IDONTEXIST", new ImmutableList.Builder<String>()
+                    .add(PermissionType.CREATE.getName()).build());
+        
+        // Set the permission via REST
+        WebResource resource = client.resource(getExtensionEntryPointUri() + "/"
+                + Entities.PERMISSION + "/" + LIMITED_USER_NAME);
+        ClientResponse response = resource
+                .accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                        getAdminUserProfileId())
+                .entity(new ObjectMapper().writeValueAsBytes(testMatrix))
+                .post(ClientResponse.class);
+        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+    }
+    
     @Test
     public void testSettingGlobalPermissions() throws JsonGenerationException,
             JsonMappingException, UniformInterfaceException, IOException {

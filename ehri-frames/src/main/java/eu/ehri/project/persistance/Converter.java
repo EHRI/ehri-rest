@@ -96,6 +96,8 @@ public final class Converter {
             // just seems to be Object ???
             ObjectMapper mapper = new ObjectMapper();
             return dataToBundle(mapper.readValue(json, Map.class));
+        } catch (DeserializationError e) {
+            throw e;
         } catch (Exception e) {
             throw new DeserializationError("Error decoding JSON", e);
         }
