@@ -18,15 +18,15 @@ import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.exceptions.SerializationError;
-import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.ContentType;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Permission;
 import eu.ehri.project.models.PermissionGrant;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
+import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
+import eu.ehri.project.persistance.ActionManager;
 import eu.ehri.project.views.Acl;
 import eu.ehri.project.views.ViewHelper;
 
@@ -67,52 +67,47 @@ public final class AclViews<E extends AccessibleEntity> implements Acl<E> {
     /**
      * Set permissions on a PermissionTarget.
      * 
-     * @param target
-     *            target id
-     * @param accessor
-     *            accessor id
-     * @param permission
-     *            permission
+     * @param entity
+     * @param user
+     * @param permissionType
      * @return
      * @throws PermissionDenied
-     * @throws ValidationError
-     * @throws SerializationError
      */
     public PermissionGrant setPermission(E entity, Accessor user,
-            PermissionType perm) throws PermissionDenied, ValidationError,
-            SerializationError {
+            PermissionType permissionType) throws PermissionDenied {
         helper.checkEntityPermission(entity, user, PermissionType.GRANT);
-        return acl.grantPermissions(user, entity, perm, scope);
+        return acl.grantPermissions(user, entity, permissionType, scope);
     }
 
+    /**
+     * Set the global permission matrix for a user.
+     * 
+     * @param accessor
+     * @param grantee
+     * @param matrix
+     * 
+     * @throws PermissionDenied
+     */
     public void setGlobalPermissionMatrix(Accessor accessor, Accessor grantee,
             Map<ContentTypes, List<PermissionType>> permissionMap)
-            throws PermissionDenied, ValidationError, SerializationError {
-
-        // Check we have grant permissions for the requested content types
-        if (!acl.belongsToAdmin(grantee)) {
-            try {
-                Permission grantPerm = helper.getEntity(EntityClass.PERMISSION,
-                        PermissionType.GRANT.getName(), Permission.class);
-                for (ContentTypes ctype : permissionMap.keySet()) {
-                    ContentType target = manager.getFrame(ctype.getName(),
-                            ContentType.class);
-                    Iterable<PermissionGrant> grants = acl.getPermissionGrants(
-                            grantee, target, grantPerm);
-                    if (!grants.iterator().hasNext()) {
-                        throw new PermissionDenied(grantee, target, grantPerm,
-                                SystemScope.getInstance());
-                    }
-                }
-            } catch (ItemNotFound e) {
-                throw new RuntimeException(
-                        "Unable to get node for permission type '"
-                                + PermissionType.GRANT + "'", e);
-            }
+            throws PermissionDenied {
+        try {
+            checkGrantPermission(grantee, permissionMap);
+            acl.setGlobalPermissionMatrix(accessor, permissionMap);
+            // Log the action...
+            new ActionManager(graph).createAction(
+                    graph.frame(accessor.asVertex(), AccessibleEntity.class),
+                    graph.frame(grantee.asVertex(), Actioner.class),
+                    "Updated permissions");
+            graph.getBaseGraph().stopTransaction(Conclusion.SUCCESS);
+        } catch (PermissionDenied e) {
+            graph.getBaseGraph().stopTransaction(Conclusion.FAILURE);
+            throw e;
+        } catch (Exception e) {
+            graph.getBaseGraph().stopTransaction(Conclusion.FAILURE);
         }
-
-        acl.setGlobalPermissionMatrix(accessor, permissionMap);
     }
+
 
     public void setAccessors(E entity, Set<Accessor> accessors, Accessor user)
             throws PermissionDenied {
@@ -142,6 +137,40 @@ public final class AclViews<E extends AccessibleEntity> implements Acl<E> {
         for (Accessor accessor : accessors) {
             if (!existing.contains(accessor.asVertex())) {
                 entity.addAccessor(accessor);
+            }
+        }
+    }
+    
+    /**
+     * Check the accessor has GRANT permissions to update another
+     * user's permissions.
+     * 
+     * @param accessor
+     * @param permissionMap
+     * @throws PermissionDenied
+     */
+    private void checkGrantPermission(Accessor accessor,
+            Map<ContentTypes, List<PermissionType>> permissionMap)
+            throws PermissionDenied {
+        // Check we have grant permissions for the requested content types
+        if (!acl.belongsToAdmin(accessor)) {
+            try {
+                Permission grantPerm = helper.getEntity(EntityClass.PERMISSION,
+                        PermissionType.GRANT.getName(), Permission.class);
+                for (ContentTypes ctype : permissionMap.keySet()) {
+                    ContentType target = manager.getFrame(ctype.getName(),
+                            ContentType.class);
+                    Iterable<PermissionGrant> grants = acl.getPermissionGrants(
+                            accessor, target, grantPerm);
+                    if (!grants.iterator().hasNext()) {
+                        throw new PermissionDenied(accessor, target, grantPerm,
+                                SystemScope.getInstance());
+                    }
+                }
+            } catch (ItemNotFound e) {
+                throw new RuntimeException(
+                        "Unable to get node for permission type '"
+                                + PermissionType.GRANT + "'", e);
             }
         }
     }

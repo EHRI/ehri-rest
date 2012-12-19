@@ -32,10 +32,9 @@ public class PermissionDeniedMapper implements ExceptionMapper<PermissionDenied>
         };
 		try {
             return Response.status(Status.UNAUTHORIZED)
-            	.entity(new ObjectMapper().writeValueAsString(out).getBytes()).build();
+            	.entity(new ObjectMapper().writeValueAsBytes(out)).build();
         } catch (Exception e1) {
             throw new RuntimeException(e1);
         }
 	}
-
 }

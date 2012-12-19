@@ -1,5 +1,8 @@
 package eu.ehri.project.acl;
 
+import org.codehaus.jackson.annotate.JsonCreator;
+import org.codehaus.jackson.annotate.JsonValue;
+
 public enum PermissionType {
     CREATE("create", 1),
     UPDATE("update", 2),
@@ -16,6 +19,7 @@ public enum PermissionType {
         this.mask = mask;
     }
 
+    @JsonValue
     public String getName() {
         return name;
     }
@@ -28,6 +32,7 @@ public enum PermissionType {
         return name;
     }
     
+    @JsonCreator
     public static PermissionType withName(String name) {
         for (PermissionType p : PermissionType.values()) {
             if (p.getName().equals(name))

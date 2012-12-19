@@ -1,5 +1,8 @@
 package eu.ehri.project.acl;
 
+import org.codehaus.jackson.annotate.JsonCreator;
+import org.codehaus.jackson.annotate.JsonValue;
+
 import eu.ehri.project.definitions.Entities;
 
 public enum ContentTypes {
@@ -17,6 +20,7 @@ public enum ContentTypes {
         this.name = name;
     }
 
+    @JsonValue
     public String getName() {
         return name;
     }
@@ -25,6 +29,7 @@ public enum ContentTypes {
         return name;
     }
     
+    @JsonCreator
     public static ContentTypes withName(String name) {
         for (ContentTypes c : ContentTypes.values()) {
             if (c.getName().equals(name))

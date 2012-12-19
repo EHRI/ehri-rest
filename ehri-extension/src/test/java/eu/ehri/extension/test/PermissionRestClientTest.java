@@ -24,7 +24,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.WebResource;
@@ -116,6 +115,24 @@ public class PermissionRestClientTest extends BaseRestClientTest {
                 .contains(PermissionType.DELETE.getName()));
     }
 
+    @Test
+    public void testPermissionSetPermissionDenied() throws JsonGenerationException,
+            JsonMappingException, UniformInterfaceException, IOException {
+
+        // Test a user setting his own permissions over REST - this should
+        // obviously fail...
+        WebResource resource = client.resource(getExtensionEntryPointUri() + "/"
+                + Entities.PERMISSION + "/" + LIMITED_USER_NAME);
+        ClientResponse response = resource
+                .accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                        LIMITED_USER_NAME)
+                .entity(new ObjectMapper().writeValueAsBytes(getTestMatrix()))
+                .post(ClientResponse.class);
+        assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), response.getStatus());
+    }
+    
     @Test
     public void testGivingBadPermsErrorsCorrectly() throws JsonGenerationException,
             JsonMappingException, UniformInterfaceException, IOException {

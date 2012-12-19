@@ -31,7 +31,7 @@ public class IntegrityErrorMapper implements ExceptionMapper<IntegrityError> {
         };
         try {
             return Response.status(Status.BAD_REQUEST)
-                .entity(new ObjectMapper().writeValueAsString(out).getBytes()).build();
+                .entity(new ObjectMapper().writeValueAsBytes(out)).build();
         } catch (Exception e1) {
             throw new RuntimeException(e1);
         }

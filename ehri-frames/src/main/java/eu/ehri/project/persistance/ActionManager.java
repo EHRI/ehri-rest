@@ -45,8 +45,7 @@ public class ActionManager {
      * @return
      * @throws ItemNotFound
      */
-    public Action createAction(Actioner user, String logMessage)
-            throws ItemNotFound {
+    public Action createAction(Actioner user, String logMessage) {
 
         Map<String, Object> actionData = new HashMap<String, Object>();
         actionData.put(Action.TIMESTAMP, getTimestamp());
@@ -82,7 +81,7 @@ public class ActionManager {
      * @throws ItemNotFound
      */
     public Action createAction(AccessibleEntity subject, Actioner user,
-            String logMessage) throws ItemNotFound {
+            String logMessage) {
         Action action = createAction(user, logMessage);
         action.setSubject(subject);
         return action;

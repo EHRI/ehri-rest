@@ -6,15 +6,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.NoSuchElementException;
-
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -22,12 +19,10 @@ import javax.ws.rs.core.Response.Status;
 
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerationException;
-import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Transaction;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
@@ -41,9 +36,7 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.models.base.Actioner;
-import eu.ehri.project.persistance.ActionManager;
-import eu.ehri.project.persistance.Converter;
+import eu.ehri.project.views.impl.AclViews;
 
 /**
  * Provides a RESTfull(ish) interface for setting PermissionTarget perms.
@@ -65,40 +58,26 @@ public class PermissionsResource extends AbstractRestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:.+}")
     public Response setGlobalMatrix(@PathParam("id") String id, String json)
-            throws PermissionDenied, JsonParseException, JsonMappingException,
-            IOException, ItemNotFound, DeserializationError {
+            throws PermissionDenied, IOException, ItemNotFound,
+            DeserializationError, BadRequester {
 
-        JsonFactory factory = new JsonFactory();
-        ObjectMapper mapper = new ObjectMapper(factory);
-        TypeReference<HashMap<String, List<String>>> typeRef = new TypeReference<HashMap<String, List<String>>>() {
-        };
-        HashMap<String, List<String>> globals = mapper.readValue(json, typeRef);
-        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
+        HashMap<ContentTypes, List<PermissionType>> globals;
         try {
-            Accessor accessor = manager.getFrame(id, Accessor.class);
-            Accessor grantee = getRequesterUserProfile();
-            AclManager acl = new AclManager(graph);
-            acl.setGlobalPermissionMatrix(accessor, enumifyMatrix(globals));
-            // Log the action...
-            new ActionManager(graph).createAction(
-                    graph.frame(accessor.asVertex(), AccessibleEntity.class),
-                    graph.frame(grantee.asVertex(), Actioner.class),
-                    "Updated permissions");
-
-            tx.success();
-            return getGlobalMatrix(id);
-        } catch (NoSuchElementException e) {
-            throw new ItemNotFound(Converter.ID_KEY, id);
-        } catch (DeserializationError e) {
-            throw e;
-        } catch (PermissionDenied e) {
-            throw e;
-        } catch (Exception e) {
-            tx.failure();
-            throw new WebApplicationException(e);
-        } finally {
-            tx.finish();
+            JsonFactory factory = new JsonFactory();
+            ObjectMapper mapper = new ObjectMapper(factory);
+            TypeReference<HashMap<ContentTypes, List<PermissionType>>> typeRef = new TypeReference<HashMap<ContentTypes, List<PermissionType>>>() {
+            };
+            globals = mapper.readValue(json, typeRef);
+        } catch (JsonMappingException e) {
+            throw new DeserializationError(e.getMessage());
         }
+
+        Accessor accessor = manager.getFrame(id, Accessor.class);
+        Accessor grantee = getRequesterUserProfile();
+        AclViews<AccessibleEntity> acl = new AclViews<AccessibleEntity>(graph,
+                AccessibleEntity.class);
+        acl.setGlobalPermissionMatrix(accessor, grantee, globals);
+        return getGlobalMatrix(id);
     }
 
     /**
@@ -236,22 +215,5 @@ public class PermissionsResource extends AbstractRestResource {
             out.put(entry.getKey(), tmp);
         }
         return out;
-    }
-
-    private Map<ContentTypes, List<PermissionType>> enumifyMatrix(
-            Map<String, List<String>> matrix) throws DeserializationError {
-        try {
-            Map<ContentTypes, List<PermissionType>> out = Maps.newHashMap();
-            for (Entry<String, List<String>> entry : matrix.entrySet()) {
-                List<PermissionType> tmp = Lists.newLinkedList();
-                for (String t : entry.getValue()) {
-                    tmp.add(PermissionType.withName(t));
-                }
-                out.put(ContentTypes.withName(entry.getKey()), tmp);
-            }
-            return out;
-        } catch (IllegalArgumentException e) {
-            throw new DeserializationError(e.getMessage());
-        }
     }
 }
