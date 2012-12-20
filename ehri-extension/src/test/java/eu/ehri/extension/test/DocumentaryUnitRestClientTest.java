@@ -247,7 +247,7 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
         // -get the data and change it
         String json = response.getEntity(String.class);
         Bundle entityBundle = DataConverter
-                .jsonToBundle(json).setDataValue("name", UPDATED_NAME);
+                .jsonToBundle(json).withDataValue("name", UPDATED_NAME);
         String toUpdateJson = DataConverter.bundleToJson(entityBundle);
 
         // -update

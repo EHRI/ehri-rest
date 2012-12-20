@@ -73,8 +73,8 @@ public class AdminResource {
         try {
             String ident = getNextDefaultUserId();
             Map<String, Object> data = converter.bundleToData(new Bundle(
-                    EntityClass.USER_PROFILE).setDataValue(
-                    AccessibleEntity.IDENTIFIER_KEY, ident).setDataValue(
+                    EntityClass.USER_PROFILE).withDataValue(
+                    AccessibleEntity.IDENTIFIER_KEY, ident).withDataValue(
                     Accessor.NAME, ident));
 
             // NB: This assumes that admin's ID is the same as its identifier.

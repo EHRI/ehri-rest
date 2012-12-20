@@ -115,11 +115,8 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
 
         // -get the data and change it
         String json = response.getEntity(String.class);
-        Bundle entityBundle = DataConverter.jsonToBundle(json);
-        Map<String, Object> data = entityBundle.getData();
-        data.put("name", UPDATED_NAME);
-        entityBundle = entityBundle.setData(data);
-        String toUpdateJson = DataConverter.bundleToJson(entityBundle);
+        Bundle entityBundle = DataConverter.jsonToBundle(json).withDataValue(
+                "name", UPDATED_NAME);
 
         // -update
         resource = client
@@ -128,7 +125,8 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
                 .header(AbstractRestResource.AUTH_HEADER_NAME,
-                        getAdminUserProfileId()).entity(toUpdateJson)
+                        getAdminUserProfileId())
+                .entity(DataConverter.bundleToJson(entityBundle))
                 .put(ClientResponse.class);
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
 
@@ -147,4 +145,41 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
         assertEquals(UPDATED_NAME, updatedData.get("name"));
     }
 
+    @Test
+    public void testUpdateWithIntegrityError() throws Exception {
+
+        // -create data for testing
+        WebResource resource = client.resource(getExtensionEntryPointUri()
+                + "/userProfile");
+        ClientResponse response = resource
+                .accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                        getAdminUserProfileId())
+                .entity(jsonUserProfileTestString).post(ClientResponse.class);
+
+        assertEquals(Response.Status.CREATED.getStatusCode(),
+                response.getStatus());
+
+        // Create a bundle with a username that's already been taken.
+        Bundle bundle = DataConverter.jsonToBundle(
+                response.getEntity(String.class)).withDataValue(
+                AccessibleEntity.IDENTIFIER_KEY, "mike");
+
+        // Get created doc via the response location?
+        URI location = response.getLocation();
+
+        response = client
+                .resource(location)
+                .accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                        getAdminUserProfileId())
+                .entity(DataConverter.bundleToJson(bundle))
+                .put(ClientResponse.class);
+
+        System.out.println(response.getEntity(String.class));
+        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(),
+                response.getStatus());
+    }
 }
