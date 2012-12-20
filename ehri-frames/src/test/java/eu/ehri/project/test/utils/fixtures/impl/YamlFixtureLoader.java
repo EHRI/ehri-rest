@@ -1,7 +1,6 @@
 package eu.ehri.project.test.utils.fixtures.impl;
 
 import java.io.InputStream;
-import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,11 +15,11 @@ import org.yaml.snakeyaml.Yaml;
 
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Maps;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
-import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.frames.VertexFrame;
 
@@ -32,7 +31,6 @@ import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.persistance.BundleDAO;
 import eu.ehri.project.persistance.Converter;
 import eu.ehri.project.persistance.Bundle;
@@ -85,7 +83,7 @@ public class YamlFixtureLoader implements FixtureLoader {
     private void loadFixtureFile(InputStream yamlStream) {
         Yaml yaml = new Yaml();
         try {
-            Map<Vertex, ListMultimap<String,String>> links = new HashMap<Vertex, ListMultimap<String,String>>();
+            Map<Vertex, ListMultimap<String,String>> links = Maps.newHashMap();
             for (Object data : yaml.loadAll(yamlStream)) {
                 for (Object node : (List<?>) data) {
                     if (node instanceof Map) {
@@ -116,56 +114,19 @@ public class YamlFixtureLoader implements FixtureLoader {
 
     private void addRelationship(Vertex src, Vertex dst, String relname) {
         boolean found = false;
-        Direction direction = getDirectionOfRelationship(src, dst, relname);
-        for (Vertex v : src.getVertices(direction, relname)) {
+        for (Vertex v : src.getVertices(Direction.OUT, relname)) {
             if (v == dst) {
                 found = true;
                 break;
             }
         }
         if (!found) {
-            if (direction == Direction.OUT) {
-                logger.debug(String.format(" - %s -[%s]-> %s", src, dst,
-                        relname));
-                graph.addEdge(null, src, dst, (String) relname);
-            } else {
-                logger.debug(String.format(" - %s -[%s]-> %s", dst, src,
-                        relname));
-                graph.addEdge(null, dst, src, (String) relname);
-            }
+            logger.debug(String.format(" - %s -[%s]-> %s", src, dst,
+                    relname));
+            graph.addEdge(null, src, dst, (String) relname);
             graph.getBaseGraph().stopTransaction(
                     TransactionalGraph.Conclusion.SUCCESS);
         }
-    }
-
-    // Copied and pasted from BundleDAO for the moment...
-    private Direction getDirectionOfRelationship(Vertex a, Vertex b, String rel) {
-        Class<?> classA = getClassForVertex(a);
-        Class<?> classB = getClassForVertex(b);
-        for (Method method : classA.getMethods()) {
-            Adjacency adj = method.getAnnotation(Adjacency.class);
-            if (adj != null && adj.label().equals(rel)) {
-                return adj.direction();
-            }
-        }
-        for (Method method : classB.getMethods()) {
-            Adjacency adj = method.getAnnotation(Adjacency.class);
-            if (adj != null && adj.label().equals(rel)) {
-                return adj.direction();
-            }
-        }
-        // If we get here then something has gone badly wrong, because the
-        // correct direction could not be found. Maybe it's better to just
-        // ignore saving the dependency in the long run?
-        throw new RuntimeException(
-                String.format(
-                        "Unable to find the direction of relationship between dependent classes with relationship '%s': '%s', '%s'",
-                        rel, classA.getName(), classB.getName()));
-    }
-
-    private Class<?> getClassForVertex(Vertex a) {
-        return EntityClass.withName(
-                (String) a.getProperty(EntityType.TYPE_KEY)).getEntityClass();
     }
 
     /**

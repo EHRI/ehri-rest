@@ -45,8 +45,7 @@
     belongsTo:
       - admin
       - kcl
-    hasAnnotation:
-      - ann1
+    hasAnnotation: ann1
 
 # Reto is a member of the KCL group
 # separately
@@ -56,8 +55,7 @@
     identifier: reto
     name: Reto
   relationships:
-    belongsTo:
-      - kcl
+    belongsTo: kcl
 
 # Tim is a member of NIOD, which is itself a member of Admin, so Tim
 # belongs to Admin by extension
@@ -67,10 +65,8 @@
     identifier: tim
     name: Tim
   relationships:
-    belongsTo:
-      - niod
-    hasAnnotation:
-      - ann2
+    belongsTo: niod
+    hasAnnotation: ann2
       
 # Linda belongs to DANS
 - id: linda
@@ -79,8 +75,7 @@
     identifier: linda
     name: Linda
   relationships:
-    belongsTo:
-      - dans
+    belongsTo: dans
 
 # Veerle is a member of CEGES-SOMA, and also a member of Admin
 - id: veerle
