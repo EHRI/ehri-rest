@@ -2,17 +2,13 @@ package eu.ehri.project.persistance;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.tinkerpop.blueprints.Vertex;
+import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
+import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.frames.VertexFrame;
 
 import eu.ehri.project.exceptions.DeserializationError;
@@ -24,8 +20,6 @@ import eu.ehri.project.models.utils.ClassUtils;
 
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.ObjectWriter;
 
 /**
  * Class containing static methods to convert between FramedVertex instances,
@@ -36,6 +30,7 @@ import org.codehaus.jackson.map.ObjectWriter;
  */
 public final class Converter {
 
+    private final FramedGraph<Neo4jGraph> graph;
     public static final int DEFAULT_TRAVERSALS = 5;
 
     /**
@@ -54,8 +49,8 @@ public final class Converter {
     /**
      * Constructor.
      */
-    public Converter() {
-        this(DEFAULT_TRAVERSALS);
+    public Converter(FramedGraph<Neo4jGraph> graph) {
+        this(graph, DEFAULT_TRAVERSALS);
     }
 
     /**
@@ -63,7 +58,8 @@ public final class Converter {
      * 
      * @param depth
      */
-    public Converter(int depth) {
+    public Converter(FramedGraph<Neo4jGraph> graph, int depth) {
+        this.graph = graph;
         this.maxTraversals = depth;
     }
 
@@ -90,17 +86,7 @@ public final class Converter {
      * @throws DeserializationError
      */
     public Bundle jsonToBundle(String json) throws DeserializationError {
-        try {
-            // FIXME: For some reason I can't fathom, a type reference is not working here.
-            // When I add one in for HashMap<String,Object>, the return value of readValue
-            // just seems to be Object ???
-            ObjectMapper mapper = new ObjectMapper();
-            return dataToBundle(mapper.readValue(json, Map.class));
-        } catch (DeserializationError e) {
-            throw e;
-        } catch (Exception e) {
-            throw new DeserializationError("Error decoding JSON", e);
-        }
+        return DataConverter.jsonToBundle(json);
     }
 
     /**
@@ -111,7 +97,7 @@ public final class Converter {
      * @throws SerializationError
      */
     public <T extends VertexFrame> String vertexFrameToJson(T item) throws SerializationError {
-        return bundleToJson(vertexFrameToBundle(item));
+        return DataConverter.bundleToJson(vertexFrameToBundle(item));
     }
 
     /**
@@ -121,20 +107,11 @@ public final class Converter {
      * @return
      * @throws SerializationError
      * 
+     * @deprecated Use DataConverter static method instead.
+     * 
      */
     public String bundleToJson(Bundle bundle) throws SerializationError {
-        Map<String, Object> data = bundleToData(bundle);
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            // Note: defaultPrettyPrintWriter has been replaced by
-            // writerWithDefaultPrettyPrinter in newer versions of
-            // Jackson, though not the one available in Neo4j.
-            @SuppressWarnings("deprecation")
-            ObjectWriter writer = mapper.defaultPrettyPrintingWriter();
-            return writer.writeValueAsString(data);
-        } catch (Exception e) {
-            throw new SerializationError("Error writing bundle to JSON", e);
-        }
+        return DataConverter.bundleToJson(bundle);
     }
 
     /**
@@ -147,32 +124,7 @@ public final class Converter {
      */
     public Bundle dataToBundle(Map<String, Object> data)
             throws DeserializationError {
-        try {
-            String id = (String) data.get(ID_KEY);
-            EntityClass type = EntityClass.withName((String) data
-                    .get(TYPE_KEY));
-            Map<String, Object> props = (Map<String, Object>) data
-                    .get(DATA_KEY);
-            if (props == null)
-                throw new DeserializationError("No item data map found");
-            ListMultimap<String,Bundle> relationbundles = LinkedListMultimap.create();
-
-            Map<String, List<Map<String, Object>>> relations = (Map<String, List<Map<String, Object>>>) data
-                    .get(REL_KEY);
-            if (relations != null) {
-                for (Entry<String, List<Map<String, Object>>> entry : relations
-                        .entrySet()) {
-                    for (Map<String, Object> item : entry.getValue()) {
-                        relationbundles.put(entry.getKey(), dataToBundle(item));
-                    }
-                }
-            }
-
-            return new Bundle(id, type, props, relationbundles);
-
-        } catch (ClassCastException e) {
-            throw new DeserializationError("Error deserializing data", e);
-        }
+        return DataConverter.dataToBundle(data);
     }
 
     /**
@@ -182,22 +134,7 @@ public final class Converter {
      * @return
      */
     public Map<String, Object> bundleToData(Bundle bundle) {
-        Map<String, Object> data = Maps.newHashMap();
-        data.put(ID_KEY, bundle.getId());
-        data.put(TYPE_KEY, bundle.getType().getName());
-        data.put(DATA_KEY, bundle.getData());
-
-        Map<String, List<Map<String, Object>>> relations = Maps.newHashMap();
-        ListMultimap<String,Bundle> crelations = bundle.getRelations();
-        for (String key : crelations.keySet()) {
-            List<Map<String, Object>> rels = Lists.newArrayList();
-            for (Bundle subbundle : crelations.get(key)) {
-                rels.add(bundleToData(subbundle));
-            }
-            relations.put((String) key, rels);
-        }
-        data.put(REL_KEY, relations);
-        return data;
+        return DataConverter.bundleToData(bundle);
     }
 
     /**
@@ -252,8 +189,9 @@ public final class Converter {
 
                 try {
                     Object result;
-                    try {
-                        result = method.invoke(item);
+                    try {                        
+                        // NB: We have to re-cast the item into its 'natural' type.
+                        result = method.invoke(graph.frame(item.asVertex(), cls));
                     } catch (IllegalArgumentException e) {
                         String message = String
                                 .format("When serializing a bundle, a method was called on an item it did not expect. Method name: %s, item class: %s",

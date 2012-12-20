@@ -50,7 +50,7 @@ public class GetEntity extends BaseCommand implements Command {
             CommandLine cmdLine) throws Exception {
 
         GraphManager manager = GraphManagerFactory.getInstance(graph);
-        Converter converter = new Converter();
+        Converter converter = new Converter(graph);
 
         if (cmdLine.getArgList().size() < 2)
             throw new RuntimeException(getHelp());

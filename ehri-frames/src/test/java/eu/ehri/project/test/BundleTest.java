@@ -35,7 +35,7 @@ public class BundleTest extends ModelTestBase {
     @Before
     public void setUp() {
         super.setUp();
-        converter = new Converter();
+        converter = new Converter(graph);
     }
 
     @Test

@@ -51,7 +51,7 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> extends
     protected final Crud<E> views;
     protected final Query<E> querier;
     protected final Class<E> cls;
-    protected final Converter converter = new Converter();
+    protected final Converter converter = new Converter(graph);
 
     /**
      * Constructor
@@ -152,7 +152,7 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> extends
             final Iterable<T> list) {
         final ObjectMapper mapper = new ObjectMapper();
         final JsonFactory f = new JsonFactory();
-        final Converter converter = new Converter();
+        final Converter converter = new Converter(graph);
         // FIXME: I don't understand this streaming output system well
         // enough
         // to determine whether this actually streams or not. It certainly
@@ -229,7 +229,7 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> extends
         try {
             E entity = views.detail(graph.getVertex(id, cls),
                     getRequesterUserProfile());
-            String jsonStr = new Converter().vertexFrameToJson(entity);
+            String jsonStr = converter.vertexFrameToJson(entity);
 
             return Response.status(Status.OK).entity((jsonStr).getBytes())
                     .build();
@@ -260,7 +260,7 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> extends
         try {
             E entity = views.detail(manager.getFrame(id, getEntityType(), cls),
                     getRequesterUserProfile());
-            String jsonStr = new Converter().vertexFrameToJson(entity);
+            String jsonStr = converter.vertexFrameToJson(entity);
             return Response.status(Status.OK).entity((jsonStr).getBytes())
                     .build();
         } catch (SerializationError e) {
@@ -285,7 +285,7 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> extends
             PermissionDenied, BadRequester {
         try {
             E entity = querier.get(key, value, getRequesterUserProfile());
-            String jsonStr = new Converter().vertexFrameToJson(entity);
+            String jsonStr = converter.vertexFrameToJson(entity);
             return Response.status(Status.OK).entity((jsonStr).getBytes())
                     .build();
         } catch (SerializationError e) {
@@ -314,7 +314,7 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> extends
             Bundle entityBundle = converter.jsonToBundle(json);
             E update = views.update(converter.bundleToData(entityBundle),
                     getRequesterUserProfile());
-            String jsonStr = new Converter().vertexFrameToJson(update);
+            String jsonStr = converter.vertexFrameToJson(update);
 
             return Response.status(Status.OK).entity((jsonStr).getBytes())
                     .build();

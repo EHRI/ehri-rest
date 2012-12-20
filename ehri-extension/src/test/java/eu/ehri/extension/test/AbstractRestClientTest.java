@@ -16,7 +16,6 @@ import com.sun.jersey.api.client.WebResource;
 
 import eu.ehri.extension.AbstractRestResource;
 import eu.ehri.project.definitions.Entities;
-import eu.ehri.project.persistance.Converter;
 
 /**
  * For testing the REST interface of the neo4j (unmanaged) extension
@@ -38,8 +37,7 @@ abstract public class AbstractRestClientTest {
     abstract String getAdminUserProfileId();
 
     protected Client client = Client.create();
-    protected Converter converter = new Converter();
-
+    
     /**
      * Tests if we have an admin user, we need that user for doing all the other
      * tests

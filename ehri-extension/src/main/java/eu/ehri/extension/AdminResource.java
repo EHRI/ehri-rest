@@ -3,7 +3,6 @@ package eu.ehri.extension;
 // Borrowed, temporarily, from Michael Hunger:
 // https://github.com/jexp/neo4j-clean-remote-db-addon
 
-import java.util.HashMap;
 import java.util.Map;
 
 import javax.ws.rs.POST;
@@ -22,15 +21,19 @@ import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
+import eu.ehri.project.acl.AclManager;
+import eu.ehri.project.acl.PermissionType;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.models.EntityClass;
+import eu.ehri.project.models.Group;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistance.Bundle;
-import eu.ehri.project.persistance.BundleDAO;
 import eu.ehri.project.persistance.Converter;
+import eu.ehri.project.views.Crud;
+import eu.ehri.project.views.impl.LoggingCrudViews;
 
 /**
  * Provides a RESTfull interface for the Action class. Note: Action instances
@@ -52,7 +55,7 @@ public class AdminResource {
         this.database = database;
         this.graph = new FramedGraph<Neo4jGraph>(new Neo4jGraph(
                 database.getGraph()));
-        converter = new Converter();
+        converter = new Converter(graph);
         manager = GraphManagerFactory.getInstance(graph);
     }
 
@@ -69,14 +72,21 @@ public class AdminResource {
         Transaction tx = database.getGraph().beginTx();
         try {
             String ident = getNextDefaultUserId();
-            Map<String, Object> data = new HashMap<String, Object>();
-            data.put(AccessibleEntity.IDENTIFIER_KEY, ident);
-            data.put(Accessor.NAME, ident);
+            Map<String, Object> data = converter.bundleToData(new Bundle(
+                    EntityClass.USER_PROFILE).setDataValue(
+                    AccessibleEntity.IDENTIFIER_KEY, ident).setDataValue(
+                    Accessor.NAME, ident));
 
-            // TODO: Create an action for this with the system user...
-            BundleDAO persister = new BundleDAO(graph);
-            UserProfile user = persister.create(new Bundle(
-                    EntityClass.USER_PROFILE, data), UserProfile.class);
+            // NB: This assumes that admin's ID is the same as its identifier.
+            Accessor accessor = manager.getFrame(Group.ADMIN_GROUP_IDENTIFIER,
+                    Accessor.class);
+            Crud<UserProfile> view = new LoggingCrudViews<UserProfile>(graph,
+                    UserProfile.class);
+            UserProfile user = view.create(data, accessor);
+            // Grant them owner permissions on their own account.
+            new AclManager(graph).grantPermissions(user, user,
+                    PermissionType.OWNER);
+
             String jsonStr = converter.vertexFrameToJson(user);
             tx.success();
             return Response.status(Status.CREATED).entity((jsonStr).getBytes())

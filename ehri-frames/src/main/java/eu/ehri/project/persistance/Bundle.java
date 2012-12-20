@@ -24,7 +24,7 @@ public class Bundle {
     private final String id;
     private final EntityClass type;
     private final Map<String, Object> data;
-    private final ListMultimap<String,Bundle> relations;
+    private final ListMultimap<String, Bundle> relations;
 
     /**
      * Constructor.
@@ -35,7 +35,7 @@ public class Bundle {
      * @param relations
      */
     public Bundle(String id, EntityClass type, final Map<String, Object> data,
-            final ListMultimap<String,Bundle> relations) {
+            final ListMultimap<String, Bundle> relations) {
         this.id = id;
         this.data = new HashMap<String, Object>(data);
         this.type = type;
@@ -50,8 +50,20 @@ public class Bundle {
      * @param relations
      */
     public Bundle(EntityClass type, final Map<String, Object> data,
-            final ListMultimap<String,Bundle> relations) {
+            final ListMultimap<String, Bundle> relations) {
         this(null, type, data, relations);
+    }
+
+    /**
+     * Constructor for just a type.
+     * 
+     * @param cls
+     * @param data
+     * @param relations
+     */
+    public Bundle(EntityClass type) {
+        this(null, type, Maps.<String,Object>newHashMap(), LinkedListMultimap
+                .<String, Bundle> create());
     }
 
     /**
@@ -62,7 +74,7 @@ public class Bundle {
      * @param relations
      */
     public Bundle(EntityClass type, final Map<String, Object> data) {
-        this(null, type, data, LinkedListMultimap.<String,Bundle>create());
+        this(null, type, data, LinkedListMultimap.<String, Bundle> create());
     }
 
     /**
@@ -111,7 +123,7 @@ public class Bundle {
      * 
      * @return
      */
-    public ListMultimap<String,Bundle> getRelations() {
+    public ListMultimap<String, Bundle> getRelations() {
         return relations;
     }
 
@@ -129,11 +141,11 @@ public class Bundle {
      * 
      * @param key
      * @param value
-     * @return 
+     * @return
      * @throws ValidationError
      */
     public Bundle setDataValue(String key, Object value) {
-        Map<String,Object> newData = Maps.newHashMap(data);
+        Map<String, Object> newData = Maps.newHashMap(data);
         newData.put(key, value);
         return setData(newData);
     }

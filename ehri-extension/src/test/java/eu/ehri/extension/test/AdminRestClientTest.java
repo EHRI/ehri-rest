@@ -14,6 +14,7 @@ import com.sun.jersey.api.client.WebResource;
 import eu.ehri.extension.AdminResource;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.persistance.Bundle;
+import eu.ehri.project.persistance.DataConverter;
 
 /**
  * Test admin REST functions.
@@ -39,7 +40,7 @@ public class AdminRestClientTest extends BaseRestClientTest {
         assertEquals(Response.Status.CREATED.getStatusCode(),
                 response.getStatus());
         String json = response.getEntity(String.class);
-        Bundle bundle = converter.jsonToBundle(json);
+        Bundle bundle = DataConverter.jsonToBundle(json);
         String ident = (String) bundle.getData().get(
                 AccessibleEntity.IDENTIFIER_KEY);
         assertTrue(ident != null);
@@ -55,7 +56,7 @@ public class AdminRestClientTest extends BaseRestClientTest {
         assertEquals(Response.Status.CREATED.getStatusCode(),
                 response2.getStatus());
         String json2 = response2.getEntity(String.class);
-        Bundle bundle2 = converter.jsonToBundle(json2);
+        Bundle bundle2 = DataConverter.jsonToBundle(json2);
         String ident2 = (String) bundle2.getData().get(
                 AccessibleEntity.IDENTIFIER_KEY);
         assertEquals(parseUserId(ident) + 1L, parseUserId(ident2));

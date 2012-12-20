@@ -27,7 +27,7 @@ import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.persistance.BundleDAO;
-import eu.ehri.project.persistance.Converter;
+import eu.ehri.project.persistance.DataConverter;
 import eu.ehri.project.views.ViewHelper;
 import eu.ehri.project.views.impl.CrudViews;
 
@@ -102,11 +102,10 @@ public class PermissionsTest extends AbstractFixtureTest {
         // and inherit the perms from r1
         // FIXME: We have to alter the test data so it doesn't throw a
         // validation error due to duplicate identifiers
-        Converter converter = new Converter();
-        Bundle bundle = converter.dataToBundle(getTestBundle()).setDataValue(
+        Bundle bundle = DataConverter.dataToBundle(getTestBundle()).setDataValue(
                 AccessibleEntity.IDENTIFIER_KEY, "nested-item");
         DocumentaryUnit c2 = views.setScope(c1).create(
-                converter.bundleToData(bundle), user);
+                DataConverter.bundleToData(bundle), user);
         assertNotNull(c2);
     }
 

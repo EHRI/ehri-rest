@@ -6,6 +6,7 @@ import com.tinkerpop.frames.Property;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Actioner;
 
 @EntityType(EntityClass.ACTION)
@@ -39,7 +40,7 @@ public interface Action extends AccessibleEntity {
 
     @Fetch
     @Adjacency(label = HAS_ACTIONER)
-    public UserProfile getActioner();
+    public Actioner getActioner();
 
     @Adjacency(label = HAS_ACTIONER)
     public void setActioner(final Actioner user);

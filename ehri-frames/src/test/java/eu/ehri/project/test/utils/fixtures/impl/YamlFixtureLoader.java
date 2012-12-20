@@ -36,6 +36,7 @@ import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.persistance.BundleDAO;
 import eu.ehri.project.persistance.Converter;
 import eu.ehri.project.persistance.Bundle;
+import eu.ehri.project.persistance.DataConverter;
 import eu.ehri.project.test.utils.fixtures.FixtureLoader;
 import eu.ehri.project.utils.GraphInitializer;
 
@@ -217,7 +218,7 @@ public class YamlFixtureLoader implements FixtureLoader {
                 put(Converter.REL_KEY, dependentRelations.asMap());
             }
         };
-        return new Converter().dataToBundle(data);
+        return DataConverter.dataToBundle(data);
     }
 
     /**
