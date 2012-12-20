@@ -95,10 +95,11 @@ public class BundleTest extends ModelTestBase {
                     + "' not found in index before delete test.");
         }
 
-        List<Bundle> dates = bundle.getRelations().removeAll(TemporalEntity.HAS_DATE);
-        bundle.getRelations().put(TemporalEntity.HAS_DATE, dates.get(0));
+        List<Bundle> dates = bundle.getRelations(TemporalEntity.HAS_DATE);
+        Bundle newBundle = bundle.removeRelations(TemporalEntity.HAS_DATE)
+                    .withRelation(TemporalEntity.HAS_DATE, dates.get(0));
         BundleDAO persister = new BundleDAO(graph);
-        persister.update(bundle, DocumentaryUnit.class);
+        persister.update(newBundle, DocumentaryUnit.class);
         assertEquals(1, toList(c1.getDatePeriods()).size());
 
         // The second date period should be gone from the index
@@ -143,13 +144,13 @@ public class BundleTest extends ModelTestBase {
         DocumentaryUnit c1 = manager.getFrame(ID, DocumentaryUnit.class);
         Bundle bundle = converter.vertexFrameToBundle(c1);
 
-        List<Bundle> dates = bundle.getRelations().removeAll(TemporalEntity.HAS_DATE);
+        List<Bundle> dates = bundle.getRelations(TemporalEntity.HAS_DATE);
         // remove the start date key from a date
-        Bundle invalidDate = dates.get(0).setData(Maps.<String,Object>newHashMap());
-        bundle.addRelation(TemporalEntity.HAS_DATE, invalidDate);
+        Bundle invalidDate = dates.get(0).withData(Maps.<String,Object>newHashMap());
+        Bundle newBundle = bundle.withRelation(TemporalEntity.HAS_DATE, invalidDate);
 
         BundleDAO persister = new BundleDAO(graph);
-        persister.update(bundle, DocumentaryUnit.class);
+        persister.update(newBundle, DocumentaryUnit.class);
         fail("Bundle with invalid dates did not throw a ValidationError");
     }    
 }

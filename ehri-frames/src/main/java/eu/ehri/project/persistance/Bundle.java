@@ -2,10 +2,11 @@ package eu.ehri.project.persistance;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.ImmutableListMultimap;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Maps;
@@ -23,8 +24,8 @@ import eu.ehri.project.models.utils.ClassUtils;
 public class Bundle {
     private final String id;
     private final EntityClass type;
-    private final Map<String, Object> data;
-    private final ListMultimap<String, Bundle> relations;
+    private final ImmutableMap<String, Object> data;
+    private final ImmutableListMultimap<String, Bundle> relations;
 
     /**
      * Constructor.
@@ -37,9 +38,9 @@ public class Bundle {
     public Bundle(String id, EntityClass type, final Map<String, Object> data,
             final ListMultimap<String, Bundle> relations) {
         this.id = id;
-        this.data = new HashMap<String, Object>(data);
         this.type = type;
-        this.relations = relations;
+        this.data = ImmutableMap.copyOf(data);
+        this.relations = ImmutableListMultimap.copyOf(relations);
     }
 
     /**
@@ -83,8 +84,10 @@ public class Bundle {
      * @param relation
      * @param other
      */
-    public void addRelation(String relation, Bundle other) {
-        relations.put(relation, other);
+    public Bundle withRelation(String relation, Bundle other) {
+        LinkedListMultimap<String, Bundle> tmp = LinkedListMultimap.create(relations);
+        tmp.put(relation, other);
+        return new Bundle(id, type, data, tmp);
     }
 
     /**
@@ -94,8 +97,10 @@ public class Bundle {
      * @param others
      * @return
      */
-    public void setRelations(String relation, List<Bundle> others) {
-        relations.putAll(relation, others);
+    public Bundle withRelations(String relation, List<Bundle> others) {
+        LinkedListMultimap<String, Bundle> tmp = LinkedListMultimap.create(relations);
+        tmp.putAll(relation, others);
+        return new Bundle(id, type, data, tmp);
     }
 
     /**
@@ -135,6 +140,16 @@ public class Bundle {
     public Map<String, Object> getData() {
         return data;
     }
+    
+    /**
+     * Get a data value.
+     * 
+     * @return
+     */
+    public Object getDataValue(String key) {
+        checkNotNull(key);
+        return data.get(key);
+    }
 
     /**
      * Set a value in the bundle's data.
@@ -144,14 +159,54 @@ public class Bundle {
      * @return
      * @throws ValidationError
      */
-    public Bundle setDataValue(String key, Object value) {
+    public Bundle withDataValue(String key, Object value) {
         Map<String, Object> newData = Maps.newHashMap(data);
         newData.put(key, value);
-        return setData(newData);
+        return withData(newData);
     }
 
-    public Bundle setData(final Map<String, Object> data) {
+    /**
+     * Set the entire data map for this bundle.
+     * 
+     * @param data
+     * @return
+     */
+    public Bundle withData(final Map<String, Object> data) {
         return new Bundle(id, type, data, relations);
+    }
+    
+    /**
+     * Get a set of relations.
+     * 
+     * @param relation
+     * @return
+     */
+    public List<Bundle> getRelations(String relation) {
+        return relations.get(relation);
+    }
+
+    /**
+     * Remove a single relation.
+     * 
+     * @param relation
+     * @return
+     */
+    public Bundle removeRelation(String relation, Bundle item) {
+        ListMultimap<String, Bundle> tmp = LinkedListMultimap.create(relations);
+        tmp.remove(relation, item);
+        return new Bundle(id, type, data, tmp);
+    }
+    
+    /**
+     * Remove a set of relationships.
+     * 
+     * @param relation
+     * @return
+     */
+    public Bundle removeRelations(String relation) {
+        ListMultimap<String, Bundle> tmp = LinkedListMultimap.create(relations);
+        tmp.removeAll(relation);
+        return new Bundle(id, type, data, tmp);
     }
 
     /**
