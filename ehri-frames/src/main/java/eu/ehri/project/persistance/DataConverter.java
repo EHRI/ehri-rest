@@ -34,7 +34,7 @@ public class DataConverter {
         data.put(Converter.DATA_KEY, bundle.getData());
 
         Map<String, List<Map<String, Object>>> relations = Maps.newHashMap();
-        ListMultimap<String,Bundle> crelations = bundle.getRelations();
+        ListMultimap<String, Bundle> crelations = bundle.getRelations();
         for (String key : crelations.keySet()) {
             List<Map<String, Object>> rels = Lists.newArrayList();
             for (Bundle subbundle : crelations.get(key)) {
@@ -45,7 +45,7 @@ public class DataConverter {
         data.put(Converter.REL_KEY, relations);
         return data;
     }
-    
+
     /**
      * Convert a bundle to JSON.
      * 
@@ -68,8 +68,7 @@ public class DataConverter {
             throw new SerializationError("Error writing bundle to JSON", e);
         }
     }
-    
-    
+
     /**
      * Convert some JSON into an EntityBundle.
      * 
@@ -82,14 +81,17 @@ public class DataConverter {
      */
     public static Bundle jsonToBundle(String json) throws DeserializationError {
         try {
-            // FIXME: For some reason I can't fathom, a type reference is not working here.
-            // When I add one in for HashMap<String,Object>, the return value of readValue
+            // FIXME: For some reason I can't fathom, a type reference is not
+            // working here.
+            // When I add one in for HashMap<String,Object>, the return value of
+            // readValue
             // just seems to be Object ???
             ObjectMapper mapper = new ObjectMapper();
             return dataToBundle(mapper.readValue(json, Map.class));
         } catch (DeserializationError e) {
             throw e;
         } catch (Exception e) {
+            e.printStackTrace();
             throw new DeserializationError("Error decoding JSON", e);
         }
     }
@@ -100,35 +102,107 @@ public class DataConverter {
      * Prize to whomever can remove all the unchecked warnings. I don't really
      * know how else to do this otherwise.
      * 
+     * NB: We also strip out all NULL property values at this stage.
+     * 
      * @throws DeserializationError
      */
-    public static Bundle dataToBundle(Map<String, Object> data)
+    public static Bundle dataToBundle(Object rawData)
             throws DeserializationError {
-        try {
-            String id = (String) data.get(Converter.ID_KEY);
-            EntityClass type = EntityClass.withName((String) data
-                    .get(Converter.TYPE_KEY));
-            Map<String, Object> props = (Map<String, Object>) data
-                    .get(Converter.DATA_KEY);
-            if (props == null)
-                throw new DeserializationError("No item data map found");
-            ListMultimap<String,Bundle> relationbundles = LinkedListMultimap.create();
+        
+        // Check what we've been given is actually a Map...
+        if (!(rawData instanceof Map<?, ?>))
+            throw new DeserializationError("Bundle data must be a map value.");
+        
+        Map<?, ?> data = (Map<?, ?>) rawData;
+        String id = (String) data.get(Converter.ID_KEY);
+        EntityClass type = getType(data);
 
-            Map<String, List<Map<String, Object>>> relations = (Map<String, List<Map<String, Object>>>) data
-                    .get(Converter.REL_KEY);
-            if (relations != null) {
-                for (Entry<String, List<Map<String, Object>>> entry : relations
-                        .entrySet()) {
-                    for (Map<String, Object> item : entry.getValue()) {
-                        relationbundles.put(entry.getKey(), dataToBundle(item));
+        // Guava's immutable collections don't allow null values.
+        // Since Neo4j doesn't either it's safest to trip these out
+        // at the deserialization stage. I can't think of a use-case
+        // where we'd need them.
+        Map<String, Object> properties = getSanitisedProperties(data);
+
+        ListMultimap<String, Bundle> relationbundles = getRelationships(data);
+
+        return new Bundle(id, type, properties, relationbundles);
+    }
+
+    /**
+     * Extract relationships from the bundle data.
+     * 
+     * TODO: Should we throw an error if something
+     * 
+     * @param data
+     * @return
+     * @throws DeserializationError
+     */
+    private static ListMultimap<String, Bundle> getRelationships(Map<?, ?> data)
+            throws DeserializationError {
+        ListMultimap<String, Bundle> relationbundles = LinkedListMultimap
+                .create();
+
+        // It's okay to pass in a null value for relationships.
+        Object relations = data.get(Converter.REL_KEY);
+        if (relations == null)
+            return relationbundles;
+
+        if (relations instanceof Map) {
+            for (Entry<?, ?> entry : ((Map<?, ?>) relations).entrySet()) {
+                if (entry.getValue() instanceof List<?>) {
+                    for (Object item : (List<?>) entry.getValue()) {
+                        relationbundles.put((String) entry.getKey(),
+                                dataToBundle(item));
                     }
                 }
             }
-
-            return new Bundle(id, type, props, relationbundles);
-
-        } catch (ClassCastException e) {
-            throw new DeserializationError("Error deserializing data", e);
+        } else {
+            throw new DeserializationError(
+                    "Relationships value should be a map type");
         }
-    }    
+        return relationbundles;
+    }
+
+    private static Map<String, Object> getSanitisedProperties(Map<?, ?> data)
+            throws DeserializationError {
+        Object props = data.get(Converter.DATA_KEY);
+        if (props != null && props instanceof Map) {
+            return sanitiseProperties((Map<?, ?>) props);
+        }
+        throw new DeserializationError(
+                "No item data map found or data value not a map type.");
+    }
+
+    /**
+     * Get the type key, which should correspond the one of the EntityTypes enum
+     * values.
+     * 
+     * @param data
+     * @return
+     * @throws DeserializationError
+     */
+    private static EntityClass getType(Map<?, ?> data)
+            throws DeserializationError {
+        try {
+            return EntityClass.withName((String) data.get(Converter.TYPE_KEY));
+        } catch (IllegalArgumentException e) {
+            throw new DeserializationError("Bad or unknown type key: "
+                    + data.get(Converter.TYPE_KEY));
+        }
+    }
+
+    /**
+     * Filter null values out of a map.
+     * 
+     * @param data
+     * @return
+     */
+    private static Map<String, Object> sanitiseProperties(Map<?, ?> data) {
+        Map<String, Object> cleaned = Maps.newHashMap();
+        for (Entry<?, ?> entry : data.entrySet()) {
+            if (entry.getKey() instanceof String && entry.getValue() != null)
+                cleaned.put((String) entry.getKey(), entry.getValue());
+        }
+        return cleaned;
+    }
 }
