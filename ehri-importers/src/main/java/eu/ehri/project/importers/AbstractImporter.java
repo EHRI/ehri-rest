@@ -124,12 +124,12 @@ public abstract class AbstractImporter<T> {
         // Add dates and descriptions to the bundle since they're @Dependent
         // relations.
         for (Map<String, Object> dpb : extractDates(itemData)) {
-            unit.addRelation(TemporalEntity.HAS_DATE, new Bundle(
+            unit = unit.withRelation(TemporalEntity.HAS_DATE, new Bundle(
                     EntityClass.DATE_PERIOD, dpb));
         }
         for (Map<String, Object> dpb : extractDocumentDescriptions(itemData,
                 depth)) {
-            unit.addRelation(Description.DESCRIBES, new Bundle(
+            unit = unit.withRelation(Description.DESCRIBES, new Bundle(
                     EntityClass.DOCUMENT_DESCRIPTION, dpb));
         }
 
@@ -144,9 +144,8 @@ public abstract class AbstractImporter<T> {
                     (String) unit.getData().get(DocumentaryUnit.IDENTIFIER_KEY));
         }
         boolean exists = manager.exists(id);
-        DocumentaryUnit frame = persister.createOrUpdate(
-                new Bundle(id, EntityClass.DOCUMENTARY_UNIT, unit.getData(),
-                        unit.getRelations()), DocumentaryUnit.class);
+        DocumentaryUnit frame = persister.createOrUpdate(unit.withId(id),
+                DocumentaryUnit.class);
 
         // Set the repository/item relationship
         frame.setAgent(repository);
