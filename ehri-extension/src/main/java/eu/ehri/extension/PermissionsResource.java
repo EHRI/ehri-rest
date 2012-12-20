@@ -61,11 +61,11 @@ public class PermissionsResource extends AbstractRestResource {
             throws PermissionDenied, IOException, ItemNotFound,
             DeserializationError, BadRequester {
 
-        HashMap<ContentTypes, List<PermissionType>> globals;
+        HashMap<String, List<String>> globals;
         try {
             JsonFactory factory = new JsonFactory();
             ObjectMapper mapper = new ObjectMapper(factory);
-            TypeReference<HashMap<ContentTypes, List<PermissionType>>> typeRef = new TypeReference<HashMap<ContentTypes, List<PermissionType>>>() {
+            TypeReference<HashMap<String, List<String>>> typeRef = new TypeReference<HashMap<String, List<String>>>() {
             };
             globals = mapper.readValue(json, typeRef);
         } catch (JsonMappingException e) {
@@ -76,7 +76,7 @@ public class PermissionsResource extends AbstractRestResource {
         Accessor grantee = getRequesterUserProfile();
         AclViews<AccessibleEntity> acl = new AclViews<AccessibleEntity>(graph,
                 AccessibleEntity.class);
-        acl.setGlobalPermissionMatrix(accessor, grantee, globals);
+        acl.setGlobalPermissionMatrix(accessor, grantee, enumifyMatrix(globals));
         return getGlobalMatrix(id);
     }
 
@@ -215,5 +215,32 @@ public class PermissionsResource extends AbstractRestResource {
             out.put(entry.getKey(), tmp);
         }
         return out;
+    }
+
+    /**
+     * Convert a permission matrix containing strings in lieu of content type
+     * and permission type enum values to the enum version. If Jackson 1.9 were
+     * available in Neo4j we wouldn't need this, since its @JsonCreator
+     * annotation allows specifying how to deserialize those enums properly.
+     * 
+     * @param matrix
+     * @return
+     * @throws DeserializationError
+     */
+    private Map<ContentTypes, List<PermissionType>> enumifyMatrix(
+            Map<String, List<String>> matrix) throws DeserializationError {
+        try {
+            Map<ContentTypes, List<PermissionType>> out = Maps.newHashMap();
+            for (Entry<String, List<String>> entry : matrix.entrySet()) {
+                List<PermissionType> tmp = Lists.newLinkedList();
+                for (String t : entry.getValue()) {
+                    tmp.add(PermissionType.withName(t));
+                }
+                out.put(ContentTypes.withName(entry.getKey()), tmp);
+            }
+            return out;
+        } catch (IllegalArgumentException e) {
+            throw new DeserializationError(e.getMessage());
+        }
     }
 }
