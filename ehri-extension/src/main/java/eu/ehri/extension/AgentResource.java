@@ -169,6 +169,19 @@ public class AgentResource extends EhriNeo4jFramedResource<Agent> {
         return buildResponseFromDocumentaryUnit(doc);
     }
 
+    /**
+     * Create a documentary unit for this repository.
+     * 
+     * @param id
+     * @param json
+     * @return
+     * @throws PermissionDenied
+     * @throws ValidationError
+     * @throws IntegrityError
+     * @throws DeserializationError
+     * @throws ItemNotFound
+     * @throws BadRequester
+     */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)

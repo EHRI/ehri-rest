@@ -53,6 +53,18 @@ public class PermissionsResource extends AbstractRestResource {
         super(database);
     }
 
+    /**
+     * Set a user's global permission matrix.
+     * 
+     * @param id
+     * @param json
+     * @return
+     * @throws PermissionDenied
+     * @throws IOException
+     * @throws ItemNotFound
+     * @throws DeserializationError
+     * @throws BadRequester
+     */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
