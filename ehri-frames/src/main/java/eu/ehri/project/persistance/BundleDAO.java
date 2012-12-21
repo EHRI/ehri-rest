@@ -193,6 +193,7 @@ public final class BundleDAO {
                 String id = bundle.getId() != null ? bundle.getId() : bundle
                         .getType().getIdgen()
                         .generateId(bundle.getType(), scope, bundle.getData());
+
                 node = manager.createVertex(id, bundle.getType(),
                         bundle.getData(), bundle.getPropertyKeys(),
                         bundle.getUniquePropertyKeys());
@@ -207,7 +208,7 @@ public final class BundleDAO {
                 }
             }
 
-            if (!errors.isEmpty()|| hasNestedErrors(nestedErrors)) {
+            if (!errors.isEmpty() || hasNestedErrors(nestedErrors)) {
                 throw new ValidationError(bundle, errors, nestedErrors);
             }
             return node;
@@ -419,9 +420,8 @@ public final class BundleDAO {
     }
 
     /**
-     * Search a tree of errors and determine if there's anything in it
-     * except for null values, which have to be there to maintain item
-     * ordering.
+     * Search a tree of errors and determine if there's anything in it except
+     * for null values, which have to be there to maintain item ordering.
      * 
      * @param errors
      * @return
