@@ -144,7 +144,7 @@ public class AgentRestClientTest extends BaseRestClientTest {
         assertEquals(Response.Status.NOT_FOUND.getStatusCode(),
                 response.getStatus());
     }
-    
+
     @Test
     public void testGrantPermsForAgentScope() throws Exception {
         // Grant permissions for a user to create items within this scope.
@@ -170,17 +170,15 @@ public class AgentRestClientTest extends BaseRestClientTest {
                 .post(ClientResponse.class);
         assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(),
                 response.getStatus());
-        
-        
+
         // Now grant the user permissions to create just within
         // the scope of r2
         String permData = "[\"create\"]";
-        
+
         URI grantUri = UriBuilder.fromPath(getExtensionEntryPointUri())
-                .segment(Entities.AGENT).segment("r2")
-                .segment("grant")
+                .segment(Entities.AGENT).segment("r2").segment("grant")
                 .segment(LIMITED_USER_NAME).build();
-        
+
         resource = client.resource(grantUri);
         response = resource
                 .accept(MediaType.APPLICATION_JSON)
@@ -188,10 +186,9 @@ public class AgentRestClientTest extends BaseRestClientTest {
                 .header(AbstractRestResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId()).entity(permData)
                 .post(ClientResponse.class);
-        
-        assertEquals(Response.Status.OK.getStatusCode(),
-                response.getStatus());
-        
+
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+
         // Now creation should succeed...
         resource = client.resource(getCreationUriFor("r2"));
         response = resource
@@ -202,7 +199,7 @@ public class AgentRestClientTest extends BaseRestClientTest {
                 .post(ClientResponse.class);
         assertEquals(Response.Status.CREATED.getStatusCode(),
                 response.getStatus());
-        
+
         // But r3 should still fail...
         // Or r3...
         resource = client.resource(getCreationUriFor("r3"));
@@ -213,7 +210,27 @@ public class AgentRestClientTest extends BaseRestClientTest {
                         LIMITED_USER_NAME).entity(docTestData)
                 .post(ClientResponse.class);
         assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(),
-                response.getStatus());        
+                response.getStatus());
+
+        // And the user himself should not be able to grant
+        // others the ability to create within that scope.
+        String otherUserName = "linda";
+        String grantPermData = "[\"grant\"]";
+        URI otherGrantUri = UriBuilder.fromPath(getExtensionEntryPointUri())
+                .segment(Entities.AGENT).segment("r2").segment("grant")
+                .segment(otherUserName).build();
+
+        resource = client.resource(otherGrantUri);
+        response = resource
+                .accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                        LIMITED_USER_NAME).entity(grantPermData)
+                .post(ClientResponse.class);
+
+        assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(),
+                response.getStatus());
+
     }
 
     private URI getCreationUriFor(String id) {
@@ -222,4 +239,5 @@ public class AgentRestClientTest extends BaseRestClientTest {
                 .segment(Entities.DOCUMENTARY_UNIT).build();
         return creationUri;
     }
+
 }
