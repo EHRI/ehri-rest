@@ -109,7 +109,6 @@ public final class AclViews<E extends AccessibleEntity> implements Acl<E> {
         }
     }
 
-
     public void setAccessors(E entity, Set<Accessor> accessors, Accessor user)
             throws PermissionDenied {
         try {
@@ -130,11 +129,7 @@ public final class AclViews<E extends AccessibleEntity> implements Acl<E> {
                 }
             }
             for (Vertex v : remove) {
-                // FIXME: The Blueprints remove behaviour is strange. It seems
-                // to open a new transaction for every delete operation, which
-                // then requires closing explicitly. Check this out.
                 entity.removeAccessor(graph.frame(v, Accessor.class));
-                //graph.getBaseGraph().stopTransaction(Conclusion.SUCCESS);
             }
             for (Accessor accessor : accessors) {
                 if (!existing.contains(accessor.asVertex())) {
@@ -145,8 +140,8 @@ public final class AclViews<E extends AccessibleEntity> implements Acl<E> {
             new ActionManager(graph).createAction(
                     graph.frame(entity.asVertex(), AccessibleEntity.class),
                     graph.frame(user.asVertex(), Actioner.class),
-                    "Set visibility");            
-            graph.getBaseGraph().stopTransaction(Conclusion.SUCCESS);            
+                    "Set visibility");
+            graph.getBaseGraph().stopTransaction(Conclusion.SUCCESS);
         } catch (PermissionDenied e) {
             graph.getBaseGraph().stopTransaction(Conclusion.FAILURE);
             throw e;
@@ -155,10 +150,10 @@ public final class AclViews<E extends AccessibleEntity> implements Acl<E> {
             throw new RuntimeException(e);
         }
     }
-    
+
     /**
-     * Check the accessor has GRANT permissions to update another
-     * user's permissions.
+     * Check the accessor has GRANT permissions to update another user's
+     * permissions.
      * 
      * @param accessor
      * @param permissionMap
