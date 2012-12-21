@@ -19,7 +19,6 @@ import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.ContentType;
-import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Permission;
 import eu.ehri.project.models.PermissionGrant;
 import eu.ehri.project.models.base.AccessibleEntity;
@@ -165,7 +164,7 @@ public final class AclViews<E extends AccessibleEntity> implements Acl<E> {
         // Check we have grant permissions for the requested content types
         if (!acl.belongsToAdmin(accessor)) {
             try {
-                Permission grantPerm = helper.getEntity(EntityClass.PERMISSION,
+                Permission grantPerm = manager.getFrame(
                         PermissionType.GRANT.getName(), Permission.class);
                 for (ContentTypes ctype : permissionMap.keySet()) {
                     ContentType target = manager.getFrame(ctype.getName(),
@@ -191,8 +190,9 @@ public final class AclViews<E extends AccessibleEntity> implements Acl<E> {
         try {
             helper.checkEntityPermission(scope, grantee, PermissionType.GRANT);
             for (PermissionType t : enumifyPermissionList) {
-                acl.grantPermissions(accessor, acl.getContentType(contentType), t, scope);
-            }            
+                acl.grantPermissions(accessor, acl.getContentType(contentType),
+                        t, scope);
+            }
             graph.getBaseGraph().stopTransaction(Conclusion.SUCCESS);
         } catch (PermissionDenied e) {
             graph.getBaseGraph().stopTransaction(Conclusion.FAILURE);

@@ -141,20 +141,6 @@ public final class ViewHelper {
     }
 
     /**
-     * Fetch any item of a particular type by its identifier.
-     * 
-     * @param typeName
-     * @param name
-     * @param cls
-     * @return
-     * @throws ItemNotFound
-     */
-    public <T> T getEntity(EntityClass type, String name, Class<T> cls)
-            throws ItemNotFound {
-        return manager.getFrame(name, type, cls);
-    }
-
-    /**
      * Get the permission with the given string.
      * 
      * @param permissionId
