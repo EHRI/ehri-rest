@@ -43,7 +43,6 @@ import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.DocumentaryUnit;
-import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.views.impl.AclViews;
@@ -219,8 +218,8 @@ public class AgentResource extends EhriNeo4jFramedResource<Agent> {
         Agent agent = manager.getFrame(id, Agent.class);
         Accessor accessor = manager.getFrame(userId, Accessor.class);
         Accessor grantee = getRequesterUserProfile();
-        AclViews<AccessibleEntity> acl = new AclViews<AccessibleEntity>(graph,
-                AccessibleEntity.class, agent);
+        AclViews<Agent> acl = new AclViews<Agent>(graph,
+                Agent.class, agent);
         acl.setScopedPermissions(accessor, grantee,
                 ContentTypes.DOCUMENTARY_UNIT, enumifyPermissionList(scopedPerms));
         return Response.status(Status.OK).build();
