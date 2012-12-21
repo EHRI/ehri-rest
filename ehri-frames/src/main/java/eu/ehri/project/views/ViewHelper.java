@@ -22,6 +22,18 @@ import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.utils.ClassUtils;
 
+/**
+ * Messy stopgap class to hold a bunch of sort-of view/sort-of acl
+ * functions.
+ * 
+ * TODO: Clarify, consolidate and remove this class.
+ * 
+ * FIXME: In particular, this class shouldn't need a reference
+ * to the framed class cls. 
+ * 
+ * @author mike
+ *
+ */
 public final class ViewHelper {
 
     private final FramedGraph<Neo4jGraph> graph;
@@ -55,8 +67,12 @@ public final class ViewHelper {
         // If we're admin, the answer is always "no problem"!
         if (!acl.belongsToAdmin(accessor)) {
             Permission permission = getPermission(permType);
+            
+            // FIXME: THIS CRASHES WHEN THE cls ISN'T A CONCRETE
+            // FRAMED CLASS, i.e. an actual entity type.
             ContentType contentType = getContentType(ClassUtils
                     .getEntityType(cls));
+            
             Iterable<PermissionGrant> perms = acl.getPermissionGrants(accessor,
                     contentType, permission);
             boolean found = false;
