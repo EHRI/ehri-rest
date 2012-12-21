@@ -1,6 +1,8 @@
 package eu.ehri.extension;
 
+import java.io.IOException;
 import java.net.URI;
+import java.util.List;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -20,10 +22,18 @@ import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.Response.Status;
 
+import org.codehaus.jackson.JsonFactory;
+import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.type.TypeReference;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 
+import com.google.common.collect.Lists;
+
 import eu.ehri.extension.errors.BadRequester;
+import eu.ehri.project.acl.ContentTypes;
+import eu.ehri.project.acl.PermissionType;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.IntegrityError;
@@ -33,7 +43,10 @@ import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistance.Bundle;
+import eu.ehri.project.views.impl.AclViews;
 import eu.ehri.project.views.impl.LoggingCrudViews;
 import eu.ehri.project.views.impl.Query;
 
@@ -170,6 +183,64 @@ public class AgentResource extends EhriNeo4jFramedResource<Agent> {
     }
 
     /**
+     * Set a user's documentary unit permissions for this repository scope.
+     * 
+     * FIXME: Generalise this behaviour.
+     * 
+     * @param id
+     * @param json
+     * @return
+     * @throws PermissionDenied
+     * @throws IOException
+     * @throws ItemNotFound
+     * @throws DeserializationError
+     * @throws BadRequester
+     */
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id:.+}/grant/{userId:.+}")
+    public Response setDocumentaryUnitPermissions(@PathParam("id") String id,
+            @PathParam("userId") String userId, String json)
+            throws PermissionDenied, IOException, ItemNotFound,
+            DeserializationError, BadRequester {
+
+        List<String> scopedPerms;
+        try {
+            JsonFactory factory = new JsonFactory();
+            ObjectMapper mapper = new ObjectMapper(factory);
+            TypeReference<List<String>> typeRef = new TypeReference<List<String>>() {
+            };
+            scopedPerms = mapper.readValue(json, typeRef);
+        } catch (JsonMappingException e) {
+            throw new DeserializationError(e.getMessage());
+        }
+
+        Agent agent = manager.getFrame(id, Agent.class);
+        Accessor accessor = manager.getFrame(userId, Accessor.class);
+        Accessor grantee = getRequesterUserProfile();
+        AclViews<AccessibleEntity> acl = new AclViews<AccessibleEntity>(graph,
+                AccessibleEntity.class, agent);
+        acl.setScopedPermissions(accessor, grantee,
+                ContentTypes.DOCUMENTARY_UNIT, enumifyPermissionList(scopedPerms));
+        return Response.status(Status.OK).build();
+    }
+
+    private List<PermissionType> enumifyPermissionList(List<String> scopedPerms)
+        throws DeserializationError {
+        try {
+            List<PermissionType> perms = Lists.newLinkedList();
+            for (String p : scopedPerms) {
+                perms.add(PermissionType.withName(p));
+            }
+            
+            return perms;
+        } catch (IllegalArgumentException e) {
+            throw new DeserializationError(e.getMessage());
+        }
+    }
+
+    /**
      * Create a documentary unit for this repository.
      * 
      * @param id
@@ -210,10 +281,8 @@ public class AgentResource extends EhriNeo4jFramedResource<Agent> {
             throws SerializationError {
         String jsonStr = converter.vertexFrameToJson(doc);
         // FIXME: Hide the details of building this path
-        URI docUri = UriBuilder
-                .fromUri(uriInfo.getBaseUri())
-                .segment(Entities.DOCUMENTARY_UNIT)
-                .segment(manager.getId(doc))
+        URI docUri = UriBuilder.fromUri(uriInfo.getBaseUri())
+                .segment(Entities.DOCUMENTARY_UNIT).segment(manager.getId(doc))
                 .build();
 
         return Response.status(Status.CREATED).location(docUri)

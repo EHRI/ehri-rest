@@ -7,6 +7,7 @@ import java.net.URI;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriBuilder;
 
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -18,15 +19,18 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 
 import eu.ehri.extension.AbstractRestResource;
+import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.persistance.Bundle;
 
 public class AgentRestClientTest extends BaseRestClientTest {
 
-    static final String UPDATED_ID = "r1";
+    static final String ID = "r1";
+    static final String LIMITED_USER_NAME = "reto";
     static final String UPDATED_NAME = "UpdatedNameTEST";
 
     private String agentTestData;
+    private String docTestData;
     private String badAgentTestData = "{\"data\":{\"identifier\": \"jmp\"}}";
 
     @BeforeClass
@@ -37,6 +41,7 @@ public class AgentRestClientTest extends BaseRestClientTest {
     @Before
     public void setUp() throws Exception {
         agentTestData = readFileAsString("agent.json");
+        docTestData = readFileAsString("documentaryUnit.json");
     }
 
     @Test
@@ -138,5 +143,83 @@ public class AgentRestClientTest extends BaseRestClientTest {
 
         assertEquals(Response.Status.NOT_FOUND.getStatusCode(),
                 response.getStatus());
+    }
+    
+    @Test
+    public void testGrantPermsForAgentScope() throws Exception {
+        // Grant permissions for a user to create items within this scope.
+
+        // The user shouldn't be able to create docs with r2
+        WebResource resource = client.resource(getCreationUriFor("r2"));
+        ClientResponse response = resource
+                .accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                        LIMITED_USER_NAME).entity(docTestData)
+                .post(ClientResponse.class);
+        assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(),
+                response.getStatus());
+
+        // Or r3...
+        resource = client.resource(getCreationUriFor("r3"));
+        response = resource
+                .accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                        LIMITED_USER_NAME).entity(docTestData)
+                .post(ClientResponse.class);
+        assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(),
+                response.getStatus());
+        
+        
+        // Now grant the user permissions to create just within
+        // the scope of r2
+        String permData = "[\"create\"]";
+        
+        URI grantUri = UriBuilder.fromPath(getExtensionEntryPointUri())
+                .segment(Entities.AGENT).segment("r2")
+                .segment("grant")
+                .segment(LIMITED_USER_NAME).build();
+        
+        resource = client.resource(grantUri);
+        response = resource
+                .accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                        getAdminUserProfileId()).entity(permData)
+                .post(ClientResponse.class);
+        
+        assertEquals(Response.Status.OK.getStatusCode(),
+                response.getStatus());
+        
+        // Now creation should succeed...
+        resource = client.resource(getCreationUriFor("r2"));
+        response = resource
+                .accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                        LIMITED_USER_NAME).entity(docTestData)
+                .post(ClientResponse.class);
+        assertEquals(Response.Status.CREATED.getStatusCode(),
+                response.getStatus());
+        
+        // But r3 should still fail...
+        // Or r3...
+        resource = client.resource(getCreationUriFor("r3"));
+        response = resource
+                .accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                        LIMITED_USER_NAME).entity(docTestData)
+                .post(ClientResponse.class);
+        assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(),
+                response.getStatus());        
+    }
+
+    private URI getCreationUriFor(String id) {
+        URI creationUri = UriBuilder.fromPath(getExtensionEntryPointUri())
+                .segment(Entities.AGENT).segment(id)
+                .segment(Entities.DOCUMENTARY_UNIT).build();
+        return creationUri;
     }
 }
