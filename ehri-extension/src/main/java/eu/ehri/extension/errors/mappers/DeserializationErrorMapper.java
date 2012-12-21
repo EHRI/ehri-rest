@@ -1,5 +1,7 @@
 package eu.ehri.extension.errors.mappers;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,6 +17,14 @@ import eu.ehri.project.exceptions.DeserializationError;
 @Provider
 public class DeserializationErrorMapper implements ExceptionMapper<DeserializationError> {
 
+    @SuppressWarnings("unused")
+    private String getStacktrace(Exception e) {
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        e.printStackTrace(pw);
+        return sw.toString();
+    }
+    
 	@SuppressWarnings("serial")
     @Override
 	public Response toResponse(final DeserializationError e) {
