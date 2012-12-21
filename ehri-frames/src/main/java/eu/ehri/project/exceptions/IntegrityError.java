@@ -7,12 +7,7 @@ public class IntegrityError extends Exception {
     
     private Map<String,String> fields = new HashMap<String, String>();
     private String index;
-    
-    public IntegrityError(String message, String index) {
-        super(message);
-        this.index = index;
-    }
-    
+        
     public IntegrityError(String index, Map<String,String> fields) {
         super(String.format("Integity error for index: %s (%s)", index, fields));
         this.index = index;
