@@ -12,6 +12,7 @@ import org.neo4j.graphdb.index.IndexHits;
 import org.neo4j.graphdb.index.IndexManager;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMap;
 import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.Element;
 import com.tinkerpop.blueprints.Index;
@@ -124,7 +125,8 @@ public final class SingleIndexGraphManager implements GraphManager {
         String queryStr = getLuceneQuery(EntityType.ID_KEY, id, type.getName());
         try {
             IndexHits<Node> rawQuery = getRawIndex().query(queryStr);
-            // NB: Not using rawQuery.getSingle here so we throw NoSuchElement other
+            // NB: Not using rawQuery.getSingle here so we throw NoSuchElement
+            // other
             // than return null.
             try {
                 return new Neo4jVertex(rawQuery.iterator().next(),
@@ -135,7 +137,8 @@ public final class SingleIndexGraphManager implements GraphManager {
                 rawQuery.close();
             }
         } catch (NullPointerException e) {
-            throw new RuntimeException(String.format("Error running Lucene query: '%s'", queryStr), e);
+            throw new RuntimeException(String.format(
+                    "Error running Lucene query: '%s'", queryStr), e);
         }
     }
 
@@ -394,9 +397,11 @@ public final class SingleIndexGraphManager implements GraphManager {
 
     private void checkExists(Index<Vertex> index, String id)
             throws IntegrityError {
-        long existing = index.count(EntityType.ID_KEY, id);
-        if (existing != 0)
-            throw new IntegrityError("Item exists with ID: " + id, "entities");
+        if (index.count(EntityType.ID_KEY, id) != 0) {
+            // FIXME: Should expose ID implementation details to outside world.
+            throw new IntegrityError(INDEX_NAME, ImmutableMap.of(
+                    EntityType.ID_KEY, id));
+        }
     }
 
     private Map<String, Object> getVertexData(String id, EntityClass type,
@@ -414,7 +419,6 @@ public final class SingleIndexGraphManager implements GraphManager {
         return vkeys;
     }
 
-
     private org.neo4j.graphdb.index.Index<Node> getRawIndex() {
         IndexManager index = graph.getBaseGraph().getRawGraph().index();
         return index.forNodes(INDEX_NAME);
@@ -430,8 +434,10 @@ public final class SingleIndexGraphManager implements GraphManager {
     }
 
     private String getLuceneQuery(String key, Object value, String type) {
-        return String.format("%s:\"%s\" AND %s:\"%s\"", 
-                QueryParser.escape(key), QueryParser.escape(String.valueOf(value)),
-                QueryParser.escape(EntityType.TYPE_KEY), QueryParser.escape(type));
+        return String.format("%s:\"%s\" AND %s:\"%s\"",
+                QueryParser.escape(key),
+                QueryParser.escape(String.valueOf(value)),
+                QueryParser.escape(EntityType.TYPE_KEY),
+                QueryParser.escape(type));
     }
 }
