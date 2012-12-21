@@ -11,12 +11,14 @@ import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Maps;
 
+import eu.ehri.project.exceptions.DeserializationError;
+import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.utils.ClassUtils;
 
 /**
- * Class that represents a graph entity and its set of relations.
+ * Class that represents a graph entity and subtree relations.
  * 
  * @author michaelb
  * 
@@ -63,7 +65,7 @@ public class Bundle {
      * @param relations
      */
     public Bundle(EntityClass type) {
-        this(null, type, Maps.<String,Object>newHashMap(), LinkedListMultimap
+        this(null, type, Maps.<String, Object> newHashMap(), LinkedListMultimap
                 .<String, Bundle> create());
     }
 
@@ -85,7 +87,8 @@ public class Bundle {
      * @param other
      */
     public Bundle withRelation(String relation, Bundle other) {
-        LinkedListMultimap<String, Bundle> tmp = LinkedListMultimap.create(relations);
+        LinkedListMultimap<String, Bundle> tmp = LinkedListMultimap
+                .create(relations);
         tmp.put(relation, other);
         return new Bundle(id, type, data, tmp);
     }
@@ -98,7 +101,8 @@ public class Bundle {
      * @return
      */
     public Bundle withRelations(String relation, List<Bundle> others) {
-        LinkedListMultimap<String, Bundle> tmp = LinkedListMultimap.create(relations);
+        LinkedListMultimap<String, Bundle> tmp = LinkedListMultimap
+                .create(relations);
         tmp.putAll(relation, others);
         return new Bundle(id, type, data, tmp);
     }
@@ -140,7 +144,7 @@ public class Bundle {
     public Map<String, Object> getData() {
         return data;
     }
-    
+
     /**
      * Get a data value.
      * 
@@ -174,7 +178,7 @@ public class Bundle {
     public Bundle withData(final Map<String, Object> data) {
         return new Bundle(id, type, data, relations);
     }
-    
+
     /**
      * Get a set of relations.
      * 
@@ -196,7 +200,7 @@ public class Bundle {
         tmp.remove(relation, item);
         return new Bundle(id, type, data, tmp);
     }
-    
+
     /**
      * Remove a set of relationships.
      * 
@@ -247,8 +251,46 @@ public class Bundle {
         return ClassUtils.getUniquePropertyKeys(type.getEntityClass());
     }
 
+    /**
+     * Create a bundle from raw data.
+     * 
+     * @param data
+     * @return
+     * @throws DeserializationError
+     */
+    public static Bundle fromData(Object data) throws DeserializationError {
+        return DataConverter.dataToBundle(data);
+    }
+
+    /**
+     * Serialize a bundle to raw data.
+     * 
+     * @return
+     */
+    public Map<String, Object> toData() {
+        return DataConverter.bundleToData(this);
+    }
+
+    /**
+     * Create a bundle from a (JSON) string.
+     * 
+     * @param json
+     * @return
+     * @throws DeserializationError
+     */
+    public static Bundle fromString(String json) throws DeserializationError {
+        return DataConverter.jsonToBundle(json);
+    }
+
+    /**
+     * Serialize a bundle to a JSON string.
+     */
     @Override
     public String toString() {
-        return String.format("<%s: %s>", type.getName(), data);
+        try {
+            return DataConverter.bundleToJson(this);
+        } catch (SerializationError e) {
+            return "Invalid Bundle: " + e.getMessage();
+        }
     }
 }
