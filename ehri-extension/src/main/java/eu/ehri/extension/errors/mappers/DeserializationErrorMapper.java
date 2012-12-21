@@ -15,7 +15,8 @@ import org.codehaus.jackson.map.ObjectMapper;
 import eu.ehri.project.exceptions.DeserializationError;
 
 @Provider
-public class DeserializationErrorMapper implements ExceptionMapper<DeserializationError> {
+public class DeserializationErrorMapper implements
+        ExceptionMapper<DeserializationError> {
 
     @SuppressWarnings("unused")
     private String getStacktrace(Exception e) {
@@ -24,10 +25,10 @@ public class DeserializationErrorMapper implements ExceptionMapper<Deserializati
         e.printStackTrace(pw);
         return sw.toString();
     }
-    
-	@SuppressWarnings("serial")
+
+    @SuppressWarnings("serial")
     @Override
-	public Response toResponse(final DeserializationError e) {
+    public Response toResponse(final DeserializationError e) {
         Map<String, Object> out = new HashMap<String, Object>() {
             {
                 put("error", DeserializationError.class.getSimpleName());
@@ -35,10 +36,12 @@ public class DeserializationErrorMapper implements ExceptionMapper<Deserializati
             }
         };
         try {
-            return Response.status(Status.BAD_REQUEST)
-                .entity(new ObjectMapper().writeValueAsString(out).getBytes()).build();
+            return Response
+                    .status(Status.BAD_REQUEST)
+                    .entity(new ObjectMapper().writeValueAsString(out)
+                            .getBytes()).build();
         } catch (Exception e1) {
             throw new RuntimeException(e1);
         }
-	}
+    }
 }
