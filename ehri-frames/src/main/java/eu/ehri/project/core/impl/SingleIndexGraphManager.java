@@ -353,23 +353,23 @@ public final class SingleIndexGraphManager implements GraphManager {
      * 
      * @param index
      *            The index of the container
-     * @param c
+     * @param item
      *            The container Edge or Vertex of type <code>T</code>
      * @param data
      *            The properties
      */
-    private <T extends Element> void replaceProperties(Index<T> index, T c,
+    private <T extends Element> void replaceProperties(Index<T> index, T item,
             Map<String, Object> data, Collection<String> keys) {
         // remove 'old' properties
-        for (String key : c.getPropertyKeys()) {
+        for (String key : item.getPropertyKeys()) {
             if (keys == null || keys.contains(key)) {
-                index.remove(key, c.getProperty(key), c);
+                index.remove(key, item.getProperty(key), item);
             }
-            c.removeProperty(key);
+            item.removeProperty(key);
         }
 
         // add all 'new' properties to the relationship and index
-        addProperties(index, c, data, keys);
+        addProperties(index, item, data, keys);
     }
 
     /**
@@ -377,21 +377,21 @@ public final class SingleIndexGraphManager implements GraphManager {
      * 
      * @param index
      *            The index of the container
-     * @param c
+     * @param item
      *            The container Edge or Vertex of type <code>T</code>
      * @param data
      *            The properties
      */
-    private <T extends Element> void addProperties(Index<T> index, T c,
+    private <T extends Element> void addProperties(Index<T> index, T item,
             Map<String, Object> data, Collection<String> keys) {
-        // TODO data cannot be null
-
+        Preconditions.checkNotNull(data, "Data map cannot be null");
         for (Map.Entry<String, Object> entry : data.entrySet()) {
             if (entry.getValue() == null)
                 continue;
-            c.setProperty(entry.getKey(), entry.getValue());
+            item.setProperty(entry.getKey(), entry.getValue());
             if (keys == null || keys.contains(entry.getKey()))
-                index.put(entry.getKey(), String.valueOf(entry.getValue()), c);
+                index.put(entry.getKey(), String.valueOf(entry.getValue()),
+                        item);
         }
     }
 
