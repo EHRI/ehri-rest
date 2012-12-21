@@ -545,7 +545,7 @@ public class AclManager {
     }
 
     /**
-     * Get the permission with the given string.
+     * Get the permission node for a given type.
      * 
      * @param permissionId
      * @return
@@ -559,4 +559,21 @@ public class AclManager {
                     "No permission found for name: '%s'", perm.getName()), e);
         }
     }
+    
+    /**
+     * Get the permission with the given string.
+     * 
+     * @param permissionId
+     * @return
+     */
+    public ContentType getContentType(ContentTypes contentType) {
+        try {
+            return manager.getFrame(contentType.getName(), EntityClass.CONTENT_TYPE,
+                    ContentType.class);
+        } catch (ItemNotFound e) {
+            throw new RuntimeException(String.format(
+                    "No content type found for name: '%s'", contentType.getName()), e);
+        }
+    }
+    
 }

@@ -184,4 +184,22 @@ public final class AclViews<E extends AccessibleEntity> implements Acl<E> {
             }
         }
     }
+
+    public void setScopedPermissions(Accessor accessor, Accessor grantee,
+            ContentTypes contentType, List<PermissionType> enumifyPermissionList)
+            throws PermissionDenied {
+        try {
+            helper.checkEntityPermission(scope, grantee, PermissionType.GRANT);
+            for (PermissionType t : enumifyPermissionList) {
+                acl.grantPermissions(accessor, acl.getContentType(contentType), t, scope);
+            }            
+            graph.getBaseGraph().stopTransaction(Conclusion.SUCCESS);
+        } catch (PermissionDenied e) {
+            graph.getBaseGraph().stopTransaction(Conclusion.FAILURE);
+            throw e;
+        } catch (Exception e) {
+            graph.getBaseGraph().stopTransaction(Conclusion.FAILURE);
+            throw new RuntimeException(e);
+        }
+    }
 }
