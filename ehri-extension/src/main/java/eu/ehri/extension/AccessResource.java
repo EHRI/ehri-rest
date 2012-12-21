@@ -21,8 +21,8 @@ import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Transaction;
-
+import eu.ehri.extension.errors.BadRequester;
+import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.base.AccessibleEntity;
@@ -43,22 +43,22 @@ public class AccessResource extends EhriNeo4jFramedResource<AccessibleEntity> {
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/{id:[^/]+}")
     public Response setVisibility(@PathParam("id") String id, String json)
-            throws PermissionDenied, JsonParseException, JsonMappingException,
-            IOException {
+            throws PermissionDenied, ItemNotFound, BadRequester,
+            DeserializationError {
 
-        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
+            Set<Accessor> accessors = extractAccessors(json);
             AclViews<AccessibleEntity> acl = new AclViews<AccessibleEntity>(
                     graph, cls);
             acl.setAccessors(manager.getFrame(id, AccessibleEntity.class),
-                    extractAccessors(json), getRequesterUserProfile());
-            tx.success();
+                    accessors, getRequesterUserProfile());
             return Response.status(Status.OK).build();
-        } catch (Exception e) {
-            tx.failure();
+        } catch (JsonParseException e) {
+            throw new DeserializationError("Unable to parse accessor list", e);
+        } catch (JsonMappingException e) {
             throw new WebApplicationException(e);
-        } finally {
-            tx.finish();
+        } catch (IOException e) {
+            throw new WebApplicationException(e);
         }
     }
 

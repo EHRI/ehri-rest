@@ -105,39 +105,54 @@ public final class AclViews<E extends AccessibleEntity> implements Acl<E> {
             throw e;
         } catch (Exception e) {
             graph.getBaseGraph().stopTransaction(Conclusion.FAILURE);
+            throw new RuntimeException(e);
         }
     }
 
 
     public void setAccessors(E entity, Set<Accessor> accessors, Accessor user)
             throws PermissionDenied {
-        helper.checkEntityPermission(entity, user, PermissionType.UPDATE);
-        // FIXME: Must be a more efficient way to do this, whilst
-        // ensuring that superfluous double relationships don't get created?
-        Set<Vertex> accessorVertices = Sets.newHashSet();
-        for (Accessor acc : accessors)
-            accessorVertices.add(acc.asVertex());
+        try {
+            helper.checkEntityPermission(entity, user, PermissionType.UPDATE);
+            // FIXME: Must be a more efficient way to do this, whilst
+            // ensuring that superfluous double relationships don't get created?
+            Set<Vertex> accessorVertices = Sets.newHashSet();
+            for (Accessor acc : accessors)
+                accessorVertices.add(acc.asVertex());
 
-        Set<Vertex> existing = Sets.newHashSet();
-        Set<Vertex> remove = Sets.newHashSet();
-        for (Accessor accessor : entity.getAccessors()) {
-            Vertex v = accessor.asVertex();
-            existing.add(v);
-            if (!accessorVertices.contains(v)) {
-                remove.add(v);
+            Set<Vertex> existing = Sets.newHashSet();
+            Set<Vertex> remove = Sets.newHashSet();
+            for (Accessor accessor : entity.getAccessors()) {
+                Vertex v = accessor.asVertex();
+                existing.add(v);
+                if (!accessorVertices.contains(v)) {
+                    remove.add(v);
+                }
             }
-        }
-        for (Vertex v : remove) {
-            // FIXME: The Blueprints remove behaviour is strange. It seems
-            // to open a new transaction for every delete operation, which
-            // then requires closing explicitly. Check this out.
-            entity.removeAccessor(graph.frame(v, Accessor.class));
-            graph.getBaseGraph().stopTransaction(Conclusion.SUCCESS);
-        }
-        for (Accessor accessor : accessors) {
-            if (!existing.contains(accessor.asVertex())) {
-                entity.addAccessor(accessor);
+            for (Vertex v : remove) {
+                // FIXME: The Blueprints remove behaviour is strange. It seems
+                // to open a new transaction for every delete operation, which
+                // then requires closing explicitly. Check this out.
+                entity.removeAccessor(graph.frame(v, Accessor.class));
+                //graph.getBaseGraph().stopTransaction(Conclusion.SUCCESS);
             }
+            for (Accessor accessor : accessors) {
+                if (!existing.contains(accessor.asVertex())) {
+                    entity.addAccessor(accessor);
+                }
+            }
+            // Log the action...
+            new ActionManager(graph).createAction(
+                    graph.frame(entity.asVertex(), AccessibleEntity.class),
+                    graph.frame(user.asVertex(), Actioner.class),
+                    "Set visibility");            
+            graph.getBaseGraph().stopTransaction(Conclusion.SUCCESS);            
+        } catch (PermissionDenied e) {
+            graph.getBaseGraph().stopTransaction(Conclusion.FAILURE);
+            throw e;
+        } catch (Exception e) {
+            graph.getBaseGraph().stopTransaction(Conclusion.FAILURE);
+            throw new RuntimeException(e);
         }
     }
     
