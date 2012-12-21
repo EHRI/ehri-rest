@@ -325,22 +325,20 @@ public class AclManager {
             List<PermissionType> list = Lists.newLinkedList();
             // Cache a set of permission scopes. This is the hierarchy on which
             // permissions are granted. For most items it will contain zero
-            // entries
-            // and thus be pretty fast, but for deeply nested documentary units
-            // there might be quite a few.
-            HashSet<Object> scopes = Sets.newHashSet();
+            // entries and thus be pretty fast, but for deeply nested
+            // documentary units there might be quite a few.
+            HashSet<Vertex> scopes = Sets.newHashSet();
             for (PermissionScope scope : entity.getScopes())
-                scopes.add(scope.asVertex().getId());
+                scopes.add(scope.asVertex());
 
             for (PermissionGrant grant : accessor.getPermissionGrants()) {
-                if (entity.asVertex().getId()
-                        .equals(grant.getTarget().asVertex().getId())) {
+                if (entity.asVertex().equals(grant.getTarget().asVertex())) {
                     list.add(PermissionType.withName(manager.getId(grant
                             .getPermission())));
                 } else if (grant.getScope() != null) {
                     // If there isn't a direct grant to the entity, search its
                     // parent scopes for an appropriate scoped permission
-                    if (scopes.contains(grant.getScope().asVertex().getId())) {
+                    if (scopes.contains(grant.getScope().asVertex())) {
                         list.add(PermissionType.withName(manager.getId(grant
                                 .getPermission())));
                     }
