@@ -14,6 +14,7 @@ import eu.ehri.extension.AbstractRestResource;
 
 public class AccessRestClientTest extends BaseRestClientTest {
 
+    static final String PRIVILEGED_USER_NAME = "mike";
     static final String LIMITED_USER_NAME = "reto";
 
     @BeforeClass
@@ -38,7 +39,7 @@ public class AccessRestClientTest extends BaseRestClientTest {
 
     @Test
     public void testGrantAccess() throws Exception {
-        // Create
+        // Attempt to fetch an element.
         WebResource resource = client.resource(getExtensionEntryPointUri()
                 + "/documentaryUnit/c1");
         ClientResponse response = resource
@@ -51,16 +52,14 @@ public class AccessRestClientTest extends BaseRestClientTest {
                 response.getStatus());
 
         // Set the form data
-        String accJson = "[\"" + LIMITED_USER_NAME + "\"]}";
+        String accJson = "[\"" + LIMITED_USER_NAME + "\"]";
 
-        resource = client.resource(getExtensionEntryPointUri()
-                + "/access/c1");
+        resource = client.resource(getExtensionEntryPointUri() + "/access/c1");
         response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
                 .header(AbstractRestResource.AUTH_HEADER_NAME,
-                        getAdminUserProfileId())
-                .entity(accJson.getBytes())
+                        getAdminUserProfileId()).entity(accJson.getBytes())
                 .post(ClientResponse.class);
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
 
@@ -74,4 +73,46 @@ public class AccessRestClientTest extends BaseRestClientTest {
                         LIMITED_USER_NAME).get(ClientResponse.class);
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
     }
+
+    @Test
+    public void testRevokeAccess() throws Exception {
+
+        // first, grant access
+        testGrantAccess();
+
+        // Create
+        WebResource resource = client.resource(getExtensionEntryPointUri()
+                + "/documentaryUnit/c1");
+        ClientResponse response = resource
+                .accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                        LIMITED_USER_NAME).get(ClientResponse.class);
+
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+
+        // Set the form data
+        String accJson = "[\"" + PRIVILEGED_USER_NAME + "\"]";
+
+        resource = client.resource(getExtensionEntryPointUri() + "/access/c1");
+        response = resource
+                .accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                        getAdminUserProfileId()).entity(accJson.getBytes())
+                .post(ClientResponse.class);
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+
+        // Try the original request again and ensure it worked...
+        resource = client.resource(getExtensionEntryPointUri()
+                + "/documentaryUnit/c1");
+        response = resource
+                .accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                        LIMITED_USER_NAME).get(ClientResponse.class);
+        assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(),
+                response.getStatus());
+    }
+
 }
