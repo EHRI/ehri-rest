@@ -6,7 +6,6 @@ import com.tinkerpop.frames.Property;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Actioner;
 
 @EntityType(EntityClass.ACTION)

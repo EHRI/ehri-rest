@@ -6,7 +6,6 @@ import com.tinkerpop.frames.Property;
 import com.tinkerpop.frames.VertexFrame;
 import com.tinkerpop.frames.annotations.gremlin.GremlinGroovy;
 
-import eu.ehri.project.models.annotations.Dependent;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.base.AccessibleEntity;
@@ -64,9 +63,4 @@ public interface DocumentaryUnit extends VertexFrame, AccessibleEntity,
 
     @Adjacency(label = Authority.MENTIONED_IN, direction = Direction.IN)
     public void addNameAccess(final Authority nameAccess);
-    
-    @Fetch
-    @Dependent
-    @Adjacency(label = DESCRIBES, direction = Direction.IN)
-    public Iterable<DocumentDescription> getDescriptions();        
 }

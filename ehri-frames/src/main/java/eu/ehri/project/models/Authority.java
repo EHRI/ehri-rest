@@ -1,13 +1,10 @@
 package eu.ehri.project.models;
 
-import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Property;
 import com.tinkerpop.frames.VertexFrame;
 
-import eu.ehri.project.models.annotations.Dependent;
 import eu.ehri.project.models.annotations.EntityType;
-import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.AnnotatableEntity;
 import eu.ehri.project.models.base.DescribedEntity;
@@ -33,9 +30,4 @@ public interface Authority extends VertexFrame, AccessibleEntity,
 
     @Adjacency(label = MENTIONED_IN)
     public void addMentionedIn(final DocumentaryUnit unit);
-    
-    @Fetch
-    @Dependent
-    @Adjacency(label = DESCRIBES, direction = Direction.IN)
-    public Iterable<AuthorityDescription> getDescriptions();        
 }
