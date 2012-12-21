@@ -3,8 +3,6 @@ package eu.ehri.extension.test;
 import static org.junit.Assert.assertEquals;
 
 import java.net.URI;
-import java.util.Map;
-
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
@@ -19,7 +17,6 @@ import com.sun.jersey.core.util.MultivaluedMapImpl;
 import eu.ehri.extension.AbstractRestResource;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.persistance.Bundle;
-import eu.ehri.project.persistance.DataConverter;
 
 public class UserProfileRestClientTest extends BaseRestClientTest {
 
@@ -115,8 +112,8 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
 
         // -get the data and change it
         String json = response.getEntity(String.class);
-        Bundle entityBundle = DataConverter.jsonToBundle(json).withDataValue(
-                "name", UPDATED_NAME);
+        Bundle entityBundle = Bundle.fromString(json).withDataValue("name",
+                UPDATED_NAME);
 
         // -update
         resource = client
@@ -126,8 +123,7 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
                 .type(MediaType.APPLICATION_JSON)
                 .header(AbstractRestResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId())
-                .entity(DataConverter.bundleToJson(entityBundle))
-                .put(ClientResponse.class);
+                .entity(entityBundle.toString()).put(ClientResponse.class);
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
 
         // -get the data and convert to a bundle, is it changed?
@@ -140,9 +136,8 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
 
         // -get the data and convert to a bundle, is it OK?
         String updatedJson = response.getEntity(String.class);
-        Bundle updatedEntityBundle = DataConverter.jsonToBundle(updatedJson);
-        Map<String, Object> updatedData = updatedEntityBundle.getData();
-        assertEquals(UPDATED_NAME, updatedData.get("name"));
+        Bundle updatedEntityBundle = Bundle.fromString(updatedJson);
+        assertEquals(UPDATED_NAME, updatedEntityBundle.getDataValue("name"));
     }
 
     @Test
@@ -162,9 +157,8 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
                 response.getStatus());
 
         // Create a bundle with a username that's already been taken.
-        Bundle bundle = DataConverter.jsonToBundle(
-                response.getEntity(String.class)).withDataValue(
-                AccessibleEntity.IDENTIFIER_KEY, "mike");
+        Bundle bundle = Bundle.fromString(response.getEntity(String.class))
+                .withDataValue(AccessibleEntity.IDENTIFIER_KEY, "mike");
 
         // Get created doc via the response location?
         URI location = response.getLocation();
@@ -174,11 +168,9 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
                 .header(AbstractRestResource.AUTH_HEADER_NAME,
-                        getAdminUserProfileId())
-                .entity(DataConverter.bundleToJson(bundle))
+                        getAdminUserProfileId()).entity(bundle.toString())
                 .put(ClientResponse.class);
 
-        System.out.println(response.getEntity(String.class));
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(),
                 response.getStatus());
     }

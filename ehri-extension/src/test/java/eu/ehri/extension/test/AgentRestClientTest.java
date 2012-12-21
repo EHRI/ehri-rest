@@ -90,7 +90,6 @@ public class AgentRestClientTest extends BaseRestClientTest {
                 .header(AbstractRestResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId()).entity(updateData)
                 .put(ClientResponse.class);
-        System.out.println(response.getEntity(String.class));
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
     }
 

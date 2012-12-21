@@ -62,7 +62,6 @@ public class AccessRestClientTest extends BaseRestClientTest {
                         getAdminUserProfileId())
                 .entity(accJson.getBytes())
                 .post(ClientResponse.class);
-        System.out.println(response.getEntity(String.class));
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
 
         // Try the original request again and ensure it worked...

@@ -29,7 +29,6 @@ import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.TemporalEntity;
 import eu.ehri.project.persistance.Bundle;
-import eu.ehri.project.persistance.DataConverter;
 
 public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
 
@@ -72,7 +71,8 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
                 response.getStatus());
         // TODO test if json is valid?
         // response.getEntity(String.class)
-        //System.out.println("POST Respons json: " + response.getEntity(String.class));
+        // System.out.println("POST Respons json: " +
+        // response.getEntity(String.class));
 
         // Get created doc via the response location?
         URI location = response.getLocation();
@@ -110,15 +110,14 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
                 .entity(jsonDocumentaryUnitTestStr).post(ClientResponse.class);
         // Check the JSON gives use the correct error
         String errString = response.getEntity(String.class);
-        
+
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(),
                 response.getStatus());
 
         ObjectMapper mapper = new ObjectMapper();
-        JsonNode rootNode = mapper.readValue(errString,
-                JsonNode.class);
-        JsonNode errValue = rootNode.path(BundleError.ERROR_KEY)
-                .path(AccessibleEntity.IDENTIFIER_KEY);
+        JsonNode rootNode = mapper.readValue(errString, JsonNode.class);
+        JsonNode errValue = rootNode.path(BundleError.ERROR_KEY).path(
+                AccessibleEntity.IDENTIFIER_KEY);
         assertFalse(errValue.isMissingNode());
     }
 
@@ -131,7 +130,8 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
                 .type(MediaType.APPLICATION_JSON)
                 .header(AbstractRestResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId())
-                .entity(invalidJsonDocumentaryUnitTestStr).post(ClientResponse.class);
+                .entity(invalidJsonDocumentaryUnitTestStr)
+                .post(ClientResponse.class);
 
         String errorJson = response.getEntity(String.class);
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(),
@@ -141,17 +141,13 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
         // In this case the start and end dates for the
         // first date relation should be missing
         ObjectMapper mapper = new ObjectMapper();
-        JsonNode rootNode = mapper.readValue(errorJson,
-                JsonNode.class);
-        JsonNode errValue1 = rootNode
-                    .path(BundleError.REL_KEY)
-                    .path(TemporalEntity.HAS_DATE)
-                    .path(0)
-                    .path(BundleError.ERROR_KEY)
-                    .path(DatePeriod.START_DATE);
+        JsonNode rootNode = mapper.readValue(errorJson, JsonNode.class);
+        JsonNode errValue1 = rootNode.path(BundleError.REL_KEY)
+                .path(TemporalEntity.HAS_DATE).path(0)
+                .path(BundleError.ERROR_KEY).path(DatePeriod.START_DATE);
         assertFalse(errValue1.isMissingNode());
     }
-    
+
     @Test
     public void testGetDocumentaryUnitByIdentifier() throws Exception {
         // Create
@@ -246,9 +242,8 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
 
         // -get the data and change it
         String json = response.getEntity(String.class);
-        Bundle entityBundle = DataConverter
-                .jsonToBundle(json).withDataValue("name", UPDATED_NAME);
-        String toUpdateJson = DataConverter.bundleToJson(entityBundle);
+        String toUpdateJson = Bundle.fromString(json)
+                .withDataValue("name", UPDATED_NAME).toString();
 
         // -update
         resource = client.resource(getExtensionEntryPointUri()
@@ -271,10 +266,8 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
 
         // -get the data and convert to a bundle, is it OK?
         String updatedJson = response.getEntity(String.class);
-        Bundle updatedEntityBundle = DataConverter
-                .jsonToBundle(updatedJson);
-        Map<String, Object> updatedData = updatedEntityBundle.getData();
-        assertEquals(UPDATED_NAME, updatedData.get("name"));
+        Bundle updatedEntityBundle = Bundle.fromString(updatedJson);
+        assertEquals(UPDATED_NAME, updatedEntityBundle.getDataValue("name"));
     }
 
     private URI getCreationUri() {

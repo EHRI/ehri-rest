@@ -19,7 +19,7 @@ import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.models.EntityClass;
 
-public class DataConverter {
+class DataConverter {
 
     /**
      * Convert a bundle to a generic data structure.
