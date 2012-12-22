@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -381,6 +382,7 @@ public class AclManager {
     public PermissionGrant grantPermissions(Accessor accessor,
             PermissionGrantTarget target, PermissionType permission,
             PermissionScope scope) {
+        Preconditions.checkNotNull(scope, "Scope given to grantPermissions is null");
         PermissionGrant grant = grantPermissions(accessor, target, permission);
         if (!scope.getIdentifier().equals(SystemScope.SYSTEM))
             grant.setScope(scope);
