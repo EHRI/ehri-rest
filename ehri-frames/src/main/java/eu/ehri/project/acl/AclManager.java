@@ -44,8 +44,12 @@ import eu.ehri.project.models.utils.ClassUtils;
  */
 public class AclManager {
 
-    private FramedGraph<Neo4jGraph> graph;
-    private GraphManager manager;
+    private final FramedGraph<Neo4jGraph> graph;
+    private final GraphManager manager;
+    private final Map<PermissionType, Permission> permissionMap = Maps
+            .newEnumMap(PermissionType.class);
+    private final Map<ContentTypes, ContentType> contentMap = Maps
+            .newEnumMap(ContentTypes.class);
 
     public AclManager(FramedGraph<Neo4jGraph> graph) {
         this.graph = graph;
@@ -552,14 +556,19 @@ public class AclManager {
      */
     public Permission getPermission(PermissionType perm) {
         try {
-            return manager.getFrame(perm.getName(), EntityClass.PERMISSION,
-                    Permission.class);
+            Permission pt = permissionMap.get(perm);
+            if (pt == null) {
+                pt = manager.getFrame(perm.getName(), EntityClass.PERMISSION,
+                        Permission.class);
+                permissionMap.put(perm, pt);
+            }
+            return pt;
         } catch (ItemNotFound e) {
             throw new RuntimeException(String.format(
                     "No permission found for name: '%s'", perm.getName()), e);
         }
     }
-    
+
     /**
      * Get the permission with the given string.
      * 
@@ -568,12 +577,17 @@ public class AclManager {
      */
     public ContentType getContentType(ContentTypes contentType) {
         try {
-            return manager.getFrame(contentType.getName(), EntityClass.CONTENT_TYPE,
-                    ContentType.class);
+            ContentType ct = contentMap.get(contentType);
+            if (ct == null) {
+                ct = manager.getFrame(contentType.getName(),
+                        EntityClass.CONTENT_TYPE, ContentType.class);
+                contentMap.put(contentType, ct);
+            }
+            return ct;
         } catch (ItemNotFound e) {
             throw new RuntimeException(String.format(
-                    "No content type found for name: '%s'", contentType.getName()), e);
+                    "No content type found for name: '%s'",
+                    contentType.getName()), e);
         }
     }
-    
 }
