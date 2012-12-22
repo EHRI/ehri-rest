@@ -46,9 +46,9 @@ public class AclManager {
 
     private final FramedGraph<Neo4jGraph> graph;
     private final GraphManager manager;
-    private final Map<PermissionType, Permission> permissionMap = Maps
+    private final Map<PermissionType, Permission> enumPermissionMap = Maps
             .newEnumMap(PermissionType.class);
-    private final Map<ContentTypes, ContentType> contentMap = Maps
+    private final Map<ContentTypes, ContentType> enumContentTypeMap = Maps
             .newEnumMap(ContentTypes.class);
 
     public AclManager(FramedGraph<Neo4jGraph> graph) {
@@ -556,11 +556,11 @@ public class AclManager {
      */
     public Permission getPermission(PermissionType perm) {
         try {
-            Permission pt = permissionMap.get(perm);
+            Permission pt = enumPermissionMap.get(perm);
             if (pt == null) {
                 pt = manager.getFrame(perm.getName(), EntityClass.PERMISSION,
                         Permission.class);
-                permissionMap.put(perm, pt);
+                enumPermissionMap.put(perm, pt);
             }
             return pt;
         } catch (ItemNotFound e) {
@@ -570,18 +570,18 @@ public class AclManager {
     }
 
     /**
-     * Get the permission with the given string.
+     * Get the content type node for a given enum.
      * 
      * @param permissionId
      * @return
      */
     public ContentType getContentType(ContentTypes contentType) {
         try {
-            ContentType ct = contentMap.get(contentType);
+            ContentType ct = enumContentTypeMap.get(contentType);
             if (ct == null) {
                 ct = manager.getFrame(contentType.getName(),
                         EntityClass.CONTENT_TYPE, ContentType.class);
-                contentMap.put(contentType, ct);
+                enumContentTypeMap.put(contentType, ct);
             }
             return ct;
         } catch (ItemNotFound e) {
@@ -590,4 +590,25 @@ public class AclManager {
                     contentType.getName()), e);
         }
     }
+
+    /**
+     * Get the permission type enum for a given node.
+     * 
+     * @param permissionId
+     * @return
+     */
+    public PermissionType getPermissionType(Permission perm) {
+        return PermissionType.withName(manager.getId(perm));
+    }
+
+    /**
+     * Get the content type enum for a given node.
+     * 
+     * @param permissionId
+     * @return
+     */
+    public ContentTypes getContentTypes(ContentType contentType) {
+        return ContentTypes.withName(manager.getId(contentType));
+    }
+
 }
