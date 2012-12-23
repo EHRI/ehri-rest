@@ -6,11 +6,12 @@ import com.tinkerpop.frames.VertexFrame;
 
 public interface Description extends VertexFrame, VersionedEntity {
     public static final String DESCRIBES = "describes";
+    public static final String LANGUAGE_CODE = "languageCode";
 
     @Adjacency(label = DESCRIBES)
     public DescribedEntity getEntity();
 
-    @Property("languageCode")
+    @Property(LANGUAGE_CODE)
     public String getLanguageOfDescription();
-
+    
 }
