@@ -123,22 +123,16 @@ public final class SingleIndexGraphManager implements GraphManager {
         Preconditions
                 .checkNotNull(id, "attempt to fetch vertex with a null id");
         String queryStr = getLuceneQuery(EntityType.ID_KEY, id, type.getName());
+        IndexHits<Node> rawQuery = getRawIndex().query(queryStr);
+        // NB: Not using rawQuery.getSingle here so we throw NoSuchElement
+        // other than return null.
         try {
-            IndexHits<Node> rawQuery = getRawIndex().query(queryStr);
-            // NB: Not using rawQuery.getSingle here so we throw NoSuchElement
-            // other
-            // than return null.
-            try {
-                return new Neo4jVertex(rawQuery.iterator().next(),
-                        graph.getBaseGraph());
-            } catch (NoSuchElementException e) {
-                throw new ItemNotFound(id);
-            } finally {
-                rawQuery.close();
-            }
-        } catch (NullPointerException e) {
-            throw new RuntimeException(String.format(
-                    "Error running Lucene query: '%s'", queryStr), e);
+            return new Neo4jVertex(rawQuery.iterator().next(),
+                    graph.getBaseGraph());
+        } catch (NoSuchElementException e) {
+            throw new ItemNotFound(id);
+        } finally {
+            rawQuery.close();
         }
     }
 
