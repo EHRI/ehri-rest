@@ -10,6 +10,5 @@ import com.google.common.collect.ListMultimap;
  */
 public interface BundleValidator {
     public ListMultimap<String, String> validate();
-    public ListMultimap<String, String> validateForInsert();
     public ListMultimap<String, String> validateForUpdate();
 }

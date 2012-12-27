@@ -1,5 +1,6 @@
 package eu.ehri.project.persistance;
 
+import java.text.MessageFormat;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -74,7 +75,7 @@ public final class BundleDAO {
      * @throws ItemNotFound
      */
     public <T extends VertexFrame> T update(Bundle bundle, Class<T> cls)
-            throws ValidationError, IntegrityError, ItemNotFound {
+            throws ValidationError, ItemNotFound {
         return graph.frame(updateInner(bundle), cls);
     }
 
@@ -87,7 +88,7 @@ public final class BundleDAO {
      * @throws IntegrityError
      */
     public <T extends VertexFrame> T create(Bundle bundle, Class<T> cls)
-            throws ValidationError, IntegrityError {
+            throws ValidationError {        
         return graph.frame(createInner(bundle), cls);
     }
 
@@ -101,7 +102,7 @@ public final class BundleDAO {
      * @throws IntegrityError
      */
     public <T extends VertexFrame> T createOrUpdate(Bundle bundle, Class<T> cls)
-            throws ValidationError, IntegrityError {
+            throws ValidationError {
         return graph.frame(createOrUpdateInner(bundle), cls);
     }
 
@@ -187,9 +188,6 @@ public final class BundleDAO {
             ListMultimap<String, BundleError> nestedErrors = LinkedListMultimap
                     .create();
             try {
-                // If the bundle doesn't already have an ID, generate one using
-                // the
-                // (presently stopgap) type-dependent ID generator.
                 String id = bundle.getId() != null ? bundle.getId() : bundle
                         .getType().getIdgen()
                         .generateId(bundle.getType(), scope, bundle.getData());
@@ -202,9 +200,9 @@ public final class BundleDAO {
             } catch (IntegrityError e) {
                 // Convert integrity errors to validation errors
                 for (Entry<String, String> entry : e.getFields().entrySet()) {
-                    errors.put(entry.getKey(), String.format(
-                            "Value '%s' exists and must be unique.",
-                            entry.getValue()));
+                    errors.put(entry.getKey(), MessageFormat.format(
+                            Messages.getString("BundleDAO.uniquenessError"), //$NON-NLS-1$
+                            new Object[] {entry.getValue()}));
                 }
             }
 
@@ -241,9 +239,9 @@ public final class BundleDAO {
                     bundle.getRelations());
         } catch (IntegrityError e) {
             for (Entry<String, String> entry : e.getFields().entrySet()) {
-                errors.put(entry.getKey(), String.format(
-                        "Value '%s' exists and must be unique.",
-                        entry.getValue()));
+                errors.put(entry.getKey(), MessageFormat.format(
+                        Messages.getString("BundleDAO.uniquenessError"), //$NON-NLS-1$
+                        new Object[] {entry.getValue()}));
             }
         }
         if (!errors.isEmpty() || hasNestedErrors(nestedErrors)) {

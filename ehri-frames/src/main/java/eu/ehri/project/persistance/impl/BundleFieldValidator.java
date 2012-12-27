@@ -46,22 +46,6 @@ public final class BundleFieldValidator implements BundleValidator {
     }
 
     /**
-     * Validate the data in the bundle, according to the target class, and
-     * ensure it is fit for insert into the graph.
-     * 
-     * @return errors 
-     * 
-     */
-    public ListMultimap<String, String> validateForInsert() {
-        if (bundle.getId() != null)
-            errors.put("id",
-                    String.format(
-                            "Identifier is present ('%s') but insert operation specified.",
-                            bundle.getId()));
-        return validate();
-    }
-
-    /**
      * Validate bundle fields.
      * 
      * @return errors
