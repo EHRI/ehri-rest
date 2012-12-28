@@ -24,7 +24,7 @@ import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.PermissionGrantTarget;
-import eu.ehri.project.persistance.Converter;
+import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.views.Crud;
 import eu.ehri.project.views.impl.LoggingCrudViews;
 import eu.ehri.project.views.impl.CrudViews;
@@ -113,12 +113,12 @@ public class ViewsTest extends AbstractFixtureTest {
         // We could convert the FramedNode back into a bundle here,
         // but let's instead just modify the initial data.
         String newName = TEST_COLLECTION_NAME + " with new stuff";
-        bundleData.put(Converter.ID_KEY,
+        bundleData.put(Bundle.ID_KEY,
                 unit.asVertex().getProperty(EntityType.ID_KEY));
 
         @SuppressWarnings("unchecked")
         Map<String, Object> data = (Map<String, Object>) bundleData
-                .get(Converter.DATA_KEY);
+                .get(Bundle.DATA_KEY);
         data.put("name", newName);
         DocumentaryUnit changedUnit = docViews.update(bundleData, validUser);
         assertEquals(newName, changedUnit.getName());
@@ -149,7 +149,7 @@ public class ViewsTest extends AbstractFixtureTest {
         Map<String, Object> bundle = getTestUserBundle();
         UserProfile user = userViews.create(bundle, validUser);
         assertEquals(TEST_USER_NAME, user.getName());
-        bundle.put(Converter.ID_KEY,
+        bundle.put(Bundle.ID_KEY,
                 user.asVertex().getProperty(EntityType.ID_KEY));
         // We could convert the FramedNode back into a bundle here,
         // but let's instead just modify the initial data.
@@ -157,7 +157,7 @@ public class ViewsTest extends AbstractFixtureTest {
 
         @SuppressWarnings("unchecked")
         Map<String, Object> data = (Map<String, Object>) bundle
-                .get(Converter.DATA_KEY);
+                .get(Bundle.DATA_KEY);
         data.put("name", newName);
 
         UserProfile changedUser = userViews.update(bundle, validUser);

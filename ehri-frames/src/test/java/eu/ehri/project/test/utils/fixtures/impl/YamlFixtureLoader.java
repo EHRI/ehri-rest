@@ -32,7 +32,6 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.persistance.BundleDAO;
-import eu.ehri.project.persistance.Converter;
 import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.test.utils.fixtures.FixtureLoader;
 import eu.ehri.project.utils.GraphInitializer;
@@ -139,17 +138,17 @@ public class YamlFixtureLoader implements FixtureLoader {
     private void importNode(Map<Vertex, ListMultimap<String,String>> links,
             Map<String, Object> node) throws DeserializationError,
             ValidationError, IntegrityError, ItemNotFound {
-        String id = (String) node.get(Converter.ID_KEY);
+        String id = (String) node.get(Bundle.ID_KEY);
         EntityClass isa = EntityClass.withName((String) node
-                .get(Converter.TYPE_KEY));
+                .get(Bundle.TYPE_KEY));
         @SuppressWarnings("unchecked")
         Map<String, Object> nodeData = (Map<String, Object>) node
-                .get(Converter.DATA_KEY);
+                .get(Bundle.DATA_KEY);
         if (nodeData == null)
             nodeData = new HashMap<String, Object>();
         @SuppressWarnings("unchecked")
         Map<String, Object> nodeRels = (Map<String, Object>) node
-                .get(Converter.REL_KEY);
+                .get(Bundle.REL_KEY);
 
         // Since our data is written as a subgraph, we can use the
         // bundle converter to load it.
@@ -172,10 +171,10 @@ public class YamlFixtureLoader implements FixtureLoader {
         @SuppressWarnings("serial")
         Map<String, Object> data = new HashMap<String, Object>() {
             {
-                put(Converter.ID_KEY, id);
-                put(Converter.TYPE_KEY, type.getName());
-                put(Converter.DATA_KEY, nodeData);
-                put(Converter.REL_KEY, dependentRelations.asMap());
+                put(Bundle.ID_KEY, id);
+                put(Bundle.TYPE_KEY, type.getName());
+                put(Bundle.DATA_KEY, nodeData);
+                put(Bundle.REL_KEY, dependentRelations.asMap());
             }
         };
         return Bundle.fromData(data);

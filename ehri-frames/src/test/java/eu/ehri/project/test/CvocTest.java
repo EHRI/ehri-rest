@@ -19,7 +19,7 @@ import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Text;
-import eu.ehri.project.persistance.Converter;
+import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.views.Crud;
 import eu.ehri.project.views.impl.CrudViews;
 
@@ -98,17 +98,17 @@ public class CvocTest extends ModelTestBase {
         // Data structure representing a not-yet-created collection.
         // Using double-brace initialization to ease the pain.
         return new HashMap<String, Object>() {{
-            put(Converter.ID_KEY, null);
-            put(Converter.TYPE_KEY, Entities.CVOC_CONCEPT);
-            put(Converter.DATA_KEY, new HashMap<String, Object>() {{
+            put(Bundle.ID_KEY, null);
+            put(Bundle.TYPE_KEY, Entities.CVOC_CONCEPT);
+            put(Bundle.DATA_KEY, new HashMap<String, Object>() {{
                 put(AccessibleEntity.IDENTIFIER_KEY, "apple");
             }});
-            put(Converter.REL_KEY, new HashMap<String, Object>() {{
+            put(Bundle.REL_KEY, new HashMap<String, Object>() {{
                 put("prefLabel", new LinkedList<HashMap<String, Object>>() {{
                     add(new HashMap<String, Object>() {{
-                        put(Converter.ID_KEY, null);
-                        put(Converter.TYPE_KEY, Entities.CVOC_TEXT);
-                        put(Converter.DATA_KEY, new HashMap<String, Object>() {{
+                        put(Bundle.ID_KEY, null);
+                        put(Bundle.TYPE_KEY, Entities.CVOC_TEXT);
+                        put(Bundle.DATA_KEY, new HashMap<String, Object>() {{
                             put(AccessibleEntity.IDENTIFIER_KEY, "apple-someid");
                             put(Text.LANGUAGE, TEST_LABEL_LANG);
                             put(Text.CONTENT, TEST_LABEL_CONTENT);

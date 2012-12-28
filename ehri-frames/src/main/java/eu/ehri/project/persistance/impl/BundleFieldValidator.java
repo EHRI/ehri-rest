@@ -37,9 +37,8 @@ public final class BundleFieldValidator implements BundleValidator {
      */
     public ListMultimap<String, String> validateForUpdate() {
         if (bundle.getId() == null)
-            errors.put(
-                    "id", //$NON-NLS-1$
-                    Messages.getString("BundleFieldValidator.missingIdForUpdate")); //$NON-NLS-1$
+            errors.put(Bundle.ID_KEY, Messages
+                    .getString("BundleFieldValidator.missingIdForUpdate")); //$NON-NLS-1$
         return validate();
     }
 
@@ -73,13 +72,13 @@ public final class BundleFieldValidator implements BundleValidator {
     private void checkField(String name) {
         Map<String, Object> data = bundle.getData();
         if (!data.containsKey(name)) {
-            errors.put(name, Messages
-                    .getString("BundleFieldValidator.missingField"));
+            errors.put(name,
+                    Messages.getString("BundleFieldValidator.missingField"));
         } else {
             Object value = data.get(name);
             if (value == null) {
-                errors.put(name, Messages
-                        .getString("BundleFieldValidator.emptyField"));
+                errors.put(name,
+                        Messages.getString("BundleFieldValidator.emptyField"));
             } else if (value instanceof String) {
                 if (((String) value).trim().isEmpty()) {
                     errors.put(name, Messages
@@ -96,8 +95,8 @@ public final class BundleFieldValidator implements BundleValidator {
         EntityType annotation = bundle.getBundleClass().getAnnotation(
                 EntityType.class);
         if (annotation == null) {
-            errors.put("class", MessageFormat.format(Messages
-                    .getString("BundleFieldValidator.missingTypeAnnotation"), //$NON-NLS-1$ //$NON-NLS-2$
+            errors.put(Bundle.TYPE_KEY, MessageFormat.format(Messages
+                    .getString("BundleFieldValidator.missingTypeAnnotation"), //$NON-NLS-1$
                     bundle.getBundleClass().getName()));
         }
     }

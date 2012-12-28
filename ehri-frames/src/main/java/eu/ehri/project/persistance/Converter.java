@@ -34,14 +34,6 @@ public final class Converter {
     public static final int DEFAULT_TRAVERSALS = 5;
 
     /**
-     * Constant definitions
-     */
-    public static final String ID_KEY = "id";
-    public static final String TYPE_KEY = "type";
-    public static final String DATA_KEY = "data";
-    public static final String REL_KEY = "relationships";
-
-    /**
      * Lookup of entityType keys against their annotated class.
      */
     private final int maxTraversals;

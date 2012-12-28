@@ -30,6 +30,14 @@ public class Bundle {
     private final ImmutableListMultimap<String, Bundle> relations;
 
     /**
+     * Serialization constant definitions
+     */
+    public static final String ID_KEY = "id";
+    public static final String REL_KEY = "relationships";
+    public static final String DATA_KEY = "data";
+    public static final String TYPE_KEY = "type";
+
+    /**
      * Constructor.
      * 
      * @param id

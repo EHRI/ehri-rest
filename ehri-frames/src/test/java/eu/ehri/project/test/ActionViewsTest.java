@@ -19,7 +19,7 @@ import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.Description;
-import eu.ehri.project.persistance.Converter;
+import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.views.impl.LoggingCrudViews;
 
 public class ActionViewsTest extends AbstractFixtureTest {
@@ -40,7 +40,7 @@ public class ActionViewsTest extends AbstractFixtureTest {
         Map<String, Object> testData = getTestBundle();
         DocumentaryUnit unit = docViews.create(testData, validUser);
         assertEquals(TEST_COLLECTION_NAME, unit.getName());
-        testData.put(Converter.ID_KEY,
+        testData.put(Bundle.ID_KEY,
                 unit.asVertex().getProperty(EntityType.ID_KEY));
 
         // We could convert the FramedNode back into a bundle here,
@@ -79,7 +79,7 @@ public class ActionViewsTest extends AbstractFixtureTest {
         Map<String, Object> userData = getTestUserBundle();
         UserProfile user = userViews.create(userData, validUser);
         assertEquals(TEST_USER_NAME, user.getName());
-        userData.put(Converter.ID_KEY,
+        userData.put(Bundle.ID_KEY,
                 user.asVertex().getProperty(EntityType.ID_KEY));
 
         // We could convert the FramedNode back into a bundle here,

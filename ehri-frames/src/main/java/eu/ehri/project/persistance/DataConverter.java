@@ -29,9 +29,9 @@ class DataConverter {
      */
     public static Map<String, Object> bundleToData(Bundle bundle) {
         Map<String, Object> data = Maps.newHashMap();
-        data.put(Converter.ID_KEY, bundle.getId());
-        data.put(Converter.TYPE_KEY, bundle.getType().getName());
-        data.put(Converter.DATA_KEY, bundle.getData());
+        data.put(Bundle.ID_KEY, bundle.getId());
+        data.put(Bundle.TYPE_KEY, bundle.getType().getName());
+        data.put(Bundle.DATA_KEY, bundle.getData());
 
         Map<String, List<Map<String, Object>>> relations = Maps.newHashMap();
         ListMultimap<String, Bundle> crelations = bundle.getRelations();
@@ -42,7 +42,7 @@ class DataConverter {
             }
             relations.put((String) key, rels);
         }
-        data.put(Converter.REL_KEY, relations);
+        data.put(Bundle.REL_KEY, relations);
         return data;
     }
 
@@ -114,7 +114,7 @@ class DataConverter {
             throw new DeserializationError("Bundle data must be a map value.");
         
         Map<?, ?> data = (Map<?, ?>) rawData;
-        String id = (String) data.get(Converter.ID_KEY);
+        String id = (String) data.get(Bundle.ID_KEY);
         EntityClass type = getType(data);
 
         // Guava's immutable collections don't allow null values.
@@ -143,7 +143,7 @@ class DataConverter {
                 .create();
 
         // It's okay to pass in a null value for relationships.
-        Object relations = data.get(Converter.REL_KEY);
+        Object relations = data.get(Bundle.REL_KEY);
         if (relations == null)
             return relationbundles;
 
@@ -165,7 +165,7 @@ class DataConverter {
 
     private static Map<String, Object> getSanitisedProperties(Map<?, ?> data)
             throws DeserializationError {
-        Object props = data.get(Converter.DATA_KEY);
+        Object props = data.get(Bundle.DATA_KEY);
         if (props != null && props instanceof Map) {
             return sanitiseProperties((Map<?, ?>) props);
         }
@@ -184,10 +184,10 @@ class DataConverter {
     private static EntityClass getType(Map<?, ?> data)
             throws DeserializationError {
         try {
-            return EntityClass.withName((String) data.get(Converter.TYPE_KEY));
+            return EntityClass.withName((String) data.get(Bundle.TYPE_KEY));
         } catch (IllegalArgumentException e) {
             throw new DeserializationError("Bad or unknown type key: "
-                    + data.get(Converter.TYPE_KEY));
+                    + data.get(Bundle.TYPE_KEY));
         }
     }
 
