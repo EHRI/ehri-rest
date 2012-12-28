@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -34,7 +35,6 @@ import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.PermissionGrantTarget;
 import eu.ehri.project.models.base.PermissionScope;
-import eu.ehri.project.models.utils.AnnotationUtils;
 import eu.ehri.project.models.utils.ClassUtils;
 
 /**
@@ -183,7 +183,9 @@ public class AclManager {
             PermissionGrantTarget target, Permission permission) {
         List<PermissionGrant> grants = Lists.newLinkedList();
         for (PermissionGrant grant : accessor.getPermissionGrants()) {
-            if (target.asVertex().equals(grant.getTarget().asVertex())) {
+            if (Iterables
+                    .contains(grant.getTargets(), graph.frame(
+                            target.asVertex(), PermissionGrantTarget.class))) {
 
                 // Fetch the permission types corresponding to the nodes.
                 // FIXME: The identifier might not be the most stable way of
@@ -337,7 +339,8 @@ public class AclManager {
                 scopes.add(scope.asVertex());
 
             for (PermissionGrant grant : accessor.getPermissionGrants()) {
-                if (entity.asVertex().equals(grant.getTarget().asVertex())) {
+                if (Iterables.contains(grant.getTargets(), graph.frame(
+                        entity.asVertex(), PermissionGrantTarget.class))) {
                     list.add(PermissionType.withName(manager.getId(grant
                             .getPermission())));
                 } else if (grant.getScope() != null) {
@@ -366,7 +369,7 @@ public class AclManager {
         PermissionGrant grant = graph.addVertex(null, PermissionGrant.class);
         accessor.addPermissionGrant(grant);
         grant.setPermission(getPermission(permType));
-        grant.setTarget(target);
+        grant.addTarget(target);
         return grant;
     }
 
@@ -382,7 +385,8 @@ public class AclManager {
     public PermissionGrant grantPermissions(Accessor accessor,
             PermissionGrantTarget target, PermissionType permission,
             PermissionScope scope) {
-        Preconditions.checkNotNull(scope, "Scope given to grantPermissions is null");
+        Preconditions.checkNotNull(scope,
+                "Scope given to grantPermissions is null");
         PermissionGrant grant = grantPermissions(accessor, target, permission);
         if (!scope.getIdentifier().equals(SystemScope.SYSTEM))
             grant.setScope(scope);
@@ -400,7 +404,8 @@ public class AclManager {
             PermissionGrantTarget target, PermissionType permType) {
         Permission perm = getPermission(permType);
         for (PermissionGrant grant : accessor.getPermissionGrants()) {
-            if (grant.getTarget().asVertex().equals(target.asVertex())
+            if (Iterables.contains(grant.getTargets(), graph.frame(
+                    target.asVertex(), PermissionGrantTarget.class))
                     && grant.getPermission().equals(perm)) {
                 graph.removeVertex(grant.asVertex());
             }
@@ -520,15 +525,17 @@ public class AclManager {
                 .create();
         for (PermissionGrant grant : accessor.getPermissionGrants()) {
             // Since these are global perms only include those where the target
-            // is a content type
-            PermissionGrantTarget target = grant.getTarget();
-            if (grant.getScope() == null
-                    && AnnotationUtils.hasFramedInterface(target,
-                            ContentType.class)) {
-                ContentTypes ctype = ContentTypes.withName(manager
-                        .getId(target));
-                permmap.put(ctype, PermissionType.withName(manager.getId(grant
-                        .getPermission())));
+            // is a content type. FIXME: if it has been deleted, the target
+            // could well be null.
+            if (grant.getScope() == null) {
+                for (PermissionGrantTarget target : grant.getTargets()) {
+                    if (ClassUtils.hasType(target, EntityClass.CONTENT_TYPE)) {
+                        ContentTypes ctype = ContentTypes.withName(manager
+                                .getId(target));
+                        permmap.put(ctype, PermissionType.withName(manager
+                                .getId(grant.getPermission())));
+                    }
+                }
             }
         }
         return permmap.asMap();

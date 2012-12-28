@@ -33,10 +33,10 @@ public interface PermissionGrant extends VertexFrame {
     public void setGrantee(final Accessor accessor);
     
     @Adjacency(label = HAS_TARGET)
-    public PermissionGrantTarget getTarget();
+    public Iterable<PermissionGrantTarget> getTargets();
 
     @Adjacency(label = HAS_TARGET)
-    public void setTarget(final PermissionGrantTarget target);
+    public void addTarget(final PermissionGrantTarget target);
     
     @Adjacency(label = HAS_TARGET)
     public void removeTarget(final PermissionGrantTarget target);

@@ -9,6 +9,8 @@ import java.util.Map;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Property;
+import com.tinkerpop.frames.VertexFrame;
+
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.Dependent;
 import eu.ehri.project.models.annotations.EntityType;
@@ -19,12 +21,12 @@ import eu.ehri.project.models.annotations.Unique;
  * Helper functions for managing EntityType classes.
  * 
  * @author mike
- *
+ * 
  */
 public class ClassUtils {
 
     public static final String FETCH_METHOD_PREFIX = "get";
-    
+
     /**
      * Get the entity type string for a given class.
      * 
@@ -39,8 +41,8 @@ public class ClassUtils {
         return ann.value();
     }
 
-    public static Map<String,Direction> getDependentRelations(Class<?> cls) {
-        Map<String,Direction> out = new HashMap<String,Direction>();
+    public static Map<String, Direction> getDependentRelations(Class<?> cls) {
+        Map<String, Direction> out = new HashMap<String, Direction>();
         for (Method method : cls.getMethods()) {
             if (method.getAnnotation(Dependent.class) != null) {
                 Adjacency ann = method.getAnnotation(Adjacency.class);
@@ -145,5 +147,17 @@ public class ClassUtils {
         set.addAll(list);
         out.addAll(set);
         return out;
+    }
+
+    /**
+     * Check if a given vertex is of a particular type.
+     * 
+     * @param frame
+     * @param type
+     * @return
+     */
+    public static boolean hasType(VertexFrame frame, EntityClass type) {
+        String isa = (String) frame.asVertex().getProperty(EntityType.TYPE_KEY);
+        return isa.equals(type.getName());
     }
 }
