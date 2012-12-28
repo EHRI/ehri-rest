@@ -2,10 +2,14 @@ package eu.ehri.project.models.utils;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
+import org.neo4j.helpers.collection.Iterables;
+
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Property;
@@ -101,8 +105,8 @@ public class ClassUtils {
         return out;
     }
 
-    public static List<String> getPropertyKeys(Class<?> cls) {
-        List<String> out = new LinkedList<String>();
+    public static Iterable<String> getPropertyKeys(Class<?> cls) {
+        List<String> out = Lists.newLinkedList();
         for (Method method : cls.getMethods()) {
             Property ann = method.getAnnotation(Property.class);
             if (ann != null)
@@ -110,13 +114,13 @@ public class ClassUtils {
         }
 
         for (Class<?> s : cls.getInterfaces()) {
-            out.addAll(getPropertyKeys(s));
+            Iterables.addAll(out, getPropertyKeys(s));
         }
 
-        return makeUnique(out);
+        return ImmutableSet.copyOf(out);
     }
 
-    public static List<String> getUniquePropertyKeys(Class<?> cls) {
+    public static Iterable<String> getUniquePropertyKeys(Class<?> cls) {
         List<String> out = new LinkedList<String>();
         for (Method method : cls.getMethods()) {
             Unique unique = method.getAnnotation(Unique.class);
@@ -129,26 +133,12 @@ public class ClassUtils {
         }
 
         for (Class<?> s : cls.getInterfaces()) {
-            out.addAll(getUniquePropertyKeys(s));
+            Iterables.addAll(out, getUniquePropertyKeys(s));
         }
 
-        return makeUnique(out);
+        return ImmutableSet.copyOf(out);
     }
-
-    /**
-     * Another method to make a list unique. Sigh.
-     * 
-     * @param list
-     * @return
-     */
-    public static <T> List<T> makeUnique(List<T> list) {
-        List<T> out = new LinkedList<T>();
-        HashSet<T> set = new HashSet<T>();
-        set.addAll(list);
-        out.addAll(set);
-        return out;
-    }
-
+    
     /**
      * Check if a given vertex is of a particular type.
      * 

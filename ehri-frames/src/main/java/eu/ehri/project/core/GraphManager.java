@@ -1,6 +1,5 @@
 package eu.ehri.project.core;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -152,7 +151,7 @@ public interface GraphManager {
      * @throws IntegrityError
      */
     public Vertex createVertex(String id, EntityClass type,
-            Map<String, Object> data, List<String> keys) throws IntegrityError;
+            Map<String, Object> data, Iterable<String> keys) throws IntegrityError;
 
     /**
      * Create a vertex with the given id, type, and data, specifying which
@@ -167,8 +166,8 @@ public interface GraphManager {
      * @throws IntegrityError
      */
     public Vertex updateVertex(String id, EntityClass type,
-            Map<String, Object> data, Collection<String> keys,
-            Collection<String> uniqueKeys) throws IntegrityError, ItemNotFound;
+            Map<String, Object> data, Iterable<String> keys,
+            Iterable<String> uniqueKeys) throws IntegrityError, ItemNotFound;
 
     /**
      * Create a vertex with the given id, type, and data.
@@ -194,7 +193,7 @@ public interface GraphManager {
      * @throws IntegrityError
      */
     public Vertex updateVertex(String id, EntityClass type,
-            Map<String, Object> data, Collection<String> keys)
+            Map<String, Object> data, Iterable<String> keys)
             throws IntegrityError, ItemNotFound;
 
     /**
@@ -210,6 +209,6 @@ public interface GraphManager {
      * @throws IntegrityError
      */
     public Vertex createVertex(String id, EntityClass type,
-            Map<String, Object> data, Collection<String> keys,
-            Collection<String> uniqueKeys) throws IntegrityError;
+            Map<String, Object> data, Iterable<String> keys,
+            Iterable<String> uniqueKeys) throws IntegrityError;
 }

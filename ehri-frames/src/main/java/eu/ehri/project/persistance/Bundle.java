@@ -238,7 +238,7 @@ public class Bundle {
      * 
      * @return
      */
-    public List<String> getPropertyKeys() {
+    public Iterable<String> getPropertyKeys() {
         return ClassUtils.getPropertyKeys(type.getEntityClass());
     }
 
@@ -247,7 +247,7 @@ public class Bundle {
      * 
      * @return
      */
-    public List<String> getUniquePropertyKeys() {
+    public Iterable<String> getUniquePropertyKeys() {
         return ClassUtils.getUniquePropertyKeys(type.getEntityClass());
     }
 

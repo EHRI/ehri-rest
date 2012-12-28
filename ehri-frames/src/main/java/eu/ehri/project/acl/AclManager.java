@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Lists;
@@ -207,7 +208,7 @@ public class AclManager {
                 grants.add(grant);
             }
         }
-        return ClassUtils.makeUnique(grants);
+        return ImmutableSet.copyOf(grants);
     }
 
     /**

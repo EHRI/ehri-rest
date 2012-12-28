@@ -13,6 +13,9 @@ import org.neo4j.graphdb.index.IndexManager;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.Element;
 import com.tinkerpop.blueprints.Index;
@@ -160,7 +163,7 @@ public final class SingleIndexGraphManager implements GraphManager {
      * @throws IntegrityError
      */
     public Vertex createVertex(String id, EntityClass type,
-            Map<String, Object> data, List<String> keys) throws IntegrityError {
+            Map<String, Object> data, Iterable<String> keys) throws IntegrityError {
         return createVertex(id, type, data, keys, new LinkedList<String>());
     }
 
@@ -175,8 +178,8 @@ public final class SingleIndexGraphManager implements GraphManager {
      * @throws IntegrityError
      */
     public Vertex createVertex(String id, EntityClass type,
-            Map<String, Object> data, Collection<String> keys,
-            Collection<String> uniqueKeys) throws IntegrityError {
+            Map<String, Object> data, Iterable<String> keys,
+            Iterable<String> uniqueKeys) throws IntegrityError {
         Preconditions
                 .checkNotNull(id, "null vertex ID given for item creation");
         Index<Vertex> index = getIndex();
@@ -217,14 +220,14 @@ public final class SingleIndexGraphManager implements GraphManager {
     }
 
     public Vertex updateVertex(String id, EntityClass type,
-            Map<String, Object> data, Collection<String> keys)
+            Map<String, Object> data, Iterable<String> keys)
             throws IntegrityError, ItemNotFound {
         return updateVertex(id, type, data, keys, new LinkedList<String>());
     }
 
     public Vertex updateVertex(String id, EntityClass type,
-            Map<String, Object> data, Collection<String> keys,
-            Collection<String> uniqueKeys) throws IntegrityError, ItemNotFound {
+            Map<String, Object> data, Iterable<String> keys,
+            Iterable<String> uniqueKeys) throws IntegrityError, ItemNotFound {
         Preconditions.checkNotNull(id, "null vertex ID given for item update");
         Index<Vertex> index = getIndex();
         Map<String, Object> indexData = getVertexData(id, type, data);
@@ -318,9 +321,9 @@ public final class SingleIndexGraphManager implements GraphManager {
      * @throws IntegrityError
      */
     private void checkUniqueness(Index<Vertex> index,
-            Collection<String> uniqueKeys, Map<String, Object> data,
+            Iterable<String> uniqueKeys, Map<String, Object> data,
             Vertex current) throws IntegrityError {
-        if (uniqueKeys != null && uniqueKeys.size() != 0) {
+        if (uniqueKeys != null && Iterables.size(uniqueKeys) != 0) {
             Map<String, String> clashes = new HashMap<String, String>();
             for (String ukey : uniqueKeys) {
                 String uval = (String) data.get(ukey);
@@ -400,14 +403,14 @@ public final class SingleIndexGraphManager implements GraphManager {
 
     private Map<String, Object> getVertexData(String id, EntityClass type,
             Map<String, Object> data) {
-        Map<String, Object> vdata = new HashMap<String, Object>(data);
+        Map<String, Object> vdata = Maps.newHashMap(data);
         vdata.put(EntityType.ID_KEY, id);
         vdata.put(EntityType.TYPE_KEY, type.getName());
         return vdata;
     }
 
-    private Collection<String> getVertexKeys(Collection<String> keys) {
-        List<String> vkeys = new LinkedList<String>(keys);
+    private Collection<String> getVertexKeys(Iterable<String> keys) {
+        List<String> vkeys = Lists.newLinkedList(keys);
         vkeys.add(EntityType.ID_KEY);
         vkeys.add(EntityType.TYPE_KEY);
         return vkeys;
