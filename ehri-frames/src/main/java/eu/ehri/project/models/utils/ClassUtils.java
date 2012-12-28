@@ -158,6 +158,6 @@ public class ClassUtils {
      */
     public static boolean hasType(VertexFrame frame, EntityClass type) {
         String isa = (String) frame.asVertex().getProperty(EntityType.TYPE_KEY);
-        return isa.equals(type.getName());
+        return type.getName().equals(isa);
     }
 }
