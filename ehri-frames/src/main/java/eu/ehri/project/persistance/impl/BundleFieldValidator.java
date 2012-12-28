@@ -1,5 +1,6 @@
 package eu.ehri.project.persistance.impl;
 
+import java.text.MessageFormat;
 import java.util.Map;
 
 import com.google.common.collect.ArrayListMultimap;
@@ -18,10 +19,6 @@ import eu.ehri.project.persistance.Bundle;
  */
 public final class BundleFieldValidator implements BundleValidator {
 
-    private static final String MISSING_PROPERTY = "Missing mandatory field";
-    private static final String EMPTY_VALUE = "No value given for mandatory field";
-    private static final String INVALID_ENTITY = "No EntityType annotation";
-
     private final Bundle bundle;
 
     private final ListMultimap<String, String> errors = ArrayListMultimap
@@ -35,13 +32,14 @@ public final class BundleFieldValidator implements BundleValidator {
      * Validate the data in the bundle, according to the target class, and
      * ensure it is fit for updating in the graph.
      * 
-     * @return errors 
+     * @return errors
      * 
      */
     public ListMultimap<String, String> validateForUpdate() {
         if (bundle.getId() == null)
-            errors.put("id", 
-                    "No identifier given for update operation.");
+            errors.put(
+                    "id", //$NON-NLS-1$
+                    Messages.getString("BundleFieldValidator.missingIdForUpdate")); //$NON-NLS-1$
         return validate();
     }
 
@@ -52,7 +50,7 @@ public final class BundleFieldValidator implements BundleValidator {
      */
     public ListMultimap<String, String> validate() {
         checkFields();
-        checkIsA();
+        checkEntityType();
         return errors;
     }
 
@@ -75,29 +73,31 @@ public final class BundleFieldValidator implements BundleValidator {
     private void checkField(String name) {
         Map<String, Object> data = bundle.getData();
         if (!data.containsKey(name)) {
-            errors.put(name, MISSING_PROPERTY);
+            errors.put(name, Messages
+                    .getString("BundleFieldValidator.missingField"));
         } else {
             Object value = data.get(name);
             if (value == null) {
-                errors.put(name, EMPTY_VALUE);
+                errors.put(name, Messages
+                        .getString("BundleFieldValidator.emptyField"));
             } else if (value instanceof String) {
                 if (((String) value).trim().isEmpty()) {
-                    errors.put(name, EMPTY_VALUE);
+                    errors.put(name, Messages
+                            .getString("BundleFieldValidator.emptyField"));
                 }
             }
         }
     }
 
     /**
-     * @param data
-     * @param cls
-     * @param errors
+     * Check entity type annotation.
      */
-    private void checkIsA() {
+    private void checkEntityType() {
         EntityType annotation = bundle.getBundleClass().getAnnotation(
                 EntityType.class);
         if (annotation == null) {
-            errors.put("class", String.format("%s: '%s'", INVALID_ENTITY,
+            errors.put("class", MessageFormat.format(Messages
+                    .getString("BundleFieldValidator.missingTypeAnnotation"), //$NON-NLS-1$ //$NON-NLS-2$
                     bundle.getBundleClass().getName()));
         }
     }
