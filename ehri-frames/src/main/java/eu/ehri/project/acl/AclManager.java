@@ -181,12 +181,18 @@ public class AclManager {
      *         target, and permission
      */
     public Iterable<PermissionGrant> getPermissionGrants(Accessor accessor,
-            PermissionGrantTarget target, Permission permission) {
+            AccessibleEntity entity, Permission permission) {
+
+        // FIXME: Although passed in as a PermissionGrantTarget, the proxy item
+        // may not originally have been framed as that, but instead as a
+        // subclass.
+        // This means we have to cast it as a PermissionGrantTarget anyway.
+        PermissionGrantTarget target = graph.frame(entity.asVertex(),
+                PermissionGrantTarget.class);
+
         List<PermissionGrant> grants = Lists.newLinkedList();
         for (PermissionGrant grant : accessor.getPermissionGrants()) {
-            if (Iterables
-                    .contains(grant.getTargets(), graph.frame(
-                            target.asVertex(), PermissionGrantTarget.class))) {
+            if (Iterables.contains(grant.getTargets(), target)) {
 
                 // Fetch the permission types corresponding to the nodes.
                 // FIXME: The identifier might not be the most stable way of
@@ -203,7 +209,7 @@ public class AclManager {
         }
 
         for (Accessor parent : accessor.getParents()) {
-            for (PermissionGrant grant : getPermissionGrants(parent, target,
+            for (PermissionGrant grant : getPermissionGrants(parent, entity,
                     permission)) {
                 grants.add(grant);
             }
@@ -339,9 +345,11 @@ public class AclManager {
             for (PermissionScope scope : entity.getScopes())
                 scopes.add(scope.asVertex());
 
+            PermissionGrantTarget target = graph.frame(entity.asVertex(),
+                    PermissionGrantTarget.class);
+
             for (PermissionGrant grant : accessor.getPermissionGrants()) {
-                if (Iterables.contains(grant.getTargets(), graph.frame(
-                        entity.asVertex(), PermissionGrantTarget.class))) {
+                if (Iterables.contains(grant.getTargets(), target)) {
                     list.add(PermissionType.withName(manager.getId(grant
                             .getPermission())));
                 } else if (grant.getScope() != null) {
@@ -401,12 +409,15 @@ public class AclManager {
      * @param target
      * @param permType
      */
-    public void revokePermissions(Accessor accessor,
-            PermissionGrantTarget target, PermissionType permType) {
+    public void revokePermissions(Accessor accessor, AccessibleEntity entity,
+            PermissionType permType) {
+
+        PermissionGrantTarget target = graph.frame(entity.asVertex(),
+                PermissionGrantTarget.class);
+
         Permission perm = getPermission(permType);
         for (PermissionGrant grant : accessor.getPermissionGrants()) {
-            if (Iterables.contains(grant.getTargets(), graph.frame(
-                    target.asVertex(), PermissionGrantTarget.class))
+            if (Iterables.contains(grant.getTargets(), target)
                     && grant.getPermission().equals(perm)) {
                 graph.removeVertex(grant.asVertex());
             }
