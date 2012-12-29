@@ -54,4 +54,34 @@ public class ActionRestClientTest extends BaseRestClientTest {
         // Having created a new Agent, we should have at least one Action.
         assertEquals(actionsBefore.size() + 1, actionsAfter.size());
     }
+    
+    @Test
+    public void testGetActionsForItem() throws Exception {
+
+        // Create an item
+        WebResource resource = client.resource(getExtensionEntryPointUri()
+                + "/agent");
+        ClientResponse response = resource
+                .accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                        getAdminUserProfileId()).entity(jsonAgentTestString)
+                .post(ClientResponse.class);
+        
+        // Get the id
+        String url = response.getLocation().toString();
+        String id = url.substring(url.lastIndexOf("/") + 1);
+        
+        resource = client.resource(getExtensionEntryPointUri()
+                + "/" + Entities.ACTION + "/for/" + id);
+        
+        response = resource
+                .accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                        getAdminUserProfileId())
+                .get(ClientResponse.class);
+        assertEquals(Response.Status.OK.getStatusCode(),
+                response.getStatus());
+    }
 }

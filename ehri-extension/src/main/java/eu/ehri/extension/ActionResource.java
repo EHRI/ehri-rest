@@ -18,6 +18,9 @@ import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.Action;
+import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.views.impl.LoggingCrudViews;
+import eu.ehri.project.views.impl.Query;
 
 /**
  * Provides a RESTfull interface for the Action class. Note: Action instances
@@ -56,7 +59,36 @@ public class ActionResource extends EhriNeo4jFramedResource<Action> {
             throws ItemNotFound, BadRequester {
         return list(offset, limit);
     }
-    
+
+    /**
+     * Lookup and page the history for a given item.
+     * 
+     * @param id
+     * @param offset
+     * @param limit
+     * @return
+     * @throws ItemNotFound
+     * @throws BadRequester
+     * @throws PermissionDenied
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/for/{id:.+}")
+    public StreamingOutput pageActionsForItem(
+            @PathParam("id") String id,
+            @QueryParam("offset") @DefaultValue("0") int offset,
+            @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit)
+            throws ItemNotFound, BadRequester, PermissionDenied {
+        AccessibleEntity item = new LoggingCrudViews<AccessibleEntity>(graph,
+                AccessibleEntity.class).detail(
+                manager.getFrame(id, AccessibleEntity.class),
+                getRequesterUserProfile());
+        final Query.Page<Action> page = new Query<Action>(graph, Action.class)
+                .setOffset(offset).setLimit(limit)
+                .page(item.getHistory(), getRequesterUserProfile());
+        return streamingPage(page);
+    }
+
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/page")
@@ -65,5 +97,5 @@ public class ActionResource extends EhriNeo4jFramedResource<Action> {
             @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit)
             throws ItemNotFound, BadRequester {
         return page(offset, limit);
-    }    
+    }
 }
