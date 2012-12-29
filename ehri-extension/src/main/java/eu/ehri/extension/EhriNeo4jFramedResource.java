@@ -80,38 +80,10 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> extends
      */
     public StreamingOutput page(Integer offset, Integer limit)
             throws ItemNotFound, BadRequester {
-        final ObjectMapper mapper = new ObjectMapper();
-        final JsonFactory f = new JsonFactory();
         final Query.Page<E> page = querier.setOffset(offset).setLimit(limit)
                 .page(getRequesterUserProfile());
 
-        // FIXME: I don't understand this streaming output system well
-        // enough
-        // to determine whether this actually streams or not. It certainly
-        // doesn't look like it.
-        return new StreamingOutput() {
-            @Override
-            public void write(OutputStream os) throws IOException,
-                    WebApplicationException {
-                JsonGenerator g = f.createJsonGenerator(os);
-                g.writeStartObject();
-                g.writeNumberField("total", page.getCount());
-                g.writeNumberField("offset", page.getOffset());
-                g.writeNumberField("limit", page.getLimit());
-                g.writeFieldName("values");
-                g.writeStartArray();
-                for (E item : page.getIterable()) {
-                    try {
-                        mapper.writeValue(g, converter.vertexFrameToData(item));
-                    } catch (SerializationError e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-                g.writeEndArray();
-                g.writeEndObject();
-                g.close();
-            }
-        };
+        return streamingPage(page);
     }
 
     /**
@@ -126,7 +98,7 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> extends
             throws ItemNotFound, BadRequester {
         final Iterable<E> list = querier.setOffset(offset).setLimit(limit)
                 .list(getRequesterUserProfile());
-        return streamingResponse(list);
+        return streamingList(list);
     }
 
     /**
@@ -139,41 +111,7 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> extends
      */
     public <T extends VertexFrame> StreamingOutput list(Iterable<T> iter,
             Integer offset, Integer limit) throws ItemNotFound, BadRequester {
-        return streamingResponse(iter);
-    }
-
-    /**
-     * Return a streaming response from an iterable.
-     * 
-     * @param list
-     * @return
-     */
-    private <T extends VertexFrame> StreamingOutput streamingResponse(
-            final Iterable<T> list) {
-        final ObjectMapper mapper = new ObjectMapper();
-        final JsonFactory f = new JsonFactory();
-        final Converter converter = new Converter(graph);
-        // FIXME: I don't understand this streaming output system well
-        // enough
-        // to determine whether this actually streams or not. It certainly
-        // doesn't look like it.
-        return new StreamingOutput() {
-            @Override
-            public void write(OutputStream arg0) throws IOException,
-                    WebApplicationException {
-                JsonGenerator g = f.createJsonGenerator(arg0);
-                g.writeStartArray();
-                for (T item : list) {
-                    try {
-                        mapper.writeValue(g, converter.vertexFrameToData(item));
-                    } catch (SerializationError e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-                g.writeEndArray();
-                g.close();
-            }
-        };
+        return streamingList(iter);
     }
 
     /**
@@ -341,21 +279,16 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> extends
     public Response update(String id, String json) throws PermissionDenied,
             IntegrityError, ValidationError, DeserializationError,
             ItemNotFound, BadRequester {
-        try {
-            // FIXME: This is nasty because it searches for an item with the
-            // specified key/value and constructs a new bundle containing the
-            // item's graph id, which requires an extra
-            // serialization/deserialization.
-            E entity = views.detail(manager.getFrame(id, getEntityType(), cls),
-                    getRequesterUserProfile());
-            Bundle rawBundle = converter.jsonToBundle(json);
-            Bundle entityBundle = new Bundle(manager.getId(entity),
-                    getEntityType(), rawBundle.getData(),
-                    rawBundle.getRelations());
-            return update(converter.bundleToJson(entityBundle));
-        } catch (SerializationError e) {
-            throw new WebApplicationException(e);
-        }
+        // FIXME: This is nasty because it searches for an item with the
+        // specified key/value and constructs a new bundle containing the
+        // item's graph id, which requires an extra
+        // serialization/deserialization.
+        E entity = views.detail(manager.getFrame(id, getEntityType(), cls),
+                getRequesterUserProfile());
+        Bundle rawBundle = converter.jsonToBundle(json);
+        Bundle entityBundle = new Bundle(manager.getId(entity),
+                getEntityType(), rawBundle.getData(), rawBundle.getRelations());
+        return update(entityBundle.toString());
     }
 
     /**
@@ -407,5 +340,74 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> extends
 
     private EntityClass getEntityType() {
         return ClassUtils.getEntityType(cls);
+    }
+
+    /**
+     * Stream a single page with total, limit, and offset info.
+     * 
+     * @param page
+     * @return
+     */
+    protected <T extends VertexFrame> StreamingOutput streamingPage(
+            final Query.Page<T> page) {
+        final ObjectMapper mapper = new ObjectMapper();
+        final JsonFactory f = new JsonFactory();
+        return new StreamingOutput() {
+            @Override
+            public void write(OutputStream os) throws IOException,
+                    WebApplicationException {
+                JsonGenerator g = f.createJsonGenerator(os);
+                g.writeStartObject();
+                g.writeNumberField("total", page.getCount());
+                g.writeNumberField("offset", page.getOffset());
+                g.writeNumberField("limit", page.getLimit());
+                g.writeFieldName("values");
+                g.writeStartArray();
+                for (T item : page.getIterable()) {
+                    try {
+                        mapper.writeValue(g, converter.vertexFrameToData(item));
+                    } catch (SerializationError e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+                g.writeEndArray();
+                g.writeEndObject();
+                g.close();
+            }
+        };
+    }
+
+    /**
+     * Return a streaming response from an iterable.
+     * 
+     * @param list
+     * @return
+     */
+    protected <T extends VertexFrame> StreamingOutput streamingList(
+            final Iterable<T> list) {
+        final ObjectMapper mapper = new ObjectMapper();
+        final JsonFactory f = new JsonFactory();
+        final Converter converter = new Converter(graph);
+        // FIXME: I don't understand this streaming output system well
+        // enough
+        // to determine whether this actually streams or not. It certainly
+        // doesn't look like it.
+        return new StreamingOutput() {
+            @Override
+            public void write(OutputStream arg0) throws IOException,
+                    WebApplicationException {
+                JsonGenerator g = f.createJsonGenerator(arg0);
+                g.writeStartArray();
+                for (T item : list) {
+                    try {
+                        mapper.writeValue(g, converter.vertexFrameToData(item));
+                    } catch (SerializationError e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+                g.writeEndArray();
+                g.close();
+            }
+        };
     }
 }
