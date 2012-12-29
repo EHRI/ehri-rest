@@ -1,14 +1,15 @@
 package eu.ehri.project.views.impl;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jVertex;
 import com.tinkerpop.frames.FramedGraph;
-import com.tinkerpop.frames.FramedVertexIterable;
 import com.tinkerpop.frames.VertexFrame;
 import com.tinkerpop.gremlin.java.GremlinPipeline;
 import com.tinkerpop.pipes.PipeFunction;
@@ -147,16 +148,13 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      * Wrapper method for FramedVertexIterables that converts a
      * FramedVertexIterable<T> back into a plain Iterable<Vertex>.
      * 
-     * @author michaelb
-     * 
      * @param <T>
      */
     public static class FramedVertexIterableAdaptor<T extends VertexFrame>
             implements Iterable<Vertex> {
-        FramedVertexIterable<T> iterable;
+        Iterable<T> iterable;
 
-        public FramedVertexIterableAdaptor(
-                final FramedVertexIterable<T> iterable) {
+        public FramedVertexIterableAdaptor(final Iterable<T> iterable) {
             this.iterable = iterable;
         }
 
@@ -180,8 +178,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
     }
 
     /**
-     * Fetch an item by property id. The first matching item will be
-     * returned.
+     * Fetch an item by property id. The first matching item will be returned.
      * 
      * @param key
      * @param value
@@ -190,8 +187,8 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      * @throws PermissionDenied
      * @throws ItemNotFound
      */
-    public E get(String id, Accessor user)
-            throws PermissionDenied, ItemNotFound {
+    public E get(String id, Accessor user) throws PermissionDenied,
+            ItemNotFound {
         E item = manager.getFrame(id, cls);
         helper.checkReadAccess(item, user);
         return item;
@@ -255,7 +252,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
         // FIXME: Grotesque and fragile hack using the type key
         // Breaks encapsulation of graph implementation.
         // This should instead call a dedicated method of the graph
-        // manager to return a framed iterable of all nodes of a 
+        // manager to return a framed iterable of all nodes of a
         // given class.
         return list(EntityType.TYPE_KEY, type.toString(), user);
     }
@@ -272,9 +269,42 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
         // FIXME: Grotesque and fragile hack using the type key
         // Breaks encapsulation of graph implementation.
         // This should instead call a dedicated method of the graph
-        // manager to return a framed iterable of all nodes of a 
+        // manager to return a framed iterable of all nodes of a
         // given class.
         return page(EntityType.TYPE_KEY, type.toString(), user);
+    }
+
+    /**
+     * Return a Page instance containing a count of total items, and an iterable
+     * for the given offset/limit.
+     * 
+     * @param iterable
+     * @param user
+     * 
+     * @return Page instance
+     * @throws IndexNotFoundException
+     */
+    public Page<E> page(Iterable<E> vertices, Accessor user) {
+        // This function is optimised for ACL actions.
+        // FIXME: Work out if there's any way of doing, in Gremlin or
+        // Cypher, a count that doesn't require re-iterating the results on
+        // a completely new index query. This seems stupid.
+
+        PipeFunction<Vertex, Boolean> aclFilterFunction = new AclManager(graph)
+                .getAclFilterFunction(user);
+
+        // FIXME: We have to read the vertices into memory here since we
+        // can't re-use the iterator for counting and streaming.
+        ArrayList<Vertex> userVerts = Lists
+                .newArrayList(new GremlinPipeline<E, Vertex>(
+                        new FramedVertexIterableAdaptor<E>(vertices)).filter(
+                        aclFilterFunction).iterator());
+
+        return new Page<E>(
+                graph.frameVertices(
+                        setPipelineRange(new GremlinPipeline<Vertex, Vertex>(
+                                userVerts)), cls), userVerts.size(), offset,
+                limit);
     }
 
     /**
@@ -288,7 +318,6 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      * @return Page instance
      * @throws IndexNotFoundException
      */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     public Page<E> page(String key, String query, Accessor user) {
         // This function is optimised for ACL actions.
         // FIXME: Work out if there's any way of doing, in Gremlin or
@@ -302,12 +331,12 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
             try {
                 PipeFunction<Vertex, Boolean> aclFilterFunction = new AclManager(
                         graph).getAclFilterFunction(user);
-                long count = new GremlinPipeline(countQ).filter(
-                        aclFilterFunction).count();
-                return new Page(graph.frameVertices(
-                        setPipelineRange(new GremlinPipeline(indexQ)
-                                .filter(aclFilterFunction)), cls), count,
-                        offset, limit);
+                long count = new GremlinPipeline<Vertex, Vertex>(countQ)
+                        .filter(aclFilterFunction).count();
+                return new Page<E>(graph.frameVertices(
+                        setPipelineRange(new GremlinPipeline<Vertex, Vertex>(
+                                indexQ).filter(aclFilterFunction)), cls),
+                        count, offset, limit);
             } finally {
                 indexQ.close();
             }
@@ -315,7 +344,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
             countQ.close();
         }
     }
-    
+
     /**
      * List items accessible to a given user.
      * 
@@ -324,20 +353,20 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      * @return Iterable of items accessible to the given accessor
      * @throws IndexNotFoundException
      */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     public Iterable<E> list(String key, String query, Accessor user) {
         // This function is optimised for ACL actions.
         CloseableIterable<Neo4jVertex> vertices = manager.getVertices(key,
                 query, ClassUtils.getEntityType(cls));
         try {
-            GremlinPipeline filter = new GremlinPipeline(vertices)
-                    .filter(new AclManager(graph).getAclFilterFunction(user));
+            GremlinPipeline<E, Vertex> filter = new GremlinPipeline<E, Vertex>(
+                    vertices).filter(new AclManager(graph)
+                    .getAclFilterFunction(user));
             return graph.frameVertices(setPipelineRange(filter), cls);
         } finally {
             vertices.close();
         }
     }
-    
+
     /**
      * List items accessible to a given user.
      * 
@@ -347,15 +376,11 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      * @return Iterable of items accessible to the given accessor
      * @throws IndexNotFoundException
      */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    public Iterable<E> list(CloseableIterable<E> vertices, Accessor user) {
-        try {
-            GremlinPipeline filter = new GremlinPipeline(vertices)
-                    .filter(new AclManager(graph).getAclFilterFunction(user));
-            return graph.frameVertices(setPipelineRange(filter), cls);
-        } finally {
-            vertices.close();
-        }
+    public Iterable<E> list(Iterable<E> vertices, Accessor user) {
+        GremlinPipeline<E, Vertex> filter = new GremlinPipeline<E, Vertex>(
+                new FramedVertexIterableAdaptor<E>(vertices))
+                .filter(new AclManager(graph).getAclFilterFunction(user));
+        return graph.frameVertices(setPipelineRange(filter), cls);
     }
 
     /**
@@ -391,8 +416,8 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
 
     // Helpers
 
-    @SuppressWarnings("rawtypes")
-    private GremlinPipeline setPipelineRange(GremlinPipeline filter) {
+    private <EE> GremlinPipeline<EE, Vertex> setPipelineRange(
+            GremlinPipeline<EE, Vertex> filter) {
         int low = offset == null ? 0 : Math.max(offset, 0);
         int high = limit == null ? -1 : low + Math.max(limit, 0) - 1;
         return filter.range(low, high);
