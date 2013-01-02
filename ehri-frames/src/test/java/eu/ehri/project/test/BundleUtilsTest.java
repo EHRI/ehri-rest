@@ -22,6 +22,10 @@ public class BundleUtilsTest extends AbstractFixtureTest {
         Bundle bundle = Bundle.fromData(getTestBundle());
         assertEquals(TEST_COLLECTION_NAME,
                 BundleUtils.get(bundle, Accessor.NAME));
+        assertEquals(TEST_START_DATE,
+                BundleUtils.get(bundle, "describes[0]/hasDate[0]/startDate"));
+        assertEquals(TEST_START_DATE, BundleUtils.get(bundle,
+                "describes[0]/hasDate[0]/hasDate[0]/startDate"));
         assertEquals("en", BundleUtils.get(bundle, "describes[0]/languageCode"));
     }
 
@@ -35,25 +39,60 @@ public class BundleUtilsTest extends AbstractFixtureTest {
     @Test(expected = BundleUtils.BundleIndexError.class)
     public void testGetPathWithBadIndex() throws Exception {
         Bundle bundle = Bundle.fromData(getTestBundle());
-        assertEquals("en",
-                BundleUtils.get(bundle, "describes[2]/languageCode"));
+        assertEquals("en", BundleUtils.get(bundle, "describes[2]/languageCode"));
     }
-    
+
     @Test
     public void testUpdatePath() throws Exception {
+        String testDate = "2012-12-12";
         Bundle bundle = Bundle.fromData(getTestBundle());
         Bundle newBundle = BundleUtils.set(bundle, "describes[0]/languageCode",
                 "fr");
         assertEquals("fr",
                 BundleUtils.get(newBundle, "describes[0]/languageCode"));
+        newBundle = BundleUtils.set(bundle,
+                "describes[0]/hasDate[0]/startDate", testDate);
+        assertEquals(testDate,
+                BundleUtils.get(newBundle, "describes[0]/hasDate[0]/startDate"));
+        assertEquals(TEST_START_DATE,
+                BundleUtils.get(bundle, "describes[0]/hasDate[0]/startDate"));
+        newBundle = BundleUtils.set(bundle,
+                "describes[0]/hasDate[0]/hasDate[0]/startDate", testDate);
+        assertEquals(testDate, BundleUtils.get(newBundle,
+                "describes[0]/hasDate[0]/hasDate[0]/startDate"));
+        assertEquals(TEST_START_DATE, BundleUtils.get(bundle,
+                "describes[0]/hasDate[0]/hasDate[0]/startDate"));
+    }
+
+    @Test
+    public void testSetNestedNode() throws Exception {
+        Bundle bundle = Bundle.fromData(getTestBundle());
+        Bundle dateBundle = BundleUtils.getBundle(bundle,
+                "describes[0]/hasDate[0]").withDataValue("testattr", "testval");
+        Bundle newBundle = BundleUtils.setBundle(bundle,
+                "describes[0]/hasDate[0]/hasDate[0]", dateBundle);
+        assertEquals("testval", BundleUtils.get(newBundle,
+                "describes[0]/hasDate[0]/hasDate[0]/testattr"));
     }
 
     @Test
     public void testDeletePath() throws Exception {
         Bundle bundle = Bundle.fromData(getTestBundle());
         assertEquals("en", BundleUtils.get(bundle, "describes[0]/languageCode"));
-        Bundle newBundle = BundleUtils.delete(bundle, "describes[0]/languageCode");
+        Bundle newBundle = BundleUtils.delete(bundle,
+                "describes[0]/languageCode");
         assertNull(BundleUtils.get(newBundle, "describes[0]/languageCode"));
+    }
+
+    @Test(expected = BundleUtils.BundlePathError.class)
+    public void testDeleteNode() throws Exception {
+        Bundle bundle = Bundle.fromData(getTestBundle());
+        assertEquals(TEST_START_DATE,
+                BundleUtils.get(bundle, "describes[0]/hasDate[0]/startDate"));
+        Bundle newBundle = BundleUtils.deleteBundle(bundle,
+                "describes[0]/hasDate[0]");
+        assertEquals(TEST_START_DATE,
+                BundleUtils.get(newBundle, "describes[0]/hasDate[0]/startDate"));
     }
 
     @Test(expected = BundleUtils.BundlePathError.class)
@@ -61,15 +100,15 @@ public class BundleUtilsTest extends AbstractFixtureTest {
         Bundle bundle = Bundle.fromData(getTestBundle());
         BundleUtils.set(bundle, "idontexist[0]/languageCode", "fr");
     }
-    
+
     @Test(expected = BundleUtils.BundleIndexError.class)
     public void testUpdatePathWithBadIndex() throws Exception {
         Bundle bundle = Bundle.fromData(getTestBundle());
         BundleUtils.set(bundle, "describes[2]/languageCode", "fr");
     }
-    
+
     // Helpers
-    
+
     // @formatter:off
     @SuppressWarnings("serial")
     @Override

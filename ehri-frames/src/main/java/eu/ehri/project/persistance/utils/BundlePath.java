@@ -4,6 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
@@ -51,7 +52,7 @@ final class BundlePath {
         return sections.get(0);
     }
     
-    public boolean hasNext() {
+    public boolean isEmpty() {
         return sections.isEmpty();
     }
     
@@ -78,5 +79,9 @@ final class BundlePath {
             return new BundlePath(sections, Optional.of(terminus));
         }
     }
-
+    
+    public String toString() {
+        Joiner joiner = Joiner.on("/");
+        return joiner.join(joiner.join(sections), terminus.or(""));
+    }
 }
