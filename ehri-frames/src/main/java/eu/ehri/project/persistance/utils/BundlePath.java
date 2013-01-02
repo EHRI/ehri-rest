@@ -4,6 +4,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
@@ -25,15 +27,20 @@ final class BundlePath {
     private static Splitter splitter = Splitter.on(PATH_SEP).omitEmptyStrings();
 
     private final List<PathSection> sections;
-    private final String terminus;
+    private final Optional<String> terminus;
 
-    private BundlePath(List<PathSection> sections, String terminus) {
+    private BundlePath(List<PathSection> sections, Optional<String> terminus) {
+        Preconditions.checkNotNull(terminus);
         this.sections = ImmutableList.copyOf(sections);
         this.terminus = terminus;
     }
 
     public String getTerminus() {
-        return terminus;
+        return terminus.get();
+    }
+    
+    public boolean hasTerminus() {
+        return terminus.isPresent();
     }
 
     public List<PathSection> getSections() {
@@ -44,7 +51,7 @@ final class BundlePath {
         return sections.get(0);
     }
     
-    public boolean isEmpty() {
+    public boolean hasNext() {
         return sections.isEmpty();
     }
     
@@ -62,7 +69,14 @@ final class BundlePath {
         String terminus = ps.remove(ps.size() - 1);
         for (String s : ps)
             sections.add(PathSection.fromString(s));
-        return new BundlePath(sections, terminus);
+        // If the last part of the path matches a pathsection, i.e.
+        // the pattern something[1]
+        try {
+            sections.add(PathSection.fromString(terminus));
+            return new BundlePath(sections, Optional.<String>absent());
+        } catch (Exception e) {
+            return new BundlePath(sections, Optional.of(terminus));
+        }
     }
 
 }
