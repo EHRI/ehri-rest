@@ -152,5 +152,5 @@ public class BundleTest extends ModelTestBase {
         BundleDAO persister = new BundleDAO(graph);
         persister.update(newBundle, DocumentaryUnit.class);
         fail("Bundle with invalid dates did not throw a ValidationError");
-    }    
+    }
 }

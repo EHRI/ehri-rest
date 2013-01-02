@@ -116,6 +116,17 @@ public class Bundle {
     }
 
     /**
+     * Set entire set of relations.
+     * 
+     * @param relation
+     * @param others
+     * @return
+     */
+    public Bundle withRelations(ListMultimap<String, Bundle> relations) {
+        return new Bundle(id, type, data, relations);
+    }
+
+    /**
      * Get the id of the bundle's graph vertex (or null if it does not yet
      * exist.
      * 
@@ -185,6 +196,16 @@ public class Bundle {
      */
     public Bundle withData(final Map<String, Object> data) {
         return new Bundle(id, type, data, relations);
+    }
+
+    /**
+     * Check if this bundle contains the given relation set.
+     * 
+     * @param relation
+     * @return
+     */
+    public boolean hasRelations(String relation) {
+        return relations.containsKey(relation);
     }
 
     /**
