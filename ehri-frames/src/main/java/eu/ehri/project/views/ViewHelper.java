@@ -5,8 +5,10 @@ import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
+import com.tinkerpop.frames.VertexFrame;
 
 import eu.ehri.project.acl.AclManager;
+import eu.ehri.project.acl.ContentTypes;
 import eu.ehri.project.acl.PermissionType;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.core.GraphManager;
@@ -23,34 +25,27 @@ import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.utils.ClassUtils;
 
 /**
- * Messy stopgap class to hold a bunch of sort-of view/sort-of acl
- * functions.
+ * Messy stopgap class to hold a bunch of sort-of view/sort-of acl functions.
  * 
  * TODO: Clarify, consolidate and remove this class.
  * 
- * FIXME: In particular, this class shouldn't need a reference
- * to the framed class cls. 
- * 
  * @author mike
- *
+ * 
  */
 public final class ViewHelper {
 
     private final FramedGraph<Neo4jGraph> graph;
-    private final Class<?> cls;
     private final PermissionScope scope;
     private final Collection<Vertex> scopes;
     private final AclManager acl;
     private final GraphManager manager;
 
-    public ViewHelper(FramedGraph<Neo4jGraph> graph, Class<?> cls) {
-        this(graph, cls, SystemScope.getInstance());
+    public ViewHelper(FramedGraph<Neo4jGraph> graph) {
+        this(graph, SystemScope.getInstance());
     }
 
-    public ViewHelper(FramedGraph<Neo4jGraph> graph, Class<?> cls,
-            PermissionScope scope) {
+    public ViewHelper(FramedGraph<Neo4jGraph> graph, PermissionScope scope) {
         this.graph = graph;
-        this.cls = cls;
         this.acl = new AclManager(graph);
         this.scope = scope;
         this.scopes = getAllScopes(scope);
@@ -60,19 +55,19 @@ public final class ViewHelper {
     /**
      * Check permissions for a given type.
      * 
+     * @param ctype
+     *            TODO
+     * 
      * @throws PermissionDenied
      */
-    public void checkPermission(Accessor accessor, PermissionType permType)
-            throws PermissionDenied {
+    public void checkContentPermission(Accessor accessor, ContentTypes ctype,
+            PermissionType permType) throws PermissionDenied {
         // If we're admin, the answer is always "no problem"!
         if (!acl.belongsToAdmin(accessor)) {
             Permission permission = getPermission(permType);
-            
-            // FIXME: THIS CRASHES WHEN THE cls ISN'T A CONCRETE
-            // FRAMED CLASS, i.e. an actual entity type.
-            ContentType contentType = getContentType(ClassUtils
-                    .getEntityType(cls));
-            
+
+            ContentType contentType = getContentType(ctype);
+
             Iterable<PermissionGrant> perms = acl.getPermissionGrants(accessor,
                     contentType, permission);
             boolean found = false;
@@ -104,13 +99,14 @@ public final class ViewHelper {
         // TODO: Determine behaviour for granular item-level
         // attributes.
         try {
-            checkPermission(accessor, permType);
+            checkContentPermission(accessor, getContentType(entity), permType);
         } catch (PermissionDenied e) {
+            Permission permission = getPermission(permType);
             Iterable<PermissionGrant> perms = acl.getPermissionGrants(accessor,
-                    entity, getPermission(permType));
+                    entity, permission);
             // Scopes do not apply to entity-level perms...
             if (!perms.iterator().hasNext())
-                throw new PermissionDenied(accessor, entity);
+                throw new PermissionDenied(accessor, entity, permission, scope);
         }
 
     }
@@ -157,6 +153,45 @@ public final class ViewHelper {
     }
 
     /**
+     * Deduce content type from the given enum.
+     * 
+     * @param type
+     * @return
+     */
+    public ContentType getContentType(ContentTypes type) {
+        return getContentType(type.getName());
+    }
+
+    /**
+     * Get the content type node for the given enum.
+     * 
+     * @param typeName
+     * @return
+     */
+    public ContentType getContentType(String typeName) {
+        try {
+            return manager.getFrame(typeName, ContentType.class);
+        } catch (ItemNotFound e) {
+            throw new RuntimeException(String.format(
+                    "No content type node found for type: '%s'", typeName), e);
+        }
+    }
+
+    public ContentTypes getContentType(Class<?> cls) {
+        return ContentTypes.withName(ClassUtils.getEntityType(cls).getName());
+    }
+
+    public ContentTypes getContentType(VertexFrame frame) {
+        EntityClass et = manager.getType(frame);
+        try {
+            return ContentTypes.withName(et.getName());
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException(String.format(
+                    "No content type found for node of class: '%s'", et), e);
+        }
+    }
+
+    /**
      * Get the permission with the given string.
      * 
      * @param permissionId
@@ -181,13 +216,14 @@ public final class ViewHelper {
      * @param scope
      */
     public ViewHelper setScope(PermissionScope scope) {
-        return new ViewHelper(graph, cls, scope);
+        return new ViewHelper(graph, scope);
     }
 
     // Get a list of the current scope and its parents
     public static Collection<Vertex> getAllScopes(PermissionScope scope) {
         Collection<Vertex> all = Lists.newArrayList();
-        for (PermissionScope s : scope.getScopes()) all.add(s.asVertex());
+        for (PermissionScope s : scope.getScopes())
+            all.add(s.asVertex());
         all.add(scope.asVertex());
         return all;
     }

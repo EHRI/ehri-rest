@@ -46,7 +46,7 @@ public class PermissionsTest extends AbstractFixtureTest {
                 UserProfile.class);
         views = new CrudViews<DocumentaryUnit>(graph, DocumentaryUnit.class,
                 manager.getFrame("r1", Agent.class));
-        viewHelper = new ViewHelper(graph, DocumentaryUnit.class);
+        viewHelper = new ViewHelper(graph);
         acl = new AclManager(graph);
     }
 
@@ -103,8 +103,7 @@ public class PermissionsTest extends AbstractFixtureTest {
         // validation error due to duplicate identifiers
         Bundle bundle = Bundle.fromData(getTestBundle()).withDataValue(
                 AccessibleEntity.IDENTIFIER_KEY, "nested-item");
-        DocumentaryUnit c2 = views.setScope(c1).create(
-                bundle.toData(), user);
+        DocumentaryUnit c2 = views.setScope(c1).create(bundle.toData(), user);
         assertNotNull(c2);
     }
 

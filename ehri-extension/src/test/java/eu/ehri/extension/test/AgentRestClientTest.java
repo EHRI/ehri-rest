@@ -176,7 +176,9 @@ public class AgentRestClientTest extends BaseRestClientTest {
         String permData = "[\"create\"]";
 
         URI grantUri = UriBuilder.fromPath(getExtensionEntryPointUri())
-                .segment(Entities.AGENT).segment("r2").segment("grant")
+                .segment(Entities.PERMISSION)
+                .segment("r2")
+                .segment(Entities.DOCUMENTARY_UNIT)
                 .segment(LIMITED_USER_NAME).build();
 
         resource = client.resource(grantUri);
@@ -217,7 +219,9 @@ public class AgentRestClientTest extends BaseRestClientTest {
         String otherUserName = "linda";
         String grantPermData = "[\"grant\"]";
         URI otherGrantUri = UriBuilder.fromPath(getExtensionEntryPointUri())
-                .segment(Entities.AGENT).segment("r2").segment("grant")
+                .segment(Entities.PERMISSION)
+                .segment("r2")
+                .segment(Entities.DOCUMENTARY_UNIT)
                 .segment(otherUserName).build();
 
         resource = client.resource(otherGrantUri);

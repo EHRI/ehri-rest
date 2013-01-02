@@ -72,7 +72,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
         this.limit = limit;
         this.sort = sort;
         this.page = page;
-        helper = new ViewHelper(graph, cls, scope);
+        helper = new ViewHelper(graph, scope);
         manager = GraphManagerFactory.getInstance(graph);
     }
 

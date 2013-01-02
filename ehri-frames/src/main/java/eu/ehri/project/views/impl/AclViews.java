@@ -49,7 +49,7 @@ public final class AclViews<E extends AccessibleEntity> implements Acl<E> {
         this.graph = graph;
         this.scope = scope;
         acl = new AclManager(graph);
-        helper = new ViewHelper(graph, cls, scope);
+        helper = new ViewHelper(graph, scope);
         manager = GraphManagerFactory.getInstance(graph);
     }
 

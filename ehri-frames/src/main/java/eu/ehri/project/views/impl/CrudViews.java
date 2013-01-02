@@ -45,7 +45,7 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
         this.graph = graph;
         this.cls = cls;
         this.scope = scope;
-        helper = new ViewHelper(graph, cls, scope);
+        helper = new ViewHelper(graph, scope);
         converter = new Converter(graph);
         manager = GraphManagerFactory.getInstance(graph);
         acl = new AclManager(graph);
@@ -109,7 +109,8 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
     public E create(Map<String, Object> data, Accessor user)
             throws PermissionDenied, ValidationError, DeserializationError,
             IntegrityError {
-        helper.checkPermission(user, PermissionType.CREATE);
+        helper.checkContentPermission(user, helper.getContentType(cls),
+                PermissionType.CREATE);
         Bundle bundle = converter.dataToBundle(data);
         E item = new BundleDAO(graph, scope).create(bundle, cls);
         // If a user creates an item, grant them OWNER perms on it.
@@ -132,8 +133,10 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
     public E createOrUpdate(Map<String, Object> data, Accessor user)
             throws PermissionDenied, ValidationError, DeserializationError,
             IntegrityError {
-        helper.checkPermission(user, PermissionType.CREATE);
-        helper.checkPermission(user, PermissionType.UPDATE);
+        helper.checkContentPermission(user, helper.getContentType(cls),
+                PermissionType.CREATE);
+        helper.checkContentPermission(user, helper.getContentType(cls),
+                PermissionType.UPDATE);
         Bundle bundle = converter.dataToBundle(data);
         return new BundleDAO(graph, scope).createOrUpdate(bundle, cls);
     }

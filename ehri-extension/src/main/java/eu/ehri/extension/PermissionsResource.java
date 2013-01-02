@@ -36,6 +36,7 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
+import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.views.impl.AclViews;
 
 /**
@@ -173,6 +174,59 @@ public class PermissionsResource extends AbstractRestResource {
                 .build();
     }
 
+    /**
+     * Set a user's permissions on a content type with a given scope.
+     * 
+     * FIXME: Generalise this behaviour.
+     * 
+     * @param id
+     *            the scope id
+     * @param type
+     *            the content type
+     * @param the
+     *            user id
+     * @param json
+     *            the serialized permission list
+     * @return
+     * @throws PermissionDenied
+     * @throws IOException
+     * @throws ItemNotFound
+     * @throws DeserializationError
+     * @throws BadRequester
+     */
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id:.+}/{typeId:.+}/{userId:.+}")
+    public Response setScopedPermissions(@PathParam("id") String id,
+            @PathParam("typeId") String typeId,
+            @PathParam("userId") String userId, String json)
+            throws PermissionDenied, IOException, ItemNotFound,
+            DeserializationError, BadRequester {
+
+        List<String> scopedPerms;
+        try {
+            JsonFactory factory = new JsonFactory();
+            ObjectMapper mapper = new ObjectMapper(factory);
+            TypeReference<List<String>> typeRef = new TypeReference<List<String>>() {
+            };
+            scopedPerms = mapper.readValue(json, typeRef);
+        } catch (JsonMappingException e) {
+            throw new DeserializationError(e.getMessage());
+        }
+
+        PermissionScope scope = manager.getFrame(id, PermissionScope.class);
+        Accessor accessor = manager.getFrame(userId, Accessor.class);
+        Accessor grantee = getRequesterUserProfile();
+        AclViews<AccessibleEntity> acl = new AclViews<AccessibleEntity>(graph,
+                AccessibleEntity.class, scope);
+
+        acl.setScopedPermissions(accessor, grantee,
+                ContentTypes.withName(typeId),
+                enumifyPermissionList(scopedPerms));
+        return Response.status(Status.OK).build();
+    }
+
     // Helpers. These just convert from string to internal enum representations
     // of the various permissions-related data structures.
     // TODO: There's probably a way to get Jackson to do that automatically.
@@ -251,6 +305,20 @@ public class PermissionsResource extends AbstractRestResource {
                 out.put(ContentTypes.withName(entry.getKey()), tmp);
             }
             return out;
+        } catch (IllegalArgumentException e) {
+            throw new DeserializationError(e.getMessage());
+        }
+    }
+
+    private List<PermissionType> enumifyPermissionList(List<String> scopedPerms)
+            throws DeserializationError {
+        try {
+            List<PermissionType> perms = Lists.newLinkedList();
+            for (String p : scopedPerms) {
+                perms.add(PermissionType.withName(p));
+            }
+
+            return perms;
         } catch (IllegalArgumentException e) {
             throw new DeserializationError(e.getMessage());
         }
