@@ -1,12 +1,6 @@
 package eu.ehri.project.persistance.utils;
 
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import org.neo4j.helpers.collection.Iterables;
-
-import com.google.common.base.Splitter;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
@@ -20,11 +14,6 @@ import eu.ehri.project.persistance.Bundle;
  * 
  */
 public class BundleUtils {
-
-    public static final String PATH_SEP = "/";
-    private static final Pattern pattern = Pattern
-            .compile("([^/\\[\\]]+)\\[(\\d+)\\]");
-    private static Splitter splitter = Splitter.on(PATH_SEP).omitEmptyStrings();
 
     public static class BundlePathError extends NullPointerException {
         private static final long serialVersionUID = -8933938027614207655L;
@@ -53,10 +42,7 @@ public class BundleUtils {
      * @return
      */
     public static Object get(Bundle bundle, String path) {
-        List<String> list = Iterables.toList(splitter.split(path));
-        String attr = list.remove(list.size() - 1);
-
-        return getPathSections(bundle, list, attr);
+        return getPathSections(bundle, BundlePath.fromString(path));
     }
 
     /**
@@ -72,10 +58,7 @@ public class BundleUtils {
      * @return
      */
     public static Bundle set(Bundle bundle, String path, Object value) {
-        List<String> list = Iterables.toList(splitter.split(path));
-        String attr = list.remove(list.size() - 1);
-
-        return updatePathSections(bundle, list, attr, value);
+        return updatePathSections(bundle, BundlePath.fromString(path), value);
     }
 
     /**
@@ -86,108 +69,69 @@ public class BundleUtils {
      * @return
      */
     public static List<Bundle> getRelations(Bundle bundle, String path) {
-        List<String> list = Iterables.toList(splitter.split(path));
-        String attr = list.remove(list.size() - 1);
-
-        return getRelationsPathSections(bundle, list, attr);
+        return getRelationsPathSections(bundle, BundlePath.fromString(path));
     }
 
     // Private implementation helpers.
 
     private static List<Bundle> getRelationsPathSections(Bundle bundle,
-            List<String> list, String attr) {
-        if (list.isEmpty()) {
-            return bundle.getRelations(attr);
+            BundlePath path) {
+        if (path.isEmpty()) {
+            return bundle.getRelations(path.getTerminus());
         } else {
-            String pathSection = list.remove(0);
-            Matcher matcher = pattern.matcher(pathSection);
-            if (!matcher.matches()) {
-                throw new IllegalArgumentException(
-                        String.format(
-                                "Bad path section for nested bundle update: '%s'. "
-                                        + "Non-terminal paths should contain relation name and index.",
-                                pathSection));
-            }
-            String relation = matcher.group(1);
-            Integer index = Integer.valueOf(matcher.group(2));
-
-            if (!bundle.hasRelations(relation))
+            PathSection section = path.current();
+            if (!bundle.hasRelations(section.getPath()))
                 throw new BundlePathError(String.format(
-                        "Relation path '%s' not found", pathSection));
+                        "Relation path '%s' not found", section.getPath()));
             try {
-                List<Bundle> relations = bundle.getRelations(relation);
-                return getRelationsPathSections(relations.get(index), list,
-                        attr);
+                List<Bundle> relations = bundle.getRelations(section.getPath());
+                return getRelationsPathSections(relations.get(section.getIndex()), path.next());
             } catch (IndexOutOfBoundsException e) {
                 throw new BundleIndexError(String.format(
-                        "Relation index '%s' not found", pathSection));
+                        "Relation index '%s' not found", section.getIndex()));
             }
         }
     }
 
-    private static Object getPathSections(Bundle bundle, List<String> list,
-            String attr) {
-        if (list.isEmpty()) {
-            return bundle.getDataValue(attr);
+    private static Object getPathSections(Bundle bundle, BundlePath path) {
+        if (path.isEmpty()) {
+            return bundle.getDataValue(path.getTerminus());
         } else {
-            String pathSection = list.remove(0);
-            Matcher matcher = pattern.matcher(pathSection);
-            if (!matcher.matches()) {
-                throw new IllegalArgumentException(
-                        String.format(
-                                "Bad path section for nested bundle update: '%s'. "
-                                        + "Non-terminal paths should contain relation name and index.",
-                                pathSection));
-            }
-            String relation = matcher.group(1);
-            Integer index = Integer.valueOf(matcher.group(2));
-
-            if (!bundle.hasRelations(relation))
+            PathSection section = path.current();
+            if (!bundle.hasRelations(section.getPath()))
                 throw new BundlePathError(String.format(
-                        "Relation path '%s' not found", pathSection));
+                        "Relation path '%s' not found", section.getPath()));
             try {
-                List<Bundle> relations = bundle.getRelations(relation);
-                return getPathSections(relations.get(index), list, attr);
+                List<Bundle> relations = bundle.getRelations(section.getPath());
+                return getPathSections(relations.get(section.getIndex()), path.next());
             } catch (IndexOutOfBoundsException e) {
                 throw new BundleIndexError(String.format(
-                        "Relation index '%s' not found", pathSection));
+                        "Relation index '%s' not found", section.getIndex()));
             }
         }
     }
 
-    private static Bundle updatePathSections(Bundle bundle, List<String> list,
-            String attr, Object value) {
-        if (list.isEmpty()) {
-            return bundle.withDataValue(attr, value);
+    private static Bundle updatePathSections(Bundle bundle, BundlePath path, Object value) {
+        if (path.isEmpty()) {
+            return bundle.withDataValue(path.getTerminus(), value);
         } else {
-            String pathSection = list.remove(0);
-            Matcher matcher = pattern.matcher(pathSection);
-            if (!matcher.matches()) {
-                throw new IllegalArgumentException(
-                        String.format(
-                                "Bad path section for nested bundle update: '%s'. "
-                                        + "Non-terminal paths should contain relation name and index.",
-                                pathSection));
-            }
-            String relation = matcher.group(1);
-            Integer index = Integer.valueOf(matcher.group(2));
-
-            if (!bundle.hasRelations(relation))
+            PathSection section = path.current();
+            if (!bundle.hasRelations(section.getPath()))
                 throw new BundlePathError(String.format(
-                        "Relation path '%s' not found", pathSection));
+                        "Relation path '%s' not found", section.getPath()));
             ListMultimap<String, Bundle> allRelations = LinkedListMultimap
                     .create(bundle.getRelations());
             try {
                 List<Bundle> relations = Lists.newLinkedList(allRelations
-                        .removeAll(relation));
+                        .removeAll(section.getPath()));
                 relations.set(
-                        index,
-                        updatePathSections(relations.get(index), list, attr,
+                        section.getIndex(),
+                        updatePathSections(relations.get(section.getIndex()), path.next(),
                                 value));
-                allRelations.putAll(relation, relations);
+                allRelations.putAll(section.getPath(), relations);
             } catch (IndexOutOfBoundsException e) {
                 throw new BundleIndexError(String.format(
-                        "Relation index '%s' not found", pathSection));
+                        "Relation index '%s' not found", section.getIndex()));
             }
 
             return bundle.withRelations(allRelations);
