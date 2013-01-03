@@ -77,7 +77,7 @@ public final class AclManager {
         this.graph = graph;
         this.manager = GraphManagerFactory.getInstance(graph);
         this.scope = Optional.<PermissionScope>fromNullable(scope).or(SystemScope.getInstance());
-        this.scopes = getAllScopes(scope);
+        this.scopes = getAllScopes();
         populateEnumNodeLookups();
     }
 
@@ -647,7 +647,7 @@ public final class AclManager {
     }
     
     // Get a list of the current scope and its parents
-    private static Collection<Vertex> getAllScopes(PermissionScope scope) {
+    private Collection<Vertex> getAllScopes() {
         Collection<Vertex> all = Lists.newArrayList();
         for (PermissionScope s : scope.getScopes())
             all.add(s.asVertex());
