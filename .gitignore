@@ -35,6 +35,9 @@ local.properties
 # Ignore target
 **/target/*
 
+Intellij
+**/*iml
+
 # OS generated files #
 ######################
 .DS_Store
