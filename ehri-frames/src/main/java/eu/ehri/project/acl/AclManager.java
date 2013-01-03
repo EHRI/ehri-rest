@@ -76,7 +76,7 @@ public final class AclManager {
     public AclManager(FramedGraph<Neo4jGraph> graph, PermissionScope scope) {
         this.graph = graph;
         this.manager = GraphManagerFactory.getInstance(graph);
-        this.scope = Optional.<PermissionScope>of(scope).or(SystemScope.getInstance());
+        this.scope = Optional.<PermissionScope>fromNullable(scope).or(SystemScope.getInstance());
         this.scopes = getAllScopes(scope);
         populateEnumNodeLookups();
     }
