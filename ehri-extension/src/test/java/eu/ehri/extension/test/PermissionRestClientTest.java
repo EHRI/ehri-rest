@@ -251,8 +251,8 @@ public class PermissionRestClientTest extends BaseRestClientTest {
         String permData = "{\"documentaryUnit\": [\"create\"]}";
 
         URI grantUri = UriBuilder.fromPath(getExtensionEntryPointUri())
-                .segment(Entities.PERMISSION).segment(r2)
-                .segment("scope").segment(LIMITED_USER_NAME)
+                .segment(Entities.PERMISSION).segment(LIMITED_USER_NAME)
+                .segment("scope").segment(r2)
                 .build();
 
         resource = client.resource(grantUri);
@@ -294,8 +294,8 @@ public class PermissionRestClientTest extends BaseRestClientTest {
         String otherUserName = "linda";
         String grantPermData = "{\"documentaryUnit\": [\"grant\"]}";
         URI otherGrantUri = UriBuilder.fromPath(getExtensionEntryPointUri())
-                .segment(Entities.PERMISSION).segment(r2)
-                .segment("scope").segment(otherUserName)
+                .segment(Entities.PERMISSION).segment(otherUserName)
+                .segment("scope").segment(r2)
                 .build();
 
         resource = client.resource(otherGrantUri);
