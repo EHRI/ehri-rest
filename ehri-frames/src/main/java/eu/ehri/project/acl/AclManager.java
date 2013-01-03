@@ -363,15 +363,6 @@ public class AclManager {
         }
     }
 
-    private void checkNoGrantOnAdminOrAnon(Accessor accessor)
-            throws PermissionDenied {
-        // Quick sanity check to make sure we're not trying to add/remove
-        // permissions from the admin or the anonymous accounts.
-        if (isAdmin(accessor) || isAnonymous(accessor))
-            throw new PermissionDenied(
-                    "Unable to grant or revoke permissions to system accounts.");
-    }
-
     /**
      * Get a list of global permissions for a given accessor. Returns a map of
      * content types against the grant permissions.
@@ -609,6 +600,15 @@ public class AclManager {
     }
 
     // Helpers...
+
+    private void checkNoGrantOnAdminOrAnon(Accessor accessor)
+            throws PermissionDenied {
+        // Quick sanity check to make sure we're not trying to add/remove
+        // permissions from the admin or the anonymous accounts.
+        if (isAdmin(accessor) || isAnonymous(accessor))
+            throw new PermissionDenied(
+                    "Unable to grant or revoke permissions to system accounts.");
+    }
 
     /**
      * Search the group hierarchy of the given accessors to find an intersection
