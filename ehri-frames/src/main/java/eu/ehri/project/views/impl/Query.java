@@ -109,25 +109,25 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
     }
 
     /**
+     * Class representing a page of content.
      * 
-     * @author michaelb
-     * 
-     * @param <E>
+     * @param <T>
+     *            the item type
      */
-    public static class Page<E> {
-        private Iterable<E> iterable;
+    public static class Page<T> {
+        private Iterable<T> iterable;
         private long count;
         private Integer offset;
         private Integer limit;
 
-        Page(Iterable<E> iterable, long count, Integer offset, Integer limit) {
+        Page(Iterable<T> iterable, long count, Integer offset, Integer limit) {
             this.iterable = iterable;
             this.count = count;
             this.offset = offset;
             this.limit = limit;
         }
 
-        public Iterable<E> getIterable() {
+        public Iterable<T> getIterable() {
             return iterable;
         }
 
