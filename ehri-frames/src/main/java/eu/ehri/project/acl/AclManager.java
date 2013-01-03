@@ -26,6 +26,8 @@ import com.tinkerpop.pipes.PipeFunction;
 
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
+import eu.ehri.project.exceptions.IdGenerationError;
+import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.ContentType;
 import eu.ehri.project.models.EntityClass;
@@ -296,7 +298,8 @@ public class AclManager {
                 for (PermissionGrantTarget target : grant.getTargets()) {
                     if (ClassUtils.hasType(target, EntityClass.CONTENT_TYPE)) {
                         ContentTypes ctype = enumForContentType(target);
-                        permmap.put(ctype, enumForPermission(grant.getPermission()));
+                        permmap.put(ctype,
+                                enumForPermission(grant.getPermission()));
                     }
                 }
             }
@@ -414,11 +417,16 @@ public class AclManager {
      */
     public PermissionGrant grantPermissions(Accessor accessor,
             PermissionGrantTarget target, PermissionType permType) {
-        PermissionGrant grant = graph.addVertex(null, PermissionGrant.class);
-        accessor.addPermissionGrant(grant);
-        grant.setPermission(vertexForPermission(permType));
-        grant.addTarget(target);
-        return grant;
+        try {
+            PermissionGrant grant = createPermissionGrant();
+            accessor.addPermissionGrant(grant);
+            grant.setPermission(vertexForPermission(permType));
+            grant.addTarget(target);
+            return grant;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -600,6 +608,18 @@ public class AclManager {
     }
 
     // Helpers...
+
+    private PermissionGrant createPermissionGrant() throws IntegrityError,
+            IdGenerationError {
+        Vertex vertex = manager.createVertex(
+                EntityClass.PERMISSION_GRANT.getIdgen().generateId(
+                        EntityClass.PERMISSION_GRANT,
+                        SystemScope.getInstance(), null),
+                EntityClass.PERMISSION_GRANT,
+                Maps.<String, Object> newHashMap());
+        PermissionGrant grant = graph.frame(vertex, PermissionGrant.class);
+        return grant;
+    }
 
     private void checkNoGrantOnAdminOrAnon(Accessor accessor)
             throws PermissionDenied {
