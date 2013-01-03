@@ -22,7 +22,6 @@ import eu.ehri.project.exceptions.IndexNotFoundException;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.PermissionScope;
@@ -249,12 +248,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      * @throws IndexNotFoundException
      */
     public Iterable<E> list(EntityClass type, Accessor user) {
-        // FIXME: Grotesque and fragile hack using the type key
-        // Breaks encapsulation of graph implementation.
-        // This should instead call a dedicated method of the graph
-        // manager to return a framed iterable of all nodes of a
-        // given class.
-        return list(EntityType.TYPE_KEY, type.toString(), user);
+        return list(manager.getFrames(type, cls), user);
     }
 
     /**
@@ -266,12 +260,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      * @throws IndexNotFoundException
      */
     public Page<E> page(EntityClass type, Accessor user) {
-        // FIXME: Grotesque and fragile hack using the type key
-        // Breaks encapsulation of graph implementation.
-        // This should instead call a dedicated method of the graph
-        // manager to return a framed iterable of all nodes of a
-        // given class.
-        return page(EntityType.TYPE_KEY, type.toString(), user);
+        return page(manager.getFrames(type, cls), user);
     }
 
     /**
