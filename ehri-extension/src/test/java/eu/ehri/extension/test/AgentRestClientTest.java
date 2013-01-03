@@ -173,12 +173,12 @@ public class AgentRestClientTest extends BaseRestClientTest {
 
         // Now grant the user permissions to create just within
         // the scope of r2
-        String permData = "[\"create\"]";
+        String permData = "{\"documentaryUnit\": [\"create\"]}";
 
         URI grantUri = UriBuilder.fromPath(getExtensionEntryPointUri())
                 .segment(Entities.PERMISSION)
                 .segment("r2")
-                .segment(Entities.DOCUMENTARY_UNIT)
+                .segment("scope")
                 .segment(LIMITED_USER_NAME).build();
 
         resource = client.resource(grantUri);
@@ -217,11 +217,11 @@ public class AgentRestClientTest extends BaseRestClientTest {
         // And the user himself should not be able to grant
         // others the ability to create within that scope.
         String otherUserName = "linda";
-        String grantPermData = "[\"grant\"]";
+        String grantPermData = "{\"documentaryUnit\": [\"grant\"]}";
         URI otherGrantUri = UriBuilder.fromPath(getExtensionEntryPointUri())
                 .segment(Entities.PERMISSION)
                 .segment("r2")
-                .segment(Entities.DOCUMENTARY_UNIT)
+                .segment("scope")
                 .segment(otherUserName).build();
 
         resource = client.resource(otherGrantUri);

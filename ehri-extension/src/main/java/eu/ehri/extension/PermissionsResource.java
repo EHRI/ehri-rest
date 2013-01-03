@@ -21,6 +21,7 @@ import javax.ws.rs.core.Response.Status;
 
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerationException;
+import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
@@ -58,41 +59,24 @@ public class PermissionsResource extends AbstractRestResource {
     }
 
     /**
-     * Set a user's global permission matrix.
+     * Get the global permission matrix for the user making the request, based
+     * on the Authorization header.
      * 
-     * @param id
-     * @param json
      * @return
      * @throws PermissionDenied
+     * @throws JsonGenerationException
+     * @throws JsonMappingException
      * @throws IOException
      * @throws ItemNotFound
-     * @throws DeserializationError
      * @throws BadRequester
      */
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
+    @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{id:.+}")
-    public Response setGlobalMatrix(@PathParam("id") String id, String json)
-            throws PermissionDenied, IOException, ItemNotFound,
-            DeserializationError, BadRequester {
-
-        HashMap<String, List<String>> globals;
-        try {
-            JsonFactory factory = new JsonFactory();
-            ObjectMapper mapper = new ObjectMapper(factory);
-            TypeReference<HashMap<String, List<String>>> typeRef = new TypeReference<HashMap<String, List<String>>>() {
-            };
-            globals = mapper.readValue(json, typeRef);
-        } catch (JsonMappingException e) {
-            throw new DeserializationError(e.getMessage());
-        }
-
-        Accessor accessor = manager.getFrame(id, Accessor.class);
-        Accessor grantee = getRequesterUserProfile();
-        new AclViews(graph).setGlobalPermissionMatrix(accessor, enumifyMatrix(globals),
-                grantee);
-        return getGlobalMatrix(id);
+    public Response getGlobalMatrix() throws PermissionDenied,
+            JsonGenerationException, JsonMappingException, IOException,
+            ItemNotFound, BadRequester {
+        Accessor accessor = getRequesterUserProfile();
+        return getGlobalMatrix(manager.getId(accessor));
     }
 
     /**
@@ -125,24 +109,31 @@ public class PermissionsResource extends AbstractRestResource {
     }
 
     /**
-     * Get the global permission matrix for the user making the request, based
-     * on the Authorization header.
+     * Set a user's global permission matrix.
      * 
+     * @param id
+     * @param json
      * @return
      * @throws PermissionDenied
-     * @throws JsonGenerationException
-     * @throws JsonMappingException
      * @throws IOException
      * @throws ItemNotFound
+     * @throws DeserializationError
      * @throws BadRequester
      */
-    @GET
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getGlobalMatrix() throws PermissionDenied,
-            JsonGenerationException, JsonMappingException, IOException,
-            ItemNotFound, BadRequester {
-        Accessor accessor = getRequesterUserProfile();
-        return getGlobalMatrix(manager.getId(accessor));
+    @Path("/{id:.+}")
+    public Response setGlobalMatrix(@PathParam("id") String id, String json)
+            throws PermissionDenied, IOException, ItemNotFound,
+            DeserializationError, BadRequester {
+
+        HashMap<String, List<String>> globals = parseMatrix(json);
+        Accessor accessor = manager.getFrame(id, Accessor.class);
+        Accessor grantee = getRequesterUserProfile();
+        new AclViews(graph).setGlobalPermissionMatrix(accessor,
+                enumifyMatrix(globals), grantee);
+        return getGlobalMatrix(id);
     }
 
     /**
@@ -177,12 +168,47 @@ public class PermissionsResource extends AbstractRestResource {
     }
 
     /**
+     * Get the user's permissions for a given scope.
+     * 
+     * @param userId
+     * @param scopeId
+     * @return
+     * @throws IOException
+     * @throws JsonMappingException
+     * @throws JsonGenerationException
+     * @throws DeserializationError
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Path("/{userId:.+}/scope/{id:.+}")
+    public Response getScopedMatrix(@PathParam("userId") String userId,
+            @PathParam("id") String id) throws PermissionDenied, ItemNotFound,
+            JsonGenerationException, JsonMappingException, IOException,
+            DeserializationError {
+
+        Accessor accessor = manager.getFrame(userId, Accessor.class);
+        PermissionScope scope = manager.getFrame(id, PermissionScope.class);
+        AclManager acl = new AclManager(graph);
+
+        return Response
+                .status(Status.OK)
+                .entity(new ObjectMapper().writeValueAsBytes(stringifyInheritedGlobalMatrix(acl
+                        .getInheritedScopedPermissions(accessor, scope))))
+                .build();
+    }
+
+    /**
      * Set a user's permissions on a content type with a given scope.
      * 
-     * @param id the scope id
-     * @param type the content type
-     * @param user the user id
-     * @param json the serialized permission list
+     * @param id
+     *            the scope id
+     * @param type
+     *            the content type
+     * @param user
+     *            the user id
+     * @param json
+     *            the serialized permission list
      * @return
      * @throws PermissionDenied
      * @throws IOException
@@ -193,48 +219,32 @@ public class PermissionsResource extends AbstractRestResource {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{id:.+}/{typeId:.+}/{userId:.+}")
+    @Path("/{id:.+}/scope/{userId:.+}")
     public Response setScopedPermissions(@PathParam("id") String id,
             @PathParam("typeId") String typeId,
             @PathParam("userId") String userId, String json)
             throws PermissionDenied, IOException, ItemNotFound,
             DeserializationError, BadRequester {
 
-        List<String> scopedPerms;
-        try {
-            JsonFactory factory = new JsonFactory();
-            ObjectMapper mapper = new ObjectMapper(factory);
-            TypeReference<List<String>> typeRef = new TypeReference<List<String>>() {
-            };
-            scopedPerms = mapper.readValue(json, typeRef);
-        } catch (JsonMappingException e) {
-            throw new DeserializationError(e.getMessage());
-        }
-
+        HashMap<String, List<String>> globals = parseMatrix(json);
         PermissionScope scope = manager.getFrame(id, PermissionScope.class);
         Accessor accessor = manager.getFrame(userId, Accessor.class);
         Accessor grantee = getRequesterUserProfile();
         AclViews acl = new AclViews(graph, scope);
 
-        acl.setScopedPermissions(ContentTypes.withName(typeId), accessor,
-                enumifyPermissionList(scopedPerms),
-                grantee);
-
-        return Response
-                .status(Status.OK)
-                .entity(new ObjectMapper()
-                        .writeValueAsBytes(stringifyInheritedMatrix(new AclManager(
-                                graph).getInheritedEntityPermissions(accessor,
-                                manager.getFrame(id, AccessibleEntity.class)))))
-                .build();
+        acl.setScopedPermissions(accessor, enumifyMatrix(globals), grantee);
+        return getScopedMatrix(userId, id);
     }
 
     /**
      * Set a user's permissions on a given item.
      * 
-     * @param id the item id
-     * @param userId the user id
-     * @param json the serialized permission list
+     * @param id
+     *            the item id
+     * @param userId
+     *            the user id
+     * @param json
+     *            the serialized permission list
      * @return
      * 
      * @throws PermissionDenied
@@ -268,8 +278,8 @@ public class PermissionsResource extends AbstractRestResource {
         Accessor grantee = getRequesterUserProfile();
         AclViews acl = new AclViews(graph, item.getScope());
 
-        acl.setItemPermissions(item, accessor, enumifyPermissionList(scopedPerms),
-                grantee);
+        acl.setItemPermissions(item, accessor,
+                enumifyPermissionList(scopedPerms), grantee);
 
         return Response
                 .status(Status.OK)
@@ -284,6 +294,21 @@ public class PermissionsResource extends AbstractRestResource {
     // of the various permissions-related data structures.
     // TODO: There's probably a way to get Jackson to do that automatically.
     // This was why scala was invented...
+
+    private HashMap<String, List<String>> parseMatrix(String json)
+            throws IOException, JsonParseException, DeserializationError {
+        HashMap<String, List<String>> globals;
+        try {
+            JsonFactory factory = new JsonFactory();
+            ObjectMapper mapper = new ObjectMapper(factory);
+            TypeReference<HashMap<String, List<String>>> typeRef = new TypeReference<HashMap<String, List<String>>>() {
+            };
+            globals = mapper.readValue(json, typeRef);
+        } catch (JsonMappingException e) {
+            throw new DeserializationError(e.getMessage());
+        }
+        return globals;
+    }
 
     private List<Map<String, Map<String, List<String>>>> stringifyInheritedGlobalMatrix(
             List<Map<String, Map<ContentTypes, Collection<PermissionType>>>> list2) {

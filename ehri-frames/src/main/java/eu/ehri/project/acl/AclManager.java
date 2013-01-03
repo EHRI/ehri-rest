@@ -41,6 +41,9 @@ import eu.ehri.project.models.utils.ClassUtils;
 /**
  * Helper class for checking and asserting access and write permissions.
  * 
+ * TODO: Re-express all this hideousness as Cypher or Gremlin queries, though
+ * they will inevitably be quite complex.
+ * 
  * @author mike
  * 
  */
@@ -218,6 +221,53 @@ public class AclManager {
     }
 
     /**
+     * Get a list of permissions for a given accessor on a given entity. Returns
+     * a map of content types against the grant permissions.
+     * 
+     * @param accessor
+     * @return List of permission maps for the given target
+     */
+    public List<Map<String, List<PermissionType>>> getInheritedEntityPermissions(
+            Accessor accessor, AccessibleEntity entity) {
+        List<Map<String, List<PermissionType>>> list = Lists.newLinkedList();
+        Map<String, List<PermissionType>> userMap = Maps.newHashMap();
+        userMap.put(manager.getId(accessor),
+                getEntityPermissions(accessor, entity));
+        list.add(userMap);
+        for (Accessor parent : accessor.getAllParents()) {
+            Map<String, List<PermissionType>> parentMap = Maps.newHashMap();
+            list.add(parentMap);
+            parentMap.put(manager.getId(parent),
+                    getEntityPermissions(parent, entity));
+        }
+        return list;
+    }
+
+    /**
+     * Return a permission list for the given accessor and her inherited groups.
+     * 
+     * @param accessor
+     * @return List of permission maps for the given accessor and his group
+     *         parents.
+     */
+    public List<Map<String, Map<ContentTypes, Collection<PermissionType>>>> getInheritedScopedPermissions(
+            Accessor accessor, PermissionScope scope) {
+        List<Map<String, Map<ContentTypes, Collection<PermissionType>>>> globals = Lists
+                .newLinkedList();
+        Map<String, Map<ContentTypes, Collection<PermissionType>>> userMap = Maps
+                .newHashMap();
+        userMap.put(manager.getId(accessor), getScopedPermissions(accessor, scope));
+        globals.add(userMap);
+        for (Accessor parent : accessor.getParents()) {
+            Map<String, Map<ContentTypes, Collection<PermissionType>>> parentMap = Maps
+                    .newHashMap();
+            parentMap.put(manager.getId(parent), getScopedPermissions(parent, scope));
+            globals.add(parentMap);
+        }
+        return globals;
+    }
+
+    /**
      * Return a permission list for the given accessor and her inherited groups.
      * 
      * @param accessor
@@ -255,11 +305,40 @@ public class AclManager {
     }
 
     /**
+     * Get content type permissions constrained by a scope.
+     * 
+     * @param accessor
+     * @param scope
+     * @return
+     */
+    public Map<ContentTypes, Collection<PermissionType>> getScopedPermissions(
+            Accessor accessor, PermissionScope scope) {
+        Multimap<ContentTypes, PermissionType> permmap = LinkedListMultimap
+                .create();
+        for (PermissionGrant grant : accessor.getPermissionGrants()) {
+            // Since these are global perms only include those where the target
+            // is a content type.
+            if (grant.getScope() != null
+                    && grant.getScope().asVertex().equals(scope.asVertex())) {
+                for (PermissionGrantTarget target : grant.getTargets()) {
+                    if (ClassUtils.hasType(target, EntityClass.CONTENT_TYPE)) {
+                        ContentTypes ctype = ContentTypes.withName(manager
+                                .getId(target));
+                        permmap.put(ctype, PermissionType.withName(manager
+                                .getId(grant.getPermission())));
+                    }
+                }
+            }
+        }
+        return permmap.asMap();
+    }    
+    
+    /**
      * Set a matrix of global permissions for a given accessor.
      * 
      * @param accessor
      * @param globals
-     *            Global permission map
+     *            global permission map
      * @throws PermissionDenied
      */
     public void setGlobalPermissionMatrix(Accessor accessor,
@@ -300,26 +379,49 @@ public class AclManager {
     }
 
     /**
-     * Get a list of permissions for a given accessor on a given entity. Returns
-     * a map of content types against the grant permissions.
+     * Set a matrix of global permissions for a given accessor.
      * 
      * @param accessor
-     * @return List of permission maps for the given target
+     * @param globals
+     *            global permission map
+     * @throws PermissionDenied
      */
-    public List<Map<String, List<PermissionType>>> getInheritedEntityPermissions(
-            Accessor accessor, AccessibleEntity entity) {
-        List<Map<String, List<PermissionType>>> list = Lists.newLinkedList();
-        Map<String, List<PermissionType>> userMap = Maps.newHashMap();
-        userMap.put(manager.getId(accessor),
-                getEntityPermissions(accessor, entity));
-        list.add(userMap);
-        for (Accessor parent : accessor.getAllParents()) {
-            Map<String, List<PermissionType>> parentMap = Maps.newHashMap();
-            list.add(parentMap);
-            parentMap.put(manager.getId(parent),
-                    getEntityPermissions(parent, entity));
+    public void setScopedPermissionMatrix(Accessor accessor,
+            PermissionScope scope,
+            Map<ContentTypes, List<PermissionType>> globals)
+            throws PermissionDenied {
+        // Build a lookup of content types and permissions keyed by their
+        // identifier.
+        Map<ContentTypes, ContentType> cmap = Maps.newHashMap();
+        for (ContentType c : manager.getFrames(EntityClass.CONTENT_TYPE,
+                ContentType.class)) {
+            cmap.put(ContentTypes.withName(manager.getId(c)), c);
         }
-        return list;
+        Map<PermissionType, Permission> pmap = Maps.newHashMap();
+        for (Permission p : manager.getFrames(EntityClass.PERMISSION,
+                Permission.class)) {
+            pmap.put(PermissionType.withName(manager.getId(p)), p);
+        }
+
+        // Quick sanity check to make sure we're not trying to add/remove
+        // permissions from the admin or the anonymous accounts.
+        if (isAdmin(accessor) || isAnonymous(accessor))
+            throw new PermissionDenied(
+                    "Unable to grant or revoke permissions to system accounts.");
+
+        for (Entry<ContentTypes, ContentType> centry : cmap.entrySet()) {
+            ContentType target = centry.getValue();
+            List<PermissionType> pset = globals.get(centry.getKey());
+            if (pset == null)
+                continue;
+            for (PermissionType perm : PermissionType.values()) {
+                if (pset.contains(perm)) {
+                    grantPermissions(accessor, target, perm, scope);
+                } else {
+                    revokeScopedPermissions(accessor, target, perm, scope);
+                }
+            }
+        }
     }
 
     /**
@@ -424,6 +526,31 @@ public class AclManager {
         }
     }
 
+    /**
+     * Revoke a particular permission grant with a given scope.
+     * 
+     * @param accessor
+     * @param target
+     * @param permType
+     */
+    public void revokeScopedPermissions(Accessor accessor, AccessibleEntity entity,
+            PermissionType permType, PermissionScope scope) {
+        Preconditions.checkNotNull(scope,
+                "Scope given to revokePermissions is null");
+        PermissionGrantTarget target = graph.frame(entity.asVertex(),
+                PermissionGrantTarget.class);
+        Vertex scopeVertex = scope.asVertex();
+        Permission perm = getPermission(permType);
+        for (PermissionGrant grant : accessor.getPermissionGrants()) {
+            if (grant.getScope() != null && grant.getScope().asVertex().equals(scopeVertex)) {
+                if (Iterables.contains(grant.getTargets(), target)
+                        && grant.getPermission().equals(perm)) {
+                    graph.removeVertex(grant.asVertex());
+                }                
+            }
+        }
+    }
+    
     /**
      * Set access control on an entity.
      * 
@@ -631,5 +758,4 @@ public class AclManager {
     public ContentTypes getContentTypes(ContentType contentType) {
         return ContentTypes.withName(manager.getId(contentType));
     }
-
 }

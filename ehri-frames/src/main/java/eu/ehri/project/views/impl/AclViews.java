@@ -222,15 +222,12 @@ public final class AclViews implements Acl {
      * 
      * @throws PermissionDenied
      */
-    public void setScopedPermissions(ContentTypes contentType,
-            Accessor accessor, Set<PermissionType> permissionList,
+    public void setScopedPermissions(Accessor accessor,
+            Map<ContentTypes, List<PermissionType>> permissionMap,
             Accessor grantee) throws PermissionDenied {
         try {
             helper.checkEntityPermission(scope, grantee, PermissionType.GRANT);
-            for (PermissionType t : permissionList) {
-                acl.grantPermissions(accessor, acl.getContentType(contentType),
-                        t, scope);
-            }
+            acl.setScopedPermissionMatrix(accessor, scope, permissionMap);
             // Log the action...
             new ActionManager(graph).createAction(
                     graph.frame(scope.asVertex(), AccessibleEntity.class),
