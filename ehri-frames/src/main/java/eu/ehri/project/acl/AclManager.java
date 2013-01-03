@@ -76,7 +76,8 @@ public final class AclManager {
     public AclManager(FramedGraph<Neo4jGraph> graph, PermissionScope scope) {
         this.graph = graph;
         this.manager = GraphManagerFactory.getInstance(graph);
-        this.scope = Optional.<PermissionScope>fromNullable(scope).or(SystemScope.getInstance());
+        this.scope = Optional.<PermissionScope> fromNullable(scope).or(
+                SystemScope.getInstance());
         this.scopes = getAllScopes();
         populateEnumNodeLookups();
     }
@@ -95,7 +96,7 @@ public final class AclManager {
      * 
      * @param accessor
      */
-    public Boolean isAdmin(Accessor accessor) {
+    Boolean isAdmin(Accessor accessor) {
         Preconditions.checkNotNull(accessor, "NULL accessor given.");
         return accessor.getIdentifier().equals(Group.ADMIN_GROUP_IDENTIFIER);
     }
@@ -122,7 +123,7 @@ public final class AclManager {
      * @param accessor
      * @return User is an anonymous accessor
      */
-    public Boolean isAnonymous(Accessor accessor) {
+    Boolean isAnonymous(Accessor accessor) {
         Preconditions.checkNotNull(accessor, "NULL accessor given.");
         return accessor instanceof AnonymousAccessor
                 || accessor.getIdentifier()
@@ -189,8 +190,9 @@ public final class AclManager {
 
         List<PermissionGrant> grants = Lists.newLinkedList();
         for (PermissionGrant grant : accessor.getPermissionGrants()) {
-            
-            if (isGlobalOrInScope(grant) && Iterables.contains(grant.getTargets(), target)) {
+
+            if (isGlobalOrInScope(grant)
+                    && Iterables.contains(grant.getTargets(), target)) {
                 PermissionType gt = enumForPermission(grant.getPermission());
                 PermissionType pt = enumForPermission(permission);
                 if (((gt.getMask() & pt.getMask()) == pt.getMask())) {
@@ -268,7 +270,6 @@ public final class AclManager {
                 : getAccessorPermissions(accessor);
     }
 
-
     /**
      * Set a matrix of global permissions for a given accessor.
      * 
@@ -306,7 +307,7 @@ public final class AclManager {
      * @return List of permission names for the given accessor on the given
      *         target
      */
-    public List<PermissionType> getEntityPermissions(Accessor accessor,
+    List<PermissionType> getEntityPermissions(Accessor accessor,
             AccessibleEntity entity) {
         // If we're admin, add it regardless.
         if (isAdmin(accessor)) {
@@ -379,7 +380,8 @@ public final class AclManager {
 
         Permission perm = enumPermissionMap.get(permType);
         for (PermissionGrant grant : accessor.getPermissionGrants()) {
-            if (isInScope(grant) && Iterables.contains(grant.getTargets(), target)
+            if (isInScope(grant)
+                    && Iterables.contains(grant.getTargets(), target)
                     && grant.getPermission().equals(perm)) {
                 graph.removeVertex(grant.asVertex());
             }
@@ -395,8 +397,7 @@ public final class AclManager {
      * @param canWrite
      * @throws PermissionDenied
      */
-    public void setAccessControl(AccessibleEntity entity, Accessor accessor)
-            throws PermissionDenied {
+    public void setAccessControl(AccessibleEntity entity, Accessor accessor) {
         entity.addAccessor(accessor);
     }
 
@@ -419,8 +420,7 @@ public final class AclManager {
      * @param canWrite
      * @throws PermissionDenied
      */
-    public void setAccessControl(AccessibleEntity entity, Accessor[] accessors)
-            throws PermissionDenied {
+    public void setAccessControl(AccessibleEntity entity, Accessor[] accessors) {
         for (Accessor accessor : accessors)
             entity.addAccessor(accessor);
     }
@@ -455,11 +455,8 @@ public final class AclManager {
         };
     }
 
-    
-
-
     // Helpers...
-    
+
     /**
      * Set scope.
      * 
@@ -507,8 +504,7 @@ public final class AclManager {
                         SystemScope.getInstance(), null),
                 EntityClass.PERMISSION_GRANT,
                 Maps.<String, Object> newHashMap());
-        PermissionGrant grant = graph.frame(vertex, PermissionGrant.class);
-        return grant;
+        return graph.frame(vertex, PermissionGrant.class);
     }
 
     private void checkNoGrantOnAdminOrAnon(Accessor accessor)
@@ -645,7 +641,7 @@ public final class AclManager {
             permissionEnumMap.put(p.asVertex(), pt);
         }
     }
-    
+
     // Get a list of the current scope and its parents
     private Collection<Vertex> getAllScopes() {
         Collection<Vertex> all = Lists.newArrayList();
@@ -653,18 +649,17 @@ public final class AclManager {
             all.add(s.asVertex());
         all.add(scope.asVertex());
         return all;
-    }    
-    
-    private boolean hasActiveScope() {
-        return !scope.equals(SystemScope.INSTANCE);
+    }
+
+    private boolean isSystemScope() {
+        return scope.equals(SystemScope.INSTANCE);
     }
 
     private boolean isInScope(PermissionGrant grant) {
         // If we're on the system scope, only remove unscoped
         // permissions. Otherwise, check the scope matches the grant.
-        if (!hasActiveScope() && grant.getScope() == null)
-            return true;
-        return Iterables.contains(scopes, grant.getScope().asVertex());        
+        return isSystemScope() && grant.getScope() == null
+                || Iterables.contains(scopes, grant.getScope().asVertex());
     }
 
     private boolean isGlobalOrInScope(PermissionGrant grant) {
@@ -672,8 +667,7 @@ public final class AclManager {
         // permissions. Otherwise, check the scope matches the grant.
         if (grant.getScope() == null)
             return true;
-        if (!hasActiveScope())
-            return false;
-        return Iterables.contains(scopes, grant.getScope().asVertex());        
+        return !isSystemScope()
+                && Iterables.contains(scopes, grant.getScope().asVertex());
     }
 }

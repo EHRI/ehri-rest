@@ -21,6 +21,7 @@ import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 import org.neo4j.graphdb.GraphDatabaseService;
+
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
@@ -74,7 +75,7 @@ public class AccessResource extends AbstractAccessibleEntityResource<AccessibleE
      * @throws ItemNotFound
      */
     private Set<Accessor> extractAccessors(String json) throws IOException,
-            JsonParseException, JsonMappingException, ItemNotFound {
+            JsonMappingException, ItemNotFound {
         JsonFactory factory = new JsonFactory();
         ObjectMapper mapper = new ObjectMapper(factory);
         TypeReference<LinkedList<String>> typeRef = new TypeReference<LinkedList<String>>() {

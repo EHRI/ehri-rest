@@ -31,7 +31,6 @@ public class AgentRestClientTest extends BaseRestClientTest {
 
     private String agentTestData;
     private String docTestData;
-    private String badAgentTestData = "{\"data\":{\"identifier\": \"jmp\"}}";
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
@@ -103,6 +102,7 @@ public class AgentRestClientTest extends BaseRestClientTest {
         // Create
         WebResource resource = client.resource(getExtensionEntryPointUri()
                 + "/agent");
+        String badAgentTestData = "{\"data\":{\"identifier\": \"jmp\"}}";
         ClientResponse response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)

@@ -19,8 +19,8 @@ import org.neo4j.server.configuration.ThirdPartyJaxRsPackage;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 
-import eu.ehri.extension.AbstractRestResource;
 import eu.ehri.extension.AbstractAccessibleEntityResource;
+import eu.ehri.extension.AbstractRestResource;
 import eu.ehri.plugin.test.utils.ServerRunner;
 
 /**

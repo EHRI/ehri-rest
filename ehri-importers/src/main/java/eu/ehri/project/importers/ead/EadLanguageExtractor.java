@@ -134,11 +134,11 @@ public class EadLanguageExtractor {
                     topLevelEad, XPathConstants.NODESET);
         } catch (XPathExpressionException e) {
             e.printStackTrace();
+            throw new RuntimeException(e);
         }
         for (int i = 0; i < profDescLang.getLength(); i++) {
             String langCode = getLanguageCodeFromLanguageNode(profDescLang
                     .item(i));
-            ;
             if (langCode != null) {
                 langs.add(langCode);
                 logger.debug("Got top level lang: " + langCode);

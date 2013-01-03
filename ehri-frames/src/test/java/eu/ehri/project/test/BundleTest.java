@@ -1,6 +1,8 @@
 package eu.ehri.project.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -21,9 +23,9 @@ import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.TemporalEntity;
+import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.persistance.BundleDAO;
 import eu.ehri.project.persistance.Converter;
-import eu.ehri.project.persistance.Bundle;
 
 public class BundleTest extends ModelTestBase {
 

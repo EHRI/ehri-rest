@@ -5,6 +5,7 @@ import static org.junit.Assert.assertFalse;
 
 import java.io.IOException;
 import java.util.Map;
+
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -130,7 +131,7 @@ public class EhriNeo4jPluginRestClientTest {
      * @throws JsonParseException
      */
     private Long getIdFromResponseString(String responseStr)
-            throws JsonParseException, JsonMappingException, IOException {
+            throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         Map<String, Object> data = mapper.readValue(responseStr, Map.class);
         String self = (String) data.get("self");

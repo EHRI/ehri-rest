@@ -1,6 +1,8 @@
 package eu.ehri.extension.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.net.URI;
@@ -14,9 +16,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 
 import org.codehaus.jackson.JsonFactory;
-import org.codehaus.jackson.JsonGenerationException;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 import org.junit.Before;
@@ -27,6 +26,7 @@ import com.google.common.collect.ImmutableList;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.WebResource;
+
 import eu.ehri.extension.AbstractRestResource;
 import eu.ehri.project.acl.ContentTypes;
 import eu.ehri.project.acl.PermissionType;
@@ -61,7 +61,7 @@ public class PermissionRestClientTest extends BaseRestClientTest {
 
     @Test
     public void testSettingGlobalPermissionMatrix()
-            throws JsonGenerationException, JsonMappingException,
+            throws
             UniformInterfaceException, IOException {
 
         WebResource resource = client.resource(getExtensionEntryPointUri()
@@ -119,7 +119,7 @@ public class PermissionRestClientTest extends BaseRestClientTest {
 
     @Test
     public void testPermissionSetPermissionDenied()
-            throws JsonGenerationException, JsonMappingException,
+            throws
             UniformInterfaceException, IOException {
 
         // Test a user setting his own permissions over REST - this should
@@ -140,7 +140,7 @@ public class PermissionRestClientTest extends BaseRestClientTest {
 
     @Test
     public void testGivingBadPermsErrorsCorrectly()
-            throws JsonGenerationException, JsonMappingException,
+            throws
             UniformInterfaceException, IOException {
 
         // If we give a permission matrix for a content type that doesn't
@@ -166,8 +166,8 @@ public class PermissionRestClientTest extends BaseRestClientTest {
     }
 
     @Test
-    public void testSettingGlobalPermissions() throws JsonGenerationException,
-            JsonMappingException, UniformInterfaceException, IOException {
+    public void testSettingGlobalPermissions() throws
+            UniformInterfaceException, IOException {
 
         WebResource resource = client.resource(getCreationUri());
         ClientResponse response = resource
@@ -312,8 +312,8 @@ public class PermissionRestClientTest extends BaseRestClientTest {
     }
 
     @Test
-    public void testSettingItemPermissions() throws JsonGenerationException,
-            JsonMappingException, UniformInterfaceException, IOException,
+    public void testSettingItemPermissions() throws
+            UniformInterfaceException, IOException,
             DeserializationError {
 
         // Fetch an existing item's data
@@ -388,7 +388,7 @@ public class PermissionRestClientTest extends BaseRestClientTest {
     }
 
     private List<Map<String, Map<String, List<String>>>> getInheritedMatrix(
-            String json) throws JsonParseException, JsonMappingException,
+            String json) throws
             IOException {
         JsonFactory factory = new JsonFactory();
         ObjectMapper mapper = new ObjectMapper(factory);

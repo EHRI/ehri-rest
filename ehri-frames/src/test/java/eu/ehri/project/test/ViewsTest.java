@@ -1,11 +1,14 @@
 package eu.ehri.project.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.Iterator;
 import java.util.Map;
 
 import org.junit.Test;
+
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.acl.AnonymousAccessor;
 import eu.ehri.project.acl.ContentTypes;
@@ -26,8 +29,8 @@ import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.PermissionGrantTarget;
 import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.views.Crud;
-import eu.ehri.project.views.impl.LoggingCrudViews;
 import eu.ehri.project.views.impl.CrudViews;
+import eu.ehri.project.views.impl.LoggingCrudViews;
 
 public class ViewsTest extends AbstractFixtureTest {
 

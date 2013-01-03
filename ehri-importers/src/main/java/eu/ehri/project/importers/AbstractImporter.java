@@ -6,6 +6,7 @@ import java.util.Map;
 
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
+
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.exceptions.IdGenerationError;
@@ -19,8 +20,8 @@ import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.base.TemporalEntity;
 import eu.ehri.project.models.idgen.AccessibleEntityIdGenerator;
 import eu.ehri.project.models.idgen.IdGenerator;
-import eu.ehri.project.persistance.BundleDAO;
 import eu.ehri.project.persistance.Bundle;
+import eu.ehri.project.persistance.BundleDAO;
 
 /**
  * Base class for importers that import documentary units, with their

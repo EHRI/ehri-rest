@@ -9,6 +9,7 @@ import java.util.Map.Entry;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.ParseException;
+
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
@@ -22,8 +23,8 @@ import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.UserProfile;
-import eu.ehri.project.persistance.BundleDAO;
 import eu.ehri.project.persistance.Bundle;
+import eu.ehri.project.persistance.BundleDAO;
 
 /**
  * Import EAD from the command line...

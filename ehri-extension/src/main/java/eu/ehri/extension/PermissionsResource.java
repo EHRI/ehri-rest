@@ -24,11 +24,11 @@ import javax.ws.rs.core.StreamingOutput;
 
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerationException;
-import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 import org.neo4j.graphdb.GraphDatabaseService;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -105,8 +105,7 @@ public class PermissionsResource extends AbstractRestResource {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getGlobalMatrix() throws PermissionDenied,
-            JsonGenerationException, JsonMappingException, IOException,
+    public Response getGlobalMatrix() throws PermissionDenied, IOException,
             ItemNotFound, BadRequester {
         Accessor accessor = getRequesterUserProfile();
         return getGlobalMatrix(manager.getId(accessor));
@@ -127,8 +126,7 @@ public class PermissionsResource extends AbstractRestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{userId:.+}")
     public Response getGlobalMatrix(@PathParam("userId") String userId)
-            throws PermissionDenied, JsonGenerationException,
-            JsonMappingException, IOException, ItemNotFound {
+            throws PermissionDenied, IOException, ItemNotFound {
 
         Accessor accessor = manager.getFrame(userId, Accessor.class);
         AclManager acl = new AclManager(graph);
@@ -157,8 +155,8 @@ public class PermissionsResource extends AbstractRestResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{userId:.+}")
-    public Response setGlobalMatrix(@PathParam("userId") String userId, String json)
-            throws PermissionDenied, IOException, ItemNotFound,
+    public Response setGlobalMatrix(@PathParam("userId") String userId,
+            String json) throws PermissionDenied, IOException, ItemNotFound,
             DeserializationError, BadRequester {
 
         HashMap<String, List<String>> globals = parseMatrix(json);
@@ -185,8 +183,7 @@ public class PermissionsResource extends AbstractRestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{userId:.+}/{id:.+}")
     public Response getEntityMatrix(@PathParam("userId") String userId,
-            @PathParam("id") String id) throws PermissionDenied,
-            JsonGenerationException, JsonMappingException, IOException,
+            @PathParam("id") String id) throws PermissionDenied, IOException,
             ItemNotFound {
 
         Accessor accessor = manager.getFrame(userId, Accessor.class);
@@ -217,8 +214,7 @@ public class PermissionsResource extends AbstractRestResource {
     @Path("/{userId:.+}/scope/{id:.+}")
     public Response getScopedMatrix(@PathParam("userId") String userId,
             @PathParam("id") String id) throws PermissionDenied, ItemNotFound,
-            JsonGenerationException, JsonMappingException, IOException,
-            DeserializationError {
+            IOException, DeserializationError {
 
         Accessor accessor = manager.getFrame(userId, Accessor.class);
         PermissionScope scope = manager.getFrame(id, PermissionScope.class);
@@ -226,8 +222,9 @@ public class PermissionsResource extends AbstractRestResource {
 
         return Response
                 .status(Status.OK)
-                .entity(new ObjectMapper().writeValueAsBytes(stringifyInheritedGlobalMatrix(acl
-                        .getInheritedGlobalPermissions(accessor))))
+                .entity(new ObjectMapper()
+                        .writeValueAsBytes(stringifyInheritedGlobalMatrix(acl
+                                .getInheritedGlobalPermissions(accessor))))
                 .build();
     }
 
@@ -253,12 +250,9 @@ public class PermissionsResource extends AbstractRestResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{userId:.+}/scope/{id:.+}")
-    public Response setScopedPermissions(
-            @PathParam("userId") String userId,
-            @PathParam("id") String id,
-            String json)
-            throws PermissionDenied, IOException, ItemNotFound,
-            DeserializationError, BadRequester {
+    public Response setScopedPermissions(@PathParam("userId") String userId,
+            @PathParam("id") String id, String json) throws PermissionDenied,
+            IOException, ItemNotFound, DeserializationError, BadRequester {
 
         HashMap<String, List<String>> globals = parseMatrix(json);
         Accessor accessor = manager.getFrame(userId, Accessor.class);
@@ -291,11 +285,9 @@ public class PermissionsResource extends AbstractRestResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{userId:.+}/{id:.+}")
-    public Response setItemPermissions(@PathParam("userId") String userId, 
-            @PathParam("id") String id,
-            String json)
-            throws PermissionDenied, IOException, ItemNotFound,
-            DeserializationError, BadRequester {
+    public Response setItemPermissions(@PathParam("userId") String userId,
+            @PathParam("id") String id, String json) throws PermissionDenied,
+            IOException, ItemNotFound, DeserializationError, BadRequester {
 
         List<String> scopedPerms;
         try {
@@ -331,7 +323,7 @@ public class PermissionsResource extends AbstractRestResource {
     // This was why scala was invented...
 
     private HashMap<String, List<String>> parseMatrix(String json)
-            throws IOException, JsonParseException, DeserializationError {
+            throws IOException, DeserializationError {
         HashMap<String, List<String>> globals;
         try {
             JsonFactory factory = new JsonFactory();

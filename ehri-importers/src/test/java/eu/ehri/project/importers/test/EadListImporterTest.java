@@ -1,12 +1,14 @@
 package eu.ehri.project.importers.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.InputStream;
 
 import org.junit.Test;
 
 import com.tinkerpop.blueprints.Vertex;
+
 import eu.ehri.project.importers.EadImportManager;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.models.Action;

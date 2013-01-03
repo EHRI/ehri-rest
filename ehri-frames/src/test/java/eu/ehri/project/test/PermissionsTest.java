@@ -1,6 +1,7 @@
 package eu.ehri.project.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 
 import java.util.HashMap;
 import java.util.LinkedList;

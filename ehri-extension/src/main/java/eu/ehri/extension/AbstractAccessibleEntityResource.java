@@ -1,14 +1,18 @@
 package eu.ehri.extension;
 
+import static eu.ehri.extension.RestHelpers.produceErrorMessageJson;
+
 import java.net.URI;
+
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriBuilder;
-import javax.ws.rs.core.Response.Status;
 
 import org.neo4j.graphdb.GraphDatabaseService;
+
 import com.tinkerpop.frames.VertexFrame;
 
 import eu.ehri.extension.errors.BadRequester;
@@ -26,8 +30,6 @@ import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.views.Crud;
 import eu.ehri.project.views.impl.LoggingCrudViews;
 import eu.ehri.project.views.impl.Query;
-
-import static eu.ehri.extension.RestHelpers.*;
 
 /**
  * Handle CRUD operations on AccessibleEntity's by using the

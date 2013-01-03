@@ -8,8 +8,8 @@ import com.google.common.collect.ListMultimap;
 
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.utils.ClassUtils;
-import eu.ehri.project.persistance.BundleValidator;
 import eu.ehri.project.persistance.Bundle;
+import eu.ehri.project.persistance.BundleValidator;
 
 /**
  * Class responsible for validating bundles.

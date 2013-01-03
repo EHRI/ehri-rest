@@ -10,6 +10,7 @@ import org.junit.Test;
 
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
+
 import eu.ehri.extension.AbstractRestResource;
 
 public class AccessRestClientTest extends BaseRestClientTest {
