@@ -31,6 +31,8 @@ import eu.ehri.project.views.impl.Query;
 
 public abstract class AbstractRestResource {
 
+    public static final int DEFAULT_LIST_LIMIT = 20;
+
     /**
      * With each request the headers of that request are injected into the
      * requestHeaders parameter.

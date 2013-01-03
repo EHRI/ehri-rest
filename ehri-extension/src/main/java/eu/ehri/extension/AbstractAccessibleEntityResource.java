@@ -40,8 +40,6 @@ import static eu.ehri.extension.RestHelpers.*;
 public class AbstractAccessibleEntityResource<E extends AccessibleEntity> extends
         AbstractRestResource {
 
-    public static final int DEFAULT_LIST_LIMIT = 20;
-
     protected final Crud<E> views;
     protected final Query<E> querier;
     protected final Class<E> cls;

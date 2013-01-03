@@ -88,7 +88,8 @@ public final class Converter {
      * @return
      * @throws SerializationError
      */
-    public <T extends VertexFrame> String vertexFrameToJson(T item) throws SerializationError {
+    public <T extends VertexFrame> String vertexFrameToJson(T item)
+            throws SerializationError {
         return DataConverter.bundleToJson(vertexFrameToBundle(item));
     }
 
@@ -154,18 +155,23 @@ public final class Converter {
     public <T extends VertexFrame> Bundle vertexFrameToBundle(T item, int depth)
             throws SerializationError {
         // FIXME: Try and move the logic for accessing id and type elsewhere.
-        String id = (String) item.asVertex().getProperty(EntityType.ID_KEY);
-        EntityClass type = EntityClass.withName((String) item.asVertex()
-                .getProperty(EntityType.TYPE_KEY));
-        ListMultimap<String,Bundle> relations = getRelationData(item, depth,
-                type.getEntityClass());
-        return new Bundle(id, type,
-                getVertexData(item.asVertex()), relations);
+        try {
+            String id = (String) item.asVertex().getProperty(EntityType.ID_KEY);
+            EntityClass type = EntityClass.withName((String) item.asVertex()
+                    .getProperty(EntityType.TYPE_KEY));
+            ListMultimap<String, Bundle> relations = getRelationData(item,
+                    depth, type.getEntityClass());
+            return new Bundle(id, type, getVertexData(item.asVertex()),
+                    relations);
+        } catch (IllegalArgumentException e) {
+            throw new SerializationError("Unable to serialize vertex: " + item,
+                    e);
+        }
     }
 
-    private <T extends VertexFrame> ListMultimap<String,Bundle> getRelationData(T item, int depth,
-            Class<?> cls) {
-        ListMultimap<String,Bundle> relations = LinkedListMultimap.create();
+    private <T extends VertexFrame> ListMultimap<String, Bundle> getRelationData(
+            T item, int depth, Class<?> cls) {
+        ListMultimap<String, Bundle> relations = LinkedListMultimap.create();
         if (depth > 0) {
             Map<String, Method> fetchMethods = ClassUtils.getFetchMethods(cls);
             for (Map.Entry<String, Method> entry : fetchMethods.entrySet()) {
@@ -181,9 +187,11 @@ public final class Converter {
 
                 try {
                     Object result;
-                    try {                        
-                        // NB: We have to re-cast the item into its 'natural' type.
-                        result = method.invoke(graph.frame(item.asVertex(), cls));
+                    try {
+                        // NB: We have to re-cast the item into its 'natural'
+                        // type.
+                        result = method
+                                .invoke(graph.frame(item.asVertex(), cls));
                     } catch (IllegalArgumentException e) {
                         String message = String
                                 .format("When serializing a bundle, a method was called on an item it did not expect. Method name: %s, item class: %s",

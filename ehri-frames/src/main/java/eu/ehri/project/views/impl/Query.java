@@ -40,6 +40,9 @@ import eu.ehri.project.views.ViewHelper;
  * @param <E>
  */
 public final class Query<E extends AccessibleEntity> implements Search<E> {
+
+    public static final int DEFAULT_LIST_LIMIT = 20;
+
     private final Optional<Integer> offset;
     private final Optional<Integer> limit;
     private final boolean page;
@@ -288,7 +291,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
                 graph.frameVertices(
                         setPipelineRange(new GremlinPipeline<Vertex, Vertex>(
                                 userVerts)), cls), userVerts.size(),
-                offset.orNull(), limit.orNull());
+                offset.or(0), limit.or(DEFAULT_LIST_LIMIT));
     }
 
     /**
@@ -320,7 +323,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
                 return new Page<E>(graph.frameVertices(
                         setPipelineRange(new GremlinPipeline<Vertex, Vertex>(
                                 indexQ).filter(aclFilterFunction)), cls),
-                        count, offset.orNull(), limit.orNull());
+                        count, offset.or(0), limit.or(DEFAULT_LIST_LIMIT));
             } finally {
                 indexQ.close();
             }
@@ -407,8 +410,8 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      * 
      * @return
      */
-    public int getOffset() {
-        return offset.orNull();
+    public Optional<Integer> getOffset() {
+        return offset;
     }
 
     /**
@@ -426,8 +429,8 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      * 
      * @return
      */
-    public int getLimit() {
-        return limit.orNull();
+    public Optional<Integer> getLimit() {
+        return limit;
     }
 
     /**

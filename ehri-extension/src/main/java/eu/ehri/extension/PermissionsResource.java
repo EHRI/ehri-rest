@@ -9,15 +9,18 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.StreamingOutput;
 
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerationException;
@@ -38,10 +41,12 @@ import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
+import eu.ehri.project.models.PermissionGrant;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.views.impl.AclViews;
+import eu.ehri.project.views.impl.Query;
 
 /**
  * Provides a RESTfull(ish) interface for setting PermissionTarget perms.
@@ -56,6 +61,34 @@ public class PermissionsResource extends AbstractRestResource {
 
     public PermissionsResource(@Context GraphDatabaseService database) {
         super(database);
+    }
+
+    /**
+     * Get the global permission matrix for the user making the request, based
+     * on the Authorization header.
+     * 
+     * @return
+     * @throws PermissionDenied
+     * @throws JsonGenerationException
+     * @throws JsonMappingException
+     * @throws IOException
+     * @throws ItemNotFound
+     * @throws BadRequester
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/list/{id:.+}")
+    public StreamingOutput listPermissionGrants(
+            @PathParam("id") String id,
+            @QueryParam("offset") @DefaultValue("0") int offset,
+            @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit)
+            throws PermissionDenied, ItemNotFound, BadRequester {
+        Accessor user = manager.getFrame(id, Accessor.class);
+        Accessor accessor = getRequesterUserProfile();
+        Query<AccessibleEntity> query = new Query<AccessibleEntity>(graph,
+                AccessibleEntity.class);
+        return streamingPage(query.page(user.getPermissionGrants(), accessor,
+                PermissionGrant.class));
     }
 
     /**
@@ -92,12 +125,12 @@ public class PermissionsResource extends AbstractRestResource {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{id:.+}")
-    public Response getGlobalMatrix(@PathParam("id") String id)
+    @Path("/{userId:.+}")
+    public Response getGlobalMatrix(@PathParam("userId") String userId)
             throws PermissionDenied, JsonGenerationException,
             JsonMappingException, IOException, ItemNotFound {
 
-        Accessor accessor = manager.getFrame(id, Accessor.class);
+        Accessor accessor = manager.getFrame(userId, Accessor.class);
         AclManager acl = new AclManager(graph);
 
         return Response
@@ -123,17 +156,17 @@ public class PermissionsResource extends AbstractRestResource {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{id:.+}")
-    public Response setGlobalMatrix(@PathParam("id") String id, String json)
+    @Path("/{userId:.+}")
+    public Response setGlobalMatrix(@PathParam("userId") String userId, String json)
             throws PermissionDenied, IOException, ItemNotFound,
             DeserializationError, BadRequester {
 
         HashMap<String, List<String>> globals = parseMatrix(json);
-        Accessor accessor = manager.getFrame(id, Accessor.class);
+        Accessor accessor = manager.getFrame(userId, Accessor.class);
         Accessor grantee = getRequesterUserProfile();
         new AclViews(graph).setGlobalPermissionMatrix(accessor,
                 enumifyMatrix(globals), grantee);
-        return getGlobalMatrix(id);
+        return getGlobalMatrix(userId);
     }
 
     /**
@@ -219,16 +252,17 @@ public class PermissionsResource extends AbstractRestResource {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{id:.+}/scope/{userId:.+}")
-    public Response setScopedPermissions(@PathParam("id") String id,
-            @PathParam("typeId") String typeId,
-            @PathParam("userId") String userId, String json)
+    @Path("/{userId:.+}/scope/{id:.+}")
+    public Response setScopedPermissions(
+            @PathParam("userId") String userId,
+            @PathParam("id") String id,
+            String json)
             throws PermissionDenied, IOException, ItemNotFound,
             DeserializationError, BadRequester {
 
         HashMap<String, List<String>> globals = parseMatrix(json);
-        PermissionScope scope = manager.getFrame(id, PermissionScope.class);
         Accessor accessor = manager.getFrame(userId, Accessor.class);
+        PermissionScope scope = manager.getFrame(id, PermissionScope.class);
         Accessor grantee = getRequesterUserProfile();
         AclViews acl = new AclViews(graph, scope);
 
