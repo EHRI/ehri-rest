@@ -68,9 +68,10 @@ public class PermissionsTest extends AbstractFixtureTest {
     @Test(expected = PermissionDenied.class)
     public void testCreateAsUserWithBadScopedPerms() throws PermissionDenied,
             ValidationError, DeserializationError, IntegrityError, ItemNotFound {
-        acl.grantPermissions(user,
+        Agent scope = manager.getFrame("r1", Agent.class);
+        new AclManager(graph, scope).grantPermissions(user,
                 viewHelper.getContentType(EntityClass.DOCUMENTARY_UNIT),
-                PermissionType.CREATE, manager.getFrame("r1", Agent.class));
+                PermissionType.CREATE);
         assertNotNull(views.setScope(SystemScope.getInstance()).create(
                 getTestBundle(), user));
     }
@@ -79,9 +80,9 @@ public class PermissionsTest extends AbstractFixtureTest {
     public void testCreateAsUserWithGoodScopedPerms() throws PermissionDenied,
             ValidationError, DeserializationError, IntegrityError, ItemNotFound {
         Agent scope = manager.getFrame("r1", Agent.class);
-        acl.grantPermissions(user,
+        new AclManager(graph, scope).grantPermissions(user,
                 viewHelper.getContentType(EntityClass.DOCUMENTARY_UNIT),
-                PermissionType.CREATE, scope);
+                PermissionType.CREATE);
         assertNotNull(views.setScope(scope).create(getTestBundle(), user));
     }
 
@@ -90,9 +91,9 @@ public class PermissionsTest extends AbstractFixtureTest {
             throws PermissionDenied, ValidationError, DeserializationError,
             IntegrityError, ItemNotFound {
         Agent scope = manager.getFrame("r1", Agent.class);
-        acl.grantPermissions(user,
+        new AclManager(graph, scope).grantPermissions(user,
                 viewHelper.getContentType(EntityClass.DOCUMENTARY_UNIT),
-                PermissionType.CREATE, scope);
+                PermissionType.CREATE);
         DocumentaryUnit c1 = views.setScope(scope)
                 .create(getTestBundle(), user);
         // We have to explicitly set the scope of this new item.
@@ -113,9 +114,9 @@ public class PermissionsTest extends AbstractFixtureTest {
             IntegrityError, ItemNotFound {
         Agent scope = manager.getFrame("r1", Agent.class);
         Agent badScope = manager.getFrame("r2", Agent.class);
-        acl.grantPermissions(user,
+        new AclManager(graph, scope).grantPermissions(user,
                 viewHelper.getContentType(EntityClass.DOCUMENTARY_UNIT),
-                PermissionType.CREATE, scope);
+                PermissionType.CREATE);
         assertNotNull(views.setScope(badScope).create(getTestBundle(), user));
     }
 

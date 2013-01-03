@@ -34,7 +34,6 @@ public final class AclViews implements Acl {
     private final FramedGraph<Neo4jGraph> graph;
     private final AclManager acl;
     private final ViewHelper helper;
-    private final PermissionScope scope;
     private final GraphManager manager;
 
     /**
@@ -46,9 +45,8 @@ public final class AclViews implements Acl {
      */
     public AclViews(FramedGraph<Neo4jGraph> graph, PermissionScope scope) {
         this.graph = graph;
-        this.scope = scope;
-        acl = new AclManager(graph);
         helper = new ViewHelper(graph, scope);
+        acl = helper.getAclManager();
         manager = GraphManagerFactory.getInstance(graph);
     }
 
@@ -193,7 +191,7 @@ public final class AclViews implements Acl {
         try {
             helper.checkEntityPermission(item, grantee, PermissionType.GRANT);
             for (PermissionType t : permissionList) {
-                acl.grantPermissions(accessor, item, t, scope);
+                acl.grantPermissions(accessor, item, t);
             }
             // Log the action...
             new ActionManager(graph).createAction(
@@ -211,36 +209,4 @@ public final class AclViews implements Acl {
         }
     }
 
-    /**
-     * Set permissions for an accessor within a the given scope of this Acl
-     * view, on the given content types.
-     * 
-     * @param contentType
-     * @param accessor
-     * @param permissionList
-     * @param grantee
-     * 
-     * @throws PermissionDenied
-     */
-    public void setScopedPermissions(Accessor accessor,
-            Map<ContentTypes, List<PermissionType>> permissionMap,
-            Accessor grantee) throws PermissionDenied {
-        try {
-            helper.checkEntityPermission(scope, grantee, PermissionType.GRANT);
-            acl.setScopedPermissionMatrix(accessor, scope, permissionMap);
-            // Log the action...
-            new ActionManager(graph).createAction(
-                    graph.frame(scope.asVertex(), AccessibleEntity.class),
-                    graph.frame(grantee.asVertex(), Actioner.class),
-                    "Set scoped permissions").setSubject(
-                    graph.frame(accessor.asVertex(), AccessibleEntity.class));
-            graph.getBaseGraph().stopTransaction(Conclusion.SUCCESS);
-        } catch (PermissionDenied e) {
-            graph.getBaseGraph().stopTransaction(Conclusion.FAILURE);
-            throw e;
-        } catch (Exception e) {
-            graph.getBaseGraph().stopTransaction(Conclusion.FAILURE);
-            throw new RuntimeException(e);
-        }
-    }
 }

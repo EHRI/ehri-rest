@@ -222,12 +222,12 @@ public class PermissionsResource extends AbstractRestResource {
 
         Accessor accessor = manager.getFrame(userId, Accessor.class);
         PermissionScope scope = manager.getFrame(id, PermissionScope.class);
-        AclManager acl = new AclManager(graph);
+        AclManager acl = new AclManager(graph, scope);
 
         return Response
                 .status(Status.OK)
                 .entity(new ObjectMapper().writeValueAsBytes(stringifyInheritedGlobalMatrix(acl
-                        .getInheritedScopedPermissions(accessor, scope))))
+                        .getInheritedGlobalPermissions(accessor))))
                 .build();
     }
 
@@ -266,7 +266,7 @@ public class PermissionsResource extends AbstractRestResource {
         Accessor grantee = getRequesterUserProfile();
         AclViews acl = new AclViews(graph, scope);
 
-        acl.setScopedPermissions(accessor, enumifyMatrix(globals), grantee);
+        acl.setGlobalPermissionMatrix(accessor, enumifyMatrix(globals), grantee);
         return getScopedMatrix(userId, id);
     }
 
@@ -290,9 +290,10 @@ public class PermissionsResource extends AbstractRestResource {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{id:.+}/{userId:.+}")
-    public Response setItemPermissions(@PathParam("id") String id,
-            @PathParam("userId") String userId, String json)
+    @Path("/{userId:.+}/{id:.+}")
+    public Response setItemPermissions(@PathParam("userId") String userId, 
+            @PathParam("id") String id,
+            String json)
             throws PermissionDenied, IOException, ItemNotFound,
             DeserializationError, BadRequester {
 
@@ -307,10 +308,10 @@ public class PermissionsResource extends AbstractRestResource {
             throw new DeserializationError(e.getMessage());
         }
 
-        AccessibleEntity item = manager.getFrame(id, PermissionScope.class);
         Accessor accessor = manager.getFrame(userId, Accessor.class);
+        AccessibleEntity item = manager.getFrame(id, PermissionScope.class);
         Accessor grantee = getRequesterUserProfile();
-        AclViews acl = new AclViews(graph, item.getScope());
+        AclViews acl = new AclViews(graph);
 
         acl.setItemPermissions(item, accessor,
                 enumifyPermissionList(scopedPerms), grantee);

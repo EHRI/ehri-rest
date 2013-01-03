@@ -331,6 +331,7 @@ public class PermissionRestClientTest extends BaseRestClientTest {
                         LIMITED_USER_NAME).get(ClientResponse.class);
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
 
+        System.out.println("------------ BEFORE -----------------");
         // First try and update the item
         String testUpdateString = Bundle
                 .fromString(response.getEntity(String.class))
@@ -351,8 +352,7 @@ public class PermissionRestClientTest extends BaseRestClientTest {
 
         // Set the permission via REST
         resource = client.resource(getExtensionEntryPointUri() + "/"
-                + Entities.PERMISSION + "/" + targetResourceId + "/"
-                + LIMITED_USER_NAME);
+                + Entities.PERMISSION + "/" + LIMITED_USER_NAME + "/" + targetResourceId);
         response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
@@ -362,6 +362,7 @@ public class PermissionRestClientTest extends BaseRestClientTest {
 
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
 
+        System.out.println("------------ AFTER -----------------");
         // Retry the create action
         resource = client.resource(targetResourceUri);
         response = resource
@@ -370,7 +371,7 @@ public class PermissionRestClientTest extends BaseRestClientTest {
                 .header(AbstractRestResource.AUTH_HEADER_NAME,
                         LIMITED_USER_NAME).entity(testUpdateString)
                 .put(ClientResponse.class);
-
+        System.out.println(response.getEntity(String.class));
         // Should get UPDATED this time...
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
 

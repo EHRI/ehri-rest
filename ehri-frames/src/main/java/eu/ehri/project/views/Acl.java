@@ -30,10 +30,6 @@ public interface Acl {
             Set<PermissionType> permissions, Accessor grantee)
             throws PermissionDenied;
 
-    public void setScopedPermissions(Accessor accessor,
-            Map<ContentTypes, List<PermissionType>> permissionMap,
-            Accessor grantee) throws PermissionDenied;
-
     public void setAccessors(AccessibleEntity entity, Set<Accessor> accessors,
             Accessor user) throws PermissionDenied;
 }
