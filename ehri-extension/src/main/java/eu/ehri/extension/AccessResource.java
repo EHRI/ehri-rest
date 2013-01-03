@@ -48,8 +48,7 @@ public class AccessResource extends EhriNeo4jFramedResource<AccessibleEntity> {
 
         try {
             Set<Accessor> accessors = extractAccessors(json);
-            AclViews<AccessibleEntity> acl = new AclViews<AccessibleEntity>(
-                    graph, cls);
+            AclViews acl = new AclViews(graph);
             acl.setAccessors(manager.getFrame(id, AccessibleEntity.class),
                     accessors, getRequesterUserProfile());
             return Response.status(Status.OK).build();

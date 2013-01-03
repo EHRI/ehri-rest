@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -25,6 +27,7 @@ import org.codehaus.jackson.type.TypeReference;
 import org.neo4j.graphdb.GraphDatabaseService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.acl.AclManager;
@@ -87,9 +90,8 @@ public class PermissionsResource extends AbstractRestResource {
 
         Accessor accessor = manager.getFrame(id, Accessor.class);
         Accessor grantee = getRequesterUserProfile();
-        AclViews<AccessibleEntity> acl = new AclViews<AccessibleEntity>(graph,
-                AccessibleEntity.class);
-        acl.setGlobalPermissionMatrix(accessor, grantee, enumifyMatrix(globals));
+        new AclViews(graph).setGlobalPermissionMatrix(accessor, enumifyMatrix(globals),
+                grantee);
         return getGlobalMatrix(id);
     }
 
@@ -177,16 +179,10 @@ public class PermissionsResource extends AbstractRestResource {
     /**
      * Set a user's permissions on a content type with a given scope.
      * 
-     * FIXME: Generalise this behaviour.
-     * 
-     * @param id
-     *            the scope id
-     * @param type
-     *            the content type
-     * @param the
-     *            user id
-     * @param json
-     *            the serialized permission list
+     * @param id the scope id
+     * @param type the content type
+     * @param user the user id
+     * @param json the serialized permission list
      * @return
      * @throws PermissionDenied
      * @throws IOException
@@ -218,13 +214,70 @@ public class PermissionsResource extends AbstractRestResource {
         PermissionScope scope = manager.getFrame(id, PermissionScope.class);
         Accessor accessor = manager.getFrame(userId, Accessor.class);
         Accessor grantee = getRequesterUserProfile();
-        AclViews<AccessibleEntity> acl = new AclViews<AccessibleEntity>(graph,
-                AccessibleEntity.class, scope);
+        AclViews acl = new AclViews(graph, scope);
 
-        acl.setScopedPermissions(accessor, grantee,
-                ContentTypes.withName(typeId),
-                enumifyPermissionList(scopedPerms));
-        return Response.status(Status.OK).build();
+        acl.setScopedPermissions(ContentTypes.withName(typeId), accessor,
+                enumifyPermissionList(scopedPerms),
+                grantee);
+
+        return Response
+                .status(Status.OK)
+                .entity(new ObjectMapper()
+                        .writeValueAsBytes(stringifyInheritedMatrix(new AclManager(
+                                graph).getInheritedEntityPermissions(accessor,
+                                manager.getFrame(id, AccessibleEntity.class)))))
+                .build();
+    }
+
+    /**
+     * Set a user's permissions on a given item.
+     * 
+     * @param id the item id
+     * @param userId the user id
+     * @param json the serialized permission list
+     * @return
+     * 
+     * @throws PermissionDenied
+     * @throws IOException
+     * @throws ItemNotFound
+     * @throws DeserializationError
+     * @throws BadRequester
+     */
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id:.+}/{userId:.+}")
+    public Response setItemPermissions(@PathParam("id") String id,
+            @PathParam("userId") String userId, String json)
+            throws PermissionDenied, IOException, ItemNotFound,
+            DeserializationError, BadRequester {
+
+        List<String> scopedPerms;
+        try {
+            JsonFactory factory = new JsonFactory();
+            ObjectMapper mapper = new ObjectMapper(factory);
+            TypeReference<List<String>> typeRef = new TypeReference<List<String>>() {
+            };
+            scopedPerms = mapper.readValue(json, typeRef);
+        } catch (JsonMappingException e) {
+            throw new DeserializationError(e.getMessage());
+        }
+
+        AccessibleEntity item = manager.getFrame(id, PermissionScope.class);
+        Accessor accessor = manager.getFrame(userId, Accessor.class);
+        Accessor grantee = getRequesterUserProfile();
+        AclViews acl = new AclViews(graph, item.getScope());
+
+        acl.setItemPermissions(item, accessor, enumifyPermissionList(scopedPerms),
+                grantee);
+
+        return Response
+                .status(Status.OK)
+                .entity(new ObjectMapper()
+                        .writeValueAsBytes(stringifyInheritedMatrix(new AclManager(
+                                graph).getInheritedEntityPermissions(accessor,
+                                manager.getFrame(id, AccessibleEntity.class)))))
+                .build();
     }
 
     // Helpers. These just convert from string to internal enum representations
@@ -310,10 +363,10 @@ public class PermissionsResource extends AbstractRestResource {
         }
     }
 
-    private List<PermissionType> enumifyPermissionList(List<String> scopedPerms)
+    private Set<PermissionType> enumifyPermissionList(List<String> scopedPerms)
             throws DeserializationError {
         try {
-            List<PermissionType> perms = Lists.newLinkedList();
+            Set<PermissionType> perms = Sets.newHashSet();
             for (String p : scopedPerms) {
                 perms.add(PermissionType.withName(p));
             }

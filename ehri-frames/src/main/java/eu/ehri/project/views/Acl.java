@@ -10,7 +10,6 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.models.PermissionGrant;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 
@@ -18,19 +17,23 @@ import eu.ehri.project.models.base.Accessor;
  * View interface for access control operations.
  * 
  * @author mike
- *
- * @param <E>
+ * 
  */
-public interface Acl<E extends AccessibleEntity> {
+public interface Acl {
 
-    public PermissionGrant setPermission(E entity, Accessor user,
-            PermissionType permission) throws PermissionDenied, ValidationError,
-            SerializationError;
-    
-    public void setGlobalPermissionMatrix(Accessor accessor, Accessor grantee,
-            Map<ContentTypes, List<PermissionType>> permissionMap) throws PermissionDenied,
-            ValidationError, SerializationError, ItemNotFound;
-    
-    public void setAccessors(E entity, Set<Accessor> accessors, Accessor user)
+    public void setGlobalPermissionMatrix(Accessor accessor,
+            Map<ContentTypes, List<PermissionType>> permissionMap,
+            Accessor grantee) throws PermissionDenied, ValidationError,
+            SerializationError, ItemNotFound;
+
+    public void setItemPermissions(AccessibleEntity entity, Accessor accessor,
+            Set<PermissionType> permissions, Accessor grantee)
             throws PermissionDenied;
+
+    public void setScopedPermissions(ContentTypes contentType,
+            Accessor accessor, Set<PermissionType> permissions, Accessor grantee)
+            throws PermissionDenied;
+
+    public void setAccessors(AccessibleEntity entity, Set<Accessor> accessors,
+            Accessor user) throws PermissionDenied;
 }

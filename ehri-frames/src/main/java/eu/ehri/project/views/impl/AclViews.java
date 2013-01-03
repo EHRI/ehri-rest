@@ -29,7 +29,7 @@ import eu.ehri.project.persistance.ActionManager;
 import eu.ehri.project.views.Acl;
 import eu.ehri.project.views.ViewHelper;
 
-public final class AclViews<E extends AccessibleEntity> implements Acl<E> {
+public final class AclViews implements Acl {
 
     private final FramedGraph<Neo4jGraph> graph;
     private final AclManager acl;
@@ -44,8 +44,7 @@ public final class AclViews<E extends AccessibleEntity> implements Acl<E> {
      * @param cls
      * @param scope
      */
-    public AclViews(FramedGraph<Neo4jGraph> graph, Class<E> cls,
-            PermissionScope scope) {
+    public AclViews(FramedGraph<Neo4jGraph> graph, PermissionScope scope) {
         this.graph = graph;
         this.scope = scope;
         acl = new AclManager(graph);
@@ -59,23 +58,8 @@ public final class AclViews<E extends AccessibleEntity> implements Acl<E> {
      * @param graph
      * @param cls
      */
-    public AclViews(FramedGraph<Neo4jGraph> graph, Class<E> cls) {
-        this(graph, cls, SystemScope.getInstance());
-    }
-
-    /**
-     * Set permissions on a PermissionTarget.
-     * 
-     * @param entity
-     * @param user
-     * @param permissionType
-     * @return
-     * @throws PermissionDenied
-     */
-    public PermissionGrant setPermission(E entity, Accessor user,
-            PermissionType permissionType) throws PermissionDenied {
-        helper.checkEntityPermission(entity, user, PermissionType.GRANT);
-        return acl.grantPermissions(user, entity, permissionType, scope);
+    public AclViews(FramedGraph<Neo4jGraph> graph) {
+        this(graph, SystemScope.getInstance());
     }
 
     /**
@@ -84,12 +68,11 @@ public final class AclViews<E extends AccessibleEntity> implements Acl<E> {
      * @param accessor
      * @param grantee
      * @param matrix
-     * 
      * @throws PermissionDenied
      */
-    public void setGlobalPermissionMatrix(Accessor accessor, Accessor grantee,
-            Map<ContentTypes, List<PermissionType>> permissionMap)
-            throws PermissionDenied {
+    public void setGlobalPermissionMatrix(Accessor accessor,
+            Map<ContentTypes, List<PermissionType>> permissionMap,
+            Accessor grantee) throws PermissionDenied {
         try {
             checkGrantPermission(grantee, permissionMap);
             acl.setGlobalPermissionMatrix(accessor, permissionMap);
@@ -108,8 +91,18 @@ public final class AclViews<E extends AccessibleEntity> implements Acl<E> {
         }
     }
 
-    public void setAccessors(E entity, Set<Accessor> accessors, Accessor user)
-            throws PermissionDenied {
+    /**
+     * Set accessors for a given resource. If the given accessor set is empty
+     * the resource will be globally visible.
+     * 
+     * @param entity
+     * @param accessors
+     *            the list of accessors to whom this item is visible
+     * @param accessor
+     *            the user making the change
+     */
+    public void setAccessors(AccessibleEntity entity, Set<Accessor> accessors,
+            Accessor user) throws PermissionDenied {
         try {
             helper.checkEntityPermission(entity, user, PermissionType.UPDATE);
             // FIXME: Must be a more efficient way to do this, whilst
@@ -184,15 +177,66 @@ public final class AclViews<E extends AccessibleEntity> implements Acl<E> {
         }
     }
 
-    public void setScopedPermissions(Accessor accessor, Accessor grantee,
-            ContentTypes contentType, List<PermissionType> enumifyPermissionList)
+    /**
+     * Set permissions for the given user on the given item.
+     * 
+     * @param item
+     * @param accessor
+     * @param permissionList
+     * @param grantee
+     * 
+     * @throws PermissionDenied
+     */
+    public void setItemPermissions(AccessibleEntity item, Accessor accessor,
+            Set<PermissionType> permissionList, Accessor grantee)
             throws PermissionDenied {
         try {
+            helper.checkEntityPermission(item, grantee, PermissionType.GRANT);
+            for (PermissionType t : permissionList) {
+                acl.grantPermissions(accessor, item, t, scope);
+            }
+            // Log the action...
+            new ActionManager(graph).createAction(
+                    graph.frame(item.asVertex(), AccessibleEntity.class),
+                    graph.frame(grantee.asVertex(), Actioner.class),
+                    "Set item permissions").setSubject(
+                    graph.frame(accessor.asVertex(), AccessibleEntity.class));
+            graph.getBaseGraph().stopTransaction(Conclusion.SUCCESS);
+        } catch (PermissionDenied e) {
+            graph.getBaseGraph().stopTransaction(Conclusion.FAILURE);
+            throw e;
+        } catch (Exception e) {
+            graph.getBaseGraph().stopTransaction(Conclusion.FAILURE);
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Set permissions for an accessor within a the given scope of this Acl
+     * view, on the given content types.
+     * 
+     * @param contentType
+     * @param accessor
+     * @param permissionList
+     * @param grantee
+     * 
+     * @throws PermissionDenied
+     */
+    public void setScopedPermissions(ContentTypes contentType,
+            Accessor accessor, Set<PermissionType> permissionList,
+            Accessor grantee) throws PermissionDenied {
+        try {
             helper.checkEntityPermission(scope, grantee, PermissionType.GRANT);
-            for (PermissionType t : enumifyPermissionList) {
+            for (PermissionType t : permissionList) {
                 acl.grantPermissions(accessor, acl.getContentType(contentType),
                         t, scope);
             }
+            // Log the action...
+            new ActionManager(graph).createAction(
+                    graph.frame(scope.asVertex(), AccessibleEntity.class),
+                    graph.frame(grantee.asVertex(), Actioner.class),
+                    "Set scoped permissions").setSubject(
+                    graph.frame(accessor.asVertex(), AccessibleEntity.class));
             graph.getBaseGraph().stopTransaction(Conclusion.SUCCESS);
         } catch (PermissionDenied e) {
             graph.getBaseGraph().stopTransaction(Conclusion.FAILURE);
