@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
@@ -75,7 +76,7 @@ public final class AclManager {
     public AclManager(FramedGraph<Neo4jGraph> graph, PermissionScope scope) {
         this.graph = graph;
         this.manager = GraphManagerFactory.getInstance(graph);
-        this.scope = scope;
+        this.scope = Optional.<PermissionScope>of(scope).or(SystemScope.getInstance());
         this.scopes = getAllScopes(scope);
         populateEnumNodeLookups();
     }
