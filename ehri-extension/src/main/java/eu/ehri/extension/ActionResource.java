@@ -28,7 +28,7 @@ import eu.ehri.project.views.impl.Query;
  * here.
  */
 @Path(Entities.ACTION)
-public class ActionResource extends EhriNeo4jFramedResource<Action> {
+public class ActionResource extends AbstractAccessibleEntityResource<Action> {
 
     public ActionResource(@Context GraphDatabaseService database) {
         super(database, Action.class);

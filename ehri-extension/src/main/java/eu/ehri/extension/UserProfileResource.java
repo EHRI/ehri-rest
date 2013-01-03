@@ -30,7 +30,7 @@ import eu.ehri.project.models.UserProfile;
  * Provides a RESTfull interface for the UserProfile.
  */
 @Path(Entities.USER_PROFILE)
-public class UserProfileResource extends EhriNeo4jFramedResource<UserProfile> {
+public class UserProfileResource extends AbstractAccessibleEntityResource<UserProfile> {
 
     public UserProfileResource(@Context GraphDatabaseService database) {
         super(database, UserProfile.class);

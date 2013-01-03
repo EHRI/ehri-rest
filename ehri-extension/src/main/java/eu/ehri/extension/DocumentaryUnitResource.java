@@ -40,7 +40,7 @@ import eu.ehri.project.views.impl.Query;
  */
 @Path(Entities.DOCUMENTARY_UNIT)
 public class DocumentaryUnitResource extends
-        EhriNeo4jFramedResource<DocumentaryUnit> {
+        AbstractAccessibleEntityResource<DocumentaryUnit> {
 
     public DocumentaryUnitResource(@Context GraphDatabaseService database) {
         super(database, DocumentaryUnit.class);

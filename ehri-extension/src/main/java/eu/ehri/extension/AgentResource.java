@@ -40,7 +40,7 @@ import eu.ehri.project.views.impl.Query;
  * Provides a RESTfull interface for the Agent
  */
 @Path(Entities.AGENT)
-public class AgentResource extends EhriNeo4jFramedResource<Agent> {
+public class AgentResource extends AbstractAccessibleEntityResource<Agent> {
 
     public AgentResource(@Context GraphDatabaseService database) {
         super(database, Agent.class);

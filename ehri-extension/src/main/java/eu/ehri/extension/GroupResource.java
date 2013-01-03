@@ -37,7 +37,7 @@ import eu.ehri.project.persistance.ActionManager;
  * Provides a RESTfull interface for the Group class.
  */
 @Path(Entities.GROUP)
-public class GroupResource extends EhriNeo4jFramedResource<Group> {
+public class GroupResource extends AbstractAccessibleEntityResource<Group> {
 
     public GroupResource(@Context GraphDatabaseService database) {
         super(database, Group.class);
