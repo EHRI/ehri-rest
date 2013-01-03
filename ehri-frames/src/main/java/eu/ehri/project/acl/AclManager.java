@@ -21,6 +21,7 @@ import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
+import com.tinkerpop.frames.VertexFrame;
 import com.tinkerpop.pipes.PipeFunction;
 
 import eu.ehri.project.core.GraphManager;
@@ -62,6 +63,11 @@ public class AclManager {
     private final Map<Vertex, ContentTypes> contentTypeEnumMap = Maps
             .newHashMap();
 
+    /**
+     * Constructor.
+     * 
+     * @param graph
+     */
     public AclManager(FramedGraph<Neo4jGraph> graph) {
         this.graph = graph;
         this.manager = GraphManagerFactory.getInstance(graph);
@@ -74,8 +80,7 @@ public class AclManager {
      * @param accessor
      */
     public Boolean isAdmin(Accessor accessor) {
-        if (accessor == null)
-            throw new RuntimeException("NULL accessor given.");
+        Preconditions.checkNotNull(accessor, "NULL accessor given.");
         return accessor.getIdentifier().equals(Group.ADMIN_GROUP_IDENTIFIER);
     }
 
@@ -102,8 +107,7 @@ public class AclManager {
      * @return User is an anonymous accessor
      */
     public Boolean isAnonymous(Accessor accessor) {
-        if (accessor == null)
-            throw new RuntimeException("NULL accessor given.");
+        Preconditions.checkNotNull(accessor, "NULL accessor given.");
         return accessor instanceof AnonymousAccessor
                 || accessor.getIdentifier()
                         .equals(Group.ADMIN_GROUP_IDENTIFIER);
@@ -118,10 +122,10 @@ public class AclManager {
      * @return Whether or not the given accessor can access the entity
      */
     public boolean getAccessControl(AccessibleEntity entity, Accessor accessor) {
+        Preconditions.checkNotNull(entity, "Entity is null");
+        Preconditions.checkNotNull(accessor, "Accessor is null");
         // Admin can read/write everything and object can always read/write
         // itself
-        assert entity != null : "Entity is null";
-        assert accessor != null : "Accessor is null";
         // FIXME: Tidy up the logic here.
         if (belongsToAdmin(accessor)
                 || (!isAnonymous(accessor) && accessor.asVertex().equals(
@@ -170,8 +174,8 @@ public class AclManager {
         List<PermissionGrant> grants = Lists.newLinkedList();
         for (PermissionGrant grant : accessor.getPermissionGrants()) {
             if (Iterables.contains(grant.getTargets(), target)) {
-                PermissionType gt = getPermissionType(grant.getPermission());
-                PermissionType pt = getPermissionType(permission);
+                PermissionType gt = enumForPermission(grant.getPermission());
+                PermissionType pt = enumForPermission(permission);
                 if (((gt.getMask() & pt.getMask()) == pt.getMask())) {
                     grants.add(grant);
                 }
@@ -291,10 +295,8 @@ public class AclManager {
                     && grant.getScope().asVertex().equals(scope.asVertex())) {
                 for (PermissionGrantTarget target : grant.getTargets()) {
                     if (ClassUtils.hasType(target, EntityClass.CONTENT_TYPE)) {
-                        ContentTypes ctype = ContentTypes.withName(manager
-                                .getId(target));
-                        permmap.put(ctype, PermissionType.withName(manager
-                                .getId(grant.getPermission())));
+                        ContentTypes ctype = enumForContentType(target);
+                        permmap.put(ctype, enumForPermission(grant.getPermission()));
                     }
                 }
             }
@@ -398,14 +400,12 @@ public class AclManager {
 
             for (PermissionGrant grant : accessor.getPermissionGrants()) {
                 if (Iterables.contains(grant.getTargets(), target)) {
-                    list.add(PermissionType.withName(manager.getId(grant
-                            .getPermission())));
+                    list.add(enumForPermission(grant.getPermission()));
                 } else if (grant.getScope() != null) {
                     // If there isn't a direct grant to the entity, search its
                     // parent scopes for an appropriate scoped permission
                     if (scopes.contains(grant.getScope().asVertex())) {
-                        list.add(PermissionType.withName(manager.getId(grant
-                                .getPermission())));
+                        list.add(enumForPermission(grant.getPermission()));
                     }
                 }
             }
@@ -425,7 +425,7 @@ public class AclManager {
             PermissionGrantTarget target, PermissionType permType) {
         PermissionGrant grant = graph.addVertex(null, PermissionGrant.class);
         accessor.addPermissionGrant(grant);
-        grant.setPermission(enumPermissionMap.get(permType));
+        grant.setPermission(vertexForPermission(permType));
         grant.addTarget(target);
         return grant;
     }
@@ -574,7 +574,27 @@ public class AclManager {
      * @param permissionId
      * @return
      */
-    public PermissionType getPermissionType(Permission perm) {
+    public Permission vertexForPermission(PermissionType perm) {
+        return enumPermissionMap.get(perm);
+    }
+
+    /**
+     * Get the content type enum for a given node.
+     * 
+     * @param permissionId
+     * @return
+     */
+    public ContentType vertexForContentType(ContentTypes contentType) {
+        return enumContentTypeMap.get(contentType);
+    }
+
+    /**
+     * Get the permission type enum for a given node.
+     * 
+     * @param permissionId
+     * @return
+     */
+    public PermissionType enumForPermission(VertexFrame perm) {
         return permissionEnumMap.get(perm.asVertex());
     }
 
@@ -584,7 +604,7 @@ public class AclManager {
      * @param permissionId
      * @return
      */
-    public ContentTypes getContentTypes(ContentType contentType) {
+    public ContentTypes enumForContentType(VertexFrame contentType) {
         return contentTypeEnumMap.get(contentType.asVertex());
     }
 
