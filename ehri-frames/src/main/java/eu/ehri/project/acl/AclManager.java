@@ -25,7 +25,6 @@ import com.tinkerpop.pipes.PipeFunction;
 
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
-import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.ContentType;
 import eu.ehri.project.models.EntityClass;
@@ -51,14 +50,22 @@ public class AclManager {
 
     private final FramedGraph<Neo4jGraph> graph;
     private final GraphManager manager;
+
+    // Lookups to convert between the enum and node representations
+    // of content and permission types.
     private final Map<PermissionType, Permission> enumPermissionMap = Maps
             .newEnumMap(PermissionType.class);
     private final Map<ContentTypes, ContentType> enumContentTypeMap = Maps
             .newEnumMap(ContentTypes.class);
+    private final Map<Vertex, PermissionType> permissionEnumMap = Maps
+            .newHashMap();
+    private final Map<Vertex, ContentTypes> contentTypeEnumMap = Maps
+            .newHashMap();
 
     public AclManager(FramedGraph<Neo4jGraph> graph) {
         this.graph = graph;
         this.manager = GraphManagerFactory.getInstance(graph);
+        populateEnumNodeLookups();
     }
 
     /**
@@ -100,39 +107,6 @@ public class AclManager {
         return accessor instanceof AnonymousAccessor
                 || accessor.getIdentifier()
                         .equals(Group.ADMIN_GROUP_IDENTIFIER);
-    }
-
-    /**
-     * Search the group hierarchy of the given accessors to find an intersection
-     * with those who can access a resource.
-     * 
-     * @param accessing
-     *            The user(s) accessing the resource
-     * @return The accessors in the given list able to access the resource
-     */
-    private List<Accessor> searchAccess(List<Accessor> accessing,
-            List<Accessor> allowedAccessors) {
-        if (accessing.isEmpty()) {
-            return new ArrayList<Accessor>();
-        } else {
-            List<Accessor> intersection = new ArrayList<Accessor>();
-            for (Accessor acc : allowedAccessors) {
-                if (accessing.contains(acc)) {
-                    intersection.add(acc);
-                }
-            }
-
-            List<Accessor> parentPerms = new ArrayList<Accessor>();
-            parentPerms.addAll(intersection);
-            for (Accessor acc : accessing) {
-                List<Accessor> parents = new ArrayList<Accessor>();
-                for (Accessor parent : acc.getAllParents())
-                    parents.add(parent);
-                parentPerms.addAll(searchAccess(parents, allowedAccessors));
-            }
-
-            return parentPerms;
-        }
     }
 
     /**
@@ -196,15 +170,8 @@ public class AclManager {
         List<PermissionGrant> grants = Lists.newLinkedList();
         for (PermissionGrant grant : accessor.getPermissionGrants()) {
             if (Iterables.contains(grant.getTargets(), target)) {
-
-                // Fetch the permission types corresponding to the nodes.
-                // FIXME: The identifier might not be the most stable way of
-                // id'ing a permission type.
-                PermissionType gt = PermissionType.withName(grant
-                        .getPermission().getIdentifier());
-                PermissionType pt = PermissionType.withName(permission
-                        .getIdentifier());
-
+                PermissionType gt = getPermissionType(grant.getPermission());
+                PermissionType pt = getPermissionType(permission);
                 if (((gt.getMask() & pt.getMask()) == pt.getMask())) {
                     grants.add(grant);
                 }
@@ -256,12 +223,14 @@ public class AclManager {
                 .newLinkedList();
         Map<String, Map<ContentTypes, Collection<PermissionType>>> userMap = Maps
                 .newHashMap();
-        userMap.put(manager.getId(accessor), getScopedPermissions(accessor, scope));
+        userMap.put(manager.getId(accessor),
+                getScopedPermissions(accessor, scope));
         globals.add(userMap);
         for (Accessor parent : accessor.getParents()) {
             Map<String, Map<ContentTypes, Collection<PermissionType>>> parentMap = Maps
                     .newHashMap();
-            parentMap.put(manager.getId(parent), getScopedPermissions(parent, scope));
+            parentMap.put(manager.getId(parent),
+                    getScopedPermissions(parent, scope));
             globals.add(parentMap);
         }
         return globals;
@@ -331,8 +300,8 @@ public class AclManager {
             }
         }
         return permmap.asMap();
-    }    
-    
+    }
+
     /**
      * Set a matrix of global permissions for a given accessor.
      * 
@@ -344,26 +313,10 @@ public class AclManager {
     public void setGlobalPermissionMatrix(Accessor accessor,
             Map<ContentTypes, List<PermissionType>> globals)
             throws PermissionDenied {
-        // Build a lookup of content types and permissions keyed by their
-        // identifier.
-        Map<ContentTypes, ContentType> cmap = Maps.newHashMap();
-        for (ContentType c : manager.getFrames(EntityClass.CONTENT_TYPE,
-                ContentType.class)) {
-            cmap.put(ContentTypes.withName(manager.getId(c)), c);
-        }
-        Map<PermissionType, Permission> pmap = Maps.newHashMap();
-        for (Permission p : manager.getFrames(EntityClass.PERMISSION,
-                Permission.class)) {
-            pmap.put(PermissionType.withName(manager.getId(p)), p);
-        }
+        checkNoGrantOnAdminOrAnon(accessor);
 
-        // Quick sanity check to make sure we're not trying to add/remove
-        // permissions from the admin or the anonymous accounts.
-        if (isAdmin(accessor) || isAnonymous(accessor))
-            throw new PermissionDenied(
-                    "Unable to grant or revoke permissions to system accounts.");
-
-        for (Entry<ContentTypes, ContentType> centry : cmap.entrySet()) {
+        for (Entry<ContentTypes, ContentType> centry : enumContentTypeMap
+                .entrySet()) {
             ContentType target = centry.getValue();
             List<PermissionType> pset = globals.get(centry.getKey());
             if (pset == null)
@@ -390,26 +343,10 @@ public class AclManager {
             PermissionScope scope,
             Map<ContentTypes, List<PermissionType>> globals)
             throws PermissionDenied {
-        // Build a lookup of content types and permissions keyed by their
-        // identifier.
-        Map<ContentTypes, ContentType> cmap = Maps.newHashMap();
-        for (ContentType c : manager.getFrames(EntityClass.CONTENT_TYPE,
-                ContentType.class)) {
-            cmap.put(ContentTypes.withName(manager.getId(c)), c);
-        }
-        Map<PermissionType, Permission> pmap = Maps.newHashMap();
-        for (Permission p : manager.getFrames(EntityClass.PERMISSION,
-                Permission.class)) {
-            pmap.put(PermissionType.withName(manager.getId(p)), p);
-        }
+        checkNoGrantOnAdminOrAnon(accessor);
 
-        // Quick sanity check to make sure we're not trying to add/remove
-        // permissions from the admin or the anonymous accounts.
-        if (isAdmin(accessor) || isAnonymous(accessor))
-            throw new PermissionDenied(
-                    "Unable to grant or revoke permissions to system accounts.");
-
-        for (Entry<ContentTypes, ContentType> centry : cmap.entrySet()) {
+        for (Entry<ContentTypes, ContentType> centry : enumContentTypeMap
+                .entrySet()) {
             ContentType target = centry.getValue();
             List<PermissionType> pset = globals.get(centry.getKey());
             if (pset == null)
@@ -422,6 +359,15 @@ public class AclManager {
                 }
             }
         }
+    }
+
+    private void checkNoGrantOnAdminOrAnon(Accessor accessor)
+            throws PermissionDenied {
+        // Quick sanity check to make sure we're not trying to add/remove
+        // permissions from the admin or the anonymous accounts.
+        if (isAdmin(accessor) || isAnonymous(accessor))
+            throw new PermissionDenied(
+                    "Unable to grant or revoke permissions to system accounts.");
     }
 
     /**
@@ -479,7 +425,7 @@ public class AclManager {
             PermissionGrantTarget target, PermissionType permType) {
         PermissionGrant grant = graph.addVertex(null, PermissionGrant.class);
         accessor.addPermissionGrant(grant);
-        grant.setPermission(getPermission(permType));
+        grant.setPermission(enumPermissionMap.get(permType));
         grant.addTarget(target);
         return grant;
     }
@@ -517,7 +463,7 @@ public class AclManager {
         PermissionGrantTarget target = graph.frame(entity.asVertex(),
                 PermissionGrantTarget.class);
 
-        Permission perm = getPermission(permType);
+        Permission perm = enumPermissionMap.get(permType);
         for (PermissionGrant grant : accessor.getPermissionGrants()) {
             if (Iterables.contains(grant.getTargets(), target)
                     && grant.getPermission().equals(perm)) {
@@ -533,24 +479,26 @@ public class AclManager {
      * @param target
      * @param permType
      */
-    public void revokeScopedPermissions(Accessor accessor, AccessibleEntity entity,
-            PermissionType permType, PermissionScope scope) {
+    public void revokeScopedPermissions(Accessor accessor,
+            AccessibleEntity entity, PermissionType permType,
+            PermissionScope scope) {
         Preconditions.checkNotNull(scope,
                 "Scope given to revokePermissions is null");
         PermissionGrantTarget target = graph.frame(entity.asVertex(),
                 PermissionGrantTarget.class);
         Vertex scopeVertex = scope.asVertex();
-        Permission perm = getPermission(permType);
+        Permission perm = enumPermissionMap.get(permType);
         for (PermissionGrant grant : accessor.getPermissionGrants()) {
-            if (grant.getScope() != null && grant.getScope().asVertex().equals(scopeVertex)) {
+            if (grant.getScope() != null
+                    && grant.getScope().asVertex().equals(scopeVertex)) {
                 if (Iterables.contains(grant.getTargets(), target)
                         && grant.getPermission().equals(perm)) {
                     graph.removeVertex(grant.asVertex());
-                }                
+                }
             }
         }
     }
-    
+
     /**
      * Set access control on an entity.
      * 
@@ -621,18 +569,58 @@ public class AclManager {
     }
 
     /**
-     * Pipe filter function that passes through all items. TODO: Check if we
-     * actually need this???
+     * Get the permission type enum for a given node.
      * 
-     * @return A no-op PipeFunction for filtering a list of vertices as an admin
-     *         user
+     * @param permissionId
+     * @return
      */
-    private PipeFunction<Vertex, Boolean> noopFilterFunction() {
-        return new PipeFunction<Vertex, Boolean>() {
-            public Boolean compute(Vertex v) {
-                return true;
+    public PermissionType getPermissionType(Permission perm) {
+        return permissionEnumMap.get(perm.asVertex());
+    }
+
+    /**
+     * Get the content type enum for a given node.
+     * 
+     * @param permissionId
+     * @return
+     */
+    public ContentTypes getContentTypes(ContentType contentType) {
+        return contentTypeEnumMap.get(contentType.asVertex());
+    }
+
+    // Helpers...
+
+    /**
+     * Search the group hierarchy of the given accessors to find an intersection
+     * with those who can access a resource.
+     * 
+     * @param accessing
+     *            The user(s) accessing the resource
+     * @return The accessors in the given list able to access the resource
+     */
+    private List<Accessor> searchAccess(List<Accessor> accessing,
+            List<Accessor> allowedAccessors) {
+        if (accessing.isEmpty()) {
+            return new ArrayList<Accessor>();
+        } else {
+            List<Accessor> intersection = new ArrayList<Accessor>();
+            for (Accessor acc : allowedAccessors) {
+                if (accessing.contains(acc)) {
+                    intersection.add(acc);
+                }
             }
-        };
+
+            List<Accessor> parentPerms = new ArrayList<Accessor>();
+            parentPerms.addAll(intersection);
+            for (Accessor acc : accessing) {
+                List<Accessor> parents = new ArrayList<Accessor>();
+                for (Accessor parent : acc.getAllParents())
+                    parents.add(parent);
+                parentPerms.addAll(searchAccess(parents, allowedAccessors));
+            }
+
+            return parentPerms;
+        }
     }
 
     /**
@@ -697,65 +685,34 @@ public class AclManager {
     }
 
     /**
-     * Get the permission node for a given type.
+     * Pipe filter function that passes through all items. TODO: Check if we
+     * actually need this???
      * 
-     * @param permissionId
-     * @return
+     * @return A no-op PipeFunction for filtering a list of vertices as an admin
+     *         user
      */
-    public Permission getPermission(PermissionType perm) {
-        try {
-            Permission pt = enumPermissionMap.get(perm);
-            if (pt == null) {
-                pt = manager.getFrame(perm.getName(), EntityClass.PERMISSION,
-                        Permission.class);
-                enumPermissionMap.put(perm, pt);
+    private PipeFunction<Vertex, Boolean> noopFilterFunction() {
+        return new PipeFunction<Vertex, Boolean>() {
+            public Boolean compute(Vertex v) {
+                return true;
             }
-            return pt;
-        } catch (ItemNotFound e) {
-            throw new RuntimeException(String.format(
-                    "No permission found for name: '%s'", perm.getName()), e);
+        };
+    }
+
+    private void populateEnumNodeLookups() {
+        // Build a lookup of content types and permissions keyed by their
+        // identifier.
+        for (ContentType c : manager.getFrames(EntityClass.CONTENT_TYPE,
+                ContentType.class)) {
+            ContentTypes ct = ContentTypes.withName(manager.getId(c));
+            enumContentTypeMap.put(ct, c);
+            contentTypeEnumMap.put(c.asVertex(), ct);
         }
-    }
-
-    /**
-     * Get the content type node for a given enum.
-     * 
-     * @param permissionId
-     * @return
-     */
-    public ContentType getContentType(ContentTypes contentType) {
-        try {
-            ContentType ct = enumContentTypeMap.get(contentType);
-            if (ct == null) {
-                ct = manager.getFrame(contentType.getName(),
-                        EntityClass.CONTENT_TYPE, ContentType.class);
-                enumContentTypeMap.put(contentType, ct);
-            }
-            return ct;
-        } catch (ItemNotFound e) {
-            throw new RuntimeException(String.format(
-                    "No content type found for name: '%s'",
-                    contentType.getName()), e);
+        for (Permission p : manager.getFrames(EntityClass.PERMISSION,
+                Permission.class)) {
+            PermissionType pt = PermissionType.withName(manager.getId(p));
+            enumPermissionMap.put(pt, p);
+            permissionEnumMap.put(p.asVertex(), pt);
         }
-    }
-
-    /**
-     * Get the permission type enum for a given node.
-     * 
-     * @param permissionId
-     * @return
-     */
-    public PermissionType getPermissionType(Permission perm) {
-        return PermissionType.withName(manager.getId(perm));
-    }
-
-    /**
-     * Get the content type enum for a given node.
-     * 
-     * @param permissionId
-     * @return
-     */
-    public ContentTypes getContentTypes(ContentType contentType) {
-        return ContentTypes.withName(manager.getId(contentType));
     }
 }
