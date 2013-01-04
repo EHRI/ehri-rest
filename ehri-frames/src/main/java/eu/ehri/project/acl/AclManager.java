@@ -350,18 +350,27 @@ public final class AclManager {
      */
     public PermissionGrant grantPermissions(Accessor accessor,
             PermissionGrantTarget target, PermissionType permType) {
-        try {
-            PermissionGrant grant = createPermissionGrant();
-            accessor.addPermissionGrant(grant);
-            grant.setPermission(vertexForPermission(permType));
-            grant.addTarget(target);
-            if (!scope.equals(SystemScope.getInstance())) {
-                grant.setScope(scope);
+
+        // If we can find an existing grant, use that, otherwise create a new
+        // one.
+        Optional<PermissionGrant> maybeGrant = findPermission(accessor, target,
+                permType);
+        if (maybeGrant.isPresent()) {
+            return maybeGrant.get();
+        } else {
+            try {
+                PermissionGrant grant = createPermissionGrant();
+                accessor.addPermissionGrant(grant);
+                grant.setPermission(vertexForPermission(permType));
+                grant.addTarget(target);
+                if (!scope.equals(SystemScope.getInstance())) {
+                    grant.setScope(scope);
+                }
+                return grant;
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw new RuntimeException(e);
             }
-            return grant;
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
         }
     }
 
@@ -375,16 +384,10 @@ public final class AclManager {
     public void revokePermissions(Accessor accessor, AccessibleEntity entity,
             PermissionType permType) {
 
-        PermissionGrantTarget target = graph.frame(entity.asVertex(),
-                PermissionGrantTarget.class);
-
-        Permission perm = enumPermissionMap.get(permType);
-        for (PermissionGrant grant : accessor.getPermissionGrants()) {
-            if (isInScope(grant)
-                    && Iterables.contains(grant.getTargets(), target)
-                    && grant.getPermission().equals(perm)) {
-                graph.removeVertex(grant.asVertex());
-            }
+        Optional<PermissionGrant> maybeGrant = findPermission(accessor, entity,
+                permType);
+        if (maybeGrant.isPresent()) {
+            graph.removeVertex(maybeGrant.get().asVertex());
         }
     }
 
@@ -494,6 +497,31 @@ public final class AclManager {
      */
     private PermissionType enumForPermission(VertexFrame perm) {
         return permissionEnumMap.get(perm.asVertex());
+    }
+
+    /**
+     * Attempt to locate an existing grant with the same accessor, entity, and
+     * permission, within the given scope.
+     * 
+     * @param accessor
+     * @param entity
+     * @param permType
+     * @return
+     */
+    private Optional<PermissionGrant> findPermission(Accessor accessor,
+            PermissionGrantTarget entity, PermissionType permType) {
+        PermissionGrantTarget target = graph.frame(entity.asVertex(),
+                PermissionGrantTarget.class);
+
+        Permission perm = enumPermissionMap.get(permType);
+        for (PermissionGrant grant : accessor.getPermissionGrants()) {
+            if (isInScope(grant)
+                    && Iterables.contains(grant.getTargets(), target)
+                    && grant.getPermission().equals(perm)) {
+                return Optional.of(grant);
+            }
+        }
+        return Optional.absent();
     }
 
     private PermissionGrant createPermissionGrant() throws IntegrityError,
@@ -658,8 +686,10 @@ public final class AclManager {
     private boolean isInScope(PermissionGrant grant) {
         // If we're on the system scope, only remove unscoped
         // permissions. Otherwise, check the scope matches the grant.
-        return isSystemScope() && grant.getScope() == null
-                || Iterables.contains(scopes, grant.getScope().asVertex());
+        return isSystemScope()
+                && grant.getScope() == null
+                || (grant.getScope() != null && Iterables.contains(scopes,
+                        grant.getScope().asVertex()));
     }
 
     private boolean isGlobalOrInScope(PermissionGrant grant) {
