@@ -244,7 +244,7 @@ public class AclTest extends ModelTestBase {
         }
 
         AclManager acl = new AclManager(graph);
-        acl.setGlobalPermissionMatrix(accessor, matrix);
+        acl.setPermissionMatrix(accessor, matrix);
 
         // Check that everything is still there...
         cmap = acl.getGlobalPermissions(accessor);
@@ -289,7 +289,7 @@ public class AclTest extends ModelTestBase {
 
         AclManager acl = new AclManager(graph);
         // This should throw PermissionDenied
-        acl.setGlobalPermissionMatrix(accessor, matrix);
+        acl.setPermissionMatrix(accessor, matrix);
         fail();
     }
 }

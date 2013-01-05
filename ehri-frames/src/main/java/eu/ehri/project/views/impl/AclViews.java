@@ -71,7 +71,7 @@ public final class AclViews implements Acl {
             Accessor grantee) throws PermissionDenied {
         try {
             checkGrantPermission(grantee, permissionMap);
-            acl.setGlobalPermissionMatrix(accessor, permissionMap);
+            acl.setPermissionMatrix(accessor, permissionMap);
             // Log the action...
             new ActionManager(graph).createAction(
                     graph.frame(accessor.asVertex(), AccessibleEntity.class),

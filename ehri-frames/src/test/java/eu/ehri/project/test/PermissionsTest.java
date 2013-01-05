@@ -45,8 +45,7 @@ public class PermissionsTest extends AbstractFixtureTest {
         user = new BundleDAO(graph).create(new Bundle(EntityClass.USER_PROFILE,
                 (Map<String, Object>) getTestUserBundle().get("data")),
                 UserProfile.class);
-        views = new CrudViews<DocumentaryUnit>(graph, DocumentaryUnit.class,
-                manager.getFrame("r1", Agent.class));
+        views = new CrudViews<DocumentaryUnit>(graph, DocumentaryUnit.class);
         viewHelper = new ViewHelper(graph);
         acl = new AclManager(graph);
     }
@@ -236,10 +235,44 @@ public class PermissionsTest extends AbstractFixtureTest {
             views.create(getTestBundle(), user);
             fail();
         } catch (PermissionDenied e) {
-            acl.setGlobalPermissionMatrix(user, matrix);
+            acl.setPermissionMatrix(user, matrix);
             DocumentaryUnit unit = views.create(getTestBundle(), user);
             assertNotNull(unit);
             views.delete(unit, user);
+        }
+    }
+
+    @SuppressWarnings("serial")
+    @Test
+    public void testSetScopedPermissionMatrix() throws PermissionDenied,
+            ValidationError, DeserializationError, IntegrityError,
+            SerializationError, ItemNotFound {
+        Agent scope = manager.getFrame("r1", Agent.class);
+
+        // @formatter:off
+        Map<ContentTypes,List<PermissionType>> matrix = new HashMap<ContentTypes, List<PermissionType>>() {{
+            put(ContentTypes.DOCUMENTARY_UNIT, new LinkedList<PermissionType>() {{
+                add(PermissionType.CREATE);
+                add(PermissionType.DELETE);
+            }});
+        }};
+        // @formatter:on
+
+        try {
+            views.setScope(scope).create(getTestBundle(), user);
+            fail("Should be unable to create an item with scope: " + scope);
+        } catch (PermissionDenied e) {
+            acl.withScope(scope).setPermissionMatrix(user, matrix);
+
+            try {
+                views.create(getTestBundle(), user);
+                fail("Should be unable to create an item with no scope after setting scoped perms.");
+            } catch (PermissionDenied e1) {
+                DocumentaryUnit unit = views.setScope(scope).create(
+                        getTestBundle(), user);
+                assertNotNull(unit);
+                views.setScope(scope).delete(unit, user);
+            }
         }
     }
 }

@@ -328,7 +328,7 @@ public final class AclManager {
      *            global permission map
      * @throws PermissionDenied
      */
-    public void setGlobalPermissionMatrix(Accessor accessor,
+    public void setPermissionMatrix(Accessor accessor,
             Map<ContentTypes, List<PermissionType>> globals)
             throws PermissionDenied {
         checkNoGrantOnAdminOrAnon(accessor);
