@@ -97,7 +97,7 @@ public final class AclManager {
      * 
      * @param accessor
      */
-    Boolean isAdmin(Accessor accessor) {
+    public boolean isAdmin(Accessor accessor) {
         Preconditions.checkNotNull(accessor, "NULL accessor given.");
         return accessor.getIdentifier().equals(Group.ADMIN_GROUP_IDENTIFIER);
     }
@@ -108,7 +108,7 @@ public final class AclManager {
      * @param accessor
      * @return User belongs to the admin group
      */
-    public Boolean belongsToAdmin(Accessor accessor) {
+    public boolean belongsToAdmin(Accessor accessor) {
         if (isAdmin(accessor))
             return true;
         for (Accessor parent : accessor.getAllParents()) {
@@ -124,11 +124,11 @@ public final class AclManager {
      * @param accessor
      * @return User is an anonymous accessor
      */
-    Boolean isAnonymous(Accessor accessor) {
+    public boolean isAnonymous(Accessor accessor) {
         Preconditions.checkNotNull(accessor, "NULL accessor given.");
         return accessor instanceof AnonymousAccessor
-                || accessor.getIdentifier()
-                        .equals(Group.ADMIN_GROUP_IDENTIFIER);
+                || accessor.getIdentifier().equals(
+                        Group.ANONYMOUS_GROUP_IDENTIFIER);
     }
 
     /**
@@ -165,6 +165,55 @@ public final class AclManager {
             List<Accessor> initial = new ArrayList<Accessor>();
             initial.add(accessor);
             return !searchAccess(initial, accessors).isEmpty();
+        }
+    }
+
+    /**
+     * Revoke an accessor's access to an entity.
+     * 
+     * @param entity
+     * @param accessor
+     */
+    public void removeAccessControl(AccessibleEntity entity, Accessor accessor) {
+        for (Accessor acc : entity.getAccessors()) {
+            if (acc.asVertex().equals(accessor.asVertex()))
+                entity.removeAccessor(accessor);
+        }
+    }
+
+    /**
+     * Set access control on an entity to several accessors.
+     * 
+     * @param entity
+     * @param accessors
+     * @param canRead
+     * @param canWrite
+     * @throws PermissionDenied
+     */
+    public void setAccessors(AccessibleEntity entity,
+            Iterable<Accessor> accessors) {
+        // FIXME: Must be a more efficient way to do this, whilst
+        // ensuring that superfluous double relationships don't get created?
+        Set<Vertex> accessorVertices = Sets.newHashSet();
+        for (Accessor acc : accessors)
+            accessorVertices.add(acc.asVertex());
+
+        Set<Vertex> existing = Sets.newHashSet();
+        Set<Vertex> remove = Sets.newHashSet();
+        for (Accessor accessor : entity.getAccessors()) {
+            Vertex v = accessor.asVertex();
+            existing.add(v);
+            if (!accessorVertices.contains(v)) {
+                remove.add(v);
+            }
+        }
+        for (Vertex v : remove) {
+            entity.removeAccessor(graph.frame(v, Accessor.class));
+        }
+        for (Accessor accessor : accessors) {
+            if (!existing.contains(accessor.asVertex())) {
+                entity.addAccessor(accessor);
+            }
         }
     }
 
@@ -301,47 +350,6 @@ public final class AclManager {
     }
 
     /**
-     * Get a list of global permissions for a given accessor. Returns a map of
-     * content types against the grant permissions.
-     * 
-     * @param accessor
-     * @return List of permission names for the given accessor on the given
-     *         target
-     */
-    List<PermissionType> getEntityPermissions(Accessor accessor,
-            AccessibleEntity entity) {
-        // If we're admin, add it regardless.
-        if (isAdmin(accessor)) {
-            return Lists.newArrayList(PermissionType.values());
-        } else {
-            List<PermissionType> list = Lists.newLinkedList();
-            // Cache a set of permission scopes. This is the hierarchy on which
-            // permissions are granted. For most items it will contain zero
-            // entries and thus be pretty fast, but for deeply nested
-            // documentary units there might be quite a few.
-            HashSet<Vertex> scopes = Sets.newHashSet();
-            for (PermissionScope scope : entity.getScopes())
-                scopes.add(scope.asVertex());
-
-            PermissionGrantTarget target = graph.frame(entity.asVertex(),
-                    PermissionGrantTarget.class);
-
-            for (PermissionGrant grant : accessor.getPermissionGrants()) {
-                if (Iterables.contains(grant.getTargets(), target)) {
-                    list.add(enumForPermission(grant.getPermission()));
-                } else if (grant.getScope() != null) {
-                    // If there isn't a direct grant to the entity, search its
-                    // parent scopes for an appropriate scoped permission
-                    if (scopes.contains(grant.getScope().asVertex())) {
-                        list.add(enumForPermission(grant.getPermission()));
-                    }
-                }
-            }
-            return list;
-        }
-    }
-
-    /**
      * Grant a user permissions to a content type.
      * 
      * @param accessor
@@ -393,54 +401,6 @@ public final class AclManager {
     }
 
     /**
-     * Revoke an accessor's access to an entity.
-     * 
-     * @param entity
-     * @param accessor
-     */
-    public void removeAccessControl(AccessibleEntity entity, Accessor accessor) {
-        for (Accessor acc : entity.getAccessors()) {
-            if (acc.asVertex().equals(accessor.asVertex()))
-                entity.removeAccessor(accessor);            
-        }
-    }
-
-    /**
-     * Set access control on an entity to several accessors.
-     * 
-     * @param entity
-     * @param accessors
-     * @param canRead
-     * @param canWrite
-     * @throws PermissionDenied
-     */
-    public void setAccessors(AccessibleEntity entity, Iterable<Accessor> accessors) {
-        // FIXME: Must be a more efficient way to do this, whilst
-        // ensuring that superfluous double relationships don't get created?
-        Set<Vertex> accessorVertices = Sets.newHashSet();
-        for (Accessor acc : accessors)
-            accessorVertices.add(acc.asVertex());
-
-        Set<Vertex> existing = Sets.newHashSet();
-        Set<Vertex> remove = Sets.newHashSet();
-        for (Accessor accessor : entity.getAccessors()) {
-            Vertex v = accessor.asVertex();
-            existing.add(v);
-            if (!accessorVertices.contains(v)) {
-                remove.add(v);
-            }
-        }
-        for (Vertex v : remove) {
-            entity.removeAccessor(graph.frame(v, Accessor.class));
-        }
-        for (Accessor accessor : accessors) {
-            if (!existing.contains(accessor.asVertex())) {
-                entity.addAccessor(accessor);
-            }
-        }
-    }
-
-    /**
      * Build a gremlin filter function that passes through items readable by a
      * given accessor.
      * 
@@ -448,7 +408,7 @@ public final class AclManager {
      * @return A PipeFunction for filtering a set of vertices as the given user
      */
     public PipeFunction<Vertex, Boolean> getAclFilterFunction(Accessor accessor) {
-        assert accessor != null;
+        Preconditions.checkNotNull(accessor, "Accessor is null");
         if (belongsToAdmin(accessor))
             return noopFilterFunction();
 
@@ -509,6 +469,47 @@ public final class AclManager {
      */
     private PermissionType enumForPermission(VertexFrame perm) {
         return permissionEnumMap.get(perm.asVertex());
+    }
+
+    /**
+     * Get a list of global permissions for a given accessor. Returns a map of
+     * content types against the grant permissions.
+     * 
+     * @param accessor
+     * @return List of permission names for the given accessor on the given
+     *         target
+     */
+    private List<PermissionType> getEntityPermissions(Accessor accessor,
+            AccessibleEntity entity) {
+        // If we're admin, add it regardless.
+        if (isAdmin(accessor)) {
+            return Lists.newArrayList(PermissionType.values());
+        } else {
+            List<PermissionType> list = Lists.newLinkedList();
+            // Cache a set of permission scopes. This is the hierarchy on which
+            // permissions are granted. For most items it will contain zero
+            // entries and thus be pretty fast, but for deeply nested
+            // documentary units there might be quite a few.
+            HashSet<Vertex> scopes = Sets.newHashSet();
+            for (PermissionScope scope : entity.getScopes())
+                scopes.add(scope.asVertex());
+
+            PermissionGrantTarget target = graph.frame(entity.asVertex(),
+                    PermissionGrantTarget.class);
+
+            for (PermissionGrant grant : accessor.getPermissionGrants()) {
+                if (Iterables.contains(grant.getTargets(), target)) {
+                    list.add(enumForPermission(grant.getPermission()));
+                } else if (grant.getScope() != null) {
+                    // If there isn't a direct grant to the entity, search its
+                    // parent scopes for an appropriate scoped permission
+                    if (scopes.contains(grant.getScope().asVertex())) {
+                        list.add(enumForPermission(grant.getPermission()));
+                    }
+                }
+            }
+            return list;
+        }
     }
 
     /**
