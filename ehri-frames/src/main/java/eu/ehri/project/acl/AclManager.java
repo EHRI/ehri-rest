@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Map.Entry;
 
 import com.google.common.base.Optional;
@@ -392,26 +393,16 @@ public final class AclManager {
     }
 
     /**
-     * Set access control on an entity.
-     * 
-     * @param entity
-     * @param accessor
-     * @param canRead
-     * @param canWrite
-     * @throws PermissionDenied
-     */
-    public void setAccessControl(AccessibleEntity entity, Accessor accessor) {
-        entity.addAccessor(accessor);
-    }
-
-    /**
-     * Revoke an accessors access to an entity.
+     * Revoke an accessor's access to an entity.
      * 
      * @param entity
      * @param accessor
      */
     public void removeAccessControl(AccessibleEntity entity, Accessor accessor) {
-        entity.removeAccessor(accessor);
+        for (Accessor acc : entity.getAccessors()) {
+            if (acc.asVertex().equals(accessor.asVertex()))
+                entity.removeAccessor(accessor);            
+        }
     }
 
     /**
@@ -423,9 +414,30 @@ public final class AclManager {
      * @param canWrite
      * @throws PermissionDenied
      */
-    public void setAccessControl(AccessibleEntity entity, Accessor[] accessors) {
-        for (Accessor accessor : accessors)
-            entity.addAccessor(accessor);
+    public void setAccessors(AccessibleEntity entity, Iterable<Accessor> accessors) {
+        // FIXME: Must be a more efficient way to do this, whilst
+        // ensuring that superfluous double relationships don't get created?
+        Set<Vertex> accessorVertices = Sets.newHashSet();
+        for (Accessor acc : accessors)
+            accessorVertices.add(acc.asVertex());
+
+        Set<Vertex> existing = Sets.newHashSet();
+        Set<Vertex> remove = Sets.newHashSet();
+        for (Accessor accessor : entity.getAccessors()) {
+            Vertex v = accessor.asVertex();
+            existing.add(v);
+            if (!accessorVertices.contains(v)) {
+                remove.add(v);
+            }
+        }
+        for (Vertex v : remove) {
+            entity.removeAccessor(graph.frame(v, Accessor.class));
+        }
+        for (Accessor accessor : accessors) {
+            if (!existing.contains(accessor.asVertex())) {
+                entity.addAccessor(accessor);
+            }
+        }
     }
 
     /**

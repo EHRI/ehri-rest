@@ -4,9 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.common.collect.Sets;
 import com.tinkerpop.blueprints.TransactionalGraph.Conclusion;
-import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
@@ -103,29 +101,7 @@ public final class AclViews implements Acl {
             Accessor user) throws PermissionDenied {
         try {
             helper.checkEntityPermission(entity, user, PermissionType.UPDATE);
-            // FIXME: Must be a more efficient way to do this, whilst
-            // ensuring that superfluous double relationships don't get created?
-            Set<Vertex> accessorVertices = Sets.newHashSet();
-            for (Accessor acc : accessors)
-                accessorVertices.add(acc.asVertex());
-
-            Set<Vertex> existing = Sets.newHashSet();
-            Set<Vertex> remove = Sets.newHashSet();
-            for (Accessor accessor : entity.getAccessors()) {
-                Vertex v = accessor.asVertex();
-                existing.add(v);
-                if (!accessorVertices.contains(v)) {
-                    remove.add(v);
-                }
-            }
-            for (Vertex v : remove) {
-                entity.removeAccessor(graph.frame(v, Accessor.class));
-            }
-            for (Accessor accessor : accessors) {
-                if (!existing.contains(accessor.asVertex())) {
-                    entity.addAccessor(accessor);
-                }
-            }
+            acl.setAccessors(entity, accessors);
             // Log the action...
             new ActionManager(graph).createAction(
                     graph.frame(entity.asVertex(), AccessibleEntity.class),
