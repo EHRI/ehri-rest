@@ -166,9 +166,7 @@ public final class AclViews implements Acl {
             throws PermissionDenied {
         try {
             helper.checkEntityPermission(item, grantee, PermissionType.GRANT);
-            for (PermissionType t : permissionList) {
-                acl.grantPermissions(accessor, item, t);
-            }
+            acl.setEntityPermissions(accessor, item, permissionList);
             // Log the action...
             new ActionManager(graph).createAction(
                     graph.frame(item.asVertex(), AccessibleEntity.class),

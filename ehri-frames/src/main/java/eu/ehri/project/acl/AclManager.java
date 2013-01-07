@@ -284,6 +284,23 @@ public final class AclManager {
     }
 
     /**
+     * Set the permissions for a particular user on the given item.
+     * 
+     * @param accessor
+     * @param item
+     * @param permissionList
+     */
+    public void setEntityPermissions(Accessor accessor, AccessibleEntity item,
+            Set<PermissionType> permissionList) {
+        for (PermissionType t : PermissionType.values()) {
+            if (permissionList.contains(t))
+                grantPermissions(accessor, item, t);
+            else
+                revokePermissions(accessor, item, t);
+        }
+    }
+
+    /**
      * Return a permission list for the given accessor and her inherited groups.
      * 
      * @param accessor
