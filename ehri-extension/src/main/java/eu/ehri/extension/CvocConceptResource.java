@@ -40,7 +40,7 @@ import eu.ehri.project.models.cvoc.Concept;
  * Provides a RESTfull interface for the cvoc.Concept.
  */
 @Path(Entities.CVOC_CONCEPT)
-public class CvocConceptResource extends EhriNeo4jFramedResource<Concept> {
+public class CvocConceptResource extends AbstractAccessibleEntityResource<Concept> {
 
     public CvocConceptResource(@Context GraphDatabaseService database) {
         super(database, Concept.class);

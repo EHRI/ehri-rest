@@ -10,6 +10,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import com.tinkerpop.blueprints.CloseableIterable;
@@ -21,10 +22,9 @@ import com.tinkerpop.blueprints.Parameter;
 import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
+
 import eu.ehri.project.exceptions.IndexNotFoundException;
 import eu.ehri.project.exceptions.IntegrityError;
-
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * Main purpose is to be used by the ehri-plugin to provide a REST API to the

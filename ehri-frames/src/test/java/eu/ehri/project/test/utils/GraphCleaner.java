@@ -42,7 +42,7 @@ public class GraphCleaner {
                 graph.getBaseGraph().dropIndex(relIndex);
             }
             for (Vertex v : graph.getVertices()) {
-                if (!((Long)v.getId()).equals(0))
+                if (!v.getId().equals(0L))
                     graph.removeVertex(v);
             }
             tx.success();

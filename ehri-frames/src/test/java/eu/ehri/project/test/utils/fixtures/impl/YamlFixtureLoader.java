@@ -31,8 +31,8 @@ import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.persistance.BundleDAO;
 import eu.ehri.project.persistance.Bundle;
+import eu.ehri.project.persistance.BundleDAO;
 import eu.ehri.project.test.utils.fixtures.FixtureLoader;
 import eu.ehri.project.utils.GraphInitializer;
 
@@ -100,8 +100,8 @@ public class YamlFixtureLoader implements FixtureLoader {
                 ListMultimap<String,String> rels = entry.getValue();
                 for (String relname : rels.keySet()) {
                     for (String target : rels.get(relname)) {
-                        Vertex dst = manager.getVertex((String) target);
-                        addRelationship(src, dst, (String) relname);
+                        Vertex dst = manager.getVertex(target);
+                        addRelationship(src, dst, relname);
                     }
                 }
             }
@@ -121,7 +121,7 @@ public class YamlFixtureLoader implements FixtureLoader {
         if (!found) {
             logger.debug(String.format(" - %s -[%s]-> %s", src, dst,
                     relname));
-            graph.addEdge(null, src, dst, (String) relname);
+            graph.addEdge(null, src, dst, relname);
             graph.getBaseGraph().stopTransaction(
                     TransactionalGraph.Conclusion.SUCCESS);
         }

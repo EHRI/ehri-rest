@@ -3,6 +3,7 @@ package eu.ehri.extension.test;
 import static org.junit.Assert.assertEquals;
 
 import java.net.URI;
+
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;

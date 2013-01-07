@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+
 import org.apache.lucene.queryParser.QueryParser;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.index.IndexHits;
@@ -96,19 +97,6 @@ public final class SingleIndexGraphManager implements GraphManager {
         }
     }
 
-    public CloseableIterable<Vertex> getVertices(EntityClass type) {
-        return getIndex().get(EntityType.TYPE_KEY, type.getName());
-    }
-
-    @SuppressWarnings("unchecked")
-    public CloseableIterable<Neo4jVertex> getVertices(String key, Object value,
-            EntityClass type) {
-        String queryStr = getLuceneQuery(key, value, type.getName());
-        IndexHits<Node> rawQuery = getRawIndex().query(queryStr);
-        return new Neo4jVertexIterable<Vertex>(rawQuery, graph.getBaseGraph(),
-                false);
-    }
-
     public Vertex getVertex(String id) throws ItemNotFound {
         Preconditions
                 .checkNotNull(id, "attempt to fetch vertex with a null id");
@@ -137,6 +125,19 @@ public final class SingleIndexGraphManager implements GraphManager {
         } finally {
             rawQuery.close();
         }
+    }
+
+    public CloseableIterable<Vertex> getVertices(EntityClass type) {
+        return getIndex().get(EntityType.TYPE_KEY, type.getName());
+    }
+
+    @SuppressWarnings("unchecked")
+    public CloseableIterable<Neo4jVertex> getVertices(String key, Object value,
+            EntityClass type) {
+        String queryStr = getLuceneQuery(key, value, type.getName());
+        IndexHits<Node> rawQuery = getRawIndex().query(queryStr);
+        return new Neo4jVertexIterable<Vertex>(rawQuery, graph.getBaseGraph(),
+                false);
     }
 
     /**
@@ -260,27 +261,6 @@ public final class SingleIndexGraphManager implements GraphManager {
         } finally {
             get.close();
         }
-    }
-
-    /**
-     * List the given property for objects within a given index.
-     * 
-     * @param typeName
-     * @param propertyName
-     * @return
-     */
-    public List<Object> getAllPropertiesOfType(EntityClass typeName,
-            String propertyName) {
-        List<Object> out = new LinkedList<Object>();
-        CloseableIterable<Vertex> query = getVertices(typeName);
-        try {
-            for (Vertex v : query) {
-                out.add(v.getProperty(propertyName));
-            }
-        } finally {
-            query.close();
-        }
-        return out;
     }
 
     /**

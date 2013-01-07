@@ -6,6 +6,7 @@ import org.apache.commons.cli.ParseException;
 
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
+
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.models.EntityClass;
@@ -67,7 +68,7 @@ public class UserListEntities extends BaseCommand implements Command {
             throw new RuntimeException("Unknown accessible entity: " + type);
 
         UserProfile user = manager.getFrame(
-                (String) cmdLine.getOptionValue("user"), UserProfile.class);
+                cmdLine.getOptionValue("user"), UserProfile.class);
 
         @SuppressWarnings("unchecked")
         Query<AccessibleEntity> query = new Query<AccessibleEntity>(graph,

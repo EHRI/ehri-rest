@@ -13,8 +13,8 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.StreamingOutput;
 
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
@@ -37,7 +37,7 @@ import eu.ehri.project.persistance.ActionManager;
  * Provides a RESTfull interface for the Group class.
  */
 @Path(Entities.GROUP)
-public class GroupResource extends EhriNeo4jFramedResource<Group> {
+public class GroupResource extends AbstractAccessibleEntityResource<Group> {
 
     public GroupResource(@Context GraphDatabaseService database) {
         super(database, Group.class);

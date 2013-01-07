@@ -24,8 +24,6 @@ public class GroupRestClientTest extends BaseRestClientTest {
     static final String CURRENT_ADMIN_USER = "mike";
     static final String NON_ADMIN_USER = "reto";
 
-    private String jsonGroupTestString = "{\"type\": \"group\", \"data\":{\"identifier\": \"jmp\", \"name\": \"JMP\"}}";
-
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
         initializeTestDb(GroupRestClientTest.class.getName());
@@ -36,6 +34,7 @@ public class GroupRestClientTest extends BaseRestClientTest {
         // Create
         WebResource resource = client.resource(getExtensionEntryPointUri()
                 + "/group");
+        String jsonGroupTestString = "{\"type\": \"group\", \"data\":{\"identifier\": \"jmp\", \"name\": \"JMP\"}}";
         ClientResponse response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)

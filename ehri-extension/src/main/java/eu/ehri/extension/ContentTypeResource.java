@@ -25,7 +25,7 @@ import eu.ehri.project.models.ContentType;
  * here.
  */
 @Path(Entities.CONTENT_TYPE)
-public class ContentTypeResource extends EhriNeo4jFramedResource<ContentType> {
+public class ContentTypeResource extends AbstractAccessibleEntityResource<ContentType> {
 
     public ContentTypeResource(@Context GraphDatabaseService database) {
         super(database, ContentType.class);

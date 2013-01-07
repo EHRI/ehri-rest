@@ -1,6 +1,7 @@
 package eu.ehri.project.importers.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.InputStream;
 import java.util.List;
@@ -8,12 +9,12 @@ import java.util.List;
 import org.junit.Test;
 
 import com.tinkerpop.blueprints.Vertex;
+
 import eu.ehri.project.importers.EadImportManager;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.models.Action;
 import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.DocumentaryUnit;
-import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.test.AbstractFixtureTest;
 

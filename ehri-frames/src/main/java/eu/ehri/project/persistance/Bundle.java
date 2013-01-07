@@ -89,33 +89,6 @@ public class Bundle {
     }
 
     /**
-     * Add a bundle for a particular relation.
-     * 
-     * @param relation
-     * @param other
-     */
-    public Bundle withRelation(String relation, Bundle other) {
-        LinkedListMultimap<String, Bundle> tmp = LinkedListMultimap
-                .create(relations);
-        tmp.put(relation, other);
-        return new Bundle(id, type, data, tmp);
-    }
-
-    /**
-     * Set bundles for a particular relation.
-     * 
-     * @param relation
-     * @param others
-     * @return
-     */
-    public Bundle withRelations(String relation, List<Bundle> others) {
-        LinkedListMultimap<String, Bundle> tmp = LinkedListMultimap
-                .create(relations);
-        tmp.putAll(relation, others);
-        return new Bundle(id, type, data, tmp);
-    }
-
-    /**
      * Get the id of the bundle's graph vertex (or null if it does not yet
      * exist.
      * 
@@ -136,21 +109,13 @@ public class Bundle {
     }
 
     /**
-     * Get the bundle's relation bundles.
+     * Get the type of entity this bundle represents as per the target class's
+     * entity type key.
      * 
      * @return
      */
-    public ListMultimap<String, Bundle> getRelations() {
-        return relations;
-    }
-
-    /**
-     * Get the bundle data.
-     * 
-     * @return
-     */
-    public Map<String, Object> getData() {
-        return data;
+    public EntityClass getType() {
+        return type;
     }
 
     /**
@@ -178,12 +143,41 @@ public class Bundle {
     }
 
     /**
+     * Get the bundle data.
+     * 
+     * @return
+     */
+    public Map<String, Object> getData() {
+        return data;
+    }
+
+    /**
      * Set the entire data map for this bundle.
      * 
      * @param data
      * @return
      */
     public Bundle withData(final Map<String, Object> data) {
+        return new Bundle(id, type, data, relations);
+    }
+
+    /**
+     * Get the bundle's relation bundles.
+     * 
+     * @return
+     */
+    public ListMultimap<String, Bundle> getRelations() {
+        return relations;
+    }
+
+    /**
+     * Set entire set of relations.
+     * 
+     * @param relation
+     * @param others
+     * @return
+     */
+    public Bundle withRelations(ListMultimap<String, Bundle> relations) {
         return new Bundle(id, type, data, relations);
     }
 
@@ -195,6 +189,43 @@ public class Bundle {
      */
     public List<Bundle> getRelations(String relation) {
         return relations.get(relation);
+    }
+
+    /**
+     * Set bundles for a particular relation.
+     * 
+     * @param relation
+     * @param others
+     * @return
+     */
+    public Bundle withRelations(String relation, List<Bundle> others) {
+        LinkedListMultimap<String, Bundle> tmp = LinkedListMultimap
+                .create(relations);
+        tmp.putAll(relation, others);
+        return new Bundle(id, type, data, tmp);
+    }
+
+    /**
+     * Add a bundle for a particular relation.
+     * 
+     * @param relation
+     * @param other
+     */
+    public Bundle withRelation(String relation, Bundle other) {
+        LinkedListMultimap<String, Bundle> tmp = LinkedListMultimap
+                .create(relations);
+        tmp.put(relation, other);
+        return new Bundle(id, type, data, tmp);
+    }
+
+    /**
+     * Check if this bundle contains the given relation set.
+     * 
+     * @param relation
+     * @return
+     */
+    public boolean hasRelations(String relation) {
+        return relations.containsKey(relation);
     }
 
     /**
@@ -228,16 +259,6 @@ public class Bundle {
      */
     public Class<?> getBundleClass() {
         return type.getEntityClass();
-    }
-
-    /**
-     * Get the type of entity this bundle represents as per the target class's
-     * entity type key.
-     * 
-     * @return
-     */
-    public EntityClass getType() {
-        return type;
     }
 
     /**

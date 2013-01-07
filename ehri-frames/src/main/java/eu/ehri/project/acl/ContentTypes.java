@@ -12,7 +12,8 @@ public enum ContentTypes {
     GROUP(Entities.GROUP),
     USER_PROFILE(Entities.USER_PROFILE),
     ANNOTATION(Entities.ANNOTATION),
-    ACTION(Entities.ACTION);
+    ACTION(Entities.ACTION),
+    CVOC_CONCEPT(Entities.CVOC_CONCEPT);
     
     private final String name;
     
@@ -36,6 +37,5 @@ public enum ContentTypes {
                 return c;
         }
         throw new IllegalArgumentException("Invalid content type type: " + name);
-    }    
-
+    }
 }

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.Vertex;
@@ -22,7 +23,6 @@ import eu.ehri.project.exceptions.IndexNotFoundException;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.PermissionScope;
@@ -40,9 +40,11 @@ import eu.ehri.project.views.ViewHelper;
  * @param <E>
  */
 public final class Query<E extends AccessibleEntity> implements Search<E> {
-    private final Integer offset;
-    private final Integer limit;
-    private final String sort;
+
+    public static final int DEFAULT_LIST_LIMIT = 20;
+
+    private final Optional<Integer> offset;
+    private final Optional<Integer> limit;
     private final boolean page;
 
     private final FramedGraph<Neo4jGraph> graph;
@@ -63,16 +65,15 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      * @param page
      */
     public Query(FramedGraph<Neo4jGraph> graph, Class<E> cls,
-            PermissionScope scope, Integer offset, Integer limit, String sort,
-            Boolean page) {
+            PermissionScope scope, Optional<Integer> offset,
+            Optional<Integer> limit, Boolean page) {
         this.graph = graph;
         this.cls = cls;
         this.scope = scope;
         this.offset = offset;
         this.limit = limit;
-        this.sort = sort;
         this.page = page;
-        helper = new ViewHelper(graph, cls, scope);
+        helper = new ViewHelper(graph, scope);
         manager = GraphManagerFactory.getInstance(graph);
     }
 
@@ -83,7 +84,8 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      * @param cls
      */
     public Query(FramedGraph<Neo4jGraph> graph, Class<E> cls) {
-        this(graph, cls, SystemScope.getInstance(), null, null, null, false);
+        this(graph, cls, SystemScope.getInstance(),
+                Optional.<Integer> absent(), Optional.<Integer> absent(), false);
     }
 
     /**
@@ -95,7 +97,8 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      */
     public Query(FramedGraph<Neo4jGraph> graph, Class<E> cls,
             PermissionScope scope) {
-        this(graph, cls, scope, null, null, null, false);
+        this(graph, cls, scope, Optional.<Integer> absent(), Optional
+                .<Integer> absent(), false);
     }
 
     /**
@@ -105,29 +108,29 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      */
     public Query<E> copy(Query<E> other) {
         return new Query<E>(other.graph, other.cls, other.scope, other.offset,
-                other.limit, other.sort, other.page);
+                other.limit, other.page);
     }
 
     /**
+     * Class representing a page of content.
      * 
-     * @author michaelb
-     * 
-     * @param <E>
+     * @param <T>
+     *            the item type
      */
-    public static class Page<E> {
-        private Iterable<E> iterable;
+    public static class Page<T> {
+        private Iterable<T> iterable;
         private long count;
         private Integer offset;
         private Integer limit;
 
-        Page(Iterable<E> iterable, long count, Integer offset, Integer limit) {
+        Page(Iterable<T> iterable, long count, Integer offset, Integer limit) {
             this.iterable = iterable;
             this.count = count;
             this.offset = offset;
             this.limit = limit;
         }
 
-        public Iterable<E> getIterable() {
+        public Iterable<T> getIterable() {
             return iterable;
         }
 
@@ -221,16 +224,6 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
     }
 
     /**
-     * Return an iterable for all items accessible to the user.
-     * 
-     * @param user
-     * @return Iterable of framed vertices accessible to the given user
-     */
-    public Iterable<E> list(Accessor user) {
-        return list(ClassUtils.getEntityType(cls), user);
-    }
-
-    /**
      * Return a Page instance containing a count of total items, and an iterable
      * for the given offset/limit.
      * 
@@ -242,22 +235,6 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
     }
 
     /**
-     * Return an iterable for all items accessible to the user.
-     * 
-     * @param user
-     * @return Iterable of framed vertices accessible to the given user
-     * @throws IndexNotFoundException
-     */
-    public Iterable<E> list(EntityClass type, Accessor user) {
-        // FIXME: Grotesque and fragile hack using the type key
-        // Breaks encapsulation of graph implementation.
-        // This should instead call a dedicated method of the graph
-        // manager to return a framed iterable of all nodes of a
-        // given class.
-        return list(EntityType.TYPE_KEY, type.toString(), user);
-    }
-
-    /**
      * Return a Page instance containing a count of total items, and an iterable
      * for the given offset/limit.
      * 
@@ -266,12 +243,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      * @throws IndexNotFoundException
      */
     public Page<E> page(EntityClass type, Accessor user) {
-        // FIXME: Grotesque and fragile hack using the type key
-        // Breaks encapsulation of graph implementation.
-        // This should instead call a dedicated method of the graph
-        // manager to return a framed iterable of all nodes of a
-        // given class.
-        return page(EntityType.TYPE_KEY, type.toString(), user);
+        return page(manager.getFrames(type, cls), user);
     }
 
     /**
@@ -285,6 +257,21 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      * @throws IndexNotFoundException
      */
     public Page<E> page(Iterable<E> vertices, Accessor user) {
+        return page(vertices, user, cls);
+    }
+
+    /**
+     * Return a Page instance containing a count of total items, and an iterable
+     * for the given offset/limit.
+     * 
+     * @param iterable
+     * @param user
+     * 
+     * @return Page instance
+     * @throws IndexNotFoundException
+     */
+    public <T extends VertexFrame> Page<T> page(Iterable<T> vertices,
+            Accessor user, Class<T> cls) {
         // This function is optimised for ACL actions.
         // FIXME: Work out if there's any way of doing, in Gremlin or
         // Cypher, a count that doesn't require re-iterating the results on
@@ -297,14 +284,14 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
         // can't re-use the iterator for counting and streaming.
         ArrayList<Vertex> userVerts = Lists
                 .newArrayList(new GremlinPipeline<E, Vertex>(
-                        new FramedVertexIterableAdaptor<E>(vertices)).filter(
+                        new FramedVertexIterableAdaptor<T>(vertices)).filter(
                         aclFilterFunction).iterator());
 
-        return new Page<E>(
+        return new Page<T>(
                 graph.frameVertices(
                         setPipelineRange(new GremlinPipeline<Vertex, Vertex>(
-                                userVerts)), cls), userVerts.size(), offset,
-                limit);
+                                userVerts)), cls), userVerts.size(),
+                offset.or(0), limit.or(DEFAULT_LIST_LIMIT));
     }
 
     /**
@@ -336,13 +323,23 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
                 return new Page<E>(graph.frameVertices(
                         setPipelineRange(new GremlinPipeline<Vertex, Vertex>(
                                 indexQ).filter(aclFilterFunction)), cls),
-                        count, offset, limit);
+                        count, offset.or(0), limit.or(DEFAULT_LIST_LIMIT));
             } finally {
                 indexQ.close();
             }
         } finally {
             countQ.close();
         }
+    }
+
+    /**
+     * Return an iterable for all items accessible to the user.
+     * 
+     * @param user
+     * @return Iterable of framed vertices accessible to the given user
+     */
+    public Iterable<E> list(Accessor user) {
+        return list(ClassUtils.getEntityType(cls), user);
     }
 
     /**
@@ -377,49 +374,81 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      * @throws IndexNotFoundException
      */
     public Iterable<E> list(Iterable<E> vertices, Accessor user) {
-        GremlinPipeline<E, Vertex> filter = new GremlinPipeline<E, Vertex>(
-                new FramedVertexIterableAdaptor<E>(vertices))
+        return list(vertices, user, cls);
+    }
+
+    /**
+     * List items accessible to a given user.
+     * 
+     * @param vertices
+     * @param user
+     * 
+     * @return Iterable of items accessible to the given accessor
+     * @throws IndexNotFoundException
+     */
+    public <T extends VertexFrame> Iterable<T> list(Iterable<T> vertices,
+            Accessor user, Class<T> cls) {
+        GremlinPipeline<T, Vertex> filter = new GremlinPipeline<T, Vertex>(
+                new FramedVertexIterableAdaptor<T>(vertices))
                 .filter(new AclManager(graph).getAclFilterFunction(user));
         return graph.frameVertices(setPipelineRange(filter), cls);
     }
 
     /**
+     * Return an iterable for all items accessible to the user.
+     * 
+     * @param user
+     * @return Iterable of framed vertices accessible to the given user
+     * @throws IndexNotFoundException
+     */
+    public Iterable<E> list(EntityClass type, Accessor user) {
+        return list(manager.getFrames(type, cls), user);
+    }
+
+    /**
+     * Get the offset applied to this query.
      * 
      * @return
      */
-    public int getOffset() {
+    public Optional<Integer> getOffset() {
         return offset;
     }
 
+    /**
+     * Set the offset applied to this query.
+     * 
+     * @param offset
+     */
     public Query<E> setOffset(Integer offset) {
-        return new Query<E>(this.graph, this.cls, this.scope, offset,
-                this.limit, this.sort, this.page);
+        return new Query<E>(this.graph, this.cls, this.scope,
+                Optional.fromNullable(offset), this.limit, this.page);
     }
 
-    public int getLimit() {
+    /**
+     * Get the limit applied to this query.
+     * 
+     * @return
+     */
+    public Optional<Integer> getLimit() {
         return limit;
     }
 
+    /**
+     * Set the limit applied to this query.
+     * 
+     * @param limit
+     */
     public Query<E> setLimit(Integer limit) {
         return new Query<E>(this.graph, this.cls, this.scope, this.offset,
-                limit, this.sort, this.page);
-    }
-
-    public String getSort() {
-        return sort;
-    }
-
-    public Query<E> setSort(String sort) {
-        return new Query<E>(this.graph, this.cls, this.scope, this.offset,
-                this.limit, sort, this.page);
+                Optional.fromNullable(limit), this.page);
     }
 
     // Helpers
 
     private <EE> GremlinPipeline<EE, Vertex> setPipelineRange(
             GremlinPipeline<EE, Vertex> filter) {
-        int low = offset == null ? 0 : Math.max(offset, 0);
-        int high = limit == null ? -1 : low + Math.max(limit, 0) - 1;
+        int low = Math.max(offset.or(0), 0);
+        int high = low + Math.max(limit.or(-1), 0) - 1;
         return filter.range(low, high);
     }
 }

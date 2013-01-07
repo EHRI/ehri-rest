@@ -202,7 +202,7 @@ public final class BundleDAO {
                 for (Entry<String, String> entry : e.getFields().entrySet()) {
                     errors.put(entry.getKey(), MessageFormat.format(
                             Messages.getString("BundleDAO.uniquenessError"), //$NON-NLS-1$
-                            new Object[] {entry.getValue()}));
+                            entry.getValue()));
                 }
             }
 
@@ -241,7 +241,7 @@ public final class BundleDAO {
             for (Entry<String, String> entry : e.getFields().entrySet()) {
                 errors.put(entry.getKey(), MessageFormat.format(
                         Messages.getString("BundleDAO.uniquenessError"), //$NON-NLS-1$
-                        new Object[] {entry.getValue()}));
+                        entry.getValue()));
             }
         }
         if (!errors.isEmpty() || hasNestedErrors(nestedErrors)) {

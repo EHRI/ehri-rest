@@ -12,8 +12,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -242,7 +240,7 @@ public class CvocConceptClientTest  extends BaseRestClientTest {
         return response;
     }
     
-    public boolean containsIdentifier(final ClientResponse response, final String idStr) throws JsonParseException, JsonMappingException, IOException {
+    public boolean containsIdentifier(final ClientResponse response, final String idStr) throws IOException {
         String json = response.getEntity(String.class);
         //System.out.println("list Response json: " + json);
         

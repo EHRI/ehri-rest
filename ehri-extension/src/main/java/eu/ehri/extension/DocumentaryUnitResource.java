@@ -16,9 +16,10 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriBuilder;
-import javax.ws.rs.core.Response.Status;
+
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 
@@ -40,7 +41,7 @@ import eu.ehri.project.views.impl.Query;
  */
 @Path(Entities.DOCUMENTARY_UNIT)
 public class DocumentaryUnitResource extends
-        EhriNeo4jFramedResource<DocumentaryUnit> {
+        AbstractAccessibleEntityResource<DocumentaryUnit> {
 
     public DocumentaryUnitResource(@Context GraphDatabaseService database) {
         super(database, DocumentaryUnit.class);

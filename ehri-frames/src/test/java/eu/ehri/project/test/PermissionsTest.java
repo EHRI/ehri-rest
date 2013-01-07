@@ -1,6 +1,7 @@
 package eu.ehri.project.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -44,9 +45,8 @@ public class PermissionsTest extends AbstractFixtureTest {
         user = new BundleDAO(graph).create(new Bundle(EntityClass.USER_PROFILE,
                 (Map<String, Object>) getTestUserBundle().get("data")),
                 UserProfile.class);
-        views = new CrudViews<DocumentaryUnit>(graph, DocumentaryUnit.class,
-                manager.getFrame("r1", Agent.class));
-        viewHelper = new ViewHelper(graph, DocumentaryUnit.class);
+        views = new CrudViews<DocumentaryUnit>(graph, DocumentaryUnit.class);
+        viewHelper = new ViewHelper(graph);
         acl = new AclManager(graph);
     }
 
@@ -68,9 +68,10 @@ public class PermissionsTest extends AbstractFixtureTest {
     @Test(expected = PermissionDenied.class)
     public void testCreateAsUserWithBadScopedPerms() throws PermissionDenied,
             ValidationError, DeserializationError, IntegrityError, ItemNotFound {
-        acl.grantPermissions(user,
+        Agent scope = manager.getFrame("r1", Agent.class);
+        new AclManager(graph, scope).grantPermissions(user,
                 viewHelper.getContentType(EntityClass.DOCUMENTARY_UNIT),
-                PermissionType.CREATE, manager.getFrame("r1", Agent.class));
+                PermissionType.CREATE);
         assertNotNull(views.setScope(SystemScope.getInstance()).create(
                 getTestBundle(), user));
     }
@@ -79,9 +80,9 @@ public class PermissionsTest extends AbstractFixtureTest {
     public void testCreateAsUserWithGoodScopedPerms() throws PermissionDenied,
             ValidationError, DeserializationError, IntegrityError, ItemNotFound {
         Agent scope = manager.getFrame("r1", Agent.class);
-        acl.grantPermissions(user,
+        new AclManager(graph, scope).grantPermissions(user,
                 viewHelper.getContentType(EntityClass.DOCUMENTARY_UNIT),
-                PermissionType.CREATE, scope);
+                PermissionType.CREATE);
         assertNotNull(views.setScope(scope).create(getTestBundle(), user));
     }
 
@@ -90,9 +91,9 @@ public class PermissionsTest extends AbstractFixtureTest {
             throws PermissionDenied, ValidationError, DeserializationError,
             IntegrityError, ItemNotFound {
         Agent scope = manager.getFrame("r1", Agent.class);
-        acl.grantPermissions(user,
+        new AclManager(graph, scope).grantPermissions(user,
                 viewHelper.getContentType(EntityClass.DOCUMENTARY_UNIT),
-                PermissionType.CREATE, scope);
+                PermissionType.CREATE);
         DocumentaryUnit c1 = views.setScope(scope)
                 .create(getTestBundle(), user);
         // We have to explicitly set the scope of this new item.
@@ -103,8 +104,7 @@ public class PermissionsTest extends AbstractFixtureTest {
         // validation error due to duplicate identifiers
         Bundle bundle = Bundle.fromData(getTestBundle()).withDataValue(
                 AccessibleEntity.IDENTIFIER_KEY, "nested-item");
-        DocumentaryUnit c2 = views.setScope(c1).create(
-                bundle.toData(), user);
+        DocumentaryUnit c2 = views.setScope(c1).create(bundle.toData(), user);
         assertNotNull(c2);
     }
 
@@ -114,9 +114,9 @@ public class PermissionsTest extends AbstractFixtureTest {
             IntegrityError, ItemNotFound {
         Agent scope = manager.getFrame("r1", Agent.class);
         Agent badScope = manager.getFrame("r2", Agent.class);
-        acl.grantPermissions(user,
+        new AclManager(graph, scope).grantPermissions(user,
                 viewHelper.getContentType(EntityClass.DOCUMENTARY_UNIT),
-                PermissionType.CREATE, scope);
+                PermissionType.CREATE);
         assertNotNull(views.setScope(badScope).create(getTestBundle(), user));
     }
 
@@ -235,10 +235,44 @@ public class PermissionsTest extends AbstractFixtureTest {
             views.create(getTestBundle(), user);
             fail();
         } catch (PermissionDenied e) {
-            acl.setGlobalPermissionMatrix(user, matrix);
+            acl.setPermissionMatrix(user, matrix);
             DocumentaryUnit unit = views.create(getTestBundle(), user);
             assertNotNull(unit);
             views.delete(unit, user);
+        }
+    }
+
+    @SuppressWarnings("serial")
+    @Test
+    public void testSetScopedPermissionMatrix() throws PermissionDenied,
+            ValidationError, DeserializationError, IntegrityError,
+            SerializationError, ItemNotFound {
+        Agent scope = manager.getFrame("r1", Agent.class);
+
+        // @formatter:off
+        Map<ContentTypes,List<PermissionType>> matrix = new HashMap<ContentTypes, List<PermissionType>>() {{
+            put(ContentTypes.DOCUMENTARY_UNIT, new LinkedList<PermissionType>() {{
+                add(PermissionType.CREATE);
+                add(PermissionType.DELETE);
+            }});
+        }};
+        // @formatter:on
+
+        try {
+            views.setScope(scope).create(getTestBundle(), user);
+            fail("Should be unable to create an item with scope: " + scope);
+        } catch (PermissionDenied e) {
+            acl.withScope(scope).setPermissionMatrix(user, matrix);
+
+            try {
+                views.create(getTestBundle(), user);
+                fail("Should be unable to create an item with no scope after setting scoped perms.");
+            } catch (PermissionDenied e1) {
+                DocumentaryUnit unit = views.setScope(scope).create(
+                        getTestBundle(), user);
+                assertNotNull(unit);
+                views.setScope(scope).delete(unit, user);
+            }
         }
     }
 }

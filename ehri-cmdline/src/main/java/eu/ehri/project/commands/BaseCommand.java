@@ -13,7 +13,8 @@ public abstract class BaseCommand {
     Options options = new Options();
     CommandLineParser parser = new PosixParser();
         
-    protected void setCustomOptions() {};    
+    protected void setCustomOptions() {}
+
     public abstract String getHelp();
     public abstract String getUsage();
     public final int exec(final FramedGraph<Neo4jGraph> graph, String[] args) throws Exception {

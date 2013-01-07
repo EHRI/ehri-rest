@@ -1,6 +1,5 @@
 package eu.ehri.project.core;
 
-import java.util.List;
 import java.util.Map;
 
 import com.tinkerpop.blueprints.CloseableIterable;
@@ -102,30 +101,8 @@ public interface GraphManager {
      */
     public <T> Iterable<T> getFrames(EntityClass type, Class<T> cls);
 
-    /**
-     * List the given property for objects of a given type.
-     * 
-     * @param type
-     * @param propertyName
-     * @return
-     */
-    public List<Object> getAllPropertiesOfType(EntityClass type, String propertyName);
 
     // CRUD functions
-
-    /**
-     * Delete a vertex with the given ID.
-     * 
-     * @param id
-     */
-    public void deleteVertex(String id) throws ItemNotFound;
-
-    /**
-     * Delete the given vertex.
-     * 
-     * @param vertex
-     */
-    public void deleteVertex(Vertex vertex);
 
     /**
      * Create a vertex with the given id, type, and data.
@@ -152,6 +129,22 @@ public interface GraphManager {
      */
     public Vertex createVertex(String id, EntityClass type,
             Map<String, Object> data, Iterable<String> keys) throws IntegrityError;
+
+    /**
+     * Create a vertex with the given id, type, and data, specifying which
+     * property keys should be indexed, and which should be unique.
+     * 
+     * @param id
+     * @param type
+     * @param data
+     * @param keys
+     * @param uniqueKeys
+     * @return
+     * @throws IntegrityError
+     */
+    public Vertex createVertex(String id, EntityClass type,
+            Map<String, Object> data, Iterable<String> keys,
+            Iterable<String> uniqueKeys) throws IntegrityError;
 
     /**
      * Create a vertex with the given id, type, and data, specifying which
@@ -196,19 +189,19 @@ public interface GraphManager {
             Map<String, Object> data, Iterable<String> keys)
             throws IntegrityError, ItemNotFound;
 
+    // CRUD functions
+    
     /**
-     * Create a vertex with the given id, type, and data, specifying which
-     * property keys should be indexed, and which should be unique.
+     * Delete a vertex with the given ID.
      * 
      * @param id
-     * @param type
-     * @param data
-     * @param keys
-     * @param uniqueKeys
-     * @return
-     * @throws IntegrityError
      */
-    public Vertex createVertex(String id, EntityClass type,
-            Map<String, Object> data, Iterable<String> keys,
-            Iterable<String> uniqueKeys) throws IntegrityError;
+    public void deleteVertex(String id) throws ItemNotFound;
+
+    /**
+     * Delete the given vertex.
+     * 
+     * @param vertex
+     */
+    public void deleteVertex(Vertex vertex);
 }

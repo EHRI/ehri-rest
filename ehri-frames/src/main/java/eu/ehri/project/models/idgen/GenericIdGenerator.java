@@ -1,11 +1,11 @@
 package eu.ehri.project.models.idgen;
 
+import java.util.Map;
+import java.util.UUID;
+
 import eu.ehri.project.exceptions.IdGenerationError;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.PermissionScope;
-
-import java.util.Map;
-import java.util.UUID;
 
 /**
  * Generates a generic ID for tertiary node types.

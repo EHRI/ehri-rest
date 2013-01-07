@@ -19,8 +19,8 @@ import org.neo4j.server.configuration.ThirdPartyJaxRsPackage;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 
+import eu.ehri.extension.AbstractAccessibleEntityResource;
 import eu.ehri.extension.AbstractRestResource;
-import eu.ehri.extension.EhriNeo4jFramedResource;
 import eu.ehri.plugin.test.utils.ServerRunner;
 
 /**
@@ -81,7 +81,7 @@ public class BaseRestClientTest extends AbstractRestClientTest {
         runner = new ServerRunner(dbName, testServerPort);
         runner.getConfigurator()
                 .getThirdpartyJaxRsClasses()
-                .add(new ThirdPartyJaxRsPackage(EhriNeo4jFramedResource.class
+                .add(new ThirdPartyJaxRsPackage(AbstractAccessibleEntityResource.class
                         .getPackage().getName(), mountPoint));
         runner.start();
     }

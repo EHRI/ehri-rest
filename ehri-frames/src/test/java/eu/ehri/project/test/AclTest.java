@@ -1,9 +1,9 @@
 package eu.ehri.project.test;
 
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.Collection;
@@ -15,6 +15,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 import eu.ehri.project.acl.AclManager;
@@ -167,7 +168,7 @@ public class AclTest extends ModelTestBase {
         assertTrue(acl.getAccessControl(kcl, reto));
 
         // Now set the access control on KCL so Reto can write to it...
-        acl.setAccessControl(kcl, reto);
+        acl.setAccessors(kcl, Lists.newArrayList(reto));
         assertTrue(acl.getAccessControl(kcl, reto));
     }
 
@@ -187,7 +188,7 @@ public class AclTest extends ModelTestBase {
         assertTrue(acl.getAccessControl(kcl, reto));
 
         // Now set the access control on KCL so Reto can write to it...
-        acl.setAccessControl(kcl, reto);
+        acl.setAccessors(kcl, Lists.newArrayList(reto));
         assertTrue(acl.getAccessControl(kcl, reto));
 
         // Now remove the access control...
@@ -243,7 +244,7 @@ public class AclTest extends ModelTestBase {
         }
 
         AclManager acl = new AclManager(graph);
-        acl.setGlobalPermissionMatrix(accessor, matrix);
+        acl.setPermissionMatrix(accessor, matrix);
 
         // Check that everything is still there...
         cmap = acl.getGlobalPermissions(accessor);
@@ -288,7 +289,7 @@ public class AclTest extends ModelTestBase {
 
         AclManager acl = new AclManager(graph);
         // This should throw PermissionDenied
-        acl.setGlobalPermissionMatrix(accessor, matrix);
+        acl.setPermissionMatrix(accessor, matrix);
         fail();
     }
 }

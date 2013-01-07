@@ -1,27 +1,19 @@
 package eu.ehri.plugin.test;
 
-import static org.junit.Assert.assertEquals;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.server.rest.repr.Representation;
 import org.neo4j.test.TestGraphDatabaseFactory;
 
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
+import eu.ehri.plugin.EhriNeo4jPlugin;
 import eu.ehri.project.exceptions.IndexNotFoundException;
-import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.test.utils.fixtures.FixtureLoader;
 import eu.ehri.project.test.utils.fixtures.FixtureLoaderFactory;
-import eu.ehri.project.views.impl.CrudViews;
-
-import eu.ehri.plugin.EhriNeo4jPlugin;
 
 public class EhriNeo4jPluginTest {
     protected FramedGraph<Neo4jGraph> graph;

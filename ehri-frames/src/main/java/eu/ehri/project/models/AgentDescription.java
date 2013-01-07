@@ -7,7 +7,6 @@ import eu.ehri.project.models.annotations.Dependent;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.base.Description;
-import eu.ehri.project.models.Address;
 
 @EntityType(EntityClass.AGENT_DESCRIPTION)
 public interface AgentDescription extends Description {

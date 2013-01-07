@@ -1,19 +1,18 @@
 package eu.ehri.extension;
 
-import java.io.IOException;
-import java.io.OutputStream;
+import static eu.ehri.extension.RestHelpers.produceErrorMessageJson;
+
 import java.net.URI;
+
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriBuilder;
-import javax.ws.rs.core.Response.Status;
 
-import org.codehaus.jackson.JsonFactory;
-import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.neo4j.graphdb.GraphDatabaseService;
+
 import com.tinkerpop.frames.VertexFrame;
 
 import eu.ehri.extension.errors.BadRequester;
@@ -27,13 +26,10 @@ import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.utils.ClassUtils;
-import eu.ehri.project.persistance.Converter;
 import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.views.Crud;
 import eu.ehri.project.views.impl.LoggingCrudViews;
 import eu.ehri.project.views.impl.Query;
-
-import static eu.ehri.extension.RestHelpers.*;
 
 /**
  * Handle CRUD operations on AccessibleEntity's by using the
@@ -43,15 +39,12 @@ import static eu.ehri.extension.RestHelpers.*;
  * @param <E>
  *            The specific AccesibleEntity derived class
  */
-public class EhriNeo4jFramedResource<E extends AccessibleEntity> extends
+public class AbstractAccessibleEntityResource<E extends AccessibleEntity> extends
         AbstractRestResource {
-
-    public static final int DEFAULT_LIST_LIMIT = 20;
 
     protected final Crud<E> views;
     protected final Query<E> querier;
     protected final Class<E> cls;
-    protected final Converter converter = new Converter(graph);
 
     /**
      * Constructor
@@ -61,7 +54,7 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> extends
      * @param cls
      *            The 'entity' class
      */
-    public EhriNeo4jFramedResource(@Context GraphDatabaseService database,
+    public AbstractAccessibleEntityResource(@Context GraphDatabaseService database,
             Class<E> cls) {
         super(database);
         this.cls = cls;
@@ -342,72 +335,4 @@ public class EhriNeo4jFramedResource<E extends AccessibleEntity> extends
         return ClassUtils.getEntityType(cls);
     }
 
-    /**
-     * Stream a single page with total, limit, and offset info.
-     * 
-     * @param page
-     * @return
-     */
-    protected <T extends VertexFrame> StreamingOutput streamingPage(
-            final Query.Page<T> page) {
-        final ObjectMapper mapper = new ObjectMapper();
-        final JsonFactory f = new JsonFactory();
-        return new StreamingOutput() {
-            @Override
-            public void write(OutputStream os) throws IOException,
-                    WebApplicationException {
-                JsonGenerator g = f.createJsonGenerator(os);
-                g.writeStartObject();
-                g.writeNumberField("total", page.getCount());
-                g.writeNumberField("offset", page.getOffset());
-                g.writeNumberField("limit", page.getLimit());
-                g.writeFieldName("values");
-                g.writeStartArray();
-                for (T item : page.getIterable()) {
-                    try {
-                        mapper.writeValue(g, converter.vertexFrameToData(item));
-                    } catch (SerializationError e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-                g.writeEndArray();
-                g.writeEndObject();
-                g.close();
-            }
-        };
-    }
-
-    /**
-     * Return a streaming response from an iterable.
-     * 
-     * @param list
-     * @return
-     */
-    protected <T extends VertexFrame> StreamingOutput streamingList(
-            final Iterable<T> list) {
-        final ObjectMapper mapper = new ObjectMapper();
-        final JsonFactory f = new JsonFactory();
-        final Converter converter = new Converter(graph);
-        // FIXME: I don't understand this streaming output system well
-        // enough
-        // to determine whether this actually streams or not. It certainly
-        // doesn't look like it.
-        return new StreamingOutput() {
-            @Override
-            public void write(OutputStream arg0) throws IOException,
-                    WebApplicationException {
-                JsonGenerator g = f.createJsonGenerator(arg0);
-                g.writeStartArray();
-                for (T item : list) {
-                    try {
-                        mapper.writeValue(g, converter.vertexFrameToData(item));
-                    } catch (SerializationError e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-                g.writeEndArray();
-                g.close();
-            }
-        };
-    }
 }

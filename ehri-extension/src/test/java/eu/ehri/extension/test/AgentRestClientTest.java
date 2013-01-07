@@ -31,7 +31,6 @@ public class AgentRestClientTest extends BaseRestClientTest {
 
     private String agentTestData;
     private String docTestData;
-    private String badAgentTestData = "{\"data\":{\"identifier\": \"jmp\"}}";
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
@@ -103,6 +102,7 @@ public class AgentRestClientTest extends BaseRestClientTest {
         // Create
         WebResource resource = client.resource(getExtensionEntryPointUri()
                 + "/agent");
+        String badAgentTestData = "{\"data\":{\"identifier\": \"jmp\"}}";
         ClientResponse response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
@@ -173,11 +173,13 @@ public class AgentRestClientTest extends BaseRestClientTest {
 
         // Now grant the user permissions to create just within
         // the scope of r2
-        String permData = "[\"create\"]";
+        String permData = "{\"documentaryUnit\": [\"create\"]}";
 
         URI grantUri = UriBuilder.fromPath(getExtensionEntryPointUri())
-                .segment(Entities.AGENT).segment("r2").segment("grant")
-                .segment(LIMITED_USER_NAME).build();
+                .segment(Entities.PERMISSION)
+                .segment(LIMITED_USER_NAME)
+                .segment("scope")
+                .segment("r2").build();
 
         resource = client.resource(grantUri);
         response = resource
@@ -215,10 +217,12 @@ public class AgentRestClientTest extends BaseRestClientTest {
         // And the user himself should not be able to grant
         // others the ability to create within that scope.
         String otherUserName = "linda";
-        String grantPermData = "[\"grant\"]";
+        String grantPermData = "{\"documentaryUnit\": [\"grant\"]}";
         URI otherGrantUri = UriBuilder.fromPath(getExtensionEntryPointUri())
-                .segment(Entities.AGENT).segment("r2").segment("grant")
-                .segment(otherUserName).build();
+                .segment(Entities.PERMISSION)
+                .segment(otherUserName)
+                .segment("scope")
+                .segment("r2").build();
 
         resource = client.resource(otherGrantUri);
         response = resource

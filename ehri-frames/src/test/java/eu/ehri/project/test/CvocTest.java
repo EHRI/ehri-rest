@@ -10,8 +10,8 @@ import java.util.Map;
 import org.junit.Test;
 import org.neo4j.graphdb.Transaction;
 
-import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.TransactionalGraph.Conclusion;
+import com.tinkerpop.blueprints.Vertex;
 
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.models.EntityClass;
