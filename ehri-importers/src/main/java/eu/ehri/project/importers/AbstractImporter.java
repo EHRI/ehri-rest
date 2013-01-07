@@ -150,7 +150,7 @@ public abstract class AbstractImporter<T> {
 
         // Set the repository/item relationship
         frame.setAgent(repository);
-        frame.setScope(scope);
+        frame.setPermissionScope(scope);
         // Set the parent child relationship
         if (parent != null)
             parent.addChild(frame);
