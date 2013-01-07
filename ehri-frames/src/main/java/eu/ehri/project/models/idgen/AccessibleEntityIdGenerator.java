@@ -30,7 +30,7 @@ public enum AccessibleEntityIdGenerator implements IdGenerator {
             Map<String, Object> data) throws IdGenerationError {
         LinkedList<String> scopeIds = Lists.newLinkedList();
         if (!scope.equals(SystemScope.getInstance())) {
-            for (PermissionScope s : scope.getScopes())
+            for (PermissionScope s : scope.getPermissionScopes())
                 scopeIds.addFirst(s.getIdentifier());
             scopeIds.add(scope.getIdentifier());            
         }

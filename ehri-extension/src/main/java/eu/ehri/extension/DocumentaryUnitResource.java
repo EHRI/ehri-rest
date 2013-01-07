@@ -184,7 +184,7 @@ public class DocumentaryUnitResource extends
         // Add it to this agent's collections
         parent.addChild(doc);
         doc.setAgent(parent.getAgent());
-        doc.setScope(parent);
+        doc.setPermissionScope(parent);
         return doc;
     }
 }

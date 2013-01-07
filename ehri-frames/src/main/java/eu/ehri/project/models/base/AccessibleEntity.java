@@ -38,12 +38,12 @@ public interface AccessibleEntity extends VertexFrame, PermissionGrantTarget {
     public Iterable<Action> getHistory();
     
     @Adjacency(label = HAS_PERMISSION_SCOPE)
-    public PermissionScope getScope();
+    public PermissionScope getPermissionScope();
     
     @Adjacency(label = HAS_PERMISSION_SCOPE)
-    public void setScope(final PermissionScope scope);
+    public void setPermissionScope(final PermissionScope scope);
     
     @GremlinGroovy("_().as('n').out('" + HAS_PERMISSION_SCOPE
             + "').loop('n'){it.loops < 20}{true}")
-    public Iterable<PermissionScope> getScopes();    
+    public Iterable<PermissionScope> getPermissionScopes();    
 }

@@ -97,7 +97,7 @@ public class PermissionsTest extends AbstractFixtureTest {
         DocumentaryUnit c1 = views.setScope(scope)
                 .create(getTestBundle(), user);
         // We have to explicitly set the scope of this new item.
-        c1.setScope(scope);
+        c1.setPermissionScope(scope);
         // We should be able to create another item with c1 as the scope,
         // and inherit the perms from r1
         // FIXME: We have to alter the test data so it doesn't throw a

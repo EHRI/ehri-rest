@@ -229,7 +229,7 @@ public class AgentResource extends AbstractAccessibleEntityResource<Agent> {
                         getRequesterUserProfile());
         // Add it to this agent's collections
         doc.setAgent(agent);
-        doc.setScope(agent);
+        doc.setPermissionScope(agent);
         return doc;
     }
 }
