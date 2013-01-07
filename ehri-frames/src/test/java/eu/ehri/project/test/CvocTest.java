@@ -19,6 +19,7 @@ import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Text;
+import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.views.Crud;
 import eu.ehri.project.views.impl.CrudViews;
@@ -137,4 +138,31 @@ public class CvocTest extends ModelTestBase {
 		assertEquals(TEST_LABEL_LANG, concept.getPrefLabel().iterator().next().getLanguage());
 	}
     
+	@Test
+	public void testAddConceptToVocabulary() throws Exception {
+		UserProfile validUser = manager.getFrame("mike", UserProfile.class);
+
+		Map<String, Object> data = new HashMap<String, Object>() {{put(AccessibleEntity.IDENTIFIER_KEY, "testVocabulary");}};
+		Vertex v_voc = manager.createVertex("voc_id", EntityClass.CVOC_VOCABULARY, data);
+		data = new HashMap<String, Object>() {{put(AccessibleEntity.IDENTIFIER_KEY, "apples");}};
+		Vertex v_apples = manager.createVertex("applies_id", EntityClass.CVOC_CONCEPT, data);
+
+		// frame it
+		Vocabulary vocabulary = graph.frame(v_voc, Vocabulary.class);
+		Concept apples = graph.frame(v_apples, Concept.class);
+
+		// now add the apples to the vocabulary
+		Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
+		try {
+			vocabulary.addConcept(apples);
+			tx.success();
+		} catch (Exception e) {
+			tx.failure();
+		} finally {
+			tx.finish();
+		}
+
+		assertEquals(vocabulary.getIdentifier(), apples.getVocabulary().getIdentifier());
+
+	}
 }

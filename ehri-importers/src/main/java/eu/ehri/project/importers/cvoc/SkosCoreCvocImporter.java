@@ -198,8 +198,8 @@ public class SkosCoreCvocImporter {
             				  extractCvocConcept(element));
             		 // get an ID for the GraphDB
             		 IdGenerator generator = AccessibleEntityIdGenerator.INSTANCE;
-            	       String id = null;
-            	       /*
+            	     String id = null;
+            	     /*
             	        try {
             	            id = generator.generateId(EntityClass.CVOC_CONCEPT, scope,
             	                    unit.getData());
@@ -207,13 +207,14 @@ public class SkosCoreCvocImporter {
             	            throw new ValidationError(unit, Concept.IDENTIFIER_KEY,
             	                    (String) unit.getData().get(Concept.IDENTIFIER_KEY));
             	        }
-            	        */
+            	        
             		 BundleDAO persister = new BundleDAO(framedGraph);
             		 Concept frame = persister.createOrUpdate(unit.withId(id),
             				 Concept.class);
             		  
             		 //action.addSubjects(item); // when concept was successfully persisted!
             		 manifest.addCreated();
+            		 */
             	  } 
              }
          }

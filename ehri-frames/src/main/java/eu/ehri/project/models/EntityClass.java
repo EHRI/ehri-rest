@@ -5,6 +5,7 @@ import com.tinkerpop.frames.VertexFrame;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Text;
+import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.models.idgen.AccessibleEntityIdGenerator;
 import eu.ehri.project.models.idgen.GenericIdGenerator;
 import eu.ehri.project.models.idgen.IdGenerator;
@@ -39,6 +40,7 @@ public enum EntityClass {
     PERMISSION_GRANT(Entities.PERMISSION_GRANT, "pmg", PermissionGrant.class),
     CONTENT_TYPE(Entities.CONTENT_TYPE, "ct", ContentType.class),
     REVISION(Entities.REVISION, "rv", Revision.class),
+    CVOC_VOCABULARY(Entities.CVOC_VOCABULARY, "cvv", Vocabulary.class),
     CVOC_CONCEPT(Entities.CVOC_CONCEPT, "cv", Concept.class),
     CVOC_TEXT(Entities.CVOC_TEXT, "cvt", Text.class);
     // @formatter:on

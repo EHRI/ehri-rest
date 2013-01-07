@@ -3,6 +3,7 @@ package eu.ehri.project.models.cvoc;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.frames.Adjacency;
 
+import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.Dependent;
 import eu.ehri.project.models.annotations.EntityType;
@@ -30,6 +31,14 @@ public interface Concept extends AccessibleEntity {
     public static final String ALTLABEL = "altLabel";
     public static final String DEFINITION = "definition";
     public static final String SCOPENOTE = "scopeNote";
+
+    @Fetch
+    @Adjacency(label = Vocabulary.IN_CVOC)
+    public Vocabulary getVocabulary();
+
+    @Adjacency(label = Vocabulary.IN_CVOC)
+    public void setVocabulary(final Vocabulary vocabulary);
+
 
     // relations to other concepts
     
