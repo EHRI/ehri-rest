@@ -205,7 +205,7 @@
           startDate: !!str 1939-01-01
           endDate: !!str 1945-01-01
     heldBy: r1
-    hasScope: r1
+    hasPermissionScope: r1
     access:
       - mike
       - admin
@@ -232,7 +232,7 @@
           endDate: !!str 1945-01-01
     heldBy: r1
     childOf: c1
-    hasScope: c1
+    hasPermissionScope: c1
     access:
       - tim
       - admin
@@ -259,7 +259,7 @@
           endDate: !!str 1945-01-01
     heldBy: r1
     childOf: c2
-    hasScope: c2    
+    hasPermissionScope: c2    
     access:
       - tim
 
@@ -284,7 +284,7 @@
           startDate: !!str 1939-01-01
           endDate: !!str 1945-01-01
     heldBy: r1
-    hasScope: r1
+    hasPermissionScope: r1
     
 --- # Authorities
 - id: a1

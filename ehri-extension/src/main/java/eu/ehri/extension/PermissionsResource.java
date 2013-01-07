@@ -44,6 +44,7 @@ import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.PermissionGrant;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
+import eu.ehri.project.models.base.PermissionGrantTarget;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.views.impl.AclViews;
 import eu.ehri.project.views.impl.Query;
@@ -69,9 +70,6 @@ public class PermissionsResource extends AbstractRestResource {
      * 
      * @return
      * @throws PermissionDenied
-     * @throws JsonGenerationException
-     * @throws JsonMappingException
-     * @throws IOException
      * @throws ItemNotFound
      * @throws BadRequester
      */
@@ -88,6 +86,55 @@ public class PermissionsResource extends AbstractRestResource {
         Query<AccessibleEntity> query = new Query<AccessibleEntity>(graph,
                 AccessibleEntity.class);
         return streamingPage(query.page(user.getPermissionGrants(), accessor,
+                PermissionGrant.class));
+    }
+
+    /**
+     * List all the permission grants that relate specifically to this item.
+     * 
+     * @return
+     * @throws PermissionDenied
+     * @throws ItemNotFound
+     * @throws BadRequester
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/listForItem/{id:.+}")
+    public StreamingOutput listPermissionGrantsForItem(
+            @PathParam("id") String id,
+            @QueryParam("offset") @DefaultValue("0") int offset,
+            @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit)
+            throws PermissionDenied, ItemNotFound, BadRequester {
+        PermissionGrantTarget target = manager.getFrame(id,
+                PermissionGrantTarget.class);
+        Accessor accessor = getRequesterUserProfile();
+        Query<AccessibleEntity> query = new Query<AccessibleEntity>(graph,
+                AccessibleEntity.class);
+        return streamingPage(query.page(target.getPermissionGrants(), accessor,
+                PermissionGrant.class));
+    }
+
+    /**
+     * List all the permission grants that relate specifically to this scope.
+     * 
+     * @return
+     * @throws PermissionDenied
+     * @throws ItemNotFound
+     * @throws BadRequester
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/listForScope/{id:.+}")
+    public StreamingOutput listPermissionGrantsForScope(
+            @PathParam("id") String id,
+            @QueryParam("offset") @DefaultValue("0") int offset,
+            @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit)
+            throws PermissionDenied, ItemNotFound, BadRequester {
+        PermissionScope scope = manager.getFrame(id, PermissionScope.class);
+        Accessor accessor = getRequesterUserProfile();
+        Query<AccessibleEntity> query = new Query<AccessibleEntity>(graph,
+                AccessibleEntity.class);
+        return streamingPage(query.page(scope.getPermissionGrants(), accessor,
                 PermissionGrant.class));
     }
 
