@@ -84,7 +84,7 @@ public class PermissionsResource extends AbstractRestResource {
         Accessor user = manager.getFrame(id, Accessor.class);
         Accessor accessor = getRequesterUserProfile();
         Query<AccessibleEntity> query = new Query<AccessibleEntity>(graph,
-                AccessibleEntity.class);
+                AccessibleEntity.class).setOffset(offset).setLimit(limit);
         return streamingPage(query.page(user.getPermissionGrants(), accessor,
                 PermissionGrant.class));
     }
@@ -109,7 +109,7 @@ public class PermissionsResource extends AbstractRestResource {
                 PermissionGrantTarget.class);
         Accessor accessor = getRequesterUserProfile();
         Query<AccessibleEntity> query = new Query<AccessibleEntity>(graph,
-                AccessibleEntity.class);
+                AccessibleEntity.class).setOffset(offset).setLimit(limit);
         return streamingPage(query.page(target.getPermissionGrants(), accessor,
                 PermissionGrant.class));
     }
@@ -133,7 +133,7 @@ public class PermissionsResource extends AbstractRestResource {
         PermissionScope scope = manager.getFrame(id, PermissionScope.class);
         Accessor accessor = getRequesterUserProfile();
         Query<AccessibleEntity> query = new Query<AccessibleEntity>(graph,
-                AccessibleEntity.class);
+                AccessibleEntity.class).setOffset(offset).setLimit(limit);
         return streamingPage(query.page(scope.getPermissionGrants(), accessor,
                 PermissionGrant.class));
     }
