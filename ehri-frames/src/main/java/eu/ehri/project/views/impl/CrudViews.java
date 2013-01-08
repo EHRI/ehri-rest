@@ -114,7 +114,8 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
         Bundle bundle = converter.dataToBundle(data);
         E item = new BundleDAO(graph, scope).create(bundle, cls);
         // If a user creates an item, grant them OWNER perms on it.
-        acl.grantPermissions(user, item, PermissionType.OWNER);
+        if (!acl.isAdmin(user))
+            acl.grantPermissions(user, item, PermissionType.OWNER);
         return item;
     }
 
