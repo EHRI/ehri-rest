@@ -76,7 +76,7 @@ public class PermissionsResource extends AbstractRestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/list/{id:.+}")
-    public StreamingOutput listPermissionGrants(
+    public StreamingOutput pagePermissionGrants(
             @PathParam("id") String id,
             @QueryParam("offset") @DefaultValue("0") int offset,
             @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit)
@@ -84,7 +84,7 @@ public class PermissionsResource extends AbstractRestResource {
         Accessor user = manager.getFrame(id, Accessor.class);
         Accessor accessor = getRequesterUserProfile();
         Query<AccessibleEntity> query = new Query<AccessibleEntity>(graph,
-                AccessibleEntity.class);
+                AccessibleEntity.class).setLimit(limit).setOffset(offset);
         return streamingPage(query.page(user.getPermissionGrants(), accessor,
                 PermissionGrant.class));
     }
@@ -100,7 +100,7 @@ public class PermissionsResource extends AbstractRestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/listForItem/{id:.+}")
-    public StreamingOutput listPermissionGrantsForItem(
+    public StreamingOutput pagePermissionGrantsForItem(
             @PathParam("id") String id,
             @QueryParam("offset") @DefaultValue("0") int offset,
             @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit)
@@ -109,7 +109,7 @@ public class PermissionsResource extends AbstractRestResource {
                 PermissionGrantTarget.class);
         Accessor accessor = getRequesterUserProfile();
         Query<AccessibleEntity> query = new Query<AccessibleEntity>(graph,
-                AccessibleEntity.class);
+                AccessibleEntity.class).setLimit(limit).setOffset(offset);
         return streamingPage(query.page(target.getPermissionGrants(), accessor,
                 PermissionGrant.class));
     }
@@ -125,7 +125,7 @@ public class PermissionsResource extends AbstractRestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/listForScope/{id:.+}")
-    public StreamingOutput listPermissionGrantsForScope(
+    public StreamingOutput pagePermissionGrantsForScope(
             @PathParam("id") String id,
             @QueryParam("offset") @DefaultValue("0") int offset,
             @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit)
@@ -133,7 +133,7 @@ public class PermissionsResource extends AbstractRestResource {
         PermissionScope scope = manager.getFrame(id, PermissionScope.class);
         Accessor accessor = getRequesterUserProfile();
         Query<AccessibleEntity> query = new Query<AccessibleEntity>(graph,
-                AccessibleEntity.class);
+                AccessibleEntity.class).setLimit(limit).setOffset(offset);
         return streamingPage(query.page(scope.getPermissionGrants(), accessor,
                 PermissionGrant.class));
     }
