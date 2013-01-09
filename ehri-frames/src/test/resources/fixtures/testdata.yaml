@@ -354,4 +354,17 @@
     hasAccessor: linda
     hasGrantee: mike
 
-    
+--- # Vocabularies
+- id: cvoc1
+  type: cvocVocabulary
+  data:
+    identifier: cvoc1
+
+--- # Concepts
+- id: cvocc1
+  type: cvocConcept
+  data:
+    identifier: cvocc1
+  relationships:
+    inCvoc: cvoc1
+
