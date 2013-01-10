@@ -76,7 +76,7 @@ public class PermissionsResource extends AbstractRestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/list/{id:.+}")
-    public StreamingOutput listPermissionGrants(
+    public StreamingOutput pagePermissionGrants(
             @PathParam("id") String id,
             @QueryParam("offset") @DefaultValue("0") int offset,
             @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit)
@@ -100,7 +100,7 @@ public class PermissionsResource extends AbstractRestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/listForItem/{id:.+}")
-    public StreamingOutput listPermissionGrantsForItem(
+    public StreamingOutput pagePermissionGrantsForItem(
             @PathParam("id") String id,
             @QueryParam("offset") @DefaultValue("0") int offset,
             @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit)
@@ -125,7 +125,7 @@ public class PermissionsResource extends AbstractRestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/listForScope/{id:.+}")
-    public StreamingOutput listPermissionGrantsForScope(
+    public StreamingOutput pagePermissionGrantsForScope(
             @PathParam("id") String id,
             @QueryParam("offset") @DefaultValue("0") int offset,
             @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit)

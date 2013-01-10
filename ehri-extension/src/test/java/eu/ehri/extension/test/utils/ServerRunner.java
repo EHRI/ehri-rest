@@ -1,4 +1,4 @@
-package eu.ehri.plugin.test.utils;
+package eu.ehri.extension.test.utils;
 
 import java.io.File;
 

@@ -21,7 +21,7 @@ import com.sun.jersey.api.client.WebResource;
 
 import eu.ehri.extension.AbstractAccessibleEntityResource;
 import eu.ehri.extension.AbstractRestResource;
-import eu.ehri.plugin.test.utils.ServerRunner;
+import eu.ehri.extension.test.utils.ServerRunner;
 
 /**
  * Base class for testing the REST interface on a 'embedded' neo4j server.

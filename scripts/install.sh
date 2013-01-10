@@ -52,19 +52,16 @@ fi
 echo "Attempting package..."
 mvn clean test-compile package -DskipTests || { echo "Maven package exited with non-zero status, install aborted..."; exit 4; }
 
-PLUGINJAR=`ls ehri-plugin/target/ehri-plugin*jar|grep -v test`
 EXTENSIONJAR=`ls ehri-extension/target/ehri-extension*jar|grep -v test`
 FRAMESJAR=`ls ehri-frames/target/ehri-frames*jar|grep -v test` 
 
-for jar in $FRAMESJAR $EXTENSIONJAR $PLUGINJAR; do
+for jar in $FRAMESJAR $EXTENSIONJAR ; do
     if [ $jar == '' ]; then
         echo "Unable to find all jars, check build is correct."
         exit 5
     fi
 done
 
-echo "Copying $PLUGINJAR to $NEO4JPATH/plugins" 
-cp ehri-plugin/target/ehri*jar $NEO4JPATH/plugins
 echo "Copying $EXTENSIONJAR to $NEO4JPATH/plugins" 
 cp ehri-extension/target/ehri*jar $NEO4JPATH/plugins
 echo "Copying $EXTENSIONJAR to $NEO4JPATH/system/lib" 

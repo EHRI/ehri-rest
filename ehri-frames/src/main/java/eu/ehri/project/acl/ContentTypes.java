@@ -13,6 +13,7 @@ public enum ContentTypes {
     USER_PROFILE(Entities.USER_PROFILE),
     ANNOTATION(Entities.ANNOTATION),
     ACTION(Entities.ACTION),
+    CVOC_VOCABULARY(Entities.CVOC_VOCABULARY),
     CVOC_CONCEPT(Entities.CVOC_CONCEPT);
     
     private final String name;

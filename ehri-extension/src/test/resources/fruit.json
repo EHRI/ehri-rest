@@ -4,15 +4,6 @@
     "identifier": "fruit"
   },
   "relationships": {
-    "prefLabel": [
-      {
-        "type": "cvocText",
-        "data": {
-          "languageCode": "en",
-          "content": "fruit"
-        }
-      }
-      ],
       "narrower": [
         {
           "type": "cvocConcept",

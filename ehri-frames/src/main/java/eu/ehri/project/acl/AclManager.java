@@ -289,9 +289,11 @@ public final class AclManager {
      * @param accessor
      * @param item
      * @param permissionList
+     * @throws PermissionDenied
      */
     public void setEntityPermissions(Accessor accessor, AccessibleEntity item,
-            Set<PermissionType> permissionList) {
+            Set<PermissionType> permissionList) throws PermissionDenied {
+        checkNoGrantOnAdminOrAnon(accessor);
         for (PermissionType t : PermissionType.values()) {
             if (permissionList.contains(t))
                 grantPermissions(accessor, item, t);
@@ -376,7 +378,7 @@ public final class AclManager {
      */
     public PermissionGrant grantPermissions(Accessor accessor,
             PermissionGrantTarget target, PermissionType permType) {
-
+        assertNoGrantOnAdminOrAnon(accessor);
         // If we can find an existing grant, use that, otherwise create a new
         // one.
         Optional<PermissionGrant> maybeGrant = findPermission(accessor, target,
@@ -571,6 +573,15 @@ public final class AclManager {
         // permissions from the admin or the anonymous accounts.
         if (isAdmin(accessor) || isAnonymous(accessor))
             throw new PermissionDenied(
+                    "Unable to grant or revoke permissions to system accounts.");
+    }
+
+    private void assertNoGrantOnAdminOrAnon(Accessor accessor) {
+        // Quick sanity check to make sure we're not trying to add/remove
+        // permissions from the admin or the anonymous accounts.
+        // This time throw  a runtime error.
+        if (isAdmin(accessor) || isAnonymous(accessor))
+            throw new RuntimeException(
                     "Unable to grant or revoke permissions to system accounts.");
     }
 

@@ -36,14 +36,6 @@ public class ActionResource extends AbstractAccessibleEntityResource<Action> {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{id:\\d+}")
-    public Response getAction(@PathParam("id") long id)
-            throws PermissionDenied, BadRequester {
-        return retrieve(id);
-    }
-
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:.+}")
     public Response getAction(@PathParam("id") String id) throws ItemNotFound,
             PermissionDenied, BadRequester {

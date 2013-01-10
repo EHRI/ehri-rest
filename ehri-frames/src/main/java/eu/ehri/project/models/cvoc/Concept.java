@@ -4,16 +4,20 @@ import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.frames.Adjacency;
 
 import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.annotations.Dependent;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.DescribedEntity;
 
 /**
  * This models the thesaurus terms or keywords in a way that is better managing multi-linguality. 
  * The terms are then labels of concepts in a specific language and concepts can have many labels.  
- * This is following the SKOS-Core concept, but maybe not fully so we don't use 'SKOS' in the class name. 
+ * This is following the SKOS-Core concept, but not fully so we don't use 'SKOS' in the class name. 
  * For SKOS core see: http://www.w3.org/2009/08/skos-reference/skos.html
+ * 
+ * Also note that the labels and textual information of a single language 
+ * are all placed in a ConceptDescription, following the pattern 
+ * that the textual details of an entity are described by a Description entity.  
  * 
  * A nice glossary of terms used with controlled vocabularies can be found here: 
  * http://www.willpowerinfo.co.uk/glossary.htm
@@ -22,14 +26,19 @@ import eu.ehri.project.models.base.AccessibleEntity;
  *
  */
 @EntityType(EntityClass.CVOC_CONCEPT)
-public interface Concept extends AccessibleEntity {
+//public interface Concept extends AccessibleEntity {
+public interface Concept extends AccessibleEntity, DescribedEntity {
     //public static final String BROADER = "broader";
     public static final String NARROWER = "narrower";
     public static final String RELATED = "related";
-    public static final String PREFLABEL = "prefLabel";
-    public static final String ALTLABEL = "altLabel";
-    public static final String DEFINITION = "definition";
-    public static final String SCOPENOTE = "scopeNote";
+    
+    @Fetch
+    @Adjacency(label = Vocabulary.IN_CVOC)
+    public Vocabulary getVocabulary();
+
+    @Adjacency(label = Vocabulary.IN_CVOC)
+    public void setVocabulary(final Vocabulary vocabulary);
+
 
     // relations to other concepts
     
@@ -66,53 +75,4 @@ public interface Concept extends AccessibleEntity {
     @Adjacency(label = RELATED, direction=Direction.IN)
     public Iterable<Concept> getRelatedByConcepts();
     
-    // textual information
-    
-    @Fetch
-    @Dependent
-    @Adjacency(label = PREFLABEL)
-    public Iterable<Text> getPrefLabel();
-
-    // NOTE: we should only allow one prefLabel per language, but we cannot model that
-    @Adjacency(label = PREFLABEL)
-    public void addPrefLabel(final Text prefLabel);
-   
-    @Adjacency(label = PREFLABEL)
-    public void removePrefLabel(final Text prefLabel);
-
-    @Fetch
-    @Dependent
-    @Adjacency(label = ALTLABEL)
-    public Iterable<Text> getAltLabels();
-
-    @Adjacency(label = ALTLABEL)
-    public void addAltLabel(final Text altLabel);
-
-    @Adjacency(label = ALTLABEL)
-    public void removeAltLabel(final Text altLabel);
-
-    @Fetch
-    @Dependent
-    @Adjacency(label = DEFINITION)
-    public Iterable<Text> getDefinitions();
-
-    @Adjacency(label = DEFINITION)
-    public void addDefinition(final Text definition);
-    
-    @Adjacency(label = DEFINITION)
-    public void removeDefinition(final Text definition);
-
-    // NOTE: why has SKOS definitions and scope notes, what is the difference?
-    // scope notes seem to be used in a more flexible way 
-    // and can contain some extra information besides describing the definition. 
-    @Fetch
-    @Dependent
-    @Adjacency(label = SCOPENOTE)
-    public Iterable<Text> getScopeNotes();
-
-    @Adjacency(label = SCOPENOTE)
-    public void addScopeNote(final Text scopeNote);
-    
-    @Adjacency(label = SCOPENOTE)
-    public void removeScopeNote(final Text scopeNote);
 }

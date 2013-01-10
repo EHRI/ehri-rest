@@ -150,35 +150,6 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity> extend
      * Retieve (get) an instance of the 'entity' in the database
      * 
      * @param id
-     *            The vertex id
-     * @return The response of the request, which contains the json
-     *         representation
-     * @throws PermissionDenied
-     * @throws BadRequester
-     */
-    public Response retrieve(long id) throws PermissionDenied, BadRequester {
-        try {
-            E entity = views.detail(graph.getVertex(id, cls),
-                    getRequesterUserProfile());
-            String jsonStr = converter.vertexFrameToJson(entity);
-
-            return Response.status(Status.OK).entity((jsonStr).getBytes())
-                    .build();
-        } catch (SerializationError e) {
-            // Most likely there was no such item (wrong id)
-            // BETTER get a different Exception for that?
-            //
-            // so we would need to return a BADREQUEST, or NOTFOUND
-
-            return Response.status(Status.NOT_FOUND)
-                    .entity((produceErrorMessageJson(e)).getBytes()).build();
-        }
-    }
-
-    /**
-     * Retieve (get) an instance of the 'entity' in the database
-     * 
-     * @param id
      *            The Entities identifier string
      * @return The response of the request, which contains the json
      *         representation
@@ -282,27 +253,6 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity> extend
         Bundle entityBundle = new Bundle(manager.getId(entity),
                 getEntityType(), rawBundle.getData(), rawBundle.getRelations());
         return update(entityBundle.toString());
-    }
-
-    /**
-     * Delete (remove) an instance of the 'entity' in the database
-     * 
-     * @param id
-     *            The vertex id
-     * @return The response of the delete request
-     * @throws PermissionDenied
-     * @throws ValidationError
-     * @throws ItemNotFound
-     * @throws BadRequester
-     */
-    protected Response delete(Long id) throws PermissionDenied,
-            ValidationError, ItemNotFound, BadRequester {
-        try {
-            views.delete(graph.getVertex(id, cls), getRequesterUserProfile());
-            return Response.status(Status.OK).build();
-        } catch (SerializationError e) {
-            throw new WebApplicationException(e);
-        }
     }
 
     /**

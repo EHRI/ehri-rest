@@ -16,9 +16,9 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriBuilder;
+import javax.ws.rs.core.Response.Status;
 
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
@@ -31,26 +31,30 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.models.Agent;
-import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.cvoc.Concept;
+import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.views.impl.LoggingCrudViews;
 import eu.ehri.project.views.impl.Query;
 
 /**
- * Provides a RESTfull interface for the Agent
+ * Provides a RESTfull interface for the Vocabulary
+ * Also for managing the Concepts that are in the Vocabulary
+ * 
+ * @author paulboon
+ *
  */
-@Path(Entities.AGENT)
-public class AgentResource extends AbstractAccessibleEntityResource<Agent> {
+@Path(Entities.CVOC_VOCABULARY)
+public class VocabularyResource extends AbstractAccessibleEntityResource<Vocabulary> {
 
-    public AgentResource(@Context GraphDatabaseService database) {
-        super(database, Agent.class);
+    public VocabularyResource(@Context GraphDatabaseService database) {
+        super(database, Vocabulary.class);
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:.+}")
-    public Response getAgent(@PathParam("id") String id) throws ItemNotFound,
+    public Response getVocabulary(@PathParam("id") String id) throws ItemNotFound,
             PermissionDenied, BadRequester {
         return retrieve(id);
     }
@@ -58,7 +62,7 @@ public class AgentResource extends AbstractAccessibleEntityResource<Agent> {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/list")
-    public StreamingOutput listAgents(
+    public StreamingOutput listVocabularies(
             @QueryParam("offset") @DefaultValue("0") int offset,
             @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit)
             throws ItemNotFound, BadRequester {
@@ -68,20 +72,20 @@ public class AgentResource extends AbstractAccessibleEntityResource<Agent> {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:.+}/list")
-    public StreamingOutput listAgentDocumentaryUnits(
+    public StreamingOutput listVocabularyConcepts(
             @PathParam("id") String id,
             @QueryParam("offset") @DefaultValue("0") int offset,
             @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit)
             throws ItemNotFound, BadRequester, PermissionDenied {
-        Agent agent = new Query<Agent>(graph, Agent.class).get(id,
+        Vocabulary vocabulary = new Query<Vocabulary>(graph, Vocabulary.class).get(id,
                 getRequesterUserProfile());
-        return list(agent.getCollections(), offset, limit);
+        return list(vocabulary.getConcepts(), offset, limit);
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/page")
-    public StreamingOutput pageAgents(
+    public StreamingOutput pageVocabularies(
             @QueryParam("offset") @DefaultValue("0") int offset,
             @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit)
             throws ItemNotFound, BadRequester {
@@ -91,16 +95,17 @@ public class AgentResource extends AbstractAccessibleEntityResource<Agent> {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response createAgent(String json) throws PermissionDenied,
+    public Response createVocabulary(String json) throws PermissionDenied,
             ValidationError, IntegrityError, DeserializationError,
             ItemNotFound, BadRequester {
         return create(json);
     }
 
+    // Note: json contains id
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response updateAgent(String json) throws PermissionDenied,
+    public Response updateVocabulary(String json) throws PermissionDenied,
             IntegrityError, ValidationError, DeserializationError,
             ItemNotFound, BadRequester {
         return update(json);
@@ -110,7 +115,7 @@ public class AgentResource extends AbstractAccessibleEntityResource<Agent> {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:.+}")
-    public Response updateAgent(@PathParam("id") String id, String json)
+    public Response updateVocabulary(@PathParam("id") String id, String json)
             throws PermissionDenied, IntegrityError, ValidationError,
             DeserializationError, ItemNotFound, BadRequester {
         return update(id, json);
@@ -118,12 +123,15 @@ public class AgentResource extends AbstractAccessibleEntityResource<Agent> {
 
     @DELETE
     @Path("/{id:.+}")
-    public Response deleteAgent(@PathParam("id") String id)
+    public Response deleteVocabulary(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound, ValidationError,
             BadRequester {
         return delete(id);
     }
 
+    /*** Concept manipulation ***/
+    
+    // NOTE no id as long called!
     /**
      * Create an instance of the 'entity' in the database
      * 
@@ -143,14 +151,14 @@ public class AgentResource extends AbstractAccessibleEntityResource<Agent> {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:\\d+}")
-    public Response createAgentDocumentaryUnit(@PathParam("id") long id,
+    public Response createVocabularyConcept(@PathParam("id") long id,
             String json) throws PermissionDenied, ValidationError,
             IntegrityError, DeserializationError, SerializationError,
             BadRequester {
-        Agent agent = views.detail(graph.getVertex(id, cls),
+    	Vocabulary vocabulary = views.detail(graph.getVertex(id, cls),
                 getRequesterUserProfile());
-        DocumentaryUnit doc = createDocumentaryUnit(json, agent);
-        return buildResponseFromDocumentaryUnit(doc);
+    	Concept concept = createConcept(json, vocabulary);
+        return buildResponseFromConcept(concept);
     }
 
     /**
@@ -169,17 +177,17 @@ public class AgentResource extends AbstractAccessibleEntityResource<Agent> {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{id:.+}/" + Entities.DOCUMENTARY_UNIT)
-    public Response createAgentDocumentaryUnit(@PathParam("id") String id,
+    @Path("/{id:.+}/" + Entities.CVOC_CONCEPT)
+    public Response createVocabularyConcept(@PathParam("id") String id,
             String json) throws PermissionDenied, ValidationError,
             IntegrityError, DeserializationError, ItemNotFound, BadRequester {
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
-            Agent agent = new Query<Agent>(graph, Agent.class).get(id,
+        	Vocabulary vocabulary = new Query<Vocabulary>(graph, Vocabulary.class).get(id,
                     getRequesterUserProfile());
-            DocumentaryUnit doc = createDocumentaryUnit(json, agent);
+        	Concept concept = createConcept(json, vocabulary);
             tx.success();
-            return buildResponseFromDocumentaryUnit(doc);
+            return buildResponseFromConcept(concept);
         } catch (SerializationError e) {
             tx.failure();
             throw new WebApplicationException(e);
@@ -190,30 +198,32 @@ public class AgentResource extends AbstractAccessibleEntityResource<Agent> {
 
     // Helpers
 
-    private Response buildResponseFromDocumentaryUnit(DocumentaryUnit doc)
+    private Response buildResponseFromConcept(Concept concept)
             throws SerializationError {
-        String jsonStr = converter.vertexFrameToJson(doc);
+        String jsonStr = converter.vertexFrameToJson(concept);
         // FIXME: Hide the details of building this path
         URI docUri = UriBuilder.fromUri(uriInfo.getBaseUri())
-                .segment(Entities.DOCUMENTARY_UNIT).segment(manager.getId(doc))
+                .segment(Entities.CVOC_CONCEPT).segment(manager.getId(concept))
                 .build();
 
         return Response.status(Status.CREATED).location(docUri)
                 .entity((jsonStr).getBytes()).build();
     }
 
-    private DocumentaryUnit createDocumentaryUnit(String json, Agent agent)
+    private Concept createConcept(String json, Vocabulary vocabulary)
             throws DeserializationError, PermissionDenied, ValidationError,
             IntegrityError, BadRequester {
         Bundle entityBundle = converter.jsonToBundle(json);
 
-        DocumentaryUnit doc = new LoggingCrudViews<DocumentaryUnit>(graph,
-                DocumentaryUnit.class, agent)
+        Concept concept = new LoggingCrudViews<Concept>(graph,
+        		Concept.class, vocabulary)
                 .create(converter.bundleToData(entityBundle),
                         getRequesterUserProfile());
-        // Add it to this agent's collections
-        doc.setAgent(agent);
-        doc.setPermissionScope(agent);
-        return doc;
+        
+        // Add it to this Vocabulary's concepts
+        concept.setVocabulary(vocabulary);
+        concept.setPermissionScope(vocabulary);
+        return concept;
     }
+    
 }

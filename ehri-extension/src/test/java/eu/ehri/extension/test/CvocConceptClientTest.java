@@ -10,6 +10,7 @@ import java.util.Iterator;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriBuilder;
 
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -21,10 +22,12 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 
 import eu.ehri.extension.AbstractRestResource;
+import eu.ehri.project.definitions.Entities;
 
 public class CvocConceptClientTest  extends BaseRestClientTest {
-	 
-    //private String jsonCvocConceptTestString = "{\"data\":{\"identifier\": \"apples\",\"isA\":\"cvocConcept\"}}";
+    static final String TEST_CVOC_ID = "cvoc1"; // vocabulary in fixture
+    static final String TEST_CVOC_CONCEPT_ID = "cvocc1";
+    
     private String jsonApplesTestStr;
     
     @BeforeClass
@@ -43,8 +46,8 @@ public class CvocConceptClientTest  extends BaseRestClientTest {
     @Test
     public void testCreateDeleteCvocConcept() throws Exception {
         // Create
-        WebResource resource = client.resource(getExtensionEntryPointUri()
-                + "/cvocConcept");
+        WebResource resource = client.resource(getCreationUri());
+        
         ClientResponse response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
@@ -76,13 +79,6 @@ public class CvocConceptClientTest  extends BaseRestClientTest {
                         getAdminUserProfileId()).delete(ClientResponse.class);
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
         
-// NOTE FIX this, now we get an java.lang.IllegalArgumentException: Element can not be null
-//        response = resource
-//                .accept(MediaType.APPLICATION_JSON)
-//                .header(AbstractRestResource.AUTH_HEADER_NAME,
-//                        getAdminUserProfileId()).get(ClientResponse.class);
-//        assertEquals(Response.Status.NO_CONTENT.getStatusCode(), response.getStatus());
-        
     }
 
     /**
@@ -104,6 +100,7 @@ public class CvocConceptClientTest  extends BaseRestClientTest {
        
         // Create apple
         response = testCreateConcept(jsonAppleTestStr);
+        //System.out.println("POST Respons json: " + response.getEntity(String.class));
         
         // Get created entity via the response location
         URI appleLocation = response.getLocation();
@@ -226,19 +223,33 @@ public class CvocConceptClientTest  extends BaseRestClientTest {
         // check that apple is NOT in there
         assertFalse(containsIdentifier(response, "apple"));
     }
+
+    @Test
+    public void testGetConcept() throws Exception {    	
+    	testGet(getExtensionEntryPointUri()
+    			+ "/"  + Entities.CVOC_CONCEPT + "/" + TEST_CVOC_CONCEPT_ID);
+    }
+
+    @Test
+    public void testDeleteConcept() throws Exception {
+    	String url = getExtensionEntryPointUri()
+    			+ "/"  + Entities.CVOC_CONCEPT + "/" + TEST_CVOC_CONCEPT_ID;
+    	testDelete(url);
+    	
+        // Check it's really gone...
+    	WebResource resource = client.resource(url);
+        ClientResponse responseDel = resource
+                .accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                        getAdminUserProfileId()).get(ClientResponse.class);
+
+        assertEquals(Response.Status.NOT_FOUND.getStatusCode(),
+        		responseDel.getStatus());
+    }
     
     /*** helpers ***/
     
-    public ClientResponse testGet(String url) {
-    	WebResource resource = client.resource(url);
-    	ClientResponse response = resource
-                .accept(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME,
-                        getAdminUserProfileId()).get(ClientResponse.class);
-        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
-     	
-        return response;
-    }
     
     public boolean containsIdentifier(final ClientResponse response, final String idStr) throws IOException {
         String json = response.getEntity(String.class);
@@ -267,10 +278,32 @@ public class CvocConceptClientTest  extends BaseRestClientTest {
     	return result;
     }
     
+    public ClientResponse testGet(String url) {
+    	WebResource resource = client.resource(url);
+    	ClientResponse response = resource
+                .accept(MediaType.APPLICATION_JSON)
+                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                        getAdminUserProfileId()).get(ClientResponse.class);
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+     	
+        return response;
+    }
+    
+    public ClientResponse testDelete(String url) {
+    	WebResource resource = client.resource(url);
+    	ClientResponse response = resource
+                .accept(MediaType.APPLICATION_JSON)
+                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                        getAdminUserProfileId()).delete(ClientResponse.class);
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        
+        return response;
+    }
+
     public ClientResponse testCreateConcept(String json) {
         // Create
-        WebResource resource = client.resource(getExtensionEntryPointUri()
-                + "/cvocConcept");
+        WebResource resource = client.resource(getCreationUri());
+        
         ClientResponse response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
@@ -282,5 +315,13 @@ public class CvocConceptClientTest  extends BaseRestClientTest {
                 response.getStatus());
     	
         return response;
+    }
+    
+    
+    private URI getCreationUri() {
+    	// always create Concepts under a Vocabulary
+        return UriBuilder.fromPath(getExtensionEntryPointUri())
+                .segment(Entities.CVOC_VOCABULARY).segment(TEST_CVOC_ID)
+                .segment(Entities.CVOC_CONCEPT).build();
     }
 }
