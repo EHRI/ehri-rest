@@ -38,6 +38,8 @@ import eu.ehri.project.models.cvoc.Concept;
 
 /**
  * Provides a RESTfull interface for the cvoc.Concept.
+ * Note that the concept creation endpoint is part of the VocabularyResource 
+ * and creation without a Vocabulary is not possible via this API
  */
 @Path(Entities.CVOC_CONCEPT)
 public class CvocConceptResource extends AbstractAccessibleEntityResource<Concept> {
@@ -79,16 +81,7 @@ public class CvocConceptResource extends AbstractAccessibleEntityResource<Concep
             throws ItemNotFound, BadRequester {
         return list(offset, limit);
     }
-
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response createCvocConcept(String json) throws PermissionDenied,
-            ValidationError, IntegrityError, DeserializationError,
-            ItemNotFound, BadRequester {
-        return create(json);
-    }
-
+    
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
@@ -140,8 +133,6 @@ public class CvocConceptResource extends AbstractAccessibleEntityResource<Concep
     /**
      * Add an existing concept to the list of 'narrower' of this existing Concepts
 	 * No vertex is created, but the 'narrower' edge is created between the two concept vertices. 
-	 * 
-	 * Note: the internal vertex id's are used now, but we want identifiers
      */
     @POST
     @Path("/{id:.+}/narrower/{id_narrower:.+}")
@@ -281,8 +272,9 @@ public class CvocConceptResource extends AbstractAccessibleEntityResource<Concep
 		}   	
     }
     
-    // TODO helper function 
-	// NOTE: maybe we can make this generic and reuse it from EhriNeo4jFramedResource 
+    /*** helpers ***/
+
+    // NOTE: maybe we can make this generic and reuse it
     public StreamingOutput getListAsJson(final Iterable<Concept> list)
             throws ItemNotFound, BadRequester {
         final ObjectMapper mapper = new ObjectMapper();
