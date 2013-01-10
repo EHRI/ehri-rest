@@ -21,5 +21,5 @@ public class Entities {
     public static final String REVISION = "revision";
     public static final String CVOC_VOCABULARY = "cvocVocabulary";
     public static final String CVOC_CONCEPT = "cvocConcept";
-    public static final String CVOC_TEXT = "cvocText";
+    public static final String CVOC_CONCEPT_DESCRIPTION = "cvocConceptDescription";
 }

@@ -17,8 +17,9 @@ import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.cvoc.Concept;
-import eu.ehri.project.models.cvoc.Text;
+import eu.ehri.project.models.cvoc.ConceptDescription;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.views.Crud;
@@ -105,14 +106,18 @@ public class CvocTest extends ModelTestBase {
                 put(AccessibleEntity.IDENTIFIER_KEY, "apple");
             }});
             put(Bundle.REL_KEY, new HashMap<String, Object>() {{
-                put("prefLabel", new LinkedList<HashMap<String, Object>>() {{
+                put("describes", new LinkedList<HashMap<String, Object>>() {{
                     add(new HashMap<String, Object>() {{
-                        put(Bundle.ID_KEY, null);
-                        put(Bundle.TYPE_KEY, Entities.CVOC_TEXT);
+                        //put(Bundle.ID_KEY, "cvd1");
+                        put(Bundle.TYPE_KEY, Entities.CVOC_CONCEPT_DESCRIPTION);
                         put(Bundle.DATA_KEY, new HashMap<String, Object>() {{
-                            put(AccessibleEntity.IDENTIFIER_KEY, "apple-someid");
-                            put(Text.LANGUAGE, TEST_LABEL_LANG);
-                            put(Text.CONTENT, TEST_LABEL_CONTENT);
+                            put(Description.LANGUAGE_CODE, TEST_LABEL_LANG);
+                            // all properties must be there
+                            //put("altLabel", new String[]{"alt1","alt2"});
+                            put("altLabel", new String[]{});
+                            put(ConceptDescription.PREFLABEL, "pref1");
+                            put(ConceptDescription.DEFINITION, "def1");
+                            put(ConceptDescription.SCOPENOTE, "sn1");
                         }});
                     }});
                 }});
@@ -122,7 +127,7 @@ public class CvocTest extends ModelTestBase {
     // @formatter:on
     
 	@Test
-	public void testCreateConceptWithLabel() throws Exception {
+	public void testCreateConceptWithDescription() throws Exception {
 		UserProfile validUser = manager.getFrame("mike", UserProfile.class);
         Crud<Concept> conceptViews = new CrudViews<Concept>(graph,
         		Concept.class);
@@ -134,8 +139,20 @@ public class CvocTest extends ModelTestBase {
 
 		// Does the label have the correct properties
 		assertNotNull(concept);
-		assertEquals(TEST_LABEL_CONTENT, concept.getPrefLabel().iterator().next().getContent());
-		assertEquals(TEST_LABEL_LANG, concept.getPrefLabel().iterator().next().getLanguage());
+		
+		// test for description
+		Description description = concept.getDescriptions().iterator().next();
+		assertEquals(TEST_LABEL_LANG, description.getLanguageOfDescription());
+		
+		//String[] altLabels = ((ConceptDescription)description).getAltLabels();		
+		// NOTE: use framing on the vertex to get the Model class
+		// that is the frames way of doning things
+		
+		ConceptDescription descr = graph.frame(description.asVertex(), ConceptDescription.class);
+		String[] altLabels = descr.getAltLabels();
+//		assertEquals("alt2", altLabels[1]);
+		assertEquals("pref1", descr.getPrefLabel());
+		// etc. etc.
 	}
     
 	@Test
@@ -165,4 +182,5 @@ public class CvocTest extends ModelTestBase {
 		assertEquals(vocabulary.getIdentifier(), apples.getVocabulary().getIdentifier());
 
 	}
+	
 }
