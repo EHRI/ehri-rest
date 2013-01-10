@@ -45,14 +45,6 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{id:\\d+}")
-    public Response getGroup(@PathParam("id") long id) throws PermissionDenied,
-            BadRequester {
-        return retrieve(id);
-    }
-
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:.+}")
     public Response getGroup(@PathParam("id") String id) throws ItemNotFound,
             PermissionDenied, BadRequester {
@@ -183,24 +175,6 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
         }
     }    
     
-    /**
-     * Delete a group with the given graph ID.
-     * 
-     * @param id
-     * @return
-     * @throws PermissionDenied
-     * @throws ValidationError
-     * @throws ItemNotFound
-     * @throws BadRequester
-     */
-    @DELETE
-    @Path("/{id}")
-    public Response deleteGroup(@PathParam("id") long id)
-            throws PermissionDenied, ValidationError, ItemNotFound,
-            BadRequester {
-        return delete(id);
-    }
-
     /**
      * Delete a group with the given identifier string.
      * 

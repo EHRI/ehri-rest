@@ -46,14 +46,6 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{id:\\d+}")
-    public Response getUserProfile(@PathParam("id") long id)
-            throws PermissionDenied, BadRequester {
-        return retrieve(id);
-    }
-
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:.+}")
     public Response getUserProfile(@PathParam("id") String id)
             throws ItemNotFound, PermissionDenied, BadRequester {
@@ -106,14 +98,6 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
             throws PermissionDenied, IntegrityError, ValidationError,
             DeserializationError, ItemNotFound, BadRequester {
         return update(id, json);
-    }
-
-    @DELETE
-    @Path("/{id:\\d+}")
-    public Response deleteUserProfile(@PathParam("id") long id)
-            throws PermissionDenied, ValidationError, ItemNotFound,
-            BadRequester {
-        return delete(id);
     }
 
     @DELETE

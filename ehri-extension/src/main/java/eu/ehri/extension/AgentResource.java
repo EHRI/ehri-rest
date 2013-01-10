@@ -49,14 +49,6 @@ public class AgentResource extends AbstractAccessibleEntityResource<Agent> {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{id:\\d+}")
-    public Response getAgent(@PathParam("id") long id) throws PermissionDenied,
-            BadRequester {
-        return retrieve(id);
-    }
-
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:.+}")
     public Response getAgent(@PathParam("id") String id) throws ItemNotFound,
             PermissionDenied, BadRequester {
@@ -122,14 +114,6 @@ public class AgentResource extends AbstractAccessibleEntityResource<Agent> {
             throws PermissionDenied, IntegrityError, ValidationError,
             DeserializationError, ItemNotFound, BadRequester {
         return update(id, json);
-    }
-
-    @DELETE
-    @Path("/{id}")
-    public Response deleteAgent(@PathParam("id") long id)
-            throws PermissionDenied, ValidationError, ItemNotFound,
-            BadRequester {
-        return delete(id);
     }
 
     @DELETE

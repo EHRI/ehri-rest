@@ -51,15 +51,6 @@ public class VocabularyResource extends AbstractAccessibleEntityResource<Vocabul
         super(database, Vocabulary.class);
     }
 
-    // NOTE not used...
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{id:\\d+}")
-    public Response getVocabulary(@PathParam("id") long id) throws PermissionDenied,
-            BadRequester {
-        return retrieve(id);
-    }
-
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:.+}")
@@ -128,14 +119,6 @@ public class VocabularyResource extends AbstractAccessibleEntityResource<Vocabul
             throws PermissionDenied, IntegrityError, ValidationError,
             DeserializationError, ItemNotFound, BadRequester {
         return update(id, json);
-    }
-
-    @DELETE
-    @Path("/{id}")
-    public Response deleteVocabulary(@PathParam("id") long id)
-            throws PermissionDenied, ValidationError, ItemNotFound,
-            BadRequester {
-        return delete(id);
     }
 
     @DELETE
