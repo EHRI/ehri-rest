@@ -31,8 +31,6 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.models.Agent;
-import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.persistance.Bundle;
@@ -241,7 +239,7 @@ public class VocabularyResource extends AbstractAccessibleEntityResource<Vocabul
         
         // Add it to this Vocabulary's concepts
         concept.setVocabulary(vocabulary);
-        concept.setScope(vocabulary);
+        concept.setPermissionScope(vocabulary);
         return concept;
     }
     
