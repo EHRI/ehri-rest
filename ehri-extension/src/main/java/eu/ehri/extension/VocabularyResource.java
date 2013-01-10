@@ -217,7 +217,7 @@ public class VocabularyResource extends AbstractAccessibleEntityResource<Vocabul
 
         Concept concept = new LoggingCrudViews<Concept>(graph,
         		Concept.class, vocabulary)
-                .create(converter.bundleToData(entityBundle),
+                .create(entityBundle,
                         getRequesterUserProfile());
         
         // Add it to this Vocabulary's concepts

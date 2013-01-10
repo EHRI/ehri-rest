@@ -3,8 +3,6 @@ package eu.ehri.extension;
 // Borrowed, temporarily, from Michael Hunger:
 // https://github.com/jexp/neo4j-clean-remote-db-addon
 
-import java.util.Map;
-
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -72,17 +70,16 @@ public class AdminResource {
         Transaction tx = database.getGraph().beginTx();
         try {
             String ident = getNextDefaultUserId();
-            Map<String, Object> data = converter.bundleToData(new Bundle(
-                    EntityClass.USER_PROFILE).withDataValue(
-                    AccessibleEntity.IDENTIFIER_KEY, ident).withDataValue(
-                    Accessor.NAME, ident));
+            Bundle bundle = new Bundle(EntityClass.USER_PROFILE)
+                    .withDataValue(AccessibleEntity.IDENTIFIER_KEY, ident)
+                    .withDataValue(Accessor.NAME, ident);
 
             // NB: This assumes that admin's ID is the same as its identifier.
             Accessor accessor = manager.getFrame(Group.ADMIN_GROUP_IDENTIFIER,
                     Accessor.class);
             Crud<UserProfile> view = new LoggingCrudViews<UserProfile>(graph,
                     UserProfile.class);
-            UserProfile user = view.create(data, accessor);
+            UserProfile user = view.create(bundle, accessor);
             // Grant them owner permissions on their own account.
             new AclManager(graph).grantPermissions(user, user,
                     PermissionType.OWNER);

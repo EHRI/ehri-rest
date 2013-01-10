@@ -131,7 +131,7 @@ public class CvocTest extends ModelTestBase {
 		UserProfile validUser = manager.getFrame("mike", UserProfile.class);
         Crud<Concept> conceptViews = new CrudViews<Concept>(graph,
         		Concept.class);
-        Map<String, Object> bundle = getAppleTestBundle();
+        Bundle bundle = Bundle.fromData(getAppleTestBundle());
  
         Concept concept = null;
         concept = conceptViews.create(bundle, validUser);

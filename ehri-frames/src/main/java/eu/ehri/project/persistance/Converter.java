@@ -65,7 +65,32 @@ public final class Converter {
      */
     public <T extends VertexFrame> Map<String, Object> vertexFrameToData(T item)
             throws SerializationError {
-        return bundleToData(vertexFrameToBundle(item));
+        return vertexFrameToBundle(item).toData();
+    }
+
+    /**
+     * Convert a VertexFrame into an EntityBundle that includes its @Fetch'd
+     * relations.
+     * 
+     * @param item
+     * @return
+     * @throws SerializationError
+     */
+    public <T extends VertexFrame> Bundle vertexFrameToBundle(T item)
+            throws SerializationError {
+        return vertexFrameToBundle(item, maxTraversals);
+    }
+
+    /**
+     * Serialise a vertex frame to JSON.
+     * 
+     * @param item
+     * @return
+     * @throws SerializationError
+     */
+    public <T extends VertexFrame> String vertexFrameToJson(T item)
+            throws SerializationError {
+        return DataConverter.bundleToJson(vertexFrameToBundle(item));
     }
 
     /**
@@ -83,32 +108,6 @@ public final class Converter {
     }
 
     /**
-     * Serialise a vertex frame to JSON.
-     * 
-     * @param item
-     * @return
-     * @throws SerializationError
-     */
-    public <T extends VertexFrame> String vertexFrameToJson(T item)
-            throws SerializationError {
-        return DataConverter.bundleToJson(vertexFrameToBundle(item));
-    }
-
-    /**
-     * Convert a bundle to JSON.
-     * 
-     * @param bundle
-     * @return
-     * @throws SerializationError
-     * 
-     * @deprecated Use DataConverter static method instead.
-     * 
-     */
-    public String bundleToJson(Bundle bundle) throws SerializationError {
-        return DataConverter.bundleToJson(bundle);
-    }
-
-    /**
      * Convert generic data into a bundle.
      * 
      * Prize to whomever can remove all the unchecked warnings. I don't really
@@ -122,29 +121,6 @@ public final class Converter {
     }
 
     /**
-     * Convert a bundle to a generic data structure.
-     * 
-     * @param bundle
-     * @return
-     */
-    public Map<String, Object> bundleToData(Bundle bundle) {
-        return DataConverter.bundleToData(bundle);
-    }
-
-    /**
-     * Convert a VertexFrame into an EntityBundle that includes its @Fetch'd
-     * relations.
-     * 
-     * @param item
-     * @return
-     * @throws SerializationError
-     */
-    public <T extends VertexFrame> Bundle vertexFrameToBundle(T item)
-            throws SerializationError {
-        return vertexFrameToBundle(item, maxTraversals);
-    }
-
-    /**
      * Convert a VertexFrame into an EntityBundle that includes its @Fetch'd
      * relations.
      * 
@@ -153,7 +129,7 @@ public final class Converter {
      * @return
      * @throws SerializationError
      */
-    public <T extends VertexFrame> Bundle vertexFrameToBundle(T item, int depth)
+    private <T extends VertexFrame> Bundle vertexFrameToBundle(T item, int depth)
             throws SerializationError {
         // FIXME: Try and move the logic for accessing id and type elsewhere.
         try {

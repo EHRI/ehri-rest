@@ -1,7 +1,5 @@
 package eu.ehri.project.views.impl;
 
-import java.util.Map;
-
 import org.neo4j.graphdb.Transaction;
 
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
@@ -18,6 +16,7 @@ import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistance.ActionManager;
+import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.views.Crud;
 
 /**
@@ -80,10 +79,10 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws IntegrityError
      * @throws DeserializationError
      */
-    public E create(Map<String, Object> data, Accessor user)
+    public E create(Bundle bundle, Accessor user)
             throws PermissionDenied, ValidationError, DeserializationError,
             IntegrityError {
-        return create(data, user, DEFAULT_CREATE_LOG);
+        return create(bundle, user, DEFAULT_CREATE_LOG);
     }
 
     /**
@@ -99,7 +98,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws IntegrityError
      * @throw DeserializationError
      */
-    public E create(Map<String, Object> data, Accessor user, String logMessage)
+    public E create(Bundle bundle, Accessor user, String logMessage)
             throws PermissionDenied, ValidationError, DeserializationError,
             IntegrityError {
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
@@ -107,7 +106,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
         // http://docs.oracle.com/javase/7/docs/technotes/guides/language/catch-multiple.html
         try {
 
-            E out = views.create(data, user);
+            E out = views.create(bundle, user);
             actionManager
                     .createAction(out,
                             graph.frame(user.asVertex(), UserProfile.class),
@@ -121,9 +120,6 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
             tx.failure();
             throw ex;
         } catch (ValidationError ex) {
-            tx.failure();
-            throw ex;
-        } catch (DeserializationError ex) {
             tx.failure();
             throw ex;
         } catch (Exception ex) {
@@ -146,10 +142,10 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws IntegrityError
      * @throws DeserializationError
      */
-    public E createOrUpdate(Map<String, Object> data, Accessor user)
+    public E createOrUpdate(Bundle bundle, Accessor user)
             throws PermissionDenied, ValidationError, DeserializationError,
             IntegrityError {
-        return createOrUpdate(data, user, DEFAULT_IMPORT_LOG);
+        return createOrUpdate(bundle, user, DEFAULT_IMPORT_LOG);
     }
 
     /**
@@ -165,13 +161,13 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws IntegrityError
      * @throw DeserializationError
      */
-    public E createOrUpdate(Map<String, Object> data, Accessor user,
+    public E createOrUpdate(Bundle bundle, Accessor user,
             String logMessage) throws PermissionDenied, ValidationError,
             DeserializationError, IntegrityError {
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
 
-            E out = views.createOrUpdate(data, user);
+            E out = views.createOrUpdate(bundle, user);
             actionManager
                     .createAction(out,
                             graph.frame(user.asVertex(), UserProfile.class),
@@ -185,9 +181,6 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
             tx.failure();
             throw ex;
         } catch (ValidationError ex) {
-            tx.failure();
-            throw ex;
-        } catch (DeserializationError ex) {
             tx.failure();
             throw ex;
         } catch (Exception ex) {
@@ -210,10 +203,10 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws IntegrityError
      * @throws DeserializationError
      */
-    public E update(Map<String, Object> data, Accessor user)
+    public E update(Bundle bundle, Accessor user)
             throws PermissionDenied, ValidationError, DeserializationError,
             IntegrityError {
-        return update(data, user, DEFAULT_UPDATE_LOG);
+        return update(bundle, user, DEFAULT_UPDATE_LOG);
     }
 
     /**
@@ -229,12 +222,12 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws IntegrityError
      * @throw DeserializationError
      */
-    public E update(Map<String, Object> data, Accessor user, String logMessage)
+    public E update(Bundle bundle, Accessor user, String logMessage)
             throws PermissionDenied, ValidationError, DeserializationError,
             IntegrityError {
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
-            E out = views.update(data, user);
+            E out = views.update(bundle, user);
             actionManager
                     .createAction(out,
                             graph.frame(user.asVertex(), UserProfile.class),
@@ -248,9 +241,6 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
             tx.failure();
             throw ex;
         } catch (ValidationError ex) {
-            tx.failure();
-            throw ex;
-        } catch (DeserializationError ex) {
             tx.failure();
             throw ex;
         } catch (Exception ex) {

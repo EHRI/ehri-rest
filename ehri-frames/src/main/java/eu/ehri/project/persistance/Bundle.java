@@ -143,6 +143,18 @@ public class Bundle {
     }
 
     /**
+     * Remove a value in the bundle's data.
+     * 
+     * @param key
+     * @return
+     */
+    public Bundle removeDataValue(String key) {
+        Map<String, Object> newData = Maps.newHashMap(data);
+        newData.remove(key);
+        return withData(newData);
+    }
+
+    /**
      * Get the bundle data.
      * 
      * @return

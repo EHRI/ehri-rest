@@ -5,8 +5,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.Iterator;
-import java.util.Map;
-
 import org.junit.Test;
 
 import eu.ehri.project.acl.AclManager;
@@ -24,7 +22,6 @@ import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Group;
 import eu.ehri.project.models.UserProfile;
-import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.PermissionGrantTarget;
 import eu.ehri.project.persistance.Bundle;
@@ -109,21 +106,15 @@ public class ViewsTest extends AbstractFixtureTest {
             DeserializationError, IntegrityError, ItemNotFound {
         CrudViews<DocumentaryUnit> docViews = new CrudViews<DocumentaryUnit>(
                 graph, DocumentaryUnit.class);
-        Map<String, Object> bundleData = getTestBundle();
-        DocumentaryUnit unit = docViews.create(bundleData, validUser);
+        Bundle bundle = Bundle.fromData(getTestBundle());
+        DocumentaryUnit unit = docViews.create(bundle, validUser);
         assertEquals(TEST_COLLECTION_NAME, unit.getName());
 
-        // We could convert the FramedNode back into a bundle here,
-        // but let's instead just modify the initial data.
         String newName = TEST_COLLECTION_NAME + " with new stuff";
-        bundleData.put(Bundle.ID_KEY,
-                unit.asVertex().getProperty(EntityType.ID_KEY));
+        Bundle newBundle = bundle.withId(manager.getId(unit)).withDataValue(
+                "name", newName);
 
-        @SuppressWarnings("unchecked")
-        Map<String, Object> data = (Map<String, Object>) bundleData
-                .get(Bundle.DATA_KEY);
-        data.put("name", newName);
-        DocumentaryUnit changedUnit = docViews.update(bundleData, validUser);
+        DocumentaryUnit changedUnit = docViews.update(newBundle, validUser);
         assertEquals(newName, changedUnit.getName());
 
         // Check the nested item was created correctly
@@ -149,21 +140,14 @@ public class ViewsTest extends AbstractFixtureTest {
             DeserializationError, IntegrityError, ItemNotFound {
         CrudViews<UserProfile> userViews = new CrudViews<UserProfile>(graph,
                 UserProfile.class);
-        Map<String, Object> bundle = getTestUserBundle();
+        Bundle bundle = Bundle.fromData(getTestUserBundle());
         UserProfile user = userViews.create(bundle, validUser);
         assertEquals(TEST_USER_NAME, user.getName());
-        bundle.put(Bundle.ID_KEY,
-                user.asVertex().getProperty(EntityType.ID_KEY));
-        // We could convert the FramedNode back into a bundle here,
-        // but let's instead just modify the initial data.
+
         String newName = TEST_USER_NAME + " with new stuff";
-
-        @SuppressWarnings("unchecked")
-        Map<String, Object> data = (Map<String, Object>) bundle
-                .get(Bundle.DATA_KEY);
-        data.put("name", newName);
-
-        UserProfile changedUser = userViews.update(bundle, validUser);
+        Bundle newBundle = bundle.withId(manager.getId(user)).withDataValue(
+                "name", newName);
+        UserProfile changedUser = userViews.update(newBundle, validUser);
         assertEquals(newName, changedUser.getName());
     }
 
@@ -180,7 +164,7 @@ public class ViewsTest extends AbstractFixtureTest {
             DeserializationError, IntegrityError {
         CrudViews<DocumentaryUnit> docViews = new CrudViews<DocumentaryUnit>(
                 graph, DocumentaryUnit.class);
-        Map<String, Object> bundle = getTestBundle();
+        Bundle bundle = Bundle.fromData(getTestBundle());
         DocumentaryUnit unit = docViews.create(bundle, validUser);
         assertEquals(TEST_COLLECTION_NAME, unit.getName());
     }
@@ -198,7 +182,7 @@ public class ViewsTest extends AbstractFixtureTest {
             PermissionDenied, DeserializationError, IntegrityError {
         CrudViews<DocumentaryUnit> docViews = new CrudViews<DocumentaryUnit>(
                 graph, DocumentaryUnit.class);
-        Map<String, Object> bundle = getTestBundle();
+        Bundle bundle = Bundle.fromData(getTestBundle());
         DocumentaryUnit unit = docViews.create(bundle, invalidUser);
         assertEquals(TEST_COLLECTION_NAME, unit.getName());
     }
@@ -218,7 +202,7 @@ public class ViewsTest extends AbstractFixtureTest {
             ItemNotFound {
         CrudViews<DocumentaryUnit> docViews = new CrudViews<DocumentaryUnit>(
                 graph, DocumentaryUnit.class);
-        Map<String, Object> bundle = getTestBundle();
+        Bundle bundle = Bundle.fromData(getTestBundle());
 
         try {
             docViews.create(bundle, invalidUser);
@@ -252,7 +236,7 @@ public class ViewsTest extends AbstractFixtureTest {
         Crud<DocumentaryUnit> docViews = new LoggingCrudViews<DocumentaryUnit>(
                 graph, DocumentaryUnit.class, manager.getFrame("r1",
                         Agent.class));
-        Map<String, Object> bundle = getTestBundle();
+        Bundle bundle = Bundle.fromData(getTestBundle());
         // In the fixtures, 'reto' should have a grant for 'CREATE'
         // scoped to the 'r1' repository.
         DocumentaryUnit unit = docViews.create(bundle, invalidUser);
@@ -272,7 +256,7 @@ public class ViewsTest extends AbstractFixtureTest {
             DeserializationError, IntegrityError {
         CrudViews<UserProfile> userViews = new CrudViews<UserProfile>(graph,
                 UserProfile.class);
-        Map<String, Object> bundle = getTestUserBundle();
+        Bundle bundle = Bundle.fromData(getTestUserBundle());
         UserProfile user = userViews.create(bundle, validUser);
         assertEquals(TEST_USER_NAME, user.getName());
     }
@@ -289,7 +273,7 @@ public class ViewsTest extends AbstractFixtureTest {
     public void testGroupCreate() throws ValidationError, PermissionDenied,
             DeserializationError, IntegrityError {
         CrudViews<Group> groupViews = new CrudViews<Group>(graph, Group.class);
-        Map<String, Object> bundle = getTestGroupBundle();
+        Bundle bundle = Bundle.fromData(getTestGroupBundle());
         Group group = groupViews.create(bundle, validUser);
         assertEquals(TEST_GROUP_NAME, group.getName());
     }
@@ -307,32 +291,8 @@ public class ViewsTest extends AbstractFixtureTest {
             DeserializationError, IntegrityError {
         CrudViews<DocumentaryUnit> docViews = new CrudViews<DocumentaryUnit>(
                 graph, DocumentaryUnit.class);
-        Map<String, Object> bundle = getTestBundle();
-
-        @SuppressWarnings("unchecked")
-        Map<String, Object> data = (Map<String, Object>) bundle.get("data");
-        data.remove("name");
-
-        // This should barf because the collection has no name.
-        DocumentaryUnit unit = docViews.create(bundle, validUser);
-        assertEquals(TEST_COLLECTION_NAME, unit.getName());
-    }
-
-    /**
-     * Test creating a view with invalid data throws a validationError
-     * 
-     * @throws ValidationError
-     * @throws PermissionDenied
-     * @throws DeserializationError
-     * @throws IntegrityError
-     */
-    @Test(expected = DeserializationError.class)
-    public void testCreateWithDeserialisationError() throws ValidationError,
-            PermissionDenied, DeserializationError, IntegrityError {
-        CrudViews<DocumentaryUnit> docViews = new CrudViews<DocumentaryUnit>(
-                graph, DocumentaryUnit.class);
-        Map<String, Object> bundle = getTestBundle();
-        bundle.remove("data");
+        Bundle bundle = Bundle.fromData(getTestBundle())
+                .removeDataValue("name");
 
         // This should barf because the collection has no name.
         DocumentaryUnit unit = docViews.create(bundle, validUser);

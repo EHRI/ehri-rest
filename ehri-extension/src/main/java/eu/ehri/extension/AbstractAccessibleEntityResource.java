@@ -39,8 +39,8 @@ import eu.ehri.project.views.impl.Query;
  * @param <E>
  *            The specific AccesibleEntity derived class
  */
-public class AbstractAccessibleEntityResource<E extends AccessibleEntity> extends
-        AbstractRestResource {
+public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
+        extends AbstractRestResource {
 
     protected final Crud<E> views;
     protected final Query<E> querier;
@@ -54,8 +54,8 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity> extend
      * @param cls
      *            The 'entity' class
      */
-    public AbstractAccessibleEntityResource(@Context GraphDatabaseService database,
-            Class<E> cls) {
+    public AbstractAccessibleEntityResource(
+            @Context GraphDatabaseService database, Class<E> cls) {
         super(database);
         this.cls = cls;
         views = new LoggingCrudViews<E>(graph, cls);
@@ -128,7 +128,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity> extend
 
         try {
             Bundle entityBundle = converter.jsonToBundle(json);
-            E entity = views.create(converter.bundleToData(entityBundle),
+            E entity = views.create(entityBundle,
                     getRequesterUserProfile());
             String jsonStr = converter.vertexFrameToJson(entity);
             UriBuilder ub = uriInfo.getAbsolutePathBuilder();
@@ -214,7 +214,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity> extend
 
         try {
             Bundle entityBundle = converter.jsonToBundle(json);
-            E update = views.update(converter.bundleToData(entityBundle),
+            E update = views.update(entityBundle,
                     getRequesterUserProfile());
             String jsonStr = converter.vertexFrameToJson(update);
 

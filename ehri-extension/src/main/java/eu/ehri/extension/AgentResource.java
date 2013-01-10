@@ -208,9 +208,8 @@ public class AgentResource extends AbstractAccessibleEntityResource<Agent> {
         Bundle entityBundle = converter.jsonToBundle(json);
 
         DocumentaryUnit doc = new LoggingCrudViews<DocumentaryUnit>(graph,
-                DocumentaryUnit.class, agent)
-                .create(converter.bundleToData(entityBundle),
-                        getRequesterUserProfile());
+                DocumentaryUnit.class, agent).create(entityBundle,
+                getRequesterUserProfile());
         // Add it to this agent's collections
         doc.setAgent(agent);
         doc.setPermissionScope(agent);
