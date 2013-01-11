@@ -77,6 +77,7 @@ public class ActionResource extends AbstractAccessibleEntityResource<Action> {
                 getRequesterUserProfile());
         final Query.Page<Action> page = new Query<Action>(graph, Action.class)
                 .setOffset(offset).setLimit(limit)
+                .orderBy(Action.TIMESTAMP, Query.Sort.DESC)
                 .page(item.getHistory(), getRequesterUserProfile());
         return streamingPage(page);
     }

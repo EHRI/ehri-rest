@@ -2,10 +2,16 @@ package eu.ehri.project.views.impl;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.NoSuchElementException;
+import java.util.SortedMap;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.ComparisonChain;
+import com.google.common.collect.ImmutableSortedMap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Ordering;
 import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
@@ -14,6 +20,7 @@ import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.frames.VertexFrame;
 import com.tinkerpop.gremlin.java.GremlinPipeline;
 import com.tinkerpop.pipes.PipeFunction;
+import com.tinkerpop.pipes.util.structures.Pair;
 
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.acl.SystemScope;
@@ -41,10 +48,15 @@ import eu.ehri.project.views.ViewHelper;
  */
 public final class Query<E extends AccessibleEntity> implements Search<E> {
 
+    public static enum Sort {
+        ASC, DESC;
+    };
+
     public static final int DEFAULT_LIST_LIMIT = 20;
 
     private final Optional<Integer> offset;
     private final Optional<Integer> limit;
+    private final SortedMap<String, Sort> sort;
     private final boolean page;
 
     private final FramedGraph<Neo4jGraph> graph;
@@ -66,12 +78,14 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      */
     public Query(FramedGraph<Neo4jGraph> graph, Class<E> cls,
             PermissionScope scope, Optional<Integer> offset,
-            Optional<Integer> limit, Boolean page) {
+            Optional<Integer> limit, final SortedMap<String, Sort> sort,
+            Boolean page) {
         this.graph = graph;
         this.cls = cls;
         this.scope = scope;
         this.offset = offset;
         this.limit = limit;
+        this.sort = ImmutableSortedMap.<String, Sort> copyOf(sort);
         this.page = page;
         helper = new ViewHelper(graph, scope);
         manager = GraphManagerFactory.getInstance(graph);
@@ -85,7 +99,8 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      */
     public Query(FramedGraph<Neo4jGraph> graph, Class<E> cls) {
         this(graph, cls, SystemScope.getInstance(),
-                Optional.<Integer> absent(), Optional.<Integer> absent(), false);
+                Optional.<Integer> absent(), Optional.<Integer> absent(),
+                ImmutableSortedMap.<String, Sort> of(), false);
     }
 
     /**
@@ -98,7 +113,8 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
     public Query(FramedGraph<Neo4jGraph> graph, Class<E> cls,
             PermissionScope scope) {
         this(graph, cls, scope, Optional.<Integer> absent(), Optional
-                .<Integer> absent(), false);
+                .<Integer> absent(), ImmutableSortedMap.<String, Sort> of(),
+                false);
     }
 
     /**
@@ -108,7 +124,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      */
     public Query<E> copy(Query<E> other) {
         return new Query<E>(other.graph, other.cls, other.scope, other.offset,
-                other.limit, other.page);
+                other.limit, other.sort, other.page);
     }
 
     /**
@@ -122,12 +138,15 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
         private long count;
         private Integer offset;
         private Integer limit;
+        private Map<String, Sort> sort;
 
-        Page(Iterable<T> iterable, long count, Integer offset, Integer limit) {
+        Page(Iterable<T> iterable, long count, Integer offset, Integer limit,
+                Map<String, Sort> sort) {
             this.iterable = iterable;
             this.count = count;
             this.offset = offset;
             this.limit = limit;
+            this.sort = sort;
         }
 
         public Iterable<T> getIterable() {
@@ -144,6 +163,10 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
 
         public Integer getLimit() {
             return limit;
+        }
+
+        public Map<String, Sort> getSort() {
+            return sort;
         }
     }
 
@@ -287,11 +310,10 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
                         new FramedVertexIterableAdaptor<T>(vertices)).filter(
                         aclFilterFunction).iterator());
 
-        return new Page<T>(
-                graph.frameVertices(
-                        setPipelineRange(new GremlinPipeline<Vertex, Vertex>(
-                                userVerts)), cls), userVerts.size(),
-                offset.or(0), limit.or(DEFAULT_LIST_LIMIT));
+        return new Page<T>(graph.frameVertices(
+                setPipelineRange(setOrder(new GremlinPipeline<Vertex, Vertex>(
+                        userVerts))), cls), userVerts.size(), offset.or(0),
+                limit.or(DEFAULT_LIST_LIMIT), sort);
     }
 
     /**
@@ -320,10 +342,12 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
                         graph).getAclFilterFunction(user);
                 long count = new GremlinPipeline<Vertex, Vertex>(countQ)
                         .filter(aclFilterFunction).count();
-                return new Page<E>(graph.frameVertices(
-                        setPipelineRange(new GremlinPipeline<Vertex, Vertex>(
-                                indexQ).filter(aclFilterFunction)), cls),
-                        count, offset.or(0), limit.or(DEFAULT_LIST_LIMIT));
+                return new Page<E>(
+                        graph.frameVertices(
+                                setPipelineRange(setOrder(new GremlinPipeline<Vertex, Vertex>(
+                                        indexQ).filter(aclFilterFunction))),
+                                cls), count, offset.or(0),
+                        limit.or(DEFAULT_LIST_LIMIT), sort);
             } finally {
                 indexQ.close();
             }
@@ -358,7 +382,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
             GremlinPipeline<E, Vertex> filter = new GremlinPipeline<E, Vertex>(
                     vertices).filter(new AclManager(graph)
                     .getAclFilterFunction(user));
-            return graph.frameVertices(setPipelineRange(filter), cls);
+            return graph.frameVertices(setPipelineRange(setOrder(filter)), cls);
         } finally {
             vertices.close();
         }
@@ -391,7 +415,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
         GremlinPipeline<T, Vertex> filter = new GremlinPipeline<T, Vertex>(
                 new FramedVertexIterableAdaptor<T>(vertices))
                 .filter(new AclManager(graph).getAclFilterFunction(user));
-        return graph.frameVertices(setPipelineRange(filter), cls);
+        return graph.frameVertices(setPipelineRange(setOrder(filter)), cls);
     }
 
     /**
@@ -421,7 +445,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      */
     public Query<E> setOffset(Integer offset) {
         return new Query<E>(this.graph, this.cls, this.scope,
-                Optional.fromNullable(offset), this.limit, this.page);
+                Optional.fromNullable(offset), this.limit, this.sort, this.page);
     }
 
     /**
@@ -440,7 +464,29 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      */
     public Query<E> setLimit(Integer limit) {
         return new Query<E>(this.graph, this.cls, this.scope, this.offset,
-                Optional.fromNullable(limit), this.page);
+                Optional.fromNullable(limit), this.sort, this.page);
+    }
+
+    /**
+     * Clear the order clause from this query.
+     * 
+     * @param limit
+     */
+    public Query<E> orderBy() {
+        return new Query<E>(this.graph, this.cls, this.scope, this.offset,
+                limit, ImmutableSortedMap.<String, Sort> of(), this.page);
+    }
+
+    /**
+     * Add an order clause.
+     * 
+     * @param limit
+     */
+    public Query<E> orderBy(String field, Sort order) {
+        SortedMap<String, Sort> tmp = new ImmutableSortedMap.Builder<String, Sort>(
+                Ordering.natural()).putAll(sort).put(field, order).build();
+        return new Query<E>(this.graph, this.cls, this.scope, this.offset,
+                limit, tmp, this.page);
     }
 
     // Helpers
@@ -450,5 +496,36 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
         int low = Math.max(offset.or(0), 0);
         int high = low + Math.max(limit.or(-1), 0) - 1;
         return filter.range(low, high);
+    }
+
+    private <EE> GremlinPipeline<EE, Vertex> setOrder(
+            GremlinPipeline<EE, Vertex> pipe) {
+        if (sort.isEmpty())
+            return pipe;
+        return pipe.order(getOrderFunction());
+    }
+
+    private PipeFunction<Pair<Vertex, Vertex>, Integer> getOrderFunction() {
+        return new PipeFunction<Pair<Vertex, Vertex>, Integer>() {
+            public Integer compute(Pair<Vertex, Vertex> pair) {
+                ComparisonChain chain = ComparisonChain.start();
+                for (Entry<String, Sort> entry : sort.entrySet()) {
+                    if (entry.getValue().equals(Sort.ASC)) {
+                        chain = chain.compare(
+                                (String) pair.getA()
+                                        .getProperty(entry.getKey()),
+                                (String) pair.getB()
+                                        .getProperty(entry.getKey()));
+                    } else {
+                        chain = chain.compare(
+                                (String) pair.getB()
+                                        .getProperty(entry.getKey()),
+                                (String) pair.getA()
+                                        .getProperty(entry.getKey()));
+                    }
+                }
+                return chain.result();
+            }
+        };
     }
 }

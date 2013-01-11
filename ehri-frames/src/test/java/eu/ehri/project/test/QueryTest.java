@@ -19,6 +19,7 @@ import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.views.impl.Query;
+import eu.ehri.project.views.impl.Query.Page;
 
 public class QueryTest extends AbstractFixtureTest {
 
@@ -97,6 +98,28 @@ public class QueryTest extends AbstractFixtureTest {
                 AccessibleEntity.IDENTIFIER_KEY, "c1", validUser));
         assertFalse(list.isEmpty());
         assertEquals(1, list.size());
+    }
+
+    @Test
+    public void testListWithSort() throws IndexNotFoundException {
+        Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
+                DocumentaryUnit.class);
+
+        // Query for document identifier c1.
+        Page<DocumentaryUnit> page = query
+                .orderBy(AccessibleEntity.IDENTIFIER_KEY, Query.Sort.ASC).page(
+                EntityClass.DOCUMENTARY_UNIT, validUser);
+        assertFalse(page.getCount() == 0);
+        assertEquals("c1", toList(page.getIterable()).get(0).getIdentifier());
+        
+        page = query
+                .orderBy(AccessibleEntity.IDENTIFIER_KEY, Query.Sort.DESC).page(
+                EntityClass.DOCUMENTARY_UNIT, validUser);
+        assertFalse(page.getCount() == 0);
+        
+        // NB: This will break if other collections are added to the
+        // fixtures. Adjust as necessary.
+        assertEquals("c4", toList(page.getIterable()).get(0).getIdentifier());        
     }
 
     @Test
