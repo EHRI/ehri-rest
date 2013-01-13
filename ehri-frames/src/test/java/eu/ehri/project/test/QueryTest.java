@@ -101,25 +101,60 @@ public class QueryTest extends AbstractFixtureTest {
     }
 
     @Test
+    public void testListWithPredicateFilter() throws IndexNotFoundException {
+        Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
+                DocumentaryUnit.class);
+
+        // Query for document identifier c1.
+        List<DocumentaryUnit> list = toList(query.filter(
+                AccessibleEntity.IDENTIFIER_KEY, Query.FilterPredicate.EQUALS,
+                "c1").list(EntityClass.DOCUMENTARY_UNIT, validUser));
+        assertEquals(1, list.size());
+        
+        // Case-insensitive query
+        list = toList(query.filter(
+                AccessibleEntity.IDENTIFIER_KEY, Query.FilterPredicate.IEQUALS,
+                "C1").list(EntityClass.DOCUMENTARY_UNIT, validUser));
+        assertEquals(1, list.size());
+
+        // Startswith...
+        list = toList(query.filter(
+                AccessibleEntity.IDENTIFIER_KEY, Query.FilterPredicate.STARTSWITH,
+                "c").list(EntityClass.DOCUMENTARY_UNIT, validUser));
+        assertEquals(4, list.size());
+        
+        // Endswith... should get one item (c1)
+        list = toList(query.filter(
+                AccessibleEntity.IDENTIFIER_KEY, Query.FilterPredicate.ENDSWITH,
+                "1").list(EntityClass.DOCUMENTARY_UNIT, validUser));
+        assertEquals(1, list.size());
+        
+        // Regexp... should get all doc units (c1-4)
+        list = toList(query.filter(
+                AccessibleEntity.IDENTIFIER_KEY, Query.FilterPredicate.MATCHES,
+                "^c\\d+$").list(EntityClass.DOCUMENTARY_UNIT, validUser));
+        assertEquals(4, list.size());        
+    }
+
+    @Test
     public void testListWithSort() throws IndexNotFoundException {
         Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
 
         // Query for document identifier c1.
-        Page<DocumentaryUnit> page = query
-                .orderBy(AccessibleEntity.IDENTIFIER_KEY, Query.Sort.ASC).page(
+        Page<DocumentaryUnit> page = query.orderBy(
+                AccessibleEntity.IDENTIFIER_KEY, Query.Sort.ASC).page(
                 EntityClass.DOCUMENTARY_UNIT, validUser);
         assertFalse(page.getCount() == 0);
         assertEquals("c1", toList(page.getIterable()).get(0).getIdentifier());
-        
-        page = query
-                .orderBy(AccessibleEntity.IDENTIFIER_KEY, Query.Sort.DESC).page(
-                EntityClass.DOCUMENTARY_UNIT, validUser);
+
+        page = query.orderBy(AccessibleEntity.IDENTIFIER_KEY, Query.Sort.DESC)
+                .page(EntityClass.DOCUMENTARY_UNIT, validUser);
         assertFalse(page.getCount() == 0);
-        
+
         // NB: This will break if other collections are added to the
         // fixtures. Adjust as necessary.
-        assertEquals("c4", toList(page.getIterable()).get(0).getIdentifier());        
+        assertEquals("c4", toList(page.getIterable()).get(0).getIdentifier());
     }
 
     @Test

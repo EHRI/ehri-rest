@@ -1,6 +1,7 @@
 package eu.ehri.extension;
 
 import java.net.URI;
+import java.util.List;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -64,9 +65,10 @@ public class VocabularyResource extends AbstractAccessibleEntityResource<Vocabul
     @Path("/list")
     public StreamingOutput listVocabularies(
             @QueryParam("offset") @DefaultValue("0") int offset,
-            @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit)
+            @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam("filter") List<String> filters)
             throws ItemNotFound, BadRequester {
-        return list(offset, limit);
+        return list(offset, limit, filters);
     }
 
     @GET

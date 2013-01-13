@@ -13,6 +13,7 @@ import javax.ws.rs.core.UriBuilder;
 
 import org.neo4j.graphdb.GraphDatabaseService;
 
+import com.google.common.collect.Lists;
 import com.tinkerpop.frames.VertexFrame;
 
 import eu.ehri.extension.errors.BadRequester;
@@ -71,6 +72,22 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * @throws BadRequester
      * @throws PermissionDenied
      */
+    public StreamingOutput page(Integer offset, Integer limit, Iterable<String> filters)
+            throws ItemNotFound, BadRequester {
+        final Query.Page<E> page = querier.setOffset(offset).setLimit(limit)
+                .filter(filters).page(getRequesterUserProfile());
+
+        return streamingPage(page);
+    }
+
+    /**
+     * List all instances of the 'entity' accessible to the given user.
+     * 
+     * @return
+     * @throws ItemNotFound
+     * @throws BadRequester
+     * @throws PermissionDenied
+     */
     public StreamingOutput page(Integer offset, Integer limit)
             throws ItemNotFound, BadRequester {
         final Query.Page<E> page = querier.setOffset(offset).setLimit(limit)
@@ -85,13 +102,27 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * @return
      * @throws ItemNotFound
      * @throws BadRequester
+     * @throws BadFilterSpecification 
+     * @throws PermissionDenied
+     */
+    public StreamingOutput list(Integer offset, Integer limit, Iterable<String> filters)
+            throws ItemNotFound, BadRequester {
+        final Query<E> query = querier.setOffset(offset).setLimit(limit).filter(filters);
+        return streamingList(query.list(getRequesterUserProfile()));
+    }
+
+    /**
+     * List all instances of the 'entity' accessible to the given user.
+     * 
+     * @return
+     * @throws ItemNotFound
+     * @throws BadRequester
+     * @throws BadFilterSpecification 
      * @throws PermissionDenied
      */
     public StreamingOutput list(Integer offset, Integer limit)
             throws ItemNotFound, BadRequester {
-        final Iterable<E> list = querier.setOffset(offset).setLimit(limit)
-                .list(getRequesterUserProfile());
-        return streamingList(list);
+        return list(offset, limit, Lists.<String>newArrayList());
     }
 
     /**

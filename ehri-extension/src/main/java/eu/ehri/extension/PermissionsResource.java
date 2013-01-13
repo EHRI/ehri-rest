@@ -79,12 +79,14 @@ public class PermissionsResource extends AbstractRestResource {
     public StreamingOutput pagePermissionGrants(
             @PathParam("id") String id,
             @QueryParam("offset") @DefaultValue("0") int offset,
-            @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit)
+            @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam("filter") List<String> filters)
             throws PermissionDenied, ItemNotFound, BadRequester {
         Accessor user = manager.getFrame(id, Accessor.class);
         Accessor accessor = getRequesterUserProfile();
         Query<AccessibleEntity> query = new Query<AccessibleEntity>(graph,
-                AccessibleEntity.class).setOffset(offset).setLimit(limit);
+                AccessibleEntity.class).setOffset(offset).setLimit(limit)
+                .filter(filters);
         return streamingPage(query.page(user.getPermissionGrants(), accessor,
                 PermissionGrant.class));
     }

@@ -1,6 +1,7 @@
 package eu.ehri.extension;
 
 import java.net.URI;
+import java.util.List;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -60,9 +61,10 @@ public class DocumentaryUnitResource extends
     @Path("/list")
     public StreamingOutput listDocumentaryUnits(
             @QueryParam("offset") @DefaultValue("0") int offset,
-            @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit)
+            @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam("filter") List<String> filters)
             throws ItemNotFound, BadRequester {
-        return list(offset, limit);
+        return list(offset, limit, filters);
     }
 
     @GET
@@ -71,11 +73,14 @@ public class DocumentaryUnitResource extends
     public StreamingOutput listAgentDocumentaryUnits(
             @PathParam("id") String id,
             @QueryParam("offset") @DefaultValue("0") int offset,
-            @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit)
+            @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam("filter") List<String> filters)
             throws ItemNotFound, BadRequester, PermissionDenied {
-        DocumentaryUnit parent = new Query<DocumentaryUnit>(graph,
-                DocumentaryUnit.class).get(id, getRequesterUserProfile());
-        return list(parent.getChildren(), offset, limit);
+        DocumentaryUnit parent = manager.getFrame(id, DocumentaryUnit.class);
+        Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph, cls)
+                .setOffset(offset).setLimit(limit).filter(filters);
+        return streamingList(query.list(parent.getChildren(),
+                getRequesterUserProfile()));
     }
 
     @GET
@@ -83,9 +88,10 @@ public class DocumentaryUnitResource extends
     @Path("/page")
     public StreamingOutput pageDocumentaryUnits(
             @QueryParam("offset") @DefaultValue("0") int offset,
-            @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit)
+            @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam("filter") List<String> filters)
             throws ItemNotFound, BadRequester {
-        return page(offset, limit);
+        return page(offset, limit, filters);
     }
 
     @PUT

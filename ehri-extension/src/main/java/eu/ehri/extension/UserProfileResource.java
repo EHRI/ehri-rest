@@ -1,5 +1,7 @@
 package eu.ehri.extension;
 
+import java.util.List;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
@@ -57,9 +59,10 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
     @Path("/list")
     public StreamingOutput listUserProfiles(
             @QueryParam("offset") @DefaultValue("0") int offset,
-            @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit)
+            @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam("filter") List<String> filters)
             throws ItemNotFound, BadRequester {
-        return list(offset, limit);
+        return list(offset, limit, filters);
     }
 
     @GET
@@ -67,9 +70,10 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
     @Path("/page")
     public StreamingOutput pageUserProfiles(
             @QueryParam("offset") @DefaultValue("0") int offset,
-            @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit)
+            @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam("filter") List<String> filters)
             throws ItemNotFound, BadRequester {
-        return page(offset, limit);
+        return page(offset, limit, filters);
     }
     
     @POST

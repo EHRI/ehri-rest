@@ -1,5 +1,7 @@
 package eu.ehri.extension;
 
+import java.util.List;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
@@ -56,9 +58,10 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
     @Path("/list")
     public StreamingOutput listGroups(
             @QueryParam("offset") @DefaultValue("0") int offset,
-            @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit)
+            @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam("filter") List<String> filters)
             throws ItemNotFound, BadRequester {
-        return list(offset, limit);
+        return list(offset, limit, filters);
     }
 
     @GET
@@ -66,7 +69,8 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
     @Path("/page")
     public StreamingOutput pageGroups(
             @QueryParam("offset") @DefaultValue("0") int offset,
-            @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit)
+            @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam("filter") List<String> filters)
             throws ItemNotFound, BadRequester {
         return page(offset, limit);
     }

@@ -2,6 +2,7 @@ package eu.ehri.extension;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.List;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -69,9 +70,10 @@ public class CvocConceptResource extends AbstractAccessibleEntityResource<Concep
     @Path("/list")
     public StreamingOutput listCvocConcepts(
             @QueryParam("offset") @DefaultValue("0") int offset,
-            @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit)
+            @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam("filter") List<String> filters)
             throws ItemNotFound, BadRequester {
-        return list(offset, limit);
+        return list(offset, limit, filters);
     }
     
     @PUT
