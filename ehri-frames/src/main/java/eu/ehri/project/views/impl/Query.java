@@ -336,9 +336,9 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
         // FIXME: We have to read the vertices into memory here since we
         // can't re-use the iterator for counting and streaming.
         ArrayList<Vertex> userVerts = Lists
-                .newArrayList(new GremlinPipeline<E, Vertex>(
+                .newArrayList(setFilters(new GremlinPipeline<E, Vertex>(
                         new FramedVertexIterableAdaptor<T>(vertices)).filter(
-                        aclFilterFunction).iterator());
+                        aclFilterFunction)).iterator());
 
         return new Page<T>(
                 graph.frameVertices(
@@ -371,8 +371,8 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
             try {
                 PipeFunction<Vertex, Boolean> aclFilterFunction = new AclManager(
                         graph).getAclFilterFunction(user);
-                long count = new GremlinPipeline<Vertex, Vertex>(countQ)
-                        .filter(aclFilterFunction).count();
+                long count = setFilters(new GremlinPipeline<Vertex, Vertex>(countQ)
+                        .filter(aclFilterFunction)).count();
                 return new Page<E>(
                         graph.frameVertices(
                                 setPipelineRange(setOrder(setFilters(new GremlinPipeline<Vertex, Vertex>(
