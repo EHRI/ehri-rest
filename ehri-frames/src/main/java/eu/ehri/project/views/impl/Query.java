@@ -325,6 +325,11 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      */
     public <T extends VertexFrame> Page<T> page(Iterable<T> vertices,
             Accessor user, Class<T> cls) {
+        // This function is optimised for ACL actions.
+        // FIXME: Work out if there's any way of doing, in Gremlin or
+        // Cypher, a count that doesn't require re-iterating the results on
+        // a completely new index query. This seems stupid.
+
         PipeFunction<Vertex, Boolean> aclFilterFunction = new AclManager(graph)
                 .getAclFilterFunction(user);
 
@@ -337,8 +342,8 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
 
         return new Page<T>(
                 graph.frameVertices(
-                        setPipelineRange(setOrder(new GremlinPipeline<Vertex, Vertex>(
-                                userVerts))), cls), userVerts.size(),
+                        setPipelineRange(setOrder(setFilters(new GremlinPipeline<Vertex, Vertex>(
+                                userVerts)))), cls), userVerts.size(),
                 offset.or(0), limit.or(DEFAULT_LIST_LIMIT), sort);
     }
 
@@ -354,6 +359,10 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      * @throws IndexNotFoundException
      */
     public Page<E> page(String key, String query, Accessor user) {
+        // This function is optimised for ACL actions.
+        // FIXME: Work out if there's any way of doing, in Gremlin or
+        // Cypher, a count that doesn't require re-iterating the results on
+        // a completely new index query. This seems stupid.
         CloseableIterable<Neo4jVertex> countQ = manager.getVertices(key, query,
                 ClassUtils.getEntityType(cls));
         try {
