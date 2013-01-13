@@ -82,7 +82,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      * 
      */
     public static enum FilterPredicate {
-        EQUALS, IEQUALS, STARTSWITH, ENDSWITH, CONTAINS, ICONTAINS, MATCHES;
+        EQUALS, IEQUALS, STARTSWITH, ENDSWITH, CONTAINS, ICONTAINS, MATCHES, GT, GTE, LT, LTE;
     };
 
     /**
@@ -708,7 +708,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
         case EQUALS:
             return a.equals(b);
         case IEQUALS:
-            return a.toLowerCase().equals(b.toLowerCase());
+            return a.equalsIgnoreCase(b);
         case STARTSWITH:
             return a.startsWith(b);
         case ENDSWITH:
@@ -719,6 +719,14 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
             return a.toLowerCase().contains(b.toLowerCase());
         case MATCHES:
             return a.matches(b);
+        case GT:
+            return a.compareTo(b) > 0;
+        case GTE:
+            return a.compareTo(b) >= 0;
+        case LT:
+            return a.compareTo(b) < 0;
+        case LTE:
+            return a.compareTo(b) <= 0;
         default:
             throw new RuntimeException("Unexpected filter predicate: "
                     + predicate);

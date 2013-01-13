@@ -133,7 +133,38 @@ public class QueryTest extends AbstractFixtureTest {
         list = toList(query.filter(
                 AccessibleEntity.IDENTIFIER_KEY, Query.FilterPredicate.MATCHES,
                 "^c\\d+$").list(EntityClass.DOCUMENTARY_UNIT, validUser));
-        assertEquals(4, list.size());        
+        assertEquals(4, list.size());
+        
+        // Less than... should get one item (c1)
+        list = toList(query.filter(
+                AccessibleEntity.IDENTIFIER_KEY, Query.FilterPredicate.LT,
+                "c2").list(EntityClass.DOCUMENTARY_UNIT, validUser));
+        assertEquals(1, list.size());
+        assertEquals("c1", list.get(0).getIdentifier());
+        
+        // Greater than... should get one item (c4)
+        list = toList(query.filter(
+                AccessibleEntity.IDENTIFIER_KEY, Query.FilterPredicate.GT,
+                "c3").list(EntityClass.DOCUMENTARY_UNIT, validUser));
+        assertEquals(1, list.size());
+        assertEquals("c4", list.get(0).getIdentifier());
+        
+        // Less than or equal... should get twos items (c1,c2)
+        list = toList(query.filter(
+                AccessibleEntity.IDENTIFIER_KEY, Query.FilterPredicate.LTE,
+                "c2").list(EntityClass.DOCUMENTARY_UNIT, validUser));
+        assertEquals(2, list.size());
+        assertEquals("c1", list.get(0).getIdentifier());
+        assertEquals("c2", list.get(1).getIdentifier());
+        
+        // Greater than or equal... should get two items (c3,c4)
+        list = toList(query.filter(
+                AccessibleEntity.IDENTIFIER_KEY, Query.FilterPredicate.GTE,
+                "c3").list(EntityClass.DOCUMENTARY_UNIT, validUser));
+        assertEquals(2, list.size());
+        assertEquals("c3", list.get(0).getIdentifier());
+        assertEquals("c4", list.get(1).getIdentifier());
+        
     }
 
     @Test
