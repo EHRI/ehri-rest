@@ -6,8 +6,6 @@ import java.net.URI;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriBuilder;
-
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;

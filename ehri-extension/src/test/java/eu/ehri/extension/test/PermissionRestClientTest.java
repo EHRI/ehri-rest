@@ -262,8 +262,6 @@ public class PermissionRestClientTest extends BaseRestClientTest {
                 .header(AbstractRestResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId()).entity(permData)
                 .post(ClientResponse.class);
-        System.out.println(permData);
-        System.out.println(response.getEntity(String.class));
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
 
         // Now creation should succeed...
@@ -331,7 +329,6 @@ public class PermissionRestClientTest extends BaseRestClientTest {
                         LIMITED_USER_NAME).get(ClientResponse.class);
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
 
-        System.out.println("------------ BEFORE -----------------");
         // First try and update the item
         String testUpdateString = Bundle
                 .fromString(response.getEntity(String.class))
@@ -362,7 +359,6 @@ public class PermissionRestClientTest extends BaseRestClientTest {
 
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
 
-        System.out.println("------------ AFTER -----------------");
         // Retry the create action
         resource = client.resource(targetResourceUri);
         response = resource

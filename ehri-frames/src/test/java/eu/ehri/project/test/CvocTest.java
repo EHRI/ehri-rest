@@ -26,75 +26,98 @@ import eu.ehri.project.views.Crud;
 import eu.ehri.project.views.impl.CrudViews;
 
 public class CvocTest extends ModelTestBase {
-   	
-	/**
-	 * Just play a bit with a small 'graph' of concepts. 
-	 * 
-	 * NOTE: Better wait for the improved testing 'fixture' 
-	 * before doing extensive testing on Concepts
-	 * 
-	 * @throws Exception 
-	 */
-	@SuppressWarnings("serial")
-	@Test
-	public void testConceptHierarchy() throws Exception {
-		// Fruit, Apples and Bananas etc.
-				
-	    Map<String, Object> data = new HashMap<String, Object>() {{put(AccessibleEntity.IDENTIFIER_KEY, "fruit");}};
-	    Vertex v_fruit = manager.createVertex("fruit_id", EntityClass.CVOC_CONCEPT, data);
 
-	    data = new HashMap<String, Object>() {{put(AccessibleEntity.IDENTIFIER_KEY, "apples");}};
-	    Vertex v_apples = manager.createVertex("applies_id", EntityClass.CVOC_CONCEPT, data);
+    /**
+     * Just play a bit with a small 'graph' of concepts.
+     * 
+     * NOTE: Better wait for the improved testing 'fixture' before doing
+     * extensive testing on Concepts
+     * 
+     * @throws Exception
+     */
+    @SuppressWarnings("serial")
+    @Test
+    public void testConceptHierarchy() throws Exception {
+        // Fruit, Apples and Bananas etc.
 
-	    data = new HashMap<String, Object>() {{put(AccessibleEntity.IDENTIFIER_KEY, "bananas");}};
-	    Vertex v_bananas = manager.createVertex("bananas_id", EntityClass.CVOC_CONCEPT, data);
+        Map<String, Object> data = new HashMap<String, Object>() {
+            {
+                put(AccessibleEntity.IDENTIFIER_KEY, "fruit");
+            }
+        };
+        Vertex v_fruit = manager.createVertex("fruit_id",
+                EntityClass.CVOC_CONCEPT, data);
 
-	    data = new HashMap<String, Object>() {{put(AccessibleEntity.IDENTIFIER_KEY, "trees");}};
-	    Vertex v_trees = manager.createVertex("trees_id", EntityClass.CVOC_CONCEPT, data);
+        data = new HashMap<String, Object>() {
+            {
+                put(AccessibleEntity.IDENTIFIER_KEY, "apples");
+            }
+        };
+        Vertex v_apples = manager.createVertex("applies_id",
+                EntityClass.CVOC_CONCEPT, data);
 
-		// OK, so now we have fruit and more....
-		// See if we can frame them
-		Concept fruit = graph.frame(v_fruit, Concept.class);
-		Concept apples = graph.frame(v_apples, Concept.class);
-		Concept bananas = graph.frame(v_bananas, Concept.class);
-		Concept trees = graph.frame(v_trees, Concept.class);
+        data = new HashMap<String, Object>() {
+            {
+                put(AccessibleEntity.IDENTIFIER_KEY, "bananas");
+            }
+        };
+        Vertex v_bananas = manager.createVertex("bananas_id",
+                EntityClass.CVOC_CONCEPT, data);
 
-		// OK, framed, now construct relations etc.
-		Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
-		try {
-			fruit.addNarrowerConcept(apples);
-			fruit.addNarrowerConcept(bananas);
-			tx.success();
-		} catch (Exception e) {
-			tx.failure();
-		} finally {
-			tx.finish();
-		}
+        data = new HashMap<String, Object>() {
+            {
+                put(AccessibleEntity.IDENTIFIER_KEY, "trees");
+            }
+        };
+        Vertex v_trees = manager.createVertex("trees_id",
+                EntityClass.CVOC_CONCEPT, data);
 
-		// fruit should now be the broader concept
-		assertEquals(fruit.getIdentifier(), apples.getBroaderConcepts().iterator().next().getIdentifier());
-		assertEquals(fruit.getIdentifier(), bananas.getBroaderConcepts().iterator().next().getIdentifier());
+        // OK, so now we have fruit and more....
+        // See if we can frame them
+        Concept fruit = graph.frame(v_fruit, Concept.class);
+        Concept apples = graph.frame(v_apples, Concept.class);
+        Concept bananas = graph.frame(v_bananas, Concept.class);
+        Concept trees = graph.frame(v_trees, Concept.class);
 
-		// make a relation to Trees concept
-		tx = graph.getBaseGraph().getRawGraph().beginTx();
-		try {
-			apples.addRelatedConcept(trees);
-			tx.success();
-		} catch (Exception e) {
-			tx.failure();
-		} finally {
-			tx.finish();
-		}
+        // OK, framed, now construct relations etc.
+        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
+        try {
+            fruit.addNarrowerConcept(apples);
+            fruit.addNarrowerConcept(bananas);
+            tx.success();
+        } catch (Exception e) {
+            tx.failure();
+        } finally {
+            tx.finish();
+        }
 
-		// is it symmetric?
-		assertEquals(apples.getIdentifier(), trees.getRelatedByConcepts().iterator().next().getIdentifier());
+        // fruit should now be the broader concept
+        assertEquals(fruit.getIdentifier(), apples.getBroaderConcepts()
+                .iterator().next().getIdentifier());
+        assertEquals(fruit.getIdentifier(), bananas.getBroaderConcepts()
+                .iterator().next().getIdentifier());
 
-		// TODO test removal of a relation
-	}
-	
-	private String TEST_LABEL_CONTENT = "apple-label-content";
-	private String TEST_LABEL_LANG =  "en-US";
-	// @formatter:off
+        // make a relation to Trees concept
+        tx = graph.getBaseGraph().getRawGraph().beginTx();
+        try {
+            apples.addRelatedConcept(trees);
+            tx.success();
+        } catch (Exception e) {
+            tx.failure();
+        } finally {
+            tx.finish();
+        }
+
+        // is it symmetric?
+        assertEquals(apples.getIdentifier(), trees.getRelatedByConcepts()
+                .iterator().next().getIdentifier());
+
+        // TODO test removal of a relation
+    }
+
+    private String TEST_LABEL_LANG = "en-US";
+
+    // @formatter:off
     @SuppressWarnings("serial")
     protected Map<String, Object> getAppleTestBundle() {
         // Data structure representing a not-yet-created collection.
@@ -113,8 +136,8 @@ public class CvocTest extends ModelTestBase {
                         put(Bundle.DATA_KEY, new HashMap<String, Object>() {{
                             put(Description.LANGUAGE_CODE, TEST_LABEL_LANG);
                             // all properties must be there
-                            //put("altLabel", new String[]{"alt1","alt2"});
-                            put("altLabel", new String[]{});
+                            put("altLabel", new String[]{"alt1","alt2"});
+                            //put("altLabel", new String[]{});
                             put(ConceptDescription.PREFLABEL, "pref1");
                             put(ConceptDescription.DEFINITION, "def1");
                             put(ConceptDescription.SCOPENOTE, "sn1");
@@ -125,62 +148,67 @@ public class CvocTest extends ModelTestBase {
         }};
     }
     // @formatter:on
-    
-	@Test
-	public void testCreateConceptWithDescription() throws Exception {
-		UserProfile validUser = manager.getFrame("mike", UserProfile.class);
+
+    @Test
+    public void testCreateConceptWithDescription() throws Exception {
+        UserProfile validUser = manager.getFrame("mike", UserProfile.class);
         Crud<Concept> conceptViews = new CrudViews<Concept>(graph,
-        		Concept.class);
+                Concept.class);
         Bundle bundle = Bundle.fromData(getAppleTestBundle());
- 
+
         Concept concept = null;
         concept = conceptViews.create(bundle, validUser);
         graph.getBaseGraph().stopTransaction(Conclusion.SUCCESS);
 
-		// Does the label have the correct properties
-		assertNotNull(concept);
-		
-		// test for description
-		Description description = concept.getDescriptions().iterator().next();
-		assertEquals(TEST_LABEL_LANG, description.getLanguageOfDescription());
-		
-		//String[] altLabels = ((ConceptDescription)description).getAltLabels();		
-		// NOTE: use framing on the vertex to get the Model class
-		// that is the frames way of doning things
-		
-		ConceptDescription descr = graph.frame(description.asVertex(), ConceptDescription.class);
-		String[] altLabels = descr.getAltLabels();
-//		assertEquals("alt2", altLabels[1]);
-		assertEquals("pref1", descr.getPrefLabel());
-		// etc. etc.
-	}
-    
-	@Test
-	public void testAddConceptToVocabulary() throws Exception {
-		UserProfile validUser = manager.getFrame("mike", UserProfile.class);
+        // Does the label have the correct properties
+        assertNotNull(concept);
 
-		Map<String, Object> data = new HashMap<String, Object>() {{put(AccessibleEntity.IDENTIFIER_KEY, "testVocabulary");}};
-		Vertex v_voc = manager.createVertex("voc_id", EntityClass.CVOC_VOCABULARY, data);
-		data = new HashMap<String, Object>() {{put(AccessibleEntity.IDENTIFIER_KEY, "apples");}};
-		Vertex v_apples = manager.createVertex("applies_id", EntityClass.CVOC_CONCEPT, data);
+        // test for description
+        Description description = concept.getDescriptions().iterator().next();
+        assertEquals(TEST_LABEL_LANG, description.getLanguageOfDescription());
 
-		// frame it
-		Vocabulary vocabulary = graph.frame(v_voc, Vocabulary.class);
-		Concept apples = graph.frame(v_apples, Concept.class);
+        ConceptDescription descr = graph.frame(description.asVertex(),
+                ConceptDescription.class);
+        String[] altLabels = descr.getAltLabels();
+        assertEquals("alt2", altLabels[1]);
+        assertEquals("pref1", descr.getPrefLabel());
+    }
 
-		// now add the apples to the vocabulary
-		Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
-		try {
-			vocabulary.addConcept(apples);
-			tx.success();
-		} catch (Exception e) {
-			tx.failure();
-		} finally {
-			tx.finish();
-		}
+    @SuppressWarnings("serial")
+    @Test
+    public void testAddConceptToVocabulary() throws Exception {
+        Map<String, Object> data = new HashMap<String, Object>() {
+            {
+                put(AccessibleEntity.IDENTIFIER_KEY, "testVocabulary");
+            }
+        };
+        Vertex v_voc = manager.createVertex("voc_id",
+                EntityClass.CVOC_VOCABULARY, data);
+        data = new HashMap<String, Object>() {
+            {
+                put(AccessibleEntity.IDENTIFIER_KEY, "apples");
+            }
+        };
+        Vertex v_apples = manager.createVertex("applies_id",
+                EntityClass.CVOC_CONCEPT, data);
 
-		assertEquals(vocabulary.getIdentifier(), apples.getVocabulary().getIdentifier());
+        // frame it
+        Vocabulary vocabulary = graph.frame(v_voc, Vocabulary.class);
+        Concept apples = graph.frame(v_apples, Concept.class);
 
-	}
-	
+        // now add the apples to the vocabulary
+        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
+        try {
+            vocabulary.addConcept(apples);
+            tx.success();
+        } catch (Exception e) {
+            tx.failure();
+        } finally {
+            tx.finish();
+        }
+
+        assertEquals(vocabulary.getIdentifier(), apples.getVocabulary()
+                .getIdentifier());
+    }
+
 }
