@@ -25,9 +25,6 @@ public class RestHelpers {
      * @param e
      *            The exception
      * @return The json string
-     * @throws IOException
-     * @throws JsonMappingException
-     * @throws JsonGenerationException
      */
     static String produceErrorMessageJson(final Throwable e) {
         // NOTE only put in a stacktrace when debugging??

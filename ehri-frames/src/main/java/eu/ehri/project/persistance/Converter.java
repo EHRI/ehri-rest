@@ -98,9 +98,6 @@ public final class Converter {
      * 
      * @param json
      * @return
-     * @throws JsonParseException
-     * @throws JsonMappingException
-     * @throws IOException
      * @throws DeserializationError
      */
     public Bundle jsonToBundle(String json) throws DeserializationError {

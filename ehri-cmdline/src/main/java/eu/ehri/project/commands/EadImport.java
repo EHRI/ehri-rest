@@ -38,7 +38,6 @@ public class EadImport extends BaseCommand implements Command {
      * Constructor.
      * 
      * @param args
-     * @throws ParseException
      */
     public EadImport() {
     }
@@ -97,8 +96,7 @@ public class EadImport extends BaseCommand implements Command {
             // Find the agent
             Agent agent;
             try {
-                agent = manager.getFrame(
-                        (String) cmdLine.getOptionValue("repo"), Agent.class);
+                agent = manager.getFrame(cmdLine.getOptionValue("repo"), Agent.class);
             } catch (ItemNotFound e) {
                 if (cmdLine.hasOption("createrepo")) {
                     agent = createAgent(graph, cmdLine.getOptionValue("repo"));
@@ -110,8 +108,7 @@ public class EadImport extends BaseCommand implements Command {
             // Find the user
             UserProfile user;
             try {
-                user = manager.getFrame(
-                        (String) cmdLine.getOptionValue("user"),
+                user = manager.getFrame(cmdLine.getOptionValue("user"),
                         UserProfile.class);
             } catch (ItemNotFound e) {
                 if (cmdLine.hasOption("createuser")) {

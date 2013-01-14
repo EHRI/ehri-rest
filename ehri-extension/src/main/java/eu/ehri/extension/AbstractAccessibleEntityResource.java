@@ -65,10 +65,9 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
     /**
      * List all instances of the 'entity' accessible to the given user.
      * 
-     * @return
+     * @return List of entities
      * @throws ItemNotFound
      * @throws BadRequester
-     * @throws PermissionDenied
      */
     public StreamingOutput page(Integer offset, Integer limit,
             Iterable<String> order,
@@ -98,11 +97,14 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
     /**
      * List all instances of the 'entity' accessible to the given user.
      * 
-     * @return
+     * @return List of entities
      * @throws ItemNotFound
      * @throws BadRequester
+<<<<<<< HEAD
      * @throws BadFilterSpecification
      * @throws PermissionDenied
+=======
+>>>>>>> master
      */
     public StreamingOutput list(Integer offset, Integer limit,
             Iterable<String> order, Iterable<String> filters)
@@ -115,11 +117,14 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
     /**
      * List all instances of the 'entity' accessible to the given user.
      * 
-     * @return
+     * @return List of entities
      * @throws ItemNotFound
      * @throws BadRequester
+<<<<<<< HEAD
      * @throws BadFilterSpecification
      * @throws PermissionDenied
+=======
+>>>>>>> master
      */
     public StreamingOutput list(Integer offset, Integer limit)
             throws ItemNotFound, BadRequester {
@@ -283,7 +288,6 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * @throws ItemNotFound
      * @throws ValidationError
      * @throws BadRequester
-     * @throws SerializationError
      */
     protected Response delete(String id) throws PermissionDenied, ItemNotFound,
             ValidationError, BadRequester {

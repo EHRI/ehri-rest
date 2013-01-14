@@ -31,7 +31,6 @@ import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
-import eu.ehri.project.exceptions.IndexNotFoundException;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.EntityClass;
@@ -106,7 +105,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
         this.scope = scope;
         this.offset = offset;
         this.limit = limit;
-        this.sort = ImmutableSortedMap.<String, Sort> copyOf(sort);
+        this.sort = ImmutableSortedMap.copyOf(sort);
         this.filters = ImmutableSortedMap
                 .<String, Pair<FilterPredicate, String>> copyOf(filters);
         this.page = page;
@@ -293,7 +292,6 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      * 
      * @param user
      * @return Page instance
-     * @throws IndexNotFoundException
      */
     public Page<E> page(EntityClass type, Accessor user) {
         return page(manager.getFrames(type, cls), user);
@@ -307,7 +305,6 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      * @param user
      * 
      * @return Page instance
-     * @throws IndexNotFoundException
      */
     public Page<E> page(Iterable<E> vertices, Accessor user) {
         return page(vertices, user, cls);
@@ -321,7 +318,6 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      * @param user
      * 
      * @return Page instance
-     * @throws IndexNotFoundException
      */
     public <T extends VertexFrame> Page<T> page(Iterable<T> vertices,
             Accessor user, Class<T> cls) {
@@ -351,7 +347,6 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      * @param user
      * 
      * @return Page instance
-     * @throws IndexNotFoundException
      */
     public Page<E> page(String key, String query, Accessor user) {
         CloseableIterable<Neo4jVertex> countQ = manager.getVertices(key, query,
@@ -394,7 +389,6 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      * @param user
      * 
      * @return Iterable of items accessible to the given accessor
-     * @throws IndexNotFoundException
      */
     public Iterable<E> list(String key, String query, Accessor user) {
         // This function is optimised for ACL actions.
@@ -418,7 +412,6 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      * @param user
      * 
      * @return Iterable of items accessible to the given accessor
-     * @throws IndexNotFoundException
      */
     public Iterable<E> list(Iterable<E> vertices, Accessor user) {
         return list(vertices, user, cls);
@@ -431,7 +424,6 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      * @param user
      * 
      * @return Iterable of items accessible to the given accessor
-     * @throws IndexNotFoundException
      */
     public <T extends VertexFrame> Iterable<T> list(Iterable<T> vertices,
             Accessor user, Class<T> cls) {
@@ -447,7 +439,6 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      * 
      * @param user
      * @return Iterable of framed vertices accessible to the given user
-     * @throws IndexNotFoundException
      */
     public Iterable<E> list(EntityClass type, Accessor user) {
         return list(manager.getFrames(type, cls), user);
