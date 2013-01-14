@@ -76,17 +76,16 @@ public class ActionResource extends AbstractAccessibleEntityResource<Action> {
             @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
             @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
             @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)         
+            @QueryParam(FILTER_PARAM) List<String> filters)
             throws ItemNotFound, BadRequester, PermissionDenied {
         Accessor user = getRequesterUserProfile();
         AccessibleEntity item = new LoggingCrudViews<AccessibleEntity>(graph,
                 AccessibleEntity.class).detail(
-                manager.getFrame(id, AccessibleEntity.class),
-                user);
+                manager.getFrame(id, AccessibleEntity.class), user);
+        // FIXME: We ignore the sort param here...
         Query<Action> query = new Query<Action>(graph, Action.class)
                 .setOffset(offset).setLimit(limit)
-                .orderBy(Action.TIMESTAMP, Query.Sort.DESC)
-                .filter(filters);
+                .orderBy(Action.TIMESTAMP, Query.Sort.DESC).filter(filters);
         return streamingPage(query.page(item.getHistory(), user));
     }
 
