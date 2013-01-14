@@ -1,0 +1,269 @@
+package eu.ehri.project.test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.neo4j.test.TestGraphDatabaseFactory;
+
+import com.tinkerpop.blueprints.CloseableIterable;
+import com.tinkerpop.blueprints.Vertex;
+import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
+import com.tinkerpop.frames.FramedGraph;
+
+import eu.ehri.project.core.GraphManager;
+import eu.ehri.project.core.GraphManagerFactory;
+import eu.ehri.project.exceptions.IndexNotFoundException;
+import eu.ehri.project.exceptions.IntegrityError;
+import eu.ehri.project.exceptions.ItemNotFound;
+import eu.ehri.project.models.EntityClass;
+
+
+/**
+ * 
+ * @author paulboon
+ *
+ */
+public class GraphManagerTest {
+    private static final String NON_EXISTING_ID = "non-existing-id-962b04d7-f093-43df-a58e-25a898bd83be";
+    private static final String TEST_ID1 = "3c73a804-0a3b-4a10-8b7c-01ed285977db";
+    private static final String TEST_ID2 = "734e084a-bcc8-47c7-8896-57497aea0241";
+    private static final String TEST_KEY = "testKey";
+    private static final String TEST_VALUE = "testValue";
+    private static final EntityClass TEST_TYPE = EntityClass.USER_PROFILE;// Note: should we mock the entityclass
+    
+	protected FramedGraph<Neo4jGraph> graph;
+    protected GraphManager manager;
+
+    /**
+     * Note that there is only one implementation that I can test: SingleIndexGraphManager 
+     * but the factory handles that. 
+     */
+    @Before
+    public void setUp() {
+        graph = new FramedGraph<Neo4jGraph>(new Neo4jGraph(
+                new TestGraphDatabaseFactory().newImpermanentDatabaseBuilder()
+                        .newGraphDatabase()));
+        manager = GraphManagerFactory.getInstance(graph);
+    }
+    
+    @After
+    public void tearDown() {
+        graph.shutdown();
+    }
+    
+    @Test
+    public void testNonExistingVertex() {
+        boolean exists = manager.exists(NON_EXISTING_ID);
+        assertFalse(exists); 
+    }
+    
+    @Test(expected = ItemNotFound.class)
+    public void testDeleteNonExistingVertex() throws ItemNotFound {
+    	manager.deleteVertex(NON_EXISTING_ID);
+	}
+
+    @Test(expected = ItemNotFound.class)
+    public void testGetNonExistingVertex() throws ItemNotFound {
+    	manager.getVertex(NON_EXISTING_ID);
+	}
+    
+    @Test
+    public void testCreateVertex() throws Exception {
+        @SuppressWarnings("serial")
+		Map<String, Object> data = new HashMap<String, Object>() {{
+            		put(TEST_KEY, TEST_VALUE);
+            	}};
+        
+        Vertex vertex = manager.createVertex(TEST_ID1, TEST_TYPE, data);
+
+        assertEquals(TEST_ID1, manager.getId(vertex));
+        assertEquals(TEST_TYPE, manager.getType(vertex));
+        assertEquals(TEST_VALUE, vertex.getProperty(TEST_KEY));
+        
+        assertTrue(manager.exists(TEST_ID1)); 
+        // now get it and test again
+        vertex = manager.getVertex(TEST_ID1);
+        assertEquals(TEST_ID1, manager.getId(vertex));
+        assertEquals(TEST_TYPE, manager.getType(vertex));
+        assertEquals(TEST_VALUE, vertex.getProperty(TEST_KEY));        
+    }
+ 
+    @Test
+    public void testDeleteVertex() throws IntegrityError, ItemNotFound {
+        @SuppressWarnings("serial")
+		Map<String, Object> data = new HashMap<String, Object>() {{
+            		put(TEST_KEY, TEST_VALUE);
+            	}};
+        
+        Vertex vertex = manager.createVertex(TEST_ID1, TEST_TYPE, data);
+        manager.deleteVertex(TEST_ID1); // don't want the exeption here
+        
+        assertFalse(manager.exists(TEST_ID1)); 
+        
+        try {
+        	vertex = manager.getVertex(TEST_ID1); 
+        	assertFalse(true); // Not OK, shoukd throw the exception here
+        } catch (ItemNotFound e) {
+        	// ignore, this is OK
+        }        
+    }
+    
+    @Test
+    public void testUpdateVertex() throws Exception {
+        @SuppressWarnings("serial")
+		Map<String, Object> data = new HashMap<String, Object>() {{
+            		put(TEST_KEY, TEST_VALUE);
+            	}};
+        
+        Vertex vertex = manager.createVertex(TEST_ID1, TEST_TYPE, data);
+        
+        final String NEW_TEST_KEY = "newTestKey";
+        final String NEW_TEST_VALUE = "newTestValue";
+        
+        // change a value of existing key
+        data.put(TEST_KEY, NEW_TEST_VALUE);
+        manager.updateVertex(TEST_ID1, TEST_TYPE, data);
+        vertex = manager.getVertex(TEST_ID1);
+        assertEquals(NEW_TEST_VALUE, vertex.getProperty(TEST_KEY));
+        
+        // add a new key, value pair
+        data.put(NEW_TEST_KEY, NEW_TEST_VALUE);
+        manager.updateVertex(TEST_ID1, TEST_TYPE, data);
+        vertex = manager.getVertex(TEST_ID1);
+        assertEquals(NEW_TEST_VALUE, vertex.getProperty(TEST_KEY));
+        assertEquals(NEW_TEST_VALUE, vertex.getProperty(NEW_TEST_KEY));
+        
+        // remove a key, value pair
+        data.remove(TEST_KEY);
+        manager.updateVertex(TEST_ID1, TEST_TYPE, data);
+        vertex = manager.getVertex(TEST_ID1);
+        assertEquals(NEW_TEST_VALUE, vertex.getProperty(NEW_TEST_KEY));
+        assertEquals(null, vertex.getProperty(TEST_KEY));
+    } 
+    
+    
+    // TODO copy and change the other tests
+    
+
+    @SuppressWarnings("serial")
+    @Test
+    public void testSelectiveIndexing() throws IndexNotFoundException, IntegrityError {
+        // We need to create one first, sorry
+        Map<String, Object> data = new HashMap<String, Object>() {
+            {
+                put("name", "joe");
+                put("age", 32);
+                put("height", "5.11");
+            }
+        };
+        List<String> keys = new LinkedList<String>() {
+            {
+                add("name");
+                add("age");
+            }
+        };
+
+        Vertex joe = manager.createVertex(TEST_ID1, TEST_TYPE, data, keys);
+
+        // try and find joe via name and age...
+        CloseableIterable<Vertex> query1 = manager.getVertices("name", data.get("name"), TEST_TYPE); 
+        assertTrue(query1.iterator().hasNext());
+        Vertex joe1 = query1.iterator().next();
+        assertEquals(joe, joe1);
+
+        CloseableIterable<Vertex> query2 = manager.getVertices("age", data.get("age"), TEST_TYPE); 
+        assertTrue(query2.iterator().hasNext());
+        Vertex joe2 = query2.iterator().next();
+        assertEquals(joe, joe2);
+
+        // Query by height should fail...
+        CloseableIterable<Vertex> query3 = manager.getVertices("height", data.get("height"), TEST_TYPE); 
+        assertFalse(query3.iterator().hasNext());
+    }
+    
+    @SuppressWarnings("serial")
+    @Test(expected=IntegrityError.class)
+    public void testUniqueIndexingOnCreate() throws IntegrityError {
+        // Name must be unique
+        List<String> unique = new LinkedList<String>() {
+            {
+                add("name");
+            }
+        };
+        List<String> keys = new LinkedList<String>() {
+            {
+                add("name");
+                add("age");
+            }
+        };
+
+        Map<String, Object> data1 = new HashMap<String, Object>() {
+            {
+                put("name", "joe");
+                put("age", 32);
+                put("height", "5.11");
+            }
+        };
+        Map<String, Object> data2 = new HashMap<String, Object>() {
+            {
+                put("name", "joe");
+                put("age", 36);
+                put("height", "5.6");
+            }
+        };
+
+        manager.createVertex(TEST_ID1, TEST_TYPE, data1, keys, unique);
+        
+        // This should throw an integrity error
+        manager.createVertex(TEST_ID2, TEST_TYPE, data2, keys, unique);
+    }
+
+    @SuppressWarnings("serial")
+    @Test(expected=IntegrityError.class)
+    public void testUniqueIndexingOnUpdate() throws IntegrityError, ItemNotFound {
+        // Name must be unique
+        List<String> unique = new LinkedList<String>() {
+            {
+                add("name");
+            }
+        };
+        List<String> keys = new LinkedList<String>() {
+            {
+                add("name");
+                add("age");
+            }
+        };
+
+        Map<String, Object> data1 = new HashMap<String, Object>() {
+            {
+                put("name", "joe");
+                put("age", 32);
+                put("height", "5.11");
+            }
+        };
+        Map<String, Object> data2 = new HashMap<String, Object>() {
+            {
+                put("name", "linda");
+                put("age", 36);
+                put("height", "5.6");
+            }
+        };
+
+        manager.createVertex(TEST_ID1, TEST_TYPE, data1, keys, unique);
+        Vertex vertex = manager.createVertex(TEST_ID2, TEST_TYPE, data2, keys, unique);
+       
+        // Updating linda with Joe's name should throw an Integrity error...
+        data2.put("name", data1.get("name"));
+        manager.updateVertex(TEST_ID2, TEST_TYPE, data2, keys, unique);       
+    }
+    
+}
