@@ -33,6 +33,7 @@ public class CmdEntryPoint extends BaseCommand {
         mmap.put(GetEntity.NAME, GetEntity.class);
         mmap.put(LoadFixtures.NAME, LoadFixtures.class);
         mmap.put(Initialize.NAME, Initialize.class);
+        mmap.put(UserAdd.NAME, UserAdd.class);
         COMMANDS = Collections.unmodifiableMap(mmap);
     }
 
@@ -79,6 +80,7 @@ public class CmdEntryPoint extends BaseCommand {
                 try {                    
                     cmd.exec(graph, newArgs.toArray(new String[newArgs.size()]));
                 } catch(Exception e) {
+                    e.printStackTrace();
                     System.err.println("Error: " + e.getMessage());
                     return 1;
                 } finally {
