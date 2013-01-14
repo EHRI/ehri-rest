@@ -39,6 +39,7 @@ import eu.ehri.project.views.impl.Query;
  * @param <E>
  *            The specific AccesibleEntity derived class
  */
+@SuppressWarnings("ALL")
 public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
         extends AbstractRestResource {
 

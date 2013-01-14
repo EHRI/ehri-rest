@@ -41,7 +41,6 @@ public class UserAdd extends BaseCommand implements Command {
      * Constructor.
      * 
      * @param args
-     * @throws ParseException
      */
     public UserAdd() {
     }
@@ -74,7 +73,6 @@ public class UserAdd extends BaseCommand implements Command {
      * @throws DeserializationError 
      * @throws PermissionDenied 
      * @throws ValidationError 
-     * @throws Exception
      */
     public int execWithOptions(final FramedGraph<Neo4jGraph> graph,
             CommandLine cmdLine) throws ItemNotFound, ValidationError, PermissionDenied, DeserializationError {

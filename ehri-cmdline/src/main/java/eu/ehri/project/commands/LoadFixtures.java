@@ -21,7 +21,6 @@ public class LoadFixtures extends BaseCommand implements Command {
      * Constructor.
      * 
      * @param args
-     * @throws ParseException
      */
     public LoadFixtures() {
     }

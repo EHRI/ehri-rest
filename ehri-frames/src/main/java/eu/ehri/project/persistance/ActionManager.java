@@ -42,7 +42,6 @@ public class ActionManager {
      * @param user
      * @param logMessage
      * @return
-     * @throws ItemNotFound
      */
     public Action createAction(Actioner user, String logMessage) {
 
@@ -73,7 +72,6 @@ public class ActionManager {
      * @param user
      * @param logMessage
      * @return
-     * @throws ItemNotFound
      */
     public Action createAction(AccessibleEntity subject, Actioner user,
             String logMessage) {

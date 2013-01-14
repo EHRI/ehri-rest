@@ -22,7 +22,6 @@ abstract public class XmlImportManager implements ImportManager {
      * @param actioner
      * 
      * @throws IOException
-     * @throws SAXException
      * @throws ValidationError
      * @throws NoItemsCreated
      */
@@ -47,7 +46,6 @@ abstract public class XmlImportManager implements ImportManager {
      * @param actioner
      * 
      * @throws IOException
-     * @throws SAXException
      * @throws ValidationError
      * @throws NoItemsCreated
      */

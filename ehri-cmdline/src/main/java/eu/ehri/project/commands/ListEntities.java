@@ -23,7 +23,6 @@ public class ListEntities extends BaseCommand implements Command {
      * Constructor.
      * 
      * @param args
-     * @throws ParseException
      */
     public ListEntities() {
     }

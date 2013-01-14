@@ -399,7 +399,6 @@ public class EadImporter extends AbstractMultiItemRecursiveImporter<Node> {
      * @param data
      * @param path
      * @return
-     * @throws XPathExpressionException
      */
     private String getElementText(Node data, String path) {
         NodeList nodes;

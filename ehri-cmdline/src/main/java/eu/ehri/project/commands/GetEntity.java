@@ -24,7 +24,6 @@ public class GetEntity extends BaseCommand implements Command {
      * Constructor.
      * 
      * @param args
-     * @throws ParseException
      */
     public GetEntity() {
     }

@@ -134,7 +134,6 @@ public class Bundle {
      * @param key
      * @param value
      * @return
-     * @throws ValidationError
      */
     public Bundle withDataValue(String key, Object value) {
         Map<String, Object> newData = Maps.newHashMap(data);

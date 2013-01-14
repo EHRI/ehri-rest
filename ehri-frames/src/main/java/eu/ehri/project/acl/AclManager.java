@@ -188,7 +188,6 @@ public final class AclManager {
      * @param accessors
      * @param canRead
      * @param canWrite
-     * @throws PermissionDenied
      */
     public void setAccessors(AccessibleEntity entity,
             Iterable<Accessor> accessors) {

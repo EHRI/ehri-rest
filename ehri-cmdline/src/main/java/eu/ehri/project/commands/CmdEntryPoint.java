@@ -18,7 +18,6 @@ public class CmdEntryPoint extends BaseCommand {
      * Constructor.
      * 
      * @param args
-     * @throws ParseException
      */
     public CmdEntryPoint() {
         super();
@@ -69,7 +68,7 @@ public class CmdEntryPoint extends BaseCommand {
 
                 // Get the graph
                 FramedGraph<Neo4jGraph> graph = new FramedGraph<Neo4jGraph>(
-                        new Neo4jGraph((String) args[0]));
+                        new Neo4jGraph(args[0]));
 
                 List<String> newArgs = new LinkedList<String>();
                 for (int i = 2; i < args.length; i++) {

@@ -85,7 +85,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
         this.scope = scope;
         this.offset = offset;
         this.limit = limit;
-        this.sort = ImmutableSortedMap.<String, Sort> copyOf(sort);
+        this.sort = ImmutableSortedMap.copyOf(sort);
         this.page = page;
         helper = new ViewHelper(graph, scope);
         manager = GraphManagerFactory.getInstance(graph);
@@ -263,7 +263,6 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      * 
      * @param user
      * @return Page instance
-     * @throws IndexNotFoundException
      */
     public Page<E> page(EntityClass type, Accessor user) {
         return page(manager.getFrames(type, cls), user);
@@ -277,7 +276,6 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      * @param user
      * 
      * @return Page instance
-     * @throws IndexNotFoundException
      */
     public Page<E> page(Iterable<E> vertices, Accessor user) {
         return page(vertices, user, cls);
@@ -291,7 +289,6 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      * @param user
      * 
      * @return Page instance
-     * @throws IndexNotFoundException
      */
     public <T extends VertexFrame> Page<T> page(Iterable<T> vertices,
             Accessor user, Class<T> cls) {
@@ -325,7 +322,6 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      * @param user
      * 
      * @return Page instance
-     * @throws IndexNotFoundException
      */
     public Page<E> page(String key, String query, Accessor user) {
         // This function is optimised for ACL actions.
@@ -372,7 +368,6 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      * @param user
      * 
      * @return Iterable of items accessible to the given accessor
-     * @throws IndexNotFoundException
      */
     public Iterable<E> list(String key, String query, Accessor user) {
         // This function is optimised for ACL actions.
@@ -395,7 +390,6 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      * @param user
      * 
      * @return Iterable of items accessible to the given accessor
-     * @throws IndexNotFoundException
      */
     public Iterable<E> list(Iterable<E> vertices, Accessor user) {
         return list(vertices, user, cls);
@@ -408,7 +402,6 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      * @param user
      * 
      * @return Iterable of items accessible to the given accessor
-     * @throws IndexNotFoundException
      */
     public <T extends VertexFrame> Iterable<T> list(Iterable<T> vertices,
             Accessor user, Class<T> cls) {
@@ -423,7 +416,6 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      * 
      * @param user
      * @return Iterable of framed vertices accessible to the given user
-     * @throws IndexNotFoundException
      */
     public Iterable<E> list(EntityClass type, Accessor user) {
         return list(manager.getFrames(type, cls), user);

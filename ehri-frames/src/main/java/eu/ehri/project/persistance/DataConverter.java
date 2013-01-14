@@ -40,7 +40,7 @@ class DataConverter {
             for (Bundle subbundle : crelations.get(key)) {
                 rels.add(bundleToData(subbundle));
             }
-            relations.put((String) key, rels);
+            relations.put(key, rels);
         }
         data.put(Bundle.REL_KEY, relations);
         return data;
@@ -74,9 +74,6 @@ class DataConverter {
      * 
      * @param json
      * @return
-     * @throws JsonParseException
-     * @throws JsonMappingException
-     * @throws IOException
      * @throws DeserializationError
      */
     public static Bundle jsonToBundle(String json) throws DeserializationError {
