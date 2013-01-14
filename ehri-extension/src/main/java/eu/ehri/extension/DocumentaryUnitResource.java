@@ -60,11 +60,12 @@ public class DocumentaryUnitResource extends
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/list")
     public StreamingOutput listDocumentaryUnits(
-            @QueryParam("offset") @DefaultValue("0") int offset,
-            @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
-            @QueryParam("filter") List<String> filters)
+            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
+            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(SORT_PARAM) List<String> order,            
+            @QueryParam(FILTER_PARAM) List<String> filters)
             throws ItemNotFound, BadRequester {
-        return list(offset, limit, filters);
+        return list(offset, limit, order, filters);
     }
 
     @GET
@@ -72,13 +73,15 @@ public class DocumentaryUnitResource extends
     @Path("/{id:.+}/list")
     public StreamingOutput listAgentDocumentaryUnits(
             @PathParam("id") String id,
-            @QueryParam("offset") @DefaultValue("0") int offset,
-            @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
-            @QueryParam("filter") List<String> filters)
+            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
+            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(SORT_PARAM) List<String> order,            
+            @QueryParam(FILTER_PARAM) List<String> filters)
             throws ItemNotFound, BadRequester, PermissionDenied {
         DocumentaryUnit parent = manager.getFrame(id, DocumentaryUnit.class);
         Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph, cls)
-                .setOffset(offset).setLimit(limit).filter(filters);
+                .setOffset(offset).setLimit(limit).filter(filters)
+                .orderBy(order).filter(filters);
         return streamingList(query.list(parent.getChildren(),
                 getRequesterUserProfile()));
     }
@@ -87,11 +90,12 @@ public class DocumentaryUnitResource extends
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/page")
     public StreamingOutput pageDocumentaryUnits(
-            @QueryParam("offset") @DefaultValue("0") int offset,
-            @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
-            @QueryParam("filter") List<String> filters)
+            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
+            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(SORT_PARAM) List<String> order,
+            @QueryParam(FILTER_PARAM) List<String> filters)
             throws ItemNotFound, BadRequester {
-        return page(offset, limit, filters);
+        return page(offset, limit, order, filters);
     }
 
     @PUT

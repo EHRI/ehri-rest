@@ -14,8 +14,6 @@ import javax.ws.rs.core.UriBuilder;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import com.google.common.collect.Lists;
-import com.tinkerpop.frames.VertexFrame;
-
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.IntegrityError;
@@ -72,11 +70,12 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * @throws BadRequester
      * @throws PermissionDenied
      */
-    public StreamingOutput page(Integer offset, Integer limit, Iterable<String> filters)
-            throws ItemNotFound, BadRequester {
+    public StreamingOutput page(Integer offset, Integer limit,
+            Iterable<String> order,
+            Iterable<String> filters) throws ItemNotFound, BadRequester {
         final Query.Page<E> page = querier.setOffset(offset).setLimit(limit)
+                .orderBy(order)
                 .filter(filters).page(getRequesterUserProfile());
-
         return streamingPage(page);
     }
 
@@ -102,12 +101,14 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * @return
      * @throws ItemNotFound
      * @throws BadRequester
-     * @throws BadFilterSpecification 
+     * @throws BadFilterSpecification
      * @throws PermissionDenied
      */
-    public StreamingOutput list(Integer offset, Integer limit, Iterable<String> filters)
+    public StreamingOutput list(Integer offset, Integer limit,
+            Iterable<String> order, Iterable<String> filters)
             throws ItemNotFound, BadRequester {
-        final Query<E> query = querier.setOffset(offset).setLimit(limit).filter(filters);
+        final Query<E> query = querier.setOffset(offset).setLimit(limit)
+                .orderBy(order).filter(filters);
         return streamingList(query.list(getRequesterUserProfile()));
     }
 
@@ -117,25 +118,13 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * @return
      * @throws ItemNotFound
      * @throws BadRequester
-     * @throws BadFilterSpecification 
+     * @throws BadFilterSpecification
      * @throws PermissionDenied
      */
     public StreamingOutput list(Integer offset, Integer limit)
             throws ItemNotFound, BadRequester {
-        return list(offset, limit, Lists.<String>newArrayList());
-    }
-
-    /**
-     * List all instances of the 'entity' accessible to the given user.
-     * 
-     * @return
-     * @throws ItemNotFound
-     * @throws BadRequester
-     * @throws PermissionDenied
-     */
-    public <T extends VertexFrame> StreamingOutput list(Iterable<T> iter,
-            Integer offset, Integer limit) throws ItemNotFound, BadRequester {
-        return streamingList(iter);
+        return list(offset, limit, Lists.<String> newArrayList(),
+                Lists.<String> newArrayList());
     }
 
     /**
@@ -159,8 +148,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
 
         try {
             Bundle entityBundle = converter.jsonToBundle(json);
-            E entity = views.create(entityBundle,
-                    getRequesterUserProfile());
+            E entity = views.create(entityBundle, getRequesterUserProfile());
             String jsonStr = converter.vertexFrameToJson(entity);
             UriBuilder ub = uriInfo.getAbsolutePathBuilder();
             // FIXME: Hide the details of building this path
@@ -245,8 +233,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
 
         try {
             Bundle entityBundle = converter.jsonToBundle(json);
-            E update = views.update(entityBundle,
-                    getRequesterUserProfile());
+            E update = views.update(entityBundle, getRequesterUserProfile());
             String jsonStr = converter.vertexFrameToJson(update);
 
             return Response.status(Status.OK).entity((jsonStr).getBytes())

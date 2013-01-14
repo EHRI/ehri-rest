@@ -34,6 +34,7 @@ import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.views.impl.LoggingCrudViews;
 import eu.ehri.project.views.impl.Query;
@@ -60,11 +61,12 @@ public class AgentResource extends AbstractAccessibleEntityResource<Agent> {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/list")
     public StreamingOutput listAgents(
-            @QueryParam("offset") @DefaultValue("0") int offset,
-            @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
-            @QueryParam("filter") List<String> filters)
+            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
+            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(SORT_PARAM) List<String> order,
+            @QueryParam(FILTER_PARAM) List<String> filters)
             throws ItemNotFound, BadRequester {
-        return list(offset, limit, filters);
+        return list(offset, limit, order, filters);
     }
 
     @GET
@@ -72,22 +74,29 @@ public class AgentResource extends AbstractAccessibleEntityResource<Agent> {
     @Path("/{id:.+}/list")
     public StreamingOutput listAgentDocumentaryUnits(
             @PathParam("id") String id,
-            @QueryParam("offset") @DefaultValue("0") int offset,
-            @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit)
+            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
+            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(SORT_PARAM) List<String> order,
+            @QueryParam(FILTER_PARAM) List<String> filters)
             throws ItemNotFound, BadRequester, PermissionDenied {
-        Agent agent = new Query<Agent>(graph, Agent.class).get(id,
-                getRequesterUserProfile());
-        return list(agent.getCollections(), offset, limit);
+        Accessor user = getRequesterUserProfile();
+        Agent agent = views.detail(manager.getFrame(id, cls), user);
+        Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
+                DocumentaryUnit.class).setLimit(limit).setOffset(offset)
+                .orderBy(order).filter(filters);
+        return streamingList(query.list(agent.getCollections(), user));
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/page")
     public StreamingOutput pageAgents(
-            @QueryParam("offset") @DefaultValue("0") int offset,
-            @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit)
+            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
+            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(SORT_PARAM) List<String> order,
+            @QueryParam(FILTER_PARAM) List<String> filters)
             throws ItemNotFound, BadRequester {
-        return page(offset, limit);
+        return page(offset, limit, order, filters);
     }
 
     @POST

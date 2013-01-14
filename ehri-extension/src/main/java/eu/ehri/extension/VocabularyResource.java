@@ -32,6 +32,7 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.persistance.Bundle;
@@ -39,14 +40,15 @@ import eu.ehri.project.views.impl.LoggingCrudViews;
 import eu.ehri.project.views.impl.Query;
 
 /**
- * Provides a RESTfull interface for the Vocabulary
- * Also for managing the Concepts that are in the Vocabulary
+ * Provides a RESTfull interface for the Vocabulary Also for managing the
+ * Concepts that are in the Vocabulary
  * 
  * @author paulboon
- *
+ * 
  */
 @Path(Entities.CVOC_VOCABULARY)
-public class VocabularyResource extends AbstractAccessibleEntityResource<Vocabulary> {
+public class VocabularyResource extends
+        AbstractAccessibleEntityResource<Vocabulary> {
 
     public VocabularyResource(@Context GraphDatabaseService database) {
         super(database, Vocabulary.class);
@@ -55,8 +57,8 @@ public class VocabularyResource extends AbstractAccessibleEntityResource<Vocabul
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:.+}")
-    public Response getVocabulary(@PathParam("id") String id) throws ItemNotFound,
-            PermissionDenied, BadRequester {
+    public Response getVocabulary(@PathParam("id") String id)
+            throws ItemNotFound, PermissionDenied, BadRequester {
         return retrieve(id);
     }
 
@@ -64,34 +66,60 @@ public class VocabularyResource extends AbstractAccessibleEntityResource<Vocabul
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/list")
     public StreamingOutput listVocabularies(
-            @QueryParam("offset") @DefaultValue("0") int offset,
-            @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
-            @QueryParam("filter") List<String> filters)
+            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
+            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(SORT_PARAM) List<String> order,
+            @QueryParam(FILTER_PARAM) List<String> filters)
             throws ItemNotFound, BadRequester {
-        return list(offset, limit, filters);
-    }
-
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{id:.+}/list")
-    public StreamingOutput listVocabularyConcepts(
-            @PathParam("id") String id,
-            @QueryParam("offset") @DefaultValue("0") int offset,
-            @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit)
-            throws ItemNotFound, BadRequester, PermissionDenied {
-        Vocabulary vocabulary = new Query<Vocabulary>(graph, Vocabulary.class).get(id,
-                getRequesterUserProfile());
-        return list(vocabulary.getConcepts(), offset, limit);
+        return list(offset, limit, order, filters);
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/page")
     public StreamingOutput pageVocabularies(
-            @QueryParam("offset") @DefaultValue("0") int offset,
-            @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit)
+            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
+            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(SORT_PARAM) List<String> order,
+            @QueryParam(FILTER_PARAM) List<String> filters)
             throws ItemNotFound, BadRequester {
-        return page(offset, limit);
+        return page(offset, limit, order, filters);
+    }
+    
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id:.+}/list")
+    public StreamingOutput listVocabularyConcepts(
+            @PathParam("id") String id,
+            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
+            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(SORT_PARAM) List<String> order,
+            @QueryParam(FILTER_PARAM) List<String> filters)
+            throws ItemNotFound, BadRequester, PermissionDenied {
+        Accessor user = getRequesterUserProfile();
+        Vocabulary vocabulary = views.detail(manager.getFrame(id, cls), user);
+        Query<Concept> query = new Query<Concept>(graph, Concept.class)
+                .setLimit(limit).setOffset(offset).orderBy(order)
+                .filter(filters);
+        return streamingList(query.list(vocabulary.getConcepts(), user));
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id:.+}/page")
+    public StreamingOutput pageVocabularyConcepts(
+            @PathParam("id") String id,
+            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
+            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(SORT_PARAM) List<String> order,
+            @QueryParam(FILTER_PARAM) List<String> filters)
+            throws ItemNotFound, BadRequester, PermissionDenied {
+        Accessor user = getRequesterUserProfile();
+        Vocabulary vocabulary = views.detail(manager.getFrame(id, cls), user);
+        Query<Concept> query = new Query<Concept>(graph, Concept.class)
+                .setLimit(limit).setOffset(offset).orderBy(order)
+                .filter(filters);
+        return streamingPage(query.page(vocabulary.getConcepts(), user));
     }
 
     @POST
@@ -132,7 +160,7 @@ public class VocabularyResource extends AbstractAccessibleEntityResource<Vocabul
     }
 
     /*** Concept manipulation ***/
-    
+
     // NOTE no id as long called!
     /**
      * Create an instance of the 'entity' in the database
@@ -157,9 +185,9 @@ public class VocabularyResource extends AbstractAccessibleEntityResource<Vocabul
             String json) throws PermissionDenied, ValidationError,
             IntegrityError, DeserializationError, SerializationError,
             BadRequester {
-    	Vocabulary vocabulary = views.detail(graph.getVertex(id, cls),
+        Vocabulary vocabulary = views.detail(graph.getVertex(id, cls),
                 getRequesterUserProfile());
-    	Concept concept = createConcept(json, vocabulary);
+        Concept concept = createConcept(json, vocabulary);
         return buildResponseFromConcept(concept);
     }
 
@@ -185,9 +213,9 @@ public class VocabularyResource extends AbstractAccessibleEntityResource<Vocabul
             IntegrityError, DeserializationError, ItemNotFound, BadRequester {
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
-        	Vocabulary vocabulary = new Query<Vocabulary>(graph, Vocabulary.class).get(id,
-                    getRequesterUserProfile());
-        	Concept concept = createConcept(json, vocabulary);
+            Vocabulary vocabulary = new Query<Vocabulary>(graph,
+                    Vocabulary.class).get(id, getRequesterUserProfile());
+            Concept concept = createConcept(json, vocabulary);
             tx.success();
             return buildResponseFromConcept(concept);
         } catch (SerializationError e) {
@@ -217,15 +245,13 @@ public class VocabularyResource extends AbstractAccessibleEntityResource<Vocabul
             IntegrityError, BadRequester {
         Bundle entityBundle = converter.jsonToBundle(json);
 
-        Concept concept = new LoggingCrudViews<Concept>(graph,
-        		Concept.class, vocabulary)
-                .create(entityBundle,
-                        getRequesterUserProfile());
-        
+        Concept concept = new LoggingCrudViews<Concept>(graph, Concept.class,
+                vocabulary).create(entityBundle, getRequesterUserProfile());
+
         // Add it to this Vocabulary's concepts
         concept.setVocabulary(vocabulary);
         concept.setPermissionScope(vocabulary);
         return concept;
     }
-    
+
 }

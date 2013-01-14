@@ -58,22 +58,24 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/list")
     public StreamingOutput listUserProfiles(
-            @QueryParam("offset") @DefaultValue("0") int offset,
-            @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
-            @QueryParam("filter") List<String> filters)
+            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
+            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(SORT_PARAM) List<String> order,            
+            @QueryParam(FILTER_PARAM) List<String> filters)
             throws ItemNotFound, BadRequester {
-        return list(offset, limit, filters);
+        return list(offset, limit, order, filters);
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/page")
     public StreamingOutput pageUserProfiles(
-            @QueryParam("offset") @DefaultValue("0") int offset,
-            @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
-            @QueryParam("filter") List<String> filters)
+            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
+            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(SORT_PARAM) List<String> order,
+            @QueryParam(FILTER_PARAM) List<String> filters)
             throws ItemNotFound, BadRequester {
-        return page(offset, limit, filters);
+        return page(offset, limit, order, filters);
     }
     
     @POST

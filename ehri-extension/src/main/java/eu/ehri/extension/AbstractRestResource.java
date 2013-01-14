@@ -32,6 +32,15 @@ import eu.ehri.project.views.impl.Query;
 public abstract class AbstractRestResource {
 
     public static final int DEFAULT_LIST_LIMIT = 20;
+    
+    /**
+     * Query arguments.
+     */
+    public static final String SORT_PARAM = "sort";
+    public static final String FILTER_PARAM = "filter";
+    public static final String LIMIT_PARAM = "limit";
+    public static final String OFFSET_PARAM = "offset";
+    
 
     /**
      * With each request the headers of that request are injected into the
