@@ -81,10 +81,11 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response createUserProfile(String json) throws PermissionDenied,
+    public Response createUserProfile(String json,
+            @QueryParam(ACCESSOR_PARAM) List<String> accessors) throws PermissionDenied,
             ValidationError, IntegrityError, DeserializationError,
             ItemNotFound, BadRequester {
-        return create(json);
+        return create(json, accessors);
     }
 
     @PUT

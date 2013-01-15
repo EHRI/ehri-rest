@@ -25,6 +25,7 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 
 import eu.ehri.extension.errors.BadRequester;
+import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.IntegrityError;
@@ -102,16 +103,18 @@ public class AgentResource extends AbstractAccessibleEntityResource<Agent> {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response createAgent(String json) throws PermissionDenied,
-            ValidationError, IntegrityError, DeserializationError,
-            ItemNotFound, BadRequester {
-        return create(json);
+    public Response createAgent(String json,
+            @QueryParam(ACCESSOR_PARAM) List<String> accessors)
+            throws PermissionDenied, ValidationError, IntegrityError,
+            DeserializationError, ItemNotFound, BadRequester {
+        return create(json, accessors);
     }
 
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response updateAgent(String json) throws PermissionDenied,
+    public Response updateAgent(String json,
+            @QueryParam(ACCESSOR_PARAM) List<String> accessors) throws PermissionDenied,
             IntegrityError, ValidationError, DeserializationError,
             ItemNotFound, BadRequester {
         return update(json);
@@ -136,35 +139,6 @@ public class AgentResource extends AbstractAccessibleEntityResource<Agent> {
     }
 
     /**
-     * Create an instance of the 'entity' in the database
-     * 
-     * @param json
-     *            The json representation of the entity to create (no vertex
-     *            'id' fields)
-     * @return The response of the create request, the 'location' will contain
-     *         the url of the newly created instance.
-     * @throws PermissionDenied
-     * @throws IntegrityError
-     * @throws ValidationError
-     * @throws DeserializationError
-     * @throws SerializationError
-     * @throws BadRequester
-     */
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{id:\\d+}")
-    public Response createAgentDocumentaryUnit(@PathParam("id") long id,
-            String json) throws PermissionDenied, ValidationError,
-            IntegrityError, DeserializationError, SerializationError,
-            BadRequester {
-        Agent agent = views.detail(graph.getVertex(id, cls),
-                getRequesterUserProfile());
-        DocumentaryUnit doc = createDocumentaryUnit(json, agent);
-        return buildResponseFromDocumentaryUnit(doc);
-    }
-
-    /**
      * Create a documentary unit for this repository.
      * 
      * @param id
@@ -182,13 +156,16 @@ public class AgentResource extends AbstractAccessibleEntityResource<Agent> {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:.+}/" + Entities.DOCUMENTARY_UNIT)
     public Response createAgentDocumentaryUnit(@PathParam("id") String id,
-            String json) throws PermissionDenied, ValidationError,
-            IntegrityError, DeserializationError, ItemNotFound, BadRequester {
+            String json, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
+            throws PermissionDenied, ValidationError, IntegrityError,
+            DeserializationError, ItemNotFound, BadRequester {
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
-            Agent agent = new Query<Agent>(graph, Agent.class).get(id,
-                    getRequesterUserProfile());
+            Accessor user = getRequesterUserProfile();
+            Agent agent = views.detail(graph.getVertex(id, cls), user);
             DocumentaryUnit doc = createDocumentaryUnit(json, agent);
+            new AclManager(graph).setAccessors(doc,
+                    getAccessors(accessors, user));
             tx.success();
             return buildResponseFromDocumentaryUnit(doc);
         } catch (SerializationError e) {

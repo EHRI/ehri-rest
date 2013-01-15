@@ -80,10 +80,11 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response createGroup(String json) throws PermissionDenied,
+    public Response createGroup(String json,
+            @QueryParam(ACCESSOR_PARAM) List<String> accessors) throws PermissionDenied,
             ValidationError, IntegrityError, DeserializationError,
             ItemNotFound, BadRequester {
-        return create(json);
+        return create(json, accessors);
     }
 
     @PUT
@@ -118,7 +119,7 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
      */
     @POST
     @Path("/{id:[^/]+}/{aid:.+}")
-    public Response addAccessor(@PathParam("id") String id,
+    public Response addMember(@PathParam("id") String id,
             @PathParam("atype") String atype, @PathParam("aid") String aid)
             throws PermissionDenied, ItemNotFound, BadRequester {
         // FIXME: Add permission checks for this!!!
@@ -157,7 +158,7 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
      */
     @DELETE
     @Path("/{id:[^/]+}/{aid:.+}")
-    public Response removeAccessor(@PathParam("id") String id,
+    public Response removeMember(@PathParam("id") String id,
             @PathParam("aid") String aid)
             throws PermissionDenied, ItemNotFound, BadRequester {
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();

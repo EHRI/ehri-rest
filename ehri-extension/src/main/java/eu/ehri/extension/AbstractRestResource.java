@@ -40,6 +40,7 @@ public abstract class AbstractRestResource {
     public static final String FILTER_PARAM = "filter";
     public static final String LIMIT_PARAM = "limit";
     public static final String OFFSET_PARAM = "offset";
+    public static final String ACCESSOR_PARAM = "accessibleTo";
     
 
     /**

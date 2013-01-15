@@ -25,6 +25,7 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 
 import eu.ehri.extension.errors.BadRequester;
+import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.IntegrityError;
@@ -85,7 +86,7 @@ public class VocabularyResource extends
             throws ItemNotFound, BadRequester {
         return page(offset, limit, order, filters);
     }
-    
+
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:.+}/list")
@@ -125,10 +126,11 @@ public class VocabularyResource extends
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response createVocabulary(String json) throws PermissionDenied,
-            ValidationError, IntegrityError, DeserializationError,
-            ItemNotFound, BadRequester {
-        return create(json);
+    public Response createVocabulary(String json,
+            @QueryParam(ACCESSOR_PARAM) List<String> accessors)
+            throws PermissionDenied, ValidationError, IntegrityError,
+            DeserializationError, ItemNotFound, BadRequester {
+        return create(json, accessors);
     }
 
     // Note: json contains id
@@ -209,13 +211,17 @@ public class VocabularyResource extends
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:.+}/" + Entities.CVOC_CONCEPT)
     public Response createVocabularyConcept(@PathParam("id") String id,
-            String json) throws PermissionDenied, ValidationError,
-            IntegrityError, DeserializationError, ItemNotFound, BadRequester {
+            String json, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
+            throws PermissionDenied, ValidationError, IntegrityError,
+            DeserializationError, ItemNotFound, BadRequester {
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
+            Accessor user = getRequesterUserProfile();
             Vocabulary vocabulary = new Query<Vocabulary>(graph,
-                    Vocabulary.class).get(id, getRequesterUserProfile());
+                    Vocabulary.class).get(id, user);
             Concept concept = createConcept(json, vocabulary);
+            new AclManager(graph).setAccessors(concept,
+                    getAccessors(accessors, user));
             tx.success();
             return buildResponseFromConcept(concept);
         } catch (SerializationError e) {

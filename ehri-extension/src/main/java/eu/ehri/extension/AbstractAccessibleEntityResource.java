@@ -3,6 +3,8 @@ package eu.ehri.extension;
 import static eu.ehri.extension.RestHelpers.produceErrorMessageJson;
 
 import java.net.URI;
+import java.util.List;
+import java.util.Set;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
@@ -11,10 +13,15 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriBuilder;
 
+import org.apache.log4j.Logger;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Transaction;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+
 import eu.ehri.extension.errors.BadRequester;
+import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
@@ -22,8 +29,8 @@ import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.utils.ClassUtils;
 import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.views.Crud;
@@ -40,6 +47,9 @@ import eu.ehri.project.views.impl.Query;
  */
 public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
         extends AbstractRestResource {
+
+    protected final static Logger logger = Logger
+            .getLogger(AbstractAccessibleEntityResource.class);
 
     protected final Crud<E> views;
     protected final Query<E> querier;
@@ -70,11 +80,10 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * @throws BadRequester
      */
     public StreamingOutput page(Integer offset, Integer limit,
-            Iterable<String> order,
-            Iterable<String> filters) throws ItemNotFound, BadRequester {
+            Iterable<String> order, Iterable<String> filters)
+            throws ItemNotFound, BadRequester {
         final Query.Page<E> page = querier.setOffset(offset).setLimit(limit)
-                .orderBy(order)
-                .filter(filters).page(getRequesterUserProfile());
+                .orderBy(order).filter(filters).page(getRequesterUserProfile());
         return streamingPage(page);
     }
 
@@ -98,13 +107,9 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * List all instances of the 'entity' accessible to the given user.
      * 
      * @return List of entities
+     * 
      * @throws ItemNotFound
      * @throws BadRequester
-<<<<<<< HEAD
-     * @throws BadFilterSpecification
-     * @throws PermissionDenied
-=======
->>>>>>> master
      */
     public StreamingOutput list(Integer offset, Integer limit,
             Iterable<String> order, Iterable<String> filters)
@@ -118,13 +123,9 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * List all instances of the 'entity' accessible to the given user.
      * 
      * @return List of entities
+
      * @throws ItemNotFound
      * @throws BadRequester
-<<<<<<< HEAD
-     * @throws BadFilterSpecification
-     * @throws PermissionDenied
-=======
->>>>>>> master
      */
     public StreamingOutput list(Integer offset, Integer limit)
             throws ItemNotFound, BadRequester {
@@ -138,6 +139,8 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * @param json
      *            The json representation of the entity to create (no vertex
      *            'id' fields)
+     * @param accessors
+     *            List of accessors who can initially view this item
      * @return The response of the create request, the 'location' will contain
      *         the url of the newly created instance.
      * @throws PermissionDenied
@@ -147,26 +150,31 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * @throws ItemNotFound
      * @throws BadRequester
      */
-    public Response create(String json) throws PermissionDenied,
-            ValidationError, IntegrityError, DeserializationError,
-            ItemNotFound, BadRequester {
+    public Response create(String json, List<String> accessorIds)
+            throws PermissionDenied, ValidationError, IntegrityError,
+            DeserializationError, BadRequester {
 
+        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
+            Accessor user = getRequesterUserProfile();
             Bundle entityBundle = converter.jsonToBundle(json);
-            E entity = views.create(entityBundle, getRequesterUserProfile());
+            E entity = views.create(entityBundle, user);
+            // TODO: Move elsewhere
+            new AclManager(graph).setAccessors(entity,
+                    getAccessors(accessorIds, user));
+
             String jsonStr = converter.vertexFrameToJson(entity);
             UriBuilder ub = uriInfo.getAbsolutePathBuilder();
-            // FIXME: Hide the details of building this path
-            URI docUri = ub.path(
-                    (String) entity.asVertex().getProperty(EntityType.ID_KEY))
-                    .build();
-
+            URI docUri = ub.path(manager.getId(entity)).build();
+            tx.success();
             return Response.status(Status.CREATED).location(docUri)
                     .entity((jsonStr).getBytes()).build();
-
         } catch (SerializationError e) {
+            tx.failure();
             return Response.status(Status.INTERNAL_SERVER_ERROR)
                     .entity((produceErrorMessageJson(e)).getBytes()).build();
+        } finally {
+            tx.finish();
         }
     }
 
@@ -307,4 +315,21 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
         return ClassUtils.getEntityType(cls);
     }
 
+    protected Iterable<Accessor> getAccessors(List<String> accessorIds,
+            Accessor current) {
+        Set<Accessor> accessors = Sets.newHashSet();
+        for (String id : accessorIds) {
+            try {
+                accessors.add(manager.getFrame(id, Accessor.class));
+            } catch (ItemNotFound e) {
+                logger.error("Invalid accessor given: " + id);
+            }
+        }
+        // The current user should always be among the accessors, so add
+        // them unless the list is empty.
+        if (!accessors.isEmpty()) {
+            accessors.add(current);
+        }
+        return accessors;
+    }
 }
