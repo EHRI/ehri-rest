@@ -1,8 +1,6 @@
 package eu.ehri.project.commands;
 
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.ParseException;
-
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
@@ -44,6 +42,7 @@ public class ListEntities extends BaseCommand implements Command {
      * @param args
      * @throws Exception
      */
+    @Override
     public int execWithOptions(final FramedGraph<Neo4jGraph> graph, CommandLine cmdLine) throws Exception {
 
         if (cmdLine.getArgList().size() < 1)

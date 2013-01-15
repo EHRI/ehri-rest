@@ -1,8 +1,6 @@
 package eu.ehri.project.commands;
 
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.ParseException;
-
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
@@ -14,7 +12,7 @@ import eu.ehri.project.test.utils.fixtures.FixtureLoaderFactory;
  * 
  */
 public class LoadFixtures extends BaseCommand implements Command {
-    
+
     final static String NAME = "load-fixtures";
 
     /**
@@ -46,7 +44,9 @@ public class LoadFixtures extends BaseCommand implements Command {
      * @param args
      * @throws Exception
      */
-    public int execWithOptions(final FramedGraph<Neo4jGraph> graph, CommandLine cmdLine) throws Exception {
+    @Override
+    public int execWithOptions(final FramedGraph<Neo4jGraph> graph,
+            CommandLine cmdLine) throws Exception {
         FixtureLoader loader = FixtureLoaderFactory.getInstance(graph);
         loader.loadTestData();
 

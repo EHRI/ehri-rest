@@ -3,7 +3,6 @@ package eu.ehri.project.commands;
 import java.util.Map;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
-import org.apache.commons.cli.ParseException;
 import org.neo4j.graphdb.Transaction;
 
 import com.google.common.collect.ImmutableMap;
@@ -74,6 +73,7 @@ public class UserAdd extends BaseCommand implements Command {
      * @throws PermissionDenied 
      * @throws ValidationError 
      */
+    @Override
     public int execWithOptions(final FramedGraph<Neo4jGraph> graph,
             CommandLine cmdLine) throws ItemNotFound, ValidationError, PermissionDenied, DeserializationError {
 
