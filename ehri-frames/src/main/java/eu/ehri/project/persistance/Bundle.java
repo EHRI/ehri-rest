@@ -13,7 +13,6 @@ import com.google.common.collect.Maps;
 
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.SerializationError;
-import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.utils.ClassUtils;
 

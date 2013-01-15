@@ -31,7 +31,6 @@ import eu.ehri.project.persistance.BundleDAO;
  * 
  * @param <T>
  */
-@SuppressWarnings("ALL")
 public abstract class AbstractImporter<T> {
 
     protected final Agent repository;
