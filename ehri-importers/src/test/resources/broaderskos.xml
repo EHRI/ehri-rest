@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:dct="http://purl.org/dc/terms/"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:skos="http://www.w3.org/2004/02/skos/core#"
+>  
+  <rdf:Description rdf:about="http://ehri01.dans.knaw.nl/tematres/vocab/?tema=512">
+    <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+    <skos:broader rdf:resource="http://ehri01.dans.knaw.nl/tematres/vocab/?tema=884"/>
+    <skos:inScheme rdf:resource="http://ehri01.dans.knaw.nl/tematres/vocab/"/>
+    <dct:created>2012-06-27 15:33:02</dct:created>
+    <skos:broader rdf:resource="http://ehri01.dans.knaw.nl/tematres/vocab/?tema=511"/>
+    <skos:altLabel xml:lang="en">Prisoners of war - Jews</skos:altLabel>
+    <skos:prefLabel xml:lang="en">Jewish POWs</skos:prefLabel>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://ehri01.dans.knaw.nl/tematres/vocab/?tema=511">
+    <skos:narrower rdf:resource="http://ehri01.dans.knaw.nl/tematres/vocab/?tema=512"/>
+    <skos:prefLabel xml:lang="en">Prisoners of war</skos:prefLabel>
+    <skos:prefLabel xml:lang="de">Kriegsgefangener</skos:prefLabel>
+    <skos:broader rdf:resource="http://ehri01.dans.knaw.nl/tematres/vocab/?tema=510"/>
+    <skos:broader rdf:resource="http://ehri01.dans.knaw.nl/tematres/vocab/?tema=1207"/>
+    <skos:altLabel xml:lang="de">Kriegsgefangene</skos:altLabel>
+    <skos:altLabel xml:lang="en">POWs</skos:altLabel>
+    <skos:inScheme rdf:resource="http://ehri01.dans.knaw.nl/tematres/vocab/"/>
+    <dct:created>2012-06-27 15:33:02</dct:created>
+    <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+  </rdf:Description>
+</rdf:RDF>

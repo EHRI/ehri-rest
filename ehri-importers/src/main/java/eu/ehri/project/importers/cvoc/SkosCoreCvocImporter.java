@@ -215,6 +215,7 @@ public class SkosCoreCvocImporter {
             		 //action.addSubjects(item); // when concept was successfully persisted!
             		 manifest.addCreated();
             		 */
+            	     
             	  } 
              }
          }
@@ -249,9 +250,10 @@ public class SkosCoreCvocImporter {
         String value = namedItem.getNodeValue();
         dataMap.put(AccessibleEntity.IDENTIFIER_KEY, value);
 
-        // TODO extract and add the prefLabels and all other CvocText items
+        logger.info("Extracting Concept id: " + dataMap.get(AccessibleEntity.IDENTIFIER_KEY));
         
-        logger.info("Importing item: " + dataMap.get(AccessibleEntity.IDENTIFIER_KEY));
+        // TODO extract and add the prefLabels and all other items
+        
 
         return dataMap;
     }
