@@ -11,10 +11,17 @@
     <skos:prefLabel xml:lang="de">Kriegsgefangener</skos:prefLabel>
     <skos:broader rdf:resource="http://ehri01.dans.knaw.nl/tematres/vocab/?tema=510"/>
     <skos:broader rdf:resource="http://ehri01.dans.knaw.nl/tematres/vocab/?tema=1207"/>
+<!-- -->     
     <skos:altLabel xml:lang="de">Kriegsgefangene</skos:altLabel>
     <skos:altLabel xml:lang="en">POWs</skos:altLabel>
+<!-- -->
     <skos:inScheme rdf:resource="http://ehri01.dans.knaw.nl/tematres/vocab/"/>
     <dct:created>2012-06-27 15:33:02</dct:created>
     <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+    <!-- added  non-optional for now -->
+    <skos:definition xml:lang="en">def</skos:definition>
+    <skos:definition xml:lang="de">def</skos:definition>
+    <skos:scopeNote xml:lang="en">sn</skos:scopeNote>
+    <skos:scopeNote xml:lang="de">sn</skos:scopeNote>      
   </rdf:Description>
 </rdf:RDF>
