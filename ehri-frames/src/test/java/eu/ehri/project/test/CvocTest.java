@@ -1,6 +1,7 @@
 package eu.ehri.project.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 
 import java.util.HashMap;
@@ -112,12 +113,11 @@ public class CvocTest extends ModelTestBase {
                         put(Bundle.TYPE_KEY, Entities.CVOC_CONCEPT_DESCRIPTION);
                         put(Bundle.DATA_KEY, new HashMap<String, Object>() {{
                             put(Description.LANGUAGE_CODE, TEST_LABEL_LANG);
-                            // all properties must be there
-                            //put("altLabel", new String[]{"alt1","alt2"});
-                            put("altLabel", new String[]{});
                             put(ConceptDescription.PREFLABEL, "pref1");
-                            put(ConceptDescription.DEFINITION, "def1");
-                            put(ConceptDescription.SCOPENOTE, "sn1");
+                            // other properties are optional, but we put them in
+                            put("altLabel", new String[]{"alt1","alt2"});
+                            put(ConceptDescription.DEFINITION, new String[]{"def1"}); // allow multiple
+                            put(ConceptDescription.SCOPENOTE, new String[]{"sn1"}); // allow multiple
                         }});
                     }});
                 }});
@@ -148,11 +148,17 @@ public class CvocTest extends ModelTestBase {
 		// NOTE: use framing on the vertex to get the Model class
 		// that is the frames way of doning things
 		
-		ConceptDescription descr = graph.frame(description.asVertex(), ConceptDescription.class);
-		String[] altLabels = descr.getAltLabels();
-//		assertEquals("alt2", altLabels[1]);
+		ConceptDescription descr = graph.frame(description.asVertex(), ConceptDescription.class);		
 		assertEquals("pref1", descr.getPrefLabel());
 		// etc. etc.
+		
+		//String[] altLabels = descr.getAltLabels();		
+		//assertEquals("alt2", altLabels[1]);
+		// NOTE we can't call getAltLabels() on the interface, because it is optional
+		String[] altLabels = (String[])descr.asVertex().getProperty(ConceptDescription.ALTLABEL);
+		assertFalse(altLabels == null);
+		assertEquals(2, altLabels.length);
+		assertEquals("alt2", altLabels[1]);
 	}
     
 	@Test

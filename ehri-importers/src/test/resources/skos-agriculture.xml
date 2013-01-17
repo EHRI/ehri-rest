@@ -11,9 +11,11 @@
         <skos:broader rdf:resource="http://ehri01.dans.knaw.nl/tematres/vocab/?tema=918"/>  
         <dct:created>2012-07-13 10:44:16</dct:created>  
         <!-- added  non-optional for now -->
+<!--         
         <skos:definition xml:lang="en">def</skos:definition>
         <skos:definition xml:lang="de">def</skos:definition>
         <skos:scopeNote xml:lang="en">sn</skos:scopeNote>
         <skos:scopeNote xml:lang="de">sn</skos:scopeNote>      
+ -->        
     </skos:Concept>  
 </rdf:RDF>
