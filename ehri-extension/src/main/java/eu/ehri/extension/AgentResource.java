@@ -162,7 +162,7 @@ public class AgentResource extends AbstractAccessibleEntityResource<Agent> {
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
             Accessor user = getRequesterUserProfile();
-            Agent agent = views.detail(graph.getVertex(id, cls), user);
+            Agent agent = views.detail(manager.getFrame(id, cls), user);
             DocumentaryUnit doc = createDocumentaryUnit(json, agent);
             new AclManager(graph).setAccessors(doc,
                     getAccessors(accessors, user));

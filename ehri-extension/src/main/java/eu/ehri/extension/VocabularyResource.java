@@ -163,36 +163,6 @@ public class VocabularyResource extends
 
     /*** Concept manipulation ***/
 
-    // NOTE no id as long called!
-    /**
-     * Create an instance of the 'entity' in the database
-     * 
-     * @param json
-     *            The json representation of the entity to create (no vertex
-     *            'id' fields)
-     * @return The response of the create request, the 'location' will contain
-     *         the url of the newly created instance.
-     * @throws PermissionDenied
-     * @throws IntegrityError
-     * @throws ValidationError
-     * @throws DeserializationError
-     * @throws SerializationError
-     * @throws BadRequester
-     */
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{id:\\d+}")
-    public Response createVocabularyConcept(@PathParam("id") long id,
-            String json) throws PermissionDenied, ValidationError,
-            IntegrityError, DeserializationError, SerializationError,
-            BadRequester {
-        Vocabulary vocabulary = views.detail(graph.getVertex(id, cls),
-                getRequesterUserProfile());
-        Concept concept = createConcept(json, vocabulary);
-        return buildResponseFromConcept(concept);
-    }
-
     /**
      * Create a documentary unit for this repository.
      * 
