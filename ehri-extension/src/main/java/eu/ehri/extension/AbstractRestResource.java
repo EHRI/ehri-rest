@@ -113,7 +113,7 @@ public abstract class AbstractRestResource {
             throws ItemNotFound {
         return graph.frame(manager.getVertex(name), cls);
     }
-    
+
     /**
      * Stream a single page with total, limit, and offset info.
      * 
@@ -122,6 +122,18 @@ public abstract class AbstractRestResource {
      */
     protected <T extends VertexFrame> StreamingOutput streamingPage(
             final Query.Page<T> page) {
+        return streamingPage(page, converter);
+    }
+    
+    /**
+     * Stream a single page with total, limit, and offset info, using
+     * the given entity converter.
+     * 
+     * @param page
+     * @return
+     */
+    protected <T extends VertexFrame> StreamingOutput streamingPage(
+            final Query.Page<T> page, final Converter converter) {
         final ObjectMapper mapper = new ObjectMapper();
         final JsonFactory f = new JsonFactory();
         return new StreamingOutput() {
@@ -157,13 +169,20 @@ public abstract class AbstractRestResource {
      */
     protected <T extends VertexFrame> StreamingOutput streamingList(
             final Iterable<T> list) {
+        return streamingList(list, converter);
+    }
+        
+    /**
+     * Return a streaming response from an iterable, using the given
+     * entity converter.
+     * 
+     * @param list
+     * @return
+     */
+    protected <T extends VertexFrame> StreamingOutput streamingList(
+            final Iterable<T> list, final Converter converter) {
         final ObjectMapper mapper = new ObjectMapper();
         final JsonFactory f = new JsonFactory();
-        final Converter converter = new Converter(graph);
-        // FIXME: I don't understand this streaming output system well
-        // enough
-        // to determine whether this actually streams or not. It certainly
-        // doesn't look like it.
         return new StreamingOutput() {
             @Override
             public void write(OutputStream arg0) throws IOException,
@@ -182,7 +201,7 @@ public abstract class AbstractRestResource {
             }
         };
     }
-    
+
     /**
      * Return a streaming response from an iterable.
      * 
@@ -191,9 +210,20 @@ public abstract class AbstractRestResource {
      */
     protected <T extends VertexFrame> StreamingOutput streamingMultimap(
             final ListMultimap<String, T> map) {
+        return streamingMultimap(map, converter);
+    }
+        
+    /**
+     * Return a streaming response from an iterable, using the given
+     * entity converter.
+     * 
+     * @param list
+     * @return
+     */
+    protected <T extends VertexFrame> StreamingOutput streamingMultimap(
+            final ListMultimap<String, T> map, final Converter converter) {
         final ObjectMapper mapper = new ObjectMapper();
         final JsonFactory f = new JsonFactory();
-        final Converter converter = new Converter(graph);
         return new StreamingOutput() {
             @Override
             public void write(OutputStream arg0) throws IOException,
