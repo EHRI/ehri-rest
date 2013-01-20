@@ -13,7 +13,7 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriBuilder;
 
-import org.apache.log4j.Logger;
+//import org.apache.log4j.Logger;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 
@@ -48,8 +48,10 @@ import eu.ehri.project.views.impl.Query;
 public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
         extends AbstractRestResource {
 
-    protected final static Logger logger = Logger
-            .getLogger(AbstractAccessibleEntityResource.class);
+    // FIXME: Logger gives NoClassDefFound when run on server, probably because
+    // Log4j isn't available in the default Neo4j server/lib dir.
+    //protected final static Logger logger = Logger
+    //        .getLogger(AbstractAccessibleEntityResource.class);
 
     protected final Crud<E> views;
     protected final Query<E> querier;
@@ -322,7 +324,9 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
             try {
                 accessors.add(manager.getFrame(id, Accessor.class));
             } catch (ItemNotFound e) {
-                logger.error("Invalid accessor given: " + id);
+                // FIXME: Using the logger gives a noclassdef found error
+                // logger.error("Invalid accessor given: " + id);
+                System.err.println("Invalid accessor given: " + id);
             }
         }
         // The current user should always be among the accessors, so add
