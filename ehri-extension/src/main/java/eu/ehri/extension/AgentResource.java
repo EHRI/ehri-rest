@@ -113,8 +113,7 @@ public class AgentResource extends AbstractAccessibleEntityResource<Agent> {
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response updateAgent(String json,
-            @QueryParam(ACCESSOR_PARAM) List<String> accessors) throws PermissionDenied,
+    public Response updateAgent(String json) throws PermissionDenied,
             IntegrityError, ValidationError, DeserializationError,
             ItemNotFound, BadRequester {
         return update(json);
