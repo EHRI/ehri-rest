@@ -5,6 +5,7 @@ import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Property;
 
 import eu.ehri.project.models.annotations.EntityType;
+import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.AnnotatableEntity;
 import eu.ehri.project.models.base.Annotator;
@@ -14,6 +15,11 @@ public interface Annotation extends AnnotatableEntity, AccessibleEntity {
 
     public static final String ANNOTATES = "annotates";
 
+    @Fetch
+    @Adjacency(label = Annotation.ANNOTATES, direction = Direction.IN)
+    public Iterable<Annotation> getAnnotations();
+
+    @Fetch(depth = 1)
     @Adjacency(label = Annotator.HAS_ANNOTATION, direction = Direction.IN)
     public Annotator getAnnotator();
 
@@ -22,8 +28,4 @@ public interface Annotation extends AnnotatableEntity, AccessibleEntity {
 
     @Property("body")
     public String getBody();
-
-    @Property("body")
-    public void setBody(String body);
-
 }
