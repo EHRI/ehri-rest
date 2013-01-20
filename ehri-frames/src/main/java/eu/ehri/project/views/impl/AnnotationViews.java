@@ -11,16 +11,25 @@ import com.tinkerpop.frames.VertexFrame;
 import com.tinkerpop.pipes.PipeFunction;
 
 import eu.ehri.project.acl.AclManager;
+import eu.ehri.project.acl.PermissionType;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.exceptions.ItemNotFound;
+import eu.ehri.project.exceptions.PermissionDenied;
+import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.Annotation;
 import eu.ehri.project.models.annotations.Fetch;
+import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
+import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.AnnotatableEntity;
+import eu.ehri.project.models.base.Annotator;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.utils.ClassUtils;
+import eu.ehri.project.persistance.ActionManager;
+import eu.ehri.project.persistance.Bundle;
+import eu.ehri.project.persistance.BundleDAO;
 import eu.ehri.project.persistance.Converter;
 import eu.ehri.project.views.Annotations;
 import eu.ehri.project.views.ViewHelper;
@@ -61,6 +70,34 @@ public final class AnnotationViews implements Annotations {
         this(graph, SystemScope.getInstance());
     }
 
+    public Annotation createFor(String id, Bundle bundle, Accessor accessor)
+            throws PermissionDenied, ValidationError, ItemNotFound {
+        AccessibleEntity entity = manager.getFrame(id, AccessibleEntity.class);
+        helper.checkEntityPermission(entity, accessor, PermissionType.ANNOTATE);
+        // FIXME: This kind of sucks, generating a UUID identifier
+        // manually - we should relax the restriction to have one.
+        if (bundle.getDataValue(AccessibleEntity.IDENTIFIER_KEY) == null) {
+            bundle = bundle.withDataValue(AccessibleEntity.IDENTIFIER_KEY, 
+                    java.util.UUID.randomUUID().toString());            
+        }
+        Annotation annotation = new BundleDAO(graph).create(bundle,
+                Annotation.class);
+        graph.frame(entity.asVertex(), AnnotatableEntity.class).addAnnotation(
+                annotation);
+        annotation.setAnnotator(graph.frame(accessor.asVertex(), Annotator.class));
+        new ActionManager(graph).createAction(entity,
+                graph.frame(accessor.asVertex(), Actioner.class),
+                "Added annotation");
+        return annotation;
+    }
+
+    /**
+     * Fetch annotations for an item subtree.
+     * 
+     * @param id
+     * @param accessor
+     * @return map of ids to annotation lists.
+     */
     public ListMultimap<String, Annotation> getFor(String id, Accessor accessor)
             throws ItemNotFound {
         PipeFunction<Vertex, Boolean> filter = acl
@@ -72,6 +109,14 @@ public final class AnnotationViews implements Annotations {
         return annotations;
     }
 
+    /**
+     * Fetch annotations for an item and its subtree.
+     * 
+     * @param item
+     * @param depth
+     * @param annotations
+     * @param filter
+     */
     private <T extends VertexFrame> void getAnnotations(T item, int depth,
             ListMultimap<String, Annotation> annotations,
             PipeFunction<Vertex, Boolean> filter) {
@@ -87,6 +132,15 @@ public final class AnnotationViews implements Annotations {
                 .getEntityClass(), annotations, filter);
     }
 
+    /**
+     * Populate annotations for an item subtree.
+     * 
+     * @param item
+     * @param depth
+     * @param cls
+     * @param annotations
+     * @param filter
+     */
     private <T extends VertexFrame> void getRelationAnnotations(T item,
             int depth, Class<?> cls,
             ListMultimap<String, Annotation> annotations,
