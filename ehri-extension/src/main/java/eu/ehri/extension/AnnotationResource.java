@@ -15,15 +15,15 @@ import javax.ws.rs.core.StreamingOutput;
 
 import org.neo4j.graphdb.GraphDatabaseService;
 
+import com.google.common.collect.ListMultimap;
+
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.Annotation;
-import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.base.AnnotatableEntity;
-import eu.ehri.project.views.impl.LoggingCrudViews;
-import eu.ehri.project.views.impl.Query;
+import eu.ehri.project.views.Annotations;
+import eu.ehri.project.views.impl.AnnotationViews;
 
 /**
  * Provides a RESTfull(ish) interface for creating.
@@ -66,10 +66,8 @@ public class AnnotationResource extends
     }
 
     /**
-     * List the annotations for a given item.
-     * 
-     * FIXME: Ultimately this method will have to be more clever, and fetch the
-     * annotations for an entire subtree, but it's not for now.
+     * Return a map of annotations for the subtree of the given item and
+     * its child items.
      * 
      * @param id
      * @return
@@ -80,17 +78,11 @@ public class AnnotationResource extends
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/for/{id:.+}")
-    public StreamingOutput listActionsForItem(@PathParam("id") String id)
+    public StreamingOutput listAnnotationsForSubtree(@PathParam("id") String id)
             throws ItemNotFound, BadRequester, PermissionDenied {
-        new LoggingCrudViews<AccessibleEntity>(graph,
-                AccessibleEntity.class).detail(
-                manager.getFrame(id, AccessibleEntity.class),
+        Annotations annotationViews = new AnnotationViews(graph);
+        ListMultimap<String, Annotation> anns = annotationViews.getFor(id,
                 getRequesterUserProfile());
-        final Iterable<Annotation> list = new Query<Annotation>(graph,
-                Annotation.class).list(
-                manager.getFrame(id, AnnotatableEntity.class).getAnnotations(),
-                getRequesterUserProfile());
-        return streamingList(list);
-    }
-
+        return streamingMultimap(anns);
+    }    
 }
