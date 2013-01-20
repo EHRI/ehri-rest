@@ -22,6 +22,7 @@ import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.Action;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
+import eu.ehri.project.persistance.Converter;
 import eu.ehri.project.views.impl.LoggingCrudViews;
 import eu.ehri.project.views.impl.Query;
 
@@ -55,6 +56,38 @@ public class ActionResource extends AbstractAccessibleEntityResource<Action> {
             @QueryParam(FILTER_PARAM) List<String> filters)
             throws ItemNotFound, BadRequester {
         return list(offset, limit, order, filters);
+    }
+
+    /**
+     * Lookup and page the history for a given item.
+     * 
+     * @param id
+     * @param offset
+     * @param limit
+     * @return
+     * @throws ItemNotFound
+     * @throws BadRequester
+     * @throws PermissionDenied
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id:.+}/subjects")
+    public StreamingOutput pageSubjectsForAction(
+            @PathParam("id") String id,
+            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
+            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(SORT_PARAM) List<String> order,
+            @QueryParam(FILTER_PARAM) List<String> filters)
+            throws ItemNotFound, BadRequester, PermissionDenied {
+        Accessor user = getRequesterUserProfile();
+        Action action = views.detail(manager.getFrame(id, cls), user);
+        Query<AccessibleEntity> query = new Query<AccessibleEntity>(graph,
+                AccessibleEntity.class).setOffset(offset).setLimit(limit)
+                .orderBy(order).filter(filters);
+        // NB: Taking a pragmatic decision here to only stream the first
+        // level of the subject's tree.
+        return streamingPage(query.page(action.getSubjects(), user),
+                new Converter(graph, 1));
     }
 
     /**
