@@ -1,0 +1,132 @@
+package eu.ehri.project.views.impl;
+
+import java.lang.reflect.Method;
+import java.util.Map;
+import com.google.common.collect.LinkedListMultimap;
+import com.google.common.collect.ListMultimap;
+import com.tinkerpop.blueprints.Vertex;
+import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
+import com.tinkerpop.frames.FramedGraph;
+import com.tinkerpop.frames.VertexFrame;
+import com.tinkerpop.pipes.PipeFunction;
+
+import eu.ehri.project.acl.AclManager;
+import eu.ehri.project.acl.SystemScope;
+import eu.ehri.project.core.GraphManager;
+import eu.ehri.project.core.GraphManagerFactory;
+import eu.ehri.project.exceptions.ItemNotFound;
+import eu.ehri.project.models.Annotation;
+import eu.ehri.project.models.annotations.Fetch;
+import eu.ehri.project.models.base.Accessor;
+import eu.ehri.project.models.base.AnnotatableEntity;
+import eu.ehri.project.models.base.PermissionScope;
+import eu.ehri.project.models.utils.ClassUtils;
+import eu.ehri.project.persistance.Converter;
+import eu.ehri.project.views.Annotations;
+import eu.ehri.project.views.ViewHelper;
+
+/**
+ * View class for handling annotation-related operations.
+ * 
+ * @author mike
+ */
+public final class AnnotationViews implements Annotations {
+
+    private final FramedGraph<Neo4jGraph> graph;
+    private final AclManager acl;
+    private final ViewHelper helper;
+    private final GraphManager manager;
+
+    /**
+     * Scoped constructor.
+     * 
+     * @param graph
+     * @param cls
+     * @param scope
+     */
+    public AnnotationViews(FramedGraph<Neo4jGraph> graph, PermissionScope scope) {
+        this.graph = graph;
+        helper = new ViewHelper(graph, scope);
+        acl = helper.getAclManager();
+        manager = GraphManagerFactory.getInstance(graph);
+    }
+
+    /**
+     * Constructor with system scope.
+     * 
+     * @param graph
+     * @param cls
+     */
+    public AnnotationViews(FramedGraph<Neo4jGraph> graph) {
+        this(graph, SystemScope.getInstance());
+    }
+
+    public ListMultimap<String, Annotation> getFor(String id, Accessor accessor)
+            throws ItemNotFound {
+        PipeFunction<Vertex, Boolean> filter = acl
+                .getAclFilterFunction(accessor);
+        ListMultimap<String, Annotation> annotations = LinkedListMultimap
+                .create();
+        getAnnotations(manager.getFrame(id, AnnotatableEntity.class),
+                Converter.DEFAULT_TRAVERSALS, annotations, filter);
+        return annotations;
+    }
+
+    private <T extends VertexFrame> void getAnnotations(T item, int depth,
+            ListMultimap<String, Annotation> annotations,
+            PipeFunction<Vertex, Boolean> filter) {
+        String id = manager.getId(item);
+        AnnotatableEntity entity = graph.frame(item.asVertex(),
+                AnnotatableEntity.class);
+        for (Annotation ann : entity.getAnnotations()) {
+            if (filter.compute(ann.asVertex())) {
+                annotations.put(id, ann);
+            }
+        }
+        getRelationAnnotations(item, depth, manager.getType(item)
+                .getEntityClass(), annotations, filter);
+    }
+
+    private <T extends VertexFrame> void getRelationAnnotations(T item,
+            int depth, Class<?> cls,
+            ListMultimap<String, Annotation> annotations,
+            PipeFunction<Vertex, Boolean> filter) {
+        if (depth > 0) {
+            Map<String, Method> fetchMethods = ClassUtils.getFetchMethods(cls);
+            for (Map.Entry<String, Method> entry : fetchMethods.entrySet()) {
+
+                // In order to avoid @Fetching the whole graph we track the
+                // maxDepth parameter and reduce it for every traversal.
+                // However the @Fetch annotation can also specify a non-default
+                // depth, so we need to determine whatever is lower - the
+                // current traversal count, or the annotation's count.
+                Method method = entry.getValue();
+                int nextDepth = Math.min(depth,
+                        method.getAnnotation(Fetch.class).depth()) - 1;
+
+                try {
+                    Object result = method.invoke(graph.frame(item.asVertex(),
+                            cls));
+                    // The result of one of these fetchMethods should either be
+                    // a single VertexFrame, or a Iterable<VertexFrame>.
+                    if (result instanceof Iterable<?>) {
+                        for (Object d : (Iterable<?>) result) {
+                            VertexFrame r = (VertexFrame) d;
+                            getAnnotations(r, nextDepth, annotations, filter);
+                        }
+                    } else {
+                        // This relationship could be NULL if, e.g. a collection
+                        // has no holder.
+                        if (result != null) {
+                            VertexFrame r = (VertexFrame) result;
+                            getAnnotations(r, nextDepth, annotations, filter);
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+    }
+}
