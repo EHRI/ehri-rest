@@ -15,6 +15,7 @@ import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.neo4j.graphdb.GraphDatabaseService;
 
+import com.google.common.collect.ListMultimap;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.frames.VertexFrame;
@@ -177,6 +178,41 @@ public abstract class AbstractRestResource {
                     }
                 }
                 g.writeEndArray();
+                g.close();
+            }
+        };
+    }
+    
+    /**
+     * Return a streaming response from an iterable.
+     * 
+     * @param list
+     * @return
+     */
+    protected <T extends VertexFrame> StreamingOutput streamingMultimap(
+            final ListMultimap<String, T> map) {
+        final ObjectMapper mapper = new ObjectMapper();
+        final JsonFactory f = new JsonFactory();
+        final Converter converter = new Converter(graph);
+        return new StreamingOutput() {
+            @Override
+            public void write(OutputStream arg0) throws IOException,
+                    WebApplicationException {
+                JsonGenerator g = f.createJsonGenerator(arg0);
+                g.writeStartObject();
+                for (String itemId : map.keySet()) {
+                    g.writeFieldName(itemId);
+                    g.writeStartArray();
+                    for (T item : map.get(itemId)) {
+                        try {
+                            mapper.writeValue(g, converter.vertexFrameToData(item));
+                        } catch (SerializationError e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                    g.writeEndArray();
+                }
+                g.writeEndObject();
                 g.close();
             }
         };
