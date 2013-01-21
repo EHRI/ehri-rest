@@ -64,7 +64,7 @@ public class SkosCoreCvocImporterTest extends AbstractImporterTest { //AbstractF
         List<Concept> list = toList(query.setLimit(1).list(
                 AccessibleEntity.IDENTIFIER_KEY, skosConceptId, validUser));
         // and print the tree
-        printConceptTree(System.out, list.get(0));
+        //printConceptTree(System.out, list.get(0));
     }
 
     
@@ -74,7 +74,7 @@ public class SkosCoreCvocImporterTest extends AbstractImporterTest { //AbstractF
     }
     public void printConceptTree(final PrintStream out, Concept c, int depth, String indent) {
     	if (depth > 100) {
-    		out.println("STOP RECURSION");
+    		out.println("STOP RECURSION, possibly cyclic 'tree'");
     		return;
     	}
 
@@ -88,9 +88,17 @@ public class SkosCoreCvocImporterTest extends AbstractImporterTest { //AbstractF
     		String prefLabel = (String)d.asVertex().getProperty(ConceptDescription.PREFLABEL); // can't use the getPrefLabel() !
     		out.print(", \"" + prefLabel + "\"(" + lang+ ")");
     	}
-    	out.println("");
-        indent += ".   ";// the '.' improves readability, but the whole printing could be improved
-    	        
+    	// TODO Print related concept ids?
+    	for (Concept related: c.getRelatedConcepts()) {
+    		out.print("["+ related.getIdentifier() + "]");
+    	}
+    	for (Concept relatedBy: c.getRelatedByConcepts()) {
+    		out.print("["+ relatedBy.getIdentifier() + "]");
+    	}
+    	
+    	out.println("");// end of concept
+    	
+        indent += ".   ";// the '.' improves readability, but the whole printing could be improved        
     	for (Concept nc: c.getNarrowerConcepts()) {
     		printConceptTree(out, nc, ++depth, indent); // recursive call
     	}

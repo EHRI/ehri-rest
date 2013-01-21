@@ -8,13 +8,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpressionException;
 
 import org.neo4j.graphdb.Transaction;
 import org.slf4j.Logger;
@@ -27,29 +24,25 @@ import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import com.tinkerpop.blueprints.TransactionalGraph;
-import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
 import eu.ehri.project.exceptions.IdGenerationError;
 import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.importers.EadImportManager;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.exceptions.InvalidEadDocument;
 import eu.ehri.project.importers.exceptions.InvalidInputFormatError;
 import eu.ehri.project.models.Action;
-import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
+import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
-import eu.ehri.project.models.idgen.AccessibleEntityIdGenerator;
 import eu.ehri.project.models.idgen.GenericIdGenerator;
 import eu.ehri.project.models.idgen.IdGenerator;
 import eu.ehri.project.persistance.ActionManager;
@@ -57,13 +50,14 @@ import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.persistance.BundleDAO;
 
 /**
- * Importer for the controled vocabulary (TemaTres thesaurus) 
- * in a SKOS-Core RDF file. 
+ * Importer for the controlled vocabulary (TemaTres thesaurus) 
+ * specified by a SKOS-Core RDF file. 
  * 
  * This is different from the other importing mainly because I don't fully understand that. 
- * So this importer will also do the 'management' and we will see later on how to refactor it. 
+ * So this importer will also do the 'management' and we will see later how to refactor it. 
  *
- * Also note that: We don't have an Agent for the CVOCs!
+ * Note: most code was copied from the EadImportManager and its base classes
+ * Also note that: We don't have an Agent for the CVOCs, but a Vocabulary instead!
  *  
  * @author paulboon
  *
@@ -71,16 +65,10 @@ import eu.ehri.project.persistance.BundleDAO;
 public class SkosCoreCvocImporter {
 	   private static final Logger logger = LoggerFactory
 	            .getLogger(SkosCoreCvocImporter.class);
-
-	// most stuff copied from the EadImportManager and its base classes
-	// but we don't have EAD and 
-	// note that we don't have an Agent for the CVOCs!
-	
     protected final FramedGraph<Neo4jGraph> framedGraph;
     protected final Actioner actioner;
     protected Boolean tolerant = false;
     protected final Vocabulary vocabulary;
-    
     // map from the internal Skos identifier to the placeholder
     protected Map<String, ConceptPlaceholder> conceptLookup = new HashMap<String, ConceptPlaceholder>();
     
@@ -89,6 +77,7 @@ public class SkosCoreCvocImporter {
      * 
      * @param framedGraph
      * @param actioner
+     * @param vocabulary
      */
     public SkosCoreCvocImporter(FramedGraph<Neo4jGraph> framedGraph,
              final Actioner actioner, Vocabulary vocabulary) {
@@ -171,10 +160,10 @@ public class SkosCoreCvocImporter {
 
     }
     
-    /*** End of management part ***/
+    /*** End of management part, Vocabulary/Concept code below ***/
     
     /**
-     * Import an XML doc using the given action.
+     * Import an RDF/XML doc using the given action.
      * 
      * @param doc
      * @param action
@@ -189,12 +178,19 @@ public class SkosCoreCvocImporter {
             InvalidInputFormatError, IntegrityError {
 
     	 createConcepts(doc, action, manifest);
-
-    	 // All Concepts are created, now the next step 
     	 createVocabularyStruture(doc, action, manifest);
     }
 
-	// Do the Concept data extraction and create the Concepts in the db
+    /**
+     * Do the Concept data extraction and create all the Concepts 
+     * 
+     * @param doc
+     * @param action
+     * @param manifest
+     * @throws ValidationError
+     * @throws InvalidInputFormatError
+     * @throws IntegrityError
+     */
     private void createConcepts(Document doc, final Action action,
             final ImportLog manifest) throws ValidationError,
             InvalidInputFormatError, IntegrityError {
@@ -218,7 +214,7 @@ public class SkosCoreCvocImporter {
             		 // then use BundleDAO.createOrUpdate and use the framed Entity = CvocConcept  
             		 // see: AbstractImporter.importItem
             		   
-            		 Bundle unit = constructBundle(element);
+            		 Bundle unit = constructBundleForConcept(element);
         	        
             		 BundleDAO persister = new BundleDAO(framedGraph);
             		 Concept frame = persister.createOrUpdate(unit,
@@ -237,17 +233,27 @@ public class SkosCoreCvocImporter {
             		 List<String> broaderIds = getBroaderConceptIds(element);
             		 logger.debug("Concept has " + broaderIds.size() 
             				 + " broader ids: " + broaderIds.toString());
+            		 List<String> relatedIds = getRelatedConceptIds(element);
+            		 logger.debug("Concept has " + relatedIds.size() 
+            				 + " related ids: " + relatedIds.toString());
+            		 
             		 String storeId = unit.getId();//id;
             		 String skosId = frame.getIdentifier(); // the identifier used in the Skos file and is used for internal referal
             		 logger.debug("Concept store id = " + storeId + ", skos id = " + skosId);
-            		 conceptLookup.put(skosId, new ConceptPlaceholder(storeId, broaderIds, frame));
+            		 conceptLookup.put(skosId, new ConceptPlaceholder(storeId, broaderIds, relatedIds, frame));
             	  } 
              }
          }    	
     }
     
-    // extract data and construct the bundle
-    private Bundle constructBundle(Element element) throws ValidationError {
+    /**
+     * Extract data and construct the bundle for a new Concept
+     * 
+     * @param element
+     * @return
+     * @throws ValidationError
+     */
+    private Bundle constructBundleForConcept(Element element) throws ValidationError {
 		  Bundle unit = new Bundle(EntityClass.CVOC_CONCEPT,
 				  extractCvocConcept(element));
 		 
@@ -258,7 +264,7 @@ public class SkosCoreCvocImporter {
 			  Map<String, Object> d = (Map<String, Object>)descriptions.get(key);
 			  logger.debug("languageCode = " + d.get("languageCode"));
 
-			  // NOTE maybe best if pferLabel is there?
+			  // NOTE maybe test if prefLabel is there?
 
 			  unit = unit.withRelation(Description.DESCRIBES, new Bundle(
 					  EntityClass.CVOC_CONCEPT_DESCRIPTION, d));
@@ -283,6 +289,12 @@ public class SkosCoreCvocImporter {
 		  return unit;
     }
     
+    /**
+     * Get the list of id's of the Concept's broader concepts
+     * 
+     * @param element
+     * @return
+     */
     private List<String> getBroaderConceptIds(Element element) {
     	List<String> ids = new ArrayList<String>();
     	
@@ -295,24 +307,72 @@ public class SkosCoreCvocImporter {
         
     	return ids;
     }
-    
-    // Store all relations between the concepts; BT/NT/RT in the database
-    // NOTE that we want this to be done in the same database 'transaction' 
-    // and this 'current' one is not finished. 
-    // Therefore the Concepts are not retrievable from the database yet!
+
+    /**
+     * Get the list of id's of the Concept's related concepts
+     * 
+     * @param element
+     * @return
+     */
+    private List<String> getRelatedConceptIds(Element element) {
+    	List<String> ids = new ArrayList<String>();
+    	
+    	NodeList nodeList = element.getElementsByTagName("skos:related");
+        for(int i=0; i<nodeList.getLength(); i++){
+        	  Node typeNode = nodeList.item(i);
+        	  Node namedItem = typeNode.getAttributes().getNamedItem("rdf:resource");
+        	  ids.add(namedItem.getNodeValue());
+        }
+        
+    	return ids;
+    }
+   
+    /**
+     * Create the Vocabulary structure by creating all relations (BT/NT/RT) between the concepts
+     * 
+     * Note that we want this to be done in the same database 'transaction' 
+     * and this 'current' one is not finished. 
+     * Therefore the Concepts are not retrievable from the database yet 
+     * and we need to keep them in out lookup!
+     *  
+     * @param doc
+     * @param action
+     * @param manifest
+     * @throws ValidationError
+     * @throws InvalidInputFormatError
+     * @throws IntegrityError
+     */
     private void createVocabularyStruture(Document doc, final Action action,
             final ImportLog manifest) throws ValidationError,
             InvalidInputFormatError, IntegrityError {
     	
 	   	 logger.debug("Number of concepts in lookup: " + conceptLookup.size());
 	   	 
-	   	 // check the lookup and start making the BT relations
+	   	 createBroaderNarrowerRelations(doc, action, manifest);	   	
+	   	 createNonspecificRelations(doc, action, manifest);
+    }
+    
+    /**
+     * Create the broader/narrower relations for all the concepts
+     * 
+     * @param doc
+     * @param action
+     * @param manifest
+     * @throws ValidationError
+     * @throws InvalidInputFormatError
+     * @throws IntegrityError
+     */
+    private void createBroaderNarrowerRelations(Document doc, final Action action,
+    			final ImportLog manifest) throws ValidationError,
+    			InvalidInputFormatError, IntegrityError {
+    	
+	   	 // check the lookup and start making the BT relations (and narrower implicit)
 	   	 // visit all concepts an see if they have broader concepts
 	     for (String skosId : conceptLookup.keySet()) {
 	    	 ConceptPlaceholder conceptPlaceholder = conceptLookup.get(skosId);
 	    	 if (!conceptPlaceholder.broaderIds.isEmpty()) {
 	    		 logger.debug("Concept with skos id [" + skosId 
-	    				 + "] has broader terms");
+	    				 + "] has broader concepts");
 	    		 // find them in the lookup
 	    		 for (String bsId: conceptPlaceholder.broaderIds) {
 	    			 if (conceptLookup.containsKey(bsId)) {
@@ -320,7 +380,7 @@ public class SkosCoreCvocImporter {
 	    				 logger.debug("Found mapping from: " + bsId 
 	    						 + " to: " + conceptLookup.get(bsId).storeId);
 	    				 
-	    				 createBNrelation(conceptLookup.get(bsId), conceptPlaceholder);
+	    				 createBroaderNarrowerRelation(conceptLookup.get(bsId), conceptPlaceholder);
 	    			 } else {
 	    				 // not found
 	    				 logger.debug("Found NO mapping for: " + bsId); 
@@ -328,26 +388,108 @@ public class SkosCoreCvocImporter {
 	    			 }
 	    		 }
 	    	 }
-	     }
-
-	     // TODO check and fix relations
+	     }    	
     }
     
     /**
-     * Store the Broader to Narrower Concept relation
-     * 
+     * Create the Broader to Narrower Concept relation
      * Note that we cannot use the storeId's and retrieve them from the database. 
      * we need to use the Concept objects from the placeholders in the lookup. 
+     * 
+     * @param bcp
+     * @param ncp
      */
-    private void createBNrelation(ConceptPlaceholder bc, ConceptPlaceholder nc)  {
-    	logger.debug("Storing Broader: " + bc.storeId + " to Narrower: " + nc.storeId);
-    	bc.concept.addNarrowerConcept(nc.concept);
+    private void createBroaderNarrowerRelation(ConceptPlaceholder bcp, ConceptPlaceholder ncp)  {
+    	logger.debug("Creating Broader: " + bcp.storeId + " to Narrower: " + ncp.storeId);
+    	bcp.concept.addNarrowerConcept(ncp.concept);
+    }
+
+    /**
+     * Create the 'non-specific' relations for all the concepts
+     * 
+     * @param doc
+     * @param action
+     * @param manifest
+     * @throws ValidationError
+     * @throws InvalidInputFormatError
+     * @throws IntegrityError
+     */
+    private void createNonspecificRelations(Document doc, final Action action,
+    			final ImportLog manifest) throws ValidationError,
+    			InvalidInputFormatError, IntegrityError {
+    	
+	   	 // check the lookup and start making the relations
+	   	 // visit all concepts an see if they have a related concept    	
+	     for (String skosId : conceptLookup.keySet()) {
+	    	 ConceptPlaceholder conceptPlaceholder = conceptLookup.get(skosId);
+	    	 if (!conceptPlaceholder.relatedIds.isEmpty()) {
+	    		 logger.debug("Concept with skos id [" + skosId 
+	    				 + "] has related concepts");
+	    		 // find them in the lookup
+	    		 for (String toCId: conceptPlaceholder.relatedIds) {
+	    			 if (conceptLookup.containsKey(toCId)) {
+	    				 // found
+	    				 logger.debug("Found mapping from: " + toCId 
+	    						 + " to: " + conceptLookup.get(toCId).storeId);
+	    				 
+	    				 createNonspecificRelation(conceptPlaceholder, conceptLookup.get(toCId));
+	    			 } else {
+	    				 // not found
+	    				 logger.debug("Found NO mapping for: " + toCId); 
+	    				 // NOTE What does this mean; refers to an External resource, not in this file?
+	    			 }
+	    		 }
+	    	 }
+	     }    	
     }
     
-	// but now check if it has an rdf:type element 
-	// with the attribute rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"
+    /**
+     * Create a non specific relation; this is the 'skos:related' on a concept 
+     * @param from
+     * @param to
+     */
+    private void createNonspecificRelation(ConceptPlaceholder from, ConceptPlaceholder to)  {
+    	
+    	// Prevent creating the relation both ways
+    	// NOTE, optimization possible if we could prevent for checking everything twice!
+    	if (!reverseRelationExists(from, to)) {
+        	logger.debug("Creating relation from: " + from.storeId + " to: " + to.storeId);    	
+    		from.concept.addRelatedConcept(to.concept);
+    	}
+    }
+    
+    /**
+     * Check if the 'reverse' relation is exists already, via relatedBy 
+     * 
+     * @param from
+     * @param to
+     * @return
+     */
+    private boolean reverseRelationExists(ConceptPlaceholder from, ConceptPlaceholder to) {
+    	boolean result = false;
+    	for(Concept relatedBy: from.concept.getRelatedByConcepts()) {
+    		//logger.debug("Related By: " + relatedBy.asVertex().getProperty(EntityType.ID_KEY));
+    		String relatedByStoreId = (String) relatedBy.asVertex().getProperty(EntityType.ID_KEY);
+    		if (relatedByStoreId == to.storeId) {
+    			result = true;
+    			break; // found
+    		}
+    	}
+    	logger.debug("Relation exists: " + result + " for: " + to.storeId);
+    	return result;
+    }
+    
+    /**
+     * Check if the element represents a Concept
+     * 
+     * @param element
+     * @return
+     */
     private boolean isConceptElement(Element element) {
     	boolean result = false;
+
+    	// For now check if it has an rdf:type element 
+    	// with the attribute rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"
     	
     	NodeList nodeList = element.getElementsByTagName("rdf:type");
         for(int i=0; i<nodeList.getLength(); i++){
@@ -361,12 +503,21 @@ public class SkosCoreCvocImporter {
     	return result;
     }
     
-    Map<String, Object> extractCvocConcept(Node node)
+    /*** data extraction from XML below ***/
+    
+    /**
+     * Extract the Concept information (but not the descriptions)
+     * 
+     * @param conceptNode
+     * @return
+     * @throws ValidationError
+     */
+    Map<String, Object> extractCvocConcept(Node conceptNode)
             throws ValidationError {
         Map<String, Object> dataMap = new HashMap<String, Object>();
 
         // are we using the rdf:about attribute as 'identifier'
-        Node namedItem = node.getAttributes().getNamedItem("rdf:about");
+        Node namedItem = conceptNode.getAttributes().getNamedItem("rdf:about");
         String value = namedItem.getNodeValue();
         dataMap.put(AccessibleEntity.IDENTIFIER_KEY, value);
 
@@ -375,6 +526,12 @@ public class SkosCoreCvocImporter {
         return dataMap;
     }
 
+    /**
+     * Extract the Descriptions information for a concept
+     * 
+     * @param conceptElement
+     * @return
+     */
     Map<String, Object> extractCvocConceptDescriptions(Element conceptElement) {
         // extract and process the textual items (with a language)
         // one description for each language, so the languageCode serve as a key into the map
@@ -398,6 +555,14 @@ public class SkosCoreCvocImporter {
     	return descriptionData;
     }
 
+    /**
+     * Extract a 'single valued' textual description property and add it to the data
+     * 
+     * @param descriptionData
+     * @param textName
+     * @param skosName
+     * @param conceptElement
+     */
     private void extractAndAddSingleValuedTextToDescriptionData(Map<String, Object> descriptionData, 
     		String textName, String skosName, Element conceptElement) {
 
@@ -417,6 +582,14 @@ public class SkosCoreCvocImporter {
         }    	
     }
 
+    /**
+     * Extract a 'multi valued' textual description property and add it to the data (list)
+     * 
+     * @param descriptionData
+     * @param textName
+     * @param skosName
+     * @param conceptElement
+     */
     private void extractAndAddMultiValuedTextToDescriptionData(Map<String, Object> descriptionData, 
     		String textName, String skosName, Element conceptElement) {
 
@@ -432,7 +605,6 @@ public class SkosCoreCvocImporter {
         	  // add to descriptionData
         	  Map<String, Object> d = getOrCreateDescriptionForLanguage(descriptionData, lang);
     		  // get the array if it is there, otherwise create it first
-    		  //d.put(textName, text); // only one item with this name per description
     		  if (d.containsKey(textName)) {
     			  // should be a list, add it
     			  ((List<String>)d.get(textName)).add(text);
@@ -445,6 +617,13 @@ public class SkosCoreCvocImporter {
         }    	
     }    
 
+    /**
+     * Create a description for a specific language or return the one created before
+     * 
+     * @param descriptionData
+     * @param lang
+     * @return
+     */
     private Map<String, Object> getOrCreateDescriptionForLanguage(Map<String, Object> descriptionData, String lang) {
     	Map<String, Object> d = null;
     	if (descriptionData.containsKey(lang)) {
@@ -461,7 +640,7 @@ public class SkosCoreCvocImporter {
     /*** ***/
     
     /**
-     * Used in the lookup
+     * Used in the lookup which is needed for creating the Vocabulary structure
      * 
      * @author paulboon
      *
@@ -469,11 +648,16 @@ public class SkosCoreCvocImporter {
     private class ConceptPlaceholder {
     	public String storeId; // the identifier used for storage and referring in the repository
     	List<String> broaderIds;
+    	List<String> relatedIds;
     	Concept concept;
     	
-		public ConceptPlaceholder(String storeId, List<String> broaderIds, Concept concept) {
+		public ConceptPlaceholder(String storeId,
+				List<String> broaderIds,
+				List<String> relatedIds,
+				Concept concept) {
 			this.storeId = storeId;
 			this.broaderIds = broaderIds;
+			this.relatedIds = relatedIds;
 			
 			// NOTE if we have the concept; why do we need those other members?
 			this.concept = concept;
@@ -492,6 +676,5 @@ public class SkosCoreCvocImporter {
             return new InputSource(new StringReader(""));
         }
     }
-
 
 }
