@@ -87,7 +87,7 @@ public final class AnnotationViews implements Annotations {
         annotation.setAnnotator(graph.frame(accessor.asVertex(), Annotator.class));
         new ActionManager(graph).createAction(entity,
                 graph.frame(accessor.asVertex(), Actioner.class),
-                "Added annotation");
+                "Added annotation").addSubjects(annotation);
         return annotation;
     }
 
