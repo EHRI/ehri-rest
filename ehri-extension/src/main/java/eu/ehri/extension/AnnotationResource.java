@@ -120,6 +120,9 @@ public class AnnotationResource extends
                     getAccessors(accessors, user));
             tx.success();
             return buildResponseFromAnnotation(ann);
+        } catch (ItemNotFound e) {
+            tx.failure();
+            throw e;
         } catch (PermissionDenied e) {
             tx.failure();
             throw e;
@@ -133,6 +136,7 @@ public class AnnotationResource extends
             tx.failure();
             throw e;
         } catch (Exception e) {
+            e.printStackTrace();
             throw new WebApplicationException(e);
         } finally {
             tx.finish();
@@ -170,6 +174,9 @@ public class AnnotationResource extends
                     getAccessors(accessors, user));
             tx.success();
             return buildResponseFromAnnotation(ann);
+        } catch (ItemNotFound e) {
+            tx.failure();
+            throw e;
         } catch (PermissionDenied e) {
             tx.failure();
             throw e;
