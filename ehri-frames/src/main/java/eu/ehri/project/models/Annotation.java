@@ -14,6 +14,8 @@ import eu.ehri.project.models.base.Annotator;
 public interface Annotation extends AnnotatableEntity, AccessibleEntity {
 
     public static final String ANNOTATES = "annotates";
+    
+    public static final String HAS_SOURCE = "hasSource";
 
     @Fetch
     @Adjacency(label = Annotation.ANNOTATES, direction = Direction.IN)
@@ -27,7 +29,14 @@ public interface Annotation extends AnnotatableEntity, AccessibleEntity {
     public Annotator setAnnotator(final Annotator annotator);
 
     @Adjacency(label = ANNOTATES)
-    public AnnotatableEntity getTarget();
+    public Iterable<AnnotatableEntity> getTargets();
+    
+    @Fetch
+    @Adjacency(label = HAS_SOURCE)
+    public AnnotatableEntity getSource();
+
+    @Adjacency(label = HAS_SOURCE)
+    public void setSource(final Annotator annotator);
 
     @Property("body")
     public String getBody();

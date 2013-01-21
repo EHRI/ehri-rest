@@ -70,6 +70,37 @@ public final class AnnotationViews implements Annotations {
         this(graph, SystemScope.getInstance());
     }
 
+    /**
+     * Create a link between two items.
+     * 
+     * @param id
+     * @param sourceId
+     * @param bundle
+     * @param user
+     * @return
+     * @throws ItemNotFound
+     * @throws ValidationError
+     * @throws PermissionDenied
+     */
+    public Annotation createLink(String id, String sourceId, Bundle bundle,
+            Accessor user) throws ItemNotFound, ValidationError,
+            PermissionDenied {
+        Annotation ann = createFor(id, bundle, user);
+        ann.setSource(manager.getFrame(sourceId, Annotator.class));
+        return ann;
+    }
+
+    /**
+     * Create an annotation for an item.
+     * 
+     * @param id
+     * @param bundle
+     * @param accessor
+     * @return
+     * @throws PermissionDenied
+     * @throws ValidationError
+     * @throws ItemNotFound
+     */
     public Annotation createFor(String id, Bundle bundle, Accessor accessor)
             throws PermissionDenied, ValidationError, ItemNotFound {
         AccessibleEntity entity = manager.getFrame(id, AccessibleEntity.class);
@@ -77,14 +108,15 @@ public final class AnnotationViews implements Annotations {
         // FIXME: This kind of sucks, generating a UUID identifier
         // manually - we should relax the restriction to have one.
         if (bundle.getDataValue(AccessibleEntity.IDENTIFIER_KEY) == null) {
-            bundle = bundle.withDataValue(AccessibleEntity.IDENTIFIER_KEY, 
-                    java.util.UUID.randomUUID().toString());            
+            bundle = bundle.withDataValue(AccessibleEntity.IDENTIFIER_KEY,
+                    java.util.UUID.randomUUID().toString());
         }
         Annotation annotation = new BundleDAO(graph).create(bundle,
                 Annotation.class);
         graph.frame(entity.asVertex(), AnnotatableEntity.class).addAnnotation(
                 annotation);
-        annotation.setAnnotator(graph.frame(accessor.asVertex(), Annotator.class));
+        annotation.setAnnotator(graph.frame(accessor.asVertex(),
+                Annotator.class));
         new ActionManager(graph).createAction(entity,
                 graph.frame(accessor.asVertex(), Actioner.class),
                 "Added annotation").addSubjects(annotation);

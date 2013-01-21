@@ -64,6 +64,17 @@ public class AnnotationResource extends
         return retrieve(id);
     }
 
+    /**
+     * List all annotations.
+     * 
+     * @param offset
+     * @param limit
+     * @param order
+     * @param filters
+     * @return
+     * @throws ItemNotFound
+     * @throws BadRequester
+     */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/list")
@@ -75,6 +86,58 @@ public class AnnotationResource extends
             throws ItemNotFound, BadRequester {
         return list(offset, limit, order, filters);
     }
+    
+    /**
+     * Create a link between two items.
+     * 
+     * @param id
+     * @param sourceId
+     * @param json
+     * @param accessors
+     * @return
+     * @throws PermissionDenied
+     * @throws ValidationError
+     * @throws DeserializationError
+     * @throws ItemNotFound
+     * @throws BadRequester
+     * @throws SerializationError
+     */
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("{id:.+}/{sourceId:.+}")
+    public Response createAnnotationFor(@PathParam("id") String id,
+            @PathParam("sourceId") String sourceId, String json,
+            @QueryParam(ACCESSOR_PARAM) List<String> accessors)
+            throws PermissionDenied, ValidationError, DeserializationError,
+            ItemNotFound, BadRequester, SerializationError {
+        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
+        try {
+            Accessor user = getRequesterUserProfile();
+            Annotation ann = new AnnotationViews(graph).createLink(id,
+                    sourceId, Bundle.fromString(json), user);
+            new AclManager(graph).setAccessors(ann,
+                    getAccessors(accessors, user));
+            tx.success();
+            return buildResponseFromAnnotation(ann);
+        } catch (PermissionDenied e) {
+            tx.failure();
+            throw e;
+        } catch (DeserializationError e) {
+            tx.failure();
+            throw e;
+        } catch (BadRequester e) {
+            tx.failure();
+            throw e;
+        } catch (ValidationError e) {
+            tx.failure();
+            throw e;
+        } catch (Exception e) {
+            throw new WebApplicationException(e);
+        } finally {
+            tx.finish();
+        }
+    }    
 
     /**
      * Create an annotation for a particular item.
