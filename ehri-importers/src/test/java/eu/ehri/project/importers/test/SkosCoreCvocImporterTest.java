@@ -65,6 +65,15 @@ public class SkosCoreCvocImporterTest extends AbstractImporterTest { //AbstractF
                 AccessibleEntity.IDENTIFIER_KEY, skosConceptId, validUser));
         // and print the tree
         //printConceptTree(System.out, list.get(0));
+        
+        /*
+        // NOW add again to another vocabulary (Yep, doesn't work!)
+        vocabulary = manager.getFrame("cvoc2", Vocabulary.class);
+        ios = ClassLoader.getSystemResourceAsStream(SKOS_FILE);
+        importer = new SkosCoreCvocImporter(graph, validUser, vocabulary);
+        importer.setTolerant(true);
+        log = importer.importFile(ios, logMessage);
+		*/
     }
 
     

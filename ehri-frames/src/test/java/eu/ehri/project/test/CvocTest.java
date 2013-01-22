@@ -23,6 +23,7 @@ import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.ConceptDescription;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.persistance.Bundle;
+import eu.ehri.project.persistance.BundleDAO;
 import eu.ehri.project.views.Crud;
 import eu.ehri.project.views.impl.CrudViews;
 
@@ -189,4 +190,20 @@ public class CvocTest extends ModelTestBase {
 
 	}
 	
+	// test creation of a vocabulary using the BundleDAO
+	@Test
+	public void testCreateVocabulary() throws Exception {
+		String name = "voc-test-id";
+		
+	  	System.out.println("Creating vocabulary: \"" + name + "\"");
+        Map<String, Object> vocabularyData = new HashMap<String, Object>();
+        vocabularyData.put(AccessibleEntity.IDENTIFIER_KEY, name);
+        //vocabularyData.put(EntityType.ID_KEY, name);
+        //vocabularyData.put("name", name);
+        Bundle bundle = new Bundle(EntityClass.CVOC_VOCABULARY, vocabularyData);
+        bundle = bundle.withId(name);
+        
+         Vocabulary vocabulary = new BundleDAO(graph).create(bundle, Vocabulary.class);
+         assertEquals(name, vocabulary.getIdentifier());
+	}
 }

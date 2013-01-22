@@ -360,6 +360,11 @@
   data:
     identifier: cvoc1
 
+- id: cvoc2
+  type: cvocVocabulary
+  data:
+    identifier: cvoc2
+
 --- # Concepts
 - id: cvocc1
   type: cvocConcept
