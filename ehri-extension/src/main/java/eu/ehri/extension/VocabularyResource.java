@@ -31,6 +31,7 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.persistance.Bundle;
@@ -147,7 +148,39 @@ public class VocabularyResource extends AbstractAccessibleEntityResource<Vocabul
     }
 
     /*** Concept manipulation ***/
-    
+
+    @DELETE
+    @Path("/{id:.+}/all")
+    public Response deleteAllVocabularyConcepts(
+            @PathParam("id") String id)
+            throws ItemNotFound, BadRequester, PermissionDenied {
+        Vocabulary vocabulary = new Query<Vocabulary>(graph, Vocabulary.class).get(id,
+                getRequesterUserProfile());
+        
+        //return deleteAllConcepts(vocabulary);
+        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
+        try {
+        	LoggingCrudViews<Concept> conceptViews = new LoggingCrudViews<Concept>(graph,
+            		Concept.class, vocabulary);
+        	Accessor requesterUserProfile = getRequesterUserProfile();
+        	Iterable<Concept> concepts = vocabulary.getConcepts();
+        	for (Concept concept : concepts) {
+        		conceptViews.delete(concept, requesterUserProfile);
+        	}
+            tx.success();
+            return Response.status(Status.OK).build();
+        } catch (SerializationError e) {
+            tx.failure();
+            throw new WebApplicationException(e);
+        } catch (ValidationError e) {
+            tx.failure();
+            throw new WebApplicationException(e);
+		} finally {
+            tx.finish();
+        }
+        
+    }
+
     // NOTE no id as long called!
     /**
      * Create an instance of the 'entity' in the database

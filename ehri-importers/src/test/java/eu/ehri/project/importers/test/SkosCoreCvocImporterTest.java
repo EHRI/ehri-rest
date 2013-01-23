@@ -9,6 +9,8 @@ import java.util.List;
 
 import org.junit.Test;
 
+import com.tinkerpop.blueprints.Vertex;
+
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.cvoc.SkosCoreCvocImporter;
 import eu.ehri.project.models.DocumentaryUnit;
@@ -20,6 +22,12 @@ import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.test.AbstractFixtureTest;
 import eu.ehri.project.views.impl.Query;
 
+/**
+ * TODO cleanup this mess
+ * 
+ * @author paulboon
+ *
+ */
 public class SkosCoreCvocImporterTest extends AbstractImporterTest { //AbstractFixtureTest {
 	// Note we only can do RSF
     protected final String SKOS_FILE = "ehri-skos.rdf";//"broaderskos.xml";//"skos.rdf";
@@ -66,6 +74,9 @@ public class SkosCoreCvocImporterTest extends AbstractImporterTest { //AbstractF
         // and print the tree
         //printConceptTree(System.out, list.get(0));
         
+        // output RDF
+        new SkosCVocExporter().printRdf(System.out, vocabulary);
+        
         /*
         // NOW add again to another vocabulary (Yep, doesn't work!)
         vocabulary = manager.getFrame("cvoc2", Vocabulary.class);
@@ -111,5 +122,96 @@ public class SkosCoreCvocImporterTest extends AbstractImporterTest { //AbstractF
     	for (Concept nc: c.getNarrowerConcepts()) {
     		printConceptTree(out, nc, ++depth, indent); // recursive call
     	}
+    }
+    
+    // TODO export to RDF
+    
+    public class SkosCVocExporter {
+    	
+    	/**
+    	 * Simple 'xml text' printing to generate RDF output
+    	 * Note, we don't check if any value needs to be escaped for proper XML 
+    	 * 
+    	 * @param out
+    	 * @param vocabulary
+    	 */
+        public void printRdf(final PrintStream out, final Vocabulary vocabulary) {
+        	out.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+        	
+        	// rdfStart
+        	out.println("<rdf:RDF");
+        	out.println(" xmlns:dc=\"http://purl.org/dc/elements/1.1/\"");
+        	out.println(" xmlns:dct=\"http://purl.org/dc/terms/\"");
+        	out.println(" xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"");
+        	out.println(" xmlns:skos=\"http://www.w3.org/2004/02/skos/core#\"");
+        	out.println(">");
+
+        	String vId = vocabulary.getIdentifier();
+        	// for all concepts
+        	for(Concept concept : vocabulary.getConcepts()) {
+        	  // conceptStart
+        	  String cId = concept.getIdentifier();
+        	  out.println("<rdf:Description rdf:about=\"" + cId + "\">");
+        	  out.println("  <rdf:type rdf:resource=\"http://www.w3.org/2004/02/skos/core#Concept\"/>");
+        	  out.println("  <skos:inScheme rdf:resource=\"" +  vId +  "\"/>");
+        	  
+        	  // conceptDescriptions
+        	  for(Description description : concept.getDescriptions()) {
+        		  String language = description.getLanguageOfDescription();
+        		  Vertex cdVertex = description.asVertex();
+        		  // prefLabel (one and only one)
+        		  String prefLabel = (String)cdVertex.getProperty(ConceptDescription.PREFLABEL);
+        		  out.println("  <skos:prefLabel xml:lang=\""+ language +"\">"+ prefLabel +"</skos:prefLabel>");
+        	  
+        		  // other stuff as well
+        		  Object obj = cdVertex.getProperty(ConceptDescription.ALTLABEL); 
+        		  if (obj != null) {
+	        		  String[] altLabels = (String[])obj; 
+	        		  for (String altLabel : altLabels) {
+	            		  out.println("  <skos:altLabel xml:lang=\""+ language +"\">"+ altLabel +"</skos:altLabel>");        			  
+	        		  }
+        		  }
+        		  obj = cdVertex.getProperty(ConceptDescription.SCOPENOTE); 
+        		  if (obj != null) {
+	        		  String[] scopeNotes = (String[])obj; 
+	        		  for (String scopeNote : scopeNotes) {
+	            		  out.println("  <skos:scopeNote xml:lang=\""+ language +"\">"+ scopeNote +"</skos:altLabel>");        			  
+	        		  }
+        		  }
+        		  obj = cdVertex.getProperty(ConceptDescription.DEFINITION); 
+        		  if (obj != null) {
+	        		  String[] definitions = (String[])obj; 
+	        		  for (String definition : definitions) {
+	            		  out.println("  <skos:definition xml:lang=\""+ language +"\">"+ definition +"</skos:altLabel>");        			  
+	        		  }
+        		  }
+        		  
+        	  }
+        	  
+        	  // broader
+        	  for(Concept bc : concept.getBroaderConcepts()) {
+        		  out.println("  <skos:broader rdf:resource=\"" + bc.getIdentifier() + "\"/>");
+        	  }
+        	  // narraower
+         	  for(Concept nc : concept.getNarrowerConcepts()) {
+        		  out.println("  <skos:narrower rdf:resource=\"" + nc.getIdentifier() + "\"/>");
+        	  }
+        	  // related
+          	  for(Concept rc : concept.getRelatedConcepts()) {
+        		  out.println("  <skos:related rdf:resource=\"" + rc.getIdentifier() + "\"/>");
+        	  }
+          	  // related, reverse direction also
+           	  for(Concept rc : concept.getRelatedByConcepts()) {
+        		  out.println("  <skos:related rdf:resource=\"" + rc.getIdentifier() + "\"/>");
+        	  }
+        	  
+        	  // conceptEnd
+        	  out.println("</rdf:Description>");
+        	}
+        	
+        	// rdfEnd
+        	out.println("</rdf:RDF>");
+        }
+    	
     }
 }
