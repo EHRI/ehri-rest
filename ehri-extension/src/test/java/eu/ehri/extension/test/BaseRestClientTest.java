@@ -38,12 +38,15 @@ public class BaseRestClientTest extends AbstractRestClientTest {
     // Admin user prefix - depends on fixture data
     final static private String adminUserProfileId = "mike";
 
+    // Regular user
+    final static private String regularUserProfileId = "reto";
+
     protected static ServerRunner runner;
 
     protected String getBaseUri() {
         return baseUri;
     }
-    
+
     @Override
     String getExtensionEntryPointUri() {
         return extensionEntryPointUri;
@@ -52,6 +55,10 @@ public class BaseRestClientTest extends AbstractRestClientTest {
     @Override
     String getAdminUserProfileId() {
         return adminUserProfileId;
+    }
+
+    String getRegularUserProfileId() {
+        return regularUserProfileId;
     }
 
     @BeforeClass
@@ -81,8 +88,9 @@ public class BaseRestClientTest extends AbstractRestClientTest {
         runner = new ServerRunner(dbName, testServerPort);
         runner.getConfigurator()
                 .getThirdpartyJaxRsClasses()
-                .add(new ThirdPartyJaxRsPackage(AbstractAccessibleEntityResource.class
-                        .getPackage().getName(), mountPoint));
+                .add(new ThirdPartyJaxRsPackage(
+                        AbstractAccessibleEntityResource.class.getPackage()
+                                .getName(), mountPoint));
         runner.start();
     }
 

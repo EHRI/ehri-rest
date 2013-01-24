@@ -1,5 +1,7 @@
 package eu.ehri.extension;
 
+import java.util.List;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
@@ -55,29 +57,34 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/list")
     public StreamingOutput listGroups(
-            @QueryParam("offset") @DefaultValue("0") int offset,
-            @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit)
+            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
+            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(SORT_PARAM) List<String> order,            
+            @QueryParam(FILTER_PARAM) List<String> filters)
             throws ItemNotFound, BadRequester {
-        return list(offset, limit);
+        return list(offset, limit, order, filters);
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/page")
     public StreamingOutput pageGroups(
-            @QueryParam("offset") @DefaultValue("0") int offset,
-            @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit)
+            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
+            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(SORT_PARAM) List<String> order,
+            @QueryParam(FILTER_PARAM) List<String> filters)
             throws ItemNotFound, BadRequester {
-        return page(offset, limit);
+        return page(offset, limit, order, filters);
     }
     
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response createGroup(String json) throws PermissionDenied,
+    public Response createGroup(String json,
+            @QueryParam(ACCESSOR_PARAM) List<String> accessors) throws PermissionDenied,
             ValidationError, IntegrityError, DeserializationError,
             ItemNotFound, BadRequester {
-        return create(json);
+        return create(json, accessors);
     }
 
     @PUT
@@ -112,7 +119,7 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
      */
     @POST
     @Path("/{id:[^/]+}/{aid:.+}")
-    public Response addAccessor(@PathParam("id") String id,
+    public Response addMember(@PathParam("id") String id,
             @PathParam("atype") String atype, @PathParam("aid") String aid)
             throws PermissionDenied, ItemNotFound, BadRequester {
         // FIXME: Add permission checks for this!!!
@@ -151,7 +158,7 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
      */
     @DELETE
     @Path("/{id:[^/]+}/{aid:.+}")
-    public Response removeAccessor(@PathParam("id") String id,
+    public Response removeMember(@PathParam("id") String id,
             @PathParam("aid") String aid)
             throws PermissionDenied, ItemNotFound, BadRequester {
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
