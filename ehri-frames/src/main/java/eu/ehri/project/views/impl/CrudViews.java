@@ -18,7 +18,7 @@ import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.persistance.BundleDAO;
-import eu.ehri.project.persistance.Converter;
+import eu.ehri.project.persistance.Serializer;
 import eu.ehri.project.views.Crud;
 import eu.ehri.project.views.ViewHelper;
 
@@ -27,7 +27,7 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
     private final Class<E> cls;
     private final ViewHelper helper;
     private final GraphManager manager;
-    private final Converter converter;
+    private final Serializer serializer;
     private final PermissionScope scope;
     private final AclManager acl;
 
@@ -44,7 +44,7 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
         this.scope = scope;
         helper = new ViewHelper(graph, scope);
         acl = helper.getAclManager();
-        converter = new Converter(graph);
+        serializer = new Serializer(graph);
         manager = GraphManagerFactory.getInstance(graph);
     }
 
@@ -150,7 +150,7 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
     public Integer delete(E item, Accessor user) throws PermissionDenied,
             ValidationError, SerializationError {
         helper.checkEntityPermission(item, user, PermissionType.DELETE);
-        return new BundleDAO(graph, scope).delete(converter
+        return new BundleDAO(graph, scope).delete(serializer
                 .vertexFrameToBundle(item));
     }
 

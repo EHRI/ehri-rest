@@ -219,7 +219,7 @@ public class AnnotationResource extends
 
     private Response buildResponseFromAnnotation(Annotation ann)
             throws SerializationError {
-        String jsonStr = converter.vertexFrameToJson(ann);
+        String jsonStr = serializer.vertexFrameToJson(ann);
         return Response.status(Status.CREATED).entity((jsonStr).getBytes())
                 .build();
     }

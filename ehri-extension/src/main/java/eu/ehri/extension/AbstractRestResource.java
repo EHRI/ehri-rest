@@ -27,7 +27,7 @@ import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.persistance.Converter;
+import eu.ehri.project.persistance.Serializer;
 import eu.ehri.project.views.impl.Query;
 
 public abstract class AbstractRestResource {
@@ -59,13 +59,13 @@ public abstract class AbstractRestResource {
     protected final FramedGraph<Neo4jGraph> graph;
     protected final GraphManager manager;
     public static final String AUTH_HEADER_NAME = "Authorization";
-    protected final Converter converter;
+    protected final Serializer serializer;
 
     public AbstractRestResource(@Context GraphDatabaseService database) {
         this.database = database;
         graph = new FramedGraph<Neo4jGraph>(new Neo4jGraph(database));
         manager = GraphManagerFactory.getInstance(graph);
-        converter  = new Converter(graph);
+        serializer  = new Serializer(graph);
     }
 
     /**
@@ -122,7 +122,7 @@ public abstract class AbstractRestResource {
      */
     protected <T extends VertexFrame> StreamingOutput streamingPage(
             final Query.Page<T> page) {
-        return streamingPage(page, converter);
+        return streamingPage(page, serializer);
     }
     
     /**
@@ -133,7 +133,7 @@ public abstract class AbstractRestResource {
      * @return
      */
     protected <T extends VertexFrame> StreamingOutput streamingPage(
-            final Query.Page<T> page, final Converter converter) {
+            final Query.Page<T> page, final Serializer serializer) {
         final ObjectMapper mapper = new ObjectMapper();
         final JsonFactory f = new JsonFactory();
         return new StreamingOutput() {
@@ -149,7 +149,7 @@ public abstract class AbstractRestResource {
                 g.writeStartArray();
                 for (T item : page.getIterable()) {
                     try {
-                        mapper.writeValue(g, converter.vertexFrameToData(item));
+                        mapper.writeValue(g, serializer.vertexFrameToData(item));
                     } catch (SerializationError e) {
                         throw new RuntimeException(e);
                     }
@@ -169,7 +169,7 @@ public abstract class AbstractRestResource {
      */
     protected <T extends VertexFrame> StreamingOutput streamingList(
             final Iterable<T> list) {
-        return streamingList(list, converter);
+        return streamingList(list, serializer);
     }
         
     /**
@@ -180,7 +180,7 @@ public abstract class AbstractRestResource {
      * @return
      */
     protected <T extends VertexFrame> StreamingOutput streamingList(
-            final Iterable<T> list, final Converter converter) {
+            final Iterable<T> list, final Serializer serializer) {
         final ObjectMapper mapper = new ObjectMapper();
         final JsonFactory f = new JsonFactory();
         return new StreamingOutput() {
@@ -191,7 +191,7 @@ public abstract class AbstractRestResource {
                 g.writeStartArray();
                 for (T item : list) {
                     try {
-                        mapper.writeValue(g, converter.vertexFrameToData(item));
+                        mapper.writeValue(g, serializer.vertexFrameToData(item));
                     } catch (SerializationError e) {
                         throw new RuntimeException(e);
                     }
@@ -210,7 +210,7 @@ public abstract class AbstractRestResource {
      */
     protected <T extends VertexFrame> StreamingOutput streamingMultimap(
             final ListMultimap<String, T> map) {
-        return streamingMultimap(map, converter);
+        return streamingMultimap(map, serializer);
     }
         
     /**
@@ -221,7 +221,7 @@ public abstract class AbstractRestResource {
      * @return
      */
     protected <T extends VertexFrame> StreamingOutput streamingMultimap(
-            final ListMultimap<String, T> map, final Converter converter) {
+            final ListMultimap<String, T> map, final Serializer serializer) {
         final ObjectMapper mapper = new ObjectMapper();
         final JsonFactory f = new JsonFactory();
         return new StreamingOutput() {
@@ -235,7 +235,7 @@ public abstract class AbstractRestResource {
                     g.writeStartArray();
                     for (T item : map.get(itemId)) {
                         try {
-                            mapper.writeValue(g, converter.vertexFrameToData(item));
+                            mapper.writeValue(g, serializer.vertexFrameToData(item));
                         } catch (SerializationError e) {
                             throw new RuntimeException(e);
                         }

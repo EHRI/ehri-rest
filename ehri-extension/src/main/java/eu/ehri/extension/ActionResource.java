@@ -22,7 +22,7 @@ import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.Action;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.persistance.Converter;
+import eu.ehri.project.persistance.Serializer;
 import eu.ehri.project.views.impl.LoggingCrudViews;
 import eu.ehri.project.views.impl.Query;
 
@@ -87,7 +87,7 @@ public class ActionResource extends AbstractAccessibleEntityResource<Action> {
         // NB: Taking a pragmatic decision here to only stream the first
         // level of the subject's tree.
         return streamingPage(query.page(action.getSubjects(), user),
-                new Converter(graph, 1));
+                new Serializer(graph, 1));
     }
 
     /**

@@ -1,7 +1,5 @@
 package eu.ehri.project.views.impl;
 
-import java.lang.reflect.Method;
-import java.util.Map;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.tinkerpop.blueprints.Vertex;
@@ -19,18 +17,17 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.Annotation;
-import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.AnnotatableEntity;
 import eu.ehri.project.models.base.Annotator;
 import eu.ehri.project.models.base.PermissionScope;
-import eu.ehri.project.models.utils.ClassUtils;
 import eu.ehri.project.persistance.ActionManager;
 import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.persistance.BundleDAO;
-import eu.ehri.project.persistance.Converter;
+import eu.ehri.project.persistance.Serializer;
+import eu.ehri.project.persistance.TraversalCallback;
 import eu.ehri.project.views.Annotations;
 import eu.ehri.project.views.ViewHelper;
 
@@ -132,12 +129,18 @@ public final class AnnotationViews implements Annotations {
      */
     public ListMultimap<String, Annotation> getFor(String id, Accessor accessor)
             throws ItemNotFound {
-        PipeFunction<Vertex, Boolean> filter = acl
+        final PipeFunction<Vertex, Boolean> filter = acl
                 .getAclFilterFunction(accessor);
-        ListMultimap<String, Annotation> annotations = LinkedListMultimap
+        final ListMultimap<String, Annotation> annotations = LinkedListMultimap
                 .create();
-        getAnnotations(manager.getFrame(id, AnnotatableEntity.class),
-                0, annotations, filter);
+        AnnotatableEntity item = manager.getFrame(id, AnnotatableEntity.class);
+        getAnnotations(item, annotations, filter);
+        new Serializer(graph).traverseSubtree(item, new TraversalCallback() {            
+            public void process(VertexFrame vertexFrame, int depth, String relation,
+                    int relationIndex) {
+                getAnnotations(vertexFrame, annotations, filter);                
+            }
+        });
         return annotations;
     }
 
@@ -149,7 +152,7 @@ public final class AnnotationViews implements Annotations {
      * @param annotations
      * @param filter
      */
-    private <T extends VertexFrame> void getAnnotations(T item, int depth,
+    private <T extends VertexFrame> void getAnnotations(T item,
             ListMultimap<String, Annotation> annotations,
             PipeFunction<Vertex, Boolean> filter) {
         String id = manager.getId(item);
@@ -158,60 +161,6 @@ public final class AnnotationViews implements Annotations {
         for (Annotation ann : entity.getAnnotations()) {
             if (filter.compute(ann.asVertex())) {
                 annotations.put(id, ann);
-            }
-        }
-        getRelationAnnotations(item, depth, manager.getType(item)
-                .getEntityClass(), annotations, filter);
-    }
-
-    /**
-     * Populate annotations for an item subtree.
-     * 
-     * @param item
-     * @param depth
-     * @param cls
-     * @param annotations
-     * @param filter
-     */
-    private <T extends VertexFrame> void getRelationAnnotations(T item,
-            int depth, Class<?> cls,
-            ListMultimap<String, Annotation> annotations,
-            PipeFunction<Vertex, Boolean> filter) {
-        if (depth < Fetch.DEFAULT_TRAVERSALS) {
-            Map<String, Method> fetchMethods = ClassUtils.getFetchMethods(cls);
-            for (Map.Entry<String, Method> entry : fetchMethods.entrySet()) {
-
-                // In order to avoid @Fetching the whole graph we track the
-                // maxDepth parameter and reduce it for every traversal.
-                // However the @Fetch annotation can also specify a non-default
-                // depth, so we need to determine whatever is lower - the
-                // current traversal count, or the annotation's count.
-                Method method = entry.getValue();
-                int nextDepth = Math.max(depth,
-                        method.getAnnotation(Fetch.class).depth()) + 1;
-
-                try {
-                    Object result = method.invoke(graph.frame(item.asVertex(),
-                            cls));
-                    // The result of one of these fetchMethods should either be
-                    // a single VertexFrame, or a Iterable<VertexFrame>.
-                    if (result instanceof Iterable<?>) {
-                        for (Object d : (Iterable<?>) result) {
-                            VertexFrame r = (VertexFrame) d;
-                            getAnnotations(r, nextDepth, annotations, filter);
-                        }
-                    } else {
-                        // This relationship could be NULL if, e.g. a collection
-                        // has no holder.
-                        if (result != null) {
-                            VertexFrame r = (VertexFrame) result;
-                            getAnnotations(r, nextDepth, annotations, filter);
-                        }
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    throw new RuntimeException(e);
-                }
             }
         }
     }

@@ -206,7 +206,7 @@ public class VocabularyResource extends
 
     private Response buildResponseFromConcept(Concept concept)
             throws SerializationError {
-        String jsonStr = converter.vertexFrameToJson(concept);
+        String jsonStr = serializer.vertexFrameToJson(concept);
         // FIXME: Hide the details of building this path
         URI docUri = UriBuilder.fromUri(uriInfo.getBaseUri())
                 .segment(Entities.CVOC_CONCEPT).segment(manager.getId(concept))
@@ -219,7 +219,7 @@ public class VocabularyResource extends
     private Concept createConcept(String json, Vocabulary vocabulary)
             throws DeserializationError, PermissionDenied, ValidationError,
             IntegrityError, BadRequester {
-        Bundle entityBundle = converter.jsonToBundle(json);
+        Bundle entityBundle = Bundle.fromString(json);
 
         Concept concept = new LoggingCrudViews<Concept>(graph, Concept.class,
                 vocabulary).create(entityBundle, getRequesterUserProfile());

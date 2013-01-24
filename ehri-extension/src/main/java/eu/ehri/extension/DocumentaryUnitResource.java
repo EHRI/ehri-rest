@@ -157,7 +157,7 @@ public class DocumentaryUnitResource extends
 
     private Response buildResponseFromDocumentaryUnit(DocumentaryUnit doc)
             throws SerializationError {
-        String jsonStr = converter.vertexFrameToJson(doc);
+        String jsonStr = serializer.vertexFrameToJson(doc);
 
         try {
             // FIXME: Hide the details of building this path
@@ -175,7 +175,7 @@ public class DocumentaryUnitResource extends
     private DocumentaryUnit createDocumentaryUnit(String json,
             DocumentaryUnit parent) throws DeserializationError,
             PermissionDenied, ValidationError, IntegrityError, BadRequester {
-        Bundle entityBundle = converter.jsonToBundle(json);
+        Bundle entityBundle = Bundle.fromString(json);
 
         DocumentaryUnit doc = new LoggingCrudViews<DocumentaryUnit>(graph,
                 DocumentaryUnit.class, parent).create(entityBundle,

@@ -179,7 +179,7 @@ public class AgentResource extends AbstractAccessibleEntityResource<Agent> {
 
     private Response buildResponseFromDocumentaryUnit(DocumentaryUnit doc)
             throws SerializationError {
-        String jsonStr = converter.vertexFrameToJson(doc);
+        String jsonStr = serializer.vertexFrameToJson(doc);
         // FIXME: Hide the details of building this path
         URI docUri = UriBuilder.fromUri(uriInfo.getBaseUri())
                 .segment(Entities.DOCUMENTARY_UNIT).segment(manager.getId(doc))
@@ -192,7 +192,7 @@ public class AgentResource extends AbstractAccessibleEntityResource<Agent> {
     private DocumentaryUnit createDocumentaryUnit(String json, Agent agent)
             throws DeserializationError, PermissionDenied, ValidationError,
             IntegrityError, BadRequester {
-        Bundle entityBundle = converter.jsonToBundle(json);
+        Bundle entityBundle = Bundle.fromString(json);
 
         DocumentaryUnit doc = new LoggingCrudViews<DocumentaryUnit>(graph,
                 DocumentaryUnit.class, agent).create(entityBundle,

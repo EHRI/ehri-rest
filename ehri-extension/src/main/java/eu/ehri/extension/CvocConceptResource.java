@@ -307,7 +307,7 @@ public class CvocConceptResource extends
                 g.writeStartArray();
                 for (Concept item : list) {
                     try {
-                        mapper.writeValue(g, converter.vertexFrameToData(item));
+                        mapper.writeValue(g, serializer.vertexFrameToData(item));
                     } catch (SerializationError e) {
                         throw new RuntimeException(e);
                     }

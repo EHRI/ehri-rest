@@ -159,13 +159,13 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
             Accessor user = getRequesterUserProfile();
-            Bundle entityBundle = converter.jsonToBundle(json);
+            Bundle entityBundle = Bundle.fromString(json);
             E entity = views.create(entityBundle, user);
             // TODO: Move elsewhere
             new AclManager(graph).setAccessors(entity,
                     getAccessors(accessorIds, user));
 
-            String jsonStr = converter.vertexFrameToJson(entity);
+            String jsonStr = serializer.vertexFrameToJson(entity);
             UriBuilder ub = uriInfo.getAbsolutePathBuilder();
             URI docUri = ub.path(manager.getId(entity)).build();
             tx.success();
@@ -196,7 +196,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
         try {
             E entity = views.detail(manager.getFrame(id, getEntityType(), cls),
                     getRequesterUserProfile());
-            String jsonStr = converter.vertexFrameToJson(entity);
+            String jsonStr = serializer.vertexFrameToJson(entity);
             return Response.status(Status.OK).entity((jsonStr).getBytes())
                     .build();
         } catch (SerializationError e) {
@@ -221,7 +221,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
             PermissionDenied, BadRequester {
         try {
             E entity = querier.get(key, value, getRequesterUserProfile());
-            String jsonStr = converter.vertexFrameToJson(entity);
+            String jsonStr = serializer.vertexFrameToJson(entity);
             return Response.status(Status.OK).entity((jsonStr).getBytes())
                     .build();
         } catch (SerializationError e) {
@@ -247,9 +247,9 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
             ItemNotFound, BadRequester {
 
         try {
-            Bundle entityBundle = converter.jsonToBundle(json);
+            Bundle entityBundle = Bundle.fromString(json);
             E update = views.update(entityBundle, getRequesterUserProfile());
-            String jsonStr = converter.vertexFrameToJson(update);
+            String jsonStr = serializer.vertexFrameToJson(update);
 
             return Response.status(Status.OK).entity((jsonStr).getBytes())
                     .build();
@@ -282,7 +282,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
         // serialization/deserialization.
         E entity = views.detail(manager.getFrame(id, getEntityType(), cls),
                 getRequesterUserProfile());
-        Bundle rawBundle = converter.jsonToBundle(json);
+        Bundle rawBundle = Bundle.fromString(json);
         Bundle entityBundle = new Bundle(manager.getId(entity),
                 getEntityType(), rawBundle.getData(), rawBundle.getRelations());
         return update(entityBundle.toString());

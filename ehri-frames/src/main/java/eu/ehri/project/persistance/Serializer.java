@@ -11,7 +11,6 @@ import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.frames.VertexFrame;
 
-import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
@@ -25,7 +24,7 @@ import eu.ehri.project.models.utils.ClassUtils;
  * @author michaelb
  * 
  */
-public final class Converter {
+public final class Serializer {
 
     private final FramedGraph<Neo4jGraph> graph;
 
@@ -37,7 +36,7 @@ public final class Converter {
     /**
      * Constructor.
      */
-    public Converter(FramedGraph<Neo4jGraph> graph) {
+    public Serializer(FramedGraph<Neo4jGraph> graph) {
         this(graph, Fetch.DEFAULT_TRAVERSALS);
     }
 
@@ -46,7 +45,7 @@ public final class Converter {
      * 
      * @param depth
      */
-    public Converter(FramedGraph<Neo4jGraph> graph, int depth) {
+    public Serializer(FramedGraph<Neo4jGraph> graph, int depth) {
         this.graph = graph;
         this.maxTraversals = depth;
     }
@@ -86,30 +85,6 @@ public final class Converter {
     public <T extends VertexFrame> String vertexFrameToJson(T item)
             throws SerializationError {
         return DataConverter.bundleToJson(vertexFrameToBundle(item));
-    }
-
-    /**
-     * Convert some JSON into an EntityBundle.
-     * 
-     * @param json
-     * @return
-     * @throws DeserializationError
-     */
-    public Bundle jsonToBundle(String json) throws DeserializationError {
-        return DataConverter.jsonToBundle(json);
-    }
-
-    /**
-     * Convert generic data into a bundle.
-     * 
-     * Prize to whomever can remove all the unchecked warnings. I don't really
-     * know how else to do this otherwise.
-     * 
-     * @throws DeserializationError
-     */
-    public Bundle dataToBundle(Map<String, Object> data)
-            throws DeserializationError {
-        return DataConverter.dataToBundle(data);
     }
 
     /**
@@ -197,4 +172,71 @@ public final class Converter {
         }
         return data;
     }
+    
+    /**
+     * Run a callback every time a node in a subtree is encountered, starting
+     * with the top-level node.
+     * 
+     * @param item
+     * @param cb
+     */
+    public <T extends VertexFrame> void traverseSubtree(
+            T item, final TraversalCallback cb) {
+        traverseSubtree(item, 0, cb);
+    }
+    
+    /**
+     * Run a callback every time a node in a subtree is encountered, starting
+     * with the top-level node.
+     * 
+     * @param item
+     * @param depth
+     * @param cb
+     */
+    private <T extends VertexFrame> void traverseSubtree(
+            T item, int depth, final TraversalCallback cb) {
+        
+        if (depth < maxTraversals) {
+            Class<?> cls = EntityClass.withName((String) item.asVertex()
+                    .getProperty(EntityType.TYPE_KEY)).getEntityClass();
+            Map<String, Method> fetchMethods = ClassUtils.getFetchMethods(cls);
+            for (Map.Entry<String, Method> entry : fetchMethods.entrySet()) {
+
+                // In order to avoid @Fetching the whole graph we track the
+                // maxDepth parameter and reduce it for every traversal.
+                // However the @Fetch annotation can also specify a non-default
+                // depth, so we need to determine whatever is lower - the
+                // current traversal count, or the annotation's count.
+                Method method = entry.getValue();
+                int nextDepth = Math.max(depth,
+                        method.getAnnotation(Fetch.class).depth()) + 1;
+
+                try {
+                    Object result = method
+                            .invoke(graph.frame(item.asVertex(), cls));
+                    // The result of one of these fetchMethods should either be
+                    // a single VertexFrame, or a Iterable<VertexFrame>.
+                    if (result instanceof Iterable<?>) {
+                        int rnum = 0;
+                        for (Object d : (Iterable<?>) result) {
+                            cb.process((VertexFrame)d, depth, entry.getKey(), rnum);
+                            traverseSubtree((VertexFrame)d, nextDepth, cb);
+                            rnum++;
+                        }
+                    } else {
+                        // This relationship could be NULL if, e.g. a collection
+                        // has no holder.
+                        if (result != null) {
+                            cb.process((VertexFrame)result, depth, entry.getKey(), 0);
+                            traverseSubtree((VertexFrame)result, nextDepth, cb);                            
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    throw new RuntimeException(
+                            "Unexpected error serializing VertexFrame", e);
+                }
+            }
+        }
+    }    
 }

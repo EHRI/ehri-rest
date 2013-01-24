@@ -8,7 +8,7 @@ import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.persistance.Converter;
+import eu.ehri.project.persistance.Serializer;
 
 /**
  * Import EAD from the command line...
@@ -49,7 +49,7 @@ public class GetEntity extends BaseCommand implements Command {
             CommandLine cmdLine) throws Exception {
 
         GraphManager manager = GraphManagerFactory.getInstance(graph);
-        Converter converter = new Converter(graph);
+        Serializer serializer = new Serializer(graph);
 
         if (cmdLine.getArgList().size() < 2)
             throw new RuntimeException(getHelp());
@@ -61,7 +61,7 @@ public class GetEntity extends BaseCommand implements Command {
         if (!AccessibleEntity.class.isAssignableFrom(cls))
             throw new RuntimeException("Unknown accessible entity: " + type);
 
-        System.out.println(converter.vertexFrameToJson(manager.getFrame(id,
+        System.out.println(serializer.vertexFrameToJson(manager.getFrame(id,
                 type, (Class<AccessibleEntity>)cls)));
         return 0;
     }
