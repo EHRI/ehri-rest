@@ -28,7 +28,6 @@ import eu.ehri.project.models.utils.ClassUtils;
 public final class Converter {
 
     private final FramedGraph<Neo4jGraph> graph;
-    public static final int DEFAULT_TRAVERSALS = 5;
 
     /**
      * Lookup of entityType keys against their annotated class.
@@ -39,7 +38,7 @@ public final class Converter {
      * Constructor.
      */
     public Converter(FramedGraph<Neo4jGraph> graph) {
-        this(graph, DEFAULT_TRAVERSALS);
+        this(graph, Fetch.DEFAULT_TRAVERSALS);
     }
 
     /**
@@ -74,7 +73,7 @@ public final class Converter {
      */
     public <T extends VertexFrame> Bundle vertexFrameToBundle(T item)
             throws SerializationError {
-        return vertexFrameToBundle(item, maxTraversals);
+        return vertexFrameToBundle(item, 0);
     }
 
     /**
@@ -142,7 +141,7 @@ public final class Converter {
     private <T extends VertexFrame> ListMultimap<String, Bundle> getRelationData(
             T item, int depth, Class<?> cls) {
         ListMultimap<String, Bundle> relations = LinkedListMultimap.create();
-        if (depth > 0) {
+        if (depth < maxTraversals) {
             Map<String, Method> fetchMethods = ClassUtils.getFetchMethods(cls);
             for (Map.Entry<String, Method> entry : fetchMethods.entrySet()) {
 
@@ -152,24 +151,12 @@ public final class Converter {
                 // depth, so we need to determine whatever is lower - the
                 // current traversal count, or the annotation's count.
                 Method method = entry.getValue();
-                int nextDepth = Math.min(depth,
-                        method.getAnnotation(Fetch.class).depth()) - 1;
+                int nextDepth = Math.max(depth,
+                        method.getAnnotation(Fetch.class).depth()) + 1;
 
                 try {
-                    Object result;
-                    try {
-                        // NB: We have to re-cast the item into its 'natural'
-                        // type.
-                        result = method
-                                .invoke(graph.frame(item.asVertex(), cls));
-                    } catch (IllegalArgumentException e) {
-                        String message = String
-                                .format("When serializing a bundle, a method was called on an item it did not expect. Method name: %s, item class: %s",
-                                        method.getName(),
-                                        item.asVertex().getProperty(
-                                                EntityType.TYPE_KEY));
-                        throw new RuntimeException(message, e);
-                    }
+                    Object result = method
+                            .invoke(graph.frame(item.asVertex(), cls));
                     // The result of one of these fetchMethods should either be
                     // a single VertexFrame, or a Iterable<VertexFrame>.
                     if (result instanceof Iterable<?>) {

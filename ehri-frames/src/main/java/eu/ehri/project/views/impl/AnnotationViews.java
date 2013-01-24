@@ -137,7 +137,7 @@ public final class AnnotationViews implements Annotations {
         ListMultimap<String, Annotation> annotations = LinkedListMultimap
                 .create();
         getAnnotations(manager.getFrame(id, AnnotatableEntity.class),
-                Converter.DEFAULT_TRAVERSALS, annotations, filter);
+                0, annotations, filter);
         return annotations;
     }
 
@@ -177,7 +177,7 @@ public final class AnnotationViews implements Annotations {
             int depth, Class<?> cls,
             ListMultimap<String, Annotation> annotations,
             PipeFunction<Vertex, Boolean> filter) {
-        if (depth > 0) {
+        if (depth < Fetch.DEFAULT_TRAVERSALS) {
             Map<String, Method> fetchMethods = ClassUtils.getFetchMethods(cls);
             for (Map.Entry<String, Method> entry : fetchMethods.entrySet()) {
 
@@ -187,8 +187,8 @@ public final class AnnotationViews implements Annotations {
                 // depth, so we need to determine whatever is lower - the
                 // current traversal count, or the annotation's count.
                 Method method = entry.getValue();
-                int nextDepth = Math.min(depth,
-                        method.getAnnotation(Fetch.class).depth()) - 1;
+                int nextDepth = Math.max(depth,
+                        method.getAnnotation(Fetch.class).depth()) + 1;
 
                 try {
                     Object result = method.invoke(graph.frame(item.asVertex(),
