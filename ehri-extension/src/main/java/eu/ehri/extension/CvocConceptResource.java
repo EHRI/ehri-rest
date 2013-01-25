@@ -22,6 +22,8 @@ import javax.ws.rs.core.StreamingOutput;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 
+import com.tinkerpop.blueprints.Direction;
+
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.DeserializationError;
@@ -29,7 +31,9 @@ import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.cvoc.Concept;
+import eu.ehri.project.views.impl.Query;
 
 /**
  * Provides a RESTfull interface for the cvoc.Concept. Note that the concept
@@ -125,6 +129,50 @@ public class CvocConceptResource extends
         return streamingList(concept.getNarrowerConcepts());
     }
 
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id:.+}/list")
+    public StreamingOutput listCvocNarrowerConcepts(
+            @PathParam("id") String id,
+            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
+            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(SORT_PARAM) List<String> order,
+            @QueryParam(FILTER_PARAM) List<String> filters)
+            
+            throws ItemNotFound, PermissionDenied, BadRequester {
+
+        Accessor user = getRequesterUserProfile();
+        Concept concept = views.detail(manager.getFrame(id, cls), user);
+        Query<Concept> query = new Query<Concept>(graph, Concept.class)
+                .setLimit(limit).setOffset(offset).orderBy(order)
+                .depthFilter(Concept.NARROWER, Direction.IN
+                        , 0)
+                .filter(filters);
+        return streamingList(query.list(concept.getNarrowerConcepts(), user));        
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id:.+}/page")
+    public StreamingOutput pageCvocNarrowerConcepts(
+            @PathParam("id") String id,
+            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
+            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(SORT_PARAM) List<String> order,
+            @QueryParam(FILTER_PARAM) List<String> filters)
+            
+            throws ItemNotFound, PermissionDenied, BadRequester {
+
+        Accessor user = getRequesterUserProfile();
+        Concept concept = views.detail(manager.getFrame(id, cls), user);
+        Query<Concept> query = new Query<Concept>(graph, Concept.class)
+                .setLimit(limit).setOffset(offset).orderBy(order)
+                .depthFilter(Concept.NARROWER, Direction.IN
+                        , 0)
+                .filter(filters);
+        return streamingPage(query.page(concept.getNarrowerConcepts(), user));
+    }
+    
     /**
      * Add an existing concept to the list of 'narrower' of this existing
      * Concepts No vertex is created, but the 'narrower' edge is created between
