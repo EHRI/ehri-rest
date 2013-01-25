@@ -24,6 +24,8 @@ import javax.ws.rs.core.UriBuilder;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 
+import com.tinkerpop.blueprints.Direction;
+
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.definitions.Entities;
@@ -84,8 +86,30 @@ public class AgentResource extends AbstractAccessibleEntityResource<Agent> {
         Agent agent = views.detail(manager.getFrame(id, cls), user);
         Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
                 DocumentaryUnit.class).setLimit(limit).setOffset(offset)
-                .orderBy(order).filter(filters);
+                .orderBy(order)
+                .depthFilter(DocumentaryUnit.CHILD_OF, Direction.OUT, 0)
+                .filter(filters);
         return streamingList(query.list(agent.getCollections(), user));
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id:.+}/page")
+    public StreamingOutput pageAgentDocumentaryUnits(
+            @PathParam("id") String id,
+            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
+            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(SORT_PARAM) List<String> order,
+            @QueryParam(FILTER_PARAM) List<String> filters)
+            throws ItemNotFound, BadRequester, PermissionDenied {
+        Accessor user = getRequesterUserProfile();
+        Agent agent = views.detail(manager.getFrame(id, cls), user);
+        Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
+                DocumentaryUnit.class).setLimit(limit).setOffset(offset)
+                .orderBy(order)
+                .depthFilter(DocumentaryUnit.CHILD_OF, Direction.OUT, 0)
+                .filter(filters);
+        return streamingPage(query.page(agent.getCollections(), user));
     }
 
     @GET

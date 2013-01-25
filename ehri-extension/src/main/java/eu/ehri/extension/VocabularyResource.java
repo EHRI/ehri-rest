@@ -24,6 +24,8 @@ import javax.ws.rs.core.Response.Status;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 
+import com.tinkerpop.blueprints.Direction;
+
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.definitions.Entities;
@@ -101,6 +103,7 @@ public class VocabularyResource extends
         Vocabulary vocabulary = views.detail(manager.getFrame(id, cls), user);
         Query<Concept> query = new Query<Concept>(graph, Concept.class)
                 .setLimit(limit).setOffset(offset).orderBy(order)
+                .depthFilter(Concept.NARROWER, Direction.IN, 0)
                 .filter(filters);
         return streamingList(query.list(vocabulary.getConcepts(), user));
     }
@@ -119,6 +122,7 @@ public class VocabularyResource extends
         Vocabulary vocabulary = views.detail(manager.getFrame(id, cls), user);
         Query<Concept> query = new Query<Concept>(graph, Concept.class)
                 .setLimit(limit).setOffset(offset).orderBy(order)
+                .depthFilter(Concept.NARROWER, Direction.IN, 0)
                 .filter(filters);
         return streamingPage(query.page(vocabulary.getConcepts(), user));
     }
