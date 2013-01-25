@@ -2,9 +2,6 @@ package eu.ehri.extension.test;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.List;
-import java.util.Map;
-
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -15,7 +12,6 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 
 import eu.ehri.extension.AbstractRestResource;
-import eu.ehri.project.definitions.Entities;
 
 public class AnnotationRestClientTest extends BaseRestClientTest {
 
