@@ -101,6 +101,26 @@ public class QueryTest extends AbstractFixtureTest {
     }
 
     @Test
+    public void testListWithDepthFilter() throws IndexNotFoundException {
+        Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
+                DocumentaryUnit.class);
+
+        // Query for only top-level documentary units.
+        // The result should be c1 and c4
+        List<DocumentaryUnit> list = toList(query.depthFilter(DocumentaryUnit.CHILD_OF, 0).list(
+                EntityClass.DOCUMENTARY_UNIT, validUser));
+        assertFalse(list.isEmpty());
+        assertEquals(2, list.size());
+
+        // The same query with a depth filter of 1 should get 3 items
+         list = toList(query.depthFilter(DocumentaryUnit.CHILD_OF, 1).list(
+                EntityClass.DOCUMENTARY_UNIT, validUser));
+        assertFalse(list.isEmpty());
+        assertEquals(3, list.size());
+        
+    }
+
+    @Test
     public void testListWithPredicateFilter() throws IndexNotFoundException {
         Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);

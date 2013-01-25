@@ -13,11 +13,14 @@ import org.neo4j.helpers.collection.Iterables;
 import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ComparisonChain;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSortedMap;
+import com.google.common.collect.Maps;
 import com.google.common.collect.ImmutableSortedMap.Builder;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Ordering;
 import com.tinkerpop.blueprints.CloseableIterable;
+import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jVertex;
@@ -59,6 +62,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
     private final SortedMap<String, Sort> sort;
     private final Optional<Pair<String, Sort>> defaultSort;
     private final SortedMap<String, Pair<FilterPredicate, String>> filters;
+    private final ImmutableMap<String, Integer> depthFilters;
     private final boolean page;
 
     private final FramedGraph<Neo4jGraph> graph;
@@ -101,7 +105,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
             Optional<Integer> limit, final SortedMap<String, Sort> sort,
             final Optional<Pair<String, Sort>> defSort,
             final SortedMap<String, Pair<FilterPredicate, String>> filters,
-            Boolean page) {
+            final Map<String, Integer> depthFilters, Boolean page) {
         this.graph = graph;
         this.cls = cls;
         this.scope = scope;
@@ -111,6 +115,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
         this.defaultSort = defSort;
         this.filters = ImmutableSortedMap
                 .<String, Pair<FilterPredicate, String>> copyOf(filters);
+        this.depthFilters = ImmutableMap.copyOf(depthFilters);
         this.page = page;
         helper = new ViewHelper(graph, scope);
         manager = GraphManagerFactory.getInstance(graph);
@@ -127,7 +132,8 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
                 Optional.<Integer> absent(), Optional.<Integer> absent(),
                 ImmutableSortedMap.<String, Sort> of(), Optional
                         .<Pair<String, Sort>> absent(), ImmutableSortedMap
-                        .<String, Pair<FilterPredicate, String>> of(), false);
+                        .<String, Pair<FilterPredicate, String>> of(), Maps
+                        .<String, Integer> newHashMap(), false);
     }
 
     /**
@@ -142,7 +148,8 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
         this(graph, cls, scope, Optional.<Integer> absent(), Optional
                 .<Integer> absent(), ImmutableSortedMap.<String, Sort> of(),
                 Optional.<Pair<String, Sort>> absent(), ImmutableSortedMap
-                        .<String, Pair<FilterPredicate, String>> of(), false);
+                        .<String, Pair<FilterPredicate, String>> of(), Maps
+                        .<String, Integer> newHashMap(), false);
     }
 
     /**
@@ -153,7 +160,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
     public Query<E> copy(Query<E> other) {
         return new Query<E>(other.graph, other.cls, other.scope, other.offset,
                 other.limit, other.sort, other.defaultSort, other.filters,
-                other.page);
+                other.depthFilters, other.page);
     }
 
     /**
@@ -357,12 +364,12 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
                 PipeFunction<Vertex, Boolean> aclFilterFunction = new AclManager(
                         graph).getAclFilterFunction(user);
                 long count = setFilters(
-                        new GremlinPipeline<Vertex, Vertex>(countQ)
-                                .filter(aclFilterFunction)).count();
+                        setDepthFilters(new GremlinPipeline<Vertex, Vertex>(
+                                countQ).filter(aclFilterFunction))).count();
                 return new Page<E>(
                         graph.frameVertices(
-                                setPipelineRange(setOrder(setFilters(new GremlinPipeline<Vertex, Vertex>(
-                                        indexQ).filter(aclFilterFunction)))),
+                                setPipelineRange(setOrder(setFilters(setDepthFilters(new GremlinPipeline<Vertex, Vertex>(
+                                        indexQ).filter(aclFilterFunction))))),
                                 cls), count, offset.or(0),
                         limit.or(DEFAULT_LIST_LIMIT), sort);
             } finally {
@@ -398,8 +405,10 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
             GremlinPipeline<E, Vertex> filter = new GremlinPipeline<E, Vertex>(
                     vertices).filter(new AclManager(graph)
                     .getAclFilterFunction(user));
-            return graph.frameVertices(
-                    setPipelineRange(setOrder(setFilters(filter))), cls);
+            return graph
+                    .frameVertices(
+                            setPipelineRange(setOrder(setFilters(setDepthFilters(filter)))),
+                            cls);
         } finally {
             vertices.close();
         }
@@ -430,8 +439,10 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
         GremlinPipeline<T, Vertex> filter = new GremlinPipeline<T, Vertex>(
                 new FramedVertexIterableAdaptor<T>(vertices))
                 .filter(new AclManager(graph).getAclFilterFunction(user));
-        return graph.frameVertices(
-                setPipelineRange(setOrder(setFilters(filter))), cls);
+        return graph
+                .frameVertices(
+                        setPipelineRange(setOrder(setFilters(setDepthFilters(filter)))),
+                        cls);
     }
 
     /**
@@ -460,7 +471,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      */
     public Query<E> setOffset(Integer offset) {
         return new Query<E>(graph, cls, scope, Optional.fromNullable(offset),
-                limit, sort, defaultSort, filters, page);
+                limit, sort, defaultSort, filters, depthFilters, page);
     }
 
     /**
@@ -479,7 +490,8 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      */
     public Query<E> setLimit(Integer limit) {
         return new Query<E>(graph, cls, scope, offset,
-                Optional.fromNullable(limit), sort, defaultSort, filters, page);
+                Optional.fromNullable(limit), sort, defaultSort, filters,
+                depthFilters, page);
     }
 
     /**
@@ -488,7 +500,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
     public Query<E> clearOrder() {
         return new Query<E>(graph, cls, scope, offset, limit,
                 ImmutableSortedMap.<String, Sort> of(), defaultSort, filters,
-                page);
+                depthFilters, page);
     }
 
     /**
@@ -501,7 +513,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
 
         return new Query<E>(graph, cls, scope, offset, limit, sort,
                 Optional.of(new Pair<String, Sort>(field, order)), filters,
-                page);
+                depthFilters, page);
     }
 
     /**
@@ -514,7 +526,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
         SortedMap<String, Sort> tmp = new ImmutableSortedMap.Builder<String, Sort>(
                 Ordering.natural()).putAll(sort).put(field, order).build();
         return new Query<E>(graph, cls, scope, offset, limit, tmp, defaultSort,
-                filters, page);
+                filters, depthFilters, page);
     }
 
     /**
@@ -528,7 +540,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
     public Query<E> orderBy(Iterable<String> orderSpecs) {
         SortedMap<String, Sort> tmp = parseOrderSpecs(orderSpecs);
         return new Query<E>(graph, cls, scope, offset, limit, tmp, defaultSort,
-                filters, page);
+                filters, depthFilters, page);
     }
 
     /**
@@ -544,7 +556,22 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
                 sort,
                 defaultSort,
                 ImmutableSortedMap.<String, Pair<FilterPredicate, String>> of(),
-                page);
+                depthFilters, page);
+    }
+
+    /**
+     * Filter out items that are over a certain depth in the given 
+     * relationship chain. Currently only outward relationships are supported.
+     * 
+     * @param label
+     * @param depth
+     * @return
+     */
+    public Query<E> depthFilter(String label, Integer depth) {
+        Map<String, Integer> tmp = Maps.newHashMap(depthFilters);
+        tmp.put(label, depth);
+        return new Query<E>(graph, cls, scope, offset, limit, sort,
+                defaultSort, filters, tmp, page);
     }
 
     /**
@@ -564,7 +591,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
                         new Pair<FilterPredicate, String>(predicate, value))
                 .build();
         return new Query<E>(graph, cls, scope, offset, limit, sort,
-                defaultSort, tmp, page);
+                defaultSort, tmp, depthFilters, page);
     }
 
     /**
@@ -579,9 +606,15 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
     public Query<E> filter(Iterable<String> filters) {
         SortedMap<String, Pair<FilterPredicate, String>> tmp = parseFilters(filters);
         return new Query<E>(graph, cls, scope, offset, limit, sort,
-                defaultSort, tmp, page);
+                defaultSort, tmp, depthFilters, page);
     }
 
+    /**
+     * Parse a list of sort specifications.
+     * 
+     * @param orderSpecs
+     * @return
+     */
     private SortedMap<String, Sort> parseOrderSpecs(Iterable<String> orderSpecs) {
         Builder<String, Sort> builder = new ImmutableSortedMap.Builder<String, Sort>(
                 Ordering.natural());
@@ -666,6 +699,13 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
         return pipe.filter(getFilterFunction());
     }
 
+    private <EE> GremlinPipeline<EE, Vertex> setDepthFilters(
+            GremlinPipeline<EE, Vertex> pipe) {
+        if (depthFilters.isEmpty())
+            return pipe;
+        return pipe.filter(getDepthFilterFunction());
+    }
+
     private PipeFunction<Pair<Vertex, Vertex>, Integer> getOrderFunction(
             final SortedMap<String, Sort> sort) {
         return new PipeFunction<Pair<Vertex, Vertex>, Integer>() {
@@ -687,6 +727,42 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
                     }
                 }
                 return chain.result();
+            }
+        };
+    }
+
+    /**
+     * Create a filter that limits the selected nodes to with a particular depth
+     * of a relationship chain. For example, if a set of nodes form a
+     * hierachical relationship such as:
+     * 
+     * child -[childOf]-> parent -[childOf]-> grandparent
+     * 
+     * Then a depthFilter of childOf -> 0 would filter out all except the
+     * grandparent node.
+     * 
+     * TODO: Figure out how to do this will Gremlin's loop() construct, and
+     * support relationships in an inward direction.
+     * 
+     * @return
+     */
+    private PipeFunction<Vertex, Boolean> getDepthFilterFunction() {
+        return new PipeFunction<Vertex, Boolean>() {
+            public Boolean compute(Vertex vertex) {
+                for (Entry<String, Integer> entry : depthFilters.entrySet()) {
+                    int depthCount = 0;
+                    Vertex tmp = vertex;
+                    while (tmp.getEdges(Direction.OUT, entry.getKey())
+                            .iterator().hasNext()) {
+                        tmp = tmp.getVertices(Direction.OUT, entry.getKey())
+                                .iterator().next();
+                        depthCount++;
+                        if (depthCount > entry.getValue()) {
+                            return false;
+                        }
+                    }
+                }
+                return true;
             }
         };
     }
