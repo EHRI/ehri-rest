@@ -19,6 +19,7 @@ import org.neo4j.graphdb.Transaction;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.tinkerpop.blueprints.Vertex;
 
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.acl.AclManager;
@@ -50,8 +51,8 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
 
     // FIXME: Logger gives NoClassDefFound when run on server, probably because
     // Log4j isn't available in the default Neo4j server/lib dir.
-    //protected final static Logger logger = Logger
-    //        .getLogger(AbstractAccessibleEntityResource.class);
+    // protected final static Logger logger = Logger
+    // .getLogger(AbstractAccessibleEntityResource.class);
 
     protected final Crud<E> views;
     protected final Query<E> querier;
@@ -125,7 +126,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * List all instances of the 'entity' accessible to the given user.
      * 
      * @return List of entities
-
+     * 
      * @throws ItemNotFound
      * @throws BadRequester
      */
@@ -319,10 +320,14 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
 
     protected Iterable<Accessor> getAccessors(List<String> accessorIds,
             Accessor current) {
+
+        Set<Vertex> accessorV = Sets.newHashSet();
         Set<Accessor> accessors = Sets.newHashSet();
         for (String id : accessorIds) {
             try {
-                accessors.add(manager.getFrame(id, Accessor.class));
+                Accessor av = manager.getFrame(id, Accessor.class);
+                accessors.add(av);
+                accessorV.add(av.asVertex());                
             } catch (ItemNotFound e) {
                 // FIXME: Using the logger gives a noclassdef found error
                 // logger.error("Invalid accessor given: " + id);
@@ -331,7 +336,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
         }
         // The current user should always be among the accessors, so add
         // them unless the list is empty.
-        if (!accessors.isEmpty()) {
+        if (!accessors.isEmpty() && !accessorV.contains(current.asVertex())) {
             accessors.add(current);
         }
         return accessors;
