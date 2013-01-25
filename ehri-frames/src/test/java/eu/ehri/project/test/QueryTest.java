@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.junit.Test;
 
+import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Vertex;
 
 import eu.ehri.project.acl.AclManager;
@@ -107,17 +108,18 @@ public class QueryTest extends AbstractFixtureTest {
 
         // Query for only top-level documentary units.
         // The result should be c1 and c4
-        List<DocumentaryUnit> list = toList(query.depthFilter(DocumentaryUnit.CHILD_OF, 0).list(
+        List<DocumentaryUnit> list = toList(query.depthFilter(
+                DocumentaryUnit.CHILD_OF, Direction.OUT, 0).list(
                 EntityClass.DOCUMENTARY_UNIT, validUser));
         assertFalse(list.isEmpty());
         assertEquals(2, list.size());
 
         // The same query with a depth filter of 1 should get 3 items
-         list = toList(query.depthFilter(DocumentaryUnit.CHILD_OF, 1).list(
-                EntityClass.DOCUMENTARY_UNIT, validUser));
+        list = toList(query.depthFilter(DocumentaryUnit.CHILD_OF,
+                Direction.OUT, 1).list(EntityClass.DOCUMENTARY_UNIT, validUser));
         assertFalse(list.isEmpty());
         assertEquals(3, list.size());
-        
+
     }
 
     @Test
@@ -130,61 +132,61 @@ public class QueryTest extends AbstractFixtureTest {
                 AccessibleEntity.IDENTIFIER_KEY, Query.FilterPredicate.EQUALS,
                 "c1").list(EntityClass.DOCUMENTARY_UNIT, validUser));
         assertEquals(1, list.size());
-        
+
         // Case-insensitive query
-        list = toList(query.filter(
-                AccessibleEntity.IDENTIFIER_KEY, Query.FilterPredicate.IEQUALS,
-                "C1").list(EntityClass.DOCUMENTARY_UNIT, validUser));
+        list = toList(query.filter(AccessibleEntity.IDENTIFIER_KEY,
+                Query.FilterPredicate.IEQUALS, "C1").list(
+                EntityClass.DOCUMENTARY_UNIT, validUser));
         assertEquals(1, list.size());
 
         // Startswith...
-        list = toList(query.filter(
-                AccessibleEntity.IDENTIFIER_KEY, Query.FilterPredicate.STARTSWITH,
-                "c").list(EntityClass.DOCUMENTARY_UNIT, validUser));
+        list = toList(query.filter(AccessibleEntity.IDENTIFIER_KEY,
+                Query.FilterPredicate.STARTSWITH, "c").list(
+                EntityClass.DOCUMENTARY_UNIT, validUser));
         assertEquals(4, list.size());
-        
+
         // Endswith... should get one item (c1)
-        list = toList(query.filter(
-                AccessibleEntity.IDENTIFIER_KEY, Query.FilterPredicate.ENDSWITH,
-                "1").list(EntityClass.DOCUMENTARY_UNIT, validUser));
+        list = toList(query.filter(AccessibleEntity.IDENTIFIER_KEY,
+                Query.FilterPredicate.ENDSWITH, "1").list(
+                EntityClass.DOCUMENTARY_UNIT, validUser));
         assertEquals(1, list.size());
-        
+
         // Regexp... should get all doc units (c1-4)
-        list = toList(query.filter(
-                AccessibleEntity.IDENTIFIER_KEY, Query.FilterPredicate.MATCHES,
-                "^c\\d+$").list(EntityClass.DOCUMENTARY_UNIT, validUser));
+        list = toList(query.filter(AccessibleEntity.IDENTIFIER_KEY,
+                Query.FilterPredicate.MATCHES, "^c\\d+$").list(
+                EntityClass.DOCUMENTARY_UNIT, validUser));
         assertEquals(4, list.size());
-        
+
         // Less than... should get one item (c1)
-        list = toList(query.filter(
-                AccessibleEntity.IDENTIFIER_KEY, Query.FilterPredicate.LT,
-                "c2").list(EntityClass.DOCUMENTARY_UNIT, validUser));
+        list = toList(query.filter(AccessibleEntity.IDENTIFIER_KEY,
+                Query.FilterPredicate.LT, "c2").list(
+                EntityClass.DOCUMENTARY_UNIT, validUser));
         assertEquals(1, list.size());
         assertEquals("c1", list.get(0).getIdentifier());
-        
+
         // Greater than... should get one item (c4)
-        list = toList(query.filter(
-                AccessibleEntity.IDENTIFIER_KEY, Query.FilterPredicate.GT,
-                "c3").list(EntityClass.DOCUMENTARY_UNIT, validUser));
+        list = toList(query.filter(AccessibleEntity.IDENTIFIER_KEY,
+                Query.FilterPredicate.GT, "c3").list(
+                EntityClass.DOCUMENTARY_UNIT, validUser));
         assertEquals(1, list.size());
         assertEquals("c4", list.get(0).getIdentifier());
-        
+
         // Less than or equal... should get twos items (c1,c2)
-        list = toList(query.filter(
-                AccessibleEntity.IDENTIFIER_KEY, Query.FilterPredicate.LTE,
-                "c2").list(EntityClass.DOCUMENTARY_UNIT, validUser));
+        list = toList(query.filter(AccessibleEntity.IDENTIFIER_KEY,
+                Query.FilterPredicate.LTE, "c2").list(
+                EntityClass.DOCUMENTARY_UNIT, validUser));
         assertEquals(2, list.size());
         assertEquals("c1", list.get(0).getIdentifier());
         assertEquals("c2", list.get(1).getIdentifier());
-        
+
         // Greater than or equal... should get two items (c3,c4)
-        list = toList(query.filter(
-                AccessibleEntity.IDENTIFIER_KEY, Query.FilterPredicate.GTE,
-                "c3").list(EntityClass.DOCUMENTARY_UNIT, validUser));
+        list = toList(query.filter(AccessibleEntity.IDENTIFIER_KEY,
+                Query.FilterPredicate.GTE, "c3").list(
+                EntityClass.DOCUMENTARY_UNIT, validUser));
         assertEquals(2, list.size());
         assertEquals("c3", list.get(0).getIdentifier());
         assertEquals("c4", list.get(1).getIdentifier());
-        
+
     }
 
     @Test

@@ -62,7 +62,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
     private final SortedMap<String, Sort> sort;
     private final Optional<Pair<String, Sort>> defaultSort;
     private final SortedMap<String, Pair<FilterPredicate, String>> filters;
-    private final ImmutableMap<String, Integer> depthFilters;
+    private final ImmutableMap<Pair<String,Direction>, Integer> depthFilters;
     private final boolean page;
 
     private final FramedGraph<Neo4jGraph> graph;
@@ -105,7 +105,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
             Optional<Integer> limit, final SortedMap<String, Sort> sort,
             final Optional<Pair<String, Sort>> defSort,
             final SortedMap<String, Pair<FilterPredicate, String>> filters,
-            final Map<String, Integer> depthFilters, Boolean page) {
+            final Map<Pair<String,Direction>, Integer> depthFilters, Boolean page) {
         this.graph = graph;
         this.cls = cls;
         this.scope = scope;
@@ -133,7 +133,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
                 ImmutableSortedMap.<String, Sort> of(), Optional
                         .<Pair<String, Sort>> absent(), ImmutableSortedMap
                         .<String, Pair<FilterPredicate, String>> of(), Maps
-                        .<String, Integer> newHashMap(), false);
+                        .<Pair<String,Direction>, Integer> newHashMap(), false);
     }
 
     /**
@@ -149,7 +149,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
                 .<Integer> absent(), ImmutableSortedMap.<String, Sort> of(),
                 Optional.<Pair<String, Sort>> absent(), ImmutableSortedMap
                         .<String, Pair<FilterPredicate, String>> of(), Maps
-                        .<String, Integer> newHashMap(), false);
+                        .<Pair<String,Direction>, Integer> newHashMap(), false);
     }
 
     /**
@@ -561,15 +561,15 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
 
     /**
      * Filter out items that are over a certain depth in the given 
-     * relationship chain. Currently only outward relationships are supported.
+     * relationship chain.
      * 
      * @param label
      * @param depth
      * @return
      */
-    public Query<E> depthFilter(String label, Integer depth) {
-        Map<String, Integer> tmp = Maps.newHashMap(depthFilters);
-        tmp.put(label, depth);
+    public Query<E> depthFilter(String label, Direction direction, Integer depth) {
+        Map<Pair<String,Direction>, Integer> tmp = Maps.newHashMap(depthFilters);
+        tmp.put(new Pair<String,Direction>(label, direction), depth);
         return new Query<E>(graph, cls, scope, offset, limit, sort,
                 defaultSort, filters, tmp, page);
     }
@@ -741,20 +741,21 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      * Then a depthFilter of childOf -> 0 would filter out all except the
      * grandparent node.
      * 
-     * TODO: Figure out how to do this will Gremlin's loop() construct, and
-     * support relationships in an inward direction.
+     * TODO: Figure out how to do this will Gremlin's loop() construct.
      * 
      * @return
      */
     private PipeFunction<Vertex, Boolean> getDepthFilterFunction() {
         return new PipeFunction<Vertex, Boolean>() {
             public Boolean compute(Vertex vertex) {
-                for (Entry<String, Integer> entry : depthFilters.entrySet()) {
+                for (Entry<Pair<String,Direction>, Integer> entry : depthFilters.entrySet()) {
                     int depthCount = 0;
                     Vertex tmp = vertex;
-                    while (tmp.getEdges(Direction.OUT, entry.getKey())
+                    String label = entry.getKey().getA();
+                    Direction direction = entry.getKey().getB();
+                    while (tmp.getEdges(direction, label)
                             .iterator().hasNext()) {
-                        tmp = tmp.getVertices(Direction.OUT, entry.getKey())
+                        tmp = tmp.getVertices(direction, label)
                                 .iterator().next();
                         depthCount++;
                         if (depthCount > entry.getValue()) {
