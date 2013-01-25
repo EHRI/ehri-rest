@@ -1,7 +1,5 @@
 package eu.ehri.extension;
 
-import java.io.IOException;
-import java.io.OutputStream;
 import java.util.List;
 
 import javax.ws.rs.Consumes;
@@ -21,9 +19,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
 
-import org.codehaus.jackson.JsonFactory;
-import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 
@@ -33,7 +28,6 @@ import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.cvoc.Concept;
 
@@ -128,7 +122,7 @@ public class CvocConceptResource extends
         Concept concept = views.detail(manager.getFrame(id, cls),
                 getRequesterUserProfile());
 
-        return getListAsJson(concept.getNarrowerConcepts());
+        return streamingList(concept.getNarrowerConcepts());
     }
 
     /**
@@ -202,7 +196,7 @@ public class CvocConceptResource extends
         Concept concept = views.detail(manager.getFrame(id, cls),
                 getRequesterUserProfile());
 
-        return getListAsJson(concept.getBroaderConcepts());
+        return streamingList(concept.getBroaderConcepts());
     }
 
     // See the relatedBy for the 'reverse' relation
@@ -215,7 +209,7 @@ public class CvocConceptResource extends
         Concept concept = views.detail(manager.getFrame(id, cls),
                 getRequesterUserProfile());
 
-        return getListAsJson(concept.getRelatedConcepts());
+        return streamingList(concept.getRelatedConcepts());
     }
 
     @GET
@@ -227,7 +221,7 @@ public class CvocConceptResource extends
         Concept concept = views.detail(manager.getFrame(id, cls),
                 getRequesterUserProfile());
 
-        return getListAsJson(concept.getRelatedByConcepts());
+        return streamingList(concept.getRelatedByConcepts());
     }
 
     /**
@@ -290,32 +284,4 @@ public class CvocConceptResource extends
             tx.finish();
         }
     }
-
-    /*** helpers ***/
-
-    // NOTE: maybe we can make this generic and reuse it
-    public StreamingOutput getListAsJson(final Iterable<Concept> list)
-            throws ItemNotFound, BadRequester {
-        final ObjectMapper mapper = new ObjectMapper();
-        final JsonFactory f = new JsonFactory();
-
-        return new StreamingOutput() {
-            @Override
-            public void write(OutputStream arg0) throws IOException,
-                    WebApplicationException {
-                JsonGenerator g = f.createJsonGenerator(arg0);
-                g.writeStartArray();
-                for (Concept item : list) {
-                    try {
-                        mapper.writeValue(g, serializer.vertexFrameToData(item));
-                    } catch (SerializationError e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-                g.writeEndArray();
-                g.close();
-            }
-        };
-    }
-
 }
