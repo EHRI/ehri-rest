@@ -46,6 +46,17 @@ public class ActionResource extends AbstractAccessibleEntityResource<Action> {
         return retrieve(id);
     }
 
+    /**
+     * List actions.
+     * 
+     * @param offset
+     * @param limit
+     * @param order
+     * @param filters
+     * @return
+     * @throws ItemNotFound
+     * @throws BadRequester
+     */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/list")
@@ -55,7 +66,35 @@ public class ActionResource extends AbstractAccessibleEntityResource<Action> {
             @QueryParam(SORT_PARAM) List<String> order,
             @QueryParam(FILTER_PARAM) List<String> filters)
             throws ItemNotFound, BadRequester {
+        // FIXME: Hack to get actions to come out in newest-first order.
+        // This should eventually be done via the defaultOrderBy setting
+        // on the query class, but that will require some refactoring
+        if (order.isEmpty()) {
+            order.add(String
+                    .format("%s__%s", Action.TIMESTAMP, Query.Sort.DESC));
+        }
+
         return list(offset, limit, order, filters);
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/page")
+    public StreamingOutput pageActions(
+            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
+            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(SORT_PARAM) List<String> order,
+            @QueryParam(FILTER_PARAM) List<String> filters)
+            throws ItemNotFound, BadRequester {
+        // FIXME: Hack to get actions to come out in newest-first order.
+        // This should eventually be done via the defaultOrderBy setting
+        // on the query class, but that will require some refactoring
+        if (order.isEmpty()) {
+            order.add(String
+                    .format("%s__%s", Action.TIMESTAMP, Query.Sort.DESC));
+        }
+
+        return page(offset, limit, order, filters);
     }
 
     /**
@@ -120,17 +159,5 @@ public class ActionResource extends AbstractAccessibleEntityResource<Action> {
                 .setOffset(offset).setLimit(limit)
                 .orderBy(Action.TIMESTAMP, Query.Sort.DESC).filter(filters);
         return streamingPage(query.page(item.getHistory(), user));
-    }
-
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("/page")
-    public StreamingOutput pageActions(
-            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
-            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
-            @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)
-            throws ItemNotFound, BadRequester {
-        return page(offset, limit, order, filters);
     }
 }
