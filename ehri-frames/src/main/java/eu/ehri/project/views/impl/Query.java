@@ -57,6 +57,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
     private final Optional<Integer> offset;
     private final Optional<Integer> limit;
     private final SortedMap<String, Sort> sort;
+    private final Optional<Pair<String, Sort>> defaultSort;
     private final SortedMap<String, Pair<FilterPredicate, String>> filters;
     private final boolean page;
 
@@ -98,6 +99,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
     public Query(FramedGraph<Neo4jGraph> graph, Class<E> cls,
             PermissionScope scope, Optional<Integer> offset,
             Optional<Integer> limit, final SortedMap<String, Sort> sort,
+            final Optional<Pair<String, Sort>> defSort,
             final SortedMap<String, Pair<FilterPredicate, String>> filters,
             Boolean page) {
         this.graph = graph;
@@ -106,6 +108,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
         this.offset = offset;
         this.limit = limit;
         this.sort = ImmutableSortedMap.copyOf(sort);
+        this.defaultSort = defSort;
         this.filters = ImmutableSortedMap
                 .<String, Pair<FilterPredicate, String>> copyOf(filters);
         this.page = page;
@@ -122,7 +125,8 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
     public Query(FramedGraph<Neo4jGraph> graph, Class<E> cls) {
         this(graph, cls, SystemScope.getInstance(),
                 Optional.<Integer> absent(), Optional.<Integer> absent(),
-                ImmutableSortedMap.<String, Sort> of(), ImmutableSortedMap
+                ImmutableSortedMap.<String, Sort> of(), Optional
+                        .<Pair<String, Sort>> absent(), ImmutableSortedMap
                         .<String, Pair<FilterPredicate, String>> of(), false);
     }
 
@@ -135,15 +139,10 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      */
     public Query(FramedGraph<Neo4jGraph> graph, Class<E> cls,
             PermissionScope scope) {
-        this(
-                graph,
-                cls,
-                scope,
-                Optional.<Integer> absent(),
-                Optional.<Integer> absent(),
-                ImmutableSortedMap.<String, Sort> of(),
-                ImmutableSortedMap.<String, Pair<FilterPredicate, String>> of(),
-                false);
+        this(graph, cls, scope, Optional.<Integer> absent(), Optional
+                .<Integer> absent(), ImmutableSortedMap.<String, Sort> of(),
+                Optional.<Pair<String, Sort>> absent(), ImmutableSortedMap
+                        .<String, Pair<FilterPredicate, String>> of(), false);
     }
 
     /**
@@ -153,7 +152,8 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      */
     public Query<E> copy(Query<E> other) {
         return new Query<E>(other.graph, other.cls, other.scope, other.offset,
-                other.limit, other.sort, other.filters, other.page);
+                other.limit, other.sort, other.defaultSort, other.filters,
+                other.page);
     }
 
     /**
@@ -326,16 +326,15 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
 
         // FIXME: We have to read the vertices into memory here since we
         // can't re-use the iterator for counting and streaming.
-        ArrayList<Vertex> userVerts = Lists
-                .newArrayList(setFilters(new GremlinPipeline<E, Vertex>(
-                        new FramedVertexIterableAdaptor<T>(vertices)).filter(
-                        aclFilterFunction)).iterator());
+        ArrayList<Vertex> userVerts = Lists.newArrayList(setFilters(
+                new GremlinPipeline<E, Vertex>(
+                        new FramedVertexIterableAdaptor<T>(vertices))
+                        .filter(aclFilterFunction)).iterator());
 
-        return new Page<T>(
-                graph.frameVertices(
-                        setPipelineRange(setOrder(new GremlinPipeline<Vertex, Vertex>(
-                                userVerts))), cls), userVerts.size(),
-                offset.or(0), limit.or(DEFAULT_LIST_LIMIT), sort);
+        return new Page<T>(graph.frameVertices(
+                setPipelineRange(setOrder(new GremlinPipeline<Vertex, Vertex>(
+                        userVerts))), cls), userVerts.size(), offset.or(0),
+                limit.or(DEFAULT_LIST_LIMIT), sort);
     }
 
     /**
@@ -357,8 +356,9 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
             try {
                 PipeFunction<Vertex, Boolean> aclFilterFunction = new AclManager(
                         graph).getAclFilterFunction(user);
-                long count = setFilters(new GremlinPipeline<Vertex, Vertex>(countQ)
-                        .filter(aclFilterFunction)).count();
+                long count = setFilters(
+                        new GremlinPipeline<Vertex, Vertex>(countQ)
+                                .filter(aclFilterFunction)).count();
                 return new Page<E>(
                         graph.frameVertices(
                                 setPipelineRange(setOrder(setFilters(new GremlinPipeline<Vertex, Vertex>(
@@ -460,7 +460,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      */
     public Query<E> setOffset(Integer offset) {
         return new Query<E>(graph, cls, scope, Optional.fromNullable(offset),
-                limit, sort, filters, page);
+                limit, sort, defaultSort, filters, page);
     }
 
     /**
@@ -479,7 +479,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      */
     public Query<E> setLimit(Integer limit) {
         return new Query<E>(graph, cls, scope, offset,
-                Optional.fromNullable(limit), sort, filters, page);
+                Optional.fromNullable(limit), sort, defaultSort, filters, page);
     }
 
     /**
@@ -487,7 +487,21 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      */
     public Query<E> clearOrder() {
         return new Query<E>(graph, cls, scope, offset, limit,
-                ImmutableSortedMap.<String, Sort> of(), filters, page);
+                ImmutableSortedMap.<String, Sort> of(), defaultSort, filters,
+                page);
+    }
+
+    /**
+     * Add an default order clause, to be used if no custom order is specified.
+     * 
+     * @param field
+     * @param order
+     */
+    public Query<E> defaultOrderBy(String field, Sort order) {
+
+        return new Query<E>(graph, cls, scope, offset, limit, sort,
+                Optional.of(new Pair<String, Sort>(field, order)), filters,
+                page);
     }
 
     /**
@@ -499,8 +513,8 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
     public Query<E> orderBy(String field, Sort order) {
         SortedMap<String, Sort> tmp = new ImmutableSortedMap.Builder<String, Sort>(
                 Ordering.natural()).putAll(sort).put(field, order).build();
-        return new Query<E>(graph, cls, scope, offset, limit, tmp, filters,
-                page);
+        return new Query<E>(graph, cls, scope, offset, limit, tmp, defaultSort,
+                filters, page);
     }
 
     /**
@@ -513,26 +527,8 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      */
     public Query<E> orderBy(Iterable<String> orderSpecs) {
         SortedMap<String, Sort> tmp = parseOrderSpecs(orderSpecs);
-        return new Query<E>(graph, cls, scope, offset, limit, tmp, filters,
-                page);
-    }
-
-    private SortedMap<String, Sort> parseOrderSpecs(Iterable<String> orderSpecs) {
-        Builder<String, Sort> builder = new ImmutableSortedMap.Builder<String, Sort>(
-                Ordering.natural());
-        Splitter psplit = Splitter.on("__");
-        for (String spec : orderSpecs) {
-            List<String> od = Iterables.toList(psplit.split(spec));
-            switch (od.size()) {
-            case 1:
-                builder.put(od.get(0), Sort.ASC);
-                break;
-            case 2:
-                builder.put(od.get(0), Sort.valueOf(od.get(1)));
-                break;
-            }
-        }
-        return builder.build();
+        return new Query<E>(graph, cls, scope, offset, limit, tmp, defaultSort,
+                filters, page);
     }
 
     /**
@@ -546,6 +542,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
                 offset,
                 limit,
                 sort,
+                defaultSort,
                 ImmutableSortedMap.<String, Pair<FilterPredicate, String>> of(),
                 page);
     }
@@ -566,7 +563,8 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
                 .put(property,
                         new Pair<FilterPredicate, String>(predicate, value))
                 .build();
-        return new Query<E>(graph, cls, scope, offset, limit, sort, tmp, page);
+        return new Query<E>(graph, cls, scope, offset, limit, sort,
+                defaultSort, tmp, page);
     }
 
     /**
@@ -580,7 +578,26 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      */
     public Query<E> filter(Iterable<String> filters) {
         SortedMap<String, Pair<FilterPredicate, String>> tmp = parseFilters(filters);
-        return new Query<E>(graph, cls, scope, offset, limit, sort, tmp, page);
+        return new Query<E>(graph, cls, scope, offset, limit, sort,
+                defaultSort, tmp, page);
+    }
+
+    private SortedMap<String, Sort> parseOrderSpecs(Iterable<String> orderSpecs) {
+        Builder<String, Sort> builder = new ImmutableSortedMap.Builder<String, Sort>(
+                Ordering.natural());
+        Splitter psplit = Splitter.on("__");
+        for (String spec : orderSpecs) {
+            List<String> od = Iterables.toList(psplit.split(spec));
+            switch (od.size()) {
+            case 1:
+                builder.put(od.get(0), Sort.ASC);
+                break;
+            case 2:
+                builder.put(od.get(0), Sort.valueOf(od.get(1)));
+                break;
+            }
+        }
+        return builder.build();
     }
 
     /**
@@ -629,9 +646,17 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
 
     private <EE> GremlinPipeline<EE, Vertex> setOrder(
             GremlinPipeline<EE, Vertex> pipe) {
-        if (sort.isEmpty())
+        if (sort.isEmpty()) {
+            if (defaultSort.isPresent()) {
+                return pipe
+                        .order(getOrderFunction(new ImmutableSortedMap.Builder<String, Sort>(
+                                Ordering.natural()).put(
+                                defaultSort.get().getA(),
+                                defaultSort.get().getB()).build()));
+            }
             return pipe;
-        return pipe.order(getOrderFunction());
+        }
+        return pipe.order(getOrderFunction(sort));
     }
 
     private <EE> GremlinPipeline<EE, Vertex> setFilters(
@@ -641,7 +666,8 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
         return pipe.filter(getFilterFunction());
     }
 
-    private PipeFunction<Pair<Vertex, Vertex>, Integer> getOrderFunction() {
+    private PipeFunction<Pair<Vertex, Vertex>, Integer> getOrderFunction(
+            final SortedMap<String, Sort> sort) {
         return new PipeFunction<Pair<Vertex, Vertex>, Integer>() {
             public Integer compute(Pair<Vertex, Vertex> pair) {
                 ComparisonChain chain = ComparisonChain.start();
