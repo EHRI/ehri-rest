@@ -38,8 +38,8 @@ public abstract class AbstractImporter<T> {
     protected final GraphManager manager;
     protected final ImportLog log;
     protected final T documentContext;
-    private List<ImportCallback> createCallbacks = new LinkedList<ImportCallback>();
-    private List<ImportCallback> updateCallbacks = new LinkedList<ImportCallback>();
+    protected List<ImportCallback> createCallbacks = new LinkedList<ImportCallback>();
+    protected List<ImportCallback> updateCallbacks = new LinkedList<ImportCallback>();
 
     /**
      * Constructor.

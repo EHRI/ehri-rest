@@ -167,6 +167,38 @@ public class VocabularyResource extends
 
     /*** Concept manipulation ***/
 
+    @DELETE
+    @Path("/{id:.+}/all")
+    public Response deleteAllVocabularyConcepts(
+            @PathParam("id") String id)
+            throws ItemNotFound, BadRequester, PermissionDenied {
+        Vocabulary vocabulary = new Query<Vocabulary>(graph, Vocabulary.class).get(id,
+                getRequesterUserProfile());
+        
+        //return deleteAllConcepts(vocabulary);
+        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
+        try {
+        	LoggingCrudViews<Concept> conceptViews = new LoggingCrudViews<Concept>(graph,
+            		Concept.class, vocabulary);
+        	Accessor requesterUserProfile = getRequesterUserProfile();
+        	Iterable<Concept> concepts = vocabulary.getConcepts();
+        	for (Concept concept : concepts) {
+        		conceptViews.delete(concept, requesterUserProfile);
+        	}
+            tx.success();
+            return Response.status(Status.OK).build();
+        } catch (SerializationError e) {
+            tx.failure();
+            throw new WebApplicationException(e);
+        } catch (ValidationError e) {
+            tx.failure();
+            throw new WebApplicationException(e);
+		} finally {
+            tx.finish();
+        }
+        
+    }
+
     /**
      * Create a documentary unit for this repository.
      * 

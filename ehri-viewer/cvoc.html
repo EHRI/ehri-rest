@@ -2,7 +2,7 @@
 <html>
 <head>
 	<title>EHRI cvoc test</title>
-	<!-- css should be mede non-inline -->
+	<!-- css should be made non-inline -->
 	<link rel="stylesheet" type="text/css" href="script/render-node.css" />
 	<!-- jquery -->
 	<script src="script/jquery-1.8.2.min.js"></script>
@@ -10,118 +10,136 @@
 	<!-- our code -->
 	<script>
 
-// should check for XSS
-function renderConceptList(json) {
+// NOTE all rendering should check for XSS
+
+function addExpandHandlers(newStuff) {
+	// add handlers, but if it is allready there, we get loads of handlers
+	// so restrict to the new stuff
+	
+	/* only expand
+    $(".narrowerLink", newStuff).click(function(event) {
+    	event.preventDefault();
+    	var id = extractIdFromNeo4jUrl(this.href);
+        loadNarrowerConceptList($(this).next(), id);
+    });
+    $(".relatedLink", newStuff).click(function(event) {
+		event.preventDefault();
+		var id = extractIdFromNeo4jUrl(this.href);
+		loadRelatedConceptList($(this).next(), id);
+	});
+    $(".broaderLink", newStuff).click(function(event) {
+		event.preventDefault();
+		var id = extractIdFromNeo4jUrl(this.href);
+		loadBroaderConceptList($(this).next(), id);
+	});
+	*/
+	
+	$(".narrowerLink", newStuff).toggle(function() {
+    	event.preventDefault();
+    	var id = extractIdFromNeo4jUrl(this.href);
+        loadNarrowerConceptList($(this).next(), id);
+		$(this).text("- collapse");
+	}, function() {
+		// Note maybe not clean it, but hide instead?
+		$(this).next().empty();
+		$(this).text("+ expand");
+	});
+	$(".relatedLink", newStuff).toggle(function() {
+    	event.preventDefault();
+    	var id = extractIdFromNeo4jUrl(this.href);
+        loadRelatedConceptList($(this).next(), id);
+		$(this).text("- collapse");
+	}, function() {
+		// Note maybe not clean it, but hide instead?
+		$(this).next().empty();
+		$(this).text("+ expand");
+	});
+	$(".broaderLink", newStuff).toggle(function() {
+    	event.preventDefault();
+    	var id = extractIdFromNeo4jUrl(this.href);
+        loadBroaderConceptList($(this).next(), id);
+		$(this).text("- collapse");
+	}, function() {
+		// Note maybe not clean it, but hide instead?
+		$(this).next().empty();
+		$(this).text("+ expand");
+	});
+	
+}
+
+function renderConceptList(json, voc) {
 	var container = $("#conceptList");
+
 	var lines = [];
-	lines.push("<h2>Concepts</h2>");		
+	lines.push("<hr/>"); // TODO in css	
+	lines.push("<h2>Concepts for "+voc+"</h2>");		
 	lines.push("<ul>");	
 	var numConcepts = json.length;
 	for (var i = 0; i < numConcepts; i++) {
 		var c = json[i];
-		console.log(c.data.identifier);
+		//console.log(c.data.identifier);
+		
 		lines.push("<li>");
-		lines.push("identifier: ");
-		lines.push("<span class='conceptIdentifier'>" + c.data.identifier + "</span>");
-		
-		// show preflabels...
-		if (c.relationships.prefLabel) {
-		  lines.push("<ul class='prefLabelsInList'>");
-		  var numPrefLabels = c.relationships.prefLabel.length;
-		  for ( var p = 0; p < numPrefLabels; p++) {
-			var label = c.relationships.prefLabel[p];
-			//console.log(label.data.content);
-			lines.push("<li>");
-			lines.push("<span>" + label.data.content + "</span>");
-			lines.push(" [<span class='languageCodeInList'>" + label.data.languageCode + "</span>]");
-			lines.push("</li>");
-		  }
-		  lines.push("</ul>");
-		}
-		
+		lines.push(createConceptHtmlString(c));		
 		lines.push("</li>");
 	}
 	lines.push("</ul>");
 	container.empty(); // clear any old stuff!
-	container.append(lines.join(''));
-	
-	// append delete buttons
-	$(".conceptIdentifier").each(function(index) {
-       console.log(index + ': ' + $(this).text());
-       $(this).after(" <button type='button' class='conceptDeleteButton'>Delete</button>");         
-    });
-    // add delete handlers
-    $(".conceptDeleteButton").click(function() {
-              // now create it via a Post request...
-              deleteConcept($(this).prev().text());
-    });
-
-}
-
-function createConcept(identifier) {
-              console.log("creating concept: " + identifier);
-
-			// construct input json string
-			//'{"data":{"identifier": "' + identifier + '","isA":"cvocConcept"}}';
-			var conceptJson = {data:{"identifier":  identifier, isA:"cvocConcept"},relationships:{}};
-			
-// TRY to add a prefLabel
-conceptJson.relationships = {prefLabel : [{data : {identifier: "someid", isA: "cvocText", content : "content text", languageCode : "en"}}]};
-conceptJson.relationships.prefLabel[0].data.content = $("#firstPrefLabelContent").val();
-conceptJson.relationships.prefLabel[0].data.languageCode = $("#firstPrefLabelLanguageCode").val();	
+	var newStuff = container.append(lines.join(''));
 		
-			console.log(conceptJson);
-			
-			var request = $.ajax({
-				url : "http://localhost:7474/ehri/cvocConcept/", 
-				type : "POST",
-				headers: {"Authorization" : "admin"},
-				data : JSON.stringify(conceptJson), 
-				contentType: "application/json",
-				dataType : "json"
-			});
-	
-			request.done(function(json) {
-				console.log(json);
-				loadConceptList(); // update
-			});
-	
-			request.fail(function(jqXHR, textStatus) {
-				alert("Request failed: " + textStatus);
-			});
+	addExpandHandlers(newStuff);
 }
 
-function deleteConcept(identifier) {
-              console.log("deleteing concept: " + identifier);
-
-			var request = $.ajax({
-				url : "http://localhost:7474/ehri/cvocConcept/"+identifier, 
-				type : "DELETE",
-				headers: {"Authorization" : "admin"},
-				dataType : "json"
-			});
-	
-			request.done(function(json) {
-				console.log(json);
-				loadConceptList(); // update
-			});
-	
-			request.fail(function(jqXHR, textStatus) {
-				alert("Request failed: " + textStatus);
-			});              
+function createConceptHtmlString(c) {
+		//console.log(c.data.identifier);
+	var lines = [];
+		lines.push("<div>");
+		lines.push("concept: ");
+		lines.push("id: ");
+		lines.push("<span class='conceptIdentifier'>" + c.id + "</span>");
+		lines.push("<br/>");
+		lines.push("identifier: ");
+		// NOTE could make it into a link if it starts with http://
+		lines.push("<span>" + c.data.identifier + "</span>");
+		
+		// show preflabels...
+		if (c.relationships.describes) {
+		  lines.push("<ul class='prefLabelsInList'>");
+		  var numDescriptions = c.relationships.describes.length;
+		  for ( var p = 0; p < numDescriptions; p++) {
+			var description = c.relationships.describes[p];
+			//console.log(label.data.content);
+			lines.push("<li>");
+			lines.push("description ["+ description.data.languageCode +"]: <br/>");
+			lines.push("<div>prefLabel: " + description.data.prefLabel + "</div>");
+			// TODO altLabel's, scopeNoe's, definition's
+		  }
+		  lines.push("</ul>");
+		}
+		// links
+		//lines.push("<div><a href='"+c.id+"' class='broaderLink'>broader</a></div>");
+		lines.push("<div>broader: <a href='"+c.id+"' class='broaderLink'>+ expand</a><div class='expanded'></div></div>");
+		lines.push("<div>related: <a href='"+c.id+"' class='relatedLink'>+ expand</a><div class='expanded'></div></div>");
+		lines.push("<div>narrower: <a href='"+c.id+"' class='narrowerLink'>+ expand</a><div class='expanded'></div></div>");
+		lines.push("</div>");
+	return lines.join('');
 }
 
-function loadConceptList() {
-		// get the list of (ALL?) concepts
+function loadNarrowerConceptList(element, id) {
+		// get the list of concepts
 			var request = $.ajax({
-				url : "http://localhost:7474/ehri/cvocConcept/list", 
+				url : "http://localhost:7474/ehri/cvocConcept/"+id+"/narrower/list", 
 				type : "GET",
 				dataType : "json"
 			});
 	
 			request.done(function(json) {
-				console.log(json);
-				renderConceptList(json);
+				//console.log(json);
+				//renderConceptList(json, voc);
+				var container = element;
+				container.empty();
+				var newStuff = container.append(createConceptListHtmlString(json));
+				addExpandHandlers(newStuff);
 			});
 	
 			request.fail(function(jqXHR, textStatus) {
@@ -129,49 +147,151 @@ function loadConceptList() {
 			});
 }
 
-function initCreateForm() {
-			// form to create a new concept 
-			$('#conceptCreateForm').submit(function() {
-              //alert('Handler for .submit() called.');
-              var identifier = $("[name='identifier']", this).val();
-              // could do some basic validation here, like no empty values
-              // should check for XSS
-              identifier = $.trim(identifier);
-              
-              // now create it via a Post request...
-              createConcept(identifier);
-              
-              return false;
-           });
-
+function loadRelatedConceptList(element, id) {
+		// get the list of concepts
+			var request = $.ajax({
+				url : "http://localhost:7474/ehri/cvocConcept/"+id+"/related/list", 
+				type : "GET",
+				dataType : "json"
+			});
+	
+			request.done(function(json) {
+				//console.log(json);
+				//renderConceptList(json, voc);
+				var container = element;
+				container.empty();
+				var newStuff = container.append(createConceptListHtmlString(json));
+				addExpandHandlers(newStuff);	
+			});
+	
+			request.fail(function(jqXHR, textStatus) {
+				alert("Request failed: " + textStatus);
+			});
 }
 
+function loadBroaderConceptList(element, id) {
+		// get the list of concepts
+			var request = $.ajax({
+				url : "http://localhost:7474/ehri/cvocConcept/"+id+"/broader/list", 
+				type : "GET",
+				dataType : "json"
+			});
+	
+			request.done(function(json) {
+				//console.log(json);
+				//renderConceptList(json, voc);
+				var container = element;
+				container.empty();
+				var newStuff = container.append(createConceptListHtmlString(json));
+				addExpandHandlers(newStuff);
+			});
+	
+			request.fail(function(jqXHR, textStatus) {
+				alert("Request failed: " + textStatus);
+			});
+}
+function loadConceptList(voc) {
+		// get the list of (ALL?) concepts
+			var request = $.ajax({
+				url : "http://localhost:7474/ehri/cvocVocabulary/"+voc+"/list", 
+				type : "GET",
+				dataType : "json"
+			});
+	
+			request.done(function(json) {
+				//console.log(json);
+				renderConceptList(json, voc);
+			});
+	
+			request.fail(function(jqXHR, textStatus) {
+				alert("Request failed: " + textStatus);
+			});
+}
+
+function createConceptListHtmlString(json) {
+	var lines = [];
+	var num = json.length;
+	if(num < 1) return "-none-";
+	lines.push("<ul>");	
+	console.log("list size: " + num);
+	
+	for (var i = 0; i < num; i++) {
+		var c = json[i];
+		//console.log(c.data.identifier);
+		
+		lines.push("<li>");
+		lines.push(createConceptHtmlString(c));	
+		//lines.push("<div>"+c.id+"</div>");	
+		lines.push("</li>");
+	}
+	lines.push("</ul>");
+	return lines.join('');
+}
+
+function renderVocabularyList(json) {
+	var container = $("#vocabularyList");
+	var lines = [];
+	lines.push("<h2>Vocabularies</h2>");		
+	lines.push("<ul>");	
+	var num = json.length;
+	for (var i = 0; i < num; i++) {
+		var v = json[i];
+		//console.log(c.data.identifier);
+		
+		lines.push("<li>");
+		//lines.push(createConceptHtmlString(c));	
+		lines.push("<div>"+v.id+"</div>");	
+		lines.push("</li>");
+	}
+	lines.push("</ul>");
+	container.empty(); // clear any old stuff!
+	container.append(lines.join(''));
+}
+
+function loadVocabularyList() {
+		// get the list of (ALL?) vocabularie
+			var request = $.ajax({
+				url : "http://localhost:7474/ehri/cvocVocabulary/list", 
+				type : "GET",
+				dataType : "json"
+			});
+	
+			request.done(function(json) {
+				//console.log(json);
+				//renderConceptList(json);
+				renderVocabularyList(json);
+			});
+	
+			request.fail(function(jqXHR, textStatus) {
+				alert("Request failed: " + textStatus);
+			});
+}
+
+	/**
+	 * Extract the node id from the neo4j REST url.  
+	 * Example neo4j url: "http://localhost:7474/db/data/node/1700" 
+	 * node id: 1700
+	 * 
+	 * @param url The url to extract the id from
+	 * @returns The extracted id
+	 */
+	function extractIdFromNeo4jUrl(url) {
+		var pos = url.lastIndexOf("/");
+		return $.trim(url.substring(pos+1, url.length));
+	} 
+	
 	// jQuery main entrance
 	$(document).ready(function() {
-		loadConceptList();	
-		initCreateForm();
+		loadVocabularyList();
+		loadConceptList("ehri-thes");	
 	});
 	</script>
 </head>
 <body>
 	<h1>EHRI cvoc - internal API</h1>
+	DEV NOTE: needs code cleanup and refactoring!
+	<div id="vocabularyList"></div>
 	<div id="conceptList"></div>
 	
-	<div id="conceptCreate">
-		<h2>New concept</h2>
-    	<form id="conceptCreateForm" >
-    		<label>identifier</label>
-	    	<input type="text" value="" name="identifier"/>
-		    <input type="submit" value="Create" />
-		    
-		    <!-- at least one preflabel in languageCode = "en" -->
-			<div class='prefLabelInput'>
-			    <label>prefLabel</label>
-		    	<input type="text" value="" name="prefLabel" id="firstPrefLabelContent"/>
-		    	<label>Language code</label>
-		    	<input type="text" value="en" name="prefLabelLanguageCode" id="firstPrefLabelLanguageCode"/>
-			</div>		    
-		</form>
-	</div>
 </body>
 </html>

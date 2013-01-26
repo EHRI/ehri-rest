@@ -39,7 +39,7 @@ public interface ConceptDescription extends VertexFrame, Description {
      *   and case insensitive comparison must be used 
 	 *   and the first subtag is the "Primary Language"
      */  
-// NOTE alreadty in Description
+// NOTE already in Description
 //    @Property(LANGUAGE)
 //    public String getLanguage();
 //    @Property(LANGUAGE)
@@ -51,18 +51,20 @@ public interface ConceptDescription extends VertexFrame, Description {
     @Property(PREFLABEL)
     public String getPrefLabel();
     
-    // More than one!
-    @Property(ALTLABEL)
-    public String[] getAltLabels();
+// NOTE if it's optional then don't use this Entity interface!
     
-    @Property(DEFINITION)
-    public String getDefinition();
-
-	// NOTE: why has SKOS definitions and scope notes, what is the difference?
-	// scope notes seem to be used in a more flexible way 
-	// and can contain some extra information besides describing the definition. 
-
-    @Property(SCOPENOTE)
-    public String getScopeNote();
+//    // More than one!
+//    @Property(ALTLABEL)
+//    public String[] getAltLabels();
+//    
+//    @Property(DEFINITION)
+//    public String getDefinition();
+//
+//	// NOTE: why has SKOS definitions and scope notes, what is the difference?
+//	// scope notes seem to be used in a more flexible way 
+//	// and can contain some extra information besides describing the definition. 
+//
+//    @Property(SCOPENOTE)
+//    public String getScopeNote();
 
 }

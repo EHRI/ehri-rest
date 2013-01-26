@@ -24,6 +24,7 @@ public class CmdEntryPoint extends BaseCommand {
     private static final Map<String, Class<? extends Command>> COMMANDS;
     static {
         Map<String, Class<? extends Command>> mmap = new HashMap<String, Class<? extends Command>>();
+        mmap.put(SkosVocabularyImport.NAME, SkosVocabularyImport.class);
         mmap.put(EadImport.NAME, EadImport.class);
         mmap.put(UserListEntities.NAME, UserListEntities.class);
         mmap.put(ListEntities.NAME, ListEntities.class);
