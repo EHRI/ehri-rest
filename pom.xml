@@ -26,8 +26,8 @@
 		</dependencies>
 	</dependencyManagement>
 	<properties>
-		<neo4j-version>1.9-SNAPSHOT-EHRI</neo4j-version>
-		<tinkerpop-version>2.1.0</tinkerpop-version>
+		<neo4j-version>1.9.M04</neo4j-version>
+	<tinkerpop-version>2.2.0</tinkerpop-version>
 
 		<!-- The directory where the yWorks doclet (for uml schema's in javadoc) 
 			is installed HOWEVER, we need to hardcode it into the profile in the missing 
