@@ -73,7 +73,7 @@ public class DocumentaryUnitResource extends
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:.+}/list")
-    public StreamingOutput listAgentDocumentaryUnits(
+    public StreamingOutput listChildDocumentaryUnits(
             @PathParam("id") String id,
             @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
             @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
@@ -85,6 +85,24 @@ public class DocumentaryUnitResource extends
                 .setOffset(offset).setLimit(limit).filter(filters)
                 .orderBy(order).filter(filters);
         return streamingList(query.list(parent.getChildren(),
+                getRequesterUserProfile()));
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id:.+}/page")
+    public StreamingOutput pageChildDocumentaryUnits(
+            @PathParam("id") String id,
+            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
+            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(SORT_PARAM) List<String> order,
+            @QueryParam(FILTER_PARAM) List<String> filters)
+            throws ItemNotFound, BadRequester, PermissionDenied {
+        DocumentaryUnit parent = manager.getFrame(id, DocumentaryUnit.class);
+        Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph, cls)
+                .setOffset(offset).setLimit(limit).filter(filters)
+                .orderBy(order).filter(filters);
+        return streamingPage(query.page(parent.getChildren(),
                 getRequesterUserProfile()));
     }
 
