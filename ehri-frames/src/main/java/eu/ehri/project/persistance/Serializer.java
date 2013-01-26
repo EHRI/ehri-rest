@@ -119,15 +119,15 @@ public final class Serializer {
         if (depth < maxTraversals) {
             Map<String, Method> fetchMethods = ClassUtils.getFetchMethods(cls);
             for (Map.Entry<String, Method> entry : fetchMethods.entrySet()) {
-
                 // In order to avoid @Fetching the whole graph we track the
-                // maxDepth parameter and reduce it for every traversal.
-                // However the @Fetch annotation can also specify a non-default
-                // depth, so we need to determine whatever is lower - the
-                // current traversal count, or the annotation's count.
+                // depth parameter and increase it for every traversal.
+                // However the @Fetch annotation can also specify a maximum
+                // depth of traversal beyong which we don't serialize.
                 Method method = entry.getValue();
-                int nextDepth = Math.max(depth,
-                        method.getAnnotation(Fetch.class).depth()) + 1;
+                int nextDepth = depth + 1;                
+                if (nextDepth > method.getAnnotation(Fetch.class).depth()) {
+                    continue;
+                }
 
                 try {
                     Object result = method
