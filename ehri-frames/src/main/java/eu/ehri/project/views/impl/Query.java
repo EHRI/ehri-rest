@@ -339,8 +339,8 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
                         .filter(aclFilterFunction)).iterator());
 
         return new Page<T>(graph.frameVertices(
-                setPipelineRange(setOrder(new GremlinPipeline<Vertex, Vertex>(
-                        userVerts))), cls), userVerts.size(), offset.or(0),
+                setPipelineRange(setOrder(setFilters(setDepthFilters(new GremlinPipeline<Vertex, Vertex>(
+                        userVerts))))), cls), userVerts.size(), offset.or(0),
                 limit.or(DEFAULT_LIST_LIMIT), sort);
     }
 
