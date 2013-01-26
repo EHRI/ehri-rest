@@ -17,10 +17,13 @@ import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.models.Agent;
+import eu.ehri.project.models.AgentDescription;
 import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
+import eu.ehri.project.models.base.DescribedEntity;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.TemporalEntity;
 import eu.ehri.project.persistance.Bundle;
@@ -30,7 +33,7 @@ import eu.ehri.project.persistance.Serializer;
 public class BundleTest extends ModelTestBase {
 
     private static final String ID = "c1";
-    
+
     private Serializer serializer;
 
     @Override
@@ -47,6 +50,17 @@ public class BundleTest extends ModelTestBase {
         String json = serializer.vertexFrameToJson(c1);
         Bundle bundle = Bundle.fromString(json);
         assertEquals(ID, bundle.getId());
+
+        // Test Agent serialization
+        Agent r1 = manager.getFrame("r1", Agent.class);
+        json = serializer.vertexFrameToJson(r1);
+        bundle = Bundle.fromString(json);
+        List<Bundle> descs = bundle.getRelations(DescribedEntity.DESCRIBES);
+        assertEquals(1, descs.size());
+        Bundle descBundle = descs.get(0);
+        List<Bundle> addresses = descBundle
+                .getRelations(AgentDescription.HAS_ADDRESS);
+        assertEquals(1, addresses.size());
     }
 
     public void testSaving() throws SerializationError, ValidationError,
@@ -61,6 +75,23 @@ public class BundleTest extends ModelTestBase {
 
         assertEquals(toList(c1.getDescriptions()),
                 toList(c1redux.getDescriptions()));
+    }
+
+    public void testSavingAgent() throws SerializationError, ValidationError,
+            IntegrityError, ItemNotFound {
+        Agent r1 = manager.getFrame("r1", Agent.class);
+        assertEquals(1, toList(r1.getDescriptions()).size());
+
+        Bundle bundle = serializer.vertexFrameToBundle(r1);
+        BundleDAO persister = new BundleDAO(graph);
+        Agent r1redux = persister.update(bundle, Agent.class);
+
+        assertEquals(toList(r1.getDescriptions()),
+                toList(r1redux.getDescriptions()));
+
+        AgentDescription ad1 = graph.frame(r1redux.getDescriptions().iterator()
+                .next().asVertex(), AgentDescription.class);
+        assertEquals(1, toList(ad1.getAddresses()).size());
     }
 
     @Test
@@ -99,7 +130,7 @@ public class BundleTest extends ModelTestBase {
 
         List<Bundle> dates = bundle.getRelations(TemporalEntity.HAS_DATE);
         Bundle newBundle = bundle.removeRelations(TemporalEntity.HAS_DATE)
-                    .withRelation(TemporalEntity.HAS_DATE, dates.get(0));
+                .withRelation(TemporalEntity.HAS_DATE, dates.get(0));
         BundleDAO persister = new BundleDAO(graph);
         persister.update(newBundle, DocumentaryUnit.class);
         assertEquals(1, toList(c1.getDatePeriods()).size());
@@ -139,7 +170,7 @@ public class BundleTest extends ModelTestBase {
         // Should raise NoSuchElementException
         manager.getFrame(ID, DocumentaryUnit.class);
     }
-    
+
     @Test(expected = ValidationError.class)
     public void testValidationError() throws SerializationError,
             ValidationError, ItemNotFound, IntegrityError {
@@ -148,8 +179,10 @@ public class BundleTest extends ModelTestBase {
 
         List<Bundle> dates = bundle.getRelations(TemporalEntity.HAS_DATE);
         // remove the start date key from a date
-        Bundle invalidDate = dates.get(0).withData(Maps.<String,Object>newHashMap());
-        Bundle newBundle = bundle.withRelation(TemporalEntity.HAS_DATE, invalidDate);
+        Bundle invalidDate = dates.get(0).withData(
+                Maps.<String, Object> newHashMap());
+        Bundle newBundle = bundle.withRelation(TemporalEntity.HAS_DATE,
+                invalidDate);
 
         BundleDAO persister = new BundleDAO(graph);
         persister.update(newBundle, DocumentaryUnit.class);
