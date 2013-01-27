@@ -339,8 +339,8 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
                         .filter(aclFilterFunction)).iterator());
 
         return new Page<T>(graph.frameVertices(
-                setPipelineRange(setOrder(setFilters(setDepthFilters(new GremlinPipeline<Vertex, Vertex>(
-                        userVerts))))), cls), userVerts.size(), offset.or(0),
+                setPipelineRange(setOrder(applyFilters(new GremlinPipeline<Vertex, Vertex>(
+                        userVerts)))), cls), userVerts.size(), offset.or(0),
                 limit.or(DEFAULT_LIST_LIMIT), sort);
     }
 
@@ -363,13 +363,12 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
             try {
                 PipeFunction<Vertex, Boolean> aclFilterFunction = new AclManager(
                         graph).getAclFilterFunction(user);
-                long count = setFilters(
-                        setDepthFilters(new GremlinPipeline<Vertex, Vertex>(
-                                countQ).filter(aclFilterFunction))).count();
+                long count = applyFilters(new GremlinPipeline<Vertex, Vertex>(
+                                countQ).filter(aclFilterFunction)).count();
                 return new Page<E>(
                         graph.frameVertices(
-                                setPipelineRange(setOrder(setFilters(setDepthFilters(new GremlinPipeline<Vertex, Vertex>(
-                                        indexQ).filter(aclFilterFunction))))),
+                                setPipelineRange(setOrder(applyFilters(new GremlinPipeline<Vertex, Vertex>(
+                                        indexQ).filter(aclFilterFunction)))),
                                 cls), count, offset.or(0),
                         limit.or(DEFAULT_LIST_LIMIT), sort);
             } finally {
@@ -378,6 +377,16 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
         } finally {
             countQ.close();
         }
+    }
+    
+    /**
+     * Apply filtering actions to a Gremlin pipeline.
+     * 
+     * @param pipe
+     * @return
+     */
+    public <S> GremlinPipeline<S, Vertex> applyFilters(GremlinPipeline<S, Vertex> pipe) {
+        return setFilters(setDepthFilters(pipe));
     }
 
     /**
@@ -407,7 +416,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
                     .getAclFilterFunction(user));
             return graph
                     .frameVertices(
-                            setPipelineRange(setOrder(setFilters(setDepthFilters(filter)))),
+                            setPipelineRange(setOrder(applyFilters(filter))),
                             cls);
         } finally {
             vertices.close();
@@ -441,7 +450,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
                 .filter(new AclManager(graph).getAclFilterFunction(user));
         return graph
                 .frameVertices(
-                        setPipelineRange(setOrder(setFilters(setDepthFilters(filter)))),
+                        setPipelineRange(setOrder(applyFilters(filter))),
                         cls);
     }
 
