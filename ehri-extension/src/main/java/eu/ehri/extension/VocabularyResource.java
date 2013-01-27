@@ -200,7 +200,7 @@ public class VocabularyResource extends
     }
 
     /**
-     * Create a documentary unit for this repository.
+     * Create a top-level concept unit for this vocabulary.
      * 
      * @param id
      * @param json

@@ -1,5 +1,6 @@
 package eu.ehri.extension;
 
+import java.net.URI;
 import java.util.List;
 
 import javax.ws.rs.Consumes;
@@ -16,6 +17,7 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
 
@@ -25,14 +27,18 @@ import org.neo4j.graphdb.Transaction;
 import com.tinkerpop.blueprints.Direction;
 
 import eu.ehri.extension.errors.BadRequester;
+import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
+import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.cvoc.Concept;
+import eu.ehri.project.persistance.Bundle;
+import eu.ehri.project.views.impl.LoggingCrudViews;
 import eu.ehri.project.views.impl.Query;
 
 /**
@@ -138,17 +144,15 @@ public class CvocConceptResource extends
             @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
             @QueryParam(SORT_PARAM) List<String> order,
             @QueryParam(FILTER_PARAM) List<String> filters)
-            
-            throws ItemNotFound, PermissionDenied, BadRequester {
+
+    throws ItemNotFound, PermissionDenied, BadRequester {
 
         Accessor user = getRequesterUserProfile();
         Concept concept = views.detail(manager.getFrame(id, cls), user);
         Query<Concept> query = new Query<Concept>(graph, Concept.class)
                 .setLimit(limit).setOffset(offset).orderBy(order)
-                .depthFilter(Concept.NARROWER, Direction.IN
-                        , 0)
-                .filter(filters);
-        return streamingList(query.list(concept.getNarrowerConcepts(), user));        
+                .depthFilter(Concept.NARROWER, Direction.IN, 0).filter(filters);
+        return streamingList(query.list(concept.getNarrowerConcepts(), user));
     }
 
     @GET
@@ -160,19 +164,17 @@ public class CvocConceptResource extends
             @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
             @QueryParam(SORT_PARAM) List<String> order,
             @QueryParam(FILTER_PARAM) List<String> filters)
-            
-            throws ItemNotFound, PermissionDenied, BadRequester {
+
+    throws ItemNotFound, PermissionDenied, BadRequester {
 
         Accessor user = getRequesterUserProfile();
         Concept concept = views.detail(manager.getFrame(id, cls), user);
         Query<Concept> query = new Query<Concept>(graph, Concept.class)
                 .setLimit(limit).setOffset(offset).orderBy(order)
-                .depthFilter(Concept.NARROWER, Direction.IN
-                        , 0)
                 .filter(filters);
         return streamingPage(query.page(concept.getNarrowerConcepts(), user));
     }
-    
+
     /**
      * Add an existing concept to the list of 'narrower' of this existing
      * Concepts No vertex is created, but the 'narrower' edge is created between
@@ -331,5 +333,77 @@ public class CvocConceptResource extends
         } finally {
             tx.finish();
         }
+    }
+
+    /**
+     * Create a top-level concept unit for this vocabulary.
+     * 
+     * @param id
+     * @param json
+     * @return
+     * @throws PermissionDenied
+     * @throws ValidationError
+     * @throws IntegrityError
+     * @throws DeserializationError
+     * @throws ItemNotFound
+     * @throws BadRequester
+     */
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id:.+}/" + Entities.CVOC_CONCEPT)
+    public Response createNarrowerConcept(@PathParam("id") String id,
+            String json, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
+            throws PermissionDenied, ValidationError, IntegrityError,
+            DeserializationError, ItemNotFound, BadRequester {
+        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
+        try {
+            Accessor user = getRequesterUserProfile();
+            Concept parent = new Query<Concept>(graph, Concept.class).get(id,
+                    user);
+            Concept concept = createConcept(json, parent);
+            new AclManager(graph).setAccessors(concept,
+                    getAccessors(accessors, user));
+            tx.success();
+            return buildResponseFromConcept(concept);
+        } catch (SerializationError e) {
+            tx.failure();
+            throw new WebApplicationException(e);
+        } finally {
+            tx.finish();
+        }
+    }
+
+    // Helpers
+
+    private Response buildResponseFromConcept(Concept concept)
+            throws SerializationError {
+        String jsonStr = serializer.vertexFrameToJson(concept);
+        // FIXME: Hide the details of building this path
+        URI docUri = UriBuilder.fromUri(uriInfo.getBaseUri())
+                .segment(Entities.CVOC_CONCEPT).segment(manager.getId(concept))
+                .build();
+
+        return Response.status(Status.CREATED).location(docUri)
+                .entity((jsonStr).getBytes()).build();
+    }
+
+    private Concept createConcept(String json, Concept parent)
+            throws DeserializationError, PermissionDenied, ValidationError,
+            IntegrityError, BadRequester {
+        Bundle entityBundle = Bundle.fromString(json);
+
+        // NB: Because concepts aren't strictly hierarchical (they can have
+        // more than one broader term) we use the containing vocabulary as
+        // the permission scope here, rather than the immediate parent.
+        Concept concept = new LoggingCrudViews<Concept>(graph, Concept.class,
+                parent.getPermissionScope()).create(entityBundle,
+                getRequesterUserProfile());
+
+        // Add it to this Vocabulary's concepts
+        parent.addNarrowerConcept(concept);
+        concept.setVocabulary(parent.getVocabulary());
+        concept.setPermissionScope(parent.getPermissionScope());
+        return concept;
     }
 }
