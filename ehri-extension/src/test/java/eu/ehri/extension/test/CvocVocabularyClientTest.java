@@ -143,6 +143,4 @@ public class CvocVocabularyClientTest extends BaseRestClientTest {
         
         return response;
     }
-    
-
 }
