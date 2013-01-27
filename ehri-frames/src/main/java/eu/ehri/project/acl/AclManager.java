@@ -417,6 +417,15 @@ public final class AclManager {
             graph.removeVertex(maybeGrant.get().asVertex());
         }
     }
+    
+    /**
+     * Revoke a particular permission grant.
+     * 
+     * @param grant
+     */
+    public void revokePermissionGrant(PermissionGrant grant) {
+        graph.removeVertex(grant.asVertex());
+    }
 
     /**
      * Build a gremlin filter function that passes through items readable by a

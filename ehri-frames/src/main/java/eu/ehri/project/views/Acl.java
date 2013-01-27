@@ -10,6 +10,7 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.models.PermissionGrant;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 
@@ -32,4 +33,7 @@ public interface Acl {
 
     public void setAccessors(AccessibleEntity entity, Set<Accessor> accessors,
             Accessor user) throws PermissionDenied;
+
+    public void revokePermissionGrant(PermissionGrant grant, Accessor user)
+            throws PermissionDenied;
 }
