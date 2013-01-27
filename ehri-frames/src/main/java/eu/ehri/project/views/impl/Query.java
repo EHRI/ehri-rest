@@ -333,7 +333,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
 
         // FIXME: We have to read the vertices into memory here since we
         // can't re-use the iterator for counting and streaming.
-        ArrayList<Vertex> userVerts = Lists.newArrayList(setFilters(
+        ArrayList<Vertex> userVerts = Lists.newArrayList(applyFilters(
                 new GremlinPipeline<E, Vertex>(
                         new FramedVertexIterableAdaptor<T>(vertices))
                         .filter(aclFilterFunction)).iterator());
