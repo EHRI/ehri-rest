@@ -35,7 +35,7 @@ public class ContentTypeResource extends AbstractAccessibleEntityResource<Conten
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{id:[\\w-]+}")
+    @Path("/{id:.+}")
     public Response getContentType(@PathParam("id") String id)
             throws ItemNotFound, PermissionDenied, BadRequester {
         return retrieve(id);

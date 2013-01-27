@@ -35,7 +35,6 @@ public class AnnotationRestClientTest extends BaseRestClientTest {
                 .header(AbstractRestResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId())
                 .get(ClientResponse.class);
-        System.out.println(response.getEntity(String.class));
         assertEquals(Response.Status.OK.getStatusCode(),
                 response.getStatus());        
     }

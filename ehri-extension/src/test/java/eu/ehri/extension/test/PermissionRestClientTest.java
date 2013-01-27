@@ -367,7 +367,6 @@ public class PermissionRestClientTest extends BaseRestClientTest {
                 .header(AbstractRestResource.AUTH_HEADER_NAME,
                         LIMITED_USER_NAME).entity(testUpdateString)
                 .put(ClientResponse.class);
-        System.out.println(response.getEntity(String.class));
         // Should get UPDATED this time...
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
 
