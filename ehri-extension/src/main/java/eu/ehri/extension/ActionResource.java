@@ -20,6 +20,7 @@ import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.Action;
+import eu.ehri.project.models.ActionEvent;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistance.Serializer;
@@ -154,10 +155,9 @@ public class ActionResource extends AbstractAccessibleEntityResource<Action> {
         AccessibleEntity item = new LoggingCrudViews<AccessibleEntity>(graph,
                 AccessibleEntity.class).detail(
                 manager.getFrame(id, AccessibleEntity.class), user);
-        // FIXME: We ignore the sort param here...
-        Query<Action> query = new Query<Action>(graph, Action.class)
+        Query<ActionEvent> query = new Query<ActionEvent>(graph, ActionEvent.class)
                 .setOffset(offset).setLimit(limit)
-                .orderBy(Action.TIMESTAMP, Query.Sort.DESC).filter(filters);
+                .orderBy(order).filter(filters);
         return streamingPage(query.page(item.getHistory(), user));
     }
 }

@@ -125,7 +125,14 @@ public final class Serializer {
                 // depth of traversal beyong which we don't serialize.
                 Method method = entry.getValue();
                 int nextDepth = depth + 1;                
-                if (nextDepth > method.getAnnotation(Fetch.class).depth()) {
+                Fetch fetchProps = method.getAnnotation(Fetch.class);
+                if (nextDepth > fetchProps.depth()) {
+                    continue;
+                }
+                
+                // If the fetch should only be serialized at a certain depth and
+                // we've exceeded that, don't serialize.
+                if (fetchProps.ifDepth() != -1 && depth > fetchProps.ifDepth()) {
                     continue;
                 }
 

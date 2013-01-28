@@ -28,6 +28,7 @@ import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.models.Action;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Group;
 import eu.ehri.project.models.base.AccessibleEntity;
@@ -59,7 +60,7 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
     public StreamingOutput listGroups(
             @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
             @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
-            @QueryParam(SORT_PARAM) List<String> order,            
+            @QueryParam(SORT_PARAM) List<String> order,
             @QueryParam(FILTER_PARAM) List<String> filters)
             throws ItemNotFound, BadRequester {
         return list(offset, limit, order, filters);
@@ -76,14 +77,14 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
             throws ItemNotFound, BadRequester {
         return page(offset, limit, order, filters);
     }
-    
+
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response createGroup(String json,
-            @QueryParam(ACCESSOR_PARAM) List<String> accessors) throws PermissionDenied,
-            ValidationError, IntegrityError, DeserializationError,
-            ItemNotFound, BadRequester {
+            @QueryParam(ACCESSOR_PARAM) List<String> accessors)
+            throws PermissionDenied, ValidationError, IntegrityError,
+            DeserializationError, ItemNotFound, BadRequester {
         return create(json, accessors);
     }
 
@@ -129,22 +130,27 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
             Group group = manager.getFrame(id, EntityClass.GROUP, Group.class);
             Accessor accessor = manager.getFrame(aid, Accessor.class);
             group.addMember(accessor);
-            
+
             // Log the action...
-            new ActionManager(graph).createAction(
+            // FIXME: Sort out the logic in ActionManager so this cruft isn't
+            // required.
+            ActionManager actionManager = new ActionManager(graph);
+            Actioner actioner = graph.frame(getRequesterUserProfile()
+                    .asVertex(), Actioner.class);
+            Action action = actionManager.createAction(
                     graph.frame(accessor.asVertex(), AccessibleEntity.class),
-                    graph.frame(getRequesterUserProfile().asVertex(), Actioner.class),
-                    "Added accessor to group").addSubjects(group);
-            
+                    actioner, "Added accessor to group");
+            actionManager.addSubjects(action, actioner, group);
+
             tx.success();
-            
+
             // TODO: Is there anything worth return here except OK?
             return Response.status(Status.OK).build();
         } finally {
             tx.finish();
         }
     }
-    
+
     /**
      * Remove an accessor from a group.
      * 
@@ -159,8 +165,8 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
     @DELETE
     @Path("/{id:[^/]+}/{aid:.+}")
     public Response removeMember(@PathParam("id") String id,
-            @PathParam("aid") String aid)
-            throws PermissionDenied, ItemNotFound, BadRequester {
+            @PathParam("aid") String aid) throws PermissionDenied,
+            ItemNotFound, BadRequester {
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
             // FIXME: Add permission checks for this!!!
@@ -168,20 +174,25 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
             Accessor accessor = manager.getFrame(aid, Accessor.class);
             group.removeMember(accessor);
             // Log the action...
-            new ActionManager(graph).createAction(
+            // FIXME: Sort out the logic in ActionManager so this cruft isn't
+            // required.
+            ActionManager actionManager = new ActionManager(graph);
+            Actioner actioner = graph.frame(getRequesterUserProfile()
+                    .asVertex(), Actioner.class);
+            Action action = actionManager.createAction(
                     graph.frame(accessor.asVertex(), AccessibleEntity.class),
-                    graph.frame(getRequesterUserProfile().asVertex(), Actioner.class),
-                    "Removed accessor from group").addSubjects(group);
-            
+                    actioner, "Removed accessor from group");
+            actionManager.addSubjects(action, actioner, group);
+
             tx.success();
-            
+
             // TODO: Is there anything worth return here except OK?
             return Response.status(Status.OK).build();
         } finally {
             tx.finish();
         }
-    }    
-    
+    }
+
     /**
      * Delete a group with the given identifier string.
      * 

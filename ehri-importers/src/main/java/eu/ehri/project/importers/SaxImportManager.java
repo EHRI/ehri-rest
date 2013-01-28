@@ -49,6 +49,8 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
     protected final FramedGraph<Neo4jGraph> framedGraph;
     protected final Agent agent;
     protected final Actioner actioner;
+    protected final ActionManager actionManager;
+    
     // Ugly stateful variables for tracking import state
     // and reporting errors usefully...
     private String currentFile = null;
@@ -82,6 +84,7 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
         this.framedGraph = framedGraph;
         this.agent = agent;
         this.actioner = actioner;
+        this.actionManager = new ActionManager(framedGraph);
         this.importerClass = importerClass;
         this.handlerClass = handlerClass;
         
@@ -216,14 +219,14 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
             importer.addCreationCallback(new ImportCallback() {
                 public void itemImported(AccessibleEntity item) {
                     System.out.println("ImportCallback: itemImported creation " + item.getIdentifier());
-                    action.addSubjects(item);
+                    actionManager.addSubjects(action, actioner, item);
                     log.addCreated();
                 }
             });
             importer.addUpdateCallback(new ImportCallback() {
                 public void itemImported(AccessibleEntity item) {
                     System.out.println("ImportCallback: itemImported updated");
-                    action.addSubjects(item);
+                    actionManager.addSubjects(action, actioner, item);
                     log.addUpdated();
                 }
             });

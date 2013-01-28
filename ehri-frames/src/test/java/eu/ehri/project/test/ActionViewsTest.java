@@ -2,10 +2,14 @@ package eu.ehri.project.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNotNull;
 
 import java.util.Iterator;
 import java.util.List;
 import org.junit.Test;
+
+import com.tinkerpop.blueprints.Direction;
+import com.tinkerpop.blueprints.Vertex;
 
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.IntegrityError;
@@ -13,10 +17,12 @@ import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.Action;
+import eu.ehri.project.models.ActionEvent;
 import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.Description;
+import eu.ehri.project.persistance.ActionManager;
 import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.views.impl.LoggingCrudViews;
 
@@ -80,15 +86,34 @@ public class ActionViewsTest extends AbstractFixtureTest {
         assertEquals(newName, changedUser.getName());
 
         // Check we have an audit action.
+        assertNotNull(changedUser.getLatestEvent());
+        assertNotNull(validUser.getLatestAction());
+        assertTrue(validUser.getLatestAction().getSubjects().iterator()
+                .hasNext());
+        assertEquals(changedUser.asVertex(), validUser.getLatestAction()
+                .getSubjects().iterator().next().asVertex());
         assertTrue(changedUser.getHistory().iterator().hasNext());
-        // We should have exactly two; one for create, one for update...
-        List<Action> actions = toList(changedUser.getHistory());
+        System.out.println(validUser.getName());
+        System.out.println(changedUser.getHistory().iterator()
+        .next().getAction().getLogMessage());
+        System.out.println(toList(changedUser.getHistory()));
+        assertEquals(validUser.asVertex(), changedUser.getHistory().iterator()
+                .next().getAction().getActioner().iterator().next().asVertex());
+        
+        // We should have exactly two actions now; one for create, one for
+        // update...
+        List<ActionEvent> actions = toList(changedUser.getHistory());
+        for (ActionEvent action : actions) {
+            
+            System.out.println(action.getAction().getTimestamp());
+            System.out.println(action.getAction().getLogMessage());
+        }
         assertEquals(2, actions.size());
-        // They should have default log messages...
-        assertEquals(LoggingCrudViews.DEFAULT_CREATE_LOG, actions.get(0)
-                .getLogMessage());
-        assertEquals(LoggingCrudViews.DEFAULT_UPDATE_LOG, actions.get(1)
-                .getLogMessage());
+        // They should have default log messages, and come out latest-first.
+        assertEquals(LoggingCrudViews.DEFAULT_UPDATE_LOG, actions.get(0)
+                .getAction().getLogMessage());
+        assertEquals(LoggingCrudViews.DEFAULT_CREATE_LOG, actions.get(1)
+                .getAction().getLogMessage());
     }
 
     /**
@@ -106,7 +131,7 @@ public class ActionViewsTest extends AbstractFixtureTest {
         LoggingCrudViews<DocumentaryUnit> docViews = new LoggingCrudViews<DocumentaryUnit>(
                 graph, DocumentaryUnit.class);
         Integer shouldDelete = 1;
-        int origActionCount = toList(validUser.getActions()).size();
+        int origActionCount = toList(validUser.getHistory()).size();
 
         // FIXME: Surely there's a better way of doing this???
         Iterator<DatePeriod> dateIter = item.getDatePeriods().iterator();

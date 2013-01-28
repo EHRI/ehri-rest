@@ -34,6 +34,7 @@ public enum EntityClass {
     ANNOTATION(Entities.ANNOTATION, "ann", Annotation.class),
     ADDRESS(Entities.ADDRESS, "adr", Address.class),
     ACTION(Entities.ACTION, "act", Action.class),
+    ACTION_EVENT(Entities.ACTION_EVENT, "actev", Action.class),
     IMPORT(Entities.IMPORT, "imp", Import.class),
     PROPERTY(Entities.PROPERTY, "p", Property.class),
     PERMISSION(Entities.PERMISSION, "pm", Permission.class),

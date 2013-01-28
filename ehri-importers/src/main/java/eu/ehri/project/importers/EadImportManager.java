@@ -59,6 +59,7 @@ public class EadImportManager extends XmlImportManager implements ImportManager 
     protected final FramedGraph<Neo4jGraph> framedGraph;
     protected final Agent agent;
     protected final Actioner actioner;
+    protected final ActionManager actionManager;
 
     // Ugly stateful variables for tracking import state
     // and reporting errors usefully...
@@ -90,6 +91,7 @@ public class EadImportManager extends XmlImportManager implements ImportManager 
         this.framedGraph = framedGraph;
         this.agent = agent;
         this.actioner = actioner;
+        this.actionManager = new ActionManager(framedGraph);
     }
 
     /**
@@ -120,7 +122,7 @@ public class EadImportManager extends XmlImportManager implements ImportManager 
         Transaction tx = framedGraph.getBaseGraph().getRawGraph().beginTx();
         try {
             // Create a new action for this import
-            final Action action = new ActionManager(framedGraph).createAction(
+            final Action action = actionManager.createAction(
                     actioner, logMessage);
             // Create a manifest to store the results of the import.
             final ImportLog log = new ImportLog(action);
@@ -313,13 +315,13 @@ public class EadImportManager extends XmlImportManager implements ImportManager 
         // Create a new action for this import
         importer.addCreationCallback(new ImportCallback() {
             public void itemImported(AccessibleEntity item) {
-                action.addSubjects(item);
+                actionManager.addSubjects(action, actioner, item);
                 log.addCreated();
             }
         });
         importer.addUpdateCallback(new ImportCallback() {
             public void itemImported(AccessibleEntity item) {
-                action.addSubjects(item);
+                actionManager.addSubjects(action, actioner, item);
                 log.addUpdated();
             }
         });

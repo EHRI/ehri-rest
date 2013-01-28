@@ -67,6 +67,7 @@ public class SkosCoreCvocImporter {
 	            .getLogger(SkosCoreCvocImporter.class);
     protected final FramedGraph<Neo4jGraph> framedGraph;
     protected final Actioner actioner;
+    protected final ActionManager actionManager;
     protected Boolean tolerant = false;
     protected final Vocabulary vocabulary;
     // map from the internal Skos identifier to the placeholder
@@ -84,6 +85,7 @@ public class SkosCoreCvocImporter {
         this.framedGraph = framedGraph;
         this.actioner = actioner;
         this.vocabulary = vocabulary;
+        this.actionManager = new ActionManager(framedGraph);
     }
     
     /**
@@ -225,7 +227,8 @@ public class SkosCoreCvocImporter {
             		 frame.setVocabulary(vocabulary);
             		 frame.setPermissionScope(scope);
 
-            		 action.addSubjects(frame); // when concept was successfully persisted!
+            		 // when concept was successfully persisted!
+            		 actionManager.addSubjects(action, actioner, frame);
             		 manifest.addCreated();
             		 
             	     // Create and add a ConceptPlaceholder 

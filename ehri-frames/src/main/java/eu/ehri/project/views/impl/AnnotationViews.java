@@ -16,6 +16,7 @@ import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.models.Action;
 import eu.ehri.project.models.Annotation;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
@@ -114,9 +115,14 @@ public final class AnnotationViews implements Annotations {
                 annotation);
         annotation.setAnnotator(graph.frame(accessor.asVertex(),
                 Annotator.class));
-        new ActionManager(graph).createAction(entity,
-                graph.frame(accessor.asVertex(), Actioner.class),
-                "Added annotation").addSubjects(annotation);
+
+        // FIXME: Sort out the logic in ActionManager so this cruft isn't
+        // required.
+        ActionManager actionManager = new ActionManager(graph);
+        Actioner actioner = graph.frame(accessor.asVertex(), Actioner.class);
+        Action action = actionManager.createAction(entity, actioner,
+                "Added annotation");
+        actionManager.addSubjects(action, actioner, annotation);
         return annotation;
     }
 
@@ -135,10 +141,10 @@ public final class AnnotationViews implements Annotations {
                 .create();
         AnnotatableEntity item = manager.getFrame(id, AnnotatableEntity.class);
         getAnnotations(item, annotations, filter);
-        new Serializer(graph).traverseSubtree(item, new TraversalCallback() {            
-            public void process(VertexFrame vertexFrame, int depth, String relation,
-                    int relationIndex) {
-                getAnnotations(vertexFrame, annotations, filter);                
+        new Serializer(graph).traverseSubtree(item, new TraversalCallback() {
+            public void process(VertexFrame vertexFrame, int depth,
+                    String relation, int relationIndex) {
+                getAnnotations(vertexFrame, annotations, filter);
             }
         });
         return annotations;

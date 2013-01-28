@@ -91,13 +91,17 @@ public class UserMod extends BaseCommand implements Command {
         try {
             UserProfile user = manager.getFrame(userId,
                     EntityClass.USER_PROFILE, UserProfile.class);
-            Action action = new ActionManager(graph).createAction(user, admin,
-                    logMessage);
+
+            // FIXME: Sort out the logic in ActionManager so this cruft isn't
+            // required.
+            ActionManager actionManager = new ActionManager(graph);
+            Action action = actionManager.createAction(user, admin, logMessage);
+
             for (String groupId : groups) {
                 Group group = manager.getFrame(groupId, EntityClass.GROUP,
                         Group.class);
                 group.addMember(user);
-                action.addSubjects(group);
+                actionManager.addSubjects(action, admin, group);
             }
             tx.success();
         } finally {

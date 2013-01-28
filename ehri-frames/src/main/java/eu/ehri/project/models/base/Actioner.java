@@ -1,17 +1,27 @@
 package eu.ehri.project.models.base;
 
-import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Property;
 import com.tinkerpop.frames.VertexFrame;
+import com.tinkerpop.frames.annotations.gremlin.GremlinGroovy;
 
 import eu.ehri.project.models.Action;
+import eu.ehri.project.persistance.ActionManager;
 
 public interface Actioner extends VertexFrame {
 
     @Property("name")
     public String getName();
 
-    @Adjacency(label = Action.HAS_ACTIONER, direction = Direction.IN)
-    public Iterable<Action> getActions();
+    /**
+     * Fetch a list of Actions for this user in newest-first order.
+     * 
+     * @return
+     */
+    @GremlinGroovy("_().as('n').out('" + ActionManager.LIFECYCLE_ACTION + "')" +
+            ".loop('n'){true}{true}")
+    public Iterable<Action> getActions();    
+    
+    @Adjacency(label = ActionManager.LIFECYCLE_ACTION)
+    public Action getLatestAction();
 }

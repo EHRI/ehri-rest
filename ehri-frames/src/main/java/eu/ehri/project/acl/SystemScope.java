@@ -2,7 +2,7 @@ package eu.ehri.project.acl;
 
 import com.tinkerpop.blueprints.Vertex;
 
-import eu.ehri.project.models.Action;
+import eu.ehri.project.models.ActionEvent;
 import eu.ehri.project.models.PermissionGrant;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
@@ -65,10 +65,6 @@ public enum SystemScope implements PermissionScope, AccessibleEntity {
         return new EmptyIterable<PermissionGrant>();
     }
 
-    public Iterable<Action> getHistory() {
-        return new EmptyIterable<Action>();
-    }
-
     public PermissionScope getPermissionScope() {
         return null;
     }
@@ -79,5 +75,15 @@ public enum SystemScope implements PermissionScope, AccessibleEntity {
 
     public Iterable<PermissionScope> getPermissionScopes() {
         return new EmptyIterable<PermissionScope>();
+    }
+
+    public ActionEvent getLatestEvent() {
+        // FIXME: Refactor frames hierarchy to make
+        // AccessibleEntity less important.
+        throw new UnsupportedOperationException();
+    }
+
+    public Iterable<ActionEvent> getHistory() {
+        return new EmptyIterable<ActionEvent>();
     }
 }
