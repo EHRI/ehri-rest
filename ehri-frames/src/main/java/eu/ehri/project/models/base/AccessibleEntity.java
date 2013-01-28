@@ -21,7 +21,7 @@ public interface AccessibleEntity extends VertexFrame, PermissionGrantTarget {
     @Property(IDENTIFIER_KEY)
     public String getIdentifier();
 
-    @Fetch(depth = 1)
+    @Fetch(value = ACCESS, depth = 1)
     @Adjacency(label = ACCESS)
     public Iterable<Accessor> getAccessors();
 
@@ -53,7 +53,7 @@ public interface AccessibleEntity extends VertexFrame, PermissionGrantTarget {
             + ".loop('n'){true}{true}")
     public Iterable<ActionEvent> getHistory();
 
-    @Fetch
+    @Fetch(value = ActionManager.LIFECYCLE_ACTION, ifDepth = 0)
     @Adjacency(label = ActionManager.LIFECYCLE_EVENT)
     public ActionEvent getLatestEvent();
 }

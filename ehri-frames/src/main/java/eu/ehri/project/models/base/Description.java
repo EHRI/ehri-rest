@@ -23,7 +23,7 @@ public interface Description extends VertexFrame, VersionedEntity {
      * 
      * @return
      */
-    @Fetch(ifDepth=0)
+    @Fetch(value = DESCRIBES, ifDepth=0)
     @Adjacency(label = DESCRIBES)
     public DescribedEntity getDescribedEntity();    
 }

@@ -46,7 +46,7 @@ public interface Action extends AccessibleEntity {
     @Adjacency(label = HAS_ACTION_EVENT)
     public Iterable<ActionEvent> getActionEvent();
 
-    @Fetch(ifDepth = 0)
+    @Fetch(value = HAS_ACTIONER, ifDepth = 0)
     @GremlinGroovy("_().as('e').in('" + ActionManager.LIFECYCLE_ACTION
             + "').loop('e'){true}{it.object.in('"
             + ActionManager.LIFECYCLE_ACTION + "').count()==0}")

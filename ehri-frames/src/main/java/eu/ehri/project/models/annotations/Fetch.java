@@ -32,4 +32,6 @@ public @interface Fetch {
 
     int ifDepth() default -1;
 
+    String value();
+
 }

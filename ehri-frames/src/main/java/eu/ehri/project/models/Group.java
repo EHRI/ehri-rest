@@ -18,7 +18,7 @@ public interface Group extends VertexFrame, Accessor, AccessibleEntity,
     public static final String ADMIN_GROUP_IDENTIFIER = "admin";
     public static final String ANONYMOUS_GROUP_IDENTIFIER = "anonymous";
 
-    @Fetch
+    @Fetch(BELONGS_TO)
     @Adjacency(label = BELONGS_TO)
     public Iterable<Group> getGroups();
     

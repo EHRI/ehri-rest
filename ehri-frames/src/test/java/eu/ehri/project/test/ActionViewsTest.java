@@ -7,6 +7,7 @@ import static org.junit.Assert.assertNotNull;
 import java.util.Iterator;
 import java.util.List;
 
+import eu.ehri.project.persistance.Serializer;
 import org.junit.Test;
 
 import eu.ehri.project.exceptions.DeserializationError;
@@ -97,6 +98,18 @@ public class ActionViewsTest extends AbstractFixtureTest {
         // update...
         List<ActionEvent> actionEvents = toList(changedUser.getHistory());
         assertEquals(2, actionEvents.size());
+        // We should have the right subject on the actionEvent
+        assertTrue(actionEvents.get(0).getSubject().iterator().hasNext());
+        assertTrue(actionEvents.get(1).getSubject().iterator().hasNext());
+        assertEquals(changedUser.asVertex(), actionEvents.get(0)
+                .getSubject().iterator().next().asVertex());
+        assertEquals(changedUser.asVertex(), actionEvents.get(1)
+                .getSubject().iterator().next().asVertex());
+        try {
+            System.out.println(new Serializer(graph).vertexFrameToBundle(actionEvents.get(0)));
+        } catch (SerializationError serializationError) {
+            serializationError.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
         // They should have default log messages, and come out latest-first.
         assertEquals(LoggingCrudViews.DEFAULT_UPDATE_LOG, actionEvents.get(0)
                 .getAction().getLogMessage());

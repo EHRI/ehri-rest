@@ -17,11 +17,11 @@ public interface Annotation extends AnnotatableEntity, AccessibleEntity {
     
     public static final String HAS_SOURCE = "hasSource";
 
-    @Fetch
+    @Fetch(Annotation.ANNOTATES)
     @Adjacency(label = Annotation.ANNOTATES, direction = Direction.IN)
     public Iterable<Annotation> getAnnotations();
 
-    @Fetch(depth = 1)
+    @Fetch(value = Annotator.HAS_ANNOTATION, depth = 1)
     @Adjacency(label = Annotator.HAS_ANNOTATION, direction = Direction.IN)
     public Annotator getAnnotator();
 
@@ -31,7 +31,7 @@ public interface Annotation extends AnnotatableEntity, AccessibleEntity {
     @Adjacency(label = ANNOTATES)
     public Iterable<AnnotatableEntity> getTargets();
     
-    @Fetch
+    @Fetch(HAS_SOURCE)
     @Adjacency(label = HAS_SOURCE)
     public AnnotatableEntity getSource();
 

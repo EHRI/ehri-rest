@@ -63,10 +63,9 @@ public class ClassUtils {
     public static List<String> getFetchedRelations(Class<?> cls) {
         List<String> out = new LinkedList<String>();
         for (Method method : cls.getMethods()) {
-            if (method.getAnnotation(Fetch.class) != null) {
-                Adjacency ann = method.getAnnotation(Adjacency.class);
-                if (ann != null)
-                    out.add(ann.label());
+            Fetch ann = method.getAnnotation(Fetch.class);
+            if (ann != null) {
+                out.add(ann.value());
             }
         }
         return out;
@@ -76,13 +75,11 @@ public class ClassUtils {
         logger.trace(" - checking for @Fetch methods: {}", cls.getCanonicalName());
         Map<String, Method> out = new HashMap<String, Method>();
         for (Method method : cls.getMethods()) {
-            if (method.getAnnotation(Fetch.class) != null
+            Fetch fetch = method.getAnnotation(Fetch.class);
+            if (fetch != null
                     && method.getName().startsWith(FETCH_METHOD_PREFIX)) {
-                Adjacency ann = method.getAnnotation(Adjacency.class);
-                if (ann != null) {
-                    out.put(ann.label(), method);
-                    logger.trace(" --- found @Fetch annotation: {}: {}", method.getName(), ann.label());
-                }
+                out.put(fetch.value(), method);
+                logger.trace(" --- found @Fetch annotation: {}: {}", method.getName(), fetch.value());
             }
         }
 

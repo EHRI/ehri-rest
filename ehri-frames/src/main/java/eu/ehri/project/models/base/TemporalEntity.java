@@ -12,7 +12,7 @@ public interface TemporalEntity extends VertexFrame {
     public static final String HAS_DATE = "hasDate";
 
     @Dependent
-    @Fetch
+    @Fetch(HAS_DATE)
     @Adjacency(label = HAS_DATE)
     public abstract Iterable<DatePeriod> getDatePeriods();
 

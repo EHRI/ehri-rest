@@ -10,6 +10,8 @@ import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.persistance.ActionManager;
 
+import static eu.ehri.project.persistance.ActionManager.*;
+
 @EntityType(EntityClass.ACTION_EVENT)
 public interface ActionEvent extends AccessibleEntity {
     public static final String HAS_SUBJECT = "hasSubject";
@@ -30,14 +32,14 @@ public interface ActionEvent extends AccessibleEntity {
     @Property(LOG_MESSAGE)
     public String getLogMessage();
 
-    @Fetch
-    @Adjacency(label = ActionManager.HAS_EVENT_ACTION)
+    @Fetch(HAS_EVENT_ACTION)
+    @Adjacency(label = HAS_EVENT_ACTION)
     public Action getAction();
 
-    @Fetch(ifDepth = 0)
-    @GremlinGroovy("_().as('e').in('" + ActionManager.LIFECYCLE_EVENT
+    @Fetch(value = HAS_SUBJECT, ifDepth = 0)
+    @GremlinGroovy("_().as('e').in('" + LIFECYCLE_EVENT
             + "').loop('e'){true}{it.object.in('"
-            + ActionManager.LIFECYCLE_EVENT + "').count()==0}")
+            + LIFECYCLE_EVENT + "').count()==0}")
     public Iterable<AccessibleEntity> getSubject();
 
     @Adjacency(label = HAS_PRIOR_EVENT, direction = Direction.IN)
