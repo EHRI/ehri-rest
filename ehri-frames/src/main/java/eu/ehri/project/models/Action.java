@@ -48,6 +48,7 @@ public interface Action extends AccessibleEntity {
 
     @Fetch(ifDepth = 0)
     @GremlinGroovy("_().as('e').in('" + ActionManager.LIFECYCLE_ACTION
-            + "').loop('e'){true}{it.object.out('childOf').count()==0}")
+            + "').loop('e'){true}{it.object.in('"
+            + ActionManager.LIFECYCLE_ACTION + "').count()==0}")
     public Iterable<Actioner> getActioner();
 }

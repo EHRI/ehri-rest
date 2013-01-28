@@ -3,6 +3,7 @@ package eu.ehri.project.models;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Property;
+import com.tinkerpop.frames.annotations.gremlin.GremlinGroovy;
 
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
@@ -27,14 +28,17 @@ public interface ActionEvent extends AccessibleEntity {
     public String getTimestamp();
 
     @Property(LOG_MESSAGE)
-    public String getLogMessage();    
-    
+    public String getLogMessage();
+
     @Fetch
     @Adjacency(label = ActionManager.HAS_EVENT_ACTION)
     public Action getAction();
 
-    @Adjacency(label = HAS_SUBJECT)
-    public AccessibleEntity getSubject();
+    @Fetch(ifDepth = 0)
+    @GremlinGroovy("_().as('e').in('" + ActionManager.LIFECYCLE_EVENT
+            + "').loop('e'){true}{it.object.in('"
+            + ActionManager.LIFECYCLE_EVENT + "').count()==0}")
+    public Iterable<AccessibleEntity> getSubject();
 
     @Adjacency(label = HAS_PRIOR_EVENT, direction = Direction.IN)
     public ActionEvent getPriorActionEvent();
