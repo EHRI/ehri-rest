@@ -9,6 +9,7 @@ import org.junit.BeforeClass;
 
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.ItemNotFound;
+import eu.ehri.project.models.Address;
 import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.UserProfile;
@@ -18,6 +19,7 @@ import eu.ehri.project.models.base.Accessor;
 abstract public class AbstractFixtureTest extends ModelTestBase {
 
     protected static final String TEST_COLLECTION_NAME = "A brand new collection";
+    protected static final String TEST_AGENT_NAME = "Test Repo 1";
     protected static final String TEST_START_DATE = "1945-01-01T00:00:00Z";
     protected static final String TEST_USER_NAME = "Joe Blogs";
     protected static final String TEST_GROUP_NAME = "People";
@@ -74,6 +76,41 @@ abstract public class AbstractFixtureTest extends ModelTestBase {
                         put("data", new HashMap<String, Object>() {{
                             put(DatePeriod.START_DATE, TEST_START_DATE);
                             put(DatePeriod.END_DATE, TEST_START_DATE);
+                        }});
+                    }});
+                }});
+            }});
+        }};
+    }
+
+    @SuppressWarnings("serial")
+    protected Map<String, Object> getTestAgentBundle() {
+        // Data structure representing a not-yet-created collection.
+        // Using double-brace initialization to ease the pain.
+        return new HashMap<String, Object>() {{
+            put("type", Entities.AGENT);
+            put("data", new HashMap<String, Object>() {{
+                put(Accessor.NAME, TEST_AGENT_NAME);
+                put(AccessibleEntity.IDENTIFIER_KEY, "test-repo-1");
+            }});
+            put("relationships", new HashMap<String, Object>() {{
+                put("describes", new LinkedList<HashMap<String, Object>>() {{
+                    add(new HashMap<String, Object>() {{
+                        put("type", Entities.AGENT_DESCRIPTION);
+                        put("data", new HashMap<String, Object>() {{
+                            put(AccessibleEntity.IDENTIFIER_KEY, "test-repo-1-desc");
+                            put("title", "A Test Repository");
+                            put("languageCode", "en");
+                        }});
+                        put("relationships", new HashMap<String, Object>() {{
+                            put("hasAddress", new LinkedList<HashMap<String, Object>>() {{
+                                add(new HashMap<String, Object>() {{
+                                    put("type", Entities.ADDRESS);
+                                    put("data", new HashMap<String, Object>() {{
+                                        put(Address.ADDRESS_NAME, "primary");
+                                    }});
+                                }});
+                            }});
                         }});
                     }});
                 }});

@@ -8,9 +8,7 @@
 		<groupId>ehri-project</groupId>
 		<version>1.0</version>
 	</parent>
-	<groupId>ehri-project</groupId>
 	<artifactId>ehri-importers</artifactId>
-	<version>1.0</version>
 	<name>ehri-importers</name>
 	<url>http://maven.apache.org</url>
 	<properties>
@@ -41,6 +39,12 @@
 			<groupId>ehri-project</groupId>
 			<artifactId>ehri-frames</artifactId>
 			<version>0.1-SNAPSHOT</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>log4j</artifactId>
+					<groupId>log4j</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<dependency>
@@ -64,18 +68,24 @@
 			<groupId>com.tinkerpop.blueprints</groupId>
 			<artifactId>blueprints-neo4j-graph</artifactId>
 			<version>${tinkerpop-version}</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>log4j</artifactId>
+					<groupId>log4j</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<!-- logging -->
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<version>1.6.6</version>
-		</dependency>
+			<version>1.7.2</version>
+        </dependency>
 		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
-			<version>1.6.6</version>
-		</dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<version>1.0.0</version>
+        </dependency>
 	</dependencies>
 </project>

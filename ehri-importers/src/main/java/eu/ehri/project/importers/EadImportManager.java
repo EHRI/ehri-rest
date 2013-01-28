@@ -112,7 +112,6 @@ public class EadImportManager extends XmlImportManager implements ImportManager 
      * 
      * @throws IOException
      * @throws ValidationError
-     * @throws InvalidEadDocument
      * @throw InputParseError
      */
     @Override

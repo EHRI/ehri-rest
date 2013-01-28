@@ -1,4 +1,4 @@
-package eu.ehri.plugin.test.utils;
+package eu.ehri.extension.test.utils;
 
 import java.io.File;
 
@@ -50,6 +50,14 @@ public class ServerRunner {
         config = new ServerConfigurator(graphDatabase);
         config.configuration().setProperty("org.neo4j.server.webserver.port",
                 dbPort.toString());
+
+        // FIXME: Work out how to turn off server logging. The config below
+        // doesn't
+        // work but I'm leaving it in place so I know what's been tried!
+        config.configuration().setProperty(
+                "java.util.logging.ConsoleHandler.level", "OFF");
+        config.configuration().setProperty("org.neo4j.server.logging.level",
+                "ERROR");
 
         bootstrapper = new WrappingNeoServerBootstrapper(graphDatabase, config);
 

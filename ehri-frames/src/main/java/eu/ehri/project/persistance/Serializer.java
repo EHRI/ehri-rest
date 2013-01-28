@@ -1,11 +1,7 @@
 package eu.ehri.project.persistance;
 
-import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.Map;
-
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
 
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
@@ -15,7 +11,6 @@ import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.frames.VertexFrame;
 
-import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
@@ -29,10 +24,9 @@ import eu.ehri.project.models.utils.ClassUtils;
  * @author michaelb
  * 
  */
-public final class Converter {
+public final class Serializer {
 
     private final FramedGraph<Neo4jGraph> graph;
-    public static final int DEFAULT_TRAVERSALS = 5;
 
     /**
      * Lookup of entityType keys against their annotated class.
@@ -42,8 +36,8 @@ public final class Converter {
     /**
      * Constructor.
      */
-    public Converter(FramedGraph<Neo4jGraph> graph) {
-        this(graph, DEFAULT_TRAVERSALS);
+    public Serializer(FramedGraph<Neo4jGraph> graph) {
+        this(graph, Fetch.DEFAULT_TRAVERSALS);
     }
 
     /**
@@ -51,7 +45,7 @@ public final class Converter {
      * 
      * @param depth
      */
-    public Converter(FramedGraph<Neo4jGraph> graph, int depth) {
+    public Serializer(FramedGraph<Neo4jGraph> graph, int depth) {
         this.graph = graph;
         this.maxTraversals = depth;
     }
@@ -65,21 +59,20 @@ public final class Converter {
      */
     public <T extends VertexFrame> Map<String, Object> vertexFrameToData(T item)
             throws SerializationError {
-        return bundleToData(vertexFrameToBundle(item));
+        return vertexFrameToBundle(item).toData();
     }
 
     /**
-     * Convert some JSON into an EntityBundle.
+     * Convert a VertexFrame into an EntityBundle that includes its @Fetch'd
+     * relations.
      * 
-     * @param json
+     * @param item
      * @return
-     * @throws JsonParseException
-     * @throws JsonMappingException
-     * @throws IOException
-     * @throws DeserializationError
+     * @throws SerializationError
      */
-    public Bundle jsonToBundle(String json) throws DeserializationError {
-        return DataConverter.jsonToBundle(json);
+    public <T extends VertexFrame> Bundle vertexFrameToBundle(T item)
+            throws SerializationError {
+        return vertexFrameToBundle(item, 0);
     }
 
     /**
@@ -95,56 +88,6 @@ public final class Converter {
     }
 
     /**
-     * Convert a bundle to JSON.
-     * 
-     * @param bundle
-     * @return
-     * @throws SerializationError
-     * 
-     * @deprecated Use DataConverter static method instead.
-     * 
-     */
-    public String bundleToJson(Bundle bundle) throws SerializationError {
-        return DataConverter.bundleToJson(bundle);
-    }
-
-    /**
-     * Convert generic data into a bundle.
-     * 
-     * Prize to whomever can remove all the unchecked warnings. I don't really
-     * know how else to do this otherwise.
-     * 
-     * @throws DeserializationError
-     */
-    public Bundle dataToBundle(Map<String, Object> data)
-            throws DeserializationError {
-        return DataConverter.dataToBundle(data);
-    }
-
-    /**
-     * Convert a bundle to a generic data structure.
-     * 
-     * @param bundle
-     * @return
-     */
-    public Map<String, Object> bundleToData(Bundle bundle) {
-        return DataConverter.bundleToData(bundle);
-    }
-
-    /**
-     * Convert a VertexFrame into an EntityBundle that includes its @Fetch'd
-     * relations.
-     * 
-     * @param item
-     * @return
-     * @throws SerializationError
-     */
-    public <T extends VertexFrame> Bundle vertexFrameToBundle(T item)
-            throws SerializationError {
-        return vertexFrameToBundle(item, maxTraversals);
-    }
-
-    /**
      * Convert a VertexFrame into an EntityBundle that includes its @Fetch'd
      * relations.
      * 
@@ -153,7 +96,7 @@ public final class Converter {
      * @return
      * @throws SerializationError
      */
-    public <T extends VertexFrame> Bundle vertexFrameToBundle(T item, int depth)
+    private <T extends VertexFrame> Bundle vertexFrameToBundle(T item, int depth)
             throws SerializationError {
         // FIXME: Try and move the logic for accessing id and type elsewhere.
         try {
@@ -173,34 +116,22 @@ public final class Converter {
     private <T extends VertexFrame> ListMultimap<String, Bundle> getRelationData(
             T item, int depth, Class<?> cls) {
         ListMultimap<String, Bundle> relations = LinkedListMultimap.create();
-        if (depth > 0) {
+        if (depth < maxTraversals) {
             Map<String, Method> fetchMethods = ClassUtils.getFetchMethods(cls);
             for (Map.Entry<String, Method> entry : fetchMethods.entrySet()) {
-
                 // In order to avoid @Fetching the whole graph we track the
-                // maxDepth parameter and reduce it for every traversal.
-                // However the @Fetch annotation can also specify a non-default
-                // depth, so we need to determine whatever is lower - the
-                // current traversal count, or the annotation's count.
+                // depth parameter and increase it for every traversal.
+                // However the @Fetch annotation can also specify a maximum
+                // depth of traversal beyong which we don't serialize.
                 Method method = entry.getValue();
-                int nextDepth = Math.min(depth,
-                        method.getAnnotation(Fetch.class).depth()) - 1;
+                int nextDepth = depth + 1;                
+                if (nextDepth > method.getAnnotation(Fetch.class).depth()) {
+                    continue;
+                }
 
                 try {
-                    Object result;
-                    try {
-                        // NB: We have to re-cast the item into its 'natural'
-                        // type.
-                        result = method
-                                .invoke(graph.frame(item.asVertex(), cls));
-                    } catch (IllegalArgumentException e) {
-                        String message = String
-                                .format("When serializing a bundle, a method was called on an item it did not expect. Method name: %s, item class: %s",
-                                        method.getName(),
-                                        item.asVertex().getProperty(
-                                                EntityType.TYPE_KEY));
-                        throw new RuntimeException(message, e);
-                    }
+                    Object result = method
+                            .invoke(graph.frame(item.asVertex(), cls));
                     // The result of one of these fetchMethods should either be
                     // a single VertexFrame, or a Iterable<VertexFrame>.
                     if (result instanceof Iterable<?>) {
@@ -241,4 +172,71 @@ public final class Converter {
         }
         return data;
     }
+    
+    /**
+     * Run a callback every time a node in a subtree is encountered, starting
+     * with the top-level node.
+     * 
+     * @param item
+     * @param cb
+     */
+    public <T extends VertexFrame> void traverseSubtree(
+            T item, final TraversalCallback cb) {
+        traverseSubtree(item, 0, cb);
+    }
+    
+    /**
+     * Run a callback every time a node in a subtree is encountered, starting
+     * with the top-level node.
+     * 
+     * @param item
+     * @param depth
+     * @param cb
+     */
+    private <T extends VertexFrame> void traverseSubtree(
+            T item, int depth, final TraversalCallback cb) {
+        
+        if (depth < maxTraversals) {
+            Class<?> cls = EntityClass.withName((String) item.asVertex()
+                    .getProperty(EntityType.TYPE_KEY)).getEntityClass();
+            Map<String, Method> fetchMethods = ClassUtils.getFetchMethods(cls);
+            for (Map.Entry<String, Method> entry : fetchMethods.entrySet()) {
+
+                // In order to avoid @Fetching the whole graph we track the
+                // maxDepth parameter and reduce it for every traversal.
+                // However the @Fetch annotation can also specify a non-default
+                // depth, so we need to determine whatever is lower - the
+                // current traversal count, or the annotation's count.
+                Method method = entry.getValue();
+                int nextDepth = Math.max(depth,
+                        method.getAnnotation(Fetch.class).depth()) + 1;
+
+                try {
+                    Object result = method
+                            .invoke(graph.frame(item.asVertex(), cls));
+                    // The result of one of these fetchMethods should either be
+                    // a single VertexFrame, or a Iterable<VertexFrame>.
+                    if (result instanceof Iterable<?>) {
+                        int rnum = 0;
+                        for (Object d : (Iterable<?>) result) {
+                            cb.process((VertexFrame)d, depth, entry.getKey(), rnum);
+                            traverseSubtree((VertexFrame)d, nextDepth, cb);
+                            rnum++;
+                        }
+                    } else {
+                        // This relationship could be NULL if, e.g. a collection
+                        // has no holder.
+                        if (result != null) {
+                            cb.process((VertexFrame)result, depth, entry.getKey(), 0);
+                            traverseSubtree((VertexFrame)result, nextDepth, cb);                            
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    throw new RuntimeException(
+                            "Unexpected error serializing VertexFrame", e);
+                }
+            }
+        }
+    }    
 }

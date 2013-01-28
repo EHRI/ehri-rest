@@ -71,7 +71,6 @@ public final class BundleDAO {
      * @param bundle
      * @return
      * @throws ValidationError
-     * @throws IntegrityError
      * @throws ItemNotFound
      */
     public <T extends VertexFrame> T update(Bundle bundle, Class<T> cls)
@@ -85,7 +84,6 @@ public final class BundleDAO {
      * @param bundle
      * @return
      * @throws ValidationError
-     * @throws IntegrityError
      */
     public <T extends VertexFrame> T create(Bundle bundle, Class<T> cls)
             throws ValidationError {        
@@ -99,7 +97,6 @@ public final class BundleDAO {
      * @param bundle
      * @return
      * @throws ValidationError
-     * @throws IntegrityError
      */
     public <T extends VertexFrame> T createOrUpdate(Bundle bundle, Class<T> cls)
             throws ValidationError {
@@ -221,7 +218,6 @@ public final class BundleDAO {
      * @param bundle
      * @return
      * @throws ValidationError
-     * @throws IntegrityError
      * @throws ItemNotFound
      */
     private Vertex updateInner(Bundle bundle) throws ValidationError,
@@ -259,8 +255,7 @@ public final class BundleDAO {
      * @param relations
      * @return
      * @throws IntegrityError
-     * @throws ItemNotFound
-     * 
+     *
      * @return errors
      */
     private ListMultimap<String, BundleError> createDependents(Vertex master,
@@ -272,10 +267,9 @@ public final class BundleDAO {
         // Accumulate child errors before re-throwing...
         ListMultimap<String, BundleError> errors = LinkedListMultimap.create();
 
-        for (String key : relations.keySet()) {
-            String relation = (String) key;
+        for (String relation : relations.keySet()) {
             if (dependents.containsKey(relation)) {
-                for (Bundle bundle : relations.get(key)) {
+                for (Bundle bundle : relations.get(relation)) {
                     try {
                         Vertex child = createInner(bundle);
                         createChildRelationship(master, child, relation,
@@ -299,7 +293,6 @@ public final class BundleDAO {
      * @param cls
      * @param relations
      * @return
-     * @throws ValidationError
      * @throws IntegrityError
      * @throws ItemNotFound
      * 
@@ -323,8 +316,7 @@ public final class BundleDAO {
         ListMultimap<String, BundleError> errors = LinkedListMultimap.create();
 
         // Now go throw and create or update the new subtrees.
-        for (String key : relations.keySet()) {
-            String relation = (String) key;
+        for (String relation : relations.keySet()) {
             if (dependents.containsKey(relation)) {
                 Direction direction = dependents.get(relation);
 
@@ -335,7 +327,7 @@ public final class BundleDAO {
                 HashSet<Vertex> currentRels = getCurrentRelationships(master,
                         direction, relation);
 
-                for (Bundle bundle : relations.get(key)) {
+                for (Bundle bundle : relations.get(relation)) {
                     try {
                         Vertex child = createOrUpdateInner(bundle);
                         // Create a relation if there isn't one already
@@ -366,13 +358,13 @@ public final class BundleDAO {
 
     private void deleteMissingFromUpdateSet(Vertex master,
             Map<String, Direction> dependents, Set<String> updating) {
-        Converter converter = new Converter(graph);
+        Serializer serializer = new Serializer(graph);
         for (Entry<String, Direction> relEntry : dependents.entrySet()) {
             for (Vertex v : getCurrentRelationships(master,
                     relEntry.getValue(), relEntry.getKey())) {
                 if (!updating.contains(manager.getId(v))) {
                     try {
-                        delete(converter.vertexFrameToBundle(graph.frame(v,
+                        delete(serializer.vertexFrameToBundle(graph.frame(v,
                                 manager.getType(v).getEntityClass())));
                     } catch (SerializationError e) {
                         throw new RuntimeException(e);

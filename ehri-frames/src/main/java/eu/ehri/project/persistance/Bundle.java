@@ -13,7 +13,6 @@ import com.google.common.collect.Maps;
 
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.SerializationError;
-import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.utils.ClassUtils;
 
@@ -134,11 +133,22 @@ public class Bundle {
      * @param key
      * @param value
      * @return
-     * @throws ValidationError
      */
     public Bundle withDataValue(String key, Object value) {
         Map<String, Object> newData = Maps.newHashMap(data);
         newData.put(key, value);
+        return withData(newData);
+    }
+
+    /**
+     * Remove a value in the bundle's data.
+     * 
+     * @param key
+     * @return
+     */
+    public Bundle removeDataValue(String key) {
+        Map<String, Object> newData = Maps.newHashMap(data);
+        newData.remove(key);
         return withData(newData);
     }
 

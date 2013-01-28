@@ -188,7 +188,6 @@ public final class AclManager {
      * @param accessors
      * @param canRead
      * @param canWrite
-     * @throws PermissionDenied
      */
     public void setAccessors(AccessibleEntity entity,
             Iterable<Accessor> accessors) {
@@ -417,6 +416,15 @@ public final class AclManager {
         if (maybeGrant.isPresent()) {
             graph.removeVertex(maybeGrant.get().asVertex());
         }
+    }
+    
+    /**
+     * Revoke a particular permission grant.
+     * 
+     * @param grant
+     */
+    public void revokePermissionGrant(PermissionGrant grant) {
+        graph.removeVertex(grant.asVertex());
     }
 
     /**

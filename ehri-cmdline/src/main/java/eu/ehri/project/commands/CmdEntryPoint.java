@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.ParseException;
-
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
@@ -18,7 +16,6 @@ public class CmdEntryPoint extends BaseCommand {
      * Constructor.
      * 
      * @param args
-     * @throws ParseException
      */
     public CmdEntryPoint() {
         super();
@@ -34,6 +31,8 @@ public class CmdEntryPoint extends BaseCommand {
         mmap.put(GetEntity.NAME, GetEntity.class);
         mmap.put(LoadFixtures.NAME, LoadFixtures.class);
         mmap.put(Initialize.NAME, Initialize.class);
+        mmap.put(UserAdd.NAME, UserAdd.class);
+        mmap.put(UserMod.NAME, UserMod.class);
         COMMANDS = Collections.unmodifiableMap(mmap);
     }
 
@@ -69,7 +68,7 @@ public class CmdEntryPoint extends BaseCommand {
 
                 // Get the graph
                 FramedGraph<Neo4jGraph> graph = new FramedGraph<Neo4jGraph>(
-                        new Neo4jGraph((String) args[0]));
+                        new Neo4jGraph(args[0]));
 
                 List<String> newArgs = new LinkedList<String>();
                 for (int i = 2; i < args.length; i++) {
@@ -80,6 +79,7 @@ public class CmdEntryPoint extends BaseCommand {
                 try {                    
                     cmd.exec(graph, newArgs.toArray(new String[newArgs.size()]));
                 } catch(Exception e) {
+                    e.printStackTrace();
                     System.err.println("Error: " + e.getMessage());
                     return 1;
                 } finally {

@@ -22,6 +22,7 @@ import eu.ehri.project.models.PermissionGrant;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Actioner;
+import eu.ehri.project.models.base.PermissionGrantTarget;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistance.ActionManager;
 import eu.ehri.project.views.Acl;
@@ -181,6 +182,18 @@ public final class AclViews implements Acl {
             graph.getBaseGraph().stopTransaction(Conclusion.FAILURE);
             throw new RuntimeException(e);
         }
+    }
+
+    public void revokePermissionGrant(PermissionGrant grant, Accessor user)
+            throws PermissionDenied {
+        // TODO: This should be rather more complicated and account for the
+        // fact that individual grants can, in theory, have more than one
+        // target content type.
+        for (PermissionGrantTarget tg : grant.getTargets()) {
+            helper.checkEntityPermission(graph.frame(tg.asVertex(), AccessibleEntity.class), 
+                    user, PermissionType.GRANT);            
+        }
+        acl.revokePermissionGrant(grant);        
     }
 
 }

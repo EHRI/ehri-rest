@@ -34,7 +34,7 @@ public class AnnotationTest extends ModelTestBase {
         assertEquals(toList(c1.getAnnotations()).get(0), annotation);
 
         // Check target
-        assertEquals(annotation.getTarget().asVertex().getId(), c1.asVertex()
+        assertEquals(annotation.getTargets().iterator().next().asVertex().getId(), c1.asVertex()
                 .getId());
     }
 
@@ -44,7 +44,7 @@ public class AnnotationTest extends ModelTestBase {
                 AnnotatableEntity.class);
         Annotation ann2 = manager.getFrame("ann2", Annotation.class);
 
-        assertEquals(ann2.getTarget(), ann1);
+        assertEquals(ann2.getTargets().iterator().next(), ann1);
         assertEquals(ann1.getAnnotations().iterator().next().getBody(),
                 ann2.getBody());
     }

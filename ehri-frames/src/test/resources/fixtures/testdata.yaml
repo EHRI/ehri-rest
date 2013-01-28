@@ -332,6 +332,15 @@
     body: Test Annotation of Annotation
   relationships:
     annotates: ann1
+    
+- id: ann3
+  type: annotation
+  data:
+    identifier: ann3
+    body: Created by
+  relationships:
+    annotates: c1
+    hasSource: mike
 
 --- # Permission grants
 

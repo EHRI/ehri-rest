@@ -21,7 +21,7 @@ public interface GraphManager {
      * Get the id of a given vertex frame.
      */
     public String getId(VertexFrame vertex);
-    
+
     /**
      * Get the type of an arbitrary vertex.
      */
@@ -31,7 +31,7 @@ public interface GraphManager {
      * Get the type of an arbitrary vertex.
      */
     public EntityClass getType(VertexFrame vertex);
-    
+
     /**
      * Check if a node with the given ID exists or not.
      */
@@ -72,7 +72,8 @@ public interface GraphManager {
      * @param cls
      * @return
      */
-    public <T> T getFrame(String id, EntityClass type, Class<T> cls) throws ItemNotFound;
+    public <T> T getFrame(String id, EntityClass type, Class<T> cls)
+            throws ItemNotFound;
 
     /**
      * Get a CloseableIterable of vertices with the given type.
@@ -101,7 +102,6 @@ public interface GraphManager {
      */
     public <T> Iterable<T> getFrames(EntityClass type, Class<T> cls);
 
-
     // CRUD functions
 
     /**
@@ -113,8 +113,8 @@ public interface GraphManager {
      * @return
      * @throws IntegrityError
      */
-    public Vertex createVertex(String id, EntityClass type, Map<String, Object> data)
-            throws IntegrityError;
+    public Vertex createVertex(String id, EntityClass type,
+            Map<String, Object> data) throws IntegrityError;
 
     /**
      * Create a vertex with the given id, type, and data, specifying which
@@ -128,7 +128,8 @@ public interface GraphManager {
      * @throws IntegrityError
      */
     public Vertex createVertex(String id, EntityClass type,
-            Map<String, Object> data, Iterable<String> keys) throws IntegrityError;
+            Map<String, Object> data, Iterable<String> keys)
+            throws IntegrityError;
 
     /**
      * Create a vertex with the given id, type, and data, specifying which
@@ -147,22 +148,6 @@ public interface GraphManager {
             Iterable<String> uniqueKeys) throws IntegrityError;
 
     /**
-     * Create a vertex with the given id, type, and data, specifying which
-     * property keys should be indexed, and which should be unique.
-     * 
-     * @param id
-     * @param type
-     * @param data
-     * @param keys
-     * @param uniqueKeys
-     * @return
-     * @throws IntegrityError
-     */
-    public Vertex updateVertex(String id, EntityClass type,
-            Map<String, Object> data, Iterable<String> keys,
-            Iterable<String> uniqueKeys) throws IntegrityError, ItemNotFound;
-
-    /**
      * Create a vertex with the given id, type, and data.
      * 
      * @param id
@@ -171,8 +156,8 @@ public interface GraphManager {
      * @return
      * @throws IntegrityError
      */
-    public Vertex updateVertex(String id, EntityClass type, Map<String, Object> data)
-            throws IntegrityError, ItemNotFound;
+    public Vertex updateVertex(String id, EntityClass type,
+            Map<String, Object> data) throws IntegrityError, ItemNotFound;
 
     /**
      * Create a vertex with the given id, type, and data, specifying which
@@ -189,8 +174,24 @@ public interface GraphManager {
             Map<String, Object> data, Iterable<String> keys)
             throws IntegrityError, ItemNotFound;
 
+    /**
+     * Create a vertex with the given id, type, and data, specifying which
+     * property keys should be indexed, and which should be unique.
+     * 
+     * @param id
+     * @param type
+     * @param data
+     * @param keys
+     * @param uniqueKeys
+     * @return
+     * @throws IntegrityError
+     */
+    public Vertex updateVertex(String id, EntityClass type,
+            Map<String, Object> data, Iterable<String> keys,
+            Iterable<String> uniqueKeys) throws IntegrityError, ItemNotFound;
+
     // CRUD functions
-    
+
     /**
      * Delete a vertex with the given ID.
      * 

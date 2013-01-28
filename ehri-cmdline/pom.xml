@@ -8,9 +8,7 @@
 		<groupId>ehri-project</groupId>
 		<version>1.0</version>
 	</parent>
-	<groupId>ehri-project</groupId>
 	<artifactId>ehri-cmdline</artifactId>
-	<version>1.0</version>
 	<name>ehri-cmdline</name>
 	<url>http://maven.apache.org</url>
 	<build>
@@ -46,13 +44,18 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>3.8.1</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>ehri-project</groupId>
 			<artifactId>ehri-frames</artifactId>
 			<version>0.1-SNAPSHOT</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>log4j</artifactId>
+					<groupId>log4j</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<dependency>

@@ -1,6 +1,7 @@
 package eu.ehri.extension;
 
 import java.net.URI;
+import java.util.List;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -24,6 +25,7 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 
 import eu.ehri.extension.errors.BadRequester;
+import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.IntegrityError;
@@ -32,6 +34,7 @@ import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.views.impl.LoggingCrudViews;
 import eu.ehri.project.views.impl.Query;
@@ -49,14 +52,6 @@ public class DocumentaryUnitResource extends
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{id:\\d+}")
-    public Response getDocumentaryUnit(@PathParam("id") long id)
-            throws PermissionDenied, BadRequester {
-        return retrieve(id);
-    }
-
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:.+}")
     public Response getDocumentaryUnit(@PathParam("id") String id)
             throws ItemNotFound, PermissionDenied, BadRequester {
@@ -67,33 +62,60 @@ public class DocumentaryUnitResource extends
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/list")
     public StreamingOutput listDocumentaryUnits(
-            @QueryParam("offset") @DefaultValue("0") int offset,
-            @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit)
+            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
+            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(SORT_PARAM) List<String> order,
+            @QueryParam(FILTER_PARAM) List<String> filters)
             throws ItemNotFound, BadRequester {
-        return list(offset, limit);
+        return list(offset, limit, order, filters);
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:.+}/list")
-    public StreamingOutput listAgentDocumentaryUnits(
+    public StreamingOutput listChildDocumentaryUnits(
             @PathParam("id") String id,
-            @QueryParam("offset") @DefaultValue("0") int offset,
-            @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit)
+            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
+            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(SORT_PARAM) List<String> order,
+            @QueryParam(FILTER_PARAM) List<String> filters)
             throws ItemNotFound, BadRequester, PermissionDenied {
-        DocumentaryUnit parent = new Query<DocumentaryUnit>(graph,
-                DocumentaryUnit.class).get(id, getRequesterUserProfile());
-        return list(parent.getChildren(), offset, limit);
+        DocumentaryUnit parent = manager.getFrame(id, DocumentaryUnit.class);
+        Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph, cls)
+                .setOffset(offset).setLimit(limit).filter(filters)
+                .orderBy(order).filter(filters);
+        return streamingList(query.list(parent.getChildren(),
+                getRequesterUserProfile()));
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id:.+}/page")
+    public StreamingOutput pageChildDocumentaryUnits(
+            @PathParam("id") String id,
+            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
+            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(SORT_PARAM) List<String> order,
+            @QueryParam(FILTER_PARAM) List<String> filters)
+            throws ItemNotFound, BadRequester, PermissionDenied {
+        DocumentaryUnit parent = manager.getFrame(id, DocumentaryUnit.class);
+        Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph, cls)
+                .setOffset(offset).setLimit(limit).filter(filters)
+                .orderBy(order).filter(filters);
+        return streamingPage(query.page(parent.getChildren(),
+                getRequesterUserProfile()));
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/page")
     public StreamingOutput pageDocumentaryUnits(
-            @QueryParam("offset") @DefaultValue("0") int offset,
-            @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit)
+            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
+            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(SORT_PARAM) List<String> order,
+            @QueryParam(FILTER_PARAM) List<String> filters)
             throws ItemNotFound, BadRequester {
-        return page(offset, limit);
+        return page(offset, limit, order, filters);
     }
 
     @PUT
@@ -116,14 +138,6 @@ public class DocumentaryUnitResource extends
     }
 
     @DELETE
-    @Path("/{id}")
-    public Response deleteDocumentaryUnit(@PathParam("id") long id)
-            throws PermissionDenied, ValidationError, ItemNotFound,
-            BadRequester {
-        return delete(id);
-    }
-
-    @DELETE
     @Path("/{id:.+}")
     public Response deleteDocumentaryUnit(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound, ValidationError,
@@ -136,13 +150,17 @@ public class DocumentaryUnitResource extends
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:.+}/" + Entities.DOCUMENTARY_UNIT)
     public Response createAgentDocumentaryUnit(@PathParam("id") String id,
-            String json) throws PermissionDenied, ValidationError,
-            IntegrityError, DeserializationError, ItemNotFound, BadRequester {
+            String json, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
+            throws PermissionDenied, ValidationError, IntegrityError,
+            DeserializationError, ItemNotFound, BadRequester {
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
+            Accessor user = getRequesterUserProfile();
             DocumentaryUnit parent = new Query<DocumentaryUnit>(graph,
                     DocumentaryUnit.class).get(id, getRequesterUserProfile());
             DocumentaryUnit doc = createDocumentaryUnit(json, parent);
+            new AclManager(graph).setAccessors(doc,
+                    getAccessors(accessors, user));
             tx.success();
             return buildResponseFromDocumentaryUnit(doc);
         } catch (SerializationError e) {
@@ -157,7 +175,7 @@ public class DocumentaryUnitResource extends
 
     private Response buildResponseFromDocumentaryUnit(DocumentaryUnit doc)
             throws SerializationError {
-        String jsonStr = converter.vertexFrameToJson(doc);
+        String jsonStr = serializer.vertexFrameToJson(doc);
 
         try {
             // FIXME: Hide the details of building this path
@@ -175,12 +193,11 @@ public class DocumentaryUnitResource extends
     private DocumentaryUnit createDocumentaryUnit(String json,
             DocumentaryUnit parent) throws DeserializationError,
             PermissionDenied, ValidationError, IntegrityError, BadRequester {
-        Bundle entityBundle = converter.jsonToBundle(json);
+        Bundle entityBundle = Bundle.fromString(json);
 
         DocumentaryUnit doc = new LoggingCrudViews<DocumentaryUnit>(graph,
-                DocumentaryUnit.class, parent)
-                .create(converter.bundleToData(entityBundle),
-                        getRequesterUserProfile());
+                DocumentaryUnit.class, parent).create(entityBundle,
+                getRequesterUserProfile());
         // Add it to this agent's collections
         parent.addChild(doc);
         doc.setAgent(parent.getAgent());

@@ -3,6 +3,8 @@ package eu.ehri.extension;
 import static eu.ehri.extension.RestHelpers.produceErrorMessageJson;
 
 import java.net.URI;
+import java.util.List;
+import java.util.Set;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
@@ -11,11 +13,16 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriBuilder;
 
+//import org.apache.log4j.Logger;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Transaction;
 
-import com.tinkerpop.frames.VertexFrame;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import com.tinkerpop.blueprints.Vertex;
 
 import eu.ehri.extension.errors.BadRequester;
+import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
@@ -23,8 +30,8 @@ import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.utils.ClassUtils;
 import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.views.Crud;
@@ -39,8 +46,13 @@ import eu.ehri.project.views.impl.Query;
  * @param <E>
  *            The specific AccesibleEntity derived class
  */
-public class AbstractAccessibleEntityResource<E extends AccessibleEntity> extends
-        AbstractRestResource {
+public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
+        extends AbstractRestResource {
+
+    // FIXME: Logger gives NoClassDefFound when run on server, probably because
+    // Log4j isn't available in the default Neo4j server/lib dir.
+    // protected final static Logger logger = Logger
+    // .getLogger(AbstractAccessibleEntityResource.class);
 
     protected final Crud<E> views;
     protected final Query<E> querier;
@@ -54,13 +66,28 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity> extend
      * @param cls
      *            The 'entity' class
      */
-    public AbstractAccessibleEntityResource(@Context GraphDatabaseService database,
-            Class<E> cls) {
+    public AbstractAccessibleEntityResource(
+            @Context GraphDatabaseService database, Class<E> cls) {
         super(database);
         this.cls = cls;
         views = new LoggingCrudViews<E>(graph, cls);
         querier = new Query<E>(graph, cls);
 
+    }
+
+    /**
+     * List all instances of the 'entity' accessible to the given user.
+     * 
+     * @return List of entities
+     * @throws ItemNotFound
+     * @throws BadRequester
+     */
+    public StreamingOutput page(Integer offset, Integer limit,
+            Iterable<String> order, Iterable<String> filters)
+            throws ItemNotFound, BadRequester {
+        final Query.Page<E> page = querier.setOffset(offset).setLimit(limit)
+                .orderBy(order).filter(filters).page(getRequesterUserProfile());
+        return streamingPage(page);
     }
 
     /**
@@ -82,29 +109,31 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity> extend
     /**
      * List all instances of the 'entity' accessible to the given user.
      * 
-     * @return
+     * @return List of entities
+     * 
      * @throws ItemNotFound
      * @throws BadRequester
-     * @throws PermissionDenied
      */
-    public StreamingOutput list(Integer offset, Integer limit)
+    public StreamingOutput list(Integer offset, Integer limit,
+            Iterable<String> order, Iterable<String> filters)
             throws ItemNotFound, BadRequester {
-        final Iterable<E> list = querier.setOffset(offset).setLimit(limit)
-                .list(getRequesterUserProfile());
-        return streamingList(list);
+        final Query<E> query = querier.setOffset(offset).setLimit(limit)
+                .orderBy(order).filter(filters);
+        return streamingList(query.list(getRequesterUserProfile()));
     }
 
     /**
      * List all instances of the 'entity' accessible to the given user.
      * 
-     * @return
+     * @return List of entities
+     * 
      * @throws ItemNotFound
      * @throws BadRequester
-     * @throws PermissionDenied
      */
-    public <T extends VertexFrame> StreamingOutput list(Iterable<T> iter,
-            Integer offset, Integer limit) throws ItemNotFound, BadRequester {
-        return streamingList(iter);
+    public StreamingOutput list(Integer offset, Integer limit)
+            throws ItemNotFound, BadRequester {
+        return list(offset, limit, Lists.<String> newArrayList(),
+                Lists.<String> newArrayList());
     }
 
     /**
@@ -113,6 +142,8 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity> extend
      * @param json
      *            The json representation of the entity to create (no vertex
      *            'id' fields)
+     * @param accessors
+     *            List of accessors who can initially view this item
      * @return The response of the create request, the 'location' will contain
      *         the url of the newly created instance.
      * @throws PermissionDenied
@@ -122,56 +153,31 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity> extend
      * @throws ItemNotFound
      * @throws BadRequester
      */
-    public Response create(String json) throws PermissionDenied,
-            ValidationError, IntegrityError, DeserializationError,
-            ItemNotFound, BadRequester {
+    public Response create(String json, List<String> accessorIds)
+            throws PermissionDenied, ValidationError, IntegrityError,
+            DeserializationError, BadRequester {
 
+        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
-            Bundle entityBundle = converter.jsonToBundle(json);
-            E entity = views.create(converter.bundleToData(entityBundle),
-                    getRequesterUserProfile());
-            String jsonStr = converter.vertexFrameToJson(entity);
-            UriBuilder ub = uriInfo.getAbsolutePathBuilder();
-            // FIXME: Hide the details of building this path
-            URI docUri = ub.path(
-                    (String) entity.asVertex().getProperty(EntityType.ID_KEY))
-                    .build();
+            Accessor user = getRequesterUserProfile();
+            Bundle entityBundle = Bundle.fromString(json);
+            E entity = views.create(entityBundle, user);
+            // TODO: Move elsewhere
+            new AclManager(graph).setAccessors(entity,
+                    getAccessors(accessorIds, user));
 
+            String jsonStr = serializer.vertexFrameToJson(entity);
+            UriBuilder ub = uriInfo.getAbsolutePathBuilder();
+            URI docUri = ub.path(manager.getId(entity)).build();
+            tx.success();
             return Response.status(Status.CREATED).location(docUri)
                     .entity((jsonStr).getBytes()).build();
-
         } catch (SerializationError e) {
+            tx.failure();
             return Response.status(Status.INTERNAL_SERVER_ERROR)
                     .entity((produceErrorMessageJson(e)).getBytes()).build();
-        }
-    }
-
-    /**
-     * Retieve (get) an instance of the 'entity' in the database
-     * 
-     * @param id
-     *            The vertex id
-     * @return The response of the request, which contains the json
-     *         representation
-     * @throws PermissionDenied
-     * @throws BadRequester
-     */
-    public Response retrieve(long id) throws PermissionDenied, BadRequester {
-        try {
-            E entity = views.detail(graph.getVertex(id, cls),
-                    getRequesterUserProfile());
-            String jsonStr = converter.vertexFrameToJson(entity);
-
-            return Response.status(Status.OK).entity((jsonStr).getBytes())
-                    .build();
-        } catch (SerializationError e) {
-            // Most likely there was no such item (wrong id)
-            // BETTER get a different Exception for that?
-            //
-            // so we would need to return a BADREQUEST, or NOTFOUND
-
-            return Response.status(Status.NOT_FOUND)
-                    .entity((produceErrorMessageJson(e)).getBytes()).build();
+        } finally {
+            tx.finish();
         }
     }
 
@@ -191,7 +197,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity> extend
         try {
             E entity = views.detail(manager.getFrame(id, getEntityType(), cls),
                     getRequesterUserProfile());
-            String jsonStr = converter.vertexFrameToJson(entity);
+            String jsonStr = serializer.vertexFrameToJson(entity);
             return Response.status(Status.OK).entity((jsonStr).getBytes())
                     .build();
         } catch (SerializationError e) {
@@ -216,7 +222,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity> extend
             PermissionDenied, BadRequester {
         try {
             E entity = querier.get(key, value, getRequesterUserProfile());
-            String jsonStr = converter.vertexFrameToJson(entity);
+            String jsonStr = serializer.vertexFrameToJson(entity);
             return Response.status(Status.OK).entity((jsonStr).getBytes())
                     .build();
         } catch (SerializationError e) {
@@ -242,10 +248,9 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity> extend
             ItemNotFound, BadRequester {
 
         try {
-            Bundle entityBundle = converter.jsonToBundle(json);
-            E update = views.update(converter.bundleToData(entityBundle),
-                    getRequesterUserProfile());
-            String jsonStr = converter.vertexFrameToJson(update);
+            Bundle entityBundle = Bundle.fromString(json);
+            E update = views.update(entityBundle, getRequesterUserProfile());
+            String jsonStr = serializer.vertexFrameToJson(update);
 
             return Response.status(Status.OK).entity((jsonStr).getBytes())
                     .build();
@@ -278,7 +283,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity> extend
         // serialization/deserialization.
         E entity = views.detail(manager.getFrame(id, getEntityType(), cls),
                 getRequesterUserProfile());
-        Bundle rawBundle = converter.jsonToBundle(json);
+        Bundle rawBundle = Bundle.fromString(json);
         Bundle entityBundle = new Bundle(manager.getId(entity),
                 getEntityType(), rawBundle.getData(), rawBundle.getRelations());
         return update(entityBundle.toString());
@@ -291,31 +296,9 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity> extend
      *            The vertex id
      * @return The response of the delete request
      * @throws PermissionDenied
-     * @throws ValidationError
-     * @throws ItemNotFound
-     * @throws BadRequester
-     */
-    protected Response delete(Long id) throws PermissionDenied,
-            ValidationError, ItemNotFound, BadRequester {
-        try {
-            views.delete(graph.getVertex(id, cls), getRequesterUserProfile());
-            return Response.status(Status.OK).build();
-        } catch (SerializationError e) {
-            throw new WebApplicationException(e);
-        }
-    }
-
-    /**
-     * Delete (remove) an instance of the 'entity' in the database
-     * 
-     * @param id
-     *            The vertex id
-     * @return The response of the delete request
-     * @throws PermissionDenied
      * @throws ItemNotFound
      * @throws ValidationError
      * @throws BadRequester
-     * @throws SerializationError
      */
     protected Response delete(String id) throws PermissionDenied, ItemNotFound,
             ValidationError, BadRequester {
@@ -335,4 +318,27 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity> extend
         return ClassUtils.getEntityType(cls);
     }
 
+    protected Iterable<Accessor> getAccessors(List<String> accessorIds,
+            Accessor current) {
+
+        Set<Vertex> accessorV = Sets.newHashSet();
+        Set<Accessor> accessors = Sets.newHashSet();
+        for (String id : accessorIds) {
+            try {
+                Accessor av = manager.getFrame(id, Accessor.class);
+                accessors.add(av);
+                accessorV.add(av.asVertex());                
+            } catch (ItemNotFound e) {
+                // FIXME: Using the logger gives a noclassdef found error
+                // logger.error("Invalid accessor given: " + id);
+                System.err.println("Invalid accessor given: " + id);
+            }
+        }
+        // The current user should always be among the accessors, so add
+        // them unless the list is empty.
+        if (!accessors.isEmpty() && !accessorV.contains(current.asVertex())) {
+            accessors.add(current);
+        }
+        return accessors;
+    }
 }

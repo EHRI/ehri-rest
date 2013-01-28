@@ -43,6 +43,7 @@ public interface Concept extends AccessibleEntity, DescribedEntity {
     // relations to other concepts
     
     // Note that multiple broader concepts are possible
+    @Fetch
     @Adjacency(label = NARROWER, direction=Direction.IN)
     //@Adjacency(label = BROADER)
     public Iterable<Concept> getBroaderConcepts();

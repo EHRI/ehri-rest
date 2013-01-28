@@ -118,7 +118,6 @@ public abstract class AbstractMultiItemRecursiveImporter<T> extends
      * @param depth
      * @throws ValidationError
      * @throws IntegrityError 
-     * @throws ItemNotFound 
      */
     @Override
     public DocumentaryUnit importItem(T itemData, DocumentaryUnit parent,

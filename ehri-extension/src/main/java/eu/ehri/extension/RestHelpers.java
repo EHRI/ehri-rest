@@ -9,9 +9,6 @@ import java.io.Writer;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.StreamingOutput;
 
-import org.codehaus.jackson.JsonGenerationException;
-import org.codehaus.jackson.map.JsonMappingException;
-
 /**
  * Static helpers for dealing with REST conversions.
  * 
@@ -25,9 +22,6 @@ public class RestHelpers {
      * @param e
      *            The exception
      * @return The json string
-     * @throws IOException
-     * @throws JsonMappingException
-     * @throws JsonGenerationException
      */
     static String produceErrorMessageJson(final Throwable e) {
         // NOTE only put in a stacktrace when debugging??

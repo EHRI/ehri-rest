@@ -87,9 +87,19 @@
 	<dependencies>
 		<!-- the ehri data via tinkerpop frames project -->
 		<dependency>
-			<groupId>ehri-project</groupId>
-			<artifactId>ehri-frames</artifactId>
-			<version>0.1-SNAPSHOT</version>
+		  <groupId>ehri-project</groupId>
+		  <artifactId>ehri-frames</artifactId>
+          <version>0.1-SNAPSHOT</version>
+          <exclusions>
+          	<exclusion>
+          		<artifactId>slf4j-log4j12</artifactId>
+          		<groupId>org.slf4j</groupId>
+          	</exclusion>
+          	<exclusion>
+          		<artifactId>log4j</artifactId>
+          		<groupId>log4j</groupId>
+          	</exclusion>
+          </exclusions>
 		</dependency>
 		<dependency>
 			<groupId>ehri-project</groupId>
@@ -104,6 +114,12 @@
 			<version>0.0.1-SNAPSHOT</version>
 			<type>test-jar</type>
 			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<artifactId>slf4j-log4j12</artifactId>
+					<groupId>org.slf4j</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 
@@ -143,18 +159,24 @@
 			<groupId>com.tinkerpop.blueprints</groupId>
 			<artifactId>blueprints-neo4j-graph</artifactId>
 			<version>${tinkerpop-version}</version><!-- was 1.2 -->
+			<exclusions>
+				<exclusion>
+					<artifactId>log4j</artifactId>
+					<groupId>log4j</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
-		<!-- logging -->
+        <!-- logging -->
 		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
-			<version>1.6.6</version>
-		</dependency>		
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<version>1.0.0</version>
+        </dependency>		
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<version>1.6.6</version>
+			<version>1.7.2</version>
 		</dependency>
 
 		<!-- testing -->

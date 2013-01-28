@@ -1,6 +1,7 @@
 package eu.ehri.extension;
 
 import java.net.URI;
+import java.util.List;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -23,7 +24,10 @@ import javax.ws.rs.core.UriBuilder;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 
+import com.tinkerpop.blueprints.Direction;
+
 import eu.ehri.extension.errors.BadRequester;
+import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.IntegrityError;
@@ -33,6 +37,7 @@ import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.views.impl.LoggingCrudViews;
 import eu.ehri.project.views.impl.Query;
@@ -49,14 +54,6 @@ public class AgentResource extends AbstractAccessibleEntityResource<Agent> {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{id:\\d+}")
-    public Response getAgent(@PathParam("id") long id) throws PermissionDenied,
-            BadRequester {
-        return retrieve(id);
-    }
-
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:.+}")
     public Response getAgent(@PathParam("id") String id) throws ItemNotFound,
             PermissionDenied, BadRequester {
@@ -67,10 +64,12 @@ public class AgentResource extends AbstractAccessibleEntityResource<Agent> {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/list")
     public StreamingOutput listAgents(
-            @QueryParam("offset") @DefaultValue("0") int offset,
-            @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit)
+            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
+            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(SORT_PARAM) List<String> order,
+            @QueryParam(FILTER_PARAM) List<String> filters)
             throws ItemNotFound, BadRequester {
-        return list(offset, limit);
+        return list(offset, limit, order, filters);
     }
 
     @GET
@@ -78,31 +77,61 @@ public class AgentResource extends AbstractAccessibleEntityResource<Agent> {
     @Path("/{id:.+}/list")
     public StreamingOutput listAgentDocumentaryUnits(
             @PathParam("id") String id,
-            @QueryParam("offset") @DefaultValue("0") int offset,
-            @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit)
+            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
+            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(SORT_PARAM) List<String> order,
+            @QueryParam(FILTER_PARAM) List<String> filters)
             throws ItemNotFound, BadRequester, PermissionDenied {
-        Agent agent = new Query<Agent>(graph, Agent.class).get(id,
-                getRequesterUserProfile());
-        return list(agent.getCollections(), offset, limit);
+        Accessor user = getRequesterUserProfile();
+        Agent agent = views.detail(manager.getFrame(id, cls), user);
+        Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
+                DocumentaryUnit.class).setLimit(limit).setOffset(offset)
+                .orderBy(order)
+                .depthFilter(DocumentaryUnit.CHILD_OF, Direction.OUT, 0)
+                .filter(filters);
+        return streamingList(query.list(agent.getCollections(), user));
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id:.+}/page")
+    public StreamingOutput pageAgentDocumentaryUnits(
+            @PathParam("id") String id,
+            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
+            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(SORT_PARAM) List<String> order,
+            @QueryParam(FILTER_PARAM) List<String> filters)
+            throws ItemNotFound, BadRequester, PermissionDenied {
+        Accessor user = getRequesterUserProfile();
+        Agent agent = views.detail(manager.getFrame(id, cls), user);
+        Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
+                DocumentaryUnit.class).setLimit(limit).setOffset(offset)
+                .orderBy(order)
+                .depthFilter(DocumentaryUnit.CHILD_OF, Direction.OUT, 0)
+                .filter(filters);
+        return streamingPage(query.page(agent.getCollections(), user));
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/page")
     public StreamingOutput pageAgents(
-            @QueryParam("offset") @DefaultValue("0") int offset,
-            @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit)
+            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
+            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(SORT_PARAM) List<String> order,
+            @QueryParam(FILTER_PARAM) List<String> filters)
             throws ItemNotFound, BadRequester {
-        return page(offset, limit);
+        return page(offset, limit, order, filters);
     }
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response createAgent(String json) throws PermissionDenied,
-            ValidationError, IntegrityError, DeserializationError,
-            ItemNotFound, BadRequester {
-        return create(json);
+    public Response createAgent(String json,
+            @QueryParam(ACCESSOR_PARAM) List<String> accessors)
+            throws PermissionDenied, ValidationError, IntegrityError,
+            DeserializationError, ItemNotFound, BadRequester {
+        return create(json, accessors);
     }
 
     @PUT
@@ -125,48 +154,11 @@ public class AgentResource extends AbstractAccessibleEntityResource<Agent> {
     }
 
     @DELETE
-    @Path("/{id}")
-    public Response deleteAgent(@PathParam("id") long id)
-            throws PermissionDenied, ValidationError, ItemNotFound,
-            BadRequester {
-        return delete(id);
-    }
-
-    @DELETE
     @Path("/{id:.+}")
     public Response deleteAgent(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound, ValidationError,
             BadRequester {
         return delete(id);
-    }
-
-    /**
-     * Create an instance of the 'entity' in the database
-     * 
-     * @param json
-     *            The json representation of the entity to create (no vertex
-     *            'id' fields)
-     * @return The response of the create request, the 'location' will contain
-     *         the url of the newly created instance.
-     * @throws PermissionDenied
-     * @throws IntegrityError
-     * @throws ValidationError
-     * @throws DeserializationError
-     * @throws SerializationError
-     * @throws BadRequester
-     */
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{id:\\d+}")
-    public Response createAgentDocumentaryUnit(@PathParam("id") long id,
-            String json) throws PermissionDenied, ValidationError,
-            IntegrityError, DeserializationError, SerializationError,
-            BadRequester {
-        Agent agent = views.detail(graph.getVertex(id, cls),
-                getRequesterUserProfile());
-        DocumentaryUnit doc = createDocumentaryUnit(json, agent);
-        return buildResponseFromDocumentaryUnit(doc);
     }
 
     /**
@@ -187,13 +179,16 @@ public class AgentResource extends AbstractAccessibleEntityResource<Agent> {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:.+}/" + Entities.DOCUMENTARY_UNIT)
     public Response createAgentDocumentaryUnit(@PathParam("id") String id,
-            String json) throws PermissionDenied, ValidationError,
-            IntegrityError, DeserializationError, ItemNotFound, BadRequester {
+            String json, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
+            throws PermissionDenied, ValidationError, IntegrityError,
+            DeserializationError, ItemNotFound, BadRequester {
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
-            Agent agent = new Query<Agent>(graph, Agent.class).get(id,
-                    getRequesterUserProfile());
+            Accessor user = getRequesterUserProfile();
+            Agent agent = views.detail(manager.getFrame(id, cls), user);
             DocumentaryUnit doc = createDocumentaryUnit(json, agent);
+            new AclManager(graph).setAccessors(doc,
+                    getAccessors(accessors, user));
             tx.success();
             return buildResponseFromDocumentaryUnit(doc);
         } catch (SerializationError e) {
@@ -208,7 +203,7 @@ public class AgentResource extends AbstractAccessibleEntityResource<Agent> {
 
     private Response buildResponseFromDocumentaryUnit(DocumentaryUnit doc)
             throws SerializationError {
-        String jsonStr = converter.vertexFrameToJson(doc);
+        String jsonStr = serializer.vertexFrameToJson(doc);
         // FIXME: Hide the details of building this path
         URI docUri = UriBuilder.fromUri(uriInfo.getBaseUri())
                 .segment(Entities.DOCUMENTARY_UNIT).segment(manager.getId(doc))
@@ -221,12 +216,11 @@ public class AgentResource extends AbstractAccessibleEntityResource<Agent> {
     private DocumentaryUnit createDocumentaryUnit(String json, Agent agent)
             throws DeserializationError, PermissionDenied, ValidationError,
             IntegrityError, BadRequester {
-        Bundle entityBundle = converter.jsonToBundle(json);
+        Bundle entityBundle = Bundle.fromString(json);
 
         DocumentaryUnit doc = new LoggingCrudViews<DocumentaryUnit>(graph,
-                DocumentaryUnit.class, agent)
-                .create(converter.bundleToData(entityBundle),
-                        getRequesterUserProfile());
+                DocumentaryUnit.class, agent).create(entityBundle,
+                getRequesterUserProfile());
         // Add it to this agent's collections
         doc.setAgent(agent);
         doc.setPermissionScope(agent);
