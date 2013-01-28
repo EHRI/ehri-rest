@@ -10,6 +10,8 @@ import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.frames.VertexFrame;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.models.EntityClass;
@@ -25,6 +27,8 @@ import eu.ehri.project.models.utils.ClassUtils;
  * 
  */
 public final class Serializer {
+
+    private static final Logger logger = LoggerFactory.getLogger(Serializer.class);
 
     private final FramedGraph<Neo4jGraph> graph;
 
@@ -88,6 +92,18 @@ public final class Serializer {
     }
 
     /**
+     * Run a callback every time a node in a subtree is encountered, starting
+     * with the top-level node.
+     * 
+     * @param item
+     * @param cb
+     */
+    public <T extends VertexFrame> void traverseSubtree(T item,
+            final TraversalCallback cb) {
+        traverseSubtree(item, 0, cb);
+    }
+
+    /**
      * Convert a VertexFrame into an EntityBundle that includes its @Fetch'd
      * relations.
      * 
@@ -103,6 +119,7 @@ public final class Serializer {
             String id = (String) item.asVertex().getProperty(EntityType.ID_KEY);
             EntityClass type = EntityClass.withName((String) item.asVertex()
                     .getProperty(EntityType.TYPE_KEY));
+            logger.trace("Serializing {} ({}) at depth {}", id, type, depth);
             ListMultimap<String, Bundle> relations = getRelationData(item,
                     depth, type.getEntityClass());
             return new Bundle(id, type, getVertexData(item.asVertex()),
@@ -118,53 +135,80 @@ public final class Serializer {
         ListMultimap<String, Bundle> relations = LinkedListMultimap.create();
         if (depth < maxTraversals) {
             Map<String, Method> fetchMethods = ClassUtils.getFetchMethods(cls);
+            logger.trace(" - Fetch methods: {}", fetchMethods);
             for (Map.Entry<String, Method> entry : fetchMethods.entrySet()) {
-                // In order to avoid @Fetching the whole graph we track the
-                // depth parameter and increase it for every traversal.
-                // However the @Fetch annotation can also specify a maximum
-                // depth of traversal beyong which we don't serialize.
+                String relationName = entry.getKey();
                 Method method = entry.getValue();
-                int nextDepth = depth + 1;                
-                Fetch fetchProps = method.getAnnotation(Fetch.class);
-                if (nextDepth > fetchProps.depth()) {
-                    continue;
-                }
-                
-                // If the fetch should only be serialized at a certain depth and
-                // we've exceeded that, don't serialize.
-                if (fetchProps.ifDepth() != -1 && depth > fetchProps.ifDepth()) {
-                    continue;
-                }
 
-                try {
-                    Object result = method
-                            .invoke(graph.frame(item.asVertex(), cls));
-                    // The result of one of these fetchMethods should either be
-                    // a single VertexFrame, or a Iterable<VertexFrame>.
-                    if (result instanceof Iterable<?>) {
-                        for (Object d : (Iterable<?>) result) {
-                            relations.put(
-                                    entry.getKey(),
-                                    vertexFrameToBundle((VertexFrame) d,
-                                            nextDepth));
+                if (shouldTraverse(relationName, method, depth)) {
+                    logger.trace("Fetching relation: {}, depth {}, {}",
+                            relationName, depth, method.getName());
+                    try {
+                        Object result = method.invoke(graph.frame(
+                                item.asVertex(), cls));
+                        // The result of one of these fetchMethods should either
+                        // be a single VertexFrame, or a Iterable<VertexFrame>.
+                        if (result instanceof Iterable<?>) {
+                            for (Object d : (Iterable<?>) result) {
+                                relations.put(
+                                        relationName,
+                                        vertexFrameToBundle((VertexFrame) d,
+                                                depth + 1));
+                            }
+                        } else {
+                            // This relationship could be NULL if, e.g. a
+                            // collection has no holder.
+                            if (result != null)
+                                relations
+                                        .put(relationName,
+                                                vertexFrameToBundle(
+                                                        (VertexFrame) result,
+                                                        depth + 1));
                         }
-                    } else {
-                        // This relationship could be NULL if, e.g. a collection
-                        // has no holder.
-                        if (result != null)
-                            relations.put(
-                                    entry.getKey(),
-                                    vertexFrameToBundle((VertexFrame) result,
-                                            nextDepth));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        throw new RuntimeException(
+                                "Unexpected error serializing VertexFrame", e);
                     }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    throw new RuntimeException(
-                            "Unexpected error serializing VertexFrame", e);
                 }
             }
         }
         return relations;
+    }
+
+    /**
+     * Determine if traversal should proceed on a Frames relation.
+     * 
+     * @param relationName
+     * @param method
+     * @param depth
+     * @return
+     */
+    private boolean shouldTraverse(String relationName, Method method, int depth) {
+        // In order to avoid @Fetching the whole graph we track the
+        // depth parameter and increase it for every traversal.
+        // However the @Fetch annotation can also specify a maximum
+        // depth of traversal beyong which we don't serialize.
+        Fetch fetchProps = method.getAnnotation(Fetch.class);
+        if (fetchProps == null)
+            return false;
+
+        if (depth >= fetchProps.depth()) {
+            logger.trace(
+                    "Terminating fetch because depth exceeded depth on fetch clause: {}, depth {}, limit {}, {}",
+                    relationName, depth, fetchProps.depth());
+            return false;
+        }
+
+        // If the fetch should only be serialized at a certain depth and
+        // we've exceeded that, don't serialize.
+        if (fetchProps.ifDepth() != -1 && depth > fetchProps.ifDepth()) {
+            logger.trace(
+                    "Terminating fetch because ifDepth clause found on {}, depth {}, {}",
+                    relationName, depth);
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -179,19 +223,7 @@ public final class Serializer {
         }
         return data;
     }
-    
-    /**
-     * Run a callback every time a node in a subtree is encountered, starting
-     * with the top-level node.
-     * 
-     * @param item
-     * @param cb
-     */
-    public <T extends VertexFrame> void traverseSubtree(
-            T item, final TraversalCallback cb) {
-        traverseSubtree(item, 0, cb);
-    }
-    
+
     /**
      * Run a callback every time a node in a subtree is encountered, starting
      * with the top-level node.
@@ -200,50 +232,45 @@ public final class Serializer {
      * @param depth
      * @param cb
      */
-    private <T extends VertexFrame> void traverseSubtree(
-            T item, int depth, final TraversalCallback cb) {
-        
+    private <T extends VertexFrame> void traverseSubtree(T item, int depth,
+            final TraversalCallback cb) {
+
         if (depth < maxTraversals) {
-            Class<?> cls = EntityClass.withName((String) item.asVertex()
-                    .getProperty(EntityType.TYPE_KEY)).getEntityClass();
+            Class<?> cls = EntityClass.withName(
+                    (String) item.asVertex().getProperty(EntityType.TYPE_KEY))
+                    .getEntityClass();
             Map<String, Method> fetchMethods = ClassUtils.getFetchMethods(cls);
             for (Map.Entry<String, Method> entry : fetchMethods.entrySet()) {
 
-                // In order to avoid @Fetching the whole graph we track the
-                // maxDepth parameter and reduce it for every traversal.
-                // However the @Fetch annotation can also specify a non-default
-                // depth, so we need to determine whatever is lower - the
-                // current traversal count, or the annotation's count.
+                String relationName = entry.getKey();
                 Method method = entry.getValue();
-                int nextDepth = Math.max(depth,
-                        method.getAnnotation(Fetch.class).depth()) + 1;
-
-                try {
-                    Object result = method
-                            .invoke(graph.frame(item.asVertex(), cls));
-                    // The result of one of these fetchMethods should either be
-                    // a single VertexFrame, or a Iterable<VertexFrame>.
-                    if (result instanceof Iterable<?>) {
-                        int rnum = 0;
-                        for (Object d : (Iterable<?>) result) {
-                            cb.process((VertexFrame)d, depth, entry.getKey(), rnum);
-                            traverseSubtree((VertexFrame)d, nextDepth, cb);
-                            rnum++;
+                if (shouldTraverse(relationName, method, depth)) {
+                    try {
+                        Object result = method.invoke(graph.frame(
+                                item.asVertex(), cls));
+                        if (result instanceof Iterable<?>) {
+                            int rnum = 0;
+                            for (Object d : (Iterable<?>) result) {
+                                cb.process((VertexFrame) d, depth,
+                                        entry.getKey(), rnum);
+                                traverseSubtree((VertexFrame) d, depth + 1, cb);
+                                rnum++;
+                            }
+                        } else {
+                            if (result != null) {
+                                cb.process((VertexFrame) result, depth,
+                                        entry.getKey(), 0);
+                                traverseSubtree((VertexFrame) result,
+                                        depth + 1, cb);
+                            }
                         }
-                    } else {
-                        // This relationship could be NULL if, e.g. a collection
-                        // has no holder.
-                        if (result != null) {
-                            cb.process((VertexFrame)result, depth, entry.getKey(), 0);
-                            traverseSubtree((VertexFrame)result, nextDepth, cb);                            
-                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        throw new RuntimeException(
+                                "Unexpected error serializing VertexFrame", e);
                     }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    throw new RuntimeException(
-                            "Unexpected error serializing VertexFrame", e);
                 }
             }
         }
-    }    
+    }
 }

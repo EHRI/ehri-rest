@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.neo4j.helpers.collection.Iterables;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
@@ -23,17 +25,18 @@ import eu.ehri.project.models.annotations.Unique;
 
 /**
  * Helper functions for managing EntityType classes.
- * 
+ *
  * @author mike
- * 
  */
 public class ClassUtils {
 
     public static final String FETCH_METHOD_PREFIX = "get";
 
+    private static final Logger logger = LoggerFactory.getLogger(ClassUtils.class);
+
     /**
      * Get the entity type string for a given class.
-     * 
+     *
      * @param cls
      * @return
      */
@@ -70,13 +73,16 @@ public class ClassUtils {
     }
 
     public static Map<String, Method> getFetchMethods(Class<?> cls) {
+        logger.trace(" - checking for @Fetch methods: {}", cls.getCanonicalName());
         Map<String, Method> out = new HashMap<String, Method>();
         for (Method method : cls.getMethods()) {
             if (method.getAnnotation(Fetch.class) != null
                     && method.getName().startsWith(FETCH_METHOD_PREFIX)) {
                 Adjacency ann = method.getAnnotation(Adjacency.class);
-                if (ann != null)
+                if (ann != null) {
                     out.put(ann.label(), method);
+                    logger.trace(" --- found @Fetch annotation: {}: {}", method.getName(), ann.label());
+                }
             }
         }
 
@@ -138,10 +144,10 @@ public class ClassUtils {
 
         return ImmutableSet.copyOf(out);
     }
-    
+
     /**
      * Check if a given vertex is of a particular type.
-     * 
+     *
      * @param frame
      * @param type
      * @return
