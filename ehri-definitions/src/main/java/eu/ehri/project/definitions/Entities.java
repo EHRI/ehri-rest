@@ -2,6 +2,7 @@ package eu.ehri.project.definitions;
 
 public class Entities {
     public static final String ACTION = "action";
+    public static final String ACTION_EVENT = "actionEvent";
     public static final String AGENT = "agent";
     public static final String AUTHORITY = "authority";
     public static final String DOCUMENTARY_UNIT = "documentaryUnit";

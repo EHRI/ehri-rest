@@ -16,11 +16,9 @@ import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.models.Action;
 import eu.ehri.project.models.Annotation;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.AnnotatableEntity;
 import eu.ehri.project.models.base.Annotator;
 import eu.ehri.project.models.base.PermissionScope;
@@ -116,13 +114,8 @@ public final class AnnotationViews implements Annotations {
         annotation.setAnnotator(graph.frame(accessor.asVertex(),
                 Annotator.class));
 
-        // FIXME: Sort out the logic in ActionManager so this cruft isn't
-        // required.
-        ActionManager actionManager = new ActionManager(graph);
-        Actioner actioner = graph.frame(accessor.asVertex(), Actioner.class);
-        Action action = actionManager.createAction(entity, actioner,
-                "Added annotation");
-        actionManager.addSubjects(action, actioner, annotation);
+        new ActionManager(graph).createAction(entity, accessor,
+                "Added annotation").addSubjects(annotation);
         return annotation;
     }
 

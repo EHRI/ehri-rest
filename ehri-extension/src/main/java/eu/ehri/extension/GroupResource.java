@@ -28,12 +28,10 @@ import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.models.Action;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Group;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.persistance.ActionManager;
 
 /**
@@ -132,16 +130,12 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
             group.addMember(accessor);
 
             // Log the action...
-            // FIXME: Sort out the logic in ActionManager so this cruft isn't
-            // required.
-            ActionManager actionManager = new ActionManager(graph);
-            Actioner actioner = graph.frame(getRequesterUserProfile()
-                    .asVertex(), Actioner.class);
-            Action action = actionManager.createAction(
+            new ActionManager(graph)
+            .createAction(
                     graph.frame(accessor.asVertex(), AccessibleEntity.class),
-                    actioner, "Added accessor to group");
-            actionManager.addSubjects(action, actioner, group);
-
+                    getRequesterUserProfile(), "Added accessor to group")
+                    .addSubjects(group);            
+            
             tx.success();
 
             // TODO: Is there anything worth return here except OK?
@@ -174,15 +168,11 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
             Accessor accessor = manager.getFrame(aid, Accessor.class);
             group.removeMember(accessor);
             // Log the action...
-            // FIXME: Sort out the logic in ActionManager so this cruft isn't
-            // required.
-            ActionManager actionManager = new ActionManager(graph);
-            Actioner actioner = graph.frame(getRequesterUserProfile()
-                    .asVertex(), Actioner.class);
-            Action action = actionManager.createAction(
-                    graph.frame(accessor.asVertex(), AccessibleEntity.class),
-                    actioner, "Removed accessor from group");
-            actionManager.addSubjects(action, actioner, group);
+            new ActionManager(graph)
+                .createAction(
+                        graph.frame(accessor.asVertex(), AccessibleEntity.class),
+                        getRequesterUserProfile(), "Removed accessor from group")
+                        .addSubjects(group);            
 
             tx.success();
 

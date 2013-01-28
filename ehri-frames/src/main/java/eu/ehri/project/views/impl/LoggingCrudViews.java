@@ -11,7 +11,6 @@ import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.PermissionScope;
@@ -79,9 +78,8 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws IntegrityError
      * @throws DeserializationError
      */
-    public E create(Bundle bundle, Accessor user)
-            throws PermissionDenied, ValidationError, DeserializationError,
-            IntegrityError {
+    public E create(Bundle bundle, Accessor user) throws PermissionDenied,
+            ValidationError, DeserializationError, IntegrityError {
         return create(bundle, user, DEFAULT_CREATE_LOG);
     }
 
@@ -107,10 +105,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
         try {
 
             E out = views.create(bundle, user);
-            actionManager
-                    .createAction(out,
-                            graph.frame(user.asVertex(), UserProfile.class),
-                            logMessage);
+            actionManager.createAction(out, user, logMessage);
             tx.success();
             return out;
         } catch (IntegrityError ex) {
@@ -161,17 +156,14 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws IntegrityError
      * @throw DeserializationError
      */
-    public E createOrUpdate(Bundle bundle, Accessor user,
-            String logMessage) throws PermissionDenied, ValidationError,
-            DeserializationError, IntegrityError {
+    public E createOrUpdate(Bundle bundle, Accessor user, String logMessage)
+            throws PermissionDenied, ValidationError, DeserializationError,
+            IntegrityError {
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
 
             E out = views.createOrUpdate(bundle, user);
-            actionManager
-                    .createAction(out,
-                            graph.frame(user.asVertex(), UserProfile.class),
-                            logMessage);
+            actionManager.createAction(out, user, logMessage);
             tx.success();
             return out;
         } catch (IntegrityError ex) {
@@ -203,9 +195,8 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws IntegrityError
      * @throws DeserializationError
      */
-    public E update(Bundle bundle, Accessor user)
-            throws PermissionDenied, ValidationError, DeserializationError,
-            IntegrityError {
+    public E update(Bundle bundle, Accessor user) throws PermissionDenied,
+            ValidationError, DeserializationError, IntegrityError {
         return update(bundle, user, DEFAULT_UPDATE_LOG);
     }
 
@@ -228,10 +219,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
             E out = views.update(bundle, user);
-            actionManager
-                    .createAction(out,
-                            graph.frame(user.asVertex(), UserProfile.class),
-                            logMessage);
+            actionManager.createAction(out, user, logMessage);
             tx.success();
             return out;
         } catch (IntegrityError ex) {
@@ -283,10 +271,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
             throws PermissionDenied, ValidationError, SerializationError {
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
-            actionManager
-                    .createAction(item,
-                            graph.frame(user.asVertex(), UserProfile.class),
-                            logMessage);
+            actionManager.createAction(item, user, logMessage);
             Integer count = views.delete(item, user);
             tx.success();
             return count;

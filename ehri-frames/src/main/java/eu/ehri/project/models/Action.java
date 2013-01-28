@@ -4,7 +4,6 @@ import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Property;
 import com.tinkerpop.frames.annotations.gremlin.GremlinGroovy;
 
-import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.base.AccessibleEntity;
@@ -49,6 +48,6 @@ public interface Action extends AccessibleEntity {
 
     @Fetch(ifDepth = 0)
     @GremlinGroovy("_().as('e').in('" + ActionManager.LIFECYCLE_ACTION
-            + "').loop('e'){true}{true}.sideEffect{x=it}.filter{x.__ISA__=='" + Entities.USER_PROFILE + "'}")
+            + "').loop('e'){true}{it.object.out('childOf').count()==0}")
     public Iterable<Actioner> getActioner();
 }

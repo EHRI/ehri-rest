@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import eu.ehri.project.models.Action;
+import eu.ehri.project.persistance.ActionManager.ActionContext;
 
 /**
  * Class that serves as a manifest for an import batch,
@@ -18,17 +19,17 @@ public class ImportLog {
 	private int created = 0;
 	private int updated = 0;
 	private int errored = 0;
-	private Action action;
+	private ActionContext actionContet;
 	private Map<String, String> errors = new HashMap<String, String>();
 	
 	
 	/**
 	 * Constructor.
 	 * 
-	 * @param action
+	 * @param action2
 	 */
-	public ImportLog(final Action action) {
-		this.action = action;
+	public ImportLog(final ActionContext action) {
+		this.actionContet = action;
 	}
 	
 	/**
@@ -99,7 +100,7 @@ public class ImportLog {
 	 * @return
 	 */
 	public Action getAction() {
-		return action;
+		return actionContet.getAction();
 	}			
 	
 	/**

@@ -17,6 +17,7 @@ import eu.ehri.project.models.Action;
 import eu.ehri.project.models.ActionEvent;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Actioner;
 
 /**
@@ -59,13 +60,53 @@ public final class ActionManager {
     }
 
     /**
+     * ActionContext is a handle to a particular action to which additional
+     * subjects can be added.
+     * 
+     * @author mike
+     * 
+     */
+    public static class ActionContext {
+        private final ActionManager actionManager;
+        private final Action action;
+        private final Actioner actioner;
+        private final String logMessage;
+
+        public ActionContext(ActionManager actionManager, Action action,
+                Actioner actioner, String logMessage) {
+            this.actionManager = actionManager;
+            this.action = action;
+            this.actioner = actioner;
+            this.logMessage = logMessage;
+        }
+
+        public Action getAction() {
+            return this.action;
+        }
+
+        public Actioner getActioner() {
+            return this.actioner;
+        }
+
+        public ActionContext addSubjects(AccessibleEntity... entities) {
+            for (AccessibleEntity entity : entities) {
+                ActionEvent event = actionManager.createEvent(entity, actioner,
+                        logMessage);
+                actionManager.graph.addEdge(null, event.asVertex(),
+                        action.asVertex(), HAS_EVENT_ACTION);
+            }
+            return this;
+        }
+    }
+
+    /**
      * Create an action node describing something that user U has done.
      * 
      * @param user
      * @param logMessage
      * @return
      */
-    public Action createAction(Actioner user, String logMessage) {
+    public ActionContext createAction(Actioner user, String logMessage) {
         Bundle actionBundle = new Bundle(EntityClass.ACTION)
                 .withDataValue(Action.TIMESTAMP, getTimestamp())
                 .withDataValue(Action.LOG_MESSAGE, logMessage)
@@ -77,13 +118,42 @@ public final class ActionManager {
         try {
             Action action = persister.create(actionBundle, Action.class);
             setLatestAction(user, action, LIFECYCLE_ACTION);
-            return action;
+            return new ActionContext(this, action, user, logMessage);
         } catch (ValidationError e) {
             e.printStackTrace();
             throw new RuntimeException(
                     "Unexpected validation error creating action", e);
         }
     }
+    
+    /**
+     * Create an action given an accessor.
+     */
+    public ActionContext createAction(AccessibleEntity subject, Accessor user,
+            String logMessage) {
+        return createAction(subject, graph.frame(user.asVertex(), Actioner.class), logMessage);
+    }
+
+    /**
+     * Create an action node that describes what user U has done with subject S
+     * via logMessage log.
+     * 
+     * @param subject
+     * @param user
+     * @param logMessage
+     * @return
+     */
+    public ActionContext createAction(AccessibleEntity subject, Actioner user,
+            String logMessage) {
+        ActionContext context = createAction(user, logMessage);
+        ActionEvent event = createEvent(subject, user, logMessage);
+        graph.addEdge(null, event.asVertex(), context.getAction().asVertex(),
+                HAS_EVENT_ACTION);
+        return context;
+    }
+
+
+    // Helpers.
 
     /**
      * Create an action node describing something that user U has done.
@@ -92,7 +162,7 @@ public final class ActionManager {
      * @param logMessage
      * @return
      */
-    public ActionEvent createEvent(AccessibleEntity item, Actioner user,
+    private ActionEvent createEvent(AccessibleEntity item, Actioner user,
             String logMessage) {
         Bundle actionBundle = new Bundle(EntityClass.ACTION_EVENT)
                 .withDataValue(Action.TIMESTAMP, getTimestamp())
@@ -113,6 +183,11 @@ public final class ActionManager {
         }
     }
 
+    private String getTimestamp() {
+        DateTime dt = DateTime.now();
+        return ISODateTimeFormat.dateTime().print(dt);
+    }
+
     /**
      * Add a new action to the head of this user's action history linked list.
      * 
@@ -122,8 +197,7 @@ public final class ActionManager {
     private void setLatestAction(Actioner user, Action action, String actionType) {
         Action existingAction = user.getLatestAction();
         if (existingAction != null) {
-            for (Edge e : user.asVertex().getEdges(Direction.OUT,
-                    actionType)) {
+            for (Edge e : user.asVertex().getEdges(Direction.OUT, actionType)) {
                 graph.removeEdge(e);
             }
             graph.addEdge(null, action.asVertex(), existingAction.asVertex(),
@@ -138,52 +212,16 @@ public final class ActionManager {
      * @param item
      * @param action
      */
-    private void setLatestEvent(AccessibleEntity item, ActionEvent event, String actionType) {
+    private void setLatestEvent(AccessibleEntity item, ActionEvent event,
+            String actionType) {
         ActionEvent existingEvent = item.getLatestEvent();
         if (existingEvent != null) {
-            for (Edge e : item.asVertex().getEdges(Direction.OUT,
-                    actionType)) {
+            for (Edge e : item.asVertex().getEdges(Direction.OUT, actionType)) {
                 graph.removeEdge(e);
             }
             graph.addEdge(null, event.asVertex(), existingEvent.asVertex(),
                     actionType);
         }
         graph.addEdge(null, item.asVertex(), event.asVertex(), actionType);
-    }
-
-    /**
-     * Create an action node that describes what user U has done with subject S
-     * via logMessage log.
-     * 
-     * @param subject
-     * @param user
-     * @param logMessage
-     * @return
-     */
-    public Action createAction(AccessibleEntity subject, Actioner user,
-            String logMessage) {
-        Action action = createAction(user, logMessage);
-        ActionEvent event = createEvent(subject, user, logMessage);
-        graph.addEdge(null, event.asVertex(), action.asVertex(), HAS_EVENT_ACTION);
-        return action;
-    }
-    
-    /**
-     * Add subjects to an existing action.
-     * @return
-     */
-    public void addSubjects(Action action, Actioner user, AccessibleEntity... entities) {
-        String logMsg = action.getLogMessage();
-        for (AccessibleEntity entity :  entities) {
-            ActionEvent event = createEvent(entity, user, logMsg);
-            graph.addEdge(null, event.asVertex(), action.asVertex(), HAS_EVENT_ACTION);
-        }
-    }
-
-    // Helpers.
-
-    private String getTimestamp() {
-        DateTime dt = DateTime.now();
-        return ISODateTimeFormat.dateTime().print(dt);
     }
 }

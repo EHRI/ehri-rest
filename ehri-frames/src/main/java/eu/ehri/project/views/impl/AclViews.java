@@ -16,7 +16,6 @@ import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.models.Action;
 import eu.ehri.project.models.ContentType;
 import eu.ehri.project.models.Permission;
 import eu.ehri.project.models.PermissionGrant;
@@ -170,13 +169,9 @@ public final class AclViews implements Acl {
             helper.checkEntityPermission(item, grantee, PermissionType.GRANT);
             acl.setEntityPermissions(accessor, item, permissionList);
             // Log the action...
-            // FIXME: Sort out the logic in ActionManager so this cruft isn't
-            // required.
-            ActionManager actionManager = new ActionManager(graph);
-            Actioner actioner = graph.frame(grantee.asVertex(), Actioner.class);
-            Action action = actionManager.createAction(item, actioner,
-                    "Added annotation");
-            actionManager.addSubjects(action, actioner,
+            new ActionManager(graph).createAction(item,
+                    graph.frame(grantee.asVertex(), Actioner.class),
+                    "Added annotation").addSubjects(
                     graph.frame(accessor.asVertex(), AccessibleEntity.class));
 
             graph.getBaseGraph().stopTransaction(Conclusion.SUCCESS);

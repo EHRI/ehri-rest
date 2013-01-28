@@ -27,11 +27,11 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.exceptions.InvalidEadDocument;
 import eu.ehri.project.importers.exceptions.InvalidInputFormatError;
-import eu.ehri.project.models.Action;
 import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.persistance.ActionManager;
+import eu.ehri.project.persistance.ActionManager.ActionContext;
 
 /**
  * Class that provides a front-end for importing XML files like EAD and EAC and
@@ -49,7 +49,6 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
     protected final FramedGraph<Neo4jGraph> framedGraph;
     protected final Agent agent;
     protected final Actioner actioner;
-    protected final ActionManager actionManager;
     
     // Ugly stateful variables for tracking import state
     // and reporting errors usefully...
@@ -84,7 +83,6 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
         this.framedGraph = framedGraph;
         this.agent = agent;
         this.actioner = actioner;
-        this.actionManager = new ActionManager(framedGraph);
         this.importerClass = importerClass;
         this.handlerClass = handlerClass;
         
@@ -118,7 +116,7 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
         Transaction tx = framedGraph.getBaseGraph().getRawGraph().beginTx();
         try {
             // Create a new action for this import
-            final Action action = new ActionManager(framedGraph).createAction(
+            final ActionContext action = new ActionManager(framedGraph).createAction(
                     actioner, logMessage);
             // Create a manifest to store the results of the import.
             final ImportLog log = new ImportLog(action);
@@ -155,7 +153,7 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
         Transaction tx = framedGraph.getBaseGraph().getRawGraph().beginTx();
         try {
 
-            final Action action = new ActionManager(framedGraph).createAction(
+            final ActionContext action = new ActionManager(framedGraph).createAction(
                     actioner, logMessage);
             final ImportLog log = new ImportLog(action);
             for (String path : paths) {
@@ -199,7 +197,7 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
      * Import EAD from the given InputStream, as part of the given action.
      *
      * @param ios
-     * @param action
+     * @param actionContext
      * @param log
      *
      * @throws IOException
@@ -208,7 +206,7 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
      * @throws InvalidInputFormatError
      * @throws InvalidEadDocument
      */
-    private void importFile(InputStream ios, final Action action,
+    private void importFile(InputStream ios, final ActionContext actionContext,
             final ImportLog log) throws IOException, ValidationError,
             InputParseError, InvalidEadDocument, InvalidInputFormatError {
 
@@ -219,14 +217,14 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
             importer.addCreationCallback(new ImportCallback() {
                 public void itemImported(AccessibleEntity item) {
                     System.out.println("ImportCallback: itemImported creation " + item.getIdentifier());
-                    actionManager.addSubjects(action, actioner, item);
+                    actionContext.addSubjects(item);
                     log.addCreated();
                 }
             });
             importer.addUpdateCallback(new ImportCallback() {
                 public void itemImported(AccessibleEntity item) {
                     System.out.println("ImportCallback: itemImported updated");
-                    actionManager.addSubjects(action, actioner, item);
+                    actionContext.addSubjects(item);
                     log.addUpdated();
                 }
             });
