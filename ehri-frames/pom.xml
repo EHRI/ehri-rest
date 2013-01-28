@@ -17,7 +17,7 @@
 		<name>EHRI</name>
 	</organization>
 	<build>
-	
+
 		<!-- Copy messages_*.properties files from the source tree. These are
 		typically used for externalized i18n strings. -->
 		<resources>
@@ -156,6 +156,11 @@
 			<url>http://m2.neo4j.org/releases/</url>
 			<layout>default</layout>
 		</repository>
+		  <repository>
+            <id>sonatype-nexus-snapshots</id>
+            <name>Sonatype Nexus Snapshots</name>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </repository>
 		<repository>
 			<id>Sonatype-public</id>
 			<name>SnakeYAML repository</name>
