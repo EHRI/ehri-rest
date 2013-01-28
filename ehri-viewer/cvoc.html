@@ -54,6 +54,16 @@ function addExpandHandlers(newStuff) {
 		$(this).next().empty();
 		$(this).text("+ expand");
 	});
+	$(".relatedByLink", newStuff).toggle(function() {
+    	event.preventDefault();
+    	var id = extractIdFromNeo4jUrl(this.href);
+        loadRelatedByConceptList($(this).next(), id);
+		$(this).text("- collapse");
+	}, function() {
+		// Note maybe not clean it, but hide instead?
+		$(this).next().empty();
+		$(this).text("+ expand");
+	});	
 	$(".broaderLink", newStuff).toggle(function() {
     	event.preventDefault();
     	var id = extractIdFromNeo4jUrl(this.href);
@@ -120,6 +130,7 @@ function createConceptHtmlString(c) {
 		//lines.push("<div><a href='"+c.id+"' class='broaderLink'>broader</a></div>");
 		lines.push("<div>broader: <a href='"+c.id+"' class='broaderLink'>+ expand</a><div class='expanded'></div></div>");
 		lines.push("<div>related: <a href='"+c.id+"' class='relatedLink'>+ expand</a><div class='expanded'></div></div>");
+		lines.push("<div>relatedBy: <a href='"+c.id+"' class='relatedByLink'>+ expand</a><div class='expanded'></div></div>");
 		lines.push("<div>narrower: <a href='"+c.id+"' class='narrowerLink'>+ expand</a><div class='expanded'></div></div>");
 		lines.push("</div>");
 	return lines.join('');
@@ -151,6 +162,28 @@ function loadRelatedConceptList(element, id) {
 		// get the list of concepts
 			var request = $.ajax({
 				url : "http://localhost:7474/ehri/cvocConcept/"+id+"/related/list", 
+				type : "GET",
+				dataType : "json"
+			});
+	
+			request.done(function(json) {
+				//console.log(json);
+				//renderConceptList(json, voc);
+				var container = element;
+				container.empty();
+				var newStuff = container.append(createConceptListHtmlString(json));
+				addExpandHandlers(newStuff);	
+			});
+	
+			request.fail(function(jqXHR, textStatus) {
+				alert("Request failed: " + textStatus);
+			});
+}
+
+function loadRelatedByConceptList(element, id) {
+		// get the list of concepts
+			var request = $.ajax({
+				url : "http://localhost:7474/ehri/cvocConcept/"+id+"/relatedBy/list", 
 				type : "GET",
 				dataType : "json"
 			});
@@ -244,6 +277,8 @@ function renderVocabularyList(json) {
 		lines.push("</li>");
 	}
 	lines.push("</ul>");
+	lines.push("DEV NOTE: need to make selectable, \"ehri-thes\" now hardcoded");
+	
 	container.empty(); // clear any old stuff!
 	container.append(lines.join(''));
 }
@@ -283,13 +318,13 @@ function loadVocabularyList() {
 	// jQuery main entrance
 	$(document).ready(function() {
 		loadVocabularyList();
-		loadConceptList("ehri-thes");	
+		loadConceptList("ehri-thes");	// HARDCODED!
 	});
 	</script>
 </head>
 <body>
 	<h1>EHRI cvoc - internal API</h1>
-	DEV NOTE: needs code cleanup and refactoring!
+	<!-- DEV NOTE: needs code cleanup and refactoring! -->
 	<div id="vocabularyList"></div>
 	<div id="conceptList"></div>
 	
