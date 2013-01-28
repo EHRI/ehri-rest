@@ -46,12 +46,11 @@ import eu.ehri.project.views.ViewHelper;
 
 /**
  * Handles querying Accessible Entities, with ACL semantics.
- * 
+ * <p/>
  * TODO: Possibly refactor more of the ACL logic into AclManager.
- * 
- * @author mike
- * 
+ *
  * @param <E>
+ * @author mike
  */
 public final class Query<E extends AccessibleEntity> implements Search<E> {
 
@@ -62,7 +61,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
     private final SortedMap<String, Sort> sort;
     private final Optional<Pair<String, Sort>> defaultSort;
     private final SortedMap<String, Pair<FilterPredicate, String>> filters;
-    private final ImmutableMap<Pair<String,Direction>, Integer> depthFilters;
+    private final ImmutableMap<Pair<String, Direction>, Integer> depthFilters;
     private final boolean page;
 
     private final FramedGraph<Neo4jGraph> graph;
@@ -73,25 +72,27 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
 
     /**
      * Directions for sort.
-     * 
      */
     public static enum Sort {
-        ASC, DESC;
-    };
+        ASC, DESC
+    }
+
+    ;
 
     /**
      * Filter predicates
-     * 
+     *
      * @author mike
-     * 
      */
     public static enum FilterPredicate {
         EQUALS, IEQUALS, STARTSWITH, ENDSWITH, CONTAINS, ICONTAINS, MATCHES, GT, GTE, LT, LTE;
-    };
+    }
+
+    ;
 
     /**
      * Full Constructor.
-     * 
+     *
      * @param graph
      * @param cls
      * @param scope
@@ -101,11 +102,11 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      * @param page
      */
     public Query(FramedGraph<Neo4jGraph> graph, Class<E> cls,
-            PermissionScope scope, Optional<Integer> offset,
-            Optional<Integer> limit, final SortedMap<String, Sort> sort,
-            final Optional<Pair<String, Sort>> defSort,
-            final SortedMap<String, Pair<FilterPredicate, String>> filters,
-            final Map<Pair<String,Direction>, Integer> depthFilters, Boolean page) {
+                 PermissionScope scope, Optional<Integer> offset,
+                 Optional<Integer> limit, final SortedMap<String, Sort> sort,
+                 final Optional<Pair<String, Sort>> defSort,
+                 final SortedMap<String, Pair<FilterPredicate, String>> filters,
+                 final Map<Pair<String, Direction>, Integer> depthFilters, Boolean page) {
         this.graph = graph;
         this.cls = cls;
         this.scope = scope;
@@ -114,7 +115,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
         this.sort = ImmutableSortedMap.copyOf(sort);
         this.defaultSort = defSort;
         this.filters = ImmutableSortedMap
-                .<String, Pair<FilterPredicate, String>> copyOf(filters);
+                .copyOf(filters);
         this.depthFilters = ImmutableMap.copyOf(depthFilters);
         this.page = page;
         helper = new ViewHelper(graph, scope);
@@ -123,38 +124,38 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
 
     /**
      * Simple constructor.
-     * 
+     *
      * @param graph
      * @param cls
      */
     public Query(FramedGraph<Neo4jGraph> graph, Class<E> cls) {
         this(graph, cls, SystemScope.getInstance(),
-                Optional.<Integer> absent(), Optional.<Integer> absent(),
-                ImmutableSortedMap.<String, Sort> of(), Optional
-                        .<Pair<String, Sort>> absent(), ImmutableSortedMap
-                        .<String, Pair<FilterPredicate, String>> of(), Maps
-                        .<Pair<String,Direction>, Integer> newHashMap(), false);
+                Optional.<Integer>absent(), Optional.<Integer>absent(),
+                ImmutableSortedMap.<String, Sort>of(), Optional
+                .<Pair<String, Sort>>absent(), ImmutableSortedMap
+                .<String, Pair<FilterPredicate, String>>of(), Maps
+                .<Pair<String, Direction>, Integer>newHashMap(), false);
     }
 
     /**
      * Scoped Constructor.
-     * 
+     *
      * @param graph
      * @param cls
      * @param scope
      */
     public Query(FramedGraph<Neo4jGraph> graph, Class<E> cls,
-            PermissionScope scope) {
-        this(graph, cls, scope, Optional.<Integer> absent(), Optional
-                .<Integer> absent(), ImmutableSortedMap.<String, Sort> of(),
-                Optional.<Pair<String, Sort>> absent(), ImmutableSortedMap
-                        .<String, Pair<FilterPredicate, String>> of(), Maps
-                        .<Pair<String,Direction>, Integer> newHashMap(), false);
+                 PermissionScope scope) {
+        this(graph, cls, scope, Optional.<Integer>absent(), Optional
+                .<Integer>absent(), ImmutableSortedMap.<String, Sort>of(),
+                Optional.<Pair<String, Sort>>absent(), ImmutableSortedMap
+                .<String, Pair<FilterPredicate, String>>of(), Maps
+                .<Pair<String, Direction>, Integer>newHashMap(), false);
     }
 
     /**
      * Copy constructor.
-     * 
+     *
      * @param other
      */
     public Query<E> copy(Query<E> other) {
@@ -165,9 +166,8 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
 
     /**
      * Class representing a page of content.
-     * 
-     * @param <T>
-     *            the item type
+     *
+     * @param <T> the item type
      */
     public static class Page<T> {
         private Iterable<T> iterable;
@@ -177,7 +177,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
         private Map<String, Sort> sort;
 
         Page(Iterable<T> iterable, long count, Integer offset, Integer limit,
-                Map<String, Sort> sort) {
+             Map<String, Sort> sort) {
             this.iterable = iterable;
             this.count = count;
             this.offset = offset;
@@ -209,7 +209,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
     /**
      * Wrapper method for FramedVertexIterables that converts a
      * FramedVertexIterable<T> back into a plain Iterable<Vertex>.
-     * 
+     *
      * @param <T>
      */
     public static class FramedVertexIterableAdaptor<T extends VertexFrame>
@@ -241,9 +241,8 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
 
     /**
      * Fetch an item by property id. The first matching item will be returned.
-     * 
-     * @param key
-     * @param value
+     *
+     * @param id
      * @param user
      * @return The matching framed vertex.
      * @throws PermissionDenied
@@ -259,7 +258,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
     /**
      * Fetch an item by property key/value. The first matching item will be
      * returned.
-     * 
+     *
      * @param key
      * @param value
      * @param user
@@ -285,7 +284,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
     /**
      * Return a Page instance containing a count of total items, and an iterable
      * for the given offset/limit.
-     * 
+     *
      * @param user
      * @return Page instance
      */
@@ -296,7 +295,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
     /**
      * Return a Page instance containing a count of total items, and an iterable
      * for the given offset/limit.
-     * 
+     *
      * @param user
      * @return Page instance
      */
@@ -307,10 +306,9 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
     /**
      * Return a Page instance containing a count of total items, and an iterable
      * for the given offset/limit.
-     * 
-     * @param iterable
+     *
+     * @param vertices
      * @param user
-     * 
      * @return Page instance
      */
     public Page<E> page(Iterable<E> vertices, Accessor user) {
@@ -320,14 +318,14 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
     /**
      * Return a Page instance containing a count of total items, and an iterable
      * for the given offset/limit.
-     * 
-     * @param iterable
+     *
+     * @param vertices
      * @param user
-     * 
+     * @param cls
      * @return Page instance
      */
     public <T extends VertexFrame> Page<T> page(Iterable<T> vertices,
-            Accessor user, Class<T> cls) {
+                                                Accessor user, Class<T> cls) {
         PipeFunction<Vertex, Boolean> aclFilterFunction = new AclManager(graph)
                 .getAclFilterFunction(user);
 
@@ -347,11 +345,10 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
     /**
      * Return a Page instance containing a count of total items, and an iterable
      * for the given offset/limit.
-     * 
+     *
      * @param key
      * @param query
      * @param user
-     * 
      * @return Page instance
      */
     public Page<E> page(String key, String query, Accessor user) {
@@ -364,7 +361,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
                 PipeFunction<Vertex, Boolean> aclFilterFunction = new AclManager(
                         graph).getAclFilterFunction(user);
                 long count = applyFilters(new GremlinPipeline<Vertex, Vertex>(
-                                countQ).filter(aclFilterFunction)).count();
+                        countQ).filter(aclFilterFunction)).count();
                 return new Page<E>(
                         graph.frameVertices(
                                 setPipelineRange(setOrder(applyFilters(new GremlinPipeline<Vertex, Vertex>(
@@ -378,10 +375,10 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
             countQ.close();
         }
     }
-    
+
     /**
      * Apply filtering actions to a Gremlin pipeline.
-     * 
+     *
      * @param pipe
      * @return
      */
@@ -391,7 +388,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
 
     /**
      * Return an iterable for all items accessible to the user.
-     * 
+     *
      * @param user
      * @return Iterable of framed vertices accessible to the given user
      */
@@ -401,9 +398,8 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
 
     /**
      * List items accessible to a given user.
-     * 
+     *
      * @param user
-     * 
      * @return Iterable of items accessible to the given accessor
      */
     public Iterable<E> list(String key, String query, Accessor user) {
@@ -425,10 +421,9 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
 
     /**
      * List items accessible to a given user.
-     * 
+     *
      * @param vertices
      * @param user
-     * 
      * @return Iterable of items accessible to the given accessor
      */
     public Iterable<E> list(Iterable<E> vertices, Accessor user) {
@@ -437,14 +432,13 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
 
     /**
      * List items accessible to a given user.
-     * 
+     *
      * @param vertices
      * @param user
-     * 
      * @return Iterable of items accessible to the given accessor
      */
     public <T extends VertexFrame> Iterable<T> list(Iterable<T> vertices,
-            Accessor user, Class<T> cls) {
+                                                    Accessor user, Class<T> cls) {
         GremlinPipeline<T, Vertex> filter = new GremlinPipeline<T, Vertex>(
                 new FramedVertexIterableAdaptor<T>(vertices))
                 .filter(new AclManager(graph).getAclFilterFunction(user));
@@ -456,7 +450,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
 
     /**
      * Return an iterable for all items accessible to the user.
-     * 
+     *
      * @param user
      * @return Iterable of framed vertices accessible to the given user
      */
@@ -466,7 +460,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
 
     /**
      * Get the offset applied to this query.
-     * 
+     *
      * @return
      */
     public Optional<Integer> getOffset() {
@@ -475,7 +469,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
 
     /**
      * Set the offset applied to this query.
-     * 
+     *
      * @param offset
      */
     public Query<E> setOffset(Integer offset) {
@@ -485,7 +479,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
 
     /**
      * Get the limit applied to this query.
-     * 
+     *
      * @return
      */
     public Optional<Integer> getLimit() {
@@ -494,7 +488,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
 
     /**
      * Set the limit applied to this query.
-     * 
+     *
      * @param limit
      */
     public Query<E> setLimit(Integer limit) {
@@ -508,13 +502,13 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      */
     public Query<E> clearOrder() {
         return new Query<E>(graph, cls, scope, offset, limit,
-                ImmutableSortedMap.<String, Sort> of(), defaultSort, filters,
+                ImmutableSortedMap.<String, Sort>of(), defaultSort, filters,
                 depthFilters, page);
     }
 
     /**
      * Add an default order clause, to be used if no custom order is specified.
-     * 
+     *
      * @param field
      * @param order
      */
@@ -527,7 +521,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
 
     /**
      * Add an order clause.
-     * 
+     *
      * @param field
      * @param order
      */
@@ -540,11 +534,10 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
 
     /**
      * Add a set of string order clauses. Clauses must be of the form:
-     * 
+     * <p/>
      * property__DIRECTION
-     * 
-     * @param order
-     *            properties
+     *
+     * @param orderSpecs list of orderSpecs
      */
     public Query<E> orderBy(Iterable<String> orderSpecs) {
         SortedMap<String, Sort> tmp = parseOrderSpecs(orderSpecs);
@@ -564,35 +557,35 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
                 limit,
                 sort,
                 defaultSort,
-                ImmutableSortedMap.<String, Pair<FilterPredicate, String>> of(),
+                ImmutableSortedMap.<String, Pair<FilterPredicate, String>>of(),
                 depthFilters, page);
     }
 
     /**
-     * Filter out items that are over a certain depth in the given 
+     * Filter out items that are over a certain depth in the given
      * relationship chain.
-     * 
+     *
      * @param label
      * @param depth
      * @return
      */
     public Query<E> depthFilter(String label, Direction direction, Integer depth) {
-        Map<Pair<String,Direction>, Integer> tmp = Maps.newHashMap(depthFilters);
-        tmp.put(new Pair<String,Direction>(label, direction), depth);
+        Map<Pair<String, Direction>, Integer> tmp = Maps.newHashMap(depthFilters);
+        tmp.put(new Pair<String, Direction>(label, direction), depth);
         return new Query<E>(graph, cls, scope, offset, limit, sort,
                 defaultSort, filters, tmp, page);
     }
 
     /**
      * Add a filter clause.
-     * 
+     *
      * @param property
-     * @param filter
-     *            predicate
+     * @param predicate   predicate
      * @param value
+     * @return a new query object
      */
     public Query<E> filter(String property, FilterPredicate predicate,
-            String value) {
+                           String value) {
         SortedMap<String, Pair<FilterPredicate, String>> tmp = new ImmutableSortedMap.Builder<String, Pair<FilterPredicate, String>>(
                 Ordering.natural())
                 .putAll(filters)
@@ -606,11 +599,12 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
     /**
      * Add a set of unparsed filter clauses. Clauses must be of the format:
      * property__PREDICATE:value
-     * 
+     * <p/>
      * If PREDICATE is omitted, EQUALS is the default.
-     * 
-     * @param filter
-     *            list
+     *
+     * @param filters list of filters
+     * @return a new query object
+     *
      */
     public Query<E> filter(Iterable<String> filters) {
         SortedMap<String, Pair<FilterPredicate, String>> tmp = parseFilters(filters);
@@ -620,7 +614,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
 
     /**
      * Parse a list of sort specifications.
-     * 
+     *
      * @param orderSpecs
      * @return
      */
@@ -631,12 +625,12 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
         for (String spec : orderSpecs) {
             List<String> od = Iterables.toList(psplit.split(spec));
             switch (od.size()) {
-            case 1:
-                builder.put(od.get(0), Sort.ASC);
-                break;
-            case 2:
-                builder.put(od.get(0), Sort.valueOf(od.get(1)));
-                break;
+                case 1:
+                    builder.put(od.get(0), Sort.ASC);
+                    break;
+                case 2:
+                    builder.put(od.get(0), Sort.valueOf(od.get(1)));
+                    break;
             }
         }
         return builder.build();
@@ -644,10 +638,9 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
 
     /**
      * Parse a list of string filter specifications.
-     * 
+     *
      * @param filterList
      * @return
-     * @throws BadFilterSpecification
      */
     private SortedMap<String, Pair<FilterPredicate, String>> parseFilters(
             Iterable<String> filterList) {
@@ -662,14 +655,14 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
                 String value = kv.get(1);
                 List<String> pp = Iterables.toList(psplit.split(ppred));
                 switch (pp.size()) {
-                case 1:
-                    builder.put(pp.get(0), new Pair<FilterPredicate, String>(
-                            FilterPredicate.EQUALS, value));
-                    break;
-                case 2:
-                    builder.put(pp.get(0), new Pair<FilterPredicate, String>(
-                            FilterPredicate.valueOf(pp.get(1)), value));
-                    break;
+                    case 1:
+                        builder.put(pp.get(0), new Pair<FilterPredicate, String>(
+                                FilterPredicate.EQUALS, value));
+                        break;
+                    case 2:
+                        builder.put(pp.get(0), new Pair<FilterPredicate, String>(
+                                FilterPredicate.valueOf(pp.get(1)), value));
+                        break;
                 }
 
             }
@@ -744,20 +737,20 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      * Create a filter that limits the selected nodes to with a particular depth
      * of a relationship chain. For example, if a set of nodes form a
      * hierachical relationship such as:
-     * 
+     * <p/>
      * child -[childOf]-> parent -[childOf]-> grandparent
-     * 
+     * <p/>
      * Then a depthFilter of childOf -> 0 would filter out all except the
      * grandparent node.
-     * 
+     * <p/>
      * TODO: Figure out how to do this will Gremlin's loop() construct.
-     * 
+     *
      * @return
      */
     private PipeFunction<Vertex, Boolean> getDepthFilterFunction() {
         return new PipeFunction<Vertex, Boolean>() {
             public Boolean compute(Vertex vertex) {
-                for (Entry<Pair<String,Direction>, Integer> entry : depthFilters.entrySet()) {
+                for (Entry<Pair<String, Direction>, Integer> entry : depthFilters.entrySet()) {
                     int depthCount = 0;
                     Vertex tmp = vertex;
                     String label = entry.getKey().getA();
@@ -799,31 +792,31 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
     // - doesn't do case-insensitive regexp matching.
     private boolean matches(String a, FilterPredicate predicate, String b) {
         switch (predicate) {
-        case EQUALS:
-            return a.equals(b);
-        case IEQUALS:
-            return a.equalsIgnoreCase(b);
-        case STARTSWITH:
-            return a.startsWith(b);
-        case ENDSWITH:
-            return a.endsWith(b);
-        case CONTAINS:
-            return a.contains(b);
-        case ICONTAINS:
-            return a.toLowerCase().contains(b.toLowerCase());
-        case MATCHES:
-            return a.matches(b);
-        case GT:
-            return a.compareTo(b) > 0;
-        case GTE:
-            return a.compareTo(b) >= 0;
-        case LT:
-            return a.compareTo(b) < 0;
-        case LTE:
-            return a.compareTo(b) <= 0;
-        default:
-            throw new RuntimeException("Unexpected filter predicate: "
-                    + predicate);
+            case EQUALS:
+                return a.equals(b);
+            case IEQUALS:
+                return a.equalsIgnoreCase(b);
+            case STARTSWITH:
+                return a.startsWith(b);
+            case ENDSWITH:
+                return a.endsWith(b);
+            case CONTAINS:
+                return a.contains(b);
+            case ICONTAINS:
+                return a.toLowerCase().contains(b.toLowerCase());
+            case MATCHES:
+                return a.matches(b);
+            case GT:
+                return a.compareTo(b) > 0;
+            case GTE:
+                return a.compareTo(b) >= 0;
+            case LT:
+                return a.compareTo(b) < 0;
+            case LTE:
+                return a.compareTo(b) <= 0;
+            default:
+                throw new RuntimeException("Unexpected filter predicate: "
+                        + predicate);
         }
     }
 }

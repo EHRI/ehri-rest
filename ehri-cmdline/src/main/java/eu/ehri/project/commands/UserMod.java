@@ -31,7 +31,6 @@ public class UserMod extends BaseCommand implements Command {
     /**
      * Constructor.
      * 
-     * @param args
      */
     public UserMod() {
     }

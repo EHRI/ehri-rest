@@ -33,7 +33,7 @@ public class SkosImporter extends XmlCVocImporter<Map<String, Object>> {
      *
      * @param framedGraph
      * @param repository
-     * @param topLevelEad
+     * @param log
      */
     public SkosImporter(FramedGraph<Neo4jGraph> framedGraph, Agent repository,
             ImportLog log) {
@@ -44,7 +44,6 @@ public class SkosImporter extends XmlCVocImporter<Map<String, Object>> {
      * Import a single item, keeping a reference to the hierarchical depth.
      *
      * @param itemData
-     * @param parent
      * @param depth
      * @throws ValidationError
      */

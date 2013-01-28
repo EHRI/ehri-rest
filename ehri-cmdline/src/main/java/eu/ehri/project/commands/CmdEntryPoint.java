@@ -15,7 +15,6 @@ public class CmdEntryPoint extends BaseCommand {
     /**
      * Constructor.
      * 
-     * @param args
      */
     public CmdEntryPoint() {
         super();

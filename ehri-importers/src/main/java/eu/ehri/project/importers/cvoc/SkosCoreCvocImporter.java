@@ -168,7 +168,6 @@ public class SkosCoreCvocImporter {
      * @param doc
      * @param actionContext
      * 
-     * @return
      * @throws ValidationError
      * @throws InvalidInputFormatError
      * @throws IntegrityError 

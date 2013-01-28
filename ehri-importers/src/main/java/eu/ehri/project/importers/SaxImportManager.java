@@ -108,8 +108,7 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
      *
      * @throws IOException
      * @throws ValidationError
-     * @throws InvalidEadDocument
-     * @throw InputParseError
+     * @throws InputParseError
      */
     public ImportLog importFile(InputStream ios, String logMessage)
             throws IOException, ValidationError, InputParseError {

@@ -39,7 +39,6 @@ public class UserAdd extends BaseCommand implements Command {
     /**
      * Constructor.
      * 
-     * @param args
      */
     public UserAdd() {
     }

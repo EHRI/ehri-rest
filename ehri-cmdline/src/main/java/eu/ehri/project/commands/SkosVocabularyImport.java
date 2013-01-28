@@ -32,7 +32,6 @@ import eu.ehri.project.persistance.BundleDAO;
 
 /**
  * Import Skos from the command line...
- * 
  */
 public class SkosVocabularyImport extends BaseCommand implements Command {
 
@@ -40,8 +39,7 @@ public class SkosVocabularyImport extends BaseCommand implements Command {
 
     /**
      * Constructor.
-     * 
-     * @param args
+     *
      * @throws ParseException
      */
     public SkosVocabularyImport() {
@@ -78,12 +76,11 @@ public class SkosVocabularyImport extends BaseCommand implements Command {
 
     /**
      * Command-line entry-point (for testing.)
-     * 
-     * @param args
+     *
      * @throws Exception
      */
     public int execWithOptions(final FramedGraph<Neo4jGraph> graph,
-            CommandLine cmdLine) throws Exception {
+                               CommandLine cmdLine) throws Exception {
 
         GraphManager manager = GraphManagerFactory.getInstance(graph);
         final String logMessage = "Imported from command-line";
@@ -97,14 +94,14 @@ public class SkosVocabularyImport extends BaseCommand implements Command {
         //    filePaths.add((String) cmdLine.getArgList().get(i));
         //}
         String filePath = (String) cmdLine.getArgList().get(0);
-        
+
         try {
 
             // Find the agent
             Vocabulary vocabulary;
             try {
                 vocabulary = manager.getFrame(
-                        (String) cmdLine.getOptionValue("vocabulary"), Vocabulary.class);
+                        cmdLine.getOptionValue("vocabulary"), Vocabulary.class);
             } catch (ItemNotFound e) {
                 if (cmdLine.hasOption("createvocabulary")) {
                     vocabulary = createVocabulary(graph, cmdLine.getOptionValue("vocabulary"));
@@ -117,7 +114,7 @@ public class SkosVocabularyImport extends BaseCommand implements Command {
             UserProfile user;
             try {
                 user = manager.getFrame(
-                        (String) cmdLine.getOptionValue("user"),
+                        cmdLine.getOptionValue("user"),
                         UserProfile.class);
             } catch (ItemNotFound e) {
                 if (cmdLine.hasOption("createuser")) {
@@ -150,7 +147,7 @@ public class SkosVocabularyImport extends BaseCommand implements Command {
     }
 
     private static UserProfile createUser(FramedGraph<Neo4jGraph> graph,
-            String name) throws ValidationError, IntegrityError {
+                                          String name) throws ValidationError, IntegrityError {
         Map<String, Object> userData = new HashMap<String, Object>();
         userData.put("identifier", name);
         userData.put("name", name);
@@ -160,18 +157,18 @@ public class SkosVocabularyImport extends BaseCommand implements Command {
 
     private static Vocabulary createVocabulary(FramedGraph<Neo4jGraph> graph, String name)
             throws ValidationError, IntegrityError {
-    	System.out.println("Creating vocabulary: \"" + name + "\" ...");
+        System.out.println("Creating vocabulary: \"" + name + "\" ...");
         Map<String, Object> vocabularyData = new HashMap<String, Object>();
         vocabularyData.put(AccessibleEntity.IDENTIFIER_KEY, name);
         //vocabularyData.put(EntityType.ID_KEY, name);
         //vocabularyData.put("name", name);
         Bundle bundle = new Bundle(EntityClass.CVOC_VOCABULARY, vocabularyData);
         bundle = bundle.withId(name);
-        
+
         Vocabulary vocabulary = new BundleDAO(graph).create(bundle, Vocabulary.class);
         System.out.println("Done Creating vocabulary");
         System.out.flush();
         return vocabulary;
-        
+
     }
 }

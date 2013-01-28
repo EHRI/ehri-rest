@@ -96,7 +96,6 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * @return
      * @throws ItemNotFound
      * @throws BadRequester
-     * @throws PermissionDenied
      */
     public StreamingOutput page(Integer offset, Integer limit)
             throws ItemNotFound, BadRequester {
@@ -142,7 +141,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * @param json
      *            The json representation of the entity to create (no vertex
      *            'id' fields)
-     * @param accessors
+     * @param accessorIds
      *            List of accessors who can initially view this item
      * @return The response of the create request, the 'location' will contain
      *         the url of the newly created instance.
@@ -150,7 +149,6 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * @throws ValidationError
      * @throws IntegrityError
      * @throws DeserializationError
-     * @throws ItemNotFound
      * @throws BadRequester
      */
     public Response create(String json, List<String> accessorIds)
