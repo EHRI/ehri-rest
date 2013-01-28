@@ -108,19 +108,6 @@
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>ehri-project</groupId>
-			<artifactId>ehri-plugin</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-			<type>test-jar</type>
-			<scope>test</scope>
-			<exclusions>
-				<exclusion>
-					<artifactId>slf4j-log4j12</artifactId>
-					<groupId>org.slf4j</groupId>
-				</exclusion>
-			</exclusions>
-		</dependency>
 
 
 
