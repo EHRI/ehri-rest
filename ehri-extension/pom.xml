@@ -108,21 +108,6 @@
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>ehri-project</groupId>
-			<artifactId>ehri-plugin</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-			<type>test-jar</type>
-			<scope>test</scope>
-			<exclusions>
-				<exclusion>
-					<artifactId>slf4j-log4j12</artifactId>
-					<groupId>org.slf4j</groupId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-
-
 
 		<!-- neo4j -->
 		<dependency>
@@ -224,7 +209,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<!-- Jar Versions -->
 		<!-- was 1.8-SNAPSHOT -->
-		<neo4j.version>1.8.M07</neo4j.version>
+		<!-- <neo4j.version>1.8.M07</neo4j.version> -->
 	</properties>
 
 
