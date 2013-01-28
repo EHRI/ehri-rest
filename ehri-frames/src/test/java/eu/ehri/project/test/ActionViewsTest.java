@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNotNull;
 
 import java.util.Iterator;
 import java.util.List;
+
 import org.junit.Test;
 
 import eu.ehri.project.exceptions.DeserializationError;
@@ -26,7 +27,7 @@ public class ActionViewsTest extends AbstractFixtureTest {
 
     /**
      * Test updating an item.
-     * 
+     *
      * @throws PermissionDenied
      * @throws ValidationError
      * @throws DeserializationError
@@ -59,7 +60,7 @@ public class ActionViewsTest extends AbstractFixtureTest {
 
     /**
      * Test updating a user.
-     * 
+     *
      * @throws PermissionDenied
      * @throws ValidationError
      * @throws DeserializationError
@@ -89,26 +90,17 @@ public class ActionViewsTest extends AbstractFixtureTest {
         assertEquals(changedUser.asVertex(), validUser.getLatestAction()
                 .getSubjects().iterator().next().asVertex());
         assertTrue(changedUser.getHistory().iterator().hasNext());
-        System.out.println(validUser.getName());
-        System.out.println(changedUser.getHistory().iterator()
-        .next().getAction().getLogMessage());
-        System.out.println(toList(changedUser.getHistory()));
         assertEquals(validUser.asVertex(), changedUser.getHistory().iterator()
                 .next().getAction().getActioner().iterator().next().asVertex());
-        
+
         // We should have exactly two actions now; one for create, one for
         // update...
-        List<ActionEvent> actions = toList(changedUser.getHistory());
-        for (ActionEvent action : actions) {
-            
-            System.out.println(action.getAction().getTimestamp());
-            System.out.println(action.getAction().getLogMessage());
-        }
-        assertEquals(2, actions.size());
+        List<ActionEvent> actionEvents = toList(changedUser.getHistory());
+        assertEquals(2, actionEvents.size());
         // They should have default log messages, and come out latest-first.
-        assertEquals(LoggingCrudViews.DEFAULT_UPDATE_LOG, actions.get(0)
+        assertEquals(LoggingCrudViews.DEFAULT_UPDATE_LOG, actionEvents.get(0)
                 .getAction().getLogMessage());
-        assertEquals(LoggingCrudViews.DEFAULT_CREATE_LOG, actions.get(1)
+        assertEquals(LoggingCrudViews.DEFAULT_CREATE_LOG, actionEvents.get(1)
                 .getAction().getLogMessage());
     }
 
@@ -116,7 +108,7 @@ public class ActionViewsTest extends AbstractFixtureTest {
      * Tests that deleting a collection will also delete its dependent
      * relations. NB: This test will break of other @Dependent relations are
      * added to DocumentaryUnit.
-     * 
+     *
      * @throws PermissionDenied
      * @throws ValidationError
      * @throws SerializationError
