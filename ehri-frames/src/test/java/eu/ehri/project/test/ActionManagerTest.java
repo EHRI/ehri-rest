@@ -2,6 +2,7 @@ package eu.ehri.project.test;
 
 import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.Agent;
+import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.events.Action;
@@ -26,6 +27,9 @@ public class ActionManagerTest extends AbstractFixtureTest {
 
     @Test
     public void testCorrectEventNodesAreCreated() throws DeserializationError, ValidationError {
+        Bundle userBundle = Bundle.fromData(getTestUserBundle());
+        UserProfile user = new BundleDAO(graph).create(userBundle, UserProfile.class);
+
         Bundle repoBundle = Bundle.fromData(getTestAgentBundle());
         Agent agent = new BundleDAO(graph).create(repoBundle, Agent.class);
 
