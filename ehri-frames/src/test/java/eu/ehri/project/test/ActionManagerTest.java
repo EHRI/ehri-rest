@@ -34,25 +34,18 @@ public class ActionManagerTest extends AbstractFixtureTest {
         Agent agent = new BundleDAO(graph).create(repoBundle, Agent.class);
 
         ActionManager am = new ActionManager(graph);
-        ActionManager.ActionContext ctx = am.createAction(agent,
+        ActionManager.EventContext ctx = am.logEvent(agent,
                 graph.frame(validUser.asVertex(), Actioner.class), "Creating agent");
 
-        Action action = ctx.getAction();
+        GlobalEvent event = ctx.getGlobalEvent();
 
         // Check exactly one ItemEvent was created
-        assertEquals(1, Iterables.count(action.getActionEvents()));
-        ItemEvent event = action.getActionEvents().iterator().next();
-        // Check one GlobalEvent was created
-        assertNotNull(action.getGlobalEvent());
-        // Check global event is connected properly
-        assertEquals(event.getGlobalEvent(), action.getGlobalEvent());
+        assertEquals(1, Iterables.count(event.getSubjects()));
+        assertEquals(1, Iterables.count(event.getActioners()));
 
-        // Check they both have the right subject
-        assertEquals(1, Iterables.count(event.getSubject()));
-        AccessibleEntity subject = event.getSubject().iterator().next();
-        assertEquals(agent.asVertex(), subject.asVertex());
+        assertEquals(1, Iterables.count(agent.getHistory()));
+        assertEquals(1, Iterables.count(agent.getLatestEvent()));
 
-        assertEquals(am.getLatestGlobalEvent(), event.getGlobalEvent());
 
         // Check the latest event in the list is the one we want...
         //GlobalEvent top = am.getLatestGlobalEvents().iterator().next();

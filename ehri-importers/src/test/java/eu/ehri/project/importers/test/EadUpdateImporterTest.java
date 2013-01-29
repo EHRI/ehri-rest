@@ -59,7 +59,7 @@ public class EadUpdateImporterTest extends AbstractFixtureTest {
         // Check we've only got one action
         assertEquals(1, actions.size());
         assertEquals(logMessage, actions.get(0).getAction()
-                .getLogMessage());
+                .getGlobalEvent().getLogMessage());
 
         // Now re-import the same file
         InputStream ios2 = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);

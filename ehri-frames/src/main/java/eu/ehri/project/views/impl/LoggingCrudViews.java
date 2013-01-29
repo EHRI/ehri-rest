@@ -105,7 +105,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
         try {
 
             E out = views.create(bundle, user);
-            actionManager.createAction(out, user, logMessage);
+            actionManager.logEvent(out, user, logMessage);
             tx.success();
             return out;
         } catch (IntegrityError ex) {
@@ -163,7 +163,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
         try {
 
             E out = views.createOrUpdate(bundle, user);
-            actionManager.createAction(out, user, logMessage);
+            actionManager.logEvent(out, user, logMessage);
             tx.success();
             return out;
         } catch (IntegrityError ex) {
@@ -219,7 +219,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
             E out = views.update(bundle, user);
-            actionManager.createAction(out, user, logMessage);
+            actionManager.logEvent(out, user, logMessage);
             tx.success();
             return out;
         } catch (IntegrityError ex) {
@@ -271,7 +271,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
             throws PermissionDenied, ValidationError, SerializationError {
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
-            actionManager.createAction(item, user, logMessage);
+            actionManager.logEvent(item, user, logMessage);
             Integer count = views.delete(item, user);
             tx.success();
             return count;

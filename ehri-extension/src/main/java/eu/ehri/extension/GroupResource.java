@@ -131,7 +131,7 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
 
             // Log the action...
             new ActionManager(graph)
-            .createAction(
+            .logEvent(
                     graph.frame(accessor.asVertex(), AccessibleEntity.class),
                     getRequesterUserProfile(), "Added accessor to group")
                     .addSubjects(group);            
@@ -169,7 +169,7 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
             group.removeMember(accessor);
             // Log the action...
             new ActionManager(graph)
-                .createAction(
+                .logEvent(
                         graph.frame(accessor.asVertex(), AccessibleEntity.class),
                         getRequesterUserProfile(), "Removed accessor from group")
                         .addSubjects(group);            

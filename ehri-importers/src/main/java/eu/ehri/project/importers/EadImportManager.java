@@ -36,7 +36,7 @@ import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.persistance.ActionManager;
-import eu.ehri.project.persistance.ActionManager.ActionContext;
+import eu.ehri.project.persistance.ActionManager.EventContext;
 
 /**
  * Class that provides a front-end for importing EAD XML files, EADGRP, and
@@ -120,7 +120,7 @@ public class EadImportManager extends XmlImportManager implements ImportManager 
         Transaction tx = framedGraph.getBaseGraph().getRawGraph().beginTx();
         try {
             // Create a new action for this import
-            final ActionContext action = new ActionManager(framedGraph).createAction(
+            final ActionManager.EventContext action = new ActionManager(framedGraph).logEvent(
                     actioner, logMessage);
             // Create a manifest to store the results of the import.
             final ImportLog log = new ImportLog(action);
@@ -157,7 +157,7 @@ public class EadImportManager extends XmlImportManager implements ImportManager 
         Transaction tx = framedGraph.getBaseGraph().getRawGraph().beginTx();
         try {
 
-            final ActionContext action = new ActionManager(framedGraph).createAction(
+            final ActionManager.EventContext action = new ActionManager(framedGraph).logEvent(
                     actioner, logMessage);
             final ImportLog log = new ImportLog(action);
             for (String path : paths) {
@@ -210,7 +210,7 @@ public class EadImportManager extends XmlImportManager implements ImportManager 
      * @throws InvalidEadDocument
      * @throws IntegrityError 
      */
-    private void importFile(InputStream ios, final ActionContext action,
+    private void importFile(InputStream ios, final EventContext action,
             final ImportLog log) throws IOException, ValidationError,
             InputParseError, InvalidEadDocument, InvalidInputFormatError, IntegrityError {
 
@@ -246,7 +246,7 @@ public class EadImportManager extends XmlImportManager implements ImportManager 
      * @throws InvalidInputFormatError
      * @throws IntegrityError 
      */
-    private void importDocWithinAction(Document doc, final ActionContext action,
+    private void importDocWithinAction(Document doc, final ActionManager.EventContext action,
             final ImportLog manifest) throws ValidationError,
             InvalidEadDocument, InvalidInputFormatError, IntegrityError {
 
@@ -275,7 +275,7 @@ public class EadImportManager extends XmlImportManager implements ImportManager 
      * @throws IntegrityError 
      */
     private void importNestedItemsWithinAction(Document doc, String path,
-            final ActionContext action, final ImportLog manifest)
+            final ActionManager.EventContext action, final ImportLog manifest)
             throws ValidationError, InvalidInputFormatError, InvalidEadDocument, IntegrityError {
         XPath xpath = XPathFactory.newInstance().newXPath();
         NodeList eadList;
@@ -304,7 +304,7 @@ public class EadImportManager extends XmlImportManager implements ImportManager 
      * @throws InvalidEadDocument
      * @throws IntegrityError 
      */
-    private void importNodeWithinAction(Node node, final ActionContext action,
+    private void importNodeWithinAction(Node node, final ActionManager.EventContext action,
             final ImportLog log) throws ValidationError,
             InvalidInputFormatError, InvalidEadDocument, IntegrityError {
 

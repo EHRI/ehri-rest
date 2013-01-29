@@ -45,7 +45,7 @@ import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.models.idgen.GenericIdGenerator;
 import eu.ehri.project.models.idgen.IdGenerator;
 import eu.ehri.project.persistance.ActionManager;
-import eu.ehri.project.persistance.ActionManager.ActionContext;
+import eu.ehri.project.persistance.ActionManager.EventContext;
 import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.persistance.BundleDAO;
 
@@ -114,13 +114,13 @@ public class SkosCoreCvocImporter {
         Transaction tx = framedGraph.getBaseGraph().getRawGraph().beginTx();
         try {
             // Create a new action for this import
-            final ActionContext actionContext = new ActionManager(framedGraph).createAction(
+            final EventContext eventContext = new ActionManager(framedGraph).logEvent(
                     actioner, logMessage);
             // Create a manifest to store the results of the import.
-            final ImportLog log = new ImportLog(actionContext);
+            final ImportLog log = new ImportLog(eventContext);
 
             // Do the import...
-            importFile(ios, actionContext, log);
+            importFile(ios, eventContext, log);
             // If nothing was imported, remove the action...
             if (log.isValid()) {
                 tx.success();
@@ -136,7 +136,7 @@ public class SkosCoreCvocImporter {
         }
     }
 	
-    private void importFile(InputStream ios, final ActionContext actionContext,
+    private void importFile(InputStream ios, final ActionManager.EventContext eventContext,
             final ImportLog log) throws IOException, ValidationError,
             InputParseError, InvalidEadDocument, InvalidInputFormatError, IntegrityError {
 
@@ -150,7 +150,7 @@ public class SkosCoreCvocImporter {
             if (tolerant)
                 builder.setEntityResolver(new DummyEntityResolver());
             Document doc = builder.parse(ios);
-            importDocWithinAction(doc, actionContext, log);
+            importDocWithinAction(doc, eventContext, log);
         } catch (ParserConfigurationException e) {
             e.printStackTrace();
             throw new RuntimeException(e);
@@ -166,18 +166,18 @@ public class SkosCoreCvocImporter {
      * Import an RDF/XML doc using the given action.
      * 
      * @param doc
-     * @param actionContext
+     * @param eventContext
      * 
      * @throws ValidationError
      * @throws InvalidInputFormatError
      * @throws IntegrityError 
      */
-    private void importDocWithinAction(Document doc, final ActionContext actionContext,
+    private void importDocWithinAction(Document doc, final ActionManager.EventContext eventContext,
             final ImportLog manifest) throws ValidationError,
             InvalidInputFormatError, IntegrityError {
 
-    	 createConcepts(doc, actionContext, manifest);
-    	 createVocabularyStruture(doc, actionContext, manifest);
+    	 createConcepts(doc, eventContext, manifest);
+    	 createVocabularyStruture(doc, eventContext, manifest);
     }
 
     /**
@@ -190,7 +190,7 @@ public class SkosCoreCvocImporter {
      * @throws InvalidInputFormatError
      * @throws IntegrityError
      */
-    private void createConcepts(Document doc, final ActionContext action,
+    private void createConcepts(Document doc, final ActionManager.EventContext action,
             final ImportLog manifest) throws ValidationError,
             InvalidInputFormatError, IntegrityError {
 
@@ -336,33 +336,33 @@ public class SkosCoreCvocImporter {
      * and we need to keep them in out lookup!
      *  
      * @param doc
-     * @param actionContext
+     * @param eventContext
      * @param manifest
      * @throws ValidationError
      * @throws InvalidInputFormatError
      * @throws IntegrityError
      */
-    private void createVocabularyStruture(Document doc, final ActionContext actionContext,
+    private void createVocabularyStruture(Document doc, final EventContext eventContext,
             final ImportLog manifest) throws ValidationError,
             InvalidInputFormatError, IntegrityError {
     	
 	   	 logger.debug("Number of concepts in lookup: " + conceptLookup.size());
 	   	 
-	   	 createBroaderNarrowerRelations(doc, actionContext, manifest);	   	
-	   	 createNonspecificRelations(doc, actionContext, manifest);
+	   	 createBroaderNarrowerRelations(doc, eventContext, manifest);
+	   	 createNonspecificRelations(doc, eventContext, manifest);
     }
     
     /**
      * Create the broader/narrower relations for all the concepts
      * 
      * @param doc
-     * @param actionContext
+     * @param eventContext
      * @param manifest
      * @throws ValidationError
      * @throws InvalidInputFormatError
      * @throws IntegrityError
      */
-    private void createBroaderNarrowerRelations(Document doc, final ActionContext actionContext,
+    private void createBroaderNarrowerRelations(Document doc, final EventContext eventContext,
     			final ImportLog manifest) throws ValidationError,
     			InvalidInputFormatError, IntegrityError {
     	
@@ -408,13 +408,13 @@ public class SkosCoreCvocImporter {
      * Create the 'non-specific' relations for all the concepts
      * 
      * @param doc
-     * @param actionContext
+     * @param eventContext
      * @param manifest
      * @throws ValidationError
      * @throws InvalidInputFormatError
      * @throws IntegrityError
      */
-    private void createNonspecificRelations(Document doc, final ActionContext actionContext,
+    private void createNonspecificRelations(Document doc, final EventContext eventContext,
     			final ImportLog manifest) throws ValidationError,
     			InvalidInputFormatError, IntegrityError {
     	

@@ -81,7 +81,7 @@ public class HierarchicalEadImporterTest extends AbstractFixtureTest {
 		Iterable<ItemEvent> actions = unit.getHistory();
 		// Check we've only got one action
 		assertEquals(1, toList(actions).size());
-		assertEquals(logMessage, log.getAction().getLogMessage());
+		assertEquals(logMessage, log.getAction().getGlobalEvent().getLogMessage());
 
 		List<AccessibleEntity> subjects = toList(log.getAction().getSubjects());
 		assertEquals(4, subjects.size());

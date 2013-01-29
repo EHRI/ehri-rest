@@ -58,7 +58,7 @@ public class SingleEadImporterTest extends AbstractFixtureTest {
         // Check we've only got one action
         assertEquals(1, actions.size());
         assertEquals(logMessage, actions.get(0).getAction()
-                .getLogMessage());
+                .getGlobalEvent().getLogMessage());
     }
 
     private int getNodeCount() {

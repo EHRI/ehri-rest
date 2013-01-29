@@ -5,6 +5,7 @@ import com.tinkerpop.frames.Property;
 import com.tinkerpop.frames.VertexFrame;
 import com.tinkerpop.frames.annotations.gremlin.GremlinGroovy;
 
+import eu.ehri.project.models.events.GlobalEvent;
 import eu.ehri.project.models.events.ItemEvent;
 import eu.ehri.project.models.PermissionGrant;
 import eu.ehri.project.models.annotations.Fetch;
@@ -50,10 +51,12 @@ public interface AccessibleEntity extends VertexFrame, PermissionGrantTarget {
      * @return
      */
     @GremlinGroovy("_().as('n').out('" + ActionManager.LIFECYCLE_EVENT + "')"
-            + ".loop('n'){true}{true}")
-    public Iterable<ItemEvent> getHistory();
+            + ".loop('n'){true}{true}.out('" + GlobalEvent.HAS_EVENT + "')")
+    public Iterable<GlobalEvent> getHistory();
 
-    @Fetch(value = ActionManager.LIFECYCLE_ACTION, ifDepth = 0)
-    @Adjacency(label = ActionManager.LIFECYCLE_EVENT)
-    public ItemEvent getLatestEvent();
+    // FIXME: This should be a single item return but frames doesn't currently
+    // support those...
+    @GremlinGroovy("_().as('n').out('" + ActionManager.LIFECYCLE_EVENT + "')"
+            + ".out('" + GlobalEvent.HAS_EVENT + "')")
+    public Iterable<GlobalEvent> getLatestEvent();
 }

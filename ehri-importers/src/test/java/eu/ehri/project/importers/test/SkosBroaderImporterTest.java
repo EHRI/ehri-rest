@@ -94,7 +94,7 @@ public class SkosBroaderImporterTest extends AbstractImporterTest {
         // Check we've only got one action
         assertEquals(1, log.getCreated());
         assertTrue(log.getAction() instanceof Action);
-        assertEquals(logMessage, log.getAction().getLogMessage());
+        assertEquals(logMessage, log.getAction().getGlobalEvent().getLogMessage());
 
         // Ensure the import action has the right number of subjects.
         List<AccessibleEntity> subjects = toList(log.getAction().getSubjects());

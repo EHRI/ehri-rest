@@ -65,7 +65,7 @@ public class EadListImporterTest extends AbstractFixtureTest {
         assertEquals(1, actions.size());
         assertEquals(2, toList(log.getAction().getSubjects()).size());
         assertEquals(logMessage, actions.get(0).getAction()
-                .getLogMessage());
+                .getGlobalEvent().getLogMessage());
     }
 
     private int getNodeCount() {

@@ -7,6 +7,8 @@ import static org.junit.Assert.assertNotNull;
 import java.util.Iterator;
 import java.util.List;
 
+import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.events.GlobalEvent;
 import eu.ehri.project.persistance.Serializer;
 import org.junit.Test;
 
@@ -23,6 +25,7 @@ import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.views.impl.LoggingCrudViews;
+import org.neo4j.helpers.collection.Iterables;
 
 public class ActionViewsTest extends AbstractFixtureTest {
 
@@ -85,36 +88,40 @@ public class ActionViewsTest extends AbstractFixtureTest {
 
         // Check we have an audit action.
         assertNotNull(changedUser.getLatestEvent());
-        assertNotNull(validUser.getLatestAction());
-        assertTrue(validUser.getLatestAction().getSubjects().iterator()
+        // FIXME: getLatestAction() should return a single item, but due to
+        // a current (2.2.0) limitation in frames' @GremlinGroovy mechanism
+        // it can't
+        assertEquals(1, Iterables.count(validUser.getLatestAction()));
+        GlobalEvent event = Iterables.single(validUser.getLatestAction());
+        assertTrue(event.getSubjects().iterator()
                 .hasNext());
-        assertEquals(changedUser.asVertex(), validUser.getLatestAction()
-                .getSubjects().iterator().next().asVertex());
+        assertEquals(changedUser.asVertex(), event.getSubjects().iterator().next().asVertex());
         assertTrue(changedUser.getHistory().iterator().hasNext());
-        assertEquals(validUser.asVertex(), changedUser.getHistory().iterator()
-                .next().getAction().getActioner().iterator().next().asVertex());
 
+        System.out.println("User: " + user.asVertex());
         // We should have exactly two actions now; one for create, one for
         // update...
-        List<ItemEvent> itemEvents = toList(changedUser.getHistory());
-        assertEquals(2, itemEvents.size());
+        List<GlobalEvent> events = toList(changedUser.getHistory());
+        assertEquals(2, events.size());
         // We should have the right subject on the actionEvent
-        assertTrue(itemEvents.get(0).getSubject().iterator().hasNext());
-        assertTrue(itemEvents.get(1).getSubject().iterator().hasNext());
-        assertEquals(changedUser.asVertex(), itemEvents.get(0)
-                .getSubject().iterator().next().asVertex());
-        assertEquals(changedUser.asVertex(), itemEvents.get(1)
-                .getSubject().iterator().next().asVertex());
+        assertTrue(events.get(0).getSubjects().iterator().hasNext());
+        assertTrue(events.get(1).getSubjects().iterator().hasNext());
+
+        assertEquals(1, Iterables.count(events.get(0).getSubjects()));
+        assertEquals(1, Iterables.count(events.get(1).getSubjects()));
+
+        assertEquals(changedUser.asVertex(), events.get(0)
+                .getSubjects().iterator().next().asVertex());
+        assertEquals(changedUser.asVertex(), events.get(1)
+                .getSubjects().iterator().next().asVertex());
         try {
-            System.out.println(new Serializer(graph).vertexFrameToBundle(itemEvents.get(0)));
+            System.out.println(new Serializer(graph).vertexFrameToBundle(events.get(0)));
         } catch (SerializationError serializationError) {
             serializationError.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
         // They should have default log messages, and come out latest-first.
-        assertEquals(LoggingCrudViews.DEFAULT_UPDATE_LOG, itemEvents.get(0)
-                .getAction().getGlobalEvent().getLogMessage());
-        assertEquals(LoggingCrudViews.DEFAULT_CREATE_LOG, itemEvents.get(1)
-                .getAction().getGlobalEvent().getLogMessage());
+        assertEquals(LoggingCrudViews.DEFAULT_UPDATE_LOG, events.get(0).getLogMessage());
+        assertEquals(LoggingCrudViews.DEFAULT_CREATE_LOG, events.get(1).getLogMessage());
     }
 
     /**
@@ -145,15 +152,15 @@ public class ActionViewsTest extends AbstractFixtureTest {
         Integer deleted = docViews.delete(item, validUser);
         assertEquals(shouldDelete, deleted);
 
-        List<Action> actions = toList(validUser.getActions());
+        List<GlobalEvent> actions = toList(validUser.getActions());
 
         // Check there's an extra audit log for the user
         assertEquals(origActionCount + 1, actions.size());
         // Check the deletion log has a default label
         // Assumes the action is the last in the list,
         // which it should be as the most recent.
-        Action deleteAction = actions.get(actions.size() - 1);
+        GlobalEvent deleteAction = actions.get(actions.size() - 1);
         assertEquals(LoggingCrudViews.DEFAULT_DELETE_LOG,
-                deleteAction.getGlobalEvent().getLogMessage());
+                deleteAction.getLogMessage());
     }
 }

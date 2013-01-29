@@ -4,15 +4,12 @@ import java.util.Iterator;
 import java.util.UUID;
 
 import com.tinkerpop.blueprints.Vertex;
-import com.tinkerpop.gremlin.groovy.jsr223.GremlinGroovyScriptEngine;
 import com.tinkerpop.gremlin.java.GremlinPipeline;
 import com.tinkerpop.pipes.PipeFunction;
 import com.tinkerpop.pipes.branch.LoopPipe;
-import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.events.GlobalEvent;
 import eu.ehri.project.models.events.ItemEvent;
-import eu.ehri.project.views.impl.Query;
 import org.joda.time.DateTime;
 import org.joda.time.format.ISODateTimeFormat;
 
@@ -24,14 +21,10 @@ import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.models.events.Action;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Actioner;
-
-import javax.script.ScriptContext;
-import javax.script.ScriptEngine;
 
 /**
  * Class for dealing with actions.
@@ -75,29 +68,23 @@ public final class ActionManager {
     }
 
     /**
-     * ActionContext is a handle to a particular action to which additional
+     * EventContext is a handle to a particular action to which additional
      * subjects can be added.
      *
      * @author mike
      */
-    public static class ActionContext {
+    public static class EventContext {
         private final ActionManager actionManager;
-        private final Action action;
         private final GlobalEvent globalEvent;
         private final Actioner actioner;
         private final String logMessage;
 
-        public ActionContext(ActionManager actionManager, Action action, GlobalEvent globalEvent,
+        public EventContext(ActionManager actionManager, GlobalEvent globalEvent,
                 Actioner actioner, String logMessage) {
             this.actionManager = actionManager;
-            this.action = action;
             this.globalEvent = globalEvent;
             this.actioner = actioner;
             this.logMessage = logMessage;
-        }
-
-        public Action getAction() {
-            return this.action;
         }
 
         public GlobalEvent getGlobalEvent() {
@@ -108,14 +95,13 @@ public final class ActionManager {
             return this.actioner;
         }
 
-        public ActionContext addSubjects(AccessibleEntity... entities) {
+        public EventContext addSubjects(AccessibleEntity... entities) {
             for (AccessibleEntity entity : entities) {
-                ItemEvent event = actionManager.createEvent(entity, actioner,
-                        logMessage);
-                actionManager.graph.addEdge(null, event.asVertex(),
-                        action.asVertex(), Action.HAS_EVENT_ACTION);
-                actionManager.graph.addEdge(null, event.asVertex(),
-                        globalEvent.asVertex(), ItemEvent.HAS_GLOBAL_EVENT);
+                Vertex vertex = actionManager.graph.addVertex(null);
+                actionManager.replaceAtHead(entity.asVertex(), vertex,
+                        LIFECYCLE_EVENT, LIFECYCLE_EVENT, Direction.OUT);
+                actionManager.graph.addEdge(null, vertex,
+                        globalEvent.asVertex(), GlobalEvent.HAS_EVENT);
             }
             return this;
         }
@@ -159,7 +145,7 @@ public final class ActionManager {
      * @param logMessage
      * @return
      */
-    public GlobalEvent createGlobalEvent(Actioner user, String actionType, String logMessage) {
+    private GlobalEvent createGlobalEvent(Actioner user, String actionType, String logMessage) {
         try {
             Vertex system = manager.getVertex(GLOBAL_EVENT_ROOT, EntityClass.SYSTEM);
             Bundle ge = new Bundle(EntityClass.GLOBAL_EVENT)
@@ -188,31 +174,20 @@ public final class ActionManager {
      * @param logMessage
      * @return
      */
-    public ActionContext createAction(Actioner user, String logMessage) {
+    public EventContext logEvent(Actioner user, String logMessage) {
+        Vertex vertex = graph.addVertex(null);
+        replaceAtHead(user.asVertex(), vertex, LIFECYCLE_ACTION, LIFECYCLE_ACTION, Direction.OUT);
         GlobalEvent ge = createGlobalEvent(user, LIFECYCLE_ACTION, logMessage);
-        Bundle actionBundle = new Bundle(EntityClass.ACTION)
-                .withDataValue(AccessibleEntity.IDENTIFIER_KEY,
-                        UUID.randomUUID().toString());
-
-        BundleDAO persister = new BundleDAO(graph);
-        try {
-            Action action = persister.create(actionBundle, Action.class);
-            setLatestAction(user, action, LIFECYCLE_ACTION);
-            graph.addEdge(null, action.asVertex(), ge.asVertex(), Action.HAS_GLOBAL_EVENT);
-            return new ActionContext(this, action, ge, user, logMessage);
-        } catch (ValidationError e) {
-            e.printStackTrace();
-            throw new RuntimeException(
-                    "Unexpected validation error creating action", e);
-        }
+        graph.addEdge(null, vertex, ge.asVertex(), GlobalEvent.HAS_EVENT);
+        return new EventContext(this, ge, user, logMessage);
     }
 
     /**
      * Create an action given an accessor.
      */
-    public ActionContext createAction(AccessibleEntity subject, Accessor user,
+    public EventContext logEvent(AccessibleEntity subject, Accessor user,
             String logMessage) {
-        return createAction(subject, graph.frame(user.asVertex(), Actioner.class), logMessage);
+        return logEvent(subject, graph.frame(user.asVertex(), Actioner.class), logMessage);
     }
 
     /**
@@ -224,9 +199,9 @@ public final class ActionManager {
      * @param logMessage
      * @return
      */
-    public ActionContext createAction(AccessibleEntity subject, Actioner user,
+    public EventContext logEvent(AccessibleEntity subject, Actioner user,
             String logMessage) {
-        ActionContext context = createAction(user, logMessage);
+        EventContext context = logEvent(user, logMessage);
         context.addSubjects(subject);
         return context;
     }
@@ -234,56 +209,9 @@ public final class ActionManager {
 
     // Helpers.
 
-    /**
-     * Create an action node describing something that user U has done.
-     *
-     * @param user
-     * @param logMessage
-     * @return
-     */
-    private ItemEvent createEvent(AccessibleEntity item, Actioner user,
-            String logMessage) {
-        Bundle actionBundle = new Bundle(EntityClass.ACTION_EVENT)
-                .withDataValue(AccessibleEntity.IDENTIFIER_KEY,
-                        UUID.randomUUID().toString());
-        BundleDAO persister = new BundleDAO(graph, null);
-        try {
-            ItemEvent action = persister.create(actionBundle,
-                    ItemEvent.class);
-            setLatestEvent(item, action, LIFECYCLE_EVENT);
-            return action;
-        } catch (ValidationError e) {
-            e.printStackTrace();
-            throw new RuntimeException(
-                    "Unexpected validation error creating action", e);
-        }
-    }
-
     public static String getTimestamp() {
         DateTime dt = DateTime.now();
         return ISODateTimeFormat.dateTime().print(dt);
-    }
-
-    /**
-     * Add a new action to the head of this user's action history linked list.
-     *
-     * @param user
-     * @param action
-     */
-    private void setLatestAction(Actioner user, Action action, String actionType) {
-        replaceAtHead(user.asVertex(), action.asVertex(), actionType, actionType, Direction.OUT);
-    }
-
-    /**
-     * Add a new event to the head of this item's event history linked list.
-     *
-     * @param item
-     * @param event
-     * @param actionType
-     */
-    private void setLatestEvent(AccessibleEntity item, ItemEvent event,
-            String actionType) {
-        replaceAtHead(item.asVertex(), event.asVertex(), actionType, actionType, Direction.OUT);
     }
 
     /**

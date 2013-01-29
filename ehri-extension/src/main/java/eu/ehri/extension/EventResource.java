@@ -13,16 +13,17 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
+import eu.ehri.project.models.events.GlobalEvent;
+import eu.ehri.project.models.events.ItemEvent;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.models.events.Action;
-import eu.ehri.project.models.events.ItemEvent;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
+import eu.ehri.project.persistance.Serializer;
 import eu.ehri.project.views.impl.LoggingCrudViews;
 import eu.ehri.project.views.impl.Query;
 
@@ -31,11 +32,12 @@ import eu.ehri.project.views.impl.Query;
  * are created by the system, so we do not have create/update/delete methods
  * here.
  */
-@Path(Entities.ACTION_EVENT)
-public class ActionEventResource extends AbstractAccessibleEntityResource<ItemEvent> {
+// FIXME: Change this to GLOBAL_EVENT
+@Path(Entities.ACTION)
+public class EventResource extends AbstractAccessibleEntityResource<GlobalEvent> {
 
-    public ActionEventResource(@Context GraphDatabaseService database) {
-        super(database, ItemEvent.class);
+    public EventResource(@Context GraphDatabaseService database) {
+        super(database, GlobalEvent.class);
     }
 
     @GET
@@ -71,7 +73,7 @@ public class ActionEventResource extends AbstractAccessibleEntityResource<ItemEv
         // on the query class, but that will require some refactoring
         if (order.isEmpty()) {
             order.add(String
-                    .format("%s__%s", ItemEvent.TIMESTAMP, Query.Sort.DESC));
+                    .format("%s__%s", GlobalEvent.TIMESTAMP, Query.Sort.DESC));
         }
 
         return list(offset, limit, order, filters);
@@ -80,7 +82,7 @@ public class ActionEventResource extends AbstractAccessibleEntityResource<ItemEv
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/page")
-    public StreamingOutput pageActions(
+    public StreamingOutput pageEvents(
             @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
             @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
             @QueryParam(SORT_PARAM) List<String> order,
@@ -91,7 +93,7 @@ public class ActionEventResource extends AbstractAccessibleEntityResource<ItemEv
         // on the query class, but that will require some refactoring
         if (order.isEmpty()) {
             order.add(String
-                    .format("%s__%s", Action.TIMESTAMP, Query.Sort.DESC));
+                    .format("%s__%s", GlobalEvent.TIMESTAMP, Query.Sort.DESC));
         }
 
         return page(offset, limit, order, filters);
@@ -110,8 +112,40 @@ public class ActionEventResource extends AbstractAccessibleEntityResource<ItemEv
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id:.+}/subjects")
+    public StreamingOutput pageSubjectsForEvent(
+            @PathParam("id") String id,
+            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
+            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(SORT_PARAM) List<String> order,
+            @QueryParam(FILTER_PARAM) List<String> filters)
+            throws ItemNotFound, BadRequester, PermissionDenied {
+        Accessor user = getRequesterUserProfile();
+        GlobalEvent event = views.detail(manager.getFrame(id, cls), user);
+        Query<AccessibleEntity> query = new Query<AccessibleEntity>(graph,
+                AccessibleEntity.class).setOffset(offset).setLimit(limit)
+                .orderBy(order).filter(filters);
+        // NB: Taking a pragmatic decision here to only stream the first
+        // level of the subject's tree.
+        return streamingPage(query.page(event.getSubjects(), user),
+                new Serializer(graph, 1));
+    }
+
+    /**
+     * Lookup and page the history for a given item.
+     * 
+     * @param id
+     * @param offset
+     * @param limit
+     * @return
+     * @throws ItemNotFound
+     * @throws BadRequester
+     * @throws PermissionDenied
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("/for/{id:.+}")
-    public StreamingOutput pageActionEventsForItem(
+    public StreamingOutput pageEventsForItem(
             @PathParam("id") String id,
             @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
             @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
@@ -122,7 +156,7 @@ public class ActionEventResource extends AbstractAccessibleEntityResource<ItemEv
         AccessibleEntity item = new LoggingCrudViews<AccessibleEntity>(graph,
                 AccessibleEntity.class).detail(
                 manager.getFrame(id, AccessibleEntity.class), user);
-        Query<ItemEvent> query = new Query<ItemEvent>(graph, ItemEvent.class)
+        Query<GlobalEvent> query = new Query<GlobalEvent>(graph, GlobalEvent.class)
                 .setOffset(offset).setLimit(limit)
                 .orderBy(order).filter(filters);
         return streamingPage(query.page(item.getHistory(), user));

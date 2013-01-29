@@ -6,6 +6,7 @@ import com.tinkerpop.frames.VertexFrame;
 import com.tinkerpop.frames.annotations.gremlin.GremlinGroovy;
 
 import eu.ehri.project.models.events.Action;
+import eu.ehri.project.models.events.GlobalEvent;
 import eu.ehri.project.persistance.ActionManager;
 
 public interface Actioner extends VertexFrame {
@@ -19,9 +20,10 @@ public interface Actioner extends VertexFrame {
      * @return
      */
     @GremlinGroovy("_().as('n').out('" + ActionManager.LIFECYCLE_ACTION + "')" +
-            ".loop('n'){true}{true}")
-    public Iterable<Action> getActions();    
-    
-    @Adjacency(label = ActionManager.LIFECYCLE_ACTION)
-    public Action getLatestAction();
+            ".loop('n'){true}{true}.out('" + GlobalEvent.HAS_EVENT + "')")
+    public Iterable<GlobalEvent> getActions();
+
+    @GremlinGroovy("_().as('n').out('" + ActionManager.LIFECYCLE_ACTION + "')"
+            + ".out('" + GlobalEvent.HAS_EVENT + "')")
+    public Iterable<GlobalEvent> getLatestAction();
 }

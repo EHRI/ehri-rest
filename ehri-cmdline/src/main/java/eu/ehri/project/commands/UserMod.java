@@ -18,7 +18,7 @@ import eu.ehri.project.models.Group;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.persistance.ActionManager;
-import eu.ehri.project.persistance.ActionManager.ActionContext;
+import eu.ehri.project.persistance.ActionManager.EventContext;
 
 /**
  * Add a user.
@@ -91,7 +91,7 @@ public class UserMod extends BaseCommand implements Command {
             UserProfile user = manager.getFrame(userId,
                     EntityClass.USER_PROFILE, UserProfile.class);
 
-            ActionContext actionCtx = new ActionManager(graph).createAction(user, admin, logMessage);
+            EventContext actionCtx = new ActionManager(graph).logEvent(user, admin, logMessage);
 
             for (String groupId : groups) {
                 Group group = manager.getFrame(groupId, EntityClass.GROUP,

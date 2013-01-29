@@ -31,7 +31,6 @@ import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.persistance.ActionManager;
-import eu.ehri.project.persistance.ActionManager.ActionContext;
 
 /**
  * Class that provides a front-end for importing XML files like EAD and EAC and
@@ -115,7 +114,7 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
         Transaction tx = framedGraph.getBaseGraph().getRawGraph().beginTx();
         try {
             // Create a new action for this import
-            final ActionContext action = new ActionManager(framedGraph).createAction(
+            final ActionManager.EventContext action = new ActionManager(framedGraph).logEvent(
                     actioner, logMessage);
             // Create a manifest to store the results of the import.
             final ImportLog log = new ImportLog(action);
@@ -152,7 +151,7 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
         Transaction tx = framedGraph.getBaseGraph().getRawGraph().beginTx();
         try {
 
-            final ActionContext action = new ActionManager(framedGraph).createAction(
+            final ActionManager.EventContext action = new ActionManager(framedGraph).logEvent(
                     actioner, logMessage);
             final ImportLog log = new ImportLog(action);
             for (String path : paths) {
@@ -196,7 +195,7 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
      * Import EAD from the given InputStream, as part of the given action.
      *
      * @param ios
-     * @param actionContext
+     * @param eventContext
      * @param log
      *
      * @throws IOException
@@ -205,7 +204,7 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
      * @throws InvalidInputFormatError
      * @throws InvalidEadDocument
      */
-    private void importFile(InputStream ios, final ActionContext actionContext,
+    private void importFile(InputStream ios, final ActionManager.EventContext eventContext,
             final ImportLog log) throws IOException, ValidationError,
             InputParseError, InvalidEadDocument, InvalidInputFormatError {
 
@@ -216,14 +215,14 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
             importer.addCreationCallback(new ImportCallback() {
                 public void itemImported(AccessibleEntity item) {
                     System.out.println("ImportCallback: itemImported creation " + item.getIdentifier());
-                    actionContext.addSubjects(item);
+                    eventContext.addSubjects(item);
                     log.addCreated();
                 }
             });
             importer.addUpdateCallback(new ImportCallback() {
                 public void itemImported(AccessibleEntity item) {
                     System.out.println("ImportCallback: itemImported updated");
-                    actionContext.addSubjects(item);
+                    eventContext.addSubjects(item);
                     log.addUpdated();
                 }
             });
