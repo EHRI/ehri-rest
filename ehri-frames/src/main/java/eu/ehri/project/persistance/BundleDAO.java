@@ -204,6 +204,7 @@ public final class BundleDAO {
             }
 
             if (!errors.isEmpty() || hasNestedErrors(nestedErrors)) {
+                System.out.println(nestedErrors);
                 throw new ValidationError(bundle, errors, nestedErrors);
             }
             return node;

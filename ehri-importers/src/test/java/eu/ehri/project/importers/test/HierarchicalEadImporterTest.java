@@ -12,8 +12,7 @@ import com.tinkerpop.blueprints.Vertex;
 
 import eu.ehri.project.importers.EadImportManager;
 import eu.ehri.project.importers.ImportLog;
-import eu.ehri.project.models.Action;
-import eu.ehri.project.models.ActionEvent;
+import eu.ehri.project.models.events.ItemEvent;
 import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.base.AccessibleEntity;
@@ -48,7 +47,7 @@ public class HierarchicalEadImporterTest extends AbstractFixtureTest {
 		// - 4 more DocumentDescription
 		// - 1 more DatePeriod
 		// - 1 more import Action
-        // - 4 more import ActionEvent		
+        // - 4 more import ItemEvent
 		assertEquals(count + 14, getNodeCount());
 		Iterable<Vertex> docs = graph.getVertices("identifier",
 				IMPORTED_ITEM_ID);
@@ -79,7 +78,7 @@ public class HierarchicalEadImporterTest extends AbstractFixtureTest {
 		assertEquals(unit, ancestors.get(ancestors.size() - 1));
 
 		// Ensure the import action has the right number of subjects.
-		Iterable<ActionEvent> actions = unit.getHistory();
+		Iterable<ItemEvent> actions = unit.getHistory();
 		// Check we've only got one action
 		assertEquals(1, toList(actions).size());
 		assertEquals(logMessage, log.getAction().getLogMessage());

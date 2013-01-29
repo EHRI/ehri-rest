@@ -12,7 +12,7 @@ import com.tinkerpop.blueprints.Vertex;
 
 import eu.ehri.project.importers.EadImportManager;
 import eu.ehri.project.importers.ImportLog;
-import eu.ehri.project.models.ActionEvent;
+import eu.ehri.project.models.events.ItemEvent;
 import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.test.AbstractFixtureTest;
@@ -43,7 +43,7 @@ public class EadUpdateImporterTest extends AbstractFixtureTest {
         // - 1 more DocumentDescription
         // - 1 more DatePeriod
         // - 1 more import Action
-        // - 1 more import ActionEvent
+        // - 1 more import ItemEvent
         int createCount = origCount + 5;
         assertEquals(createCount, getNodeCount());
 
@@ -55,7 +55,7 @@ public class EadUpdateImporterTest extends AbstractFixtureTest {
         assertTrue(docs.iterator().hasNext());
         DocumentaryUnit unit = graph.frame(docs.iterator().next(),
                 DocumentaryUnit.class);
-        List<ActionEvent> actions = toList(unit.getHistory());
+        List<ItemEvent> actions = toList(unit.getHistory());
         // Check we've only got one action
         assertEquals(1, actions.size());
         assertEquals(logMessage, actions.get(0).getAction()

@@ -22,6 +22,6 @@ public enum GenericIdGenerator implements IdGenerator {
      */
     public String generateId(EntityClass type, PermissionScope scope,
             Map<String, Object> data) throws IdGenerationError {
-        return type.getAbbreviation() + SEPERATOR + UUID.randomUUID();
+        return UUID.randomUUID().toString();
     }
 }

@@ -3,7 +3,7 @@ package eu.ehri.project.importers;
 import java.util.HashMap;
 import java.util.Map;
 
-import eu.ehri.project.models.Action;
+import eu.ehri.project.models.events.Action;
 import eu.ehri.project.persistance.ActionManager.ActionContext;
 
 /**

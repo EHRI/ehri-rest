@@ -19,7 +19,7 @@ import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.SaxImportManager;
 import eu.ehri.project.importers.SkosHandler;
 import eu.ehri.project.importers.SkosImporter;
-import eu.ehri.project.models.Action;
+import eu.ehri.project.models.events.Action;
 import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.AccessibleEntity;

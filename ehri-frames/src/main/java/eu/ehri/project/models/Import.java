@@ -5,6 +5,7 @@ import com.tinkerpop.frames.VertexFrame;
 
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.events.Action;
 
 @EntityType(EntityClass.IMPORT)
 public interface Import extends Action, AccessibleEntity, VertexFrame {

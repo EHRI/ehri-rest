@@ -15,8 +15,8 @@ import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.models.Action;
-import eu.ehri.project.models.ActionEvent;
+import eu.ehri.project.models.events.Action;
+import eu.ehri.project.models.events.ItemEvent;
 import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.UserProfile;
@@ -96,25 +96,25 @@ public class ActionViewsTest extends AbstractFixtureTest {
 
         // We should have exactly two actions now; one for create, one for
         // update...
-        List<ActionEvent> actionEvents = toList(changedUser.getHistory());
-        assertEquals(2, actionEvents.size());
+        List<ItemEvent> itemEvents = toList(changedUser.getHistory());
+        assertEquals(2, itemEvents.size());
         // We should have the right subject on the actionEvent
-        assertTrue(actionEvents.get(0).getSubject().iterator().hasNext());
-        assertTrue(actionEvents.get(1).getSubject().iterator().hasNext());
-        assertEquals(changedUser.asVertex(), actionEvents.get(0)
+        assertTrue(itemEvents.get(0).getSubject().iterator().hasNext());
+        assertTrue(itemEvents.get(1).getSubject().iterator().hasNext());
+        assertEquals(changedUser.asVertex(), itemEvents.get(0)
                 .getSubject().iterator().next().asVertex());
-        assertEquals(changedUser.asVertex(), actionEvents.get(1)
+        assertEquals(changedUser.asVertex(), itemEvents.get(1)
                 .getSubject().iterator().next().asVertex());
         try {
-            System.out.println(new Serializer(graph).vertexFrameToBundle(actionEvents.get(0)));
+            System.out.println(new Serializer(graph).vertexFrameToBundle(itemEvents.get(0)));
         } catch (SerializationError serializationError) {
             serializationError.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
         // They should have default log messages, and come out latest-first.
-        assertEquals(LoggingCrudViews.DEFAULT_UPDATE_LOG, actionEvents.get(0)
-                .getAction().getLogMessage());
-        assertEquals(LoggingCrudViews.DEFAULT_CREATE_LOG, actionEvents.get(1)
-                .getAction().getLogMessage());
+        assertEquals(LoggingCrudViews.DEFAULT_UPDATE_LOG, itemEvents.get(0)
+                .getAction().getGlobalEvent().getLogMessage());
+        assertEquals(LoggingCrudViews.DEFAULT_CREATE_LOG, itemEvents.get(1)
+                .getAction().getGlobalEvent().getLogMessage());
     }
 
     /**
@@ -154,6 +154,6 @@ public class ActionViewsTest extends AbstractFixtureTest {
         // which it should be as the most recent.
         Action deleteAction = actions.get(actions.size() - 1);
         assertEquals(LoggingCrudViews.DEFAULT_DELETE_LOG,
-                deleteAction.getLogMessage());
+                deleteAction.getGlobalEvent().getLogMessage());
     }
 }

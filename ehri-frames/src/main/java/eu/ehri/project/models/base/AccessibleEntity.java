@@ -5,7 +5,7 @@ import com.tinkerpop.frames.Property;
 import com.tinkerpop.frames.VertexFrame;
 import com.tinkerpop.frames.annotations.gremlin.GremlinGroovy;
 
-import eu.ehri.project.models.ActionEvent;
+import eu.ehri.project.models.events.ItemEvent;
 import eu.ehri.project.models.PermissionGrant;
 import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.annotations.Unique;
@@ -51,9 +51,9 @@ public interface AccessibleEntity extends VertexFrame, PermissionGrantTarget {
      */
     @GremlinGroovy("_().as('n').out('" + ActionManager.LIFECYCLE_EVENT + "')"
             + ".loop('n'){true}{true}")
-    public Iterable<ActionEvent> getHistory();
+    public Iterable<ItemEvent> getHistory();
 
     @Fetch(value = ActionManager.LIFECYCLE_ACTION, ifDepth = 0)
     @Adjacency(label = ActionManager.LIFECYCLE_EVENT)
-    public ActionEvent getLatestEvent();
+    public ItemEvent getLatestEvent();
 }

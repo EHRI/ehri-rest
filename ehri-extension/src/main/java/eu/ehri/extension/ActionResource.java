@@ -13,14 +13,14 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
+import eu.ehri.project.models.events.ItemEvent;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.models.Action;
-import eu.ehri.project.models.ActionEvent;
+import eu.ehri.project.models.events.Action;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistance.Serializer;
@@ -155,7 +155,7 @@ public class ActionResource extends AbstractAccessibleEntityResource<Action> {
         AccessibleEntity item = new LoggingCrudViews<AccessibleEntity>(graph,
                 AccessibleEntity.class).detail(
                 manager.getFrame(id, AccessibleEntity.class), user);
-        Query<ActionEvent> query = new Query<ActionEvent>(graph, ActionEvent.class)
+        Query<ItemEvent> query = new Query<ItemEvent>(graph, ItemEvent.class)
                 .setOffset(offset).setLimit(limit)
                 .orderBy(order).filter(filters);
         return streamingPage(query.page(item.getHistory(), user));

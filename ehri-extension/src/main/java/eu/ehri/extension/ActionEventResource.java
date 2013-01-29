@@ -19,8 +19,8 @@ import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.models.Action;
-import eu.ehri.project.models.ActionEvent;
+import eu.ehri.project.models.events.Action;
+import eu.ehri.project.models.events.ItemEvent;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.views.impl.LoggingCrudViews;
@@ -32,10 +32,10 @@ import eu.ehri.project.views.impl.Query;
  * here.
  */
 @Path(Entities.ACTION_EVENT)
-public class ActionEventResource extends AbstractAccessibleEntityResource<ActionEvent> {
+public class ActionEventResource extends AbstractAccessibleEntityResource<ItemEvent> {
 
     public ActionEventResource(@Context GraphDatabaseService database) {
-        super(database, ActionEvent.class);
+        super(database, ItemEvent.class);
     }
 
     @GET
@@ -71,7 +71,7 @@ public class ActionEventResource extends AbstractAccessibleEntityResource<Action
         // on the query class, but that will require some refactoring
         if (order.isEmpty()) {
             order.add(String
-                    .format("%s__%s", ActionEvent.TIMESTAMP, Query.Sort.DESC));
+                    .format("%s__%s", ItemEvent.TIMESTAMP, Query.Sort.DESC));
         }
 
         return list(offset, limit, order, filters);
@@ -122,7 +122,7 @@ public class ActionEventResource extends AbstractAccessibleEntityResource<Action
         AccessibleEntity item = new LoggingCrudViews<AccessibleEntity>(graph,
                 AccessibleEntity.class).detail(
                 manager.getFrame(id, AccessibleEntity.class), user);
-        Query<ActionEvent> query = new Query<ActionEvent>(graph, ActionEvent.class)
+        Query<ItemEvent> query = new Query<ItemEvent>(graph, ItemEvent.class)
                 .setOffset(offset).setLimit(limit)
                 .orderBy(order).filter(filters);
         return streamingPage(query.page(item.getHistory(), user));
