@@ -3,6 +3,7 @@ package eu.ehri.project.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import com.google.common.collect.Iterables;
 import org.junit.Test;
 
 import eu.ehri.project.exceptions.ItemNotFound;
@@ -12,6 +13,8 @@ import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.AnnotatableEntity;
 
 public class AnnotationTest extends ModelTestBase {
+
+    // FIXME: These tests depend on iteration order, which is not guaranteed!
 
     // NB: These must match up with the JSON fixture...
     public static final String TEST_ANNOTATION_BODY = "Test Annotation";
@@ -30,12 +33,8 @@ public class AnnotationTest extends ModelTestBase {
         UserProfile mike = manager.getFrame("mike", UserProfile.class);
         DocumentaryUnit c1 = manager.getFrame("c1", DocumentaryUnit.class);
         Annotation annotation = mike.getAnnotations().iterator().next();
-        assertEquals(toList(mike.getAnnotations()).get(0), annotation);
-        assertEquals(toList(c1.getAnnotations()).get(0), annotation);
-
-        // Check target
-        assertEquals(annotation.getTargets().iterator().next().asVertex().getId(), c1.asVertex()
-                .getId());
+        assertTrue(Iterables.contains(mike.getAnnotations(), annotation));
+        assertTrue(Iterables.contains(c1.getAnnotations(), annotation));
     }
 
     @Test
