@@ -49,11 +49,10 @@ import eu.ehri.project.views.impl.Query;
 
 /**
  * Provides a RESTfull(ish) interface for setting PermissionTarget perms.
- * 
+ * <p/>
  * TODO: These functions will typically be called quite frequently for the
  * portal. We should possibly implement some kind of caching system for ACL
  * permissions.
- * 
  */
 @Path(Entities.PERMISSION)
 public class PermissionsResource extends AbstractRestResource {
@@ -65,7 +64,12 @@ public class PermissionsResource extends AbstractRestResource {
     /**
      * Get the global permission matrix for the user making the request, based
      * on the Authorization header.
-     * 
+     *
+     * @param id
+     * @param offset
+     * @param limit
+     * @param order
+     * @param filters
      * @return
      * @throws PermissionDenied
      * @throws ItemNotFound
@@ -93,7 +97,12 @@ public class PermissionsResource extends AbstractRestResource {
     /**
      * Get the global permission matrix for the user making the request, based
      * on the Authorization header.
-     * 
+     *
+     * @param id
+     * @param offset
+     * @param limit
+     * @param order
+     * @param filters
      * @return
      * @throws PermissionDenied
      * @throws ItemNotFound
@@ -120,7 +129,12 @@ public class PermissionsResource extends AbstractRestResource {
 
     /**
      * List all the permission grants that relate specifically to this item.
-     * 
+     *
+     * @param id
+     * @param offset
+     * @param limit
+     * @param order
+     * @param filters
      * @return
      * @throws PermissionDenied
      * @throws ItemNotFound
@@ -148,7 +162,12 @@ public class PermissionsResource extends AbstractRestResource {
 
     /**
      * List all the permission grants that relate specifically to this item.
-     * 
+     *
+     * @param id
+     * @param offset
+     * @param limit
+     * @param order
+     * @param filters
      * @return
      * @throws PermissionDenied
      * @throws ItemNotFound
@@ -176,7 +195,8 @@ public class PermissionsResource extends AbstractRestResource {
 
     /**
      * List all the permission grants that relate specifically to this scope.
-     * 
+     *
+     * @param id
      * @return
      * @throws PermissionDenied
      * @throws ItemNotFound
@@ -203,7 +223,12 @@ public class PermissionsResource extends AbstractRestResource {
 
     /**
      * List all the permission grants that relate specifically to this scope.
-     * 
+     *
+     * @param id
+     * @param offset
+     * @param limit
+     * @param order
+     * @param filters
      * @return
      * @throws PermissionDenied
      * @throws ItemNotFound
@@ -231,7 +256,7 @@ public class PermissionsResource extends AbstractRestResource {
     /**
      * Get the global permission matrix for the user making the request, based
      * on the Authorization header.
-     * 
+     *
      * @return
      * @throws PermissionDenied
      * @throws JsonGenerationException
@@ -250,8 +275,8 @@ public class PermissionsResource extends AbstractRestResource {
 
     /**
      * Get the global permission matrix for the given accessor.
-     * 
-     * @param id
+     *
+     * @param userId the user id
      * @return
      * @throws PermissionDenied
      * @throws JsonGenerationException
@@ -283,9 +308,9 @@ public class PermissionsResource extends AbstractRestResource {
 
     /**
      * Set a user's global permission matrix.
-     * 
-     * @param id
-     * @param json
+     *
+     * @param userId the user id
+     * @param json   the global permission matrix
      * @return
      * @throws PermissionDenied
      * @throws IOException
@@ -311,9 +336,9 @@ public class PermissionsResource extends AbstractRestResource {
 
     /**
      * Get the permission matrix for a given user on the given entity.
-     * 
-     * @param userId
-     * @param id
+     *
+     * @param userId the user id
+     * @param id     the item id
      * @return
      * @throws PermissionDenied
      * @throws JsonGenerationException
@@ -346,9 +371,9 @@ public class PermissionsResource extends AbstractRestResource {
 
     /**
      * Get the user's permissions for a given scope.
-     * 
-     * @param userId
-     * @param scopeId
+     *
+     * @param userId the user id
+     * @param id     the scope id
      * @return
      * @throws IOException
      * @throws JsonMappingException
@@ -381,15 +406,10 @@ public class PermissionsResource extends AbstractRestResource {
 
     /**
      * Set a user's permissions on a content type with a given scope.
-     * 
-     * @param id
-     *            the scope id
-     * @param type
-     *            the content type
-     * @param user
-     *            the user id
-     * @param json
-     *            the serialized permission list
+     *
+     * @param userId the user id
+     * @param id     the scope id
+     * @param json   the serialized permission list
      * @return
      * @throws PermissionDenied
      * @throws IOException
@@ -418,15 +438,11 @@ public class PermissionsResource extends AbstractRestResource {
 
     /**
      * Set a user's permissions on a given item.
-     * 
-     * @param id
-     *            the item id
-     * @param userId
-     *            the user id
-     * @param json
-     *            the serialized permission list
+     *
+     * @param id     the item id
+     * @param userId the user id
+     * @param json   the serialized permission list
      * @return
-     * 
      * @throws PermissionDenied
      * @throws IOException
      * @throws ItemNotFound

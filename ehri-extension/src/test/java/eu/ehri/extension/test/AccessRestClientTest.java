@@ -3,8 +3,10 @@ package eu.ehri.extension.test;
 import static org.junit.Assert.assertEquals;
 
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
+import com.sun.jersey.core.util.MultivaluedMapImpl;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -53,14 +55,16 @@ public class AccessRestClientTest extends BaseRestClientTest {
                 response.getStatus());
 
         // Set the form data
-        String accJson = "[\"" + LIMITED_USER_NAME + "\"]";
+        MultivaluedMap<String,String> queryParams = new MultivaluedMapImpl();
+        queryParams.add(AbstractRestResource.ACCESSOR_PARAM, LIMITED_USER_NAME);
 
         resource = client.resource(getExtensionEntryPointUri() + "/access/c1");
         response = resource
+                .queryParams(queryParams)
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
                 .header(AbstractRestResource.AUTH_HEADER_NAME,
-                        getAdminUserProfileId()).entity(accJson.getBytes())
+                        getAdminUserProfileId())
                 .post(ClientResponse.class);
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
 
@@ -93,14 +97,16 @@ public class AccessRestClientTest extends BaseRestClientTest {
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
 
         // Set the form data
-        String accJson = "[\"" + PRIVILEGED_USER_NAME + "\"]";
+        MultivaluedMap<String,String> queryParams = new MultivaluedMapImpl();
+        queryParams.add(AbstractRestResource.ACCESSOR_PARAM, PRIVILEGED_USER_NAME);
 
         resource = client.resource(getExtensionEntryPointUri() + "/access/c1");
         response = resource
+                .queryParams(queryParams)
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
                 .header(AbstractRestResource.AUTH_HEADER_NAME,
-                        getAdminUserProfileId()).entity(accJson.getBytes())
+                        getAdminUserProfileId())
                 .post(ClientResponse.class);
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
 
