@@ -2,14 +2,19 @@ package eu.ehri.project.views.impl;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
+import com.google.common.base.Splitter;
+import com.google.common.collect.ImmutableSortedMap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Ordering;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.pipes.util.structures.Pair;
 
+import org.neo4j.helpers.collection.Iterables;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.SortedMap;
 
 /**
  * Created with IntelliJ IDEA.
@@ -21,6 +26,64 @@ import java.util.List;
 public class QueryUtils {
 
     public static Logger logger = LoggerFactory.getLogger(QueryUtils.class);
+
+    /**
+     * Parse a list of string filter specifications.
+     *
+     * @param filterList
+     * @return
+     */
+    static SortedMap<String, Pair<Query.FilterPredicate, String>> parseFilters(
+            Iterable<String> filterList) {
+        ImmutableSortedMap.Builder<String, Pair<Query.FilterPredicate, String>> builder = new ImmutableSortedMap.Builder<String, Pair<Query.FilterPredicate, String>>(
+                Ordering.natural());
+        Splitter psplit = Splitter.on("__");
+        Splitter vsplit = Splitter.on(":");
+        for (String filter : filterList) {
+            List<String> kv = Iterables.toList(vsplit.split(filter));
+            if (kv.size() == 2) {
+                String ppred = kv.get(0);
+                String value = kv.get(1);
+                List<String> pp = Iterables.toList(psplit.split(ppred));
+                switch (pp.size()) {
+                    case 1:
+                        builder.put(pp.get(0), new Pair<Query.FilterPredicate, String>(
+                                Query.FilterPredicate.EQUALS, value));
+                        break;
+                    case 2:
+                        builder.put(pp.get(0), new Pair<Query.FilterPredicate, String>(
+                                Query.FilterPredicate.valueOf(pp.get(1)), value));
+                        break;
+                }
+
+            }
+        }
+        return builder.build();
+    }
+
+    /**
+     * Parse a list of sort specifications.
+     *
+     * @param orderSpecs
+     * @return
+     */
+    static SortedMap<String, Query.Sort> parseOrderSpecs(Iterable<String> orderSpecs) {
+        ImmutableSortedMap.Builder<String, Query.Sort> builder = new ImmutableSortedMap.Builder<String, Query.Sort>(
+                Ordering.natural());
+        Splitter psplit = Splitter.on("__");
+        for (String spec : orderSpecs) {
+            List<String> od = Iterables.toList(psplit.split(spec));
+            switch (od.size()) {
+                case 1:
+                    builder.put(od.get(0), Query.Sort.ASC);
+                    break;
+                case 2:
+                    builder.put(od.get(0), Query.Sort.valueOf(od.get(1)));
+                    break;
+            }
+        }
+        return builder.build();
+    }
 
     /**
      * Class that represents a traversal path to a particular
