@@ -19,8 +19,11 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
@@ -267,7 +270,7 @@ public class PermissionsResource extends AbstractRestResource {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public StreamingOutput getGlobalMatrix() throws PermissionDenied,
+    public Response getGlobalMatrix() throws PermissionDenied,
             IOException, ItemNotFound, BadRequester {
         Accessor accessor = getRequesterUserProfile();
         return getGlobalMatrix(manager.getId(accessor));
@@ -287,23 +290,17 @@ public class PermissionsResource extends AbstractRestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{userId:.+}")
-    public StreamingOutput getGlobalMatrix(@PathParam("userId") String userId)
+    public Response getGlobalMatrix(@PathParam("userId") String userId)
             throws PermissionDenied, IOException, ItemNotFound {
-
+        System.out.println("RETURNING MATRIX FOR: " + userId);
         Accessor accessor = manager.getFrame(userId, Accessor.class);
         AclManager acl = new AclManager(graph);
 
         final List<Map<String, Map<ContentTypes, Collection<PermissionType>>>> perms = acl
                 .getInheritedGlobalPermissions(accessor);
-        final ObjectMapper mapper = new ObjectMapper();
-        return new StreamingOutput() {
-            @Override
-            public void write(OutputStream output) throws IOException,
-                    WebApplicationException {
-                mapper.writeValue(output, perms);
-            }
-        };
 
+        final ObjectMapper mapper = new ObjectMapper();
+        return Response.status(Response.Status.OK).entity(mapper.writeValueAsBytes(stringifyInheritedGlobalMatrix(perms))).build();
     }
 
     /**
@@ -322,7 +319,7 @@ public class PermissionsResource extends AbstractRestResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{userId:.+}")
-    public StreamingOutput setGlobalMatrix(@PathParam("userId") String userId,
+    public Response setGlobalMatrix(@PathParam("userId") String userId,
             String json) throws PermissionDenied, IOException, ItemNotFound,
             DeserializationError, BadRequester {
 
@@ -508,5 +505,61 @@ public class PermissionsResource extends AbstractRestResource {
         } catch (JsonMappingException e) {
             throw new DeserializationError(e.getMessage());
         }
+    }
+
+    // Helpers. These just convert from string to internal enum representations
+    // of the various permissions-related data structures.
+    // TODO: There's probably a way to get Jackson to do that automatically.
+    // This was why scala was invented...
+
+    private List<Map<String, Map<String, List<String>>>> stringifyInheritedGlobalMatrix(
+            List<Map<String, Map<ContentTypes, Collection<PermissionType>>>> list2) {
+        List<Map<String, Map<String, List<String>>>> list = Lists
+                .newLinkedList();
+        for (Map<String, Map<ContentTypes, Collection<PermissionType>>> item : list2) {
+            Map<String, Map<String, List<String>>> tmp = Maps.newHashMap();
+            for (Map.Entry<String, Map<ContentTypes, Collection<PermissionType>>> entry : item
+                    .entrySet()) {
+                tmp.put(entry.getKey(), stringifyGlobalMatrix(entry.getValue()));
+            }
+            list.add(tmp);
+        }
+        return list;
+    }
+
+    private Map<String, List<String>> stringifyGlobalMatrix(
+            Map<ContentTypes, Collection<PermissionType>> map) {
+        Map<String, List<String>> tmp = Maps.newHashMap();
+        for (Map.Entry<ContentTypes, Collection<PermissionType>> entry : map
+                .entrySet()) {
+            List<String> ptmp = Lists.newLinkedList();
+            for (PermissionType pt : entry.getValue()) {
+                ptmp.add(pt.getName());
+            }
+            tmp.put(entry.getKey().getName(), ptmp);
+        }
+        return tmp;
+    }
+
+    private List<Map<String, List<String>>> stringifyInheritedMatrix(
+            List<Map<String, List<PermissionType>>> matrix) {
+        List<Map<String, List<String>>> tmp = Lists.newLinkedList();
+        for (Map<String, List<PermissionType>> item : matrix) {
+            tmp.add(stringifyMatrix(item));
+        }
+        return tmp;
+    }
+
+    private Map<String, List<String>> stringifyMatrix(
+            Map<String, List<PermissionType>> matrix) {
+        Map<String, List<String>> out = Maps.newHashMap();
+        for (Map.Entry<String, List<PermissionType>> entry : matrix.entrySet()) {
+            List<String> tmp = Lists.newLinkedList();
+            for (PermissionType t : entry.getValue()) {
+                tmp.add(t.getName());
+            }
+            out.put(entry.getKey(), tmp);
+        }
+        return out;
     }
 }
