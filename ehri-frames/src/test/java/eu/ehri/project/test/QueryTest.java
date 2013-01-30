@@ -6,6 +6,10 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import eu.ehri.project.models.Agent;
 import org.junit.Test;
 
 import com.tinkerpop.blueprints.Direction;
@@ -188,6 +192,29 @@ public class QueryTest extends AbstractFixtureTest {
         assertEquals("c4", list.get(1).getIdentifier());
 
     }
+
+    @Test
+    public void testListWithTraversalFilter() {
+        Query<DocumentaryUnit> query1 = new Query<DocumentaryUnit>(graph,
+                DocumentaryUnit.class);
+        List<String> filters1 = ImmutableList.of(
+          "<-describes.identifier:c1-desc"
+        );
+        Iterable<DocumentaryUnit> list1 = query1
+                .filter(filters1).list(validUser);
+        assertEquals(1, Iterables.size(list1));
+
+        Query<Agent> query2 = new Query<Agent>(graph,
+                Agent.class);
+        List<String> filters2 = ImmutableList.of(
+                "<-describes->hasAddress.city:Brussels"
+        );
+        Iterable<Agent> list2 = query2
+                .filter(filters2).list(validUser);
+        assertEquals(1, Iterables.size(list2));
+
+    }
+
 
     @Test
     public void testListWithSort() throws IndexNotFoundException {

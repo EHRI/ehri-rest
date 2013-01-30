@@ -1,12 +1,7 @@
 package eu.ehri.project.views.impl;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.NoSuchElementException;
-import java.util.SortedMap;
 
 import org.neo4j.helpers.collection.Iterables;
 
@@ -29,6 +24,9 @@ import com.tinkerpop.frames.VertexFrame;
 import com.tinkerpop.gremlin.java.GremlinPipeline;
 import com.tinkerpop.pipes.PipeFunction;
 import com.tinkerpop.pipes.util.structures.Pair;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.acl.SystemScope;
@@ -56,12 +54,15 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
 
     public static final int DEFAULT_LIST_LIMIT = 20;
 
+    public static Logger logger = LoggerFactory.getLogger(Query.class);
+
     private final Optional<Integer> offset;
     private final Optional<Integer> limit;
     private final SortedMap<String, Sort> sort;
     private final Optional<Pair<String, Sort>> defaultSort;
     private final SortedMap<String, Pair<FilterPredicate, String>> filters;
     private final ImmutableMap<Pair<String, Direction>, Integer> depthFilters;
+    private final ImmutableMap<QueryUtils.TraversalPath, Pair<FilterPredicate, String>> traversalFilters;
     private final boolean page;
 
     private final FramedGraph<Neo4jGraph> graph;
@@ -99,14 +100,17 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      * @param offset
      * @param limit
      * @param sort
+     * @param traversalFilters
      * @param page
      */
     public Query(FramedGraph<Neo4jGraph> graph, Class<E> cls,
-                 PermissionScope scope, Optional<Integer> offset,
-                 Optional<Integer> limit, final SortedMap<String, Sort> sort,
-                 final Optional<Pair<String, Sort>> defSort,
-                 final SortedMap<String, Pair<FilterPredicate, String>> filters,
-                 final Map<Pair<String, Direction>, Integer> depthFilters, Boolean page) {
+            PermissionScope scope, Optional<Integer> offset,
+            Optional<Integer> limit, final SortedMap<String, Sort> sort,
+            final Optional<Pair<String, Sort>> defSort,
+            final SortedMap<String, Pair<FilterPredicate, String>> filters,
+            final Map<Pair<String, Direction>, Integer> depthFilters,
+            final Map<QueryUtils.TraversalPath, Pair<FilterPredicate, String>> traversalFilters,
+            Boolean page) {
         this.graph = graph;
         this.cls = cls;
         this.scope = scope;
@@ -117,6 +121,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
         this.filters = ImmutableSortedMap
                 .copyOf(filters);
         this.depthFilters = ImmutableMap.copyOf(depthFilters);
+        this.traversalFilters = ImmutableMap.copyOf(traversalFilters);
         this.page = page;
         helper = new ViewHelper(graph, scope);
         manager = GraphManagerFactory.getInstance(graph);
@@ -134,7 +139,10 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
                 ImmutableSortedMap.<String, Sort>of(), Optional
                 .<Pair<String, Sort>>absent(), ImmutableSortedMap
                 .<String, Pair<FilterPredicate, String>>of(), Maps
-                .<Pair<String, Direction>, Integer>newHashMap(), false);
+                .<Pair<String, Direction>, Integer>newHashMap(),
+                ImmutableSortedMap
+                        .<QueryUtils.TraversalPath, Pair<FilterPredicate, String>>of(),
+                false);
     }
 
     /**
@@ -145,12 +153,14 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      * @param scope
      */
     public Query(FramedGraph<Neo4jGraph> graph, Class<E> cls,
-                 PermissionScope scope) {
+            PermissionScope scope) {
         this(graph, cls, scope, Optional.<Integer>absent(), Optional
                 .<Integer>absent(), ImmutableSortedMap.<String, Sort>of(),
                 Optional.<Pair<String, Sort>>absent(), ImmutableSortedMap
                 .<String, Pair<FilterPredicate, String>>of(), Maps
-                .<Pair<String, Direction>, Integer>newHashMap(), false);
+                .<Pair<String, Direction>, Integer>newHashMap(),
+                ImmutableSortedMap
+                        .<QueryUtils.TraversalPath, Pair<FilterPredicate, String>>of(), false);
     }
 
     /**
@@ -161,8 +171,9 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
     public Query<E> copy(Query<E> other) {
         return new Query<E>(other.graph, other.cls, other.scope, other.offset,
                 other.limit, other.sort, other.defaultSort, other.filters,
-                other.depthFilters, other.page);
+                other.depthFilters, other.traversalFilters, other.page);
     }
+
 
     /**
      * Class representing a page of content.
@@ -177,7 +188,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
         private Map<String, Sort> sort;
 
         Page(Iterable<T> iterable, long count, Integer offset, Integer limit,
-             Map<String, Sort> sort) {
+                Map<String, Sort> sort) {
             this.iterable = iterable;
             this.count = count;
             this.offset = offset;
@@ -325,7 +336,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      * @return Page instance
      */
     public <T extends VertexFrame> Page<T> page(Iterable<T> vertices,
-                                                Accessor user, Class<T> cls) {
+            Accessor user, Class<T> cls) {
         PipeFunction<Vertex, Boolean> aclFilterFunction = new AclManager(graph)
                 .getAclFilterFunction(user);
 
@@ -383,7 +394,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      * @return
      */
     public <S> GremlinPipeline<S, Vertex> applyFilters(GremlinPipeline<S, Vertex> pipe) {
-        return setFilters(setDepthFilters(pipe));
+        return setFilters(setDepthFilters(setTraversalFilters(pipe)));
     }
 
     /**
@@ -438,7 +449,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      * @return Iterable of items accessible to the given accessor
      */
     public <T extends VertexFrame> Iterable<T> list(Iterable<T> vertices,
-                                                    Accessor user, Class<T> cls) {
+            Accessor user, Class<T> cls) {
         GremlinPipeline<T, Vertex> filter = new GremlinPipeline<T, Vertex>(
                 new FramedVertexIterableAdaptor<T>(vertices))
                 .filter(new AclManager(graph).getAclFilterFunction(user));
@@ -474,7 +485,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      */
     public Query<E> setOffset(Integer offset) {
         return new Query<E>(graph, cls, scope, Optional.fromNullable(offset),
-                limit, sort, defaultSort, filters, depthFilters, page);
+                limit, sort, defaultSort, filters, depthFilters, traversalFilters, page);
     }
 
     /**
@@ -494,7 +505,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
     public Query<E> setLimit(Integer limit) {
         return new Query<E>(graph, cls, scope, offset,
                 Optional.fromNullable(limit), sort, defaultSort, filters,
-                depthFilters, page);
+                depthFilters, traversalFilters, page);
     }
 
     /**
@@ -503,7 +514,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
     public Query<E> clearOrder() {
         return new Query<E>(graph, cls, scope, offset, limit,
                 ImmutableSortedMap.<String, Sort>of(), defaultSort, filters,
-                depthFilters, page);
+                depthFilters, traversalFilters, page);
     }
 
     /**
@@ -516,7 +527,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
 
         return new Query<E>(graph, cls, scope, offset, limit, sort,
                 Optional.of(new Pair<String, Sort>(field, order)), filters,
-                depthFilters, page);
+                depthFilters, traversalFilters, page);
     }
 
     /**
@@ -529,7 +540,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
         SortedMap<String, Sort> tmp = new ImmutableSortedMap.Builder<String, Sort>(
                 Ordering.natural()).putAll(sort).put(field, order).build();
         return new Query<E>(graph, cls, scope, offset, limit, tmp, defaultSort,
-                filters, depthFilters, page);
+                filters, depthFilters, traversalFilters, page);
     }
 
     /**
@@ -542,7 +553,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
     public Query<E> orderBy(Iterable<String> orderSpecs) {
         SortedMap<String, Sort> tmp = parseOrderSpecs(orderSpecs);
         return new Query<E>(graph, cls, scope, offset, limit, tmp, defaultSort,
-                filters, depthFilters, page);
+                filters, depthFilters, traversalFilters, page);
     }
 
     /**
@@ -558,7 +569,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
                 sort,
                 defaultSort,
                 ImmutableSortedMap.<String, Pair<FilterPredicate, String>>of(),
-                depthFilters, page);
+                depthFilters, traversalFilters, page);
     }
 
     /**
@@ -573,19 +584,19 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
         Map<Pair<String, Direction>, Integer> tmp = Maps.newHashMap(depthFilters);
         tmp.put(new Pair<String, Direction>(label, direction), depth);
         return new Query<E>(graph, cls, scope, offset, limit, sort,
-                defaultSort, filters, tmp, page);
+                defaultSort, filters, tmp, traversalFilters, page);
     }
 
     /**
      * Add a filter clause.
      *
      * @param property
-     * @param predicate   predicate
+     * @param predicate predicate
      * @param value
      * @return a new query object
      */
     public Query<E> filter(String property, FilterPredicate predicate,
-                           String value) {
+            String value) {
         SortedMap<String, Pair<FilterPredicate, String>> tmp = new ImmutableSortedMap.Builder<String, Pair<FilterPredicate, String>>(
                 Ordering.natural())
                 .putAll(filters)
@@ -593,7 +604,25 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
                         new Pair<FilterPredicate, String>(predicate, value))
                 .build();
         return new Query<E>(graph, cls, scope, offset, limit, sort,
-                defaultSort, tmp, depthFilters, page);
+                defaultSort, tmp, depthFilters, traversalFilters, page);
+    }
+
+    /**
+     * Add a filter clause.
+     *
+     * @param path
+     * @param predicate predicate
+     * @param value
+     * @return a new query object
+     */
+    public Query<E> filterTraversal(QueryUtils.TraversalPath path, FilterPredicate predicate,
+            String value) {
+        Map<QueryUtils.TraversalPath, Pair<FilterPredicate, String>> tmp = new ImmutableMap.Builder<QueryUtils.TraversalPath, Pair<FilterPredicate, String>>()
+                .putAll(traversalFilters)
+                .put(path, new Pair<FilterPredicate, String>(predicate, value))
+                .build();
+        return new Query<E>(graph, cls, scope, offset, limit, sort,
+                defaultSort, filters, depthFilters, tmp, page);
     }
 
     /**
@@ -604,12 +633,25 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      *
      * @param filters list of filters
      * @return a new query object
-     *
      */
     public Query<E> filter(Iterable<String> filters) {
+        // FIXME: This is really gross, but we want to allow the arguments
+        // to .filter() to be a mix of property filters and traversal path
+        // filters, because they'll usually just come straight from some
+        // query params.
         SortedMap<String, Pair<FilterPredicate, String>> tmp = parseFilters(filters);
-        return new Query<E>(graph, cls, scope, offset, limit, sort,
-                defaultSort, tmp, depthFilters, page);
+        Query<E> query = this;
+        for (Entry<String, Pair<FilterPredicate, String>> ft : tmp.entrySet()) {
+            Optional<QueryUtils.TraversalPath> tpath = QueryUtils.getTraversalPath(ft.getKey());
+            if (tpath.isPresent()) {
+                logger.debug("Adding traversal filter: {}", tpath.get());
+                query = query.filterTraversal(tpath.get(), ft.getValue().getA(), ft.getValue().getB());
+            } else {
+                logger.debug("Adding property filter: {}", ft.getKey());
+                query = query.filter(ft.getKey(), ft.getValue().getA(), ft.getValue().getB());
+            }
+        }
+        return query;
     }
 
     /**
@@ -701,6 +743,13 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
         return pipe.filter(getFilterFunction());
     }
 
+    private <EE> GremlinPipeline<EE, Vertex> setTraversalFilters(
+            GremlinPipeline<EE, Vertex> pipe) {
+        if (traversalFilters.isEmpty())
+            return pipe;
+        return pipe.filter(getTraversalFilterFunction());
+    }
+
     private <EE> GremlinPipeline<EE, Vertex> setDepthFilters(
             GremlinPipeline<EE, Vertex> pipe) {
         if (depthFilters.isEmpty())
@@ -776,16 +825,60 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
                 for (Entry<String, Pair<FilterPredicate, String>> entry : filters
                         .entrySet()) {
                     String p = (String) vertex.getProperty(entry.getKey());
-                    if (p == null)
+                    if (p == null || !matches(p, entry.getValue().getA(), entry.getValue()
+                            .getB())) {
                         return false;
-                    if (!matches(p, entry.getValue().getA(), entry.getValue()
-                            .getB()))
-                        return false;
+                    }
                 }
                 return true;
             }
         };
     }
+
+    private PipeFunction<Vertex, Boolean> getTraversalFilterFunction() {
+        // FIXME: Make this less horribly inefficient!
+        return new PipeFunction<Vertex, Boolean>() {
+            public Boolean compute(Vertex vertex) {
+                for (Entry<QueryUtils.TraversalPath, Pair<FilterPredicate, String>> entry : traversalFilters
+                        .entrySet()) {
+                    Vertex current = vertex;
+                    GremlinPipeline<Vertex, Vertex> pipeline = getFilterTraversalPipeline(
+                            vertex, entry.getKey(), entry.getValue());
+                    if (!pipeline.hasNext()) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+        };
+    }
+
+    private GremlinPipeline<Vertex, Vertex> getFilterTraversalPipeline(
+            final Vertex startVertex, final QueryUtils.TraversalPath traversalPath,
+            final Pair<FilterPredicate, String> filter) {
+        GremlinPipeline<Vertex, Vertex> p = new GremlinPipeline<Vertex, Vertex>(startVertex);
+        for (Pair<String, Direction> tp : traversalPath.getTraversals()) {
+            switch (tp.getB()) {
+                case IN:
+                    logger.debug("Adding in relation: {}", tp.getA());
+                    p = p.in(tp.getA());
+                    break;
+                case OUT:
+                    logger.debug("Adding out relation: {}", tp.getA());
+                    p = p.out(tp.getA());
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unexpected direction in traversal pipe function: " + tp.getB());
+            }
+        }
+        return p.filter(new PipeFunction<Vertex, Boolean>() {
+            public Boolean compute(Vertex vertex) {
+                String p = (String) vertex.getProperty(traversalPath.getProperty());
+                return p != null && matches(p, filter.getA(), filter.getB());
+            }
+        });
+    }
+
 
     // FIXME: This has several limitations so far.
     // - only handles properties cast as strings
