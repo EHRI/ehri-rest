@@ -17,7 +17,7 @@ import com.sun.jersey.api.client.WebResource;
 import eu.ehri.extension.AbstractRestResource;
 import eu.ehri.project.definitions.Entities;
 
-public class ActionRestClientTest extends BaseRestClientTest {
+public class SystemEventRestClientTest extends BaseRestClientTest {
 
     static final String UPDATED_NAME = "UpdatedNameTEST";
 
@@ -25,7 +25,7 @@ public class ActionRestClientTest extends BaseRestClientTest {
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
-        initializeTestDb(ActionRestClientTest.class.getName());
+        initializeTestDb(SystemEventRestClientTest.class.getName());
     }
 
     @Test
@@ -34,7 +34,7 @@ public class ActionRestClientTest extends BaseRestClientTest {
         // a corresponding action.
 
         List<Map<String, Object>> actionsBefore = getEntityList(
-                Entities.ACTION, getAdminUserProfileId());
+                Entities.SYSTEM_EVENT, getAdminUserProfileId());
 
         WebResource resource = client.resource(getExtensionEntryPointUri()
                 + "/agent");
@@ -49,9 +49,9 @@ public class ActionRestClientTest extends BaseRestClientTest {
                 response.getStatus());
 
         List<Map<String, Object>> actionsAfter = getEntityList(
-                Entities.ACTION, getAdminUserProfileId());
+                Entities.SYSTEM_EVENT, getAdminUserProfileId());
 
-        // Having created a new Agent, we should have at least one Action.
+        // Having created a new Agent, we should have at least one Event.
         assertEquals(actionsBefore.size() + 1, actionsAfter.size());
     }
     
@@ -73,7 +73,7 @@ public class ActionRestClientTest extends BaseRestClientTest {
         String id = url.substring(url.lastIndexOf("/") + 1);
         
         resource = client.resource(getExtensionEntryPointUri()
-                + "/" + Entities.ACTION + "/for/" + id);
+                + "/" + Entities.SYSTEM_EVENT + "/for/" + id);
         
         response = resource
                 .accept(MediaType.APPLICATION_JSON)

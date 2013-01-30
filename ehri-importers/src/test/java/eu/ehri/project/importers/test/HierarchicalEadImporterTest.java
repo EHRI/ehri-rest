@@ -6,13 +6,13 @@ import static org.junit.Assert.assertTrue;
 import java.io.InputStream;
 import java.util.List;
 
+import eu.ehri.project.models.events.SystemEvent;
 import org.junit.Test;
 
 import com.tinkerpop.blueprints.Vertex;
 
 import eu.ehri.project.importers.EadImportManager;
 import eu.ehri.project.importers.ImportLog;
-import eu.ehri.project.models.events.ItemEvent;
 import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.base.AccessibleEntity;
@@ -46,9 +46,9 @@ public class HierarchicalEadImporterTest extends AbstractFixtureTest {
 		// - 4 more DocumentaryUnits
 		// - 4 more DocumentDescription
 		// - 1 more DatePeriod
-		// - 1 more import Action
-        // - 4 more import ItemEvent
-		assertEquals(count + 14, getNodeCount());
+		// - 5 more import Event links
+        // - 1 more import Event
+		assertEquals(count + 15, getNodeCount());
 		Iterable<Vertex> docs = graph.getVertices("identifier",
 				IMPORTED_ITEM_ID);
 		assertTrue(docs.iterator().hasNext());
@@ -78,10 +78,10 @@ public class HierarchicalEadImporterTest extends AbstractFixtureTest {
 		assertEquals(unit, ancestors.get(ancestors.size() - 1));
 
 		// Ensure the import action has the right number of subjects.
-		Iterable<ItemEvent> actions = unit.getHistory();
+		Iterable<SystemEvent> actions = unit.getHistory();
 		// Check we've only got one action
 		assertEquals(1, toList(actions).size());
-		assertEquals(logMessage, log.getAction().getGlobalEvent().getLogMessage());
+		assertEquals(logMessage, log.getAction().getLogMessage());
 
 		List<AccessibleEntity> subjects = toList(log.getAction().getSubjects());
 		assertEquals(4, subjects.size());

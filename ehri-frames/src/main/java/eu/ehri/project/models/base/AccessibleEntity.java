@@ -5,11 +5,10 @@ import com.tinkerpop.frames.Property;
 import com.tinkerpop.frames.VertexFrame;
 import com.tinkerpop.frames.annotations.gremlin.GremlinGroovy;
 
-import eu.ehri.project.models.events.GlobalEvent;
-import eu.ehri.project.models.events.ItemEvent;
 import eu.ehri.project.models.PermissionGrant;
 import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.annotations.Unique;
+import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.persistance.ActionManager;
 
 public interface AccessibleEntity extends VertexFrame, PermissionGrantTarget {
@@ -51,12 +50,12 @@ public interface AccessibleEntity extends VertexFrame, PermissionGrantTarget {
      * @return
      */
     @GremlinGroovy("_().as('n').out('" + ActionManager.LIFECYCLE_EVENT + "')"
-            + ".loop('n'){true}{true}.out('" + GlobalEvent.HAS_EVENT + "')")
-    public Iterable<GlobalEvent> getHistory();
+            + ".loop('n'){true}{true}.out('" + eu.ehri.project.models.events.SystemEvent.HAS_EVENT + "')")
+    public Iterable<SystemEvent> getHistory();
 
     // FIXME: This should be a single item return but frames doesn't currently
     // support those...
     @GremlinGroovy("_().as('n').out('" + ActionManager.LIFECYCLE_EVENT + "')"
-            + ".out('" + GlobalEvent.HAS_EVENT + "')")
-    public Iterable<GlobalEvent> getLatestEvent();
+            + ".out('" + eu.ehri.project.models.events.SystemEvent.HAS_EVENT + "')")
+    public Iterable<SystemEvent> getLatestEvent();
 }

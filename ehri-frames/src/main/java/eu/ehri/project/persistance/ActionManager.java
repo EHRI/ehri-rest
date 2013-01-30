@@ -8,8 +8,7 @@ import com.tinkerpop.gremlin.java.GremlinPipeline;
 import com.tinkerpop.pipes.PipeFunction;
 import com.tinkerpop.pipes.branch.LoopPipe;
 import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.models.events.GlobalEvent;
-import eu.ehri.project.models.events.ItemEvent;
+import eu.ehri.project.models.events.SystemEvent;
 import org.joda.time.DateTime;
 import org.joda.time.format.ISODateTimeFormat;
 
@@ -38,8 +37,8 @@ public final class ActionManager {
     public static final String GLOBAL_EVENT_ROOT = "globalEventRoot";
 
     /**
-     * Because fetching the user and/or subjects from an Action or an
-     * ItemEvent potentially means traversing several links in the item/user
+     * Because fetching the user and/or subjects from an Event
+     * potentially means traversing several links in the item/user
      * history, we can their IDs as a property.
      */
     private static final String USER_ID_CACHE = "__USER_ID_CACHE__";
@@ -75,20 +74,20 @@ public final class ActionManager {
      */
     public static class EventContext {
         private final ActionManager actionManager;
-        private final GlobalEvent globalEvent;
+        private final SystemEvent systemEvent;
         private final Actioner actioner;
         private final String logMessage;
 
-        public EventContext(ActionManager actionManager, GlobalEvent globalEvent,
+        public EventContext(ActionManager actionManager, SystemEvent systemEvent,
                 Actioner actioner, String logMessage) {
             this.actionManager = actionManager;
-            this.globalEvent = globalEvent;
+            this.systemEvent = systemEvent;
             this.actioner = actioner;
             this.logMessage = logMessage;
         }
 
-        public GlobalEvent getGlobalEvent() {
-            return this.globalEvent;
+        public SystemEvent getSystemEvent() {
+            return this.systemEvent;
         }
 
         public Actioner getActioner() {
@@ -101,17 +100,17 @@ public final class ActionManager {
                 actionManager.replaceAtHead(entity.asVertex(), vertex,
                         LIFECYCLE_EVENT, LIFECYCLE_EVENT, Direction.OUT);
                 actionManager.graph.addEdge(null, vertex,
-                        globalEvent.asVertex(), GlobalEvent.HAS_EVENT);
+                        systemEvent.asVertex(), eu.ehri.project.models.events.SystemEvent.HAS_EVENT);
             }
             return this;
         }
     }
 
-    public GlobalEvent getLatestGlobalEvent() {
+    public SystemEvent getLatestGlobalEvent() {
         try {
             Vertex sys = manager.getVertex(GLOBAL_EVENT_ROOT, EntityClass.SYSTEM);
             Iterable<Vertex> latest = sys.getVertices(Direction.OUT, LIFECYCLE_ACTION + "Stream");
-            return latest.iterator().hasNext() ? graph.frame(latest.iterator().next(), GlobalEvent.class) : null;
+            return latest.iterator().hasNext() ? graph.frame(latest.iterator().next(), SystemEvent.class) : null;
         } catch (ItemNotFound itemNotFound) {
             throw new RuntimeException("Fatal error: system node (id: 'system') was not found. " +
                     "Perhaps the graph was incorrectly initialised?");
@@ -127,12 +126,12 @@ public final class ActionManager {
         };
     }
 
-    public Iterable<GlobalEvent> getLatestGlobalEvents() {
-        GlobalEvent globalEvent = getLatestGlobalEvent();
-        GremlinPipeline<Vertex, Vertex> loop = new GremlinPipeline<Vertex, Vertex>(globalEvent.asVertex())._()
+    public Iterable<SystemEvent> getLatestGlobalEvents() {
+        SystemEvent systemEvent = getLatestGlobalEvent();
+        GremlinPipeline<Vertex, Vertex> loop = new GremlinPipeline<Vertex, Vertex>(systemEvent.asVertex())._()
                 .as("n").out(LIFECYCLE_ACTION)
                 .loop("n", noopBooleanFunction(), noopBooleanFunction());
-        return graph.frameVertices(new GremlinPipeline<Vertex, Vertex>(globalEvent.asVertex())._().and(loop), GlobalEvent.class);
+        return graph.frameVertices(new GremlinPipeline<Vertex, Vertex>(systemEvent.asVertex())._().and(loop), SystemEvent.class);
     }
 
     /**
@@ -145,15 +144,15 @@ public final class ActionManager {
      * @param logMessage
      * @return
      */
-    private GlobalEvent createGlobalEvent(Actioner user, String actionType, String logMessage) {
+    private SystemEvent createGlobalEvent(Actioner user, String actionType, String logMessage) {
         try {
             Vertex system = manager.getVertex(GLOBAL_EVENT_ROOT, EntityClass.SYSTEM);
-            Bundle ge = new Bundle(EntityClass.GLOBAL_EVENT)
-                    .withDataValue(GlobalEvent.TIMESTAMP, getTimestamp())
-                    .withDataValue(GlobalEvent.LOG_MESSAGE, logMessage)
+            Bundle ge = new Bundle(EntityClass.SYSTEM_EVENT)
+                    .withDataValue(eu.ehri.project.models.events.SystemEvent.TIMESTAMP, getTimestamp())
+                    .withDataValue(SystemEvent.LOG_MESSAGE, logMessage)
                     .withDataValue(AccessibleEntity.IDENTIFIER_KEY, UUID.randomUUID().toString())
                     .withDataValue(USER_ID_CACHE, manager.getId(user));
-            GlobalEvent ev = new BundleDAO(graph).create(ge, GlobalEvent.class);
+            SystemEvent ev = new BundleDAO(graph).create(ge, SystemEvent.class);
             replaceAtHead(system, ev.asVertex(), actionType + "Stream", actionType, Direction.OUT);
             return ev;
         } catch (ItemNotFound e) {
@@ -177,8 +176,8 @@ public final class ActionManager {
     public EventContext logEvent(Actioner user, String logMessage) {
         Vertex vertex = graph.addVertex(null);
         replaceAtHead(user.asVertex(), vertex, LIFECYCLE_ACTION, LIFECYCLE_ACTION, Direction.OUT);
-        GlobalEvent ge = createGlobalEvent(user, LIFECYCLE_ACTION, logMessage);
-        graph.addEdge(null, vertex, ge.asVertex(), GlobalEvent.HAS_EVENT);
+        SystemEvent ge = createGlobalEvent(user, LIFECYCLE_ACTION, logMessage);
+        graph.addEdge(null, vertex, ge.asVertex(), eu.ehri.project.models.events.SystemEvent.HAS_EVENT);
         return new EventContext(this, ge, user, logMessage);
     }
 

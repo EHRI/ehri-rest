@@ -12,7 +12,7 @@ public enum ContentTypes {
     GROUP(Entities.GROUP),
     USER_PROFILE(Entities.USER_PROFILE),
     ANNOTATION(Entities.ANNOTATION),
-    ACTION(Entities.ACTION),
+    SYSTEM_EVENT(Entities.SYSTEM_EVENT),
     CVOC_VOCABULARY(Entities.CVOC_VOCABULARY),
     CVOC_CONCEPT(Entities.CVOC_CONCEPT);
     

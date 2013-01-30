@@ -6,7 +6,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.InputStream;
 import java.util.List;
 
-import eu.ehri.project.models.events.ItemEvent;
+import eu.ehri.project.models.events.SystemEvent;
 import org.junit.Test;
 
 import com.tinkerpop.blueprints.Vertex;
@@ -50,9 +50,9 @@ public class EadListImporterTest extends AbstractFixtureTest {
         // How many new nodes will have been created? We should have
         // - 2 more DocumentaryUnit
         // - 2 more DocumentDescription
-        // - 1 more import Action
-        // - 2 more import ItemEvent
-        assertEquals(count + 7, getNodeCount());
+        // - 2 more import Event links
+        // - 1 more import Event
+        assertEquals(count + 8, getNodeCount());
         Iterable<Vertex> docs = graph.getVertices("identifier",
                 IMPORTED_ITEM_ID1);
         assertTrue(docs.iterator().hasNext());
@@ -60,12 +60,11 @@ public class EadListImporterTest extends AbstractFixtureTest {
                 DocumentaryUnit.class);
         docs = graph.getVertices("identifier", IMPORTED_ITEM_ID2);
         assertTrue(docs.iterator().hasNext());
-        List<ItemEvent> actions = toList(unit.getHistory());
+        List<SystemEvent> actions = toList(unit.getHistory());
         // Check we've only got one action
         assertEquals(1, actions.size());
         assertEquals(2, toList(log.getAction().getSubjects()).size());
-        assertEquals(logMessage, actions.get(0).getAction()
-                .getGlobalEvent().getLogMessage());
+        assertEquals(logMessage, actions.get(0).getLogMessage());
     }
 
     private int getNodeCount() {

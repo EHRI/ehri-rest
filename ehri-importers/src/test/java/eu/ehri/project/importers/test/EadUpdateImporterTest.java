@@ -6,13 +6,13 @@ import static org.junit.Assert.assertTrue;
 import java.io.InputStream;
 import java.util.List;
 
+import eu.ehri.project.models.events.SystemEvent;
 import org.junit.Test;
 
 import com.tinkerpop.blueprints.Vertex;
 
 import eu.ehri.project.importers.EadImportManager;
 import eu.ehri.project.importers.ImportLog;
-import eu.ehri.project.models.events.ItemEvent;
 import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.test.AbstractFixtureTest;
@@ -42,9 +42,9 @@ public class EadUpdateImporterTest extends AbstractFixtureTest {
         // - 1 more DocumentaryUnit
         // - 1 more DocumentDescription
         // - 1 more DatePeriod
-        // - 1 more import Action
-        // - 1 more import ItemEvent
-        int createCount = origCount + 5;
+        // - 2 more import Event links
+        // - 1 more import Event
+        int createCount = origCount + 6;
         assertEquals(createCount, getNodeCount());
 
         // Yet we've only created 1 *logical* item...
@@ -55,19 +55,19 @@ public class EadUpdateImporterTest extends AbstractFixtureTest {
         assertTrue(docs.iterator().hasNext());
         DocumentaryUnit unit = graph.frame(docs.iterator().next(),
                 DocumentaryUnit.class);
-        List<ItemEvent> actions = toList(unit.getHistory());
+        List<SystemEvent> actions = toList(unit.getHistory());
         // Check we've only got one action
         assertEquals(1, actions.size());
-        assertEquals(logMessage, actions.get(0).getAction()
-                .getGlobalEvent().getLogMessage());
+        assertEquals(logMessage, actions.get(0).getLogMessage());
 
         // Now re-import the same file
         InputStream ios2 = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
         ImportLog log2 = new EadImportManager(graph, agent, validUser)
                 .importFile(ios2, logMessage);
 
-        // We should only have two more nodes, for the action and the user
-        assertEquals(createCount + 2, getNodeCount());
+        // We should only have three more nodes, for the action and the user
+        // event links, plus the global event
+        assertEquals(createCount + 3, getNodeCount());
         // And one logical item should've been updated
         assertEquals(1, log2.getUpdated());
 

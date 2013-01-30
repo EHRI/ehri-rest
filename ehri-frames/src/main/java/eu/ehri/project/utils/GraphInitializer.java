@@ -12,13 +12,12 @@ import eu.ehri.project.acl.ContentTypes;
 import eu.ehri.project.acl.PermissionType;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
-import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.models.ContentType;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Group;
 import eu.ehri.project.models.Permission;
 import eu.ehri.project.models.UserProfile;
-import eu.ehri.project.models.events.GlobalEvent;
+import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.persistance.ActionManager;
 
 /**
@@ -49,8 +48,8 @@ public class GraphInitializer {
                     ImmutableMap.<String,Object>of(
                         // It might be useful to know when this graph was
                         // initialise. We can also put other metadata here.
-                        GlobalEvent.TIMESTAMP, ActionManager.getTimestamp(),
-                        GlobalEvent.LOG_MESSAGE, INIT_MESSAGE
+                        eu.ehri.project.models.events.SystemEvent.TIMESTAMP, ActionManager.getTimestamp(),
+                        SystemEvent.LOG_MESSAGE, INIT_MESSAGE
                     ));
 
             // Create admin account

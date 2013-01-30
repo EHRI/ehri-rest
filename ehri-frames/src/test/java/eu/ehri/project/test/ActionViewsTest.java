@@ -7,8 +7,7 @@ import static org.junit.Assert.assertNotNull;
 import java.util.Iterator;
 import java.util.List;
 
-import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.events.GlobalEvent;
+import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.persistance.Serializer;
 import org.junit.Test;
 
@@ -17,8 +16,6 @@ import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.models.events.Action;
-import eu.ehri.project.models.events.ItemEvent;
 import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.UserProfile;
@@ -92,7 +89,7 @@ public class ActionViewsTest extends AbstractFixtureTest {
         // a current (2.2.0) limitation in frames' @GremlinGroovy mechanism
         // it can't
         assertEquals(1, Iterables.count(validUser.getLatestAction()));
-        GlobalEvent event = Iterables.single(validUser.getLatestAction());
+        SystemEvent event = Iterables.single(validUser.getLatestAction());
         assertTrue(event.getSubjects().iterator()
                 .hasNext());
         assertEquals(changedUser.asVertex(), event.getSubjects().iterator().next().asVertex());
@@ -101,7 +98,7 @@ public class ActionViewsTest extends AbstractFixtureTest {
         System.out.println("User: " + user.asVertex());
         // We should have exactly two actions now; one for create, one for
         // update...
-        List<GlobalEvent> events = toList(changedUser.getHistory());
+        List<SystemEvent> events = toList(changedUser.getHistory());
         assertEquals(2, events.size());
         // We should have the right subject on the actionEvent
         assertTrue(events.get(0).getSubjects().iterator().hasNext());
@@ -152,14 +149,14 @@ public class ActionViewsTest extends AbstractFixtureTest {
         Integer deleted = docViews.delete(item, validUser);
         assertEquals(shouldDelete, deleted);
 
-        List<GlobalEvent> actions = toList(validUser.getActions());
+        List<SystemEvent> actions = toList(validUser.getActions());
 
         // Check there's an extra audit log for the user
         assertEquals(origActionCount + 1, actions.size());
         // Check the deletion log has a default label
         // Assumes the action is the last in the list,
         // which it should be as the most recent.
-        GlobalEvent deleteAction = actions.get(actions.size() - 1);
+        SystemEvent deleteAction = actions.get(actions.size() - 1);
         assertEquals(LoggingCrudViews.DEFAULT_DELETE_LOG,
                 deleteAction.getLogMessage());
     }

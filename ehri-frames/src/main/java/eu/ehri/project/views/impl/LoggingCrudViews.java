@@ -70,7 +70,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * Create a new object of type `E` from the given data, saving an Action log
      * with the default creation message.
      * 
-     * @param data
+     * @param bundle
      * @param user
      * @return The created framed vertex
      * @throws PermissionDenied
@@ -87,7 +87,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * Create a new object of type `E` from the given data, saving an Action log
      * with the given log message.
      * 
-     * @param data
+     * @param bundle
      * @param user
      * @param logMessage
      * @return The created framed vertex
@@ -129,7 +129,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * Create or update a new object of type `E` from the given data, saving an
      * Action log with the default creation message.
      * 
-     * @param data
+     * @param bundle
      * @param user
      * @return The created framed vertex
      * @throws PermissionDenied
@@ -147,7 +147,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * Create or update a new object of type `E` from the given data, saving an
      * Action log with the given log message.
      * 
-     * @param data
+     * @param bundle
      * @param user
      * @param logMessage
      * @return The created framed vertex
@@ -187,7 +187,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * Update an object of type `E` from the given data, saving an Action log
      * with the default update message.
      * 
-     * @param data
+     * @param bundle
      * @param user
      * @return The updated framed vertex
      * @throws PermissionDenied
@@ -204,7 +204,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * Update an object of type `E` from the given data, saving an Action log
      * with the given log message.
      * 
-     * @param data
+     * @param bundle
      * @param user
      * @param logMessage
      * @return The updated framed vertex

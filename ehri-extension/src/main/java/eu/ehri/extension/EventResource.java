@@ -13,8 +13,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
-import eu.ehri.project.models.events.GlobalEvent;
-import eu.ehri.project.models.events.ItemEvent;
+import eu.ehri.project.models.events.SystemEvent;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import eu.ehri.extension.errors.BadRequester;
@@ -28,16 +27,16 @@ import eu.ehri.project.views.impl.LoggingCrudViews;
 import eu.ehri.project.views.impl.Query;
 
 /**
- * Provides a RESTfull interface for the Action class. Note: Action instances
+ * Provides a RESTfull interface for the Event class. Note: Event instances
  * are created by the system, so we do not have create/update/delete methods
  * here.
  */
-// FIXME: Change this to GLOBAL_EVENT
-@Path(Entities.ACTION)
-public class EventResource extends AbstractAccessibleEntityResource<GlobalEvent> {
+// FIXME: Change this to SYSTEM_EVENT
+@Path(Entities.SYSTEM_EVENT)
+public class EventResource extends AbstractAccessibleEntityResource<SystemEvent> {
 
     public EventResource(@Context GraphDatabaseService database) {
-        super(database, GlobalEvent.class);
+        super(database, SystemEvent.class);
     }
 
     @GET
@@ -73,7 +72,7 @@ public class EventResource extends AbstractAccessibleEntityResource<GlobalEvent>
         // on the query class, but that will require some refactoring
         if (order.isEmpty()) {
             order.add(String
-                    .format("%s__%s", GlobalEvent.TIMESTAMP, Query.Sort.DESC));
+                    .format("%s__%s", SystemEvent.TIMESTAMP, Query.Sort.DESC));
         }
 
         return list(offset, limit, order, filters);
@@ -93,7 +92,7 @@ public class EventResource extends AbstractAccessibleEntityResource<GlobalEvent>
         // on the query class, but that will require some refactoring
         if (order.isEmpty()) {
             order.add(String
-                    .format("%s__%s", GlobalEvent.TIMESTAMP, Query.Sort.DESC));
+                    .format("%s__%s", eu.ehri.project.models.events.SystemEvent.TIMESTAMP, Query.Sort.DESC));
         }
 
         return page(offset, limit, order, filters);
@@ -121,7 +120,7 @@ public class EventResource extends AbstractAccessibleEntityResource<GlobalEvent>
             @QueryParam(FILTER_PARAM) List<String> filters)
             throws ItemNotFound, BadRequester, PermissionDenied {
         Accessor user = getRequesterUserProfile();
-        GlobalEvent event = views.detail(manager.getFrame(id, cls), user);
+        SystemEvent event = views.detail(manager.getFrame(id, cls), user);
         Query<AccessibleEntity> query = new Query<AccessibleEntity>(graph,
                 AccessibleEntity.class).setOffset(offset).setLimit(limit)
                 .orderBy(order).filter(filters);
@@ -156,7 +155,7 @@ public class EventResource extends AbstractAccessibleEntityResource<GlobalEvent>
         AccessibleEntity item = new LoggingCrudViews<AccessibleEntity>(graph,
                 AccessibleEntity.class).detail(
                 manager.getFrame(id, AccessibleEntity.class), user);
-        Query<GlobalEvent> query = new Query<GlobalEvent>(graph, GlobalEvent.class)
+        Query<SystemEvent> query = new Query<SystemEvent>(graph, SystemEvent.class)
                 .setOffset(offset).setLimit(limit)
                 .orderBy(order).filter(filters);
         return streamingPage(query.page(item.getHistory(), user));

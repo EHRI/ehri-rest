@@ -1,7 +1,5 @@
 package eu.ehri.project.models.events;
 
-import com.tinkerpop.blueprints.Direction;
-import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Property;
 import com.tinkerpop.frames.annotations.gremlin.GremlinGroovy;
 import eu.ehri.project.models.EntityClass;
@@ -11,10 +9,8 @@ import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.persistance.ActionManager;
 
-import static eu.ehri.project.persistance.ActionManager.LIFECYCLE_EVENT;
-
-@EntityType(EntityClass.GLOBAL_EVENT)
-public interface GlobalEvent extends AccessibleEntity {
+@EntityType(EntityClass.SYSTEM_EVENT)
+public interface SystemEvent extends AccessibleEntity {
 
     public static final String HAS_EVENT = "hasEvent";
     public static final String HAS_ACTIONER = "hasActioner";

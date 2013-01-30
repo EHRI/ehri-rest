@@ -3,11 +3,8 @@ package eu.ehri.project.test;
 import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.UserProfile;
-import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Actioner;
-import eu.ehri.project.models.events.Action;
-import eu.ehri.project.models.events.GlobalEvent;
-import eu.ehri.project.models.events.ItemEvent;
+import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.persistance.ActionManager;
 import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.persistance.BundleDAO;
@@ -37,9 +34,9 @@ public class ActionManagerTest extends AbstractFixtureTest {
         ActionManager.EventContext ctx = am.logEvent(agent,
                 graph.frame(validUser.asVertex(), Actioner.class), "Creating agent");
 
-        GlobalEvent event = ctx.getGlobalEvent();
+        SystemEvent event = ctx.getSystemEvent();
 
-        // Check exactly one ItemEvent was created
+        // Check exactly one Event was created
         assertEquals(1, Iterables.count(event.getSubjects()));
         assertEquals(1, Iterables.count(event.getActioners()));
 
@@ -48,10 +45,10 @@ public class ActionManagerTest extends AbstractFixtureTest {
 
 
         // Check the latest event in the list is the one we want...
-        //GlobalEvent top = am.getLatestGlobalEvents().iterator().next();
-//        assertEquals(top, event.getGlobalEvent());
+        //SystemEvent top = am.getLatestGlobalEvents().iterator().next();
+//        assertEquals(top, event.getSystemEvent());
 
-        for (GlobalEvent ev : am.getLatestGlobalEvents()) {
+        for (SystemEvent ev : am.getLatestGlobalEvents()) {
             System.out.println(ev);
         }
 

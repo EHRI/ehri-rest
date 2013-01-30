@@ -6,7 +6,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.InputStream;
 import java.util.List;
 
-import eu.ehri.project.models.events.ItemEvent;
+import eu.ehri.project.models.events.SystemEvent;
 import org.junit.Test;
 
 import com.tinkerpop.blueprints.Vertex;
@@ -42,9 +42,9 @@ public class SingleEadImporterTest extends AbstractFixtureTest {
         // - 1 more DocumentaryUnit
         // - 1 more DocumentDescription
         // - 1 more DatePeriod
-        // - 1 more import Action
-        // - 1 more import ItemEvent
-        assertEquals(count + 5, getNodeCount());
+        // - 2 more import Event links
+        // - 1 more import Event
+        assertEquals(count + 6, getNodeCount());
 
         // Yet we've only created 1 *logical* item...
         assertEquals(1, log.getSuccessful());
@@ -54,11 +54,10 @@ public class SingleEadImporterTest extends AbstractFixtureTest {
         assertTrue(docs.iterator().hasNext());
         DocumentaryUnit unit = graph.frame(docs.iterator().next(),
                 DocumentaryUnit.class);
-        List<ItemEvent> actions = toList(unit.getHistory());
+        List<SystemEvent> actions = toList(unit.getHistory());
         // Check we've only got one action
         assertEquals(1, actions.size());
-        assertEquals(logMessage, actions.get(0).getAction()
-                .getGlobalEvent().getLogMessage());
+        assertEquals(logMessage, actions.get(0).getLogMessage());
     }
 
     private int getNodeCount() {

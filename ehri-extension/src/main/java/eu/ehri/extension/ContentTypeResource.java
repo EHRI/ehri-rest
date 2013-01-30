@@ -22,7 +22,7 @@ import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.ContentType;
 
 /**
- * Provides a RESTfull interface for the Action class. Note: Action instances
+ * Provides a RESTfull interface for the ContentType class. Note: ContentType instances
  * are created by the system, so we do not have create/update/delete methods
  * here.
  */
