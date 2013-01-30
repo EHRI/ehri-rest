@@ -55,6 +55,7 @@ public interface AccessibleEntity extends VertexFrame, PermissionGrantTarget {
 
     // FIXME: This should be a single item return but frames doesn't currently
     // support those...
+    @Fetch(ActionManager.LIFECYCLE_EVENT)
     @GremlinGroovy("_().as('n').out('" + ActionManager.LIFECYCLE_EVENT + "')"
             + ".out('" + eu.ehri.project.models.events.SystemEvent.HAS_EVENT + "')")
     public Iterable<SystemEvent> getLatestEvent();
