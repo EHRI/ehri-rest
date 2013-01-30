@@ -42,7 +42,10 @@ public class GraphCleaner {
                 graph.getBaseGraph().dropIndex(relIndex);
             }
             for (Vertex v : graph.getVertices()) {
-                graph.removeVertex(v);
+                // TODO: Figure out why it seems to cause problems when we
+                // delete the root node. Difference between Neo4j and Blueprints???
+                if (v.getId().equals(0L))
+                    graph.removeVertex(v);
             }
             tx.success();
         } catch (Exception e) {
