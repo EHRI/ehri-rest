@@ -10,6 +10,10 @@
 	<!-- our code -->
 	<script>
 
+// Yes globals are bad, but for now I use them
+var Neo4jEhriUrlBase = "http://localhost:7474/ehri";
+
+
 // NOTE all rendering should check for XSS
 
 function addExpandHandlers(newStuff) {
@@ -139,7 +143,7 @@ function createConceptHtmlString(c) {
 function loadNarrowerConceptList(element, id) {
 		// get the list of concepts
 			var request = $.ajax({
-				url : "http://localhost:7474/ehri/cvocConcept/"+id+"/narrower/list", 
+				url :  Neo4jEhriUrlBase + "/cvocConcept/"+id+"/narrower/list", 
 				type : "GET",
 				dataType : "json"
 			});
@@ -161,7 +165,7 @@ function loadNarrowerConceptList(element, id) {
 function loadRelatedConceptList(element, id) {
 		// get the list of concepts
 			var request = $.ajax({
-				url : "http://localhost:7474/ehri/cvocConcept/"+id+"/related/list", 
+				url : Neo4jEhriUrlBase + "/cvocConcept/"+id+"/related/list", 
 				type : "GET",
 				dataType : "json"
 			});
@@ -183,7 +187,7 @@ function loadRelatedConceptList(element, id) {
 function loadRelatedByConceptList(element, id) {
 		// get the list of concepts
 			var request = $.ajax({
-				url : "http://localhost:7474/ehri/cvocConcept/"+id+"/relatedBy/list", 
+				url : Neo4jEhriUrlBase + "/cvocConcept/"+id+"/relatedBy/list", 
 				type : "GET",
 				dataType : "json"
 			});
@@ -205,7 +209,7 @@ function loadRelatedByConceptList(element, id) {
 function loadBroaderConceptList(element, id) {
 		// get the list of concepts
 			var request = $.ajax({
-				url : "http://localhost:7474/ehri/cvocConcept/"+id+"/broader/list", 
+				url : Neo4jEhriUrlBase + "/cvocConcept/"+id+"/broader/list", 
 				type : "GET",
 				dataType : "json"
 			});
@@ -226,9 +230,10 @@ function loadBroaderConceptList(element, id) {
 function loadConceptList(voc) {
 		// get the list of (ALL?) concepts
 			var request = $.ajax({
-				url : "http://localhost:7474/ehri/cvocVocabulary/"+voc+"/list", 
+				url : Neo4jEhriUrlBase + "/cvocVocabulary/"+voc+"/list", 
 				type : "GET",
-				dataType : "json"
+				dataType : "json", 
+				data: {limit : '9999'} // HACK = try to show all for NOW!
 			});
 	
 			request.done(function(json) {
@@ -269,24 +274,29 @@ function renderVocabularyList(json) {
 	var num = json.length;
 	for (var i = 0; i < num; i++) {
 		var v = json[i];
-		//console.log(c.data.identifier);
-		
+		//console.log(c.data.identifier);	
 		lines.push("<li>");
-		//lines.push(createConceptHtmlString(c));	
-		lines.push("<div>"+v.id+"</div>");	
+		lines.push("<div><a href='"+v.id+"' class='vocLink'>"+v.id+"</a></div>");
 		lines.push("</li>");
 	}
 	lines.push("</ul>");
-	lines.push("DEV NOTE: need to make selectable, \"ehri-thes\" now hardcoded");
+	lines.push("DEV NOTE: need to show progress indicator and implement result paging");
 	
 	container.empty(); // clear any old stuff!
-	container.append(lines.join(''));
+	var newStuff = container.append(lines.join(''));
+	
+	$(".vocLink", newStuff).click(function(event) {
+    	event.preventDefault();
+    	var id = extractIdFromNeo4jUrl(this.href);
+        loadConceptList(id);
+    });
+
 }
 
 function loadVocabularyList() {
 		// get the list of (ALL?) vocabularie
 			var request = $.ajax({
-				url : "http://localhost:7474/ehri/cvocVocabulary/list", 
+				url : Neo4jEhriUrlBase + "/cvocVocabulary/list", 
 				type : "GET",
 				dataType : "json"
 			});
@@ -318,7 +328,6 @@ function loadVocabularyList() {
 	// jQuery main entrance
 	$(document).ready(function() {
 		loadVocabularyList();
-		loadConceptList("ehri-thes");	// HARDCODED!
 	});
 	</script>
 </head>
