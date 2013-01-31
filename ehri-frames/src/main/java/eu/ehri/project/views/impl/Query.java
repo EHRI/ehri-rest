@@ -779,8 +779,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
             public Boolean compute(Vertex vertex) {
                 for (GremlinPipeline<Vertex, Vertex> pipeline : traversalFilters) {
                     pipeline.reset();
-                    pipeline.setStarts(Lists.newArrayList(vertex));
-                    if (!pipeline.hasNext()) {
+                    if (!pipeline.start(vertex).hasNext()) {
                         return false;
                     }
                 }
@@ -801,16 +800,14 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
                 String b = cache.get(pair.getB());
                 if (!cache.containsKey(pair.getA())) {
                     pipe.reset();
-                    pipe.setStarts(Lists.newArrayList(pair.getA()));
-                    if (pipe.hasNext()) {
+                    if (pipe.start(pair.getA()).hasNext()) {
                         a = pipe.next();
                         cache.put(pair.getA(), a);
                     }
                 }
                 if (!cache.containsKey(pair.getB())) {
                     pipe.reset();
-                    pipe.setStarts(Lists.newArrayList(pair.getB()));
-                    if (pipe.hasNext()) {
+                    if (pipe.start(pair.getB()).hasNext()) {
                         b = pipe.next();
                         cache.put(pair.getB(), b);
                     }

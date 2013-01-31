@@ -1,5 +1,6 @@
 package eu.ehri.project.views.impl;
 
+import eu.ehri.project.models.base.Actioner;
 import org.neo4j.graphdb.Transaction;
 
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
@@ -105,7 +106,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
         try {
 
             E out = views.create(bundle, user);
-            actionManager.logEvent(out, user, logMessage);
+            actionManager.logEvent(out, graph.frame(user.asVertex(), Actioner.class), logMessage);
             tx.success();
             return out;
         } catch (IntegrityError ex) {
@@ -163,7 +164,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
         try {
 
             E out = views.createOrUpdate(bundle, user);
-            actionManager.logEvent(out, user, logMessage);
+            actionManager.logEvent(out, graph.frame(user.asVertex(), Actioner.class), logMessage);
             tx.success();
             return out;
         } catch (IntegrityError ex) {
@@ -219,7 +220,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
             E out = views.update(bundle, user);
-            actionManager.logEvent(out, user, logMessage);
+            actionManager.logEvent(out, graph.frame(user.asVertex(), Actioner.class), logMessage);
             tx.success();
             return out;
         } catch (IntegrityError ex) {
@@ -271,7 +272,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
             throws PermissionDenied, ValidationError, SerializationError {
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
-            actionManager.logEvent(item, user, logMessage);
+            actionManager.logEvent(item, graph.frame(user.asVertex(), Actioner.class), logMessage);
             Integer count = views.delete(item, user);
             tx.success();
             return count;

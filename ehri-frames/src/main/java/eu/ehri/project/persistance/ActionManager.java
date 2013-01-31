@@ -4,11 +4,11 @@ import java.util.Iterator;
 import java.util.UUID;
 
 import com.tinkerpop.blueprints.Vertex;
-import com.tinkerpop.gremlin.java.GremlinPipeline;
 import com.tinkerpop.pipes.PipeFunction;
 import com.tinkerpop.pipes.branch.LoopPipe;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.events.SystemEvent;
+import eu.ehri.project.models.events.SystemEventQueue;
 import org.joda.time.DateTime;
 import org.joda.time.format.ISODateTimeFormat;
 
@@ -53,7 +53,7 @@ public final class ActionManager {
     public static final String LIFECYCLE_EVENT = "lifecycleEvent";
     public static final String INTERACTION_EVENT = "interactionEvent";
 
-    private final FramedGraph<Neo4jGraph> graph;
+    private final FramedGraph graph;
     private final GraphManager manager;
 
     /**
@@ -108,16 +108,16 @@ public final class ActionManager {
 
     public SystemEvent getLatestGlobalEvent() {
         try {
-            Vertex sys = manager.getVertex(GLOBAL_EVENT_ROOT, EntityClass.SYSTEM);
-            Iterable<Vertex> latest = sys.getVertices(Direction.OUT, LIFECYCLE_ACTION + "Stream");
-            return latest.iterator().hasNext() ? graph.frame(latest.iterator().next(), SystemEvent.class) : null;
+            SystemEventQueue sys = manager.getFrame(GLOBAL_EVENT_ROOT, EntityClass.SYSTEM, SystemEventQueue.class);
+            Iterable<SystemEvent> latest = sys.getSystemEvents();
+            return latest.iterator().hasNext() ? latest.iterator().next() : null;
         } catch (ItemNotFound itemNotFound) {
             throw new RuntimeException("Fatal error: system node (id: 'system') was not found. " +
                     "Perhaps the graph was incorrectly initialised?");
         }
     }
 
-    private PipeFunction<LoopPipe.LoopBundle<Vertex>, Boolean> noopBooleanFunction() {
+    private PipeFunction<LoopPipe.LoopBundle<Vertex>, Boolean> noOpBooleanFunction() {
         return new PipeFunction<LoopPipe.LoopBundle<Vertex>, Boolean>() {
             @Override
             public Boolean compute(LoopPipe.LoopBundle<Vertex> vertexLoopBundle) {
@@ -128,10 +128,21 @@ public final class ActionManager {
 
     public Iterable<SystemEvent> getLatestGlobalEvents() {
         SystemEvent systemEvent = getLatestGlobalEvent();
-        GremlinPipeline<Vertex, Vertex> loop = new GremlinPipeline<Vertex, Vertex>(systemEvent.asVertex())._()
-                .as("n").out(LIFECYCLE_ACTION)
-                .loop("n", noopBooleanFunction(), noopBooleanFunction());
-        return graph.frameVertices(new GremlinPipeline<Vertex, Vertex>(systemEvent.asVertex())._().and(loop), SystemEvent.class);
+//        GremlinPipeline startPipe = new GremlinPipeline<Vertex, Vertex>(systemEvent.asVertex())
+//                .out(LIFECYCLE_ACTION + "Stream");
+//        GremlinPipeline pipe = startPipe.copySplit(
+//                new GremlinPipeline<Vertex, Vertex>()._(),
+//                new GremlinPipeline<Vertex, Vertex>(systemEvent.asVertex())
+//                        .out(LIFECYCLE_ACTION + "Stream")._().as("n")
+//                        .out(LIFECYCLE_ACTION)
+//                        .loop("n", noOpBooleanFunction(), noOpBooleanFunction()));
+
+        try {
+            SystemEventQueue queue = manager.getFrame(GLOBAL_EVENT_ROOT, EntityClass.SYSTEM, SystemEventQueue.class);
+            return queue.getSystemEvents();
+        } catch (ItemNotFound itemNotFound) {
+            throw new RuntimeException("Couldn't find system event queue!");
+        }
     }
 
     /**
@@ -184,10 +195,10 @@ public final class ActionManager {
     /**
      * Create an action given an accessor.
      */
-    public EventContext logEvent(AccessibleEntity subject, Accessor user,
-            String logMessage) {
-        return logEvent(subject, graph.frame(user.asVertex(), Actioner.class), logMessage);
-    }
+//    public EventContext logEvent(AccessibleEntity subject, Accessor user,
+//            String logMessage) {
+//        return logEvent(subject, graph.frame(user.asVertex(), Actioner.class), logMessage);
+//    }
 
     /**
      * Create an action node that describes what user U has done with subject S

@@ -47,7 +47,7 @@ public class ActionManagerTest extends AbstractFixtureTest {
         // Check the latest event in the list is the one we want...
         //SystemEvent top = am.getLatestGlobalEvents().iterator().next();
 //        assertEquals(top, event.getSystemEvent());
-
+        System.out.println(event);
         for (SystemEvent ev : am.getLatestGlobalEvents()) {
             System.out.println(ev);
         }

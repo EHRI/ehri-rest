@@ -17,11 +17,7 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.Annotation;
-import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.models.base.AnnotatableEntity;
-import eu.ehri.project.models.base.Annotator;
-import eu.ehri.project.models.base.PermissionScope;
+import eu.ehri.project.models.base.*;
 import eu.ehri.project.persistance.ActionManager;
 import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.persistance.BundleDAO;
@@ -114,7 +110,7 @@ public final class AnnotationViews implements Annotations {
         annotation.setAnnotator(graph.frame(accessor.asVertex(),
                 Annotator.class));
 
-        new ActionManager(graph).logEvent(entity, accessor,
+        new ActionManager(graph).logEvent(entity, graph.frame(accessor.asVertex(), Actioner.class),
                 "Added annotation").addSubjects(annotation);
         return annotation;
     }
