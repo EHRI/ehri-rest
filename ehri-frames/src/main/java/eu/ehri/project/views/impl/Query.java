@@ -785,6 +785,10 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
         };
     }
 
+    /**
+     * Create a function that filters nodes given a string and a predicate.
+     * @return
+     */
     private PipeFunction<Vertex, Boolean> getFilterFunction() {
         return new PipeFunction<Vertex, Boolean>() {
             public Boolean compute(Vertex vertex) {
@@ -850,21 +854,8 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
 
     private GremlinPipeline<Vertex, String> getOrderTraversalPipeline(
             final QueryUtils.TraversalPath traversalPath) {
-        GremlinPipeline<Vertex, Vertex> p = new GremlinPipeline<Vertex, Vertex>();
-        for (Pair<String, Direction> tp : traversalPath.getTraversals()) {
-            switch (tp.getB()) {
-                case IN:
-                    logger.debug("Adding in relation: {}", tp.getA());
-                    p = p.in(tp.getA());
-                    break;
-                case OUT:
-                    logger.debug("Adding out relation: {}", tp.getA());
-                    p = p.out(tp.getA());
-                    break;
-                default:
-                    throw new IllegalArgumentException("Unexpected direction in traversal pipe function: " + tp.getB());
-            }
-        }
+        GremlinPipeline<Vertex, Vertex> p = addTraversals(traversalPath.getTraversals(), false,
+                new GremlinPipeline<Vertex, Vertex>());
         return p.transform(new PipeFunction<Vertex, String>() {
             public String compute(Vertex vertex) {
                 return (String) vertex.getProperty(traversalPath.getProperty());
@@ -876,21 +867,8 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
     private GremlinPipeline<Vertex, Vertex> getFilterTraversalPipeline(
             final QueryUtils.TraversalPath traversalPath,
             final Pair<FilterPredicate, String> filter) {
-        GremlinPipeline<Vertex, Vertex> p = new GremlinPipeline<Vertex, Vertex>();
-        for (Pair<String, Direction> tp : traversalPath.getTraversals()) {
-            switch (tp.getB()) {
-                case IN:
-                    logger.debug("Adding in relation: {}", tp.getA());
-                    p = p.in(tp.getA());
-                    break;
-                case OUT:
-                    logger.debug("Adding out relation: {}", tp.getA());
-                    p = p.out(tp.getA());
-                    break;
-                default:
-                    throw new IllegalArgumentException("Unexpected direction in traversal pipe function: " + tp.getB());
-            }
-        }
+        GremlinPipeline<Vertex, Vertex> p = addTraversals(traversalPath.getTraversals(), false,
+                new GremlinPipeline<Vertex, Vertex>());
         return p.filter(new PipeFunction<Vertex, Boolean>() {
             public Boolean compute(Vertex vertex) {
                 String p = (String) vertex.getProperty(traversalPath.getProperty());
@@ -899,17 +877,28 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
         });
     }
 
+    /**
+     * Add traversals to a pipeline given a set of String/Direction pairs.
+     * @param paths
+     * @param reverse   reverse the traversal ordering
+     * @param pipe      the pipeline to process
+     * @param <S>
+     * @return
+     */
     private static <S> GremlinPipeline<S, Vertex> addTraversals(List<Pair<String, Direction>> paths,
             Boolean reverse, GremlinPipeline<S, Vertex> pipe) {
-        for (Pair<String, Direction> tp : paths) {
-            switch (tp.getB()) {
+        List<Pair<String, Direction>> orderedPaths = reverse ? Lists.reverse(paths) : paths;
+        for (Pair<String, Direction> tp : orderedPaths) {
+            Direction direction = reverse ? tp.getB().opposite() : tp.getB();
+            String relation = tp.getA();
+            switch (direction) {
                 case IN:
-                    logger.debug("Adding {} relation: {}", tp.getA(), reverse ? "out" : "in");
-                    pipe = reverse ? pipe.out(tp.getA()) : pipe.in(tp.getA());
+                    logger.debug("Adding {} relation: {}", relation, direction);
+                    pipe = pipe.in(relation);
                     break;
                 case OUT:
-                    logger.debug("Adding {} relation: {}", tp.getA(), reverse ? "in" : "out");
-                    pipe = reverse ? pipe.in(tp.getA()) : pipe.out(tp.getA());
+                    logger.debug("Adding {} relation: {}", relation, direction);
+                    pipe = pipe.out(relation);
                     break;
                 default:
                     throw new IllegalArgumentException("Unexpected direction in traversal pipe function: " + tp.getB());
