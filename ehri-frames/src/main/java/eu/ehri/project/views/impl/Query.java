@@ -832,6 +832,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
                     pipe.setStarts(Lists.newArrayList(pair.getA()));
                     if (pipe.hasNext()) {
                         a = pipe.next();
+                        cache.put(pair.getA(), a);
                     }
                 }
                 if (!cache.containsKey(pair.getB())) {
@@ -839,6 +840,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
                     pipe.setStarts(Lists.newArrayList(pair.getB()));
                     if (pipe.hasNext()) {
                         b = pipe.next();
+                        cache.put(pair.getB(), b);
                     }
                 }
                 return sort == Sort.ASC ? order.compare(a, b) : order.compare(b, a);
