@@ -18,6 +18,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
 
+import eu.ehri.project.models.base.Actioner;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 
@@ -107,7 +108,7 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
 
     /**
      * Add an accessor to a group.
-     * 
+     *
      * @param id
      * @param atype
      * @param aid
@@ -131,11 +132,11 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
 
             // Log the action...
             new ActionManager(graph)
-            .logEvent(
-                    graph.frame(accessor.asVertex(), AccessibleEntity.class),
-                    getRequesterUserProfile(), "Added accessor to group")
-                    .addSubjects(group);            
-            
+                    .logEvent(
+                            graph.frame(accessor.asVertex(), AccessibleEntity.class),
+                            graph.frame(getRequesterUserProfile().asVertex(), Actioner.class), "Added accessor to group")
+                    .addSubjects(group);
+
             tx.success();
 
             // TODO: Is there anything worth return here except OK?
@@ -147,7 +148,7 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
 
     /**
      * Remove an accessor from a group.
-     * 
+     *
      * @param id
      * @param atype
      * @param aid
@@ -169,10 +170,11 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
             group.removeMember(accessor);
             // Log the action...
             new ActionManager(graph)
-                .logEvent(
-                        graph.frame(accessor.asVertex(), AccessibleEntity.class),
-                        getRequesterUserProfile(), "Removed accessor from group")
-                        .addSubjects(group);            
+                    .logEvent(
+                            graph.frame(accessor.asVertex(), AccessibleEntity.class),
+                            graph.frame(getRequesterUserProfile().asVertex(), Actioner.class),
+                            "Removed accessor from group")
+                    .addSubjects(group);
 
             tx.success();
 
@@ -185,7 +187,7 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
 
     /**
      * Delete a group with the given identifier string.
-     * 
+     *
      * @param id
      * @return
      * @throws PermissionDenied
