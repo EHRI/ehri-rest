@@ -127,18 +127,9 @@ public final class ActionManager {
     }
 
     public Iterable<SystemEvent> getLatestGlobalEvents() {
-        SystemEvent systemEvent = getLatestGlobalEvent();
-//        GremlinPipeline startPipe = new GremlinPipeline<Vertex, Vertex>(systemEvent.asVertex())
-//                .out(LIFECYCLE_ACTION + "Stream");
-//        GremlinPipeline pipe = startPipe.copySplit(
-//                new GremlinPipeline<Vertex, Vertex>()._(),
-//                new GremlinPipeline<Vertex, Vertex>(systemEvent.asVertex())
-//                        .out(LIFECYCLE_ACTION + "Stream")._().as("n")
-//                        .out(LIFECYCLE_ACTION)
-//                        .loop("n", noOpBooleanFunction(), noOpBooleanFunction()));
-
         try {
-            SystemEventQueue queue = manager.getFrame(GLOBAL_EVENT_ROOT, EntityClass.SYSTEM, SystemEventQueue.class);
+            SystemEventQueue queue = manager.getFrame(
+                    GLOBAL_EVENT_ROOT, EntityClass.SYSTEM, SystemEventQueue.class);
             return queue.getSystemEvents();
         } catch (ItemNotFound itemNotFound) {
             throw new RuntimeException("Couldn't find system event queue!");

@@ -13,7 +13,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
+import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.events.SystemEvent;
+import eu.ehri.project.persistance.ActionManager;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import eu.ehri.extension.errors.BadRequester;
@@ -61,21 +63,18 @@ public class EventResource extends AbstractAccessibleEntityResource<SystemEvent>
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/list")
-    public StreamingOutput listActions(
+    public StreamingOutput listEvents(
             @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
             @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
             @QueryParam(SORT_PARAM) List<String> order,
             @QueryParam(FILTER_PARAM) List<String> filters)
             throws ItemNotFound, BadRequester {
-        // FIXME: Hack to get actions to come out in newest-first order.
-        // This should eventually be done via the defaultOrderBy setting
-        // on the query class, but that will require some refactoring
-        if (order.isEmpty()) {
-            order.add(String
-                    .format("%s__%s", SystemEvent.TIMESTAMP, Query.Sort.DESC));
-        }
-
-        return list(offset, limit, order, filters);
+        Query<SystemEvent> query = new Query<SystemEvent>(graph,
+                SystemEvent.class).setOffset(offset).setLimit(limit)
+                .orderBy(order).filter(filters);
+        ActionManager am = new ActionManager(graph);
+        return streamingList(query.list(am.getLatestGlobalEvents(),
+                getRequesterUserProfile()));
     }
 
     @GET
@@ -87,15 +86,12 @@ public class EventResource extends AbstractAccessibleEntityResource<SystemEvent>
             @QueryParam(SORT_PARAM) List<String> order,
             @QueryParam(FILTER_PARAM) List<String> filters)
             throws ItemNotFound, BadRequester {
-        // FIXME: Hack to get actions to come out in newest-first order.
-        // This should eventually be done via the defaultOrderBy setting
-        // on the query class, but that will require some refactoring
-        if (order.isEmpty()) {
-            order.add(String
-                    .format("%s__%s", eu.ehri.project.models.events.SystemEvent.TIMESTAMP, Query.Sort.DESC));
-        }
-
-        return page(offset, limit, order, filters);
+        Query<SystemEvent> query = new Query<SystemEvent>(graph,
+                SystemEvent.class).setOffset(offset).setLimit(limit)
+                .orderBy(order).filter(filters);
+        ActionManager am = new ActionManager(graph);
+        return streamingPage(query.page(am.getLatestGlobalEvents(),
+                getRequesterUserProfile()));
     }
 
     /**
