@@ -37,21 +37,10 @@ public final class ActionManager {
     public static final String GLOBAL_EVENT_ROOT = "globalEventRoot";
 
     /**
-     * Because fetching the user and/or subjects from an Event
-     * potentially means traversing several links in the item/user
-     * history, we can their IDs as a property.
-     */
-    private static final String USER_ID_CACHE = "__USER_ID_CACHE__";
-    @SuppressWarnings("unused")
-    private static final String ITEM_ID_CACHE = "__ITEM_ID_CACHE__";
-
-    /**
      * Constant relationship names
      */
     public static final String LIFECYCLE_ACTION = "lifecycleAction";
-    public static final String INTERACTION_ACTION = "interactionAction";
     public static final String LIFECYCLE_EVENT = "lifecycleEvent";
-    public static final String INTERACTION_EVENT = "interactionEvent";
 
     private final FramedGraph graph;
     private final GraphManager manager;
@@ -90,10 +79,19 @@ public final class ActionManager {
             return this.systemEvent;
         }
 
+        /**
+         * Get the event actioner.
+         * @return
+         */
         public Actioner getActioner() {
             return this.actioner;
         }
 
+        /**
+         * Add subjects to an event.
+         * @param entities
+         * @return
+         */
         public EventContext addSubjects(AccessibleEntity... entities) {
             for (AccessibleEntity entity : entities) {
                 Vertex vertex = actionManager.graph.addVertex(null);
@@ -106,6 +104,10 @@ public final class ActionManager {
         }
     }
 
+    /**
+     * Get the latest global event.
+     * @return
+     */
     public SystemEvent getLatestGlobalEvent() {
         try {
             SystemEventQueue sys = manager.getFrame(GLOBAL_EVENT_ROOT, EntityClass.SYSTEM, SystemEventQueue.class);
@@ -117,15 +119,10 @@ public final class ActionManager {
         }
     }
 
-    private PipeFunction<LoopPipe.LoopBundle<Vertex>, Boolean> noOpBooleanFunction() {
-        return new PipeFunction<LoopPipe.LoopBundle<Vertex>, Boolean>() {
-            @Override
-            public Boolean compute(LoopPipe.LoopBundle<Vertex> vertexLoopBundle) {
-                return true;
-            }
-        };
-    }
-
+    /**
+     * Get an iterable of global events in most-recent-first order.
+     * @return
+     */
     public Iterable<SystemEvent> getLatestGlobalEvents() {
         try {
             SystemEventQueue queue = manager.getFrame(
@@ -150,10 +147,9 @@ public final class ActionManager {
         try {
             Vertex system = manager.getVertex(GLOBAL_EVENT_ROOT, EntityClass.SYSTEM);
             Bundle ge = new Bundle(EntityClass.SYSTEM_EVENT)
-                    .withDataValue(eu.ehri.project.models.events.SystemEvent.TIMESTAMP, getTimestamp())
+                    .withDataValue(SystemEvent.TIMESTAMP, getTimestamp())
                     .withDataValue(SystemEvent.LOG_MESSAGE, logMessage)
-                    .withDataValue(AccessibleEntity.IDENTIFIER_KEY, UUID.randomUUID().toString())
-                    .withDataValue(USER_ID_CACHE, manager.getId(user));
+                    .withDataValue(SystemEvent.IDENTIFIER_KEY, UUID.randomUUID().toString());
             SystemEvent ev = new BundleDAO(graph).create(ge, SystemEvent.class);
             replaceAtHead(system, ev.asVertex(), actionType + "Stream", actionType, Direction.OUT);
             return ev;
@@ -177,19 +173,12 @@ public final class ActionManager {
      */
     public EventContext logEvent(Actioner user, String logMessage) {
         Vertex vertex = graph.addVertex(null);
-        replaceAtHead(user.asVertex(), vertex, LIFECYCLE_ACTION, LIFECYCLE_ACTION, Direction.OUT);
+        replaceAtHead(user.asVertex(), vertex,
+                LIFECYCLE_ACTION, LIFECYCLE_ACTION, Direction.OUT);
         SystemEvent ge = createGlobalEvent(user, LIFECYCLE_ACTION, logMessage);
         graph.addEdge(null, vertex, ge.asVertex(), eu.ehri.project.models.events.SystemEvent.HAS_EVENT);
         return new EventContext(this, ge, user, logMessage);
     }
-
-    /**
-     * Create an action given an accessor.
-     */
-//    public EventContext logEvent(AccessibleEntity subject, Accessor user,
-//            String logMessage) {
-//        return logEvent(subject, graph.frame(user.asVertex(), Actioner.class), logMessage);
-//    }
 
     /**
      * Create an action node that describes what user U has done with subject S
@@ -210,11 +199,6 @@ public final class ActionManager {
 
     // Helpers.
 
-    public static String getTimestamp() {
-        DateTime dt = DateTime.now();
-        return ISODateTimeFormat.dateTime().print(dt);
-    }
-
     /**
      * Given a vertex <em>head</em> that forms that start of a chain <em>relation</em> with
      * direction <em>direction</em>, insert vertex <em>insert</em> <strong>after</strong>
@@ -225,7 +209,8 @@ public final class ActionManager {
      * @param relation
      * @param direction
      */
-    private void replaceAtHead(Vertex head, Vertex newHead, String headRelation, String relation, Direction direction) {
+    private void replaceAtHead(Vertex head, Vertex newHead, String headRelation,
+            String relation, Direction direction) {
         Iterator<Vertex> iter = head.getVertices(direction, headRelation).iterator();
         if (iter.hasNext()) {
             Vertex current = iter.next();
@@ -236,5 +221,14 @@ public final class ActionManager {
 
         }
         graph.addEdge(null, head, newHead, headRelation);
+    }
+
+    /**
+     * Get the current time as a timestamp.
+     * @return
+     */
+    public static String getTimestamp() {
+        DateTime dt = DateTime.now();
+        return ISODateTimeFormat.dateTime().print(dt);
     }
 }
