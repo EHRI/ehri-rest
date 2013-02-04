@@ -1,8 +1,6 @@
 package eu.ehri.project.importers;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +13,9 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
@@ -219,9 +220,7 @@ public class EadImporter extends AbstractMultiItemRecursiveImporter<Node> {
     @Override
     public List<Map<String, Object>> extractDocumentDescriptions(Node data,
             int depth) throws ValidationError {
-        List<Map<String, Object>> descs = new LinkedList<Map<String, Object>>();
-
-        Map<String, Object> dataMap = new HashMap<String, Object>();
+        Map<String, Object> dataMap = Maps.newHashMap();
 
         // For EAD (and most other types) there will only be one description
         // per logical object we create.
@@ -249,9 +248,7 @@ public class EadImporter extends AbstractMultiItemRecursiveImporter<Node> {
         materialCodes.addAll(langHelper.getGlobalLanguagesOfMaterial());
         dataMap.put("languagesOfMaterial", getUniqueArray(materialCodes));
 
-        descs.add(dataMap);
-
-        return descs;
+        return Lists.newArrayList(dataMap);
     }
 
     /**
@@ -276,7 +273,7 @@ public class EadImporter extends AbstractMultiItemRecursiveImporter<Node> {
     @Override
     protected List<Node> getEntryPoints() throws ValidationError,
             InvalidInputFormatError {
-        List<Node> entryPoints = new LinkedList<Node>();
+        List<Node> entryPoints = Lists.newLinkedList();
         try {
             NodeList nodes = (NodeList) xpath.compile("archdesc").evaluate(
                     documentContext, XPathConstants.NODESET);
@@ -328,9 +325,8 @@ public class EadImporter extends AbstractMultiItemRecursiveImporter<Node> {
      * @return
      */
     private String[] getUniqueArray(List<String> list) {
-        HashSet<String> hs = new HashSet<String>();
-        hs.addAll(list);
-        return hs.toArray(new String[list.size()]);
+        return Lists.newLinkedList(
+                Sets.newHashSet(list)).toArray(new String[list.size()]);
     }
 
     /**
@@ -343,7 +339,7 @@ public class EadImporter extends AbstractMultiItemRecursiveImporter<Node> {
      */
     private List<String> extractTextList(Node data, String path)
             throws XPathExpressionException {
-        List<String> names = new ArrayList<String>();
+        List<String> names = Lists.newArrayList();
 
         NodeList nodes = (NodeList) xpath.compile(path).evaluate(data,
                 XPathConstants.NODESET);
@@ -376,7 +372,7 @@ public class EadImporter extends AbstractMultiItemRecursiveImporter<Node> {
      * @throws ValidationError
      */
     private Map<String, Object> extractDate(String date) throws ValidationError {
-        Map<String, Object> data = new HashMap<String, Object>();
+        Map<String, Object> data = Maps.newHashMap();
         boolean ok = false;
         for (Pattern re : datePatterns) {
             Matcher matcher = re.matcher(date);

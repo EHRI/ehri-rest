@@ -20,9 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.xml.sax.EntityResolver;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
+import org.xml.sax.*;
 
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
@@ -41,9 +39,8 @@ import eu.ehri.project.persistance.ActionManager.EventContext;
 /**
  * Class that provides a front-end for importing EAD XML files, EADGRP, and
  * nested lists of EAD documents into the graph.
- * 
+ *
  * @author michaelb
- * 
  */
 public class EadImportManager extends XmlImportManager implements ImportManager {
 
@@ -79,8 +76,28 @@ public class EadImportManager extends XmlImportManager implements ImportManager 
     }
 
     /**
+     * Error handler for when validation is enabled (tolerant: false)
+     */
+    public class EadErrorHandler implements  ErrorHandler {
+        @Override
+        public void warning(SAXParseException exception) throws SAXException {
+            logger.warn(exception.getMessage());
+        }
+
+        @Override
+        public void error(SAXParseException exception) throws SAXException {
+            logger.error(exception.getMessage());
+        }
+
+        @Override
+        public void fatalError(SAXParseException exception) throws SAXException {
+            throw exception;
+        }
+    }
+
+    /**
      * Constructor.
-     * 
+     *
      * @param framedGraph
      * @param agent
      * @param actioner
@@ -95,7 +112,7 @@ public class EadImportManager extends XmlImportManager implements ImportManager 
     /**
      * Tell the importer to simply skip invalid items rather than throwing an
      * exception.
-     * 
+     *
      * @param tolerant
      */
     public void setTolerant(Boolean tolerant) {
@@ -105,11 +122,10 @@ public class EadImportManager extends XmlImportManager implements ImportManager 
 
     /**
      * Import a file, creating a new action with the given log message.
-     * 
+     *
      * @param ios
      * @param logMessage
      * @return
-     * 
      * @throws IOException
      * @throws ValidationError
      * @throw InputParseError
@@ -144,10 +160,9 @@ public class EadImportManager extends XmlImportManager implements ImportManager 
 
     /**
      * Import multiple files in the same batch/transaction.
-     * 
+     *
      * @param paths
      * @param logMessage
-     * 
      * @throws IOException
      * @throws ValidationError
      */
@@ -198,17 +213,16 @@ public class EadImportManager extends XmlImportManager implements ImportManager 
 
     /**
      * Import EAD from the given InputStream, as part of the given action.
-     * 
+     *
      * @param ios
      * @param action
      * @param log
-     * 
      * @throws IOException
      * @throws ValidationError
      * @throws InputParseError
      * @throws InvalidInputFormatError
      * @throws InvalidEadDocument
-     * @throws IntegrityError 
+     * @throws IntegrityError
      */
     private void importFile(InputStream ios, final EventContext action,
             final ImportLog log) throws IOException, ValidationError,
@@ -221,8 +235,11 @@ public class EadImportManager extends XmlImportManager implements ImportManager 
 
         try {
             DocumentBuilder builder = factory.newDocumentBuilder();
-            if (tolerant)
+            if (tolerant) {
                 builder.setEntityResolver(new DummyEntityResolver());
+            } else {
+                builder.setErrorHandler(new EadErrorHandler());
+            }
             Document doc = builder.parse(ios);
             importDocWithinAction(doc, action, log);
         } catch (ParserConfigurationException e) {
@@ -236,15 +253,13 @@ public class EadImportManager extends XmlImportManager implements ImportManager 
 
     /**
      * Import an XML doc using the given action.
-     * 
+     *
      * @param doc
      * @param action
-     * 
-     * @return
      * @throws ValidationError
      * @throws InvalidEadDocument
      * @throws InvalidInputFormatError
-     * @throws IntegrityError 
+     * @throws IntegrityError
      */
     private void importDocWithinAction(Document doc, final ActionManager.EventContext action,
             final ImportLog manifest) throws ValidationError,
@@ -268,41 +283,37 @@ public class EadImportManager extends XmlImportManager implements ImportManager 
      * @param doc
      * @param path
      * @param action
-     * @return
      * @throws ValidationError
      * @throws InvalidInputFormatError
      * @throws InvalidEadDocument
-     * @throws IntegrityError 
+     * @throws IntegrityError
      */
     private void importNestedItemsWithinAction(Document doc, String path,
             final ActionManager.EventContext action, final ImportLog manifest)
             throws ValidationError, InvalidInputFormatError, InvalidEadDocument, IntegrityError {
         XPath xpath = XPathFactory.newInstance().newXPath();
-        NodeList eadList;
         try {
-            eadList = (NodeList) xpath.compile(path).evaluate(doc,
+            NodeList eadList = (NodeList) xpath.compile(path).evaluate(doc,
                     XPathConstants.NODESET);
+            for (int i = 0; i < eadList.getLength(); i++) {
+                currentPosition = i;
+                importNodeWithinAction(eadList.item(i), action, manifest);
+            }
         } catch (XPathExpressionException e) {
             e.printStackTrace();
             throw new RuntimeException(e);
-        }
-        for (int i = 0; i < eadList.getLength(); i++) {
-            currentPosition = i;
-            importNodeWithinAction(eadList.item(i), action, manifest);
         }
     }
 
     /**
      * Import a Node doc using the given action.
-     * 
+     *
      * @param node
      * @param action
-     * 
-     * @return
      * @throws ValidationError
      * @throws InvalidInputFormatError
      * @throws InvalidEadDocument
-     * @throws IntegrityError 
+     * @throws IntegrityError
      */
     private void importNodeWithinAction(Node node, final ActionManager.EventContext action,
             final ImportLog log) throws ValidationError,

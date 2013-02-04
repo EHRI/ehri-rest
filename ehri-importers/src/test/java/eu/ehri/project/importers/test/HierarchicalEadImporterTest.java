@@ -18,7 +18,7 @@ import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.test.AbstractFixtureTest;
 
-public class HierarchicalEadImporterTest extends AbstractFixtureTest {
+public class HierarchicalEadImporterTest extends AbstractImporterTest {
 
 	protected final String HIERARCHICAL_EAD = "hierarchical-ead.xml";
 
@@ -36,7 +36,7 @@ public class HierarchicalEadImporterTest extends AbstractFixtureTest {
 		Agent agent = manager.getFrame(TEST_REPO, Agent.class);
 		final String logMessage = "Importing a single EAD";
 
-		int count = getNodeCount();
+		int count = getNodeCount(graph);
 
 		InputStream ios = ClassLoader
 				.getSystemResourceAsStream(HIERARCHICAL_EAD);
@@ -48,7 +48,7 @@ public class HierarchicalEadImporterTest extends AbstractFixtureTest {
 		// - 1 more DatePeriod
 		// - 5 more import Event links
         // - 1 more import Event
-		assertEquals(count + 15, getNodeCount());
+		assertEquals(count + 15, getNodeCount(graph));
 		Iterable<Vertex> docs = graph.getVertices("identifier",
 				IMPORTED_ITEM_ID);
 		assertTrue(docs.iterator().hasNext());
@@ -94,10 +94,5 @@ public class HierarchicalEadImporterTest extends AbstractFixtureTest {
 	private Vertex getVertexByIdentifier(String id) {
 		Iterable<Vertex> docs = graph.getVertices("identifier", id);
 		return docs.iterator().next();
-	}
-
-	private int getNodeCount() {
-		// Note: deprecated use of getAllNodes...
-		return toList(graph.getBaseGraph().getRawGraph().getAllNodes()).size();
 	}
 }

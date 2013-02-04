@@ -15,9 +15,8 @@ import eu.ehri.project.importers.EadImportManager;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.DocumentaryUnit;
-import eu.ehri.project.test.AbstractFixtureTest;
 
-public class SingleEadImporterTest extends AbstractFixtureTest {
+public class SingleEadImporterTest extends AbstractImporterTest {
 
     protected final String SINGLE_EAD = "single-ead.xml";
 

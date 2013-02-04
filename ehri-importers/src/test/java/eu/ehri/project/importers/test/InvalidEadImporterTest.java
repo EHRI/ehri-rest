@@ -14,9 +14,8 @@ import eu.ehri.project.importers.EadImportManager;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.models.Agent;
-import eu.ehri.project.test.AbstractFixtureTest;
 
-public class InvalidEadImporterTest extends AbstractFixtureTest {
+public class InvalidEadImporterTest extends AbstractImporterTest {
 
     protected final String INVALID_EAD = "invalid-ead.xml";
 
@@ -61,21 +60,14 @@ public class InvalidEadImporterTest extends AbstractFixtureTest {
         Agent agent = manager.getFrame(TEST_REPO, Agent.class);
         final String logMessage = "Importing an invalid EAD";
 
-        int count = getNodeCount();
+        int count = getNodeCount(graph);
         EadImportManager manager = new EadImportManager(graph, agent, validUser);
         manager.setTolerant(true);        
         InputStream ios = ClassLoader.getSystemResourceAsStream(INVALID_EAD);
         ImportLog log = manager.importFile(ios, logMessage);
 
         // Check the state of the graph is the same...
-        assertEquals(count, getNodeCount());
+        assertEquals(count, getNodeCount(graph));
         assertEquals(1, log.getErrored());
     }
-    
-    
-    private int getNodeCount() {
-        // Note: deprecated use of getAllNodes...
-        return toList(graph.getBaseGraph().getRawGraph().getAllNodes()).size();
-    }
-
 }

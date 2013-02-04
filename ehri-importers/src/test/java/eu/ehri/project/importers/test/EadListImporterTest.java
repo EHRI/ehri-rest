@@ -15,9 +15,8 @@ import eu.ehri.project.importers.EadImportManager;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.DocumentaryUnit;
-import eu.ehri.project.test.AbstractFixtureTest;
 
-public class EadListImporterTest extends AbstractFixtureTest {
+public class EadListImporterTest extends AbstractImporterTest {
 
     protected final String EADLIST = "list-ead.xml";
 
@@ -33,7 +32,7 @@ public class EadListImporterTest extends AbstractFixtureTest {
         Agent agent = manager.getFrame(TEST_REPO, Agent.class);
         final String logMessage = "Importing a single EAD";
 
-        int count = getNodeCount();
+        int count = getNodeCount(graph);
 
         InputStream ios = ClassLoader.getSystemResourceAsStream(EADLIST);
         ImportLog log;
@@ -52,7 +51,7 @@ public class EadListImporterTest extends AbstractFixtureTest {
         // - 2 more DocumentDescription
         // - 2 more import Event links
         // - 1 more import Event
-        assertEquals(count + 8, getNodeCount());
+        assertEquals(count + 8, getNodeCount(graph));
         Iterable<Vertex> docs = graph.getVertices("identifier",
                 IMPORTED_ITEM_ID1);
         assertTrue(docs.iterator().hasNext());
@@ -66,10 +65,4 @@ public class EadListImporterTest extends AbstractFixtureTest {
         assertEquals(2, toList(log.getAction().getSubjects()).size());
         assertEquals(logMessage, actions.get(0).getLogMessage());
     }
-
-    private int getNodeCount() {
-        // Note: deprecated use of getAllNodes...
-        return toList(graph.getBaseGraph().getRawGraph().getAllNodes()).size();
-    }
-
 }
