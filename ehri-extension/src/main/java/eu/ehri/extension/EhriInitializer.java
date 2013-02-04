@@ -28,8 +28,10 @@ public class EhriInitializer implements PluginLifecycle {
 		//logger.info("========= EhriInitializer start called");
 		System.out.println("========= EhriInitializer start called");
 		
+		/* TODO regsiter handler when we want to use it, but leave it disabled for now!
 		EhriTxEventHandler handler = new EhriTxEventHandler(); 
 		service.registerTransactionEventHandler( handler );
+		*/
 		
 		// return an empty list
 		Collection<Injectable<?>> result = new ArrayList<Injectable<?>>();
