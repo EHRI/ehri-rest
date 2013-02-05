@@ -178,39 +178,35 @@ public final class BundleDAO {
      * @throws ValidationError
      */
     private Vertex createInner(Bundle bundle) throws ValidationError {
+        ListMultimap<String, String> errors = BundleValidatorFactory
+                .getInstance(bundle).validate();
+        Vertex node = null;
+        ListMultimap<String, BundleError> nestedErrors = LinkedListMultimap
+                .create();
         try {
-            ListMultimap<String, String> errors = BundleValidatorFactory
-                    .getInstance(bundle).validate();
-            Vertex node = null;
-            ListMultimap<String, BundleError> nestedErrors = LinkedListMultimap
-                    .create();
-            try {
-                String id = bundle.getId() != null ? bundle.getId() : bundle
-                        .getType().getIdgen()
-                        .generateId(bundle.getType(), scope, bundle.getData());
+            String id = bundle.getId() != null ? bundle.getId() : bundle
+                    .getType().getIdgen()
+                    .generateId(bundle.getType(), scope, bundle.getData());
 
-                node = manager.createVertex(id, bundle.getType(),
-                        bundle.getData(), bundle.getPropertyKeys(),
-                        bundle.getUniquePropertyKeys());
-                nestedErrors = createDependents(node, bundle.getBundleClass(),
-                        bundle.getRelations());
-            } catch (IntegrityError e) {
-                // Convert integrity errors to validation errors
-                for (Entry<String, String> entry : e.getFields().entrySet()) {
-                    errors.put(entry.getKey(), MessageFormat.format(
-                            Messages.getString("BundleDAO.uniquenessError"), //$NON-NLS-1$
-                            entry.getValue()));
-                }
+            node = manager.createVertex(id, bundle.getType(),
+                    bundle.getData(), bundle.getPropertyKeys(),
+                    bundle.getUniquePropertyKeys());
+            nestedErrors = createDependents(node, bundle.getBundleClass(),
+                    bundle.getRelations());
+        } catch (IntegrityError e) {
+            // Convert integrity errors to validation errors
+            for (Entry<String, String> entry : e.getFields().entrySet()) {
+                errors.put(entry.getKey(), MessageFormat.format(
+                        Messages.getString("BundleDAO.uniquenessError"), //$NON-NLS-1$
+                        entry.getValue()));
             }
-
-            if (!errors.isEmpty() || hasNestedErrors(nestedErrors)) {
-                System.out.println(nestedErrors);
-                throw new ValidationError(bundle, errors, nestedErrors);
-            }
-            return node;
-        } catch (IdGenerationError err) {
-            throw new RuntimeException(err.getMessage());
         }
+
+        if (!errors.isEmpty() || hasNestedErrors(nestedErrors)) {
+            System.out.println(nestedErrors);
+            throw new ValidationError(bundle, errors, nestedErrors);
+        }
+        return node;
     }
 
     /**

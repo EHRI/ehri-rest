@@ -274,16 +274,10 @@ public class SkosCoreCvocImporter {
 
 		  // get an ID for the GraphDB
 		  IdGenerator generator = GenericIdGenerator.INSTANCE;//AccessibleEntityIdGenerator.INSTANCE;
-		  String id = null;
 		  PermissionScope scope = vocabulary;
 
-		  try {
-			  id = generator.generateId(EntityClass.CVOC_CONCEPT, scope,
-					  unit.getData());
-		  } catch (IdGenerationError e) {
-			  throw new ValidationError(unit, Concept.IDENTIFIER_KEY,
-					  (String) unit.getData().get(Concept.IDENTIFIER_KEY));
-		  }
+          String id = generator.generateId(EntityClass.CVOC_CONCEPT, scope,
+                  unit.getData());
 
 		  unit = unit.withId(id);
 		  return unit;

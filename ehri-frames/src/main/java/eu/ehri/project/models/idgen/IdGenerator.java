@@ -30,5 +30,5 @@ public interface IdGenerator {
      *             TODO
      */
     public String generateId(EntityClass type, PermissionScope scope,
-            Map<String, Object> data) throws IdGenerationError;
+            Map<String, Object> data);
 }

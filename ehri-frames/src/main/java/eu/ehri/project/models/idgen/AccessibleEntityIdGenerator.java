@@ -27,7 +27,7 @@ public enum AccessibleEntityIdGenerator implements IdGenerator {
      * unique ID.
      */
     public String generateId(EntityClass type, PermissionScope scope,
-            Map<String, Object> data) throws IdGenerationError {
+            Map<String, Object> data) {
         LinkedList<String> scopeIds = Lists.newLinkedList();
         if (!scope.equals(SystemScope.getInstance())) {
             for (PermissionScope s : scope.getPermissionScopes())

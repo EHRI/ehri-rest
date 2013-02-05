@@ -136,14 +136,8 @@ public abstract class AbstractImporter<T> {
 
         PermissionScope scope = parent != null ? parent : repository;
         IdGenerator generator = AccessibleEntityIdGenerator.INSTANCE;
-        String id = null;
-        try {
-            id = generator.generateId(EntityClass.DOCUMENTARY_UNIT, scope,
+        String id = generator.generateId(EntityClass.DOCUMENTARY_UNIT, scope,
                     unit.getData());
-        } catch (IdGenerationError e) {
-            throw new ValidationError(unit, DocumentaryUnit.IDENTIFIER_KEY,
-                    (String) unit.getData().get(DocumentaryUnit.IDENTIFIER_KEY));
-        }
         boolean exists = manager.exists(id);
         DocumentaryUnit frame = persister.createOrUpdate(unit.withId(id),
                 DocumentaryUnit.class);
