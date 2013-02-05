@@ -19,9 +19,11 @@ Building and deploying the plugin:
     The directory where neo4j is installed will be called {neo4j} from now on. 
       
     **NOTE:** 
-    The code is now dependent on e special version of neo4j, the existing version uses a blueprints that is not compatible with the blueprints we use in our own code. 
+    Neo4j uses a blueprints that is not compatible with the blueprints we use in our own code. 
     This blueprints version problem will be fixed by the neo4j development team, but we have to wait for it!
-    You need the 'neo4j-community-1.9-SNAPSHOT-EHRI' server. 
+    You can use the mainline Neo4j 1.9.M04 build, 
+    provided all the Blueprints/Gremlin 1.x jars in system/lib are replaced 
+    with 2.2.0 ones.
     Also you need the 'special' jar's and pom's into your maven repository (.m2 directory)
     
     Two directories that are important are the NEO4J home directory {neo4j-home} where you installed neo4j 
@@ -72,16 +74,19 @@ Building and deploying the plugin:
 
    >   cp ehri-extension/target/ehri-extension-0.0.1-SNAPSHOT.jar {neo4j-home}/plugins   
 
-    The plugin depends on ehri-frames; 
+    The extension depends on ehri-frames; 
     therefore you need to copy the 'ehri-frames-0.1-SNAPSHOT.jar' into the 
     '{neo4j-home}/system/lib'
     Any jars that the ehri-data-frames uses also need to be placed into the 
     '{neo4j-home}/system/lib'
     For the current version that means:
-    -   blueprints-core-2.1.0.jar
-    -   blueprints-neo4j-graph-2.1.0.jar
-    -   frames-2.1.0.jar
-    -   pipes-2.1.0.jar
+    -   blueprints-core-2.2.0.jar
+    -   blueprints-neo4j-graph-2.2.0.jar
+    -   frames-2.2.0.jar
+    -   gremlin-groovy-2.2.0.jar
+    -   gremlin-java-2.2.0.jar
+    -   pipes-2.2.0.jar
+    -   guava-10.0.1.jar
     -   joda-time-2.1.jar
 
 2.  restart neo4j
