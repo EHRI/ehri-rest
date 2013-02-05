@@ -4,12 +4,9 @@ import java.text.MessageFormat;
 import java.util.LinkedList;
 
 import com.google.common.base.Joiner;
-import com.google.common.collect.LinkedListMultimap;
-import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
 
 import eu.ehri.project.acl.SystemScope;
-import eu.ehri.project.exceptions.BundleError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.AccessibleEntity;
