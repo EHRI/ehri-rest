@@ -136,8 +136,7 @@ public abstract class AbstractImporter<T> {
 
         PermissionScope scope = parent != null ? parent : repository;
         IdGenerator generator = AccessibleEntityIdGenerator.INSTANCE;
-        String id = generator.generateId(EntityClass.DOCUMENTARY_UNIT, scope,
-                    unit.getData());
+        String id = generator.generateId(EntityClass.DOCUMENTARY_UNIT, scope, unit);
         boolean exists = manager.exists(id);
         DocumentaryUnit frame = persister.createOrUpdate(unit.withId(id),
                 DocumentaryUnit.class);

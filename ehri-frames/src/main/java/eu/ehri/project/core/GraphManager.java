@@ -38,6 +38,11 @@ public interface GraphManager {
     public boolean exists(String id);
 
     /**
+     * Check if a node has a property with a given value.
+     */
+    public boolean propertyValueExists(String key, Object value);
+
+    /**
      * Get a node with the given ID.
      * 
      * @param id
@@ -132,22 +137,6 @@ public interface GraphManager {
             throws IntegrityError;
 
     /**
-     * Create a vertex with the given id, type, and data, specifying which
-     * property keys should be indexed, and which should be unique.
-     * 
-     * @param id
-     * @param type
-     * @param data
-     * @param keys
-     * @param uniqueKeys
-     * @return
-     * @throws IntegrityError
-     */
-    public Vertex createVertex(String id, EntityClass type,
-            Map<String, Object> data, Iterable<String> keys,
-            Iterable<String> uniqueKeys) throws IntegrityError;
-
-    /**
      * Create a vertex with the given id, type, and data.
      * 
      * @param id
@@ -157,7 +146,7 @@ public interface GraphManager {
      * @throws IntegrityError
      */
     public Vertex updateVertex(String id, EntityClass type,
-            Map<String, Object> data) throws IntegrityError, ItemNotFound;
+            Map<String, Object> data) throws ItemNotFound;
 
     /**
      * Create a vertex with the given id, type, and data, specifying which
@@ -172,23 +161,7 @@ public interface GraphManager {
      */
     public Vertex updateVertex(String id, EntityClass type,
             Map<String, Object> data, Iterable<String> keys)
-            throws IntegrityError, ItemNotFound;
-
-    /**
-     * Create a vertex with the given id, type, and data, specifying which
-     * property keys should be indexed, and which should be unique.
-     * 
-     * @param id
-     * @param type
-     * @param data
-     * @param keys
-     * @param uniqueKeys
-     * @return
-     * @throws IntegrityError
-     */
-    public Vertex updateVertex(String id, EntityClass type,
-            Map<String, Object> data, Iterable<String> keys,
-            Iterable<String> uniqueKeys) throws IntegrityError, ItemNotFound;
+            throws ItemNotFound;
 
     // CRUD functions
 

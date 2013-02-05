@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import eu.ehri.project.models.idgen.IdGenerator;
 import org.neo4j.graphdb.Transaction;
 
 import com.google.common.collect.LinkedListMultimap;
@@ -179,27 +180,25 @@ public final class BundleDAO {
      */
     private Vertex createInner(Bundle bundle) throws ValidationError {
         ListMultimap<String, String> errors = BundleValidatorFactory
-                .getInstance(bundle).validate();
+                .getInstance(manager, bundle).validate();
+        IdGenerator idGen = bundle.getType().getIdgen();
         Vertex node = null;
         ListMultimap<String, BundleError> nestedErrors = LinkedListMultimap
                 .create();
         try {
-            String id = bundle.getId() != null ? bundle.getId() : bundle
-                    .getType().getIdgen()
-                    .generateId(bundle.getType(), scope, bundle.getData());
+            String id = bundle.getId() != null ? bundle.getId() : idGen
+                    .generateId(bundle.getType(), scope, bundle);
 
             node = manager.createVertex(id, bundle.getType(),
-                    bundle.getData(), bundle.getPropertyKeys(),
-                    bundle.getUniquePropertyKeys());
+                    bundle.getData(), bundle.getPropertyKeys());
             nestedErrors = createDependents(node, bundle.getBundleClass(),
                     bundle.getRelations());
         } catch (IntegrityError e) {
             // Convert integrity errors to validation errors
-            for (Entry<String, String> entry : e.getFields().entrySet()) {
-                errors.put(entry.getKey(), MessageFormat.format(
-                        Messages.getString("BundleDAO.uniquenessError"), //$NON-NLS-1$
-                        entry.getValue()));
-            }
+            // TODO: Move the uniqueness checking code out of the manager and
+            // into the BundleValidator class.
+            idGen.handleIdCollision(bundle.getType(),
+                    scope, bundle);
         }
 
         if (!errors.isEmpty() || hasNestedErrors(nestedErrors)) {
@@ -220,23 +219,11 @@ public final class BundleDAO {
     private Vertex updateInner(Bundle bundle) throws ValidationError,
             ItemNotFound {
         ListMultimap<String, String> errors = BundleValidatorFactory
-                .getInstance(bundle).validateForUpdate();
-        Vertex node = null;
-        ListMultimap<String, BundleError> nestedErrors = LinkedListMultimap
-                .create();
-        try {
-            node = manager.updateVertex(bundle.getId(), bundle.getType(),
-                    bundle.getData(), bundle.getPropertyKeys(),
-                    bundle.getUniquePropertyKeys());
-            nestedErrors = updateDependents(node, bundle.getBundleClass(),
-                    bundle.getRelations());
-        } catch (IntegrityError e) {
-            for (Entry<String, String> entry : e.getFields().entrySet()) {
-                errors.put(entry.getKey(), MessageFormat.format(
-                        Messages.getString("BundleDAO.uniquenessError"), //$NON-NLS-1$
-                        entry.getValue()));
-            }
-        }
+                .getInstance(manager, bundle).validateForUpdate();
+        Vertex node = manager.updateVertex(bundle.getId(), bundle.getType(),
+                bundle.getData(), bundle.getPropertyKeys());
+        ListMultimap<String, BundleError> nestedErrors = updateDependents(node, bundle.getBundleClass(),
+                bundle.getRelations());
         if (!errors.isEmpty() || hasNestedErrors(nestedErrors)) {
             throw new ValidationError(bundle, errors, nestedErrors);
         }
@@ -290,14 +277,13 @@ public final class BundleDAO {
      * @param cls
      * @param relations
      * @return
-     * @throws IntegrityError
      * @throws ItemNotFound
      * 
      * @return errors
      */
     private ListMultimap<String, BundleError> updateDependents(Vertex master,
             Class<?> cls, ListMultimap<String, Bundle> relations)
-            throws IntegrityError, ItemNotFound {
+            throws ItemNotFound {
 
         // Get a list of dependent relationships for this class, and their
         // directions.

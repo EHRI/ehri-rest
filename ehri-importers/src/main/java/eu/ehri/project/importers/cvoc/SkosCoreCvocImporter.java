@@ -276,9 +276,7 @@ public class SkosCoreCvocImporter {
 		  IdGenerator generator = GenericIdGenerator.INSTANCE;//AccessibleEntityIdGenerator.INSTANCE;
 		  PermissionScope scope = vocabulary;
 
-          String id = generator.generateId(EntityClass.CVOC_CONCEPT, scope,
-                  unit.getData());
-
+          String id = generator.generateId(EntityClass.CVOC_CONCEPT, scope, unit);
 		  unit = unit.withId(id);
 		  return unit;
     }

@@ -74,8 +74,7 @@ public class SkosImporter extends XmlCVocImporter<Map<String, Object>> {
         PermissionScope scope = repository;
         
         IdGenerator generator = AccessibleEntityIdGenerator.INSTANCE;
-        String id = generator.generateId(EntityClass.CVOC_CONCEPT, scope,
-                    unit.getData());
+        String id = generator.generateId(EntityClass.CVOC_CONCEPT, scope, unit);
         boolean exists = manager.exists(id);
         Concept frame = persister.createOrUpdate(unit.withId(id),
         		Concept.class);

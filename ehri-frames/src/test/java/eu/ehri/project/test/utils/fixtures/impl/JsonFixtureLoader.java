@@ -49,8 +49,7 @@ public class JsonFixtureLoader implements FixtureLoader {
                         .get("data");
                 Bundle bundle = new Bundle(id, isa, data, LinkedListMultimap.<String,Bundle>create());
                 manager.createVertex(id, bundle.getType(), bundle.getData(),
-                        bundle.getPropertyKeys(),
-                        bundle.getUniquePropertyKeys());
+                        bundle.getPropertyKeys());
             }
         } catch (Exception e) {
             throw new RuntimeException("Error loading JSON fixture", e);
