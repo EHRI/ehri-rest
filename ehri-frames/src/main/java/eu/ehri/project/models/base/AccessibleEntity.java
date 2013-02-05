@@ -17,7 +17,6 @@ public interface AccessibleEntity extends VertexFrame, PermissionGrantTarget {
     public static final String IDENTIFIER_KEY = "identifier";
     public static final String HAS_PERMISSION_SCOPE = "hasPermissionScope";
 
-    @Unique
     @Property(IDENTIFIER_KEY)
     public String getIdentifier();
 

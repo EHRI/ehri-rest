@@ -140,39 +140,4 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
         Bundle updatedEntityBundle = Bundle.fromString(updatedJson);
         assertEquals(UPDATED_NAME, updatedEntityBundle.getDataValue("name"));
     }
-
-    @Test
-    public void testUpdateWithIntegrityError() throws Exception {
-
-        // -create data for testing
-        WebResource resource = client.resource(getExtensionEntryPointUri()
-                + "/userProfile");
-        ClientResponse response = resource
-                .accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME,
-                        getAdminUserProfileId())
-                .entity(jsonUserProfileTestString).post(ClientResponse.class);
-
-        assertEquals(Response.Status.CREATED.getStatusCode(),
-                response.getStatus());
-
-        // Create a bundle with a username that's already been taken.
-        Bundle bundle = Bundle.fromString(response.getEntity(String.class))
-                .withDataValue(AccessibleEntity.IDENTIFIER_KEY, "mike");
-
-        // Get created doc via the response location?
-        URI location = response.getLocation();
-
-        response = client
-                .resource(location)
-                .accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME,
-                        getAdminUserProfileId()).entity(bundle.toString())
-                .put(ClientResponse.class);
-
-        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(),
-                response.getStatus());
-    }
 }
