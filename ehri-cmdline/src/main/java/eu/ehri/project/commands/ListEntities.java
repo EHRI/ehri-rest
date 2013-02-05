@@ -19,8 +19,6 @@ public class ListEntities extends BaseCommand implements Command {
 
     /**
      * Constructor.
-     * 
-     * @param args
      */
     public ListEntities() {
     }
@@ -39,7 +37,6 @@ public class ListEntities extends BaseCommand implements Command {
     /**
      * Command-line entry-point (for testing.)
      * 
-     * @param args
      * @throws Exception
      */
     @Override
