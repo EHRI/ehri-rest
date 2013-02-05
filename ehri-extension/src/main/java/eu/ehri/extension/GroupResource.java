@@ -30,10 +30,12 @@ import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Group;
+import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.persistance.ActionManager;
+import eu.ehri.project.views.impl.Query;
 
 /**
  * Provides a RESTfull interface for the Group class.
@@ -182,6 +184,53 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
         }
     }    
     
+    /**
+     * list members of the specified group; 
+     * UserProfiles and sub-Groups (direct descendants)
+     * 
+     * @param id
+     * @param offset
+     * @param limit
+     * @param order
+     * @param filters
+     * @return
+     * @throws ItemNotFound
+     * @throws BadRequester
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id:[^/]+}/list")
+    public StreamingOutput listGroupMembers(
+    		@PathParam("id") String id,
+            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
+            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(SORT_PARAM) List<String> order,            
+            @QueryParam(FILTER_PARAM) List<String> filters)
+            throws ItemNotFound, BadRequester {
+        //return list(offset, limit, order, filters);
+        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
+        try {
+            
+            Group group = manager.getFrame(id, EntityClass.GROUP, Group.class);
+            // TODO list all users of the group
+            // get them from the RelationShip
+            // Iterable<Accessor> members = group.getMembers();
+            // use offset to skip is not efficient... but what else to do
+            // better query and add a filter to reduce for the specified group
+            Query<AccessibleEntity> userQuerier = new Query<AccessibleEntity>(graph, AccessibleEntity.class);
+            Query<AccessibleEntity> query = userQuerier.setOffset(offset).setLimit(limit)
+                    .orderBy(order).filter(filters);
+            
+            tx.success();
+            
+            // TODO
+            //return streamingList(query.list(getRequesterUserProfile()));
+            return streamingList(query.list(group.getMembersAsEntities(), getRequesterUserProfile()));
+        } finally {
+            tx.finish();
+        }
+    }
+
     /**
      * Delete a group with the given identifier string.
      * 

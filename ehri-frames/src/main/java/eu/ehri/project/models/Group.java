@@ -21,7 +21,20 @@ public interface Group extends VertexFrame, Accessor, AccessibleEntity,
     @Fetch
     @Adjacency(label = BELONGS_TO)
     public Iterable<Group> getGroups();
-    
+
+    /**
+     * TODO FIXME use this in case we need AccesibleEnity's instead of Accessors, 
+     * but we should change the inheritance instead! 
+     * 
+     * Note: 
+     * All directly related 'belongsTo' are return now, 
+     * in order to traverse the tree and only get UserProfile's we could do something like: 
+     * @GremlinGroovy("_().as('n').in('belongsTo').loop('n'){true}{it.object.__ISA__=='userProfile'}")
+     * public Iterable<UserProfile> getAllUserProfileMembers();      
+     */
+    @Adjacency(label = BELONGS_TO, direction = Direction.IN)
+    public Iterable<AccessibleEntity> getMembersAsEntities();
+
     @Adjacency(label = BELONGS_TO, direction = Direction.IN)
     public Iterable<Accessor> getMembers();
 
