@@ -28,6 +28,7 @@ public interface DocumentaryUnit extends VertexFrame, AccessibleEntity,
 
     // NB: This is only an iterable until we upgrade to frames 2.3.0
     // which supports GremlinGroovy annotations for single items
+    @Fetch(Agent.HELDBY)
     @GremlinGroovy("_().copySplit(_(), _().as('n').out('" + CHILD_OF +"')"
             + ".loop('n'){true}{!it.object.out('" + CHILD_OF +"').hasNext()}"
             + ").exhaustMerge().out('" + Agent.HELDBY + "')")
