@@ -140,4 +140,33 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
         Bundle updatedEntityBundle = Bundle.fromString(updatedJson);
         assertEquals(UPDATED_NAME, updatedEntityBundle.getDataValue("name"));
     }
+
+    @Test
+    public void testCreateUserProfileWithIntegrityErrir() throws Exception {
+        // Create
+        WebResource resource = client.resource(getExtensionEntryPointUri()
+                + "/userProfile");
+        ClientResponse response = resource
+                .accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                        getAdminUserProfileId())
+                .entity(jsonUserProfileTestString).post(ClientResponse.class);
+
+        assertEquals(Response.Status.CREATED.getStatusCode(),
+                response.getStatus());
+
+        // Doing exactly the same thing twice should result in a
+        // ValidationError because the same IDs will be generated...
+        response = resource
+                .accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                        getAdminUserProfileId())
+                .entity(jsonUserProfileTestString).post(ClientResponse.class);
+        System.out.println(response.getEntity(String.class));
+        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(),
+                response.getStatus());
+    }
+
 }
