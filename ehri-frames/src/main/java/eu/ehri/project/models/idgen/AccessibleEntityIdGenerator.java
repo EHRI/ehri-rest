@@ -4,7 +4,12 @@ import java.text.MessageFormat;
 import java.util.LinkedList;
 
 import com.google.common.base.Joiner;
+import com.google.common.collect.LinkedListMultimap;
+import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.exceptions.ValidationError;
@@ -24,11 +29,18 @@ public enum AccessibleEntityIdGenerator implements IdGenerator {
 
     INSTANCE;
 
+    private static Logger logger = LoggerFactory.getLogger(AccessibleEntityIdGenerator.class);
+
     public void handleIdCollision(EntityClass type, PermissionScope scope,
             Bundle bundle) throws ValidationError {
-        throw new ValidationError(bundle, AccessibleEntity.IDENTIFIER_KEY, MessageFormat.format(
+        String scopeId = scope == null ? "none" : scope.getIdentifier();
+        logger.error("ID Generation error: {}={} (scope: {})", AccessibleEntity.IDENTIFIER_KEY,
+                bundle.getDataValue(AccessibleEntity.IDENTIFIER_KEY), scopeId);
+        ListMultimap<String,String> errors = LinkedListMultimap.create();
+        errors.put(AccessibleEntity.IDENTIFIER_KEY,  MessageFormat.format(
                 Messages.getString("BundleDAO.uniquenessError"), //$NON-NLS-1$
                 bundle.getDataValue(AccessibleEntity.IDENTIFIER_KEY)));
+        throw new ValidationError(bundle, errors);
     }
 
 
