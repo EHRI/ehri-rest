@@ -179,33 +179,31 @@ public final class BundleDAO {
      * @throws ValidationError
      */
     private Vertex createInner(Bundle bundle) throws ValidationError {
-        ListMultimap<String, String> errors = BundleValidatorFactory
-                .getInstance(manager, bundle).validate();
         IdGenerator idGen = bundle.getType().getIdgen();
-        Vertex node = null;
-        ListMultimap<String, BundleError> nestedErrors = LinkedListMultimap
-                .create();
         try {
+            ListMultimap<String, String> errors = BundleValidatorFactory
+                    .getInstance(manager, bundle).validate();
+            ListMultimap<String, BundleError> nestedErrors = LinkedListMultimap
+                    .create();
             String id = bundle.getId() != null ? bundle.getId() : idGen
                     .generateId(bundle.getType(), scope, bundle);
 
-            node = manager.createVertex(id, bundle.getType(),
+            Vertex node = manager.createVertex(id, bundle.getType(),
                     bundle.getData(), bundle.getPropertyKeys());
             nestedErrors = createDependents(node, bundle.getBundleClass(),
                     bundle.getRelations());
+            if (!errors.isEmpty() || hasNestedErrors(nestedErrors)) {
+                    throw new ValidationError(bundle, errors, nestedErrors);
+            }
+            return node;
         } catch (IntegrityError e) {
             // Convert integrity errors to validation errors
-            // TODO: Move the uniqueness checking code out of the manager and
-            // into the BundleValidator class.
-            idGen.handleIdCollision(bundle.getType(),
-                    scope, bundle);
+            idGen.handleIdCollision(bundle.getType(), scope, bundle);
         }
-
-        if (!errors.isEmpty() || hasNestedErrors(nestedErrors)) {
-            System.out.println(nestedErrors);
-            throw new ValidationError(bundle, errors, nestedErrors);
-        }
-        return node;
+        // Mmmn, if we get here, it means that there's been an ID generation error
+        // which was not handled by an exception.. so throw a runtime error...
+        throw new RuntimeException(
+                "Unexpected state: ID generation error not handled by IdGenerator class: " + idGen);
     }
 
     /**
