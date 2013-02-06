@@ -26,9 +26,12 @@ public interface DocumentaryUnit extends VertexFrame, AccessibleEntity,
     @Property(NAME)
     public void setName(String name);
 
-    @Fetch(Agent.HELDBY)
-    @Adjacency(label = Agent.HELDBY)
-    public Agent getAgent();
+    // NB: This is only an iterable until we upgrade to frames 2.3.0
+    // which supports GremlinGroovy annotations for single items
+    @GremlinGroovy("_().copySplit(_(), _().as('n').out('" + CHILD_OF +"')"
+            + ".loop('n'){true}{!it.object.out('" + CHILD_OF +"').hasNext()}"
+            + ").exhaustMerge().out('" + Agent.HELDBY + "')")
+    public Iterable<Agent> getAgent();
 
     @Adjacency(label = Agent.HELDBY)
     public void setAgent(final Agent institution);

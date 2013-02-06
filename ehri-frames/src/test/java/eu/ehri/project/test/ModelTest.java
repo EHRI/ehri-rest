@@ -2,13 +2,16 @@ package eu.ehri.project.test;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 
 import java.util.List;
 
+import com.google.common.collect.Iterables;
 import org.junit.Test;
 
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.Address;
+import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.AgentDescription;
 import eu.ehri.project.models.Authority;
 import eu.ehri.project.models.DocumentaryUnit;
@@ -38,9 +41,31 @@ public class ModelTest extends ModelTestBase {
     @Test
     public void testCollectionHelpByRepo() throws ItemNotFound {
         DocumentaryUnit unit = manager.getFrame("c1", DocumentaryUnit.class);
-        assertTrue(unit.getAgent() != null);
+        // FIXME: When we upgrade to frames 2.3.0 getAgent will again
+        // return a single Agent item (or null)
+        assertTrue(unit.getAgent().iterator().hasNext());
         // and have a description
         assertFalse(toList(unit.getDescriptions()).isEmpty());
+    }
+
+    @Test
+    public void testChildDocsCanAccessTheirAgent() throws ItemNotFound {
+        DocumentaryUnit unit = manager.getFrame("c1", DocumentaryUnit.class);
+        DocumentaryUnit child = manager.getFrame("c3", DocumentaryUnit.class);
+        // FIXME: When we upgrade to frames 2.3.0 getAgent will again
+        // return a single Agent item (or null)
+        assertTrue(child.getAgent().iterator().hasNext());
+        assertTrue(unit.getAgent().iterator().hasNext());
+        assertEquals(unit.getAgent().iterator().next(),
+                child.getAgent().iterator().next());
+    }
+
+    @Test
+    public void testAgentsCanGetAllCollections() throws ItemNotFound {
+        Agent agent = manager.getFrame("r1", Agent.class);
+        assertEquals(2, Iterables.size(agent.getCollections()));
+        assertEquals(4, Iterables.size(agent.getAllCollections()));
+
     }
 
     @Test

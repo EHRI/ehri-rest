@@ -230,7 +230,6 @@
         data:
           startDate: !!str 1939-01-01
           endDate: !!str 1945-01-01
-    heldBy: r1
     childOf: c1
     hasPermissionScope: c1
     access:
@@ -257,7 +256,6 @@
         data:
           startDate: !!str 1939-01-01
           endDate: !!str 1945-01-01
-    heldBy: r1
     childOf: c2
     hasPermissionScope: c2    
     access:
