@@ -21,12 +21,7 @@ public class IntegrityErrorMapper implements ExceptionMapper<IntegrityError> {
         Map<String, Object> out = new HashMap<String, Object>() {
             {
                 put("error", IntegrityError.class.getSimpleName());
-                put("details", new HashMap<String, Object>() {
-                    {
-                        put("message", e.getMessage());
-                        put("fields", e.getFields());
-                    }
-                });
+                put("value", e.getIdValue());
             }
         };
         try {

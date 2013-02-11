@@ -153,7 +153,7 @@ public final class SingleIndexGraphManager implements GraphManager {
      * 
      * @param id
      * @param data
-     * @return
+     * @return vertex
      * @throws IntegrityError
      */
     public Vertex createVertex(String id, EntityClass type,
@@ -167,7 +167,7 @@ public final class SingleIndexGraphManager implements GraphManager {
      * @param id
      * @param data
      * @param keys
-     * @return
+     * @return vertex
      * @throws IntegrityError
      */
     public Vertex createVertex(String id, EntityClass type,
@@ -321,9 +321,7 @@ public final class SingleIndexGraphManager implements GraphManager {
     private void checkExists(Index<Vertex> index, String id)
             throws IntegrityError {
         if (index.count(EntityType.ID_KEY, id) != 0) {
-            // FIXME: Should expose ID implementation details to outside world.
-            throw new IntegrityError(INDEX_NAME, ImmutableMap.of(
-                    EntityType.ID_KEY, id));
+            throw new IntegrityError(id);
         }
     }
 
