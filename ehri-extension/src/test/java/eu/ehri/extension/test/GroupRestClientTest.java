@@ -110,9 +110,8 @@ public class GroupRestClientTest extends BaseRestClientTest {
         
     	assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
     	
-    	// test results
+    	// check results
     	//System.out.println(response.getEntity(String.class));
-    	
     	Set<String> ids = getIdsFromEntityListJson(response.getEntity(String.class));
     	// for 'kcl' it should be 'mike', 'reto' and nothing else
     	assertTrue(ids.contains("mike"));
