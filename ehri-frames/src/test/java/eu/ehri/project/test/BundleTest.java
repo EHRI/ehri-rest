@@ -98,12 +98,12 @@ public class BundleTest extends ModelTestBase {
     public void testSavingWithDependentChanges() throws SerializationError,
             DeserializationError, ValidationError, IntegrityError, ItemNotFound {
         DocumentaryUnit c1 = manager.getFrame(ID, DocumentaryUnit.class);
-        assertEquals(1, toList(c1.getDescriptions()).size());
+        assertEquals(2, toList(c1.getDescriptions()).size());
         String json = serializer.vertexFrameToJson(c1);
 
         Description desc = toList(c1.getDescriptions()).get(0);
         c1.removeDescription(desc);
-        assertEquals(0, toList(c1.getDescriptions()).size());
+        assertEquals(1, toList(c1.getDescriptions()).size());
 
         // Restore the item from JSON
         Bundle bundle = Bundle.fromString(json);
@@ -111,7 +111,7 @@ public class BundleTest extends ModelTestBase {
         persister.update(bundle, DocumentaryUnit.class);
 
         // Our deleted description should have come back...
-        assertEquals(1, toList(c1.getDescriptions()).size());
+        assertEquals(2, toList(c1.getDescriptions()).size());
     }
 
     @Test

@@ -193,6 +193,14 @@
           identifier: c1-desc
           title: Documentary Unit 1
           languageCode: en
+          scopeAndContent: Some description text for c1
+      - id: cd1-2
+        type: documentDescription
+        data:
+          identifier: c1-desc2
+          title: Documentary Unit 1
+          languageCode: en
+          scopeAndContent: Some alternate description text for c1
     hasDate:
       - id: c1-dp1
         type: datePeriod
@@ -224,6 +232,7 @@
           identifier: c2-desc
           title: Documentary Unit 2
           languageCode: en
+          scopeAndContent: Some description text for c2
     hasDate:
       - id: c2-dp1
         type: datePeriod
@@ -250,6 +259,7 @@
           identifier: c3-desc
           title: Documentary Unit 3
           languageCode: en
+          scopeAndContent: Some description text for c3
     hasDate:
       - id: c3-dp1
         type: datePeriod
@@ -275,6 +285,7 @@
           identifier: c4-desc
           title: Documentary Unit 4
           languageCode: en
+          scopeAndContent: Some description text for c4
     hasDate:
       - id: c4-dp1
         type: datePeriod
