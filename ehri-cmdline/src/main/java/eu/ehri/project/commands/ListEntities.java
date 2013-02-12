@@ -1,6 +1,8 @@
 package eu.ehri.project.commands;
 
 import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.OptionBuilder;
 import org.codehaus.jettison.json.JSONObject;
 
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
@@ -16,6 +18,17 @@ import eu.ehri.project.persistance.Serializer;
 import net.sf.json.JSON;
 import net.sf.json.JSONSerializer;
 import net.sf.json.xml.XMLSerializer;
+import org.w3c.dom.Document;
+
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 
 /**
  * Import EAD from the command line...
@@ -29,6 +42,16 @@ public class ListEntities extends BaseCommand implements Command {
      * Constructor.
      */
     public ListEntities() {
+    }
+
+    @Override
+    protected void setCustomOptions() {
+        options.addOption(OptionBuilder
+                .withType(String.class)
+                .withLongOpt("format").isRequired(false)
+                .hasArg(true).withArgName("f")
+                .withDescription("Format for output data, which defaults to just the id. " +
+                        "If provided can be one of: xml, json").create("f"));
     }
 
     @Override
@@ -54,12 +77,12 @@ public class ListEntities extends BaseCommand implements Command {
         if (cmdLine.getArgList().size() < 1)
             throw new RuntimeException(getHelp());
 
-        if (cmdLine.getArgList().size() < 2) {
+        if (!cmdLine.hasOption("f")) {
         	// default to only outputting the id's
         	printIds(graph, cmdLine);    
         } else {
             // if there is a second argument, that might be 'json' or 'xml'
-        	String format = cmdLine.getArgs()[1];
+        	String format = (String)cmdLine.getOptionValue("f");
         	if (format.equalsIgnoreCase("xml")) {
         		printXml(graph, cmdLine);
         	} else if (format.equalsIgnoreCase("json")) {
@@ -130,24 +153,30 @@ public class ListEntities extends BaseCommand implements Command {
         System.out.print("<list>\n"); // root element
         
         for (AccessibleEntity acc : manager.getFrames(type, AccessibleEntity.class)) {
-        	        	
-        	// First to json then to xml, but we could go from bundle to xml
-        	String jsonString = serializer.vertexFrameToJson(acc);
-        	// NOTE: we could implement the XML production in a DataConverter.bundleToXml
-        	
-
-        	// NOTE: I was hoping that the 'Jackson' json lib could also generate XML !
-        	// Then I could use JSONObject jsonObject = new JSONObject(jsonString);
-        	// 
-        	// However now I need another lib to do it: 
-        	// produce XML, using XMlSerializer from json-lib 
-        	net.sf.json.xml.XMLSerializer xmlSerializer = new net.sf.json.xml.XMLSerializer();
-        	net.sf.json.JSON json = net.sf.json.JSONSerializer.toJSON( jsonString ); 
-            String xmlString = xmlSerializer.write( json );
-            xmlString = xmlString.substring(xmlString.indexOf('\n')+1); // remove instruction
-            System.out.print(xmlString);   
+            printDocument(serializer.vertexFrameToXml(acc), System.out);
         }
         
         System.out.print("</list>\n"); // root element
+    }
+
+    /**
+     * Pretty-print an XML document.
+     *
+     * @param doc
+     * @param out
+     * @throws java.io.IOException
+     * @throws javax.xml.transform.TransformerException
+     */
+    private static void printDocument(Document doc, OutputStream out) throws IOException, TransformerException {
+        TransformerFactory tf = TransformerFactory.newInstance();
+        Transformer transformer = tf.newTransformer();
+        transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+        transformer.setOutputProperty(OutputKeys.METHOD, "xml");
+        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+        transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+        transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
+
+        transformer.transform(new DOMSource(doc),
+                new StreamResult(new OutputStreamWriter(out, "UTF-8")));
     }
 }
