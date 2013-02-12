@@ -57,7 +57,8 @@ public class UserMod extends BaseCommand implements Command {
     /**
      * Command-line entry-point (for testing.)
      * 
-     * @param args
+     * @param graph
+     * @param cmdLine
      * @throws ItemNotFound
      * @throws DeserializationError
      * @throws PermissionDenied
