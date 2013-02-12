@@ -34,8 +34,6 @@ public class EadImport extends BaseCommand implements Command {
 
     /**
      * Constructor.
-     * 
-     * @param args
      */
     public EadImport() {
     }
