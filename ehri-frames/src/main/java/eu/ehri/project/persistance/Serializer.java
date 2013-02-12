@@ -18,6 +18,7 @@ import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.utils.ClassUtils;
+import org.w3c.dom.Document;
 
 /**
  * Class containing static methods to convert between FramedVertex instances,
@@ -89,6 +90,31 @@ public final class Serializer {
     public <T extends VertexFrame> String vertexFrameToJson(T item)
             throws SerializationError {
         return DataConverter.bundleToJson(vertexFrameToBundle(item));
+    }
+
+
+    /**
+     * Serialise a vertex frame to XML.
+     *
+     * @param item
+     * @return document
+     * @throws SerializationError
+     */
+    public <T extends VertexFrame> Document vertexFrameToXml(T item)
+            throws SerializationError {
+        return DataConverter.bundleToXml(vertexFrameToBundle(item));
+    }
+
+    /**
+     * Serialise a vertex frame to XML string.
+     *
+     * @param item
+     * @return document string
+     * @throws SerializationError
+     */
+    public <T extends VertexFrame> String vertexFrameToXmlString(T item)
+            throws SerializationError {
+        return DataConverter.bundleToXmlString(vertexFrameToBundle(item));
     }
 
     /**
