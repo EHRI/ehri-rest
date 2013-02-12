@@ -32,7 +32,8 @@ public class DataConverterTest extends AbstractFixtureTest {
     @Test
     public void testBundleToXml() throws Exception {
         DocumentaryUnit c1 = manager.getFrame("c1", DocumentaryUnit.class);
-        Bundle bundle = new Serializer(graph).vertexFrameToBundle(c1);
+        Bundle bundle = new Serializer(graph).vertexFrameToBundle(c1)
+                .withDataValue("testarray", new String[] { "one", "two", "three" });
 
         Document document = bundle.toXml();
         assertTrue(document.hasChildNodes());

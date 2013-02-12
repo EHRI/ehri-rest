@@ -300,29 +300,31 @@ class DataConverter {
     }
 
     private  static Element bundleDataValueToElement(final Document document, String key, Object value) {
-        Element dataValue = document.createElement("property");
-        dataValue.setAttribute("name", key);
-        if (value instanceof String) {
-            dataValue.setAttribute("type", "xs:string");
-            dataValue.appendChild(document.createTextNode(String.valueOf(value)));
-        } else if (value instanceof Integer) {
-            dataValue.setAttribute("type", "xs:int");
-            dataValue.appendChild(document.createTextNode(String.valueOf(value)));
-        } else if (value instanceof Long) {
-            dataValue.setAttribute("type", "xs:long");
-            dataValue.appendChild(document.createTextNode(String.valueOf(value)));
-        } else if (value instanceof Object[]) {
-            dataValue.setAttribute("type", "array");
-            Element seq = document.createElement("xs:sequence");
+        if (value instanceof  Object[]) {
+            Element dataValue = document.createElement("propertySequence");
             for (Object item : (Object[])value) {
-                seq.appendChild(bundleDataValueToElement(document, key, item));
+                dataValue.appendChild(bundleDataValueToElement(document, key, item));
             }
-
-        } // Mmmn, what should we do for other types???
-        else {
-            dataValue.setAttribute("type", "unknown");
-            dataValue.appendChild(document.createTextNode(String.valueOf(value)));
+            return dataValue;
+        } else {
+            Element dataValue = document.createElement("property");
+            if (value instanceof String) {
+                dataValue.setAttribute("name", key);
+                dataValue.setAttribute("type", "xs:string");
+                dataValue.appendChild(document.createTextNode(String.valueOf(value)));
+            } else if (value instanceof Integer) {
+                dataValue.setAttribute("name", key);
+                dataValue.setAttribute("type", "xs:int");
+                dataValue.appendChild(document.createTextNode(String.valueOf(value)));
+            } else if (value instanceof Long) {
+                dataValue.setAttribute("name", key);
+                dataValue.setAttribute("type", "xs:long");
+                dataValue.appendChild(document.createTextNode(String.valueOf(value)));
+            } else { // Mmmn, what should we do for other types???
+                dataValue.setAttribute("type", "unknown");
+                dataValue.appendChild(document.createTextNode(String.valueOf(value)));
+            }
+            return dataValue;
         }
-        return dataValue;
     }
 }
