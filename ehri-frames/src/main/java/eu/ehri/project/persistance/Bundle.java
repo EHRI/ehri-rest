@@ -15,6 +15,7 @@ import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.utils.ClassUtils;
+import org.w3c.dom.Document;
 
 /**
  * Class that represents a graph entity and subtree relations.
@@ -323,6 +324,7 @@ public class Bundle {
 
     /**
      * Serialize a bundle to a JSON string.
+     * @return json string
      */
     public String toJson() {
         try {
@@ -330,5 +332,21 @@ public class Bundle {
         } catch (SerializationError e) {
             return "Invalid Bundle: " + e.getMessage();
         }
+    }
+
+    /**
+     * Serialize a bundle to a JSON string.
+     * @return document
+     */
+    public Document toXml() {
+        return DataConverter.bundleToXml(this);
+    }
+
+    /**
+     * Serialize to an XML String.
+     * @return
+     */
+    public String toXmlString() {
+        return DataConverter.bundleToXmlString(this);
     }
 }
