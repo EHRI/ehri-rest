@@ -284,7 +284,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
         Bundle rawBundle = Bundle.fromString(json);
         Bundle entityBundle = new Bundle(manager.getId(entity),
                 getEntityType(), rawBundle.getData(), rawBundle.getRelations());
-        return update(entityBundle.toString());
+        return update(entityBundle.toJson());
     }
 
     /**

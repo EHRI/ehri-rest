@@ -269,7 +269,7 @@ public class SkosCoreCvocImporter {
 					  EntityClass.CVOC_CONCEPT_DESCRIPTION, d));
 		  }
 		  // NOTE the following gives a lot of output!
-		  //logger.debug("Bundle as JSON: \n" + unit.toString());
+		  //logger.debug("Bundle as JSON: \n" + unit.toJson());
 
 		  // get an ID for the GraphDB
 		  IdGenerator generator = GenericIdGenerator.INSTANCE;//AccessibleEntityIdGenerator.INSTANCE;

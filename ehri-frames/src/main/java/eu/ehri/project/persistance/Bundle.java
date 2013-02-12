@@ -324,8 +324,7 @@ public class Bundle {
     /**
      * Serialize a bundle to a JSON string.
      */
-    @Override
-    public String toString() {
+    public String toJson() {
         try {
             return DataConverter.bundleToJson(this);
         } catch (SerializationError e) {

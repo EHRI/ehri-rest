@@ -131,7 +131,7 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
                 .type(MediaType.APPLICATION_JSON)
                 .header(AbstractRestResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId())
-                .entity(entityBundle.toString()).put(ClientResponse.class);
+                .entity(entityBundle.toJson()).put(ClientResponse.class);
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
 
         // -get the data and convert to a bundle, is it changed?
