@@ -103,7 +103,6 @@ public class VocabularyResource extends
         Vocabulary vocabulary = views.detail(manager.getFrame(id, cls), user);
         Query<Concept> query = new Query<Concept>(graph, Concept.class)
                 .setLimit(limit).setOffset(offset).orderBy(order)
-                .depthFilter(Concept.NARROWER, Direction.IN, 0)
                 .filter(filters);
         return streamingList(query.list(vocabulary.getConcepts(), user));
     }
@@ -122,7 +121,6 @@ public class VocabularyResource extends
         Vocabulary vocabulary = views.detail(manager.getFrame(id, cls), user);
         Query<Concept> query = new Query<Concept>(graph, Concept.class)
                 .setLimit(limit).setOffset(offset).orderBy(order)
-                .depthFilter(Concept.NARROWER, Direction.IN, 0)
                 .filter(filters);
         return streamingPage(query.page(vocabulary.getConcepts(), user));
     }

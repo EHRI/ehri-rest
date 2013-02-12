@@ -109,8 +109,6 @@
 			<scope>test</scope>
 		</dependency>
 
-
-
 		<!-- neo4j -->
 		<dependency>
 			<groupId>org.neo4j</groupId>
@@ -211,7 +209,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<!-- Jar Versions -->
 		<!-- was 1.8-SNAPSHOT -->
-		<neo4j.version>1.8.M07</neo4j.version>
+		<!-- <neo4j.version>1.8.M07</neo4j.version> -->
 	</properties>
 
 

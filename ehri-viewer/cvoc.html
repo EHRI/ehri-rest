@@ -10,6 +10,10 @@
 	<!-- our code -->
 	<script>
 
+// Yes globals are bad, but for now I use them
+var Neo4jEhriUrlBase = "http://localhost:7474/ehri";
+
+
 // NOTE all rendering should check for XSS
 
 function addExpandHandlers(newStuff) {
@@ -54,6 +58,16 @@ function addExpandHandlers(newStuff) {
 		$(this).next().empty();
 		$(this).text("+ expand");
 	});
+	$(".relatedByLink", newStuff).toggle(function() {
+    	event.preventDefault();
+    	var id = extractIdFromNeo4jUrl(this.href);
+        loadRelatedByConceptList($(this).next(), id);
+		$(this).text("- collapse");
+	}, function() {
+		// Note maybe not clean it, but hide instead?
+		$(this).next().empty();
+		$(this).text("+ expand");
+	});	
 	$(".broaderLink", newStuff).toggle(function() {
     	event.preventDefault();
     	var id = extractIdFromNeo4jUrl(this.href);
@@ -120,6 +134,7 @@ function createConceptHtmlString(c) {
 		//lines.push("<div><a href='"+c.id+"' class='broaderLink'>broader</a></div>");
 		lines.push("<div>broader: <a href='"+c.id+"' class='broaderLink'>+ expand</a><div class='expanded'></div></div>");
 		lines.push("<div>related: <a href='"+c.id+"' class='relatedLink'>+ expand</a><div class='expanded'></div></div>");
+		lines.push("<div>relatedBy: <a href='"+c.id+"' class='relatedByLink'>+ expand</a><div class='expanded'></div></div>");
 		lines.push("<div>narrower: <a href='"+c.id+"' class='narrowerLink'>+ expand</a><div class='expanded'></div></div>");
 		lines.push("</div>");
 	return lines.join('');
@@ -128,7 +143,7 @@ function createConceptHtmlString(c) {
 function loadNarrowerConceptList(element, id) {
 		// get the list of concepts
 			var request = $.ajax({
-				url : "http://localhost:7474/ehri/cvocConcept/"+id+"/narrower/list", 
+				url :  Neo4jEhriUrlBase + "/cvocConcept/"+id+"/narrower/list", 
 				type : "GET",
 				dataType : "json"
 			});
@@ -150,7 +165,29 @@ function loadNarrowerConceptList(element, id) {
 function loadRelatedConceptList(element, id) {
 		// get the list of concepts
 			var request = $.ajax({
-				url : "http://localhost:7474/ehri/cvocConcept/"+id+"/related/list", 
+				url : Neo4jEhriUrlBase + "/cvocConcept/"+id+"/related/list", 
+				type : "GET",
+				dataType : "json"
+			});
+	
+			request.done(function(json) {
+				//console.log(json);
+				//renderConceptList(json, voc);
+				var container = element;
+				container.empty();
+				var newStuff = container.append(createConceptListHtmlString(json));
+				addExpandHandlers(newStuff);	
+			});
+	
+			request.fail(function(jqXHR, textStatus) {
+				alert("Request failed: " + textStatus);
+			});
+}
+
+function loadRelatedByConceptList(element, id) {
+		// get the list of concepts
+			var request = $.ajax({
+				url : Neo4jEhriUrlBase + "/cvocConcept/"+id+"/relatedBy/list", 
 				type : "GET",
 				dataType : "json"
 			});
@@ -172,7 +209,7 @@ function loadRelatedConceptList(element, id) {
 function loadBroaderConceptList(element, id) {
 		// get the list of concepts
 			var request = $.ajax({
-				url : "http://localhost:7474/ehri/cvocConcept/"+id+"/broader/list", 
+				url : Neo4jEhriUrlBase + "/cvocConcept/"+id+"/broader/list", 
 				type : "GET",
 				dataType : "json"
 			});
@@ -193,9 +230,10 @@ function loadBroaderConceptList(element, id) {
 function loadConceptList(voc) {
 		// get the list of (ALL?) concepts
 			var request = $.ajax({
-				url : "http://localhost:7474/ehri/cvocVocabulary/"+voc+"/list", 
+				url : Neo4jEhriUrlBase + "/cvocVocabulary/"+voc+"/list", 
 				type : "GET",
-				dataType : "json"
+				dataType : "json", 
+				data: {limit : '9999'} // HACK = try to show all for NOW!
 			});
 	
 			request.done(function(json) {
@@ -236,22 +274,29 @@ function renderVocabularyList(json) {
 	var num = json.length;
 	for (var i = 0; i < num; i++) {
 		var v = json[i];
-		//console.log(c.data.identifier);
-		
+		//console.log(c.data.identifier);	
 		lines.push("<li>");
-		//lines.push(createConceptHtmlString(c));	
-		lines.push("<div>"+v.id+"</div>");	
+		lines.push("<div><a href='"+v.id+"' class='vocLink'>"+v.id+"</a></div>");
 		lines.push("</li>");
 	}
 	lines.push("</ul>");
+	lines.push("DEV NOTE: need to show progress indicator and implement result paging");
+	
 	container.empty(); // clear any old stuff!
-	container.append(lines.join(''));
+	var newStuff = container.append(lines.join(''));
+	
+	$(".vocLink", newStuff).click(function(event) {
+    	event.preventDefault();
+    	var id = extractIdFromNeo4jUrl(this.href);
+        loadConceptList(id);
+    });
+
 }
 
 function loadVocabularyList() {
 		// get the list of (ALL?) vocabularie
 			var request = $.ajax({
-				url : "http://localhost:7474/ehri/cvocVocabulary/list", 
+				url : Neo4jEhriUrlBase + "/cvocVocabulary/list", 
 				type : "GET",
 				dataType : "json"
 			});
@@ -283,13 +328,12 @@ function loadVocabularyList() {
 	// jQuery main entrance
 	$(document).ready(function() {
 		loadVocabularyList();
-		loadConceptList("ehri-thes");	
 	});
 	</script>
 </head>
 <body>
 	<h1>EHRI cvoc - internal API</h1>
-	DEV NOTE: needs code cleanup and refactoring!
+	<!-- DEV NOTE: needs code cleanup and refactoring! -->
 	<div id="vocabularyList"></div>
 	<div id="conceptList"></div>
 	
