@@ -12,10 +12,11 @@ import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.persistance.Serializer;
 
-//import com.fasterxml.jackson.xml.XmlMapper;
+/*
 import net.sf.json.JSON;
 import net.sf.json.JSONSerializer;
 import net.sf.json.xml.XMLSerializer;
+*/
 
 /**
  * Import EAD from the command line...
@@ -46,6 +47,13 @@ public class ListEntities extends BaseCommand implements Command {
 
     /**
      * Command-line entry-point (for testing.)
+     * 
+     * list <entity-name>
+     *      just prints the id's separated by newlines
+     * list <entity-name> xml 
+     *      print the the data formatted as xml
+     * list <entity-name> json
+     *      print the the data formatted as json
      * 
      * @param args
      * @throws Exception
@@ -148,7 +156,9 @@ public class ListEntities extends BaseCommand implements Command {
         	net.sf.json.JSON json = net.sf.json.JSONSerializer.toJSON( jsonString ); 
             String xmlString = xmlSerializer.write( json );
             xmlString = xmlString.substring(xmlString.indexOf('\n')+1); // remove instruction
-            System.out.print(xmlString);   
+            //System.out.print(xmlString);   
+            byte[] bytes = xmlString.getBytes("UTF-8");
+            System.out.write(bytes, 0, bytes.length);   
         }
         
         System.out.print("</list>\n"); // root element
