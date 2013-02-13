@@ -16,15 +16,12 @@ import eu.ehri.project.persistance.Serializer;
 
 import org.w3c.dom.Document;
 
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
+import javax.xml.transform.stream.StreamSource;
+import java.io.*;
+import java.net.URL;
 
 /**
  * Import EAD from the command line...
@@ -89,8 +86,21 @@ public class ListEntities extends BaseCommand implements Command {
         	} else if (format.equalsIgnoreCase("json")) {
         		printJson(graph, cmdLine);
         	} else {
-        		// unknown format
-        		throw new RuntimeException("Unknown format: " + format);
+                // If there's an XSLT file in the resources that is named
+                // EntityType_destinationFormat.xslt use that...
+                String xsltName = String.format("%s_%s.xslt", cmdLine.getArgs()[0], format);
+                System.out.println("XSLT: " + xsltName);
+                InputStream ios = getClass().getClassLoader().getResourceAsStream(xsltName);
+                if (ios != null) {
+                    try {
+                        printTransformedXml(graph, xsltName, cmdLine);
+                    } finally {
+                        ios.close();
+                    }
+                } else {
+                    // unknown format
+                    throw new RuntimeException("Unknown format: " + format);
+                }
         	}
         }
         
@@ -152,11 +162,34 @@ public class ListEntities extends BaseCommand implements Command {
 
         System.out.print("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
         System.out.print("<list>\n"); // root element
-        
+
         for (AccessibleEntity acc : manager.getFrames(type, AccessibleEntity.class)) {
-            printDocument(serializer.vertexFrameToXml(acc), System.out);
+            printDocument(serializer.vertexFrameToXml(acc), System.out, null);
         }
         
+        System.out.print("</list>\n"); // root element
+    }
+
+    private void printTransformedXml(final FramedGraph<Neo4jGraph> graph, String xsltPath,
+            CommandLine cmdLine) throws Exception {
+
+        GraphManager manager = GraphManagerFactory.getInstance(graph);
+        Serializer serializer = new Serializer(graph);
+
+        EntityClass type = EntityClass.withName(cmdLine.getArgs()[0]);
+        Class<?> cls = type.getEntityClass();
+
+        if (!AccessibleEntity.class.isAssignableFrom(cls))
+            throw new RuntimeException("Unknown accessible entity: " + type);
+
+        System.out.print("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+        System.out.print("<list>\n"); // root element
+
+        for (AccessibleEntity acc : manager.getFrames(type, AccessibleEntity.class)) {
+            StreamSource src = new StreamSource(getClass().getClassLoader().getResourceAsStream(xsltPath));
+            printDocument(serializer.vertexFrameToXml(acc), System.out, src);
+        }
+
         System.out.print("</list>\n"); // root element
     }
 
@@ -168,9 +201,9 @@ public class ListEntities extends BaseCommand implements Command {
      * @throws java.io.IOException
      * @throws javax.xml.transform.TransformerException
      */
-    private static void printDocument(Document doc, OutputStream out) throws IOException, TransformerException {
+    private static void printDocument(Document doc, OutputStream out, StreamSource xslt) throws IOException, TransformerException {
         TransformerFactory tf = TransformerFactory.newInstance();
-        Transformer transformer = tf.newTransformer();
+        Transformer transformer = xslt == null ? tf.newTransformer() : tf.newTransformer(xslt);
         transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
         transformer.setOutputProperty(OutputKeys.METHOD, "xml");
         transformer.setOutputProperty(OutputKeys.INDENT, "yes");
