@@ -15,7 +15,7 @@ import eu.ehri.project.models.base.TemporalEntity;
 
 @EntityType(EntityClass.DOCUMENTARY_UNIT)
 public interface DocumentaryUnit extends VertexFrame, AccessibleEntity,
-        DescribedEntity, TemporalEntity, PermissionScope {
+        DescribedEntity, PermissionScope {
 
     public static final String CHILD_OF = "childOf";
     public static final String NAME = "name";
@@ -66,4 +66,7 @@ public interface DocumentaryUnit extends VertexFrame, AccessibleEntity,
      */
     @Adjacency(label = DocumentaryUnit.CHILD_OF, direction = Direction.IN)
     public Iterable<DocumentaryUnit> getChildren();
+
+    @Adjacency(label = DescribedEntity.DESCRIBES, direction = Direction.IN)
+    public Iterable<DocumentDescription> getDocumentDescriptions();
 }

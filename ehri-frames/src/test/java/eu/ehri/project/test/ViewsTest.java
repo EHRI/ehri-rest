@@ -5,6 +5,8 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.Iterator;
+
+import eu.ehri.project.models.*;
 import org.junit.Test;
 
 import eu.ehri.project.acl.AclManager;
@@ -17,11 +19,6 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.models.Agent;
-import eu.ehri.project.models.DatePeriod;
-import eu.ehri.project.models.DocumentaryUnit;
-import eu.ehri.project.models.Group;
-import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.PermissionGrantTarget;
 import eu.ehri.project.persistance.Bundle;
@@ -116,14 +113,17 @@ public class ViewsTest extends AbstractFixtureTest {
 
         DocumentaryUnit changedUnit = docViews.update(newBundle, validUser);
         assertEquals(newName, changedUnit.getName());
+        DocumentDescription desc = graph.frame(
+                changedUnit.getDescriptions().iterator().next().asVertex(),
+                DocumentDescription.class);
 
         // Check the nested item was created correctly
-        DatePeriod datePeriod = changedUnit.getDatePeriods().iterator().next();
+        DatePeriod datePeriod = desc.getDatePeriods().iterator().next();
         assertTrue(datePeriod != null);
         assertEquals(TEST_START_DATE, datePeriod.getStartDate());
 
         // And that the reverse relationship works.
-        assertEquals(changedUnit.asVertex(), datePeriod.getEntity().asVertex());
+        assertEquals(desc.asVertex(), datePeriod.getEntity().asVertex());
     }
 
     /**
@@ -316,12 +316,11 @@ public class ViewsTest extends AbstractFixtureTest {
         Integer shouldDelete = 1;
 
         // FIXME: Surely there's a better way of doing this???
-        Iterator<DatePeriod> dateIter = item.getDatePeriods().iterator();
         Iterator<Description> descIter = item.getDescriptions().iterator();
-        for (; dateIter.hasNext(); shouldDelete++)
-            dateIter.next();
-        for (; descIter.hasNext(); shouldDelete++)
-            descIter.next();
+        for (; descIter.hasNext(); shouldDelete++) {
+            DocumentDescription d = graph.frame(descIter.next().asVertex(), DocumentDescription.class);
+            for (DatePeriod dp : d.getDatePeriods()) shouldDelete++;
+        }
 
         Integer deleted = docViews.delete(item, validUser);
         assertEquals(shouldDelete, deleted);

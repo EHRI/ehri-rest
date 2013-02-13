@@ -194,6 +194,18 @@
           title: Documentary Unit 1
           languageCode: en
           scopeAndContent: Some description text for c1
+        relationships:
+          hasDate:
+            - id: c1-dp1
+              type: datePeriod
+              data:
+                startDate: !!str 1939-01-01
+                endDate: !!str 1945-01-01
+            - id: c1-dp2
+              type: datePeriod
+              data:
+                startDate: !!str 1939-01-01
+                endDate: !!str 1945-01-01
       - id: cd1-2
         type: documentDescription
         data:
@@ -201,17 +213,6 @@
           title: Documentary Unit 1
           languageCode: en
           scopeAndContent: Some alternate description text for c1
-    hasDate:
-      - id: c1-dp1
-        type: datePeriod
-        data:
-          startDate: !!str 1939-01-01
-          endDate: !!str 1945-01-01
-      - id: c1-dp2
-        type: datePeriod
-        data:
-          startDate: !!str 1939-01-01
-          endDate: !!str 1945-01-01
     heldBy: r1
     hasPermissionScope: r1
     access:
@@ -233,12 +234,13 @@
           title: Documentary Unit 2
           languageCode: en
           scopeAndContent: Some description text for c2
-    hasDate:
-      - id: c2-dp1
-        type: datePeriod
-        data:
-          startDate: !!str 1939-01-01
-          endDate: !!str 1945-01-01
+        relationships:
+          hasDate:
+            - id: c2-dp1
+              type: datePeriod
+              data:
+                startDate: !!str 1939-01-01
+                endDate: !!str 1945-01-01
     childOf: c1
     hasPermissionScope: c1
     access:
@@ -260,12 +262,13 @@
           title: Documentary Unit 3
           languageCode: en
           scopeAndContent: Some description text for c3
-    hasDate:
-      - id: c3-dp1
-        type: datePeriod
-        data:
-          startDate: !!str 1939-01-01
-          endDate: !!str 1945-01-01
+        relationships:
+          hasDate:
+            - id: c3-dp1
+              type: datePeriod
+              data:
+                startDate: !!str 1939-01-01
+                endDate: !!str 1945-01-01
     childOf: c2
     hasPermissionScope: c2    
     access:
@@ -286,12 +289,13 @@
           title: Documentary Unit 4
           languageCode: en
           scopeAndContent: Some description text for c4
-    hasDate:
-      - id: c4-dp1
-        type: datePeriod
-        data:
-          startDate: !!str 1939-01-01
-          endDate: !!str 1945-01-01
+        relationships:
+          hasDate:
+            - id: c4-dp1
+              type: datePeriod
+              data:
+                startDate: !!str 1939-01-01
+                endDate: !!str 1945-01-01
     heldBy: r1
     hasPermissionScope: r1
     
