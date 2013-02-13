@@ -198,9 +198,9 @@ public class DocumentaryUnitResource extends
         DocumentaryUnit doc = new LoggingCrudViews<DocumentaryUnit>(graph,
                 DocumentaryUnit.class, parent).create(entityBundle,
                 getRequesterUserProfile());
-        // Add it to this agent's collections
+        // NB: We no longer add this item to the
+        // parent's Agent directly.
         parent.addChild(doc);
-        doc.setAgent(parent.getAgent());
         doc.setPermissionScope(parent);
         return doc;
     }

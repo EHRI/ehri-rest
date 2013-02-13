@@ -18,6 +18,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
 
+import eu.ehri.project.models.base.Actioner;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 
@@ -33,7 +34,6 @@ import eu.ehri.project.models.Group;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.persistance.ActionManager;
 import eu.ehri.project.views.impl.Query;
 
@@ -61,7 +61,7 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
     public StreamingOutput listGroups(
             @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
             @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
-            @QueryParam(SORT_PARAM) List<String> order,            
+            @QueryParam(SORT_PARAM) List<String> order,
             @QueryParam(FILTER_PARAM) List<String> filters)
             throws ItemNotFound, BadRequester {
         return list(offset, limit, order, filters);
@@ -78,14 +78,14 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
             throws ItemNotFound, BadRequester {
         return page(offset, limit, order, filters);
     }
-    
+
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response createGroup(String json,
-            @QueryParam(ACCESSOR_PARAM) List<String> accessors) throws PermissionDenied,
-            ValidationError, IntegrityError, DeserializationError,
-            ItemNotFound, BadRequester {
+            @QueryParam(ACCESSOR_PARAM) List<String> accessors)
+            throws PermissionDenied, ValidationError, IntegrityError,
+            DeserializationError, ItemNotFound, BadRequester {
         return create(json, accessors);
     }
 
@@ -110,7 +110,7 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
 
     /**
      * Add an accessor to a group.
-     * 
+     *
      * @param id
      * @param atype
      * @param aid
@@ -131,25 +131,26 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
             Group group = manager.getFrame(id, EntityClass.GROUP, Group.class);
             Accessor accessor = manager.getFrame(aid, Accessor.class);
             group.addMember(accessor);
-            
+
             // Log the action...
-            new ActionManager(graph).createAction(
-                    graph.frame(accessor.asVertex(), AccessibleEntity.class),
-                    graph.frame(getRequesterUserProfile().asVertex(), Actioner.class),
-                    "Added accessor to group").addSubjects(group);
-            
+            new ActionManager(graph)
+                    .logEvent(
+                            graph.frame(accessor.asVertex(), AccessibleEntity.class),
+                            graph.frame(getRequesterUserProfile().asVertex(), Actioner.class), "Added accessor to group")
+                    .addSubjects(group);
+
             tx.success();
-            
+
             // TODO: Is there anything worth return here except OK?
             return Response.status(Status.OK).build();
         } finally {
             tx.finish();
         }
     }
-    
+
     /**
      * Remove an accessor from a group.
-     * 
+     *
      * @param id
      * @param atype
      * @param aid
@@ -161,8 +162,8 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
     @DELETE
     @Path("/{id:[^/]+}/{aid:.+}")
     public Response removeMember(@PathParam("id") String id,
-            @PathParam("aid") String aid)
-            throws PermissionDenied, ItemNotFound, BadRequester {
+            @PathParam("aid") String aid) throws PermissionDenied,
+            ItemNotFound, BadRequester {
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
             // FIXME: Add permission checks for this!!!
@@ -170,20 +171,22 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
             Accessor accessor = manager.getFrame(aid, Accessor.class);
             group.removeMember(accessor);
             // Log the action...
-            new ActionManager(graph).createAction(
-                    graph.frame(accessor.asVertex(), AccessibleEntity.class),
-                    graph.frame(getRequesterUserProfile().asVertex(), Actioner.class),
-                    "Removed accessor from group").addSubjects(group);
-            
+            new ActionManager(graph)
+                    .logEvent(
+                            graph.frame(accessor.asVertex(), AccessibleEntity.class),
+                            graph.frame(getRequesterUserProfile().asVertex(), Actioner.class),
+                            "Removed accessor from group")
+                    .addSubjects(group);
+
             tx.success();
-            
+
             // TODO: Is there anything worth return here except OK?
             return Response.status(Status.OK).build();
         } finally {
             tx.finish();
         }
-    }    
-    
+    }
+
     /**
      * list members of the specified group; 
      * UserProfiles and sub-Groups (direct descendants)
@@ -233,7 +236,7 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
 
     /**
      * Delete a group with the given identifier string.
-     * 
+     *
      * @param id
      * @return
      * @throws PermissionDenied

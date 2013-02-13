@@ -19,21 +19,21 @@ public interface PermissionGrant extends VertexFrame {
     public static final String HAS_SCOPE = "hasScope";
     public static final String HAS_TARGET = "hasTarget";
     
-    @Fetch(depth=1)
+    @Fetch(value = HAS_SUBJECT, depth=1)
     @Adjacency(label = HAS_SUBJECT)
     public Accessor getSubject();
 
     @Adjacency(label = HAS_SUBJECT)
     public void setSubject(final Accessor accessor);
 
-    @Fetch(depth=1)
+    @Fetch(value = HAS_GRANTEE, depth=1)
     @Adjacency(label = HAS_GRANTEE)
     public Accessor getGrantee();
     
     @Adjacency(label = HAS_GRANTEE)
     public void setGrantee(final Accessor accessor);
     
-    @Fetch(depth=1)
+    @Fetch(value = HAS_TARGET, depth=1)
     @Adjacency(label = HAS_TARGET)
     public Iterable<PermissionGrantTarget> getTargets();
 
@@ -43,14 +43,14 @@ public interface PermissionGrant extends VertexFrame {
     @Adjacency(label = HAS_TARGET)
     public void removeTarget(final PermissionGrantTarget target);
 
-    @Fetch
+    @Fetch(HAS_PERMISSION)
     @Adjacency(label = HAS_PERMISSION)
     public Permission getPermission();
 
     @Adjacency(label = HAS_PERMISSION)
     public void setPermission(final Permission permission);
 
-    @Fetch(depth=1)
+    @Fetch(value = HAS_SCOPE, depth=1)
     @Adjacency(label = HAS_SCOPE)
     public PermissionScope getScope();
     

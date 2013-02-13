@@ -332,7 +332,7 @@ public class PermissionRestClientTest extends BaseRestClientTest {
         // First try and update the item
         String testUpdateString = Bundle
                 .fromString(response.getEntity(String.class))
-                .withDataValue("testKey", "testValue").toString();
+                .withDataValue("testKey", "testValue").toJson();
 
         resource = client.resource(targetResourceUri);
         response = resource

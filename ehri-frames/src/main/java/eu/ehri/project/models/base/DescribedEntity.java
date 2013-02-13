@@ -19,7 +19,7 @@ public interface DescribedEntity extends AccessibleEntity, AnnotatableEntity {
     @Adjacency(label = DESCRIBES, direction = Direction.IN)
     public void removeDescription(final Description description);
 
-    @Fetch
+    @Fetch(DESCRIBES)
     @Dependent
     @Adjacency(label = DESCRIBES, direction = Direction.IN)
     public Iterable<Description> getDescriptions();

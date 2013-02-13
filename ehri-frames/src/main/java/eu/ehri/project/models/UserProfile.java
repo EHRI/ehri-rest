@@ -15,7 +15,7 @@ import eu.ehri.project.models.base.Annotator;
 public interface UserProfile extends VertexFrame, Accessor, AccessibleEntity,
         Annotator, Actioner {
 
-    @Fetch
+    @Fetch(Group.BELONGS_TO)
     @Adjacency(label = Group.BELONGS_TO)
     public Iterable<Group> getGroups();
 

@@ -13,12 +13,12 @@ import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.models.Action;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Group;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.persistance.ActionManager;
+import eu.ehri.project.persistance.ActionManager.EventContext;
 
 /**
  * Add a user.
@@ -31,7 +31,6 @@ public class UserMod extends BaseCommand implements Command {
     /**
      * Constructor.
      * 
-     * @param args
      */
     public UserMod() {
     }
@@ -58,7 +57,8 @@ public class UserMod extends BaseCommand implements Command {
     /**
      * Command-line entry-point (for testing.)
      * 
-     * @param args
+     * @param graph
+     * @param cmdLine
      * @throws ItemNotFound
      * @throws DeserializationError
      * @throws PermissionDenied
@@ -91,13 +91,14 @@ public class UserMod extends BaseCommand implements Command {
         try {
             UserProfile user = manager.getFrame(userId,
                     EntityClass.USER_PROFILE, UserProfile.class);
-            Action action = new ActionManager(graph).createAction(user, admin,
-                    logMessage);
+
+            EventContext actionCtx = new ActionManager(graph).logEvent(user, admin, logMessage);
+
             for (String groupId : groups) {
                 Group group = manager.getFrame(groupId, EntityClass.GROUP,
                         Group.class);
                 group.addMember(user);
-                action.addSubjects(group);
+                actionCtx.addSubjects(group);
             }
             tx.success();
         } finally {

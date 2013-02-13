@@ -176,7 +176,7 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
             	// see GroupResource.addMember
             	group.addMember(entity);
                 // note that group addition is now logged separately
-                new ActionManager(graph).createAction(
+                new ActionManager(graph).logEvent(
                         graph.frame(entity.asVertex(), AccessibleEntity.class),
                         graph.frame(getRequesterUserProfile().asVertex(), Actioner.class),
                         "Added userProfile to group").addSubjects(group);

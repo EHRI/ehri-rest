@@ -85,7 +85,7 @@ public class AgentRestClientTest extends BaseRestClientTest {
 
         // Obtain some update data.
         String updateData = Bundle.fromString(agentTestData)
-                .withDataValue("name", UPDATED_NAME).toString();
+                .withDataValue("name", UPDATED_NAME).toJson();
 
         resource = client.resource(response.getLocation());
         response = resource

@@ -1,7 +1,7 @@
 package eu.ehri.project.definitions;
 
 public class Entities {
-    public static final String ACTION = "action";
+    public static final String SYSTEM_EVENT = "systemEvent";
     public static final String AGENT = "agent";
     public static final String AUTHORITY = "authority";
     public static final String DOCUMENTARY_UNIT = "documentaryUnit";
@@ -22,4 +22,5 @@ public class Entities {
     public static final String CVOC_VOCABULARY = "cvocVocabulary";
     public static final String CVOC_CONCEPT = "cvocConcept";
     public static final String CVOC_CONCEPT_DESCRIPTION = "cvocConceptDescription";
+    public static final String SYSTEM = "system";
 }

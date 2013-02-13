@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import eu.ehri.project.models.idgen.IdGenerator;
 import org.neo4j.graphdb.Transaction;
 
 import com.google.common.collect.LinkedListMultimap;
@@ -178,37 +179,27 @@ public final class BundleDAO {
      * @throws ValidationError
      */
     private Vertex createInner(Bundle bundle) throws ValidationError {
+        IdGenerator idGen = bundle.getType().getIdgen();
         try {
             ListMultimap<String, String> errors = BundleValidatorFactory
-                    .getInstance(bundle).validate();
-            Vertex node = null;
-            ListMultimap<String, BundleError> nestedErrors = LinkedListMultimap
-                    .create();
-            try {
-                String id = bundle.getId() != null ? bundle.getId() : bundle
-                        .getType().getIdgen()
-                        .generateId(bundle.getType(), scope, bundle.getData());
-
-                node = manager.createVertex(id, bundle.getType(),
-                        bundle.getData(), bundle.getPropertyKeys(),
-                        bundle.getUniquePropertyKeys());
-                nestedErrors = createDependents(node, bundle.getBundleClass(),
-                        bundle.getRelations());
-            } catch (IntegrityError e) {
-                // Convert integrity errors to validation errors
-                for (Entry<String, String> entry : e.getFields().entrySet()) {
-                    errors.put(entry.getKey(), MessageFormat.format(
-                            Messages.getString("BundleDAO.uniquenessError"), //$NON-NLS-1$
-                            entry.getValue()));
-                }
-            }
-
+                    .getInstance(manager, bundle).validate();
+            String id = bundle.getId() != null ? bundle.getId() : idGen
+                    .generateId(bundle.getType(), scope, bundle);
+            Vertex node = manager.createVertex(id, bundle.getType(),
+                    bundle.getData(), bundle.getPropertyKeys());
+            ListMultimap<String, BundleError> nestedErrors = createDependents(node, bundle.getBundleClass(),
+                    bundle.getRelations());
             if (!errors.isEmpty() || hasNestedErrors(nestedErrors)) {
-                throw new ValidationError(bundle, errors, nestedErrors);
+                    throw new ValidationError(bundle, errors, nestedErrors);
             }
             return node;
-        } catch (IdGenerationError err) {
-            throw new RuntimeException(err.getMessage());
+        } catch (IntegrityError e) {
+            // Convert integrity errors to validation errors
+            idGen.handleIdCollision(bundle.getType(), scope, bundle);
+            // Mmmn, if we get here, it means that there's been an ID generation error
+            // which was not handled by an exception.. so throw a runtime error...
+            throw new RuntimeException(
+                    "Unexpected state: ID generation error not handled by IdGenerator class: " + idGen);
         }
     }
 
@@ -223,23 +214,11 @@ public final class BundleDAO {
     private Vertex updateInner(Bundle bundle) throws ValidationError,
             ItemNotFound {
         ListMultimap<String, String> errors = BundleValidatorFactory
-                .getInstance(bundle).validateForUpdate();
-        Vertex node = null;
-        ListMultimap<String, BundleError> nestedErrors = LinkedListMultimap
-                .create();
-        try {
-            node = manager.updateVertex(bundle.getId(), bundle.getType(),
-                    bundle.getData(), bundle.getPropertyKeys(),
-                    bundle.getUniquePropertyKeys());
-            nestedErrors = updateDependents(node, bundle.getBundleClass(),
-                    bundle.getRelations());
-        } catch (IntegrityError e) {
-            for (Entry<String, String> entry : e.getFields().entrySet()) {
-                errors.put(entry.getKey(), MessageFormat.format(
-                        Messages.getString("BundleDAO.uniquenessError"), //$NON-NLS-1$
-                        entry.getValue()));
-            }
-        }
+                .getInstance(manager, bundle).validateForUpdate();
+        Vertex node = manager.updateVertex(bundle.getId(), bundle.getType(),
+                bundle.getData(), bundle.getPropertyKeys());
+        ListMultimap<String, BundleError> nestedErrors = updateDependents(node, bundle.getBundleClass(),
+                bundle.getRelations());
         if (!errors.isEmpty() || hasNestedErrors(nestedErrors)) {
             throw new ValidationError(bundle, errors, nestedErrors);
         }
@@ -293,14 +272,13 @@ public final class BundleDAO {
      * @param cls
      * @param relations
      * @return
-     * @throws IntegrityError
      * @throws ItemNotFound
      * 
      * @return errors
      */
     private ListMultimap<String, BundleError> updateDependents(Vertex master,
             Class<?> cls, ListMultimap<String, Bundle> relations)
-            throws IntegrityError, ItemNotFound {
+            throws ItemNotFound {
 
         // Get a list of dependent relationships for this class, and their
         // directions.

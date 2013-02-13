@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.neo4j.helpers.collection.Iterables;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
@@ -23,17 +25,18 @@ import eu.ehri.project.models.annotations.Unique;
 
 /**
  * Helper functions for managing EntityType classes.
- * 
+ *
  * @author mike
- * 
  */
 public class ClassUtils {
 
     public static final String FETCH_METHOD_PREFIX = "get";
 
+    private static final Logger logger = LoggerFactory.getLogger(ClassUtils.class);
+
     /**
      * Get the entity type string for a given class.
-     * 
+     *
      * @param cls
      * @return
      */
@@ -60,23 +63,23 @@ public class ClassUtils {
     public static List<String> getFetchedRelations(Class<?> cls) {
         List<String> out = new LinkedList<String>();
         for (Method method : cls.getMethods()) {
-            if (method.getAnnotation(Fetch.class) != null) {
-                Adjacency ann = method.getAnnotation(Adjacency.class);
-                if (ann != null)
-                    out.add(ann.label());
+            Fetch ann = method.getAnnotation(Fetch.class);
+            if (ann != null) {
+                out.add(ann.value());
             }
         }
         return out;
     }
 
     public static Map<String, Method> getFetchMethods(Class<?> cls) {
+        logger.trace(" - checking for @Fetch methods: {}", cls.getCanonicalName());
         Map<String, Method> out = new HashMap<String, Method>();
         for (Method method : cls.getMethods()) {
-            if (method.getAnnotation(Fetch.class) != null
+            Fetch fetch = method.getAnnotation(Fetch.class);
+            if (fetch != null
                     && method.getName().startsWith(FETCH_METHOD_PREFIX)) {
-                Adjacency ann = method.getAnnotation(Adjacency.class);
-                if (ann != null)
-                    out.put(ann.label(), method);
+                out.put(fetch.value(), method);
+                logger.trace(" --- found @Fetch annotation: {}: {}", method.getName(), fetch.value());
             }
         }
 
@@ -138,10 +141,10 @@ public class ClassUtils {
 
         return ImmutableSet.copyOf(out);
     }
-    
+
     /**
      * Check if a given vertex is of a particular type.
-     * 
+     *
      * @param frame
      * @param type
      * @return

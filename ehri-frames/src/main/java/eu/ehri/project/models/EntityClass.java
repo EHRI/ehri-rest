@@ -6,6 +6,8 @@ import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.ConceptDescription;
 import eu.ehri.project.models.cvoc.Vocabulary;
+import eu.ehri.project.models.events.SystemEvent;
+import eu.ehri.project.models.events.SystemEventQueue;
 import eu.ehri.project.models.idgen.AccessibleEntityIdGenerator;
 import eu.ehri.project.models.idgen.GenericIdGenerator;
 import eu.ehri.project.models.idgen.IdGenerator;
@@ -33,8 +35,8 @@ public enum EntityClass {
     DATE_PERIOD(Entities.DATE_PERIOD, "dp", DatePeriod.class),
     ANNOTATION(Entities.ANNOTATION, "ann", Annotation.class),
     ADDRESS(Entities.ADDRESS, "adr", Address.class),
-    ACTION(Entities.ACTION, "act", Action.class),
-    IMPORT(Entities.IMPORT, "imp", Import.class),
+    SYSTEM_EVENT(Entities.SYSTEM_EVENT, "ev", SystemEvent.class, GenericIdGenerator.INSTANCE),
+    SYSTEM(Entities.SYSTEM, "sys", SystemEventQueue.class),
     PROPERTY(Entities.PROPERTY, "p", Property.class),
     PERMISSION(Entities.PERMISSION, "pm", Permission.class),
     PERMISSION_GRANT(Entities.PERMISSION_GRANT, "pmg", PermissionGrant.class),

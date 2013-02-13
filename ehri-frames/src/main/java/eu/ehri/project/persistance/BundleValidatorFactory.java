@@ -1,5 +1,8 @@
 package eu.ehri.project.persistance;
 
+import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
+import com.tinkerpop.frames.FramedGraph;
+import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.persistance.impl.BundleFieldValidator;
 
 /**
@@ -9,7 +12,7 @@ import eu.ehri.project.persistance.impl.BundleFieldValidator;
  *
  */
 public class BundleValidatorFactory {
-    public static BundleValidator getInstance(Bundle bundle) {
-        return new BundleFieldValidator(bundle);
+    public static BundleValidator getInstance(GraphManager manager, Bundle bundle) {
+        return new BundleFieldValidator(manager, bundle);
     }
 }

@@ -17,12 +17,7 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.Annotation;
-import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.models.base.Actioner;
-import eu.ehri.project.models.base.AnnotatableEntity;
-import eu.ehri.project.models.base.Annotator;
-import eu.ehri.project.models.base.PermissionScope;
+import eu.ehri.project.models.base.*;
 import eu.ehri.project.persistance.ActionManager;
 import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.persistance.BundleDAO;
@@ -114,8 +109,8 @@ public final class AnnotationViews implements Annotations {
                 annotation);
         annotation.setAnnotator(graph.frame(accessor.asVertex(),
                 Annotator.class));
-        new ActionManager(graph).createAction(entity,
-                graph.frame(accessor.asVertex(), Actioner.class),
+
+        new ActionManager(graph).logEvent(entity, graph.frame(accessor.asVertex(), Actioner.class),
                 "Added annotation").addSubjects(annotation);
         return annotation;
     }
@@ -135,10 +130,10 @@ public final class AnnotationViews implements Annotations {
                 .create();
         AnnotatableEntity item = manager.getFrame(id, AnnotatableEntity.class);
         getAnnotations(item, annotations, filter);
-        new Serializer(graph).traverseSubtree(item, new TraversalCallback() {            
-            public void process(VertexFrame vertexFrame, int depth, String relation,
-                    int relationIndex) {
-                getAnnotations(vertexFrame, annotations, filter);                
+        new Serializer(graph).traverseSubtree(item, new TraversalCallback() {
+            public void process(VertexFrame vertexFrame, int depth,
+                    String relation, int relationIndex) {
+                getAnnotations(vertexFrame, annotations, filter);
             }
         });
         return annotations;

@@ -87,7 +87,6 @@ public class AgentResource extends AbstractAccessibleEntityResource<Agent> {
         Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
                 DocumentaryUnit.class).setLimit(limit).setOffset(offset)
                 .orderBy(order)
-                .depthFilter(DocumentaryUnit.CHILD_OF, Direction.OUT, 0)
                 .filter(filters);
         return streamingList(query.list(agent.getCollections(), user));
     }
@@ -107,7 +106,6 @@ public class AgentResource extends AbstractAccessibleEntityResource<Agent> {
         Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
                 DocumentaryUnit.class).setLimit(limit).setOffset(offset)
                 .orderBy(order)
-                .depthFilter(DocumentaryUnit.CHILD_OF, Direction.OUT, 0)
                 .filter(filters);
         return streamingPage(query.page(agent.getCollections(), user));
     }

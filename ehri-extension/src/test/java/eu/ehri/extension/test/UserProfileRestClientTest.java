@@ -131,7 +131,7 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
                 .type(MediaType.APPLICATION_JSON)
                 .header(AbstractRestResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId())
-                .entity(entityBundle.toString()).put(ClientResponse.class);
+                .entity(entityBundle.toJson()).put(ClientResponse.class);
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
 
         // -get the data and convert to a bundle, is it changed?
@@ -149,9 +149,8 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
     }
 
     @Test
-    public void testUpdateWithIntegrityError() throws Exception {
-
-        // -create data for testing
+    public void testCreateUserProfileWithIntegrityErrir() throws Exception {
+        // Create
         WebResource resource = client.resource(getExtensionEntryPointUri()
                 + "/userProfile");
         ClientResponse response = resource
@@ -164,21 +163,15 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
         assertEquals(Response.Status.CREATED.getStatusCode(),
                 response.getStatus());
 
-        // Create a bundle with a username that's already been taken.
-        Bundle bundle = Bundle.fromString(response.getEntity(String.class))
-                .withDataValue(AccessibleEntity.IDENTIFIER_KEY, "mike");
-
-        // Get created doc via the response location?
-        URI location = response.getLocation();
-
-        response = client
-                .resource(location)
+        // Doing exactly the same thing twice should result in a
+        // ValidationError because the same IDs will be generated...
+        response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
                 .header(AbstractRestResource.AUTH_HEADER_NAME,
-                        getAdminUserProfileId()).entity(bundle.toString())
-                .put(ClientResponse.class);
-
+                        getAdminUserProfileId())
+                .entity(jsonUserProfileTestString).post(ClientResponse.class);
+        System.out.println(response.getEntity(String.class));
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(),
                 response.getStatus());
     }

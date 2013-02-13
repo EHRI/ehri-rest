@@ -74,7 +74,7 @@ public final class AclViews implements Acl {
             checkGrantPermission(grantee, permissionMap);
             acl.setPermissionMatrix(accessor, permissionMap);
             // Log the action...
-            new ActionManager(graph).createAction(
+            new ActionManager(graph).logEvent(
                     graph.frame(accessor.asVertex(), AccessibleEntity.class),
                     graph.frame(grantee.asVertex(), Actioner.class),
                     "Updated permissions");
@@ -104,7 +104,7 @@ public final class AclViews implements Acl {
             helper.checkEntityPermission(entity, user, PermissionType.UPDATE);
             acl.setAccessors(entity, accessors);
             // Log the action...
-            new ActionManager(graph).createAction(
+            new ActionManager(graph).logEvent(
                     graph.frame(entity.asVertex(), AccessibleEntity.class),
                     graph.frame(user.asVertex(), Actioner.class),
                     "Set visibility");
@@ -169,11 +169,11 @@ public final class AclViews implements Acl {
             helper.checkEntityPermission(item, grantee, PermissionType.GRANT);
             acl.setEntityPermissions(accessor, item, permissionList);
             // Log the action...
-            new ActionManager(graph).createAction(
-                    graph.frame(item.asVertex(), AccessibleEntity.class),
+            new ActionManager(graph).logEvent(item,
                     graph.frame(grantee.asVertex(), Actioner.class),
-                    "Set item permissions").setSubject(
+                    "Added annotation").addSubjects(
                     graph.frame(accessor.asVertex(), AccessibleEntity.class));
+
             graph.getBaseGraph().stopTransaction(Conclusion.SUCCESS);
         } catch (PermissionDenied e) {
             graph.getBaseGraph().stopTransaction(Conclusion.FAILURE);
@@ -190,10 +190,11 @@ public final class AclViews implements Acl {
         // fact that individual grants can, in theory, have more than one
         // target content type.
         for (PermissionGrantTarget tg : grant.getTargets()) {
-            helper.checkEntityPermission(graph.frame(tg.asVertex(), AccessibleEntity.class), 
-                    user, PermissionType.GRANT);            
+            helper.checkEntityPermission(
+                    graph.frame(tg.asVertex(), AccessibleEntity.class), user,
+                    PermissionType.GRANT);
         }
-        acl.revokePermissionGrant(grant);        
+        acl.revokePermissionGrant(grant);
     }
 
 }

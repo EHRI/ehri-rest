@@ -34,9 +34,7 @@ import eu.ehri.project.views.Crud;
 import eu.ehri.project.views.impl.LoggingCrudViews;
 
 /**
- * Provides a RESTfull interface for the Action class. Note: Action instances
- * are created by the system, so we do not have create/update/delete methods
- * here.
+ * Provides additional Admin methods needed by client systems.
  */
 @Path("admin")
 public class AdminResource {

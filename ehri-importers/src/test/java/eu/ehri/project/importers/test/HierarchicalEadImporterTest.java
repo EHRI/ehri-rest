@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.InputStream;
 import java.util.List;
 
+import eu.ehri.project.models.events.SystemEvent;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,13 +15,12 @@ import com.tinkerpop.blueprints.Vertex;
 
 import eu.ehri.project.importers.EadImportManager;
 import eu.ehri.project.importers.ImportLog;
-import eu.ehri.project.models.Action;
 import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.test.AbstractFixtureTest;
 
-public class HierarchicalEadImporterTest extends AbstractFixtureTest {
+public class HierarchicalEadImporterTest extends AbstractImporterTest {
 
 	protected final String HIERARCHICAL_EAD = "hierarchical-ead.xml";
 	 private static final Logger logger = LoggerFactory
@@ -43,7 +43,7 @@ public class HierarchicalEadImporterTest extends AbstractFixtureTest {
 		Agent agent = manager.getFrame(TEST_REPO, Agent.class);
 		final String logMessage = "Importing a single EAD";
 
-		int count = getNodeCount();
+		int count = getNodeCount(graph);
 
 		InputStream ios = ClassLoader
 				.getSystemResourceAsStream(HIERARCHICAL_EAD);
@@ -53,8 +53,9 @@ public class HierarchicalEadImporterTest extends AbstractFixtureTest {
 		// - 4 more DocumentaryUnits
 		// - 4 more DocumentDescription
 		// - 1 more DatePeriod
-		// - 1 more import Action
-		assertEquals(count + 10, getNodeCount());
+		// - 5 more import Event links
+        // - 1 more import Event
+		assertEquals(count + 15, getNodeCount(graph));
 		Iterable<Vertex> docs = graph.getVertices("identifier",
 				IMPORTED_ITEM_ID);
 		assertTrue(docs.iterator().hasNext());
@@ -84,7 +85,7 @@ public class HierarchicalEadImporterTest extends AbstractFixtureTest {
 		assertEquals(unit, ancestors.get(ancestors.size() - 1));
 
 		// Ensure the import action has the right number of subjects.
-		Iterable<Action> actions = unit.getHistory();
+		Iterable<SystemEvent> actions = unit.getHistory();
 		// Check we've only got one action
 		assertEquals(1, toList(actions).size());
 		assertEquals(logMessage, log.getAction().getLogMessage());
@@ -100,10 +101,5 @@ public class HierarchicalEadImporterTest extends AbstractFixtureTest {
 	private Vertex getVertexByIdentifier(String id) {
 		Iterable<Vertex> docs = graph.getVertices("identifier", id);
 		return docs.iterator().next();
-	}
-
-	private int getNodeCount() {
-		// Note: deprecated use of getAllNodes...
-		return toList(graph.getBaseGraph().getRawGraph().getAllNodes()).size();
 	}
 }

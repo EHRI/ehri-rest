@@ -36,7 +36,9 @@ local.properties
 **/target/*
 
 Intellij
-**/*iml
+*iml
+.idea
+
 
 # OS generated files #
 ######################

@@ -79,6 +79,14 @@ public final class SingleIndexGraphManager implements GraphManager {
         return getIndex().count(EntityType.ID_KEY, id) > 0L;
     }
 
+    public boolean propertyValueExists(String key, Object value) {
+        Preconditions.checkNotNull(key,
+                "attempt determine existence of a property value with a null name");
+        Preconditions.checkNotNull(value,
+                "attempt determine existence of a property given a null value");
+        return getIndex().count(key, String.valueOf(value)) > 0L;
+    }
+
     public <T> T getFrame(String id, Class<T> cls) throws ItemNotFound {
         return graph.frame(getVertex(id), cls);
     }
@@ -145,27 +153,12 @@ public final class SingleIndexGraphManager implements GraphManager {
      * 
      * @param id
      * @param data
-     * @return
+     * @return vertex
      * @throws IntegrityError
      */
     public Vertex createVertex(String id, EntityClass type,
             Map<String, Object> data) throws IntegrityError {
-        return createVertex(id, type, data, data.keySet(),
-                new LinkedList<String>());
-    }
-
-    /**
-     * Create a vertex with no unique keys, indexing only the given items.
-     * 
-     * @param id
-     * @param data
-     * @param keys
-     * @return
-     * @throws IntegrityError
-     */
-    public Vertex createVertex(String id, EntityClass type,
-            Map<String, Object> data, Iterable<String> keys) throws IntegrityError {
-        return createVertex(id, type, data, keys, new LinkedList<String>());
+        return createVertex(id, type, data, data.keySet());
     }
 
     /**
@@ -174,20 +167,17 @@ public final class SingleIndexGraphManager implements GraphManager {
      * @param id
      * @param data
      * @param keys
-     * @param uniqueKeys
-     * @return
+     * @return vertex
      * @throws IntegrityError
      */
     public Vertex createVertex(String id, EntityClass type,
-            Map<String, Object> data, Iterable<String> keys,
-            Iterable<String> uniqueKeys) throws IntegrityError {
+            Map<String, Object> data, Iterable<String> keys) throws IntegrityError {
         Preconditions
                 .checkNotNull(id, "null vertex ID given for item creation");
         Index<Vertex> index = getIndex();
         Map<String, Object> indexData = getVertexData(id, type, data);
         Collection<String> indexKeys = getVertexKeys(keys);
         try {
-            checkUniqueness(index, uniqueKeys, data, null);
             checkExists(index, id);
             Vertex node = graph.addVertex(null);
             for (Map.Entry<String, Object> entry : indexData.entrySet()) {
@@ -215,20 +205,12 @@ public final class SingleIndexGraphManager implements GraphManager {
     }
 
     public Vertex updateVertex(String id, EntityClass type,
-            Map<String, Object> data) throws IntegrityError, ItemNotFound {
-        return updateVertex(id, type, data, data.keySet(),
-                new LinkedList<String>());
+            Map<String, Object> data) throws ItemNotFound {
+        return updateVertex(id, type, data, data.keySet());
     }
 
     public Vertex updateVertex(String id, EntityClass type,
-            Map<String, Object> data, Iterable<String> keys)
-            throws IntegrityError, ItemNotFound {
-        return updateVertex(id, type, data, keys, new LinkedList<String>());
-    }
-
-    public Vertex updateVertex(String id, EntityClass type,
-            Map<String, Object> data, Iterable<String> keys,
-            Iterable<String> uniqueKeys) throws IntegrityError, ItemNotFound {
+            Map<String, Object> data, Iterable<String> keys) throws ItemNotFound {
         Preconditions.checkNotNull(id, "null vertex ID given for item update");
         Index<Vertex> index = getIndex();
         Map<String, Object> indexData = getVertexData(id, type, data);
@@ -237,7 +219,6 @@ public final class SingleIndexGraphManager implements GraphManager {
         try {
             try {
                 Vertex node = get.iterator().next();
-                checkUniqueness(index, uniqueKeys, data, node);
                 replaceProperties(index, node, indexData, indexKeys);
                 graph.getBaseGraph().stopTransaction(
                         TransactionalGraph.Conclusion.SUCCESS);
@@ -249,10 +230,6 @@ public final class SingleIndexGraphManager implements GraphManager {
                 throw new RuntimeException(String.format(
                         "Item with id '%s' not found in index: %s", id,
                         INDEX_NAME));
-            } catch (IntegrityError e) {
-                graph.getBaseGraph().stopTransaction(
-                        TransactionalGraph.Conclusion.FAILURE);
-                throw e;
             } catch (Exception e) {
                 graph.getBaseGraph().stopTransaction(
                         TransactionalGraph.Conclusion.FAILURE);
@@ -292,37 +269,6 @@ public final class SingleIndexGraphManager implements GraphManager {
         graph.removeVertex(vertex);
         graph.getBaseGraph().stopTransaction(
                 TransactionalGraph.Conclusion.SUCCESS);
-    }
-
-    /**
-     * @param index
-     * @param uniqueKeys
-     * @param data
-     * @throws IntegrityError
-     */
-    private void checkUniqueness(Index<Vertex> index,
-            Iterable<String> uniqueKeys, Map<String, Object> data,
-            Vertex current) throws IntegrityError {
-        if (uniqueKeys != null && Iterables.size(uniqueKeys) != 0) {
-            Map<String, String> clashes = new HashMap<String, String>();
-            for (String ukey : uniqueKeys) {
-                String uval = (String) data.get(ukey);
-                if (uval != null && index.count(ukey, uval) > 0) {
-                    CloseableIterable<Vertex> query = index.get(ukey, uval);
-                    try {
-                        Vertex other = query.iterator().next();
-                        if (other != null && !other.equals(current)) {
-                            clashes.put(ukey, uval);
-                        }
-                    } finally {
-                        query.close();
-                    }
-                }
-            }
-            if (!clashes.isEmpty()) {
-                throw new IntegrityError(index.getIndexName(), clashes);
-            }
-        }
     }
 
     /**
@@ -375,9 +321,7 @@ public final class SingleIndexGraphManager implements GraphManager {
     private void checkExists(Index<Vertex> index, String id)
             throws IntegrityError {
         if (index.count(EntityType.ID_KEY, id) != 0) {
-            // FIXME: Should expose ID implementation details to outside world.
-            throw new IntegrityError(INDEX_NAME, ImmutableMap.of(
-                    EntityType.ID_KEY, id));
+            throw new IntegrityError(id);
         }
     }
 

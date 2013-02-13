@@ -32,7 +32,7 @@ public interface Concept extends AccessibleEntity, DescribedEntity {
     public static final String NARROWER = "narrower";
     public static final String RELATED = "related";
     
-    @Fetch
+    @Fetch(Vocabulary.IN_CVOC)
     @Adjacency(label = Vocabulary.IN_CVOC)
     public Vocabulary getVocabulary();
 
@@ -43,7 +43,7 @@ public interface Concept extends AccessibleEntity, DescribedEntity {
     // relations to other concepts
     
     // Note that multiple broader concepts are possible
-    @Fetch
+    @Fetch(NARROWER)
     @Adjacency(label = NARROWER, direction=Direction.IN)
     //@Adjacency(label = BROADER)
     public Iterable<Concept> getBroaderConcepts();

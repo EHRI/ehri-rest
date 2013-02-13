@@ -10,6 +10,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.InputStream;
 import java.util.List;
 
+import eu.ehri.project.models.events.SystemEvent;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -19,7 +20,6 @@ import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.SaxImportManager;
 import eu.ehri.project.importers.SkosHandler;
 import eu.ehri.project.importers.SkosImporter;
-import eu.ehri.project.models.Action;
 import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.AccessibleEntity;
@@ -89,7 +89,7 @@ public class SkosImporterTest extends AbstractImporterTest {
 //            assertEquals(1, toList(actions).size());
         // Check we've only got one action
         assertEquals(1, log.getCreated());
-        assertTrue(log.getAction() instanceof Action);
+        assertTrue(log.getAction() instanceof SystemEvent);
         assertEquals(logMessage, log.getAction().getLogMessage());
 
         // Ensure the import action has the right number of subjects.

@@ -19,7 +19,7 @@ public class ValidationError extends BundleError {
 
     public ValidationError(Bundle bundle, ListMultimap<String, String> errors,
             ListMultimap<String, BundleError> relations) {
-        super(formatErrors(bundle.getClass().getName(), errors));
+        super(formatErrors(bundle.getBundleClass().getName(), errors));
         this.errors = errors;
         this.relations = relations;
     }

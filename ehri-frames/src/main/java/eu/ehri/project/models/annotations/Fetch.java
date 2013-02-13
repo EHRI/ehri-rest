@@ -22,9 +22,16 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 public @interface Fetch {
     public static final int DEFAULT_TRAVERSALS = 5;
+
     /**
-     * Default number of traversals to make on @Fetch'ed relations. 
+     * Default number of traversals to make on @Fetch'ed relations.
+     * 
      * @return
      */
     int depth() default DEFAULT_TRAVERSALS;
+
+    int ifDepth() default -1;
+
+    String value();
+
 }

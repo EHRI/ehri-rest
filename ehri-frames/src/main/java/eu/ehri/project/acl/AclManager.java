@@ -186,8 +186,6 @@ public final class AclManager {
      * 
      * @param entity
      * @param accessors
-     * @param canRead
-     * @param canWrite
      */
     public void setAccessors(AccessibleEntity entity,
             Iterable<Accessor> accessors) {
@@ -371,7 +369,6 @@ public final class AclManager {
      * Grant a user permissions to a content type.
      * 
      * @param accessor
-     * @param contentType
      * @param permType
      * @return The permission grant given for this accessor and target
      */
@@ -405,7 +402,6 @@ public final class AclManager {
      * Revoke a particular permission grant.
      * 
      * @param accessor
-     * @param target
      * @param permType
      */
     public void revokePermissions(Accessor accessor, AccessibleEntity entity,
@@ -481,7 +477,7 @@ public final class AclManager {
     /**
      * Get the permission type enum for a given node.
      * 
-     * @param permissionId
+     * @param perm
      * @return
      */
     private Permission vertexForPermission(PermissionType perm) {
@@ -491,7 +487,7 @@ public final class AclManager {
     /**
      * Get the permission type enum for a given node.
      * 
-     * @param permissionId
+     * @param perm
      * @return
      */
     private PermissionType enumForPermission(VertexFrame perm) {
@@ -630,7 +626,7 @@ public final class AclManager {
      * For a given user, fetch a lookup of all the inherited accessors it
      * belongs to.
      * 
-     * @param user
+     * @param accessor
      * @return
      */
     private HashSet<Vertex> getAllAccessors(Accessor accessor) {

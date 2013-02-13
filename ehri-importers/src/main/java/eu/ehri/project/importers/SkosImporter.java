@@ -33,7 +33,7 @@ public class SkosImporter extends XmlCVocImporter<Map<String, Object>> {
      *
      * @param framedGraph
      * @param repository
-     * @param topLevelEad
+     * @param log
      */
     public SkosImporter(FramedGraph<Neo4jGraph> framedGraph, Agent repository,
             ImportLog log) {
@@ -44,7 +44,6 @@ public class SkosImporter extends XmlCVocImporter<Map<String, Object>> {
      * Import a single item, keeping a reference to the hierarchical depth.
      *
      * @param itemData
-     * @param parent
      * @param depth
      * @throws ValidationError
      */
@@ -75,14 +74,7 @@ public class SkosImporter extends XmlCVocImporter<Map<String, Object>> {
         PermissionScope scope = repository;
         
         IdGenerator generator = AccessibleEntityIdGenerator.INSTANCE;
-        String id = null;
-        try {
-            id = generator.generateId(EntityClass.CVOC_CONCEPT, scope,
-                    unit.getData());
-        } catch (IdGenerationError e) {
-            throw new ValidationError(unit, Concept.IDENTIFIER_KEY,
-                    (String) unit.getData().get(Concept.IDENTIFIER_KEY));
-        }
+        String id = generator.generateId(EntityClass.CVOC_CONCEPT, scope, unit);
         boolean exists = manager.exists(id);
         Concept frame = persister.createOrUpdate(unit.withId(id),
         		Concept.class);

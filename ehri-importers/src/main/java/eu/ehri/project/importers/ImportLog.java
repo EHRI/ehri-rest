@@ -3,7 +3,8 @@ package eu.ehri.project.importers;
 import java.util.HashMap;
 import java.util.Map;
 
-import eu.ehri.project.models.Action;
+import eu.ehri.project.models.events.SystemEvent;
+import eu.ehri.project.persistance.ActionManager.EventContext;
 
 /**
  * Class that serves as a manifest for an import batch,
@@ -18,7 +19,7 @@ public class ImportLog {
 	private int created = 0;
 	private int updated = 0;
 	private int errored = 0;
-	private Action action;
+	private EventContext eventContext;
 	private Map<String, String> errors = new HashMap<String, String>();
 	
 	
@@ -27,8 +28,8 @@ public class ImportLog {
 	 * 
 	 * @param action
 	 */
-	public ImportLog(final Action action) {
-		this.action = action;
+	public ImportLog(final EventContext action) {
+		this.eventContext = action;
 	}
 	
 	/**
@@ -98,8 +99,8 @@ public class ImportLog {
 	 * 
 	 * @return
 	 */
-	public Action getAction() {
-		return action;
+	public SystemEvent getAction() {
+		return eventContext.getSystemEvent();
 	}			
 	
 	/**

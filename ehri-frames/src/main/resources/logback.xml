@@ -8,7 +8,8 @@
     </encoder>
   </appender>
   
-  <logger name="eu.ehri" level="WARN" />
+  <logger name="eu.ehri.project.test" level="${ehri.test.log.level:-warn}" />
+  <logger name="eu.ehri" level="${ehri.log.level:-warn}" />
 
   <root level="INFO">
     <appender-ref ref="STDOUT" />

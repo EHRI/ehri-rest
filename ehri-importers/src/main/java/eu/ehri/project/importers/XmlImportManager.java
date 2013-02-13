@@ -5,8 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
-import org.xml.sax.SAXException;
-
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.exceptions.InputParseError;
 
@@ -17,13 +15,9 @@ abstract public class XmlImportManager implements ImportManager {
      * 
      * @param address
      * @param logMessage
-     * @param graph
-     * @param agent
-     * @param actioner
-     * 
+     *
      * @throws IOException
      * @throws ValidationError
-     * @throws NoItemsCreated
      */
     public ImportLog importUrl(String address, String logMessage)
             throws IOException, InputParseError, ValidationError {
@@ -41,13 +35,9 @@ abstract public class XmlImportManager implements ImportManager {
      * 
      * @param filePath
      * @param logMessage
-     * @param graph
-     * @param agent
-     * @param actioner
-     * 
+     *
      * @throws IOException
      * @throws ValidationError
-     * @throws NoItemsCreated
      */
     public ImportLog importFile(String filePath, String logMessage)
             throws IOException, InputParseError, ValidationError {

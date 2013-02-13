@@ -5,6 +5,7 @@ import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Property;
 import com.tinkerpop.frames.VertexFrame;
 
+import com.tinkerpop.frames.annotations.gremlin.GremlinGroovy;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.base.AccessibleEntity;
@@ -18,7 +19,7 @@ public interface Group extends VertexFrame, Accessor, AccessibleEntity,
     public static final String ADMIN_GROUP_IDENTIFIER = "admin";
     public static final String ANONYMOUS_GROUP_IDENTIFIER = "anonymous";
 
-    @Fetch
+    @Fetch(BELONGS_TO)
     @Adjacency(label = BELONGS_TO)
     public Iterable<Group> getGroups();
 
@@ -49,4 +50,8 @@ public interface Group extends VertexFrame, Accessor, AccessibleEntity,
 
     @Property("name")
     public void setName(String name);
+
+    @GremlinGroovy("_().as('n').in('belongsTo').loop('n'){true}{it.object.__ISA__=='userProfile'}")
+    public Iterable<UserProfile> getAllUserProfileMembers();
+
 }

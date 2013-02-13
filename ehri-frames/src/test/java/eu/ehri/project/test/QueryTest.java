@@ -1,11 +1,11 @@
 package eu.ehri.project.test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import java.util.List;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import eu.ehri.project.models.Agent;
 import org.junit.Test;
 
 import com.tinkerpop.blueprints.Direction;
@@ -21,6 +21,8 @@ import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.views.impl.Query;
 import eu.ehri.project.views.impl.Query.Page;
+
+import static org.junit.Assert.*;
 
 public class QueryTest extends AbstractFixtureTest {
 
@@ -188,6 +190,46 @@ public class QueryTest extends AbstractFixtureTest {
         assertEquals("c4", list.get(1).getIdentifier());
 
     }
+
+    @Test
+    public void testListWithTraversalFilter() {
+        Query<DocumentaryUnit> query1 = new Query<DocumentaryUnit>(graph,
+                DocumentaryUnit.class);
+        List<String> filters1 = ImmutableList.of(
+          "<-describes.identifier:c1-desc"
+        );
+        Iterable<DocumentaryUnit> list1 = query1
+                .filter(filters1).list(validUser);
+        assertEquals(1, Iterables.size(list1));
+
+        Query<Agent> query2 = new Query<Agent>(graph,
+                Agent.class);
+        List<String> filters2 = ImmutableList.of(
+                "<-describes->hasAddress.city:Brussels"
+        );
+        Iterable<Agent> list2 = query2
+                .filter(filters2).list(validUser);
+        assertEquals(1, Iterables.size(list2));
+
+    }
+
+    @Test
+    public void testListWithTraversalOrder() {
+        Query<Agent> query1 = new Query<Agent>(graph, Agent.class);
+        Iterable<Agent> out1 = query1
+                .orderBy(ImmutableList.of("<-describes.identifier"))
+                .list(validUser);
+        List<Agent> list1 = Lists.newLinkedList(out1);
+
+        Query<Agent> query2 = new Query<Agent>(graph, Agent.class);
+        Iterable<Agent> out2 = query2
+                .orderBy(ImmutableList.of("<-describes.identifier__DESC"))
+                .list(validUser);
+        List<Agent> list2 = Lists.newLinkedList(out2);
+
+        assertEquals(list1, Lists.reverse(list2));
+    }
+
 
     @Test
     public void testListWithSort() throws IndexNotFoundException {

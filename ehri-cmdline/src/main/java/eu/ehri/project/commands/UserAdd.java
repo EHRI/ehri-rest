@@ -39,7 +39,6 @@ public class UserAdd extends BaseCommand implements Command {
     /**
      * Constructor.
      * 
-     * @param args
      */
     public UserAdd() {
     }
@@ -67,8 +66,7 @@ public class UserAdd extends BaseCommand implements Command {
     /**
      * Command-line entry-point (for testing.)
      * 
-     * @param args
-     * @throws ItemNotFound 
+     * @throws ItemNotFound
      * @throws DeserializationError 
      * @throws PermissionDenied 
      * @throws ValidationError 
@@ -98,19 +96,13 @@ public class UserAdd extends BaseCommand implements Command {
         Map<String, Object> data = ImmutableMap.<String, Object> of(
                 AccessibleEntity.IDENTIFIER_KEY, userId, Accessor.NAME,
                 userName);
-        String nodeId;
-        try {
-            nodeId = AccessibleEntityIdGenerator.INSTANCE.generateId(
-                    EntityClass.USER_PROFILE, SystemScope.getInstance(), data);
-        } catch (IdGenerationError e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        }
-
         Bundle bundle = new Bundle(EntityClass.USER_PROFILE,
                 Maps.<String, Object> newHashMap())
                 .withDataValue(AccessibleEntity.IDENTIFIER_KEY, userId)
-                .withDataValue(Accessor.NAME, userName).withId(nodeId);
+                .withDataValue(Accessor.NAME, userName);
+        String nodeId = AccessibleEntityIdGenerator.INSTANCE.generateId(
+                EntityClass.USER_PROFILE, SystemScope.getInstance(), bundle);
+        bundle = bundle.withId(nodeId);
 
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {

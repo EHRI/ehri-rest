@@ -1,5 +1,6 @@
 package eu.ehri.project.views.impl;
 
+import eu.ehri.project.models.base.Actioner;
 import org.neo4j.graphdb.Transaction;
 
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
@@ -11,7 +12,6 @@ import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.PermissionScope;
@@ -71,7 +71,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * Create a new object of type `E` from the given data, saving an Action log
      * with the default creation message.
      * 
-     * @param data
+     * @param bundle
      * @param user
      * @return The created framed vertex
      * @throws PermissionDenied
@@ -79,9 +79,8 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws IntegrityError
      * @throws DeserializationError
      */
-    public E create(Bundle bundle, Accessor user)
-            throws PermissionDenied, ValidationError, DeserializationError,
-            IntegrityError {
+    public E create(Bundle bundle, Accessor user) throws PermissionDenied,
+            ValidationError, DeserializationError, IntegrityError {
         return create(bundle, user, DEFAULT_CREATE_LOG);
     }
 
@@ -89,7 +88,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * Create a new object of type `E` from the given data, saving an Action log
      * with the given log message.
      * 
-     * @param data
+     * @param bundle
      * @param user
      * @param logMessage
      * @return The created framed vertex
@@ -107,10 +106,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
         try {
 
             E out = views.create(bundle, user);
-            actionManager
-                    .createAction(out,
-                            graph.frame(user.asVertex(), UserProfile.class),
-                            logMessage);
+            actionManager.logEvent(out, graph.frame(user.asVertex(), Actioner.class), logMessage);
             tx.success();
             return out;
         } catch (IntegrityError ex) {
@@ -134,7 +130,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * Create or update a new object of type `E` from the given data, saving an
      * Action log with the default creation message.
      * 
-     * @param data
+     * @param bundle
      * @param user
      * @return The created framed vertex
      * @throws PermissionDenied
@@ -152,7 +148,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * Create or update a new object of type `E` from the given data, saving an
      * Action log with the given log message.
      * 
-     * @param data
+     * @param bundle
      * @param user
      * @param logMessage
      * @return The created framed vertex
@@ -161,17 +157,14 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws IntegrityError
      * @throw DeserializationError
      */
-    public E createOrUpdate(Bundle bundle, Accessor user,
-            String logMessage) throws PermissionDenied, ValidationError,
-            DeserializationError, IntegrityError {
+    public E createOrUpdate(Bundle bundle, Accessor user, String logMessage)
+            throws PermissionDenied, ValidationError, DeserializationError,
+            IntegrityError {
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
 
             E out = views.createOrUpdate(bundle, user);
-            actionManager
-                    .createAction(out,
-                            graph.frame(user.asVertex(), UserProfile.class),
-                            logMessage);
+            actionManager.logEvent(out, graph.frame(user.asVertex(), Actioner.class), logMessage);
             tx.success();
             return out;
         } catch (IntegrityError ex) {
@@ -195,7 +188,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * Update an object of type `E` from the given data, saving an Action log
      * with the default update message.
      * 
-     * @param data
+     * @param bundle
      * @param user
      * @return The updated framed vertex
      * @throws PermissionDenied
@@ -203,9 +196,8 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws IntegrityError
      * @throws DeserializationError
      */
-    public E update(Bundle bundle, Accessor user)
-            throws PermissionDenied, ValidationError, DeserializationError,
-            IntegrityError {
+    public E update(Bundle bundle, Accessor user) throws PermissionDenied,
+            ValidationError, DeserializationError, IntegrityError {
         return update(bundle, user, DEFAULT_UPDATE_LOG);
     }
 
@@ -213,7 +205,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * Update an object of type `E` from the given data, saving an Action log
      * with the given log message.
      * 
-     * @param data
+     * @param bundle
      * @param user
      * @param logMessage
      * @return The updated framed vertex
@@ -228,10 +220,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
             E out = views.update(bundle, user);
-            actionManager
-                    .createAction(out,
-                            graph.frame(user.asVertex(), UserProfile.class),
-                            logMessage);
+            actionManager.logEvent(out, graph.frame(user.asVertex(), Actioner.class), logMessage);
             tx.success();
             return out;
         } catch (IntegrityError ex) {
@@ -283,10 +272,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
             throws PermissionDenied, ValidationError, SerializationError {
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
-            actionManager
-                    .createAction(item,
-                            graph.frame(user.asVertex(), UserProfile.class),
-                            logMessage);
+            actionManager.logEvent(item, graph.frame(user.asVertex(), Actioner.class), logMessage);
             Integer count = views.delete(item, user);
             tx.success();
             return count;

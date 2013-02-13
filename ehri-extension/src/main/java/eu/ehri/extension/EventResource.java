@@ -13,13 +13,15 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
+import eu.ehri.project.models.EntityClass;
+import eu.ehri.project.models.events.SystemEvent;
+import eu.ehri.project.persistance.ActionManager;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.models.Action;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistance.Serializer;
@@ -27,15 +29,16 @@ import eu.ehri.project.views.impl.LoggingCrudViews;
 import eu.ehri.project.views.impl.Query;
 
 /**
- * Provides a RESTfull interface for the Action class. Note: Action instances
+ * Provides a RESTfull interface for the Event class. Note: Event instances
  * are created by the system, so we do not have create/update/delete methods
  * here.
  */
-@Path(Entities.ACTION)
-public class ActionResource extends AbstractAccessibleEntityResource<Action> {
+// FIXME: Change this to SYSTEM_EVENT
+@Path(Entities.SYSTEM_EVENT)
+public class EventResource extends AbstractAccessibleEntityResource<SystemEvent> {
 
-    public ActionResource(@Context GraphDatabaseService database) {
-        super(database, Action.class);
+    public EventResource(@Context GraphDatabaseService database) {
+        super(database, SystemEvent.class);
     }
 
     @GET
@@ -60,41 +63,35 @@ public class ActionResource extends AbstractAccessibleEntityResource<Action> {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/list")
-    public StreamingOutput listActions(
+    public StreamingOutput listEvents(
             @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
             @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
             @QueryParam(SORT_PARAM) List<String> order,
             @QueryParam(FILTER_PARAM) List<String> filters)
             throws ItemNotFound, BadRequester {
-        // FIXME: Hack to get actions to come out in newest-first order.
-        // This should eventually be done via the defaultOrderBy setting
-        // on the query class, but that will require some refactoring
-        if (order.isEmpty()) {
-            order.add(String
-                    .format("%s__%s", Action.TIMESTAMP, Query.Sort.DESC));
-        }
-
-        return list(offset, limit, order, filters);
+        Query<SystemEvent> query = new Query<SystemEvent>(graph,
+                SystemEvent.class).setOffset(offset).setLimit(limit)
+                .orderBy(order).filter(filters);
+        ActionManager am = new ActionManager(graph);
+        return streamingList(query.list(am.getLatestGlobalEvents(),
+                getRequesterUserProfile()));
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/page")
-    public StreamingOutput pageActions(
+    public StreamingOutput pageEvents(
             @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
             @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
             @QueryParam(SORT_PARAM) List<String> order,
             @QueryParam(FILTER_PARAM) List<String> filters)
             throws ItemNotFound, BadRequester {
-        // FIXME: Hack to get actions to come out in newest-first order.
-        // This should eventually be done via the defaultOrderBy setting
-        // on the query class, but that will require some refactoring
-        if (order.isEmpty()) {
-            order.add(String
-                    .format("%s__%s", Action.TIMESTAMP, Query.Sort.DESC));
-        }
-
-        return page(offset, limit, order, filters);
+        Query<SystemEvent> query = new Query<SystemEvent>(graph,
+                SystemEvent.class).setOffset(offset).setLimit(limit)
+                .orderBy(order).filter(filters);
+        ActionManager am = new ActionManager(graph);
+        return streamingPage(query.page(am.getLatestGlobalEvents(),
+                getRequesterUserProfile()));
     }
 
     /**
@@ -111,7 +108,7 @@ public class ActionResource extends AbstractAccessibleEntityResource<Action> {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:.+}/subjects")
-    public StreamingOutput pageSubjectsForAction(
+    public StreamingOutput pageSubjectsForEvent(
             @PathParam("id") String id,
             @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
             @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
@@ -119,13 +116,13 @@ public class ActionResource extends AbstractAccessibleEntityResource<Action> {
             @QueryParam(FILTER_PARAM) List<String> filters)
             throws ItemNotFound, BadRequester, PermissionDenied {
         Accessor user = getRequesterUserProfile();
-        Action action = views.detail(manager.getFrame(id, cls), user);
+        SystemEvent event = views.detail(manager.getFrame(id, cls), user);
         Query<AccessibleEntity> query = new Query<AccessibleEntity>(graph,
                 AccessibleEntity.class).setOffset(offset).setLimit(limit)
                 .orderBy(order).filter(filters);
         // NB: Taking a pragmatic decision here to only stream the first
         // level of the subject's tree.
-        return streamingPage(query.page(action.getSubjects(), user),
+        return streamingPage(query.page(event.getSubjects(), user),
                 new Serializer(graph, 1));
     }
 
@@ -143,7 +140,7 @@ public class ActionResource extends AbstractAccessibleEntityResource<Action> {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/for/{id:.+}")
-    public StreamingOutput pageActionsForItem(
+    public StreamingOutput pageEventsForItem(
             @PathParam("id") String id,
             @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
             @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
@@ -154,10 +151,9 @@ public class ActionResource extends AbstractAccessibleEntityResource<Action> {
         AccessibleEntity item = new LoggingCrudViews<AccessibleEntity>(graph,
                 AccessibleEntity.class).detail(
                 manager.getFrame(id, AccessibleEntity.class), user);
-        // FIXME: We ignore the sort param here...
-        Query<Action> query = new Query<Action>(graph, Action.class)
+        Query<SystemEvent> query = new Query<SystemEvent>(graph, SystemEvent.class)
                 .setOffset(offset).setLimit(limit)
-                .orderBy(Action.TIMESTAMP, Query.Sort.DESC).filter(filters);
+                .orderBy(order).filter(filters);
         return streamingPage(query.page(item.getHistory(), user));
     }
 }

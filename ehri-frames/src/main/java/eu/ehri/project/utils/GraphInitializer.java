@@ -2,6 +2,7 @@ package eu.ehri.project.utils;
 
 import java.util.HashMap;
 
+import com.google.common.collect.ImmutableMap;
 import com.tinkerpop.blueprints.TransactionalGraph.Conclusion;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
@@ -16,6 +17,8 @@ import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Group;
 import eu.ehri.project.models.Permission;
 import eu.ehri.project.models.UserProfile;
+import eu.ehri.project.models.events.SystemEvent;
+import eu.ehri.project.persistance.ActionManager;
 
 /**
  * Initialize the graph with a minimal set of vertices. This includes:
@@ -29,6 +32,8 @@ public class GraphInitializer {
     private final FramedGraph<Neo4jGraph> graph;
     private final GraphManager manager;
 
+    private static final String INIT_MESSAGE = "Initialising graph";
+
     public GraphInitializer(FramedGraph<Neo4jGraph> graph) {
         this.graph = graph;
         manager = GraphManagerFactory.getInstance(graph);
@@ -37,6 +42,15 @@ public class GraphInitializer {
     @SuppressWarnings("serial")
     public void initialize() {
         try {
+
+            // Create the system node which is the head of the global event streams
+            manager.createVertex(ActionManager.GLOBAL_EVENT_ROOT, EntityClass.SYSTEM,
+                    ImmutableMap.<String,Object>of(
+                        // It might be useful to know when this graph was
+                        // initialise. We can also put other metadata here.
+                        eu.ehri.project.models.events.SystemEvent.TIMESTAMP, ActionManager.getTimestamp(),
+                        SystemEvent.LOG_MESSAGE, INIT_MESSAGE
+                    ));
 
             // Create admin account
             manager.createVertex(Group.ADMIN_GROUP_IDENTIFIER,

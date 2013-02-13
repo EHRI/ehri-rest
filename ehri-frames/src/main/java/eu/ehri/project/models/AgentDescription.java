@@ -13,10 +13,7 @@ public interface AgentDescription extends Description {
 
     public static final String HAS_ADDRESS = "hasAddress";
 
-    @Property("name")
-    public String getTitle();
-
-    @Fetch
+    @Fetch(HAS_ADDRESS)
     @Dependent
     @Adjacency(label = HAS_ADDRESS)
     public Iterable<Address> getAddresses();

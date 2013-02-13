@@ -27,7 +27,6 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.exceptions.InvalidEadDocument;
 import eu.ehri.project.importers.exceptions.InvalidInputFormatError;
-import eu.ehri.project.models.Action;
 import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Actioner;
@@ -49,6 +48,7 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
     protected final FramedGraph<Neo4jGraph> framedGraph;
     protected final Agent agent;
     protected final Actioner actioner;
+    
     // Ugly stateful variables for tracking import state
     // and reporting errors usefully...
     private String currentFile = null;
@@ -107,15 +107,14 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
      *
      * @throws IOException
      * @throws ValidationError
-     * @throws InvalidEadDocument
-     * @throw InputParseError
+     * @throws InputParseError
      */
     public ImportLog importFile(InputStream ios, String logMessage)
             throws IOException, ValidationError, InputParseError {
         Transaction tx = framedGraph.getBaseGraph().getRawGraph().beginTx();
         try {
             // Create a new action for this import
-            final Action action = new ActionManager(framedGraph).createAction(
+            final ActionManager.EventContext action = new ActionManager(framedGraph).logEvent(
                     actioner, logMessage);
             // Create a manifest to store the results of the import.
             final ImportLog log = new ImportLog(action);
@@ -152,7 +151,7 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
         Transaction tx = framedGraph.getBaseGraph().getRawGraph().beginTx();
         try {
 
-            final Action action = new ActionManager(framedGraph).createAction(
+            final ActionManager.EventContext action = new ActionManager(framedGraph).logEvent(
                     actioner, logMessage);
             final ImportLog log = new ImportLog(action);
             for (String path : paths) {
@@ -196,7 +195,7 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
      * Import EAD from the given InputStream, as part of the given action.
      *
      * @param ios
-     * @param action
+     * @param eventContext
      * @param log
      *
      * @throws IOException
@@ -205,7 +204,7 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
      * @throws InvalidInputFormatError
      * @throws InvalidEadDocument
      */
-    private void importFile(InputStream ios, final Action action,
+    private void importFile(InputStream ios, final ActionManager.EventContext eventContext,
             final ImportLog log) throws IOException, ValidationError,
             InputParseError, InvalidEadDocument, InvalidInputFormatError {
 
@@ -216,14 +215,14 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
             importer.addCreationCallback(new ImportCallback() {
                 public void itemImported(AccessibleEntity item) {
                     System.out.println("ImportCallback: itemImported creation " + item.getIdentifier());
-                    action.addSubjects(item);
+                    eventContext.addSubjects(item);
                     log.addCreated();
                 }
             });
             importer.addUpdateCallback(new ImportCallback() {
                 public void itemImported(AccessibleEntity item) {
                     System.out.println("ImportCallback: itemImported updated");
-                    action.addSubjects(item);
+                    eventContext.addSubjects(item);
                     log.addUpdated();
                 }
             });

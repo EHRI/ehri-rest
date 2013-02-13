@@ -11,14 +11,15 @@ import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.test.AbstractFixtureTest;
+import org.neo4j.tooling.GlobalGraphOperations;
+
 import java.util.List;
 
 /**
- *
  * @author linda
  */
-public class AbstractImporterTest extends AbstractFixtureTest{
-     protected void printGraph(FramedGraph<Neo4jGraph> graph) {
+public class AbstractImporterTest extends AbstractFixtureTest {
+    protected void printGraph(FramedGraph<Neo4jGraph> graph) {
         for (Vertex v : graph.getVertices()) {
             System.out.println("-------------------------");
             for (String key : v.getPropertyKeys()) {
@@ -37,14 +38,15 @@ public class AbstractImporterTest extends AbstractFixtureTest{
                 System.out.println(e.getLabel());
             }
         }
-     }
-      protected Vertex getVertexByIdentifier(FramedGraph<Neo4jGraph> graph, String id) {
+    }
+
+    protected Vertex getVertexByIdentifier(FramedGraph<Neo4jGraph> graph, String id) {
         Iterable<Vertex> docs = graph.getVertices(AccessibleEntity.IDENTIFIER_KEY, id);
         return docs.iterator().next();
     }
-      
-          protected int getNodeCount(FramedGraph<Neo4jGraph> graph) {
-        // Note: deprecated use of getAllNodes...
-        return toList(graph.getBaseGraph().getRawGraph().getAllNodes()).size();
+
+    protected int getNodeCount(FramedGraph<Neo4jGraph> graph) {
+        return toList(GlobalGraphOperations
+                .at(graph.getBaseGraph().getRawGraph()).getAllNodes()).size();
     }
 }
