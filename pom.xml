@@ -27,14 +27,25 @@
 	</dependencyManagement>
 	<properties>
 		<neo4j-version>1.9.M04</neo4j-version>
-	<tinkerpop-version>2.2.0</tinkerpop-version>
-
+		<tinkerpop-version>2.2.0</tinkerpop-version>
 		<!-- The directory where the yWorks doclet (for uml schema's in javadoc) 
 			is installed HOWEVER, we need to hardcode it into the profile in the missing 
 			and exists elements! -->
 		<yid>/Users/paulboon/Documents/Development/yworks-uml-doclet-3.0_02-jdk1.5</yid>
-
 	</properties>
+
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>2.3.2</version>
+				<configuration>
+					<source>1.6</source>
+					<target>1.6</target>
+				</configuration>
+			</plugin>				
+		</plugins>
+	</build>
 
 	<!-- PROFILES for javadoc stuff -->
 	<profiles>
