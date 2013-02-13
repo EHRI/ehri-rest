@@ -8,6 +8,8 @@ import java.util.List;
 
 import eu.ehri.project.models.events.SystemEvent;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.tinkerpop.blueprints.Vertex;
 
@@ -21,6 +23,8 @@ import eu.ehri.project.test.AbstractFixtureTest;
 public class HierarchicalEadImporterTest extends AbstractImporterTest {
 
 	protected final String HIERARCHICAL_EAD = "hierarchical-ead.xml";
+	 private static final Logger logger = LoggerFactory
+	            .getLogger(HierarchicalEadImporterTest.class);
 
 	// Depends on fixtures
 	protected final String TEST_REPO = "r1";
@@ -33,6 +37,9 @@ public class HierarchicalEadImporterTest extends AbstractImporterTest {
 
 	@Test
 	public void testImportItemsT() throws Exception {
+		logger.info("logger.info");
+		System.out.println("sysout");
+		logger.error("logger.error");
 		Agent agent = manager.getFrame(TEST_REPO, Agent.class);
 		final String logMessage = "Importing a single EAD";
 

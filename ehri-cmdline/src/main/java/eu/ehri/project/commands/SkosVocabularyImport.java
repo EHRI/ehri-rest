@@ -18,7 +18,6 @@ import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.importers.EadImportManager;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.cvoc.SkosCoreCvocImporter;
 import eu.ehri.project.models.Agent;

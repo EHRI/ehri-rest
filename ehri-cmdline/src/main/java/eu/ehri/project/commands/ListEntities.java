@@ -14,10 +14,6 @@ import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.persistance.Serializer;
 
-//import com.fasterxml.jackson.xml.XmlMapper;
-import net.sf.json.JSON;
-import net.sf.json.JSONSerializer;
-import net.sf.json.xml.XMLSerializer;
 import org.w3c.dom.Document;
 
 import javax.xml.transform.OutputKeys;
