@@ -18,16 +18,4 @@ public interface Authority extends VertexFrame, AccessibleEntity,
 
     @Property("typeOfEntity")
     public String getTypeOfEntity();
-
-    @Adjacency(label = CREATED)
-    public Iterable<DocumentaryUnit> getDocumentaryUnits();
-
-    @Adjacency(label = CREATED)
-    public void addDocumentaryUnit(final DocumentaryUnit unit);
-
-    @Adjacency(label = MENTIONED_IN)
-    public Iterable<DocumentaryUnit> getMentionedIn();
-
-    @Adjacency(label = MENTIONED_IN)
-    public void addMentionedIn(final DocumentaryUnit unit);
 }

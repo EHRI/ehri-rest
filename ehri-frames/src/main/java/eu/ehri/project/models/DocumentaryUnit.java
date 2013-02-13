@@ -23,9 +23,10 @@ public interface DocumentaryUnit extends VertexFrame, AccessibleEntity,
     @Property(NAME)
     public String getName();
 
-    @Property(NAME)
-    public void setName(String name);
-
+    /**
+     * Get the repository that holds this documentary unit.
+     * @return
+     */
     // NB: This is only an iterable until we upgrade to frames 2.3.0
     // which supports GremlinGroovy annotations for single items
     @Fetch(Agent.HELDBY)
@@ -34,9 +35,17 @@ public interface DocumentaryUnit extends VertexFrame, AccessibleEntity,
             + ").exhaustMerge().out('" + Agent.HELDBY + "')")
     public Iterable<Agent> getAgent();
 
+    /**
+     * Set the repository that holds this documentary unit.
+     * @param institution
+     */
     @Adjacency(label = Agent.HELDBY)
     public void setAgent(final Agent institution);
 
+    /**
+     * Get parent documentary unit, if any
+     * @return
+     */
     @Fetch(CHILD_OF)
     @Adjacency(label = CHILD_OF)
     public DocumentaryUnit getParent();
@@ -51,20 +60,10 @@ public interface DocumentaryUnit extends VertexFrame, AccessibleEntity,
             + "').loop('n'){it.loops < 20}{true}")
     public Iterable<DocumentaryUnit> getAncestors();
 
+    /**
+     * Get child documentary units
+     * @return
+     */
     @Adjacency(label = DocumentaryUnit.CHILD_OF, direction = Direction.IN)
     public Iterable<DocumentaryUnit> getChildren();
-
-    @Fetch(Authority.CREATED)
-    @Adjacency(label = Authority.CREATED, direction = Direction.IN)
-    public Iterable<Authority> getCreators();
-
-    @Adjacency(label = Authority.CREATED, direction = Direction.IN)
-    public void addCreator(final Authority creator);
-
-    @Fetch(Authority.MENTIONED_IN)
-    @Adjacency(label = Authority.MENTIONED_IN, direction = Direction.IN)
-    public Iterable<Authority> getNameAccess();
-
-    @Adjacency(label = Authority.MENTIONED_IN, direction = Direction.IN)
-    public void addNameAccess(final Authority nameAccess);
 }

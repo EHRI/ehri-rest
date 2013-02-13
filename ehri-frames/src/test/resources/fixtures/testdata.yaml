@@ -308,8 +308,7 @@
         data:
           title: An Authority 1
           languageCode: en
-    created: c1
-    
+
 - id: a2
   type: authority
   data:
@@ -322,8 +321,7 @@
         data:
           title: An Authority 2
           languageCode: en
-    mentionedIn: c1
-    
+
 
 --- # Annotations
 - id: ann1
