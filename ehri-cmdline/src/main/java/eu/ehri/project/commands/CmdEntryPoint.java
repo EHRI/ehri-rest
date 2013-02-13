@@ -6,9 +6,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.Maps;
 import org.apache.commons.cli.CommandLine;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
+import org.neo4j.kernel.EmbeddedReadOnlyGraphDatabase;
 
 public class CmdEntryPoint extends BaseCommand {
 
@@ -65,17 +67,23 @@ public class CmdEntryPoint extends BaseCommand {
         } else {
             if (CmdEntryPoint.COMMANDS.containsKey(args[1])) {
 
-                // Get the graph
-                FramedGraph<Neo4jGraph> graph = new FramedGraph<Neo4jGraph>(
-                        new Neo4jGraph(args[0]));
-
                 List<String> newArgs = new LinkedList<String>();
                 for (int i = 2; i < args.length; i++) {
                     newArgs.add(args[i]);
                 }
                 Command cmd = CmdEntryPoint.COMMANDS.get(args[1]).getConstructor().newInstance();
-                
-                try {                    
+                FramedGraph<Neo4jGraph> graph;
+                if (cmd.isReadOnly()) {
+                    // Get the graph
+                    graph = new FramedGraph<Neo4jGraph>(
+                            new Neo4jGraph(new EmbeddedReadOnlyGraphDatabase(args[0])));
+                } else {
+                    // Get the graph
+                    graph = new FramedGraph<Neo4jGraph>(
+                            new Neo4jGraph(args[0]));
+                }
+
+                try {
                     cmd.exec(graph, newArgs.toArray(new String[newArgs.size()]));
                 } catch(Exception e) {
                     e.printStackTrace();

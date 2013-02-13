@@ -41,6 +41,11 @@ public class ListEntities extends BaseCommand implements Command {
     }
 
     @Override
+    public boolean isReadOnly() {
+        return true;
+    }
+
+    @Override
     protected void setCustomOptions() {
         options.addOption(OptionBuilder
                 .withType(String.class)

@@ -8,6 +8,7 @@ import com.tinkerpop.frames.FramedGraph;
 public interface Command {
     public String getHelp();
     public String getUsage();
+    public boolean isReadOnly();
     public int execWithOptions(final FramedGraph<Neo4jGraph> graph, CommandLine cmdLine) throws Exception;
     public int exec(FramedGraph<Neo4jGraph> graph, String[] args) throws Exception;
 }

@@ -22,4 +22,7 @@ public abstract class BaseCommand {
         return execWithOptions(graph, parser.parse(options, args));
     }
     public abstract int execWithOptions(final FramedGraph<Neo4jGraph> graph, CommandLine cmdLine) throws Exception;
+    public boolean isReadOnly() {
+        return false;
+    }
 }
