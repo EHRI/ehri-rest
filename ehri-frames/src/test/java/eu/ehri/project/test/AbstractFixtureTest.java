@@ -109,7 +109,7 @@ abstract public class AbstractFixtureTest extends ModelTestBase {
                                 add(new HashMap<String, Object>() {{
                                     put("type", Entities.ADDRESS);
                                     put("data", new HashMap<String, Object>() {{
-                                        put(Address.ADDRESS_NAME, "primary");
+                                        put("addressName", "primary");
                                     }});
                                 }});
                             }});
