@@ -1,6 +1,7 @@
 package eu.ehri.project.commands;
 
 import com.google.common.base.Optional;
+import eu.ehri.project.exceptions.SerializationError;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionBuilder;
 
@@ -125,9 +126,8 @@ public class ListEntities extends BaseCommand implements Command {
      *
      * @param manager
      * @param type
-     * @throws Exception
      */
-    private void printIds(GraphManager manager, EntityClass type) throws Exception {
+    private void printIds(GraphManager manager, EntityClass type) {
         for (AccessibleEntity acc : manager.getFrames(type, AccessibleEntity.class)) {
             System.out.println(manager.getId(acc));
         }
@@ -139,9 +139,10 @@ public class ListEntities extends BaseCommand implements Command {
      * @param manager
      * @param serializer
      * @param type
-     * @throws Exception
+     * @throws SerializationError
      */
-    private void printJson(GraphManager manager, Serializer serializer, EntityClass type) throws Exception {
+    private void printJson(GraphManager manager, Serializer serializer, EntityClass type)
+            throws SerializationError {
 
         // NOTE no json root {}, but always a list []
         System.out.print("[\n");
@@ -165,10 +166,13 @@ public class ListEntities extends BaseCommand implements Command {
      * @param type
      * @param transformer
      * @param rootName
-     * @throws Exception
+     * @throws SerializationError
+     * @throws TransformerException
+     * @throws UnsupportedEncodingException
      */
     private void printXml(GraphManager manager, Serializer serializer, EntityClass type,
-            Transformer transformer, String rootName) throws Exception {
+            Transformer transformer, String rootName)
+                throws UnsupportedEncodingException, SerializationError, TransformerException {
         System.out.print("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
         System.out.print("<" + rootName + ">\n"); // root element
         for (AccessibleEntity acc : manager.getFrames(type, AccessibleEntity.class)) {
