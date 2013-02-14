@@ -12,9 +12,4 @@ public interface Address extends VersionedEntity {
 
     @Adjacency(label = AgentDescription.HAS_ADDRESS, direction = Direction.IN)
     public AgentDescription getAgentDescription();
-    
-    public static final String ADDRESS_NAME = "name";
-    
-    @Property(ADDRESS_NAME)
-    public String getStreetAddress();
 }
