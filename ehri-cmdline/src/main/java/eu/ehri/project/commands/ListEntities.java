@@ -1,9 +1,8 @@
 package eu.ehri.project.commands;
 
+import com.google.common.base.Optional;
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionBuilder;
-import org.codehaus.jettison.json.JSONObject;
 
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
@@ -21,14 +20,12 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
-import java.net.URL;
 
 /**
  * Import EAD from the command line...
- * 
  */
 public class ListEntities extends BaseCommand implements Command {
-    
+
     final static String NAME = "list";
 
     /**
@@ -50,6 +47,11 @@ public class ListEntities extends BaseCommand implements Command {
                 .hasArg(true).withArgName("f")
                 .withDescription("Format for output data, which defaults to just the id. " +
                         "If provided can be one of: xml, json").create("f"));
+        options.addOption(OptionBuilder
+                .withType(String.class)
+                .withLongOpt("root-node").isRequired(false)
+                .hasArg(true).withArgName("r")
+                .withDescription("Name of the root node (default: '" + NAME + "')").create("r"));
     }
 
     @Override
@@ -65,7 +67,7 @@ public class ListEntities extends BaseCommand implements Command {
 
     /**
      * Command-line entry-point (for testing.)
-     * 
+     *
      * @throws Exception
      */
     @Override
@@ -74,143 +76,126 @@ public class ListEntities extends BaseCommand implements Command {
         // the first argument is the entity type, and that must be specified
         if (cmdLine.getArgList().size() < 1)
             throw new RuntimeException(getHelp());
+        EntityClass type = EntityClass.withName(cmdLine.getArgs()[0]);
+        Class<?> cls = type.getEntityClass();
+
+        if (!AccessibleEntity.class.isAssignableFrom(cls))
+            throw new RuntimeException("Unknown accessible entity: " + type);
+
+        GraphManager manager = GraphManagerFactory.getInstance(graph);
+        Serializer serializer = new Serializer(graph);
+        String rootName = cmdLine.getOptionValue("r", NAME);
 
         if (!cmdLine.hasOption("f")) {
-        	// default to only outputting the id's
-        	printIds(graph, cmdLine);    
+            // default to only outputting the id's
+            printIds(manager, type);
         } else {
             // if there is a second argument, that might be 'json' or 'xml'
-        	String format = (String)cmdLine.getOptionValue("f");
-        	if (format.equalsIgnoreCase("xml")) {
-        		printXml(graph, cmdLine);
-        	} else if (format.equalsIgnoreCase("json")) {
-        		printJson(graph, cmdLine);
-        	} else {
+            String format = (String) cmdLine.getOptionValue("f");
+            if (format.equalsIgnoreCase("xml")) {
+                printXml(manager, serializer, type, getTransformer(Optional.<InputStream>absent()),
+                        rootName);
+            } else if (format.equalsIgnoreCase("json")) {
+                printJson(manager, serializer, type);
+            } else {
                 // If there's an XSLT file in the resources that is named
                 // EntityType_destinationFormat.xslt use that...
-                String xsltName = String.format("%s_%s.xslt", cmdLine.getArgs()[0], format);
-                System.out.println("XSLT: " + xsltName);
-                InputStream ios = getClass().getClassLoader().getResourceAsStream(xsltName);
+                String xsltName = String.format("%s_%s.xslt", type.getName(), format);
+                InputStream ios = EntityClass.class.getClassLoader().getResourceAsStream(xsltName);
                 if (ios != null) {
                     try {
-                        printTransformedXml(graph, xsltName, cmdLine);
+                        Transformer transformer = getTransformer(Optional.fromNullable(ios));
+                        printXml(manager, serializer, type, transformer, rootName);
                     } finally {
                         ios.close();
                     }
                 } else {
                     // unknown format
-                    throw new RuntimeException("Unknown format: " + format);
+                    throw new RuntimeException(
+                            String.format("Unknown format: '%s' and no '%s' xslt found", format, xsltName));
                 }
-        	}
+            }
         }
-        
+
         return 0;
     }
-    
-    private void printIds(final FramedGraph<Neo4jGraph> graph,
-            CommandLine cmdLine) throws Exception {
 
-        GraphManager manager = GraphManagerFactory.getInstance(graph);        
-        EntityClass type = EntityClass.withName(cmdLine.getArgs()[0]);
-        Class<?> cls = type.getEntityClass();
-
-        if (!AccessibleEntity.class.isAssignableFrom(cls))
-            throw new RuntimeException("Unknown accessible entity: " + type);
-
+    /**
+     * Output node IDs only.
+     *
+     * @param manager
+     * @param type
+     * @throws Exception
+     */
+    private void printIds(GraphManager manager, EntityClass type) throws Exception {
         for (AccessibleEntity acc : manager.getFrames(type, AccessibleEntity.class)) {
             System.out.println(manager.getId(acc));
         }
     }
-    
-    private void printJson(final FramedGraph<Neo4jGraph> graph,
-            CommandLine cmdLine) throws Exception {
 
-        GraphManager manager = GraphManagerFactory.getInstance(graph);
-        Serializer serializer = new Serializer(graph);
-
-        EntityClass type = EntityClass.withName(cmdLine.getArgs()[0]);
-        Class<?> cls = type.getEntityClass();
-
-        if (!AccessibleEntity.class.isAssignableFrom(cls))
-            throw new RuntimeException("Unknown accessible entity: " + type);
+    /**
+     * Output nodes as JSON.
+     *
+     * @param manager
+     * @param serializer
+     * @param type
+     * @throws Exception
+     */
+    private void printJson(GraphManager manager, Serializer serializer, EntityClass type) throws Exception {
 
         // NOTE no json root {}, but always a list []
         System.out.print("[\n");
-        
+
         int cnt = 0;
         for (AccessibleEntity acc : manager.getFrames(type, AccessibleEntity.class)) {
-        	String jsonString = serializer.vertexFrameToJson(acc);
-        	if (cnt != 0) System.out.print(",\n");
-        	System.out.println(jsonString);
-        	cnt++;
+            String jsonString = serializer.vertexFrameToJson(acc);
+            if (cnt != 0) System.out.print(",\n");
+            System.out.println(jsonString);
+            cnt++;
         }
         System.out.print("]\n"); // end list
 
     }
 
-    private void printXml(final FramedGraph<Neo4jGraph> graph,
-            CommandLine cmdLine) throws Exception {
-
-        GraphManager manager = GraphManagerFactory.getInstance(graph);
-        Serializer serializer = new Serializer(graph);
-
-        EntityClass type = EntityClass.withName(cmdLine.getArgs()[0]);
-        Class<?> cls = type.getEntityClass();
-
-        if (!AccessibleEntity.class.isAssignableFrom(cls))
-            throw new RuntimeException("Unknown accessible entity: " + type);
-
+    /**
+     * Output nodes as XML, with a given transformer.
+     *
+     * @param manager
+     * @param serializer
+     * @param type
+     * @param transformer
+     * @param rootName
+     * @throws Exception
+     */
+    private void printXml(GraphManager manager, Serializer serializer, EntityClass type,
+            Transformer transformer, String rootName) throws Exception {
         System.out.print("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-        System.out.print("<list>\n"); // root element
-
+        System.out.print("<" + rootName + ">\n"); // root element
         for (AccessibleEntity acc : manager.getFrames(type, AccessibleEntity.class)) {
-            printDocument(serializer.vertexFrameToXml(acc), System.out, null);
+            transformer.transform(new DOMSource(serializer.vertexFrameToXml(acc)),
+                    new StreamResult(new OutputStreamWriter(System.out, "UTF-8")));
         }
-        
-        System.out.print("</list>\n"); // root element
-    }
-
-    private void printTransformedXml(final FramedGraph<Neo4jGraph> graph, String xsltPath,
-            CommandLine cmdLine) throws Exception {
-
-        GraphManager manager = GraphManagerFactory.getInstance(graph);
-        Serializer serializer = new Serializer(graph);
-
-        EntityClass type = EntityClass.withName(cmdLine.getArgs()[0]);
-        Class<?> cls = type.getEntityClass();
-
-        if (!AccessibleEntity.class.isAssignableFrom(cls))
-            throw new RuntimeException("Unknown accessible entity: " + type);
-
-        System.out.print("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-        System.out.print("<list>\n"); // root element
-
-        for (AccessibleEntity acc : manager.getFrames(type, AccessibleEntity.class)) {
-            StreamSource src = new StreamSource(getClass().getClassLoader().getResourceAsStream(xsltPath));
-            printDocument(serializer.vertexFrameToXml(acc), System.out, src);
-        }
-
-        System.out.print("</list>\n"); // root element
+        System.out.print("</" + rootName + ">\n"); // root element
     }
 
     /**
-     * Pretty-print an XML document.
+     * Get an XML Document transformer...
      *
-     * @param doc
-     * @param out
+     * @param xsltOpt Optional XSLT InputStream
      * @throws java.io.IOException
      * @throws javax.xml.transform.TransformerException
+     *
      */
-    private static void printDocument(Document doc, OutputStream out, StreamSource xslt) throws IOException, TransformerException {
+    private static Transformer getTransformer(Optional<InputStream> xsltOpt) throws IOException, TransformerException {
         TransformerFactory tf = TransformerFactory.newInstance();
-        Transformer transformer = xslt == null ? tf.newTransformer() : tf.newTransformer(xslt);
+        Transformer transformer = xsltOpt.isPresent()
+                ? tf.newTransformer(new StreamSource(xsltOpt.get()))
+                : tf.newTransformer();
         transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
         transformer.setOutputProperty(OutputKeys.METHOD, "xml");
         transformer.setOutputProperty(OutputKeys.INDENT, "yes");
         transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
         transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
-
-        transformer.transform(new DOMSource(doc),
-                new StreamResult(new OutputStreamWriter(out, "UTF-8")));
+        return transformer;
     }
 }
