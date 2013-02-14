@@ -68,14 +68,16 @@ abstract public class AbstractFixtureTest extends ModelTestBase {
                             put("title", "A brand new item description");
                             put("languageCode", "en");
                         }});
-                    }});
-                }});
-                put("hasDate", new LinkedList<HashMap<String, Object>>() {{
-                    add(new HashMap<String, Object>() {{
-                        put("type", Entities.DATE_PERIOD);
-                        put("data", new HashMap<String, Object>() {{
-                            put(DatePeriod.START_DATE, TEST_START_DATE);
-                            put(DatePeriod.END_DATE, TEST_START_DATE);
+                        put("relationships", new HashMap<String,Object>() {{
+                            put("hasDate", new LinkedList<HashMap<String, Object>>() {{
+                                add(new HashMap<String, Object>() {{
+                                    put("type", Entities.DATE_PERIOD);
+                                    put("data", new HashMap<String, Object>() {{
+                                        put(DatePeriod.START_DATE, TEST_START_DATE);
+                                        put(DatePeriod.END_DATE, TEST_START_DATE);
+                                    }});
+                                }});
+                            }});
                         }});
                     }});
                 }});

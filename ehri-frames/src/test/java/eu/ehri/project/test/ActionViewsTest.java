@@ -7,6 +7,7 @@ import static org.junit.Assert.assertNotNull;
 import java.util.Iterator;
 import java.util.List;
 
+import eu.ehri.project.models.DocumentDescription;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.persistance.Serializer;
 import org.junit.Test;
@@ -49,14 +50,18 @@ public class ActionViewsTest extends AbstractFixtureTest {
 
         DocumentaryUnit changedUnit = docViews.update(newBundle, validUser);
         assertEquals(newName, changedUnit.getName());
+        assertTrue(changedUnit.getDescriptions().iterator().hasNext());
+        DocumentDescription desc = graph.frame(
+                changedUnit.getDescriptions().iterator().next().asVertex(),
+                DocumentDescription.class);
 
         // Check the nested item was created correctly
-        DatePeriod datePeriod = changedUnit.getDatePeriods().iterator().next();
+        DatePeriod datePeriod = desc.getDatePeriods().iterator().next();
         assertTrue(datePeriod != null);
         assertEquals(TEST_START_DATE, datePeriod.getStartDate());
 
         // And that the reverse relationship works.
-        assertEquals(changedUnit.asVertex(), datePeriod.getEntity().asVertex());
+        assertEquals(desc.asVertex(), datePeriod.getEntity().asVertex());
     }
 
     /**
@@ -139,12 +144,11 @@ public class ActionViewsTest extends AbstractFixtureTest {
         int origActionCount = toList(validUser.getHistory()).size();
 
         // FIXME: Surely there's a better way of doing this???
-        Iterator<DatePeriod> dateIter = item.getDatePeriods().iterator();
         Iterator<Description> descIter = item.getDescriptions().iterator();
-        for (; dateIter.hasNext(); shouldDelete++)
-            dateIter.next();
-        for (; descIter.hasNext(); shouldDelete++)
-            descIter.next();
+        for (; descIter.hasNext(); shouldDelete++) {
+            DocumentDescription d = graph.frame(descIter.next().asVertex(), DocumentDescription.class);
+            for (DatePeriod dp : d.getDatePeriods()) shouldDelete++;
+        }
 
         Integer deleted = docViews.delete(item, validUser);
         assertEquals(shouldDelete, deleted);

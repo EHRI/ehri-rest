@@ -122,16 +122,17 @@ public abstract class AbstractImporter<T> {
                 extractDocumentaryUnit(itemData, depth));
         BundleDAO persister = new BundleDAO(framedGraph, repository);
 
-        // Add dates and descriptions to the bundle since they're @Dependent
-        // relations.
-        for (Map<String, Object> dpb : extractDates(itemData)) {
-            unit = unit.withRelation(TemporalEntity.HAS_DATE, new Bundle(
-                    EntityClass.DATE_PERIOD, dpb));
-        }
         for (Map<String, Object> dpb : extractDocumentDescriptions(itemData,
                 depth)) {
-            unit = unit.withRelation(Description.DESCRIBES, new Bundle(
-                    EntityClass.DOCUMENT_DESCRIPTION, dpb));
+            Bundle desc = new Bundle(
+                    EntityClass.DOCUMENT_DESCRIPTION, dpb);
+            // Add dates to the description bundle since they're @Dependent
+            // relations.
+            for (Map<String, Object> datePeriod : extractDates(itemData)) {
+                desc = desc.withRelation(TemporalEntity.HAS_DATE, new Bundle(
+                        EntityClass.DATE_PERIOD, datePeriod));
+            }
+            unit = unit.withRelation(Description.DESCRIBES, desc);
         }
 
         PermissionScope scope = parent != null ? parent : repository;

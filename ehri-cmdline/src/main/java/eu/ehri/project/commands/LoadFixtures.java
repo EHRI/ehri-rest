@@ -18,7 +18,6 @@ public class LoadFixtures extends BaseCommand implements Command {
     /**
      * Constructor.
      * 
-     * @param args
      */
     public LoadFixtures() {
     }
@@ -41,7 +40,6 @@ public class LoadFixtures extends BaseCommand implements Command {
     /**
      * Command-line entry-point (for testing.)
      * 
-     * @param args
      * @throws Exception
      */
     @Override

@@ -19,7 +19,7 @@ import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Group;
 import eu.ehri.project.models.base.Accessor;
 
-public class ModelTest extends ModelTestBase {
+public class FixtureTest extends ModelTestBase {
     @Test
     public void testTheFixturesLoaded() {
         assertTrue(graph.getVertices().iterator().hasNext());
@@ -66,16 +66,6 @@ public class ModelTest extends ModelTestBase {
         assertEquals(2, Iterables.size(agent.getCollections()));
         assertEquals(4, Iterables.size(agent.getAllCollections()));
 
-    }
-
-    @Test
-    public void testCollectionNameAccess() throws ItemNotFound {
-        DocumentaryUnit c1 = manager.getFrame("c1", DocumentaryUnit.class);
-        Authority a2 = manager.getFrame("a2", Authority.class);
-        assertTrue(toList(c1.getNameAccess()).contains(a2));
-
-        // The same should be true backwards
-        assertTrue(toList(a2.getMentionedIn()).contains(c1));
     }
 
     @Test

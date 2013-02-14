@@ -20,8 +20,6 @@ public class GetEntity extends BaseCommand implements Command {
 
     /**
      * Constructor.
-     * 
-     * @param args
      */
     public GetEntity() {
     }
@@ -37,10 +35,14 @@ public class GetEntity extends BaseCommand implements Command {
         return help;
     }
 
+    @Override
+    public boolean isReadOnly() {
+        return true;
+    }
+
     /**
      * Command-line entry-point (for testing.)
      * 
-     * @param args
      * @throws Exception
      */
     @Override

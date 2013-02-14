@@ -12,13 +12,15 @@
           "languageCode": "en",
           "title": "a description",
           "identifier": "some-id"
-        }
-      }
-    ],
-    "hasDate": [
-      {
-        "type": "datePeriod",
-        "data": {
+        },
+        "relationships": {
+          "hasDate": [
+            {
+              "type": "datePeriod",
+              "data": {
+              }
+            }
+          ]
         }
       }
     ]

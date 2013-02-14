@@ -7,6 +7,8 @@ import static org.junit.Assert.fail;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import com.google.common.collect.Iterables;
+import eu.ehri.project.persistance.utils.BundleUtils;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -119,7 +121,9 @@ public class BundleTest extends ModelTestBase {
             ValidationError, IntegrityError, ItemNotFound {
         DocumentaryUnit c1 = manager.getFrame(ID, DocumentaryUnit.class);
         Bundle bundle = serializer.vertexFrameToBundle(c1);
-        assertEquals(2, toList(c1.getDatePeriods()).size());
+        assertEquals(2, Iterables.size(c1.getDocumentDescriptions()));
+        assertEquals(2, Iterables.size(c1.getDocumentDescriptions()
+                .iterator().next().getDatePeriods()));
         String dpid = "c1-dp2";
         try {
             manager.getFrame(dpid, DatePeriod.class);
@@ -128,12 +132,13 @@ public class BundleTest extends ModelTestBase {
                     + "' not found in index before delete test.");
         }
 
-        List<Bundle> dates = bundle.getRelations(TemporalEntity.HAS_DATE);
-        Bundle newBundle = bundle.removeRelations(TemporalEntity.HAS_DATE)
-                .withRelation(TemporalEntity.HAS_DATE, dates.get(0));
+        // Delete the *second* date period from the first description...
+        Bundle newBundle = BundleUtils.deleteBundle(
+                bundle, "describes[0]/hasDate[1]");
         BundleDAO persister = new BundleDAO(graph);
         persister.update(newBundle, DocumentaryUnit.class);
-        assertEquals(1, toList(c1.getDatePeriods()).size());
+        assertEquals(1, toList(c1.getDocumentDescriptions()
+                .iterator().next().getDatePeriods()).size());
 
         // The second date period should be gone from the index
         try {
@@ -155,7 +160,8 @@ public class BundleTest extends ModelTestBase {
             ValidationError, ItemNotFound {
         DocumentaryUnit c1 = manager.getFrame(ID, DocumentaryUnit.class);
         Bundle bundle = serializer.vertexFrameToBundle(c1);
-        assertEquals(2, toList(c1.getDatePeriods()).size());
+        assertEquals(2, toList(c1.getDocumentDescriptions()
+                .iterator().next().getDatePeriods()).size());
         List<DatePeriod> dates = toList(manager.getFrames(
                 EntityClass.DATE_PERIOD, DatePeriod.class));
 
@@ -177,12 +183,12 @@ public class BundleTest extends ModelTestBase {
         DocumentaryUnit c1 = manager.getFrame(ID, DocumentaryUnit.class);
         Bundle bundle = serializer.vertexFrameToBundle(c1);
 
-        List<Bundle> dates = bundle.getRelations(TemporalEntity.HAS_DATE);
+        List<Bundle> dates = BundleUtils.getRelations(bundle, "describes[0]/hasDate");
         // remove the start date key from a date
         Bundle invalidDate = dates.get(0).withData(
                 Maps.<String, Object> newHashMap());
-        Bundle newBundle = bundle.withRelation(TemporalEntity.HAS_DATE,
-                invalidDate);
+        Bundle newBundle = BundleUtils.setBundle(bundle,
+                "describes[0]/hasDate[0]", invalidDate);
 
         BundleDAO persister = new BundleDAO(graph);
         persister.update(newBundle, DocumentaryUnit.class);
