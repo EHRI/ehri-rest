@@ -2,15 +2,7 @@ package eu.ehri.extension;
 
 import java.util.List;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -222,5 +214,22 @@ public class AnnotationResource extends
         String jsonStr = serializer.vertexFrameToJson(ann);
         return Response.status(Status.CREATED).entity((jsonStr).getBytes())
                 .build();
+    }
+
+    /**
+     * Delete an annotation.
+     * @param id
+     * @return
+     * @throws PermissionDenied
+     * @throws ItemNotFound
+     * @throws ValidationError
+     * @throws BadRequester
+     */
+    @DELETE
+    @Path("/{id:.+}")
+    public Response deleteAgent(@PathParam("id") String id)
+            throws PermissionDenied, ItemNotFound, ValidationError,
+            BadRequester {
+        return delete(id);
     }
 }
