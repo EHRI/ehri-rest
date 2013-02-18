@@ -3,7 +3,9 @@ package eu.ehri.project.core;
 import java.util.Map;
 
 import com.tinkerpop.blueprints.CloseableIterable;
+import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.blueprints.Vertex;
+import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.frames.VertexFrame;
 
 import eu.ehri.project.exceptions.IntegrityError;
@@ -11,6 +13,11 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.EntityClass;
 
 public interface GraphManager {
+
+    /**
+     * Get a pointer to the underlying graph.
+     */
+    public FramedGraph<? extends TransactionalGraph> getGraph();
 
     /**
      * Get the id of a given vertex.

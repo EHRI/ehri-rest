@@ -1,27 +1,19 @@
 package eu.ehri.project.core.impl;
 
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
+import com.tinkerpop.blueprints.*;
 import org.apache.lucene.queryParser.QueryParser;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.index.IndexHits;
 import org.neo4j.graphdb.index.IndexManager;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.tinkerpop.blueprints.CloseableIterable;
-import com.tinkerpop.blueprints.Element;
-import com.tinkerpop.blueprints.Index;
-import com.tinkerpop.blueprints.TransactionalGraph;
-import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jVertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jVertexIterable;
@@ -46,11 +38,10 @@ public final class SingleIndexGraphManager implements GraphManager {
 
     private final FramedGraph<Neo4jGraph> graph;
 
-    /**
-     * Constructor.
-     * 
-     * @param graph
-     */
+    public FramedGraph<? extends TransactionalGraph> getGraph() {
+        return graph;
+    }
+
     public SingleIndexGraphManager(FramedGraph<Neo4jGraph> graph) {
         this.graph = graph;
     }
@@ -148,28 +139,11 @@ public final class SingleIndexGraphManager implements GraphManager {
                 false);
     }
 
-    /**
-     * Create a vertex with no unique keys, indexing all items.
-     * 
-     * @param id
-     * @param data
-     * @return vertex
-     * @throws IntegrityError
-     */
     public Vertex createVertex(String id, EntityClass type,
             Map<String, Object> data) throws IntegrityError {
         return createVertex(id, type, data, data.keySet());
     }
 
-    /**
-     * Create a vertex with specific unique keys, indexing the given key set.
-     * 
-     * @param id
-     * @param data
-     * @param keys
-     * @return vertex
-     * @throws IntegrityError
-     */
     public Vertex createVertex(String id, EntityClass type,
             Map<String, Object> data, Iterable<String> keys) throws IntegrityError {
         Preconditions
