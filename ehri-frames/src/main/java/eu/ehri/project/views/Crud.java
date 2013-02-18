@@ -1,5 +1,6 @@
 package eu.ehri.project.views;
 
+import com.tinkerpop.frames.VertexFrame;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
@@ -20,7 +21,14 @@ public interface Crud<E extends AccessibleEntity> {
             throws PermissionDenied, ValidationError, DeserializationError,
             IntegrityError, ItemNotFound;
 
+    public <T extends VertexFrame> T updateDependent(Bundle bundle, E parent, Accessor user, Class<T> dependentClass)
+            throws PermissionDenied, ValidationError, DeserializationError,
+            IntegrityError, ItemNotFound;
+
     public E create(Bundle bundle, Accessor user)
+            throws PermissionDenied, ValidationError, DeserializationError, IntegrityError;
+
+    public <T extends VertexFrame> T createDependent(Bundle bundle, E parent, Accessor user, Class<T> dependentClass)
             throws PermissionDenied, ValidationError, DeserializationError, IntegrityError;
 
     public E createOrUpdate(Bundle bundle, Accessor user)
@@ -28,4 +36,7 @@ public interface Crud<E extends AccessibleEntity> {
 
     public Integer delete(E item, Accessor user) throws PermissionDenied,
             ValidationError, SerializationError;
+
+    public <T extends VertexFrame> Integer deleteDependent(T item, E parent, Accessor user, Class<T> dependentClass)
+            throws PermissionDenied, ValidationError, SerializationError;
 }

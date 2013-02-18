@@ -3,6 +3,7 @@ package eu.ehri.project.views.impl;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
+import com.tinkerpop.frames.VertexFrame;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.acl.PermissionType;
 import eu.ehri.project.acl.SystemScope;
@@ -33,7 +34,7 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
 
     /**
      * Scoped Constructor.
-     * 
+     *
      * @param graph
      * @param cls
      */
@@ -50,7 +51,7 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
 
     /**
      * Constructor.
-     * 
+     *
      * @param graph
      * @param cls
      */
@@ -60,8 +61,8 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
 
     /**
      * Return a string representation of the given item.
-     * 
-     * @param item
+     *
+     * @param entity
      * @param user
      * @return The given framed vertex
      * @throws PermissionDenied
@@ -73,8 +74,8 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
 
     /**
      * Update an object bundle, also updating dependent items.
-     * 
-     * @param data
+     *
+     * @param bundle
      * @param user
      * @return The updated framed vertex
      * @throws PermissionDenied
@@ -83,21 +84,39 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws ItemNotFound
      */
     public E update(Bundle bundle, Accessor user)
-            throws PermissionDenied, ValidationError,
-            IntegrityError, ItemNotFound {
+            throws PermissionDenied, ValidationError, IntegrityError, ItemNotFound {
         E entity = graph.frame(manager.getVertex(bundle.getId()), cls);
         helper.checkEntityPermission(entity, user, PermissionType.UPDATE);
         return new BundleDAO(graph, scope).update(bundle, cls);
     }
 
     /**
+     * Update an object bundle representing a dependent item, also updating *it's*
+     * dependent items.
+     *
+     * @param bundle
+     * @param parent
+     * @param user
+     * @return The updated framed vertex
+     * @throws PermissionDenied
+     * @throws ValidationError
+     * @throws IntegrityError
+     * @throws ItemNotFound
+     */
+    public <T extends VertexFrame> T updateDependent(Bundle bundle, E parent,
+            Accessor user, Class<T> dependentClass)
+            throws PermissionDenied, ValidationError, IntegrityError, ItemNotFound {
+        helper.checkEntityPermission(parent, user, PermissionType.UPDATE);
+        return new BundleDAO(graph, scope).update(bundle, dependentClass);
+    }
+
+    /**
      * Create a new object of type `E` from the given data, within the scope of
      * `scope`.
-     * 
-     * @param data
+     *
+     * @param bundle
      * @param user
      * @return The created framed vertex
-     * @throws DeserializationError
      * @throws PermissionDenied
      * @throws ValidationError
      * @throws IntegrityError
@@ -115,20 +134,40 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
     }
 
     /**
+     * Create a dependent item of parent item E. The relationships
+     * between the items is not automatically set and must subsequently
+     * be established.
+     *
+     * @param bundle
+     * @param parent
+     * @param user
+     * @param dependentCls
+     * @return The created framed vertex
+     * @throws PermissionDenied
+     * @throws ValidationError
+     * @throws IntegrityError
+     */
+    public <T extends VertexFrame> T createDependent(Bundle bundle, E parent,
+            Accessor user, Class<T> dependentCls)
+            throws PermissionDenied, ValidationError,
+            IntegrityError {
+        helper.checkEntityPermission(parent, user, PermissionType.UPDATE);
+        return new BundleDAO(graph, scope).create(bundle, dependentCls);
+    }
+
+    /**
      * Create or update a new object of type `E` from the given data, within the
      * scope of `scope`.
-     * 
-     * @param data
+     *
+     * @param bundle
      * @param user
      * @return The created framed vertex
-     * @throws DeserializationError
      * @throws PermissionDenied
      * @throws ValidationError
      * @throws IntegrityError
      */
     public E createOrUpdate(Bundle bundle, Accessor user)
-            throws PermissionDenied, ValidationError,
-            IntegrityError {
+            throws PermissionDenied, ValidationError, IntegrityError {
         helper.checkContentPermission(user, helper.getContentType(cls),
                 PermissionType.CREATE);
         helper.checkContentPermission(user, helper.getContentType(cls),
@@ -139,7 +178,7 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
     /**
      * Delete an object bundle, following dependency cascades, within the scope
      * of item `scope`.
-     * 
+     *
      * @param item
      * @param user
      * @return The number of vertices deleted.
@@ -150,6 +189,25 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
     public Integer delete(E item, Accessor user) throws PermissionDenied,
             ValidationError, SerializationError {
         helper.checkEntityPermission(item, user, PermissionType.DELETE);
+        return new BundleDAO(graph, scope).delete(serializer
+                .vertexFrameToBundle(item));
+    }
+
+    /**
+     * Delete a dependent item bundle, following dependency cascades, within the scope
+     * of item `scope`.
+     *
+     * @param item
+     * @param user
+     * @return The number of vertices deleted.
+     * @throws PermissionDenied
+     * @throws ValidationError
+     * @throws SerializationError
+     */
+    public <T extends VertexFrame> Integer deleteDependent(T item, E parent,
+                Accessor user, Class<T> dependentClass)
+            throws PermissionDenied, ValidationError, SerializationError {
+        helper.checkEntityPermission(parent, user, PermissionType.DELETE);
         return new BundleDAO(graph, scope).delete(serializer
                 .vertexFrameToBundle(item));
     }

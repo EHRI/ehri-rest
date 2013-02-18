@@ -1,12 +1,11 @@
 package eu.ehri.project.test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.util.Iterator;
 
 import eu.ehri.project.models.*;
+import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.DescribedEntity;
+import eu.ehri.project.persistance.Serializer;
 import org.junit.Test;
 
 import eu.ehri.project.acl.AclManager;
@@ -25,6 +24,9 @@ import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.views.Crud;
 import eu.ehri.project.views.impl.CrudViews;
 import eu.ehri.project.views.impl.LoggingCrudViews;
+import org.neo4j.helpers.collection.Iterables;
+
+import static org.junit.Assert.*;
 
 public class ViewsTest extends AbstractFixtureTest {
 
@@ -76,79 +78,6 @@ public class ViewsTest extends AbstractFixtureTest {
         CrudViews<DocumentaryUnit> docViews = new CrudViews<DocumentaryUnit>(
                 graph, DocumentaryUnit.class);
         docViews.detail(item, invalidUser);
-    }
-
-    /**
-     * Access the valid user's profile as an invalid users.
-     * 
-     * TODO: Check write access!!!
-     */
-    public void testUserDetailPermissionDenied() throws PermissionDenied {
-        CrudViews<UserProfile> userViews = new CrudViews<UserProfile>(graph,
-                UserProfile.class);
-        userViews.detail(validUser, invalidUser);
-    }
-
-    /**
-     * Test updating an item.
-     * 
-     * @throws PermissionDenied
-     * @throws ValidationError
-     * @throws DeserializationError
-     * @throws IntegrityError
-     * @throws ItemNotFound
-     */
-    @Test
-    public void testUpdate() throws PermissionDenied, ValidationError,
-            DeserializationError, IntegrityError, ItemNotFound {
-        CrudViews<DocumentaryUnit> docViews = new CrudViews<DocumentaryUnit>(
-                graph, DocumentaryUnit.class);
-        Bundle bundle = Bundle.fromData(getTestBundle());
-        DocumentaryUnit unit = docViews.create(bundle, validUser);
-        assertEquals(TEST_COLLECTION_NAME, unit.getName());
-
-        String newName = TEST_COLLECTION_NAME + " with new stuff";
-        Bundle newBundle = bundle.withId(manager.getId(unit)).withDataValue(
-                "name", newName);
-
-        DocumentaryUnit changedUnit = docViews.update(newBundle, validUser);
-        assertEquals(newName, changedUnit.getName());
-        DocumentDescription desc = graph.frame(
-                changedUnit.getDescriptions().iterator().next().asVertex(),
-                DocumentDescription.class);
-
-        // Check the nested item was created correctly
-        DatePeriod datePeriod = desc.getDatePeriods().iterator().next();
-        assertTrue(datePeriod != null);
-        assertEquals(TEST_START_DATE, datePeriod.getStartDate());
-
-        // And that the reverse relationship works.
-        assertEquals(desc.asVertex(), datePeriod.getEntity().asVertex());
-    }
-
-    /**
-     * Test updating a user.
-     * 
-     * @throws PermissionDenied
-     * @throws ValidationError
-     * @throws DeserializationError
-     * @throws IntegrityError
-     * @throws ItemNotFound
-     */
-    @Test
-    public void testUserUpdate() throws PermissionDenied, ValidationError,
-            DeserializationError, IntegrityError, ItemNotFound {
-        CrudViews<UserProfile> userViews = new CrudViews<UserProfile>(graph,
-                UserProfile.class);
-        Bundle bundle = Bundle.fromData(getTestUserBundle());
-        UserProfile user = userViews.create(bundle, validUser);
-        assertEquals(TEST_USER_NAME, user.getName());
-
-        String newName = TEST_USER_NAME + " with new stuff";
-        Bundle newBundle = bundle.withId(manager.getId(user)).withDataValue(
-                "name", newName);
-        UserProfile changedUser = userViews.update(newBundle, validUser);
-        assertEquals(newName, changedUser.getName());
     }
 
     /**
@@ -244,6 +173,78 @@ public class ViewsTest extends AbstractFixtureTest {
     }
 
     /**
+     * Access the valid user's profile as an invalid users.
+     *
+     */
+    public void testUserDetailPermissionDenied() throws PermissionDenied {
+        CrudViews<UserProfile> userViews = new CrudViews<UserProfile>(graph,
+                UserProfile.class);
+        userViews.detail(validUser, invalidUser);
+    }
+
+    /**
+     * Test updating an item.
+     * 
+     * @throws PermissionDenied
+     * @throws ValidationError
+     * @throws DeserializationError
+     * @throws IntegrityError
+     * @throws ItemNotFound
+     */
+    @Test
+    public void testUpdate() throws PermissionDenied, ValidationError,
+            DeserializationError, IntegrityError, ItemNotFound {
+        CrudViews<DocumentaryUnit> docViews = new CrudViews<DocumentaryUnit>(
+                graph, DocumentaryUnit.class);
+        Bundle bundle = Bundle.fromData(getTestBundle());
+        DocumentaryUnit unit = docViews.create(bundle, validUser);
+        assertEquals(TEST_COLLECTION_NAME, unit.getName());
+
+        String newName = TEST_COLLECTION_NAME + " with new stuff";
+        Bundle newBundle = bundle.withId(manager.getId(unit)).withDataValue(
+                "name", newName);
+
+        DocumentaryUnit changedUnit = docViews.update(newBundle, validUser);
+        assertEquals(newName, changedUnit.getName());
+        DocumentDescription desc = graph.frame(
+                changedUnit.getDescriptions().iterator().next().asVertex(),
+                DocumentDescription.class);
+
+        // Check the nested item was created correctly
+        DatePeriod datePeriod = desc.getDatePeriods().iterator().next();
+        assertTrue(datePeriod != null);
+        assertEquals(TEST_START_DATE, datePeriod.getStartDate());
+
+        // And that the reverse relationship works.
+        assertEquals(desc.asVertex(), datePeriod.getEntity().asVertex());
+    }
+
+    /**
+     * Test updating a user.
+     * 
+     * @throws PermissionDenied
+     * @throws ValidationError
+     * @throws DeserializationError
+     * @throws IntegrityError
+     * @throws ItemNotFound
+     */
+    @Test
+    public void testUserUpdate() throws PermissionDenied, ValidationError,
+            DeserializationError, IntegrityError, ItemNotFound {
+        CrudViews<UserProfile> userViews = new CrudViews<UserProfile>(graph,
+                UserProfile.class);
+        Bundle bundle = Bundle.fromData(getTestUserBundle());
+        UserProfile user = userViews.create(bundle, validUser);
+        assertEquals(TEST_USER_NAME, user.getName());
+
+        String newName = TEST_USER_NAME + " with new stuff";
+        Bundle newBundle = bundle.withId(manager.getId(user)).withDataValue(
+                "name", newName);
+        UserProfile changedUser = userViews.update(newBundle, validUser);
+        assertEquals(newName, changedUser.getName());
+    }
+
+    /**
      * Test we can create a new user.
      * 
      * @throws ValidationError
@@ -324,5 +325,93 @@ public class ViewsTest extends AbstractFixtureTest {
 
         Integer deleted = docViews.delete(item, validUser);
         assertEquals(shouldDelete, deleted);
+    }
+
+
+    /**
+     * Test updating an item's dependent item.
+     *
+     * @throws PermissionDenied
+     * @throws ValidationError
+     * @throws DeserializationError
+     * @throws IntegrityError
+     * @throws ItemNotFound
+     */
+    @Test
+    public void testCreateDependent() throws PermissionDenied, ValidationError,
+            DeserializationError, IntegrityError, ItemNotFound, SerializationError {
+        CrudViews<DocumentaryUnit> docViews = new CrudViews<DocumentaryUnit>(
+                graph, DocumentaryUnit.class);
+        Bundle bundle = Bundle.fromData(getTestBundle());
+        DocumentaryUnit unit = docViews.create(bundle, validUser);
+        assertEquals(TEST_COLLECTION_NAME, unit.getName());
+
+        long descCount = Iterables.count(unit.getDescriptions());
+        Bundle descBundle = bundle
+                .getRelations(DescribedEntity.DESCRIBES)
+                .get(0).withDataValue(AccessibleEntity.IDENTIFIER_KEY, "some-new-id");
+
+        DocumentDescription changedDesc = docViews.createDependent(descBundle, unit, validUser,
+                DocumentDescription.class);
+        unit.addDescription(changedDesc);
+        assertEquals("some-new-id", new Serializer(graph)
+                .vertexFrameToBundle(unit).getRelations(DescribedEntity
+                .DESCRIBES).get((int)descCount).getDataValue(AccessibleEntity.IDENTIFIER_KEY));
+    }
+
+    /**
+     * Test updating an item's dependent item.
+     *
+     * @throws PermissionDenied
+     * @throws ValidationError
+     * @throws DeserializationError
+     * @throws IntegrityError
+     * @throws ItemNotFound
+     */
+    @Test
+    public void testUpdateDependent() throws PermissionDenied, ValidationError,
+            DeserializationError, IntegrityError, ItemNotFound, SerializationError {
+        CrudViews<DocumentaryUnit> docViews = new CrudViews<DocumentaryUnit>(
+                graph, DocumentaryUnit.class);
+        Bundle bundle = Bundle.fromData(getTestBundle());
+        DocumentaryUnit unit = docViews.create(bundle, validUser);
+        assertEquals(TEST_COLLECTION_NAME, unit.getName());
+
+        long descCount = Iterables.count(unit.getDocumentDescriptions());
+        Bundle descBundle = new Serializer(graph).vertexFrameToBundle(unit)
+                .getRelations(DescribedEntity.DESCRIBES)
+                .get(0).withDataValue(DocumentDescription.TITLE, "some-new-title");
+
+        DocumentDescription changedDesc = docViews.updateDependent(descBundle, unit, validUser,
+                DocumentDescription.class);
+        assertEquals(descCount, Iterables.count(unit.getDocumentDescriptions()));
+        assertEquals("some-new-title", changedDesc.getTitle());
+    }
+
+    /**
+     * Test deleting an item's child item.
+     *
+     * @throws PermissionDenied
+     * @throws ValidationError
+     * @throws DeserializationError
+     * @throws IntegrityError
+     * @throws ItemNotFound
+     */
+    @Test
+    public void testDeleteDependent() throws PermissionDenied, ValidationError,
+            DeserializationError, IntegrityError, ItemNotFound, SerializationError {
+        CrudViews<DocumentaryUnit> docViews = new CrudViews<DocumentaryUnit>(
+                graph, DocumentaryUnit.class);
+        Bundle bundle = Bundle.fromData(getTestBundle());
+        DocumentaryUnit unit = docViews.create(bundle, validUser);
+        assertEquals(TEST_COLLECTION_NAME, unit.getName());
+
+        long descCount = Iterables.count(unit.getDocumentDescriptions());
+
+        DocumentDescription d = Iterables.first(unit.getDocumentDescriptions());
+        assertNotNull(d);
+        int delCount = docViews.deleteDependent(d, unit, validUser, DocumentDescription.class);
+        assertTrue(delCount >= 1);
+        assertEquals(descCount - 1, Iterables.count(unit.getDocumentDescriptions()));
     }
 }

@@ -39,7 +39,6 @@ public final class AclViews implements Acl {
      * Scoped constructor.
      * 
      * @param graph
-     * @param cls
      * @param scope
      */
     public AclViews(FramedGraph<Neo4jGraph> graph, PermissionScope scope) {
@@ -53,7 +52,6 @@ public final class AclViews implements Acl {
      * Constructor with system scope.
      * 
      * @param graph
-     * @param cls
      */
     public AclViews(FramedGraph<Neo4jGraph> graph) {
         this(graph, SystemScope.getInstance());
@@ -63,8 +61,8 @@ public final class AclViews implements Acl {
      * Set the global permission matrix for a user.
      * 
      * @param accessor
+     * @param permissionMap
      * @param grantee
-     * @param matrix
      * @throws PermissionDenied
      */
     public void setGlobalPermissionMatrix(Accessor accessor,
@@ -95,7 +93,7 @@ public final class AclViews implements Acl {
      * @param entity
      * @param accessors
      *            the list of accessors to whom this item is visible
-     * @param accessor
+     * @param user
      *            the user making the change
      */
     public void setAccessors(AccessibleEntity entity, Set<Accessor> accessors,
@@ -140,8 +138,9 @@ public final class AclViews implements Acl {
                     Iterable<PermissionGrant> grants = acl.getPermissionGrants(
                             accessor, target, grantPerm);
                     if (!grants.iterator().hasNext()) {
-                        throw new PermissionDenied(accessor, target, grantPerm,
-                                SystemScope.getInstance());
+                        throw new PermissionDenied(manager.getId(accessor),
+                                manager.getId(target), manager.getId(grantPerm),
+                                "system");
                     }
                 }
             } catch (ItemNotFound e) {
