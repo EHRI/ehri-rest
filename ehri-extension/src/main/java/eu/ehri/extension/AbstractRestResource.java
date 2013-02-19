@@ -206,7 +206,7 @@ public abstract class AbstractRestResource {
     /**
      * Return a streaming response from an iterable.
      * 
-     * @param list
+     * @param map
      * @return
      */
     protected <T extends VertexFrame> StreamingOutput streamingMultimap(
@@ -218,7 +218,8 @@ public abstract class AbstractRestResource {
      * Return a streaming response from an iterable, using the given
      * entity converter.
      * 
-     * @param list
+     * @param map
+     * @param serializer
      * @return
      */
     protected <T extends VertexFrame> StreamingOutput streamingMultimap(
