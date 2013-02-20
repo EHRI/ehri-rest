@@ -76,6 +76,7 @@ public class ValidationErrorMapper implements ExceptionMapper<BundleError> {
             return Response.status(Status.BAD_REQUEST)
                     .entity(new ObjectMapper().writeValueAsBytes(out)).build();
         } catch (Exception e1) {
+            e1.printStackTrace();
             throw new RuntimeException(e1);
         }
     }
