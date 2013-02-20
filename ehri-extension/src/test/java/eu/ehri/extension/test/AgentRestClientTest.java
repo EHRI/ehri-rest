@@ -9,6 +9,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 
+import eu.ehri.project.models.Agent;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Before;
@@ -67,6 +68,23 @@ public class AgentRestClientTest extends BaseRestClientTest {
                 .header(AbstractRestResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId()).get(ClientResponse.class);
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+    }
+
+    @Test
+    public void testCreateAgentWithExistingIdentifier() throws Exception {
+        String json = Bundle.fromString(agentTestData)
+                .withDataValue(Agent.IDENTIFIER_KEY, "r1").toJson();
+        WebResource resource = client.resource(getExtensionEntryPointUri()
+                + "/agent");
+        ClientResponse response = resource
+                .accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                        getAdminUserProfileId()).entity(json)
+                .post(ClientResponse.class);
+        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(),
+                response.getStatus());
+        System.out.println(response.getEntity(String.class));
     }
 
     @Test
