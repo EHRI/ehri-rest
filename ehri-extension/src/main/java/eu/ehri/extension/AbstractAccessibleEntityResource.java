@@ -359,7 +359,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * @return
      */
     protected String getDefaultUpdateMessage(EntityClass entityClass, String id) {
-        return String.format("%s (%s): %s",
+        return String.format("%s (%s): '%s'",
                 LoggingCrudViews.DEFAULT_UPDATE_LOG,
                 entityClass.getName(), id);
     }
@@ -370,7 +370,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * @return
      */
     protected String getDefaultDeleteMessage(EntityClass entityClass, String id) {
-        return String.format("%s (%s): %s",
+        return String.format("%s (%s): '%s'",
                 LoggingCrudViews.DEFAULT_DELETE_LOG,
                 entityClass.getName(), id);
     }
