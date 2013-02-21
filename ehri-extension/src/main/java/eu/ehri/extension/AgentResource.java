@@ -21,6 +21,7 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriBuilder;
 
+import eu.ehri.project.models.EntityClass;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 
@@ -218,7 +219,8 @@ public class AgentResource extends AbstractAccessibleEntityResource<Agent> {
 
         DocumentaryUnit doc = new LoggingCrudViews<DocumentaryUnit>(graph,
                 DocumentaryUnit.class, agent).create(entityBundle,
-                getRequesterUserProfile());
+                getRequesterUserProfile(), getLogMessage(
+                    getDefaultCreateMessage(EntityClass.DOCUMENTARY_UNIT)));
         // Add it to this agent's collections
         doc.setAgent(agent);
         doc.setPermissionScope(agent);

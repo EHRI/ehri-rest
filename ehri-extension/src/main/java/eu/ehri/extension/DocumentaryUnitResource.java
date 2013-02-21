@@ -186,7 +186,8 @@ public class DocumentaryUnitResource extends
             DocumentaryUnit doc = views.detail(
                     manager.getFrame(id, EntityClass.DOCUMENTARY_UNIT, DocumentaryUnit.class), user);
             DocumentDescription desc = views.createDependent(Bundle.fromString(json),
-                    doc, user, DocumentDescription.class);
+                    doc, user, DocumentDescription.class,
+                    getLogMessage(getDefaultUpdateMessage(EntityClass.DOCUMENT_DESCRIPTION, id)));
             doc.addDescription(desc);
             tx.success();
             return buildResponseFromDocumentaryUnit(doc);
@@ -208,7 +209,8 @@ public class DocumentaryUnitResource extends
         Accessor user = getRequesterUserProfile();
         DocumentaryUnit doc = views.detail(
                 manager.getFrame(id, EntityClass.DOCUMENTARY_UNIT, DocumentaryUnit.class), user);
-        views.updateDependent(Bundle.fromString(json), doc, user, DocumentDescription.class);
+        views.updateDependent(Bundle.fromString(json), doc, user, DocumentDescription.class,
+                getLogMessage(getDefaultUpdateMessage(EntityClass.DOCUMENT_DESCRIPTION, id)));
         return retrieve(id);
     }
 
@@ -235,7 +237,8 @@ public class DocumentaryUnitResource extends
                 DocumentaryUnit.class), user);
         DocumentDescription desc = manager.getFrame(did, EntityClass.DOCUMENT_DESCRIPTION,
                 DocumentDescription.class);
-        views.deleteDependent(desc, doc, user, DocumentDescription.class);
+        views.deleteDependent(desc, doc, user, DocumentDescription.class,
+                getLogMessage(getDefaultDeleteMessage(EntityClass.DOCUMENT_DESCRIPTION, id)));
         return retrieve(id);
     }
 
@@ -265,7 +268,9 @@ public class DocumentaryUnitResource extends
 
         DocumentaryUnit doc = new LoggingCrudViews<DocumentaryUnit>(graph,
                 DocumentaryUnit.class, parent).create(entityBundle,
-                getRequesterUserProfile());
+                getRequesterUserProfile(), getLogMessage(getDefaultCreateMessage(
+                    EntityClass.DOCUMENTARY_UNIT
+        )));
         // NB: We no longer add this item to the
         // parent's Agent directly.
         parent.addChild(doc);

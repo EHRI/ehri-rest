@@ -34,7 +34,6 @@ import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.utils.ClassUtils;
 import eu.ehri.project.persistance.Bundle;
-import eu.ehri.project.views.Crud;
 import eu.ehri.project.views.impl.LoggingCrudViews;
 import eu.ehri.project.views.impl.Query;
 
@@ -54,7 +53,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
     // protected final static Logger logger = Logger
     // .getLogger(AbstractAccessibleEntityResource.class);
 
-    protected final Crud<E> views;
+    protected final LoggingCrudViews<E> views;
     protected final Query<E> querier;
     protected final Class<E> cls;
 
@@ -159,7 +158,8 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
         try {
             Accessor user = getRequesterUserProfile();
             Bundle entityBundle = Bundle.fromString(json);
-            E entity = views.create(entityBundle, user);
+            E entity = views.create(entityBundle, user,
+                    getLogMessage(getDefaultCreateMessage(getEntityType())));
             // TODO: Move elsewhere
             new AclManager(graph).setAccessors(entity,
                     getAccessors(accessorIds, user));
@@ -247,7 +247,8 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
 
         try {
             Bundle entityBundle = Bundle.fromString(json);
-            E update = views.update(entityBundle, getRequesterUserProfile());
+            E update = views.update(entityBundle, getRequesterUserProfile(),
+                    getLogMessage(getDefaultUpdateMessage(getEntityType(), entityBundle.getId())));
             String jsonStr = serializer.vertexFrameToJson(update);
 
             return Response.status(Status.OK).entity((jsonStr).getBytes())
@@ -303,7 +304,8 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
         try {
             E entity = views.detail(manager.getFrame(id, getEntityType(), cls),
                     getRequesterUserProfile());
-            views.delete(entity, getRequesterUserProfile());
+            views.delete(entity, getRequesterUserProfile(),
+                    getLogMessage(getDefaultDeleteMessage(getEntityType(), id)));
             return Response.status(Status.OK).build();
         } catch (SerializationError e) {
             throw new WebApplicationException(e);
@@ -338,5 +340,38 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
             accessors.add(current);
         }
         return accessors;
+    }
+
+    /**
+     * Get a default message for an item being created.
+     *
+     * @return
+     */
+    protected String getDefaultCreateMessage(EntityClass entityClass) {
+        return String.format("%s (%s)",
+                LoggingCrudViews.DEFAULT_CREATE_LOG,
+                entityClass.getName());
+    }
+
+    /**
+     * Get a default message for an item being updated.
+     *
+     * @return
+     */
+    protected String getDefaultUpdateMessage(EntityClass entityClass, String id) {
+        return String.format("%s (%s): %s",
+                LoggingCrudViews.DEFAULT_UPDATE_LOG,
+                entityClass.getName(), id);
+    }
+
+    /**
+     * Get a default message for an item being deleted.
+     *
+     * @return
+     */
+    protected String getDefaultDeleteMessage(EntityClass entityClass, String id) {
+        return String.format("%s (%s): %s",
+                LoggingCrudViews.DEFAULT_DELETE_LOG,
+                entityClass.getName(), id);
     }
 }

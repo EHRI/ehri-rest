@@ -10,6 +10,7 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriInfo;
 
+import com.google.common.base.Optional;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -43,7 +44,13 @@ public abstract class AbstractRestResource {
     public static final String OFFSET_PARAM = "offset";
     public static final String ACCESSOR_PARAM = "accessibleTo";
     public static final String GROUP_PARAM = "group";
-    
+
+    /**
+     * Header names
+     */
+    public static final String AUTH_HEADER_NAME = "Authorization";
+    public static final String LOG_MESSAGE_HEADER_NAME = "logMessage";
+
 
     /**
      * With each request the headers of that request are injected into the
@@ -59,7 +66,6 @@ public abstract class AbstractRestResource {
     protected final GraphDatabaseService database;
     protected final FramedGraph<Neo4jGraph> graph;
     protected final GraphManager manager;
-    public static final String AUTH_HEADER_NAME = "Authorization";
     protected final Serializer serializer;
 
     public AbstractRestResource(@Context GraphDatabaseService database) {
@@ -76,16 +82,29 @@ public abstract class AbstractRestResource {
      * @throws BadRequester
      */
     protected Accessor getRequesterUserProfile() throws BadRequester {
-        String id = getRequesterIdentifier();
-        if (id == null) {
+        Optional<String> id = getRequesterIdentifier();
+        if (!id.isPresent()) {
             return AnonymousAccessor.getInstance();
         } else {
             try {
-                return manager.getFrame(id, Accessor.class);
+                return manager.getFrame(id.get(), Accessor.class);
             } catch (ItemNotFound e) {
-                throw new BadRequester(id);
+                throw new BadRequester(id.get());
             }
         }
+    }
+
+    /**
+     * Retreive an action log message from the request header.
+     *
+     * @return
+     */
+    protected String getLogMessage(String defaultMessage) {
+        List<String> list = requestHeaders.getRequestHeader(LOG_MESSAGE_HEADER_NAME);
+        if (list != null && !list.isEmpty()) {
+            return list.get(0);
+        }
+        return defaultMessage;
     }
 
     /**
@@ -93,26 +112,12 @@ public abstract class AbstractRestResource {
      * 
      * @return
      */
-    private String getRequesterIdentifier() {
+    private Optional<String> getRequesterIdentifier() {
         List<String> list = requestHeaders.getRequestHeader(AUTH_HEADER_NAME);
         if (list != null && !list.isEmpty()) {
-            return list.get(0);
+            return Optional.fromNullable(list.get(0));
         }
-        return null;
-    }
-
-    /**
-     * Fetch an entity of a given type by its identifier.
-     * 
-     * @param typeName
-     * @param name
-     * @param cls
-     * @return
-     * @throws ItemNotFound
-     */
-    protected <E> E getEntity(String typeName, String name, Class<E> cls)
-            throws ItemNotFound {
-        return graph.frame(manager.getVertex(name), cls);
+        return Optional.absent();
     }
 
     /**
