@@ -8,11 +8,14 @@
             <doc>
                 <xsl:variable name="documentId" select="@id"/>
                 <xsl:variable name="holderId" select="relationships/heldBy/item[1]/@id" />
+                <xsl:variable name="holderName" select="relationships/heldBy/item[1]/data/property[@name='name']" />
                 <xsl:variable name="lastUpdated"  select="relationships/lifecycleEvent/item/data/property[@name='timestamp']" />
                 <xsl:for-each select="relationships/describes/item">
-                    <field name="documentId"><xsl:value-of select="$documentId" /></field>
+                    <field name="id"><xsl:value-of select="@id" /></field>
+                    <field name="type">documentDescription</field>
+                    <field name="itemId"><xsl:value-of select="$documentId" /></field>
                     <field name="holderId"><xsl:value-of select="$holderId" /></field>
-                    <field name="descriptionId"><xsl:value-of select="@id" /></field>
+                    <field name="holderName"><xsl:value-of select="$holderName" /></field>
                     <field name="lastUpdated"><xsl:value-of select="$lastUpdated" /></field>
                     <xsl:for-each select="data/property">
                         <xsl:variable name="propertyName" select="@name"/>
