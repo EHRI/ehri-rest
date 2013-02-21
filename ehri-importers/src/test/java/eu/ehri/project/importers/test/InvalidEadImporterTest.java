@@ -10,7 +10,7 @@ import org.junit.Test;
 
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.importers.EadImportManager;
+import eu.ehri.project.importers.old.EadImportManager;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.models.Agent;
