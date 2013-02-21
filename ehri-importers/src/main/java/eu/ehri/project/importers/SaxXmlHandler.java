@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
-
+import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -21,19 +21,31 @@ import org.xml.sax.helpers.DefaultHandler;
  * @author linda
  */
 public abstract class SaxXmlHandler extends DefaultHandler {
+        private static final org.slf4j.Logger logger = LoggerFactory
+            .getLogger(SaxXmlHandler.class);
     public static final String UNKNOWN = "UNKNOWN_";
     Stack<Map<String, Object>> currentGraphPath;
     Map<String, Map<String, Object>> languageMap;
     PropertiesConfig p;
     Stack<String> currentPath;
-    AbstractCVocImporter<Map<String, Object>> importer;
+    AbstractImporter<Map<String, Object>> importer;
     String languagePrefix;
     int depth = 0;
     boolean inSubnode = false;
 
-    public SaxXmlHandler(AbstractCVocImporter<Map<String, Object>> importer2, PropertiesConfig properties) {
+//    public SaxXmlHandler(AbstractCVocImporter<Map<String, Object>> importer2, PropertiesConfig properties) {
+//        super();
+//        this.importer = importer2;
+//        currentGraphPath = new Stack<Map<String, Object>>();
+//        currentGraphPath.push(new HashMap<String, Object>());
+//        p = properties;
+//        currentPath = new Stack<String>();
+//        languageMap = new HashMap<String, Map<String, Object>>();
+//    }
+    public SaxXmlHandler(AbstractImporter<Map<String, Object>> importer, PropertiesConfig properties) {
         super();
-        this.importer = importer2;
+        logger.error("constructor");
+        this.importer=importer;
         currentGraphPath = new Stack<Map<String, Object>>();
         currentGraphPath.push(new HashMap<String, Object>());
         p = properties;

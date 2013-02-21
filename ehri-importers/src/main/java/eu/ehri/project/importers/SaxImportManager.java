@@ -1,28 +1,7 @@
 package eu.ehri.project.importers;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringReader;
-import java.lang.reflect.InvocationTargetException;
-import java.util.List;
-import java.util.logging.Level;
-
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
-
-import org.neo4j.graphdb.Transaction;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.xml.sax.EntityResolver;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.xml.sax.helpers.DefaultHandler;
-
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
-
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.exceptions.InvalidEadDocument;
@@ -31,6 +10,23 @@ import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.persistance.ActionManager;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringReader;
+import java.lang.reflect.InvocationTargetException;
+import java.util.List;
+import java.util.Map;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+import org.neo4j.graphdb.Transaction;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.xml.sax.EntityResolver;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
 
 /**
  * Class that provides a front-end for importing XML files like EAD and EAC and
@@ -44,7 +40,8 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
     private static final Logger logger = LoggerFactory
             .getLogger(SaxImportManager.class);
     private Boolean tolerant = false;
-    private XmlCVocImporter importer; // CVoc specific!
+//    private XmlCVocImporter importer; // CVoc specific!
+     private AbstractImporter<Map<String, Object>> importer;
     protected final FramedGraph<Neo4jGraph> framedGraph;
     protected final Agent agent;
     protected final Actioner actioner;
@@ -54,7 +51,7 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
     private String currentFile = null;
     private Integer currentPosition = null;
 
-    private  Class<? extends XmlCVocImporter> importerClass; // CVoc specific!
+    private  Class<? extends AbstractImporter> importerClass; // CVoc specific!
     Class<? extends SaxXmlHandler> handlerClass;
     /**
      * Dummy resolver that does nothing. This is used to ensure that, in
@@ -78,7 +75,7 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
      * @param actioner
      */
     public SaxImportManager(FramedGraph<Neo4jGraph> framedGraph,
-            final Agent agent, final Actioner actioner, Class<? extends XmlCVocImporter> importerClass, Class<? extends SaxXmlHandler> handlerClass) {
+            final Agent agent, final Actioner actioner, Class<? extends AbstractImporter> importerClass, Class<? extends SaxXmlHandler> handlerClass) {
         this.framedGraph = framedGraph;
         this.agent = agent;
         this.actioner = actioner;
@@ -226,28 +223,29 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
                     log.addUpdated();
                 }
             });
-            
             // Note: CVoc specific !
             //TODO decide which handler to use, HandlerFactory? now part of constructor ...
-            DefaultHandler handler = handlerClass.getConstructor(AbstractCVocImporter.class).newInstance(importer); 
+//            DefaultHandler handler = handlerClass.getConstructor(AbstractCVocImporter.class).newInstance(importer); 
+            DefaultHandler handler = handlerClass.getConstructor(AbstractImporter.class).newInstance(importer); 
             saxParser.parse(ios, handler); //TODO + log
             
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(SaxImportManager.class.getName()).log(Level.SEVERE, null, ex);
+            logger.error(ex.getMessage());
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(SaxImportManager.class.getName()).log(Level.SEVERE, null, ex);
+            logger.error(ex.getMessage());
         } catch (IllegalArgumentException ex) {
-            java.util.logging.Logger.getLogger(SaxImportManager.class.getName()).log(Level.SEVERE, null, ex);
+            logger.error(ex.getMessage());
         } catch (InvocationTargetException ex) {
-            java.util.logging.Logger.getLogger(SaxImportManager.class.getName()).log(Level.SEVERE, null, ex);
+            logger.error(ex.getMessage());
         } catch (NoSuchMethodException ex) {
-            java.util.logging.Logger.getLogger(SaxImportManager.class.getName()).log(Level.SEVERE, null, ex);
+            logger.error(ex.getMessage());
         } catch (SecurityException ex) {
-            java.util.logging.Logger.getLogger(SaxImportManager.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (ParserConfigurationException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
+            logger.error(ex.getMessage());
+        } catch (ParserConfigurationException ex) {
+            logger.error(ex.getMessage());
+            throw new RuntimeException(ex);
         } catch (SAXException e) {
+            logger.error(e.getMessage());
             throw new InputParseError(e);
         }
 

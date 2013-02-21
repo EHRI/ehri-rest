@@ -1,5 +1,6 @@
-package eu.ehri.project.importers;
+package eu.ehri.project.importers.old;
 
+import eu.ehri.project.importers.old.EadImporter;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,6 +28,10 @@ import com.tinkerpop.frames.FramedGraph;
 
 import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.importers.ImportCallback;
+import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.importers.ImportManager;
+import eu.ehri.project.importers.XmlImportManager;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.exceptions.InvalidEadDocument;
 import eu.ehri.project.importers.exceptions.InvalidInputFormatError;

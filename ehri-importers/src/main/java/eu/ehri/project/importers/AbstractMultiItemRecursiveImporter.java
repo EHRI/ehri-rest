@@ -1,5 +1,6 @@
 package eu.ehri.project.importers;
 
+import eu.ehri.project.importers.old.AbstractImporter;
 import java.util.List;
 
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
