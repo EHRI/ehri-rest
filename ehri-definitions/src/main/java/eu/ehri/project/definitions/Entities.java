@@ -23,4 +23,5 @@ public class Entities {
     public static final String CVOC_CONCEPT = "cvocConcept";
     public static final String CVOC_CONCEPT_DESCRIPTION = "cvocConceptDescription";
     public static final String SYSTEM = "system";
+    public static final String MAINTENANCE_EVENT ="maintenanceEvent";
 }

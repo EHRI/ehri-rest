@@ -18,11 +18,11 @@ import eu.ehri.project.models.base.AccessibleEntity;
  * @author paulboon
  *
  */
-public abstract class AbstractCVocImporter<T> {
+public abstract class AbstractCVocImporter<T> extends XmlImporter<Map<String, Object>> {
 
-    protected final Agent repository;
-    protected final FramedGraph<Neo4jGraph> framedGraph;
-    protected final GraphManager manager;
+//    protected final Agent repository;
+//    protected final FramedGraph<Neo4jGraph> framedGraph;
+//    protected final GraphManager manager;
     protected final ImportLog log;
     protected final T documentContext;
     protected List<ImportCallback> createCallbacks = new LinkedList<ImportCallback>();
@@ -36,21 +36,20 @@ public abstract class AbstractCVocImporter<T> {
      * @param log
      * @param documentContext
      */
-    public AbstractCVocImporter(FramedGraph<Neo4jGraph> framedGraph,
-    		Agent repository, ImportLog log, T documentContext) {
-        this.repository = repository;
-        this.framedGraph = framedGraph;
+    public AbstractCVocImporter(FramedGraph<Neo4jGraph> framedGraph, Agent repository, ImportLog log, T documentContext) {
+        super(framedGraph, repository, log);
+//        this.repository = repository;
+//        this.framedGraph = framedGraph;
         this.log = log;
         this.documentContext = documentContext;
-        manager = GraphManagerFactory.getInstance(framedGraph);
+//        manager = GraphManagerFactory.getInstance(framedGraph);
     }
 
       public AbstractCVocImporter(FramedGraph<Neo4jGraph> framedGraph, Agent repository, ImportLog log) {
-        this.repository = repository;
-        this.framedGraph = framedGraph;
+        super(framedGraph, repository, log);
         this.log = log;
         documentContext=null;
-        manager = GraphManagerFactory.getInstance(framedGraph);
+//        manager = GraphManagerFactory.getInstance(framedGraph);
     }
       
     /**
@@ -88,7 +87,6 @@ public abstract class AbstractCVocImporter<T> {
      * @param data
      * @return
      */
-    public abstract Iterable<Map<String, Object>> extractDates(T data);
 
 
     /**
