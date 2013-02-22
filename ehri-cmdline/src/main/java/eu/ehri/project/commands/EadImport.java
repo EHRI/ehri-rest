@@ -70,7 +70,8 @@ public class EadImport extends BaseCommand implements Command {
     /**
      * Command-line entry-point (for testing.)
      * 
-     * @param args
+     * @param graph
+     * @param cmdLine
      * @throws Exception
      */
     @Override
