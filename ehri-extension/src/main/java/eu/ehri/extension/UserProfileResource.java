@@ -160,7 +160,8 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
         try {
             Accessor user = getRequesterUserProfile();
             Bundle entityBundle = Bundle.fromString(json);
-            UserProfile entity = views.create(entityBundle, user); // ! was generic E
+            UserProfile entity = views.create(entityBundle, user,
+                    getLogMessage(getDefaultCreateMessage(EntityClass.USER_PROFILE)));
             // TODO: Move elsewhere
             new AclManager(graph).setAccessors(entity,
                     getAccessors(accessorIds, user));

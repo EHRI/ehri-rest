@@ -21,6 +21,7 @@ import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.Response.Status;
 
+import eu.ehri.project.models.EntityClass;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 
@@ -256,7 +257,8 @@ public class VocabularyResource extends
         Bundle entityBundle = Bundle.fromString(json);
 
         Concept concept = new LoggingCrudViews<Concept>(graph, Concept.class,
-                vocabulary).create(entityBundle, getRequesterUserProfile());
+                vocabulary).create(entityBundle, getRequesterUserProfile(),
+                getLogMessage(getDefaultCreateMessage(EntityClass.CVOC_CONCEPT)));
 
         // Add it to this Vocabulary's concepts
         concept.setVocabulary(vocabulary);

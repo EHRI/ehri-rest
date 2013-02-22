@@ -21,6 +21,7 @@ import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
 
+import eu.ehri.project.models.EntityClass;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 
@@ -398,7 +399,8 @@ public class CvocConceptResource extends
         // the permission scope here, rather than the immediate parent.
         Concept concept = new LoggingCrudViews<Concept>(graph, Concept.class,
                 parent.getPermissionScope()).create(entityBundle,
-                getRequesterUserProfile());
+                getRequesterUserProfile(),
+                getLogMessage(getDefaultCreateMessage(EntityClass.CVOC_CONCEPT)));
 
         // Add it to this Vocabulary's concepts
         parent.addNarrowerConcept(concept);
