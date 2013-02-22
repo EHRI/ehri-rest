@@ -3,12 +3,12 @@ package eu.ehri.project.models.idgen;
 import java.text.MessageFormat;
 import java.util.LinkedList;
 
-import com.github.slugify.Slugify;
 import com.google.common.base.Joiner;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
 
+import eu.ehri.project.utils.Slugify;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
