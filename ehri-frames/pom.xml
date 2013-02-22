@@ -65,6 +65,12 @@
         </plugins>
     </build>
     <dependencies>
+        <!-- Slugification lib -->
+        <dependency>
+            <groupId>com.github.slugify</groupId>
+            <artifactId>slugify</artifactId>
+            <version>1.0-RELEASE</version>
+        </dependency>
         <!-- date time -->
         <dependency>
             <groupId>joda-time</groupId>

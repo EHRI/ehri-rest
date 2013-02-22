@@ -3,6 +3,7 @@ package eu.ehri.project.models.idgen;
 import java.text.MessageFormat;
 import java.util.LinkedList;
 
+import com.github.slugify.Slugify;
 import com.google.common.base.Joiner;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
@@ -61,6 +62,7 @@ public enum AccessibleEntityIdGenerator implements IdGenerator {
         // because having dirty IDs is an effective way of debugging (via
         // breakage) other parts of the system.
         scopeIds.add((String) bundle.getDataValue(AccessibleEntity.IDENTIFIER_KEY));
-        return Joiner.on(SEPARATOR).skipNulls().join(scopeIds);
+        String scopedId =  Joiner.on(SEPARATOR).skipNulls().join(scopeIds);
+        return Slugify.slugify(scopedId);
     }
 }
