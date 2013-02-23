@@ -11,6 +11,7 @@ import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriInfo;
 
 import com.google.common.base.Optional;
+import com.tinkerpop.blueprints.Vertex;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -198,6 +199,38 @@ public abstract class AbstractRestResource {
                 for (T item : list) {
                     try {
                         mapper.writeValue(g, serializer.vertexFrameToData(item));
+                    } catch (SerializationError e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+                g.writeEndArray();
+                g.close();
+            }
+        };
+    }
+
+    /**
+     * Return a streaming response from an iterable, using the given
+     * entity converter.
+     *
+     * FIXME: I shouldn't be here, or the other method should. Redesign API.
+     *
+     * @param list
+     * @return
+     */
+    protected StreamingOutput streamingVertexList(
+            final Iterable<Vertex> list, final Serializer serializer) {
+        final ObjectMapper mapper = new ObjectMapper();
+        final JsonFactory f = new JsonFactory();
+        return new StreamingOutput() {
+            @Override
+            public void write(OutputStream arg0) throws IOException,
+                    WebApplicationException {
+                JsonGenerator g = f.createJsonGenerator(arg0);
+                g.writeStartArray();
+                for (Vertex item : list) {
+                    try {
+                        mapper.writeValue(g, serializer.vertexToData(item));
                     } catch (SerializationError e) {
                         throw new RuntimeException(e);
                     }

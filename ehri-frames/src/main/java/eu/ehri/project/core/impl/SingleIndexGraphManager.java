@@ -1,11 +1,10 @@
 package eu.ehri.project.core.impl;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
+import java.util.*;
 
+import com.google.common.base.Joiner;
 import com.tinkerpop.blueprints.*;
+import eu.ehri.project.models.utils.EmptyIterable;
 import org.apache.lucene.queryParser.QueryParser;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.index.IndexHits;
@@ -25,6 +24,7 @@ import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
+import org.neo4j.helpers.collection.Iterables;
 
 /**
  * Implementation of GraphManager that uses a single index to manage all nodes.
@@ -128,6 +128,16 @@ public final class SingleIndexGraphManager implements GraphManager {
 
     public CloseableIterable<Vertex> getVertices(EntityClass type) {
         return getIndex().get(EntityType.TYPE_KEY, type.getName());
+    }
+
+    @SuppressWarnings("unchecked")
+    public CloseableIterable<Neo4jVertex> getVertices(String[] ids) {
+        System.out.println("USING A BROKEN FUNCTION!!! ");
+        String queryStr = getMultiItemLuceneQuery(ids);
+        System.out.println(queryStr);
+        IndexHits<Node> rawQuery = getRawIndex().query(queryStr);
+        return new Neo4jVertexIterable<Vertex>(rawQuery, graph.getBaseGraph(),
+                false);
     }
 
     @SuppressWarnings("unchecked")
@@ -334,5 +344,14 @@ public final class SingleIndexGraphManager implements GraphManager {
                 QueryParser.escape(String.valueOf(value)),
                 QueryParser.escape(EntityType.TYPE_KEY),
                 QueryParser.escape(type));
+    }
+
+    private String getMultiItemLuceneQuery(String[] ids) {
+        // FIXME: Almost certainly a less stupid way of doing this.
+        ArrayList<String> list = Lists.newArrayList();
+        for (String id : ids) {
+            list.add(EntityType.ID_KEY + ":\"" + id + "\"");
+        }
+        return Joiner.on(" OR ").join(list);
     }
 }
