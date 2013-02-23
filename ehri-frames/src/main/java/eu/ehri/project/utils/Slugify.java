@@ -9,7 +9,7 @@ package eu.ehri.project.utils;
 
 import java.text.Normalizer;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 public class Slugify {
 
