@@ -101,7 +101,7 @@ public interface GraphManager {
      * @param ids
      * @return
      */
-    public <T extends Vertex> CloseableIterable<T> getVertices(String[] ids);
+    public Iterable<Vertex> getVertices(Iterable<String> ids) throws ItemNotFound;
 
     /**
      * Get a CloseableIterable of vertices with the given type, and the given

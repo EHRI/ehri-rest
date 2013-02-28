@@ -2,7 +2,9 @@ package eu.ehri.project.core.impl;
 
 import java.util.*;
 
+import com.google.common.base.Function;
 import com.google.common.base.Joiner;
+import com.google.common.collect.FluentIterable;
 import com.tinkerpop.blueprints.*;
 import eu.ehri.project.models.utils.EmptyIterable;
 import org.apache.lucene.queryParser.QueryParser;
@@ -130,14 +132,15 @@ public final class SingleIndexGraphManager implements GraphManager {
         return getIndex().get(EntityType.TYPE_KEY, type.getName());
     }
 
-    @SuppressWarnings("unchecked")
-    public CloseableIterable<Neo4jVertex> getVertices(String[] ids) {
-        System.out.println("USING A BROKEN FUNCTION!!! ");
-        String queryStr = getMultiItemLuceneQuery(ids);
-        System.out.println(queryStr);
-        IndexHits<Node> rawQuery = getRawIndex().query(queryStr);
-        return new Neo4jVertexIterable<Vertex>(rawQuery, graph.getBaseGraph(),
-                false);
+    public Iterable<Vertex> getVertices(Iterable<String> ids) throws ItemNotFound {
+        // Ugh, we don't want to remove duplicate results here
+        // because that's not expected behaviour - if you give
+        // an array with dups you expect the dups to come out...
+        List<Vertex> verts = Lists.newLinkedList();
+        for (String id : ids) {
+            verts.add(getVertex(id));
+        }
+        return verts;
     }
 
     @SuppressWarnings("unchecked")

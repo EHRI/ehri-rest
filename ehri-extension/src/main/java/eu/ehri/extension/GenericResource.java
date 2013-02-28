@@ -63,22 +63,12 @@ public class GenericResource extends AbstractAccessibleEntityResource<Accessible
     @Produces(MediaType.APPLICATION_JSON)
     public StreamingOutput get(@QueryParam("id") List<String> ids) throws ItemNotFound,
             PermissionDenied, BadRequester {
-        // FIXME FIXME FIXME: Broken code alert - getVertices(ids) crashes if array is empty
-        // This is awkward to fix at the moment so I'm going on without it...
-        if (ids.size() == 0) {
-            return streamingVertexList(Iterables.<Vertex>empty(), serializer);
-        } else {
-            CloseableIterable<Vertex> vertices = manager.getVertices(ids.toArray(new String[ids.size()]));
-            PipeFunction<Vertex,Boolean> filter = new AclManager(graph).getAclFilterFunction(getRequesterUserProfile());
-
-            try {
-                GremlinPipeline<Vertex, Vertex> filtered = new GremlinPipeline<Vertex, Vertex>(
-                        vertices)
-                        .filter(filter);
-                return streamingVertexList(filtered, serializer);
-            } finally {
-                vertices.close();
-            }
-        }
+        Iterable<Vertex> vertices = manager.getVertices(ids);
+        PipeFunction<Vertex,Boolean> filter = new AclManager(graph)
+                .getAclFilterFunction(getRequesterUserProfile());
+        GremlinPipeline<Vertex, Vertex> filtered = new GremlinPipeline<Vertex, Vertex>(
+                vertices)
+                .filter(filter);
+        return streamingVertexList(filtered, serializer);
     }
 }
