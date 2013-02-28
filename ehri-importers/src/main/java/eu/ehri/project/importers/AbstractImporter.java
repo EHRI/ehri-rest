@@ -75,8 +75,7 @@ public abstract class AbstractImporter<T> {
     }
 
    
-    abstract public AccessibleEntity importItem(Map<String, Object> itemData, 
-            int depth) throws ValidationError;
+    abstract public AccessibleEntity importItem(Map<String, Object> itemData, int depth) throws ValidationError;
     /**
      * Extract a list of DatePeriod bundles from an item's data.
      * 
@@ -85,53 +84,7 @@ public abstract class AbstractImporter<T> {
      */
     public abstract Iterable<Map<String, Object>> extractDates(T data);
 
-/*  
-    protected DocumentaryUnit importItem(T itemData, DocumentaryUnit parent,
-            int depth) throws ValidationError, IntegrityError {
-        Bundle unit = new Bundle(EntityClass.DOCUMENTARY_UNIT,
-                extractDocumentaryUnit(itemData, depth));
-        BundleDAO persister = new BundleDAO(framedGraph, repository);
 
-        for (Map<String, Object> dpb : extractDocumentDescriptions(itemData,
-                depth)) {
-            Bundle desc = new Bundle(
-                    EntityClass.DOCUMENT_DESCRIPTION, dpb);
-            // Add dates to the description bundle since they're @Dependent
-            // relations.
-            for (Map<String, Object> datePeriod : extractDates(itemData)) {
-                desc = desc.withRelation(TemporalEntity.HAS_DATE, new Bundle(
-                        EntityClass.DATE_PERIOD, datePeriod));
-            }
-            unit = unit.withRelation(Description.DESCRIBES, desc);
-        }
-
-        PermissionScope scope = parent != null ? parent : repository;
-        IdGenerator generator = AccessibleEntityIdGenerator.INSTANCE;
-        String id = generator.generateId(EntityClass.DOCUMENTARY_UNIT, scope, unit);
-        boolean exists = manager.exists(id);
-        DocumentaryUnit frame = persister.createOrUpdate(unit.withId(id),
-                DocumentaryUnit.class);
-
-        // Set the repository/item relationship
-        frame.setAgent(repository);
-        frame.setPermissionScope(scope);
-        // Set the parent child relationship
-        if (parent != null)
-            parent.addChild(frame);
-
-        // Run creation callbacks for the new item...
-        if (exists) {
-            for (ImportCallback cb : updateCallbacks) {
-                cb.itemImported(frame);
-            }
-        } else {
-            for (ImportCallback cb : createCallbacks) {
-                cb.itemImported(frame);
-            }
-        }
-        return frame;
-    }
-*/
     
     /**
      * Lookup the graph ID of an existing object based on the IDENTITY_KEY

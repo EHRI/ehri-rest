@@ -21,8 +21,7 @@ import org.xml.sax.helpers.DefaultHandler;
  * @author linda
  */
 public abstract class SaxXmlHandler extends DefaultHandler {
-        private static final org.slf4j.Logger logger = LoggerFactory
-            .getLogger(SaxXmlHandler.class);
+    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(SaxXmlHandler.class);
     public static final String UNKNOWN = "UNKNOWN_";
     Stack<Map<String, Object>> currentGraphPath;
     Map<String, Map<String, Object>> languageMap;
@@ -32,6 +31,7 @@ public abstract class SaxXmlHandler extends DefaultHandler {
     String languagePrefix;
     int depth = 0;
     boolean inSubnode = false;
+    String currentText ="";
 
 //    public SaxXmlHandler(AbstractCVocImporter<Map<String, Object>> importer2, PropertiesConfig properties) {
 //        super();
@@ -44,7 +44,7 @@ public abstract class SaxXmlHandler extends DefaultHandler {
 //    }
     public SaxXmlHandler(AbstractImporter<Map<String, Object>> importer, PropertiesConfig properties) {
         super();
-        logger.error("constructor");
+        logger.info("constructor");
         this.importer=importer;
         currentGraphPath = new Stack<Map<String, Object>>();
         currentGraphPath.push(new HashMap<String, Object>());
@@ -53,12 +53,13 @@ public abstract class SaxXmlHandler extends DefaultHandler {
         languageMap = new HashMap<String, Map<String, Object>>();
     }
 
-    protected abstract boolean needToCreateSubNode();
+    protected abstract boolean needToCreateSubNode(String qName);
 
     @Override
     public void startElement(String uri, String localName, String qName,
             Attributes attributes) throws SAXException {
 
+        currentText="";
         String lang = languageAttribute(attributes);
         if (lang != null) {
             languagePrefix = lang;
@@ -73,7 +74,7 @@ public abstract class SaxXmlHandler extends DefaultHandler {
 
         currentPath.push(withoutNamespace(qName));
 
-        if (needToCreateSubNode()) { //a new subgraph should be created
+        if (needToCreateSubNode(qName)) { //a new subgraph should be created
             System.out.println("new subnode: " + depth);
             depth++;
             currentGraphPath.push(new HashMap<String, Object>());
@@ -90,6 +91,13 @@ public abstract class SaxXmlHandler extends DefaultHandler {
         @Override
     public void endElement(String uri, String localName, String qName) throws SAXException {
             languagePrefix=null;
+                    if(languagePrefix == null){
+           putPropertyInCurrentGraph(getImportantPath(currentPath), currentText);
+        }else{
+            putPropertyInGraph(languageMap.get(languagePrefix), getImportantPath(currentPath), currentText);
+        }
+
+            
     }
 
 
@@ -126,11 +134,8 @@ public abstract class SaxXmlHandler extends DefaultHandler {
         if (isEmpty(new String(ch, start, length))) {
             return;
         }
-        if(languagePrefix == null){
-           putPropertyInCurrentGraph(getImportantPath(currentPath), new String(ch, start, length));
-        }else{
-            putPropertyInGraph(languageMap.get(languagePrefix), getImportantPath(currentPath), new String(ch, start, length));
-        }
+        String trimmed = new String(ch, start, length).trim().replaceAll("\\s+", " ");
+        currentText += trimmed;
     }
 
     /**

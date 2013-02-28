@@ -16,13 +16,14 @@ import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.persistance.BundleDAO;
 import java.util.HashMap;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * Import EAD for a given repository into the database. Due to the laxness of
- * the EAD standard this is a fairly complex procedure. An EAD a single entity
- * at the highest level of description or multiple top-level entities, with or
- * without a hierarchical structure describing their child items. This means
- * that we need to recursively descend through the archdesc and c01-12 levels.
+ * Import EAD for a given repository into the database. Due to the laxness of the EAD standard this is a fairly complex
+ * procedure. An EAD a single entity at the highest level of description or multiple top-level entities, with or without
+ * a hierarchical structure describing their child items. This means that we need to recursively descend through the
+ * archdesc and c01-12 levels.
  *
  * TODO: Extensive cleanups, optimisation, and rationalisation.
  *
@@ -31,6 +32,7 @@ import java.util.Map;
  */
 public class IcaAtomEadImporter extends XmlImporter<Map<String, Object>> {
 
+    private static final Logger logger = LoggerFactory.getLogger(IcaAtomEadImporter.class);
     // An integer that represents how far down the
     // EAD heirarchy tree the current document is.
     public final String DEPTH_ATTR = "depthOfDescription";
@@ -38,7 +40,7 @@ public class IcaAtomEadImporter extends XmlImporter<Map<String, Object>> {
     // describing body saw fit to name a documentary unit's
     // level of description.
     public final String LEVEL_ATTR = "levelOfDescription";
-   
+
     /**
      * Construct an EadImporter object.
      *
@@ -52,46 +54,40 @@ public class IcaAtomEadImporter extends XmlImporter<Map<String, Object>> {
 
     }
 
-  /**
-     * Import a single archdesc or c01-12 item, keeping a reference to the
-     * hierarchical depth.
-     * 
+    /**
+     * Import a single archdesc or c01-12 item, keeping a reference to the hierarchical depth.
+     *
      * @param itemData
      * @param parent
      * @param depth
      * @throws ValidationError
      */
-    public DocumentaryUnit importItem(Map<String, Object> itemData, int depth) 
+    @Override
+    public DocumentaryUnit importItem(Map<String, Object> itemData, int depth)
             throws ValidationError {
-
         BundleDAO persister = new BundleDAO(framedGraph, repository);
         Bundle unit = new Bundle(EntityClass.DOCUMENTARY_UNIT, extractDocumentaryUnit(itemData, depth));
-               
 
+        Bundle descBundle = new Bundle(EntityClass.DOCUMENT_DESCRIPTION, extractDocumentDescription(itemData, depth));
         // Add dates and descriptions to the bundle since they're @Dependent
         // relations.
         for (Map<String, Object> dpb : extractDates(itemData)) {
-            unit.withRelation(TemporalEntity.HAS_DATE, new Bundle(
-                    EntityClass.DATE_PERIOD, dpb));
-            
+            descBundle=descBundle.withRelation(TemporalEntity.HAS_DATE, new Bundle(EntityClass.DATE_PERIOD, dpb));
         }
-        Map<String, Object> dpb = extractDocumentDescription(itemData,
-                depth); 
         
-        unit.withRelation(Description.DESCRIBES,
-                    new Bundle(EntityClass.DOCUMENT_DESCRIPTION, dpb));
-        
+        unit=unit.withRelation(Description.DESCRIBES, descBundle);
 
-        Object existingId = getExistingGraphId((String) unit.getData().get(
-                AccessibleEntity.IDENTIFIER_KEY));
- PermissionScope scope = repository;
-        
+        PermissionScope scope = repository;
         IdGenerator generator = AccessibleEntityIdGenerator.INSTANCE;
         String id = generator.generateId(EntityClass.DOCUMENTARY_UNIT, scope, unit);
         boolean exists = manager.exists(id);
-        DocumentaryUnit frame = persister.createOrUpdate(unit.withId(id),
-        		DocumentaryUnit.class);
-
+        DocumentaryUnit frame = persister.createOrUpdate(unit.withId(id), DocumentaryUnit.class);
+  
+        // Set the repository/item relationship
+        frame.setAgent(repository);
+        frame.setPermissionScope(scope);
+        
+        
         if (exists) {
             for (ImportCallback cb : updateCallbacks) {
                 cb.itemImported(frame);
@@ -101,10 +97,11 @@ public class IcaAtomEadImporter extends XmlImporter<Map<String, Object>> {
                 cb.itemImported(frame);
             }
         }
-        return frame;   
+        return frame;
 
-        
+
     }
+
     protected Map<String, Object> extractDocumentaryUnit(Map<String, Object> itemData, int depth) throws ValidationError {
         Map<String, Object> unit = new HashMap<String, Object>();
         unit.put(AccessibleEntity.IDENTIFIER_KEY, itemData.get(OBJECT_ID));
@@ -113,7 +110,7 @@ public class IcaAtomEadImporter extends XmlImporter<Map<String, Object>> {
     }
 
     protected Map<String, Object> extractDocumentDescription(Map<String, Object> itemData, int depth) throws ValidationError {
-        
+
         Map<String, Object> unit = new HashMap<String, Object>();
         for (String key : itemData.keySet()) {
             if (!(key.equals(OBJECT_ID) || key.equals(DocumentaryUnit.NAME) || key.startsWith(SaxXmlHandler.UNKNOWN))) {
@@ -122,6 +119,4 @@ public class IcaAtomEadImporter extends XmlImporter<Map<String, Object>> {
         }
         return unit;
     }
-
-  
 }

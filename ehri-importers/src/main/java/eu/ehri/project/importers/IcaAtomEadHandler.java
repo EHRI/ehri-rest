@@ -7,8 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
@@ -31,7 +29,6 @@ public class IcaAtomEadHandler extends SaxXmlHandler {
     @SuppressWarnings("unchecked")
     public IcaAtomEadHandler(AbstractImporter<Map<String, Object>> importer) {
         super(importer, new PropertiesConfig("icaatom.properties"));
-        logger.error("constructor");
         this.importer = importer;
         currentGraphPath = new Stack<Map<String, Object>>();
         currentGraphPath.push(new HashMap<String, Object>());
@@ -41,38 +38,48 @@ public class IcaAtomEadHandler extends SaxXmlHandler {
     }
 
     @Override
-    public void startElement(String uri, String localName, String qName,
-            Attributes attributes) throws SAXException {
-        logger.error("start: " + qName);
-        
-        currentPath.push(qName);
+    public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
+//        currentPath.push(qName);
+        super.startElement(uri, localName, qName, attributes);
 
-        if (childItemPattern.matcher(qName).matches()) { //a new DocumentaryUnit should be created
-            depth++;
-            currentGraphPath.push(new HashMap<String, Object>());
+        if (childItemPattern.matcher(qName).matches() || qName.equals("archdesc")) { //a new DocumentaryUnit should be created
+//            depth++;
+//            System.out.println("=============== startElement: " + qName);
+//            currentGraphPath.push(new HashMap<String, Object>());
             children[depth] = new ArrayList<DocumentaryUnit>();
         }
-        for (int attr = 0; attr < attributes.getLength(); attr++) { // only certain attributes get stored
-            if (p.hasAttributeProperty(attributes.getLocalName(attr))) {
-                putPropertyInCurrentGraph(p.getAttributeProperty(attributes.getLocalName(attr)), attributes.getValue(attr));
-            }
-        }
+//        for (int attr = 0; attr < attributes.getLength(); attr++) { // only certain attributes get stored
+//            if (p.hasAttributeProperty(attributes.getLocalName(attr))) {
+//                putPropertyInCurrentGraph(p.getAttributeProperty(attributes.getLocalName(attr)), attributes.getValue(attr));
+//            }
+//        }
     }
 
     @Override
     public void endElement(String uri, String localName, String qName) throws SAXException {
         //the child closes, add the new DocUnit to the list, establish some relations
-        if (childItemPattern.matcher(qName).matches()) {
+        super.endElement(uri, localName, qName);
+        if (childItemPattern.matcher(qName).matches() || qName.equals("archdesc")) {
             Map<String, Object> currentGraph = currentGraphPath.pop();
             try {
                 //add any mandatory fields not yet there:
                 if (!currentGraph.containsKey("name")) {
-                    currentGraph.put("name", currentGraph.get("title"));
+                    for(String key: currentGraph.keySet()){
+                        System.out.println(key + ":" + currentGraph.get(key));
+                    }
+                    //finding some name for this unit:
+                    if(currentGraph.containsKey("title"))
+                        currentGraph.put("name", currentGraph.get("title"));
+                    else{
+                        logger.error("IcaAtom node without name field: " );
+                        currentGraph.put("name", "UNKNOWN title");
+                    }
                 }
                 if (!currentGraph.containsKey("languageCode")) {
                     currentGraph.put("languageCode", "en");
                 }
                 DocumentaryUnit current = (DocumentaryUnit)importer.importItem(currentGraph, depth);
+                logger.error("importer used: " + importer.getClass());
                 if (depth > 0) { // if not on root level
                     children[depth - 1].add(current); // add child to parent offspring
                     //set the parent child relationships by hand, as we don't have the parent Documentary unit yet.
@@ -85,7 +92,7 @@ public class IcaAtomEadHandler extends SaxXmlHandler {
                 }
                 depth--;
             } catch (ValidationError ex) {
-                Logger.getLogger(IcaAtomEadHandler.class.getName()).log(Level.SEVERE, null, ex);
+                logger.error(ex.getMessage());
             }
         }
         
@@ -93,8 +100,8 @@ public class IcaAtomEadHandler extends SaxXmlHandler {
     }
 
     @Override
-    protected boolean needToCreateSubNode() {
-        throw new UnsupportedOperationException("Not supported yet.");
+    protected boolean needToCreateSubNode(String qName) {
+        return childItemPattern.matcher(qName).matches() || qName.equals("archdesc");
     }
 
 }

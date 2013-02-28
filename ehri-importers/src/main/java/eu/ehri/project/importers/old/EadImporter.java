@@ -28,7 +28,6 @@ import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.importers.AbstractMultiItemRecursiveImporter;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.ead.EadLanguageExtractor;
 import eu.ehri.project.importers.exceptions.InvalidInputFormatError;
