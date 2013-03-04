@@ -10,6 +10,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import com.google.common.collect.Sets;
+import eu.ehri.project.exceptions.SerializationError;
+import eu.ehri.project.persistance.Serializer;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import eu.ehri.extension.errors.BadRequester;
@@ -36,7 +38,7 @@ public class AccessResource extends
      *
      * @param id
      * @param accessorIds
-     * @return
+     * @return the updated object
      * @throws PermissionDenied
      * @throws ItemNotFound
      * @throws BadRequester
@@ -46,12 +48,14 @@ public class AccessResource extends
     @Path("/{id:[^/]+}")
     public Response setVisibility(@PathParam("id") String id,
             @QueryParam(ACCESSOR_PARAM) List<String> accessorIds)
-            throws PermissionDenied, ItemNotFound, BadRequester {
+            throws PermissionDenied, ItemNotFound, BadRequester, SerializationError {
+        AccessibleEntity item = manager.getFrame(id, AccessibleEntity.class);
         Set<Accessor> accessors = extractAccessors(accessorIds);
         AclViews acl = new AclViews(graph);
-        acl.setAccessors(manager.getFrame(id, AccessibleEntity.class),
-                accessors, getRequesterUserProfile());
-        return Response.status(Status.OK).build();
+        acl.setAccessors(item, accessors, getRequesterUserProfile());
+        return Response.status(Status.OK)
+                .entity((serializer.vertexFrameToJson(item)).getBytes())
+                .build();
     }
 
     /**
