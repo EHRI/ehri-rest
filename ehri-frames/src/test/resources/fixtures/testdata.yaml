@@ -304,26 +304,26 @@
   type: authority
   data:
     identifier: a1
-    typeOfEntity: person
   relationships:
     describes:
       - id: ad1
         type: authorityDescription
         data:
-          title: An Authority 1
+          typeOfEntity: person
+          name: An Authority 1
           languageCode: en
 
 - id: a2
   type: authority
   data:
     identifier: a2
-    typeOfEntity: person
   relationships:
     describes:
       - id: ad2
         type: authorityDescription
         data:
-          title: An Authority 2
+          typeOfEntity: person
+          name: An Authority 2
           languageCode: en
 
 
