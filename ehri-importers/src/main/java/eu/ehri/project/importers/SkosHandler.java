@@ -121,5 +121,10 @@ System.out.println("#### concepts: " + concepts.size());
             c.put(key, l);
         }
     }
+
+    @Override
+    protected boolean needToCreateSubNode(String qName) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
     
 }

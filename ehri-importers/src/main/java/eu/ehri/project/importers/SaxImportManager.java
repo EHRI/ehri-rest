@@ -15,12 +15,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import org.neo4j.graphdb.Transaction;
+import org.neo4j.tooling.GlobalGraphOperations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.EntityResolver;
@@ -106,6 +109,7 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
      * @throws ValidationError
      * @throws InputParseError
      */
+    @Override
     public ImportLog importFile(InputStream ios, String logMessage)
             throws IOException, ValidationError, InputParseError {
         Transaction tx = framedGraph.getBaseGraph().getRawGraph().beginTx();
@@ -142,6 +146,7 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
      * @throws IOException
      * @throws ValidationError
      */
+    @Override
     public ImportLog importFiles(List<String> paths, String logMessage)
             throws IOException, ValidationError {
 
@@ -187,6 +192,17 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
             tx.finish();
         }
     }
+    protected int getNodeCount(FramedGraph<Neo4jGraph> graph) {
+        return toList(GlobalGraphOperations
+                .at(graph.getBaseGraph().getRawGraph()).getAllNodes()).size();
+    }
+    protected <T> List<T> toList(Iterable<T> iter) {
+        Iterator<T> it = iter.iterator();
+        List<T> lst = new ArrayList<T>();
+        while (it.hasNext())
+            lst.add(it.next());
+        return lst;
+    }
 
     /**
      * Import EAD from the given InputStream, as part of the given action.
@@ -209,16 +225,17 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
             SAXParserFactory factory = SAXParserFactory.newInstance();
             SAXParser saxParser = factory.newSAXParser();
             importer = importerClass.getConstructor(FramedGraph.class, Agent.class, ImportLog.class).newInstance(framedGraph, agent, log);
+            logger.error("importer of class " + importer.getClass());
             importer.addCreationCallback(new ImportCallback() {
                 public void itemImported(AccessibleEntity item) {
-                    System.out.println("ImportCallback: itemImported creation " + item.getIdentifier());
+                    logger.error("ImportCallback: itemImported creation " + item.getIdentifier());
                     eventContext.addSubjects(item);
                     log.addCreated();
                 }
             });
             importer.addUpdateCallback(new ImportCallback() {
                 public void itemImported(AccessibleEntity item) {
-                    System.out.println("ImportCallback: itemImported updated");
+                    logger.error("ImportCallback: itemImported updated");
                     eventContext.addSubjects(item);
                     log.addUpdated();
                 }
@@ -227,6 +244,7 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
             //TODO decide which handler to use, HandlerFactory? now part of constructor ...
 //            DefaultHandler handler = handlerClass.getConstructor(AbstractCVocImporter.class).newInstance(importer); 
             DefaultHandler handler = handlerClass.getConstructor(AbstractImporter.class).newInstance(importer); 
+            logger.error("handler of class " + handler.getClass());
             saxParser.parse(ios, handler); //TODO + log
             
         } catch (InstantiationException ex) {

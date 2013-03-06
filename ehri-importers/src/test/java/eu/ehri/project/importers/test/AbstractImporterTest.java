@@ -24,9 +24,10 @@ public class AbstractImporterTest extends AbstractFixtureTest {
             System.out.println("-------------------------");
             for (String key : v.getPropertyKeys()) {
                 String value = "";
-                if (v.getProperty(key) instanceof List) {
-                    for (Object o : (List) v.getProperty(key)) {
-                        value += o.toString() + " ";
+                if (v.getProperty(key) instanceof String[]) {
+                    String[] list = (String[]) v.getProperty(key);
+                    for (String o : list) {
+                        value += "["+o.toString() + "] ";
                     }
                 } else {
                     value = v.getProperty(key).toString();

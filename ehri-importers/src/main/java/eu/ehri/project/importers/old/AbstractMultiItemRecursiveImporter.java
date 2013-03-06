@@ -1,4 +1,4 @@
-package eu.ehri.project.importers;
+package eu.ehri.project.importers.old;
 
 import eu.ehri.project.importers.old.AbstractImporter;
 import java.util.List;
@@ -9,6 +9,7 @@ import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.exceptions.InvalidInputFormatError;
 import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.DocumentaryUnit;

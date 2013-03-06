@@ -17,6 +17,8 @@ import java.util.regex.Pattern;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -24,9 +26,10 @@ import org.joda.time.format.ISODateTimeFormat;
  *
  */
 public abstract class XmlImporter<T> extends AbstractImporter<T> {
+
+    private static final Logger logger = LoggerFactory.getLogger(XmlImporter.class);
     protected final String OBJECT_ID = "objectIdentifier";
     protected final String DESCRIPTION_ID = "descriptionIdentifier";
-
     private PropertiesConfig dates = new PropertiesConfig("dates.properties");
     // Various date patterns
     private Pattern[] datePatterns = {
@@ -37,7 +40,9 @@ public abstract class XmlImporter<T> extends AbstractImporter<T> {
         Pattern.compile("^(\\d{4})-\\[(\\d{4})\\]$"),
         Pattern.compile("^(\\d{4}s)-\\[(\\d{4}s)\\]$"),
         Pattern.compile("^\\[(\\d{4})\\]$"), Pattern.compile("^(\\d{4})$"),
-        Pattern.compile("^(\\d{2})th century$")};
+        Pattern.compile("^(\\d{2})th century$"),
+        Pattern.compile("^\\s*(\\d{4})\\s*-\\s*(\\d{4})")
+    };
 
     public XmlImporter(FramedGraph<Neo4jGraph> framedGraph,
             Agent repository, ImportLog log) {
@@ -45,8 +50,7 @@ public abstract class XmlImporter<T> extends AbstractImporter<T> {
     }
 
     /**
-     * Extract a list of entity bundles for DatePeriods from the data,
-     * attempting to parse the unitdate attribute.
+     * Extract a list of entity bundles for DatePeriods from the data, attempting to parse the unitdate attribute.
      *
      * @param data
      */
@@ -71,14 +75,14 @@ public abstract class XmlImporter<T> extends AbstractImporter<T> {
     }
 
     /**
-     * Attempt to extract some date periods. This does not currently put the
-     * dates into ISO form.
+     * Attempt to extract some date periods. This does not currently put the dates into ISO form.
      *
      * @param date
      * @return
      * @throws ValidationError
      */
     private Map<String, Object> extractDate(Object date) throws ValidationError {
+        logger.error("date value: " + date);
         Map<String, Object> data = new HashMap<String, Object>();
         if (date instanceof String) {
             data = matchDate((String) date);
@@ -114,11 +118,12 @@ public abstract class XmlImporter<T> extends AbstractImporter<T> {
     //TODO: for now, it only returns 1 unknown node object, but it could be more accurate to return several
     /**
      * extract data nodes from the data, that are not covered by their respectable properties file.
+     *
      * @param data
-     * @return 
+     * @return
      */
-  protected Iterable<Map<String, Object>> extractOtherProperties(Map<String, Object> data){
-              List<Map<String, Object>> l = new ArrayList<Map<String, Object>>();
+    protected Iterable<Map<String, Object>> extractOtherProperties(Map<String, Object> data) {
+        List<Map<String, Object>> l = new ArrayList<Map<String, Object>>();
         Map<String, Object> unit = new HashMap<String, Object>();
         for (String key : data.keySet()) {
             if (key.startsWith(SaxXmlHandler.UNKNOWN)) {
@@ -128,8 +133,9 @@ public abstract class XmlImporter<T> extends AbstractImporter<T> {
         l.add(unit);
         return l;
 
-  }
-   //TODO: or should this be done in the Handler?
+    }
+    //TODO: or should this be done in the Handler?
+
     @SuppressWarnings("unchecked")
     protected Iterable<Map<String, Object>> extractMaintenanceEvent(Map<String, Object> data) throws ValidationError {
         List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
@@ -152,6 +158,4 @@ public abstract class XmlImporter<T> extends AbstractImporter<T> {
         }
         return list;
     }
- 
 }
-

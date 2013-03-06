@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE ead PUBLIC "+//ISBN 1
+-
+931666
+-
+00
+-
+8//DTD ead.dtd (Encoded Archival Description
+(
+EAD)
+Version 2002)//EN" "/Users/linda/Documents/knaw/ehri/dataformats/ead2002/ead.dtd">
+<ead>
+    <eadheader langencoding="iso639-2b" scriptencoding="iso15924" repositoryencoding="iso15511"
+        countryencoding="iso3166-1" dateencoding="iso8601">
+        <eadid countrycode="us" identifier="ark:/13030/kt4w10133d" mainagencycode="CU-SC"
+            publicid="PUBLIC &quot;
+            -
+            //University of California, Santa Cruz::University Library::Special
+            Collections//TEXT (US::CU
+            -
+            SC::MS 74::John Cage Mycology Collection)//EN&quot;
+            &quot;ms74.xml&quot;">ms74.xml</eadid>
+        <filedesc>
+            <titlestmt>
+                <titleproper>
+                    Guide to the John Cage Mycology Collection</titleproper>
+                <titleproper type="filing">Cage (John) Mycology Collection</titleproper>
+                <author>Processed by UCSC OAC Unit</author>
+            </titlestmt>
+            <publicationstmt>
+                <publisher>The University Library</publisher>
+                <address>
+                    <addressline>Special Collections and Archives</addressline>
+                    <addressline>University Library</addressline>
+                    <addressline>University of California, Santa Cruz</addressline>
+                    <addressline>Santa Cruz, California, 95064</addressline>
+                    <addressline>Email: spec
+                        oll@library.ucsc.edu</addressline>
+                    <addressline>URL: http://library.ucsc.edu/speccoll/</addressline>
+                    </address>
+                    <date>&#x00A9; 2003</date>
+                    <p>The Regents of the University of California. All rights reserved.</p>
+            </publicationstmt>
+        </filedesc>
+        <profiledesc>
+            <creation>Machine
+                -
+                readable finding aid derived from MS Word. Date of source: <date
+                    normal="2003-06">June 2003.</date> Machine
+                -
+                readable finding aid created by UCSC OAC
+                Unit.</creation>
+            <langusage>Description is in <language langcode="eng" scriptcode="latn"
+                >English.</language></langusage>
+            <descrules>Finding aid prepared using <title>Describing Archives: a Content
+                Standard</title></descrules>
+        </profiledesc>
+    </eadheader>
+    <archdesc level="collection" relatedencoding="marc21">
+        <did>
+            <unittitle label="Title">John Cage Mycology collection</unittitle>
+            <unitdate normal="1900/1991">1900                -                1991</unitdate>
+            <unitid label="Collection number" repositorycode="CU-SC" countrycode="us">MS 74</unitid>
+            <origination label="Creator">
+                <persname rules="aacr2">Cage, John</persname></origination>
+                <physdesc label="Extent">
+                    <extent>15 linear ft.</extent>
+                    <extent>12 cartons</extent>
+                </physdesc>
+                <repository label="Repository">
+                    <corpname source="lcnaf">University of California, Santa Cruz. University Library.
+                        <subarea>Special Collections and
+                            Archives</subarea></corpname>
+                    <address>
+                        <addressline>Santa Cruz, California 95064</addressline>
+                    </address>
+                </repository>
+                <abstract label="Abstract">This collection includes books, correspondence, journals,
+                    newsletters, pamphlets, ephemera and realia relat
+                    ed to Cage's interest in the study of
+                    mushrooms.</abstract>
+                <physloc label="Physical location">Stored offsite at NRLF: Advance notice is required for
+                    access to the papers.
+                </physloc>
+                <langmaterial label="Languages">
+                    <language langcode="eng">English</language>
+                </langmaterial>
+        </did>
+        <accessrestrict>
+            <head>Access</head>
+            <p>Collection is open for research.</p>
+        </accessrestrict>
+        <userestrict>
+            <head>Publication Rights</head>
+            <p>Property rights reside with the University of California. Literary rights are retaine
+                d
+                by the creato
+                rs
+                of the records and their heirs. For permission to publish or to reproduce
+                the material, please contact the Head of Special Collections and Archives.</p>
+        </userestrict>
+        <prefercite>
+            <head>Preferred Citation</head>
+            <p>John Cage Mycology Col
+                lection. MS 74. Special Collections and Archives, University
+                Library, University of California, Santa Cruz.</p>
+        </prefercite>
+        <acqinfo>
+            <head>Acquisition Information</head>
+            <p>Gift of John Cage in 1971.</p>
+        </acqinfo>
+        <bioghist>
+            <head>Biography</head>
+            <p>J
+                ohn Cage, justifiably famous as a composer, was also very much interested in mycology.
+                40
+                He was born in Los Angeles on the 5th of September, 1912. He attended Pomona College, but
+                dropped out after two years and headed to Europe. In 1930, while still in Paris
+                , Cage
+                became interested in both modern music and modern painting. Soon he left and went to
+                Mallorca, where he began painting and writing music himself. The following year he returned
+                to California, settling in at Pacific Palisades. While writing music for
+                the piano, he met
+                Richard Buhlig, who was the first pianist to play the Opus II of Schoenberg. Though Buhlig
+                was not a teacher of composition, he agreed to help Cage with writing music. From Buhlig he
+                went to Henry Cowell [1933
+                -
+                34] and, at Cowell's sugges
+                tion, to Adolph Weiss in preparation
+                for studies with Arnold Schoenberg. In order to work with Schoenberg, he gave up painting
+                and concentrated on music.</p>
+            <p>After two years Cage became an assistant to the film maker Oskar Fischinger, while doing
+                librar
+                y research work. He married Xenia Andreyevna Kashevaroff, a student of the bookbinder
+                Hazel Dreis. By 1937 he had found a group of modern dancers who were interested in his
+                music and could put it to use, resulting in his move to Seattle, where he was given
+                a job
+                as a dance accompanist at the Cornish School. Within a couple of years Cage and his wife
+                moved back south to San Francisco, and then in 1941 they moved to Chicago, where he joined
+                the faculty of Moholy Nagy's School of Design in Chicago. While there
+                he was commissioned
+                to write the sound effects music for a CBS Columbia Workshop Play. He was told by the sound
+                effects engineer that anything he could imagine was possible. What he wrote, however, was
+                impractical and too expensive; and the work had to be
+                rewritten for percussion orchestra,
+                copied, and rehearsed in the few remaining days and nights before its broadcast. The play,
+                incidentally, was <title>The City Wears a Slouch Hat</title> by Kenneth Patchen. In 1942
+                Cage and his wife Xenia moved to New Yo
+                rk, where within a couple of years he began working
+                with Merce Cunningham. He and Xenia were divorced in 1945.</p>
+            <p>In the late 1950's Cage taught occasionally at New York's New School for Social
+                Research. It was during that time that he met Guy Nearing,
+                who was to become his mentor in
+                the study of mushrooms and other wild edible plants. With three other friends they founded
+                the New York Mycological Society. In 1964 Cage was given the North American Mycological
+                Association's Award for Contributions to Ama
+                teur Mycology, which is "given annually to
+                recognize a person who has contributed extraordinarily to the advancement of amateur
+                mycology." It was, however, through Cage's enthusiasm for the work of English master
+                gardener Alan Chadwick and his "Student Gar
+                den Project" on the new campus of the University
+                of California at Santa Cruz that Special Collections received his "collection of mushroom
+                books and mushroomiana".</p>
+            <p>John Cage died in New York City on August 12th, 1992.</p>
+            <p>"Coming back to the noti
+                on that my thought is changing. Say it isn't. One thing,
+                however, that keeps it moving is that I'm continually finding new teachers with whom I
+                study. I had studied with Richard Buhlig, Henry Cowell, Arnold Schoenberg, Daisetz Suzuki,
+                Guy Nearing. Now I'm
+                studying with N.O. Brown, Marshall McLuhan, Buckminster Fuller, Marcel
+                Duchamp. In connection with my current studies with Duchamp, it turns out that I'm a poor
+                chessplayer. My mind seems in some respect lacking, so that I make obviously stupid moves.
+                I do
+                not for a moment doubt that this lack of intelligence affects my music and thinking
+                generally. However, I have a redeeming quality: I was gifted with a sunny disposition."
+                --
+                John Cage, <title>A Year From Monday</title> 1967.
+            </p>
+        </bioghist>
+        <scopecontent>
+            <head>Scope and Content of Collection</head>
+            <p>This collection includes correspondence, journals, newsletters, pamphlets, books,
+                ephemera and realia related to mushrooms. Cage's personal reference library has been
+                cataloged separately.</p>
+        </scopecontent>
+        <controlaccess>
+            <head>Indexing Terms</head>
+            <p>The following terms have been used to index the description of this collection in the
+                library's online public access catalog.</p>
+            <persname role="subject cre" source="lcnaf">Cage, John
+                --
+                Archives.</persname>
+            <persname role="subject oth" rules="aacr2">Chadwick, Alan.</persname>
+            <persname role="subject oth" rules="aacr2">Graves, Morris, 1910
+                -
+            </persname>
+            <persname role="subject oth" rules="aacr2">Nearing, G.G. 1890
+                -
+            </persname>
+        </controlaccess>
+    </archdesc>
+</ead>
