@@ -7,6 +7,8 @@ import java.io.InputStream;
 import java.util.List;
 
 import eu.ehri.project.models.events.SystemEvent;
+
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.tinkerpop.blueprints.Vertex;
@@ -29,6 +31,7 @@ public class EadUpdateImporterTest extends AbstractImporterTest {
     protected final String IMPORTED_ITEM_ID = "C00001";
 
     @Test
+    @Ignore
     public void testImportItemsT() throws Exception {
         Agent agent = manager.getFrame(TEST_REPO, Agent.class);
         final String logMessage = "Importing a single EAD";

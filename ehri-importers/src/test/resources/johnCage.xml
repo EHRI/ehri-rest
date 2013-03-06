@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE ead PUBLIC "+//ISBN 1
+<!-- <!DOCTYPE ead PUBLIC "+//ISBN 1
 -
 931666
 -
@@ -8,7 +8,7 @@
 8//DTD ead.dtd (Encoded Archival Description
 (
 EAD)
-Version 2002)//EN" "/Users/linda/Documents/knaw/ehri/dataformats/ead2002/ead.dtd">
+Version 2002)//EN" "/Users/linda/Documents/knaw/ehri/dataformats/ead2002/ead.dtd"> -->
 <ead>
     <eadheader langencoding="iso639-2b" scriptencoding="iso15924" repositoryencoding="iso15511"
         countryencoding="iso3166-1" dateencoding="iso8601">

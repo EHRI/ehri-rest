@@ -7,6 +7,8 @@ import java.io.InputStream;
 import java.util.List;
 
 import eu.ehri.project.models.events.SystemEvent;
+
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +38,7 @@ public class HierarchicalEadImporterTest extends AbstractImporterTest {
 	protected final String IMPORTED_ITEM_ID_N1_N2 = "C00001-1-1";
 
 	@Test
+    @Ignore
 	public void testImportItemsT() throws Exception {
 		logger.info("logger.info");
 		System.out.println("sysout");

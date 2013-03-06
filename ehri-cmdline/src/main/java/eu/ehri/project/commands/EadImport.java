@@ -1,5 +1,6 @@
 package eu.ehri.project.commands;
 
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -17,7 +18,10 @@ import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.old.EadImportManager;
+import eu.ehri.project.importers.IcaAtomEadHandler;
+import eu.ehri.project.importers.IcaAtomEadImporter;
 import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.importers.SaxImportManager;
 import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.UserProfile;
@@ -56,7 +60,7 @@ public class EadImport extends BaseCommand implements Command {
 
     @Override
     public String getHelp() {
-        return "Usage: importer [OPTIONS] -user <user-id> -repo <agent-id> <neo4j-graph-dir> <ead1.xml> <ead2.xml> ... <eadN.xml>";
+        return "Usage: " + NAME + " [OPTIONS] -user <user-id> -repo <agent-id> <neo4j-graph-dir> <ead1.xml> <ead2.xml> ... <eadN.xml>";
     }
 
     @Override
@@ -115,10 +119,15 @@ public class EadImport extends BaseCommand implements Command {
                 }
             }
 
+/*
             EadImportManager importer = new EadImportManager(graph, agent, user);
             importer.setTolerant(cmdLine.hasOption("tolerant"));
             ImportLog log = importer.importFiles(filePaths, logMessage);
-
+*/
+            ImportLog log = new SaxImportManager(graph, agent, user, IcaAtomEadImporter.class, IcaAtomEadHandler.class)
+            	.importFiles(filePaths, logMessage);
+            
+            
             System.out.println("Import completed. Created: " + log.getCreated()
                     + ", Updated: " + log.getUpdated());
             if (log.getErrored() > 0) {
