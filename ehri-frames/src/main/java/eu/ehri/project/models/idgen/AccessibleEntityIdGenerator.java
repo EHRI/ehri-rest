@@ -52,7 +52,7 @@ public enum AccessibleEntityIdGenerator implements IdGenerator {
     public String generateId(EntityClass type, PermissionScope scope,
             Bundle bundle) {
         LinkedList<String> scopeIds = Lists.newLinkedList();
-        if (!scope.equals(SystemScope.getInstance())) {
+        if (scope != null && !scope.equals(SystemScope.getInstance())) {
             for (PermissionScope s : scope.getPermissionScopes())
                 scopeIds.addFirst(s.getIdentifier());
             scopeIds.add(scope.getIdentifier());            
