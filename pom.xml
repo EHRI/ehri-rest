@@ -26,7 +26,7 @@
 		</dependencies>
 	</dependencyManagement>
 	<properties>
-		<neo4j-version>1.9.M04</neo4j-version>
+	<neo4j-version>1.9.M05</neo4j-version>
 	<tinkerpop-version>2.2.0</tinkerpop-version>
 
 		<!-- The directory where the yWorks doclet (for uml schema's in javadoc) 
