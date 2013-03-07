@@ -111,7 +111,7 @@ public final class ViewHelper {
     public void checkReadAccess(AccessibleEntity entity, Accessor user)
             throws PermissionDenied {
         if (!acl.getAccessControl(entity, user))
-            throw new PermissionDenied(user.getIdentifier(), manager.getId(entity));
+            throw new PermissionDenied(user.getIdentifier(), manager.getId(entity), "Restricted access");
     }
 
     /**

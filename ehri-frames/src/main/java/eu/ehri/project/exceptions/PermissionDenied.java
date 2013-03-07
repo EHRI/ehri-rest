@@ -27,7 +27,7 @@ public class PermissionDenied extends Exception {
     public PermissionDenied(String accessor, String entity, String message) {
         super(String.format(
                 "Permission denied accessing resource '%s' as '%s': %s",
-                entity, accessor));
+                entity, accessor, entity, message));
         this.accessor = accessor;
         this.entity = entity;
     }
