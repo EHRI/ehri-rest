@@ -582,14 +582,18 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      */
     public Query<E> filter(String property, FilterPredicate predicate,
             String value) {
-        SortedMap<String, Pair<FilterPredicate, String>> tmp = new ImmutableSortedMap.Builder<String, Pair<FilterPredicate, String>>(
-                Ordering.natural())
-                .putAll(filters)
-                .put(property,
-                        new Pair<FilterPredicate, String>(predicate, value))
-                .build();
+        ImmutableSortedMap.Builder<String, Pair<FilterPredicate, String>> builder
+                = new ImmutableSortedMap.Builder<String, Pair<FilterPredicate, String>>(
+                    Ordering.natural());
+        for (Entry<String, Pair<FilterPredicate,String>> filter : filters.entrySet()) {
+            if (!filter.getKey().equals(property)) {
+                builder.put(filter.getKey(), filter.getValue());
+            }
+        }
+        builder.put(property, new Pair<FilterPredicate, String>(predicate, value));
+        
         return new Query<E>(graph, cls, scope, offset, limit, sort,
-                traversalSort, defaultSort, tmp, depthFilters, traversalFilters, page);
+                traversalSort, defaultSort, builder.build(), depthFilters, traversalFilters, page);
     }
 
     /**
