@@ -44,7 +44,7 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
             .getLogger(SaxImportManager.class);
     private Boolean tolerant = false;
 //    private XmlCVocImporter importer; // CVoc specific!
-     private AbstractImporter<Map<String, Object>> importer;
+    private AbstractImporter<Map<String, Object>> importer;
     protected final FramedGraph<Neo4jGraph> framedGraph;
     protected final Agent agent;
     protected final Actioner actioner;
@@ -54,7 +54,7 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
     private String currentFile = null;
     private Integer currentPosition = null;
 
-    private  Class<? extends AbstractImporter> importerClass; // CVoc specific!
+    private  Class<? extends AbstractImporter> importerClass; 
     Class<? extends SaxXmlHandler> handlerClass;
     /**
      * Dummy resolver that does nothing. This is used to ensure that, in
