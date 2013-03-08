@@ -170,7 +170,7 @@ public final class AclViews implements Acl {
             // Log the action...
             new ActionManager(graph).logEvent(item,
                     graph.frame(grantee.asVertex(), Actioner.class),
-                    "Added annotation").addSubjects(
+                    "Modified item-level permissions").addSubjects(
                     graph.frame(accessor.asVertex(), AccessibleEntity.class));
 
             graph.getBaseGraph().stopTransaction(Conclusion.SUCCESS);
