@@ -9,6 +9,7 @@ import eu.ehri.project.persistance.Bundle;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import javax.ws.rs.core.MediaType;
@@ -30,6 +31,11 @@ import static junit.framework.Assert.assertTrue;
 public class GenericResourceClientTest  extends BaseRestClientTest {
 
     private static final String ITEM = "cd1";
+
+    @BeforeClass
+    public static void setUpBeforeClass() throws Exception {
+        initializeTestDb(GenericResourceClientTest.class.getName());
+    }
 
     @Test
     public void getGeneticEntity() throws IOException {
