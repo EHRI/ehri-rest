@@ -64,6 +64,11 @@ public class GenericResource extends AbstractAccessibleEntityResource<Accessible
     public StreamingOutput get(@QueryParam("id") List<String> ids) throws ItemNotFound,
             PermissionDenied, BadRequester {
         Iterable<Vertex> vertices = manager.getVertices(ids);
+        // FIXME: The Acl filter removes items that are not visible to the
+        // user only if they are AccessibleEntities. Things like Descriptions
+        // pass the filter even if their parent item should not be visible.
+        // It's difficult to know how to solve this in a generic and simple
+        // manner.
         PipeFunction<Vertex,Boolean> filter = new AclManager(graph)
                 .getAclFilterFunction(getRequesterUserProfile());
         GremlinPipeline<Vertex, Vertex> filtered = new GremlinPipeline<Vertex, Vertex>(
