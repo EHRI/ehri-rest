@@ -13,9 +13,9 @@ import eu.ehri.project.models.base.Annotator;
 @EntityType(EntityClass.ANNOTATION)
 public interface Annotation extends AnnotatableEntity, AccessibleEntity {
 
-    public static final String ANNOTATES = "annotates";
+    public static final String ANNOTATES = "hasTarget";
     
-    public static final String HAS_SOURCE = "hasSource";
+    public static final String HAS_SOURCE = "hasBody";
 
     @Fetch(Annotation.ANNOTATES)
     @Adjacency(label = Annotation.ANNOTATES, direction = Direction.IN)
