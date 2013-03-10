@@ -9,6 +9,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.Response.Status;
 
+import eu.ehri.project.exceptions.*;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 
@@ -17,11 +18,6 @@ import com.google.common.collect.ListMultimap;
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.definitions.Entities;
-import eu.ehri.project.exceptions.DeserializationError;
-import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.exceptions.SerializationError;
-import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.Annotation;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistance.Bundle;
@@ -52,7 +48,7 @@ public class AnnotationResource extends
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:.+}")
     public Response getAction(@PathParam("id") String id) throws ItemNotFound,
-            PermissionDenied, BadRequester {
+            AccessDenied, BadRequester {
         return retrieve(id);
     }
 
@@ -228,7 +224,7 @@ public class AnnotationResource extends
     @DELETE
     @Path("/{id:.+}")
     public Response deleteAgent(@PathParam("id") String id)
-            throws PermissionDenied, ItemNotFound, ValidationError,
+            throws AccessDenied, PermissionDenied, ItemNotFound, ValidationError,
             BadRequester {
         return delete(id);
     }

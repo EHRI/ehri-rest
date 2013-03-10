@@ -11,6 +11,7 @@ import eu.ehri.project.acl.PermissionType;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
+import eu.ehri.project.exceptions.AccessDenied;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.ContentType;
@@ -106,15 +107,14 @@ public final class ViewHelper {
      *
      * @param entity
      * @param user
-     * @throws PermissionDenied
+     * @throws AccessDenied
      */
     public void checkReadAccess(AccessibleEntity entity, Accessor user)
-            throws PermissionDenied {
+            throws AccessDenied {
         if (!acl.getAccessControl(entity, user)) {
             // Using 'fake' permission 'read'
-            throw new PermissionDenied(
-                    user.getIdentifier(), manager.getId(entity),
-                    "read", scope.getIdentifier());
+            throw new AccessDenied(
+                    user.getIdentifier(), manager.getId(entity));
         }
     }
 

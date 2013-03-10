@@ -14,6 +14,7 @@ import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriBuilder;
 
 //import org.apache.log4j.Logger;
+import eu.ehri.project.exceptions.*;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 
@@ -23,12 +24,6 @@ import com.tinkerpop.blueprints.Vertex;
 
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.acl.AclManager;
-import eu.ehri.project.exceptions.DeserializationError;
-import eu.ehri.project.exceptions.IntegrityError;
-import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.exceptions.SerializationError;
-import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
@@ -187,10 +182,10 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * @return The response of the request, which contains the json
      *         representation
      * @throws ItemNotFound
-     * @throws PermissionDenied
+     * @throws AccessDenied
      * @throws BadRequester
      */
-    public Response retrieve(String id) throws PermissionDenied, ItemNotFound,
+    public Response retrieve(String id) throws AccessDenied, ItemNotFound,
             BadRequester {
         try {
             E entity = views.detail(manager.getFrame(id, getEntityType(), cls),
@@ -213,11 +208,11 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * @return The response of the request, which contains the json
      *         representation
      * @throws ItemNotFound
-     * @throws PermissionDenied
+     * @throws AccessDenied
      * @throws BadRequester
      */
     public Response retrieve(String key, String value) throws ItemNotFound,
-            PermissionDenied, BadRequester {
+            AccessDenied, BadRequester {
         try {
             E entity = querier.get(key, value, getRequesterUserProfile());
             String jsonStr = serializer.vertexFrameToJson(entity);
@@ -266,6 +261,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * @param json
      *            The json
      * @return The response of the update request
+     * @throws AccessDenied
      * @throws PermissionDenied
      * @throws IntegrityError
      * @throws ValidationError
@@ -273,7 +269,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * @throws ItemNotFound
      * @throws BadRequester
      */
-    public Response update(String id, String json) throws PermissionDenied,
+    public Response update(String id, String json) throws AccessDenied, PermissionDenied,
             IntegrityError, ValidationError, DeserializationError,
             ItemNotFound, BadRequester {
         // FIXME: This is nasty because it searches for an item with the
@@ -294,12 +290,13 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * @param id
      *            The vertex id
      * @return The response of the delete request
+     * @throws AccessDenied
      * @throws PermissionDenied
      * @throws ItemNotFound
      * @throws ValidationError
      * @throws BadRequester
      */
-    protected Response delete(String id) throws PermissionDenied, ItemNotFound,
+    protected Response delete(String id) throws AccessDenied, PermissionDenied, ItemNotFound,
             ValidationError, BadRequester {
         try {
             E entity = views.detail(manager.getFrame(id, getEntityType(), cls),

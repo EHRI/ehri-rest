@@ -18,17 +18,13 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
 
+import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.base.Actioner;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.definitions.Entities;
-import eu.ehri.project.exceptions.DeserializationError;
-import eu.ehri.project.exceptions.IntegrityError;
-import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Group;
 import eu.ehri.project.models.UserProfile;
@@ -51,7 +47,7 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:.+}")
     public Response getGroup(@PathParam("id") String id) throws ItemNotFound,
-            PermissionDenied, BadRequester {
+            AccessDenied, BadRequester {
         return retrieve(id);
     }
 
@@ -92,7 +88,7 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response updateGroup(String json) throws PermissionDenied,
+    public Response updateGroup(String json) throws AccessDenied, PermissionDenied,
             IntegrityError, ValidationError, DeserializationError,
             ItemNotFound, BadRequester {
         return update(json);
@@ -103,7 +99,7 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:.+}")
     public Response updateGroup(@PathParam("id") String id, String json)
-            throws PermissionDenied, IntegrityError, ValidationError,
+            throws AccessDenied, PermissionDenied, IntegrityError, ValidationError,
             DeserializationError, ItemNotFound, BadRequester {
         return update(id, json);
     }
@@ -152,7 +148,7 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
      * Remove an accessor from a group.
      *
      * @param id
-     * @param atype
+     * @param aid
      * @param aid
      * @return
      * @throws PermissionDenied
@@ -247,7 +243,7 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
     @DELETE
     @Path("/{id:.+}")
     public Response deleteGroup(@PathParam("id") String id)
-            throws PermissionDenied, ItemNotFound, ValidationError,
+            throws AccessDenied, PermissionDenied, ItemNotFound, ValidationError,
             BadRequester {
         return delete(id);
     }

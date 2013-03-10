@@ -17,6 +17,7 @@ import com.tinkerpop.gremlin.java.GremlinPipeline;
 import com.tinkerpop.pipes.PipeFunction;
 import com.tinkerpop.pipes.util.structures.Pair;
 
+import eu.ehri.project.exceptions.AccessDenied;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -251,7 +252,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      * @throws PermissionDenied
      * @throws ItemNotFound
      */
-    public E get(String id, Accessor user) throws PermissionDenied,
+    public E get(String id, Accessor user) throws AccessDenied,
             ItemNotFound {
         E item = manager.getFrame(id, cls);
         helper.checkReadAccess(item, user);
@@ -270,7 +271,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      * @throws ItemNotFound
      */
     public E get(String key, String value, Accessor user)
-            throws PermissionDenied, ItemNotFound {
+            throws AccessDenied, ItemNotFound {
         CloseableIterable<Vertex> indexQuery = manager.getVertices(key, value,
                 ClassUtils.getEntityType(cls));
         try {

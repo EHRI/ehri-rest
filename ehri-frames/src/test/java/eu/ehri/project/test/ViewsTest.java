@@ -2,6 +2,7 @@ package eu.ehri.project.test;
 
 import java.util.Iterator;
 
+import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.*;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.DescribedEntity;
@@ -12,12 +13,6 @@ import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.acl.AnonymousAccessor;
 import eu.ehri.project.acl.ContentTypes;
 import eu.ehri.project.acl.PermissionType;
-import eu.ehri.project.exceptions.DeserializationError;
-import eu.ehri.project.exceptions.IntegrityError;
-import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.exceptions.SerializationError;
-import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.PermissionGrantTarget;
 import eu.ehri.project.persistance.Bundle;
@@ -33,10 +28,10 @@ public class ViewsTest extends AbstractFixtureTest {
     /**
      * Access an item 0 as user 20.
      * 
-     * @throws PermissionDenied
+     * @throws AccessDenied
      */
     @Test
-    public void testDetail() throws PermissionDenied {
+    public void testDetail() throws AccessDenied {
         Crud<DocumentaryUnit> docViews = new CrudViews<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
         DocumentaryUnit unit = docViews.detail(item, validUser);
@@ -46,10 +41,10 @@ public class ViewsTest extends AbstractFixtureTest {
     /**
      * Check we can access the user's own profile.
      * 
-     * @throws PermissionDenied
+     * @throws AccessDenied
      */
     @Test
-    public void testUserProfile() throws PermissionDenied {
+    public void testUserProfile() throws AccessDenied {
         CrudViews<UserProfile> userViews = new CrudViews<UserProfile>(graph,
                 UserProfile.class);
         UserProfile user = userViews.detail(validUser, validUser);
@@ -59,10 +54,10 @@ public class ViewsTest extends AbstractFixtureTest {
     /**
      * Access an item as an anon user. This should throw PermissionDenied
      * 
-     * @throws PermissionDenied
+     * @throws AccessDenied
      */
-    @Test(expected = PermissionDenied.class)
-    public void testDetailAnonymous() throws PermissionDenied {
+    @Test(expected = AccessDenied.class)
+    public void testDetailAnonymous() throws AccessDenied {
         CrudViews<DocumentaryUnit> docViews = new CrudViews<DocumentaryUnit>(
                 graph, DocumentaryUnit.class);
         docViews.detail(item, AnonymousAccessor.getInstance());
@@ -71,10 +66,10 @@ public class ViewsTest extends AbstractFixtureTest {
     /**
      * Access an item as an invalid user.
      * 
-     * @throws PermissionDenied
+     * @throws AccessDenied
      */
-    @Test(expected = PermissionDenied.class)
-    public void testDetailPermissionDenied() throws PermissionDenied {
+    @Test(expected = AccessDenied.class)
+    public void testDetailPermissionDenied() throws AccessDenied {
         CrudViews<DocumentaryUnit> docViews = new CrudViews<DocumentaryUnit>(
                 graph, DocumentaryUnit.class);
         docViews.detail(item, invalidUser);
@@ -174,9 +169,10 @@ public class ViewsTest extends AbstractFixtureTest {
 
     /**
      * Access the valid user's profile as an invalid users.
+     * @throws AccessDenied
      *
      */
-    public void testUserDetailPermissionDenied() throws PermissionDenied {
+    public void testUserDetailAccessDenied() throws AccessDenied {
         CrudViews<UserProfile> userViews = new CrudViews<UserProfile>(graph,
                 UserProfile.class);
         userViews.detail(validUser, invalidUser);

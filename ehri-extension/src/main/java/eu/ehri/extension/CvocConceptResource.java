@@ -21,6 +21,7 @@ import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
 
+import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.EntityClass;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
@@ -30,12 +31,6 @@ import com.tinkerpop.blueprints.Direction;
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.definitions.Entities;
-import eu.ehri.project.exceptions.DeserializationError;
-import eu.ehri.project.exceptions.IntegrityError;
-import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.exceptions.SerializationError;
-import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.persistance.Bundle;
@@ -59,7 +54,7 @@ public class CvocConceptResource extends
     @Produces(MediaType.APPLICATION_JSON)
     public Response getCvocConcept(@QueryParam("key") String key,
             @QueryParam("value") String value) throws ItemNotFound,
-            PermissionDenied, BadRequester {
+            AccessDenied, BadRequester {
         return retrieve(key, value);
     }
 
@@ -67,7 +62,7 @@ public class CvocConceptResource extends
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:.+}")
     public Response getCvocConcept(@PathParam("id") String id)
-            throws ItemNotFound, PermissionDenied, BadRequester {
+            throws ItemNotFound, AccessDenied, BadRequester {
         return retrieve(id);
     }
 
@@ -109,7 +104,7 @@ public class CvocConceptResource extends
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:.+}")
     public Response updateCvocConcept(@PathParam("id") String id, String json)
-            throws PermissionDenied, IntegrityError, ValidationError,
+            throws AccessDenied, PermissionDenied, IntegrityError, ValidationError,
             DeserializationError, ItemNotFound, BadRequester {
         return update(id, json);
     }
@@ -117,7 +112,7 @@ public class CvocConceptResource extends
     @DELETE
     @Path("/{id:.+}")
     public Response deleteCvocConcept(@PathParam("id") String id)
-            throws PermissionDenied, ItemNotFound, ValidationError,
+            throws AccessDenied, PermissionDenied, ItemNotFound, ValidationError,
             BadRequester {
         return delete(id);
     }
@@ -128,7 +123,7 @@ public class CvocConceptResource extends
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:.+}/narrower/list")
     public StreamingOutput getCvocNarrowerConcepts(@PathParam("id") String id)
-            throws ItemNotFound, PermissionDenied, BadRequester {
+            throws ItemNotFound, AccessDenied, PermissionDenied, BadRequester {
 
         Concept concept = views.detail(manager.getFrame(id, cls),
                 getRequesterUserProfile());
@@ -146,8 +141,7 @@ public class CvocConceptResource extends
             @QueryParam(SORT_PARAM) List<String> order,
             @QueryParam(FILTER_PARAM) List<String> filters)
 
-    throws ItemNotFound, PermissionDenied, BadRequester {
-
+    throws ItemNotFound, AccessDenied, PermissionDenied, BadRequester {
         Accessor user = getRequesterUserProfile();
         Concept concept = views.detail(manager.getFrame(id, cls), user);
         Query<Concept> query = new Query<Concept>(graph, Concept.class)
@@ -166,8 +160,7 @@ public class CvocConceptResource extends
             @QueryParam(SORT_PARAM) List<String> order,
             @QueryParam(FILTER_PARAM) List<String> filters)
 
-    throws ItemNotFound, PermissionDenied, BadRequester {
-
+    throws ItemNotFound, AccessDenied, PermissionDenied, BadRequester {
         Accessor user = getRequesterUserProfile();
         Concept concept = views.detail(manager.getFrame(id, cls), user);
         Query<Concept> query = new Query<Concept>(graph, Concept.class)
@@ -242,7 +235,7 @@ public class CvocConceptResource extends
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:.+}/broader/list")
     public StreamingOutput getCvocBroaderConcepts(@PathParam("id") String id)
-            throws ItemNotFound, PermissionDenied, BadRequester {
+            throws ItemNotFound, AccessDenied, BadRequester {
 
         Concept concept = views.detail(manager.getFrame(id, cls),
                 getRequesterUserProfile());
@@ -255,7 +248,7 @@ public class CvocConceptResource extends
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:.+}/related/list")
     public StreamingOutput getCvocRelatedConcepts(@PathParam("id") String id)
-            throws ItemNotFound, PermissionDenied, BadRequester {
+            throws ItemNotFound, AccessDenied, BadRequester {
 
         Concept concept = views.detail(manager.getFrame(id, cls),
                 getRequesterUserProfile());
@@ -267,7 +260,7 @@ public class CvocConceptResource extends
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:.+}/relatedBy/list")
     public StreamingOutput getCvocRelatedByConcepts(@PathParam("id") String id)
-            throws ItemNotFound, PermissionDenied, BadRequester {
+            throws ItemNotFound, AccessDenied, BadRequester {
 
         Concept concept = views.detail(manager.getFrame(id, cls),
                 getRequesterUserProfile());
@@ -343,6 +336,7 @@ public class CvocConceptResource extends
      * @param json
      * @return
      * @throws PermissionDenied
+     * @throws AccessDenied
      * @throws ValidationError
      * @throws IntegrityError
      * @throws DeserializationError
@@ -355,7 +349,7 @@ public class CvocConceptResource extends
     @Path("/{id:.+}/" + Entities.CVOC_CONCEPT)
     public Response createNarrowerConcept(@PathParam("id") String id,
             String json, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
-            throws PermissionDenied, ValidationError, IntegrityError,
+            throws AccessDenied, PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, ItemNotFound, BadRequester {
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {

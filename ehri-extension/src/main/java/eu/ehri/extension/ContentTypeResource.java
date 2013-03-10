@@ -13,6 +13,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
+import eu.ehri.project.exceptions.AccessDenied;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import eu.ehri.extension.errors.BadRequester;
@@ -37,7 +38,7 @@ public class ContentTypeResource extends AbstractAccessibleEntityResource<Conten
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:.+}")
     public Response getContentType(@PathParam("id") String id)
-            throws ItemNotFound, PermissionDenied, BadRequester {
+            throws ItemNotFound, AccessDenied, BadRequester {
         return retrieve(id);
     }
 

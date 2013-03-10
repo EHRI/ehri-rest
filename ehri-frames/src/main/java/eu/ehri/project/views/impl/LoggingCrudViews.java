@@ -1,6 +1,7 @@
 package eu.ehri.project.views.impl;
 
 import com.tinkerpop.frames.VertexFrame;
+import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.base.Actioner;
 import org.neo4j.graphdb.Transaction;
 
@@ -8,11 +9,6 @@ import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
 import eu.ehri.project.acl.SystemScope;
-import eu.ehri.project.exceptions.DeserializationError;
-import eu.ehri.project.exceptions.IntegrityError;
-import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.exceptions.SerializationError;
-import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.PermissionScope;
@@ -476,7 +472,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
         return new LoggingCrudViews<E>(graph, cls, scope);
     }
 
-    public E detail(E item, Accessor user) throws PermissionDenied {
+    public E detail(E item, Accessor user) throws AccessDenied {
         return views.detail(item, user);
     }
 }

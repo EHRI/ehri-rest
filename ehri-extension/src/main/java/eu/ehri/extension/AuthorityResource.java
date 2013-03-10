@@ -24,7 +24,7 @@ public class AuthorityResource extends AbstractAccessibleEntityResource<Authorit
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:.+}")
     public Response getAuthority(@PathParam("id") String id) throws ItemNotFound,
-            PermissionDenied, BadRequester {
+            AccessDenied, BadRequester {
         return retrieve(id);
     }
 
@@ -76,7 +76,7 @@ public class AuthorityResource extends AbstractAccessibleEntityResource<Authorit
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:.+}")
     public Response updateAuthority(@PathParam("id") String id, String json)
-            throws PermissionDenied, IntegrityError, ValidationError,
+            throws AccessDenied, PermissionDenied, IntegrityError, ValidationError,
             DeserializationError, ItemNotFound, BadRequester {
         return update(id, json);
     }
@@ -84,7 +84,7 @@ public class AuthorityResource extends AbstractAccessibleEntityResource<Authorit
     @DELETE
     @Path("/{id:.+}")
     public Response deleteAuthority(@PathParam("id") String id)
-            throws PermissionDenied, ItemNotFound, ValidationError,
+            throws AccessDenied, PermissionDenied, ItemNotFound, ValidationError,
             BadRequester {
         return delete(id);
     }

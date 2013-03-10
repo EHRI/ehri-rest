@@ -5,6 +5,7 @@ import java.util.List;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import eu.ehri.project.exceptions.AccessDenied;
 import eu.ehri.project.models.Agent;
 import org.junit.Test;
 
@@ -282,8 +283,8 @@ public class QueryTest extends AbstractFixtureTest {
     }
 
     @Test
-    public void testGet() throws PermissionDenied, ItemNotFound,
-            IndexNotFoundException {
+    public void testGet() throws ItemNotFound,
+            IndexNotFoundException, AccessDenied {
         Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
         DocumentaryUnit doc = query.get(AccessibleEntity.IDENTIFIER_KEY, "c1",
@@ -292,15 +293,15 @@ public class QueryTest extends AbstractFixtureTest {
     }
 
     @Test(expected = ItemNotFound.class)
-    public void testGetItemNotFound() throws PermissionDenied, ItemNotFound,
-            IndexNotFoundException {
+    public void testGetItemNotFound() throws ItemNotFound,
+            IndexNotFoundException, AccessDenied {
         Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
         query.get(AccessibleEntity.IDENTIFIER_KEY, "IDONTEXIST", validUser);
     }
 
-    @Test(expected = PermissionDenied.class)
-    public void testGetPermissionDenied() throws PermissionDenied,
+    @Test(expected = AccessDenied.class)
+    public void testGetAccessDenied() throws AccessDenied,
             ItemNotFound, IndexNotFoundException {
         Accessor accessor = manager.getFrame("reto", Accessor.class);
         Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,

@@ -9,11 +9,7 @@ import eu.ehri.project.acl.PermissionType;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
-import eu.ehri.project.exceptions.IntegrityError;
-import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.exceptions.SerializationError;
-import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.PermissionScope;
@@ -65,9 +61,9 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @param entity
      * @param user
      * @return The given framed vertex
-     * @throws PermissionDenied
+     * @throws AccessDenied
      */
-    public E detail(E entity, Accessor user) throws PermissionDenied {
+    public E detail(E entity, Accessor user) throws AccessDenied {
         helper.checkReadAccess(entity, user);
         return entity;
     }

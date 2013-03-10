@@ -21,6 +21,7 @@ import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.Response.Status;
 
+import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.EntityClass;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
@@ -30,12 +31,6 @@ import com.tinkerpop.blueprints.Direction;
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.definitions.Entities;
-import eu.ehri.project.exceptions.DeserializationError;
-import eu.ehri.project.exceptions.IntegrityError;
-import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.exceptions.SerializationError;
-import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
@@ -62,7 +57,7 @@ public class VocabularyResource extends
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:.+}")
     public Response getVocabulary(@PathParam("id") String id)
-            throws ItemNotFound, PermissionDenied, BadRequester {
+            throws ItemNotFound, AccessDenied, BadRequester {
         return retrieve(id);
     }
 
@@ -99,7 +94,7 @@ public class VocabularyResource extends
             @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
             @QueryParam(SORT_PARAM) List<String> order,
             @QueryParam(FILTER_PARAM) List<String> filters)
-            throws ItemNotFound, BadRequester, PermissionDenied {
+            throws ItemNotFound, BadRequester, AccessDenied {
         Accessor user = getRequesterUserProfile();
         Vocabulary vocabulary = views.detail(manager.getFrame(id, cls), user);
         Query<Concept> query = new Query<Concept>(graph, Concept.class)
@@ -117,7 +112,7 @@ public class VocabularyResource extends
             @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
             @QueryParam(SORT_PARAM) List<String> order,
             @QueryParam(FILTER_PARAM) List<String> filters)
-            throws ItemNotFound, BadRequester, PermissionDenied {
+            throws ItemNotFound, BadRequester, AccessDenied {
         Accessor user = getRequesterUserProfile();
         Vocabulary vocabulary = views.detail(manager.getFrame(id, cls), user);
         Query<Concept> query = new Query<Concept>(graph, Concept.class)
@@ -151,7 +146,7 @@ public class VocabularyResource extends
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:.+}")
     public Response updateVocabulary(@PathParam("id") String id, String json)
-            throws PermissionDenied, IntegrityError, ValidationError,
+            throws AccessDenied, PermissionDenied, IntegrityError, ValidationError,
             DeserializationError, ItemNotFound, BadRequester {
         return update(id, json);
     }
@@ -159,7 +154,7 @@ public class VocabularyResource extends
     @DELETE
     @Path("/{id:.+}")
     public Response deleteVocabulary(@PathParam("id") String id)
-            throws PermissionDenied, ItemNotFound, ValidationError,
+            throws AccessDenied, PermissionDenied, ItemNotFound, ValidationError,
             BadRequester {
         return delete(id);
     }
@@ -170,7 +165,7 @@ public class VocabularyResource extends
     @Path("/{id:.+}/all")
     public Response deleteAllVocabularyConcepts(
             @PathParam("id") String id)
-            throws ItemNotFound, BadRequester, PermissionDenied {
+            throws ItemNotFound, BadRequester, AccessDenied, PermissionDenied {
         Vocabulary vocabulary = new Query<Vocabulary>(graph, Vocabulary.class).get(id,
                 getRequesterUserProfile());
         
@@ -217,7 +212,7 @@ public class VocabularyResource extends
     @Path("/{id:.+}/" + Entities.CVOC_CONCEPT)
     public Response createVocabularyConcept(@PathParam("id") String id,
             String json, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
-            throws PermissionDenied, ValidationError, IntegrityError,
+            throws AccessDenied, PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, ItemNotFound, BadRequester {
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {

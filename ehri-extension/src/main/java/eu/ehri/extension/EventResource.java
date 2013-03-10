@@ -13,6 +13,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
+import eu.ehri.project.exceptions.AccessDenied;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.persistance.ActionManager;
@@ -45,7 +46,7 @@ public class EventResource extends AbstractAccessibleEntityResource<SystemEvent>
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:.+}")
     public Response getAction(@PathParam("id") String id) throws ItemNotFound,
-            PermissionDenied, BadRequester {
+            AccessDenied, BadRequester {
         return retrieve(id);
     }
 
@@ -114,7 +115,7 @@ public class EventResource extends AbstractAccessibleEntityResource<SystemEvent>
             @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
             @QueryParam(SORT_PARAM) List<String> order,
             @QueryParam(FILTER_PARAM) List<String> filters)
-            throws ItemNotFound, BadRequester, PermissionDenied {
+            throws ItemNotFound, BadRequester, AccessDenied {
         Accessor user = getRequesterUserProfile();
         SystemEvent event = views.detail(manager.getFrame(id, cls), user);
         Query<AccessibleEntity> query = new Query<AccessibleEntity>(graph,
@@ -146,7 +147,7 @@ public class EventResource extends AbstractAccessibleEntityResource<SystemEvent>
             @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
             @QueryParam(SORT_PARAM) List<String> order,
             @QueryParam(FILTER_PARAM) List<String> filters)
-            throws ItemNotFound, BadRequester, PermissionDenied {
+            throws ItemNotFound, BadRequester, AccessDenied {
         Accessor user = getRequesterUserProfile();
         AccessibleEntity item = new LoggingCrudViews<AccessibleEntity>(graph,
                 AccessibleEntity.class).detail(

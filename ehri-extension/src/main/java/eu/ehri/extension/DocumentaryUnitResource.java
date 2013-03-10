@@ -21,6 +21,7 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriBuilder;
 
+import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.DocumentDescription;
 import eu.ehri.project.models.EntityClass;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -29,12 +30,6 @@ import org.neo4j.graphdb.Transaction;
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.definitions.Entities;
-import eu.ehri.project.exceptions.DeserializationError;
-import eu.ehri.project.exceptions.IntegrityError;
-import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.exceptions.SerializationError;
-import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistance.Bundle;
@@ -56,7 +51,7 @@ public class DocumentaryUnitResource extends
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:.+}")
     public Response getDocumentaryUnit(@PathParam("id") String id)
-            throws ItemNotFound, PermissionDenied, BadRequester {
+            throws ItemNotFound, AccessDenied, BadRequester {
         return retrieve(id);
     }
 
@@ -134,7 +129,7 @@ public class DocumentaryUnitResource extends
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:.+}")
     public Response updateDocumentaryUnit(@PathParam("id") String id,
-            String json) throws PermissionDenied, IntegrityError,
+            String json) throws AccessDenied, PermissionDenied, IntegrityError,
             ValidationError, DeserializationError, ItemNotFound, BadRequester {
         return update(id, json);
     }
@@ -142,7 +137,7 @@ public class DocumentaryUnitResource extends
     @DELETE
     @Path("/{id:.+}")
     public Response deleteDocumentaryUnit(@PathParam("id") String id)
-            throws PermissionDenied, ItemNotFound, ValidationError,
+            throws AccessDenied, PermissionDenied, ItemNotFound, ValidationError,
             BadRequester, SerializationError {
         return delete(id);
     }
@@ -153,7 +148,7 @@ public class DocumentaryUnitResource extends
     @Path("/{id:.+}/" + Entities.DOCUMENTARY_UNIT)
     public Response createChildDocumentaryUnit(@PathParam("id") String id,
             String json, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
-            throws PermissionDenied, ValidationError, IntegrityError,
+            throws AccessDenied, PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, ItemNotFound, BadRequester {
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
@@ -178,7 +173,7 @@ public class DocumentaryUnitResource extends
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:.+}/" + Entities.DOCUMENT_DESCRIPTION)
     public Response createDescription(@PathParam("id") String id, String json)
-            throws PermissionDenied, ValidationError, IntegrityError,
+            throws AccessDenied, PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, ItemNotFound, BadRequester {
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
@@ -204,7 +199,7 @@ public class DocumentaryUnitResource extends
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:.+}/" + Entities.DOCUMENT_DESCRIPTION)
     public Response updateDescription(@PathParam("id") String id, String json)
-            throws PermissionDenied, ValidationError, IntegrityError,
+            throws AccessDenied, PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, ItemNotFound, BadRequester, SerializationError {
         Accessor user = getRequesterUserProfile();
         DocumentaryUnit doc = views.detail(
@@ -220,7 +215,7 @@ public class DocumentaryUnitResource extends
     @Path("/{id:.+}/" + Entities.DOCUMENT_DESCRIPTION + "/{did:.+}")
     public Response updateDescriptionWithId(@PathParam("id") String id,
                 @PathParam("did") String did, String json)
-            throws PermissionDenied, ValidationError, IntegrityError,
+            throws AccessDenied, PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, ItemNotFound, BadRequester, SerializationError {
         // FIXME: Inefficient conversion to/from JSON just to insert the ID. We
         // should rethink this somehow.
@@ -230,7 +225,7 @@ public class DocumentaryUnitResource extends
     @DELETE
     @Path("/{id:.+}/" + Entities.DOCUMENT_DESCRIPTION + "/{did:.+}")
     public Response deleteDocumentaryUnitDescription(@PathParam("id") String id, @PathParam("did") String did)
-            throws PermissionDenied, ItemNotFound, ValidationError,
+            throws AccessDenied, PermissionDenied, ItemNotFound, ValidationError,
             BadRequester, SerializationError {
         Accessor user = getRequesterUserProfile();
         DocumentaryUnit doc = views.detail(manager.getFrame(id, EntityClass.DOCUMENTARY_UNIT,
