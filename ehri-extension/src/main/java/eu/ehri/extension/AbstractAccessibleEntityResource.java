@@ -38,7 +38,7 @@ import eu.ehri.project.views.impl.Query;
  * entities can extend this class.
  * 
  * @param <E>
- *            The specific AccesibleEntity derived class
+ *            The specific AccessibleEntity derived class
  */
 public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
         extends AbstractRestResource {
