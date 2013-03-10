@@ -6,7 +6,7 @@ import com.tinkerpop.frames.VertexFrame;
 
 import eu.ehri.project.models.annotations.Fetch;
 
-public interface Description extends VertexFrame, VersionedEntity {
+public interface Description extends VertexFrame {
     public static final String DESCRIBES = "describes";
     public static final String LANGUAGE_CODE = "languageCode";
 
