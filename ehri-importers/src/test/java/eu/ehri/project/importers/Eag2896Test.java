@@ -9,18 +9,14 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.test.AbstractImporterTest;
-import eu.ehri.project.models.Address;
 import eu.ehri.project.models.Agent;
-import eu.ehri.project.models.Authority;
-import eu.ehri.project.models.AuthorityDescription;
+import eu.ehri.project.models.AgentDescription;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.events.SystemEvent;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import org.slf4j.LoggerFactory;
@@ -48,7 +44,7 @@ public class Eag2896Test extends AbstractImporterTest {
            logger.info("count of nodes before importing: " + count);
 
            InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAC);
-           ImportLog log = new SaxImportManager(graph, agent, validUser, EacImporter.class, EagHandler.class).importFile(ios, logMessage);
+           ImportLog log = new SaxImportManager(graph, agent, validUser, EagImporter.class, EagHandler.class).importFile(ios, logMessage);
            printGraph(graph);
                // How many new nodes will have been created? We should have
                // - 1 more Authority
@@ -62,14 +58,14 @@ public class Eag2896Test extends AbstractImporterTest {
                Iterable<Vertex> docs = graph.getVertices(AccessibleEntity.IDENTIFIER_KEY,
                        IMPORTED_ITEM_ID);
                assertTrue(docs.iterator().hasNext());
-               Authority unit = graph.frame(
+               Agent unit = graph.frame(
                        getVertexByIdentifier(graph,IMPORTED_ITEM_ID),
-                       Authority.class);
+                       Agent.class);
 
                // check the child items
-               AuthorityDescription c1 = graph.frame(
+               AgentDescription c1 = graph.frame(
                        getVertexByIdentifier(graph,AUTHORITY_DESC),
-                       AuthorityDescription.class);
+                       AgentDescription.class);
                
                //TODO: why doesn't this work?
    //            for(Address a : c1.getAddresses()){
@@ -98,15 +94,16 @@ public class Eag2896Test extends AbstractImporterTest {
 
    //        System.out.println("created: " + log.getCreated());
         } catch (IOException ex) {
-            Logger.getLogger(Eag2896Test.class.getName()).log(Level.SEVERE, null, ex);
+            logger.error(ex.getMessage());
             fail();
         } catch (ValidationError ex) {
+            logger.error(ex.getMessage());
             fail();
         } catch (InputParseError ex) {
-            Logger.getLogger(Eag2896Test.class.getName()).log(Level.SEVERE, null, ex);
+            logger.error(ex.getMessage());
             fail();
         } catch (ItemNotFound ex) {
-            Logger.getLogger(Eag2896Test.class.getName()).log(Level.SEVERE, null, ex);
+            logger.error(ex.getMessage());
             fail();
         }
 

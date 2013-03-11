@@ -74,7 +74,6 @@ public class EagHandler extends SaxXmlHandler {
                 importer.importItem(currentGraphPath.pop(), depth);
 
             } catch (ValidationError ex) {
-                ex.printStackTrace();
                 logger.error(ex.getMessage());
             }
         }

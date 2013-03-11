@@ -1,9 +1,12 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package eu.ehri.project.importers;
 
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.models.Authority;
 import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.AddressableEntity;
@@ -19,13 +22,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Import EAC for a given repository into the database.
  *
- * @author lindar
- *
+ * @author linda
  */
-public class EacImporter extends EaImporter {
-
+public class EagImporter extends EaImporter{
     private static final Logger logger = LoggerFactory.getLogger(EacImporter.class);
     
     /**
@@ -35,12 +35,12 @@ public class EacImporter extends EaImporter {
      * @param repository
      * @param log
      */
-    public EacImporter(FramedGraph<Neo4jGraph> framedGraph, Agent repository, ImportLog log) {
+    public EagImporter(FramedGraph<Neo4jGraph> framedGraph, Agent repository, ImportLog log) {
         super(framedGraph, repository, log);
     }
 
     @Override
-    public Authority importItem(Map<String, Object> itemData, int depth) throws ValidationError {
+    public Agent importItem(Map<String, Object> itemData, int depth) throws ValidationError {
         return importItem(itemData);
     }
 
@@ -50,12 +50,12 @@ public class EacImporter extends EaImporter {
      * @param itemData
      * @throws ValidationError
      */
-    public Authority importItem(Map<String, Object> itemData) throws ValidationError {
+    public Agent importItem(Map<String, Object> itemData) throws ValidationError {
 
         BundleDAO persister = new BundleDAO(framedGraph, repository);
-        Bundle unit = new Bundle(EntityClass.AUTHORITY, extractUnit(itemData));
+        Bundle unit = new Bundle(EntityClass.AGENT, extractUnit(itemData));
 
-        Bundle descBundle = new Bundle(EntityClass.AUTHORITY_DESCRIPTION, extractUnitDescription(itemData));
+        Bundle descBundle = new Bundle(EntityClass.AGENT_DESCRIPTION, extractUnitDescription(itemData));
 
 
         // Add dates and descriptions to the bundle since they're @Dependent
@@ -80,9 +80,9 @@ public class EacImporter extends EaImporter {
 
         PermissionScope scope = repository;
         IdGenerator generator = AccessibleEntityIdGenerator.INSTANCE;
-        String id = generator.generateId(EntityClass.AUTHORITY, scope, unit);
+        String id = generator.generateId(EntityClass.AGENT, scope, unit);
         boolean exists = manager.exists(id);
-        Authority frame = persister.createOrUpdate(unit.withId(id), Authority.class);
+        Agent frame = persister.createOrUpdate(unit.withId(id), Agent.class);
 
         // Set the repository/item relationship
         frame.setPermissionScope(scope);
@@ -100,6 +100,4 @@ public class EacImporter extends EaImporter {
         return frame;
 
     }
-
-    
 }
