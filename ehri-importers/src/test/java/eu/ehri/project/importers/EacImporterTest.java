@@ -16,13 +16,15 @@ import java.io.InputStream;
 import java.util.List;
 import static org.junit.Assert.*;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author linda
  */
 public class EacImporterTest extends AbstractImporterTest {
-
+private static final Logger logger = LoggerFactory.getLogger(EacImporterTest.class);
     protected final String SINGLE_EAC = "algemeyner-yidisher-arbeter-bund-in-lite-polyn-un-rusland.xml";
     // Depends on fixtures
     protected final String TEST_REPO = "r1";
@@ -37,7 +39,7 @@ public class EacImporterTest extends AbstractImporterTest {
         final String logMessage = "Importing a single EAC";
 
         int count = getNodeCount(graph);
-        System.out.println("count of nodes before importing: " + count);
+        logger.debug("count of nodes before importing: " + count);
 
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAC);
         ImportLog log = new SaxImportManager(graph, agent, validUser, EacImporter.class, EacHandler.class).importFile(ios, logMessage);
@@ -45,10 +47,10 @@ public class EacImporterTest extends AbstractImporterTest {
             // How many new nodes will have been created? We should have
             // - 1 more Authority
             // - 1 more AuthorityDescription
-            // (- 2 more MaintenanceEvent -- not yet)
+            // - 2 more MaintenanceEvent -- not yet
             // - 2 more linkEvents (1 for the Authority, 1 for the User)
             // - 1 more SystemEvent        
-            assertEquals(count + 5, getNodeCount(graph));
+            assertEquals(count + 7, getNodeCount(graph));
 
             Iterable<Vertex> docs = graph.getVertices(AccessibleEntity.IDENTIFIER_KEY,
                     IMPORTED_ITEM_ID);

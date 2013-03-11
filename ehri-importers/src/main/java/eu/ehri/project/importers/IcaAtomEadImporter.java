@@ -46,10 +46,9 @@ public class IcaAtomEadImporter extends XmlImporter<Map<String, Object>> {
      *
      * @param framedGraph
      * @param repository
-     * @param topLevelEad
+     * @param log
      */
-    public IcaAtomEadImporter(FramedGraph<Neo4jGraph> framedGraph, Agent repository,
-            ImportLog log) {
+    public IcaAtomEadImporter(FramedGraph<Neo4jGraph> framedGraph, Agent repository, ImportLog log) {
         super(framedGraph, repository, log);
 
     }
@@ -58,7 +57,6 @@ public class IcaAtomEadImporter extends XmlImporter<Map<String, Object>> {
      * Import a single archdesc or c01-12 item, keeping a reference to the hierarchical depth.
      *
      * @param itemData
-     * @param parent
      * @param depth
      * @throws ValidationError
      */

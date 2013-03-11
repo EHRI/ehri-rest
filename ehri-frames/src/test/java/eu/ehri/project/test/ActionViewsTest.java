@@ -24,8 +24,11 @@ import eu.ehri.project.models.base.Description;
 import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.views.impl.LoggingCrudViews;
 import org.neo4j.helpers.collection.Iterables;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ActionViewsTest extends AbstractFixtureTest {
+    private static final Logger logger = LoggerFactory.getLogger(ActionViewsTest.class);
 
     /**
      * Test updating an item.
@@ -100,7 +103,7 @@ public class ActionViewsTest extends AbstractFixtureTest {
         assertEquals(changedUser.asVertex(), event.getSubjects().iterator().next().asVertex());
         assertTrue(changedUser.getHistory().iterator().hasNext());
 
-        System.out.println("User: " + user.asVertex());
+        logger.debug("User: " + user.asVertex());
         // We should have exactly two actions now; one for create, one for
         // update...
         List<SystemEvent> events = toList(changedUser.getHistory());
@@ -117,7 +120,7 @@ public class ActionViewsTest extends AbstractFixtureTest {
         assertEquals(changedUser.asVertex(), events.get(1)
                 .getSubjects().iterator().next().asVertex());
         try {
-            System.out.println(new Serializer(graph).vertexFrameToBundle(events.get(0)));
+            logger.debug(new Serializer(graph).vertexFrameToBundle(events.get(0)).toString());
         } catch (SerializationError serializationError) {
             serializationError.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }

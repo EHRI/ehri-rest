@@ -40,9 +40,6 @@ public class HierarchicalEadImporterTest extends AbstractImporterTest {
 	@Test
     @Ignore
 	public void testImportItemsT() throws Exception {
-		logger.info("logger.info");
-		System.out.println("sysout");
-		logger.error("logger.error");
 		Agent agent = manager.getFrame(TEST_REPO, Agent.class);
 		final String logMessage = "Importing a single EAD";
 

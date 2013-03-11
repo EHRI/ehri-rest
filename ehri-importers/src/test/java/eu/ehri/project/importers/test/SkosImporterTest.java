@@ -98,7 +98,7 @@ public class SkosImporterTest extends AbstractImporterTest {
         assertEquals(log.getSuccessful(), subjects.size());
 
 
-        System.out.println("created: " + log.getCreated());
+//        System.out.println("created: " + log.getCreated());
 
     }
 }

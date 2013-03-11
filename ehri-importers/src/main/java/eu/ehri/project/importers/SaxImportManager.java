@@ -103,7 +103,7 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
      *
      * @param ios
      * @param logMessage
-     * @return
+     * @return returns an ImportLog for the given InputStream
      *
      * @throws IOException
      * @throws ValidationError
@@ -225,17 +225,17 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
             SAXParserFactory factory = SAXParserFactory.newInstance();
             SAXParser saxParser = factory.newSAXParser();
             importer = importerClass.getConstructor(FramedGraph.class, Agent.class, ImportLog.class).newInstance(framedGraph, agent, log);
-            logger.error("importer of class " + importer.getClass());
+            logger.info("importer of class " + importer.getClass());
             importer.addCreationCallback(new ImportCallback() {
                 public void itemImported(AccessibleEntity item) {
-                    logger.error("ImportCallback: itemImported creation " + item.getIdentifier());
+                    logger.info("ImportCallback: itemImported creation " + item.getIdentifier());
                     eventContext.addSubjects(item);
                     log.addCreated();
                 }
             });
             importer.addUpdateCallback(new ImportCallback() {
                 public void itemImported(AccessibleEntity item) {
-                    logger.error("ImportCallback: itemImported updated");
+                    logger.info("ImportCallback: itemImported updated");
                     eventContext.addSubjects(item);
                     log.addUpdated();
                 }
@@ -244,7 +244,7 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
             //TODO decide which handler to use, HandlerFactory? now part of constructor ...
 //            DefaultHandler handler = handlerClass.getConstructor(AbstractCVocImporter.class).newInstance(importer); 
             DefaultHandler handler = handlerClass.getConstructor(AbstractImporter.class).newInstance(importer); 
-            logger.error("handler of class " + handler.getClass());
+            logger.info("handler of class " + handler.getClass());
             saxParser.parse(ios, handler); //TODO + log
             
         } catch (InstantiationException ex) {

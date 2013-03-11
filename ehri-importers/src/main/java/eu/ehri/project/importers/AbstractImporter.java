@@ -54,7 +54,7 @@ public abstract class AbstractImporter<T> {
         this.framedGraph = framedGraph;
         this.log = log;
         documentContext=null;
-         manager = GraphManagerFactory.getInstance(framedGraph);
+        manager = GraphManagerFactory.getInstance(framedGraph);
     }
     /**
      * Add a callback to run when an item is created.
@@ -80,7 +80,7 @@ public abstract class AbstractImporter<T> {
      * Extract a list of DatePeriod bundles from an item's data.
      * 
      * @param data
-     * @return
+     * @return returns a List of Maps with DatePeriod.START_DATE and DatePeriod.END_DATE values
      */
     public abstract Iterable<Map<String, Object>> extractDates(T data);
 
@@ -90,7 +90,6 @@ public abstract class AbstractImporter<T> {
      * Lookup the graph ID of an existing object based on the IDENTITY_KEY
      * 
      * @param id
-     * @return
      */
     protected Object getExistingGraphId(final String id) {
         // Lookup the graph id of an object with the same

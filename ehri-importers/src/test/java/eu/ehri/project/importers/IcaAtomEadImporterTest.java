@@ -15,13 +15,15 @@ import java.io.InputStream;
 import java.util.List;
 import static org.junit.Assert.*;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author linda
  */
 public class IcaAtomEadImporterTest extends AbstractImporterTest{
-    
+    private static final Logger logger = LoggerFactory.getLogger(IcaAtomEadImporterTest.class);
        protected final String SINGLE_EAD = "hierarchical-ead.xml";
     // Depends on fixtures
     protected final String TEST_REPO = "r1";
@@ -92,7 +94,7 @@ public class IcaAtomEadImporterTest extends AbstractImporterTest{
 
         List<AccessibleEntity> subjects = toList(log.getAction().getSubjects());
         for(AccessibleEntity subject  : subjects)
-            System.out.println("identifier: " + subject.getIdentifier());
+            logger.info("identifier: " + subject.getIdentifier());
         
         assertEquals(5, subjects.size());
         assertEquals(log.getSuccessful(), subjects.size());
