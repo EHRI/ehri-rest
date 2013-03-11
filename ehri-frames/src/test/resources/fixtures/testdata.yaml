@@ -334,7 +334,7 @@
     identifier: ann1
     body: Test Annotation
   relationships:
-    hasTarget: c1
+    hasAnnotationTarget: c1
     
 - id: ann2
   type: annotation
@@ -342,7 +342,7 @@
     identifier: ann2
     body: Test Annotation of Annotation
   relationships:
-    hasTarget: ann1
+    hasAnnotationTarget: ann1
     
 - id: ann3
   type: annotation
@@ -350,8 +350,8 @@
     identifier: ann3
     body: Created by
   relationships:
-    hasTarget: c1
-    hasBody: mike
+    hasAnnotationTarget: c1
+    hasAnnotationBody: mike
 
 --- # Permission grants
 
