@@ -6,21 +6,29 @@ import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.persistance.Serializer;
 import org.junit.Test;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertNotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Test for Bundle data conversion functions.
  */
 public class DataConverterTest extends AbstractFixtureTest {
-private static final Logger logger = LoggerFactory.getLogger(DataConverterTest.class);
+
     @Test
     public void testBundleToXml() throws Exception {
         DocumentaryUnit c1 = manager.getFrame("c1", DocumentaryUnit.class);
@@ -39,6 +47,6 @@ private static final Logger logger = LoggerFactory.getLogger(DataConverterTest.c
                 rootItem.getAttributes().getNamedItem(Bundle.TYPE_KEY).getNodeValue());
         assertTrue(rootItem.hasChildNodes());
         // TODO: Check properties and relationships are serialized properly
-        logger.debug(bundle.toXmlString());
+        System.out.println(bundle.toXmlString());
     }
 }

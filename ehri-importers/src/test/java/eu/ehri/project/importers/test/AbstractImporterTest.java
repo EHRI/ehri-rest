@@ -44,7 +44,6 @@ public class AbstractImporterTest extends AbstractFixtureTest {
     }
 
     protected Vertex getVertexByIdentifier(FramedGraph<Neo4jGraph> graph, String id) {
-        logger.debug("AbstractImporterTest: id="+id);
         Iterable<Vertex> docs = graph.getVertices(AccessibleEntity.IDENTIFIER_KEY, id);
         return docs.iterator().next();
     }

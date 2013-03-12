@@ -5,6 +5,7 @@
 package eu.ehri.project.importers;
 
 import com.tinkerpop.blueprints.Vertex;
+import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.exceptions.InputParseError;
@@ -32,7 +33,7 @@ public class Eag2896Test extends AbstractImporterTest {
     protected final String TEST_REPO = "r1";
     // Depends on hierarchical-ead.xml
     protected final String IMPORTED_ITEM_ID = "NL-2896";
-    protected final String AUTHORITY_DESC = "NL-2896";
+    protected final String AGENT_DESC = "NL-2896-desc";
 
     @Test
     public void testImportItemsT()  {
@@ -61,18 +62,18 @@ public class Eag2896Test extends AbstractImporterTest {
                Agent unit = graph.frame(
                        getVertexByIdentifier(graph,IMPORTED_ITEM_ID),
                        Agent.class);
+               assertEquals(Entities.AGENT, unit.asVertex().getProperty("__ISA__"));
 
                // check the child items
                AgentDescription c1 = graph.frame(
-                       getVertexByIdentifier(graph,AUTHORITY_DESC),
+                       getVertexByIdentifier(graph,AGENT_DESC),
                        AgentDescription.class);
-               
-               //TODO: why doesn't this work?
-   //            for(Address a : c1.getAddresses()){
-   //                System.out.println("address: " + a.getStreetAddress());
-   //            }
-   //            assertEquals(1, toList(c1.getAddresses()).size());
+               assertEquals(Entities.AGENT_DESCRIPTION, c1.asVertex().getProperty("__ISA__"));
 
+               //check whether the description has an Address attached to it
+               assertEquals(1, toList(c1.getAddresses()).size());
+
+               assertEquals(2, toList(c1.getMaintenanceEvents()).size());
                // Ensure that c1 is a description of the unit
                for (Description d : unit.getDescriptions()) {
                    assertEquals(IMPORTED_ITEM_ID , d.getDescribedEntity().getIdentifier());
