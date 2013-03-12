@@ -62,18 +62,38 @@ public abstract class EaImporter extends XmlImporter<Map<String, Object>> {
         }
         return lst;
     }
-
-    protected Map<String, Object> extractUnitDescription(Map<String, Object> itemData) throws ValidationError {
-        Map<String, Object> unit = new HashMap<String, Object>();
+    
+    /**
+     * 
+     * @param itemData
+     * @return returns a Map with all keys from itemData that start with SaxXmlHandler.UNKNOWN
+     * @throws ValidationError 
+     */
+    protected Map<String, Object> extractUnknownProperties(Map<String, Object> itemData) throws ValidationError {
+        Map<String, Object> unknowns = new HashMap<String, Object>();
         for (String key : itemData.keySet()) {
-            if (key.equals("descriptionIdentifier")) {
-                unit.put(AccessibleEntity.IDENTIFIER_KEY, itemData.get(key));
-            }
-            if (!(key.equals(AccessibleEntity.IDENTIFIER_KEY) || key.startsWith("maintenanceEvent") || key.startsWith("address/"))) { //|| key.equals(Authority.NAME)
-                unit.put(key, itemData.get(key));
+            if (key.startsWith(SaxXmlHandler.UNKNOWN)) {
+                unknowns.put(key, itemData.get(key));
             }
         }
-        return unit;
+        return unknowns;
+    }
+
+    protected Map<String, Object> extractUnitDescription(Map<String, Object> itemData) throws ValidationError {
+        Map<String, Object> description = new HashMap<String, Object>();
+        for (String key : itemData.keySet()) {
+            if (key.equals("descriptionIdentifier")) {
+                description.put(AccessibleEntity.IDENTIFIER_KEY, itemData.get(key));
+            }else if ( !key.startsWith(SaxXmlHandler.UNKNOWN) 
+                    && ! key.equals("objectIdentifier") 
+                    && ! key.equals(AccessibleEntity.IDENTIFIER_KEY) 
+                    && ! key.startsWith("maintenanceEvent") 
+                    && ! key.startsWith("address/")) { 
+                description.put(key, itemData.get(key));
+            }
+        }
+        assert(description.containsKey(AccessibleEntity.IDENTIFIER_KEY));
+        return description;
     }
     //TODO: or should this be done in the Handler?
     private static int maintenanceIdentifier = 123;
@@ -102,20 +122,23 @@ public abstract class EaImporter extends XmlImporter<Map<String, Object>> {
                         }
                     }
                     list.add(e2);
-                    logger.error("eventType: " + e2.containsKey(MaintenanceEvent.EVENTTYPE) + ", agentType: " + e2.containsKey(MaintenanceEvent.AGENTTYPE));
                 }
             }
         }
-        logger.error("list size: " + list.size());
         return list;
     }
 
-    protected Map<String, Object> extractAddress(Map<String, Object> data) throws ValidationError {
+    /**
+     * 
+     * @param itemData
+     * @return returns a Map with all address/ keys
+     * @throws ValidationError 
+     */
+    protected Map<String, Object> extractAddress(Map<String, Object> itemData) throws ValidationError {
         Map<String, Object> address = new HashMap<String, Object>();
-        for (String key : data.keySet()) {
-            //ADDRESS_NAME
+        for (String key : itemData.keySet()) {
             if (key.startsWith("address/")) {
-                address.put(key.substring(8), data.get(key));
+                address.put(key.substring(8), itemData.get(key));
             }
         }
         if (!address.isEmpty() && !address.containsKey(Address.ADDRESS_NAME)) {
