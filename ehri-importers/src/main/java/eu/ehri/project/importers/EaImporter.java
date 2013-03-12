@@ -92,6 +92,7 @@ public abstract class EaImporter extends XmlImporter<Map<String, Object>> {
                 description.put(key, itemData.get(key));
             }
         }
+        assert(description.containsKey(AccessibleEntity.IDENTIFIER_KEY));
         return description;
     }
     //TODO: or should this be done in the Handler?
