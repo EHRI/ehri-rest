@@ -33,6 +33,8 @@ public abstract class EaImporter extends XmlImporter<Map<String, Object>> {
     public final String LEVEL_ATTR = "levelOfDescription";
     // Various date patterns
 
+    public static final String ADDRESS_NAME = "name";
+
     /**
      * Construct an EadImporter object.
      *
@@ -144,8 +146,8 @@ public abstract class EaImporter extends XmlImporter<Map<String, Object>> {
                 address.put(key.substring(8), itemData.get(key));
             }
         }
-        if (!address.isEmpty() && !address.containsKey(Address.ADDRESS_NAME)) {
-            address.put(Address.ADDRESS_NAME, address.get("street") + " " + address.get("municipality") + " " + address.get("country"));
+        if (!address.isEmpty() && !address.containsKey(ADDRESS_NAME)) {
+            address.put(ADDRESS_NAME, address.get("street") + " " + address.get("municipality") + " " + address.get("country"));
         }
         return address;
     }
