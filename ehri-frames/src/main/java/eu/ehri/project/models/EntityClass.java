@@ -43,7 +43,8 @@ public enum EntityClass {
     CONTENT_TYPE(Entities.CONTENT_TYPE, "ct", ContentType.class),
     CVOC_VOCABULARY(Entities.CVOC_VOCABULARY, "cvv", Vocabulary.class),
     CVOC_CONCEPT(Entities.CVOC_CONCEPT, "cv", Concept.class),
-    CVOC_CONCEPT_DESCRIPTION(Entities.CVOC_CONCEPT_DESCRIPTION, "cvd", ConceptDescription.class);
+    CVOC_CONCEPT_DESCRIPTION(Entities.CVOC_CONCEPT_DESCRIPTION, "cvd", ConceptDescription.class),
+    MAINTENANCE_EVENT ( Entities.MAINTENANCE_EVENT, "maintenanceEvent", MaintenanceEvent.class);
     // @formatter:on
 
     // Accessors.

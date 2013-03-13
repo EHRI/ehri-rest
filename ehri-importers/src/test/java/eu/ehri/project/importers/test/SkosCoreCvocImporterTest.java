@@ -1,10 +1,8 @@
 package eu.ehri.project.importers.test;
 
-import static org.junit.Assert.assertEquals;
 
 import java.io.InputStream;
 import java.io.PrintStream;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
@@ -13,13 +11,11 @@ import com.tinkerpop.blueprints.Vertex;
 
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.cvoc.SkosCoreCvocImporter;
-import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.ConceptDescription;
 import eu.ehri.project.models.cvoc.Vocabulary;
-import eu.ehri.project.test.AbstractFixtureTest;
 import eu.ehri.project.views.impl.Query;
 
 /**
@@ -75,7 +71,7 @@ public class SkosCoreCvocImporterTest extends AbstractImporterTest { //AbstractF
         //printConceptTree(System.out, list.get(0));
         
         // output RDF
-        new SkosCVocExporter().printRdf(System.out, vocabulary);
+//        new SkosCVocExporter().printRdf(System.out, vocabulary);
         
         /*
         // NOW add again to another vocabulary (Yep, doesn't work!)

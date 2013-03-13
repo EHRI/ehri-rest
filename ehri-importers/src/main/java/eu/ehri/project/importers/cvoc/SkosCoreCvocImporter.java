@@ -151,7 +151,7 @@ public class SkosCoreCvocImporter {
             Document doc = builder.parse(ios);
             importDocWithinAction(doc, eventContext, log);
         } catch (ParserConfigurationException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage());
             throw new RuntimeException(e);
         } catch (SAXException e) {
             throw new InputParseError(e);
@@ -249,7 +249,6 @@ public class SkosCoreCvocImporter {
      * Extract data and construct the bundle for a new Concept
      * 
      * @param element
-     * @return
      * @throws ValidationError
      */
     private Bundle constructBundleForConcept(Element element) throws ValidationError {
@@ -284,7 +283,6 @@ public class SkosCoreCvocImporter {
      * Get the list of id's of the Concept's broader concepts
      * 
      * @param element
-     * @return
      */
     private List<String> getBroaderConceptIds(Element element) {
     	List<String> ids = new ArrayList<String>();
@@ -303,7 +301,6 @@ public class SkosCoreCvocImporter {
      * Get the list of id's of the Concept's related concepts
      * 
      * @param element
-     * @return
      */
     private List<String> getRelatedConceptIds(Element element) {
     	List<String> ids = new ArrayList<String>();
@@ -454,7 +451,6 @@ public class SkosCoreCvocImporter {
      * 
      * @param from
      * @param to
-     * @return
      */
     private boolean reverseRelationExists(ConceptPlaceholder from, ConceptPlaceholder to) {
     	boolean result = false;
@@ -474,7 +470,6 @@ public class SkosCoreCvocImporter {
      * Check if the element represents a Concept
      * 
      * @param element
-     * @return
      */
     private boolean isConceptElement(Element element) {
     	boolean result = false;
@@ -500,7 +495,6 @@ public class SkosCoreCvocImporter {
      * Extract the Concept information (but not the descriptions)
      * 
      * @param conceptNode
-     * @return
      * @throws ValidationError
      */
     Map<String, Object> extractCvocConcept(Node conceptNode)
@@ -521,7 +515,6 @@ public class SkosCoreCvocImporter {
      * Extract the Descriptions information for a concept
      * 
      * @param conceptElement
-     * @return
      */
     Map<String, Object> extractCvocConceptDescriptions(Element conceptElement) {
         // extract and process the textual items (with a language)
@@ -613,7 +606,6 @@ public class SkosCoreCvocImporter {
      * 
      * @param descriptionData
      * @param lang
-     * @return
      */
     private Map<String, Object> getOrCreateDescriptionForLanguage(Map<String, Object> descriptionData, String lang) {
     	Map<String, Object> d = null;

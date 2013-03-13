@@ -7,13 +7,15 @@ import java.io.InputStream;
 import java.util.List;
 
 import eu.ehri.project.models.events.SystemEvent;
+
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.tinkerpop.blueprints.Vertex;
 
-import eu.ehri.project.importers.EadImportManager;
+import eu.ehri.project.importers.old.EadImportManager;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.DocumentaryUnit;
@@ -36,10 +38,8 @@ public class HierarchicalEadImporterTest extends AbstractImporterTest {
 	protected final String IMPORTED_ITEM_ID_N1_N2 = "C00001-1-1";
 
 	@Test
+    @Ignore
 	public void testImportItemsT() throws Exception {
-		logger.info("logger.info");
-		System.out.println("sysout");
-		logger.error("logger.error");
 		Agent agent = manager.getFrame(TEST_REPO, Agent.class);
 		final String logMessage = "Importing a single EAD";
 

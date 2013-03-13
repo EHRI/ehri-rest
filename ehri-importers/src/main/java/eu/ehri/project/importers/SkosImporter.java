@@ -1,15 +1,7 @@
 package eu.ehri.project.importers;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
-
-import eu.ehri.project.exceptions.IdGenerationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.EntityClass;
@@ -22,11 +14,19 @@ import eu.ehri.project.models.idgen.AccessibleEntityIdGenerator;
 import eu.ehri.project.models.idgen.IdGenerator;
 import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.persistance.BundleDAO;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  */
-public class SkosImporter extends XmlCVocImporter<Map<String, Object>> {
+public class SkosImporter extends XmlImporter<Map<String, Object>> {
+
+    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(SkosImporter.class);
 
     /**
      * Construct an EadImporter object.
@@ -47,16 +47,17 @@ public class SkosImporter extends XmlCVocImporter<Map<String, Object>> {
      * @param depth
      * @throws ValidationError
      */
+    @Override
     public Concept importItem(Map<String, Object> itemData,
             int depth) throws ValidationError {
 
-    	// Note pboon: 
-    	// What was the 'repository' and 'scope' should eventually be the Vocabulary!
-    	// Also note We don't have a parent here, but it could be a Broader Concept... 
- System.out.println("import item with objectIdentifier: " + itemData.get("objectIdentifier"));	
-    	
+        // Note pboon: 
+        // What was the 'repository' and 'scope' should eventually be the Vocabulary!
+        // Also note We don't have a parent here, but it could be a Broader Concept... 
+        logger.info("import item with objectIdentifier: " + itemData.get("objectIdentifier"));
+
         Bundle unit = new Bundle(EntityClass.CVOC_CONCEPT,
-        		extractConcept(itemData, depth));
+                extractConcept(itemData, depth));
         BundleDAO persister = new BundleDAO(framedGraph, repository);
 
         // Add dates and descriptions to the bundle since they're @Dependent
@@ -72,16 +73,16 @@ public class SkosImporter extends XmlCVocImporter<Map<String, Object>> {
 
         //PermissionScope scope = parent != null ? parent : repository;
         PermissionScope scope = repository;
-        
+
         IdGenerator generator = AccessibleEntityIdGenerator.INSTANCE;
         String id = generator.generateId(EntityClass.CVOC_CONCEPT, scope, unit);
         boolean exists = manager.exists(id);
         Concept frame = persister.createOrUpdate(unit.withId(id),
-        		Concept.class);
+                Concept.class);
 
         // Set the repository/item relationship
         //frame.setAgent(repository); // SHOULD set the Vocabulary at some point!
-        
+
         frame.setPermissionScope(scope);
         // Set the parent child relationship
         //if (parent != null)
@@ -97,15 +98,15 @@ public class SkosImporter extends XmlCVocImporter<Map<String, Object>> {
                 cb.itemImported(frame);
             }
         }
-        return frame;    	
+        return frame;
     }
 
     /**
      * The 'item' or entities to import (Described Entity?)
-     * 
+     *
      * @param itemData
      * @param depth
-     * @return
+     * @return returns a Map of Concept key-value pairs
      * @throws ValidationError
      */
     protected Map<String, Object> extractConcept(Map<String, Object> itemData, int depth) throws ValidationError {
@@ -116,20 +117,20 @@ public class SkosImporter extends XmlCVocImporter<Map<String, Object>> {
 
     /**
      * The description of the 'item' or main entities to import
-     * 
+     *
      * @param itemData
-     * @return
+     * @return returns a Map of ConceptDescription key-value pairs
      * @throws ValidationError
      */
     protected Iterable<Map<String, Object>> extractConceptDescription(Map<String, Object> itemData) throws ValidationError {
- 
-// TEST
-System.out.println("itemData keys: \n" + itemData.keySet().toString());
 
-    	List<Map<String, Object>> langs = new ArrayList<Map<String, Object>>();
+// TEST
+        logger.debug("itemData keys: \n" + itemData.keySet().toString());
+
+        List<Map<String, Object>> langs = new ArrayList<Map<String, Object>>();
         Map<String, Object> unit = new HashMap<String, Object>();
         for (String key : itemData.keySet()) {
-            System.out.println("extract: " + key);
+            logger.debug("extract: " + key);
             if (key.equals("descriptionIdentifier")) {
                 unit.put(AccessibleEntity.IDENTIFIER_KEY, itemData.get(key));
             } else if (key.equals("languageCode")) {
@@ -162,6 +163,4 @@ System.out.println("itemData keys: \n" + itemData.keySet().toString());
         }
         return lst;
     }
-
-
 }

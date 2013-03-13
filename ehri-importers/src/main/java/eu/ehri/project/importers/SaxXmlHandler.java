@@ -9,50 +9,67 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
-
+import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 /**
  *
- * makes use of properties file with format: part/of/path/=attribute
+ * makes use of properties file with format: 
+ * 
+ * path/within/xml/=node/property
+ *
+ * if no <node> is given, it is the default logical-unit or unit-description of this property file. 
+ * with eac.properties this would be an Authority with an AuthorityDescription
+ * if there is a <node> given, it will translate to another graph node, like Address.
+ *
+ * lines starting with '@' give the attributes:
+ * @attribute=tmpname
+ * path/within/xml/@tmpname=node/property
+ *
+ * all tags not included in the properties file that have a  nodevalue will be put in a unknownproperties node, 
+ * with an edge to the unit-description.
  *
  * @author linda
  */
 public abstract class SaxXmlHandler extends DefaultHandler {
+
+    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(SaxXmlHandler.class);
     public static final String UNKNOWN = "UNKNOWN_";
     Stack<Map<String, Object>> currentGraphPath;
     Map<String, Map<String, Object>> languageMap;
     PropertiesConfig p;
     Stack<String> currentPath;
-    AbstractCVocImporter<Map<String, Object>> importer;
+    AbstractImporter<Map<String, Object>> importer;
     String languagePrefix;
     int depth = 0;
     boolean inSubnode = false;
+    private Stack<String> currentText ;
 
-    public SaxXmlHandler(AbstractCVocImporter<Map<String, Object>> importer2, PropertiesConfig properties) {
+    public SaxXmlHandler(AbstractImporter<Map<String, Object>> importer, PropertiesConfig properties) {
         super();
-        this.importer = importer2;
+        this.importer = importer;
         currentGraphPath = new Stack<Map<String, Object>>();
         currentGraphPath.push(new HashMap<String, Object>());
         p = properties;
         currentPath = new Stack<String>();
         languageMap = new HashMap<String, Map<String, Object>>();
+        currentText = new Stack<String>();
     }
 
-    protected abstract boolean needToCreateSubNode();
+    protected abstract boolean needToCreateSubNode(String qName);
 
     @Override
-    public void startElement(String uri, String localName, String qName,
-            Attributes attributes) throws SAXException {
-
+    public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
+        currentText.push("");
         String lang = languageAttribute(attributes);
         if (lang != null) {
             languagePrefix = lang;
             if (!languageMap.containsKey(languagePrefix)) {
-                if(languageMap.isEmpty())
+                if (languageMap.isEmpty()) {
                     currentGraphPath.peek().put("languageCode", languageMap);
+                }
                 Map<String, Object> m = new HashMap<String, Object>();
                 m.put("languageCode", languagePrefix);
                 languageMap.put(languagePrefix, m);
@@ -60,40 +77,54 @@ public abstract class SaxXmlHandler extends DefaultHandler {
         }
 
         currentPath.push(withoutNamespace(qName));
-
-        if (needToCreateSubNode()) { //a new subgraph should be created
-            System.out.println("new subnode: " + depth);
+        if (needToCreateSubNode(qName)) { //a new subgraph should be created
             depth++;
             currentGraphPath.push(new HashMap<String, Object>());
         }
 
         for (int attr = 0; attr < attributes.getLength(); attr++) { // only certain attributes get stored
             String attribute = withoutNamespace(attributes.getLocalName(attr));
-            if (p.hasAttributeProperty(attribute) && ! p.getAttributeProperty(attribute).equals("languageCode")) {
-                putPropertyInCurrentGraph(p.getAttributeProperty(attribute), attributes.getValue(attr));
+            if (p.hasAttributeProperty(attribute) && !p.getAttributeProperty(attribute).equals("languageCode")) {
+                putPropertyInCurrentGraph(getImportantPath(currentPath, "@"+p.getAttributeProperty(attribute)), attributes.getValue(attr));
             }
         }
 
     }
-        @Override
+
+    @Override
     public void endElement(String uri, String localName, String qName) throws SAXException {
-            languagePrefix=null;
+        languagePrefix = null;
+        if (languagePrefix == null) {
+            putPropertyInCurrentGraph(getImportantPath(currentPath), currentText.pop());
+        } else {
+            putPropertyInGraph(languageMap.get(languagePrefix), getImportantPath(currentPath), currentText.pop());
+        }
+
+
     }
 
+    @SuppressWarnings("unchecked")
+    protected void putSubGraphInCurrentGraph(String key, Map<String, Object> subgraph) {
+        Map<String, Object> c = currentGraphPath.peek();
+//        for(String subkey : subgraph.keySet()){
+//            logger.debug(subkey + ":" + subgraph.get(key));
+//        }
+        if (c.containsKey(key)) {
+            ((List<Map<String, Object>>) c.get(key)).add(subgraph);
+        } else {
+            List<Map<String, Object>> l = new ArrayList<Map<String, Object>>();
+            l.add(subgraph);
+            c.put(key, l);
+        }
+    }
 
     private String languageAttribute(Attributes attributes) {
         for (int attr = 0; attr < attributes.getLength(); attr++) { // only certain attributes get stored
             String attribute = withoutNamespace(attributes.getLocalName(attr));
- // logging here
- //if (p.getAttributeProperty(attribute) != null) {
-//	 System.out.println("attribute: " + attribute
-//			 	+ ", prop: " + p.getAttributeProperty(attribute) 
-//			 	+ ", val: " + attributes.getValue(attr));
-// }
             
             if (p.getAttributeProperty(attribute) != null && p.getAttributeProperty(attribute).equals("languageCode")) {
- //System.out.println("Language detected!");
-            	return attributes.getValue(attr);
+                logger.debug("Language detected!");
+                return attributes.getValue(attr);
             }
         }
         return null;
@@ -114,16 +145,14 @@ public abstract class SaxXmlHandler extends DefaultHandler {
         if (isEmpty(new String(ch, start, length))) {
             return;
         }
-        if(languagePrefix == null){
-           putPropertyInCurrentGraph(getImportantPath(currentPath), new String(ch, start, length));
-        }else{
-            putPropertyInGraph(languageMap.get(languagePrefix), getImportantPath(currentPath), new String(ch, start, length));
-        }
+        String trimmed = new String(ch, start, length).trim().replaceAll("\\s+", " ");
+        currentText.push(currentText.pop()+trimmed);
+//        logger.debug(currentPath.peek() + ": "+currentText.peek() + " (" + getImportantPath(currentPath)+")");
     }
 
     /**
-     * stores this property value pair in the current DocumentNode if the
-     * property already exists, it is added to the value list
+     * stores this property value pair in the current DocumentNode if the property already exists, it is added to the
+     * value list
      *
      * @param property
      * @param value
@@ -131,12 +160,13 @@ public abstract class SaxXmlHandler extends DefaultHandler {
     protected void putPropertyInCurrentGraph(String property, String value) {
         putPropertyInGraph(currentGraphPath.peek(), property, value);
     }
+
     private void putPropertyInGraph(Map<String, Object> c, String property, String value) {
         String valuetrimmed = value.trim();
         if (valuetrimmed.isEmpty()) {
             return;
         }
-        System.out.println("putProp: " + property + " " + value);
+        logger.debug("putProp: " + property + " " + value);
 
         Object propertyList;
         if (c.containsKey(property)) {
@@ -154,7 +184,6 @@ public abstract class SaxXmlHandler extends DefaultHandler {
         }
     }
 
-    
     private boolean isEmpty(String s) {
         return (s.trim()).isEmpty();
     }
@@ -162,26 +191,35 @@ public abstract class SaxXmlHandler extends DefaultHandler {
     /**
      *
      * @param path
-     * @return returns the corresponding value to this path from the properties
-     * file. the search is inside out, so if both eadheader/ and ead/eadheader/
-     * are specified, it will return the value for the first
+     * @return returns the corresponding value to this path from the properties file. the search is inside out, so if
+     * both eadheader/ and ead/eadheader/ are specified, it will return the value for the first
      *
-     * if this path has no corresponding value in the properties file, it will
-     * be return the entire path name, with _ replacing the /
+     * if this path has no corresponding value in the properties file, it will be return the entire path name, with _
+     * replacing the /
      */
     protected String getImportantPath(Stack<String> path) {
+        return getImportantPath(path, "");
+    }
+ /**
+     *
+     * @param path
+     * @return returns the corresponding value to this path from the properties file. the search is inside out, so if
+     * both eadheader/ and ead/eadheader/ are specified, it will return the value for the first
+     *
+     * if this path has no corresponding value in the properties file, it will be return the entire path name, with _
+     * replacing the /
+     */
+    private String getImportantPath(Stack<String> path, String attribute) {
         String all = "";
         for (int i = path.size(); i > 0; i--) {
             all = path.get(i - 1) + "/" + all;
-            if (p.getProperty(all) != null) {
-                return p.getProperty(all);
+            if (p.getProperty(all+attribute) != null) {
+                return p.getProperty(all+attribute);
             }
         }
         return UNKNOWN + all.replace("/", "_");
     }
-
     protected void printGraph() {
-        String g = "";
         for (String key : currentGraphPath.peek().keySet()) {
             System.out.println(key + ":" + currentGraphPath.peek().get(key));
         }

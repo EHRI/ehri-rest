@@ -28,7 +28,7 @@ import eu.ehri.project.models.base.DescribedEntity;
 @EntityType(EntityClass.CVOC_CONCEPT)
 //public interface Concept extends AccessibleEntity {
 public interface Concept extends AccessibleEntity, DescribedEntity {
-    //public static final String BROADER = "broader";
+    public static final String BROADER = "broader";
     public static final String NARROWER = "narrower";
     public static final String RELATED = "related";
     
@@ -43,7 +43,7 @@ public interface Concept extends AccessibleEntity, DescribedEntity {
     // relations to other concepts
     
     // Note that multiple broader concepts are possible
-    @Fetch(NARROWER)
+    @Fetch(BROADER)
     @Adjacency(label = NARROWER, direction=Direction.IN)
     //@Adjacency(label = BROADER)
     public Iterable<Concept> getBroaderConcepts();

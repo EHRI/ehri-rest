@@ -4,7 +4,6 @@ import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.DatePeriod;
-//import eu.ehri.project.models.MaintenanceEvent;
 import eu.ehri.project.models.Agent;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,16 +15,19 @@ import java.util.regex.Pattern;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author lindar
- * 
+ *
  */
-public abstract class XmlCVocImporter<T> extends AbstractCVocImporter<T> {
+public abstract class XmlImporter<T> extends AbstractImporter<T> {
+
+    private static final Logger logger = LoggerFactory.getLogger(XmlImporter.class);
     protected final String OBJECT_ID = "objectIdentifier";
     protected final String DESCRIPTION_ID = "descriptionIdentifier";
-
     private PropertiesConfig dates = new PropertiesConfig("dates.properties");
     // Various date patterns
     private Pattern[] datePatterns = {
@@ -36,16 +38,16 @@ public abstract class XmlCVocImporter<T> extends AbstractCVocImporter<T> {
         Pattern.compile("^(\\d{4})-\\[(\\d{4})\\]$"),
         Pattern.compile("^(\\d{4}s)-\\[(\\d{4}s)\\]$"),
         Pattern.compile("^\\[(\\d{4})\\]$"), Pattern.compile("^(\\d{4})$"),
-        Pattern.compile("^(\\d{2})th century$")};
+        Pattern.compile("^(\\d{2})th century$"),
+        Pattern.compile("^\\s*(\\d{4})\\s*-\\s*(\\d{4})")
+    };
 
-    public XmlCVocImporter(FramedGraph<Neo4jGraph> framedGraph,
-    		Agent repository, ImportLog log) {
-        super(framedGraph, repository, log, null); // no toplevel !
+    public XmlImporter(FramedGraph<Neo4jGraph> framedGraph, Agent repository, ImportLog log) {
+        super(framedGraph, repository, log);
     }
 
     /**
-     * Extract a list of entity bundles for DatePeriods from the data,
-     * attempting to parse the unitdate attribute.
+     * Extract a list of entity bundles for DatePeriods from the data, attempting to parse the unitdate attribute.
      *
      * @param data
      */
@@ -70,14 +72,14 @@ public abstract class XmlCVocImporter<T> extends AbstractCVocImporter<T> {
     }
 
     /**
-     * Attempt to extract some date periods. This does not currently put the
-     * dates into ISO form.
+     * Attempt to extract some date periods. This does not currently put the dates into ISO form.
      *
      * @param date
-     * @return
+     * @return returns a Map with DatePeriod.START_DATE and DatePeriod.END_DATE values
      * @throws ValidationError
      */
     private Map<String, Object> extractDate(Object date) throws ValidationError {
+        logger.debug("date value: " + date);
         Map<String, Object> data = new HashMap<String, Object>();
         if (date instanceof String) {
             data = matchDate((String) date);
@@ -86,7 +88,7 @@ public abstract class XmlCVocImporter<T> extends AbstractCVocImporter<T> {
                 data.putAll(data);
             }
         } else {
-            System.out.println("ERROR WITH DATES " + date);
+            logger.error("ERROR WITH DATES " + date);
         }
         return data.isEmpty() ? null : data;
     }
@@ -113,11 +115,12 @@ public abstract class XmlCVocImporter<T> extends AbstractCVocImporter<T> {
     //TODO: for now, it only returns 1 unknown node object, but it could be more accurate to return several
     /**
      * extract data nodes from the data, that are not covered by their respectable properties file.
+     *
      * @param data
-     * @return 
+     * @return returns 1 Map of all the tags that were not handled by the property file of this Importer
      */
-  protected Iterable<Map<String, Object>> extractOtherProperties(Map<String, Object> data){
-              List<Map<String, Object>> l = new ArrayList<Map<String, Object>>();
+    protected Iterable<Map<String, Object>> extractOtherProperties(Map<String, Object> data) {
+        List<Map<String, Object>> l = new ArrayList<Map<String, Object>>();
         Map<String, Object> unit = new HashMap<String, Object>();
         for (String key : data.keySet()) {
             if (key.startsWith(SaxXmlHandler.UNKNOWN)) {
@@ -127,30 +130,6 @@ public abstract class XmlCVocImporter<T> extends AbstractCVocImporter<T> {
         l.add(unit);
         return l;
 
-  }
-/*  
-   //TODO: or should this be done in the Handler?
-    @SuppressWarnings("unchecked")
-    protected Iterable<Map<String, Object>> extractMaintenanceEvent(Map<String, Object> data) throws ValidationError {
-        List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
-        for (String key : data.keySet()) {
-            if (key.equals("maintenanceEvent")) {
-                for (Map<String, Object> event : (List<Map<String, Object>>) data.get(key)) {
-                    Map<String, Object> e2 = new HashMap<String, Object>();
-                    for (String eventkey : event.keySet()) {
-                        if (eventkey.equals("maintenanceEventType")) {
-                            e2.put(MaintenanceEvent.EVENTTYPE, event.get(eventkey));
-                        } else if (eventkey.equals("maintenanceEventAgentType")) {
-                            e2.put(MaintenanceEvent.AGENTTYPE, event.get(eventkey));
-                        } else {
-                            e2.put(eventkey, event.get(eventkey));
-                        }
-                    }
-                    list.add(e2);
-                }
-            }
-        }
-        return list;
     }
-*/ 
+    
 }

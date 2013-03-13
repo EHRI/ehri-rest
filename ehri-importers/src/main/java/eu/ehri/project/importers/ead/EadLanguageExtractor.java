@@ -153,7 +153,6 @@ public class EadLanguageExtractor {
      * 
      * @param data
      * @param path
-     * @return
      * @throws XPathExpressionException
      */
     private List<String> getLanguageCodes(Node data, String path)
