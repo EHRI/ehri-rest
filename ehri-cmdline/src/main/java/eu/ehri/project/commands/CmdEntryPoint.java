@@ -26,6 +26,7 @@ public class CmdEntryPoint extends BaseCommand {
         mmap.put(SkosVocabularyImport.NAME, SkosVocabularyImport.class);
         mmap.put(EadImport.NAME, EadImport.class);
         mmap.put(EacImport.NAME, EacImport.class);
+        mmap.put(EagImport.NAME, EagImport.class);
         mmap.put(UserListEntities.NAME, UserListEntities.class);
         mmap.put(ListEntities.NAME, ListEntities.class);
         mmap.put(GetEntity.NAME, GetEntity.class);

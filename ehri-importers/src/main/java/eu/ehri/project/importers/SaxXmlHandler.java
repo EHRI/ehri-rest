@@ -16,7 +16,20 @@ import org.xml.sax.helpers.DefaultHandler;
 
 /**
  *
- * makes use of properties file with format: part/of/path/=attribute
+ * makes use of properties file with format: 
+ * 
+ * path/within/xml/=node/property
+ *
+ * if no <node> is given, it is the default logical-unit or unit-description of this property file. 
+ * with eac.properties this would be an Authority with an AuthorityDescription
+ * if there is a <node> given, it will translate to another graph node, like Address.
+ *
+ * lines starting with '@' give the attributes:
+ * @attribute=tmpname
+ * path/within/xml/@tmpname=node/property
+ *
+ * all tags not included in the properties file that have a  nodevalue will be put in a unknownproperties node, 
+ * with an edge to the unit-description.
  *
  * @author linda
  */
@@ -32,35 +45,24 @@ public abstract class SaxXmlHandler extends DefaultHandler {
     String languagePrefix;
     int depth = 0;
     boolean inSubnode = false;
-    String currentText = "";
+    private Stack<String> currentText ;
 
-//    public SaxXmlHandler(AbstractCVocImporter<Map<String, Object>> importer2, PropertiesConfig properties) {
-//        super();
-//        this.importer = importer2;
-//        currentGraphPath = new Stack<Map<String, Object>>();
-//        currentGraphPath.push(new HashMap<String, Object>());
-//        p = properties;
-//        currentPath = new Stack<String>();
-//        languageMap = new HashMap<String, Map<String, Object>>();
-//    }
     public SaxXmlHandler(AbstractImporter<Map<String, Object>> importer, PropertiesConfig properties) {
         super();
-        logger.info("constructor");
         this.importer = importer;
         currentGraphPath = new Stack<Map<String, Object>>();
         currentGraphPath.push(new HashMap<String, Object>());
         p = properties;
         currentPath = new Stack<String>();
         languageMap = new HashMap<String, Map<String, Object>>();
+        currentText = new Stack<String>();
     }
 
     protected abstract boolean needToCreateSubNode(String qName);
 
     @Override
-    public void startElement(String uri, String localName, String qName,
-            Attributes attributes) throws SAXException {
-
-        currentText = "";
+    public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
+        currentText.push("");
         String lang = languageAttribute(attributes);
         if (lang != null) {
             languagePrefix = lang;
@@ -83,7 +85,7 @@ public abstract class SaxXmlHandler extends DefaultHandler {
         for (int attr = 0; attr < attributes.getLength(); attr++) { // only certain attributes get stored
             String attribute = withoutNamespace(attributes.getLocalName(attr));
             if (p.hasAttributeProperty(attribute) && !p.getAttributeProperty(attribute).equals("languageCode")) {
-                putPropertyInCurrentGraph(p.getAttributeProperty(attribute), attributes.getValue(attr));
+                putPropertyInCurrentGraph(getImportantPath(currentPath, "@"+p.getAttributeProperty(attribute)), attributes.getValue(attr));
             }
         }
 
@@ -93,9 +95,9 @@ public abstract class SaxXmlHandler extends DefaultHandler {
     public void endElement(String uri, String localName, String qName) throws SAXException {
         languagePrefix = null;
         if (languagePrefix == null) {
-            putPropertyInCurrentGraph(getImportantPath(currentPath), currentText);
+            putPropertyInCurrentGraph(getImportantPath(currentPath), currentText.pop());
         } else {
-            putPropertyInGraph(languageMap.get(languagePrefix), getImportantPath(currentPath), currentText);
+            putPropertyInGraph(languageMap.get(languagePrefix), getImportantPath(currentPath), currentText.pop());
         }
 
 
@@ -104,9 +106,9 @@ public abstract class SaxXmlHandler extends DefaultHandler {
     @SuppressWarnings("unchecked")
     protected void putSubGraphInCurrentGraph(String key, Map<String, Object> subgraph) {
         Map<String, Object> c = currentGraphPath.peek();
-        for(String subkey : subgraph.keySet()){
-            logger.debug(subkey + ":" + subgraph.get(key));
-        }
+//        for(String subkey : subgraph.keySet()){
+//            logger.debug(subkey + ":" + subgraph.get(key));
+//        }
         if (c.containsKey(key)) {
             ((List<Map<String, Object>>) c.get(key)).add(subgraph);
         } else {
@@ -119,15 +121,9 @@ public abstract class SaxXmlHandler extends DefaultHandler {
     private String languageAttribute(Attributes attributes) {
         for (int attr = 0; attr < attributes.getLength(); attr++) { // only certain attributes get stored
             String attribute = withoutNamespace(attributes.getLocalName(attr));
-            // logging here
-            //if (p.getAttributeProperty(attribute) != null) {
-//	 System.out.println("attribute: " + attribute
-//			 	+ ", prop: " + p.getAttributeProperty(attribute) 
-//			 	+ ", val: " + attributes.getValue(attr));
-// }
-
+            
             if (p.getAttributeProperty(attribute) != null && p.getAttributeProperty(attribute).equals("languageCode")) {
-                //System.out.println("Language detected!");
+                logger.debug("Language detected!");
                 return attributes.getValue(attr);
             }
         }
@@ -150,7 +146,8 @@ public abstract class SaxXmlHandler extends DefaultHandler {
             return;
         }
         String trimmed = new String(ch, start, length).trim().replaceAll("\\s+", " ");
-        currentText += trimmed;
+        currentText.push(currentText.pop()+trimmed);
+//        logger.debug(currentPath.peek() + ": "+currentText.peek() + " (" + getImportantPath(currentPath)+")");
     }
 
     /**
@@ -169,7 +166,7 @@ public abstract class SaxXmlHandler extends DefaultHandler {
         if (valuetrimmed.isEmpty()) {
             return;
         }
-//        System.out.println("putProp: " + property + " " + value);
+        logger.debug("putProp: " + property + " " + value);
 
         Object propertyList;
         if (c.containsKey(property)) {
@@ -201,16 +198,27 @@ public abstract class SaxXmlHandler extends DefaultHandler {
      * replacing the /
      */
     protected String getImportantPath(Stack<String> path) {
+        return getImportantPath(path, "");
+    }
+ /**
+     *
+     * @param path
+     * @return returns the corresponding value to this path from the properties file. the search is inside out, so if
+     * both eadheader/ and ead/eadheader/ are specified, it will return the value for the first
+     *
+     * if this path has no corresponding value in the properties file, it will be return the entire path name, with _
+     * replacing the /
+     */
+    private String getImportantPath(Stack<String> path, String attribute) {
         String all = "";
         for (int i = path.size(); i > 0; i--) {
             all = path.get(i - 1) + "/" + all;
-            if (p.getProperty(all) != null) {
-                return p.getProperty(all);
+            if (p.getProperty(all+attribute) != null) {
+                return p.getProperty(all+attribute);
             }
         }
         return UNKNOWN + all.replace("/", "_");
     }
-
     protected void printGraph() {
         for (String key : currentGraphPath.peek().keySet()) {
             System.out.println(key + ":" + currentGraphPath.peek().get(key));

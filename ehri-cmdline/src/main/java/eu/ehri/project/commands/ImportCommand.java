@@ -103,7 +103,7 @@ public abstract class ImportCommand extends BaseCommand implements Command{
 
             ImportLog log = new SaxImportManager(graph, agent, user, importer, handler)
             	.importFiles(filePaths, logMessage);
-            
+            //ImportLog log = new SaxImportManager(graph, agent, validUser, EagImporter.class, EagHandler.class).importFile(ios, logMessage);
             
             System.out.println("Import completed. Created: " + log.getCreated()
                     + ", Updated: " + log.getUpdated());

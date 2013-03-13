@@ -9,6 +9,7 @@ import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.EntityClass;
+import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.AddressableEntity;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.PermissionScope;
@@ -29,7 +30,7 @@ public class EagImporter extends EaImporter{
     private static final Logger logger = LoggerFactory.getLogger(EacImporter.class);
     
     /**
-     * Construct an EacImporter object.
+     * Construct an EagImporter object.
      *
      * @param framedGraph
      * @param repository
@@ -55,7 +56,9 @@ public class EagImporter extends EaImporter{
         BundleDAO persister = new BundleDAO(framedGraph, repository);
         Bundle unit = new Bundle(EntityClass.AGENT, extractUnit(itemData));
 
-        Bundle descBundle = new Bundle(EntityClass.AGENT_DESCRIPTION, extractUnitDescription(itemData));
+        Map<String, Object> descmap = extractUnitDescription(itemData);
+        descmap.put(AccessibleEntity.IDENTIFIER_KEY, descmap.get(AccessibleEntity.IDENTIFIER_KEY)+"#desc");
+        Bundle descBundle = new Bundle(EntityClass.AGENT_DESCRIPTION, descmap);
 
 
         // Add dates and descriptions to the bundle since they're @Dependent

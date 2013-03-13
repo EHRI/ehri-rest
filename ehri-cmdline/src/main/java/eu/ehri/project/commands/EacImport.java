@@ -24,7 +24,7 @@ public class EacImport extends ImportCommand implements Command {
 
     @Override
     public String getHelp() {
-        return "Usage: " + NAME + " [OPTIONS] <neo4j-graph-dir> -user <user-id> -repo <agent-id> <ead1.xml> <ead2.xml> ... <eadN.xml>";
+        return "Usage: " + NAME + " [OPTIONS] <neo4j-graph-dir> -user <user-id> -repo <agent-id> <eac1.xml> <eac2.xml> ... <eacN.xml>";
     }
 
     @Override

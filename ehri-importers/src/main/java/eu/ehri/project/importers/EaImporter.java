@@ -79,7 +79,7 @@ public abstract class EaImporter extends XmlImporter<Map<String, Object>> {
         return unknowns;
     }
 
-    protected Map<String, Object> extractUnitDescription(Map<String, Object> itemData) throws ValidationError {
+    protected Map<String, Object> extractUnitDescription(Map<String, Object> itemData) {
         Map<String, Object> description = new HashMap<String, Object>();
         for (String key : itemData.keySet()) {
             if (key.equals("descriptionIdentifier")) {
@@ -99,7 +99,7 @@ public abstract class EaImporter extends XmlImporter<Map<String, Object>> {
     private static int maintenanceIdentifier = 123;
 
     @SuppressWarnings("unchecked")
-    protected Iterable<Map<String, Object>> extractMaintenanceEvent(Map<String, Object> data, String unitid) throws ValidationError {
+    protected Iterable<Map<String, Object>> extractMaintenanceEvent(Map<String, Object> data, String unitid)  {
         List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
         for (String key : data.keySet()) {
             if (key.equals("maintenanceEvent")) {
@@ -121,6 +121,9 @@ public abstract class EaImporter extends XmlImporter<Map<String, Object>> {
                             e2.put(AccessibleEntity.IDENTIFIER_KEY, maintenanceIdentifier++);
                         }
                     }
+                    if (!e2.containsKey(MaintenanceEvent.EVENTTYPE)){
+                        e2.put(MaintenanceEvent.EVENTTYPE, "unknown event type");
+                    }
                     list.add(e2);
                 }
             }
@@ -134,7 +137,7 @@ public abstract class EaImporter extends XmlImporter<Map<String, Object>> {
      * @return returns a Map with all address/ keys
      * @throws ValidationError 
      */
-    protected Map<String, Object> extractAddress(Map<String, Object> itemData) throws ValidationError {
+    protected Map<String, Object> extractAddress(Map<String, Object> itemData)  {
         Map<String, Object> address = new HashMap<String, Object>();
         for (String key : itemData.keySet()) {
             if (key.startsWith("address/")) {

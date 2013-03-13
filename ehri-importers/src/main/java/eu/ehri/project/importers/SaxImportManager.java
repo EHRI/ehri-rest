@@ -205,7 +205,7 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
     }
 
     /**
-     * Import EAD from the given InputStream, as part of the given action.
+     * Import XML from the given InputStream, as part of the given action.
      *
      * @param ios
      * @param eventContext
@@ -240,9 +240,7 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
                     log.addUpdated();
                 }
             });
-            // Note: CVoc specific !
             //TODO decide which handler to use, HandlerFactory? now part of constructor ...
-//            DefaultHandler handler = handlerClass.getConstructor(AbstractCVocImporter.class).newInstance(importer); 
             DefaultHandler handler = handlerClass.getConstructor(AbstractImporter.class).newInstance(importer); 
             logger.info("handler of class " + handler.getClass());
             saxParser.parse(ios, handler); //TODO + log
@@ -270,7 +268,7 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
     }
 
     private String formatErrorLocation() {
-        return String.format("File: %s, EAD document: %d", currentFile,
+        return String.format("File: %s, XML document: %d", currentFile,
                 currentPosition);
     }
     

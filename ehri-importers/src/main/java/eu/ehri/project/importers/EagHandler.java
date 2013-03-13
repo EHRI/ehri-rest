@@ -15,7 +15,7 @@ import org.xml.sax.SAXException;
 
 /**
  *
- * to be used in conjunction with EacImporter (N.B.: eaC)
+ * to be used in conjunction with EagImporter
  *
  * @author linda
  */
@@ -41,9 +41,9 @@ public class EagHandler extends SaxXmlHandler {
         super.endElement(uri, localName, qName);
 
         if (needToCreateSubNode(qName)) {
-            logger.error("endElement: " + qName);
+            logger.debug("endElement: " + qName);
 
-            logger.error("just before popping: " + depth + "-" + getImportantPath(currentPath) + "-" + qName);
+            logger.debug("just before popping: " + depth + "-" + getImportantPath(currentPath) + "-" + qName);
             Map<String, Object> currentGraph = currentGraphPath.pop();
             putSubGraphInCurrentGraph(getImportantPath(currentPath), currentGraph);
 //            currentGraphPath.pop();
@@ -54,7 +54,7 @@ public class EagHandler extends SaxXmlHandler {
         //an EAG file consists of only 1 element, so if we're back at the root, we're done
         if (currentPath.isEmpty()) {
             try {
-                logger.error("depth close " + depth + " " + qName);
+                logger.debug("depth close " + depth + " " + qName);
                 //TODO: add any mandatory fields not yet there:
                 if (!currentGraphPath.peek().containsKey("objectIdentifier")) {
                     putPropertyInCurrentGraph("objectIdentifier", "id");
