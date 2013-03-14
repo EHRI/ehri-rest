@@ -3,8 +3,6 @@ package eu.ehri.project.importers;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.models.Address;
-import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.MaintenanceEvent;
 import eu.ehri.project.models.base.AccessibleEntity;
 import java.util.ArrayList;
@@ -12,6 +10,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import eu.ehri.project.models.base.PermissionScope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,15 +39,14 @@ public abstract class EaImporter extends XmlImporter<Map<String, Object>> {
      * Construct an EadImporter object.
      *
      * @param framedGraph
-     * @param repository
+     * @param permissionScope
      * @param log
      */
-    public EaImporter(FramedGraph<Neo4jGraph> framedGraph, Agent repository, ImportLog log) {
-        super(framedGraph, repository, log);
+    public EaImporter(FramedGraph<Neo4jGraph> framedGraph, PermissionScope permissionScope, ImportLog log) {
+        super(framedGraph, permissionScope, log);
     }
 
     protected Map<String, Object> extractUnit(Map<String, Object> itemData) throws ValidationError {
-        System.out.println("Unit: " + itemData);
         Map<String, Object> unit = new HashMap<String, Object>();
         unit.put(AccessibleEntity.IDENTIFIER_KEY, itemData.get("descriptionIdentifier"));
 //        unit.put(Authority.NAME, itemData.get(Authority.NAME));

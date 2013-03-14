@@ -5,7 +5,6 @@ import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.Authority;
-import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.AddressableEntity;
 import eu.ehri.project.models.base.Description;
@@ -33,11 +32,11 @@ public class EacImporter extends EaImporter {
      * Construct an EacImporter object.
      *
      * @param framedGraph
-     * @param repository
+     * @param permissionScope
      * @param log
      */
-    public EacImporter(FramedGraph<Neo4jGraph> framedGraph, Agent repository, ImportLog log) {
-        super(framedGraph, repository, log);
+    public EacImporter(FramedGraph<Neo4jGraph> framedGraph, PermissionScope permissionScope, ImportLog log) {
+        super(framedGraph, permissionScope, log);
     }
 
     @Override

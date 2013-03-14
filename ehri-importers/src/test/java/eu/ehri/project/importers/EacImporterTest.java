@@ -5,6 +5,7 @@
 package eu.ehri.project.importers;
 
 import com.tinkerpop.blueprints.Vertex;
+import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.importers.test.AbstractImporterTest;
 import eu.ehri.project.models.Authority;
 import eu.ehri.project.models.AuthorityDescription;
@@ -34,22 +35,22 @@ private static final Logger logger = LoggerFactory.getLogger(EacImporterTest.cla
 
     @Test
     public void testImportItemsT() throws Exception{
-       
-         Agent agent = manager.getFrame(TEST_REPO, Agent.class); 
+
         final String logMessage = "Importing a single EAC";
 
         int count = getNodeCount(graph);
         logger.debug("count of nodes before importing: " + count);
 
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAC);
-        ImportLog log = new SaxImportManager(graph, agent, validUser, EacImporter.class, EacHandler.class).importFile(ios, logMessage);
+        ImportLog log = new SaxImportManager(graph, SystemScope.getInstance(), validUser, EacImporter.class,
+                EacHandler.class).importFile(ios, logMessage);
         printGraph(graph);
             // How many new nodes will have been created? We should have
             // - 1 more Authority
             // - 1 more AuthorityDescription
             // - 2 more MaintenanceEvent -- not yet
             // - 2 more linkEvents (1 for the Authority, 1 for the User)
-            // - 1 more SystemEvent        
+            // - 1 more SystemEvent
             assertEquals(count + 7, getNodeCount(graph));
 
             Iterable<Vertex> docs = graph.getVertices(AccessibleEntity.IDENTIFIER_KEY,
@@ -82,7 +83,7 @@ private static final Logger logger = LoggerFactory.getLogger(EacImporterTest.cla
             List<AccessibleEntity> subjects = toList(log.getAction().getSubjects());
             assertEquals(1, subjects.size());
             assertEquals(log.getSuccessful(), subjects.size());
-       
+
 
 //        System.out.println("created: " + log.getCreated());
 
