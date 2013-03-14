@@ -73,10 +73,6 @@ public class EacHandler extends SaxXmlHandler {
                 logger.error(ex.getMessage());
             }
         }
-
     }
-
-    
-
 }
 

@@ -54,7 +54,8 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
     private String currentFile = null;
     private Integer currentPosition = null;
 
-    private  Class<? extends AbstractImporter> importerClass; 
+    private  Class<? extends AbstractImporter> importerClass;
+
     Class<? extends SaxXmlHandler> handlerClass;
     /**
      * Dummy resolver that does nothing. This is used to ensure that, in
@@ -84,7 +85,6 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
         this.actioner = actioner;
         this.importerClass = importerClass;
         this.handlerClass = handlerClass;
-        
     }
 
     /**

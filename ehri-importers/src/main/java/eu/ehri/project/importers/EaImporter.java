@@ -46,11 +46,10 @@ public abstract class EaImporter extends XmlImporter<Map<String, Object>> {
         super(framedGraph, repository, log);
     }
 
-    
-
     protected Map<String, Object> extractUnit(Map<String, Object> itemData) throws ValidationError {
+        System.out.println("Unit: " + itemData);
         Map<String, Object> unit = new HashMap<String, Object>();
-        unit.put(AccessibleEntity.IDENTIFIER_KEY, itemData.get("objectIdentifier"));
+        unit.put(AccessibleEntity.IDENTIFIER_KEY, itemData.get("descriptionIdentifier"));
 //        unit.put(Authority.NAME, itemData.get(Authority.NAME));
         unit.put("typeOfEntity", itemData.get("typeOfEntity"));
         return unit;

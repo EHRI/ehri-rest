@@ -6,6 +6,7 @@ package eu.ehri.project.importers;
 
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
+import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.EntityClass;
@@ -53,7 +54,7 @@ public class EagImporter extends EaImporter{
      */
     public Agent importItem(Map<String, Object> itemData) throws ValidationError {
 
-        BundleDAO persister = new BundleDAO(framedGraph, repository);
+        BundleDAO persister = new BundleDAO(framedGraph, permissionScope);
         Bundle unit = new Bundle(EntityClass.AGENT, extractUnit(itemData));
 
         Map<String, Object> descmap = extractUnitDescription(itemData);
@@ -81,15 +82,10 @@ public class EagImporter extends EaImporter{
 
         unit = unit.withRelation(Description.DESCRIBES, descBundle);
 
-        PermissionScope scope = repository;
         IdGenerator generator = AccessibleEntityIdGenerator.INSTANCE;
-        String id = generator.generateId(EntityClass.AGENT, scope, unit);
+        String id = generator.generateId(EntityClass.AGENT, SystemScope.getInstance(), unit);
         boolean exists = manager.exists(id);
         Agent frame = persister.createOrUpdate(unit.withId(id), Agent.class);
-
-        // Set the repository/item relationship
-        frame.setPermissionScope(scope);
-
 
         if (exists) {
             for (ImportCallback cb : updateCallbacks) {

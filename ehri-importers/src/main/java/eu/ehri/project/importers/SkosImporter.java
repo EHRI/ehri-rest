@@ -3,7 +3,6 @@ package eu.ehri.project.importers;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Description;
@@ -32,12 +31,12 @@ public class SkosImporter extends XmlImporter<Map<String, Object>> {
      * Construct an EadImporter object.
      *
      * @param framedGraph
-     * @param repository
+     * @param permissionScope
      * @param log
      */
-    public SkosImporter(FramedGraph<Neo4jGraph> framedGraph, Agent repository,
+    public SkosImporter(FramedGraph<Neo4jGraph> framedGraph, PermissionScope permissionScope,
             ImportLog log) {
-        super(framedGraph, repository, log);
+        super(framedGraph, permissionScope, log);
     }
 
     /**
@@ -58,7 +57,7 @@ public class SkosImporter extends XmlImporter<Map<String, Object>> {
 
         Bundle unit = new Bundle(EntityClass.CVOC_CONCEPT,
                 extractConcept(itemData, depth));
-        BundleDAO persister = new BundleDAO(framedGraph, repository);
+        BundleDAO persister = new BundleDAO(framedGraph, permissionScope);
 
         // Add dates and descriptions to the bundle since they're @Dependent
         // relations.
@@ -71,11 +70,8 @@ public class SkosImporter extends XmlImporter<Map<String, Object>> {
                     EntityClass.CVOC_CONCEPT_DESCRIPTION, dpb));
         }
 
-        //PermissionScope scope = parent != null ? parent : repository;
-        PermissionScope scope = repository;
-
         IdGenerator generator = AccessibleEntityIdGenerator.INSTANCE;
-        String id = generator.generateId(EntityClass.CVOC_CONCEPT, scope, unit);
+        String id = generator.generateId(EntityClass.CVOC_CONCEPT, permissionScope, unit);
         boolean exists = manager.exists(id);
         Concept frame = persister.createOrUpdate(unit.withId(id),
                 Concept.class);
@@ -83,7 +79,7 @@ public class SkosImporter extends XmlImporter<Map<String, Object>> {
         // Set the repository/item relationship
         //frame.setAgent(repository); // SHOULD set the Vocabulary at some point!
 
-        frame.setPermissionScope(scope);
+        frame.setPermissionScope(permissionScope);
         // Set the parent child relationship
         //if (parent != null)
         //    parent.addChild(frame);
