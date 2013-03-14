@@ -83,26 +83,4 @@ public abstract class AbstractImporter<T> {
      * @return returns a List of Maps with DatePeriod.START_DATE and DatePeriod.END_DATE values
      */
     public abstract Iterable<Map<String, Object>> extractDates(T data);
-
-
-    
-    /**
-     * Lookup the graph ID of an existing object based on the IDENTITY_KEY
-     * 
-     * @param id
-     */
-    protected Object getExistingGraphId(final String id) {
-        // Lookup the graph id of an object with the same
-        // identity key...
-        @SuppressWarnings({ "unchecked", "rawtypes" })
-        GremlinPipeline pipe = new GremlinPipeline(repository.asVertex())
-                .out(Agent.HELDBY).filter(new PipeFunction<Vertex, Boolean>() {
-                    public Boolean compute(Vertex item) {
-                        String vid = (String) item
-                                .getProperty(AccessibleEntity.IDENTIFIER_KEY);
-                        return (vid != null && vid.equals(id));
-                    }
-                }).id();
-        return pipe.hasNext() ? pipe.next() : null;
-    }
 }
