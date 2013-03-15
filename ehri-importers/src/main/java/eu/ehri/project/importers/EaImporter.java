@@ -145,7 +145,7 @@ public abstract class EaImporter extends XmlImporter<Map<String, Object>> {
             }
         }
         if (!address.isEmpty() && !address.containsKey(Address.ADDRESS_NAME)) {
-            address.put(Address.ADDRESS_NAME, address.get("street") + " " + address.get("municipality") + " " + address.get("country"));
+            address.put(Address.ADDRESS_NAME, address.get("street") + " " + address.get("municipality") + " " + address.get("countryCode"));
         }
         return address;
     }

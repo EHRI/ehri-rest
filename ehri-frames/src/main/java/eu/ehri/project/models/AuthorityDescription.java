@@ -9,7 +9,7 @@ import eu.ehri.project.models.base.Description;
 
 @EntityType(EntityClass.AUTHORITY_DESCRIPTION)
 public interface AuthorityDescription extends VertexFrame, Description, AddressableEntity {
+    
 
-    @Property("title")
-    public String getTitle();
+    
 }
