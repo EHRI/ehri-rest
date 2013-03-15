@@ -19,7 +19,7 @@ public class ValidationError extends BundleError {
 
     public ValidationError(Bundle bundle, ListMultimap<String, String> errors,
             ListMultimap<String, BundleError> relations) {
-        super(formatErrors(bundle.getBundleClass().getName(), errors));
+        super(formatErrors(bundle.getBundleClass().getName(), errors, relations));
         this.errors = errors;
         this.relations = relations;
     }
@@ -34,13 +34,18 @@ public class ValidationError extends BundleError {
     }
 
     private static String formatErrors(String clsName,
-            ListMultimap<String, String> errors) {
+            ListMultimap<String, String> errors, ListMultimap<String, BundleError> relations) {
         StringBuilder buf = new StringBuilder(String.format(
                 "A validation error occurred building %s:\n", clsName));
         for (String key : errors.keySet()) {
             for (String value : errors.get(key)) {
                 buf.append(String.format(" - %-20s: %s", key, value));
             }
+        }
+        buf.append("\nnested errors: \n");
+        //TODO: there must be a better way ...
+        for (String key : relations.keySet()) {
+            buf.append("nr of nested errors with " + key + ": " + relations.get(key).size() + "\n");
         }
         return buf.toString();
     }
