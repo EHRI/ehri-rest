@@ -7,6 +7,7 @@ package eu.ehri.project.importers;
 import com.tinkerpop.frames.VertexFrame;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.MaintenanceEvent;
+import eu.ehri.project.models.base.Description;
 import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -62,14 +63,13 @@ public class EagHandler extends SaxXmlHandler {
                 if (!currentGraphPath.peek().containsKey("typeOfEntity")) {
                     putPropertyInCurrentGraph("typeOfEntity", "organisation");
                 }
-                if (!currentGraphPath.peek().containsKey("title")) {
-                    putPropertyInCurrentGraph("title", "title");
+                if (!currentGraphPath.peek().containsKey(Description.TITLE)) {
+                    logger.debug("no " + Description.TITLE + " found");
+                    putPropertyInCurrentGraph(Description.TITLE, "title");
                 }
-                if (!currentGraphPath.peek().containsKey("name")) {
-                    putPropertyInCurrentGraph("name", currentGraphPath.peek().get("title").toString());
-                }
-                if (!currentGraphPath.peek().containsKey("languageCode")) {
-                    putPropertyInCurrentGraph("languageCode", "en");
+                if (!currentGraphPath.peek().containsKey(Description.LANGUAGE_CODE)) {
+                    logger.debug("no " + Description.LANGUAGE_CODE + " found");
+                    putPropertyInCurrentGraph(Description.LANGUAGE_CODE, "en");
                 }
                 importer.importItem(currentGraphPath.pop(), depth);
 

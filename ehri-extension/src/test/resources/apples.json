@@ -9,7 +9,7 @@
         "type": "cvocConceptDescription",
         "data": {
           "languageCode": "en",
-          "prefLabel": "apples",
+          "title": "apples",
           "altLabel": ["alt1", "alt2"],
           "definition": "The apple is the pomaceous fruit of the apple tree, species Malus domestica in the rose family (Rosaceae).",
           "scopeNote": "sn1"
@@ -19,7 +19,7 @@
         "type": "cvocConceptDescription",
         "data": {
           "languageCode": "nl",
-          "prefLabel": "appel",
+          "title": "appel",
           "altLabel": ["alt1", "alt2"],
           "definition": "def1",
           "scopeNote": "De appel is de belangrijkste vrucht in de geschiedenis van legendes en sprookjes: de appel van Adam en Eva, de appel van Willem Tell en de appel van Sneeuwwitje zijn de belangrijkste voorbeelden."

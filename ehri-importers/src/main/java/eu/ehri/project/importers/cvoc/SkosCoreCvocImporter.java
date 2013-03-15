@@ -40,6 +40,7 @@ import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.cvoc.Concept;
+import eu.ehri.project.models.cvoc.ConceptDescription;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.models.idgen.GenericIdGenerator;
 import eu.ehri.project.models.idgen.IdGenerator;
@@ -260,7 +261,7 @@ public class SkosCoreCvocImporter {
 		  for (String key : descriptions.keySet()) {
 			  logger.debug("description for: " + key);
 			  Map<String, Object> d = (Map<String, Object>)descriptions.get(key);
-			  logger.debug("languageCode = " + d.get("languageCode"));
+			  logger.debug("languageCode = " + d.get(Description.LANGUAGE_CODE));
 
 			  // NOTE maybe test if prefLabel is there?
 
@@ -523,16 +524,16 @@ public class SkosCoreCvocImporter {
         
         // one and only one
         extractAndAddSingleValuedTextToDescriptionData(descriptionData, 
-        		"prefLabel", "skos:prefLabel", conceptElement);
+        		Description.TITLE, "skos:prefLabel", conceptElement);
         // multiple alternatives is logical
         extractAndAddMultiValuedTextToDescriptionData(descriptionData, 
-        		"altLabel", "skos:altLabel", conceptElement);
+        		ConceptDescription.ALTLABEL, "skos:altLabel", conceptElement);
         // just allow multiple, its not forbidden by Skos
         extractAndAddMultiValuedTextToDescriptionData(descriptionData, 
-        		"scopeNote", "skos:scopeNote", conceptElement);
+        		ConceptDescription.SCOPENOTE, "skos:scopeNote", conceptElement);
         // just allow multiple, its not forbidden by Skos
         extractAndAddMultiValuedTextToDescriptionData(descriptionData, 
-        		"definition", "skos:definition", conceptElement);
+        		ConceptDescription.DEFINITION, "skos:definition", conceptElement);
         
         // NOTE we could try to also add everything else, using the skos tagname as a key?
         

@@ -5,6 +5,9 @@ import com.google.common.collect.ListMultimap;
 
 import eu.ehri.project.persistance.Bundle;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * Validation error. This exception holds a map of field=error(s) values.
  * 
@@ -19,7 +22,7 @@ public class ValidationError extends BundleError {
 
     public ValidationError(Bundle bundle, ListMultimap<String, String> errors,
             ListMultimap<String, BundleError> relations) {
-        super(formatErrors(bundle.getBundleClass().getName(), errors));
+        super(formatErrors(bundle.getBundleClass().getName(), errors, relations));
         this.errors = errors;
         this.relations = relations;
     }
@@ -34,7 +37,8 @@ public class ValidationError extends BundleError {
     }
 
     private static String formatErrors(String clsName,
-            ListMultimap<String, String> errors) {
+            ListMultimap<String, String> errors,
+            ListMultimap<String, BundleError> relations) {
         StringBuilder buf = new StringBuilder(String.format(
                 "A validation error occurred building %s:\n", clsName));
         for (String key : errors.keySet()) {

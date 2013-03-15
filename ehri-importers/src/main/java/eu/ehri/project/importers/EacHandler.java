@@ -7,7 +7,9 @@ package eu.ehri.project.importers;
 import com.tinkerpop.frames.VertexFrame;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.MaintenanceEvent;
+import eu.ehri.project.models.base.Description;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,14 +60,22 @@ public class EacHandler extends SaxXmlHandler {
                 if (!currentGraphPath.peek().containsKey("objectIdentifier")) {
                     putPropertyInCurrentGraph("objectIdentifier", "id");
                 }
-                if (!currentGraphPath.peek().containsKey("title")) {
-                    putPropertyInCurrentGraph("title", "title");
+                if (!currentGraphPath.peek().containsKey(Description.TITLE)) {
+                    if(currentGraphPath.peek().containsKey("otherFormsOfName")){
+                        Object names =  currentGraphPath.peek().get("otherFormsOfName");
+                        if(names instanceof String){
+                            putPropertyInCurrentGraph(Description.TITLE, names.toString());
+                        }else if(names instanceof List){
+                            putPropertyInCurrentGraph(Description.TITLE, ((List)names).get(0).toString());
+                        }else{
+                            logger.warn("no " + Description.TITLE + " found");
+                            putPropertyInCurrentGraph(Description.TITLE, "title");
+                        }
+                    }
                 }
-                if (!currentGraphPath.peek().containsKey("name")) {
-                    putPropertyInCurrentGraph("name", "QQQ name");
-                }
-                if (!currentGraphPath.peek().containsKey("languageCode")) {
-                    putPropertyInCurrentGraph("languageCode", "en");
+                if (!currentGraphPath.peek().containsKey(Description.LANGUAGE_CODE)) {
+                    logger.debug("no " + Description.LANGUAGE_CODE + " found");
+                    putPropertyInCurrentGraph(Description.LANGUAGE_CODE, "en");
                 }
                 importer.importItem(currentGraphPath.pop(), depth);
 

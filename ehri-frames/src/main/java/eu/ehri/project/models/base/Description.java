@@ -10,16 +10,20 @@ import eu.ehri.project.models.annotations.Dependent;
 import eu.ehri.project.models.annotations.Fetch;
 
 public interface Description extends VertexFrame {
-    public static final String DESCRIBES = "describes";
+    public static final String DESCRIBES = DescribedEntity.DESCRIBES;
     public static final String LANGUAGE_CODE = "languageCode";
     public static final String MUTATES = "maintenance"; //links to MaintenanceEvent
+    public final static String TITLE = "title";
 
     @Adjacency(label = DESCRIBES)
     public DescribedEntity getEntity();
 
     @Property(LANGUAGE_CODE)
     public String getLanguageOfDescription();
-    
+ 
+    @Property(TITLE)
+    public String getTitle();
+
     /**
      * Get the described entity of a description. This 
      * method if @Fetch serialized only if the description
