@@ -1,6 +1,6 @@
 {
 	"id" : null,
-	"type":"authority",
+	"type":"historicalAgent",
 	"data": {
 		"identifier":"some-authority",
 		"name":"Wiener Library London",
@@ -10,7 +10,7 @@
 		"describes":[
 			{
 				"id":null,
-				"type":"authorityDescription",
+				"type":"historicalAgentDescription",
 				"data":{
           "typeOfEntity": "corporateBody",
 					"history":"Founded in 1933",

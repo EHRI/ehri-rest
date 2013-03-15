@@ -5,7 +5,7 @@ import com.sun.jersey.api.client.WebResource;
 import eu.ehri.extension.AbstractRestResource;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.DeserializationError;
-import eu.ehri.project.models.Authority;
+import eu.ehri.project.models.HistoricalAgent;
 import eu.ehri.project.persistance.Bundle;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -15,13 +15,12 @@ import org.junit.Test;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
-public class AuthorityRestClientTest extends BaseRestClientTest {
+public class HistoricalAgentRestClientTest extends BaseRestClientTest {
 
     static final String TEST_ID = "a1";
     static final String UPDATED_NAME = "UpdatedNameTEST";
@@ -30,19 +29,19 @@ public class AuthorityRestClientTest extends BaseRestClientTest {
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
-        initializeTestDb(AuthorityRestClientTest.class.getName());
+        initializeTestDb(HistoricalAgentRestClientTest.class.getName());
     }
 
     @Before
     public void setUp() throws Exception {
-        authorityTestData = readFileAsString("authority.json");
+        authorityTestData = readFileAsString("historicalAgent.json");
     }
 
     @Test
     public void testCreateAuthority() throws Exception {
         // Create
         WebResource resource = client.resource(getExtensionEntryPointUri()
-                + "/authority");
+                + "/" + Entities.HISTORICAL_AGENT);
         ClientResponse response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
@@ -67,9 +66,9 @@ public class AuthorityRestClientTest extends BaseRestClientTest {
     @Test
     public void testCreateAuthorityWithExistingIdentifier() throws Exception {
         String json = Bundle.fromString(authorityTestData)
-                .withDataValue(Authority.IDENTIFIER_KEY, "r1").toJson();
+                .withDataValue(HistoricalAgent.IDENTIFIER_KEY, "r1").toJson();
         WebResource resource = client.resource(getExtensionEntryPointUri()
-                + "/authority");
+                + "/" + Entities.HISTORICAL_AGENT);
         ClientResponse response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
@@ -85,7 +84,7 @@ public class AuthorityRestClientTest extends BaseRestClientTest {
     public void testUpdateAuthorityByIdentifier() throws Exception {
         // Create
         WebResource resource = client.resource(getExtensionEntryPointUri()
-                + "/authority");
+                + "/" + Entities.HISTORICAL_AGENT);
         ClientResponse response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
@@ -113,7 +112,7 @@ public class AuthorityRestClientTest extends BaseRestClientTest {
     public void testCreateAuthorityWithDeserializationError() throws Exception {
         // Create
         WebResource resource = client.resource(getExtensionEntryPointUri()
-                + "/authority");
+                + "/" + Entities.HISTORICAL_AGENT);
         String badAuthorityTestData = "{\"data\":{\"identifier\": \"jmp\"}}";
         ClientResponse response = resource
                 .accept(MediaType.APPLICATION_JSON)
@@ -139,7 +138,7 @@ public class AuthorityRestClientTest extends BaseRestClientTest {
     public void testDeleteAuthority() throws Exception {
         // Create
         WebResource resource = client.resource(getExtensionEntryPointUri()
-                + "/authority/" + TEST_ID);
+                + "/" + Entities.HISTORICAL_AGENT + "/" + TEST_ID);
         ClientResponse response = resource.header(
                 AbstractRestResource.AUTH_HEADER_NAME, getAdminUserProfileId())
                 .delete(ClientResponse.class);

@@ -30,9 +30,9 @@ public interface MaintenanceEvent extends TemporalEntity, AccessibleEntity{
     public void setAgentType(AgentType agentType);
 
     //not required
-    @Adjacency(label = Authority.CREATED, direction = Direction.IN)
-    public Iterable<Authority> getCreators();
+    @Adjacency(label = HistoricalAgent.CREATED, direction = Direction.IN)
+    public Iterable<HistoricalAgent> getCreators();
 
-    @Adjacency(label = Authority.CREATED, direction = Direction.IN)
-    public void addCreator(final Authority creator);
+    @Adjacency(label = HistoricalAgent.CREATED, direction = Direction.IN)
+    public void addCreator(final HistoricalAgent creator);
 }

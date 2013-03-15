@@ -8,7 +8,7 @@ import eu.ehri.project.definitions.Entities;
 public enum ContentTypes {
     DOCUMENTARY_UNIT(Entities.DOCUMENTARY_UNIT),
     AGENT(Entities.REPOSITORY),
-    AUTHORITY(Entities.AUTHORITY),
+    AUTHORITY(Entities.HISTORICAL_AGENT),
     GROUP(Entities.GROUP),
     USER_PROFILE(Entities.USER_PROFILE),
     ANNOTATION(Entities.ANNOTATION),
