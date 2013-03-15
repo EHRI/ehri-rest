@@ -301,26 +301,26 @@
     
 --- # Authorities
 - id: a1
-  type: authority
+  type: historicalAgent
   data:
     identifier: a1
   relationships:
     describes:
       - id: ad1
-        type: authorityDescription
+        type: historicalAgentDescription
         data:
           typeOfEntity: person
           name: An Authority 1
           languageCode: en
 
 - id: a2
-  type: authority
+  type: historicalAgent
   data:
     identifier: a2
   relationships:
     describes:
       - id: ad2
-        type: authorityDescription
+        type: historicalAgentDescription
         data:
           typeOfEntity: person
           name: An Authority 2

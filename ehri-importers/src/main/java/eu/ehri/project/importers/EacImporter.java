@@ -4,7 +4,7 @@ import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.models.Authority;
+import eu.ehri.project.models.HistoricalAgent;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.AddressableEntity;
 import eu.ehri.project.models.base.Description;
@@ -40,7 +40,7 @@ public class EacImporter extends EaImporter {
     }
 
     @Override
-    public Authority importItem(Map<String, Object> itemData, int depth) throws ValidationError {
+    public HistoricalAgent importItem(Map<String, Object> itemData, int depth) throws ValidationError {
         return importItem(itemData);
     }
 
@@ -50,12 +50,12 @@ public class EacImporter extends EaImporter {
      * @param itemData
      * @throws ValidationError
      */
-    public Authority importItem(Map<String, Object> itemData) throws ValidationError {
+    public HistoricalAgent importItem(Map<String, Object> itemData) throws ValidationError {
 
         BundleDAO persister = new BundleDAO(framedGraph, permissionScope);
-        Bundle unit = new Bundle(EntityClass.AUTHORITY, extractUnit(itemData));
+        Bundle unit = new Bundle(EntityClass.HISTORICAL_AGENT, extractUnit(itemData));
 
-        Bundle descBundle = new Bundle(EntityClass.AUTHORITY_DESCRIPTION, extractUnitDescription(itemData));
+        Bundle descBundle = new Bundle(EntityClass.HISTORICAL_AGENT_DESCRIPTION, extractUnitDescription(itemData));
 
 
         // Add dates and descriptions to the bundle since they're @Dependent
@@ -79,9 +79,9 @@ public class EacImporter extends EaImporter {
         unit = unit.withRelation(Description.DESCRIBES, descBundle);
 
         IdGenerator generator = AccessibleEntityIdGenerator.INSTANCE;
-        String id = generator.generateId(EntityClass.AUTHORITY, SystemScope.getInstance(), unit);
+        String id = generator.generateId(EntityClass.HISTORICAL_AGENT, SystemScope.getInstance(), unit);
         boolean exists = manager.exists(id);
-        Authority frame = persister.createOrUpdate(unit.withId(id), Authority.class);
+        HistoricalAgent frame = persister.createOrUpdate(unit.withId(id), HistoricalAgent.class);
 
         if (exists) {
             for (ImportCallback cb : updateCallbacks) {

@@ -3,7 +3,7 @@ package eu.ehri.extension;
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.*;
-import eu.ehri.project.models.Authority;
+import eu.ehri.project.models.HistoricalAgent;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.*;
@@ -11,13 +11,13 @@ import javax.ws.rs.core.*;
 import java.util.List;
 
 /**
- * Provides a RESTfull interface for the Authority model.
+ * Provides a RESTfull interface for the HistoricalAgent model.
  */
-@Path(Entities.AUTHORITY)
-public class AuthorityResource extends AbstractAccessibleEntityResource<Authority> {
+@Path(Entities.HISTORICAL_AGENT)
+public class HistoricalAgentResource extends AbstractAccessibleEntityResource<HistoricalAgent> {
 
-    public AuthorityResource(@Context GraphDatabaseService database) {
-        super(database, Authority.class);
+    public HistoricalAgentResource(@Context GraphDatabaseService database) {
+        super(database, HistoricalAgent.class);
     }
 
     @GET

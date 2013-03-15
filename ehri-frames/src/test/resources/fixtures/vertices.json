@@ -212,7 +212,7 @@
   {
     "data": {
       "identifier": "a1", 
-      "name": "Authority 1", 
+      "name": "HistoricalAgent 1",
       "typeOfEntity": "person"
     },
     "__ISA__": "authority", 
@@ -221,7 +221,7 @@
   {
     "data": {
       "languageCode": "en", 
-      "title": "An Authority called 1"
+      "title": "An HistoricalAgent called 1"
     },
     "__ISA__": "authorityDescription", 
     "__ID__": "ad1"
@@ -229,7 +229,7 @@
   {
     "data": {
       "identifier": "a2", 
-      "name": "Authority 2", 
+      "name": "HistoricalAgent 2",
       "typeOfEntity": "person"
     }, 
     "__ISA__": "authority", 
@@ -238,7 +238,7 @@
   {
     "data": {
       "languageCode": "en", 
-      "title": "An Authority called 2"
+      "title": "An HistoricalAgent called 2"
     }, 
     "__ISA__": "authorityDescription", 
     "__ID__": "ad2"

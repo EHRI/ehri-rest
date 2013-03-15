@@ -21,7 +21,7 @@ import org.xml.sax.helpers.DefaultHandler;
  * path/within/xml/=node/property
  *
  * if no <node> is given, it is the default logical-unit or unit-description of this property file. 
- * with eac.properties this would be an Authority with an AuthorityDescription
+ * with eac.properties this would be an HistoricalAgent with an HistoricalAgentDescription
  * if there is a <node> given, it will translate to another graph node, like Address.
  *
  * lines starting with '@' give the attributes:

@@ -4,8 +4,8 @@ import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.importers.test.AbstractImporterTest;
-import eu.ehri.project.models.Authority;
-import eu.ehri.project.models.AuthorityDescription;
+import eu.ehri.project.models.HistoricalAgent;
+import eu.ehri.project.models.HistoricalAgentDescription;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.events.SystemEvent;
@@ -43,25 +43,25 @@ private static final Logger logger = LoggerFactory.getLogger(EacImporterTest.cla
                 EacHandler.class).importFile(ios, logMessage);
         printGraph(graph);
             // How many new nodes will have been created? We should have
-            // - 1 more Authority
-            // - 1 more AuthorityDescription
+            // - 1 more HistoricalAgent
+            // - 1 more HistoricalAgentDescription
             // - 2 more MaintenanceEvent 
-            // - 2 more linkEvents (1 for the Authority, 1 for the User)
+            // - 2 more linkEvents (1 for the HistoricalAgent, 1 for the User)
             // - 1 more SystemEvent
             assertEquals(count + 7, getNodeCount(graph));
 
             Iterable<Vertex> docs = graph.getVertices(AccessibleEntity.IDENTIFIER_KEY,
                     IMPORTED_ITEM_ID);
             assertTrue(docs.iterator().hasNext());
-            Authority unit = graph.frame(
+            HistoricalAgent unit = graph.frame(
                     getVertexByIdentifier(graph,IMPORTED_ITEM_ID),
-                    Authority.class);
+                    HistoricalAgent.class);
 
             // check the child items
-            AuthorityDescription c1 = graph.frame(
+            HistoricalAgentDescription c1 = graph.frame(
                     getVertexByIdentifier(graph,AUTHORITY_DESC),
-                    AuthorityDescription.class);
-            assertEquals(Entities.AUTHORITY_DESCRIPTION, c1.asVertex().getProperty("__ISA__"));
+                    HistoricalAgentDescription.class);
+            assertEquals(Entities.HISTORICAL_AGENT_DESCRIPTION, c1.asVertex().getProperty("__ISA__"));
 
             List<String> l = new ArrayList<String>();
             for(String al : (String[])c1.asVertex().getProperty("otherFormsOfName")){
