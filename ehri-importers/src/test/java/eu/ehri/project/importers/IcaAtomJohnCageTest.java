@@ -7,6 +7,8 @@ package eu.ehri.project.importers;
 import eu.ehri.project.importers.test.AbstractImporterTest;
 import eu.ehri.project.models.Agent;
 import java.io.InputStream;
+
+import eu.ehri.project.models.base.PermissionScope;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -28,7 +30,7 @@ public class IcaAtomJohnCageTest extends AbstractImporterTest {
     @Test
     public void testImportItemsT() throws Exception {
 
-        Agent agent = manager.getFrame(TEST_REPO, Agent.class);
+        PermissionScope agent = manager.getFrame(TEST_REPO, PermissionScope.class);
         final String logMessage = "Importing a single EAD";
 
         int count = getNodeCount(graph);

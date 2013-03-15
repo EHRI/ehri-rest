@@ -22,18 +22,13 @@ import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.Response.Status;
 
+import eu.ehri.project.exceptions.*;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.definitions.Entities;
-import eu.ehri.project.exceptions.DeserializationError;
-import eu.ehri.project.exceptions.IntegrityError;
-import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.exceptions.SerializationError;
-import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Group;
 import eu.ehri.project.models.UserProfile;
@@ -57,7 +52,7 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
     @Produces(MediaType.APPLICATION_JSON)
     public Response getUserProfile(@QueryParam("key") String key,
             @QueryParam("value") String value) throws ItemNotFound,
-            PermissionDenied, BadRequester {
+            AccessDenied, PermissionDenied, BadRequester {
         return retrieve(key, value);
     }
 
@@ -65,7 +60,7 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:.+}")
     public Response getUserProfile(@PathParam("id") String id)
-            throws ItemNotFound, PermissionDenied, BadRequester {
+            throws AccessDenied, ItemNotFound, PermissionDenied, BadRequester {
         return retrieve(id);
     }
 
@@ -129,7 +124,7 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:.+}")
     public Response updateUserProfile(@PathParam("id") String id, String json)
-            throws PermissionDenied, IntegrityError, ValidationError,
+            throws AccessDenied, PermissionDenied, IntegrityError, ValidationError,
             DeserializationError, ItemNotFound, BadRequester {
         return update(id, json);
     }
@@ -137,7 +132,7 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
     @DELETE
     @Path("/{id:.+}")
     public Response deleteUserProfile(@PathParam("id") String id)
-            throws PermissionDenied, ItemNotFound, ValidationError,
+            throws AccessDenied, PermissionDenied, ItemNotFound, ValidationError,
             BadRequester {
         return delete(id);
     }
@@ -160,7 +155,8 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
         try {
             Accessor user = getRequesterUserProfile();
             Bundle entityBundle = Bundle.fromString(json);
-            UserProfile entity = views.create(entityBundle, user); // ! was generic E
+            UserProfile entity = views.create(entityBundle, user,
+                    getLogMessage(getDefaultCreateMessage(EntityClass.USER_PROFILE)));
             // TODO: Move elsewhere
             new AclManager(graph).setAccessors(entity,
                     getAccessors(accessorIds, user));

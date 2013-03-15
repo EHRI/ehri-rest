@@ -1,0 +1,91 @@
+package eu.ehri.extension;
+
+import eu.ehri.extension.errors.BadRequester;
+import eu.ehri.project.definitions.Entities;
+import eu.ehri.project.exceptions.*;
+import eu.ehri.project.models.Authority;
+import org.neo4j.graphdb.GraphDatabaseService;
+
+import javax.ws.rs.*;
+import javax.ws.rs.core.*;
+import java.util.List;
+
+/**
+ * Provides a RESTfull interface for the Authority model.
+ */
+@Path(Entities.AUTHORITY)
+public class AuthorityResource extends AbstractAccessibleEntityResource<Authority> {
+
+    public AuthorityResource(@Context GraphDatabaseService database) {
+        super(database, Authority.class);
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id:.+}")
+    public Response getAuthority(@PathParam("id") String id) throws ItemNotFound,
+            AccessDenied, BadRequester {
+        return retrieve(id);
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/list")
+    public StreamingOutput listAuthorities(
+            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
+            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(SORT_PARAM) List<String> order,
+            @QueryParam(FILTER_PARAM) List<String> filters)
+            throws ItemNotFound, BadRequester {
+        return list(offset, limit, order, filters);
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/page")
+    public StreamingOutput pageAuthorities(
+            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
+            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(SORT_PARAM) List<String> order,
+            @QueryParam(FILTER_PARAM) List<String> filters)
+            throws ItemNotFound, BadRequester {
+        return page(offset, limit, order, filters);
+    }
+
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response createAuthority(String json,
+            @QueryParam(ACCESSOR_PARAM) List<String> accessors)
+            throws PermissionDenied, ValidationError, IntegrityError,
+            DeserializationError, ItemNotFound, BadRequester {
+        return create(json, accessors);
+    }
+
+    @PUT
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response updateAuthority(String json) throws PermissionDenied,
+            IntegrityError, ValidationError, DeserializationError,
+            ItemNotFound, BadRequester {
+        return update(json);
+    }
+
+    @PUT
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id:.+}")
+    public Response updateAuthority(@PathParam("id") String id, String json)
+            throws AccessDenied, PermissionDenied, IntegrityError, ValidationError,
+            DeserializationError, ItemNotFound, BadRequester {
+        return update(id, json);
+    }
+
+    @DELETE
+    @Path("/{id:.+}")
+    public Response deleteAuthority(@PathParam("id") String id)
+            throws AccessDenied, PermissionDenied, ItemNotFound, ValidationError,
+            BadRequester {
+        return delete(id);
+    }
+}

@@ -42,14 +42,20 @@ public class IcaAtomEadImporter extends XmlImporter<Map<String, Object>> {
     public final String LEVEL_ATTR = "levelOfDescription";
 
     /**
+     * Depth of top-level items. For reasons as-yet-undetermined in the bowels
+     * of the SamXmlHandler, top level items are at depth 1 (rather than 0)
+     */
+    private int TOP_LEVEL_DEPTH = 1;
+
+    /**
      * Construct an EadImporter object.
      *
      * @param framedGraph
-     * @param repository
+     * @param permissionScope
      * @param log
      */
-    public IcaAtomEadImporter(FramedGraph<Neo4jGraph> framedGraph, Agent repository, ImportLog log) {
-        super(framedGraph, repository, log);
+    public IcaAtomEadImporter(FramedGraph<Neo4jGraph> framedGraph, PermissionScope permissionScope, ImportLog log) {
+        super(framedGraph, permissionScope, log);
 
     }
 
@@ -63,7 +69,7 @@ public class IcaAtomEadImporter extends XmlImporter<Map<String, Object>> {
     @Override
     public DocumentaryUnit importItem(Map<String, Object> itemData, int depth)
             throws ValidationError {
-        BundleDAO persister = new BundleDAO(framedGraph, repository);
+        BundleDAO persister = new BundleDAO(framedGraph, permissionScope);
         Bundle unit = new Bundle(EntityClass.DOCUMENTARY_UNIT, extractDocumentaryUnit(itemData, depth));
 
         Bundle descBundle = new Bundle(EntityClass.DOCUMENT_DESCRIPTION, extractDocumentDescription(itemData, depth));
@@ -75,15 +81,17 @@ public class IcaAtomEadImporter extends XmlImporter<Map<String, Object>> {
         
         unit=unit.withRelation(Description.DESCRIBES, descBundle);
 
-        PermissionScope scope = repository;
         IdGenerator generator = AccessibleEntityIdGenerator.INSTANCE;
-        String id = generator.generateId(EntityClass.DOCUMENTARY_UNIT, scope, unit);
+        String id = generator.generateId(EntityClass.DOCUMENTARY_UNIT, permissionScope, unit);
         boolean exists = manager.exists(id);
         DocumentaryUnit frame = persister.createOrUpdate(unit.withId(id), DocumentaryUnit.class);
   
         // Set the repository/item relationship
-        frame.setAgent(repository);
-        frame.setPermissionScope(scope);
+        if (depth == TOP_LEVEL_DEPTH) {
+            // Then we need to add a relationship to the repository
+            frame.setAgent(framedGraph.frame(permissionScope.asVertex(), Agent.class));
+        }
+        frame.setPermissionScope(permissionScope);
         
         
         if (exists) {
@@ -111,7 +119,7 @@ public class IcaAtomEadImporter extends XmlImporter<Map<String, Object>> {
 
         Map<String, Object> unit = new HashMap<String, Object>();
         for (String key : itemData.keySet()) {
-            if (!(key.equals(OBJECT_ID) || key.equals(DocumentaryUnit.NAME) || key.startsWith(SaxXmlHandler.UNKNOWN))) {
+            if (!(key.equals(OBJECT_ID) || key.startsWith(SaxXmlHandler.UNKNOWN))) {
                 unit.put(key, itemData.get(key));
             }
         }

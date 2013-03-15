@@ -1,15 +1,11 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package eu.ehri.project.importers;
 
 import com.tinkerpop.blueprints.Vertex;
+import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.importers.test.AbstractImporterTest;
 import eu.ehri.project.models.Authority;
 import eu.ehri.project.models.AuthorityDescription;
-import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.events.SystemEvent;
@@ -36,22 +32,22 @@ private static final Logger logger = LoggerFactory.getLogger(EacImporterTest.cla
 
     @Test
     public void testImportItemsT() throws Exception{
-       
-         Agent agent = manager.getFrame(TEST_REPO, Agent.class); 
+
         final String logMessage = "Importing a single EAC";
 
         int count = getNodeCount(graph);
         logger.debug("count of nodes before importing: " + count);
 
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAC);
-        ImportLog log = new SaxImportManager(graph, agent, validUser, EacImporter.class, EacHandler.class).importFile(ios, logMessage);
+        ImportLog log = new SaxImportManager(graph, SystemScope.getInstance(), validUser, EacImporter.class,
+                EacHandler.class).importFile(ios, logMessage);
         printGraph(graph);
             // How many new nodes will have been created? We should have
             // - 1 more Authority
             // - 1 more AuthorityDescription
             // - 2 more MaintenanceEvent 
             // - 2 more linkEvents (1 for the Authority, 1 for the User)
-            // - 1 more SystemEvent        
+            // - 1 more SystemEvent
             assertEquals(count + 7, getNodeCount(graph));
 
             Iterable<Vertex> docs = graph.getVertices(AccessibleEntity.IDENTIFIER_KEY,
@@ -71,13 +67,13 @@ private static final Logger logger = LoggerFactory.getLogger(EacImporterTest.cla
             for(String al : (String[])c1.asVertex().getProperty("otherFormsOfName")){
                 l.add(al);
             }
-            assertTrue(l.contains((String)c1.asVertex().getProperty(Description.TITLE)));
+            assertTrue(l.contains((String)c1.asVertex().getProperty(Description.NAME)));
 
             assertEquals(3, ((String[])c1.asVertex().getProperty("otherFormsOfName")).length);
             // Ensure that c1 is a description of the unit
             for (Description d : unit.getDescriptions()) {
             
-            assertEquals(d.getTitle(), c1.getTitle());
+            assertEquals(d.getName(), c1.getName());
                 assertEquals(d.getEntity().getIdentifier(), unit.getIdentifier());
             }
 
@@ -93,7 +89,7 @@ private static final Logger logger = LoggerFactory.getLogger(EacImporterTest.cla
             List<AccessibleEntity> subjects = toList(log.getAction().getSubjects());
             assertEquals(1, subjects.size());
             assertEquals(log.getSuccessful(), subjects.size());
-       
+
 
 //        System.out.println("created: " + log.getCreated());
 

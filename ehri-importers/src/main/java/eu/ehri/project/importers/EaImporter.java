@@ -3,8 +3,6 @@ package eu.ehri.project.importers;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.models.Address;
-import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.MaintenanceEvent;
 import eu.ehri.project.models.base.AccessibleEntity;
 import java.util.ArrayList;
@@ -12,6 +10,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import eu.ehri.project.models.base.PermissionScope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,18 +33,18 @@ public abstract class EaImporter extends XmlImporter<Map<String, Object>> {
     public final String LEVEL_ATTR = "levelOfDescription";
     // Various date patterns
 
+    public static final String ADDRESS_NAME = "name";
+
     /**
      * Construct an EadImporter object.
      *
      * @param framedGraph
-     * @param repository
+     * @param permissionScope
      * @param log
      */
-    public EaImporter(FramedGraph<Neo4jGraph> framedGraph, Agent repository, ImportLog log) {
-        super(framedGraph, repository, log);
+    public EaImporter(FramedGraph<Neo4jGraph> framedGraph, PermissionScope permissionScope, ImportLog log) {
+        super(framedGraph, permissionScope, log);
     }
-
-    
 
     protected Map<String, Object> extractUnit(Map<String, Object> itemData) throws ValidationError {
         Map<String, Object> unit = new HashMap<String, Object>();
@@ -144,8 +144,8 @@ public abstract class EaImporter extends XmlImporter<Map<String, Object>> {
                 address.put(key.substring(8), itemData.get(key));
             }
         }
-        if (!address.isEmpty() && !address.containsKey(Address.ADDRESS_NAME)) {
-            address.put(Address.ADDRESS_NAME, address.get("street") + " " + address.get("municipality") + " " + address.get("countryCode"));
+        if (!address.isEmpty() && !address.containsKey(ADDRESS_NAME)) {
+            address.put(ADDRESS_NAME, address.get("street") + " " + address.get("municipality") + " " + address.get("country"));
         }
         return address;
     }

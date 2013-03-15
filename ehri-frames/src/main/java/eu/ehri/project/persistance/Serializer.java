@@ -68,6 +68,18 @@ public final class Serializer {
     }
 
     /**
+     * Convert a vertex to a raw bundle of data.
+     *
+     * @param item
+     * @return
+     * @throws SerializationError
+     */
+    public Map<String, Object> vertexToData(Vertex item)
+            throws SerializationError {
+        return vertexFrameToBundle(item).toData();
+    }
+
+    /**
      * Convert a VertexFrame into an EntityBundle that includes its @Fetch'd
      * relations.
      * 
@@ -77,7 +89,20 @@ public final class Serializer {
      */
     public <T extends VertexFrame> Bundle vertexFrameToBundle(T item)
             throws SerializationError {
-        return vertexFrameToBundle(item, 0);
+        return vertexToBundle(item.asVertex(), 0);
+    }
+
+    /**
+     * Convert a Vertex into an EntityBundle that includes its @Fetch'd
+     * relations.
+     *
+     * @param item
+     * @return
+     * @throws SerializationError
+     */
+    public  Bundle vertexFrameToBundle(Vertex item)
+            throws SerializationError {
+        return vertexToBundle(item, 0);
     }
 
     /**
@@ -88,6 +113,18 @@ public final class Serializer {
      * @throws SerializationError
      */
     public <T extends VertexFrame> String vertexFrameToJson(T item)
+            throws SerializationError {
+        return DataConverter.bundleToJson(vertexFrameToBundle(item));
+    }
+
+    /**
+     * Serialise a vertex to JSON.
+     *
+     * @param item
+     * @return
+     * @throws SerializationError
+     */
+    public String vertexToJson(Vertex item)
             throws SerializationError {
         return DataConverter.bundleToJson(vertexFrameToBundle(item));
     }
@@ -138,17 +175,17 @@ public final class Serializer {
      * @return
      * @throws SerializationError
      */
-    private <T extends VertexFrame> Bundle vertexFrameToBundle(T item, int depth)
+    private Bundle vertexToBundle(Vertex item, int depth)
             throws SerializationError {
         // FIXME: Try and move the logic for accessing id and type elsewhere.
         try {
-            String id = (String) item.asVertex().getProperty(EntityType.ID_KEY);
-            EntityClass type = EntityClass.withName((String) item.asVertex()
+            String id = (String) item.getProperty(EntityType.ID_KEY);
+            EntityClass type = EntityClass.withName((String) item
                     .getProperty(EntityType.TYPE_KEY));
             logger.trace("Serializing {} ({}) at depth {}", id, type, depth);
             ListMultimap<String, Bundle> relations = getRelationData(item,
                     depth, type.getEntityClass());
-            return new Bundle(id, type, getVertexData(item.asVertex()),
+            return new Bundle(id, type, getVertexData(item),
                     relations);
         } catch (IllegalArgumentException e) {
             throw new SerializationError("Unable to serialize vertex: " + item,
@@ -156,8 +193,8 @@ public final class Serializer {
         }
     }
 
-    private <T extends VertexFrame> ListMultimap<String, Bundle> getRelationData(
-            T item, int depth, Class<?> cls) {
+    private ListMultimap<String, Bundle> getRelationData(
+            Vertex item, int depth, Class<?> cls) {
         ListMultimap<String, Bundle> relations = LinkedListMultimap.create();
         if (depth < maxTraversals) {
             Map<String, Method> fetchMethods = ClassUtils.getFetchMethods(cls);
@@ -171,14 +208,14 @@ public final class Serializer {
                             relationName, depth, method.getName());
                     try {
                         Object result = method.invoke(graph.frame(
-                                item.asVertex(), cls));
+                                item, cls));
                         // The result of one of these fetchMethods should either
                         // be a single VertexFrame, or a Iterable<VertexFrame>.
                         if (result instanceof Iterable<?>) {
                             for (Object d : (Iterable<?>) result) {
                                 relations.put(
                                         relationName,
-                                        vertexFrameToBundle((VertexFrame) d,
+                                        vertexToBundle(((VertexFrame) d).asVertex(),
                                                 depth + 1));
                             }
                         } else {
@@ -187,8 +224,8 @@ public final class Serializer {
                             if (result != null)
                                 relations
                                         .put(relationName,
-                                                vertexFrameToBundle(
-                                                        (VertexFrame) result,
+                                                vertexToBundle(
+                                                        ((VertexFrame) result).asVertex(),
                                                         depth + 1));
                         }
                     } catch (Exception e) {

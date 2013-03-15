@@ -1,5 +1,7 @@
 package eu.ehri.project.views.impl;
 
+import com.tinkerpop.frames.VertexFrame;
+import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.base.Actioner;
 import org.neo4j.graphdb.Transaction;
 
@@ -7,11 +9,6 @@ import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
 import eu.ehri.project.acl.SystemScope;
-import eu.ehri.project.exceptions.DeserializationError;
-import eu.ehri.project.exceptions.IntegrityError;
-import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.exceptions.SerializationError;
-import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.PermissionScope;
@@ -241,6 +238,130 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
     }
 
     /**
+     * Update an object of type `E` from the given data, saving an Action log
+     * with the default update message.
+     *
+     * @param bundle
+     * @param parent
+     * @param user
+     * @param dependentClass
+     * @return The updated framed vertex
+     * @throws PermissionDenied
+     * @throws ValidationError
+     * @throws IntegrityError
+     * @throws DeserializationError
+     */
+    public <T extends VertexFrame> T updateDependent(Bundle bundle, E parent, Accessor user,
+            Class<T> dependentClass) throws PermissionDenied,
+            ValidationError, DeserializationError, IntegrityError {
+        return updateDependent(bundle, parent, user, dependentClass, DEFAULT_UPDATE_LOG);
+    }
+
+    /**
+     * Update an object of type `E` from the given data, saving an Action log
+     * with the given log message.
+     *
+     * @param bundle
+     * @param parent
+     * @param user
+     * @param dependentClass
+     * @param logMessage
+     * @return The updated framed vertex
+     * @throws PermissionDenied
+     * @throws ValidationError
+     * @throws IntegrityError
+     * @throw DeserializationError
+     */
+    public <T extends VertexFrame> T updateDependent(Bundle bundle, E parent, Accessor user,
+            Class<T> dependentClass, String logMessage)
+            throws PermissionDenied, ValidationError, DeserializationError,
+            IntegrityError {
+        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
+        try {
+            T out = views.updateDependent(bundle, parent, user, dependentClass);
+            actionManager.logEvent(parent, graph.frame(user.asVertex(), Actioner.class), logMessage);
+            tx.success();
+            return out;
+        } catch (IntegrityError ex) {
+            tx.failure();
+            throw ex;
+        } catch (PermissionDenied ex) {
+            tx.failure();
+            throw ex;
+        } catch (ValidationError ex) {
+            tx.failure();
+            throw ex;
+        } catch (Exception ex) {
+            tx.failure();
+            throw new RuntimeException(ex);
+        } finally {
+            tx.finish();
+        }
+    }
+
+    /**
+     * Update an object of type `E` from the given data, saving an Action log
+     * with the default update message.
+     *
+     * @param bundle
+     * @param parent
+     * @param user
+     * @param dependentClass
+     * @return The updated framed vertex
+     * @throws PermissionDenied
+     * @throws ValidationError
+     * @throws IntegrityError
+     * @throws DeserializationError
+     */
+    public <T extends VertexFrame> T createDependent(Bundle bundle,
+            E parent, Accessor user, Class<T> dependentClass) throws PermissionDenied,
+            ValidationError, DeserializationError, IntegrityError {
+        return createDependent(bundle, parent, user, dependentClass, DEFAULT_UPDATE_LOG);
+    }
+
+    /**
+     * Update an object of type `E` from the given data, saving an Action log
+     * with the given log message.
+     *
+     * @param bundle
+     * @param parent
+     * @param user
+     * @param dependentClass
+     * @param logMessage
+     * @return The updated framed vertex
+     * @throws PermissionDenied
+     * @throws ValidationError
+     * @throws IntegrityError
+     * @throw DeserializationError
+     */
+    public <T extends VertexFrame> T createDependent(Bundle bundle, E parent, Accessor user,
+                Class<T> dependentClass, String logMessage)
+            throws PermissionDenied, ValidationError, DeserializationError,
+            IntegrityError {
+        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
+        try {
+            T out = views.createDependent(bundle, parent, user, dependentClass);
+            actionManager.logEvent(parent, graph.frame(user.asVertex(), Actioner.class), logMessage);
+            tx.success();
+            return out;
+        } catch (IntegrityError ex) {
+            tx.failure();
+            throw ex;
+        } catch (PermissionDenied ex) {
+            tx.failure();
+            throw ex;
+        } catch (ValidationError ex) {
+            tx.failure();
+            throw ex;
+        } catch (Exception ex) {
+            tx.failure();
+            throw new RuntimeException(ex);
+        } finally {
+            tx.finish();
+        }
+    }
+
+    /**
      * Delete an object bundle, following dependency cascades, saving an Action
      * log with the default deletion message.
      * 
@@ -290,11 +411,68 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
         }
     }
 
+    /**
+     * Delete an object bundle, following dependency cascades, saving an Action
+     * log with the default deletion message.
+     *
+     * @param item
+     * @param parent
+     * @param user
+     * @param dependentClass
+     * @return The number of vertices deleted
+     * @throws PermissionDenied
+     * @throws ValidationError
+     * @throws SerializationError
+     */
+    public <T extends VertexFrame> Integer deleteDependent(T item, E parent, Accessor user,
+            Class<T> dependentClass) throws PermissionDenied,
+            ValidationError, SerializationError {
+        return deleteDependent(item, parent, user, dependentClass, DEFAULT_DELETE_LOG);
+    }
+
+    /**
+     * Delete an object bundle, following dependency cascades, saving an Action
+     * log with the given deletion message.
+     *
+     * @param item
+     * @param parent
+     * @param user
+     * @param dependentClass
+     * @param logMessage
+     * @return The number of vertices deleted
+     * @throws PermissionDenied
+     * @throws ValidationError
+     * @throws SerializationError
+     */
+    public <T extends VertexFrame> Integer deleteDependent(T item, E parent, Accessor user,
+            Class<T> dependentClass, String logMessage)
+            throws PermissionDenied, ValidationError, SerializationError {
+        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
+        try {
+            actionManager.logEvent(parent, graph.frame(user.asVertex(), Actioner.class), logMessage);
+            Integer count = views.deleteDependent(item, parent, user, dependentClass);
+            tx.success();
+            return count;
+        } catch (PermissionDenied ex) {
+            tx.failure();
+            throw ex;
+        } catch (ValidationError ex) {
+            tx.failure();
+            throw ex;
+        } catch (Exception ex) {
+            tx.failure();
+            throw new RuntimeException(ex);
+        } finally {
+            tx.finish();
+        }
+    }
+
+
     public Crud<E> setScope(PermissionScope scope) {
         return new LoggingCrudViews<E>(graph, cls, scope);
     }
 
-    public E detail(E item, Accessor user) throws PermissionDenied {
+    public E detail(E item, Accessor user) throws AccessDenied {
         return views.detail(item, user);
     }
 }

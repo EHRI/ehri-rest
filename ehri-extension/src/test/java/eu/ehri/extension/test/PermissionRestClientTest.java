@@ -119,8 +119,7 @@ public class PermissionRestClientTest extends BaseRestClientTest {
 
     @Test
     public void testPermissionSetPermissionDenied()
-            throws
-            UniformInterfaceException, IOException {
+            throws UniformInterfaceException, IOException {
 
         // Test a user setting his own permissions over REST - this should
         // obviously fail...

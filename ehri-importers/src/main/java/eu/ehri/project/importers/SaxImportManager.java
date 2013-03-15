@@ -9,6 +9,7 @@ import eu.ehri.project.importers.exceptions.InvalidInputFormatError;
 import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Actioner;
+import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistance.ActionManager;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -46,7 +47,7 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
 //    private XmlCVocImporter importer; // CVoc specific!
     private AbstractImporter<Map<String, Object>> importer;
     protected final FramedGraph<Neo4jGraph> framedGraph;
-    protected final Agent agent;
+    protected final PermissionScope permissionScope;
     protected final Actioner actioner;
     
     // Ugly stateful variables for tracking import state
@@ -54,7 +55,8 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
     private String currentFile = null;
     private Integer currentPosition = null;
 
-    private  Class<? extends AbstractImporter> importerClass; 
+    private  Class<? extends AbstractImporter> importerClass;
+
     Class<? extends SaxXmlHandler> handlerClass;
     /**
      * Dummy resolver that does nothing. This is used to ensure that, in
@@ -74,17 +76,16 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
      * Constructor.
      *
      * @param framedGraph
-     * @param agent
+     * @param permissionScope
      * @param actioner
      */
     public SaxImportManager(FramedGraph<Neo4jGraph> framedGraph,
-            final Agent agent, final Actioner actioner, Class<? extends AbstractImporter> importerClass, Class<? extends SaxXmlHandler> handlerClass) {
+            final PermissionScope permissionScope, final Actioner actioner, Class<? extends AbstractImporter> importerClass, Class<? extends SaxXmlHandler> handlerClass) {
         this.framedGraph = framedGraph;
-        this.agent = agent;
+        this.permissionScope = permissionScope;
         this.actioner = actioner;
         this.importerClass = importerClass;
         this.handlerClass = handlerClass;
-        
     }
 
     /**
@@ -224,7 +225,8 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
         try {
             SAXParserFactory factory = SAXParserFactory.newInstance();
             SAXParser saxParser = factory.newSAXParser();
-            importer = importerClass.getConstructor(FramedGraph.class, Agent.class, ImportLog.class).newInstance(framedGraph, agent, log);
+            importer = importerClass.getConstructor(FramedGraph.class, PermissionScope.class,
+                    ImportLog.class).newInstance(framedGraph, permissionScope, log);
             logger.info("importer of class " + importer.getClass());
             importer.addCreationCallback(new ImportCallback() {
                 public void itemImported(AccessibleEntity item) {

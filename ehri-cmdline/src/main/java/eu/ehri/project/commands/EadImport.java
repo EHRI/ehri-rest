@@ -32,7 +32,4 @@ public class EadImport extends ImportCommand implements Command {
                 + sep + "Agent and User.";
         return help;
     }
-
-   
-   
 }

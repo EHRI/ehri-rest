@@ -63,9 +63,9 @@ public class EagHandler extends SaxXmlHandler {
                 if (!currentGraphPath.peek().containsKey("typeOfEntity")) {
                     putPropertyInCurrentGraph("typeOfEntity", "organisation");
                 }
-                if (!currentGraphPath.peek().containsKey(Description.TITLE)) {
-                    logger.debug("no " + Description.TITLE + " found");
-                    putPropertyInCurrentGraph(Description.TITLE, "title");
+                if (!currentGraphPath.peek().containsKey(Description.NAME)) {
+                    logger.debug("no " + Description.NAME + " found");
+                    putPropertyInCurrentGraph(Description.NAME, "title");
                 }
                 if (!currentGraphPath.peek().containsKey(Description.LANGUAGE_CODE)) {
                     logger.debug("no " + Description.LANGUAGE_CODE + " found");

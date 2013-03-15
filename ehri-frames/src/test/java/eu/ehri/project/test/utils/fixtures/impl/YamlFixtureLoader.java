@@ -1,6 +1,6 @@
 package eu.ehri.project.test.utils.fixtures.impl;
 
-import java.io.InputStream;
+import java.io.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -60,6 +60,8 @@ import eu.ehri.project.utils.GraphInitializer;
  */
 public class YamlFixtureLoader implements FixtureLoader {
 
+    public static final String DEFAULT_FIXTURE_FILE = "testdata.yaml";
+
     private final FramedGraph<Neo4jGraph> graph;
     private final GraphManager manager;
     private static final Logger logger = LoggerFactory
@@ -71,14 +73,33 @@ public class YamlFixtureLoader implements FixtureLoader {
     }
 
     private void loadFixtures() {
+        InputStream ios = this.getClass().getClassLoader()
+                .getResourceAsStream(DEFAULT_FIXTURE_FILE);
+        loadTestData(ios);
+    }
+
+    public void loadTestData(String fixtureFile) {
+        File file = new File(fixtureFile);
+        try {
+            loadTestData(new FileInputStream(file));
+        } catch (FileNotFoundException e) {
+            throw new IllegalArgumentException("File " + fixtureFile + " does not exist.");
+        }
+    }
+
+    public void loadTestData(InputStream stream) {
         // Initialize the DB
         new GraphInitializer(graph).initialize();
-        loadFixtureFile(this.getClass().getClassLoader()
-                .getResourceAsStream("testdata.yaml"));
+        try {
+            loadFixtureFileStream(stream);
+            stream.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @SuppressWarnings("unchecked")
-    private void loadFixtureFile(InputStream yamlStream) {
+    public void loadFixtureFileStream(InputStream yamlStream) {
         Yaml yaml = new Yaml();
         try {
             Map<Vertex, ListMultimap<String,String>> links = Maps.newHashMap();

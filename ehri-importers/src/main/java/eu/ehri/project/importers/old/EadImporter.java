@@ -42,11 +42,10 @@ import eu.ehri.project.models.base.AccessibleEntity;
  * at the highest level of description or multiple top-level entities, with or
  * without a heirarchical structure describing their child items. This means
  * that we need to recursively descend through the archdesc and c01-12 levels.
- * 
+ * <p/>
  * TODO: Extensive cleanups, optimisation, and rationalisation.
- * 
+ *
  * @author michaelb
- * 
  */
 public class EadImporter extends AbstractMultiItemRecursiveImporter<Node> {
 
@@ -67,7 +66,7 @@ public class EadImporter extends AbstractMultiItemRecursiveImporter<Node> {
 
     // Global EAD Attributes (stored in eadheader).
     @SuppressWarnings("serial")
-    private final Map<String,String> eadGlobalAttributeMap = new HashMap<String, String>() {
+    private final Map<String, String> eadGlobalAttributeMap = new HashMap<String, String>() {
         {
             put("publisher", "eadheader/filedesc/publicationstmt/publisher");
             put("publicationDate", "eadheader/filedesc/date");
@@ -75,25 +74,26 @@ public class EadImporter extends AbstractMultiItemRecursiveImporter<Node> {
             put("rules", "profiledesc/descrules");
         }
     };
-    
+
     // List of XPaths against the final attribute names. This should probably be
     // moved
     // to external configuration...
     @SuppressWarnings("serial")
     private final Map<String, String> eadAttributeMap = new HashMap<String, String>() {
         {
+            put(AccessibleEntity.IDENTIFIER_KEY, "did/unitid");
             put("accruals", "accurals/p");
             put("acquisition", "acqinfo/p");
+            put("adminBiogHistory", "bioghist/p");
             put("appraisal", "appraisal/p");
             put("archivalHistory", "custodhist/p");
             put("conditionsOfAccess", "accessrestrict/p");
             put("conditionsOfReproduction", "userestrict/p");
-            put("extentAndMedium", "did/physdesc/extent"); // Should be more
-                                                           // nuanced!
-            put(AccessibleEntity.IDENTIFIER_KEY, "did/unitid");
+            put("extentAndMedium", "did/physdesc/extent"); // Should be more nuanced!
+            put("findingAids", "otherfindaid/p");
             put("locationOfCopies", "altformavail/p");
-            put("locationOfOriginals", "originalsloc/p");
-            put("title", "did/unittitle");
+            put("locationAOfOriginals", "originalsloc/p");
+            put("name", "did/unittitle");
             put("physicalCharacteristics", "phystech/p");
             put("scopeAndContent", "scopecontent/p");
             put("systemOfArrangement", "arrangement/p");
@@ -125,11 +125,11 @@ public class EadImporter extends AbstractMultiItemRecursiveImporter<Node> {
             Pattern.compile("^(\\d{4})-\\[(\\d{4})\\]$"),
             Pattern.compile("^(\\d{4}s)-\\[(\\d{4}s)\\]$"),
             Pattern.compile("^\\[(\\d{4})\\]$"), Pattern.compile("^(\\d{4})$"),
-            Pattern.compile("^(\\d{2})th century$") };
+            Pattern.compile("^(\\d{2})th century$")};
 
     /**
      * Construct an EadImporter object.
-     * 
+     *
      * @param framedGraph
      * @param repository
      * @param topLevelEad
@@ -145,7 +145,7 @@ public class EadImporter extends AbstractMultiItemRecursiveImporter<Node> {
     /**
      * Extract a list of entity bundles for DatePeriods from the data,
      * attempting to parse the unitdate attribute.
-     * 
+     *
      * @param data
      */
     @Override
@@ -213,7 +213,7 @@ public class EadImporter extends AbstractMultiItemRecursiveImporter<Node> {
     /**
      * Extract the document descriptions from the node data. For EAD, there will
      * only be one description.
-     * 
+     *
      * @param data
      * @param depth
      * @return
@@ -225,12 +225,12 @@ public class EadImporter extends AbstractMultiItemRecursiveImporter<Node> {
 
         // For EAD (and most other types) there will only be one description
         // per logical object we create.
-        
+
         // Extract global attributes from the document context
         for (Entry<String, String> entry : eadGlobalAttributeMap.entrySet()) {
             dataMap.put(entry.getKey(), getElementText(documentContext, entry.getValue()));
         }
-        
+
         // And body attrubutes from the archdesc/c01/c02/c node...
         for (Entry<String, String> entry : eadAttributeMap.entrySet()) {
             dataMap.put(entry.getKey(), getElementText(data, entry.getValue()));
@@ -255,21 +255,20 @@ public class EadImporter extends AbstractMultiItemRecursiveImporter<Node> {
     /**
      * Extract items from a node which may contain multiple top-level items or
      * just a single item. For example:
-     * 
+     * <p/>
      * &lt;archdesc level=&quot;fonds&quot;&gt; &lt;did&gt;
      * &lt;unittitle&gt;Test Item&lt;/unittitle&gt; &lt/did&gt; ...
      * &lt/archdesc&gt;
-     * 
+     * <p/>
      * or
-     * 
+     * <p/>
      * &lt;archdesc level=&quot;fonds&quot;&gt; &lt;dsc&gt; &lt;c01&gt;
-     * 
+     * <p/>
      * &lt;did&gt; &lt;unittitle&gt;Test Item 1&lt;/unittitle&gt; &lt/did&gt;
      * ... &lt;c01&gt; &lt;c01&gt;
-     * 
+     * <p/>
      * &lt;did&gt; &lt;unittitle&gt;Test Item 2&lt;/unittitle&gt; &lt/did&gt;
      * ... &lt;c01&gt; &lt;dsc&gt; &lt/archdesc&gt;
-     * 
      */
     @Override
     protected List<Node> getEntryPoints() throws ValidationError,
@@ -321,7 +320,7 @@ public class EadImporter extends AbstractMultiItemRecursiveImporter<Node> {
 
     /**
      * Make a list unique.
-     * 
+     *
      * @param list
      * @return
      */
@@ -332,7 +331,7 @@ public class EadImporter extends AbstractMultiItemRecursiveImporter<Node> {
 
     /**
      * Extract a list of strings from the specified element set.
-     * 
+     *
      * @param data
      * @param path
      * @return
@@ -352,7 +351,7 @@ public class EadImporter extends AbstractMultiItemRecursiveImporter<Node> {
 
     /**
      * Extract the level of description.
-     * 
+     *
      * @param data
      * @return
      */
@@ -367,7 +366,7 @@ public class EadImporter extends AbstractMultiItemRecursiveImporter<Node> {
     /**
      * Attempt to extract some date periods. This does not currently put the
      * dates into ISO form.
-     * 
+     *
      * @param date
      * @return
      * @throws ValidationError
@@ -392,7 +391,7 @@ public class EadImporter extends AbstractMultiItemRecursiveImporter<Node> {
     /**
      * Fetch the element text from (possibly) multiple nodes, and join them with
      * a double break.
-     * 
+     *
      * @param data
      * @param path
      * @return

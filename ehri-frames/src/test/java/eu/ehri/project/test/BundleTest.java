@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 import com.google.common.collect.Iterables;
+import eu.ehri.project.models.*;
 import eu.ehri.project.persistance.utils.BundleUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -19,11 +20,6 @@ import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.models.Agent;
-import eu.ehri.project.models.AgentDescription;
-import eu.ehri.project.models.DatePeriod;
-import eu.ehri.project.models.DocumentaryUnit;
-import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.DescribedEntity;
 import eu.ehri.project.models.base.Description;
@@ -137,8 +133,9 @@ public class BundleTest extends ModelTestBase {
                 bundle, "describes[0]/hasDate[1]");
         BundleDAO persister = new BundleDAO(graph);
         persister.update(newBundle, DocumentaryUnit.class);
-        assertEquals(1, toList(c1.getDocumentDescriptions()
-                .iterator().next().getDatePeriods()).size());
+        assertEquals(2, Iterables.size(c1.getDocumentDescriptions()));
+        assertEquals(1, Iterables.size(manager.getFrame("cd1", DocumentDescription.class)
+                .getDatePeriods()));
 
         // The second date period should be gone from the index
         try {

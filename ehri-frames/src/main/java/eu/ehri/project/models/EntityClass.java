@@ -41,7 +41,6 @@ public enum EntityClass {
     PERMISSION(Entities.PERMISSION, "pm", Permission.class),
     PERMISSION_GRANT(Entities.PERMISSION_GRANT, "pmg", PermissionGrant.class),
     CONTENT_TYPE(Entities.CONTENT_TYPE, "ct", ContentType.class),
-    REVISION(Entities.REVISION, "rv", Revision.class),
     CVOC_VOCABULARY(Entities.CVOC_VOCABULARY, "cvv", Vocabulary.class),
     CVOC_CONCEPT(Entities.CVOC_CONCEPT, "cv", Concept.class),
     CVOC_CONCEPT_DESCRIPTION(Entities.CVOC_CONCEPT_DESCRIPTION, "cvd", ConceptDescription.class),

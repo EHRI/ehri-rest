@@ -33,7 +33,8 @@ public class DataConverterTest extends AbstractFixtureTest {
     public void testBundleToXml() throws Exception {
         DocumentaryUnit c1 = manager.getFrame("c1", DocumentaryUnit.class);
         Bundle bundle = new Serializer(graph).vertexFrameToBundle(c1)
-                .withDataValue("testarray", new String[] { "one", "two", "three" });
+                .withDataValue("testarray", new String[] { "one", "two", "three" })
+                .withDataValue("itemWithLt", "I should be escape because of: <>");
 
         Document document = bundle.toXml();
         assertTrue(document.hasChildNodes());

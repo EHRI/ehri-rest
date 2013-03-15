@@ -14,8 +14,4 @@ public interface Authority extends VertexFrame, AccessibleEntity,
         DescribedEntity, AnnotatableEntity {
 
     public static final String CREATED = "created";
-    public static final String MENTIONED_IN = "mentionedIn";
-
-    @Property("typeOfEntity")
-    public String getTypeOfEntity();
 }

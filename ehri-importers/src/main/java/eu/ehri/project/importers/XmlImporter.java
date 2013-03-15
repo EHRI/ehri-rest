@@ -4,7 +4,7 @@ import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.DatePeriod;
-import eu.ehri.project.models.Agent;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import eu.ehri.project.models.base.PermissionScope;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
@@ -42,8 +44,8 @@ public abstract class XmlImporter<T> extends AbstractImporter<T> {
         Pattern.compile("^\\s*(\\d{4})\\s*-\\s*(\\d{4})")
     };
 
-    public XmlImporter(FramedGraph<Neo4jGraph> framedGraph, Agent repository, ImportLog log) {
-        super(framedGraph, repository, log);
+    public XmlImporter(FramedGraph<Neo4jGraph> framedGraph, PermissionScope permissionScope, ImportLog log) {
+        super(framedGraph, permissionScope, log);
     }
 
     /**

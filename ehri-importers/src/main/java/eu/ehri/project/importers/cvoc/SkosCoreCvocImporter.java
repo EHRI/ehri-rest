@@ -524,7 +524,7 @@ public class SkosCoreCvocImporter {
         
         // one and only one
         extractAndAddSingleValuedTextToDescriptionData(descriptionData, 
-        		Description.TITLE, "skos:prefLabel", conceptElement);
+        		Description.NAME, "skos:prefLabel", conceptElement);
         // multiple alternatives is logical
         extractAndAddMultiValuedTextToDescriptionData(descriptionData, 
         		ConceptDescription.ALTLABEL, "skos:altLabel", conceptElement);

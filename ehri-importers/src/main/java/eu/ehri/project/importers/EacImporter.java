@@ -2,9 +2,9 @@ package eu.ehri.project.importers;
 
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
+import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.Authority;
-import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.AddressableEntity;
 import eu.ehri.project.models.base.Description;
@@ -32,11 +32,11 @@ public class EacImporter extends EaImporter {
      * Construct an EacImporter object.
      *
      * @param framedGraph
-     * @param repository
+     * @param permissionScope
      * @param log
      */
-    public EacImporter(FramedGraph<Neo4jGraph> framedGraph, Agent repository, ImportLog log) {
-        super(framedGraph, repository, log);
+    public EacImporter(FramedGraph<Neo4jGraph> framedGraph, PermissionScope permissionScope, ImportLog log) {
+        super(framedGraph, permissionScope, log);
     }
 
     @Override
@@ -52,7 +52,7 @@ public class EacImporter extends EaImporter {
      */
     public Authority importItem(Map<String, Object> itemData) throws ValidationError {
 
-        BundleDAO persister = new BundleDAO(framedGraph, repository);
+        BundleDAO persister = new BundleDAO(framedGraph, permissionScope);
         Bundle unit = new Bundle(EntityClass.AUTHORITY, extractUnit(itemData));
 
         Bundle descBundle = new Bundle(EntityClass.AUTHORITY_DESCRIPTION, extractUnitDescription(itemData));
@@ -78,15 +78,10 @@ public class EacImporter extends EaImporter {
 
         unit = unit.withRelation(Description.DESCRIBES, descBundle);
 
-        PermissionScope scope = repository;
         IdGenerator generator = AccessibleEntityIdGenerator.INSTANCE;
-        String id = generator.generateId(EntityClass.AUTHORITY, scope, unit);
+        String id = generator.generateId(EntityClass.AUTHORITY, SystemScope.getInstance(), unit);
         boolean exists = manager.exists(id);
         Authority frame = persister.createOrUpdate(unit.withId(id), Authority.class);
-
-        // Set the repository/item relationship
-        frame.setPermissionScope(scope);
-
 
         if (exists) {
             for (ImportCallback cb : updateCallbacks) {
