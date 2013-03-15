@@ -12,13 +12,10 @@ import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.AbstractImporter;
-import eu.ehri.project.importers.IcaAtomEadHandler;
-import eu.ehri.project.importers.IcaAtomEadImporter;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.SaxImportManager;
 import eu.ehri.project.importers.SaxXmlHandler;
-import eu.ehri.project.importers.XmlImporter;
-import eu.ehri.project.models.Agent;
+import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.persistance.Bundle;
@@ -77,9 +74,9 @@ public abstract class ImportCommand extends BaseCommand implements Command{
         try {
 
             // Find the agent
-            Agent agent;
+            Repository agent;
             try {
-                agent = manager.getFrame(cmdLine.getOptionValue("repo"), Agent.class);
+                agent = manager.getFrame(cmdLine.getOptionValue("repo"), Repository.class);
             } catch (ItemNotFound e) {
                 if (cmdLine.hasOption("createrepo")) {
                     agent = createAgent(graph, cmdLine.getOptionValue("repo"));
@@ -132,13 +129,13 @@ public abstract class ImportCommand extends BaseCommand implements Command{
                 userData), UserProfile.class);
     }
 
-    private static Agent createAgent(FramedGraph<Neo4jGraph> graph, String name)
+    private static Repository createAgent(FramedGraph<Neo4jGraph> graph, String name)
             throws ValidationError, IntegrityError {
         Map<String, Object> agentData = new HashMap<String, Object>();
         agentData.put("identifier", name);
         agentData.put("name", name);
-        return new BundleDAO(graph).create(new Bundle(EntityClass.AGENT,
-                agentData), Agent.class);
+        return new BundleDAO(graph).create(new Bundle(EntityClass.REPOSITORY,
+                agentData), Repository.class);
     }
     
 }

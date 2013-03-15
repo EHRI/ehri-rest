@@ -11,9 +11,8 @@ import org.junit.Test;
 
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.Address;
-import eu.ehri.project.models.Agent;
-import eu.ehri.project.models.AgentDescription;
-import eu.ehri.project.models.Authority;
+import eu.ehri.project.models.Repository;
+import eu.ehri.project.models.RepositoryDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Group;
@@ -42,7 +41,7 @@ public class FixtureTest extends ModelTestBase {
     public void testCollectionHelpByRepo() throws ItemNotFound {
         DocumentaryUnit unit = manager.getFrame("c1", DocumentaryUnit.class);
         // FIXME: When we upgrade to frames 2.3.0 getAgent will again
-        // return a single Agent item (or null)
+        // return a single Repository item (or null)
         assertTrue(unit.getAgent().iterator().hasNext());
         // and have a description
         assertFalse(toList(unit.getDescriptions()).isEmpty());
@@ -53,7 +52,7 @@ public class FixtureTest extends ModelTestBase {
         DocumentaryUnit unit = manager.getFrame("c1", DocumentaryUnit.class);
         DocumentaryUnit child = manager.getFrame("c3", DocumentaryUnit.class);
         // FIXME: When we upgrade to frames 2.3.0 getAgent will again
-        // return a single Agent item (or null)
+        // return a single Repository item (or null)
         assertTrue(child.getAgent().iterator().hasNext());
         assertTrue(unit.getAgent().iterator().hasNext());
         assertEquals(unit.getAgent().iterator().next(),
@@ -62,7 +61,7 @@ public class FixtureTest extends ModelTestBase {
 
     @Test
     public void testAgentsCanGetAllCollections() throws ItemNotFound {
-        Agent agent = manager.getFrame("r1", Agent.class);
+        Repository agent = manager.getFrame("r1", Repository.class);
         assertEquals(2, Iterables.size(agent.getCollections()));
         assertEquals(4, Iterables.size(agent.getAllCollections()));
 
@@ -70,7 +69,7 @@ public class FixtureTest extends ModelTestBase {
 
     @Test
     public void testRepository() throws ItemNotFound {
-        AgentDescription rd1 = manager.getFrame("rd1", AgentDescription.class);
+        RepositoryDescription rd1 = manager.getFrame("rd1", RepositoryDescription.class);
         Address ar1 = manager.getFrame("ar1", Address.class);
         // check we have an address
         assertTrue(toList(rd1.getAddresses()).contains(ar1));

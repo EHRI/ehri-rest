@@ -11,8 +11,8 @@ import eu.ehri.project.models.base.DescribedEntity;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.base.TemporalEntity;
 
-@EntityType(EntityClass.AGENT)
-public interface Agent extends AccessibleEntity, DescribedEntity,
+@EntityType(EntityClass.REPOSITORY)
+public interface Repository extends AccessibleEntity, DescribedEntity,
         AnnotatableEntity, PermissionScope {
 
     public static final String HELDBY = "heldBy";

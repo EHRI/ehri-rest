@@ -10,8 +10,8 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.test.AbstractImporterTest;
-import eu.ehri.project.models.Agent;
-import eu.ehri.project.models.AgentDescription;
+import eu.ehri.project.models.Repository;
+import eu.ehri.project.models.RepositoryDescription;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.events.SystemEvent;
@@ -39,7 +39,7 @@ public class Eag2896Test extends AbstractImporterTest {
     @Test
     public void testImportItemsT() {
         try {
-            Agent agent = manager.getFrame(TEST_REPO, Agent.class);
+            Repository agent = manager.getFrame(TEST_REPO, Repository.class);
             final String logMessage = "Importing a single EAG";
 
             int count = getNodeCount(graph);
@@ -49,26 +49,26 @@ public class Eag2896Test extends AbstractImporterTest {
             ImportLog log = new SaxImportManager(graph, agent, validUser, EagImporter.class, EagHandler.class).importFile(ios, logMessage);
           printGraph(graph);
             // How many new nodes will have been created? We should have
-            // - 1 more Agent
-            // - 1 more AgentDescription
+            // - 1 more Repository
+            // - 1 more RepositoryDescription
             // - 1 more Address
             // - 2 more MaintenanceEvent
-            // - 2 more linkEvents (1 for the Agent, 1 for the User)
+            // - 2 more linkEvents (1 for the Repository, 1 for the User)
             // - 1 more SystemEvent        
             assertEquals(count + 8, getNodeCount(graph));
 
             Iterable<Vertex> docs = graph.getVertices(AccessibleEntity.IDENTIFIER_KEY, IMPORTED_ITEM_ID);
             assertTrue(docs.iterator().hasNext());
-            Agent unit = graph.frame(
+            Repository unit = graph.frame(
                     getVertexByIdentifier(graph, IMPORTED_ITEM_ID),
-                    Agent.class);
-            assertEquals(Entities.AGENT, unit.asVertex().getProperty("__ISA__"));
+                    Repository.class);
+            assertEquals(Entities.REPOSITORY, unit.asVertex().getProperty("__ISA__"));
 
             // check the child items
-            AgentDescription c1 = graph.frame(
+            RepositoryDescription c1 = graph.frame(
                     getVertexByIdentifier(graph, AGENT_DESC_ID),
-                    AgentDescription.class);
-            assertEquals(Entities.AGENT_DESCRIPTION, c1.asVertex().getProperty("__ISA__"));
+                    RepositoryDescription.class);
+            assertEquals(Entities.REPOSITORY_DESCRIPTION, c1.asVertex().getProperty("__ISA__"));
             Object notes = c1.asVertex().getProperty("notes");
             if (notes instanceof String[]) {
                 assertEquals(3, ((String[]) notes).length);

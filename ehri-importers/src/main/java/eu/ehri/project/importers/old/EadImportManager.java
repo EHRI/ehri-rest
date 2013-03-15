@@ -14,6 +14,7 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
+import eu.ehri.project.models.Repository;
 import org.neo4j.graphdb.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +35,6 @@ import eu.ehri.project.importers.XmlImportManager;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.exceptions.InvalidEadDocument;
 import eu.ehri.project.importers.exceptions.InvalidInputFormatError;
-import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.persistance.ActionManager;
@@ -58,7 +58,7 @@ public class EadImportManager extends XmlImportManager implements ImportManager 
     private Boolean tolerant = false;
 
     protected final FramedGraph<Neo4jGraph> framedGraph;
-    protected final Agent agent;
+    protected final Repository agent;
     protected final Actioner actioner;
 
     // Ugly stateful variables for tracking import state
@@ -107,7 +107,7 @@ public class EadImportManager extends XmlImportManager implements ImportManager 
      * @param actioner
      */
     public EadImportManager(FramedGraph<Neo4jGraph> framedGraph,
-            final Agent agent, final Actioner actioner) {
+            final Repository agent, final Actioner actioner) {
         this.framedGraph = framedGraph;
         this.agent = agent;
         this.actioner = actioner;

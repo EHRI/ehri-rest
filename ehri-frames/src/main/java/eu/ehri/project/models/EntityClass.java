@@ -23,14 +23,14 @@ public enum EntityClass {
 
     // @formatter:off
     DOCUMENTARY_UNIT(Entities.DOCUMENTARY_UNIT, "c", DocumentaryUnit.class, AccessibleEntityIdGenerator.INSTANCE),
-    AGENT(Entities.AGENT, "r", Agent.class, AccessibleEntityIdGenerator.INSTANCE),
+    REPOSITORY(Entities.REPOSITORY, "r", Repository.class, AccessibleEntityIdGenerator.INSTANCE),
     AUTHORITY(Entities.AUTHORITY, "a", Authority.class, AccessibleEntityIdGenerator.INSTANCE),
     GROUP(Entities.GROUP, "g", Group.class, AccessibleEntityIdGenerator.INSTANCE),
     USER_PROFILE(Entities.USER_PROFILE, "u", UserProfile.class, AccessibleEntityIdGenerator.INSTANCE),
     
     // Generic entities.
     DOCUMENT_DESCRIPTION(Entities.DOCUMENT_DESCRIPTION, "dd", DocumentDescription.class),
-    AGENT_DESCRIPTION(Entities.AGENT_DESCRIPTION, "rd", AgentDescription.class),
+    REPOSITORY_DESCRIPTION(Entities.REPOSITORY_DESCRIPTION, "rd", RepositoryDescription.class),
     AUTHORITY_DESCRIPTION(Entities.AUTHORITY_DESCRIPTION, "ad", AuthorityDescription.class),
     DATE_PERIOD(Entities.DATE_PERIOD, "dp", DatePeriod.class),
     ANNOTATION(Entities.ANNOTATION, "ann", Annotation.class),

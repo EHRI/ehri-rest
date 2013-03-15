@@ -159,7 +159,7 @@ public class ViewsTest extends AbstractFixtureTest {
             DeserializationError, IntegrityError, ItemNotFound {
         Crud<DocumentaryUnit> docViews = new LoggingCrudViews<DocumentaryUnit>(
                 graph, DocumentaryUnit.class, manager.getFrame("r1",
-                        Agent.class));
+                        Repository.class));
         Bundle bundle = Bundle.fromData(getTestBundle());
         // In the fixtures, 'reto' should have a grant for 'CREATE'
         // scoped to the 'r1' repository.

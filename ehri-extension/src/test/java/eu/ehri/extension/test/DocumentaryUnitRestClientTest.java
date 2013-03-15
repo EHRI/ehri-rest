@@ -15,7 +15,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 
 import eu.ehri.project.models.base.DescribedEntity;
-import eu.ehri.project.persistance.Serializer;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Before;
@@ -361,7 +360,7 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
 
     private URI getCreationUri() {
         return UriBuilder.fromPath(getExtensionEntryPointUri())
-                .segment(Entities.AGENT).segment(TEST_HOLDER_IDENTIFIER)
+                .segment(Entities.REPOSITORY).segment(TEST_HOLDER_IDENTIFIER)
                 .segment(Entities.DOCUMENTARY_UNIT).build();
     }
 }

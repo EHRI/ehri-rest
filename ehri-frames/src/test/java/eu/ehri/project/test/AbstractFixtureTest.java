@@ -11,7 +11,6 @@ import org.junit.BeforeClass;
 
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.models.Address;
 import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.UserProfile;
@@ -90,7 +89,7 @@ abstract public class AbstractFixtureTest extends ModelTestBase {
         // Data structure representing a not-yet-created collection.
         // Using double-brace initialization to ease the pain.
         return new HashMap<String, Object>() {{
-            put(Bundle.TYPE_KEY, Entities.AGENT);
+            put(Bundle.TYPE_KEY, Entities.REPOSITORY);
             put(Bundle.DATA_KEY, new HashMap<String, Object>() {{
                 put(Accessor.NAME, TEST_AGENT_NAME);
                 put(AccessibleEntity.IDENTIFIER_KEY, "test-repo-1");
@@ -98,7 +97,7 @@ abstract public class AbstractFixtureTest extends ModelTestBase {
             put(Bundle.REL_KEY, new HashMap<String, Object>() {{
                 put(Description.DESCRIBES, new LinkedList<HashMap<String, Object>>() {{
                     add(new HashMap<String, Object>() {{
-                        put(Bundle.TYPE_KEY, Entities.AGENT_DESCRIPTION);
+                        put(Bundle.TYPE_KEY, Entities.REPOSITORY_DESCRIPTION);
                         put(Bundle.DATA_KEY, new HashMap<String, Object>() {{
                             put(AccessibleEntity.IDENTIFIER_KEY, "test-repo-1-desc");
                             put(Description.NAME, "A Test Repository");

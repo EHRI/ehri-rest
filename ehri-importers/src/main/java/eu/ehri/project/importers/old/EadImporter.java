@@ -31,7 +31,7 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.ead.EadLanguageExtractor;
 import eu.ehri.project.importers.exceptions.InvalidInputFormatError;
-import eu.ehri.project.models.Agent;
+import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.base.AccessibleEntity;
@@ -134,7 +134,7 @@ public class EadImporter extends AbstractMultiItemRecursiveImporter<Node> {
      * @param repository
      * @param topLevelEad
      */
-    public EadImporter(FramedGraph<Neo4jGraph> framedGraph, Agent repository,
+    public EadImporter(FramedGraph<Neo4jGraph> framedGraph, Repository repository,
             Node topLevelEad, ImportLog log) {
         super(framedGraph, repository, log, topLevelEad);
 
