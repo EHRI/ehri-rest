@@ -9,9 +9,4 @@ import eu.ehri.project.models.base.TemporalEntity;
 
 @EntityType(EntityClass.DOCUMENT_DESCRIPTION)
 public interface DocumentDescription extends TemporalEntity, Description, VertexFrame {
-
-    public static final String TITLE = "title";
-
-    @Property(TITLE)
-    public String getTitle();
 }

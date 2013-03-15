@@ -20,7 +20,7 @@ import eu.ehri.project.models.base.Description;
 @EntityType(EntityClass.CVOC_CONCEPT_DESCRIPTION)
 public interface ConceptDescription extends VertexFrame, Description {
     public static final String LANGUAGE = Description.LANGUAGE_CODE; //"languageCode";
-    public static final String PREFLABEL = Description.TITLE; //"prefLabel";
+    public static final String PREFLABEL = Description.NAME; //"prefLabel";
     public static final String ALTLABEL = "altLabel";
     public static final String DEFINITION = "definition";
     public static final String SCOPENOTE = "scopeNote";

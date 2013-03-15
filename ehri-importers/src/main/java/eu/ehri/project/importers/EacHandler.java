@@ -60,16 +60,16 @@ public class EacHandler extends SaxXmlHandler {
                 if (!currentGraphPath.peek().containsKey("objectIdentifier")) {
                     putPropertyInCurrentGraph("objectIdentifier", "id");
                 }
-                if (!currentGraphPath.peek().containsKey(Description.TITLE)) {
+                if (!currentGraphPath.peek().containsKey(Description.NAME)) {
                     if(currentGraphPath.peek().containsKey("otherFormsOfName")){
                         Object names =  currentGraphPath.peek().get("otherFormsOfName");
                         if(names instanceof String){
-                            putPropertyInCurrentGraph(Description.TITLE, names.toString());
+                            putPropertyInCurrentGraph(Description.NAME, names.toString());
                         }else if(names instanceof List){
-                            putPropertyInCurrentGraph(Description.TITLE, ((List)names).get(0).toString());
+                            putPropertyInCurrentGraph(Description.NAME, ((List)names).get(0).toString());
                         }else{
-                            logger.warn("no " + Description.TITLE + " found");
-                            putPropertyInCurrentGraph(Description.TITLE, "title");
+                            logger.warn("no " + Description.NAME + " found");
+                            putPropertyInCurrentGraph(Description.NAME, "title");
                         }
                     }
                 }

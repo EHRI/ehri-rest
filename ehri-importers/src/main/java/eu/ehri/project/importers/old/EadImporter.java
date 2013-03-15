@@ -93,7 +93,7 @@ public class EadImporter extends AbstractMultiItemRecursiveImporter<Node> {
             put("findingAids", "otherfindaid/p");
             put("locationOfCopies", "altformavail/p");
             put("locationAOfOriginals", "originalsloc/p");
-            put("title", "did/unittitle");
+            put("name", "did/unittitle");
             put("physicalCharacteristics", "phystech/p");
             put("scopeAndContent", "scopecontent/p");
             put("systemOfArrangement", "arrangement/p");

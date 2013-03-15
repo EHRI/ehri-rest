@@ -376,12 +376,12 @@ public class ViewsTest extends AbstractFixtureTest {
         long descCount = Iterables.count(unit.getDocumentDescriptions());
         Bundle descBundle = new Serializer(graph).vertexFrameToBundle(unit)
                 .getRelations(DescribedEntity.DESCRIBES)
-                .get(0).withDataValue(DocumentDescription.TITLE, "some-new-title");
+                .get(0).withDataValue(DocumentDescription.NAME, "some-new-title");
 
         DocumentDescription changedDesc = docViews.updateDependent(descBundle, unit, validUser,
                 DocumentDescription.class);
         assertEquals(descCount, Iterables.count(unit.getDocumentDescriptions()));
-        assertEquals("some-new-title", changedDesc.getTitle());
+        assertEquals("some-new-title", changedDesc.getName());
     }
 
     /**

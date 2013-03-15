@@ -119,7 +119,7 @@ public class IcaAtomEadImporter extends XmlImporter<Map<String, Object>> {
 
         Map<String, Object> unit = new HashMap<String, Object>();
         for (String key : itemData.keySet()) {
-            if (!(key.equals(OBJECT_ID) || key.equals(DocumentaryUnit.NAME) || key.startsWith(SaxXmlHandler.UNKNOWN))) {
+            if (!(key.equals(OBJECT_ID) || key.startsWith(SaxXmlHandler.UNKNOWN))) {
                 unit.put(key, itemData.get(key));
             }
         }

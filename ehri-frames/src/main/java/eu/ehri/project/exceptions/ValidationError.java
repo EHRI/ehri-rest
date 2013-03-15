@@ -40,7 +40,7 @@ public class ValidationError extends BundleError {
             ListMultimap<String, String> errors,
             ListMultimap<String, BundleError> relations) {
         StringBuilder buf = new StringBuilder(String.format(
-                "A validation error occurred building %s:\n", clsName));
+                "A validation error occurred building %s: %s\n", clsName, getErrorTree(errors, relations)));
         for (String key : errors.keySet()) {
             for (String value : errors.get(key)) {
                 buf.append(String.format(" - %-20s: %s", key, value));

@@ -6,7 +6,6 @@ import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.importers.test.AbstractImporterTest;
 import eu.ehri.project.models.Authority;
 import eu.ehri.project.models.AuthorityDescription;
-import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.events.SystemEvent;
@@ -68,13 +67,13 @@ private static final Logger logger = LoggerFactory.getLogger(EacImporterTest.cla
             for(String al : (String[])c1.asVertex().getProperty("otherFormsOfName")){
                 l.add(al);
             }
-            assertTrue(l.contains((String)c1.asVertex().getProperty(Description.TITLE)));
+            assertTrue(l.contains((String)c1.asVertex().getProperty(Description.NAME)));
 
             assertEquals(3, ((String[])c1.asVertex().getProperty("otherFormsOfName")).length);
             // Ensure that c1 is a description of the unit
             for (Description d : unit.getDescriptions()) {
             
-            assertEquals(d.getTitle(), c1.getTitle());
+            assertEquals(d.getName(), c1.getName());
                 assertEquals(d.getEntity().getIdentifier(), unit.getIdentifier());
             }
 

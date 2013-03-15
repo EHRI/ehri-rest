@@ -13,7 +13,7 @@ public interface Description extends VertexFrame {
     public static final String DESCRIBES = DescribedEntity.DESCRIBES;
     public static final String LANGUAGE_CODE = "languageCode";
     public static final String MUTATES = "maintenance"; //links to MaintenanceEvent
-    public final static String TITLE = "title";
+    public final static String NAME = "name";
 
     @Adjacency(label = DESCRIBES)
     public DescribedEntity getEntity();
@@ -21,8 +21,8 @@ public interface Description extends VertexFrame {
     @Property(LANGUAGE_CODE)
     public String getLanguageOfDescription();
  
-    @Property(TITLE)
-    public String getTitle();
+    @Property(NAME)
+    public String getName();
 
     /**
      * Get the described entity of a description. This 
