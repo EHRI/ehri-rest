@@ -6,7 +6,7 @@ package eu.ehri.project.importers;
 
 import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.importers.test.AbstractImporterTest;
-import eu.ehri.project.models.Agent;
+import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.events.SystemEvent;
 import java.io.InputStream;
@@ -29,7 +29,7 @@ public class IcaAtomEadSingleEad extends AbstractImporterTest{
 
     @Test
     public void testImportItemsT() throws Exception {
-        Agent agent = manager.getFrame(TEST_REPO, Agent.class);
+        Repository agent = manager.getFrame(TEST_REPO, Repository.class);
         final String logMessage = "Importing a single EAD by IcaAtomEadSingleEad";
 
         int origCount = getNodeCount(graph);

@@ -6,7 +6,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import eu.ehri.project.exceptions.AccessDenied;
-import eu.ehri.project.models.Agent;
+import eu.ehri.project.models.Repository;
 import org.junit.Test;
 
 import com.tinkerpop.blueprints.Direction;
@@ -15,7 +15,6 @@ import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.exceptions.IndexNotFoundException;
 import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.AccessibleEntity;
@@ -203,12 +202,12 @@ public class QueryTest extends AbstractFixtureTest {
                 .filter(filters1).list(validUser);
         assertEquals(1, Iterables.size(list1));
 
-        Query<Agent> query2 = new Query<Agent>(graph,
-                Agent.class);
+        Query<Repository> query2 = new Query<Repository>(graph,
+                Repository.class);
         List<String> filters2 = ImmutableList.of(
                 "<-describes->hasAddress.city:Brussels"
         );
-        Iterable<Agent> list2 = query2
+        Iterable<Repository> list2 = query2
                 .filter(filters2).list(validUser);
         assertEquals(1, Iterables.size(list2));
 
@@ -216,17 +215,17 @@ public class QueryTest extends AbstractFixtureTest {
 
     @Test
     public void testListWithTraversalOrder() {
-        Query<Agent> query1 = new Query<Agent>(graph, Agent.class);
-        Iterable<Agent> out1 = query1
+        Query<Repository> query1 = new Query<Repository>(graph, Repository.class);
+        Iterable<Repository> out1 = query1
                 .orderBy(ImmutableList.of("<-describes.identifier"))
                 .list(validUser);
-        List<Agent> list1 = Lists.newLinkedList(out1);
+        List<Repository> list1 = Lists.newLinkedList(out1);
 
-        Query<Agent> query2 = new Query<Agent>(graph, Agent.class);
-        Iterable<Agent> out2 = query2
+        Query<Repository> query2 = new Query<Repository>(graph, Repository.class);
+        Iterable<Repository> out2 = query2
                 .orderBy(ImmutableList.of("<-describes.identifier__DESC"))
                 .list(validUser);
-        List<Agent> list2 = Lists.newLinkedList(out2);
+        List<Repository> list2 = Lists.newLinkedList(out2);
 
         assertEquals(list1, Lists.reverse(list2));
     }

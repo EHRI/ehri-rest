@@ -9,7 +9,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 
-import eu.ehri.project.models.Agent;
+import eu.ehri.project.models.Repository;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Before;
@@ -24,7 +24,7 @@ import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.persistance.Bundle;
 
-public class AgentRestClientTest extends BaseRestClientTest {
+public class RepositoryRestClientTest extends BaseRestClientTest {
 
     static final String ID = "r1";
     static final String LIMITED_USER_NAME = "reto";
@@ -35,12 +35,12 @@ public class AgentRestClientTest extends BaseRestClientTest {
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
-        initializeTestDb(AgentRestClientTest.class.getName());
+        initializeTestDb(RepositoryRestClientTest.class.getName());
     }
 
     @Before
     public void setUp() throws Exception {
-        agentTestData = readFileAsString("agent.json");
+        agentTestData = readFileAsString("repository.json");
         docTestData = readFileAsString("documentaryUnit.json");
     }
 
@@ -48,7 +48,7 @@ public class AgentRestClientTest extends BaseRestClientTest {
     public void testCreateAgent() throws Exception {
         // Create
         WebResource resource = client.resource(getExtensionEntryPointUri()
-                + "/agent");
+                + "/" + Entities.REPOSITORY);
         ClientResponse response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
@@ -73,9 +73,9 @@ public class AgentRestClientTest extends BaseRestClientTest {
     @Test
     public void testCreateAgentWithExistingIdentifier() throws Exception {
         String json = Bundle.fromString(agentTestData)
-                .withDataValue(Agent.IDENTIFIER_KEY, "r1").toJson();
+                .withDataValue(Repository.IDENTIFIER_KEY, "r1").toJson();
         WebResource resource = client.resource(getExtensionEntryPointUri()
-                + "/agent");
+                + "/" + Entities.REPOSITORY);
         ClientResponse response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
@@ -91,7 +91,7 @@ public class AgentRestClientTest extends BaseRestClientTest {
     public void testUpdateAgentByIdentifier() throws Exception {
         // Create
         WebResource resource = client.resource(getExtensionEntryPointUri()
-                + "/agent");
+                + "/" + Entities.REPOSITORY);
         ClientResponse response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
@@ -119,7 +119,7 @@ public class AgentRestClientTest extends BaseRestClientTest {
     public void testCreateAgentWithDeserializationError() throws Exception {
         // Create
         WebResource resource = client.resource(getExtensionEntryPointUri()
-                + "/agent");
+                + "/" + Entities.REPOSITORY);
         String badAgentTestData = "{\"data\":{\"identifier\": \"jmp\"}}";
         ClientResponse response = resource
                 .accept(MediaType.APPLICATION_JSON)
@@ -145,7 +145,7 @@ public class AgentRestClientTest extends BaseRestClientTest {
     public void testDeleteAgent() throws Exception {
         // Create
         WebResource resource = client.resource(getExtensionEntryPointUri()
-                + "/agent/r1");
+                + "/" + Entities.REPOSITORY + "/" + ID);
         ClientResponse response = resource.header(
                 AbstractRestResource.AUTH_HEADER_NAME, getAdminUserProfileId())
                 .delete(ClientResponse.class);
@@ -257,7 +257,7 @@ public class AgentRestClientTest extends BaseRestClientTest {
 
     private URI getCreationUriFor(String id) {
         URI creationUri = UriBuilder.fromPath(getExtensionEntryPointUri())
-                .segment(Entities.AGENT).segment(id)
+                .segment(Entities.REPOSITORY).segment(id)
                 .segment(Entities.DOCUMENTARY_UNIT).build();
         return creationUri;
     }

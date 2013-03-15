@@ -5,7 +5,7 @@
 package eu.ehri.project.importers;
 
 import eu.ehri.project.importers.test.AbstractImporterTest;
-import eu.ehri.project.models.Agent;
+
 import java.io.InputStream;
 
 import eu.ehri.project.models.base.PermissionScope;

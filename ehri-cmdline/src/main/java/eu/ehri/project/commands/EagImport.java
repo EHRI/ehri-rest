@@ -32,7 +32,7 @@ public class EagImport  extends ImportCommand implements Command {
     public String getUsage() {
         String sep = System.getProperty("line.separator");
         String help = "Import an EAG file into the graph database, using the specified"
-                + sep + "Agent and User.";
+                + sep + "Repository and User.";
         return help;
     }
 

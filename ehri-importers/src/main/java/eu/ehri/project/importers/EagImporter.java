@@ -8,7 +8,7 @@ import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.models.Agent;
+import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.AddressableEntity;
@@ -42,7 +42,7 @@ public class EagImporter extends EaImporter{
     }
 
     @Override
-    public Agent importItem(Map<String, Object> itemData, int depth) throws ValidationError {
+    public Repository importItem(Map<String, Object> itemData, int depth) throws ValidationError {
         return importItem(itemData);
     }
 
@@ -52,14 +52,14 @@ public class EagImporter extends EaImporter{
      * @param itemData
      * @throws ValidationError
      */
-    public Agent importItem(Map<String, Object> itemData) throws ValidationError {
+    public Repository importItem(Map<String, Object> itemData) throws ValidationError {
 
         BundleDAO persister = new BundleDAO(framedGraph, permissionScope);
-        Bundle unit = new Bundle(EntityClass.AGENT, extractUnit(itemData));
+        Bundle unit = new Bundle(EntityClass.REPOSITORY, extractUnit(itemData));
 
         Map<String, Object> descmap = extractUnitDescription(itemData);
         descmap.put(AccessibleEntity.IDENTIFIER_KEY, descmap.get(AccessibleEntity.IDENTIFIER_KEY)+"#desc");
-        Bundle descBundle = new Bundle(EntityClass.AGENT_DESCRIPTION, descmap);
+        Bundle descBundle = new Bundle(EntityClass.REPOSITORY_DESCRIPTION, descmap);
 
 
         // Add dates and descriptions to the bundle since they're @Dependent
@@ -83,9 +83,9 @@ public class EagImporter extends EaImporter{
         unit = unit.withRelation(Description.DESCRIBES, descBundle);
 
         IdGenerator generator = AccessibleEntityIdGenerator.INSTANCE;
-        String id = generator.generateId(EntityClass.AGENT, SystemScope.getInstance(), unit);
+        String id = generator.generateId(EntityClass.REPOSITORY, SystemScope.getInstance(), unit);
         boolean exists = manager.exists(id);
-        Agent frame = persister.createOrUpdate(unit.withId(id), Agent.class);
+        Repository frame = persister.createOrUpdate(unit.withId(id), Repository.class);
 
         if (exists) {
             for (ImportCallback cb : updateCallbacks) {

@@ -210,7 +210,7 @@ public final class ViewHelper {
 
     /**
      * Set the scope under which ACL and permission operations will take place.
-     * This is, for example, an Agent instance, where the objects being
+     * This is, for example, an Repository instance, where the objects being
      * manipulated are DocumentaryUnits. The given scope is used to compare
      * against the scope relation on PermissionGrants.
      *

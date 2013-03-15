@@ -6,6 +6,7 @@ import static org.junit.Assert.assertFalse;
 import java.io.IOException;
 import java.io.InputStream;
 
+import eu.ehri.project.models.Repository;
 import org.junit.Test;
 
 import eu.ehri.project.exceptions.ItemNotFound;
@@ -13,7 +14,6 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.old.EadImportManager;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.exceptions.InputParseError;
-import eu.ehri.project.models.Agent;
 
 public class InvalidEadImporterTest extends AbstractImporterTest {
 
@@ -27,7 +27,7 @@ public class InvalidEadImporterTest extends AbstractImporterTest {
 
     @Test(expected=ValidationError.class)
     public void testImportItemsT() throws ValidationError, IOException, InputParseError, ItemNotFound {
-        Agent agent = manager.getFrame(TEST_REPO, Agent.class);
+        Repository agent = manager.getFrame(TEST_REPO, Repository.class);
         final String logMessage = "Importing an invalid EAD";
         InputStream ios = ClassLoader.getSystemResourceAsStream(INVALID_EAD);
 
@@ -40,7 +40,7 @@ public class InvalidEadImporterTest extends AbstractImporterTest {
 
     @Test
     public void testTolerantImport() throws ValidationError, IOException, InputParseError, ItemNotFound {
-        Agent agent = manager.getFrame(TEST_REPO, Agent.class);
+        Repository agent = manager.getFrame(TEST_REPO, Repository.class);
         final String logMessage = "Importing an invalid EAD";
 
         EadImportManager manager = new EadImportManager(graph, agent, validUser);
@@ -57,7 +57,7 @@ public class InvalidEadImporterTest extends AbstractImporterTest {
 
     @Test
     public void testRollback() throws ValidationError, IOException, InputParseError, ItemNotFound {
-        Agent agent = manager.getFrame(TEST_REPO, Agent.class);
+        Repository agent = manager.getFrame(TEST_REPO, Repository.class);
         final String logMessage = "Importing an invalid EAD";
 
         int count = getNodeCount(graph);

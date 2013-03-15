@@ -90,14 +90,14 @@
 
 # Institutions
 - id: r1 # should be renamed niod
-  type: agent
+  type: repository
   data:
     identifier: r1
     name: Repository 1
   relationships:
     describes:
       - id: rd1
-        type: agentDescription
+        type: repositoryDescription
         data:
           identifier: niod-en
           name: NIOD Description
@@ -112,14 +112,14 @@
                 city: Amsterdam
 
 - id: r2 # should be named kcl
-  type: agent
+  type: repository
   data:
     identifier: r2
     name: King's College London
   relationships:
     describes:
       - id: rd2
-        type: agentDescription
+        type: repositoryDescription
         data:
           identifier: kcl-en
           name: KCL Description
@@ -134,14 +134,14 @@
                 city: London
                          
 - id: r3 # should be dans
-  type: agent
+  type: repository
   data:
     identifier: r3
     name: DANS
   relationships:
     describes:
       - id: rd3
-        type: agentDescription
+        type: repositoryDescription
         data:
           identifier: dans-en
           name: DANS Description
@@ -155,14 +155,14 @@
                 city: The Hague
 
 - id: r4 # should be soma
-  type: agent
+  type: repository
   data:
     identifier: r4
     name: CEGES SOMA
   relationships:
     describes:
       - id: rd4
-        type: agentDescription
+        type: repositoryDescription
         data:
           identifier: soma-en
           name: SOMA Description

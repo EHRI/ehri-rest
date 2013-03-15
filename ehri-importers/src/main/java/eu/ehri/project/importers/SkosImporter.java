@@ -77,7 +77,7 @@ public class SkosImporter extends XmlImporter<Map<String, Object>> {
                 Concept.class);
 
         // Set the repository/item relationship
-        //frame.setAgent(repository); // SHOULD set the Vocabulary at some point!
+        //frame.setRepository(repository); // SHOULD set the Vocabulary at some point!
 
         frame.setPermissionScope(permissionScope);
         // Set the parent child relationship

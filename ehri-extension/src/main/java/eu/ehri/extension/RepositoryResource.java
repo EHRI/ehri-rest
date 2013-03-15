@@ -26,12 +26,10 @@ import eu.ehri.project.models.EntityClass;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 
-import com.tinkerpop.blueprints.Direction;
-
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.definitions.Entities;
-import eu.ehri.project.models.Agent;
+import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistance.Bundle;
@@ -39,13 +37,13 @@ import eu.ehri.project.views.impl.LoggingCrudViews;
 import eu.ehri.project.views.impl.Query;
 
 /**
- * Provides a RESTfull interface for the Agent
+ * Provides a RESTfull interface for the Repository
  */
-@Path(Entities.AGENT)
-public class AgentResource extends AbstractAccessibleEntityResource<Agent> {
+@Path(Entities.REPOSITORY)
+public class RepositoryResource extends AbstractAccessibleEntityResource<Repository> {
 
-    public AgentResource(@Context GraphDatabaseService database) {
-        super(database, Agent.class);
+    public RepositoryResource(@Context GraphDatabaseService database) {
+        super(database, Repository.class);
     }
 
     @GET
@@ -79,12 +77,12 @@ public class AgentResource extends AbstractAccessibleEntityResource<Agent> {
             @QueryParam(FILTER_PARAM) List<String> filters)
             throws ItemNotFound, BadRequester, AccessDenied, PermissionDenied {
         Accessor user = getRequesterUserProfile();
-        Agent agent = views.detail(manager.getFrame(id, cls), user);
+        Repository repository = views.detail(manager.getFrame(id, cls), user);
         Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
                 DocumentaryUnit.class).setLimit(limit).setOffset(offset)
                 .orderBy(order)
                 .filter(filters);
-        return streamingList(query.list(agent.getCollections(), user));
+        return streamingList(query.list(repository.getCollections(), user));
     }
 
     @GET
@@ -98,12 +96,12 @@ public class AgentResource extends AbstractAccessibleEntityResource<Agent> {
             @QueryParam(FILTER_PARAM) List<String> filters)
             throws ItemNotFound, BadRequester, AccessDenied, PermissionDenied {
         Accessor user = getRequesterUserProfile();
-        Agent agent = views.detail(manager.getFrame(id, cls), user);
+        Repository repository = views.detail(manager.getFrame(id, cls), user);
         Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
                 DocumentaryUnit.class).setLimit(limit).setOffset(offset)
                 .orderBy(order)
                 .filter(filters);
-        return streamingPage(query.page(agent.getCollections(), user));
+        return streamingPage(query.page(repository.getCollections(), user));
     }
 
     @GET
@@ -179,8 +177,8 @@ public class AgentResource extends AbstractAccessibleEntityResource<Agent> {
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
             Accessor user = getRequesterUserProfile();
-            Agent agent = views.detail(manager.getFrame(id, cls), user);
-            DocumentaryUnit doc = createDocumentaryUnit(json, agent);
+            Repository repository = views.detail(manager.getFrame(id, cls), user);
+            DocumentaryUnit doc = createDocumentaryUnit(json, repository);
             new AclManager(graph).setAccessors(doc,
                     getAccessors(accessors, user));
             tx.success();
@@ -207,18 +205,18 @@ public class AgentResource extends AbstractAccessibleEntityResource<Agent> {
                 .entity((jsonStr).getBytes()).build();
     }
 
-    private DocumentaryUnit createDocumentaryUnit(String json, Agent agent)
+    private DocumentaryUnit createDocumentaryUnit(String json, Repository repository)
             throws DeserializationError, PermissionDenied, ValidationError,
             IntegrityError, BadRequester {
         Bundle entityBundle = Bundle.fromString(json);
 
         DocumentaryUnit doc = new LoggingCrudViews<DocumentaryUnit>(graph,
-                DocumentaryUnit.class, agent).create(entityBundle,
+                DocumentaryUnit.class, repository).create(entityBundle,
                 getRequesterUserProfile(), getLogMessage(
                     getDefaultCreateMessage(EntityClass.DOCUMENTARY_UNIT)));
-        // Add it to this agent's collections
-        doc.setAgent(agent);
-        doc.setPermissionScope(agent);
+        // Add it to this repository's collections
+        doc.setRepository(repository);
+        doc.setPermissionScope(repository);
         return doc;
     }
 }

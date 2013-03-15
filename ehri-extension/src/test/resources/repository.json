@@ -1,8 +1,8 @@
 {
 	"id" : null,
-	"type":"agent",
+	"type":"repository",
 	"data": {
-		"identifier":"some-agent",
+		"identifier":"some-repository",
 		"name":"King's College London",
 		"publicationStatus":"Draft"
 	},
@@ -10,7 +10,7 @@
 		"describes":[
 			{
 				"id":null,
-				"type":"agentDescription",
+				"type":"repositoryDescription",
 				"data":{
 					"buildings":null,
 					"generalContext":null,

@@ -267,7 +267,7 @@ public class DocumentaryUnitResource extends
                     EntityClass.DOCUMENTARY_UNIT
         )));
         // NB: We no longer add this item to the
-        // parent's Agent directly.
+        // parent's Repository directly.
         parent.addChild(doc);
         doc.setPermissionScope(parent);
         return doc;

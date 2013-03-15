@@ -57,7 +57,7 @@ import eu.ehri.project.persistance.BundleDAO;
  * So this importer will also do the 'management' and we will see later how to refactor it. 
  *
  * Note: most code was copied from the EadImportManager and its base classes
- * Also note that: We don't have an Agent for the CVOCs, but a Vocabulary instead!
+ * Also note that: We don't have an Repository for the CVOCs, but a Vocabulary instead!
  *  
  * @author paulboon
  *

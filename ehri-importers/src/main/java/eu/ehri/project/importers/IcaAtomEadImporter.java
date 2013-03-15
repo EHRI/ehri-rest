@@ -3,7 +3,7 @@ package eu.ehri.project.importers;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.models.Agent;
+import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.AccessibleEntity;
@@ -89,7 +89,7 @@ public class IcaAtomEadImporter extends XmlImporter<Map<String, Object>> {
         // Set the repository/item relationship
         if (depth == TOP_LEVEL_DEPTH) {
             // Then we need to add a relationship to the repository
-            frame.setAgent(framedGraph.frame(permissionScope.asVertex(), Agent.class));
+            frame.setRepository(framedGraph.frame(permissionScope.asVertex(), Repository.class));
         }
         frame.setPermissionScope(permissionScope);
         

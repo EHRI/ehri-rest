@@ -21,7 +21,7 @@ public class SystemEventRestClientTest extends BaseRestClientTest {
 
     static final String UPDATED_NAME = "UpdatedNameTEST";
 
-    private String jsonAgentTestString = "{\"type\": \"agent\", \"data\":{\"identifier\": \"jmp\"}}";
+    private String jsonAgentTestString = "{\"type\": \"repository\", \"data\":{\"identifier\": \"jmp\"}}";
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
@@ -37,7 +37,7 @@ public class SystemEventRestClientTest extends BaseRestClientTest {
                 Entities.SYSTEM_EVENT, getAdminUserProfileId());
 
         WebResource resource = client.resource(getExtensionEntryPointUri()
-                + "/agent");
+                + "/" + Entities.REPOSITORY);
         ClientResponse response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
@@ -51,7 +51,7 @@ public class SystemEventRestClientTest extends BaseRestClientTest {
         List<Map<String, Object>> actionsAfter = getEntityList(
                 Entities.SYSTEM_EVENT, getAdminUserProfileId());
 
-        // Having created a new Agent, we should have at least one Event.
+        // Having created a new Repository, we should have at least one Event.
         assertEquals(actionsBefore.size() + 1, actionsAfter.size());
     }
     
@@ -60,7 +60,7 @@ public class SystemEventRestClientTest extends BaseRestClientTest {
 
         // Create an item
         WebResource resource = client.resource(getExtensionEntryPointUri()
-                + "/agent");
+                + "/" + Entities.REPOSITORY);
         ClientResponse response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
