@@ -4,11 +4,13 @@
  */
 package eu.ehri.project.importers;
 
+import eu.ehri.project.importers.properties.XmlImportProperties;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
@@ -35,11 +37,11 @@ import org.xml.sax.helpers.DefaultHandler;
  */
 public abstract class SaxXmlHandler extends DefaultHandler {
 
-    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(SaxXmlHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(SaxXmlHandler.class);
     public static final String UNKNOWN = "UNKNOWN_";
     Stack<Map<String, Object>> currentGraphPath;
     Map<String, Map<String, Object>> languageMap;
-    PropertiesConfig p;
+    XmlImportProperties p;
     Stack<String> currentPath;
     AbstractImporter<Map<String, Object>> importer;
     String languagePrefix;
@@ -47,7 +49,7 @@ public abstract class SaxXmlHandler extends DefaultHandler {
     boolean inSubnode = false;
     private Stack<String> currentText ;
 
-    public SaxXmlHandler(AbstractImporter<Map<String, Object>> importer, PropertiesConfig properties) {
+    public SaxXmlHandler(AbstractImporter<Map<String, Object>> importer, XmlImportProperties properties) {
         super();
         this.importer = importer;
         currentGraphPath = new Stack<Map<String, Object>>();
@@ -182,6 +184,13 @@ public abstract class SaxXmlHandler extends DefaultHandler {
         } else {
             c.put(property, valuetrimmed);
         }
+    }
+    protected void overwritePropertyInCurrentGraph(String property, Object value){
+        overwritePropertyInCurrentGraph(currentGraphPath.peek(), property, value);
+    }
+    private void overwritePropertyInCurrentGraph(Map<String, Object> c,String property, Object value){
+        logger.debug("overwriteProp: " + property + " " + value);
+        c.put(property, value);
     }
 
     private boolean isEmpty(String s) {

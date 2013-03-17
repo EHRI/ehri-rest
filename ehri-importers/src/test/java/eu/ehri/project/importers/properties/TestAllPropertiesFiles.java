@@ -1,0 +1,68 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package eu.ehri.project.importers.properties;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
+import org.junit.Test;
+import static org.junit.Assert.*;
+import org.junit.Before;
+import org.slf4j.LoggerFactory;
+
+/**
+ *
+ * @author linda
+ */
+public class TestAllPropertiesFiles {
+private static final org.slf4j.Logger logger = LoggerFactory.getLogger(TestAllPropertiesFiles.class);
+    PropertiesChecker p;
+
+    public TestAllPropertiesFiles() {
+    }
+
+    @Before
+    public void init() {
+        NodeProperties pc = new NodeProperties();
+        try {
+            InputStream fis;
+            BufferedReader br;
+
+            fis = ClassLoader.getSystemClassLoader().getResourceAsStream("allowedNodeProperties.csv");
+            br = new BufferedReader(new InputStreamReader(fis, Charset.forName("UTF-8")));
+            String firstline = br.readLine();
+            pc.setTitles(firstline);
+
+            String line;
+            while ((line = br.readLine()) != null) {
+                pc.addRow(line);
+            }
+        } catch (IOException ex) {
+            logger.error(ex.getMessage());
+            fail();
+        }
+        p = new PropertiesChecker(pc);
+    }
+
+    @Test
+    public void testEacXmlProperties() {
+        assertTrue(p.check(new XmlImportProperties("eac.properties"), "historicalAgentDescription"));
+    }
+    @Test
+    public void testEagXmlProperties() {
+        assertTrue(p.check(new XmlImportProperties("eag.properties"), "repositoryDescription"));
+    }
+    @Test
+    public void testEadXmlProperties() {
+        assertTrue(p.check(new XmlImportProperties("icaatom.properties"), "documentsDescription"));
+    }
+    @Test
+    public void testSkosXmlProperties() {
+        assertTrue(p.check(new XmlImportProperties("skos.properties"), "conceptDescription"));
+    }
+    
+}

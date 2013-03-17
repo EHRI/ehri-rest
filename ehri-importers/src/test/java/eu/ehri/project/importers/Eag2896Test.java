@@ -69,7 +69,7 @@ public class Eag2896Test extends AbstractImporterTest {
                     getVertexByIdentifier(graph, AGENT_DESC_ID),
                     RepositoryDescription.class);
             assertEquals(Entities.REPOSITORY_DESCRIPTION, c1.asVertex().getProperty("__ISA__"));
-            Object notes = c1.asVertex().getProperty("notes");
+            Object notes = c1.asVertex().getProperty("generalContext");
             if (notes instanceof String[]) {
                 assertEquals(3, ((String[]) notes).length);
             } else {

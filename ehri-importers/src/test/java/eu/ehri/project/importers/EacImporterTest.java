@@ -67,9 +67,9 @@ private static final Logger logger = LoggerFactory.getLogger(EacImporterTest.cla
             for(String al : (String[])c1.asVertex().getProperty("otherFormsOfName")){
                 l.add(al);
             }
-            assertTrue(l.contains((String)c1.asVertex().getProperty(Description.NAME)));
+            assertTrue(c1.asVertex().getProperty(Description.NAME) instanceof String);
 
-            assertEquals(3, ((String[])c1.asVertex().getProperty("otherFormsOfName")).length);
+            assertEquals(2, ((String[])c1.asVertex().getProperty("otherFormsOfName")).length);
             // Ensure that c1 is a description of the unit
             for (Description d : unit.getDescriptions()) {
             

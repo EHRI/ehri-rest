@@ -4,6 +4,7 @@
  */
 package eu.ehri.project.importers;
 
+import eu.ehri.project.importers.properties.XmlImportProperties;
 import com.tinkerpop.frames.VertexFrame;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.MaintenanceEvent;
@@ -26,7 +27,7 @@ public class EagHandler extends SaxXmlHandler {
     private static final Logger logger = LoggerFactory.getLogger(EagHandler.class);
 
     public EagHandler(AbstractImporter<Map<String, Object>> importer) {
-        super(importer, new PropertiesConfig("eag.properties"));
+        super(importer, new XmlImportProperties("eag.properties"));
         possibleSubnodes = new HashMap<String, Class<? extends VertexFrame>>();
         possibleSubnodes.put("maintenanceEvent", MaintenanceEvent.class);
     }
@@ -58,6 +59,7 @@ public class EagHandler extends SaxXmlHandler {
                 logger.debug("depth close " + depth + " " + qName);
                 //TODO: add any mandatory fields not yet there:
                 if (!currentGraphPath.peek().containsKey("objectIdentifier")) {
+                    logger.warn("no objectIdentifier found");
                     putPropertyInCurrentGraph("objectIdentifier", "id");
                 }
                 if (!currentGraphPath.peek().containsKey("typeOfEntity")) {

@@ -4,6 +4,7 @@
  */
 package eu.ehri.project.importers;
 
+import eu.ehri.project.importers.properties.XmlImportProperties;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +32,7 @@ public class SkosHandler extends SaxXmlHandler {
 
     @SuppressWarnings("unchecked")
     public SkosHandler(AbstractImporter<Map<String, Object>> importer) {
-        super(importer, new PropertiesConfig("skos.properties"));
+        super(importer, new XmlImportProperties("skos.properties"));
         prefixStack = new Stack<String>();
         possibleSubnodes = new HashMap<String, Class<? extends VertexFrame>>();
         possibleSubnodes.put("concept", Concept.class);

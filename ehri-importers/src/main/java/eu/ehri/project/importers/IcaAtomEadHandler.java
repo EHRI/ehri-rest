@@ -1,5 +1,6 @@
 
 package eu.ehri.project.importers;
+import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.DocumentaryUnit;
 import java.util.ArrayList;
@@ -28,7 +29,7 @@ public class IcaAtomEadHandler extends SaxXmlHandler {
     
     @SuppressWarnings("unchecked")
     public IcaAtomEadHandler(AbstractImporter<Map<String, Object>> importer) {
-        super(importer, new PropertiesConfig("icaatom.properties"));
+        super(importer, new XmlImportProperties("icaatom.properties"));
         this.importer = importer;
         currentGraphPath = new Stack<Map<String, Object>>();
         currentGraphPath.push(new HashMap<String, Object>());
