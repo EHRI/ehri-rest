@@ -106,17 +106,17 @@ public abstract class EaImporter extends XmlImporter<Map<String, Object>> {
                 for (Map<String, Object> event : (List<Map<String, Object>>) data.get(key)) {
                     Map<String, Object> e2 = new HashMap<String, Object>();
                     for (String eventkey : event.keySet()) {
-                        if (eventkey.equals("maintenanceEventType")) {
+                        if (eventkey.equals("maintenanceEvent/type")) {
                             e2.put(MaintenanceEvent.EVENTTYPE, event.get(eventkey));
-                        } else if (eventkey.equals("maintenanceEventAgentType")) {
+                        } else if (eventkey.equals("maintenanceEvent/agentType")) {
                             e2.put(MaintenanceEvent.AGENTTYPE, event.get(eventkey));
                         } else {
                             e2.put(eventkey, event.get(eventkey));
                         }
                     }
                     if (!e2.containsKey(AccessibleEntity.IDENTIFIER_KEY)) {
-                        if (e2.containsKey("maintenanceEventDate")) {
-                            e2.put(AccessibleEntity.IDENTIFIER_KEY, unitid + ":" + e2.get("maintenanceEventDate"));
+                        if (e2.containsKey("maintenanceEvent/date")) {
+                            e2.put(AccessibleEntity.IDENTIFIER_KEY, unitid + ":" + e2.get("maintenanceEvent/date"));
                         } else {
                             e2.put(AccessibleEntity.IDENTIFIER_KEY, maintenanceIdentifier++);
                         }

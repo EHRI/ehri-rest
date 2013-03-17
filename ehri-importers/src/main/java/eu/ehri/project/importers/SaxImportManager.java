@@ -10,6 +10,7 @@ import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistance.ActionManager;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,9 +20,12 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import javax.xml.XMLConstants;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
+import javax.xml.transform.sax.SAXSource;
+import javax.xml.validation.SchemaFactory;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.tooling.GlobalGraphOperations;
 import org.slf4j.Logger;
@@ -91,11 +95,12 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
      * Tell the importer to simply skip invalid items rather than throwing an
      * exception.
      *
-     * @param tolerant
+     * @param tolerant true means it won't validate the xml file
      */
-    public void setTolerant(Boolean tolerant) {
+    public SaxImportManager setTolerant(Boolean tolerant) {
         logger.info("Setting importer to tolerant: " + tolerant);
         this.tolerant = tolerant;
+        return this;
     }
 
     /**
@@ -222,8 +227,6 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
             InputParseError, InvalidEadDocument, InvalidInputFormatError {
 
         try {
-            SAXParserFactory factory = SAXParserFactory.newInstance();
-            SAXParser saxParser = factory.newSAXParser();
             importer = importerClass.getConstructor(FramedGraph.class, PermissionScope.class,
                     ImportLog.class).newInstance(framedGraph, permissionScope, log);
             logger.info("importer of class " + importer.getClass());
@@ -242,8 +245,29 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
                 }
             });
             //TODO decide which handler to use, HandlerFactory? now part of constructor ...
-            DefaultHandler handler = handlerClass.getConstructor(AbstractImporter.class).newInstance(importer); 
+            SaxXmlHandler handler = handlerClass.getConstructor(AbstractImporter.class).newInstance(importer); 
             logger.info("handler of class " + handler.getClass());
+            
+            SAXParserFactory spf = SAXParserFactory.newInstance();
+            spf.setValidating(!tolerant);
+            logger.debug("path: "+new File("src/main/resources/ead.xsd").getAbsolutePath());
+            logger.debug("isValidating: " + spf.isValidating());
+//            spf.setNamespaceAware(true);
+            try {
+                logger.debug("in try");
+                SchemaFactory sf =
+                        SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+                spf.setSchema(sf.newSchema(new File("src/main/resources/ead.xsd")));
+                spf.setSchema(sf.newSchema(new File("src/main/resources/xlink.xsd")));
+                logger.debug("path: "+new File("src/main/resources/ead.xsd").getAbsolutePath());
+
+
+            } catch (SAXException e) {
+                e.printStackTrace(System.err);
+                System.exit(1);
+            } 
+            logger.debug("after catch");
+            SAXParser saxParser = spf.newSAXParser();
             saxParser.parse(ios, handler); //TODO + log
             
         } catch (InstantiationException ex) {
