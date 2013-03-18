@@ -4,7 +4,6 @@
  */
 package eu.ehri.project.importers;
 
-import eu.ehri.project.importers.test.AbstractImporterTest;
 import eu.ehri.project.persistance.ActionManager;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;

@@ -1,4 +1,4 @@
-package eu.ehri.project.importers.test;
+package eu.ehri.project.importers.cvoc;
 
 
 import java.io.InputStream;
@@ -11,6 +11,7 @@ import com.tinkerpop.blueprints.Vertex;
 
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.cvoc.SkosCoreCvocImporter;
+import eu.ehri.project.importers.AbstractImporterTest;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.cvoc.Concept;

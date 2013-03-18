@@ -3,7 +3,6 @@ package eu.ehri.project.importers;
 import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.definitions.Entities;
-import eu.ehri.project.importers.test.AbstractImporterTest;
 import eu.ehri.project.models.HistoricalAgent;
 import eu.ehri.project.models.HistoricalAgentDescription;
 import eu.ehri.project.models.base.AccessibleEntity;
