@@ -105,4 +105,11 @@ public class IcaAtomEadHandler extends SaxXmlHandler {
         return childItemPattern.matcher(qName).matches() || qName.equals("archdesc");
     }
 
+    @Override
+    protected List<String> getSchemas() {
+        List<String> schemas = new ArrayList<String>();
+        schemas.add("xlink.xsd");
+        schemas.add("ead.xsd");
+        return schemas;
+    }
 }

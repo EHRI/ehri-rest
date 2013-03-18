@@ -48,6 +48,8 @@ public abstract class SaxXmlHandler extends DefaultHandler {
     int depth = 0;
     boolean inSubnode = false;
     private Stack<String> currentText ;
+    
+    protected abstract List<String> getSchemas();
 
     public SaxXmlHandler(AbstractImporter<Map<String, Object>> importer, XmlImportProperties properties) {
         super();

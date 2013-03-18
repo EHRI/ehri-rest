@@ -39,7 +39,7 @@ private static final Logger logger = LoggerFactory.getLogger(EacImporterTest.cla
 
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAC);
         ImportLog log = new SaxImportManager(graph, SystemScope.getInstance(), validUser, EacImporter.class,
-                EacHandler.class).importFile(ios, logMessage);
+                EacHandler.class).setTolerant(Boolean.TRUE).importFile(ios, logMessage);
         printGraph(graph);
             // How many new nodes will have been created? We should have
             // - 1 more HistoricalAgent

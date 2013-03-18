@@ -36,7 +36,7 @@ public class Slugify {
             return "";
         }
 
-        ret = ret.replace("ß", "ss");
+      
         return Normalizer.normalize(ret, Normalizer.Form.NFD)
                 .replaceAll("[^\\p{ASCII}]", "")
                 .replaceAll("[^a-zA-Z0-9- ]", DEFAULT_REPLACE);
@@ -51,3 +51,4 @@ public class Slugify {
         return ret.replaceAll("\\s+", " ");
     }
 }
+

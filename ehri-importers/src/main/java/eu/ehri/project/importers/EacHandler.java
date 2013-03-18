@@ -9,6 +9,7 @@ import com.tinkerpop.frames.VertexFrame;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.MaintenanceEvent;
 import eu.ehri.project.models.base.Description;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -91,6 +92,12 @@ public class EacHandler extends SaxXmlHandler {
             nameValue = "no title";
         }
         return nameValue;
+    }
+    @Override
+    protected List<String> getSchemas() {
+        List<String> schemas = new ArrayList<String>();
+        schemas.add("eac.xsd");
+        return schemas;
     }
 
     

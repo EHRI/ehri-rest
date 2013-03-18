@@ -4,7 +4,7 @@ import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.exceptions.InputParseError;
-import eu.ehri.project.importers.exceptions.InvalidEadDocument;
+import eu.ehri.project.importers.exceptions.InvalidXmlDocument;
 import eu.ehri.project.importers.exceptions.InvalidInputFormatError;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Actioner;
@@ -171,7 +171,7 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
                     } finally {
                         ios.close();
                     }
-                } catch (InvalidEadDocument e) {
+                } catch (InvalidXmlDocument e) {
                     log.setErrored(formatErrorLocation(), e.getMessage());
                     if (!tolerant) {
                         throw e;
@@ -220,11 +220,11 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
      * @throws ValidationError
      * @throws InputParseError
      * @throws InvalidInputFormatError
-     * @throws InvalidEadDocument
+     * @throws InvalidXmlDocument
      */
     private void importFile(InputStream ios, final ActionManager.EventContext eventContext,
             final ImportLog log) throws IOException, ValidationError,
-            InputParseError, InvalidEadDocument, InvalidInputFormatError {
+            InputParseError, InvalidXmlDocument, InvalidInputFormatError {
 
         try {
             importer = importerClass.getConstructor(FramedGraph.class, PermissionScope.class,
@@ -250,16 +250,16 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
             
             SAXParserFactory spf = SAXParserFactory.newInstance();
             spf.setValidating(!tolerant);
-            logger.debug("path: "+new File("src/main/resources/ead.xsd").getAbsolutePath());
             logger.debug("isValidating: " + spf.isValidating());
 //            spf.setNamespaceAware(true);
             try {
                 logger.debug("in try");
                 SchemaFactory sf =
                         SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-                spf.setSchema(sf.newSchema(new File("src/main/resources/ead.xsd")));
-                spf.setSchema(sf.newSchema(new File("src/main/resources/xlink.xsd")));
-                logger.debug("path: "+new File("src/main/resources/ead.xsd").getAbsolutePath());
+                for(String schemafile : handler.getSchemas()){
+                  spf.setSchema(sf.newSchema(new File("src/main/resources/"+schemafile)));
+                logger.debug("path: "+new File("src/main/resources/"+schemafile).getAbsolutePath());
+                }
 
 
             } catch (SAXException e) {

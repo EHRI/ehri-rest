@@ -16,6 +16,8 @@ import com.tinkerpop.frames.VertexFrame;
 
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.cvoc.Concept;
+import java.util.ArrayList;
+import java.util.Set;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -111,5 +113,11 @@ public class SkosHandler extends SaxXmlHandler {
     @Override
     protected boolean needToCreateSubNode(String qName) {
         throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    protected List<String> getSchemas() {
+        List<String> schemas = new ArrayList<String>();
+        return schemas;
     }
 }
