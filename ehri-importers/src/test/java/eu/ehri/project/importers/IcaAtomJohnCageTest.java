@@ -4,7 +4,6 @@
  */
 package eu.ehri.project.importers;
 
-import eu.ehri.project.importers.test.AbstractImporterTest;
 
 import java.io.InputStream;
 

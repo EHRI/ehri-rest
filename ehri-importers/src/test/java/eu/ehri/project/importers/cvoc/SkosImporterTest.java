@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package eu.ehri.project.importers.test;
+package eu.ehri.project.importers.cvoc;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -10,7 +10,6 @@ import static org.junit.Assert.assertTrue;
 import java.io.InputStream;
 import java.util.List;
 
-import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.events.SystemEvent;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -21,6 +20,8 @@ import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.SaxImportManager;
 import eu.ehri.project.importers.SkosHandler;
 import eu.ehri.project.importers.SkosImporter;
+import eu.ehri.project.importers.AbstractImporterTest;
+import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.cvoc.Concept;
@@ -30,23 +31,21 @@ import eu.ehri.project.models.cvoc.ConceptDescription;
  *
  * @author linda
  */
-public class SkosBroaderImporterTest extends AbstractImporterTest {
+public class SkosImporterTest extends AbstractImporterTest {
 
-    protected final String SINGLE_SKOS = "broaderskos.xml";
+    protected final String SINGLE_SKOS = "skos-agriculture.xml";
     // Depends on fixtures
     protected final String TEST_REPO = "r1";
-    protected final String IMPORTED_ITEM_ID_512 = "http://ehri01.dans.knaw.nl/tematres/vocab/?tema=512";
-    protected final String IMPORTED_ITEM_ID_511 = "http://ehri01.dans.knaw.nl/tematres/vocab/?tema=511";
-    protected final String IMPORTED_ITEM_DESC_512_EN = "http://ehri01.dans.knaw.nl/tematres/vocab/?tema=512#description_en";
-    protected final String IMPORTED_ITEM_DESC_511_EN = "http://ehri01.dans.knaw.nl/tematres/vocab/?tema=511#description_en";
-    protected final String IMPORTED_ITEM_DESC_511_DE = "http://ehri01.dans.knaw.nl/tematres/vocab/?tema=511#description_de";
+    protected final String IMPORTED_ITEM_ID = "http://ehri01.dans.knaw.nl/tematres/vocab/?tema=932";
+    protected final String IMPORTED_ITEM_DESC_EN = "http://ehri01.dans.knaw.nl/tematres/vocab/?tema=932#description_en";
+    protected final String IMPORTED_ITEM_DESC_DE = "http://ehri01.dans.knaw.nl/tematres/vocab/?tema=932#description_de";
 
     @Ignore("not ready yet") @Test
     public void testImportItemsT() throws Exception {
         UserProfile user = validUser; //graph.frame(graph.getVertex(validUserId), UserProfile.class);
         Repository agent = manager.getFrame(TEST_REPO, Repository.class); //graph.frame(helper.getTestVertex(TEST_REPO), Repository.class);
 
-        final String logMessage = "Importing two skos";
+        final String logMessage = "Importing a single skos";
 
         int count = getNodeCount(graph);
 
@@ -55,27 +54,25 @@ public class SkosBroaderImporterTest extends AbstractImporterTest {
         printGraph(graph);
 
         // How many new nodes will have been created? We should have
-        // - 2 more Concept
-        // - 3 more ConceptDescription
+        // - 1 more Concept
+        // - 2 more ConceptDescription
         // - 1 more import Action        
-        assertEquals(count + 6, getNodeCount(graph));
+        assertEquals(count + 4, getNodeCount(graph));
 
         Iterable<Vertex> docs = graph.getVertices(AccessibleEntity.IDENTIFIER_KEY,
-                IMPORTED_ITEM_ID_512);
+                IMPORTED_ITEM_ID);
         assertTrue(docs.iterator().hasNext());
 
-        Concept concept512 = graph.frame(getVertexByIdentifier(graph, IMPORTED_ITEM_ID_512), Concept.class);
+        Concept unit = graph.frame(getVertexByIdentifier(graph, IMPORTED_ITEM_ID), Concept.class);
 
         // check the child items
-        ConceptDescription c512EN = graph.frame(getVertexByIdentifier(graph, IMPORTED_ITEM_DESC_512_EN), ConceptDescription.class);
-        ConceptDescription c511EN = graph.frame(getVertexByIdentifier(graph, IMPORTED_ITEM_DESC_511_EN), ConceptDescription.class);
-        ConceptDescription c511DE = graph.frame(getVertexByIdentifier(graph, IMPORTED_ITEM_DESC_511_DE), ConceptDescription.class);
+        ConceptDescription c1 = graph.frame(getVertexByIdentifier(graph, IMPORTED_ITEM_DESC_EN), ConceptDescription.class);
+        ConceptDescription c2 = graph.frame(getVertexByIdentifier(graph, IMPORTED_ITEM_DESC_DE), ConceptDescription.class);
         
         // Ensure that c1 is a description of the unit
-        assertEquals(c512EN.getEntity().asVertex().getId(), concept512.asVertex().getId());
+        assertEquals(c1.getEntity().asVertex().getId(), unit.asVertex().getId());
 //            assertEquals(c1.getEntity(), unit); //TODO why does not this work?
-        assertEquals(c511EN.getEntity().asVertex().getId(), concept512.asVertex().getId());
-        assertEquals(c511DE.getEntity().asVertex().getId(), concept512.asVertex().getId());
+        assertEquals(c2.getEntity().asVertex().getId(), unit.asVertex().getId());
 
 //        for (Description d : unit.getDescriptions()) {
 //                for(String key: d.getEntity().asVertex().getPropertyKeys()){
