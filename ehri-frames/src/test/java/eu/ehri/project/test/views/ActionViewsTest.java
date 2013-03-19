@@ -1,4 +1,4 @@
-package eu.ehri.project.test;
+package eu.ehri.project.test.views;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -10,6 +10,7 @@ import java.util.List;
 import eu.ehri.project.models.DocumentDescription;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.persistance.Serializer;
+import eu.ehri.project.test.AbstractFixtureTest;
 import org.junit.Test;
 
 import eu.ehri.project.exceptions.DeserializationError;

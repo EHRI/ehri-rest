@@ -20,6 +20,7 @@ import javax.ws.rs.core.StreamingOutput;
 
 import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.base.Actioner;
+import eu.ehri.project.views.impl.AclViews;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 
@@ -120,28 +121,10 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
     public Response addMember(@PathParam("id") String id,
             @PathParam("atype") String atype, @PathParam("aid") String aid)
             throws PermissionDenied, ItemNotFound, BadRequester {
-        // FIXME: Add permission checks for this!!!
-        // TODO: Check existing membership?
-        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
-        try {
-            Group group = manager.getFrame(id, EntityClass.GROUP, Group.class);
-            Accessor accessor = manager.getFrame(aid, Accessor.class);
-            group.addMember(accessor);
-
-            // Log the action...
-            new ActionManager(graph)
-                    .logEvent(
-                            graph.frame(accessor.asVertex(), AccessibleEntity.class),
-                            graph.frame(getRequesterUserProfile().asVertex(), Actioner.class), "Added accessor to group")
-                    .addSubjects(group);
-
-            tx.success();
-
-            // TODO: Is there anything worth return here except OK?
-            return Response.status(Status.OK).build();
-        } finally {
-            tx.finish();
-        }
+        Group group = manager.getFrame(id, EntityClass.GROUP, Group.class);
+        Accessor accessor = manager.getFrame(aid, Accessor.class);
+        new AclViews(graph).addAccessorToGroup(group, accessor, getRequesterUserProfile());
+        return Response.status(Status.OK).build();
     }
 
     /**
@@ -160,27 +143,11 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
     public Response removeMember(@PathParam("id") String id,
             @PathParam("aid") String aid) throws PermissionDenied,
             ItemNotFound, BadRequester {
-        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
-        try {
-            // FIXME: Add permission checks for this!!!
-            Group group = manager.getFrame(id, EntityClass.GROUP, Group.class);
-            Accessor accessor = manager.getFrame(aid, Accessor.class);
-            group.removeMember(accessor);
-            // Log the action...
-            new ActionManager(graph)
-                    .logEvent(
-                            graph.frame(accessor.asVertex(), AccessibleEntity.class),
-                            graph.frame(getRequesterUserProfile().asVertex(), Actioner.class),
-                            "Removed accessor from group")
-                    .addSubjects(group);
 
-            tx.success();
-
-            // TODO: Is there anything worth return here except OK?
-            return Response.status(Status.OK).build();
-        } finally {
-            tx.finish();
-        }
+        Group group = manager.getFrame(id, EntityClass.GROUP, Group.class);
+        Accessor accessor = manager.getFrame(aid, Accessor.class);
+        new AclViews(graph).removeAccessorFromGroup(group, accessor, getRequesterUserProfile());
+        return Response.status(Status.OK).build();
     }
 
     /**

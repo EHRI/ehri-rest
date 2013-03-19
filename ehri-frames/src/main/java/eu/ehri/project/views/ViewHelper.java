@@ -93,11 +93,12 @@ public final class ViewHelper {
             Iterable<PermissionGrant> perms = acl.getPermissionGrants(accessor,
                     entity, permission);
             // Scopes do not apply to entity-level perms...
-            if (Iterables.isEmpty(perms))
+            if (Iterables.isEmpty(perms)) {
                 throw new PermissionDenied(accessor.getIdentifier(),
                         entity.getIdentifier(),
                         permission.getIdentifier(),
                         scope.getIdentifier());
+            }
         }
 
     }

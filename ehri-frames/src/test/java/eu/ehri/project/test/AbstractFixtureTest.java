@@ -6,6 +6,7 @@ import java.util.Map;
 
 import eu.ehri.project.models.base.*;
 import eu.ehri.project.persistance.Bundle;
+import eu.ehri.project.test.utils.GraphCleaner;
 import org.junit.Before;
 import org.junit.BeforeClass;
 

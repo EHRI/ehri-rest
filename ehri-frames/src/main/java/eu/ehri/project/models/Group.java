@@ -51,6 +51,7 @@ public interface Group extends VertexFrame, Accessor, AccessibleEntity,
     @Property("name")
     public void setName(String name);
 
+    // FIXME: Use of __ISA__ here breaks encapsulation of indexing details quite horribly
     @GremlinGroovy("_().as('n').in('belongsTo').loop('n'){true}{it.object.__ISA__=='userProfile'}")
     public Iterable<UserProfile> getAllUserProfileMembers();
 
