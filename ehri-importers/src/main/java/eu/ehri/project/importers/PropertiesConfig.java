@@ -10,6 +10,8 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 
@@ -51,7 +53,7 @@ public class PropertiesConfig {
     /**
      * 
      * @param key
-     * @return 
+     * @return returns whether this key is mentioned as an attribute in the property file
      */
     public boolean hasAttributeProperty(String key){
        return containsProperty("@"+key); 
@@ -61,7 +63,7 @@ public class PropertiesConfig {
     }
 }
 abstract class PropertyLoader {
-
+private static final Logger logger = LoggerFactory.getLogger(PropertyLoader.class);
 	/**
 	 * Looks up a resource named 'name' in the classpath. The resource must map
 	 * to a file with .properties extention. The name is assumed to be absolute
@@ -135,11 +137,11 @@ abstract class PropertyLoader {
 					result = new Properties();
 					result.load(in); // Can throw IOException
 				}else{
-					System.out.println(name + " is geen file");
+					logger.error(name + " is geen file");
 				}
 			}
 		} catch (Exception e) {
-			System.out.println(e.getMessage());
+			logger.error(e.getMessage());
 			result = null;
 		} finally {
 			if (in != null)

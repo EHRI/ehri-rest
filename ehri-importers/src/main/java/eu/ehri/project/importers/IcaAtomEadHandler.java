@@ -65,7 +65,7 @@ public class IcaAtomEadHandler extends SaxXmlHandler {
                 //add any mandatory fields not yet there:
                 if (!currentGraph.containsKey("name")) {
                     for(String key: currentGraph.keySet()){
-                        System.out.println(key + ":" + currentGraph.get(key));
+                        logger.debug(key + ":" + currentGraph.get(key));
                     }
                     //finding some name for this unit:
                     if(currentGraph.containsKey("title"))
@@ -79,7 +79,7 @@ public class IcaAtomEadHandler extends SaxXmlHandler {
                     currentGraph.put("languageCode", "en");
                 }
                 DocumentaryUnit current = (DocumentaryUnit)importer.importItem(currentGraph, depth);
-                logger.error("importer used: " + importer.getClass());
+                logger.debug("importer used: " + importer.getClass());
                 if (depth > 0) { // if not on root level
                     children[depth - 1].add(current); // add child to parent offspring
                     //set the parent child relationships by hand, as we don't have the parent Documentary unit yet.

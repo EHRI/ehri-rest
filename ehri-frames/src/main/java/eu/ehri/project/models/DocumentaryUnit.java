@@ -11,7 +11,6 @@ import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.DescribedEntity;
 import eu.ehri.project.models.base.PermissionScope;
-import eu.ehri.project.models.base.TemporalEntity;
 
 @EntityType(EntityClass.DOCUMENTARY_UNIT)
 public interface DocumentaryUnit extends VertexFrame, AccessibleEntity,
@@ -29,18 +28,18 @@ public interface DocumentaryUnit extends VertexFrame, AccessibleEntity,
      */
     // NB: This is only an iterable until we upgrade to frames 2.3.0
     // which supports GremlinGroovy annotations for single items
-    @Fetch(Agent.HELDBY)
+    @Fetch(Repository.HELDBY)
     @GremlinGroovy("_().copySplit(_(), _().as('n').out('" + CHILD_OF +"')"
             + ".loop('n'){true}{!it.object.out('" + CHILD_OF +"').hasNext()}"
-            + ").exhaustMerge().out('" + Agent.HELDBY + "')")
-    public Iterable<Agent> getAgent();
+            + ").exhaustMerge().out('" + Repository.HELDBY + "')")
+    public Iterable<Repository> getAgent();
 
     /**
      * Set the repository that holds this documentary unit.
      * @param institution
      */
-    @Adjacency(label = Agent.HELDBY)
-    public void setAgent(final Agent institution);
+    @Adjacency(label = Repository.HELDBY)
+    public void setRepository(final Repository institution);
 
     /**
      * Get parent documentary unit, if any

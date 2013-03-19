@@ -40,6 +40,7 @@ import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.cvoc.Concept;
+import eu.ehri.project.models.cvoc.ConceptDescription;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.models.idgen.GenericIdGenerator;
 import eu.ehri.project.models.idgen.IdGenerator;
@@ -56,7 +57,7 @@ import eu.ehri.project.persistance.BundleDAO;
  * So this importer will also do the 'management' and we will see later how to refactor it. 
  *
  * Note: most code was copied from the EadImportManager and its base classes
- * Also note that: We don't have an Agent for the CVOCs, but a Vocabulary instead!
+ * Also note that: We don't have an Repository for the CVOCs, but a Vocabulary instead!
  *  
  * @author paulboon
  *
@@ -151,7 +152,7 @@ public class SkosCoreCvocImporter {
             Document doc = builder.parse(ios);
             importDocWithinAction(doc, eventContext, log);
         } catch (ParserConfigurationException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage());
             throw new RuntimeException(e);
         } catch (SAXException e) {
             throw new InputParseError(e);
@@ -249,7 +250,6 @@ public class SkosCoreCvocImporter {
      * Extract data and construct the bundle for a new Concept
      * 
      * @param element
-     * @return
      * @throws ValidationError
      */
     private Bundle constructBundleForConcept(Element element) throws ValidationError {
@@ -261,7 +261,7 @@ public class SkosCoreCvocImporter {
 		  for (String key : descriptions.keySet()) {
 			  logger.debug("description for: " + key);
 			  Map<String, Object> d = (Map<String, Object>)descriptions.get(key);
-			  logger.debug("languageCode = " + d.get("languageCode"));
+			  logger.debug("languageCode = " + d.get(Description.LANGUAGE_CODE));
 
 			  // NOTE maybe test if prefLabel is there?
 
@@ -284,7 +284,6 @@ public class SkosCoreCvocImporter {
      * Get the list of id's of the Concept's broader concepts
      * 
      * @param element
-     * @return
      */
     private List<String> getBroaderConceptIds(Element element) {
     	List<String> ids = new ArrayList<String>();
@@ -303,7 +302,6 @@ public class SkosCoreCvocImporter {
      * Get the list of id's of the Concept's related concepts
      * 
      * @param element
-     * @return
      */
     private List<String> getRelatedConceptIds(Element element) {
     	List<String> ids = new ArrayList<String>();
@@ -454,7 +452,6 @@ public class SkosCoreCvocImporter {
      * 
      * @param from
      * @param to
-     * @return
      */
     private boolean reverseRelationExists(ConceptPlaceholder from, ConceptPlaceholder to) {
     	boolean result = false;
@@ -474,7 +471,6 @@ public class SkosCoreCvocImporter {
      * Check if the element represents a Concept
      * 
      * @param element
-     * @return
      */
     private boolean isConceptElement(Element element) {
     	boolean result = false;
@@ -500,7 +496,6 @@ public class SkosCoreCvocImporter {
      * Extract the Concept information (but not the descriptions)
      * 
      * @param conceptNode
-     * @return
      * @throws ValidationError
      */
     Map<String, Object> extractCvocConcept(Node conceptNode)
@@ -521,7 +516,6 @@ public class SkosCoreCvocImporter {
      * Extract the Descriptions information for a concept
      * 
      * @param conceptElement
-     * @return
      */
     Map<String, Object> extractCvocConceptDescriptions(Element conceptElement) {
         // extract and process the textual items (with a language)
@@ -530,16 +524,16 @@ public class SkosCoreCvocImporter {
         
         // one and only one
         extractAndAddSingleValuedTextToDescriptionData(descriptionData, 
-        		"prefLabel", "skos:prefLabel", conceptElement);
+        		Description.NAME, "skos:prefLabel", conceptElement);
         // multiple alternatives is logical
         extractAndAddMultiValuedTextToDescriptionData(descriptionData, 
-        		"altLabel", "skos:altLabel", conceptElement);
+        		ConceptDescription.ALTLABEL, "skos:altLabel", conceptElement);
         // just allow multiple, its not forbidden by Skos
         extractAndAddMultiValuedTextToDescriptionData(descriptionData, 
-        		"scopeNote", "skos:scopeNote", conceptElement);
+        		ConceptDescription.SCOPENOTE, "skos:scopeNote", conceptElement);
         // just allow multiple, its not forbidden by Skos
         extractAndAddMultiValuedTextToDescriptionData(descriptionData, 
-        		"definition", "skos:definition", conceptElement);
+        		ConceptDescription.DEFINITION, "skos:definition", conceptElement);
         
         // NOTE we could try to also add everything else, using the skos tagname as a key?
         
@@ -613,7 +607,6 @@ public class SkosCoreCvocImporter {
      * 
      * @param descriptionData
      * @param lang
-     * @return
      */
     private Map<String, Object> getOrCreateDescriptionForLanguage(Map<String, Object> descriptionData, String lang) {
     	Map<String, Object> d = null;

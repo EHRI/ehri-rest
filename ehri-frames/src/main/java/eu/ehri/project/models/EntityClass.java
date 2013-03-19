@@ -23,15 +23,15 @@ public enum EntityClass {
 
     // @formatter:off
     DOCUMENTARY_UNIT(Entities.DOCUMENTARY_UNIT, "c", DocumentaryUnit.class, AccessibleEntityIdGenerator.INSTANCE),
-    AGENT(Entities.AGENT, "r", Agent.class, AccessibleEntityIdGenerator.INSTANCE),
-    AUTHORITY(Entities.AUTHORITY, "a", Authority.class, AccessibleEntityIdGenerator.INSTANCE),
+    REPOSITORY(Entities.REPOSITORY, "r", Repository.class, AccessibleEntityIdGenerator.INSTANCE),
+    HISTORICAL_AGENT(Entities.HISTORICAL_AGENT, "a", HistoricalAgent.class, AccessibleEntityIdGenerator.INSTANCE),
     GROUP(Entities.GROUP, "g", Group.class, AccessibleEntityIdGenerator.INSTANCE),
     USER_PROFILE(Entities.USER_PROFILE, "u", UserProfile.class, AccessibleEntityIdGenerator.INSTANCE),
     
     // Generic entities.
     DOCUMENT_DESCRIPTION(Entities.DOCUMENT_DESCRIPTION, "dd", DocumentDescription.class),
-    AGENT_DESCRIPTION(Entities.AGENT_DESCRIPTION, "rd", AgentDescription.class),
-    AUTHORITY_DESCRIPTION(Entities.AUTHORITY_DESCRIPTION, "ad", AuthorityDescription.class),
+    REPOSITORY_DESCRIPTION(Entities.REPOSITORY_DESCRIPTION, "rd", RepositoryDescription.class),
+    HISTORICAL_AGENT_DESCRIPTION(Entities.HISTORICAL_AGENT_DESCRIPTION, "ad", HistoricalAgentDescription.class),
     DATE_PERIOD(Entities.DATE_PERIOD, "dp", DatePeriod.class),
     ANNOTATION(Entities.ANNOTATION, "ann", Annotation.class),
     ADDRESS(Entities.ADDRESS, "adr", Address.class),
@@ -41,7 +41,6 @@ public enum EntityClass {
     PERMISSION(Entities.PERMISSION, "pm", Permission.class),
     PERMISSION_GRANT(Entities.PERMISSION_GRANT, "pmg", PermissionGrant.class),
     CONTENT_TYPE(Entities.CONTENT_TYPE, "ct", ContentType.class),
-    REVISION(Entities.REVISION, "rv", Revision.class),
     CVOC_VOCABULARY(Entities.CVOC_VOCABULARY, "cvv", Vocabulary.class),
     CVOC_CONCEPT(Entities.CVOC_CONCEPT, "cv", Concept.class),
     CVOC_CONCEPT_DESCRIPTION(Entities.CVOC_CONCEPT_DESCRIPTION, "cvd", ConceptDescription.class),

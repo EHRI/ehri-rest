@@ -8,6 +8,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import eu.ehri.project.models.Repository;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -21,7 +22,6 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.UserProfile;
@@ -68,7 +68,7 @@ public class PermissionsTest extends AbstractFixtureTest {
     @Test(expected = PermissionDenied.class)
     public void testCreateAsUserWithBadScopedPerms() throws PermissionDenied,
             ValidationError, DeserializationError, IntegrityError, ItemNotFound {
-        Agent scope = manager.getFrame("r1", Agent.class);
+        Repository scope = manager.getFrame("r1", Repository.class);
         new AclManager(graph, scope).grantPermissions(user,
                 viewHelper.getContentType(EntityClass.DOCUMENTARY_UNIT),
                 PermissionType.CREATE);
@@ -79,7 +79,7 @@ public class PermissionsTest extends AbstractFixtureTest {
     @Test
     public void testCreateAsUserWithGoodScopedPerms() throws PermissionDenied,
             ValidationError, DeserializationError, IntegrityError, ItemNotFound {
-        Agent scope = manager.getFrame("r1", Agent.class);
+        Repository scope = manager.getFrame("r1", Repository.class);
         new AclManager(graph, scope).grantPermissions(user,
                 viewHelper.getContentType(EntityClass.DOCUMENTARY_UNIT),
                 PermissionType.CREATE);
@@ -91,7 +91,7 @@ public class PermissionsTest extends AbstractFixtureTest {
     public void testCreateAsUserWithGoodNestedScopedPerms()
             throws PermissionDenied, ValidationError, DeserializationError,
             IntegrityError, ItemNotFound {
-        Agent scope = manager.getFrame("r1", Agent.class);
+        Repository scope = manager.getFrame("r1", Repository.class);
         new AclManager(graph, scope).grantPermissions(user,
                 viewHelper.getContentType(EntityClass.DOCUMENTARY_UNIT),
                 PermissionType.CREATE);
@@ -113,8 +113,8 @@ public class PermissionsTest extends AbstractFixtureTest {
     public void testCreateAsUserWithDifferentScopedPerms()
             throws PermissionDenied, ValidationError, DeserializationError,
             IntegrityError, ItemNotFound {
-        Agent scope = manager.getFrame("r1", Agent.class);
-        Agent badScope = manager.getFrame("r2", Agent.class);
+        Repository scope = manager.getFrame("r1", Repository.class);
+        Repository badScope = manager.getFrame("r2", Repository.class);
         new AclManager(graph, scope).grantPermissions(user,
                 viewHelper.getContentType(EntityClass.DOCUMENTARY_UNIT),
                 PermissionType.CREATE);
@@ -256,7 +256,7 @@ public class PermissionsTest extends AbstractFixtureTest {
     public void testSetScopedPermissionMatrix() throws PermissionDenied,
             ValidationError, DeserializationError, IntegrityError,
             SerializationError, ItemNotFound {
-        Agent scope = manager.getFrame("r1", Agent.class);
+        Repository scope = manager.getFrame("r1", Repository.class);
 
         // @formatter:off
         Map<ContentTypes,List<PermissionType>> matrix = new HashMap<ContentTypes, List<PermissionType>>() {{

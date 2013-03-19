@@ -31,7 +31,7 @@ fi
 echo ""
 echo "Start annotation creation using" 
 echo " - annotator: $ANNOTATOR_ID"
-echo " - annotates: $TARGET_ID" 
+echo " - hasTarget: $TARGET_ID" 
 echo " - with body: \"$BODY\""
 echo ""
 

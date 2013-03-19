@@ -12,16 +12,18 @@ import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.test.AbstractFixtureTest;
 import org.neo4j.tooling.GlobalGraphOperations;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.List;
 
 /**
  * @author linda
  */
 public class AbstractImporterTest extends AbstractFixtureTest {
+    private static final Logger logger = LoggerFactory.getLogger(AbstractImporterTest.class);
     protected void printGraph(FramedGraph<Neo4jGraph> graph) {
         for (Vertex v : graph.getVertices()) {
-            System.out.println("-------------------------");
+            logger.debug("-------------------------");
             for (String key : v.getPropertyKeys()) {
                 String value = "";
                 if (v.getProperty(key) instanceof String[]) {
@@ -32,11 +34,11 @@ public class AbstractImporterTest extends AbstractFixtureTest {
                 } else {
                     value = v.getProperty(key).toString();
                 }
-                System.out.println(key + ": " + value);
+                logger.debug(key + ": " + value);
             }
 //            
             for (Edge e : v.getEdges(Direction.OUT)) {
-                System.out.println(e.getLabel());
+                logger.debug(e.getLabel());
             }
         }
     }

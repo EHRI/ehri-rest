@@ -90,14 +90,14 @@
 
 # Institutions
 - id: r1 # should be renamed niod
-  type: agent
+  type: repository
   data:
     identifier: r1
     name: Repository 1
   relationships:
     describes:
       - id: rd1
-        type: agentDescription
+        type: repositoryDescription
         data:
           identifier: niod-en
           name: NIOD Description
@@ -112,14 +112,14 @@
                 city: Amsterdam
 
 - id: r2 # should be named kcl
-  type: agent
+  type: repository
   data:
     identifier: r2
     name: King's College London
   relationships:
     describes:
       - id: rd2
-        type: agentDescription
+        type: repositoryDescription
         data:
           identifier: kcl-en
           name: KCL Description
@@ -134,14 +134,14 @@
                 city: London
                          
 - id: r3 # should be dans
-  type: agent
+  type: repository
   data:
     identifier: r3
     name: DANS
   relationships:
     describes:
       - id: rd3
-        type: agentDescription
+        type: repositoryDescription
         data:
           identifier: dans-en
           name: DANS Description
@@ -155,14 +155,14 @@
                 city: The Hague
 
 - id: r4 # should be soma
-  type: agent
+  type: repository
   data:
     identifier: r4
     name: CEGES SOMA
   relationships:
     describes:
       - id: rd4
-        type: agentDescription
+        type: repositoryDescription
         data:
           identifier: soma-en
           name: SOMA Description
@@ -191,7 +191,7 @@
         type: documentDescription
         data:
           identifier: c1-desc
-          title: Documentary Unit 1
+          name: Documentary Unit 1
           languageCode: en
           scopeAndContent: Some description text for c1
         relationships:
@@ -210,7 +210,7 @@
         type: documentDescription
         data:
           identifier: c1-desc2
-          title: Documentary Unit 1
+          name: Documentary Unit 1
           languageCode: en
           scopeAndContent: Some alternate description text for c1
     heldBy: r1
@@ -231,7 +231,7 @@
         type: documentDescription
         data:
           identifier: c2-desc
-          title: Documentary Unit 2
+          name: Documentary Unit 2
           languageCode: en
           scopeAndContent: Some description text for c2
         relationships:
@@ -259,7 +259,7 @@
         type: documentDescription
         data:
           identifier: c3-desc
-          title: Documentary Unit 3
+          name: Documentary Unit 3
           languageCode: en
           scopeAndContent: Some description text for c3
         relationships:
@@ -286,7 +286,7 @@
         type: documentDescription
         data:
           identifier: c4-desc
-          title: Documentary Unit 4
+          name: Documentary Unit 4
           languageCode: en
           scopeAndContent: Some description text for c4
         relationships:
@@ -301,29 +301,29 @@
     
 --- # Authorities
 - id: a1
-  type: authority
+  type: historicalAgent
   data:
     identifier: a1
-    typeOfEntity: person
   relationships:
     describes:
       - id: ad1
-        type: authorityDescription
+        type: historicalAgentDescription
         data:
-          title: An Authority 1
+          typeOfEntity: person
+          name: An Authority 1
           languageCode: en
 
 - id: a2
-  type: authority
+  type: historicalAgent
   data:
     identifier: a2
-    typeOfEntity: person
   relationships:
     describes:
       - id: ad2
-        type: authorityDescription
+        type: historicalAgentDescription
         data:
-          title: An Authority 2
+          typeOfEntity: person
+          name: An Authority 2
           languageCode: en
 
 
@@ -334,7 +334,7 @@
     identifier: ann1
     body: Test Annotation
   relationships:
-    annotates: c1
+    hasAnnotationTarget: c1
     
 - id: ann2
   type: annotation
@@ -342,7 +342,7 @@
     identifier: ann2
     body: Test Annotation of Annotation
   relationships:
-    annotates: ann1
+    hasAnnotationTarget: ann1
     
 - id: ann3
   type: annotation
@@ -350,8 +350,8 @@
     identifier: ann3
     body: Created by
   relationships:
-    annotates: c1
-    hasSource: mike
+    hasAnnotationTarget: c1
+    hasAnnotationBody: mike
 
 --- # Permission grants
 

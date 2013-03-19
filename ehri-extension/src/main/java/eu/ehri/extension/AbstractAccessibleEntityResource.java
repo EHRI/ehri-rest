@@ -14,6 +14,7 @@ import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriBuilder;
 
 //import org.apache.log4j.Logger;
+import eu.ehri.project.exceptions.*;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 
@@ -23,18 +24,11 @@ import com.tinkerpop.blueprints.Vertex;
 
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.acl.AclManager;
-import eu.ehri.project.exceptions.DeserializationError;
-import eu.ehri.project.exceptions.IntegrityError;
-import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.exceptions.SerializationError;
-import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.utils.ClassUtils;
 import eu.ehri.project.persistance.Bundle;
-import eu.ehri.project.views.Crud;
 import eu.ehri.project.views.impl.LoggingCrudViews;
 import eu.ehri.project.views.impl.Query;
 
@@ -44,7 +38,7 @@ import eu.ehri.project.views.impl.Query;
  * entities can extend this class.
  * 
  * @param <E>
- *            The specific AccesibleEntity derived class
+ *            The specific AccessibleEntity derived class
  */
 public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
         extends AbstractRestResource {
@@ -54,7 +48,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
     // protected final static Logger logger = Logger
     // .getLogger(AbstractAccessibleEntityResource.class);
 
-    protected final Crud<E> views;
+    protected final LoggingCrudViews<E> views;
     protected final Query<E> querier;
     protected final Class<E> cls;
 
@@ -159,7 +153,8 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
         try {
             Accessor user = getRequesterUserProfile();
             Bundle entityBundle = Bundle.fromString(json);
-            E entity = views.create(entityBundle, user);
+            E entity = views.create(entityBundle, user,
+                    getLogMessage(getDefaultCreateMessage(getEntityType())));
             // TODO: Move elsewhere
             new AclManager(graph).setAccessors(entity,
                     getAccessors(accessorIds, user));
@@ -187,10 +182,10 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * @return The response of the request, which contains the json
      *         representation
      * @throws ItemNotFound
-     * @throws PermissionDenied
+     * @throws AccessDenied
      * @throws BadRequester
      */
-    public Response retrieve(String id) throws PermissionDenied, ItemNotFound,
+    public Response retrieve(String id) throws AccessDenied, ItemNotFound,
             BadRequester {
         try {
             E entity = views.detail(manager.getFrame(id, getEntityType(), cls),
@@ -213,11 +208,11 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * @return The response of the request, which contains the json
      *         representation
      * @throws ItemNotFound
-     * @throws PermissionDenied
+     * @throws AccessDenied
      * @throws BadRequester
      */
     public Response retrieve(String key, String value) throws ItemNotFound,
-            PermissionDenied, BadRequester {
+            AccessDenied, BadRequester {
         try {
             E entity = querier.get(key, value, getRequesterUserProfile());
             String jsonStr = serializer.vertexFrameToJson(entity);
@@ -247,7 +242,8 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
 
         try {
             Bundle entityBundle = Bundle.fromString(json);
-            E update = views.update(entityBundle, getRequesterUserProfile());
+            E update = views.update(entityBundle, getRequesterUserProfile(),
+                    getLogMessage(getDefaultUpdateMessage(getEntityType(), entityBundle.getId())));
             String jsonStr = serializer.vertexFrameToJson(update);
 
             return Response.status(Status.OK).entity((jsonStr).getBytes())
@@ -265,6 +261,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * @param json
      *            The json
      * @return The response of the update request
+     * @throws AccessDenied
      * @throws PermissionDenied
      * @throws IntegrityError
      * @throws ValidationError
@@ -272,7 +269,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * @throws ItemNotFound
      * @throws BadRequester
      */
-    public Response update(String id, String json) throws PermissionDenied,
+    public Response update(String id, String json) throws AccessDenied, PermissionDenied,
             IntegrityError, ValidationError, DeserializationError,
             ItemNotFound, BadRequester {
         // FIXME: This is nasty because it searches for an item with the
@@ -293,17 +290,19 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * @param id
      *            The vertex id
      * @return The response of the delete request
+     * @throws AccessDenied
      * @throws PermissionDenied
      * @throws ItemNotFound
      * @throws ValidationError
      * @throws BadRequester
      */
-    protected Response delete(String id) throws PermissionDenied, ItemNotFound,
+    protected Response delete(String id) throws AccessDenied, PermissionDenied, ItemNotFound,
             ValidationError, BadRequester {
         try {
             E entity = views.detail(manager.getFrame(id, getEntityType(), cls),
                     getRequesterUserProfile());
-            views.delete(entity, getRequesterUserProfile());
+            views.delete(entity, getRequesterUserProfile(),
+                    getLogMessage(getDefaultDeleteMessage(getEntityType(), id)));
             return Response.status(Status.OK).build();
         } catch (SerializationError e) {
             throw new WebApplicationException(e);
@@ -338,5 +337,38 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
             accessors.add(current);
         }
         return accessors;
+    }
+
+    /**
+     * Get a default message for an item being created.
+     *
+     * @return
+     */
+    protected String getDefaultCreateMessage(EntityClass entityClass) {
+        return String.format("%s (%s)",
+                LoggingCrudViews.DEFAULT_CREATE_LOG,
+                entityClass.getName());
+    }
+
+    /**
+     * Get a default message for an item being updated.
+     *
+     * @return
+     */
+    protected String getDefaultUpdateMessage(EntityClass entityClass, String id) {
+        return String.format("%s (%s): '%s'",
+                LoggingCrudViews.DEFAULT_UPDATE_LOG,
+                entityClass.getName(), id);
+    }
+
+    /**
+     * Get a default message for an item being deleted.
+     *
+     * @return
+     */
+    protected String getDefaultDeleteMessage(EntityClass entityClass, String id) {
+        return String.format("%s (%s): '%s'",
+                LoggingCrudViews.DEFAULT_DELETE_LOG,
+                entityClass.getName(), id);
     }
 }

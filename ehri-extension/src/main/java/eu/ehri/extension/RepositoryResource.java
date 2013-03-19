@@ -21,21 +21,15 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriBuilder;
 
+import eu.ehri.project.exceptions.*;
+import eu.ehri.project.models.EntityClass;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
-
-import com.tinkerpop.blueprints.Direction;
 
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.definitions.Entities;
-import eu.ehri.project.exceptions.DeserializationError;
-import eu.ehri.project.exceptions.IntegrityError;
-import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.exceptions.SerializationError;
-import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.models.Agent;
+import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistance.Bundle;
@@ -43,20 +37,20 @@ import eu.ehri.project.views.impl.LoggingCrudViews;
 import eu.ehri.project.views.impl.Query;
 
 /**
- * Provides a RESTfull interface for the Agent
+ * Provides a RESTfull interface for the Repository
  */
-@Path(Entities.AGENT)
-public class AgentResource extends AbstractAccessibleEntityResource<Agent> {
+@Path(Entities.REPOSITORY)
+public class RepositoryResource extends AbstractAccessibleEntityResource<Repository> {
 
-    public AgentResource(@Context GraphDatabaseService database) {
-        super(database, Agent.class);
+    public RepositoryResource(@Context GraphDatabaseService database) {
+        super(database, Repository.class);
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:.+}")
     public Response getAgent(@PathParam("id") String id) throws ItemNotFound,
-            PermissionDenied, BadRequester {
+            AccessDenied, BadRequester {
         return retrieve(id);
     }
 
@@ -81,14 +75,14 @@ public class AgentResource extends AbstractAccessibleEntityResource<Agent> {
             @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
             @QueryParam(SORT_PARAM) List<String> order,
             @QueryParam(FILTER_PARAM) List<String> filters)
-            throws ItemNotFound, BadRequester, PermissionDenied {
+            throws ItemNotFound, BadRequester, AccessDenied, PermissionDenied {
         Accessor user = getRequesterUserProfile();
-        Agent agent = views.detail(manager.getFrame(id, cls), user);
+        Repository repository = views.detail(manager.getFrame(id, cls), user);
         Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
                 DocumentaryUnit.class).setLimit(limit).setOffset(offset)
                 .orderBy(order)
                 .filter(filters);
-        return streamingList(query.list(agent.getCollections(), user));
+        return streamingList(query.list(repository.getCollections(), user));
     }
 
     @GET
@@ -100,14 +94,14 @@ public class AgentResource extends AbstractAccessibleEntityResource<Agent> {
             @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
             @QueryParam(SORT_PARAM) List<String> order,
             @QueryParam(FILTER_PARAM) List<String> filters)
-            throws ItemNotFound, BadRequester, PermissionDenied {
+            throws ItemNotFound, BadRequester, AccessDenied, PermissionDenied {
         Accessor user = getRequesterUserProfile();
-        Agent agent = views.detail(manager.getFrame(id, cls), user);
+        Repository repository = views.detail(manager.getFrame(id, cls), user);
         Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
                 DocumentaryUnit.class).setLimit(limit).setOffset(offset)
                 .orderBy(order)
                 .filter(filters);
-        return streamingPage(query.page(agent.getCollections(), user));
+        return streamingPage(query.page(repository.getCollections(), user));
     }
 
     @GET
@@ -146,7 +140,7 @@ public class AgentResource extends AbstractAccessibleEntityResource<Agent> {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:.+}")
     public Response updateAgent(@PathParam("id") String id, String json)
-            throws PermissionDenied, IntegrityError, ValidationError,
+            throws AccessDenied, PermissionDenied, IntegrityError, ValidationError,
             DeserializationError, ItemNotFound, BadRequester {
         return update(id, json);
     }
@@ -154,7 +148,7 @@ public class AgentResource extends AbstractAccessibleEntityResource<Agent> {
     @DELETE
     @Path("/{id:.+}")
     public Response deleteAgent(@PathParam("id") String id)
-            throws PermissionDenied, ItemNotFound, ValidationError,
+            throws AccessDenied, PermissionDenied, ItemNotFound, ValidationError,
             BadRequester {
         return delete(id);
     }
@@ -178,13 +172,13 @@ public class AgentResource extends AbstractAccessibleEntityResource<Agent> {
     @Path("/{id:.+}/" + Entities.DOCUMENTARY_UNIT)
     public Response createAgentDocumentaryUnit(@PathParam("id") String id,
             String json, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
-            throws PermissionDenied, ValidationError, IntegrityError,
+            throws AccessDenied, PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, ItemNotFound, BadRequester {
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
             Accessor user = getRequesterUserProfile();
-            Agent agent = views.detail(manager.getFrame(id, cls), user);
-            DocumentaryUnit doc = createDocumentaryUnit(json, agent);
+            Repository repository = views.detail(manager.getFrame(id, cls), user);
+            DocumentaryUnit doc = createDocumentaryUnit(json, repository);
             new AclManager(graph).setAccessors(doc,
                     getAccessors(accessors, user));
             tx.success();
@@ -211,17 +205,18 @@ public class AgentResource extends AbstractAccessibleEntityResource<Agent> {
                 .entity((jsonStr).getBytes()).build();
     }
 
-    private DocumentaryUnit createDocumentaryUnit(String json, Agent agent)
+    private DocumentaryUnit createDocumentaryUnit(String json, Repository repository)
             throws DeserializationError, PermissionDenied, ValidationError,
             IntegrityError, BadRequester {
         Bundle entityBundle = Bundle.fromString(json);
 
         DocumentaryUnit doc = new LoggingCrudViews<DocumentaryUnit>(graph,
-                DocumentaryUnit.class, agent).create(entityBundle,
-                getRequesterUserProfile());
-        // Add it to this agent's collections
-        doc.setAgent(agent);
-        doc.setPermissionScope(agent);
+                DocumentaryUnit.class, repository).create(entityBundle,
+                getRequesterUserProfile(), getLogMessage(
+                    getDefaultCreateMessage(EntityClass.DOCUMENTARY_UNIT)));
+        // Add it to this repository's collections
+        doc.setRepository(repository);
+        doc.setPermissionScope(repository);
         return doc;
     }
 }

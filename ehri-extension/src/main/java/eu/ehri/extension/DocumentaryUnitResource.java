@@ -21,18 +21,15 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriBuilder;
 
+import eu.ehri.project.exceptions.*;
+import eu.ehri.project.models.DocumentDescription;
+import eu.ehri.project.models.EntityClass;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.definitions.Entities;
-import eu.ehri.project.exceptions.DeserializationError;
-import eu.ehri.project.exceptions.IntegrityError;
-import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.exceptions.SerializationError;
-import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistance.Bundle;
@@ -54,7 +51,7 @@ public class DocumentaryUnitResource extends
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:.+}")
     public Response getDocumentaryUnit(@PathParam("id") String id)
-            throws ItemNotFound, PermissionDenied, BadRequester {
+            throws ItemNotFound, AccessDenied, BadRequester {
         return retrieve(id);
     }
 
@@ -132,7 +129,7 @@ public class DocumentaryUnitResource extends
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:.+}")
     public Response updateDocumentaryUnit(@PathParam("id") String id,
-            String json) throws PermissionDenied, IntegrityError,
+            String json) throws AccessDenied, PermissionDenied, IntegrityError,
             ValidationError, DeserializationError, ItemNotFound, BadRequester {
         return update(id, json);
     }
@@ -140,7 +137,7 @@ public class DocumentaryUnitResource extends
     @DELETE
     @Path("/{id:.+}")
     public Response deleteDocumentaryUnit(@PathParam("id") String id)
-            throws PermissionDenied, ItemNotFound, ValidationError,
+            throws AccessDenied, PermissionDenied, ItemNotFound, ValidationError,
             BadRequester, SerializationError {
         return delete(id);
     }
@@ -149,9 +146,9 @@ public class DocumentaryUnitResource extends
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:.+}/" + Entities.DOCUMENTARY_UNIT)
-    public Response createAgentDocumentaryUnit(@PathParam("id") String id,
+    public Response createChildDocumentaryUnit(@PathParam("id") String id,
             String json, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
-            throws PermissionDenied, ValidationError, IntegrityError,
+            throws AccessDenied, PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, ItemNotFound, BadRequester {
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
@@ -169,6 +166,75 @@ public class DocumentaryUnitResource extends
         } finally {
             tx.finish();
         }
+    }
+
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id:.+}/" + Entities.DOCUMENT_DESCRIPTION)
+    public Response createDescription(@PathParam("id") String id, String json)
+            throws AccessDenied, PermissionDenied, ValidationError, IntegrityError,
+            DeserializationError, ItemNotFound, BadRequester {
+        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
+        try {
+            Accessor user = getRequesterUserProfile();
+            DocumentaryUnit doc = views.detail(
+                    manager.getFrame(id, EntityClass.DOCUMENTARY_UNIT, DocumentaryUnit.class), user);
+            DocumentDescription desc = views.createDependent(Bundle.fromString(json),
+                    doc, user, DocumentDescription.class,
+                    getLogMessage(getDefaultUpdateMessage(EntityClass.DOCUMENT_DESCRIPTION, id)));
+            doc.addDescription(desc);
+            tx.success();
+            return buildResponseFromDocumentaryUnit(doc);
+        } catch (SerializationError e) {
+            tx.failure();
+            throw new WebApplicationException(e);
+        } finally {
+            tx.finish();
+        }
+    }
+
+    @PUT
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id:.+}/" + Entities.DOCUMENT_DESCRIPTION)
+    public Response updateDescription(@PathParam("id") String id, String json)
+            throws AccessDenied, PermissionDenied, ValidationError, IntegrityError,
+            DeserializationError, ItemNotFound, BadRequester, SerializationError {
+        Accessor user = getRequesterUserProfile();
+        DocumentaryUnit doc = views.detail(
+                manager.getFrame(id, EntityClass.DOCUMENTARY_UNIT, DocumentaryUnit.class), user);
+        views.updateDependent(Bundle.fromString(json), doc, user, DocumentDescription.class,
+                getLogMessage(getDefaultUpdateMessage(EntityClass.DOCUMENT_DESCRIPTION, id)));
+        return retrieve(id);
+    }
+
+    @PUT
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id:.+}/" + Entities.DOCUMENT_DESCRIPTION + "/{did:.+}")
+    public Response updateDescriptionWithId(@PathParam("id") String id,
+                @PathParam("did") String did, String json)
+            throws AccessDenied, PermissionDenied, ValidationError, IntegrityError,
+            DeserializationError, ItemNotFound, BadRequester, SerializationError {
+        // FIXME: Inefficient conversion to/from JSON just to insert the ID. We
+        // should rethink this somehow.
+        return updateDescription(id, Bundle.fromString(json).withId(did).toJson());
+    }
+
+    @DELETE
+    @Path("/{id:.+}/" + Entities.DOCUMENT_DESCRIPTION + "/{did:.+}")
+    public Response deleteDocumentaryUnitDescription(@PathParam("id") String id, @PathParam("did") String did)
+            throws AccessDenied, PermissionDenied, ItemNotFound, ValidationError,
+            BadRequester, SerializationError {
+        Accessor user = getRequesterUserProfile();
+        DocumentaryUnit doc = views.detail(manager.getFrame(id, EntityClass.DOCUMENTARY_UNIT,
+                DocumentaryUnit.class), user);
+        DocumentDescription desc = manager.getFrame(did, EntityClass.DOCUMENT_DESCRIPTION,
+                DocumentDescription.class);
+        views.deleteDependent(desc, doc, user, DocumentDescription.class,
+                getLogMessage(getDefaultDeleteMessage(EntityClass.DOCUMENT_DESCRIPTION, id)));
+        return retrieve(id);
     }
 
     // Helpers
@@ -197,9 +263,11 @@ public class DocumentaryUnitResource extends
 
         DocumentaryUnit doc = new LoggingCrudViews<DocumentaryUnit>(graph,
                 DocumentaryUnit.class, parent).create(entityBundle,
-                getRequesterUserProfile());
+                getRequesterUserProfile(), getLogMessage(getDefaultCreateMessage(
+                    EntityClass.DOCUMENTARY_UNIT
+        )));
         // NB: We no longer add this item to the
-        // parent's Agent directly.
+        // parent's Repository directly.
         parent.addChild(doc);
         doc.setPermissionScope(parent);
         return doc;

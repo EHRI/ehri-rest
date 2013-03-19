@@ -2,11 +2,11 @@ package eu.ehri.project.importers;
 
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
+import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.models.Authority;
-import eu.ehri.project.models.Agent;
+import eu.ehri.project.models.HistoricalAgent;
 import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.AddressableEntity;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.base.TemporalEntity;
@@ -14,91 +14,75 @@ import eu.ehri.project.models.idgen.AccessibleEntityIdGenerator;
 import eu.ehri.project.models.idgen.IdGenerator;
 import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.persistance.BundleDAO;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * Import EAD for a given repository into the database. Due to the laxness of
- * the EAD standard this is a fairly complex procedure. An EAD a single entity
- * at the highest level of description or multiple top-level entities, with or
- * without a hierarchical structure describing their child items. This means
- * that we need to recursively descend through the archdesc and c01-12 levels.
+ * Import EAC for a given repository into the database.
  *
- * TODO: Extensive cleanups, optimisation, and rationalisation.
- *
- * @author michaelb
+ * @author lindar
  *
  */
-public class EacImporter extends XmlImporter<Map<String, Object>> {
+public class EacImporter extends EaImporter {
 
-    // An integer that represents how far down the
-    // EAD heirarchy tree the current document is.
-    public final String DEPTH_ATTR = "depthOfDescription";
-    // A (possibly arbitrary) string denoting what the
-    // describing body saw fit to name a documentary unit's
-    // level of description.
-    public final String LEVEL_ATTR = "levelOfDescription";
-    // Various date patterns
-   
+    private static final Logger logger = LoggerFactory.getLogger(EacImporter.class);
+    
     /**
-     * Construct an EadImporter object.
+     * Construct an EacImporter object.
      *
      * @param framedGraph
-     * @param repository
-     * @param topLevelEad
+     * @param permissionScope
+     * @param log
      */
-    public EacImporter(FramedGraph<Neo4jGraph> framedGraph, Agent repository,
-            ImportLog log) {
-        super(framedGraph, repository, log);
+    public EacImporter(FramedGraph<Neo4jGraph> framedGraph, PermissionScope permissionScope, ImportLog log) {
+        super(framedGraph, permissionScope, log);
     }
+
     @Override
-    public Authority importItem(Map<String, Object> itemData, int depth) throws ValidationError {
- return importItem(itemData);
-}
-  /**
-     * 
-     * 
+    public HistoricalAgent importItem(Map<String, Object> itemData, int depth) throws ValidationError {
+        return importItem(itemData);
+    }
+
+    /**
+     *
+     *
      * @param itemData
      * @throws ValidationError
      */
-    public Authority importItem(Map<String, Object> itemData) throws ValidationError {
-        
-        BundleDAO persister = new BundleDAO(framedGraph, repository);
-        Bundle unit = new Bundle(EntityClass.AUTHORITY, extractAuthority(itemData));
+    public HistoricalAgent importItem(Map<String, Object> itemData) throws ValidationError {
 
-        Bundle descBundle = new Bundle(EntityClass.AUTHORITY_DESCRIPTION, extractAuthorityDescription(itemData));
+        BundleDAO persister = new BundleDAO(framedGraph, permissionScope);
+        Bundle unit = new Bundle(EntityClass.HISTORICAL_AGENT, extractUnit(itemData));
+
+        Bundle descBundle = new Bundle(EntityClass.HISTORICAL_AGENT_DESCRIPTION, extractUnitDescription(itemData));
 
 
         // Add dates and descriptions to the bundle since they're @Dependent
         // relations.
         for (Map<String, Object> dpb : extractDates(itemData)) {
-            descBundle=descBundle.withRelation(TemporalEntity.HAS_DATE, new Bundle(EntityClass.DATE_PERIOD, dpb));
+            descBundle = descBundle.withRelation(TemporalEntity.HAS_DATE, new Bundle(EntityClass.DATE_PERIOD, dpb));
         }
-        unit=unit.withRelation(Description.DESCRIBES, descBundle);
-//        EntityBundle<AuthorityDescription> adesc = 
-//                new BundleFactory<AuthorityDescription>().buildBundle(extractAuthorityDescription(itemData), AuthorityDescription.class);
-//        unit.addRelation(Description.DESCRIBES,adesc);
-        
-//        for (Map<String, Object> dpb : extractMaintenanceEvent(itemData)) {
-//            //dates in maintenanceEvents are no DatePeriods, they are not something to search on
-//            EntityBundle<MaintenanceEvent> event = new BundleFactory<MaintenanceEvent>().buildBundle(dpb,
-//                            MaintenanceEvent.class);
-//            adesc.addRelation(Description.MUTATES, event);
-//        }
-                
-        PermissionScope scope = repository;
+
+        //add the address to the description bundle
+        Map<String, Object> address = extractAddress(itemData);
+        if (!address.isEmpty()) {
+            descBundle = descBundle.withRelation(AddressableEntity.HAS_ADDRESS, new Bundle(EntityClass.ADDRESS, extractAddress(itemData)));
+        }
+
+        for (Map<String, Object> dpb : extractMaintenanceEvent(itemData, itemData.get("objectIdentifier").toString())) {
+            logger.debug("maintenance event found");
+            //dates in maintenanceEvents are no DatePeriods, they are not something to search on
+            descBundle = descBundle.withRelation(Description.MUTATES, new Bundle(EntityClass.MAINTENANCE_EVENT, dpb));
+        }
+
+        unit = unit.withRelation(Description.DESCRIBES, descBundle);
+
         IdGenerator generator = AccessibleEntityIdGenerator.INSTANCE;
-        String id = generator.generateId(EntityClass.AUTHORITY, scope, unit);
+        String id = generator.generateId(EntityClass.HISTORICAL_AGENT, SystemScope.getInstance(), unit);
         boolean exists = manager.exists(id);
-        Authority frame = persister.createOrUpdate(unit.withId(id), Authority.class);
-  
-        // Set the repository/item relationship
-        frame.setPermissionScope(scope);
-        
-        
+        HistoricalAgent frame = persister.createOrUpdate(unit.withId(id), HistoricalAgent.class);
+
         if (exists) {
             for (ImportCallback cb : updateCallbacks) {
                 cb.itemImported(frame);
@@ -111,33 +95,6 @@ public class EacImporter extends XmlImporter<Map<String, Object>> {
         return frame;
 
     }
-    protected Map<String, Object> extractAuthority(Map<String, Object> itemData) throws ValidationError {
-        Map<String, Object> unit = new HashMap<String, Object>();
-        unit.put(AccessibleEntity.IDENTIFIER_KEY, itemData.get("objectIdentifier"));
-//        unit.put(Authority.NAME, itemData.get(Authority.NAME));
-        unit.put("typeOfEntity", itemData.get("typeOfEntity"));
-        return unit;
-    }
-    protected <T> List<T> toList(Iterable<T> iter) {
-        Iterator<T> it = iter.iterator();
-        List<T> lst = new ArrayList<T>();
-        while (it.hasNext()) {
-            lst.add(it.next());
-        }
-        return lst;
-    }
 
-    protected Map<String, Object> extractAuthorityDescription(Map<String, Object> itemData) throws ValidationError {
-        Map<String, Object> unit = new HashMap<String, Object>();
-        for (String key : itemData.keySet()) {
-            if(key.equals("descriptionIdentifier"))
-                unit.put(AccessibleEntity.IDENTIFIER_KEY, itemData.get(key));
-            if (!(key.equals(AccessibleEntity.IDENTIFIER_KEY)  || key.startsWith("maintenanceEvent") )) { //|| key.equals(Authority.NAME)
-                unit.put(key, itemData.get(key));
-            }
-        }
-        return unit;
-    }
     
-   
 }

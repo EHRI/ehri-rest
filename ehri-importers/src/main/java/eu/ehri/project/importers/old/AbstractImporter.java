@@ -9,12 +9,11 @@ import com.tinkerpop.frames.FramedGraph;
 
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
-import eu.ehri.project.exceptions.IdGenerationError;
 import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportCallback;
 import eu.ehri.project.importers.ImportLog;
-import eu.ehri.project.models.Agent;
+import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.Description;
@@ -35,7 +34,7 @@ import eu.ehri.project.persistance.BundleDAO;
  */
 public abstract class AbstractImporter<T> {
 
-    protected final Agent repository;
+    protected final Repository repository;
     protected final FramedGraph<Neo4jGraph> framedGraph;
     protected final GraphManager manager;
     protected final ImportLog log;
@@ -52,7 +51,7 @@ public abstract class AbstractImporter<T> {
      * @param documentContext
      */
     public AbstractImporter(FramedGraph<Neo4jGraph> framedGraph,
-            Agent repository, ImportLog log, T documentContext) {
+            Repository repository, ImportLog log, T documentContext) {
         this.repository = repository;
         this.framedGraph = framedGraph;
         this.log = log;
@@ -144,7 +143,7 @@ public abstract class AbstractImporter<T> {
                 DocumentaryUnit.class);
 
         // Set the repository/item relationship
-        frame.setAgent(repository);
+        frame.setRepository(repository);
         frame.setPermissionScope(scope);
         // Set the parent child relationship
         if (parent != null)

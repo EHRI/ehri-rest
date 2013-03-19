@@ -6,9 +6,9 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.exceptions.InvalidEadDocument;
 import eu.ehri.project.importers.exceptions.InvalidInputFormatError;
-import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Actioner;
+import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistance.ActionManager;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -44,9 +44,9 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
             .getLogger(SaxImportManager.class);
     private Boolean tolerant = false;
 //    private XmlCVocImporter importer; // CVoc specific!
-     private AbstractImporter<Map<String, Object>> importer;
+    private AbstractImporter<Map<String, Object>> importer;
     protected final FramedGraph<Neo4jGraph> framedGraph;
-    protected final Agent agent;
+    protected final PermissionScope permissionScope;
     protected final Actioner actioner;
     
     // Ugly stateful variables for tracking import state
@@ -54,7 +54,8 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
     private String currentFile = null;
     private Integer currentPosition = null;
 
-    private  Class<? extends AbstractImporter> importerClass; // CVoc specific!
+    private  Class<? extends AbstractImporter> importerClass;
+
     Class<? extends SaxXmlHandler> handlerClass;
     /**
      * Dummy resolver that does nothing. This is used to ensure that, in
@@ -74,17 +75,16 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
      * Constructor.
      *
      * @param framedGraph
-     * @param agent
+     * @param permissionScope
      * @param actioner
      */
     public SaxImportManager(FramedGraph<Neo4jGraph> framedGraph,
-            final Agent agent, final Actioner actioner, Class<? extends AbstractImporter> importerClass, Class<? extends SaxXmlHandler> handlerClass) {
+            final PermissionScope permissionScope, final Actioner actioner, Class<? extends AbstractImporter> importerClass, Class<? extends SaxXmlHandler> handlerClass) {
         this.framedGraph = framedGraph;
-        this.agent = agent;
+        this.permissionScope = permissionScope;
         this.actioner = actioner;
         this.importerClass = importerClass;
         this.handlerClass = handlerClass;
-        
     }
 
     /**
@@ -103,7 +103,7 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
      *
      * @param ios
      * @param logMessage
-     * @return
+     * @return returns an ImportLog for the given InputStream
      *
      * @throws IOException
      * @throws ValidationError
@@ -205,7 +205,7 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
     }
 
     /**
-     * Import EAD from the given InputStream, as part of the given action.
+     * Import XML from the given InputStream, as part of the given action.
      *
      * @param ios
      * @param eventContext
@@ -224,27 +224,26 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
         try {
             SAXParserFactory factory = SAXParserFactory.newInstance();
             SAXParser saxParser = factory.newSAXParser();
-            importer = importerClass.getConstructor(FramedGraph.class, Agent.class, ImportLog.class).newInstance(framedGraph, agent, log);
-            logger.error("importer of class " + importer.getClass());
+            importer = importerClass.getConstructor(FramedGraph.class, PermissionScope.class,
+                    ImportLog.class).newInstance(framedGraph, permissionScope, log);
+            logger.info("importer of class " + importer.getClass());
             importer.addCreationCallback(new ImportCallback() {
                 public void itemImported(AccessibleEntity item) {
-                    logger.error("ImportCallback: itemImported creation " + item.getIdentifier());
+                    logger.info("ImportCallback: itemImported creation " + item.getIdentifier());
                     eventContext.addSubjects(item);
                     log.addCreated();
                 }
             });
             importer.addUpdateCallback(new ImportCallback() {
                 public void itemImported(AccessibleEntity item) {
-                    logger.error("ImportCallback: itemImported updated");
+                    logger.info("ImportCallback: itemImported updated");
                     eventContext.addSubjects(item);
                     log.addUpdated();
                 }
             });
-            // Note: CVoc specific !
             //TODO decide which handler to use, HandlerFactory? now part of constructor ...
-//            DefaultHandler handler = handlerClass.getConstructor(AbstractCVocImporter.class).newInstance(importer); 
             DefaultHandler handler = handlerClass.getConstructor(AbstractImporter.class).newInstance(importer); 
-            logger.error("handler of class " + handler.getClass());
+            logger.info("handler of class " + handler.getClass());
             saxParser.parse(ios, handler); //TODO + log
             
         } catch (InstantiationException ex) {
@@ -270,7 +269,7 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
     }
 
     private String formatErrorLocation() {
-        return String.format("File: %s, EAD document: %d", currentFile,
+        return String.format("File: %s, XML document: %d", currentFile,
                 currentPosition);
     }
     

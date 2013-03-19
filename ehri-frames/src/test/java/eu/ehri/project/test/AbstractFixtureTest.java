@@ -4,17 +4,16 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
+import eu.ehri.project.models.base.*;
+import eu.ehri.project.persistance.Bundle;
 import org.junit.Before;
 import org.junit.BeforeClass;
 
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.models.Address;
 import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.UserProfile;
-import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.base.Accessor;
 
 abstract public class AbstractFixtureTest extends ModelTestBase {
 
@@ -54,25 +53,25 @@ abstract public class AbstractFixtureTest extends ModelTestBase {
         // Data structure representing a not-yet-created collection.
         // Using double-brace initialization to ease the pain.
         return new HashMap<String, Object>() {{
-            put("type", Entities.DOCUMENTARY_UNIT);
-            put("data", new HashMap<String, Object>() {{
+            put(Bundle.TYPE_KEY, Entities.DOCUMENTARY_UNIT);
+            put(Bundle.DATA_KEY, new HashMap<String, Object>() {{
                 put(Accessor.NAME, TEST_COLLECTION_NAME);
                 put(AccessibleEntity.IDENTIFIER_KEY, "someid-01");
             }});
-            put("relationships", new HashMap<String, Object>() {{
-                put("describes", new LinkedList<HashMap<String, Object>>() {{
+            put(Bundle.REL_KEY, new HashMap<String, Object>() {{
+                put(Description.DESCRIBES, new LinkedList<HashMap<String, Object>>() {{
                     add(new HashMap<String, Object>() {{
-                        put("type", Entities.DOCUMENT_DESCRIPTION);
-                        put("data", new HashMap<String, Object>() {{
+                        put(Bundle.TYPE_KEY, Entities.DOCUMENT_DESCRIPTION);
+                        put(Bundle.DATA_KEY, new HashMap<String, Object>() {{
                             put(AccessibleEntity.IDENTIFIER_KEY, "someid-01");
-                            put("title", "A brand new item description");
-                            put("languageCode", "en");
+                            put(Description.NAME, "A brand new item description");
+                            put(Description.LANGUAGE_CODE, "en");
                         }});
-                        put("relationships", new HashMap<String,Object>() {{
-                            put("hasDate", new LinkedList<HashMap<String, Object>>() {{
+                        put(Bundle.REL_KEY, new HashMap<String,Object>() {{
+                            put(TemporalEntity.HAS_DATE, new LinkedList<HashMap<String, Object>>() {{
                                 add(new HashMap<String, Object>() {{
-                                    put("type", Entities.DATE_PERIOD);
-                                    put("data", new HashMap<String, Object>() {{
+                                    put(Bundle.TYPE_KEY, Entities.DATE_PERIOD);
+                                    put(Bundle.DATA_KEY, new HashMap<String, Object>() {{
                                         put(DatePeriod.START_DATE, TEST_START_DATE);
                                         put(DatePeriod.END_DATE, TEST_START_DATE);
                                     }});
@@ -90,26 +89,26 @@ abstract public class AbstractFixtureTest extends ModelTestBase {
         // Data structure representing a not-yet-created collection.
         // Using double-brace initialization to ease the pain.
         return new HashMap<String, Object>() {{
-            put("type", Entities.AGENT);
-            put("data", new HashMap<String, Object>() {{
+            put(Bundle.TYPE_KEY, Entities.REPOSITORY);
+            put(Bundle.DATA_KEY, new HashMap<String, Object>() {{
                 put(Accessor.NAME, TEST_AGENT_NAME);
                 put(AccessibleEntity.IDENTIFIER_KEY, "test-repo-1");
             }});
-            put("relationships", new HashMap<String, Object>() {{
-                put("describes", new LinkedList<HashMap<String, Object>>() {{
+            put(Bundle.REL_KEY, new HashMap<String, Object>() {{
+                put(Description.DESCRIBES, new LinkedList<HashMap<String, Object>>() {{
                     add(new HashMap<String, Object>() {{
-                        put("type", Entities.AGENT_DESCRIPTION);
-                        put("data", new HashMap<String, Object>() {{
+                        put(Bundle.TYPE_KEY, Entities.REPOSITORY_DESCRIPTION);
+                        put(Bundle.DATA_KEY, new HashMap<String, Object>() {{
                             put(AccessibleEntity.IDENTIFIER_KEY, "test-repo-1-desc");
-                            put("title", "A Test Repository");
-                            put("languageCode", "en");
+                            put(Description.NAME, "A Test Repository");
+                            put(Description.LANGUAGE_CODE, "en");
                         }});
-                        put("relationships", new HashMap<String, Object>() {{
-                            put("hasAddress", new LinkedList<HashMap<String, Object>>() {{
+                        put(Bundle.REL_KEY, new HashMap<String, Object>() {{
+                            put(AddressableEntity.HAS_ADDRESS, new LinkedList<HashMap<String, Object>>() {{
                                 add(new HashMap<String, Object>() {{
-                                    put("type", Entities.ADDRESS);
-                                    put("data", new HashMap<String, Object>() {{
-                                        put(Address.ADDRESS_NAME, "primary");
+                                    put(Bundle.TYPE_KEY, Entities.ADDRESS);
+                                    put(Bundle.DATA_KEY, new HashMap<String, Object>() {{
+                                        put("name", "primary");
                                     }});
                                 }});
                             }});
@@ -124,8 +123,8 @@ abstract public class AbstractFixtureTest extends ModelTestBase {
     protected Map<String, Object> getTestUserBundle() {
         // Data structure representing a not-yet-created user.
         return new HashMap<String, Object>() {{
-            put("type", Entities.USER_PROFILE);
-            put("data", new HashMap<String, Object>() {{
+            put(Bundle.TYPE_KEY, Entities.USER_PROFILE);
+            put(Bundle.DATA_KEY, new HashMap<String, Object>() {{
                 put(Accessor.NAME, TEST_USER_NAME);
                 put(AccessibleEntity.IDENTIFIER_KEY, "joe-blogs");
             }});
@@ -136,9 +135,8 @@ abstract public class AbstractFixtureTest extends ModelTestBase {
     protected Map<String, Object> getTestGroupBundle() {
         // Data structure representing a not-yet-created group.
         return new HashMap<String, Object>() {{
-            put("id", null);
-            put("type", Entities.GROUP);
-            put("data", new HashMap<String, Object>() {{
+            put(Bundle.TYPE_KEY, Entities.GROUP);
+            put(Bundle.DATA_KEY, new HashMap<String, Object>() {{
                 put(Accessor.NAME, TEST_GROUP_NAME);
                 put(AccessibleEntity.IDENTIFIER_KEY, "people");
             }});

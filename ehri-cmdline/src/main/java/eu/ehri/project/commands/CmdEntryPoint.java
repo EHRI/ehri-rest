@@ -6,11 +6,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import com.google.common.collect.Maps;
 import org.apache.commons.cli.CommandLine;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
-import org.neo4j.kernel.EmbeddedReadOnlyGraphDatabase;
 
 public class CmdEntryPoint extends BaseCommand {
 
@@ -27,9 +25,12 @@ public class CmdEntryPoint extends BaseCommand {
         Map<String, Class<? extends Command>> mmap = new HashMap<String, Class<? extends Command>>();
         mmap.put(SkosVocabularyImport.NAME, SkosVocabularyImport.class);
         mmap.put(EadImport.NAME, EadImport.class);
+        mmap.put(EacImport.NAME, EacImport.class);
+        mmap.put(EagImport.NAME, EagImport.class);
         mmap.put(UserListEntities.NAME, UserListEntities.class);
         mmap.put(ListEntities.NAME, ListEntities.class);
         mmap.put(GetEntity.NAME, GetEntity.class);
+        mmap.put(GraphViz.NAME, GraphViz.class);
         mmap.put(LoadFixtures.NAME, LoadFixtures.class);
         mmap.put(Initialize.NAME, Initialize.class);
         mmap.put(UserAdd.NAME, UserAdd.class);

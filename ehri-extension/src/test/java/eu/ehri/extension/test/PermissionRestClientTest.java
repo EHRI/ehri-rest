@@ -119,8 +119,7 @@ public class PermissionRestClientTest extends BaseRestClientTest {
 
     @Test
     public void testPermissionSetPermissionDenied()
-            throws
-            UniformInterfaceException, IOException {
+            throws UniformInterfaceException, IOException {
 
         // Test a user setting his own permissions over REST - this should
         // obviously fail...
@@ -413,13 +412,13 @@ public class PermissionRestClientTest extends BaseRestClientTest {
 
     private URI getCreationUri() {
         return UriBuilder.fromPath(getExtensionEntryPointUri())
-                .segment(Entities.AGENT).segment(TEST_HOLDER_IDENTIFIER)
+                .segment(Entities.REPOSITORY).segment(TEST_HOLDER_IDENTIFIER)
                 .segment(Entities.DOCUMENTARY_UNIT).build();
     }
 
     private URI getCreationUriFor(String id) {
         URI creationUri = UriBuilder.fromPath(getExtensionEntryPointUri())
-                .segment(Entities.AGENT).segment(id)
+                .segment(Entities.REPOSITORY).segment(id)
                 .segment(Entities.DOCUMENTARY_UNIT).build();
         return creationUri;
     }

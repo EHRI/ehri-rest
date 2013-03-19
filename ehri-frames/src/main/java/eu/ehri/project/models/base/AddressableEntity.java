@@ -1,17 +1,20 @@
-package eu.ehri.project.models;
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package eu.ehri.project.models.base;
 
 import com.tinkerpop.frames.Adjacency;
-import com.tinkerpop.frames.Property;
-
+import eu.ehri.project.models.Address;
 import eu.ehri.project.models.annotations.Dependent;
-import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
-import eu.ehri.project.models.base.Description;
 
-@EntityType(EntityClass.AGENT_DESCRIPTION)
-public interface AgentDescription extends Description {
-
-    public static final String HAS_ADDRESS = "hasAddress";
+/**
+ *
+ * @author linda
+ */
+public interface AddressableEntity {
+     public static final String HAS_ADDRESS = "hasAddress";
 
     @Fetch(HAS_ADDRESS)
     @Dependent

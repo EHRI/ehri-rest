@@ -6,22 +6,24 @@ package eu.ehri.project.importers;
 
 import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.importers.test.AbstractImporterTest;
-import eu.ehri.project.models.Agent;
+import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.events.SystemEvent;
-import eu.ehri.project.test.AbstractFixtureTest;
+
 import java.io.InputStream;
 import java.util.List;
 import static org.junit.Assert.*;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author linda
  */
 public class IcaAtomEadImporterTest extends AbstractImporterTest{
-    
+    private static final Logger logger = LoggerFactory.getLogger(IcaAtomEadImporterTest.class);
        protected final String SINGLE_EAD = "hierarchical-ead.xml";
     // Depends on fixtures
     protected final String TEST_REPO = "r1";
@@ -35,7 +37,7 @@ public class IcaAtomEadImporterTest extends AbstractImporterTest{
     @Test
     public void testImportItemsT() throws Exception {
 
-         Agent agent = manager.getFrame(TEST_REPO, Agent.class); 
+         Repository agent = manager.getFrame(TEST_REPO, Repository.class);
         final String logMessage = "Importing a single EAD";
 
         int count = getNodeCount(graph);
@@ -92,7 +94,7 @@ public class IcaAtomEadImporterTest extends AbstractImporterTest{
 
         List<AccessibleEntity> subjects = toList(log.getAction().getSubjects());
         for(AccessibleEntity subject  : subjects)
-            System.out.println("identifier: " + subject.getIdentifier());
+            logger.info("identifier: " + subject.getIdentifier());
         
         assertEquals(5, subjects.size());
         assertEquals(log.getSuccessful(), subjects.size());

@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 import com.google.common.collect.Iterables;
+import eu.ehri.project.models.*;
 import eu.ehri.project.persistance.utils.BundleUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -19,15 +20,9 @@ import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.models.Agent;
-import eu.ehri.project.models.AgentDescription;
-import eu.ehri.project.models.DatePeriod;
-import eu.ehri.project.models.DocumentaryUnit;
-import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.DescribedEntity;
 import eu.ehri.project.models.base.Description;
-import eu.ehri.project.models.base.TemporalEntity;
 import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.persistance.BundleDAO;
 import eu.ehri.project.persistance.Serializer;
@@ -53,15 +48,15 @@ public class BundleTest extends ModelTestBase {
         Bundle bundle = Bundle.fromString(json);
         assertEquals(ID, bundle.getId());
 
-        // Test Agent serialization
-        Agent r1 = manager.getFrame("r1", Agent.class);
+        // Test Repository serialization
+        Repository r1 = manager.getFrame("r1", Repository.class);
         json = serializer.vertexFrameToJson(r1);
         bundle = Bundle.fromString(json);
         List<Bundle> descs = bundle.getRelations(DescribedEntity.DESCRIBES);
         assertEquals(1, descs.size());
         Bundle descBundle = descs.get(0);
         List<Bundle> addresses = descBundle
-                .getRelations(AgentDescription.HAS_ADDRESS);
+                .getRelations(RepositoryDescription.HAS_ADDRESS);
         assertEquals(1, addresses.size());
     }
 
@@ -81,18 +76,18 @@ public class BundleTest extends ModelTestBase {
 
     public void testSavingAgent() throws SerializationError, ValidationError,
             IntegrityError, ItemNotFound {
-        Agent r1 = manager.getFrame("r1", Agent.class);
+        Repository r1 = manager.getFrame("r1", Repository.class);
         assertEquals(1, toList(r1.getDescriptions()).size());
 
         Bundle bundle = serializer.vertexFrameToBundle(r1);
         BundleDAO persister = new BundleDAO(graph);
-        Agent r1redux = persister.update(bundle, Agent.class);
+        Repository r1redux = persister.update(bundle, Repository.class);
 
         assertEquals(toList(r1.getDescriptions()),
                 toList(r1redux.getDescriptions()));
 
-        AgentDescription ad1 = graph.frame(r1redux.getDescriptions().iterator()
-                .next().asVertex(), AgentDescription.class);
+        RepositoryDescription ad1 = graph.frame(r1redux.getDescriptions().iterator()
+                .next().asVertex(), RepositoryDescription.class);
         assertEquals(1, toList(ad1.getAddresses()).size());
     }
 
@@ -137,8 +132,9 @@ public class BundleTest extends ModelTestBase {
                 bundle, "describes[0]/hasDate[1]");
         BundleDAO persister = new BundleDAO(graph);
         persister.update(newBundle, DocumentaryUnit.class);
-        assertEquals(1, toList(c1.getDocumentDescriptions()
-                .iterator().next().getDatePeriods()).size());
+        assertEquals(2, Iterables.size(c1.getDocumentDescriptions()));
+        assertEquals(1, Iterables.size(manager.getFrame("cd1", DocumentDescription.class)
+                .getDatePeriods()));
 
         // The second date period should be gone from the index
         try {

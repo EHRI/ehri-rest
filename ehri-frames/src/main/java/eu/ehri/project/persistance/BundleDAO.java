@@ -21,7 +21,6 @@ import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.exceptions.BundleError;
-import eu.ehri.project.exceptions.IdGenerationError;
 import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.SerializationError;
@@ -30,14 +29,14 @@ import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.utils.ClassUtils;
 
 /**
- * Class responsible for persisting and deleting a Bundle - a data structure
- * representing a graph node and its relations to be updated in a single batch.
- * 
- * NB: This is complicated considerably because we need to catch, accumulate,
- * and rethrow exceptions in the context of the subtree to which they belong.
- * 
+ * Class responsible for persisting and deleting a Bundle - a data structure representing a graph node and its relations
+ * to be updated in a single batch.
+ *
+ * NB: This is complicated considerably because we need to catch, accumulate, and rethrow exceptions in the context of
+ * the subtree to which they belong.
+ *
  * TODO: Extensive clean-up of error-handing.
- * 
+ *
  */
 public final class BundleDAO {
 
@@ -47,7 +46,7 @@ public final class BundleDAO {
 
     /**
      * Constructor with a given scope.
-     * 
+     *
      * @param graph
      * @param scope
      */
@@ -59,7 +58,7 @@ public final class BundleDAO {
 
     /**
      * Constructor with system scope.
-     * 
+     *
      * @param graph
      */
     public BundleDAO(FramedGraph<Neo4jGraph> graph) {
@@ -68,7 +67,7 @@ public final class BundleDAO {
 
     /**
      * Entry-point for updating a bundle.
-     * 
+     *
      * @param bundle
      * @return
      * @throws ValidationError
@@ -81,20 +80,19 @@ public final class BundleDAO {
 
     /**
      * Entry-point for creating a bundle.
-     * 
+     *
      * @param bundle
      * @return
      * @throws ValidationError
      */
     public <T extends VertexFrame> T create(Bundle bundle, Class<T> cls)
-            throws ValidationError {        
+            throws ValidationError {
         return graph.frame(createInner(bundle), cls);
     }
 
     /**
-     * Entry point for creating or updating a bundle, depending on whether it
-     * has a supplied id.
-     * 
+     * Entry point for creating or updating a bundle, depending on whether it has a supplied id.
+     *
      * @param bundle
      * @return
      * @throws ValidationError
@@ -105,9 +103,8 @@ public final class BundleDAO {
     }
 
     /**
-     * Delete a bundle and dependent items, returning the total number of
-     * vertices deleted.
-     * 
+     * Delete a bundle and dependent items, returning the total number of vertices deleted.
+     *
      * @param bundle
      * @return
      */
@@ -126,7 +123,6 @@ public final class BundleDAO {
     }
 
     // Helpers
-
     private Integer deleteCount(Bundle bundle, Integer count)
             throws ValidationError, ItemNotFound {
         Integer c = count;
@@ -148,10 +144,9 @@ public final class BundleDAO {
     }
 
     /**
-     * Insert or update an item depending on a) whether it has an ID, and b)
-     * whether it has an ID and already exists. If import mode is not enabled an
-     * error will be thrown.
-     * 
+     * Insert or update an item depending on a) whether it has an ID, and b) whether it has an ID and already exists. If
+     * import mode is not enabled an error will be thrown.
+     *
      * @param bundle
      * @return
      * @throws ValidationError
@@ -173,7 +168,7 @@ public final class BundleDAO {
 
     /**
      * Insert a bundle and save it's dependent items.
-     * 
+     *
      * @param bundle
      * @return
      * @throws ValidationError
@@ -190,7 +185,7 @@ public final class BundleDAO {
             ListMultimap<String, BundleError> nestedErrors = createDependents(node, bundle.getBundleClass(),
                     bundle.getRelations());
             if (!errors.isEmpty() || hasNestedErrors(nestedErrors)) {
-                    throw new ValidationError(bundle, errors, nestedErrors);
+                  throw new ValidationError(bundle, errors, nestedErrors);
             }
             return node;
         } catch (IntegrityError e) {
@@ -205,7 +200,7 @@ public final class BundleDAO {
 
     /**
      * Update a bundle and save its dependent items.
-     * 
+     *
      * @param bundle
      * @return
      * @throws ValidationError
@@ -226,9 +221,8 @@ public final class BundleDAO {
     }
 
     /**
-     * Saves the dependent relations within a given bundle. Relations that are
-     * not dependent are ignored.
-     * 
+     * Saves the dependent relations within a given bundle. Relations that are not dependent are ignored.
+     *
      * @param master
      * @param cls
      * @param relations
@@ -265,15 +259,14 @@ public final class BundleDAO {
     }
 
     /**
-     * Saves the dependent relations within a given bundle. Relations that are
-     * not dependent are ignored.
-     * 
+     * Saves the dependent relations within a given bundle. Relations that are not dependent are ignored.
+     *
      * @param master
      * @param cls
      * @param relations
      * @return
      * @throws ItemNotFound
-     * 
+     *
      * @return errors
      */
     private ListMultimap<String, BundleError> updateDependents(Vertex master,
@@ -353,9 +346,8 @@ public final class BundleDAO {
     }
 
     /**
-     * Get the IDs of nodes that terminate a given relationship from a
-     * particular source node.
-     * 
+     * Get the IDs of nodes that terminate a given relationship from a particular source node.
+     *
      * @param src
      * @param direction
      * @param label
@@ -372,7 +364,7 @@ public final class BundleDAO {
 
     /**
      * Create a
-     * 
+     *
      * @param master
      * @param child
      * @param label
@@ -388,16 +380,17 @@ public final class BundleDAO {
     }
 
     /**
-     * Search a tree of errors and determine if there's anything in it except
-     * for null values, which have to be there to maintain item ordering.
-     * 
+     * Search a tree of errors and determine if there's anything in it except for null values, which have to be there to
+     * maintain item ordering.
+     *
      * @param errors
      * @return
      */
     private boolean hasNestedErrors(ListMultimap<String, BundleError> errors) {
         for (BundleError e : errors.values()) {
-            if (e != null)
+            if (e != null) {
                 return true;
+            }
         }
         return false;
     }

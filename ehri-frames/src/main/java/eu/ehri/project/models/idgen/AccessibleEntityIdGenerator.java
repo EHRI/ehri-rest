@@ -8,6 +8,7 @@ import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
 
+import eu.ehri.project.utils.Slugify;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,7 +52,7 @@ public enum AccessibleEntityIdGenerator implements IdGenerator {
     public String generateId(EntityClass type, PermissionScope scope,
             Bundle bundle) {
         LinkedList<String> scopeIds = Lists.newLinkedList();
-        if (!scope.equals(SystemScope.getInstance())) {
+        if (scope != null && !scope.equals(SystemScope.getInstance())) {
             for (PermissionScope s : scope.getPermissionScopes())
                 scopeIds.addFirst(s.getIdentifier());
             scopeIds.add(scope.getIdentifier());            
@@ -61,6 +62,7 @@ public enum AccessibleEntityIdGenerator implements IdGenerator {
         // because having dirty IDs is an effective way of debugging (via
         // breakage) other parts of the system.
         scopeIds.add((String) bundle.getDataValue(AccessibleEntity.IDENTIFIER_KEY));
-        return Joiner.on(SEPARATOR).skipNulls().join(scopeIds);
+        String scopedId =  Joiner.on(SEPARATOR).skipNulls().join(scopeIds);
+        return Slugify.slugify(scopedId);
     }
 }

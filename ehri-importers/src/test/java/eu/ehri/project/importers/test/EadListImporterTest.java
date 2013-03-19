@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.InputStream;
 import java.util.List;
 
+import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.events.SystemEvent;
 import org.junit.Test;
 
@@ -13,7 +14,6 @@ import com.tinkerpop.blueprints.Vertex;
 
 import eu.ehri.project.importers.old.EadImportManager;
 import eu.ehri.project.importers.ImportLog;
-import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.DocumentaryUnit;
 
 public class EadListImporterTest extends AbstractImporterTest {
@@ -29,7 +29,7 @@ public class EadListImporterTest extends AbstractImporterTest {
 
     @Test
     public void testImportItemsT() throws Exception {
-        Agent agent = manager.getFrame(TEST_REPO, Agent.class);
+        Repository agent = manager.getFrame(TEST_REPO, Repository.class);
         final String logMessage = "Importing a single EAD";
 
         int count = getNodeCount(graph);

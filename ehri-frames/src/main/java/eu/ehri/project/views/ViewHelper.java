@@ -11,6 +11,7 @@ import eu.ehri.project.acl.PermissionType;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
+import eu.ehri.project.exceptions.AccessDenied;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.ContentType;
@@ -24,11 +25,10 @@ import eu.ehri.project.models.utils.ClassUtils;
 
 /**
  * Messy stopgap class to hold a bunch of sort-of view/sort-of acl functions.
- * 
+ * <p/>
  * TODO: Clarify, consolidate and remove this class.
- * 
+ *
  * @author mike
- * 
  */
 public final class ViewHelper {
 
@@ -50,10 +50,10 @@ public final class ViewHelper {
 
     /**
      * Check permissions for a given type.
-     * 
+     *
+     * @param accessor
      * @param ctype
-     *            TODO
-     * 
+     * @param permType
      * @throws PermissionDenied
      */
     public void checkContentPermission(Accessor accessor, ContentTypes ctype,
@@ -67,15 +67,18 @@ public final class ViewHelper {
             Iterable<PermissionGrant> perms = acl.getPermissionGrants(accessor,
                     contentType, permission);
             if (Iterables.isEmpty(perms)) {
-                throw new PermissionDenied(accessor, contentType, permission,
-                        scope);
+                throw new PermissionDenied(
+                        accessor.getIdentifier(),
+                        contentType.getIdentifier(),
+                        permission.getIdentifier(),
+                        scope.getIdentifier());
             }
         }
     }
 
     /**
      * Check permissions for a given entity.
-     * 
+     *
      * @throws PermissionDenied
      */
     public void checkEntityPermission(AccessibleEntity entity,
@@ -91,29 +94,35 @@ public final class ViewHelper {
                     entity, permission);
             // Scopes do not apply to entity-level perms...
             if (Iterables.isEmpty(perms))
-                throw new PermissionDenied(accessor, entity, permission, scope);
+                throw new PermissionDenied(accessor.getIdentifier(),
+                        entity.getIdentifier(),
+                        permission.getIdentifier(),
+                        scope.getIdentifier());
         }
 
     }
 
     /**
      * Ensure an item is readable by the given user
-     * 
+     *
      * @param entity
      * @param user
-     * @throws PermissionDenied
+     * @throws AccessDenied
      */
     public void checkReadAccess(AccessibleEntity entity, Accessor user)
-            throws PermissionDenied {
-        if (!acl.getAccessControl(entity, user))
-            throw new PermissionDenied(user, entity);
+            throws AccessDenied {
+        if (!acl.getAccessControl(entity, user)) {
+            // Using 'fake' permission 'read'
+            throw new AccessDenied(
+                    user.getIdentifier(), manager.getId(entity));
+        }
     }
 
     /**
      * Ensure an item is writable by the given user
-     * 
+     *
      * @param entity
-     * @param user
+     * @param accessor
      * @throws PermissionDenied
      */
     protected void checkWriteAccess(AccessibleEntity entity, Accessor accessor)
@@ -123,8 +132,8 @@ public final class ViewHelper {
 
     /**
      * Get the content type with the given id.
-     * 
-     * @param typeName
+     *
+     * @param type
      * @return
      */
     public ContentType getContentType(EntityClass type) {
@@ -139,7 +148,7 @@ public final class ViewHelper {
 
     /**
      * Deduce content type from the given enum.
-     * 
+     *
      * @param type
      * @return
      */
@@ -149,7 +158,7 @@ public final class ViewHelper {
 
     /**
      * Get the content type node for the given enum.
-     * 
+     *
      * @param typeName
      * @return
      */
@@ -185,26 +194,26 @@ public final class ViewHelper {
 
     /**
      * Get the permission with the given string.
-     * 
-     * @param permissionId
+     *
+     * @param permission
      * @return
      */
-    public Permission getPermission(PermissionType perm) {
+    public Permission getPermission(PermissionType permission) {
         try {
-            return manager.getFrame(perm.getName(), EntityClass.PERMISSION,
+            return manager.getFrame(permission.getName(), EntityClass.PERMISSION,
                     Permission.class);
         } catch (ItemNotFound e) {
             throw new RuntimeException(String.format(
-                    "No permission found for name: '%s'", perm.getName()), e);
+                    "No permission found for name: '%s'", permission.getName()), e);
         }
     }
 
     /**
      * Set the scope under which ACL and permission operations will take place.
-     * This is, for example, an Agent instance, where the objects being
+     * This is, for example, an Repository instance, where the objects being
      * manipulated are DocumentaryUnits. The given scope is used to compare
      * against the scope relation on PermissionGrants.
-     * 
+     *
      * @param scope
      */
     public ViewHelper setScope(PermissionScope scope) {

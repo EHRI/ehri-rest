@@ -10,6 +10,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.InputStream;
 import java.util.List;
 
+import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.events.SystemEvent;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -20,7 +21,6 @@ import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.SaxImportManager;
 import eu.ehri.project.importers.SkosHandler;
 import eu.ehri.project.importers.SkosImporter;
-import eu.ehri.project.models.Agent;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.cvoc.Concept;
@@ -44,7 +44,7 @@ public class SkosBroaderImporterTest extends AbstractImporterTest {
     @Ignore("not ready yet") @Test
     public void testImportItemsT() throws Exception {
         UserProfile user = validUser; //graph.frame(graph.getVertex(validUserId), UserProfile.class);
-        Agent agent = manager.getFrame(TEST_REPO, Agent.class); //graph.frame(helper.getTestVertex(TEST_REPO), Agent.class);
+        Repository agent = manager.getFrame(TEST_REPO, Repository.class); //graph.frame(helper.getTestVertex(TEST_REPO), Repository.class);
 
         final String logMessage = "Importing two skos";
 
@@ -102,7 +102,7 @@ public class SkosBroaderImporterTest extends AbstractImporterTest {
         assertEquals(log.getSuccessful(), subjects.size());
 
 
-        System.out.println("created: " + log.getCreated());
+//        System.out.println("created: " + log.getCreated());
 
     }
 }
