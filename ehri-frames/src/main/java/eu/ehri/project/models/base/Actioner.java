@@ -18,7 +18,7 @@ public interface Actioner extends VertexFrame {
      * @return
      */
     @GremlinGroovy("_().as('n').out('" + ActionManager.LIFECYCLE_ACTION + "')" +
-            ".loop('n'){true}{true}.out('" + eu.ehri.project.models.events.SystemEvent.HAS_EVENT + "')")
+            ".loop('n'){true}{true}.out('" + SystemEvent.HAS_EVENT + "')")
     public Iterable<SystemEvent> getActions();
 
     @GremlinGroovy("_().as('n').out('" + ActionManager.LIFECYCLE_ACTION + "')"
