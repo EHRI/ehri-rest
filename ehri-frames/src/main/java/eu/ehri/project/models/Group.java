@@ -3,7 +3,6 @@ package eu.ehri.project.models;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Property;
-import com.tinkerpop.frames.VertexFrame;
 
 import com.tinkerpop.frames.annotations.gremlin.GremlinGroovy;
 import eu.ehri.project.models.annotations.EntityType;
@@ -13,7 +12,7 @@ import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.PermissionScope;
 
 @EntityType(EntityClass.GROUP)
-public interface Group extends VertexFrame, Accessor, AccessibleEntity,
+public interface Group extends Accessor, AccessibleEntity,
         PermissionScope {
     
     public static final String ADMIN_GROUP_IDENTIFIER = "admin";

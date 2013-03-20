@@ -5,9 +5,7 @@ import com.tinkerpop.frames.Property;
 import com.tinkerpop.frames.VertexFrame;
 import com.tinkerpop.frames.annotations.gremlin.GremlinGroovy;
 
-import eu.ehri.project.models.PermissionGrant;
 import eu.ehri.project.models.annotations.Fetch;
-import eu.ehri.project.models.annotations.Unique;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.persistance.ActionManager;
 
@@ -29,9 +27,6 @@ public interface AccessibleEntity extends VertexFrame, PermissionGrantTarget {
 
     @Adjacency(label = ACCESS)
     public void removeAccessor(final Accessor accessor);
-
-    @Adjacency(label = PermissionGrant.HAS_ENTITY)
-    public Iterable<PermissionGrant> getPermissionAssertions();
 
     @Adjacency(label = HAS_PERMISSION_SCOPE)
     public PermissionScope getPermissionScope();

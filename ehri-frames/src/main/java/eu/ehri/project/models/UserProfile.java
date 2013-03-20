@@ -2,7 +2,6 @@ package eu.ehri.project.models;
 
 import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Property;
-import com.tinkerpop.frames.VertexFrame;
 
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
@@ -12,7 +11,7 @@ import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.Annotator;
 
 @EntityType(EntityClass.USER_PROFILE)
-public interface UserProfile extends VertexFrame, Accessor, AccessibleEntity,
+public interface UserProfile extends Accessor, AccessibleEntity,
         Annotator, Actioner {
 
     @Fetch(Group.BELONGS_TO)

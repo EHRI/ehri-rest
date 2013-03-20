@@ -14,8 +14,6 @@ public interface PermissionGrant extends VertexFrame {
     public static final String HAS_GRANTEE = "hasGrantee";
     public static final String HAS_SUBJECT = "hasAccessor";
     public static final String HAS_PERMISSION = "hasPermission";
-    public static final String HAS_ENTITY = "hasEntity";
-    public static final String HAS_CONTENT_TYPE = "hasContentType";
     public static final String HAS_SCOPE = "hasScope";
     public static final String HAS_TARGET = "hasTarget";
     
@@ -23,15 +21,9 @@ public interface PermissionGrant extends VertexFrame {
     @Adjacency(label = HAS_SUBJECT)
     public Accessor getSubject();
 
-    @Adjacency(label = HAS_SUBJECT)
-    public void setSubject(final Accessor accessor);
-
     @Fetch(value = HAS_GRANTEE, depth=1)
     @Adjacency(label = HAS_GRANTEE)
     public Accessor getGrantee();
-    
-    @Adjacency(label = HAS_GRANTEE)
-    public void setGrantee(final Accessor accessor);
     
     @Fetch(value = HAS_TARGET, depth=1)
     @Adjacency(label = HAS_TARGET)
@@ -39,9 +31,6 @@ public interface PermissionGrant extends VertexFrame {
 
     @Adjacency(label = HAS_TARGET)
     public void addTarget(final PermissionGrantTarget target);
-    
-    @Adjacency(label = HAS_TARGET)
-    public void removeTarget(final PermissionGrantTarget target);
 
     @Fetch(HAS_PERMISSION)
     @Adjacency(label = HAS_PERMISSION)

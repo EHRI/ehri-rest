@@ -6,10 +6,11 @@ import com.tinkerpop.frames.Property;
 import com.tinkerpop.frames.VertexFrame;
 
 import eu.ehri.project.models.annotations.EntityType;
+import eu.ehri.project.models.base.AnnotatableEntity;
 import eu.ehri.project.models.base.TemporalEntity;
 
 @EntityType(EntityClass.DATE_PERIOD)
-public interface DatePeriod extends VertexFrame {
+public interface DatePeriod extends AnnotatableEntity {
 
     static final String START_DATE = "startDate";
     static final String END_DATE = "endDate";
