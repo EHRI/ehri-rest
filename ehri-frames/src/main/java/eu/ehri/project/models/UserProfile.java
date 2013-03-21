@@ -5,22 +5,16 @@ import com.tinkerpop.frames.Property;
 
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
-import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.models.base.Actioner;
-import eu.ehri.project.models.base.Annotator;
+import eu.ehri.project.models.base.*;
 
 @EntityType(EntityClass.USER_PROFILE)
 public interface UserProfile extends Accessor, AccessibleEntity,
-        Annotator, Actioner {
+        Annotator, Actioner, NamedEntity {
 
     @Fetch(Group.BELONGS_TO)
     @Adjacency(label = Group.BELONGS_TO)
     public Iterable<Group> getGroups();
 
-    @Property("name")
+    @Property(NAME)
     public String getName();
-
-    @Property("name")
-    public void setName(String name);
 }

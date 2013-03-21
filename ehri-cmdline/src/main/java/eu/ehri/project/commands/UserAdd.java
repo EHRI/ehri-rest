@@ -1,6 +1,8 @@
 package eu.ehri.project.commands;
 
 import java.util.Map;
+
+import eu.ehri.project.models.base.NamedEntity;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.neo4j.graphdb.Transaction;
@@ -94,12 +96,12 @@ public class UserAdd extends BaseCommand implements Command {
         }
 
         Map<String, Object> data = ImmutableMap.<String, Object> of(
-                AccessibleEntity.IDENTIFIER_KEY, userId, Accessor.NAME,
+                AccessibleEntity.IDENTIFIER_KEY, userId, NamedEntity.NAME,
                 userName);
         Bundle bundle = new Bundle(EntityClass.USER_PROFILE,
                 Maps.<String, Object> newHashMap())
                 .withDataValue(AccessibleEntity.IDENTIFIER_KEY, userId)
-                .withDataValue(Accessor.NAME, userName);
+                .withDataValue(NamedEntity.NAME, userName);
         String nodeId = AccessibleEntityIdGenerator.INSTANCE.generateId(
                 EntityClass.USER_PROFILE, SystemScope.getInstance(), bundle);
         bundle = bundle.withId(nodeId);

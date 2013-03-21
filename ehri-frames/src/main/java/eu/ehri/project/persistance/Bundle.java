@@ -41,7 +41,7 @@ public class Bundle {
      * Constructor.
      * 
      * @param id
-     * @param cls
+     * @param type
      * @param data
      * @param relations
      */
@@ -56,7 +56,7 @@ public class Bundle {
     /**
      * Constructor for bundle without existing id.
      * 
-     * @param cls
+     * @param type
      * @param data
      * @param relations
      */
@@ -68,9 +68,7 @@ public class Bundle {
     /**
      * Constructor for just a type.
      * 
-     * @param cls
-     * @param data
-     * @param relations
+     * @param type
      */
     public Bundle(EntityClass type) {
         this(null, type, Maps.<String, Object> newHashMap(), LinkedListMultimap
@@ -80,9 +78,8 @@ public class Bundle {
     /**
      * Constructor for bundle without existing id or relations.
      * 
-     * @param cls
+     * @param type
      * @param data
-     * @param relations
      */
     public Bundle(EntityClass type, final Map<String, Object> data) {
         this(null, type, data, LinkedListMultimap.<String, Bundle> create());
@@ -184,8 +181,7 @@ public class Bundle {
     /**
      * Set entire set of relations.
      * 
-     * @param relation
-     * @param others
+     * @param relations
      * @return
      */
     public Bundle withRelations(ListMultimap<String, Bundle> relations) {

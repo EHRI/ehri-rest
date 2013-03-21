@@ -42,7 +42,6 @@ public final class AnnotationViews implements Annotations {
      * Scoped constructor.
      * 
      * @param graph
-     * @param cls
      * @param scope
      */
     public AnnotationViews(FramedGraph<Neo4jGraph> graph, PermissionScope scope) {
@@ -56,7 +55,6 @@ public final class AnnotationViews implements Annotations {
      * Constructor with system scope.
      * 
      * @param graph
-     * @param cls
      */
     public AnnotationViews(FramedGraph<Neo4jGraph> graph) {
         this(graph, SystemScope.getInstance());

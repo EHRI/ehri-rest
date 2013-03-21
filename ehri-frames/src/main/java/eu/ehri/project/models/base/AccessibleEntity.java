@@ -9,14 +9,10 @@ import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.persistance.ActionManager;
 
-public interface AccessibleEntity extends VertexFrame, PermissionGrantTarget {
+public interface AccessibleEntity extends IdentifiableEntity, PermissionGrantTarget {
 
     public static final String ACCESS = "access";
-    public static final String IDENTIFIER_KEY = "identifier";
     public static final String HAS_PERMISSION_SCOPE = "hasPermissionScope";
-
-    @Property(IDENTIFIER_KEY)
-    public String getIdentifier();
 
     @Fetch(value = ACCESS, depth = 1)
     @Adjacency(label = ACCESS)

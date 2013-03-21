@@ -2,17 +2,11 @@ package eu.ehri.project.models.base;
 
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.frames.Adjacency;
-import com.tinkerpop.frames.Property;
 import com.tinkerpop.frames.annotations.gremlin.GremlinGroovy;
-
 import eu.ehri.project.models.PermissionGrant;
 
-public interface Accessor extends AccessibleEntity {
+public interface Accessor extends IdentifiableEntity {
     public static final String BELONGS_TO = "belongsTo";
-    public static final String NAME = "name";
-
-    @Property(AccessibleEntity.IDENTIFIER_KEY)
-    public String getIdentifier();
 
     @Adjacency(label = BELONGS_TO)
     public Iterable<Accessor> getParents();

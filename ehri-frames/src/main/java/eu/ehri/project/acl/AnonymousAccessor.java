@@ -36,10 +36,6 @@ public enum AnonymousAccessor implements Accessor {
         return Group.ANONYMOUS_GROUP_IDENTIFIER;
     }
 
-    public void setName() {
-        throw new UnsupportedOperationException();
-    }
-
     public Iterable<Accessor> getParents() {
         return new EmptyIterable<Accessor>();
     }
@@ -50,10 +46,6 @@ public enum AnonymousAccessor implements Accessor {
 
     public Iterable<AccessibleEntity> getAccessibleEntities() {
         return new EmptyIterable<AccessibleEntity>();
-    }
-
-    public void removeAccessibleEntity(AccessibleEntity entity) {
-        throw new UnsupportedOperationException();
     }
 
     public Iterable<PermissionGrant> getPermissionGrants() {

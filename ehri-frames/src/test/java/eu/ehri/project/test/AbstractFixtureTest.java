@@ -6,7 +6,6 @@ import java.util.Map;
 
 import eu.ehri.project.models.base.*;
 import eu.ehri.project.persistance.Bundle;
-import eu.ehri.project.test.utils.GraphCleaner;
 import org.junit.Before;
 import org.junit.BeforeClass;
 
@@ -56,7 +55,7 @@ abstract public class AbstractFixtureTest extends ModelTestBase {
         return new HashMap<String, Object>() {{
             put(Bundle.TYPE_KEY, Entities.DOCUMENTARY_UNIT);
             put(Bundle.DATA_KEY, new HashMap<String, Object>() {{
-                put(Accessor.NAME, TEST_COLLECTION_NAME);
+                put(NamedEntity.NAME, TEST_COLLECTION_NAME);
                 put(AccessibleEntity.IDENTIFIER_KEY, "someid-01");
             }});
             put(Bundle.REL_KEY, new HashMap<String, Object>() {{
@@ -92,7 +91,7 @@ abstract public class AbstractFixtureTest extends ModelTestBase {
         return new HashMap<String, Object>() {{
             put(Bundle.TYPE_KEY, Entities.REPOSITORY);
             put(Bundle.DATA_KEY, new HashMap<String, Object>() {{
-                put(Accessor.NAME, TEST_AGENT_NAME);
+                put(NamedEntity.NAME, TEST_AGENT_NAME);
                 put(AccessibleEntity.IDENTIFIER_KEY, "test-repo-1");
             }});
             put(Bundle.REL_KEY, new HashMap<String, Object>() {{
@@ -126,7 +125,7 @@ abstract public class AbstractFixtureTest extends ModelTestBase {
         return new HashMap<String, Object>() {{
             put(Bundle.TYPE_KEY, Entities.USER_PROFILE);
             put(Bundle.DATA_KEY, new HashMap<String, Object>() {{
-                put(Accessor.NAME, TEST_USER_NAME);
+                put(NamedEntity.NAME, TEST_USER_NAME);
                 put(AccessibleEntity.IDENTIFIER_KEY, "joe-blogs");
             }});
         }};
@@ -138,7 +137,7 @@ abstract public class AbstractFixtureTest extends ModelTestBase {
         return new HashMap<String, Object>() {{
             put(Bundle.TYPE_KEY, Entities.GROUP);
             put(Bundle.DATA_KEY, new HashMap<String, Object>() {{
-                put(Accessor.NAME, TEST_GROUP_NAME);
+                put(NamedEntity.NAME, TEST_GROUP_NAME);
                 put(AccessibleEntity.IDENTIFIER_KEY, "people");
             }});
         }};
