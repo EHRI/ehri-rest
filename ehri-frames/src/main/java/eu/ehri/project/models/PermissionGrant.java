@@ -1,16 +1,16 @@
 package eu.ehri.project.models;
 
 import com.tinkerpop.frames.Adjacency;
-import com.tinkerpop.frames.VertexFrame;
 
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.base.Accessor;
+import eu.ehri.project.models.base.Frame;
 import eu.ehri.project.models.base.PermissionGrantTarget;
 import eu.ehri.project.models.base.PermissionScope;
 
 @EntityType(EntityClass.PERMISSION_GRANT)
-public interface PermissionGrant extends VertexFrame {
+public interface PermissionGrant extends Frame {
     public static final String HAS_GRANTEE = "hasGrantee";
     public static final String HAS_SUBJECT = "hasAccessor";
     public static final String HAS_PERMISSION = "hasPermission";

@@ -36,10 +36,7 @@ import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Group;
 import eu.ehri.project.models.Permission;
 import eu.ehri.project.models.PermissionGrant;
-import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.models.base.PermissionGrantTarget;
-import eu.ehri.project.models.base.PermissionScope;
+import eu.ehri.project.models.base.*;
 import eu.ehri.project.models.utils.ClassUtils;
 
 /**
@@ -490,7 +487,7 @@ public final class AclManager {
      * @param perm
      * @return
      */
-    private PermissionType enumForPermission(VertexFrame perm) {
+    private PermissionType enumForPermission(Frame perm) {
         return permissionEnumMap.get(perm.asVertex());
     }
 

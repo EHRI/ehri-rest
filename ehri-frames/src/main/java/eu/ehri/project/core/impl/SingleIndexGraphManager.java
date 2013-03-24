@@ -2,11 +2,9 @@ package eu.ehri.project.core.impl;
 
 import java.util.*;
 
-import com.google.common.base.Function;
 import com.google.common.base.Joiner;
-import com.google.common.collect.FluentIterable;
 import com.tinkerpop.blueprints.*;
-import eu.ehri.project.models.utils.EmptyIterable;
+import eu.ehri.project.models.base.Frame;
 import org.apache.lucene.queryParser.QueryParser;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.index.IndexHits;
@@ -19,14 +17,12 @@ import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jVertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jVertexIterable;
 import com.tinkerpop.frames.FramedGraph;
-import com.tinkerpop.frames.VertexFrame;
 
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
-import org.neo4j.helpers.collection.Iterables;
 
 /**
  * Implementation of GraphManager that uses a single index to manage all nodes.
@@ -53,7 +49,7 @@ public final class SingleIndexGraphManager implements GraphManager {
         return (String) vertex.getProperty(EntityType.ID_KEY);
     }
 
-    public String getId(VertexFrame vertex) {
+    public String getId(Frame vertex) {
         return getId(vertex.asVertex());
     }
 
@@ -62,7 +58,7 @@ public final class SingleIndexGraphManager implements GraphManager {
                 .getProperty(EntityType.TYPE_KEY));
     }
 
-    public EntityClass getType(VertexFrame vertex) {
+    public EntityClass getType(Frame vertex) {
         return getType(vertex.asVertex());
     }
 

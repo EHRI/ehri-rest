@@ -3,7 +3,6 @@ package eu.ehri.project.views;
 import com.google.common.collect.Iterables;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
-import com.tinkerpop.frames.VertexFrame;
 
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.acl.ContentTypes;
@@ -20,6 +19,7 @@ import eu.ehri.project.models.Permission;
 import eu.ehri.project.models.PermissionGrant;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
+import eu.ehri.project.models.base.Frame;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.utils.ClassUtils;
 
@@ -176,7 +176,7 @@ public final class ViewHelper {
         return ContentTypes.withName(ClassUtils.getEntityType(cls).getName());
     }
 
-    public ContentTypes getContentType(VertexFrame frame) {
+    public ContentTypes getContentType(Frame frame) {
         EntityClass et = manager.getType(frame);
         try {
             return ContentTypes.withName(et.getName());

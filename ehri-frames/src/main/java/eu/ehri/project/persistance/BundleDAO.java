@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import eu.ehri.project.models.base.Frame;
 import eu.ehri.project.models.idgen.IdGenerator;
 import org.neo4j.graphdb.Transaction;
 
@@ -15,7 +16,6 @@ import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
-import com.tinkerpop.frames.VertexFrame;
 
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.core.GraphManager;
@@ -73,7 +73,7 @@ public final class BundleDAO {
      * @throws ValidationError
      * @throws ItemNotFound
      */
-    public <T extends VertexFrame> T update(Bundle bundle, Class<T> cls)
+    public <T extends Frame> T update(Bundle bundle, Class<T> cls)
             throws ValidationError, ItemNotFound {
         return graph.frame(updateInner(bundle), cls);
     }
@@ -85,7 +85,7 @@ public final class BundleDAO {
      * @return
      * @throws ValidationError
      */
-    public <T extends VertexFrame> T create(Bundle bundle, Class<T> cls)
+    public <T extends Frame> T create(Bundle bundle, Class<T> cls)
             throws ValidationError {
         return graph.frame(createInner(bundle), cls);
     }
@@ -97,7 +97,7 @@ public final class BundleDAO {
      * @return
      * @throws ValidationError
      */
-    public <T extends VertexFrame> T createOrUpdate(Bundle bundle, Class<T> cls)
+    public <T extends Frame> T createOrUpdate(Bundle bundle, Class<T> cls)
             throws ValidationError {
         return graph.frame(createOrUpdateInner(bundle), cls);
     }

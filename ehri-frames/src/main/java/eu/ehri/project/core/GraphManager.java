@@ -6,11 +6,11 @@ import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
-import com.tinkerpop.frames.VertexFrame;
 
 import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.EntityClass;
+import eu.ehri.project.models.base.Frame;
 
 public interface GraphManager {
 
@@ -27,7 +27,7 @@ public interface GraphManager {
     /**
      * Get the id of a given vertex frame.
      */
-    public String getId(VertexFrame vertex);
+    public String getId(Frame vertex);
 
     /**
      * Get the type of an arbitrary vertex.
@@ -37,7 +37,7 @@ public interface GraphManager {
     /**
      * Get the type of an arbitrary vertex.
      */
-    public EntityClass getType(VertexFrame vertex);
+    public EntityClass getType(Frame vertex);
 
     /**
      * Check if a node with the given ID exists or not.

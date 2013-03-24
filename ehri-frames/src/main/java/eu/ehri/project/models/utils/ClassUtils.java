@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import eu.ehri.project.models.base.Frame;
 import org.neo4j.helpers.collection.Iterables;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +16,6 @@ import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Property;
-import com.tinkerpop.frames.VertexFrame;
 
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.Dependent;
@@ -149,7 +149,7 @@ public class ClassUtils {
      * @param type
      * @return
      */
-    public static boolean hasType(VertexFrame frame, EntityClass type) {
+    public static boolean hasType(Frame frame, EntityClass type) {
         String isa = (String) frame.asVertex().getProperty(EntityType.TYPE_KEY);
         return type.getName().equals(isa);
     }

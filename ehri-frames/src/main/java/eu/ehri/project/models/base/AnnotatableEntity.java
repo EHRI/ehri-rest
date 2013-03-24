@@ -6,7 +6,7 @@ import com.tinkerpop.frames.VertexFrame;
 
 import eu.ehri.project.models.Annotation;
 
-public interface AnnotatableEntity extends VertexFrame {
+public interface AnnotatableEntity extends Frame {
     @Adjacency(label = Annotation.ANNOTATES, direction = Direction.IN)
     public Iterable<Annotation> getAnnotations();
 

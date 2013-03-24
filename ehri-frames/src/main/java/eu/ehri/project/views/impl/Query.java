@@ -12,12 +12,12 @@ import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jVertex;
 import com.tinkerpop.frames.FramedGraph;
-import com.tinkerpop.frames.VertexFrame;
 import com.tinkerpop.gremlin.java.GremlinPipeline;
 import com.tinkerpop.pipes.PipeFunction;
 import com.tinkerpop.pipes.util.structures.Pair;
 
 import eu.ehri.project.exceptions.AccessDenied;
+import eu.ehri.project.models.base.Frame;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -216,7 +216,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      *
      * @param <T>
      */
-    public static class FramedVertexIterableAdaptor<T extends VertexFrame>
+    public static class FramedVertexIterableAdaptor<T extends Frame>
             implements Iterable<Vertex> {
         final Iterable<T> iterable;
 
@@ -328,7 +328,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      * @param cls
      * @return Page instance
      */
-    public <T extends VertexFrame> Page<T> page(Iterable<T> vertices,
+    public <T extends Frame> Page<T> page(Iterable<T> vertices,
             Accessor user, Class<T> cls) {
         PipeFunction<Vertex, Boolean> aclFilterFunction = new AclManager(graph)
                 .getAclFilterFunction(user);
@@ -441,7 +441,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      * @param user
      * @return Iterable of items accessible to the given accessor
      */
-    public <T extends VertexFrame> Iterable<T> list(Iterable<T> vertices,
+    public <T extends Frame> Iterable<T> list(Iterable<T> vertices,
             Accessor user, Class<T> cls) {
         GremlinPipeline<T, Vertex> filter = new GremlinPipeline<T, Vertex>(
                 new FramedVertexIterableAdaptor<T>(vertices))

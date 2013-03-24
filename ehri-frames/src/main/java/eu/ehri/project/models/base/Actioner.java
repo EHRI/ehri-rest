@@ -1,13 +1,12 @@
 package eu.ehri.project.models.base;
 
 import com.tinkerpop.frames.Property;
-import com.tinkerpop.frames.VertexFrame;
 import com.tinkerpop.frames.annotations.gremlin.GremlinGroovy;
 
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.persistance.ActionManager;
 
-public interface Actioner extends VertexFrame {
+public interface Actioner extends Frame {
 
     @Property("name")
     public String getName();

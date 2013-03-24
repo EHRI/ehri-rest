@@ -1,7 +1,7 @@
 package eu.ehri.project.persistance;
 
-import com.tinkerpop.frames.VertexFrame;
+import eu.ehri.project.models.base.Frame;
 
 public interface TraversalCallback {
-    public void process(VertexFrame vertexFrame, int depth, String relation, int relationIndex);
+    public void process(Frame vertexFrame, int depth, String relation, int relationIndex);
 }
