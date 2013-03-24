@@ -247,7 +247,7 @@ public class PermissionsResource extends AbstractRestResource {
     public Response getGlobalMatrix() throws PermissionDenied, IOException,
             ItemNotFound, BadRequester {
         Accessor accessor = getRequesterUserProfile();
-        return getGlobalMatrix(manager.getId(accessor));
+        return getGlobalMatrix(accessor.getId());
     }
 
     /**

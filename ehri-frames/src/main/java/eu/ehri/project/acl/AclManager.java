@@ -698,13 +698,13 @@ public final class AclManager {
         // identifier.
         for (ContentType c : manager.getFrames(EntityClass.CONTENT_TYPE,
                 ContentType.class)) {
-            ContentTypes ct = ContentTypes.withName(manager.getId(c));
+            ContentTypes ct = ContentTypes.withName(c.getId());
             enumContentTypeMap.put(ct, c);
             contentTypeEnumMap.put(c.asVertex(), ct);
         }
         for (Permission p : manager.getFrames(EntityClass.PERMISSION,
                 Permission.class)) {
-            PermissionType pt = PermissionType.withName(manager.getId(p));
+            PermissionType pt = PermissionType.withName(p.getId());
             enumPermissionMap.put(pt, p);
             permissionEnumMap.put(p.asVertex(), pt);
         }

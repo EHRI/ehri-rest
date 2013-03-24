@@ -239,7 +239,8 @@ public class VocabularyResource extends
         String jsonStr = serializer.vertexFrameToJson(concept);
         // FIXME: Hide the details of building this path
         URI docUri = UriBuilder.fromUri(uriInfo.getBaseUri())
-                .segment(Entities.CVOC_CONCEPT).segment(manager.getId(concept))
+                .segment(Entities.CVOC_CONCEPT)
+                .segment(concept.getId())
                 .build();
 
         return Response.status(Status.CREATED).location(docUri)

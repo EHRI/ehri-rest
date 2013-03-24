@@ -67,11 +67,8 @@ public final class ViewHelper {
             Iterable<PermissionGrant> perms = acl.getPermissionGrants(accessor,
                     contentType, permission);
             if (Iterables.isEmpty(perms)) {
-                throw new PermissionDenied(
-                        accessor.getIdentifier(),
-                        contentType.getIdentifier(),
-                        permission.getIdentifier(),
-                        scope.getIdentifier());
+                throw new PermissionDenied(accessor.getId(), contentType.getId(),
+                        permission.getId(), scope.getId());
             }
         }
     }
@@ -94,10 +91,8 @@ public final class ViewHelper {
                     entity, permission);
             // Scopes do not apply to entity-level perms...
             if (Iterables.isEmpty(perms)) {
-                throw new PermissionDenied(accessor.getIdentifier(),
-                        entity.getIdentifier(),
-                        permission.getIdentifier(),
-                        scope.getIdentifier());
+                throw new PermissionDenied(accessor.getId(), entity.getId(),
+                        permission.getId(), scope.getId());
             }
         }
 
@@ -114,8 +109,7 @@ public final class ViewHelper {
             throws AccessDenied {
         if (!acl.getAccessControl(entity, user)) {
             // Using 'fake' permission 'read'
-            throw new AccessDenied(
-                    user.getIdentifier(), manager.getId(entity));
+            throw new AccessDenied(user.getId(), entity.getId());
         }
     }
 

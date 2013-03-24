@@ -129,7 +129,7 @@ public class ListEntities extends BaseCommand implements Command {
      */
     private void printIds(GraphManager manager, EntityClass type) {
         for (AccessibleEntity acc : manager.getFrames(type, AccessibleEntity.class)) {
-            System.out.println(manager.getId(acc));
+            System.out.println(acc.getId());
         }
     }
 
