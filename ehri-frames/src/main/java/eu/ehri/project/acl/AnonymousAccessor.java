@@ -2,6 +2,7 @@ package eu.ehri.project.acl;
 
 import com.tinkerpop.blueprints.Vertex;
 
+import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.models.Group;
 import eu.ehri.project.models.PermissionGrant;
 import eu.ehri.project.models.base.AccessibleEntity;
@@ -26,6 +27,14 @@ public enum AnonymousAccessor implements Accessor {
      */
     public static Accessor getInstance() {
         return INSTANCE;
+    }
+
+    public String getId() {
+        return Group.ANONYMOUS_GROUP_IDENTIFIER;
+    }
+
+    public String getType() {
+        return Entities.GROUP;
     }
         
     public Vertex asVertex() {
