@@ -7,8 +7,9 @@ import com.tinkerpop.frames.Property;
 import eu.ehri.project.models.MaintenanceEvent;
 import eu.ehri.project.models.annotations.Dependent;
 import eu.ehri.project.models.annotations.Fetch;
+import eu.ehri.project.models.annotations.Mandatory;
 
-public interface Description extends Frame {
+public interface Description extends NamedEntity {
     public static final String DESCRIBES = DescribedEntity.DESCRIBES;
     public static final String LANGUAGE_CODE = "languageCode";
     public static final String MUTATES = "maintenance"; //links to MaintenanceEvent
@@ -17,11 +18,9 @@ public interface Description extends Frame {
     @Adjacency(label = DESCRIBES)
     public DescribedEntity getEntity();
 
+    @Mandatory
     @Property(LANGUAGE_CODE)
     public String getLanguageOfDescription();
- 
-    @Property(NAME)
-    public String getName();
 
     /**
      * Get the described entity of a description. This 

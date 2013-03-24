@@ -5,6 +5,7 @@ import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Property;
 
 import eu.ehri.project.models.annotations.EntityType;
+import eu.ehri.project.models.annotations.Mandatory;
 import eu.ehri.project.models.base.AnnotatableEntity;
 import eu.ehri.project.models.base.TemporalEntity;
 
@@ -14,9 +15,11 @@ public interface DatePeriod extends AnnotatableEntity {
     static final String START_DATE = "startDate";
     static final String END_DATE = "endDate";
 
+    @Mandatory
     @Property(START_DATE)
     public String getStartDate();
 
+    @Mandatory
     @Property(END_DATE)
     public String getEndDate();
 

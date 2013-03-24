@@ -70,7 +70,7 @@ public final class BundleFieldValidator implements BundleValidator {
      * Check a bundle's fields validate.
      */
     private void checkFields() {
-        for (String key : ClassUtils.getPropertyKeys(bundle.getBundleClass())) {
+        for (String key : ClassUtils.getMandatoryPropertyKeys(bundle.getBundleClass())) {
             checkField(key);
         }
     }

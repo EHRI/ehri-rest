@@ -6,11 +6,7 @@ import com.tinkerpop.frames.annotations.gremlin.GremlinGroovy;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.persistance.ActionManager;
 
-public interface Actioner extends Frame {
-
-    @Property("name")
-    public String getName();
-
+public interface Actioner extends NamedEntity {
     /**
      * Fetch a list of Actions for this user in newest-first order.
      * 

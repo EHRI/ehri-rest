@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import eu.ehri.project.models.annotations.*;
 import eu.ehri.project.models.base.Frame;
 import org.neo4j.helpers.collection.Iterables;
 import org.slf4j.Logger;
@@ -18,10 +19,6 @@ import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Property;
 
 import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.annotations.Dependent;
-import eu.ehri.project.models.annotations.EntityType;
-import eu.ehri.project.models.annotations.Fetch;
-import eu.ehri.project.models.annotations.Unique;
 
 /**
  * Helper functions for managing EntityType classes.
@@ -118,6 +115,25 @@ public class ClassUtils {
 
         for (Class<?> s : cls.getInterfaces()) {
             Iterables.addAll(out, getPropertyKeys(s));
+        }
+
+        return ImmutableSet.copyOf(out);
+    }
+
+    public static Iterable<String> getMandatoryPropertyKeys(Class<?> cls) {
+        List<String> out = new LinkedList<String>();
+        for (Method method : cls.getMethods()) {
+            Mandatory mandatory = method.getAnnotation(Mandatory.class);
+            if (mandatory != null) {
+                Property ann = method.getAnnotation(Property.class);
+                if (ann != null)
+                    out.add(ann.value());
+            }
+
+        }
+
+        for (Class<?> s : cls.getInterfaces()) {
+            Iterables.addAll(out, getMandatoryPropertyKeys(s));
         }
 
         return ImmutableSet.copyOf(out);
