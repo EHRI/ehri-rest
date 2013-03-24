@@ -141,9 +141,9 @@ public final class AclViews implements Acl {
                     Iterable<PermissionGrant> grants = acl.getPermissionGrants(
                             accessor, target, grantPerm);
                     if (!grants.iterator().hasNext()) {
-                        throw new PermissionDenied(manager.getId(accessor),
-                                manager.getId(target), manager.getId(grantPerm),
-                                "system");
+                        throw new PermissionDenied(accessor.getId(),
+                                target.getId(), grantPerm.getId(),
+                                scope.getId());
                     }
                 }
             } catch (ItemNotFound e) {
@@ -269,7 +269,7 @@ public final class AclViews implements Acl {
                 }
             }
             if (!found) {
-                throw new PermissionDenied(grantee.getIdentifier(), group.getIdentifier(),
+                throw new PermissionDenied(grantee.getId(), group.getId(),
                         "Non-admin users cannot add other users to groups that they" +
                                 " do not themselves belong to.");
             }

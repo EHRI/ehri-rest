@@ -96,7 +96,7 @@ public final class AclManager {
      */
     public boolean isAdmin(Accessor accessor) {
         Preconditions.checkNotNull(accessor, "NULL accessor given.");
-        return accessor.getIdentifier().equals(Group.ADMIN_GROUP_IDENTIFIER);
+        return accessor.getId().equals(Group.ADMIN_GROUP_IDENTIFIER);
     }
 
     /**
@@ -124,7 +124,7 @@ public final class AclManager {
     public boolean isAnonymous(Accessor accessor) {
         Preconditions.checkNotNull(accessor, "NULL accessor given.");
         return accessor instanceof AnonymousAccessor
-                || accessor.getIdentifier().equals(
+                || accessor.getId().equals(
                         Group.ANONYMOUS_GROUP_IDENTIFIER);
     }
 
@@ -265,14 +265,12 @@ public final class AclManager {
             Accessor accessor, AccessibleEntity entity) {
         List<Map<String, List<PermissionType>>> list = Lists.newLinkedList();
         Map<String, List<PermissionType>> userMap = Maps.newHashMap();
-        userMap.put(manager.getId(accessor),
-                getEntityPermissions(accessor, entity));
+        userMap.put(accessor.getId(), getEntityPermissions(accessor, entity));
         list.add(userMap);
         for (Accessor parent : accessor.getAllParents()) {
             Map<String, List<PermissionType>> parentMap = Maps.newHashMap();
             list.add(parentMap);
-            parentMap.put(manager.getId(parent),
-                    getEntityPermissions(parent, entity));
+            parentMap.put(parent.getId(), getEntityPermissions(parent, entity));
         }
         return list;
     }
@@ -309,12 +307,12 @@ public final class AclManager {
                 .newLinkedList();
         Map<String, Map<ContentTypes, Collection<PermissionType>>> userMap = Maps
                 .newHashMap();
-        userMap.put(manager.getId(accessor), getGlobalPermissions(accessor));
+        userMap.put(accessor.getId(), getGlobalPermissions(accessor));
         globals.add(userMap);
         for (Accessor parent : accessor.getParents()) {
             Map<String, Map<ContentTypes, Collection<PermissionType>>> parentMap = Maps
                     .newHashMap();
-            parentMap.put(manager.getId(parent), getGlobalPermissions(parent));
+            parentMap.put(parent.getId(), getGlobalPermissions(parent));
             globals.add(parentMap);
         }
         return globals;

@@ -146,7 +146,7 @@ public final class AnnotationViews implements Annotations {
     private <T extends Frame> void getAnnotations(T item,
             ListMultimap<String, Annotation> annotations,
             PipeFunction<Vertex, Boolean> filter) {
-        String id = manager.getId(item);
+        String id = item.getId();
         AnnotatableEntity entity = graph.frame(item.asVertex(),
                 AnnotatableEntity.class);
         for (Annotation ann : entity.getAnnotations()) {
