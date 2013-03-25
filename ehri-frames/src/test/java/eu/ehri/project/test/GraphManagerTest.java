@@ -90,14 +90,14 @@ public class GraphManagerTest {
         Vertex vertex = manager.createVertex(TEST_ID1, TEST_TYPE, data);
 
         assertEquals(TEST_ID1, manager.getId(vertex));
-        assertEquals(TEST_TYPE, manager.getType(vertex));
+        assertEquals(TEST_TYPE, manager.getEntityClass(vertex));
         assertEquals(TEST_VALUE, vertex.getProperty(TEST_KEY));
 
         assertTrue(manager.exists(TEST_ID1));
         // now get it and test again
         vertex = manager.getVertex(TEST_ID1);
         assertEquals(TEST_ID1, manager.getId(vertex));
-        assertEquals(TEST_TYPE, manager.getType(vertex));
+        assertEquals(TEST_TYPE, manager.getEntityClass(vertex));
         assertEquals(TEST_VALUE, vertex.getProperty(TEST_KEY));
     }
 

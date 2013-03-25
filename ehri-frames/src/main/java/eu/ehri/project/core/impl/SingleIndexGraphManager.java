@@ -48,17 +48,25 @@ public final class SingleIndexGraphManager implements GraphManager {
         return (String) vertex.getProperty(EntityType.ID_KEY);
     }
 
-    public String getId(Frame vertex) {
-        return getId(vertex.asVertex());
+    public String getId(Frame frame) {
+        return getId(frame.asVertex());
     }
 
-    public EntityClass getType(Vertex vertex) {
+    public String getType(Vertex vertex) {
+        return (String) vertex.getProperty(EntityType.ID_KEY);
+    }
+
+    public String getType(Frame frame) {
+        return frame.getType();
+    }
+
+    public EntityClass getEntityClass(Vertex vertex) {
         return EntityClass.withName((String) vertex
                 .getProperty(EntityType.TYPE_KEY));
     }
 
-    public EntityClass getType(Frame vertex) {
-        return getType(vertex.asVertex());
+    public EntityClass getEntityClass(Frame frame) {
+        return getEntityClass(frame.asVertex());
     }
 
     public boolean exists(String id) {

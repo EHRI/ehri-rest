@@ -28,7 +28,6 @@ public class SkosHandler extends SaxXmlHandler {
     Map<String, Class<? extends Frame>> possibleSubnodes;
     Stack<String> prefixStack;
 
-    @SuppressWarnings("unchecked")
     public SkosHandler(AbstractImporter<Map<String, Object>> importer) {
         super(importer, new PropertiesConfig("skos.properties"));
         prefixStack = new Stack<String>();

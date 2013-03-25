@@ -27,17 +27,27 @@ public interface GraphManager {
     /**
      * Get the id of a given vertex frame.
      */
-    public String getId(Frame vertex);
+    public String getId(Frame frame);
+
+    /**
+     * Get the id of a given vertex.
+     */
+    public String getType(Vertex vertex);
+
+    /**
+     * Get the id of a given vertex frame.
+     */
+    public String getType(Frame frame);
 
     /**
      * Get the type of an arbitrary vertex.
      */
-    public EntityClass getType(Vertex vertex);
+    public EntityClass getEntityClass(Vertex vertex);
 
     /**
      * Get the type of an arbitrary vertex.
      */
-    public EntityClass getType(Frame vertex);
+    public EntityClass getEntityClass(Frame frame);
 
     /**
      * Check if a node with the given ID exists or not.

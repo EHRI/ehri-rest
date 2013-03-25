@@ -335,7 +335,7 @@ public final class BundleDAO {
                 if (!updating.contains(manager.getId(v))) {
                     try {
                         delete(serializer.vertexFrameToBundle(graph.frame(v,
-                                manager.getType(v).getEntityClass())));
+                                manager.getEntityClass(v).getEntityClass())));
                     } catch (SerializationError e) {
                         throw new RuntimeException(e);
                     }

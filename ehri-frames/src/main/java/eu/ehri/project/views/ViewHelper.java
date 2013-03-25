@@ -171,7 +171,7 @@ public final class ViewHelper {
     }
 
     public ContentTypes getContentType(Frame frame) {
-        EntityClass et = manager.getType(frame);
+        EntityClass et = manager.getEntityClass(frame);
         try {
             return ContentTypes.withName(et.getName());
         } catch (IllegalArgumentException e) {

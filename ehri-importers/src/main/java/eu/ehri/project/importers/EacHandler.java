@@ -28,7 +28,6 @@ public class EacHandler extends SaxXmlHandler {
     Map<String, Class<? extends Frame>> possibleSubnodes;
     private static final Logger logger = LoggerFactory.getLogger(EacHandler.class);
 
-    @SuppressWarnings("unchecked")
     public EacHandler(AbstractImporter<Map<String, Object>> importer) {
         super(importer, new PropertiesConfig("eac.properties"));
         possibleSubnodes = new HashMap<String, Class<? extends Frame>>();
@@ -67,7 +66,7 @@ public class EacHandler extends SaxXmlHandler {
                         if(names instanceof String){
                             putPropertyInCurrentGraph(Description.NAME, names.toString());
                         }else if(names instanceof List){
-                            putPropertyInCurrentGraph(Description.NAME, ((List)names).get(0).toString());
+                            putPropertyInCurrentGraph(Description.NAME, ((List<?>)names).get(0).toString());
                         }else{
                             logger.warn("no " + Description.NAME + " found");
                             putPropertyInCurrentGraph(Description.NAME, "title");
