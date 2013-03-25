@@ -138,25 +138,6 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
     }
 
     /**
-     * Scoped Constructor.
-     *
-     * @param graph
-     * @param cls
-     * @param scope
-     */
-    private Query(FramedGraph<Neo4jGraph> graph, Class<E> cls,
-            PermissionScope scope) {
-        this(graph, cls, scope, Optional.<Integer>absent(), Optional
-                .<Integer>absent(), ImmutableSortedMap.<String, Sort>of(),
-                ImmutableSortedMap
-                        .<QueryUtils.TraversalPath, Sort>of(),
-                Optional.<Pair<String, Sort>>absent(), ImmutableSortedMap
-                .<String, Pair<FilterPredicate, String>>of(), Maps
-                .<Pair<String, Direction>, Integer>newHashMap(),
-                ImmutableList.<GremlinPipeline<Vertex, Vertex>>of(), false);
-    }
-
-    /**
      * Copy constructor.
      *
      * @param other
@@ -705,7 +686,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      */
     private PipeFunction<Pair<Vertex, Vertex>, Integer> getOrderFunction(
             final SortedMap<String, Sort> sort) {
-        final Ordering<Comparable> order = Ordering.natural().nullsLast();
+        final Ordering<Comparable<?>> order = Ordering.natural().nullsLast();
         return new PipeFunction<Pair<Vertex, Vertex>, Integer>() {
             public Integer compute(Pair<Vertex, Vertex> pair) {
                 ComparisonChain chain = ComparisonChain.start();
@@ -798,7 +779,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
         // FIXME: Make this less horribly inefficient!
         final GremlinPipeline<Vertex, String> pipe = getOrderTraversalPipeline(tp);
         final Map<Vertex, String> cache = Maps.newHashMap();
-        final Ordering<Comparable> order = Ordering.natural().nullsLast();
+        final Ordering<Comparable<?>> order = Ordering.natural().nullsLast();
         return new PipeFunction<Pair<Vertex, Vertex>, Integer>() {
             public Integer compute(Pair<Vertex, Vertex> pair) {
                 String a = cache.get(pair.getA());

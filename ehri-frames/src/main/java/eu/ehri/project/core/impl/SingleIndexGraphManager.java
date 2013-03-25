@@ -2,7 +2,6 @@ package eu.ehri.project.core.impl;
 
 import java.util.*;
 
-import com.google.common.base.Joiner;
 import com.tinkerpop.blueprints.*;
 import eu.ehri.project.models.base.Frame;
 import org.apache.lucene.queryParser.QueryParser;
@@ -343,14 +342,5 @@ public final class SingleIndexGraphManager implements GraphManager {
                 QueryParser.escape(String.valueOf(value)),
                 QueryParser.escape(EntityType.TYPE_KEY),
                 QueryParser.escape(type));
-    }
-
-    private String getMultiItemLuceneQuery(String[] ids) {
-        // FIXME: Almost certainly a less stupid way of doing this.
-        ArrayList<String> list = Lists.newArrayList();
-        for (String id : ids) {
-            list.add(EntityType.ID_KEY + ":\"" + id + "\"");
-        }
-        return Joiner.on(" OR ").join(list);
     }
 }

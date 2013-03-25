@@ -23,7 +23,6 @@ import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
-import com.tinkerpop.frames.VertexFrame;
 import com.tinkerpop.pipes.PipeFunction;
 
 import eu.ehri.project.core.GraphManager;

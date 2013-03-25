@@ -4,7 +4,6 @@ import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.frames.Adjacency;
 
 import com.tinkerpop.frames.annotations.gremlin.GremlinGroovy;
-import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;

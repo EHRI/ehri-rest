@@ -1,6 +1,5 @@
 package eu.ehri.project.models.base;
 
-import com.tinkerpop.frames.Property;
 import com.tinkerpop.frames.annotations.gremlin.GremlinGroovy;
 
 import eu.ehri.project.models.events.SystemEvent;
