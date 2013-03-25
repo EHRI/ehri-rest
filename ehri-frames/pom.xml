@@ -16,6 +16,11 @@
     <organization>
         <name>EHRI</name>
     </organization>
+    
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+    
     <build>
 
         <!-- Copy messages_*.properties files from the source tree. These are
@@ -50,6 +55,10 @@
             </testResource>
         </testResources>
         <plugins>
+        
+ 			<!--  use surefire instead of maven-jar-plugin 2.2
+ 			      surfire plugin worked better with eclipse 
+ 			      also used by ehri-importers project
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
@@ -62,6 +71,17 @@
                     </execution>
                 </executions>
             </plugin>
+			 -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.12.3</version>
+				<configuration>
+					<excludes>
+					</excludes>
+				</configuration>
+			</plugin>
+			             
         </plugins>
     </build>
     <dependencies>
