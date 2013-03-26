@@ -2,6 +2,7 @@ package eu.ehri.project.acl;
 
 import com.tinkerpop.blueprints.Vertex;
 
+import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.models.PermissionGrant;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
@@ -28,10 +29,16 @@ public enum SystemScope implements PermissionScope, AccessibleEntity {
         return INSTANCE;
     }
     
-    public static final String SYSTEM = "system";
+    public String getId() {
+        return Entities.SYSTEM;
+    }
+
+    public String getType() {
+        return Entities.SYSTEM;
+    }
 
     public String getIdentifier() {
-        return SYSTEM;
+        return Entities.SYSTEM;
     }
 
     public Vertex asVertex() {

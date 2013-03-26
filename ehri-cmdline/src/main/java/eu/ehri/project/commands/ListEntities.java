@@ -14,8 +14,6 @@ import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.persistance.Serializer;
 
-import org.w3c.dom.Document;
-
 import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
@@ -129,7 +127,7 @@ public class ListEntities extends BaseCommand implements Command {
      */
     private void printIds(GraphManager manager, EntityClass type) {
         for (AccessibleEntity acc : manager.getFrames(type, AccessibleEntity.class)) {
-            System.out.println(manager.getId(acc));
+            System.out.println(acc.getId());
         }
     }
 

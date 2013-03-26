@@ -19,7 +19,6 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.ContentType;
 
 /**

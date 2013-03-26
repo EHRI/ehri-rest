@@ -15,6 +15,7 @@
 		<module>ehri-importers</module>
 		<module>ehri-cmdline</module>
 		<module>ehri-definitions</module>
+		<module>ehri-searchindex</module>
 	</modules>
 	<dependencyManagement>
 		<dependencies>

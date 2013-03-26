@@ -4,13 +4,14 @@
  */
 package eu.ehri.project.importers;
 
-import com.tinkerpop.frames.VertexFrame;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.MaintenanceEvent;
 import eu.ehri.project.models.base.Description;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import eu.ehri.project.models.base.Frame;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 //import org.xml.sax.Attributes;
@@ -24,13 +25,12 @@ import org.xml.sax.SAXException;
  */
 public class EacHandler extends SaxXmlHandler {
 
-    Map<String, Class<? extends VertexFrame>> possibleSubnodes;
+    Map<String, Class<? extends Frame>> possibleSubnodes;
     private static final Logger logger = LoggerFactory.getLogger(EacHandler.class);
 
-    @SuppressWarnings("unchecked")
     public EacHandler(AbstractImporter<Map<String, Object>> importer) {
         super(importer, new PropertiesConfig("eac.properties"));
-        possibleSubnodes = new HashMap<String, Class<? extends VertexFrame>>();
+        possibleSubnodes = new HashMap<String, Class<? extends Frame>>();
         possibleSubnodes.put("maintenanceEvent", MaintenanceEvent.class);
     }
 
@@ -66,7 +66,7 @@ public class EacHandler extends SaxXmlHandler {
                         if(names instanceof String){
                             putPropertyInCurrentGraph(Description.NAME, names.toString());
                         }else if(names instanceof List){
-                            putPropertyInCurrentGraph(Description.NAME, ((List)names).get(0).toString());
+                            putPropertyInCurrentGraph(Description.NAME, ((List<?>)names).get(0).toString());
                         }else{
                             logger.warn("no " + Description.NAME + " found");
                             putPropertyInCurrentGraph(Description.NAME, "title");

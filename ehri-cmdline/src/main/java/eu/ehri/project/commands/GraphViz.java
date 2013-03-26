@@ -1,9 +1,6 @@
 package eu.ehri.project.commands;
 
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.tinkerpop.blueprints.Vertex;
-import com.tinkerpop.gremlin.groovy.jsr223.GremlinGroovyScriptEngineFactory;
 import org.apache.commons.cli.CommandLine;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
@@ -16,8 +13,6 @@ import org.neo4j.graphdb.*;
 import org.neo4j.visualization.graphviz.GraphvizWriter;
 import org.neo4j.walk.Walker;
 
-import javax.script.ScriptContext;
-import javax.script.ScriptEngine;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.util.List;

@@ -2,11 +2,8 @@ package eu.ehri.project.core.impl;
 
 import java.util.*;
 
-import com.google.common.base.Function;
-import com.google.common.base.Joiner;
-import com.google.common.collect.FluentIterable;
 import com.tinkerpop.blueprints.*;
-import eu.ehri.project.models.utils.EmptyIterable;
+import eu.ehri.project.models.base.Frame;
 import org.apache.lucene.queryParser.QueryParser;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.index.IndexHits;
@@ -19,14 +16,12 @@ import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jVertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jVertexIterable;
 import com.tinkerpop.frames.FramedGraph;
-import com.tinkerpop.frames.VertexFrame;
 
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
-import org.neo4j.helpers.collection.Iterables;
 
 /**
  * Implementation of GraphManager that uses a single index to manage all nodes.
@@ -53,17 +48,25 @@ public final class SingleIndexGraphManager implements GraphManager {
         return (String) vertex.getProperty(EntityType.ID_KEY);
     }
 
-    public String getId(VertexFrame vertex) {
-        return getId(vertex.asVertex());
+    public String getId(Frame frame) {
+        return getId(frame.asVertex());
     }
 
-    public EntityClass getType(Vertex vertex) {
+    public String getType(Vertex vertex) {
+        return (String) vertex.getProperty(EntityType.ID_KEY);
+    }
+
+    public String getType(Frame frame) {
+        return frame.getType();
+    }
+
+    public EntityClass getEntityClass(Vertex vertex) {
         return EntityClass.withName((String) vertex
                 .getProperty(EntityType.TYPE_KEY));
     }
 
-    public EntityClass getType(VertexFrame vertex) {
-        return getType(vertex.asVertex());
+    public EntityClass getEntityClass(Frame frame) {
+        return getEntityClass(frame.asVertex());
     }
 
     public boolean exists(String id) {
@@ -347,14 +350,5 @@ public final class SingleIndexGraphManager implements GraphManager {
                 QueryParser.escape(String.valueOf(value)),
                 QueryParser.escape(EntityType.TYPE_KEY),
                 QueryParser.escape(type));
-    }
-
-    private String getMultiItemLuceneQuery(String[] ids) {
-        // FIXME: Almost certainly a less stupid way of doing this.
-        ArrayList<String> list = Lists.newArrayList();
-        for (String id : ids) {
-            list.add(EntityType.ID_KEY + ":\"" + id + "\"");
-        }
-        return Joiner.on(" OR ").join(list);
     }
 }

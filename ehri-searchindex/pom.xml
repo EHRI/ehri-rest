@@ -1,0 +1,119 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<artifactId>ehri-data</artifactId>
+		<groupId>ehri-project</groupId>
+		<version>1.0</version>
+	</parent>
+  <!--  <groupId>ehri-project</groupId>  -->
+  
+  <artifactId>ehri-searchindex</artifactId>
+  <packaging>war</packaging>
+  <version>0.0.1-SNAPSHOT</version>
+
+  <name>ehri-searchindex</name>
+  <url>http://maven.apache.org</url>
+  
+  <properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<source-code-version>1.6</source-code-version>
+		<byte-code-version>1.6</byte-code-version>
+  </properties>
+  
+  <dependencies>
+
+		<!-- the ehri data via tinkerpop frames project -->
+		<dependency>
+		  <groupId>ehri-project</groupId>
+		  <artifactId>ehri-frames</artifactId>
+          <version>0.1-SNAPSHOT</version>
+          <type>jar</type>
+          <exclusions>
+          	<exclusion>
+          		<artifactId>slf4j-log4j12</artifactId>
+          		<groupId>org.slf4j</groupId>
+          	</exclusion>
+          	<exclusion>
+          		<artifactId>log4j</artifactId>
+          		<groupId>log4j</groupId>
+          	</exclusion>
+          </exclusions>
+		</dependency>
+		<dependency>
+			<groupId>ehri-project</groupId>
+			<artifactId>ehri-frames</artifactId>
+			<version>0.1-SNAPSHOT</version>
+			<type>test-jar</type>
+			<scope>test</scope>
+		</dependency>	
+		
+		<!-- OPTIONAL For saxon-style XSLT transformation -->
+		<!-- 
+		<dependency>
+			<groupId>net.sf.saxon</groupId>
+			<artifactId>Saxon-HE</artifactId>
+			<version>9.4</version>
+		</dependency>
+        -->
+      
+     	<!-- JAX-RS -->
+		<dependency>
+			<groupId>com.sun.jersey</groupId>
+			<artifactId>jersey-server</artifactId>
+			<version>1.8</version>
+		</dependency>
+		<dependency>
+			<groupId>com.sun.jersey</groupId>
+			<artifactId>jersey-client</artifactId>
+			<version>1.13</version>
+		</dependency>
+
+		<!-- to use json object and arrays -->
+		<dependency>
+			<groupId>com.sun.jersey</groupId>
+			<artifactId>jersey-json</artifactId>
+			<version>1.8</version>
+		</dependency>
+
+		<!-- logging -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.6.6</version> 
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<version>1.6.6</version>
+		</dependency>
+			
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+			<version>4.10</version>
+		</dependency>
+				
+		<!-- jersey-test-framework -->
+		<dependency>
+			<groupId>com.sun.jersey.jersey-test-framework</groupId>
+			<artifactId>jersey-test-framework-grizzly2</artifactId>
+			<version>1.8</version>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- mockito -->
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-all</artifactId>
+			<version>1.9.0</version>
+			<scope>test</scope>
+		</dependency>    
+  </dependencies>
+  
+  <build>
+    <finalName>ehri-searchindex</finalName>
+  </build>
+</project>

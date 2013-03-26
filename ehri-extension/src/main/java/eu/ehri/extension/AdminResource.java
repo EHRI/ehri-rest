@@ -11,6 +11,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import eu.ehri.project.models.base.NamedEntity;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.server.database.Database;
 
@@ -70,7 +71,7 @@ public class AdminResource {
             String ident = getNextDefaultUserId();
             Bundle bundle = new Bundle(EntityClass.USER_PROFILE)
                     .withDataValue(AccessibleEntity.IDENTIFIER_KEY, ident)
-                    .withDataValue(Accessor.NAME, ident);
+                    .withDataValue(NamedEntity.NAME, ident);
 
             // NB: This assumes that admin's ID is the same as its identifier.
             Accessor accessor = manager.getFrame(Group.ADMIN_GROUP_IDENTIFIER,

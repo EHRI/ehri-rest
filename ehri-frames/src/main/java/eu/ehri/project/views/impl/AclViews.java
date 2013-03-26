@@ -17,6 +17,7 @@ import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.ContentType;
+import eu.ehri.project.models.Group;
 import eu.ehri.project.models.Permission;
 import eu.ehri.project.models.PermissionGrant;
 import eu.ehri.project.models.base.AccessibleEntity;
@@ -34,6 +35,7 @@ public final class AclViews implements Acl {
     private final AclManager acl;
     private final ViewHelper helper;
     private final GraphManager manager;
+    private final PermissionScope scope;
 
     /**
      * Scoped constructor.
@@ -46,6 +48,7 @@ public final class AclViews implements Acl {
         helper = new ViewHelper(graph, scope);
         acl = helper.getAclManager();
         manager = GraphManagerFactory.getInstance(graph);
+        this.scope = scope;
     }
 
     /**
@@ -138,9 +141,9 @@ public final class AclViews implements Acl {
                     Iterable<PermissionGrant> grants = acl.getPermissionGrants(
                             accessor, target, grantPerm);
                     if (!grants.iterator().hasNext()) {
-                        throw new PermissionDenied(manager.getId(accessor),
-                                manager.getId(target), manager.getId(grantPerm),
-                                "system");
+                        throw new PermissionDenied(accessor.getId(),
+                                target.getId(), grantPerm.getId(),
+                                scope.getId());
                     }
                 }
             } catch (ItemNotFound e) {
@@ -196,4 +199,83 @@ public final class AclViews implements Acl {
         acl.revokePermissionGrant(grant);
     }
 
+    /**
+     * Add a user to a group. This confers any permissions the group
+     * has on the user, so requires grant permissions for the user as
+     * we as modify permissions for the group.
+     *
+     * @param group
+     * @param user
+     * @param grantee
+     * @throws PermissionDenied
+     */
+    public void addAccessorToGroup(Group group, Accessor user, Accessor grantee)
+            throws PermissionDenied {
+        ensureCanModifyGroupMembership(group, user, grantee);
+        try {
+            group.addMember(graph.frame(user.asVertex(), Accessor.class));
+            // Log the action...
+            new ActionManager(graph).logEvent(group,
+                    graph.frame(grantee.asVertex(), Actioner.class),
+                    "Added user to group").addSubjects(
+                    graph.frame(user.asVertex(), AccessibleEntity.class));
+            graph.getBaseGraph().stopTransaction(Conclusion.SUCCESS);
+        } catch (Exception e) {
+            graph.getBaseGraph().stopTransaction(Conclusion.FAILURE);
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    /**
+     * Remove a user from a group. Just as with adding uers, this requires
+     * grant permissions for the user and modify permissions for the group.
+     *
+     * @param group
+     * @param user
+     * @param grantee
+     * @throws PermissionDenied
+     */
+    public void removeAccessorFromGroup(Group group, Accessor user, Accessor grantee)
+            throws PermissionDenied {
+        ensureCanModifyGroupMembership(group, user, grantee);
+        try {
+            group.removeMember(graph.frame(user.asVertex(), Accessor.class));
+            // Log the action...
+            new ActionManager(graph).logEvent(group,
+                    graph.frame(grantee.asVertex(), Actioner.class),
+                    "Removed user from group").addSubjects(
+                    graph.frame(user.asVertex(), AccessibleEntity.class));
+            graph.getBaseGraph().stopTransaction(Conclusion.SUCCESS);
+        } catch (Exception e) {
+            graph.getBaseGraph().stopTransaction(Conclusion.FAILURE);
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void ensureCanModifyGroupMembership(Group group, Accessor user, Accessor grantee)
+            throws PermissionDenied {
+        // If a user is not admin they can only add someone else to a group if
+        // a) they belong to that group themselves, and
+        // b) they have the modify permission on that group, and
+        // c) they have grant permissions for the user
+        if (!acl.belongsToAdmin(grantee)) {
+            // FIXME: With TP 2.3.0 update this comparing of vertices shouldn't be necessary
+            boolean found = false;
+            for (Accessor acc : grantee.getAllParents()) {
+                if (group.asVertex().equals(acc.asVertex())) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                throw new PermissionDenied(grantee.getId(), group.getId(),
+                        "Non-admin users cannot add other users to groups that they" +
+                                " do not themselves belong to.");
+            }
+            helper.checkEntityPermission(graph.frame(user.asVertex(),
+                    AccessibleEntity.class), grantee, PermissionType.GRANT);
+            helper.checkEntityPermission(group, grantee, PermissionType.UPDATE);
+        }
+    }
 }

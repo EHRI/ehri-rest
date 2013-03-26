@@ -1,8 +1,7 @@
 package eu.ehri.project.models;
 
-import com.tinkerpop.frames.VertexFrame;
-
 import eu.ehri.project.definitions.Entities;
+import eu.ehri.project.models.base.Frame;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.ConceptDescription;
 import eu.ehri.project.models.cvoc.Vocabulary;
@@ -72,7 +71,7 @@ public enum EntityClass {
      * 
      * @return
      */
-    public Class<? extends VertexFrame> getEntityClass() {
+    public Class<? extends Frame> getEntityClass() {
         return cls;
     }
 
@@ -95,11 +94,11 @@ public enum EntityClass {
 
     private final String name;
     private final String abbr;
-    private final Class<? extends VertexFrame> cls;
+    private final Class<? extends Frame> cls;
     private final IdGenerator idgen;
 
     private EntityClass(String name, String abbr,
-            Class<? extends VertexFrame> cls, IdGenerator idgen) {
+            Class<? extends Frame> cls, IdGenerator idgen) {
         this.name = name;
         this.abbr = abbr;
         this.cls = cls;
@@ -114,7 +113,7 @@ public enum EntityClass {
      * @param cls
      */
     private EntityClass(String name, String abbr,
-            Class<? extends VertexFrame> cls) {
+            Class<? extends Frame> cls) {
         this(name, abbr, cls, GenericIdGenerator.INSTANCE);
     }
 

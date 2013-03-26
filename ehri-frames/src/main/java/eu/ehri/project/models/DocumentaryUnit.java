@@ -3,22 +3,23 @@ package eu.ehri.project.models;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Property;
-import com.tinkerpop.frames.VertexFrame;
 import com.tinkerpop.frames.annotations.gremlin.GremlinGroovy;
 
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
+import eu.ehri.project.models.annotations.Mandatory;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.DescribedEntity;
 import eu.ehri.project.models.base.PermissionScope;
 
 @EntityType(EntityClass.DOCUMENTARY_UNIT)
-public interface DocumentaryUnit extends VertexFrame, AccessibleEntity,
+public interface DocumentaryUnit extends AccessibleEntity,
         DescribedEntity, PermissionScope {
 
     public static final String CHILD_OF = "childOf";
     public static final String NAME = "name";
 
+    @Mandatory
     @Property(NAME)
     public String getName();
 

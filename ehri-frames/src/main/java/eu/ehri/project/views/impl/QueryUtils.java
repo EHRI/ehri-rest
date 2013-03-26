@@ -1,6 +1,5 @@
 package eu.ehri.project.views.impl;
 
-import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableSortedMap;
@@ -17,11 +16,7 @@ import java.util.List;
 import java.util.SortedMap;
 
 /**
- * Created with IntelliJ IDEA.
  * User: michaelb
- * Date: 30/01/13
- * Time: 15:09
- * To change this template use File | Settings | File Templates.
  */
 public class QueryUtils {
 

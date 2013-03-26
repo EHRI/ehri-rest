@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
+import eu.ehri.project.models.base.NamedEntity;
 import org.junit.Test;
 
 import eu.ehri.project.definitions.Entities;
@@ -22,7 +23,7 @@ public class BundleUtilsTest extends AbstractFixtureTest {
     public void testGetPath() throws Exception {
         Bundle bundle = Bundle.fromData(getTestBundle());
         assertEquals(TEST_COLLECTION_NAME,
-                BundleUtils.get(bundle, Accessor.NAME));
+                BundleUtils.get(bundle, NamedEntity.NAME));
         assertEquals(TEST_START_DATE,
                 BundleUtils.get(bundle, "describes[0]/hasDate[0]/startDate"));
         assertEquals(TEST_START_DATE, BundleUtils.get(bundle,
@@ -119,7 +120,7 @@ public class BundleUtilsTest extends AbstractFixtureTest {
         return new HashMap<String, Object>() {{
             put("type", Entities.DOCUMENTARY_UNIT);
             put("data", new HashMap<String, Object>() {{
-                put(Accessor.NAME, TEST_COLLECTION_NAME);
+                put(NamedEntity.NAME, TEST_COLLECTION_NAME);
                 put(AccessibleEntity.IDENTIFIER_KEY, "someid-01");
             }});
             put("relationships", new HashMap<String, Object>() {{

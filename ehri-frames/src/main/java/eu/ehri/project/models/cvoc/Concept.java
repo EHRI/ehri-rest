@@ -26,7 +26,6 @@ import eu.ehri.project.models.base.DescribedEntity;
  *
  */
 @EntityType(EntityClass.CVOC_CONCEPT)
-//public interface Concept extends AccessibleEntity {
 public interface Concept extends AccessibleEntity, DescribedEntity {
     public static final String BROADER = "broader";
     public static final String NARROWER = "narrower";

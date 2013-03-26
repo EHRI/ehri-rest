@@ -1,17 +1,13 @@
 package eu.ehri.project.views.impl;
 
-import com.tinkerpop.frames.VertexFrame;
 import eu.ehri.project.exceptions.*;
-import eu.ehri.project.models.base.Actioner;
+import eu.ehri.project.models.base.*;
 import org.neo4j.graphdb.Transaction;
 
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
 import eu.ehri.project.acl.SystemScope;
-import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistance.ActionManager;
 import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.views.Crud;
@@ -251,7 +247,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws IntegrityError
      * @throws DeserializationError
      */
-    public <T extends VertexFrame> T updateDependent(Bundle bundle, E parent, Accessor user,
+    public <T extends Frame> T updateDependent(Bundle bundle, E parent, Accessor user,
             Class<T> dependentClass) throws PermissionDenied,
             ValidationError, DeserializationError, IntegrityError {
         return updateDependent(bundle, parent, user, dependentClass, DEFAULT_UPDATE_LOG);
@@ -272,7 +268,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws IntegrityError
      * @throw DeserializationError
      */
-    public <T extends VertexFrame> T updateDependent(Bundle bundle, E parent, Accessor user,
+    public <T extends Frame> T updateDependent(Bundle bundle, E parent, Accessor user,
             Class<T> dependentClass, String logMessage)
             throws PermissionDenied, ValidationError, DeserializationError,
             IntegrityError {
@@ -313,7 +309,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws IntegrityError
      * @throws DeserializationError
      */
-    public <T extends VertexFrame> T createDependent(Bundle bundle,
+    public <T extends Frame> T createDependent(Bundle bundle,
             E parent, Accessor user, Class<T> dependentClass) throws PermissionDenied,
             ValidationError, DeserializationError, IntegrityError {
         return createDependent(bundle, parent, user, dependentClass, DEFAULT_UPDATE_LOG);
@@ -334,7 +330,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws IntegrityError
      * @throw DeserializationError
      */
-    public <T extends VertexFrame> T createDependent(Bundle bundle, E parent, Accessor user,
+    public <T extends Frame> T createDependent(Bundle bundle, E parent, Accessor user,
                 Class<T> dependentClass, String logMessage)
             throws PermissionDenied, ValidationError, DeserializationError,
             IntegrityError {
@@ -424,7 +420,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws ValidationError
      * @throws SerializationError
      */
-    public <T extends VertexFrame> Integer deleteDependent(T item, E parent, Accessor user,
+    public <T extends Frame> Integer deleteDependent(T item, E parent, Accessor user,
             Class<T> dependentClass) throws PermissionDenied,
             ValidationError, SerializationError {
         return deleteDependent(item, parent, user, dependentClass, DEFAULT_DELETE_LOG);
@@ -444,7 +440,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws ValidationError
      * @throws SerializationError
      */
-    public <T extends VertexFrame> Integer deleteDependent(T item, E parent, Accessor user,
+    public <T extends Frame> Integer deleteDependent(T item, E parent, Accessor user,
             Class<T> dependentClass, String logMessage)
             throws PermissionDenied, ValidationError, SerializationError {
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
