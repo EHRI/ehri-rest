@@ -1,7 +1,6 @@
 package eu.ehri.project.models.cvoc;
 
 import com.tinkerpop.frames.Property;
-import com.tinkerpop.frames.VertexFrame;
 
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
@@ -18,7 +17,7 @@ import eu.ehri.project.models.base.Description;
  *
  */
 @EntityType(EntityClass.CVOC_CONCEPT_DESCRIPTION)
-public interface ConceptDescription extends VertexFrame, Description {
+public interface ConceptDescription extends Description {
     public static final String LANGUAGE = Description.LANGUAGE_CODE; //"languageCode";
     public static final String PREFLABEL = Description.NAME; //"prefLabel";
     public static final String ALTLABEL = "altLabel";

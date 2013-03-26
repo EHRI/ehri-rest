@@ -4,15 +4,16 @@
  */
 package eu.ehri.project.importers;
 
-import eu.ehri.project.importers.properties.XmlImportProperties;
-import com.tinkerpop.frames.VertexFrame;
 import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.MaintenanceEvent;
 import eu.ehri.project.models.base.Description;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import eu.ehri.project.models.base.Frame;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 //import org.xml.sax.Attributes;
@@ -26,13 +27,14 @@ import org.xml.sax.SAXException;
  */
 public class EacHandler extends SaxXmlHandler {
 
-    Map<String, Class<? extends VertexFrame>> possibleSubnodes;
+    Map<String, Class<? extends Frame>> possibleSubnodes;
     private static final Logger logger = LoggerFactory.getLogger(EacHandler.class);
 
-    @SuppressWarnings("unchecked")
     public EacHandler(AbstractImporter<Map<String, Object>> importer) {
+
         super(importer, new XmlImportProperties("eac.properties"));
-        possibleSubnodes = new HashMap<String, Class<? extends VertexFrame>>();
+        possibleSubnodes = new HashMap<String, Class<? extends Frame>>();
+
         possibleSubnodes.put("maintenanceEvent", MaintenanceEvent.class);
     }
 
@@ -61,10 +63,12 @@ public class EacHandler extends SaxXmlHandler {
                 if (!currentGraphPath.peek().containsKey("objectIdentifier")) {
                     putPropertyInCurrentGraph("objectIdentifier", "id");
                 }
+
                 //TODO: name can have only 1 value, others are otherFormsOfName
                 if (currentGraphPath.peek().containsKey(Description.NAME)) {
                     String name = chooseName(currentGraphPath.peek().get(Description.NAME));
                     overwritePropertyInCurrentGraph(Description.NAME, name);
+
                 }
                 if (!currentGraphPath.peek().containsKey(Description.LANGUAGE_CODE)) {
                     logger.debug("no " + Description.LANGUAGE_CODE + " found");

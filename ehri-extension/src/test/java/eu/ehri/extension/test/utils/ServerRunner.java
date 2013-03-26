@@ -50,6 +50,9 @@ public class ServerRunner {
         config = new ServerConfigurator(graphDatabase);
         config.configuration().setProperty("org.neo4j.server.webserver.port",
                 dbPort.toString());
+        config.configuration().setProperty("org.neo4j.server.webserver.port",
+                dbPort.toString());
+
 
         // FIXME: Work out how to turn off server logging. The config below
         // doesn't
@@ -58,6 +61,8 @@ public class ServerRunner {
                 "java.util.logging.ConsoleHandler.level", "OFF");
         config.configuration().setProperty("org.neo4j.server.logging.level",
                 "ERROR");
+
+
 
         bootstrapper = new WrappingNeoServerBootstrapper(graphDatabase, config);
 

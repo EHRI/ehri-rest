@@ -198,7 +198,8 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
         String jsonStr = serializer.vertexFrameToJson(doc);
         // FIXME: Hide the details of building this path
         URI docUri = UriBuilder.fromUri(uriInfo.getBaseUri())
-                .segment(Entities.DOCUMENTARY_UNIT).segment(manager.getId(doc))
+                .segment(Entities.DOCUMENTARY_UNIT)
+                .segment(doc.getId())
                 .build();
 
         return Response.status(Status.CREATED).location(docUri)

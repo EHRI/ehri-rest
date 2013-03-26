@@ -46,7 +46,7 @@
       </item>
     </describes>
     <heldBy>
-      <item id="wiener-library" type="agent">
+      <item id="wiener-library" type="repository">
         <data>
           <property name="publicationStatus" type="xs:string">Draft</property>
           <property name="name" type="xs:string">Wiener Library</property>
@@ -54,7 +54,7 @@
         </data>
         <relationships>
           <describes>
-            <item id="ba926203-72ea-461c-a98b-8f4a3320d552" type="agentDescription">
+            <item id="ba926203-72ea-461c-a98b-8f4a3320d552" type="repositoryDescription">
               <data>
                 <property name="history" type="xs:string">The Wiener Library is one of the world's leading and most extensive archives on the Holocaust and Nazi era.  Formed in 1933, the Library's unique collection of over one million items includes published and unpublished works, press cuttings, photographs and eyewitness testimony.</property>
                 <propertySequence>

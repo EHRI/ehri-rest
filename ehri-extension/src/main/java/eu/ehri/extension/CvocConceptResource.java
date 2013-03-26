@@ -26,8 +26,6 @@ import eu.ehri.project.models.EntityClass;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 
-import com.tinkerpop.blueprints.Direction;
-
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.definitions.Entities;
@@ -376,7 +374,8 @@ public class CvocConceptResource extends
         String jsonStr = serializer.vertexFrameToJson(concept);
         // FIXME: Hide the details of building this path
         URI docUri = UriBuilder.fromUri(uriInfo.getBaseUri())
-                .segment(Entities.CVOC_CONCEPT).segment(manager.getId(concept))
+                .segment(Entities.CVOC_CONCEPT)
+                .segment(concept.getId())
                 .build();
 
         return Response.status(Status.CREATED).location(docUri)

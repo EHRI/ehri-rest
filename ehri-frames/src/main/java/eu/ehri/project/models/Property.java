@@ -1,8 +1,7 @@
 package eu.ehri.project.models;
 
-import com.tinkerpop.frames.VertexFrame;
-
 import eu.ehri.project.models.annotations.EntityType;
+import eu.ehri.project.models.base.AccessibleEntity;
 
 /**
  * Holds information about the collection or institute, 
@@ -10,5 +9,5 @@ import eu.ehri.project.models.annotations.EntityType;
  *
  */
 @EntityType(EntityClass.PROPERTY)
-public interface Property extends VertexFrame { 
+public interface Property extends AccessibleEntity {
 }

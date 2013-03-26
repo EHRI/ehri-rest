@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import eu.ehri.project.models.base.Frame;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
@@ -177,8 +178,8 @@ public class YamlFixtureLoader implements FixtureLoader {
                 getDependentRelations(nodeRels));
         BundleDAO persister = new BundleDAO(graph, SystemScope.getInstance());
         logger.debug("Creating node with id: {}", id);
-        VertexFrame frame = persister.createOrUpdate(entityBundle,
-                VertexFrame.class);
+        Frame frame = persister.createOrUpdate(entityBundle,
+                Frame.class);
 
         ListMultimap<String,String> linkRels = getLinkedRelations(nodeRels);
         if (!linkRels.isEmpty()) {

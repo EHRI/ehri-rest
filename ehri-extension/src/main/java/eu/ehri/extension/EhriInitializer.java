@@ -6,7 +6,6 @@ import java.util.Collection;
 import org.apache.commons.configuration.Configuration;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.event.PropertyEntry;
 import org.neo4j.graphdb.event.TransactionData;
 import org.neo4j.graphdb.event.TransactionEventHandler;
@@ -18,7 +17,8 @@ import org.slf4j.LoggerFactory;
 
 // in start do a one time 'initialization' like setting Handlers
 public class EhriInitializer implements PluginLifecycle {
-	   private static final Logger logger = LoggerFactory
+	   @SuppressWarnings("unused")
+    private static final Logger logger = LoggerFactory
 	            .getLogger(EhriInitializer.class);
 
 	@Override

@@ -2,6 +2,7 @@ package eu.ehri.project.acl;
 
 import com.tinkerpop.blueprints.Vertex;
 
+import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.models.Group;
 import eu.ehri.project.models.PermissionGrant;
 import eu.ehri.project.models.base.AccessibleEntity;
@@ -27,6 +28,14 @@ public enum AnonymousAccessor implements Accessor {
     public static Accessor getInstance() {
         return INSTANCE;
     }
+
+    public String getId() {
+        return Group.ANONYMOUS_GROUP_IDENTIFIER;
+    }
+
+    public String getType() {
+        return Entities.GROUP;
+    }
         
     public Vertex asVertex() {
         throw new UnsupportedOperationException();
@@ -34,10 +43,6 @@ public enum AnonymousAccessor implements Accessor {
 
     public String getIdentifier() {
         return Group.ANONYMOUS_GROUP_IDENTIFIER;
-    }
-
-    public void setName() {
-        throw new UnsupportedOperationException();
     }
 
     public Iterable<Accessor> getParents() {
@@ -50,10 +55,6 @@ public enum AnonymousAccessor implements Accessor {
 
     public Iterable<AccessibleEntity> getAccessibleEntities() {
         return new EmptyIterable<AccessibleEntity>();
-    }
-
-    public void removeAccessibleEntity(AccessibleEntity entity) {
-        throw new UnsupportedOperationException();
     }
 
     public Iterable<PermissionGrant> getPermissionGrants() {

@@ -6,6 +6,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import eu.ehri.project.models.annotations.*;
+import eu.ehri.project.models.base.Frame;
 import org.neo4j.helpers.collection.Iterables;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,13 +17,8 @@ import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Property;
-import com.tinkerpop.frames.VertexFrame;
 
 import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.annotations.Dependent;
-import eu.ehri.project.models.annotations.EntityType;
-import eu.ehri.project.models.annotations.Fetch;
-import eu.ehri.project.models.annotations.Unique;
 
 /**
  * Helper functions for managing EntityType classes.
@@ -123,6 +120,25 @@ public class ClassUtils {
         return ImmutableSet.copyOf(out);
     }
 
+    public static Iterable<String> getMandatoryPropertyKeys(Class<?> cls) {
+        List<String> out = new LinkedList<String>();
+        for (Method method : cls.getMethods()) {
+            Mandatory mandatory = method.getAnnotation(Mandatory.class);
+            if (mandatory != null) {
+                Property ann = method.getAnnotation(Property.class);
+                if (ann != null)
+                    out.add(ann.value());
+            }
+
+        }
+
+        for (Class<?> s : cls.getInterfaces()) {
+            Iterables.addAll(out, getMandatoryPropertyKeys(s));
+        }
+
+        return ImmutableSet.copyOf(out);
+    }
+
     public static Iterable<String> getUniquePropertyKeys(Class<?> cls) {
         List<String> out = new LinkedList<String>();
         for (Method method : cls.getMethods()) {
@@ -149,7 +165,7 @@ public class ClassUtils {
      * @param type
      * @return
      */
-    public static boolean hasType(VertexFrame frame, EntityClass type) {
+    public static boolean hasType(Frame frame, EntityClass type) {
         String isa = (String) frame.asVertex().getProperty(EntityType.TYPE_KEY);
         return type.getName().equals(isa);
     }

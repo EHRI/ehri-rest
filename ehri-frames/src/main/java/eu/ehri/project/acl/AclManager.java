@@ -23,7 +23,6 @@ import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
-import com.tinkerpop.frames.VertexFrame;
 import com.tinkerpop.pipes.PipeFunction;
 
 import eu.ehri.project.core.GraphManager;
@@ -36,10 +35,7 @@ import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Group;
 import eu.ehri.project.models.Permission;
 import eu.ehri.project.models.PermissionGrant;
-import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.models.base.PermissionGrantTarget;
-import eu.ehri.project.models.base.PermissionScope;
+import eu.ehri.project.models.base.*;
 import eu.ehri.project.models.utils.ClassUtils;
 
 /**
@@ -99,7 +95,7 @@ public final class AclManager {
      */
     public boolean isAdmin(Accessor accessor) {
         Preconditions.checkNotNull(accessor, "NULL accessor given.");
-        return accessor.getIdentifier().equals(Group.ADMIN_GROUP_IDENTIFIER);
+        return accessor.getId().equals(Group.ADMIN_GROUP_IDENTIFIER);
     }
 
     /**
@@ -127,7 +123,7 @@ public final class AclManager {
     public boolean isAnonymous(Accessor accessor) {
         Preconditions.checkNotNull(accessor, "NULL accessor given.");
         return accessor instanceof AnonymousAccessor
-                || accessor.getIdentifier().equals(
+                || accessor.getId().equals(
                         Group.ANONYMOUS_GROUP_IDENTIFIER);
     }
 
@@ -268,14 +264,12 @@ public final class AclManager {
             Accessor accessor, AccessibleEntity entity) {
         List<Map<String, List<PermissionType>>> list = Lists.newLinkedList();
         Map<String, List<PermissionType>> userMap = Maps.newHashMap();
-        userMap.put(manager.getId(accessor),
-                getEntityPermissions(accessor, entity));
+        userMap.put(accessor.getId(), getEntityPermissions(accessor, entity));
         list.add(userMap);
         for (Accessor parent : accessor.getAllParents()) {
             Map<String, List<PermissionType>> parentMap = Maps.newHashMap();
             list.add(parentMap);
-            parentMap.put(manager.getId(parent),
-                    getEntityPermissions(parent, entity));
+            parentMap.put(parent.getId(), getEntityPermissions(parent, entity));
         }
         return list;
     }
@@ -312,12 +306,12 @@ public final class AclManager {
                 .newLinkedList();
         Map<String, Map<ContentTypes, Collection<PermissionType>>> userMap = Maps
                 .newHashMap();
-        userMap.put(manager.getId(accessor), getGlobalPermissions(accessor));
+        userMap.put(accessor.getId(), getGlobalPermissions(accessor));
         globals.add(userMap);
         for (Accessor parent : accessor.getParents()) {
             Map<String, Map<ContentTypes, Collection<PermissionType>>> parentMap = Maps
                     .newHashMap();
-            parentMap.put(manager.getId(parent), getGlobalPermissions(parent));
+            parentMap.put(parent.getId(), getGlobalPermissions(parent));
             globals.add(parentMap);
         }
         return globals;
@@ -490,7 +484,7 @@ public final class AclManager {
      * @param perm
      * @return
      */
-    private PermissionType enumForPermission(VertexFrame perm) {
+    private PermissionType enumForPermission(Frame perm) {
         return permissionEnumMap.get(perm.asVertex());
     }
 
@@ -703,13 +697,13 @@ public final class AclManager {
         // identifier.
         for (ContentType c : manager.getFrames(EntityClass.CONTENT_TYPE,
                 ContentType.class)) {
-            ContentTypes ct = ContentTypes.withName(manager.getId(c));
+            ContentTypes ct = ContentTypes.withName(c.getId());
             enumContentTypeMap.put(ct, c);
             contentTypeEnumMap.put(c.asVertex(), ct);
         }
         for (Permission p : manager.getFrames(EntityClass.PERMISSION,
                 Permission.class)) {
-            PermissionType pt = PermissionType.withName(manager.getId(p));
+            PermissionType pt = PermissionType.withName(p.getId());
             enumPermissionMap.put(pt, p);
             permissionEnumMap.put(p.asVertex(), pt);
         }

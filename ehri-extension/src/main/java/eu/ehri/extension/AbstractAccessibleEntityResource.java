@@ -161,7 +161,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
 
             String jsonStr = serializer.vertexFrameToJson(entity);
             UriBuilder ub = uriInfo.getAbsolutePathBuilder();
-            URI docUri = ub.path(manager.getId(entity)).build();
+            URI docUri = ub.path(entity.getId()).build();
             tx.success();
             return Response.status(Status.CREATED).location(docUri)
                     .entity((jsonStr).getBytes()).build();
@@ -279,8 +279,8 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
         E entity = views.detail(manager.getFrame(id, getEntityType(), cls),
                 getRequesterUserProfile());
         Bundle rawBundle = Bundle.fromString(json);
-        Bundle entityBundle = new Bundle(manager.getId(entity),
-                getEntityType(), rawBundle.getData(), rawBundle.getRelations());
+        Bundle entityBundle = new Bundle(entity.getId(), getEntityType(),
+                rawBundle.getData(), rawBundle.getRelations());
         return update(entityBundle.toJson());
     }
 

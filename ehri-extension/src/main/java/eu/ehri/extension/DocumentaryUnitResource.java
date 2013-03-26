@@ -247,7 +247,7 @@ public class DocumentaryUnitResource extends
             // FIXME: Hide the details of building this path
             URI docUri = UriBuilder.fromUri(uriInfo.getBaseUri())
                     .segment(Entities.DOCUMENTARY_UNIT)
-                    .segment(manager.getId(doc)).build();
+                    .segment(doc.getId()).build();
             return Response.status(Status.CREATED).location(docUri)
                     .entity((jsonStr).getBytes()).build();
         } catch (Exception e) {

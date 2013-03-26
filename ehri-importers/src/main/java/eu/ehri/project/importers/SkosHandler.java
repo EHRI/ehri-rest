@@ -10,9 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
+import eu.ehri.project.models.base.Frame;
 import org.xml.sax.SAXException;
-
-import com.tinkerpop.frames.VertexFrame;
 
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.cvoc.Concept;
@@ -29,14 +28,13 @@ import org.slf4j.LoggerFactory;
 public class SkosHandler extends SaxXmlHandler {
 
     private static final org.slf4j.Logger logger = LoggerFactory.getLogger(SkosHandler.class);
-    Map<String, Class<? extends VertexFrame>> possibleSubnodes;
+    Map<String, Class<? extends Frame>> possibleSubnodes;
     Stack<String> prefixStack;
 
-    @SuppressWarnings("unchecked")
     public SkosHandler(AbstractImporter<Map<String, Object>> importer) {
         super(importer, new XmlImportProperties("skos.properties"));
         prefixStack = new Stack<String>();
-        possibleSubnodes = new HashMap<String, Class<? extends VertexFrame>>();
+        possibleSubnodes = new HashMap<String, Class<? extends Frame>>();
         possibleSubnodes.put("concept", Concept.class);
     }
 

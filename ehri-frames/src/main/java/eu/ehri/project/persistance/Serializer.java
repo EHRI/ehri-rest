@@ -9,7 +9,7 @@ import com.google.common.collect.Maps;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
-import com.tinkerpop.frames.VertexFrame;
+import eu.ehri.project.models.base.Frame;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,7 +62,7 @@ public final class Serializer {
      * @return
      * @throws SerializationError
      */
-    public <T extends VertexFrame> Map<String, Object> vertexFrameToData(T item)
+    public <T extends Frame> Map<String, Object> vertexFrameToData(T item)
             throws SerializationError {
         return vertexFrameToBundle(item).toData();
     }
@@ -80,14 +80,14 @@ public final class Serializer {
     }
 
     /**
-     * Convert a VertexFrame into an EntityBundle that includes its @Fetch'd
+     * Convert a Frame into an EntityBundle that includes its @Fetch'd
      * relations.
      * 
      * @param item
      * @return
      * @throws SerializationError
      */
-    public <T extends VertexFrame> Bundle vertexFrameToBundle(T item)
+    public <T extends Frame> Bundle vertexFrameToBundle(T item)
             throws SerializationError {
         return vertexToBundle(item.asVertex(), 0);
     }
@@ -112,7 +112,7 @@ public final class Serializer {
      * @return
      * @throws SerializationError
      */
-    public <T extends VertexFrame> String vertexFrameToJson(T item)
+    public <T extends Frame> String vertexFrameToJson(T item)
             throws SerializationError {
         return DataConverter.bundleToJson(vertexFrameToBundle(item));
     }
@@ -137,7 +137,7 @@ public final class Serializer {
      * @return document
      * @throws SerializationError
      */
-    public <T extends VertexFrame> Document vertexFrameToXml(T item)
+    public <T extends Frame> Document vertexFrameToXml(T item)
             throws SerializationError {
         return DataConverter.bundleToXml(vertexFrameToBundle(item));
     }
@@ -149,7 +149,7 @@ public final class Serializer {
      * @return document string
      * @throws SerializationError
      */
-    public <T extends VertexFrame> String vertexFrameToXmlString(T item)
+    public <T extends Frame> String vertexFrameToXmlString(T item)
             throws SerializationError {
         return DataConverter.bundleToXmlString(vertexFrameToBundle(item));
     }
@@ -161,13 +161,13 @@ public final class Serializer {
      * @param item
      * @param cb
      */
-    public <T extends VertexFrame> void traverseSubtree(T item,
+    public <T extends Frame> void traverseSubtree(T item,
             final TraversalCallback cb) {
         traverseSubtree(item, 0, cb);
     }
 
     /**
-     * Convert a VertexFrame into an EntityBundle that includes its @Fetch'd
+     * Convert a Frame into an EntityBundle that includes its @Fetch'd
      * relations.
      * 
      * @param item
@@ -210,12 +210,12 @@ public final class Serializer {
                         Object result = method.invoke(graph.frame(
                                 item, cls));
                         // The result of one of these fetchMethods should either
-                        // be a single VertexFrame, or a Iterable<VertexFrame>.
+                        // be a single Frame, or a Iterable<Frame>.
                         if (result instanceof Iterable<?>) {
                             for (Object d : (Iterable<?>) result) {
                                 relations.put(
                                         relationName,
-                                        vertexToBundle(((VertexFrame) d).asVertex(),
+                                        vertexToBundle(((Frame) d).asVertex(),
                                                 depth + 1));
                             }
                         } else {
@@ -225,13 +225,13 @@ public final class Serializer {
                                 relations
                                         .put(relationName,
                                                 vertexToBundle(
-                                                        ((VertexFrame) result).asVertex(),
+                                                        ((Frame) result).asVertex(),
                                                         depth + 1));
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
                         throw new RuntimeException(
-                                "Unexpected error serializing VertexFrame", e);
+                                "Unexpected error serializing Frame", e);
                     }
                 }
             }
@@ -295,7 +295,7 @@ public final class Serializer {
      * @param depth
      * @param cb
      */
-    private <T extends VertexFrame> void traverseSubtree(T item, int depth,
+    private <T extends Frame> void traverseSubtree(T item, int depth,
             final TraversalCallback cb) {
 
         if (depth < maxTraversals) {
@@ -314,23 +314,23 @@ public final class Serializer {
                         if (result instanceof Iterable<?>) {
                             int rnum = 0;
                             for (Object d : (Iterable<?>) result) {
-                                cb.process((VertexFrame) d, depth,
+                                cb.process((Frame) d, depth,
                                         entry.getKey(), rnum);
-                                traverseSubtree((VertexFrame) d, depth + 1, cb);
+                                traverseSubtree((Frame) d, depth + 1, cb);
                                 rnum++;
                             }
                         } else {
                             if (result != null) {
-                                cb.process((VertexFrame) result, depth,
+                                cb.process((Frame) result, depth,
                                         entry.getKey(), 0);
-                                traverseSubtree((VertexFrame) result,
+                                traverseSubtree((Frame) result,
                                         depth + 1, cb);
                             }
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
                         throw new RuntimeException(
-                                "Unexpected error serializing VertexFrame", e);
+                                "Unexpected error serializing Frame", e);
                     }
                 }
             }

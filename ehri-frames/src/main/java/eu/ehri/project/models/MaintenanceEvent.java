@@ -8,6 +8,7 @@ import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Property;
 import eu.ehri.project.models.annotations.EntityType;
+import eu.ehri.project.models.annotations.Mandatory;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.TemporalEntity;
 
@@ -22,10 +23,12 @@ public interface MaintenanceEvent extends TemporalEntity, AccessibleEntity{
      public enum EventType { CREATED, REVISED }
      public enum AgentType { HUMAN }
      
-    //TODO: decide whether to make these required 
+    //TODO: decide whether to make these required
+    @Mandatory
     @Property(EVENTTYPE)
     public void setEventType(EventType eventType);
 
+    @Mandatory
     @Property(AGENTTYPE)
     public void setAgentType(AgentType agentType);
 

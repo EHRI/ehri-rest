@@ -209,8 +209,7 @@ public class CvocTest extends ModelTestBase {
 		} finally {
 			tx.finish();
 		}
-
-		assertEquals(vocabulary.getIdentifier(), apples.getVocabulary().getIdentifier());
+        assertEquals(vocabulary.getIdentifier(), apples.getVocabulary().getIdentifier());
 
 	}
 	
