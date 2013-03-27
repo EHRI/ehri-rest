@@ -24,7 +24,6 @@ import javax.xml.XMLConstants;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
-import javax.xml.transform.sax.SAXSource;
 import javax.xml.validation.SchemaFactory;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.tooling.GlobalGraphOperations;
@@ -33,7 +32,6 @@ import org.slf4j.LoggerFactory;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import org.xml.sax.helpers.DefaultHandler;
 
 /**
  * Class that provides a front-end for importing XML files like EAD and EAC and
@@ -254,11 +252,10 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
 //            spf.setNamespaceAware(true);
             try {
                 logger.debug("in try");
-                SchemaFactory sf =
-                        SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+                SchemaFactory sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
                 for(String schemafile : handler.getSchemas()){
-                  spf.setSchema(sf.newSchema(new File("src/main/resources/"+schemafile)));
-                logger.debug("path: "+new File("src/main/resources/"+schemafile).getAbsolutePath());
+                    spf.setSchema(sf.newSchema(new File("src/main/resources/"+schemafile)));
+                    logger.debug("path: "+new File("src/main/resources/"+schemafile).getAbsolutePath());
                 }
 
 
@@ -271,7 +268,7 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
             saxParser.parse(ios, handler); //TODO + log
             
         } catch (InstantiationException ex) {
-            logger.error(ex.getMessage());
+            logger.error("InstantiationException: "+ex.getMessage());
         } catch (IllegalAccessException ex) {
             logger.error(ex.getMessage());
         } catch (IllegalArgumentException ex) {

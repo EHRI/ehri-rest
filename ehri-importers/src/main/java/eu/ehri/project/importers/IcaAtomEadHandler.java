@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 import java.util.regex.Pattern;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
@@ -20,7 +21,7 @@ import org.xml.sax.SAXException;
  * @author linda
  */
 public class IcaAtomEadHandler extends SaxXmlHandler {
-    private static final org.slf4j.Logger logger = LoggerFactory
+    private static final Logger logger = LoggerFactory
             .getLogger(IcaAtomEadHandler.class);
     List<DocumentaryUnit>[] children;
     // Pattern for EAD nodes that represent a child item

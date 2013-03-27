@@ -9,9 +9,9 @@
   </appender>
   
   <!-- <logger name="eu.ehri.project.test" level="${ehri.test.log.level:-warn}" /> -->
-  <logger name="eu.ehri" level="${ehri.log.level:-info}" />
+  <logger name="eu.ehri" level="${ehri.log.level:-debug}" />
 
-  <root level="INFO">
+  <root level="DEBUG">
     <appender-ref ref="STDOUT" />
   </root>
 </configuration>

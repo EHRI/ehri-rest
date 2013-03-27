@@ -64,5 +64,8 @@ private static final org.slf4j.Logger logger = LoggerFactory.getLogger(TestAllPr
     public void testSkosXmlProperties() {
         assertTrue(p.check(new XmlImportProperties("skos.properties"), "conceptDescription"));
     }
-    
+    @Test
+    public void testNiodXmlProperties() {
+        assertTrue(p.check(new XmlImportProperties("niod.properties"), "documentsDescription"));
+    }
 }

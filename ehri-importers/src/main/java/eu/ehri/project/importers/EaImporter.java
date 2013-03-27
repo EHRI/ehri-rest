@@ -47,13 +47,16 @@ public abstract class EaImporter extends XmlImporter<Map<String, Object>> {
     }
 
     protected Map<String, Object> extractUnit(Map<String, Object> itemData) throws ValidationError {
-        Map<String, Object> unit = new HashMap<String, Object>();
-        unit.put(AccessibleEntity.IDENTIFIER_KEY, itemData.get("objectIdentifier"));
-//        unit.put(HistoricalAgent.NAME, itemData.get(HistoricalAgent.NAME));
+        Map<String, Object> unit = extractDocumentaryUnit(itemData);
         unit.put("typeOfEntity", itemData.get("typeOfEntity"));
         return unit;
     }
 
+     protected Map<String, Object> extractDocumentaryUnit(Map<String, Object> itemData) throws ValidationError {
+        Map<String, Object> unit = new HashMap<String, Object>();
+        unit.put(AccessibleEntity.IDENTIFIER_KEY, itemData.get("objectIdentifier"));
+        return unit;
+    }
     protected <T> List<T> toList(Iterable<T> iter) {
         Iterator<T> it = iter.iterator();
         List<T> lst = new ArrayList<T>();
