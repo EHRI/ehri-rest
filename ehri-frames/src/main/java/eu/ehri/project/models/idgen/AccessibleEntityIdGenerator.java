@@ -61,8 +61,13 @@ public enum AccessibleEntityIdGenerator implements IdGenerator {
         // their ID a bit harder but lead to cleaner IDs. Not doing this now
         // because having dirty IDs is an effective way of debugging (via
         // breakage) other parts of the system.
-        scopeIds.add((String) bundle.getDataValue(AccessibleEntity.IDENTIFIER_KEY));
-        String scopedId =  Joiner.on(SEPARATOR).skipNulls().join(scopeIds);
+        String ident = (String) bundle.getDataValue(AccessibleEntity.IDENTIFIER_KEY);
+        // Validation should have ensured that ident exists...
+        if (ident == null || ident.trim().isEmpty()) {
+            throw new RuntimeException("Invalid null identifier for AccessibleEntity: " + bundle.getData());
+        }
+        scopeIds.add(ident);
+        String scopedId =  Joiner.on(SEPARATOR).join(scopeIds);
         return Slugify.slugify(scopedId);
     }
 }
