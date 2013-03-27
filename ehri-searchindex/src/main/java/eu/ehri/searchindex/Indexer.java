@@ -66,7 +66,7 @@ public class Indexer {
 	public Response deleteById(@PathParam("id") String id) {
 		// Note: could filter id, to prevent query injection, 
 		// but its an internal API so not needed
-		return updateAndCommitSolr("<delete><query>id:" + id + "</query></delete>");		
+		return updateSolr("<delete><query>id:" + id + "</query></delete>");		
 	}
 	
 	/**
@@ -96,7 +96,7 @@ public class Indexer {
  
         return indexNeo4jJsonResult(jsonStr);
 	}
-
+	
 	/**
 	 * Index all entities that are of the given type
 	 * 
@@ -107,31 +107,54 @@ public class Indexer {
 	@Path("/index/type/{type}")
 	@Produces(MediaType.APPLICATION_XML)
 	public Response indexByType(@PathParam("type") String type) {
-		// Note use a huge limit to force getting all
-		String url = config.getNeo4jEhriUrl() + "/" + type.trim() + "/list?limit=30000";
-		Client client = Client.create();
-        WebResource resource = client.resource(url);
-        ClientResponse response = resource
-                .accept(MediaType.APPLICATION_JSON)
-                .get(ClientResponse.class);
-
-        if (Response.Status.OK.getStatusCode() != response.getStatus()) {
-        	return getErrorResponse(response);
-        }
-        // We have json 
-        String jsonStr = response.getEntity(String.class);
-
-        return indexNeo4jJsonResult(jsonStr, type);
+		type = type.trim();
+		
+		// Note about the number of indexed documents. 
+		// the number of documents depends on the stylesheet. 
+		// For instance when retrieving entities that have descriptions, 
+		// the stylesheet will most likely index the descriptions 
+		// and that is almost always more that the number of entities. 
+		
+		// NOTE get all entities and process them, has potential 'out of memory' problems
+		// therefore we need to chop it up in chunks
+		
+		int limit = 32; // some sort of optimal constant
+		int offset = 0;
+		Response result;
+		String jsonStr = "[]";
+		do {
+			String url = config.getNeo4jEhriUrl() + "/" + type 
+					+ "/list?limit=" + limit + "&offset=" + offset;
+			Client client = Client.create();
+	        WebResource resource = client.resource(url);
+	        ClientResponse response = resource
+	                .accept(MediaType.APPLICATION_JSON)
+	                .get(ClientResponse.class);
+	
+	        if (Response.Status.OK.getStatusCode() != response.getStatus()) {
+	        	return getErrorResponse(response);
+	        }
+	        jsonStr = response.getEntity(String.class);
+	        // Note: if there is nothing we get an empty json list "[]"
+	        result = indexNeo4jJsonResult(jsonStr, type, false);
+	    	offset += limit; // advance for next chunk	        
+		} while (Response.Status.OK.getStatusCode() == result.getStatus() 
+				&& !jsonStr.contentEquals("[]")) ;
+        
+        // commit
+        result = commitSolr();
+        
+        return result;
 	}
 	
     /*** Helpers ***/
 	
-	/**
-	 * 
-	 * @param requestXml
-	 * @return
-	 */
-	private Response updateAndCommitSolr(String requestXml) {
+	private Response updateSolr(String requestXml) {
+		// commit by default
+		return updateSolr(requestXml, true); 
+	}
+	
+	private Response updateSolr(String requestXml, boolean commit) {
         // NOTE Solr can be instructed using a GET request with the commit=true
         // But I will stick to the post request for now
 
@@ -149,9 +172,25 @@ public class Indexer {
         	return getErrorResponse(response);
         }
         
+        if (commit) {
+        	return commitSolr();
+        } else {
+        	// DONT Commit the change
+        	// return the Solr response, would like to have ID back
+        	return Response.status(200).entity(response.getEntity(String.class)).build(); 	
+        }
+	}
+	
+	private Response commitSolr() {
+        // NOTE Solr can be instructed using a GET request with the commit=true
+        // But I will stick to the post request for now
+
         // Commit the change
         // curl $SOLR_URL/update --data-binary '<commit/>' -H 'Content-type:application/xml'
-        response = resource
+		Client client = Client.create();
+		// post to /update
+		WebResource resource = client.resource(config.getSolrEhriUrl() + "/update");
+		ClientResponse response = resource
                 .accept(MediaType.APPLICATION_XML)
                 .type(MediaType.APPLICATION_XML)
                 .entity("<commit/>")
@@ -162,8 +201,13 @@ public class Indexer {
         	return getErrorResponse(response);
         }
         
-        // return the Solr response, would like to have ID back
+        // return the Solr response
 		return Response.status(200).entity(response.getEntity(String.class)).build(); 		
+	}
+	
+	private Response indexNeo4jJsonResult (String jsonStr) {
+		// commit by default
+		return indexNeo4jJsonResult (jsonStr, true);
 	}
 	
 	/**
@@ -171,7 +215,7 @@ public class Indexer {
 	 * @param jsonStr
 	 * @return
 	 */
-	private Response indexNeo4jJsonResult (String jsonStr) {
+	private Response indexNeo4jJsonResult (String jsonStr, boolean commit) {
 		String type = "";
 		try {
 			type = getTypeFromNeo4jJsonResult(jsonStr);
@@ -179,17 +223,22 @@ public class Indexer {
 			return getErrorResponse(e);
 		}
 		
-		return indexNeo4jJsonResult (jsonStr, type);
+		return indexNeo4jJsonResult (jsonStr, type, commit);
 	}
 
+	private Response indexNeo4jJsonResult (String jsonStr, String type) {
+		// commit by default
+		return indexNeo4jJsonResult (jsonStr, type, true);
+	}
+	
 	/**
 	 * 
 	 * @param jsonStr
 	 * @param type
 	 * @return
 	 */
-	private Response indexNeo4jJsonResult (String jsonStr, String type) {
- 		// Lets convert that json to XML
+	private Response indexNeo4jJsonResult (String jsonStr, String type, boolean commit) {
+ 		// Convert that json to XML
         String xmlStr = "";
 		try {
 			xmlStr = convertJsonListToXml(jsonStr);
@@ -204,7 +253,7 @@ public class Indexer {
 			return getErrorResponse(e);
 		}
 
-		return updateAndCommitSolr(xmlStr);
+		return updateSolr(xmlStr, commit);
 	}
 	
 	/**
@@ -214,7 +263,7 @@ public class Indexer {
 	 * @throws Exception
 	 */
 	private String getTypeFromNeo4jJsonResult(String jsonStr) throws Exception {
-		// get the type from the JSON and not from the XML
+		// get the type from the JSON and not from the XML after converting
 		ObjectMapper mapper = new ObjectMapper();
 		JsonNode rootNode = mapper.readValue(jsonStr, JsonNode.class);
 
@@ -339,13 +388,19 @@ public class Indexer {
 	 * @return
 	 */
 	private Response getErrorResponse(ClientResponse response) {
-		/*
-    	return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-    			.entity("<status>" + response.getStatus() + "/<status>")
-    			.build();
-    	*/
     	return Response.status(response.getStatus())
     			.entity(response.getEntity(String.class))
+    			.build();
+	}
+	
+	/**
+	 * 
+	 * @param response
+	 * @return
+	 */
+	private Response getErrorResponse(Response response) {
+    	return Response.status(response.getStatus())
+    			.entity(response.getEntity())
     			.build();
 	}
 }

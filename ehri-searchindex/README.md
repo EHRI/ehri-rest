@@ -39,3 +39,10 @@ The following curl examples assume that the service is deployed on localhost por
 
 	> 	curl -v -X GET http://localhost:8080/ehri-searchindex/rest/indexer/index/type/userProfile
 
+You can delete the index of that type with curl on the Solr directly
+
+	>	curl http://localhost:8080/solr-ehri/registry/update --data-binary '<delete><query>type_s:userProfile</query></delete>' -H 'Content-type:application/xml'
+
+	>	curl http://localhost:8080/solr-ehri/registry/update --data-binary '<commit/>' -H 'Content-type:application/xml'
+ 
+Where the exact url depend on how you have Solr deployed.  
