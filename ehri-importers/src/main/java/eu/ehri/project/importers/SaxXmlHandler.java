@@ -81,7 +81,6 @@ public abstract class SaxXmlHandler extends DefaultHandler {
         }
 
         currentPath.push(withoutNamespace(qName));
-        logger.debug(currentPath.size() + ": " +currentPath.peek());
         if (needToCreateSubNode(qName)) { //a new subgraph should be created
             depth++;
             currentGraphPath.push(new HashMap<String, Object>());

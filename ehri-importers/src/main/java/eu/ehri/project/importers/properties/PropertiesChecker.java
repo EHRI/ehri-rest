@@ -44,6 +44,10 @@ public class PropertiesChecker {
         }
         Set<String> handler = allowed.getHandlerProperties(node);
         for (String property : actualproperties.getAllNonAttributeValues()) {
+            if(property.isEmpty() || property.equals("")){
+                logger.error("property file contains empty right-hand side");
+                testresult=false;
+            }
             if (!handler.contains(property)) {
                 logger.warn(node + " should NOT contain " + property);
 //                testresult = false;

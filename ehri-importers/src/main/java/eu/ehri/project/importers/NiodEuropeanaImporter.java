@@ -40,9 +40,11 @@ public class NiodEuropeanaImporter extends EaImporter{
     }
     
     @Override
-    public DocumentaryUnit importItem(Map<String, Object> itemData, int depth)
-            throws ValidationError {
-        logger.info("NiodEuropeanaImporter");
+    public DocumentaryUnit importItem(Map<String, Object> itemData, int depth) throws ValidationError {
+        return importItem(itemData);
+    }
+    
+    public DocumentaryUnit importItem(Map<String, Object> itemData) throws ValidationError {
         BundleDAO persister = new BundleDAO(framedGraph, permissionScope);
         Bundle unit = new Bundle(EntityClass.DOCUMENTARY_UNIT, extractDocumentaryUnit(itemData));
         logger.debug("unit created");

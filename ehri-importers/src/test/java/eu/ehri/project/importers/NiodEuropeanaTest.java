@@ -27,7 +27,7 @@ public class NiodEuropeanaTest extends AbstractImporterTest{
     // Depends on fixtures
     protected final String TEST_REPO = "r1";
     // Depends on hierarchical-ead.xml
-    protected final String FONDS_LEVEL = "Ctop level fonds";
+    protected final String UNIT_IDENTIFIER = "T1974-016";
 
     @Test
     public void testImportItemsT() throws Exception {
@@ -48,10 +48,10 @@ public class NiodEuropeanaTest extends AbstractImporterTest{
         assertEquals(count + 6, getNodeCount(graph));
 
         Iterable<Vertex> docs = graph.getVertices(AccessibleEntity.IDENTIFIER_KEY,
-                FONDS_LEVEL);
+                UNIT_IDENTIFIER);
         assertTrue(docs.iterator().hasNext());
         DocumentaryUnit fonds_unit = graph.frame(
-                getVertexByIdentifier(graph,FONDS_LEVEL),
+                getVertexByIdentifier(graph,UNIT_IDENTIFIER),
                 DocumentaryUnit.class);
 
         assertEquals("Jodenster", fonds_unit.getName());
@@ -71,7 +71,7 @@ public class NiodEuropeanaTest extends AbstractImporterTest{
         for(AccessibleEntity subject  : subjects)
             logger.info("identifier: " + subject.getIdentifier());
         
-        assertEquals(5, subjects.size());
+        assertEquals(1, subjects.size());
         assertEquals(log.getSuccessful(), subjects.size());
     }
 
