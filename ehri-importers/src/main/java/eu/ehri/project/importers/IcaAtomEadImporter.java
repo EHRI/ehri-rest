@@ -16,6 +16,9 @@ import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.persistance.BundleDAO;
 import java.util.HashMap;
 import java.util.Map;
+
+import eu.ehri.project.views.impl.CrudViews;
+import eu.ehri.project.views.impl.LoggingCrudViews;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,7 +74,7 @@ public class IcaAtomEadImporter extends XmlImporter<Map<String, Object>> {
             throws ValidationError {
         BundleDAO persister = new BundleDAO(framedGraph, permissionScope);
         Bundle unit = new Bundle(EntityClass.DOCUMENTARY_UNIT, extractDocumentaryUnit(itemData, depth));
-
+        System.out.println("Imported item: " + itemData.get("name"));
         Bundle descBundle = new Bundle(EntityClass.DOCUMENT_DESCRIPTION, extractDocumentDescription(itemData, depth));
         // Add dates and descriptions to the bundle since they're @Dependent
         // relations.
@@ -81,15 +84,25 @@ public class IcaAtomEadImporter extends XmlImporter<Map<String, Object>> {
         
         unit=unit.withRelation(Description.DESCRIBES, descBundle);
 
+        if (unit.getDataValue(DocumentaryUnit.IDENTIFIER_KEY) == null) {
+            throw new ValidationError(unit, DocumentaryUnit.IDENTIFIER_KEY, "Missing identifier");
+        }
         IdGenerator generator = AccessibleEntityIdGenerator.INSTANCE;
         String id = generator.generateId(EntityClass.DOCUMENTARY_UNIT, permissionScope, unit);
+        if (id.equals(permissionScope.getId())) {
+            throw new RuntimeException("Generated an id same as scope: " + unit.getData());
+        }
+        System.out.println("Generated ID: " + id + " (" + permissionScope.getId() + ")");
         boolean exists = manager.exists(id);
         DocumentaryUnit frame = persister.createOrUpdate(unit.withId(id), DocumentaryUnit.class);
-  
+
         // Set the repository/item relationship
+        System.out.println("Creating at depth: " + depth);
         if (depth == TOP_LEVEL_DEPTH) {
+            Repository repository = framedGraph.frame(permissionScope.asVertex(), Repository.class);
+            System.out.println("Setting repository: " + repository.getDescriptions().iterator().next().getName());
             // Then we need to add a relationship to the repository
-            frame.setRepository(framedGraph.frame(permissionScope.asVertex(), Repository.class));
+            frame.setRepository(repository);
         }
         frame.setPermissionScope(permissionScope);
         
@@ -110,8 +123,10 @@ public class IcaAtomEadImporter extends XmlImporter<Map<String, Object>> {
 
     protected Map<String, Object> extractDocumentaryUnit(Map<String, Object> itemData, int depth) throws ValidationError {
         Map<String, Object> unit = new HashMap<String, Object>();
-        unit.put(AccessibleEntity.IDENTIFIER_KEY, itemData.get(OBJECT_ID));
-        unit.put(DocumentaryUnit.NAME, itemData.get(DocumentaryUnit.NAME));
+        if (itemData.get(OBJECT_ID) != null)
+            unit.put(AccessibleEntity.IDENTIFIER_KEY, itemData.get(OBJECT_ID));
+        if (itemData.get(DocumentaryUnit.NAME) != null)
+            unit.put(DocumentaryUnit.NAME, itemData.get(DocumentaryUnit.NAME));
         return unit;
     }
 

@@ -58,7 +58,7 @@
         
  			<!--  use surefire instead of maven-jar-plugin 2.2
  			      surfire plugin worked better with eclipse 
- 			      also used by ehri-importers project
+                  also used by ehri-importers project -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
@@ -71,7 +71,6 @@
                     </execution>
                 </executions>
             </plugin>
-			 -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
