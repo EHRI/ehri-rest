@@ -107,7 +107,8 @@ public class Indexer {
 	@Path("/index/type/{type}")
 	@Produces(MediaType.APPLICATION_XML)
 	public Response indexByType(@PathParam("type") String type) {
-		String url = config.getNeo4jEhriUrl() + "/" + type.trim() + "/list";
+		// Note use a huge limit to force getting all
+		String url = config.getNeo4jEhriUrl() + "/" + type.trim() + "/list?limit=30000";
 		Client client = Client.create();
         WebResource resource = client.resource(url);
         ClientResponse response = resource
