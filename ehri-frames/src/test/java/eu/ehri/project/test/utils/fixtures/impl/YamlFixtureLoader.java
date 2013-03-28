@@ -67,10 +67,29 @@ public class YamlFixtureLoader implements FixtureLoader {
     private final GraphManager manager;
     private static final Logger logger = LoggerFactory
             .getLogger(YamlFixtureLoader.class);
+    private boolean initialize;
 
-    public YamlFixtureLoader(FramedGraph<Neo4jGraph> graph) {
+    /**
+     * Constructor
+     * @param graph
+     * @param initialize
+     */
+    public YamlFixtureLoader(FramedGraph<Neo4jGraph> graph, boolean initialize) {
         this.graph = graph;
+        this.initialize = initialize;
         manager = GraphManagerFactory.getInstance(graph);
+    }
+
+    /**
+     * Constructor.
+     * @param graph
+     */
+    public YamlFixtureLoader(FramedGraph<Neo4jGraph> graph) {
+        this(graph, true);
+    }
+
+    public void setInitializing(boolean initialize) {
+        this.initialize = initialize;
     }
 
     private void loadFixtures() {
@@ -90,7 +109,9 @@ public class YamlFixtureLoader implements FixtureLoader {
 
     public void loadTestData(InputStream stream) {
         // Initialize the DB
-        new GraphInitializer(graph).initialize();
+        if (initialize) {
+            new GraphInitializer(graph).initialize();
+        }
         try {
             loadFixtureFileStream(stream);
             stream.close();
