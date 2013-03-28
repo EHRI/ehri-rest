@@ -22,4 +22,16 @@ public class FixtureLoaderFactory {
     public static FixtureLoader getInstance(FramedGraph<Neo4jGraph> graph) {
         return new YamlFixtureLoader(graph);
     }
+
+    /**
+     * Get an instance of a fixture loader for the given class, specifying
+     * whether or not to initialize the graph before loading.
+     *
+     * @param graph
+     * @param initialize
+     * @return
+     */
+    public static FixtureLoader getInstance(FramedGraph<Neo4jGraph> graph, boolean initialize) {
+        return new YamlFixtureLoader(graph, initialize);
+    }
 }

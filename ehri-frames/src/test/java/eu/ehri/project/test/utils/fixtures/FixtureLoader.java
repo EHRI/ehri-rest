@@ -12,6 +12,12 @@ import java.io.InputStream;
 public interface FixtureLoader {
 
     /**
+     * Toggle whether or not initialization occurs before
+     * loading (default: true)
+     */
+    public void setInitializing(boolean toggle);
+
+    /**
      * Load the default fixtures.
      */
     public void loadTestData();
