@@ -4,6 +4,7 @@
  */
 package eu.ehri.project.importers.properties;
 
+import eu.ehri.project.models.EntityClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import org.junit.Before;
@@ -41,6 +42,6 @@ public class PropertiesCheckerTest {
 
     @Test
     public void testCheck() {
-        assertTrue(p.check(new XmlImportProperties("eag.properties"), "repositoryDescription"));
+        assertTrue(p.check(new XmlImportProperties("eag.properties"), EntityClass.REPOSITORY_DESCRIPTION));
     }
 }

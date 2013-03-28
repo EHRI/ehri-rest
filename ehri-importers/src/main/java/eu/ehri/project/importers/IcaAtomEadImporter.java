@@ -30,16 +30,9 @@ import org.slf4j.LoggerFactory;
  * @author lindar
  *
  */
-public class IcaAtomEadImporter extends XmlImporter<Map<String, Object>> {
+public class IcaAtomEadImporter extends EaImporter {
 
     private static final Logger logger = LoggerFactory.getLogger(IcaAtomEadImporter.class);
-    // An integer that represents how far down the
-    // EAD heirarchy tree the current document is.
-    public final String DEPTH_ATTR = "depthOfDescription";
-    // A (possibly arbitrary) string denoting what the
-    // describing body saw fit to name a documentary unit's
-    // level of description.
-    public final String LEVEL_ATTR = "levelOfDescription";
 
     /**
      * Depth of top-level items. For reasons as-yet-undetermined in the bowels
@@ -70,9 +63,9 @@ public class IcaAtomEadImporter extends XmlImporter<Map<String, Object>> {
     public DocumentaryUnit importItem(Map<String, Object> itemData, int depth)
             throws ValidationError {
         BundleDAO persister = new BundleDAO(framedGraph, permissionScope);
-        Bundle unit = new Bundle(EntityClass.DOCUMENTARY_UNIT, extractDocumentaryUnit(itemData, depth));
+        Bundle unit = new Bundle(EntityClass.DOCUMENTARY_UNIT, extractDocumentaryUnit(itemData));
 
-        Bundle descBundle = new Bundle(EntityClass.DOCUMENT_DESCRIPTION, extractDocumentDescription(itemData, depth));
+        Bundle descBundle = new Bundle(EntityClass.DOCUMENT_DESCRIPTION, extractUnitDescription(itemData, EntityClass.DOCUMENT_DESCRIPTION));
         // Add dates and descriptions to the bundle since they're @Dependent
         // relations.
         for (Map<String, Object> dpb : extractDates(itemData)) {
@@ -87,6 +80,7 @@ public class IcaAtomEadImporter extends XmlImporter<Map<String, Object>> {
         DocumentaryUnit frame = persister.createOrUpdate(unit.withId(id), DocumentaryUnit.class);
   
         // Set the repository/item relationship
+        //TODO: figure out another way to determine we're at the root, so we can get rid of the depth param
         if (depth == TOP_LEVEL_DEPTH) {
             // Then we need to add a relationship to the repository
             frame.setRepository(framedGraph.frame(permissionScope.asVertex(), Repository.class));
@@ -108,21 +102,8 @@ public class IcaAtomEadImporter extends XmlImporter<Map<String, Object>> {
 
     }
 
-    protected Map<String, Object> extractDocumentaryUnit(Map<String, Object> itemData, int depth) throws ValidationError {
-        Map<String, Object> unit = new HashMap<String, Object>();
-        unit.put(AccessibleEntity.IDENTIFIER_KEY, itemData.get(OBJECT_ID));
-        unit.put(DocumentaryUnit.NAME, itemData.get(DocumentaryUnit.NAME));
-        return unit;
-    }
-
-    protected Map<String, Object> extractDocumentDescription(Map<String, Object> itemData, int depth) throws ValidationError {
-
-        Map<String, Object> unit = new HashMap<String, Object>();
-        for (String key : itemData.keySet()) {
-            if (!(key.equals(OBJECT_ID) || key.startsWith(SaxXmlHandler.UNKNOWN))) {
-                unit.put(key, itemData.get(key));
-            }
-        }
-        return unit;
+    @Override
+    public AccessibleEntity importItem(Map<String, Object> itemData) throws ValidationError {
+        throw new UnsupportedOperationException("Not supported ever.");
     }
 }

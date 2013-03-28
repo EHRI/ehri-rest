@@ -70,9 +70,9 @@ public class Eag2896Test extends AbstractImporterTest {
             assertEquals(Entities.REPOSITORY_DESCRIPTION, c1.asVertex().getProperty("__ISA__"));
             Object notes = c1.asVertex().getProperty("generalContext");
             if (notes instanceof String[]) {
-                assertEquals(3, ((String[]) notes).length);
-            } else {
                 fail();
+            } else {
+                assertTrue(notes instanceof String);
             }
 
             //check whether the description has an Address attached to it

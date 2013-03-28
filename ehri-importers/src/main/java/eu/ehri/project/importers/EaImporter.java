@@ -3,7 +3,9 @@ package eu.ehri.project.importers;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.importers.properties.NodeProperties;
 import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.MaintenanceEvent;
 import eu.ehri.project.models.base.AccessibleEntity;
 import java.util.ArrayList;
@@ -25,14 +27,6 @@ import org.slf4j.LoggerFactory;
 public abstract class EaImporter extends XmlImporter<Map<String, Object>> {
 
     private static final Logger logger = LoggerFactory.getLogger(EaImporter.class);
-    // An integer that represents how far down the
-    // EAD heirarchy tree the current document is.
-    public final String DEPTH_ATTR = "depthOfDescription";
-    // A (possibly arbitrary) string denoting what the
-    // describing body saw fit to name a documentary unit's
-    // level of description.
-    public final String LEVEL_ATTR = "levelOfDescription";
-    // Various date patterns
 
     public static final String ADDRESS_NAME = "name";
 
@@ -84,7 +78,7 @@ public abstract class EaImporter extends XmlImporter<Map<String, Object>> {
         return unknowns;
     }
 
-    protected Map<String, Object> extractUnitDescription(Map<String, Object> itemData) {
+    protected Map<String, Object> extractUnitDescription(Map<String, Object> itemData, EntityClass entity) {
         Map<String, Object> description = new HashMap<String, Object>();
         for (String key : itemData.keySet()) {
             if (key.equals("descriptionIdentifier")) {
@@ -93,11 +87,11 @@ public abstract class EaImporter extends XmlImporter<Map<String, Object>> {
                     && ! key.equals("objectIdentifier") 
                     && ! key.equals(AccessibleEntity.IDENTIFIER_KEY) 
                     && ! key.startsWith("maintenanceEvent") 
-                    && ! key.startsWith("address/")) { 
-                description.put(key, itemData.get(key));
+                    && ! key.startsWith("address/")) {
+               description.put(key, changeForbiddenMultivaluedProperties(key, itemData.get(key), entity));
             }
         }
-        assert(description.containsKey(AccessibleEntity.IDENTIFIER_KEY));
+//        assert(description.containsKey(AccessibleEntity.IDENTIFIER_KEY));  //not required anymore
         return description;
     }
     //TODO: or should this be done in the Handler?
@@ -148,9 +142,6 @@ public abstract class EaImporter extends XmlImporter<Map<String, Object>> {
             if (key.startsWith("address/")) {
                 address.put(key.substring(8), itemData.get(key));
             }
-        }
-        if (!address.isEmpty() && !address.containsKey(ADDRESS_NAME)) {
-            address.put(ADDRESS_NAME, address.get("street") + " " + address.get("municipality") + " " + address.get("country"));
         }
         return address;
     }

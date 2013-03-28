@@ -55,7 +55,7 @@ public class EacImporter extends EaImporter {
         BundleDAO persister = new BundleDAO(framedGraph, permissionScope);
         Bundle unit = new Bundle(EntityClass.HISTORICAL_AGENT, extractUnit(itemData));
 
-        Bundle descBundle = new Bundle(EntityClass.HISTORICAL_AGENT_DESCRIPTION, extractUnitDescription(itemData));
+        Bundle descBundle = new Bundle(EntityClass.HISTORICAL_AGENT_DESCRIPTION, extractUnitDescription(itemData, EntityClass.HISTORICAL_AGENT_DESCRIPTION));
 
 
         // Add dates and descriptions to the bundle since they're @Dependent

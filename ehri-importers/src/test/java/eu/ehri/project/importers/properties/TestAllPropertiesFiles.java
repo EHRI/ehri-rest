@@ -4,6 +4,7 @@
  */
 package eu.ehri.project.importers.properties;
 
+import eu.ehri.project.models.EntityClass;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -50,22 +51,22 @@ private static final org.slf4j.Logger logger = LoggerFactory.getLogger(TestAllPr
 
     @Test
     public void testEacXmlProperties() {
-        assertTrue(p.check(new XmlImportProperties("eac.properties"), "historicalAgentDescription"));
+        assertTrue(p.check(new XmlImportProperties("eac.properties"), EntityClass.HISTORICAL_AGENT_DESCRIPTION));
     }
     @Test
     public void testEagXmlProperties() {
-        assertTrue(p.check(new XmlImportProperties("eag.properties"), "repositoryDescription"));
+        assertTrue(p.check(new XmlImportProperties("eag.properties"), EntityClass.REPOSITORY_DESCRIPTION));
     }
     @Test
     public void testEadXmlProperties() {
-        assertTrue(p.check(new XmlImportProperties("icaatom.properties"), "documentsDescription"));
+        assertTrue(p.check(new XmlImportProperties("icaatom.properties"), EntityClass.DOCUMENT_DESCRIPTION));
     }
     @Test
     public void testSkosXmlProperties() {
-        assertTrue(p.check(new XmlImportProperties("skos.properties"), "conceptDescription"));
+        assertTrue(p.check(new XmlImportProperties("skos.properties"), EntityClass.CVOC_CONCEPT_DESCRIPTION));
     }
     @Test
     public void testNiodXmlProperties() {
-        assertTrue(p.check(new XmlImportProperties("niod.properties"), "documentsDescription"));
+        assertTrue(p.check(new XmlImportProperties("niod.properties"), EntityClass.DOCUMENT_DESCRIPTION));
     }
 }

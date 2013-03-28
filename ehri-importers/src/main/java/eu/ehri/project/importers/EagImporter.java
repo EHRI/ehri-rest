@@ -57,7 +57,7 @@ public class EagImporter extends EaImporter{
         BundleDAO persister = new BundleDAO(framedGraph, permissionScope);
         Bundle unit = new Bundle(EntityClass.REPOSITORY, extractUnit(itemData));
 
-        Map<String, Object> descmap = extractUnitDescription(itemData);
+        Map<String, Object> descmap = extractUnitDescription(itemData, EntityClass.REPOSITORY_DESCRIPTION);
         descmap.put(AccessibleEntity.IDENTIFIER_KEY, descmap.get(AccessibleEntity.IDENTIFIER_KEY)+"#desc");
         Bundle descBundle = new Bundle(EntityClass.REPOSITORY_DESCRIPTION, descmap);
 

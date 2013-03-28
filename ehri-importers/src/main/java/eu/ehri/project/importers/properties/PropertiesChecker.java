@@ -4,6 +4,7 @@
  */
 package eu.ehri.project.importers.properties;
 
+import eu.ehri.project.models.EntityClass;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +29,8 @@ public class PropertiesChecker {
      * @param actualproperties
      * @return returns true if it contains the required ones and no new ones
      */
-    public boolean check(ImportProperties actualproperties, String node) {
+    public boolean check(ImportProperties actualproperties, EntityClass nodeEntity) {
+        String node = nodeEntity.getName();
         boolean testresult = true;
         if (allowed.getHandlerProperties(node) == null) {
             logger.error("no properties allowed for " + node);

@@ -53,7 +53,7 @@ public class NodeProperties {
         return c;
     }
 
-    protected void addRow(String row) {
+    public void addRow(String row) {
         String nodetype = row.split(SEP)[0];
         allKnownNodes.add(nodetype);
         if (!p.containsKey(nodetype)) {
@@ -75,7 +75,7 @@ public class NodeProperties {
         return null;
     }
 
-    protected boolean hasProperty(String nodetype, String property) {
+    public boolean hasProperty(String nodetype, String property) {
         PropertiesRow pr = getProperty(nodetype, property);
         return pr != null;
     }
@@ -84,7 +84,7 @@ public class NodeProperties {
         return getProperty(nodetype, property).get(HANDLERNAME);
     }
 
-    protected boolean isMultivaluedProperty(String nodetype, String property) {
+    public boolean isMultivaluedProperty(String nodetype, String property) {
         return isBooleanFieldTrue(nodetype, property, MULTIVALUED);
     }
 

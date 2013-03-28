@@ -3,6 +3,7 @@ package eu.ehri.project.importers;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.base.Description;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -65,20 +66,20 @@ public class IcaAtomEadHandler extends SaxXmlHandler {
             Map<String, Object> currentGraph = currentGraphPath.pop();
             try {
                 //add any mandatory fields not yet there:
-                if (!currentGraph.containsKey("name")) {
+                if (!currentGraph.containsKey(Description.NAME)) {
                     for(String key: currentGraph.keySet()){
                         logger.debug(key + ":" + currentGraph.get(key));
                     }
                     //finding some name for this unit:
                     if(currentGraph.containsKey("title"))
-                        currentGraph.put("name", currentGraph.get("title"));
+                        currentGraph.put(Description.NAME, currentGraph.get("title"));
                     else{
                         logger.error("IcaAtom node without name field: " );
-                        currentGraph.put("name", "UNKNOWN title");
+                        currentGraph.put(Description.NAME, "UNKNOWN title");
                     }
                 }
-                if (!currentGraph.containsKey("languageCode")) {
-                    currentGraph.put("languageCode", "en");
+                if (!currentGraph.containsKey(Description.LANGUAGE_CODE)) {
+                    currentGraph.put(Description.LANGUAGE_CODE, "en");
                 }
                 DocumentaryUnit current = (DocumentaryUnit)importer.importItem(currentGraph, depth);
                 logger.debug("importer used: " + importer.getClass());
