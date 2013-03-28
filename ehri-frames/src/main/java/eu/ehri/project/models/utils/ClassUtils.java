@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.Maps;
 import eu.ehri.project.models.annotations.*;
 import eu.ehri.project.models.base.Frame;
 import org.neo4j.helpers.collection.Iterables;
@@ -30,6 +31,8 @@ public class ClassUtils {
     public static final String FETCH_METHOD_PREFIX = "get";
 
     private static final Logger logger = LoggerFactory.getLogger(ClassUtils.class);
+
+    private static Map<Class<?>,Map<String,Method>> fetchMethodCache = Maps.newHashMap();
 
     /**
      * Get the entity type string for a given class.
@@ -69,22 +72,26 @@ public class ClassUtils {
     }
 
     public static Map<String, Method> getFetchMethods(Class<?> cls) {
-        logger.trace(" - checking for @Fetch methods: {}", cls.getCanonicalName());
-        Map<String, Method> out = new HashMap<String, Method>();
-        for (Method method : cls.getMethods()) {
-            Fetch fetch = method.getAnnotation(Fetch.class);
-            if (fetch != null
-                    && method.getName().startsWith(FETCH_METHOD_PREFIX)) {
-                out.put(fetch.value(), method);
-                logger.trace(" --- found @Fetch annotation: {}: {}", method.getName(), fetch.value());
+        Map<String, Method> cached = fetchMethodCache.get(cls);
+        if (cached == null) {
+            logger.trace(" - checking for @Fetch methods: {}", cls.getCanonicalName());
+            Map<String, Method> out = new HashMap<String, Method>();
+            for (Method method : cls.getMethods()) {
+                Fetch fetch = method.getAnnotation(Fetch.class);
+                if (fetch != null
+                        && method.getName().startsWith(FETCH_METHOD_PREFIX)) {
+                    out.put(fetch.value(), method);
+                    logger.trace(" --- found @Fetch annotation: {}: {}", method.getName(), fetch.value());
+                }
             }
-        }
 
-        for (Class<?> s : cls.getInterfaces()) {
-            out.putAll(getFetchMethods(s));
+            for (Class<?> s : cls.getInterfaces()) {
+                out.putAll(getFetchMethods(s));
+            }
+            fetchMethodCache.put(cls, out);
+            return out;
         }
-
-        return out;
+        return cached;
     }
 
     public static Map<String, Method> getDependentMethods(Class<?> cls) {
