@@ -88,8 +88,8 @@ public class IcaAtomEadImporter extends XmlImporter<Map<String, Object>> {
   
         // Set the repository/item relationship
         if (depth == TOP_LEVEL_DEPTH) {
-            // Then we need to add a relationship to the repository
-            frame.setRepository(framedGraph.frame(permissionScope.asVertex(), Repository.class));
+            Repository repository = framedGraph.frame(permissionScope.asVertex(), Repository.class);
+            frame.setRepository(repository);
         }
         frame.setPermissionScope(permissionScope);
         
