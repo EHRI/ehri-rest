@@ -111,12 +111,16 @@
 
 			<!-- biographic description of the person or organization -->
 			<bioghist>
-				<xsl:value-of select="field[@name = 'creator_bio']/normalize-space()" />
+                <p>
+                    <xsl:value-of select="field[@name = 'creator_bio']/normalize-space()"/>
+                </p>
 			</bioghist>
 
 			<!-- a detailed narrative description of the collection material -->
-			<scopecontent>
-				<xsl:value-of select="field[@name = 'scope_content']/normalize-space()" />
+            <scopecontent>
+                <p>
+                    <xsl:value-of select="field[@name = 'scope_content']/normalize-space()" />
+                </p>
 			</scopecontent>
 
 			<!-- description of items which the repository acquired separately but which are related to this collection, and which a researcher might want to be aware of -->
