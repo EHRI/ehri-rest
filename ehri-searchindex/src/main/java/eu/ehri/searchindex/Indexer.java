@@ -10,8 +10,11 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
@@ -54,7 +57,19 @@ import eu.ehri.project.persistance.Bundle;
 public class Indexer {
     private static Logger logger = LoggerFactory.getLogger(Indexer.class);
 	private Configuration config = new Configuration();
-
+/*
+	// add a small test for detecting if xml or json was requested
+	// @Context UriInfo uriInfo;
+	@Context Request request;
+	@GET
+	@Path("/test/{id}")
+	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+	public Response test(@PathParam("id") String id) {
+		
+		return Response.status(200).entity(" id param="+ id + " ").build();
+	}
+*/
+	
 	/**
 	 * Delete/remove the index for the entity with the given ID
 	 * 
