@@ -1,6 +1,13 @@
-#!/bin/sh
+#!/bin/bash
 
 DB=${1%/}
+PROF=$2
+
+# If second arg not given, use $USER
+if [ -z "$PROF" ]; then
+    PROF=$USER
+fi
+echo "Proceeding with user: $PROF"
 
 if [ "$DB" == "" ]; then
     echo "Usage: builddb.sh [NEO4J-DATABASE-PATH]"
@@ -24,11 +31,14 @@ fi
 
 echo "Initializing..."
 ./scripts/cmd $DB initialize
-echo "Creating user: $USER"
-./scripts/cmd $DB useradd $USER -group admin
+echo "Creating user: $PROF"
+./scripts/cmd $DB useradd $PROF -group admin
 echo "Importing Wiener Library EAD..."
-./scripts/cmd $DB ead-import --createrepo -repo wiener-library -user $USER -tolerant ~/Dropbox/EHRI-WP19-20/TestData/wiener-library/*xml
+./scripts/cmd $DB ead-import --createrepo -repo wiener-library -user $PROF -tolerant ~/Dropbox/EHRI-WP19-20/TestData/wiener-library/*xml
 echo "Importing ICA-AtoM EAC authorities..."
-./scripts/cmd $DB eac-import -repo wiener-library -user $USER -tolerant ~/Dropbox/EHRI-WP19-20/TestData/eac-dump-140313/*xml
+./scripts/cmd $DB eac-import -repo wiener-library -user $PROF -tolerant ~/Dropbox/EHRI-WP19-20/TestData/eac-dump-140313/*xml
 echo "Importing ICA-AtoM EAG institutions..."
-./scripts/cmd $DB eag-import -repo wiener-library -user $USER -tolerant ~/Dropbox/EHRI-WP19-20/TestData/eag-dump-080313/*xml
+./scripts/cmd $DB eag-import -repo wiener-library -user $PROF -tolerant ~/Dropbox/EHRI-WP19-20/TestData/eag-dump-080313/*xml
+echo "Importing thesaurus..."
+./scripts/cmd $DB skos-import --createvocabulary -vocabulary ehri-skos -user $PROF -tolerant ~/Dropbox/EHRI-WP19-20/TestData/ehri-skos.rdf
+

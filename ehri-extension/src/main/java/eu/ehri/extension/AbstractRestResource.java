@@ -12,6 +12,7 @@ import javax.ws.rs.core.UriInfo;
 
 import com.google.common.base.Optional;
 import com.tinkerpop.blueprints.Vertex;
+import eu.ehri.project.models.base.Frame;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -20,7 +21,6 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import com.google.common.collect.ListMultimap;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
-import com.tinkerpop.frames.VertexFrame;
 
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.acl.AnonymousAccessor;
@@ -127,7 +127,7 @@ public abstract class AbstractRestResource {
      * @param page
      * @return
      */
-    protected <T extends VertexFrame> StreamingOutput streamingPage(
+    protected <T extends Frame> StreamingOutput streamingPage(
             final Query.Page<T> page) {
         return streamingPage(page, serializer);
     }
@@ -139,7 +139,7 @@ public abstract class AbstractRestResource {
      * @param page
      * @return
      */
-    protected <T extends VertexFrame> StreamingOutput streamingPage(
+    protected <T extends Frame> StreamingOutput streamingPage(
             final Query.Page<T> page, final Serializer serializer) {
         final ObjectMapper mapper = new ObjectMapper();
         final JsonFactory f = new JsonFactory();
@@ -174,7 +174,7 @@ public abstract class AbstractRestResource {
      * @param list
      * @return
      */
-    protected <T extends VertexFrame> StreamingOutput streamingList(
+    protected <T extends Frame> StreamingOutput streamingList(
             final Iterable<T> list) {
         return streamingList(list, serializer);
     }
@@ -186,7 +186,7 @@ public abstract class AbstractRestResource {
      * @param list
      * @return
      */
-    protected <T extends VertexFrame> StreamingOutput streamingList(
+    protected <T extends Frame> StreamingOutput streamingList(
             final Iterable<T> list, final Serializer serializer) {
         final ObjectMapper mapper = new ObjectMapper();
         final JsonFactory f = new JsonFactory();
@@ -247,7 +247,7 @@ public abstract class AbstractRestResource {
      * @param map
      * @return
      */
-    protected <T extends VertexFrame> StreamingOutput streamingMultimap(
+    protected <T extends Frame> StreamingOutput streamingMultimap(
             final ListMultimap<String, T> map) {
         return streamingMultimap(map, serializer);
     }
@@ -260,7 +260,7 @@ public abstract class AbstractRestResource {
      * @param serializer
      * @return
      */
-    protected <T extends VertexFrame> StreamingOutput streamingMultimap(
+    protected <T extends Frame> StreamingOutput streamingMultimap(
             final ListMultimap<String, T> map, final Serializer serializer) {
         final ObjectMapper mapper = new ObjectMapper();
         final JsonFactory f = new JsonFactory();

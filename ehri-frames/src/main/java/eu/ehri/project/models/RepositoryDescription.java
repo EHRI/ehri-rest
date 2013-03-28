@@ -6,6 +6,4 @@ import eu.ehri.project.models.base.Description;
 
 @EntityType(EntityClass.REPOSITORY_DESCRIPTION)
 public interface RepositoryDescription extends Description, AddressableEntity {
-
-    
 }

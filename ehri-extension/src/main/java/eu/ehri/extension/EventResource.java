@@ -14,7 +14,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
 import eu.ehri.project.exceptions.AccessDenied;
-import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.persistance.ActionManager;
 import org.neo4j.graphdb.GraphDatabaseService;

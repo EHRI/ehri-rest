@@ -1,7 +1,5 @@
 package eu.ehri.project.persistance;
 
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
-import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.persistance.impl.BundleFieldValidator;
 

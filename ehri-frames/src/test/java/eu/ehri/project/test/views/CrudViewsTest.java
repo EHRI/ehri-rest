@@ -1,4 +1,4 @@
-package eu.ehri.project.test;
+package eu.ehri.project.test.views;
 
 import java.util.Iterator;
 
@@ -7,6 +7,7 @@ import eu.ehri.project.models.*;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.DescribedEntity;
 import eu.ehri.project.persistance.Serializer;
+import eu.ehri.project.test.AbstractFixtureTest;
 import org.junit.Test;
 
 import eu.ehri.project.acl.AclManager;
@@ -23,7 +24,7 @@ import org.neo4j.helpers.collection.Iterables;
 
 import static org.junit.Assert.*;
 
-public class ViewsTest extends AbstractFixtureTest {
+public class CrudViewsTest extends AbstractFixtureTest {
 
     /**
      * Access an item 0 as user 20.
@@ -197,7 +198,7 @@ public class ViewsTest extends AbstractFixtureTest {
         assertEquals(TEST_COLLECTION_NAME, unit.getName());
 
         String newName = TEST_COLLECTION_NAME + " with new stuff";
-        Bundle newBundle = bundle.withId(manager.getId(unit)).withDataValue(
+        Bundle newBundle = bundle.withId(unit.getId()).withDataValue(
                 "name", newName);
 
         DocumentaryUnit changedUnit = docViews.update(newBundle, validUser);
@@ -234,7 +235,7 @@ public class ViewsTest extends AbstractFixtureTest {
         assertEquals(TEST_USER_NAME, user.getName());
 
         String newName = TEST_USER_NAME + " with new stuff";
-        Bundle newBundle = bundle.withId(manager.getId(user)).withDataValue(
+        Bundle newBundle = bundle.withId(user.getId()).withDataValue(
                 "name", newName);
         UserProfile changedUser = userViews.update(newBundle, validUser);
         assertEquals(newName, changedUser.getName());

@@ -72,7 +72,7 @@ public class UserListEntities extends BaseCommand implements Command {
         Query<AccessibleEntity> query = new Query<AccessibleEntity>(graph,
                 (Class<AccessibleEntity>) cls);
         for (AccessibleEntity acc : query.list(user)) {
-            System.out.println(manager.getId(acc));
+            System.out.println(acc.getId());
         }
 
         return 0;

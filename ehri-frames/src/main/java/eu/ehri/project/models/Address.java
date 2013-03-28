@@ -1,8 +1,8 @@
 package eu.ehri.project.models;
 
-import com.tinkerpop.frames.VertexFrame;
 import eu.ehri.project.models.annotations.EntityType;
+import eu.ehri.project.models.base.AnnotatableEntity;
 
 @EntityType(EntityClass.ADDRESS)
-public interface Address extends VertexFrame {
+public interface Address extends AnnotatableEntity {
 }

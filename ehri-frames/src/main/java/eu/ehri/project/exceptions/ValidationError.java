@@ -5,9 +5,6 @@ import com.google.common.collect.ListMultimap;
 
 import eu.ehri.project.persistance.Bundle;
 
-import java.util.List;
-import java.util.Map;
-
 /**
  * Validation error. This exception holds a map of field=error(s) values.
  * 

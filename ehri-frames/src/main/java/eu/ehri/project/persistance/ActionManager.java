@@ -4,8 +4,6 @@ import java.util.Iterator;
 import java.util.UUID;
 
 import com.tinkerpop.blueprints.Vertex;
-import com.tinkerpop.pipes.PipeFunction;
-import com.tinkerpop.pipes.branch.LoopPipe;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.models.events.SystemEventQueue;
@@ -22,7 +20,6 @@ import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Actioner;
 
 /**
@@ -42,7 +39,7 @@ public final class ActionManager {
     public static final String LIFECYCLE_ACTION = "lifecycleAction";
     public static final String LIFECYCLE_EVENT = "lifecycleEvent";
 
-    private final FramedGraph graph;
+    private final FramedGraph<Neo4jGraph> graph;
     private final GraphManager manager;
 
     /**
@@ -85,6 +82,14 @@ public final class ActionManager {
          */
         public Actioner getActioner() {
             return this.actioner;
+        }
+        
+        /**
+         * Get the event context log message.
+         * @return
+         */
+        public String getLogMessage() {
+            return this.logMessage;
         }
 
         /**

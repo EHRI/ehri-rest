@@ -5,7 +5,6 @@ import com.google.common.collect.ListMultimap;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
-import com.tinkerpop.frames.VertexFrame;
 import com.tinkerpop.pipes.PipeFunction;
 
 import eu.ehri.project.acl.AclManager;
@@ -42,7 +41,6 @@ public final class AnnotationViews implements Annotations {
      * Scoped constructor.
      * 
      * @param graph
-     * @param cls
      * @param scope
      */
     public AnnotationViews(FramedGraph<Neo4jGraph> graph, PermissionScope scope) {
@@ -56,7 +54,6 @@ public final class AnnotationViews implements Annotations {
      * Constructor with system scope.
      * 
      * @param graph
-     * @param cls
      */
     public AnnotationViews(FramedGraph<Neo4jGraph> graph) {
         this(graph, SystemScope.getInstance());
@@ -131,7 +128,7 @@ public final class AnnotationViews implements Annotations {
         AnnotatableEntity item = manager.getFrame(id, AnnotatableEntity.class);
         getAnnotations(item, annotations, filter);
         new Serializer(graph).traverseSubtree(item, new TraversalCallback() {
-            public void process(VertexFrame vertexFrame, int depth,
+            public void process(Frame vertexFrame, int depth,
                     String relation, int relationIndex) {
                 getAnnotations(vertexFrame, annotations, filter);
             }
@@ -143,14 +140,13 @@ public final class AnnotationViews implements Annotations {
      * Fetch annotations for an item and its subtree.
      * 
      * @param item
-     * @param depth
      * @param annotations
      * @param filter
      */
-    private <T extends VertexFrame> void getAnnotations(T item,
+    private <T extends Frame> void getAnnotations(T item,
             ListMultimap<String, Annotation> annotations,
             PipeFunction<Vertex, Boolean> filter) {
-        String id = manager.getId(item);
+        String id = item.getId();
         AnnotatableEntity entity = graph.frame(item.asVertex(),
                 AnnotatableEntity.class);
         for (Annotation ann : entity.getAnnotations()) {

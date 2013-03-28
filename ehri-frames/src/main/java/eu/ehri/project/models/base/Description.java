@@ -3,13 +3,13 @@ package eu.ehri.project.models.base;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Property;
-import com.tinkerpop.frames.VertexFrame;
 
 import eu.ehri.project.models.MaintenanceEvent;
 import eu.ehri.project.models.annotations.Dependent;
 import eu.ehri.project.models.annotations.Fetch;
+import eu.ehri.project.models.annotations.Mandatory;
 
-public interface Description extends VertexFrame {
+public interface Description extends NamedEntity {
     public static final String DESCRIBES = DescribedEntity.DESCRIBES;
     public static final String LANGUAGE_CODE = "languageCode";
     public static final String MUTATES = "maintenance"; //links to MaintenanceEvent
@@ -18,11 +18,9 @@ public interface Description extends VertexFrame {
     @Adjacency(label = DESCRIBES)
     public DescribedEntity getEntity();
 
+    @Mandatory
     @Property(LANGUAGE_CODE)
     public String getLanguageOfDescription();
- 
-    @Property(NAME)
-    public String getName();
 
     /**
      * Get the described entity of a description. This 

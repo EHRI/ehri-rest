@@ -1,4 +1,4 @@
-package eu.ehri.project.test;
+package eu.ehri.project.test.views;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -10,6 +10,7 @@ import java.util.List;
 import eu.ehri.project.models.DocumentDescription;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.persistance.Serializer;
+import eu.ehri.project.test.AbstractFixtureTest;
 import org.junit.Test;
 
 import eu.ehri.project.exceptions.DeserializationError;
@@ -45,8 +46,7 @@ public class ActionViewsTest extends AbstractFixtureTest {
         assertEquals(TEST_COLLECTION_NAME, unit.getName());
 
         String newName = TEST_COLLECTION_NAME + " with new stuff";
-        Bundle newBundle = bundle.withId(manager.getId(unit)).withDataValue(
-                "name", newName);
+        Bundle newBundle = bundle.withId(unit.getId()).withDataValue("name", newName);
 
         DocumentaryUnit changedUnit = docViews.update(newBundle, validUser);
         assertEquals(newName, changedUnit.getName());
@@ -82,8 +82,7 @@ public class ActionViewsTest extends AbstractFixtureTest {
         assertEquals(TEST_USER_NAME, user.getName());
 
         String newName = TEST_USER_NAME + " with new stuff";
-        Bundle newBundle = bundle.withId(manager.getId(user)).withDataValue(
-                "name", newName);
+        Bundle newBundle = bundle.withId(user.getId()).withDataValue("name", newName);
 
         UserProfile changedUser = userViews.update(newBundle, validUser);
         assertEquals(newName, changedUser.getName());

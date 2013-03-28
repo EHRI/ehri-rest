@@ -1,8 +1,5 @@
 package eu.ehri.project.models.idgen;
 
-import java.util.Map;
-
-import eu.ehri.project.exceptions.IdGenerationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.PermissionScope;

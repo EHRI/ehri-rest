@@ -163,7 +163,7 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
 
             String jsonStr = serializer.vertexFrameToJson(entity);
             UriBuilder ub = uriInfo.getAbsolutePathBuilder();
-            URI docUri = ub.path(manager.getId(entity)).build();
+            URI docUri = ub.path(entity.getId()).build();
             
             // add to the groups
             for (String groupId: groupIds) {

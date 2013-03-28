@@ -11,7 +11,6 @@ import javax.ws.rs.core.Response.Status;
 
 import com.google.common.collect.Sets;
 import eu.ehri.project.exceptions.SerializationError;
-import eu.ehri.project.persistance.Serializer;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import eu.ehri.extension.errors.BadRequester;

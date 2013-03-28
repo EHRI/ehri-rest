@@ -74,6 +74,14 @@
 					<artifactId>log4j</artifactId>
 					<groupId>log4j</groupId>
 				</exclusion>
+                <exclusion>
+                    <artifactId>org.neo4j</artifactId>
+                    <groupId>neo4j-ha</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>org.neo4j</artifactId>
+                    <groupId>neo4j-management</groupId>
+                </exclusion>
 			</exclusions>
 		</dependency>
 
