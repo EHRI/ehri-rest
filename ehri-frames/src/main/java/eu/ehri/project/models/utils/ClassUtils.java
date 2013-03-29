@@ -33,6 +33,11 @@ public class ClassUtils {
     private static final Logger logger = LoggerFactory.getLogger(ClassUtils.class);
 
     private static Map<Class<?>,Map<String,Method>> fetchMethodCache = Maps.newHashMap();
+    private static Map<Class<?>,Iterable<String>> propertyKeysCache = Maps.newHashMap();
+    private static Map<Class<?>,Iterable<String>> mandatoryPropertyKeysCache = Maps.newHashMap();
+    private static Map<Class<?>,Iterable<String>> uniquePropertyKeysCache = Maps.newHashMap();
+    private static Map<Class<?>,Map<String, Direction>> dependentRelationsCache = Maps.newHashMap();
+    private static Map<Class<?>,EntityClass> entityClassCache = Maps.newHashMap();
 
     /**
      * Get the entity type string for a given class.
@@ -41,128 +46,10 @@ public class ClassUtils {
      * @return
      */
     public static EntityClass getEntityType(Class<?> cls) {
-        EntityType ann = cls.getAnnotation(EntityType.class);
-        if (ann == null)
-            throw new RuntimeException(String.format(
-                    "Programming error! Bad bundle type: %s", cls.getName()));
-        return ann.value();
-    }
-
-    public static Map<String, Direction> getDependentRelations(Class<?> cls) {
-        Map<String, Direction> out = new HashMap<String, Direction>();
-        for (Method method : cls.getMethods()) {
-            if (method.getAnnotation(Dependent.class) != null) {
-                Adjacency ann = method.getAnnotation(Adjacency.class);
-                if (ann != null)
-                    out.put(ann.label(), ann.direction());
-            }
+        if (!entityClassCache.containsKey(cls)) {
+            entityClassCache.put(cls, getEntityTypeInternal(cls));
         }
-        return out;
-    }
-
-    public static List<String> getFetchedRelations(Class<?> cls) {
-        List<String> out = new LinkedList<String>();
-        for (Method method : cls.getMethods()) {
-            Fetch ann = method.getAnnotation(Fetch.class);
-            if (ann != null) {
-                out.add(ann.value());
-            }
-        }
-        return out;
-    }
-
-    public static Map<String, Method> getFetchMethods(Class<?> cls) {
-        Map<String, Method> cached = fetchMethodCache.get(cls);
-        if (cached == null) {
-            logger.trace(" - checking for @Fetch methods: {}", cls.getCanonicalName());
-            Map<String, Method> out = new HashMap<String, Method>();
-            for (Method method : cls.getMethods()) {
-                Fetch fetch = method.getAnnotation(Fetch.class);
-                if (fetch != null
-                        && method.getName().startsWith(FETCH_METHOD_PREFIX)) {
-                    out.put(fetch.value(), method);
-                    logger.trace(" --- found @Fetch annotation: {}: {}", method.getName(), fetch.value());
-                }
-            }
-
-            for (Class<?> s : cls.getInterfaces()) {
-                out.putAll(getFetchMethods(s));
-            }
-            fetchMethodCache.put(cls, out);
-            return out;
-        }
-        return cached;
-    }
-
-    public static Map<String, Method> getDependentMethods(Class<?> cls) {
-        Map<String, Method> out = new HashMap<String, Method>();
-        for (Method method : cls.getMethods()) {
-            if (method.getAnnotation(Dependent.class) != null
-                    && method.getName().startsWith(FETCH_METHOD_PREFIX)) {
-                Adjacency ann = method.getAnnotation(Adjacency.class);
-                if (ann != null)
-                    out.put(ann.label(), method);
-            }
-        }
-
-        for (Class<?> s : cls.getInterfaces()) {
-            out.putAll(getDependentMethods(s));
-        }
-
-        return out;
-    }
-
-    public static Iterable<String> getPropertyKeys(Class<?> cls) {
-        List<String> out = Lists.newLinkedList();
-        for (Method method : cls.getMethods()) {
-            Property ann = method.getAnnotation(Property.class);
-            if (ann != null)
-                out.add(ann.value());
-        }
-
-        for (Class<?> s : cls.getInterfaces()) {
-            Iterables.addAll(out, getPropertyKeys(s));
-        }
-
-        return ImmutableSet.copyOf(out);
-    }
-
-    public static Iterable<String> getMandatoryPropertyKeys(Class<?> cls) {
-        List<String> out = new LinkedList<String>();
-        for (Method method : cls.getMethods()) {
-            Mandatory mandatory = method.getAnnotation(Mandatory.class);
-            if (mandatory != null) {
-                Property ann = method.getAnnotation(Property.class);
-                if (ann != null)
-                    out.add(ann.value());
-            }
-
-        }
-
-        for (Class<?> s : cls.getInterfaces()) {
-            Iterables.addAll(out, getMandatoryPropertyKeys(s));
-        }
-
-        return ImmutableSet.copyOf(out);
-    }
-
-    public static Iterable<String> getUniquePropertyKeys(Class<?> cls) {
-        List<String> out = new LinkedList<String>();
-        for (Method method : cls.getMethods()) {
-            Unique unique = method.getAnnotation(Unique.class);
-            if (unique != null) {
-                Property ann = method.getAnnotation(Property.class);
-                if (ann != null)
-                    out.add(ann.value());
-            }
-
-        }
-
-        for (Class<?> s : cls.getInterfaces()) {
-            Iterables.addAll(out, getUniquePropertyKeys(s));
-        }
-
-        return ImmutableSet.copyOf(out);
+        return entityClassCache.get(cls);
     }
 
     /**
@@ -175,5 +62,131 @@ public class ClassUtils {
     public static boolean hasType(Frame frame, EntityClass type) {
         String isa = (String) frame.asVertex().getProperty(EntityType.TYPE_KEY);
         return type.getName().equals(isa);
+    }
+
+    public static Map<String,Direction> getDependentRelations(Class<?> cls) {
+        if (!dependentRelationsCache.containsKey(cls)) {
+            dependentRelationsCache.put(cls, getDependentRelationsInternal(cls));
+        }
+        return dependentRelationsCache.get(cls);
+    }
+
+    public static Map<String, Method> getFetchMethods(Class<?> cls) {
+        if (!fetchMethodCache.containsKey(cls)) {
+            fetchMethodCache.put(cls, getFetchMethodsInternal(cls));
+        }
+        return fetchMethodCache.get(cls);
+    }
+
+    public static Iterable<String> getPropertyKeys(Class<?> cls) {
+        if (!propertyKeysCache.containsKey(cls)) {
+            propertyKeysCache.put(cls, getPropertyKeysInternal(cls));
+        }
+        return propertyKeysCache.get(cls);
+    }
+
+    public static Iterable<String> getMandatoryPropertyKeys(Class<?> cls) {
+        if (!mandatoryPropertyKeysCache.containsKey(cls)) {
+            mandatoryPropertyKeysCache.put(cls, getMandatoryPropertyKeysInternal(cls));
+        }
+        return mandatoryPropertyKeysCache.get(cls);
+    }
+
+    public static Iterable<String> getUniquePropertyKeys(Class<?> cls) {
+        if (!uniquePropertyKeysCache.containsKey(cls)) {
+            uniquePropertyKeysCache.put(cls, getUniquePropertyKeysInternal(cls));
+        }
+        return uniquePropertyKeysCache.get(cls);
+    }
+
+    private static EntityClass getEntityTypeInternal(Class<?> cls) {
+        EntityType ann = cls.getAnnotation(EntityType.class);
+        if (ann == null)
+            throw new RuntimeException(String.format(
+                    "Programming error! Bad bundle type: %s", cls.getName()));
+        return ann.value();
+    }
+
+    private static Map<String, Direction> getDependentRelationsInternal(Class<?> cls) {
+        Map<String, Direction> out = new HashMap<String, Direction>();
+        for (Method method : cls.getMethods()) {
+            if (method.getAnnotation(Dependent.class) != null) {
+                Adjacency ann = method.getAnnotation(Adjacency.class);
+                if (ann != null)
+                    out.put(ann.label(), ann.direction());
+            }
+        }
+        return out;
+    }
+
+    private static Map<String, Method> getFetchMethodsInternal(Class<?> cls) {
+        logger.trace(" - checking for @Fetch methods: {}", cls.getCanonicalName());
+        Map<String, Method> out = new HashMap<String, Method>();
+        for (Method method : cls.getMethods()) {
+            Fetch fetch = method.getAnnotation(Fetch.class);
+            if (fetch != null
+                    && method.getName().startsWith(FETCH_METHOD_PREFIX)) {
+                out.put(fetch.value(), method);
+                logger.trace(" --- found @Fetch annotation: {}: {}", method.getName(), fetch.value());
+            }
+        }
+
+        for (Class<?> s : cls.getInterfaces()) {
+            out.putAll(getFetchMethodsInternal(s));
+        }
+        return out;
+    }
+
+    private static Iterable<String> getPropertyKeysInternal(Class<?> cls) {
+        List<String> out = Lists.newLinkedList();
+        for (Method method : cls.getMethods()) {
+            Property ann = method.getAnnotation(Property.class);
+            if (ann != null)
+                out.add(ann.value());
+        }
+
+        for (Class<?> s : cls.getInterfaces()) {
+            Iterables.addAll(out, getPropertyKeysInternal(s));
+        }
+
+        return ImmutableSet.copyOf(out);
+    }
+
+    private static Iterable<String> getMandatoryPropertyKeysInternal(Class<?> cls) {
+        List<String> out = new LinkedList<String>();
+        for (Method method : cls.getMethods()) {
+            Mandatory mandatory = method.getAnnotation(Mandatory.class);
+            if (mandatory != null) {
+                Property ann = method.getAnnotation(Property.class);
+                if (ann != null)
+                    out.add(ann.value());
+            }
+
+        }
+
+        for (Class<?> s : cls.getInterfaces()) {
+            Iterables.addAll(out, getMandatoryPropertyKeysInternal(s));
+        }
+
+        return ImmutableSet.copyOf(out);
+    }
+
+    private static Iterable<String> getUniquePropertyKeysInternal(Class<?> cls) {
+        List<String> out = new LinkedList<String>();
+        for (Method method : cls.getMethods()) {
+            Unique unique = method.getAnnotation(Unique.class);
+            if (unique != null) {
+                Property ann = method.getAnnotation(Property.class);
+                if (ann != null)
+                    out.add(ann.value());
+            }
+
+        }
+
+        for (Class<?> s : cls.getInterfaces()) {
+            Iterables.addAll(out, getUniquePropertyKeysInternal(s));
+        }
+
+        return ImmutableSet.copyOf(out);
     }
 }
