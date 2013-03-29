@@ -8,7 +8,6 @@ import java.util.Map;
 
 import com.google.common.collect.Maps;
 import eu.ehri.project.models.annotations.*;
-import eu.ehri.project.models.base.Frame;
 import org.neo4j.helpers.collection.Iterables;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,18 +49,6 @@ public class ClassUtils {
             entityClassCache.put(cls, getEntityTypeInternal(cls));
         }
         return entityClassCache.get(cls);
-    }
-
-    /**
-     * Check if a given vertex is of a particular type.
-     *
-     * @param frame
-     * @param type
-     * @return
-     */
-    public static boolean hasType(Frame frame, EntityClass type) {
-        String isa = (String) frame.asVertex().getProperty(EntityType.TYPE_KEY);
-        return type.getName().equals(isa);
     }
 
     public static Map<String,Direction> getDependentRelations(Class<?> cls) {

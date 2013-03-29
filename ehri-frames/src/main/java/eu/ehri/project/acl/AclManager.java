@@ -649,7 +649,7 @@ public final class AclManager {
             // could well be null.
             if (isGlobalOrInScope(grant)) {
                 for (PermissionGrantTarget target : grant.getTargets()) {
-                    if (ClassUtils.hasType(target, EntityClass.CONTENT_TYPE)) {
+                    if (manager.getEntityClass(target).equals(EntityClass.CONTENT_TYPE)) {
                         ContentTypes ctype = ContentTypes.withName(manager
                                 .getId(target));
                         permmap.put(ctype, PermissionType.withName(manager
