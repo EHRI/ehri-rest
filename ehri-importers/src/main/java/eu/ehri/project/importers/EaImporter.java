@@ -3,11 +3,11 @@ package eu.ehri.project.importers;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.importers.properties.NodeProperties;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.MaintenanceEvent;
 import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.NamedEntity;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -28,7 +28,6 @@ public abstract class EaImporter extends XmlImporter<Map<String, Object>> {
 
     private static final Logger logger = LoggerFactory.getLogger(EaImporter.class);
 
-    public static final String ADDRESS_NAME = "name";
 
     /**
      * Construct an EadImporter object.
@@ -50,7 +49,7 @@ public abstract class EaImporter extends XmlImporter<Map<String, Object>> {
      protected Map<String, Object> extractDocumentaryUnit(Map<String, Object> itemData) throws ValidationError {
         Map<String, Object> unit = new HashMap<String, Object>();
         unit.put(AccessibleEntity.IDENTIFIER_KEY, itemData.get("objectIdentifier"));
-        unit.put(DocumentaryUnit.NAME, itemData.get(DocumentaryUnit.NAME));
+//        unit.put(NamedEntity.NAME, itemData.get(NamedEntity.NAME));
         return unit;
     }
     protected <T> List<T> toList(Iterable<T> iter) {

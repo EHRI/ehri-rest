@@ -91,7 +91,7 @@ public class CrudViewsTest extends AbstractFixtureTest {
                 graph, DocumentaryUnit.class);
         Bundle bundle = Bundle.fromData(getTestBundle());
         DocumentaryUnit unit = docViews.create(bundle, validUser);
-        assertEquals(TEST_COLLECTION_NAME, unit.getName());
+        assertEquals(TEST_COLLECTION_NAME, unit.asVertex().getProperty("name"));
     }
 
     /**
@@ -109,7 +109,7 @@ public class CrudViewsTest extends AbstractFixtureTest {
                 graph, DocumentaryUnit.class);
         Bundle bundle = Bundle.fromData(getTestBundle());
         DocumentaryUnit unit = docViews.create(bundle, invalidUser);
-        assertEquals(TEST_COLLECTION_NAME, unit.getName());
+        assertEquals(TEST_COLLECTION_NAME, unit.asVertex().getProperty("name"));
     }
 
     /**
@@ -142,7 +142,7 @@ public class CrudViewsTest extends AbstractFixtureTest {
             new AclManager(graph).grantPermissions(invalidUser, target,
                     PermissionType.CREATE);
             DocumentaryUnit unit = docViews.create(bundle, invalidUser);
-            assertEquals(TEST_COLLECTION_NAME, unit.getName());
+            assertEquals(TEST_COLLECTION_NAME, unit.asVertex().getProperty("name"));
         }
     }
 
@@ -165,7 +165,7 @@ public class CrudViewsTest extends AbstractFixtureTest {
         // In the fixtures, 'reto' should have a grant for 'CREATE'
         // scoped to the 'r1' repository.
         DocumentaryUnit unit = docViews.create(bundle, invalidUser);
-        assertEquals(TEST_COLLECTION_NAME, unit.getName());
+        assertEquals(TEST_COLLECTION_NAME, unit.asVertex().getProperty("name"));
     }
 
     /**
@@ -195,14 +195,14 @@ public class CrudViewsTest extends AbstractFixtureTest {
                 graph, DocumentaryUnit.class);
         Bundle bundle = Bundle.fromData(getTestBundle());
         DocumentaryUnit unit = docViews.create(bundle, validUser);
-        assertEquals(TEST_COLLECTION_NAME, unit.getName());
+        assertEquals(TEST_COLLECTION_NAME, unit.asVertex().getProperty("name"));
 
         String newName = TEST_COLLECTION_NAME + " with new stuff";
         Bundle newBundle = bundle.withId(unit.getId()).withDataValue(
                 "name", newName);
 
         DocumentaryUnit changedUnit = docViews.update(newBundle, validUser);
-        assertEquals(newName, changedUnit.getName());
+        assertEquals(newName, changedUnit.asVertex().getProperty("name"));
         DocumentDescription desc = graph.frame(
                 changedUnit.getDescriptions().iterator().next().asVertex(),
                 DocumentDescription.class);
@@ -284,7 +284,7 @@ public class CrudViewsTest extends AbstractFixtureTest {
      * @throws DeserializationError
      * @throws IntegrityError
      */
-    @Test(expected = ValidationError.class)
+    @Test
     public void testCreateWithError() throws ValidationError, PermissionDenied,
             DeserializationError, IntegrityError {
         CrudViews<DocumentaryUnit> docViews = new CrudViews<DocumentaryUnit>(
@@ -292,9 +292,9 @@ public class CrudViewsTest extends AbstractFixtureTest {
         Bundle bundle = Bundle.fromData(getTestBundle())
                 .removeDataValue("name");
 
-        // This should barf because the collection has no name.
+        // This shouldn't barf because the collection does not need a name.
         DocumentaryUnit unit = docViews.create(bundle, validUser);
-        assertEquals(TEST_COLLECTION_NAME, unit.getName());
+        assertEquals(null, unit.asVertex().getProperty("name"));
     }
 
     /**
@@ -341,7 +341,7 @@ public class CrudViewsTest extends AbstractFixtureTest {
                 graph, DocumentaryUnit.class);
         Bundle bundle = Bundle.fromData(getTestBundle());
         DocumentaryUnit unit = docViews.create(bundle, validUser);
-        assertEquals(TEST_COLLECTION_NAME, unit.getName());
+        assertEquals(TEST_COLLECTION_NAME, unit.asVertex().getProperty("name"));
 
         long descCount = Iterables.count(unit.getDescriptions());
         Bundle descBundle = bundle
@@ -372,7 +372,7 @@ public class CrudViewsTest extends AbstractFixtureTest {
                 graph, DocumentaryUnit.class);
         Bundle bundle = Bundle.fromData(getTestBundle());
         DocumentaryUnit unit = docViews.create(bundle, validUser);
-        assertEquals(TEST_COLLECTION_NAME, unit.getName());
+        assertEquals(TEST_COLLECTION_NAME, unit.asVertex().getProperty("name"));
 
         long descCount = Iterables.count(unit.getDocumentDescriptions());
         Bundle descBundle = new Serializer(graph).vertexFrameToBundle(unit)
@@ -401,7 +401,7 @@ public class CrudViewsTest extends AbstractFixtureTest {
                 graph, DocumentaryUnit.class);
         Bundle bundle = Bundle.fromData(getTestBundle());
         DocumentaryUnit unit = docViews.create(bundle, validUser);
-        assertEquals(TEST_COLLECTION_NAME, unit.getName());
+        assertEquals(TEST_COLLECTION_NAME, unit.asVertex().getProperty("name"));
 
         long descCount = Iterables.count(unit.getDocumentDescriptions());
 

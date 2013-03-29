@@ -7,6 +7,7 @@ package eu.ehri.project.importers;
 import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.events.SystemEvent;
 import java.io.InputStream;
 import java.util.List;
@@ -53,7 +54,8 @@ public class IcaAtomEadSingleEad extends AbstractImporterTest{
                 IMPORTED_ITEM_ID);
         assertTrue(docs.iterator().hasNext());
         DocumentaryUnit unit = graph.frame(docs.iterator().next(), DocumentaryUnit.class);
-        assertEquals("Test EAD Item", unit.getName());
+        for(Description d : unit.getDocumentDescriptions())
+            assertEquals("Test EAD Item", d.getName());
 
         for(SystemEvent event : unit.getLatestEvent()){
             System.out.println("event: " + event.getLogMessage());

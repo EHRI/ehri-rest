@@ -17,11 +17,11 @@ public interface DocumentaryUnit extends AccessibleEntity,
         DescribedEntity, PermissionScope {
 
     public static final String CHILD_OF = "childOf";
-    public static final String NAME = "name";
+//    public static final String NAME = "name";
 
-    @Mandatory
-    @Property(NAME)
-    public String getName();
+//    @Mandatory
+//    @Property(NAME)
+//    public String getName();
 
     /**
      * Get the repository that holds this documentary unit.

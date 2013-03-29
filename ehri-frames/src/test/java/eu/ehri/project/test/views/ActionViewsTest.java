@@ -43,13 +43,13 @@ public class ActionViewsTest extends AbstractFixtureTest {
                 graph, DocumentaryUnit.class);
         Bundle bundle = Bundle.fromData(getTestBundle());
         DocumentaryUnit unit = docViews.create(bundle, validUser);
-        assertEquals(TEST_COLLECTION_NAME, unit.getName());
+        assertEquals(TEST_COLLECTION_NAME, unit.asVertex().getProperty("name"));
 
         String newName = TEST_COLLECTION_NAME + " with new stuff";
         Bundle newBundle = bundle.withId(unit.getId()).withDataValue("name", newName);
 
         DocumentaryUnit changedUnit = docViews.update(newBundle, validUser);
-        assertEquals(newName, changedUnit.getName());
+        assertEquals(newName, changedUnit.asVertex().getProperty("name"));
         assertTrue(changedUnit.getDescriptions().iterator().hasNext());
         DocumentDescription desc = graph.frame(
                 changedUnit.getDescriptions().iterator().next().asVertex(),

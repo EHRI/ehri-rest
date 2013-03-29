@@ -8,6 +8,7 @@ import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.events.SystemEvent;
 import java.io.InputStream;
 import java.util.List;
@@ -54,7 +55,8 @@ public class NiodEuropeanaTest extends AbstractImporterTest{
                 getVertexByIdentifier(graph,UNIT_IDENTIFIER),
                 DocumentaryUnit.class);
 
-        assertEquals("Jodenster", fonds_unit.getName());
+        for(Description d : fonds_unit.getDescriptions())
+            assertEquals("Jodenster", d.getName());
 
 
 

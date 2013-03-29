@@ -13,7 +13,7 @@ public interface Description extends NamedEntity {
     public static final String DESCRIBES = DescribedEntity.DESCRIBES;
     public static final String LANGUAGE_CODE = "languageCode";
     public static final String MUTATES = "maintenance"; //links to MaintenanceEvent
-    public final static String NAME = "name";
+//    public final static String NAME = "name";
 
     @Adjacency(label = DESCRIBES)
     public DescribedEntity getEntity();
