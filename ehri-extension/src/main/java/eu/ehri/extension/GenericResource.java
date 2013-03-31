@@ -1,17 +1,21 @@
 package eu.ehri.extension;
 
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.StreamingOutput;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.gremlin.java.GremlinPipeline;
 import com.tinkerpop.pipes.PipeFunction;
+import eu.ehri.project.exceptions.DeserializationError;
+import org.codehaus.jackson.JsonFactory;
+import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.type.TypeReference;
 import org.neo4j.graphdb.GraphDatabaseService;
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.acl.AclManager;
@@ -27,6 +31,37 @@ public class GenericResource extends AbstractAccessibleEntityResource<Accessible
 
     public GenericResource(@Context GraphDatabaseService database) {
         super(database, AccessibleEntity.class);
+    }
+
+    /**
+     * POST alternative to 'get', which allows passing a much larger
+     * list of ids to fetch via a JSON body.
+     * @param json
+     * @return
+     * @throws ItemNotFound
+     * @throws PermissionDenied
+     * @throws BadRequester
+     * @throws DeserializationError
+     * @throws IOException
+     */
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public StreamingOutput getFromJSON(String json)
+            throws ItemNotFound, PermissionDenied, BadRequester, DeserializationError, IOException {
+        return get(parseIds(json));
+    }
+
+    private List<String> parseIds(String json) throws IOException, DeserializationError {
+        try {
+            JsonFactory factory = new JsonFactory();
+            ObjectMapper mapper = new ObjectMapper(factory);
+            TypeReference<List<String>> typeRef = new TypeReference<List<String>>() {
+            };
+            return mapper.readValue(json, typeRef);
+        } catch (JsonMappingException e) {
+            throw new DeserializationError(e.getMessage());
+        }
     }
 
     @GET
