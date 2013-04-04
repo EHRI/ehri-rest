@@ -62,19 +62,18 @@ public final class AnnotationViews implements Annotations {
     /**
      * Create a link between two items.
      * 
-     * @param id
-     * @param sourceId
-     * @param bundle
+     * @param targetId the identifier of a AccessibleEntity target of this Annotation
+     * @param sourceId the identifier of a Annotator source of this Annotation
+     * @param bundle the annotation itself
      * @param user
      * @return
      * @throws ItemNotFound
      * @throws ValidationError
      * @throws PermissionDenied
      */
-    public Annotation createLink(String id, String sourceId, Bundle bundle,
-            Accessor user) throws ItemNotFound, ValidationError,
+    public Annotation createLink(String targetId, String sourceId, Bundle bundle, Accessor user) throws ItemNotFound, ValidationError,
             PermissionDenied {
-        Annotation ann = createFor(id, bundle, user);
+        Annotation ann = createFor(targetId, bundle, user);
         ann.setSource(manager.getFrame(sourceId, Annotator.class));
         return ann;
     }
@@ -82,18 +81,18 @@ public final class AnnotationViews implements Annotations {
     /**
      * Create an annotation for an item.
      * 
-     * @param id
-     * @param bundle
-     * @param accessor
+     * @param id the identifier of the AccessibleEntity this annotation is attached to, as a target
+     * @param bundle the annotation itself
+     * @param user the user creating the annotation
      * @return
      * @throws PermissionDenied
      * @throws ValidationError
      * @throws ItemNotFound
      */
-    public Annotation createFor(String id, Bundle bundle, Accessor accessor)
+    public Annotation createFor(String id, Bundle bundle, Accessor user)
             throws PermissionDenied, ValidationError, ItemNotFound {
         AccessibleEntity entity = manager.getFrame(id, AccessibleEntity.class);
-        helper.checkEntityPermission(entity, accessor, PermissionType.ANNOTATE);
+        helper.checkEntityPermission(entity, user, PermissionType.ANNOTATE);
         // FIXME: This kind of sucks, generating a UUID identifier
         // manually - we should relax the restriction to have one.
         if (bundle.getDataValue(AccessibleEntity.IDENTIFIER_KEY) == null) {
@@ -104,10 +103,10 @@ public final class AnnotationViews implements Annotations {
                 Annotation.class);
         graph.frame(entity.asVertex(), AnnotatableEntity.class).addAnnotation(
                 annotation);
-        annotation.setAnnotator(graph.frame(accessor.asVertex(),
+        annotation.setAnnotator(graph.frame(user.asVertex(),
                 Annotator.class));
 
-        new ActionManager(graph).logEvent(entity, graph.frame(accessor.asVertex(), Actioner.class),
+        new ActionManager(graph).logEvent(entity, graph.frame(user.asVertex(), Actioner.class),
                 "Added annotation").addSubjects(annotation);
         return annotation;
     }
@@ -119,6 +118,7 @@ public final class AnnotationViews implements Annotations {
      * @param accessor
      * @return map of ids to annotation lists.
      */
+    @Override
     public ListMultimap<String, Annotation> getFor(String id, Accessor accessor)
             throws ItemNotFound {
         final PipeFunction<Vertex, Boolean> filter = acl
@@ -128,6 +128,7 @@ public final class AnnotationViews implements Annotations {
         AnnotatableEntity item = manager.getFrame(id, AnnotatableEntity.class);
         getAnnotations(item, annotations, filter);
         new Serializer(graph).traverseSubtree(item, new TraversalCallback() {
+            @Override
             public void process(Frame vertexFrame, int depth,
                     String relation, int relationIndex) {
                 getAnnotations(vertexFrame, annotations, filter);

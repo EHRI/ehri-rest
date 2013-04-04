@@ -16,6 +16,8 @@ public interface Annotation extends AnnotatableEntity, AccessibleEntity {
     public static final String ANNOTATES = "hasAnnotationTarget";
     
     public static final String HAS_SOURCE = "hasAnnotationBody";
+    public static final String NOTES_BODY = "body";
+    public static final String ANNOTATION_TYPE = "type";
 
     @Fetch(Annotation.ANNOTATES)
     @Adjacency(label = Annotation.ANNOTATES, direction = Direction.IN)
@@ -38,6 +40,6 @@ public interface Annotation extends AnnotatableEntity, AccessibleEntity {
     @Adjacency(label = HAS_SOURCE)
     public void setSource(final Annotator annotator);
 
-    @Property("body")
+    @Property(NOTES_BODY)
     public String getBody();
 }

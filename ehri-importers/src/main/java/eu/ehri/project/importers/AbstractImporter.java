@@ -1,23 +1,34 @@
 package eu.ehri.project.importers;
 
+import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
+import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.properties.NodeProperties;
 import eu.ehri.project.models.EntityClass;
+import eu.ehri.project.models.Group;
+import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessor;
+import eu.ehri.project.models.base.Description;
+import eu.ehri.project.models.base.IdentifiableEntity;
 import eu.ehri.project.models.base.PermissionScope;
 
+import eu.ehri.project.persistance.Bundle;
+import eu.ehri.project.persistance.BundleDAO;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +50,9 @@ public abstract class AbstractImporter<T> {
     protected final T documentContext;
     protected List<ImportCallback> createCallbacks = new LinkedList<ImportCallback>();
     protected List<ImportCallback> updateCallbacks = new LinkedList<ImportCallback>();
+    protected BundleDAO persister; 
 
+    protected UserProfile importUser;
         private NodeProperties pc;
 
     /**
@@ -50,8 +63,7 @@ public abstract class AbstractImporter<T> {
      * @param log
      * @param documentContext
      */
-    public AbstractImporter(FramedGraph<Neo4jGraph> framedGraph,
-            PermissionScope permissionScope, ImportLog log, T documentContext) {
+    public AbstractImporter(FramedGraph<Neo4jGraph> framedGraph, PermissionScope permissionScope, ImportLog log, T documentContext) {
         this.permissionScope = permissionScope;
         this.framedGraph = framedGraph;
         this.log = log;
@@ -65,6 +77,28 @@ public abstract class AbstractImporter<T> {
         this.log = log;
         documentContext=null;
         manager = GraphManagerFactory.getInstance(framedGraph);
+        persister = new BundleDAO(framedGraph, permissionScope);
+        try {
+            importUser=manager.getFrame("mike", UserProfile.class);
+//            importUser = manager.getFrame("ehriimporter", UserProfile.class);
+        } catch (ItemNotFound ex) {
+            logger.error(ex.getMessage());
+//              try {
+//                  logger.debug("EHRI Importer user not found, creating a new one");
+//                  Map<String, Object> userdata = new HashMap<String, Object>();
+//                  userdata.put(IdentifiableEntity.IDENTIFIER_KEY, "ehriimporter");
+//                  userdata.put(Description.NAME, "EHRI Importer");
+//                  Bundle unit = new Bundle(EntityClass.USER_PROFILE, userdata);
+//                  importUser = persister.create(unit, UserProfile.class);
+//                  Iterable<Vertex> docs = framedGraph.getVertices(AccessibleEntity.IDENTIFIER_KEY, "admin");
+//                  Vertex v = docs.iterator().next();
+//                  Group a = framedGraph.frame(v, Group.class);
+//                  importUser.addAccessor(a);
+//              } catch (ValidationError ex1) {
+//                  logger.error("validation error: "+ex1.getMessage());
+//                  throw new RuntimeException(ex1 + " "+ ex);
+//              }
+        }
     }
     /**
      * Add a callback to run when an item is created.

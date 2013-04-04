@@ -6,6 +6,7 @@ package eu.ehri.project.importers;
 
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.properties.XmlImportProperties;
+import eu.ehri.project.models.Annotation;
 import eu.ehri.project.models.MaintenanceEvent;
 import eu.ehri.project.models.base.Description;
 import java.util.ArrayList;
@@ -36,6 +37,7 @@ public class EacHandler extends EaHandler {
         possibleSubnodes = new HashMap<String, Class<? extends Frame>>();
 
         possibleSubnodes.put("maintenanceEvent", MaintenanceEvent.class);
+        possibleSubnodes.put("relation", Annotation.class);
     }
 
     @Override

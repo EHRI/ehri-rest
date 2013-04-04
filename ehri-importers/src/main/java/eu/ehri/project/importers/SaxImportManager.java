@@ -112,7 +112,7 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
      * @throws ValidationError
      * @throws InputParseError
      */
-    @Override
+     @Override
     public ImportLog importFile(InputStream ios, String logMessage)
             throws IOException, ValidationError, InputParseError {
         Transaction tx = framedGraph.getBaseGraph().getRawGraph().beginTx();
@@ -270,20 +270,20 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
         } catch (InstantiationException ex) {
             logger.error("InstantiationException: "+ex.getMessage());
         } catch (IllegalAccessException ex) {
-            logger.error(ex.getMessage());
+            logger.error("IllegalAccess: " + ex.getMessage());
         } catch (IllegalArgumentException ex) {
-            logger.error(ex.getMessage());
+            logger.error("IllegalArgumentException: "+ex.getMessage());
         } catch (InvocationTargetException ex) {
-            logger.error(ex.getMessage());
+            logger.error("InvocationTargetException: "+ ex.getMessage());
         } catch (NoSuchMethodException ex) {
-            logger.error(ex.getMessage());
+            logger.error("NoSuchMethodException: "+ ex.getMessage());
         } catch (SecurityException ex) {
-            logger.error(ex.getMessage());
+            logger.error("SecurityException: "+ ex.getMessage());
         } catch (ParserConfigurationException ex) {
-            logger.error(ex.getMessage());
+            logger.error("ParserConfigurationException: "+ ex.getMessage());
             throw new RuntimeException(ex);
         } catch (SAXException e) {
-            logger.error(e.getMessage());
+            logger.error("SAXException: "+ e.getMessage());
             throw new InputParseError(e);
         }
 

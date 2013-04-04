@@ -5,6 +5,7 @@ import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Property;
 
 import eu.ehri.project.models.MaintenanceEvent;
+import eu.ehri.project.models.UndeterminedRelationship;
 import eu.ehri.project.models.annotations.Dependent;
 import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.annotations.Mandatory;
@@ -13,7 +14,7 @@ public interface Description extends NamedEntity {
     public static final String DESCRIBES = DescribedEntity.DESCRIBES;
     public static final String LANGUAGE_CODE = "languageCode";
     public static final String MUTATES = "maintenance"; //links to MaintenanceEvent
-//    public final static String NAME = "name";
+    public static final String RELATESTO = "relatesto"; //links to UndeterminedRelationship
 
     @Adjacency(label = DESCRIBES)
     public DescribedEntity getEntity();
@@ -42,4 +43,14 @@ public interface Description extends NamedEntity {
 
     @Adjacency(label = MUTATES)
     public abstract void addMaintenanceEvent(final MaintenanceEvent maintenanceEvent);
+    
+    @Dependent
+    @Adjacency(label = RELATESTO, direction=Direction.IN)
+    public abstract Iterable<UndeterminedRelationship> getUndeterminedRelationships();
+
+    @Adjacency(label = RELATESTO)
+    public abstract void setUndeterminedRelationships(final Iterable<UndeterminedRelationship> relationship);
+
+    @Adjacency(label = RELATESTO)
+    public abstract void addUndeterminedRelationship(final UndeterminedRelationship relationship);
 }
