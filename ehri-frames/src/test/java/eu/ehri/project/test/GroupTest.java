@@ -16,6 +16,15 @@ import static junit.framework.Assert.assertEquals;
  * To change this template use File | Settings | File Templates.
  */
 public class GroupTest extends AbstractFixtureTest {
+
+    @Test
+    public void testAdminInitializedProperty() throws Exception {
+        Group admin = manager.getFrame(Group.ADMIN_GROUP_IDENTIFIER, Group.class);
+        // Both identifier and name should initialize to 'admin'
+        assertEquals(admin.getIdentifier(), Group.ADMIN_GROUP_IDENTIFIER);
+        assertEquals(admin.getName(), Group.ADMIN_GROUP_IDENTIFIER);
+    }
+
     @Test
     public void testGetAllUserProfileMembers() throws Exception {
         Group admin = manager.getFrame(Group.ADMIN_GROUP_IDENTIFIER, Group.class);
