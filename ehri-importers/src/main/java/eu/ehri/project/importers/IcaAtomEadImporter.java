@@ -16,6 +16,7 @@ import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.persistance.BundleDAO;
 import java.util.HashMap;
 import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,9 +64,9 @@ public class IcaAtomEadImporter extends EaImporter {
     public DocumentaryUnit importItem(Map<String, Object> itemData, int depth)
             throws ValidationError {
         BundleDAO persister = new BundleDAO(framedGraph, permissionScope);
-        Bundle unit = new Bundle(EntityClass.DOCUMENTARY_UNIT, extractDocumentaryUnit(itemData));
-
-        Bundle descBundle = new Bundle(EntityClass.DOCUMENT_DESCRIPTION, extractUnitDescription(itemData, EntityClass.DOCUMENT_DESCRIPTION));
+        Bundle unit = new Bundle(EntityClass.DOCUMENTARY_UNIT, extractDocumentaryUnit(itemData, depth));
+        System.out.println("Imported item: " + itemData.get("name"));
+        Bundle descBundle = new Bundle(EntityClass.DOCUMENT_DESCRIPTION, extractDocumentDescription(itemData, depth));
         // Add dates and descriptions to the bundle since they're @Dependent
         // relations.
         for (Map<String, Object> dpb : extractDates(itemData)) {
@@ -74,16 +75,23 @@ public class IcaAtomEadImporter extends EaImporter {
         
         unit=unit.withRelation(Description.DESCRIBES, descBundle);
 
-        IdGenerator generator = AccessibleEntityIdGenerator.INSTANCE;
+        if (unit.getDataValue(DocumentaryUnit.IDENTIFIER_KEY) == null) {
+            throw new ValidationError(unit, DocumentaryUnit.IDENTIFIER_KEY, "Missing identifier");
+        }
+        IdGenerator generator = IdentifiableEntityIdGenerator.INSTANCE;
         String id = generator.generateId(EntityClass.DOCUMENTARY_UNIT, permissionScope, unit);
+        if (id.equals(permissionScope.getId())) {
+            throw new RuntimeException("Generated an id same as scope: " + unit.getData());
+        }
+        System.out.println("Generated ID: " + id + " (" + permissionScope.getId() + ")");
         boolean exists = manager.exists(id);
         DocumentaryUnit frame = persister.createOrUpdate(unit.withId(id), DocumentaryUnit.class);
-  
+
         // Set the repository/item relationship
         //TODO: figure out another way to determine we're at the root, so we can get rid of the depth param
         if (depth == TOP_LEVEL_DEPTH) {
-            // Then we need to add a relationship to the repository
-            frame.setRepository(framedGraph.frame(permissionScope.asVertex(), Repository.class));
+            Repository repository = framedGraph.frame(permissionScope.asVertex(), Repository.class);
+            frame.setRepository(repository);
         }
         frame.setPermissionScope(permissionScope);
         

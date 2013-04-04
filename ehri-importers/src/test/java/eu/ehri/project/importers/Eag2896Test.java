@@ -13,6 +13,7 @@ import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.RepositoryDescription;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Description;
+import eu.ehri.project.models.base.IdentifiableEntity;
 import eu.ehri.project.models.events.SystemEvent;
 import java.io.IOException;
 import java.io.InputStream;
@@ -56,7 +57,7 @@ public class Eag2896Test extends AbstractImporterTest {
             // - 1 more SystemEvent        
             assertEquals(count + 8, getNodeCount(graph));
 
-            Iterable<Vertex> docs = graph.getVertices(AccessibleEntity.IDENTIFIER_KEY, IMPORTED_ITEM_ID);
+            Iterable<Vertex> docs = graph.getVertices(IdentifiableEntity.IDENTIFIER_KEY, IMPORTED_ITEM_ID);
             assertTrue(docs.iterator().hasNext());
             Repository unit = graph.frame(
                     getVertexByIdentifier(graph, IMPORTED_ITEM_ID),

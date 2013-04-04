@@ -15,6 +15,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 
 import eu.ehri.project.models.base.DescribedEntity;
+import eu.ehri.project.models.base.IdentifiableEntity;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Before;
@@ -122,7 +123,7 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
         ObjectMapper mapper = new ObjectMapper();
         JsonNode rootNode = mapper.readValue(errString, JsonNode.class);
         JsonNode errValue = rootNode.path(BundleError.ERROR_KEY).path(
-                AccessibleEntity.IDENTIFIER_KEY);
+                IdentifiableEntity.IDENTIFIER_KEY);
         assertFalse(errValue.isMissingNode());
     }
 
@@ -172,7 +173,7 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
         JsonNode rootNode = mapper.readValue(response.getEntity(String.class),
                 JsonNode.class);
         JsonNode errValue = rootNode.path("data").path(
-                AccessibleEntity.IDENTIFIER_KEY);
+                IdentifiableEntity.IDENTIFIER_KEY);
         assertFalse(errValue.isMissingNode());
         assertEquals(TEST_JSON_IDENTIFIER, errValue.getTextValue());
     }
@@ -196,7 +197,7 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
         JsonNode rootNode = mapper.readValue(response.getEntity(String.class),
                 JsonNode.class);
         JsonNode errValue = rootNode.path("data").path(
-                AccessibleEntity.IDENTIFIER_KEY);
+                IdentifiableEntity.IDENTIFIER_KEY);
         assertFalse(errValue.isMissingNode());
         assertEquals(CREATED_ID, errValue.getTextValue());
     }
@@ -217,7 +218,7 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
         @SuppressWarnings("unchecked")
         Map<String, Object> c1data = (Map<String, Object>) data.get(0).get(
                 "data");
-        assertEquals(FIRST_DOC_ID, c1data.get(AccessibleEntity.IDENTIFIER_KEY));
+        assertEquals(FIRST_DOC_ID, c1data.get(IdentifiableEntity.IDENTIFIER_KEY));
     }
 
     @Test
@@ -298,7 +299,7 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
         JsonNode idValue = rootNode.path(Bundle.REL_KEY).path(
                 DescribedEntity.DESCRIBES).path(1)
                 .path(Bundle.DATA_KEY)
-                .path(AccessibleEntity.IDENTIFIER_KEY);
+                .path(IdentifiableEntity.IDENTIFIER_KEY);
         assertFalse(idValue.isMissingNode());
         assertEquals(TEST_DESCRIPTION_IDENTIFIER, idValue.getTextValue());
     }
@@ -324,7 +325,7 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
         JsonNode idValue = rootNode.path(Bundle.REL_KEY).path(
                 DescribedEntity.DESCRIBES).path(0)
                 .path(Bundle.DATA_KEY)
-                .path(AccessibleEntity.IDENTIFIER_KEY);
+                .path(IdentifiableEntity.IDENTIFIER_KEY);
         assertFalse(idValue.isMissingNode());
         assertEquals(TEST_DESCRIPTION_IDENTIFIER, idValue.getTextValue());
         // Assert there are no extra descriptions
@@ -353,7 +354,7 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
         JsonNode idValue = rootNode.path(Bundle.REL_KEY).path(
                 DescribedEntity.DESCRIBES).path(0)
                 .path(Bundle.DATA_KEY)
-                .path(AccessibleEntity.IDENTIFIER_KEY);
+                .path(IdentifiableEntity.IDENTIFIER_KEY);
         // Assert there are no descriptions at all now.
         assertTrue(idValue.isMissingNode());
     }

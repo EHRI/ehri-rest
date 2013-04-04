@@ -193,6 +193,11 @@ public final class Serializer {
         }
     }
 
+    // TODO: Profiling shows that (unsurprisingly) this method is a
+    // performance hotspot. Rewrite it so that instead of using Frames
+    // method invocations to do the traversal, we use regular traversals
+    // whereever possible. Unfortunately the use of @GremlinGroovy Frame
+    // annotations will make this difficult.
     private ListMultimap<String, Bundle> getRelationData(
             Vertex item, int depth, Class<?> cls) {
         ListMultimap<String, Bundle> relations = LinkedListMultimap.create();

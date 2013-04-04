@@ -154,7 +154,7 @@ public class SkosVocabularyImport extends BaseCommand implements Command {
             throws ValidationError, IntegrityError {
         System.out.println("Creating vocabulary: \"" + name + "\" ...");
         Map<String, Object> vocabularyData = new HashMap<String, Object>();
-        vocabularyData.put(AccessibleEntity.IDENTIFIER_KEY, name);
+        vocabularyData.put(Vocabulary.IDENTIFIER_KEY, name);
         //vocabularyData.put(EntityType.ID_KEY, name);
         //vocabularyData.put("name", name);
         Bundle bundle = new Bundle(EntityClass.CVOC_VOCABULARY, vocabularyData);

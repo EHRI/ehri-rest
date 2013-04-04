@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.List;
 
+import eu.ehri.project.models.base.IdentifiableEntity;
 import org.junit.Test;
 
 import com.tinkerpop.blueprints.Vertex;
@@ -51,7 +52,7 @@ public class SkosCoreCvocImporterTest extends AbstractImporterTest { //AbstractF
         Query<Concept> query = new Query<Concept>(graph, Concept.class);
         // Query for document identifier.
         List<Concept> list = toList(query.setLimit(1).list(
-                AccessibleEntity.IDENTIFIER_KEY, skosConceptId, validUser));
+                IdentifiableEntity.IDENTIFIER_KEY, skosConceptId, validUser));
         for (Concept c: list) {
         	System.out.println("Retrieved after import; Concept: " + c.getIdentifier());
         	Iterable<Concept> bcList = c.getBroaderConcepts();
@@ -67,7 +68,7 @@ public class SkosCoreCvocImporterTest extends AbstractImporterTest { //AbstractF
         Query<Concept> query = new Query<Concept>(graph, Concept.class);
         // Query for document identifier.
         List<Concept> list = toList(query.setLimit(1).list(
-                AccessibleEntity.IDENTIFIER_KEY, skosConceptId, validUser));
+                IdentifiableEntity.IDENTIFIER_KEY, skosConceptId, validUser));
         // and print the tree
         //printConceptTree(System.out, list.get(0));
         

@@ -57,8 +57,8 @@ public class EagImporter extends EaImporter{
         BundleDAO persister = new BundleDAO(framedGraph, permissionScope);
         Bundle unit = new Bundle(EntityClass.REPOSITORY, extractUnit(itemData));
 
-        Map<String, Object> descmap = extractUnitDescription(itemData, EntityClass.REPOSITORY_DESCRIPTION);
-        descmap.put(AccessibleEntity.IDENTIFIER_KEY, descmap.get(AccessibleEntity.IDENTIFIER_KEY)+"#desc");
+        Map<String, Object> descmap = extractUnitDescription(itemData);
+        descmap.put(IdentifiableEntity.IDENTIFIER_KEY, descmap.get(IdentifiableEntity.IDENTIFIER_KEY)+"#desc");
         Bundle descBundle = new Bundle(EntityClass.REPOSITORY_DESCRIPTION, descmap);
 
 
@@ -82,7 +82,7 @@ public class EagImporter extends EaImporter{
 
         unit = unit.withRelation(Description.DESCRIBES, descBundle);
 
-        IdGenerator generator = AccessibleEntityIdGenerator.INSTANCE;
+        IdGenerator generator = IdentifiableEntityIdGenerator.INSTANCE;
         String id = generator.generateId(EntityClass.REPOSITORY, SystemScope.getInstance(), unit);
         boolean exists = manager.exists(id);
         Repository frame = persister.createOrUpdate(unit.withId(id), Repository.class);

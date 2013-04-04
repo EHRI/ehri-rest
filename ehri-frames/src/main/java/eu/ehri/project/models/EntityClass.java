@@ -7,7 +7,7 @@ import eu.ehri.project.models.cvoc.ConceptDescription;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.models.events.SystemEventQueue;
-import eu.ehri.project.models.idgen.AccessibleEntityIdGenerator;
+import eu.ehri.project.models.idgen.IdentifiableEntityIdGenerator;
 import eu.ehri.project.models.idgen.GenericIdGenerator;
 import eu.ehri.project.models.idgen.IdGenerator;
 
@@ -21,11 +21,11 @@ import eu.ehri.project.models.idgen.IdGenerator;
 public enum EntityClass {
 
     // @formatter:off
-    DOCUMENTARY_UNIT(Entities.DOCUMENTARY_UNIT, "c", DocumentaryUnit.class, AccessibleEntityIdGenerator.INSTANCE),
-    REPOSITORY(Entities.REPOSITORY, "r", Repository.class, AccessibleEntityIdGenerator.INSTANCE),
-    HISTORICAL_AGENT(Entities.HISTORICAL_AGENT, "a", HistoricalAgent.class, AccessibleEntityIdGenerator.INSTANCE),
-    GROUP(Entities.GROUP, "g", Group.class, AccessibleEntityIdGenerator.INSTANCE),
-    USER_PROFILE(Entities.USER_PROFILE, "u", UserProfile.class, AccessibleEntityIdGenerator.INSTANCE),
+    DOCUMENTARY_UNIT(Entities.DOCUMENTARY_UNIT, "c", DocumentaryUnit.class, IdentifiableEntityIdGenerator.INSTANCE),
+    REPOSITORY(Entities.REPOSITORY, "r", Repository.class, IdentifiableEntityIdGenerator.INSTANCE),
+    HISTORICAL_AGENT(Entities.HISTORICAL_AGENT, "a", HistoricalAgent.class, IdentifiableEntityIdGenerator.INSTANCE),
+    GROUP(Entities.GROUP, "g", Group.class, IdentifiableEntityIdGenerator.INSTANCE),
+    USER_PROFILE(Entities.USER_PROFILE, "u", UserProfile.class, IdentifiableEntityIdGenerator.INSTANCE),
     
     // Generic entities.
     DOCUMENT_DESCRIPTION(Entities.DOCUMENT_DESCRIPTION, "dd", DocumentDescription.class),

@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
+import eu.ehri.project.models.base.IdentifiableEntity;
 import eu.ehri.project.models.base.NamedEntity;
 import org.junit.Test;
 
@@ -121,14 +122,14 @@ public class BundleUtilsTest extends AbstractFixtureTest {
             put("type", Entities.DOCUMENTARY_UNIT);
             put("data", new HashMap<String, Object>() {{
                 put(NamedEntity.NAME, TEST_COLLECTION_NAME);
-                put(AccessibleEntity.IDENTIFIER_KEY, "someid-01");
+                put(IdentifiableEntity.IDENTIFIER_KEY, "someid-01");
             }});
             put("relationships", new HashMap<String, Object>() {{
                 put("describes", new LinkedList<HashMap<String, Object>>() {{
                     add(new HashMap<String, Object>() {{
                         put("type", Entities.DOCUMENT_DESCRIPTION);
                         put("data", new HashMap<String, Object>() {{
-                            put(AccessibleEntity.IDENTIFIER_KEY, "someid-01");
+                            put(IdentifiableEntity.IDENTIFIER_KEY, "someid-01");
                             put("title", "A brand new item description");
                             put("languageCode", "en");
                         }});

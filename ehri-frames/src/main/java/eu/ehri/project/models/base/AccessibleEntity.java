@@ -7,7 +7,7 @@ import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.persistance.ActionManager;
 
-public interface AccessibleEntity extends IdentifiableEntity, PermissionGrantTarget {
+public interface AccessibleEntity extends PermissionGrantTarget {
 
     public static final String ACCESS = "access";
     public static final String HAS_PERMISSION_SCOPE = "hasPermissionScope";

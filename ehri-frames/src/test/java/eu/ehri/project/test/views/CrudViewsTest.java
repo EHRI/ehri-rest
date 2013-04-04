@@ -4,8 +4,7 @@ import java.util.Iterator;
 
 import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.*;
-import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.base.DescribedEntity;
+import eu.ehri.project.models.base.*;
 import eu.ehri.project.persistance.Serializer;
 import eu.ehri.project.test.AbstractFixtureTest;
 import org.junit.Test;
@@ -14,8 +13,6 @@ import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.acl.AnonymousAccessor;
 import eu.ehri.project.acl.ContentTypes;
 import eu.ehri.project.acl.PermissionType;
-import eu.ehri.project.models.base.Description;
-import eu.ehri.project.models.base.PermissionGrantTarget;
 import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.views.Crud;
 import eu.ehri.project.views.impl.CrudViews;
@@ -346,14 +343,14 @@ public class CrudViewsTest extends AbstractFixtureTest {
         long descCount = Iterables.count(unit.getDescriptions());
         Bundle descBundle = bundle
                 .getRelations(DescribedEntity.DESCRIBES)
-                .get(0).withDataValue(AccessibleEntity.IDENTIFIER_KEY, "some-new-id");
+                .get(0).withDataValue(IdentifiableEntity.IDENTIFIER_KEY, "some-new-id");
 
         DocumentDescription changedDesc = docViews.createDependent(descBundle, unit, validUser,
                 DocumentDescription.class);
         unit.addDescription(changedDesc);
         assertEquals("some-new-id", new Serializer(graph)
                 .vertexFrameToBundle(unit).getRelations(DescribedEntity
-                .DESCRIBES).get((int)descCount).getDataValue(AccessibleEntity.IDENTIFIER_KEY));
+                .DESCRIBES).get((int)descCount).getDataValue(IdentifiableEntity.IDENTIFIER_KEY));
     }
 
     /**
