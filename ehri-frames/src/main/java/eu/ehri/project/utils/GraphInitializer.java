@@ -23,11 +23,10 @@ import eu.ehri.project.persistance.ActionManager;
 
 /**
  * Initialize the graph with a minimal set of vertices. This includes:
- * 
+ * <p/>
  * - an admin account - permissions - content types
- * 
+ *
  * @author michaelb
- * 
  */
 public class GraphInitializer {
     private final FramedGraph<Neo4jGraph> graph;
@@ -46,27 +45,32 @@ public class GraphInitializer {
 
             // Create the system node which is the head of the global event streams
             manager.createVertex(ActionManager.GLOBAL_EVENT_ROOT, EntityClass.SYSTEM,
-                    ImmutableMap.<String,Object>of(
-                        // It might be useful to know when this graph was
-                        // initialise. We can also put other metadata here.
-                        eu.ehri.project.models.events.SystemEvent.TIMESTAMP, ActionManager.getTimestamp(),
-                        SystemEvent.LOG_MESSAGE, INIT_MESSAGE
+                    ImmutableMap.<String, Object>of(
+                            // It might be useful to know when this graph was
+                            // initialise. We can also put other metadata here.
+                            SystemEvent.TIMESTAMP, ActionManager.getTimestamp(),
+                            SystemEvent.LOG_MESSAGE, INIT_MESSAGE
                     ));
 
             // Create admin account
             manager.createVertex(Group.ADMIN_GROUP_IDENTIFIER,
-                    EntityClass.GROUP, Maps.<String,Object>newHashMap());
+                    EntityClass.GROUP, new HashMap<String, Object>() {
+                {
+                    put(Group.IDENTIFIER_KEY, Group.ADMIN_GROUP_IDENTIFIER);
+                    put(Group.NAME, Group.ADMIN_GROUP_IDENTIFIER);
+                }
+            });
 
             // Create permission nodes corresponding to the Enum values
             for (final PermissionType pt : PermissionType.values()) {
                 manager.createVertex(pt.getName(), EntityClass.PERMISSION,
-                        Maps.<String,Object>newHashMap());
+                        Maps.<String, Object>newHashMap());
             }
 
             // Create content type nodes corresponding to the Enum values
             for (final ContentTypes ct : ContentTypes.values()) {
                 manager.createVertex(ct.getName(), EntityClass.CONTENT_TYPE,
-                        Maps.<String,Object>newHashMap());
+                        Maps.<String, Object>newHashMap());
             }
             graph.getBaseGraph().stopTransaction(Conclusion.SUCCESS);
         } catch (Exception e) {
