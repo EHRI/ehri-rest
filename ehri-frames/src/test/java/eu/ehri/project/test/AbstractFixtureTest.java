@@ -56,14 +56,14 @@ abstract public class AbstractFixtureTest extends ModelTestBase {
             put(Bundle.TYPE_KEY, Entities.DOCUMENTARY_UNIT);
             put(Bundle.DATA_KEY, new HashMap<String, Object>() {{
                 put(NamedEntity.NAME, TEST_COLLECTION_NAME);
-                put(AccessibleEntity.IDENTIFIER_KEY, "someid-01");
+                put(IdentifiableEntity.IDENTIFIER_KEY, "someid-01");
             }});
             put(Bundle.REL_KEY, new HashMap<String, Object>() {{
                 put(Description.DESCRIBES, new LinkedList<HashMap<String, Object>>() {{
                     add(new HashMap<String, Object>() {{
                         put(Bundle.TYPE_KEY, Entities.DOCUMENT_DESCRIPTION);
                         put(Bundle.DATA_KEY, new HashMap<String, Object>() {{
-                            put(AccessibleEntity.IDENTIFIER_KEY, "someid-01");
+                            put(IdentifiableEntity.IDENTIFIER_KEY, "someid-01");
                             put(Description.NAME, "A brand new item description");
                             put(Description.LANGUAGE_CODE, "en");
                         }});
@@ -92,14 +92,14 @@ abstract public class AbstractFixtureTest extends ModelTestBase {
             put(Bundle.TYPE_KEY, Entities.REPOSITORY);
             put(Bundle.DATA_KEY, new HashMap<String, Object>() {{
                 put(NamedEntity.NAME, TEST_AGENT_NAME);
-                put(AccessibleEntity.IDENTIFIER_KEY, "test-repo-1");
+                put(IdentifiableEntity.IDENTIFIER_KEY, "test-repo-1");
             }});
             put(Bundle.REL_KEY, new HashMap<String, Object>() {{
                 put(Description.DESCRIBES, new LinkedList<HashMap<String, Object>>() {{
                     add(new HashMap<String, Object>() {{
                         put(Bundle.TYPE_KEY, Entities.REPOSITORY_DESCRIPTION);
                         put(Bundle.DATA_KEY, new HashMap<String, Object>() {{
-                            put(AccessibleEntity.IDENTIFIER_KEY, "test-repo-1-desc");
+                            put(IdentifiableEntity.IDENTIFIER_KEY, "test-repo-1-desc");
                             put(Description.NAME, "A Test Repository");
                             put(Description.LANGUAGE_CODE, "en");
                         }});
@@ -126,7 +126,7 @@ abstract public class AbstractFixtureTest extends ModelTestBase {
             put(Bundle.TYPE_KEY, Entities.USER_PROFILE);
             put(Bundle.DATA_KEY, new HashMap<String, Object>() {{
                 put(NamedEntity.NAME, TEST_USER_NAME);
-                put(AccessibleEntity.IDENTIFIER_KEY, "joe-blogs");
+                put(IdentifiableEntity.IDENTIFIER_KEY, "joe-blogs");
             }});
         }};
     }
@@ -138,7 +138,7 @@ abstract public class AbstractFixtureTest extends ModelTestBase {
             put(Bundle.TYPE_KEY, Entities.GROUP);
             put(Bundle.DATA_KEY, new HashMap<String, Object>() {{
                 put(NamedEntity.NAME, TEST_GROUP_NAME);
-                put(AccessibleEntity.IDENTIFIER_KEY, "people");
+                put(IdentifiableEntity.IDENTIFIER_KEY, "people");
             }});
         }};
     }

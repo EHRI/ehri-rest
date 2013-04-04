@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import eu.ehri.project.models.Repository;
+import eu.ehri.project.models.base.IdentifiableEntity;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -104,7 +105,7 @@ public class PermissionsTest extends AbstractFixtureTest {
         // FIXME: We have to alter the test data so it doesn't throw a
         // validation error due to duplicate identifiers
         Bundle bundle = Bundle.fromData(getTestBundle()).withDataValue(
-                AccessibleEntity.IDENTIFIER_KEY, "nested-item");
+                IdentifiableEntity.IDENTIFIER_KEY, "nested-item");
         DocumentaryUnit c2 = views.setScope(c1).create(bundle, user);
         assertNotNull(c2);
     }

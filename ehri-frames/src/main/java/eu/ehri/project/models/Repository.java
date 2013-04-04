@@ -5,11 +5,7 @@ import com.tinkerpop.frames.Adjacency;
 
 import com.tinkerpop.frames.annotations.gremlin.GremlinGroovy;
 import eu.ehri.project.models.annotations.EntityType;
-import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.base.AnnotatableEntity;
-import eu.ehri.project.models.base.DescribedEntity;
-import eu.ehri.project.models.base.PermissionScope;
-import eu.ehri.project.models.base.TemporalEntity;
+import eu.ehri.project.models.base.*;
 
 @EntityType(EntityClass.REPOSITORY)
 public interface Repository extends AccessibleEntity, DescribedEntity,

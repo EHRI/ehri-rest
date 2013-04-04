@@ -153,8 +153,7 @@ public final class ActionManager {
             Vertex system = manager.getVertex(GLOBAL_EVENT_ROOT, EntityClass.SYSTEM);
             Bundle ge = new Bundle(EntityClass.SYSTEM_EVENT)
                     .withDataValue(SystemEvent.TIMESTAMP, getTimestamp())
-                    .withDataValue(SystemEvent.LOG_MESSAGE, logMessage)
-                    .withDataValue(SystemEvent.IDENTIFIER_KEY, UUID.randomUUID().toString());
+                    .withDataValue(SystemEvent.LOG_MESSAGE, logMessage);
             SystemEvent ev = new BundleDAO(graph).create(ge, SystemEvent.class);
             replaceAtHead(system, ev.asVertex(), actionType + "Stream", actionType, Direction.OUT);
             return ev;

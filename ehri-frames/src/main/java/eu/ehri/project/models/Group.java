@@ -7,13 +7,10 @@ import com.tinkerpop.frames.annotations.gremlin.GremlinGroovy;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
-import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.models.base.NamedEntity;
-import eu.ehri.project.models.base.PermissionScope;
+import eu.ehri.project.models.base.*;
 
 @EntityType(EntityClass.GROUP)
-public interface Group extends Accessor, AccessibleEntity,
+public interface Group extends Accessor, AccessibleEntity, IdentifiableEntity,
         PermissionScope, NamedEntity {
     
     public static final String ADMIN_GROUP_IDENTIFIER = "admin";

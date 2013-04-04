@@ -11,6 +11,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import eu.ehri.project.models.base.IdentifiableEntity;
 import eu.ehri.project.models.base.PermissionScope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +49,7 @@ public abstract class EaImporter extends XmlImporter<Map<String, Object>> {
 
     protected Map<String, Object> extractUnit(Map<String, Object> itemData) throws ValidationError {
         Map<String, Object> unit = new HashMap<String, Object>();
-        unit.put(AccessibleEntity.IDENTIFIER_KEY, itemData.get("objectIdentifier"));
+        unit.put(IdentifiableEntity.IDENTIFIER_KEY, itemData.get("objectIdentifier"));
 //        unit.put(HistoricalAgent.NAME, itemData.get(HistoricalAgent.NAME));
         unit.put("typeOfEntity", itemData.get("typeOfEntity"));
         return unit;
@@ -83,16 +84,16 @@ public abstract class EaImporter extends XmlImporter<Map<String, Object>> {
         Map<String, Object> description = new HashMap<String, Object>();
         for (String key : itemData.keySet()) {
             if (key.equals("descriptionIdentifier")) {
-                description.put(AccessibleEntity.IDENTIFIER_KEY, itemData.get(key));
+                description.put(IdentifiableEntity.IDENTIFIER_KEY, itemData.get(key));
             }else if ( !key.startsWith(SaxXmlHandler.UNKNOWN) 
                     && ! key.equals("objectIdentifier") 
-                    && ! key.equals(AccessibleEntity.IDENTIFIER_KEY) 
+                    && ! key.equals(IdentifiableEntity.IDENTIFIER_KEY)
                     && ! key.startsWith("maintenanceEvent") 
                     && ! key.startsWith("address/")) { 
                 description.put(key, itemData.get(key));
             }
         }
-        assert(description.containsKey(AccessibleEntity.IDENTIFIER_KEY));
+        assert(description.containsKey(IdentifiableEntity.IDENTIFIER_KEY));
         return description;
     }
     //TODO: or should this be done in the Handler?
@@ -114,11 +115,11 @@ public abstract class EaImporter extends XmlImporter<Map<String, Object>> {
                             e2.put(eventkey, event.get(eventkey));
                         }
                     }
-                    if (!e2.containsKey(AccessibleEntity.IDENTIFIER_KEY)) {
+                    if (!e2.containsKey(IdentifiableEntity.IDENTIFIER_KEY)) {
                         if (e2.containsKey("maintenanceEventDate")) {
-                            e2.put(AccessibleEntity.IDENTIFIER_KEY, unitid + ":" + e2.get("maintenanceEventDate"));
+                            e2.put(IdentifiableEntity.IDENTIFIER_KEY, unitid + ":" + e2.get("maintenanceEventDate"));
                         } else {
-                            e2.put(AccessibleEntity.IDENTIFIER_KEY, maintenanceIdentifier++);
+                            e2.put(IdentifiableEntity.IDENTIFIER_KEY, maintenanceIdentifier++);
                         }
                     }
                     if (!e2.containsKey(MaintenanceEvent.EVENTTYPE)){

@@ -12,6 +12,7 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 
+import eu.ehri.project.models.base.IdentifiableEntity;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
@@ -72,7 +73,7 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
     public void testGetByKeyValue() throws Exception {
         // -create data for testing
         MultivaluedMap<String, String> queryParams = new MultivaluedMapImpl();
-        queryParams.add("key", AccessibleEntity.IDENTIFIER_KEY);
+        queryParams.add("key", IdentifiableEntity.IDENTIFIER_KEY);
         queryParams.add("value", FETCH_NAME);
 
         WebResource resource = client.resource(

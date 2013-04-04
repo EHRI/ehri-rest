@@ -94,12 +94,6 @@ public final class AnnotationViews implements Annotations {
             throws PermissionDenied, ValidationError, ItemNotFound {
         AccessibleEntity entity = manager.getFrame(id, AccessibleEntity.class);
         helper.checkEntityPermission(entity, accessor, PermissionType.ANNOTATE);
-        // FIXME: This kind of sucks, generating a UUID identifier
-        // manually - we should relax the restriction to have one.
-        if (bundle.getDataValue(AccessibleEntity.IDENTIFIER_KEY) == null) {
-            bundle = bundle.withDataValue(AccessibleEntity.IDENTIFIER_KEY,
-                    java.util.UUID.randomUUID().toString());
-        }
         Annotation annotation = new BundleDAO(graph).create(bundle,
                 Annotation.class);
         graph.frame(entity.asVertex(), AnnotatableEntity.class).addAnnotation(

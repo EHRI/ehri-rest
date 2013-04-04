@@ -6,19 +6,14 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.base.Description;
-import eu.ehri.project.models.base.PermissionScope;
-import eu.ehri.project.models.base.TemporalEntity;
-import eu.ehri.project.models.idgen.AccessibleEntityIdGenerator;
+import eu.ehri.project.models.base.*;
+import eu.ehri.project.models.idgen.IdentifiableEntityIdGenerator;
 import eu.ehri.project.models.idgen.IdGenerator;
 import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.persistance.BundleDAO;
 import java.util.HashMap;
 import java.util.Map;
 
-import eu.ehri.project.views.impl.CrudViews;
-import eu.ehri.project.views.impl.LoggingCrudViews;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -87,7 +82,7 @@ public class IcaAtomEadImporter extends XmlImporter<Map<String, Object>> {
         if (unit.getDataValue(DocumentaryUnit.IDENTIFIER_KEY) == null) {
             throw new ValidationError(unit, DocumentaryUnit.IDENTIFIER_KEY, "Missing identifier");
         }
-        IdGenerator generator = AccessibleEntityIdGenerator.INSTANCE;
+        IdGenerator generator = IdentifiableEntityIdGenerator.INSTANCE;
         String id = generator.generateId(EntityClass.DOCUMENTARY_UNIT, permissionScope, unit);
         if (id.equals(permissionScope.getId())) {
             throw new RuntimeException("Generated an id same as scope: " + unit.getData());
@@ -122,7 +117,7 @@ public class IcaAtomEadImporter extends XmlImporter<Map<String, Object>> {
     protected Map<String, Object> extractDocumentaryUnit(Map<String, Object> itemData, int depth) throws ValidationError {
         Map<String, Object> unit = new HashMap<String, Object>();
         if (itemData.get(OBJECT_ID) != null)
-            unit.put(AccessibleEntity.IDENTIFIER_KEY, itemData.get(OBJECT_ID));
+            unit.put(IdentifiableEntity.IDENTIFIER_KEY, itemData.get(OBJECT_ID));
         if (itemData.get(DocumentaryUnit.NAME) != null)
             unit.put(DocumentaryUnit.NAME, itemData.get(DocumentaryUnit.NAME));
         return unit;

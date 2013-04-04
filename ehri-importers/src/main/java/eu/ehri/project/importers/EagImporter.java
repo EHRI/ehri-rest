@@ -10,12 +10,8 @@ import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.base.AddressableEntity;
-import eu.ehri.project.models.base.Description;
-import eu.ehri.project.models.base.PermissionScope;
-import eu.ehri.project.models.base.TemporalEntity;
-import eu.ehri.project.models.idgen.AccessibleEntityIdGenerator;
+import eu.ehri.project.models.base.*;
+import eu.ehri.project.models.idgen.IdentifiableEntityIdGenerator;
 import eu.ehri.project.models.idgen.IdGenerator;
 import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.persistance.BundleDAO;
@@ -58,7 +54,7 @@ public class EagImporter extends EaImporter{
         Bundle unit = new Bundle(EntityClass.REPOSITORY, extractUnit(itemData));
 
         Map<String, Object> descmap = extractUnitDescription(itemData);
-        descmap.put(AccessibleEntity.IDENTIFIER_KEY, descmap.get(AccessibleEntity.IDENTIFIER_KEY)+"#desc");
+        descmap.put(IdentifiableEntity.IDENTIFIER_KEY, descmap.get(IdentifiableEntity.IDENTIFIER_KEY)+"#desc");
         Bundle descBundle = new Bundle(EntityClass.REPOSITORY_DESCRIPTION, descmap);
 
 
@@ -82,7 +78,7 @@ public class EagImporter extends EaImporter{
 
         unit = unit.withRelation(Description.DESCRIBES, descBundle);
 
-        IdGenerator generator = AccessibleEntityIdGenerator.INSTANCE;
+        IdGenerator generator = IdentifiableEntityIdGenerator.INSTANCE;
         String id = generator.generateId(EntityClass.REPOSITORY, SystemScope.getInstance(), unit);
         boolean exists = manager.exists(id);
         Repository frame = persister.createOrUpdate(unit.withId(id), Repository.class);

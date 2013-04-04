@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
+import eu.ehri.project.models.base.IdentifiableEntity;
 import org.junit.Test;
 import org.neo4j.graphdb.Transaction;
 
@@ -44,7 +45,7 @@ public class CvocTest extends ModelTestBase {
 
         Map<String, Object> data = new HashMap<String, Object>() {
             {
-                put(AccessibleEntity.IDENTIFIER_KEY, "fruit");
+                put(IdentifiableEntity.IDENTIFIER_KEY, "fruit");
             }
         };
         Vertex v_fruit = manager.createVertex("fruit_id",
@@ -52,7 +53,7 @@ public class CvocTest extends ModelTestBase {
 
         data = new HashMap<String, Object>() {
             {
-                put(AccessibleEntity.IDENTIFIER_KEY, "apples");
+                put(IdentifiableEntity.IDENTIFIER_KEY, "apples");
             }
         };
         Vertex v_apples = manager.createVertex("applies_id",
@@ -60,7 +61,7 @@ public class CvocTest extends ModelTestBase {
 
         data = new HashMap<String, Object>() {
             {
-                put(AccessibleEntity.IDENTIFIER_KEY, "bananas");
+                put(IdentifiableEntity.IDENTIFIER_KEY, "bananas");
             }
         };
         Vertex v_bananas = manager.createVertex("bananas_id",
@@ -68,7 +69,7 @@ public class CvocTest extends ModelTestBase {
 
         data = new HashMap<String, Object>() {
             {
-                put(AccessibleEntity.IDENTIFIER_KEY, "trees");
+                put(IdentifiableEntity.IDENTIFIER_KEY, "trees");
             }
         };
         Vertex v_trees = manager.createVertex("trees_id",
@@ -94,10 +95,10 @@ public class CvocTest extends ModelTestBase {
         }
 
         // fruit should now be the broader concept
-        assertEquals(fruit.getIdentifier(), apples.getBroaderConcepts()
-                .iterator().next().getIdentifier());
-        assertEquals(fruit.getIdentifier(), bananas.getBroaderConcepts()
-                .iterator().next().getIdentifier());
+        assertEquals(fruit.getId(), apples.getBroaderConcepts()
+                .iterator().next().getId());
+        assertEquals(fruit.getId(), bananas.getBroaderConcepts()
+                .iterator().next().getId());
 
         // make a relation to Trees concept
         tx = graph.getBaseGraph().getRawGraph().beginTx();
@@ -111,8 +112,8 @@ public class CvocTest extends ModelTestBase {
         }
 
         // is it symmetric?
-        assertEquals(apples.getIdentifier(), trees.getRelatedByConcepts()
-                .iterator().next().getIdentifier());
+        assertEquals(apples.getId(), trees.getRelatedByConcepts()
+                .iterator().next().getId());
 
         // TODO test removal of a relation
     }
@@ -128,7 +129,7 @@ public class CvocTest extends ModelTestBase {
             put(Bundle.ID_KEY, null);
             put(Bundle.TYPE_KEY, Entities.CVOC_CONCEPT);
             put(Bundle.DATA_KEY, new HashMap<String, Object>() {{
-                put(AccessibleEntity.IDENTIFIER_KEY, "apple");
+                put(IdentifiableEntity.IDENTIFIER_KEY, "apple");
             }});
             put(Bundle.REL_KEY, new HashMap<String, Object>() {{
                 put("describes", new LinkedList<HashMap<String, Object>>() {{
@@ -190,9 +191,9 @@ public class CvocTest extends ModelTestBase {
 	public void testAddConceptToVocabulary() throws Exception {
 		UserProfile validUser = manager.getFrame("mike", UserProfile.class);
 
-		Map<String, Object> data = new HashMap<String, Object>() {{put(AccessibleEntity.IDENTIFIER_KEY, "testVocabulary");}};
+		Map<String, Object> data = new HashMap<String, Object>() {{put(IdentifiableEntity.IDENTIFIER_KEY, "testVocabulary");}};
 		Vertex v_voc = manager.createVertex("voc_id", EntityClass.CVOC_VOCABULARY, data);
-		data = new HashMap<String, Object>() {{put(AccessibleEntity.IDENTIFIER_KEY, "apples");}};
+		data = new HashMap<String, Object>() {{put(IdentifiableEntity.IDENTIFIER_KEY, "apples");}};
 		Vertex v_apples = manager.createVertex("applies_id", EntityClass.CVOC_CONCEPT, data);
 
 		// frame it
@@ -220,7 +221,7 @@ public class CvocTest extends ModelTestBase {
 		
 	  	System.out.println("Creating vocabulary: \"" + name + "\"");
         Map<String, Object> vocabularyData = new HashMap<String, Object>();
-        vocabularyData.put(AccessibleEntity.IDENTIFIER_KEY, name);
+        vocabularyData.put(IdentifiableEntity.IDENTIFIER_KEY, name);
         //vocabularyData.put(EntityType.ID_KEY, name);
         //vocabularyData.put("name", name);
         Bundle bundle = new Bundle(EntityClass.CVOC_VOCABULARY, vocabularyData);

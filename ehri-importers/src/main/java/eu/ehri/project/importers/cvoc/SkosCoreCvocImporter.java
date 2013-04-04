@@ -13,6 +13,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import eu.ehri.project.models.base.*;
 import org.neo4j.graphdb.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,10 +36,6 @@ import eu.ehri.project.importers.exceptions.InvalidEadDocument;
 import eu.ehri.project.importers.exceptions.InvalidInputFormatError;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
-import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.base.Actioner;
-import eu.ehri.project.models.base.Description;
-import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.ConceptDescription;
 import eu.ehri.project.models.cvoc.Vocabulary;
@@ -238,7 +235,8 @@ public class SkosCoreCvocImporter {
             				 + " related ids: " + relatedIds.toString());
             		 
             		 String storeId = unit.getId();//id;
-            		 String skosId = frame.getIdentifier(); // the identifier used in the Skos file and is used for internal referal
+            		 String skosId = frame.getId(); // the identifier used in the Skos file and is used for internal
+            		 // referal
             		 logger.debug("Concept store id = " + storeId + ", skos id = " + skosId);
             		 conceptLookup.put(skosId, new ConceptPlaceholder(storeId, broaderIds, relatedIds, frame));
             	  } 
@@ -505,9 +503,9 @@ public class SkosCoreCvocImporter {
         // are we using the rdf:about attribute as 'identifier'
         Node namedItem = conceptNode.getAttributes().getNamedItem("rdf:about");
         String value = namedItem.getNodeValue();
-        dataMap.put(AccessibleEntity.IDENTIFIER_KEY, value);
+        dataMap.put(IdentifiableEntity.IDENTIFIER_KEY, value);
 
-        logger.debug("Extracting Concept id: " + dataMap.get(AccessibleEntity.IDENTIFIER_KEY));        
+        logger.debug("Extracting Concept id: " + dataMap.get(IdentifiableEntity.IDENTIFIER_KEY));        
         
         return dataMap;
     }

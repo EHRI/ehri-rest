@@ -8,6 +8,7 @@ import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
 
+import eu.ehri.project.models.base.IdentifiableEntity;
 import eu.ehri.project.utils.Slugify;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +20,7 @@ import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.persistance.Messages;
+import static eu.ehri.project.models.base.IdentifiableEntity.IDENTIFIER_KEY;
 
 /**
  * Generates an ID for nodes which represent AccessibleEntities.
@@ -26,21 +28,21 @@ import eu.ehri.project.persistance.Messages;
  * @author michaelb
  * 
  */
-public enum AccessibleEntityIdGenerator implements IdGenerator {
+public enum IdentifiableEntityIdGenerator implements IdGenerator {
 
     INSTANCE;
 
-    private static Logger logger = LoggerFactory.getLogger(AccessibleEntityIdGenerator.class);
+    private static Logger logger = LoggerFactory.getLogger(IdentifiableEntityIdGenerator.class);
 
     public void handleIdCollision(EntityClass type, PermissionScope scope,
             Bundle bundle) throws ValidationError {
         String scopeId = scope == null ? "none" : scope.getIdentifier();
-        logger.error("ID Generation error: {}={} (scope: {})", AccessibleEntity.IDENTIFIER_KEY,
-                bundle.getDataValue(AccessibleEntity.IDENTIFIER_KEY), scopeId);
+        logger.error("ID Generation error: {}={} (scope: {})", IDENTIFIER_KEY,
+                bundle.getDataValue(IDENTIFIER_KEY), scopeId);
         ListMultimap<String,String> errors = LinkedListMultimap.create();
-        errors.put(AccessibleEntity.IDENTIFIER_KEY,  MessageFormat.format(
+        errors.put(IDENTIFIER_KEY,  MessageFormat.format(
                 Messages.getString("BundleDAO.uniquenessError"), //$NON-NLS-1$
-                bundle.getDataValue(AccessibleEntity.IDENTIFIER_KEY)));
+                bundle.getDataValue(IDENTIFIER_KEY)));
         throw new ValidationError(bundle, errors);
     }
 
@@ -61,7 +63,7 @@ public enum AccessibleEntityIdGenerator implements IdGenerator {
         // their ID a bit harder but lead to cleaner IDs. Not doing this now
         // because having dirty IDs is an effective way of debugging (via
         // breakage) other parts of the system.
-        String ident = (String) bundle.getDataValue(AccessibleEntity.IDENTIFIER_KEY);
+        String ident = (String) bundle.getDataValue(IDENTIFIER_KEY);
         // Validation should have ensured that ident exists...
         if (ident == null || ident.trim().isEmpty()) {
             throw new RuntimeException("Invalid null identifier for AccessibleEntity: " + bundle.getData());

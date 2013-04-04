@@ -5,7 +5,7 @@ import com.tinkerpop.frames.Adjacency;
 
 import eu.ehri.project.models.PermissionGrant;
 
-public interface PermissionScope extends AccessibleEntity {
+public interface PermissionScope extends IdentifiableEntity, AccessibleEntity {
     @Adjacency(label = PermissionGrant.HAS_SCOPE, direction = Direction.IN)
     public Iterable<PermissionGrant> getPermissionGrants();
 }

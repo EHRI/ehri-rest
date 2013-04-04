@@ -8,6 +8,7 @@ import eu.ehri.project.models.HistoricalAgent;
 import eu.ehri.project.models.HistoricalAgentDescription;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Description;
+import eu.ehri.project.models.base.IdentifiableEntity;
 import eu.ehri.project.models.events.SystemEvent;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -50,7 +51,7 @@ private static final Logger logger = LoggerFactory.getLogger(EacImporterTest.cla
             // - 1 more SystemEvent
             assertEquals(count + 7, getNodeCount(graph));
 
-            Iterable<Vertex> docs = graph.getVertices(AccessibleEntity.IDENTIFIER_KEY,
+            Iterable<Vertex> docs = graph.getVertices(IdentifiableEntity.IDENTIFIER_KEY,
                     IMPORTED_ITEM_ID);
             assertTrue(docs.iterator().hasNext());
             HistoricalAgent unit = graph.frame(
@@ -74,7 +75,7 @@ private static final Logger logger = LoggerFactory.getLogger(EacImporterTest.cla
             for (Description d : unit.getDescriptions()) {
             
             assertEquals(d.getName(), c1.getName());
-                assertEquals(d.getEntity().getIdentifier(), unit.getIdentifier());
+                assertEquals(d.getEntity().getId(), unit.getId());
             }
 
 //TODO: find out why the unit and the action are not connected ...

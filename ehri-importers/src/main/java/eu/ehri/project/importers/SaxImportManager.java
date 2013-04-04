@@ -229,7 +229,7 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
             logger.info("importer of class " + importer.getClass());
             importer.addCreationCallback(new ImportCallback() {
                 public void itemImported(AccessibleEntity item) {
-                    logger.info("ImportCallback: itemImported creation " + item.getIdentifier());
+                    logger.info("ImportCallback: itemImported creation " + item.getId());
                     eventContext.addSubjects(item);
                     log.addCreated();
                 }

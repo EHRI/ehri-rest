@@ -9,6 +9,7 @@ import eu.ehri.project.importers.test.AbstractImporterTest;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.IdentifiableEntity;
 import eu.ehri.project.models.events.SystemEvent;
 
 import java.io.InputStream;
@@ -52,7 +53,7 @@ public class IcaAtomEadImporterTest extends AbstractImporterTest{
         // - 1 more import Event
         assertEquals(count + 18, getNodeCount(graph));
 
-        Iterable<Vertex> docs = graph.getVertices(AccessibleEntity.IDENTIFIER_KEY,
+        Iterable<Vertex> docs = graph.getVertices(IdentifiableEntity.IDENTIFIER_KEY,
                 FONDS_LEVEL);
         assertTrue(docs.iterator().hasNext());
         DocumentaryUnit fonds_unit = graph.frame(
@@ -94,7 +95,7 @@ public class IcaAtomEadImporterTest extends AbstractImporterTest{
 
         List<AccessibleEntity> subjects = toList(log.getAction().getSubjects());
         for(AccessibleEntity subject  : subjects)
-            logger.info("identifier: " + subject.getIdentifier());
+            logger.info("identifier: " + subject.getId());
         
         assertEquals(5, subjects.size());
         assertEquals(log.getSuccessful(), subjects.size());

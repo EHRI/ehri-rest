@@ -7,7 +7,7 @@ import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.base.*;
 
 @EntityType(EntityClass.USER_PROFILE)
-public interface UserProfile extends Accessor, AccessibleEntity,
+public interface UserProfile extends Accessor, AccessibleEntity, IdentifiableEntity,
         Annotator, Actioner, NamedEntity {
 
     @Fetch(Group.BELONGS_TO)
