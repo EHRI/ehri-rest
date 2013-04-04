@@ -2,15 +2,15 @@ package eu.ehri.project.exceptions;
 
 import java.util.Map;
 
-import com.tinkerpop.frames.VertexFrame;
+import eu.ehri.project.models.base.Frame;
 
 public class IdGenerationError extends Exception {
     
-    public IdGenerationError(String prefix, VertexFrame scope, Map<String, Object> data) {
+    public IdGenerationError(String prefix, Frame scope, Map<String, Object> data) {
         super(String.format("Error generating ID for type prefix '%s': [Data: %s, Scope: %s]", prefix, scope, data));
     }    
 
-    public IdGenerationError(String err, String prefix, VertexFrame scope, Map<String, Object> data) {
+    public IdGenerationError(String err, String prefix, Frame scope, Map<String, Object> data) {
         super(String.format("%s [Prefix: %s, Data: %s, Scope: %s]", err, prefix, scope, data));
     }    
     

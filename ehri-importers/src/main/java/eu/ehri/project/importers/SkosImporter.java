@@ -44,8 +44,7 @@ public class SkosImporter extends XmlImporter<Map<String, Object>> {
      * @throws ValidationError
      */
     @Override
-    public Concept importItem(Map<String, Object> itemData,
-            int depth) throws ValidationError {
+    public Concept importItem(Map<String, Object> itemData) throws ValidationError {
 
         // Note pboon: 
         // What was the 'repository' and 'scope' should eventually be the Vocabulary!
@@ -53,7 +52,7 @@ public class SkosImporter extends XmlImporter<Map<String, Object>> {
         logger.info("import item with objectIdentifier: " + itemData.get("objectIdentifier"));
 
         Bundle unit = new Bundle(EntityClass.CVOC_CONCEPT,
-                extractConcept(itemData, depth));
+                extractConcept(itemData));
         BundleDAO persister = new BundleDAO(framedGraph, permissionScope);
 
         // Add dates and descriptions to the bundle since they're @Dependent
@@ -98,11 +97,10 @@ public class SkosImporter extends XmlImporter<Map<String, Object>> {
      * The 'item' or entities to import (Described Entity?)
      *
      * @param itemData
-     * @param depth
      * @return returns a Map of Concept key-value pairs
      * @throws ValidationError
      */
-    protected Map<String, Object> extractConcept(Map<String, Object> itemData, int depth) throws ValidationError {
+    protected Map<String, Object> extractConcept(Map<String, Object> itemData) throws ValidationError {
         Map<String, Object> unit = new HashMap<String, Object>();
         unit.put(IdentifiableEntity.IDENTIFIER_KEY, itemData.get("objectIdentifier"));
         return unit;
@@ -155,5 +153,10 @@ public class SkosImporter extends XmlImporter<Map<String, Object>> {
             lst.add(it.next());
         }
         return lst;
+    }
+
+    @Override
+    public AccessibleEntity importItem(Map<String, Object> itemData, int depth) throws ValidationError {
+        throw new UnsupportedOperationException("Not supported ever.");
     }
 }

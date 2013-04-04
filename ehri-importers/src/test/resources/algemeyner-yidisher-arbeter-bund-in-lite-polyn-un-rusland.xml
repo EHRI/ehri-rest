@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<eac-cpf xmlns="urn:isbn:1-931666-33-4" xmlns:xlink="http://www.w3.org/1999/xlink">
+<eac xmlns="urn:isbn:1-931666-22-9" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
     <control>
 
@@ -159,4 +159,4 @@
 
     </cpfDescription>
 
-</eac-cpf>
+</eac>

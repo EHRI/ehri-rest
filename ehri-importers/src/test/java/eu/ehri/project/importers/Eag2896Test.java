@@ -9,7 +9,6 @@ import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.exceptions.InputParseError;
-import eu.ehri.project.importers.test.AbstractImporterTest;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.RepositoryDescription;
 import eu.ehri.project.models.base.AccessibleEntity;
@@ -70,11 +69,11 @@ public class Eag2896Test extends AbstractImporterTest {
                     getVertexByIdentifier(graph, AGENT_DESC_ID),
                     RepositoryDescription.class);
             assertEquals(Entities.REPOSITORY_DESCRIPTION, c1.asVertex().getProperty("__ISA__"));
-            Object notes = c1.asVertex().getProperty("notes");
+            Object notes = c1.asVertex().getProperty("generalContext");
             if (notes instanceof String[]) {
-                assertEquals(3, ((String[]) notes).length);
-            } else {
                 fail();
+            } else {
+                assertTrue(notes instanceof String);
             }
 
             //check whether the description has an Address attached to it

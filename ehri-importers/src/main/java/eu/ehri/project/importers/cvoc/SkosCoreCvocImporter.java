@@ -32,7 +32,7 @@ import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.exceptions.InputParseError;
-import eu.ehri.project.importers.exceptions.InvalidEadDocument;
+import eu.ehri.project.importers.exceptions.InvalidXmlDocument;
 import eu.ehri.project.importers.exceptions.InvalidInputFormatError;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
@@ -135,7 +135,7 @@ public class SkosCoreCvocImporter {
 	
     private void importFile(InputStream ios, final ActionManager.EventContext eventContext,
             final ImportLog log) throws IOException, ValidationError,
-            InputParseError, InvalidEadDocument, InvalidInputFormatError, IntegrityError {
+            InputParseError, InvalidXmlDocument, InvalidInputFormatError, IntegrityError {
 
         // XML parsing boilerplate...
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();

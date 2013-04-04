@@ -4,6 +4,7 @@
  */
 package eu.ehri.project.importers;
 
+import eu.ehri.project.importers.properties.XmlImportProperties;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +15,8 @@ import org.xml.sax.SAXException;
 
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.cvoc.Concept;
+import java.util.ArrayList;
+import java.util.Set;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -29,7 +32,7 @@ public class SkosHandler extends SaxXmlHandler {
     Stack<String> prefixStack;
 
     public SkosHandler(AbstractImporter<Map<String, Object>> importer) {
-        super(importer, new PropertiesConfig("skos.properties"));
+        super(importer, new XmlImportProperties("skos.properties"));
         prefixStack = new Stack<String>();
         possibleSubnodes = new HashMap<String, Class<? extends Frame>>();
         possibleSubnodes.put("concept", Concept.class);
@@ -108,5 +111,11 @@ public class SkosHandler extends SaxXmlHandler {
     @Override
     protected boolean needToCreateSubNode(String qName) {
         throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    protected List<String> getSchemas() {
+        List<String> schemas = new ArrayList<String>();
+        return schemas;
     }
 }

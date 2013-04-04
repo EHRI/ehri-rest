@@ -1,5 +1,6 @@
 package eu.ehri.project.importers;
 
+import eu.ehri.project.importers.properties.XmlImportProperties;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.exceptions.ValidationError;
@@ -30,7 +31,7 @@ public abstract class XmlImporter<T> extends AbstractImporter<T> {
     private static final Logger logger = LoggerFactory.getLogger(XmlImporter.class);
     protected final String OBJECT_ID = "objectIdentifier";
     protected final String DESCRIPTION_ID = "descriptionIdentifier";
-    private PropertiesConfig dates = new PropertiesConfig("dates.properties");
+    private XmlImportProperties dates = new XmlImportProperties("dates.properties");
     // Various date patterns
     private Pattern[] datePatterns = {
         // Yad Vashem, ICA-Atom style: 1924-1-1 - 1947-12-31

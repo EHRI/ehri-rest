@@ -4,12 +4,13 @@ import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.exceptions.InputParseError;
-import eu.ehri.project.importers.exceptions.InvalidEadDocument;
+import eu.ehri.project.importers.exceptions.InvalidXmlDocument;
 import eu.ehri.project.importers.exceptions.InvalidInputFormatError;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistance.ActionManager;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,9 +20,11 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import javax.xml.XMLConstants;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
+import javax.xml.validation.SchemaFactory;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.tooling.GlobalGraphOperations;
 import org.slf4j.Logger;
@@ -29,7 +32,6 @@ import org.slf4j.LoggerFactory;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import org.xml.sax.helpers.DefaultHandler;
 
 /**
  * Class that provides a front-end for importing XML files like EAD and EAC and
@@ -91,11 +93,12 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
      * Tell the importer to simply skip invalid items rather than throwing an
      * exception.
      *
-     * @param tolerant
+     * @param tolerant true means it won't validate the xml file
      */
-    public void setTolerant(Boolean tolerant) {
+    public SaxImportManager setTolerant(Boolean tolerant) {
         logger.info("Setting importer to tolerant: " + tolerant);
         this.tolerant = tolerant;
+        return this;
     }
 
     /**
@@ -109,7 +112,7 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
      * @throws ValidationError
      * @throws InputParseError
      */
-    @Override
+     @Override
     public ImportLog importFile(InputStream ios, String logMessage)
             throws IOException, ValidationError, InputParseError {
         Transaction tx = framedGraph.getBaseGraph().getRawGraph().beginTx();
@@ -166,7 +169,7 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
                     } finally {
                         ios.close();
                     }
-                } catch (InvalidEadDocument e) {
+                } catch (InvalidXmlDocument e) {
                     log.setErrored(formatErrorLocation(), e.getMessage());
                     if (!tolerant) {
                         throw e;
@@ -215,15 +218,13 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
      * @throws ValidationError
      * @throws InputParseError
      * @throws InvalidInputFormatError
-     * @throws InvalidEadDocument
+     * @throws InvalidXmlDocument
      */
     private void importFile(InputStream ios, final ActionManager.EventContext eventContext,
             final ImportLog log) throws IOException, ValidationError,
-            InputParseError, InvalidEadDocument, InvalidInputFormatError {
+            InputParseError, InvalidXmlDocument, InvalidInputFormatError {
 
         try {
-            SAXParserFactory factory = SAXParserFactory.newInstance();
-            SAXParser saxParser = factory.newSAXParser();
             importer = importerClass.getConstructor(FramedGraph.class, PermissionScope.class,
                     ImportLog.class).newInstance(framedGraph, permissionScope, log);
             logger.info("importer of class " + importer.getClass());
@@ -242,27 +243,47 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
                 }
             });
             //TODO decide which handler to use, HandlerFactory? now part of constructor ...
-            DefaultHandler handler = handlerClass.getConstructor(AbstractImporter.class).newInstance(importer); 
+            SaxXmlHandler handler = handlerClass.getConstructor(AbstractImporter.class).newInstance(importer); 
             logger.info("handler of class " + handler.getClass());
+            
+            SAXParserFactory spf = SAXParserFactory.newInstance();
+            spf.setValidating(!tolerant);
+            logger.debug("isValidating: " + spf.isValidating());
+//            spf.setNamespaceAware(true);
+            try {
+                logger.debug("in try");
+                SchemaFactory sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+                for(String schemafile : handler.getSchemas()){
+                    spf.setSchema(sf.newSchema(new File("src/main/resources/"+schemafile)));
+                    logger.debug("path: "+new File("src/main/resources/"+schemafile).getAbsolutePath());
+                }
+
+
+            } catch (SAXException e) {
+                e.printStackTrace(System.err);
+                System.exit(1);
+            } 
+            logger.debug("after catch");
+            SAXParser saxParser = spf.newSAXParser();
             saxParser.parse(ios, handler); //TODO + log
             
         } catch (InstantiationException ex) {
-            logger.error(ex.getMessage());
+            logger.error("InstantiationException: "+ex.getMessage());
         } catch (IllegalAccessException ex) {
-            logger.error(ex.getMessage());
+            logger.error("IllegalAccess: " + ex.getMessage());
         } catch (IllegalArgumentException ex) {
-            logger.error(ex.getMessage());
+            logger.error("IllegalArgumentException: "+ex.getMessage());
         } catch (InvocationTargetException ex) {
-            logger.error(ex.getMessage());
+            logger.error("InvocationTargetException: "+ ex.getMessage());
         } catch (NoSuchMethodException ex) {
-            logger.error(ex.getMessage());
+            logger.error("NoSuchMethodException: "+ ex.getMessage());
         } catch (SecurityException ex) {
-            logger.error(ex.getMessage());
+            logger.error("SecurityException: "+ ex.getMessage());
         } catch (ParserConfigurationException ex) {
-            logger.error(ex.getMessage());
+            logger.error("ParserConfigurationException: "+ ex.getMessage());
             throw new RuntimeException(ex);
         } catch (SAXException e) {
-            logger.error(e.getMessage());
+            logger.error("SAXException: "+ e.getMessage());
             throw new InputParseError(e);
         }
 

@@ -1,13 +1,16 @@
 
 package eu.ehri.project.importers;
+import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.base.Description;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 import java.util.regex.Pattern;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
@@ -19,7 +22,7 @@ import org.xml.sax.SAXException;
  * @author linda
  */
 public class IcaAtomEadHandler extends SaxXmlHandler {
-    private static final org.slf4j.Logger logger = LoggerFactory
+    private static final Logger logger = LoggerFactory
             .getLogger(IcaAtomEadHandler.class);
     List<DocumentaryUnit>[] children;
     // Pattern for EAD nodes that represent a child item
@@ -28,7 +31,7 @@ public class IcaAtomEadHandler extends SaxXmlHandler {
     
     @SuppressWarnings("unchecked")
     public IcaAtomEadHandler(AbstractImporter<Map<String, Object>> importer) {
-        super(importer, new PropertiesConfig("icaatom.properties"));
+        super(importer, new XmlImportProperties("icaatom.properties"));
         this.importer = importer;
         currentGraphPath = new Stack<Map<String, Object>>();
         currentGraphPath.push(new HashMap<String, Object>());
@@ -64,20 +67,20 @@ public class IcaAtomEadHandler extends SaxXmlHandler {
             try {
                 System.out.println("Current graph: " + currentGraph);
                 //add any mandatory fields not yet there:
-                if (!currentGraph.containsKey("name")) {
+                if (!currentGraph.containsKey(Description.NAME)) {
                     for(String key: currentGraph.keySet()){
                         logger.debug(key + ":" + currentGraph.get(key));
                     }
                     //finding some name for this unit:
                     if(currentGraph.containsKey("title"))
-                        currentGraph.put("name", currentGraph.get("title"));
+                        currentGraph.put(Description.NAME, currentGraph.get("title"));
                     else{
                         logger.error("IcaAtom node without name field: " );
-                        currentGraph.put("name", "UNKNOWN title");
+                        currentGraph.put(Description.NAME, "UNKNOWN title");
                     }
                 }
-                if (!currentGraph.containsKey("languageCode")) {
-                    currentGraph.put("languageCode", "en");
+                if (!currentGraph.containsKey(Description.LANGUAGE_CODE)) {
+                    currentGraph.put(Description.LANGUAGE_CODE, "en");
                 }
                 DocumentaryUnit current = (DocumentaryUnit)importer.importItem(currentGraph, depth);
                 logger.debug("importer used: " + importer.getClass());
@@ -109,4 +112,11 @@ public class IcaAtomEadHandler extends SaxXmlHandler {
         return childItemPattern.matcher(qName).matches() || qName.equals("archdesc");
     }
 
+    @Override
+    protected List<String> getSchemas() {
+        List<String> schemas = new ArrayList<String>();
+        schemas.add("xlink.xsd");
+        schemas.add("ead.xsd");
+        return schemas;
+    }
 }
