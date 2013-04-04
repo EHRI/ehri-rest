@@ -17,6 +17,7 @@ import eu.ehri.project.models.PermissionGrant;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
+import eu.ehri.project.models.base.IdentifiableEntity;
 import eu.ehri.project.test.AbstractFixtureTest;
 import java.io.IOException;
 import java.io.InputStream;
@@ -46,16 +47,14 @@ public class AbstractImporterTest extends AbstractFixtureTest {
                             EacHandler.class).setTolerant(Boolean.TRUE).importFile(ios, "testing the AbstractImporter");
             assertTrue(65 < getNodeCount(graph));
             Vertex v = getVertexByIdentifier(graph, "ehriimporter");
+            assertNotNull(v);
             for(String key : v.getPropertyKeys())
                 logger.warn(key + ": " + v.getProperty(key));
             UserProfile up = graph.frame(v, UserProfile.class);
-            assertTrue(0 < toList(up.getAccessors()).size());
-            for(Accessor g : up.getAccessors()){
+            assertTrue(0 < toList(up.getGroups()).size());
+            for(Group g : up.getGroups()){
                 logger.warn(g.getIdentifier() + ": " + g.getType());
                 logger.warn(toList(g.getPermissionGrants()).size() +"");
-                for(PermissionGrant pg : g.getPermissionGrants()){
-                    logger.warn(pg.getId() + ": " + pg.getType() + ": " + pg.getPermission().getIdentifier());
-                }
             }
 //            printGraph(graph);
         } catch (Exception ex) {
@@ -85,7 +84,7 @@ public class AbstractImporterTest extends AbstractFixtureTest {
     }
 
     protected Vertex getVertexByIdentifier(FramedGraph<Neo4jGraph> graph, String id) {
-        Iterable<Vertex> docs = graph.getVertices(AccessibleEntity.IDENTIFIER_KEY, id);
+        Iterable<Vertex> docs = graph.getVertices(IdentifiableEntity.IDENTIFIER_KEY, id);
         return docs.iterator().next();
     }
 

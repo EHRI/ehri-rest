@@ -47,7 +47,7 @@ public class EacImporterTest extends AbstractImporterTest {
         assertTrue(abwehr != null);
         assertEquals(2, toList(abwehr.getAnnotations()).size());
         for(Annotation a : abwehr.getAnnotations()){
-            logger.debug(a.getIdentifier() + " has targets: " + toList(a.getTargets()).size());
+            logger.debug(a.getId() + " has targets: " + toList(a.getTargets()).size());
             for (AnnotatableEntity e : a.getTargets()){
                 logger.debug(e.getType());
             }

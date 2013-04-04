@@ -53,8 +53,6 @@ public abstract class EaImporter extends XmlImporter<Map<String, Object>> {
      protected Map<String, Object> extractDocumentaryUnit(Map<String, Object> itemData) throws ValidationError {
         Map<String, Object> unit = new HashMap<String, Object>();
         unit.put(IdentifiableEntity.IDENTIFIER_KEY, itemData.get("objectIdentifier"));
-//        unit.put(HistoricalAgent.NAME, itemData.get(HistoricalAgent.NAME));
-        unit.put("typeOfEntity", itemData.get("typeOfEntity"));
         return unit;
     }
     protected <T> List<T> toList(Iterable<T> iter) {
@@ -127,7 +125,7 @@ public abstract class EaImporter extends XmlImporter<Map<String, Object>> {
                description.put(key, changeForbiddenMultivaluedProperties(key, itemData.get(key), entity));
             }
         }
-        assert(description.containsKey(IdentifiableEntity.IDENTIFIER_KEY));
+//        assert(description.containsKey(IdentifiableEntity.IDENTIFIER_KEY));
         return description;
     }
     //TODO: or should this be done in the Handler?

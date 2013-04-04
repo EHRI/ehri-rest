@@ -8,10 +8,11 @@ import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Description;
+import eu.ehri.project.models.base.IdentifiableEntity;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.base.TemporalEntity;
-import eu.ehri.project.models.idgen.AccessibleEntityIdGenerator;
 import eu.ehri.project.models.idgen.IdGenerator;
+import eu.ehri.project.models.idgen.IdentifiableEntityIdGenerator;
 import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.persistance.BundleDAO;
 import java.util.HashMap;
@@ -63,10 +64,10 @@ public class IcaAtomEadImporter extends EaImporter {
     @Override
     public DocumentaryUnit importItem(Map<String, Object> itemData, int depth)
             throws ValidationError {
-        BundleDAO persister = new BundleDAO(framedGraph, permissionScope);
-        Bundle unit = new Bundle(EntityClass.DOCUMENTARY_UNIT, extractDocumentaryUnit(itemData, depth));
+//        BundleDAO persister = new BundleDAO(framedGraph, permissionScope);
+        Bundle unit = new Bundle(EntityClass.DOCUMENTARY_UNIT, extractDocumentaryUnit(itemData));
         System.out.println("Imported item: " + itemData.get("name"));
-        Bundle descBundle = new Bundle(EntityClass.DOCUMENT_DESCRIPTION, extractDocumentDescription(itemData, depth));
+        Bundle descBundle = new Bundle(EntityClass.DOCUMENT_DESCRIPTION, extractUnitDescription(itemData, EntityClass.DOCUMENT_DESCRIPTION));
         // Add dates and descriptions to the bundle since they're @Dependent
         // relations.
         for (Map<String, Object> dpb : extractDates(itemData)) {
@@ -110,8 +111,28 @@ public class IcaAtomEadImporter extends EaImporter {
 
     }
 
+    protected Map<String, Object> extractDocumentaryUnit(Map<String, Object> itemData, int depth) throws ValidationError {
+        Map<String, Object> unit = new HashMap<String, Object>();
+        if (itemData.get(OBJECT_ID) != null) {
+            unit.put(IdentifiableEntity.IDENTIFIER_KEY, itemData.get(OBJECT_ID));
+        }
+
+        return unit;
+    }
+
+    protected Map<String, Object> extractDocumentDescription(Map<String, Object> itemData, int depth) throws ValidationError {
+
+        Map<String, Object> unit = new HashMap<String, Object>();
+        for (String key : itemData.keySet()) {
+            if (!(key.equals(OBJECT_ID) || key.startsWith(SaxXmlHandler.UNKNOWN))) {
+                unit.put(key, itemData.get(key));
+            }
+        }
+        return unit;
+    }
+
     @Override
     public AccessibleEntity importItem(Map<String, Object> itemData) throws ValidationError {
-        throw new UnsupportedOperationException("Not supported ever.");
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 }

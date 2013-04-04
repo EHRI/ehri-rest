@@ -92,7 +92,7 @@ public final class AnnotationViews implements Annotations {
     public Annotation createFor(String id, Bundle bundle, Accessor user)
             throws PermissionDenied, ValidationError, ItemNotFound {
         AccessibleEntity entity = manager.getFrame(id, AccessibleEntity.class);
-        helper.checkEntityPermission(entity, accessor, PermissionType.ANNOTATE);
+        helper.checkEntityPermission(entity, user, PermissionType.ANNOTATE);
         Annotation annotation = new BundleDAO(graph).create(bundle,
                 Annotation.class);
         graph.frame(entity.asVertex(), AnnotatableEntity.class).addAnnotation(

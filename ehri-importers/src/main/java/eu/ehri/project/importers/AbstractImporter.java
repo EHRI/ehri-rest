@@ -1,6 +1,5 @@
 package eu.ehri.project.importers;
 
-import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.core.GraphManager;
@@ -12,7 +11,6 @@ import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Group;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.IdentifiableEntity;
 import eu.ehri.project.models.base.PermissionScope;
@@ -24,11 +22,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,25 +75,23 @@ public abstract class AbstractImporter<T> {
         manager = GraphManagerFactory.getInstance(framedGraph);
         persister = new BundleDAO(framedGraph, permissionScope);
         try {
-            importUser=manager.getFrame("mike", UserProfile.class);
-//            importUser = manager.getFrame("ehriimporter", UserProfile.class);
+            importUser = manager.getFrame("ehriimporter", UserProfile.class);
         } catch (ItemNotFound ex) {
-            logger.error(ex.getMessage());
-//              try {
-//                  logger.debug("EHRI Importer user not found, creating a new one");
-//                  Map<String, Object> userdata = new HashMap<String, Object>();
-//                  userdata.put(IdentifiableEntity.IDENTIFIER_KEY, "ehriimporter");
-//                  userdata.put(Description.NAME, "EHRI Importer");
-//                  Bundle unit = new Bundle(EntityClass.USER_PROFILE, userdata);
-//                  importUser = persister.create(unit, UserProfile.class);
-//                  Iterable<Vertex> docs = framedGraph.getVertices(AccessibleEntity.IDENTIFIER_KEY, "admin");
-//                  Vertex v = docs.iterator().next();
-//                  Group a = framedGraph.frame(v, Group.class);
-//                  importUser.addAccessor(a);
-//              } catch (ValidationError ex1) {
-//                  logger.error("validation error: "+ex1.getMessage());
-//                  throw new RuntimeException(ex1 + " "+ ex);
-//              }
+            try {
+                logger.debug("EHRI Importer user not found, creating a new one");
+                Bundle unit = new Bundle(EntityClass.USER_PROFILE)
+                        .withDataValue(IdentifiableEntity.IDENTIFIER_KEY, "ehriimporter")
+                        .withDataValue(Description.NAME, "EHRI Importer");
+                importUser = persister.create(unit, UserProfile.class);
+                Group admin = manager.getFrame("admin", Group.class);  // admin has id "admin"
+                admin.addMember(importUser);
+            } catch (ItemNotFound ex1) {
+                logger.error("item not found: " + ex1.getMessage());
+                throw new RuntimeException(ex1 + " " + ex);
+            } catch (ValidationError ex1) {
+                logger.error("validation error: " + ex1.getMessage());
+                throw new RuntimeException(ex1 + " " + ex);
+            }
         }
     }
     /**

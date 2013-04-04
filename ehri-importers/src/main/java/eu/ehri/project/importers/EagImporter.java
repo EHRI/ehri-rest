@@ -10,13 +10,13 @@ import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.AddressableEntity;
 import eu.ehri.project.models.base.Description;
+import eu.ehri.project.models.base.IdentifiableEntity;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.base.TemporalEntity;
-import eu.ehri.project.models.idgen.AccessibleEntityIdGenerator;
 import eu.ehri.project.models.idgen.IdGenerator;
+import eu.ehri.project.models.idgen.IdentifiableEntityIdGenerator;
 import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.persistance.BundleDAO;
 import java.util.Map;
@@ -57,7 +57,7 @@ public class EagImporter extends EaImporter{
         BundleDAO persister = new BundleDAO(framedGraph, permissionScope);
         Bundle unit = new Bundle(EntityClass.REPOSITORY, extractUnit(itemData));
 
-        Map<String, Object> descmap = extractUnitDescription(itemData);
+        Map<String, Object> descmap = extractUnitDescription(itemData, EntityClass.REPOSITORY_DESCRIPTION);
         descmap.put(IdentifiableEntity.IDENTIFIER_KEY, descmap.get(IdentifiableEntity.IDENTIFIER_KEY)+"#desc");
         Bundle descBundle = new Bundle(EntityClass.REPOSITORY_DESCRIPTION, descmap);
 
