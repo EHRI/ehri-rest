@@ -4,19 +4,17 @@ import java.util.HashMap;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.blueprints.TransactionalGraph.Conclusion;
 import com.tinkerpop.blueprints.Vertex;
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
 import eu.ehri.project.acl.ContentTypes;
 import eu.ehri.project.acl.PermissionType;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
-import eu.ehri.project.models.ContentType;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Group;
-import eu.ehri.project.models.Permission;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.persistance.ActionManager;
@@ -29,12 +27,12 @@ import eu.ehri.project.persistance.ActionManager;
  * @author michaelb
  */
 public class GraphInitializer {
-    private final FramedGraph<Neo4jGraph> graph;
+    private final FramedGraph<? extends TransactionalGraph> graph;
     private final GraphManager manager;
 
     private static final String INIT_MESSAGE = "Initialising graph";
 
-    public GraphInitializer(FramedGraph<Neo4jGraph> graph) {
+    public GraphInitializer(FramedGraph<? extends TransactionalGraph> graph) {
         this.graph = graph;
         manager = GraphManagerFactory.getInstance(graph);
     }
@@ -57,7 +55,8 @@ public class GraphInitializer {
                     EntityClass.GROUP, new HashMap<String, Object>() {
                 {
                     put(Group.IDENTIFIER_KEY, Group.ADMIN_GROUP_IDENTIFIER);
-                    put(Group.NAME, Group.ADMIN_GROUP_IDENTIFIER);
+                    put(Group.NAME, Group.ADMIN_GROUP_IDENTIFIER
+                    );
                 }
             });
 

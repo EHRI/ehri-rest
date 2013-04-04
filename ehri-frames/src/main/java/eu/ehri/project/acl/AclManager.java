@@ -49,7 +49,7 @@ import eu.ehri.project.models.utils.ClassUtils;
  */
 public final class AclManager {
 
-    private final FramedGraph<Neo4jGraph> graph;
+    private final FramedGraph<?> graph;
     private final GraphManager manager;
     private final PermissionScope scope;
     private final Collection<Vertex> scopes;
@@ -70,7 +70,7 @@ public final class AclManager {
      * 
      * @param graph
      */
-    public AclManager(FramedGraph<Neo4jGraph> graph, PermissionScope scope) {
+    public AclManager(FramedGraph<?> graph, PermissionScope scope) {
         this.graph = graph;
         this.manager = GraphManagerFactory.getInstance(graph);
         this.scope = Optional.<PermissionScope> fromNullable(scope).or(
@@ -84,7 +84,7 @@ public final class AclManager {
      * 
      * @param graph
      */
-    public AclManager(FramedGraph<Neo4jGraph> graph) {
+    public AclManager(FramedGraph<?> graph) {
         this(graph, SystemScope.getInstance());
     }
 
