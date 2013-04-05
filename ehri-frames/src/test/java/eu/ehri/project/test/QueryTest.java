@@ -187,8 +187,8 @@ public class QueryTest extends AbstractFixtureTest {
                 Query.FilterPredicate.GTE, "c3").list(
                 EntityClass.DOCUMENTARY_UNIT, validUser));
         assertEquals(2, list.size());
-        assertEquals("c3", list.get(0).getIdentifier());
-        assertEquals("c4", list.get(1).getIdentifier());
+        assertEquals("c4", list.get(0).getIdentifier());
+        assertEquals("c3", list.get(1).getIdentifier());
 
     }
 

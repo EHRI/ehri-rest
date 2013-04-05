@@ -28,8 +28,8 @@ public class GroupTest extends AbstractFixtureTest {
     @Test
     public void testGetAllUserProfileMembers() throws Exception {
         Group admin = manager.getFrame(Group.ADMIN_GROUP_IDENTIFIER, Group.class);
-        // All users should be mike, veerle, tim (inherited)
+        // All users should be ehriimporter, mike, veerle, tim (inherited)
         List<UserProfile> userProfileList = toList(admin.getAllUserProfileMembers());
-        assertEquals(3, userProfileList.size());
+        assertEquals(4, userProfileList.size());
     }
 }

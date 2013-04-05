@@ -1,5 +1,6 @@
 package eu.ehri.project.test;
 
+import eu.ehri.project.acl.SystemScope;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
@@ -11,9 +12,13 @@ import org.junit.BeforeClass;
 
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.ItemNotFound;
+import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.EntityClass;
+import eu.ehri.project.models.Group;
 import eu.ehri.project.models.UserProfile;
+import eu.ehri.project.persistance.BundleDAO;
 
 abstract public class AbstractFixtureTest extends ModelTestBase {
 
@@ -25,6 +30,7 @@ abstract public class AbstractFixtureTest extends ModelTestBase {
 
     // Members closely coupled to the test data!
     protected UserProfile validUser;
+    protected UserProfile importUser;
     protected UserProfile invalidUser;
     protected DocumentaryUnit item;
 
@@ -42,6 +48,22 @@ abstract public class AbstractFixtureTest extends ModelTestBase {
             invalidUser = manager.getFrame("reto", UserProfile.class);
         } catch (ItemNotFound e) {
             throw new RuntimeException(e);
+        }
+        try {
+            importUser = manager.getFrame("ehriimporter", UserProfile.class);
+        } catch (ItemNotFound ex) {
+            try {
+                Bundle unit = new Bundle(EntityClass.USER_PROFILE)
+                        .withDataValue(IdentifiableEntity.IDENTIFIER_KEY, "ehriimporter")
+                        .withDataValue(Description.NAME, "EHRI Importer");
+                importUser =  new BundleDAO(graph, SystemScope.getInstance()).create(unit, UserProfile.class);
+                Group admin = manager.getFrame("admin", Group.class);  // admin has id "admin"
+                admin.addMember(importUser);
+            } catch (ItemNotFound ex1) {
+                throw new RuntimeException(ex1);
+            } catch (ValidationError ex1) {
+                throw new RuntimeException(ex1);
+            }
         }
     }
 
