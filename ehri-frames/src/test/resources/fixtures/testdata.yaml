@@ -32,7 +32,7 @@
     identifier: soma-group
     name: CEGES-SOMA
 
---- # Users Mike, Tim, Linda, and Reto
+--- # Users Mike, Tim, Linda, and Reto, ehriimporter
 
 # Mike is a member of the KCL group, but he is ALSO a member of Admin
 # separately
@@ -87,7 +87,16 @@
     belongsTo:
       - soma
       - admin
-
+# ehriimporter is a member of Admin
+- id: ehriimporter
+  type: userProfile
+  data:
+    identifier: ehriimporter
+    name: EHRI Importer
+  relationships:
+    belongsTo:
+      - admin
+      
 # Institutions
 - id: r1 # should be renamed niod
   type: repository

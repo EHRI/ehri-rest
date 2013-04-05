@@ -5,7 +5,6 @@
 package eu.ehri.project.importers;
 
 import com.tinkerpop.blueprints.Vertex;
-import eu.ehri.project.importers.test.AbstractImporterTest;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.base.AccessibleEntity;
@@ -43,7 +42,7 @@ public class IcaAtomEadImporterTest extends AbstractImporterTest{
 
         int count = getNodeCount(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        ImportLog log = new SaxImportManager(graph, agent, validUser, IcaAtomEadImporter.class, IcaAtomEadHandler.class).importFile(ios, logMessage);
+        ImportLog log = new SaxImportManager(graph, agent, validUser, IcaAtomEadImporter.class, IcaAtomEadHandler.class).setTolerant(Boolean.TRUE).importFile(ios, logMessage);
 
         // How many new nodes will have been created? We should have
         // - 5 more DocumentaryUnits

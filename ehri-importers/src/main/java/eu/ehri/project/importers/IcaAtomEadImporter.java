@@ -6,9 +6,13 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.base.*;
-import eu.ehri.project.models.idgen.IdentifiableEntityIdGenerator;
+import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Description;
+import eu.ehri.project.models.base.IdentifiableEntity;
+import eu.ehri.project.models.base.PermissionScope;
+import eu.ehri.project.models.base.TemporalEntity;
 import eu.ehri.project.models.idgen.IdGenerator;
+import eu.ehri.project.models.idgen.IdentifiableEntityIdGenerator;
 import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.persistance.BundleDAO;
 import java.util.HashMap;
@@ -28,16 +32,9 @@ import org.slf4j.LoggerFactory;
  * @author lindar
  *
  */
-public class IcaAtomEadImporter extends XmlImporter<Map<String, Object>> {
+public class IcaAtomEadImporter extends EaImporter {
 
     private static final Logger logger = LoggerFactory.getLogger(IcaAtomEadImporter.class);
-    // An integer that represents how far down the
-    // EAD heirarchy tree the current document is.
-    public final String DEPTH_ATTR = "depthOfDescription";
-    // A (possibly arbitrary) string denoting what the
-    // describing body saw fit to name a documentary unit's
-    // level of description.
-    public final String LEVEL_ATTR = "levelOfDescription";
 
     /**
      * Depth of top-level items. For reasons as-yet-undetermined in the bowels
@@ -67,10 +64,10 @@ public class IcaAtomEadImporter extends XmlImporter<Map<String, Object>> {
     @Override
     public DocumentaryUnit importItem(Map<String, Object> itemData, int depth)
             throws ValidationError {
-        BundleDAO persister = new BundleDAO(framedGraph, permissionScope);
-        Bundle unit = new Bundle(EntityClass.DOCUMENTARY_UNIT, extractDocumentaryUnit(itemData, depth));
+//        BundleDAO persister = new BundleDAO(framedGraph, permissionScope);
+        Bundle unit = new Bundle(EntityClass.DOCUMENTARY_UNIT, extractDocumentaryUnit(itemData));
         System.out.println("Imported item: " + itemData.get("name"));
-        Bundle descBundle = new Bundle(EntityClass.DOCUMENT_DESCRIPTION, extractDocumentDescription(itemData, depth));
+        Bundle descBundle = new Bundle(EntityClass.DOCUMENT_DESCRIPTION, extractUnitDescription(itemData, EntityClass.DOCUMENT_DESCRIPTION));
         // Add dates and descriptions to the bundle since they're @Dependent
         // relations.
         for (Map<String, Object> dpb : extractDates(itemData)) {
@@ -92,7 +89,7 @@ public class IcaAtomEadImporter extends XmlImporter<Map<String, Object>> {
         DocumentaryUnit frame = persister.createOrUpdate(unit.withId(id), DocumentaryUnit.class);
 
         // Set the repository/item relationship
-        System.out.println("Creating at depth: " + depth);
+        //TODO: figure out another way to determine we're at the root, so we can get rid of the depth param
         if (depth == TOP_LEVEL_DEPTH) {
             Repository repository = framedGraph.frame(permissionScope.asVertex(), Repository.class);
             frame.setRepository(repository);
@@ -116,10 +113,10 @@ public class IcaAtomEadImporter extends XmlImporter<Map<String, Object>> {
 
     protected Map<String, Object> extractDocumentaryUnit(Map<String, Object> itemData, int depth) throws ValidationError {
         Map<String, Object> unit = new HashMap<String, Object>();
-        if (itemData.get(OBJECT_ID) != null)
+        if (itemData.get(OBJECT_ID) != null) {
             unit.put(IdentifiableEntity.IDENTIFIER_KEY, itemData.get(OBJECT_ID));
-        if (itemData.get(DocumentaryUnit.NAME) != null)
-            unit.put(DocumentaryUnit.NAME, itemData.get(DocumentaryUnit.NAME));
+        }
+
         return unit;
     }
 
@@ -132,5 +129,10 @@ public class IcaAtomEadImporter extends XmlImporter<Map<String, Object>> {
             }
         }
         return unit;
+    }
+
+    @Override
+    public AccessibleEntity importItem(Map<String, Object> itemData) throws ValidationError {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 }

@@ -98,7 +98,7 @@ public abstract class ImportCommand extends BaseCommand implements Command{
                 }
             }
 
-            ImportLog log = new SaxImportManager(graph, agent, user, importer, handler)
+            ImportLog log = new SaxImportManager(graph, agent, user, importer, handler).setTolerant(cmdLine.hasOption("tolerant"))
             	.importFiles(filePaths, logMessage);
             //ImportLog log = new SaxImportManager(graph, agent, validUser, EagImporter.class, EagHandler.class).importFile(ios, logMessage);
             

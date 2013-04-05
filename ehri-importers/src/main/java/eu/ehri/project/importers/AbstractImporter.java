@@ -4,13 +4,29 @@ import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
+import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.importers.properties.NodeProperties;
+import eu.ehri.project.models.EntityClass;
+import eu.ehri.project.models.Group;
+import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Description;
+import eu.ehri.project.models.base.IdentifiableEntity;
 import eu.ehri.project.models.base.PermissionScope;
 
+import eu.ehri.project.persistance.Bundle;
+import eu.ehri.project.persistance.BundleDAO;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Base class for importers that import documentary units, with their
@@ -22,6 +38,7 @@ import java.util.Map;
  */
 public abstract class AbstractImporter<T> {
 
+    private static final Logger logger = LoggerFactory.getLogger(AbstractImporter.class);
     protected final PermissionScope permissionScope;
     protected final FramedGraph<Neo4jGraph> framedGraph;
     protected final GraphManager manager;
@@ -29,6 +46,10 @@ public abstract class AbstractImporter<T> {
     protected final T documentContext;
     protected List<ImportCallback> createCallbacks = new LinkedList<ImportCallback>();
     protected List<ImportCallback> updateCallbacks = new LinkedList<ImportCallback>();
+    protected BundleDAO persister; 
+
+    protected UserProfile importUser;
+        private NodeProperties pc;
 
     /**
      * Constructor.
@@ -38,8 +59,7 @@ public abstract class AbstractImporter<T> {
      * @param log
      * @param documentContext
      */
-    public AbstractImporter(FramedGraph<Neo4jGraph> framedGraph,
-            PermissionScope permissionScope, ImportLog log, T documentContext) {
+    public AbstractImporter(FramedGraph<Neo4jGraph> framedGraph, PermissionScope permissionScope, ImportLog log, T documentContext) {
         this.permissionScope = permissionScope;
         this.framedGraph = framedGraph;
         this.log = log;
@@ -53,6 +73,26 @@ public abstract class AbstractImporter<T> {
         this.log = log;
         documentContext=null;
         manager = GraphManagerFactory.getInstance(framedGraph);
+        persister = new BundleDAO(framedGraph, permissionScope);
+        try {
+            importUser = manager.getFrame("ehriimporter", UserProfile.class);
+        } catch (ItemNotFound ex) {
+            try {
+                logger.debug("EHRI Importer user not found, creating a new one");
+                Bundle unit = new Bundle(EntityClass.USER_PROFILE)
+                        .withDataValue(IdentifiableEntity.IDENTIFIER_KEY, "ehriimporter")
+                        .withDataValue(Description.NAME, "EHRI Importer");
+                importUser = persister.create(unit, UserProfile.class);
+                Group admin = manager.getFrame("admin", Group.class);  // admin has id "admin"
+                admin.addMember(importUser);
+            } catch (ItemNotFound ex1) {
+                logger.error("item not found: " + ex1.getMessage());
+                throw new RuntimeException(ex1 + " " + ex);
+            } catch (ValidationError ex1) {
+                logger.error("validation error: " + ex1.getMessage());
+                throw new RuntimeException(ex1 + " " + ex);
+            }
+        }
     }
     /**
      * Add a callback to run when an item is created.
@@ -72,6 +112,7 @@ public abstract class AbstractImporter<T> {
         updateCallbacks.add(cb);
     }
 
+    abstract public AccessibleEntity importItem(Map<String, Object> itemData) throws ValidationError;
    
     abstract public AccessibleEntity importItem(Map<String, Object> itemData, int depth) throws ValidationError;
     /**
@@ -81,4 +122,48 @@ public abstract class AbstractImporter<T> {
      * @return returns a List of Maps with DatePeriod.START_DATE and DatePeriod.END_DATE values
      */
     public abstract Iterable<Map<String, Object>> extractDates(T data);
+    
+    
+    /**
+     * only properties that have the multivalued-status can actually be multivalued. all other properties will be
+     * flattened by this method.
+     *
+     * @param frameMap
+     * @param key
+     * @param value
+     * @param entity - the EntityClass with which this frameMap must comply
+     */
+    protected String changeForbiddenMultivaluedProperties(String key, Object value, EntityClass entity) {
+        if (pc == null) {
+            pc = new NodeProperties();
+            try {
+                InputStream fis;
+                BufferedReader br;
+
+                fis = ClassLoader.getSystemClassLoader().getResourceAsStream("allowedNodeProperties.csv");
+                br = new BufferedReader(new InputStreamReader(fis, Charset.forName("UTF-8")));
+                String firstline = br.readLine();
+                pc.setTitles(firstline);
+
+                String line;
+                while ((line = br.readLine()) != null) {
+                    pc.addRow(line);
+                }
+            } catch (IOException ex) {
+                logger.error(ex.getMessage());
+            }
+        }
+        if (value instanceof List
+                && (!pc.hasProperty(entity.getName(), key) || !pc.isMultivaluedProperty(entity.getName(), key))) {
+            String output = "";
+            for (String l : (List<String>) value) {
+                output += l + ", ";
+            }
+            logger.debug(key + " should have only 1 value. " + output.substring(0, output.length() - 2));
+            return output.substring(0, output.length() - 2);
+        } else {
+            return value.toString();
+        }
+    }
+
 }

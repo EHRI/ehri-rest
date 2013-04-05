@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<europeana:record xmlns:europeana="http://www.europeana.eu/schemas/ese/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dc="http://purl.org/dc/elements/1.1/">
+    <dc:title>Jodenster</dc:title>
+    <dc:creator>onbekend</dc:creator>
+    <dc:subject>accessoire</dc:subject>
+    <dc:date>1940 - 1945</dc:date>
+    <dc:type>jodenster</dc:type>
+    <dc:format>breedte: 10.5 cm</dc:format>
+    <dc:format>lengte: 11.5 cm</dc:format>
+    <dc:identifier>T1974-016</dc:identifier>
+    <dc:source>Fries Museum</dc:source>
+    <dcterms:provenance>Fries Museum</dcterms:provenance>
+    <dcterms:medium>bedrukt</dcterms:medium>
+    <europeana:provider>Rijksdienst voor het Cultureel Erfgoed</europeana:provider>
+    <europeana:type>IMAGE</europeana:type>
+    <europeana:rights>http://www.europeana.eu/rights/unknown/</europeana:rights>
+    <europeana:dataProvider>Fries Museum</europeana:dataProvider>
+    <europeana:isShownAt>http://collectie.friesmuseum.nl/portal/object/FriesMuseum/45F1F557EADCA80CDD61EDA92F59225ECC9EF323.html</europeana:isShownAt>
+</europeana:record>

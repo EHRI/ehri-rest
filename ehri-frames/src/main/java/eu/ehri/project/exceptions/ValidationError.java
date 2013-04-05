@@ -43,6 +43,11 @@ public class ValidationError extends BundleError {
                 buf.append(String.format(" - %-20s: %s", key, value));
             }
         }
+        buf.append("\nnested errors: \n");
+        //TODO: there must be a better way ...
+        for (String key : relations.keySet()) {
+            buf.append("nr of nested errors with " + key + ": " + relations.get(key).size() + "\n");
+        }
         return buf.toString();
     }
 
