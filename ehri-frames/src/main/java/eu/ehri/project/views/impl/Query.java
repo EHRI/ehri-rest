@@ -335,10 +335,10 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      * @return Page instance
      */
     public Page<E> page(String key, String query, Accessor user) {
-        CloseableIterable<?> countQ = manager.getVertices(key, query,
+        CloseableIterable<Vertex> countQ = manager.getVertices(key, query,
                 ClassUtils.getEntityType(cls));
         try {
-            CloseableIterable<?> indexQ = manager.getVertices(key,
+            CloseableIterable<Vertex> indexQ = manager.getVertices(key,
                     query, ClassUtils.getEntityType(cls));
             try {
                 PipeFunction<Vertex, Boolean> aclFilterFunction = new AclManager(
@@ -387,7 +387,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      */
     public Iterable<E> list(String key, String query, Accessor user) {
         // This function is optimised for ACL actions.
-        CloseableIterable<?> vertices = manager.getVertices(key,
+        CloseableIterable<Vertex> vertices = manager.getVertices(key,
                 query, ClassUtils.getEntityType(cls));
         try {
             GremlinPipeline<E, Vertex> filter = new GremlinPipeline<E, Vertex>(
