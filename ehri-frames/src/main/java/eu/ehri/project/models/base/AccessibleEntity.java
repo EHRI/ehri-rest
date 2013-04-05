@@ -16,6 +16,11 @@ public interface AccessibleEntity extends PermissionGrantTarget {
     @Adjacency(label = ACCESS)
     public Iterable<Accessor> getAccessors();
 
+    /**
+     * only Accessor accessor can access this AccessibleEntity.
+     * This is NOT the way to add an Accessor to a Group, use Group.addMember()
+     * @param accessor 
+     */
     @Adjacency(label = ACCESS)
     public void addAccessor(final Accessor accessor);
 

@@ -29,6 +29,10 @@ public interface Group extends Accessor, AccessibleEntity, IdentifiableEntity,
     @Adjacency(label = BELONGS_TO, direction = Direction.IN)
     public Iterable<Accessor> getMembers();
 
+    /**
+     * adds a Accessor as a member to this Group, so it has the permissions of the Group.
+     * @param accessor 
+     */
     @Adjacency(label = BELONGS_TO, direction = Direction.IN)
     public void addMember(final Accessor accessor);
     
