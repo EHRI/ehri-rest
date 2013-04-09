@@ -176,19 +176,21 @@ public class QueryTest extends AbstractFixtureTest {
 
         // Less than or equal... should get twos items (c1,c2)
         list = toList(query.filter(IdentifiableEntity.IDENTIFIER_KEY,
-                Query.FilterPredicate.LTE, "c2").list(
-                EntityClass.DOCUMENTARY_UNIT, validUser));
+                Query.FilterPredicate.LTE, "c2")
+                .orderBy(IdentifiableEntity.IDENTIFIER_KEY, Query.Sort.ASC)
+                .list(EntityClass.DOCUMENTARY_UNIT, validUser));
         assertEquals(2, list.size());
         assertEquals("c1", list.get(0).getIdentifier());
         assertEquals("c2", list.get(1).getIdentifier());
 
         // Greater than or equal... should get two items (c3,c4)
         list = toList(query.filter(IdentifiableEntity.IDENTIFIER_KEY,
-                Query.FilterPredicate.GTE, "c3").list(
-                EntityClass.DOCUMENTARY_UNIT, validUser));
+                Query.FilterPredicate.GTE, "c3")
+                .orderBy(IdentifiableEntity.IDENTIFIER_KEY, Query.Sort.ASC)
+                .list(EntityClass.DOCUMENTARY_UNIT, validUser));
         assertEquals(2, list.size());
-        assertEquals("c4", list.get(0).getIdentifier());
-        assertEquals("c3", list.get(1).getIdentifier());
+        assertEquals("c3", list.get(0).getIdentifier());
+        assertEquals("c4", list.get(1).getIdentifier());
 
     }
 

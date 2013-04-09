@@ -1,6 +1,5 @@
 package eu.ehri.project.views.impl;
 
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
 import eu.ehri.project.acl.AclManager;
@@ -20,7 +19,7 @@ import eu.ehri.project.views.Crud;
 import eu.ehri.project.views.ViewHelper;
 
 public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
-    private final FramedGraph<Neo4jGraph> graph;
+    private final FramedGraph<?> graph;
     private final Class<E> cls;
     private final ViewHelper helper;
     private final GraphManager manager;
@@ -34,7 +33,7 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @param graph
      * @param cls
      */
-    public CrudViews(FramedGraph<Neo4jGraph> graph, Class<E> cls,
+    public CrudViews(FramedGraph<?> graph, Class<E> cls,
             PermissionScope scope) {
         this.graph = graph;
         this.cls = cls;
@@ -51,7 +50,7 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @param graph
      * @param cls
      */
-    public CrudViews(FramedGraph<Neo4jGraph> graph, Class<E> cls) {
+    public CrudViews(FramedGraph<?> graph, Class<E> cls) {
         this(graph, cls, SystemScope.getInstance());
     }
 

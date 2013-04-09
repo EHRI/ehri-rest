@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.blueprints.TransactionalGraph.Conclusion;
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
 import eu.ehri.project.acl.AclManager;
@@ -31,7 +31,7 @@ import eu.ehri.project.views.ViewHelper;
 
 public final class AclViews implements Acl {
 
-    private final FramedGraph<Neo4jGraph> graph;
+    private final FramedGraph<? extends TransactionalGraph> graph;
     private final AclManager acl;
     private final ViewHelper helper;
     private final GraphManager manager;
@@ -43,7 +43,7 @@ public final class AclViews implements Acl {
      * @param graph
      * @param scope
      */
-    public AclViews(FramedGraph<Neo4jGraph> graph, PermissionScope scope) {
+    public AclViews(FramedGraph<? extends TransactionalGraph> graph, PermissionScope scope) {
         this.graph = graph;
         helper = new ViewHelper(graph, scope);
         acl = helper.getAclManager();
@@ -56,7 +56,7 @@ public final class AclViews implements Acl {
      * 
      * @param graph
      */
-    public AclViews(FramedGraph<Neo4jGraph> graph) {
+    public AclViews(FramedGraph<? extends TransactionalGraph> graph) {
         this(graph, SystemScope.getInstance());
     }
 

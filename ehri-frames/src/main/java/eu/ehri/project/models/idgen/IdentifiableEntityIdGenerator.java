@@ -8,7 +8,6 @@ import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
 
-import eu.ehri.project.models.base.IdentifiableEntity;
 import eu.ehri.project.utils.Slugify;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +15,6 @@ import org.slf4j.LoggerFactory;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.persistance.Messages;

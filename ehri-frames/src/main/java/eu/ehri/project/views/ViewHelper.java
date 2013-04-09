@@ -1,7 +1,6 @@
 package eu.ehri.project.views;
 
 import com.google.common.collect.Iterables;
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
 import eu.ehri.project.acl.AclManager;
@@ -32,16 +31,16 @@ import eu.ehri.project.models.utils.ClassUtils;
  */
 public final class ViewHelper {
 
-    private final FramedGraph<Neo4jGraph> graph;
+    private final FramedGraph<?> graph;
     private final PermissionScope scope;
     private final AclManager acl;
     private final GraphManager manager;
 
-    public ViewHelper(FramedGraph<Neo4jGraph> graph) {
+    public ViewHelper(FramedGraph<?> graph) {
         this(graph, SystemScope.getInstance());
     }
 
-    public ViewHelper(FramedGraph<Neo4jGraph> graph, PermissionScope scope) {
+    public ViewHelper(FramedGraph<?> graph, PermissionScope scope) {
         this.graph = graph;
         this.acl = new AclManager(graph, scope);
         this.scope = scope;

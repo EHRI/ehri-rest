@@ -9,8 +9,6 @@ import com.google.common.base.Optional;
 import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Vertex;
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jVertex;
 import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.gremlin.java.GremlinPipeline;
 import com.tinkerpop.pipes.PipeFunction;
@@ -59,7 +57,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
     private final List<GremlinPipeline<Vertex, Vertex>> traversalFilters;
     private final boolean page;
 
-    private final FramedGraph<Neo4jGraph> graph;
+    private final FramedGraph<?> graph;
     private final GraphManager manager;
     private final Class<E> cls;
     private final ViewHelper helper;
@@ -93,7 +91,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      * @param traversalFilters
      * @param page
      */
-    private Query(FramedGraph<Neo4jGraph> graph, Class<E> cls,
+    private Query(FramedGraph<?> graph, Class<E> cls,
             PermissionScope scope, Optional<Integer> offset,
             Optional<Integer> limit, final SortedMap<String, Sort> sort,
             final SortedMap<QueryUtils.TraversalPath, Sort> traversalSort,
@@ -125,7 +123,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      * @param graph
      * @param cls
      */
-    public Query(FramedGraph<Neo4jGraph> graph, Class<E> cls) {
+    public Query(FramedGraph<?> graph, Class<E> cls) {
         this(graph, cls, SystemScope.getInstance(),
                 Optional.<Integer>absent(), Optional.<Integer>absent(),
                 ImmutableSortedMap.<String, Sort>of(), ImmutableSortedMap
@@ -337,10 +335,10 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      * @return Page instance
      */
     public Page<E> page(String key, String query, Accessor user) {
-        CloseableIterable<Neo4jVertex> countQ = manager.getVertices(key, query,
+        CloseableIterable<Vertex> countQ = manager.getVertices(key, query,
                 ClassUtils.getEntityType(cls));
         try {
-            CloseableIterable<Neo4jVertex> indexQ = manager.getVertices(key,
+            CloseableIterable<Vertex> indexQ = manager.getVertices(key,
                     query, ClassUtils.getEntityType(cls));
             try {
                 PipeFunction<Vertex, Boolean> aclFilterFunction = new AclManager(
@@ -389,7 +387,7 @@ public final class Query<E extends AccessibleEntity> implements Search<E> {
      */
     public Iterable<E> list(String key, String query, Accessor user) {
         // This function is optimised for ACL actions.
-        CloseableIterable<Neo4jVertex> vertices = manager.getVertices(key,
+        CloseableIterable<Vertex> vertices = manager.getVertices(key,
                 query, ClassUtils.getEntityType(cls));
         try {
             GremlinPipeline<E, Vertex> filter = new GremlinPipeline<E, Vertex>(

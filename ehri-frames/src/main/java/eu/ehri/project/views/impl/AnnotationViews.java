@@ -3,7 +3,6 @@ package eu.ehri.project.views.impl;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.tinkerpop.blueprints.Vertex;
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.pipes.PipeFunction;
 
@@ -32,7 +31,7 @@ import eu.ehri.project.views.ViewHelper;
  */
 public final class AnnotationViews implements Annotations {
 
-    private final FramedGraph<Neo4jGraph> graph;
+    private final FramedGraph<?> graph;
     private final AclManager acl;
     private final ViewHelper helper;
     private final GraphManager manager;
@@ -43,7 +42,7 @@ public final class AnnotationViews implements Annotations {
      * @param graph
      * @param scope
      */
-    public AnnotationViews(FramedGraph<Neo4jGraph> graph, PermissionScope scope) {
+    public AnnotationViews(FramedGraph<?> graph, PermissionScope scope) {
         this.graph = graph;
         helper = new ViewHelper(graph, scope);
         acl = helper.getAclManager();
@@ -55,7 +54,7 @@ public final class AnnotationViews implements Annotations {
      * 
      * @param graph
      */
-    public AnnotationViews(FramedGraph<Neo4jGraph> graph) {
+    public AnnotationViews(FramedGraph<?> graph) {
         this(graph, SystemScope.getInstance());
     }
 

@@ -39,8 +39,9 @@ public final class SingleIndexGraphManager implements GraphManager {
         return graph;
     }
 
-    public SingleIndexGraphManager(FramedGraph<Neo4jGraph> graph) {
-        this.graph = graph;
+    public SingleIndexGraphManager(FramedGraph<?> graph) {
+        // Accept a warning here about the unsafe cast.
+        this.graph = (FramedGraph<Neo4jGraph>)graph;
     }
 
     // Access functions
