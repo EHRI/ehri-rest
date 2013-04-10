@@ -20,11 +20,12 @@ if [ -e $DB ]; then
         exit 2
     fi
     echo "Neo4j database \"$DB\" already exists. Continue?"
-    select yn in "Yes" "No" "Backup"; do
+    select yn in "Yes" "No" "Backup" "Delete"; do
         case $yn in
             Yes ) break;;
             No ) exit;;
             Backup ) tmp=$DB-`date +"%Y%m%d%H%M%S"`; mv $DB $tmp ; echo "DB backed up to $tmp..."; break;;
+            Delete ) rm -rf $DB; break;;
         esac
     done
 fi
