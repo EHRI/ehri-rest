@@ -42,19 +42,11 @@ import org.xml.sax.SAXException;
  */
 public class SaxImportManager extends XmlImportManager implements ImportManager {
 
-    private static final Logger logger = LoggerFactory
-            .getLogger(SaxImportManager.class);
-    private Boolean tolerant = false;
-//    private XmlCVocImporter importer; // CVoc specific!
+    private static final Logger logger = LoggerFactory.getLogger(SaxImportManager.class);
     private AbstractImporter<Map<String, Object>> importer;
-    protected final FramedGraph<Neo4jGraph> framedGraph;
-    protected final PermissionScope permissionScope;
-    protected final Actioner actioner;
+
+//    private XmlCVocImporter importer; // CVoc specific!
     
-    // Ugly stateful variables for tracking import state
-    // and reporting errors usefully...
-    private String currentFile = null;
-    private Integer currentPosition = null;
 
     private  Class<? extends AbstractImporter> importerClass;
 
@@ -66,6 +58,7 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
      */
     public class DummyEntityResolver implements EntityResolver {
 
+        @Override
         public InputSource resolveEntity(String publicID, String systemID)
                 throws SAXException {
 
@@ -81,130 +74,10 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
      * @param actioner
      */
     public SaxImportManager(FramedGraph<Neo4jGraph> framedGraph,
-            final PermissionScope permissionScope, final Actioner actioner, Class<? extends AbstractImporter> importerClass, Class<? extends SaxXmlHandler> handlerClass) {
-        this.framedGraph = framedGraph;
-        this.permissionScope = permissionScope;
-        this.actioner = actioner;
+           final PermissionScope permissionScope, final Actioner actioner, Class<? extends AbstractImporter> importerClass, Class<? extends SaxXmlHandler> handlerClass) {
+        super(framedGraph, permissionScope, actioner);
         this.importerClass = importerClass;
         this.handlerClass = handlerClass;
-    }
-
-    /**
-     * Tell the importer to simply skip invalid items rather than throwing an
-     * exception.
-     *
-     * @param tolerant true means it won't validate the xml file
-     */
-    public SaxImportManager setTolerant(Boolean tolerant) {
-        logger.info("Setting importer to tolerant: " + tolerant);
-        this.tolerant = tolerant;
-        return this;
-    }
-
-    /**
-     * Import a file, creating a new action with the given log message.
-     *
-     * @param ios
-     * @param logMessage
-     * @return returns an ImportLog for the given InputStream
-     *
-     * @throws IOException
-     * @throws ValidationError
-     * @throws InputParseError
-     */
-     @Override
-    public ImportLog importFile(InputStream ios, String logMessage)
-            throws IOException, ValidationError, InputParseError {
-        Transaction tx = framedGraph.getBaseGraph().getRawGraph().beginTx();
-        try {
-            // Create a new action for this import
-            final ActionManager.EventContext action = new ActionManager(framedGraph).logEvent(
-                    actioner, logMessage);
-            // Create a manifest to store the results of the import.
-            final ImportLog log = new ImportLog(action);
-
-            // Do the import...
-            importFile(ios, action, log);
-            // If nothing was imported, remove the action...
-            if (log.isValid()) {
-                tx.success();
-            }
-
-            return log;
-        } catch (ValidationError e) {
-            throw e;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        } finally {
-            tx.finish();
-        }
-    }
-
-    /**
-     * Import multiple files in the same batch/transaction.
-     *
-     * @param paths
-     * @param logMessage
-     *
-     * @throws IOException
-     * @throws ValidationError
-     */
-    @Override
-    public ImportLog importFiles(List<String> paths, String logMessage)
-            throws IOException, ValidationError {
-
-        Transaction tx = framedGraph.getBaseGraph().getRawGraph().beginTx();
-        try {
-
-            final ActionManager.EventContext action = new ActionManager(framedGraph).logEvent(
-                    actioner, logMessage);
-            final ImportLog log = new ImportLog(action);
-            for (String path : paths) {
-                try {
-                    currentFile = path;
-                    FileInputStream ios = new FileInputStream(path);
-                    try {
-                        logger.info("Importing file: " + path);
-                        importFile(ios, action, log);
-                    } finally {
-                        ios.close();
-                    }
-                } catch (InvalidXmlDocument e) {
-                    log.setErrored(formatErrorLocation(), e.getMessage());
-                    if (!tolerant) {
-                        throw e;
-                    }
-                }
-            }
-
-            // Only mark the transaction successful if we're
-            // actually accomplished something.
-            if (log.isValid()) {
-                tx.success();
-            }
-
-            return log;
-        } catch (ValidationError e) {
-            tx.failure();
-            throw e;
-        } catch (Exception e) {
-            e.printStackTrace();
-            tx.failure();
-            throw new RuntimeException(e);
-        } finally {
-            tx.finish();
-        }
-    }
-    protected int getNodeCount(FramedGraph<Neo4jGraph> graph) {
-        return toList(GlobalGraphOperations
-                .at(graph.getBaseGraph().getRawGraph()).getAllNodes()).size();
-    }
-    protected <T> List<T> toList(Iterable<T> iter) {
-        Iterator<T> it = iter.iterator();
-        List<T> lst = new ArrayList<T>();
-        while (it.hasNext())
-            lst.add(it.next());
-        return lst;
     }
 
     /**
@@ -220,7 +93,7 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
      * @throws InvalidInputFormatError
      * @throws InvalidXmlDocument
      */
-    private void importFile(InputStream ios, final ActionManager.EventContext eventContext,
+    protected void importFile(InputStream ios, final ActionManager.EventContext eventContext,
             final ImportLog log) throws IOException, ValidationError,
             InputParseError, InvalidXmlDocument, InvalidInputFormatError {
 
@@ -247,7 +120,7 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
             logger.info("handler of class " + handler.getClass());
             
             SAXParserFactory spf = SAXParserFactory.newInstance();
-            spf.setValidating(!tolerant);
+            spf.setValidating(!isTolerant());
             logger.debug("isValidating: " + spf.isValidating());
 //            spf.setNamespaceAware(true);
             try {
@@ -289,9 +162,4 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
 
     }
 
-    private String formatErrorLocation() {
-        return String.format("File: %s, XML document: %d", currentFile,
-                currentPosition);
-    }
-    
 }

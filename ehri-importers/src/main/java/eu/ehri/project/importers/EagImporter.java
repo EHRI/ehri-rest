@@ -54,7 +54,6 @@ public class EagImporter extends EaImporter{
      */
     public Repository importItem(Map<String, Object> itemData) throws ValidationError {
 
-        BundleDAO persister = new BundleDAO(framedGraph, permissionScope);
         Bundle unit = new Bundle(EntityClass.REPOSITORY, extractUnit(itemData));
 
         Map<String, Object> descmap = extractUnitDescription(itemData, EntityClass.REPOSITORY_DESCRIPTION);

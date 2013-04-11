@@ -37,6 +37,15 @@ public class XmlImportProperties implements ImportProperties {
     public String getProperty(String key) {
         return getProperties().getProperty(key);
     }
+    public Set<String> getAllNonAttributeProperties(){
+        Set<String> ps = new HashSet<String>();
+        Properties p = getProperties();
+        for(Object key : p.keySet()){
+            if( ! key.toString().startsWith("@"))
+            ps.add(key.toString());
+        }
+        return ps;
+    }
 
     public String getProperty(String key, String defaultValue) {
         return getProperties().getProperty(key, defaultValue);

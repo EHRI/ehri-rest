@@ -14,7 +14,6 @@ import eu.ehri.project.models.base.TemporalEntity;
 import eu.ehri.project.models.idgen.IdGenerator;
 import eu.ehri.project.models.idgen.IdentifiableEntityIdGenerator;
 import eu.ehri.project.persistance.Bundle;
-import eu.ehri.project.persistance.BundleDAO;
 import java.util.HashMap;
 import java.util.Map;
 
