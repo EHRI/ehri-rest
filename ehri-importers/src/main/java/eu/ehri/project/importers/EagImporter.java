@@ -18,7 +18,6 @@ import eu.ehri.project.models.base.TemporalEntity;
 import eu.ehri.project.models.idgen.IdGenerator;
 import eu.ehri.project.models.idgen.IdentifiableEntityIdGenerator;
 import eu.ehri.project.persistance.Bundle;
-import eu.ehri.project.persistance.BundleDAO;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,6 +51,7 @@ public class EagImporter extends EaImporter{
      * @param itemData
      * @throws ValidationError
      */
+    @Override
     public Repository importItem(Map<String, Object> itemData) throws ValidationError {
 
         Bundle unit = new Bundle(EntityClass.REPOSITORY, extractUnit(itemData));

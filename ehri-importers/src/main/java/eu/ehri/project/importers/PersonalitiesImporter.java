@@ -15,20 +15,19 @@ import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.IdentifiableEntity;
 import eu.ehri.project.models.base.PermissionScope;
-import eu.ehri.project.models.base.TemporalEntity;
 import eu.ehri.project.models.idgen.IdGenerator;
 import eu.ehri.project.models.idgen.IdentifiableEntityIdGenerator;
 import eu.ehri.project.persistance.Bundle;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  *
+ * before importing the file: delete the columns with the reordering of the first and last name
+ * add a column 'id' with a unique identifier, prefixed with EHRI-Personalities or some such.
+ * 
  * @author linda
  */
 public class PersonalitiesImporter extends XmlImporter<Object> {
@@ -43,6 +42,7 @@ public class PersonalitiesImporter extends XmlImporter<Object> {
     
     @Override
     public AccessibleEntity importItem(Map<String, Object> itemData) throws ValidationError {
+        logger.debug("-----------------------------------");
         Bundle unit = new Bundle(EntityClass.HISTORICAL_AGENT, extractUnit(itemData));
         
         Bundle descBundle = new Bundle(EntityClass.HISTORICAL_AGENT_DESCRIPTION, extractUnitDescription(itemData, EntityClass.HISTORICAL_AGENT_DESCRIPTION));
@@ -71,7 +71,8 @@ public class PersonalitiesImporter extends XmlImporter<Object> {
     public AccessibleEntity importItem(Map<String, Object> itemData, int depth) throws ValidationError {
         throw new UnsupportedOperationException("Not supported ever.");
     }
-
+// not using the dates as dates, so no need for this
+ 
 //    private Map<String, Object> constructDateMap(Map<String, Object> itemData) {
 //        Map<String, Object> items = new HashMap<String, Object>();
 //        String end = itemData.get("DateofdeathYYYY-MM-DD").toString();
@@ -101,45 +102,28 @@ public class PersonalitiesImporter extends XmlImporter<Object> {
     private Map<String, Object> extractUnitDescription(Map<String, Object> itemData, EntityClass entityClass) {
         Map<String, Object> item = new HashMap<String, Object>();
         
-        putPropertyInGraph(item, Description.NAME, itemData.get("Firstname") + (itemData.containsKey("Firstname") && itemData.containsKey("Lastname") ? " " : "") + itemData.get("Lastname"));
+        SaxXmlHandler.putPropertyInGraph(item, Description.NAME, itemData.get("Firstname") + (itemData.containsKey("Firstname") && itemData.containsKey("Lastname") ? " " : "") + itemData.get("Lastname"));
         for (String key : itemData.keySet()) {
             if (!key.equals("id")) {
                 if (!p.containsProperty(key)) {
-                    putPropertyInGraph(item, SaxXmlHandler.UNKNOWN + key, itemData.get(key).toString());
+                    SaxXmlHandler.putPropertyInGraph(item, SaxXmlHandler.UNKNOWN + key, itemData.get(key).toString());
                 } else {
-                    putPropertyInGraph(item, p.getProperty(key), itemData.get(key).toString());
+                    SaxXmlHandler.putPropertyInGraph(item, p.getProperty(key), itemData.get(key).toString());
                 }
             }
+            
+        }
+        //create all otherFormsOfName
+        if(!item.containsKey("typeOfEntity")){
+            SaxXmlHandler.putPropertyInGraph(item, "typeOfEntity", "person");
         }
         if (!item.containsKey(Description.LANGUAGE_CODE)) {
-            putPropertyInGraph(item, Description.LANGUAGE_CODE, "en");
+            SaxXmlHandler.putPropertyInGraph(item, Description.LANGUAGE_CODE, "en");
         }
         return item;
     }
     
-    private void putPropertyInGraph(Map<String, Object> c, String property, String value) {
-        String valuetrimmed = value.trim();
-        if (valuetrimmed.isEmpty()) {
-            return;
-        }
-        logger.debug("putProp: " + property + " " + value);
-        
-        Object propertyList;
-        //TODO: if property is not multivalued, just concatenate
-        if (c.containsKey(property)) {
-            propertyList = c.get(property);
-            if (propertyList instanceof List) {
-                ((List<Object>) propertyList).add(valuetrimmed);
-            } else {
-                List<Object> o = new ArrayList<Object>();
-                o.add(valuetrimmed);
-                o.add(c.get(property));
-                c.put(property, o);
-            }
-        } else {
-            c.put(property, valuetrimmed);
-        }
-    }
+    
     
     @Override
     public Iterable<Map<String, Object>> extractDates(Object data) {

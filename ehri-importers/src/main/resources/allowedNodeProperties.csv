@@ -42,6 +42,8 @@ documentDescription,creators,,,1
 documentDescription,subjects,,,1
 documentDescription,unitDates,,,1
 documentDescription,levelOfDescription,,,
+historicalAgentDescription,lastName,,,
+historicalAgentDescription,firstName,,,
 historicalAgentDescription,source,,,1
 historicalAgentDescription,typeOfEntity,,,
 historicalAgentDescription,otherFormsOfName,,,1
@@ -54,6 +56,8 @@ historicalAgentDescription,structure,,,
 historicalAgentDescription,generalContext,,,
 historicalAgentDescription,occupation,,,
 historicalAgentDescription,maintenanceEvent,,,1
+historicalAgentDescription,otherFormsOfFirstName,,,1
+historicalAgentDescription,otherFormsOfLastName,,,1
 repositoryDescription,typeOfEntity,,,
 repositoryDescription,otherFormsOfName,,,1
 repositoryDescription,parallelFormsOfName,,,
