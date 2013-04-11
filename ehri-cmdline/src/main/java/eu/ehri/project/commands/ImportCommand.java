@@ -6,6 +6,7 @@ package eu.ehri.project.commands;
 
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
+import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.exceptions.IntegrityError;
@@ -18,6 +19,7 @@ import eu.ehri.project.importers.SaxXmlHandler;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.UserProfile;
+import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.persistance.BundleDAO;
 import java.util.HashMap;
@@ -42,12 +44,8 @@ public abstract class ImportCommand extends BaseCommand implements Command{
     
     @Override
     protected void setCustomOptions() {
-        options.addOption(new Option("createrepo", false,
-                "Create agent with the given ID"));
-        options.addOption(new Option("repo", true,
-                "Identifier of repository to import into"));
-        options.addOption(new Option("createuser", false,
-                "Create user with the given ID"));
+        options.addOption(new Option("scope", true,
+                "Identifier of scope to import into, i.e. repository"));
         options.addOption(new Option("user", true,
                 "Identifier of user to import as"));
         options.addOption(new Option("tolerant", false,
@@ -74,31 +72,17 @@ public abstract class ImportCommand extends BaseCommand implements Command{
         try {
 
             // Find the agent
-            Repository agent;
-            try {
-                agent = manager.getFrame(cmdLine.getOptionValue("repo"), Repository.class);
-            } catch (ItemNotFound e) {
-                if (cmdLine.hasOption("createrepo")) {
-                    agent = createAgent(graph, cmdLine.getOptionValue("repo"));
-                } else {
-                    throw e;
-                }
+            PermissionScope scope = SystemScope.getInstance();
+            if (cmdLine.hasOption("scope")) {
+                scope = manager.getFrame(cmdLine.getOptionValue("scope"), PermissionScope.class);
             }
 
             // Find the user
-            UserProfile user;
-            try {
-                user = manager.getFrame(cmdLine.getOptionValue("user"),
-                        UserProfile.class);
-            } catch (ItemNotFound e) {
-                if (cmdLine.hasOption("createuser")) {
-                    user = createUser(graph, cmdLine.getOptionValue("user"));
-                } else {
-                    throw e;
-                }
-            }
+            UserProfile user = manager.getFrame(cmdLine.getOptionValue("user"),
+                    UserProfile.class);
 
-            ImportLog log = new SaxImportManager(graph, agent, user, importer, handler).setTolerant(cmdLine.hasOption("tolerant"))
+            ImportLog log = new SaxImportManager(graph, scope, user, importer, handler).setTolerant(cmdLine.hasOption
+                    ("tolerant"))
             	.importFiles(filePaths, logMessage);
             //ImportLog log = new SaxImportManager(graph, agent, validUser, EagImporter.class, EagHandler.class).importFile(ios, logMessage);
             
@@ -119,23 +103,4 @@ public abstract class ImportCommand extends BaseCommand implements Command{
         }
         return 0;
     }
-
-    private static UserProfile createUser(FramedGraph<Neo4jGraph> graph,
-            String name) throws ValidationError, IntegrityError {
-        Map<String, Object> userData = new HashMap<String, Object>();
-        userData.put("identifier", name);
-        userData.put("name", name);
-        return new BundleDAO(graph).create(new Bundle(EntityClass.USER_PROFILE,
-                userData), UserProfile.class);
-    }
-
-    private static Repository createAgent(FramedGraph<Neo4jGraph> graph, String name)
-            throws ValidationError, IntegrityError {
-        Map<String, Object> agentData = new HashMap<String, Object>();
-        agentData.put("identifier", name);
-        agentData.put("name", name);
-        return new BundleDAO(graph).create(new Bundle(EntityClass.REPOSITORY,
-                agentData), Repository.class);
-    }
-    
 }

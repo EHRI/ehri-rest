@@ -45,14 +45,14 @@ public class EacImporterTest extends AbstractImporterTest {
         logger.debug(abwehr.getId());
         assertEquals(Entities.HISTORICAL_AGENT, abwehr.asVertex().getProperty("__ISA__"));
         assertTrue(abwehr != null);
-        assertEquals(2, toList(abwehr.getAnnotations()).size());
         for(Annotation a : abwehr.getAnnotations()){
-            logger.debug(a.getId() + " has targets: " + toList(a.getTargets()).size());
+            logger.info(a.getId() + " has targets: " + toList(a.getTargets()).size());
             for (AnnotatableEntity e : a.getTargets()){
                 logger.debug(e.getType());
             }
         }
-        
+        assertEquals(2, toList(abwehr.getAnnotations()).size());
+
         HistoricalAgent ssrasse = graph.frame(getVertexByIdentifier(graph, "418"), HistoricalAgent.class);
         logger.debug(ssrasse.getId());
         assertEquals(Entities.HISTORICAL_AGENT, ssrasse.asVertex().getProperty("__ISA__"));
@@ -62,8 +62,7 @@ public class EacImporterTest extends AbstractImporterTest {
         logger.debug(feldpolizei.getId());
         assertEquals(Entities.HISTORICAL_AGENT, feldpolizei.asVertex().getProperty("__ISA__"));
         assertEquals(1, toList(feldpolizei.getAnnotations()).size());
-        
-        
+
     }
 
 //        @Test

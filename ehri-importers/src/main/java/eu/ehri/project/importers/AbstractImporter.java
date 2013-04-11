@@ -4,18 +4,12 @@ import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
-import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.properties.NodeProperties;
 import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.Group;
-import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.base.Description;
-import eu.ehri.project.models.base.IdentifiableEntity;
 import eu.ehri.project.models.base.PermissionScope;
 
-import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.persistance.BundleDAO;
 
 import java.io.BufferedReader;
@@ -51,7 +45,6 @@ public abstract class AbstractImporter<T> {
     protected List<ImportCallback> updateCallbacks = new LinkedList<ImportCallback>();
     protected BundleDAO persister;
 
-    protected UserProfile importUser;
     private NodeProperties pc;
 
     /**
@@ -69,25 +62,6 @@ public abstract class AbstractImporter<T> {
         this.documentContext = documentContext;
         manager = GraphManagerFactory.getInstance(framedGraph);
         persister = new BundleDAO(framedGraph, permissionScope);
-        try {
-            importUser = manager.getFrame("ehriimporter", UserProfile.class);
-        } catch (ItemNotFound ex) {
-            try {
-                logger.debug("EHRI Importer user not found, creating a new one");
-                Bundle unit = new Bundle(EntityClass.USER_PROFILE)
-                        .withDataValue(IdentifiableEntity.IDENTIFIER_KEY, "ehriimporter")
-                        .withDataValue(Description.NAME, "EHRI Importer");
-                importUser = new BundleDAO(framedGraph).create(unit, UserProfile.class);
-                Group admin = manager.getFrame(Group.ADMIN_GROUP_IDENTIFIER, Group.class);  // admin has id "admin"
-                admin.addMember(importUser);
-            } catch (ItemNotFound ex1) {
-                logger.error("item not found: " + ex1.getMessage());
-                throw new RuntimeException(ex1 + " " + ex);
-            } catch (ValidationError ex1) {
-                logger.error("validation error: " + ex1.getMessage());
-                throw new RuntimeException(ex1 + " " + ex);
-            }
-        }
     }
 
     /**

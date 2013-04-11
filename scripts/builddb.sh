@@ -34,12 +34,12 @@ echo "Initializing..."
 ./scripts/cmd $DB initialize
 echo "Creating user: $PROF"
 ./scripts/cmd $DB useradd $PROF -group admin
-echo "Importing Wiener Library EAD..."
-./scripts/cmd $DB ead-import --createrepo -repo wiener-library -user $PROF -tolerant ~/Dropbox/EHRI-WP19-20/TestData/wiener-library/*xml
-echo "Importing ICA-AtoM EAC authorities..."
-./scripts/cmd $DB eac-import -repo wiener-library -user $PROF -tolerant ~/Dropbox/EHRI-WP19-20/TestData/eac-dump-140313/*xml
 echo "Importing ICA-AtoM EAG institutions..."
-./scripts/cmd $DB eag-import -repo wiener-library -user $PROF -tolerant ~/Dropbox/EHRI-WP19-20/TestData/eag-dump-080313/*xml
+./scripts/cmd $DB eag-import -user $PROF -tolerant ~/Dropbox/EHRI-WP19-20/TestData/eag-dump-080313/*xml
+echo "Importing ICA-AtoM EAC authorities..."
+./scripts/cmd $DB eac-import -user $PROF -tolerant ~/Dropbox/EHRI-WP19-20/TestData/eac-dump-140313/*xml
+echo "Importing Wiener Library EAD..."
+./scripts/cmd $DB ead-import -scope gb-3348 -user $PROF -tolerant ~/Dropbox/EHRI-WP19-20/TestData/wiener-library/*xml
 echo "Importing thesaurus..."
 ./scripts/cmd $DB skos-import --createvocabulary -vocabulary ehri-skos -user $PROF -tolerant ~/Dropbox/EHRI-WP19-20/TestData/ehri-skos.rdf
 
