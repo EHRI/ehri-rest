@@ -1,6 +1,5 @@
 package eu.ehri.project.importers;
 
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
@@ -12,19 +11,14 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.Annotation;
 import eu.ehri.project.models.HistoricalAgent;
 import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.HistoricalAgentDescription;
 import eu.ehri.project.models.UndeterminedRelationship;
-import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.*;
 import eu.ehri.project.models.idgen.IdentifiableEntityIdGenerator;
 import eu.ehri.project.models.idgen.IdGenerator;
 import eu.ehri.project.persistance.Bundle;
-import eu.ehri.project.persistance.BundleDAO;
 import eu.ehri.project.views.impl.AnnotationViews;
 
-import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,7 +86,7 @@ public class EacImporter extends EaImporter {
 
         for (Map<String, Object> rel : extractRelations(itemData)) {
             logger.debug("relation found");
-            descBundle = descBundle.withRelation(Description.RELATESTO, new Bundle(EntityClass.UNDETERMINED_RELATIONSHIP, rel));
+            descBundle = descBundle.withRelation(Description.RELATES_TO, new Bundle(EntityClass.UNDETERMINED_RELATIONSHIP, rel));
         }
 
         unit = unit.withRelation(Description.DESCRIBES, descBundle);
