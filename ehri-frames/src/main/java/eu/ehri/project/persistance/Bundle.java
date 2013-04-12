@@ -133,9 +133,13 @@ public class Bundle {
      * @return
      */
     public Bundle withDataValue(String key, Object value) {
-        Map<String, Object> newData = Maps.newHashMap(data);
-        newData.put(key, value);
-        return withData(newData);
+        if (value == null) {
+            return this;
+        } else {
+            Map<String, Object> newData = Maps.newHashMap(data);
+            newData.put(key, value);
+            return withData(newData);
+        }
     }
 
     /**
