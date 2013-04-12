@@ -92,7 +92,6 @@ public class EacImporter extends EaImporter {
 
         for (Map<String, Object> rel : extractRelations(itemData)) {
             logger.debug("relation found");
-            System.out.println("Related entity: " + rel);
             descBundle = descBundle.withRelation(Description.RELATESTO, new Bundle(EntityClass.UNDETERMINED_RELATIONSHIP, rel));
         }
 
