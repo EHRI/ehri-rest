@@ -102,6 +102,7 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
             logger.info("handler of class " + handler.getClass());
 
             SAXParserFactory spf = SAXParserFactory.newInstance();
+            spf.setNamespaceAware(false);
             if (!isTolerant()) {
                 spf.setValidating(!isTolerant());
                 spf.setSchema(null);

@@ -65,7 +65,6 @@ public class IcaAtomEadImporter extends EaImporter {
             throws ValidationError {
 //        BundleDAO persister = new BundleDAO(framedGraph, permissionScope);
         Bundle unit = new Bundle(EntityClass.DOCUMENTARY_UNIT, extractDocumentaryUnit(itemData));
-        System.out.println("Imported item: " + itemData.get("name"));
         Bundle descBundle = new Bundle(EntityClass.DOCUMENT_DESCRIPTION, extractUnitDescription(itemData, EntityClass.DOCUMENT_DESCRIPTION));
         // Add dates and descriptions to the bundle since they're @Dependent
         // relations.
@@ -83,7 +82,6 @@ public class IcaAtomEadImporter extends EaImporter {
         if (id.equals(permissionScope.getId())) {
             throw new RuntimeException("Generated an id same as scope: " + unit.getData());
         }
-        System.out.println("Generated ID: " + id + " (" + permissionScope.getId() + ")");
         boolean exists = manager.exists(id);
         DocumentaryUnit frame = persister.createOrUpdate(unit.withId(id), DocumentaryUnit.class);
 

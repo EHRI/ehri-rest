@@ -84,13 +84,10 @@ public class EacHandler extends EaHandler {
         }
     }
 
-    
     @Override
     protected List<String> getSchemas() {
         List<String> schemas = new ArrayList<String>();
         schemas.add("eac.xsd");
         return schemas;
     }
-
-    
 }

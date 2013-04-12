@@ -37,7 +37,7 @@ echo "Creating user: $PROF"
 echo "Importing ICA-AtoM EAG institutions..."
 ./scripts/cmd $DB eag-import -user $PROF -tolerant ~/Dropbox/EHRI-WP19-20/TestData/eag-dump-080313/*xml
 echo "Importing ICA-AtoM EAC authorities..."
-./scripts/cmd $DB eac-import -user $PROF -tolerant ~/Dropbox/EHRI-WP19-20/TestData/eac-dump-140313/*xml
+./scripts/cmd $DB eac-import -user $PROF -tolerant ~/Dropbox/EHRI-WP19-20/TestData/eac-dump-280313/*xml
 echo "Importing Wiener Library EAD..."
 ./scripts/cmd $DB ead-import -scope gb-3348 -user $PROF -tolerant ~/Dropbox/EHRI-WP19-20/TestData/wiener-library/*xml
 echo "Importing thesaurus..."

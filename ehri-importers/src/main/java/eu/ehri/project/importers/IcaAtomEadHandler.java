@@ -65,7 +65,6 @@ public class IcaAtomEadHandler extends SaxXmlHandler {
         if (childItemPattern.matcher(qName).matches() || qName.equals("archdesc")) {
             Map<String, Object> currentGraph = currentGraphPath.pop();
             try {
-                System.out.println("Current graph: " + currentGraph);
                 //add any mandatory fields not yet there:
                 if (!currentGraph.containsKey(Description.NAME)) {
                     for(String key: currentGraph.keySet()){
@@ -100,7 +99,6 @@ public class IcaAtomEadHandler extends SaxXmlHandler {
                 logger.error(ex.getMessage());
             } finally {
                 depth--;
-                System.out.println("Popping depth... " + depth);
             }
         }
         

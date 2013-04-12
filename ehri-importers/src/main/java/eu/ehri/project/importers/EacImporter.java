@@ -65,7 +65,6 @@ public class EacImporter extends EaImporter {
 
         Bundle descBundle = new Bundle(EntityClass.HISTORICAL_AGENT_DESCRIPTION, extractUnitDescription(itemData, EntityClass.HISTORICAL_AGENT_DESCRIPTION));
 
-
         // Add dates and descriptions to the bundle since they're @Dependent
         // relations.
         for (Map<String, Object> dpb : extractDates(itemData)) {
@@ -157,8 +156,10 @@ public class EacImporter extends EaImporter {
                         targetEntity.addAnnotation(annotation);
                     } catch (ItemNotFound ex) {
                         logger.error(ex.getMessage());
+                        throw new RuntimeException(ex);
                     } catch (PermissionDenied ex) {
                         logger.error(ex.getMessage());
+                        throw new RuntimeException(ex);
                     }
                 } else {
                     logger.info("relation found, but target " + rel.asVertex().getProperty(ANNOTATION_TARGET) + " not in graph");
