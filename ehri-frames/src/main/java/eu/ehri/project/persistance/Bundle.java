@@ -2,6 +2,7 @@ package eu.ehri.project.persistance;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -11,9 +12,11 @@ import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Maps;
 
+import com.google.common.hash.*;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.models.EntityClass;
+import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.utils.ClassUtils;
 import org.w3c.dom.Document;
 
@@ -23,7 +26,7 @@ import org.w3c.dom.Document;
  * @author michaelb
  * 
  */
-public class Bundle {
+public final class Bundle {
     private final String id;
     private final EntityClass type;
     private final ImmutableMap<String, Object> data;
@@ -348,5 +351,63 @@ public class Bundle {
      */
     public String toXmlString() {
         return DataConverter.bundleToXmlString(this);
+    }
+
+    private Funnel<Object> objectFunnel = new Funnel<Object>() {
+        @Override
+        public void funnel(Object data, PrimitiveSink into) {
+            if (data instanceof Object[]) {
+                for (Object sd : (Object[])data) {
+                    funnel(sd, into);
+                }
+            } else if (data instanceof String) {
+                into.putString((String)data);
+            } else if (data instanceof Long) {
+                into.putLong((Long)data);
+            } else if (data instanceof Integer) {
+                into.putInt((Integer)data);
+            } else if (data instanceof Long) {
+                into.putLong((Long)data);
+            } else {
+                into.putString(data.toString());
+            }
+        }
+    };
+
+    private Funnel<Map.Entry<String,Object>> entryFunnel = new Funnel<Map.Entry<String, Object>>() {
+        @Override
+        public void funnel(Map.Entry<String, Object> entry, PrimitiveSink into) {
+            into.putString(entry.getKey());
+            objectFunnel.funnel(entry.getValue(), into);
+        }
+    };
+
+    private Funnel<Bundle> bundleFunnel = new Funnel<Bundle>() {
+        @Override
+        public void funnel(Bundle bundle, PrimitiveSink into) {
+            for (Map.Entry<String,Object> entry : bundle.getData().entrySet()) {
+                if (!entry.getKey().equals(EntityType.ID_KEY)
+                        && !entry.getKey().equals(EntityType.HASH_KEY)) {
+                    entryFunnel.funnel(entry, into);
+                }
+            }
+            for (Map.Entry<String,Collection<Bundle>> rels : getRelations().asMap().entrySet()) {
+                into.putString(rels.getKey());
+                for (Bundle r : rels.getValue()) {
+                    into.putString(r.getDataHash().toString());
+                }
+            }
+        }
+    };
+
+    /**
+     * Get a hashCode for this bundle.
+     * @return
+     */
+    public HashCode getDataHash() {
+        HashFunction hf = Hashing.md5();
+        Hasher hasher = hf.newHasher();
+        hasher.putObject(this, bundleFunnel);
+        return hasher.hash();
     }
 }
