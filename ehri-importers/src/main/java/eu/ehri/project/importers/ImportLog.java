@@ -3,6 +3,7 @@ package eu.ehri.project.importers;
 import java.util.HashMap;
 import java.util.Map;
 
+import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.persistance.ActionManager.EventContext;
 
@@ -97,9 +98,16 @@ public class ImportLog {
 	 */
 	public SystemEvent getAction() {
 		return eventContext.getSystemEvent();
-	}			
-	
-	/**
+	}
+
+    /**
+     * @return returns the Actioner associated with this import
+     */
+    public Actioner getActioner() {
+        return eventContext.getActioner();
+    }
+
+    /**
 	 * Indicated whether the import succeeded at all,
 	 * in terms of items created/updated.
 	 * 

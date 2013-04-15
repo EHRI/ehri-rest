@@ -87,16 +87,7 @@
     belongsTo:
       - soma
       - admin
-# ehriimporter is a member of Admin
-- id: ehriimporter
-  type: userProfile
-  data:
-    identifier: ehriimporter
-    name: EHRI Importer
-  relationships:
-    belongsTo:
-      - admin
-      
+
 # Institutions
 - id: r1 # should be renamed niod
   type: repository

@@ -14,7 +14,7 @@ public interface Description extends NamedEntity {
     public static final String DESCRIBES = DescribedEntity.DESCRIBES;
     public static final String LANGUAGE_CODE = "languageCode";
     public static final String MUTATES = "maintenance"; //links to MaintenanceEvent
-    public static final String RELATESTO = "relatesto"; //links to UndeterminedRelationship
+    public static final String RELATES_TO = "relatesTo"; //links to UndeterminedRelationship
 
     @Adjacency(label = DESCRIBES)
     public DescribedEntity getEntity();
@@ -45,12 +45,12 @@ public interface Description extends NamedEntity {
     public abstract void addMaintenanceEvent(final MaintenanceEvent maintenanceEvent);
     
     @Dependent
-    @Adjacency(label = RELATESTO, direction=Direction.IN)
+    @Adjacency(label = RELATES_TO, direction=Direction.IN)
     public abstract Iterable<UndeterminedRelationship> getUndeterminedRelationships();
 
-    @Adjacency(label = RELATESTO)
+    @Adjacency(label = RELATES_TO)
     public abstract void setUndeterminedRelationships(final Iterable<UndeterminedRelationship> relationship);
 
-    @Adjacency(label = RELATESTO)
+    @Adjacency(label = RELATES_TO)
     public abstract void addUndeterminedRelationship(final UndeterminedRelationship relationship);
 }

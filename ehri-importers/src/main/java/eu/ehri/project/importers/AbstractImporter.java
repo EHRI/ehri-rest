@@ -4,19 +4,14 @@ import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
-import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.properties.NodeProperties;
 import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.Group;
-import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.base.Description;
-import eu.ehri.project.models.base.IdentifiableEntity;
 import eu.ehri.project.models.base.PermissionScope;
 
-import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.persistance.BundleDAO;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,18 +20,20 @@ import java.nio.charset.Charset;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Base class for importers that import documentary units, with their
  * constituent logical data, description(s), and date periods.
- * 
- * @author michaelb
- * 
+ *
  * @param <T>
+ * @author michaelb
  */
 public abstract class AbstractImporter<T> {
+
+    private static final String NODE_PROPERTIES = "allowedNodeProperties.csv";
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractImporter.class);
     protected final PermissionScope permissionScope;
@@ -46,10 +43,9 @@ public abstract class AbstractImporter<T> {
     protected final T documentContext;
     protected List<ImportCallback> createCallbacks = new LinkedList<ImportCallback>();
     protected List<ImportCallback> updateCallbacks = new LinkedList<ImportCallback>();
-    protected BundleDAO persister; 
+    protected BundleDAO persister;
 
-    protected UserProfile importUser;
-        private NodeProperties pc;
+    private NodeProperties pc;
 
     /**
      * Constructor.
@@ -64,39 +60,23 @@ public abstract class AbstractImporter<T> {
         this.framedGraph = framedGraph;
         this.log = log;
         this.documentContext = documentContext;
-         manager = GraphManagerFactory.getInstance(framedGraph);
-    }
-
-      public AbstractImporter(FramedGraph<Neo4jGraph> framedGraph, PermissionScope permissionScope, ImportLog log) {
-        this.permissionScope = permissionScope;
-        this.framedGraph = framedGraph;
-        this.log = log;
-        documentContext=null;
         manager = GraphManagerFactory.getInstance(framedGraph);
         persister = new BundleDAO(framedGraph, permissionScope);
-        try {
-            importUser = manager.getFrame("ehriimporter", UserProfile.class);
-        } catch (ItemNotFound ex) {
-            try {
-                logger.debug("EHRI Importer user not found, creating a new one");
-                Bundle unit = new Bundle(EntityClass.USER_PROFILE)
-                        .withDataValue(IdentifiableEntity.IDENTIFIER_KEY, "ehriimporter")
-                        .withDataValue(Description.NAME, "EHRI Importer");
-                importUser = persister.create(unit, UserProfile.class);
-                Group admin = manager.getFrame("admin", Group.class);  // admin has id "admin"
-                admin.addMember(importUser);
-            } catch (ItemNotFound ex1) {
-                logger.error("item not found: " + ex1.getMessage());
-                throw new RuntimeException(ex1 + " " + ex);
-            } catch (ValidationError ex1) {
-                logger.error("validation error: " + ex1.getMessage());
-                throw new RuntimeException(ex1 + " " + ex);
-            }
-        }
     }
+
+    /**
+     * Constructor without a document context.
+     * @param framedGraph
+     * @param permissionScope
+     * @param log
+     */
+    public AbstractImporter(FramedGraph<Neo4jGraph> framedGraph, PermissionScope permissionScope, ImportLog log) {
+        this(framedGraph, permissionScope, log, null);
+    }
+
     /**
      * Add a callback to run when an item is created.
-     * 
+     *
      * @param cb
      */
     public void addCreationCallback(final ImportCallback cb) {
@@ -105,7 +85,7 @@ public abstract class AbstractImporter<T> {
 
     /**
      * Add a callback to run when an item is updated.
-     * 
+     *
      * @param cb
      */
     public void addUpdateCallback(final ImportCallback cb) {
@@ -113,22 +93,22 @@ public abstract class AbstractImporter<T> {
     }
 
     abstract public AccessibleEntity importItem(Map<String, Object> itemData) throws ValidationError;
-   
+
     abstract public AccessibleEntity importItem(Map<String, Object> itemData, int depth) throws ValidationError;
+
     /**
      * Extract a list of DatePeriod bundles from an item's data.
-     * 
+     *
      * @param data
      * @return returns a List of Maps with DatePeriod.START_DATE and DatePeriod.END_DATE values
      */
     public abstract Iterable<Map<String, Object>> extractDates(T data);
-    
-    
+
+
     /**
      * only properties that have the multivalued-status can actually be multivalued. all other properties will be
      * flattened by this method.
      *
-     * @param frameMap
      * @param key
      * @param value
      * @param entity - the EntityClass with which this frameMap must comply
@@ -137,11 +117,11 @@ public abstract class AbstractImporter<T> {
         if (pc == null) {
             pc = new NodeProperties();
             try {
-                InputStream fis;
-                BufferedReader br;
-
-                fis = ClassLoader.getSystemClassLoader().getResourceAsStream("allowedNodeProperties.csv");
-                br = new BufferedReader(new InputStreamReader(fis, Charset.forName("UTF-8")));
+                InputStream fis = getClass().getClassLoader().getResourceAsStream(NODE_PROPERTIES);
+                if (fis == null) {
+                    throw new RuntimeException("Missing properties file: " + NODE_PROPERTIES);
+                }
+                BufferedReader br = new BufferedReader(new InputStreamReader(fis, Charset.forName("UTF-8")));
                 String firstline = br.readLine();
                 pc.setTitles(firstline);
 

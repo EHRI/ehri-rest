@@ -10,6 +10,7 @@ import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistance.ActionManager;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -25,6 +26,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import javax.xml.validation.SchemaFactory;
+
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.tooling.GlobalGraphOperations;
 import org.slf4j.Logger;
@@ -38,33 +40,13 @@ import org.xml.sax.SAXException;
  * nested lists of EAD documents into the graph.
  *
  * @author michaelb
- *
  */
 public class SaxImportManager extends XmlImportManager implements ImportManager {
 
     private static final Logger logger = LoggerFactory.getLogger(SaxImportManager.class);
     private AbstractImporter<Map<String, Object>> importer;
-
-//    private XmlCVocImporter importer; // CVoc specific!
-    
-
-    private  Class<? extends AbstractImporter> importerClass;
-
+    private Class<? extends AbstractImporter> importerClass;
     Class<? extends SaxXmlHandler> handlerClass;
-    /**
-     * Dummy resolver that does nothing. This is used to ensure that, in
-     * tolerant mode, the parser does not lookup the DTD and validate the
-     * document, which is both slow and error prone.
-     */
-    public class DummyEntityResolver implements EntityResolver {
-
-        @Override
-        public InputSource resolveEntity(String publicID, String systemID)
-                throws SAXException {
-
-            return new InputSource(new StringReader(""));
-        }
-    }
 
     /**
      * Constructor.
@@ -74,7 +56,8 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
      * @param actioner
      */
     public SaxImportManager(FramedGraph<Neo4jGraph> framedGraph,
-           final PermissionScope permissionScope, final Actioner actioner, Class<? extends AbstractImporter> importerClass, Class<? extends SaxXmlHandler> handlerClass) {
+            final PermissionScope permissionScope, final Actioner actioner,
+            Class<? extends AbstractImporter> importerClass, Class<? extends SaxXmlHandler> handlerClass) {
         super(framedGraph, permissionScope, actioner);
         this.importerClass = importerClass;
         this.handlerClass = handlerClass;
@@ -86,7 +69,6 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
      * @param ios
      * @param eventContext
      * @param log
-     *
      * @throws IOException
      * @throws ValidationError
      * @throws InputParseError
@@ -116,50 +98,36 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
                 }
             });
             //TODO decide which handler to use, HandlerFactory? now part of constructor ...
-            SaxXmlHandler handler = handlerClass.getConstructor(AbstractImporter.class).newInstance(importer); 
+            SaxXmlHandler handler = handlerClass.getConstructor(AbstractImporter.class).newInstance(importer);
             logger.info("handler of class " + handler.getClass());
-            
+
             SAXParserFactory spf = SAXParserFactory.newInstance();
-            spf.setValidating(!isTolerant());
+            spf.setNamespaceAware(false);
+            if (!isTolerant()) {
+                spf.setValidating(!isTolerant());
+                spf.setSchema(null);
+            }
             logger.debug("isValidating: " + spf.isValidating());
-//            spf.setNamespaceAware(true);
-            try {
-                logger.debug("in try");
-                SchemaFactory sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-                for(String schemafile : handler.getSchemas()){
-                    spf.setSchema(sf.newSchema(new File("src/main/resources/"+schemafile)));
-                    logger.debug("path: "+new File("src/main/resources/"+schemafile).getAbsolutePath());
-                }
-
-
-            } catch (SAXException e) {
-                e.printStackTrace(System.err);
-                System.exit(1);
-            } 
-            logger.debug("after catch");
             SAXParser saxParser = spf.newSAXParser();
-            saxParser.parse(ios, handler); //TODO + log
-            
+            saxParser.parse(ios, handler);
         } catch (InstantiationException ex) {
-            logger.error("InstantiationException: "+ex.getMessage());
+            logger.error("InstantiationException: " + ex.getMessage());
         } catch (IllegalAccessException ex) {
             logger.error("IllegalAccess: " + ex.getMessage());
         } catch (IllegalArgumentException ex) {
-            logger.error("IllegalArgumentException: "+ex.getMessage());
+            logger.error("IllegalArgumentException: " + ex.getMessage());
         } catch (InvocationTargetException ex) {
-            logger.error("InvocationTargetException: "+ ex.getMessage());
+            logger.error("InvocationTargetException: " + ex.getMessage());
         } catch (NoSuchMethodException ex) {
-            logger.error("NoSuchMethodException: "+ ex.getMessage());
+            logger.error("NoSuchMethodException: " + ex.getMessage());
         } catch (SecurityException ex) {
-            logger.error("SecurityException: "+ ex.getMessage());
+            logger.error("SecurityException: " + ex.getMessage());
         } catch (ParserConfigurationException ex) {
-            logger.error("ParserConfigurationException: "+ ex.getMessage());
+            logger.error("ParserConfigurationException: " + ex.getMessage());
             throw new RuntimeException(ex);
         } catch (SAXException e) {
-            logger.error("SAXException: "+ e.getMessage());
+            logger.error("SAXException: " + e.getMessage());
             throw new InputParseError(e);
         }
-
     }
-
 }

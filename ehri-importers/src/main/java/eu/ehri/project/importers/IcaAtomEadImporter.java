@@ -77,7 +77,7 @@ public class IcaAtomEadImporter extends EaImporter {
         }
         for (Map<String, Object> rel : extractRelations(itemData, unit.getData().get(IdentifiableEntity.IDENTIFIER_KEY).toString())) {
             logger.debug("relation found " + rel.get(IdentifiableEntity.IDENTIFIER_KEY));
-            descBundle = descBundle.withRelation(Description.RELATESTO, new Bundle(EntityClass.UNDETERMINED_RELATIONSHIP, rel));
+            descBundle = descBundle.withRelation(Description.RELATES_TO, new Bundle(EntityClass.UNDETERMINED_RELATIONSHIP, rel));
         }
 
         unit=unit.withRelation(Description.DESCRIBES, descBundle);

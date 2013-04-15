@@ -6,6 +6,7 @@ import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.models.Annotation;
+import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.HistoricalAgent;
 import eu.ehri.project.models.HistoricalAgentDescription;
 import eu.ehri.project.models.base.AccessibleEntity;
@@ -30,7 +31,7 @@ public class EacImporterTest extends AbstractImporterTest {
     private static final Logger logger = LoggerFactory.getLogger(EacImporterTest.class);
 
     @Test
-    public void testAbwehrWithAllReferredNodes() throws IOException, ValidationError, InputParseError{
+    public void testAbwehrWithAllReferredNodes() throws Exception {
         final String SINGLE_EAC = "abwehr.xml";
         final String logMessage = "Importing EAC " + SINGLE_EAC + " and creating all two relations with previously created HistoricalAgents";
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAC);
@@ -41,42 +42,41 @@ public class EacImporterTest extends AbstractImporterTest {
         ImportLog log = new SaxImportManager(graph, SystemScope.getInstance(), validUser, EacImporter.class,
                 EacHandler.class).setTolerant(Boolean.TRUE).importFile(ios, logMessage);
 //        printGraph(graph);
-        HistoricalAgent abwehr = graph.frame(getVertexByIdentifier(graph, "381"), HistoricalAgent.class);
+        HistoricalAgent abwehr = manager.getFrame("381", HistoricalAgent.class);
         logger.debug(abwehr.getId());
-        assertEquals(Entities.HISTORICAL_AGENT, abwehr.asVertex().getProperty("__ISA__"));
+        assertEquals(Entities.HISTORICAL_AGENT, abwehr.getType());
         assertTrue(abwehr != null);
-        assertEquals(2, toList(abwehr.getAnnotations()).size());
         for(Annotation a : abwehr.getAnnotations()){
-            logger.debug(a.getId() + " has targets: " + toList(a.getTargets()).size());
+            logger.info(a.getId() + " has targets: " + toList(a.getTargets()).size());
             for (AnnotatableEntity e : a.getTargets()){
                 logger.debug(e.getType());
             }
         }
-        
-        HistoricalAgent ssrasse = graph.frame(getVertexByIdentifier(graph, "418"), HistoricalAgent.class);
+        assertEquals(2, toList(abwehr.getAnnotations()).size());
+
+        HistoricalAgent ssrasse = manager.getFrame("418", HistoricalAgent.class);
         logger.debug(ssrasse.getId());
-        assertEquals(Entities.HISTORICAL_AGENT, ssrasse.asVertex().getProperty("__ISA__"));
+        assertEquals(Entities.HISTORICAL_AGENT, ssrasse.getType());
         assertEquals(1, toList(ssrasse.getAnnotations()).size());
 
-        HistoricalAgent feldpolizei = graph.frame(getVertexByIdentifier(graph, "717"), HistoricalAgent.class);
+        HistoricalAgent feldpolizei = manager.getFrame("717", HistoricalAgent.class);
         logger.debug(feldpolizei.getId());
-        assertEquals(Entities.HISTORICAL_AGENT, feldpolizei.asVertex().getProperty("__ISA__"));
+        assertEquals(Entities.HISTORICAL_AGENT, feldpolizei.getType());
         assertEquals(1, toList(feldpolizei.getAnnotations()).size());
-        
-        
+
     }
 
 //        @Test
-    public void testAbwehrWithOUTAllReferredNodes() throws IOException, ValidationError, InputParseError{
+    public void testAbwehrWithOUTAllReferredNodes() throws Exception {
         final String SINGLE_EAC = "abwehr.xml";
         final String logMessage = "Importing EAC " + SINGLE_EAC + " without creating any annotation, since the targets are not present in the graph";
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAC);
         ImportLog log = new SaxImportManager(graph, SystemScope.getInstance(), validUser, EacImporter.class,
                 EacHandler.class).setTolerant(Boolean.TRUE).importFile(ios, logMessage);
         printGraph(graph);
-        HistoricalAgent abwehr = graph.frame(getVertexByIdentifier(graph, "381"), HistoricalAgent.class);
+        HistoricalAgent abwehr = manager.getFrame("381", HistoricalAgent.class);
         logger.debug(abwehr.getId());
-        assertEquals(Entities.HISTORICAL_AGENT, abwehr.asVertex().getProperty("__ISA__"));
+        assertEquals(Entities.HISTORICAL_AGENT, abwehr.getType());
         assertNotNull(abwehr);
         assertEquals(0, toList(abwehr.getAnnotations()).size());
         
@@ -119,7 +119,7 @@ public class EacImporterTest extends AbstractImporterTest {
         HistoricalAgentDescription c1 = graph.frame(
                 getVertexByIdentifier(graph, AUTHORITY_DESC),
                 HistoricalAgentDescription.class);
-        assertEquals(Entities.HISTORICAL_AGENT_DESCRIPTION, c1.asVertex().getProperty("__ISA__"));
+        assertEquals(Entities.HISTORICAL_AGENT_DESCRIPTION, c1.getType());
 
 
         assertTrue(c1.asVertex().getProperty(Description.NAME) instanceof String);
