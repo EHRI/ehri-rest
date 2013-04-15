@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF
+	xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+	xmlns:geo="http://www.w3.org/2003/01/geo/wgs84_pos#"
+	xmlns:foaf="http://xmlns.com/foaf/0.1/"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+	xmlns:owl="http://www.w3.org/2002/07/owl#"
+	xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+	xmlns:skos="http://www.w3.org/2004/02/skos/core#">
+
+<rdf:Description rdf:about="http://ehri01.dans.knaw.nl/ghettos/0">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<owl:sameAs>http://www.yadvashem.org/yv/he/research/ghettos_encyclopedia/ghetto_details.asp?cid=1</owl:sameAs>
+	<skos:notation>1</skos:notation>
+	<rdfs:label xml:lang="he">נובי דבור</rdfs:label>
+	<rdfs:label xml:lang="en">Nowy Dwór</rdfs:label>
+	<skos:prefLabel xml:lang="he">נובי דבור</skos:prefLabel>
+	<skos:prefLabel xml:lang="en">Nowy Dwór</skos:prefLabel>
+	<rdf:type rdf:resource="http://www.w3.org/2003/01/geo/wgs84_pos#Point"/>
+	<geo:lat>52.43333333333333</geo:lat>
+	<geo:long>20.716666666666665</geo:long>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://ehri01.dans.knaw.nl/ghettos/1">
+	<rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+	<owl:sameAs>http://www.yadvashem.org/yv/he/research/ghettos_encyclopedia/ghetto_details.asp?cid=2</owl:sameAs>
+	<skos:notation>2</skos:notation>
+	<rdfs:label xml:lang="he">סניקי</rdfs:label>
+	<rdfs:label xml:lang="en">Sanniki</rdfs:label>
+	<skos:prefLabel xml:lang="he">סניקי</skos:prefLabel>
+	<skos:prefLabel xml:lang="en">Sanniki</skos:prefLabel>
+	<rdf:type rdf:resource="http://www.w3.org/2003/01/geo/wgs84_pos#Point"/>
+	<geo:lat>52.333333333333336</geo:lat>
+	<geo:long>19.866666666666667</geo:long>
+</rdf:Description>
+</rdf:RDF>

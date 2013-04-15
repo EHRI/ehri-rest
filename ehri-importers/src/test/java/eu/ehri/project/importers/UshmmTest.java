@@ -13,12 +13,16 @@ import java.io.InputStream;
 import java.util.List;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author linda
  */
 public class UshmmTest extends AbstractImporterTest{
+    private static final Logger logger = LoggerFactory.getLogger(UshmmTest.class);
+    
     protected final String SINGLE_EAD = "ushmm-irn524448.xml";
     protected final String IMPORTED_ITEM_ID = "2007.253";
 
@@ -38,13 +42,15 @@ public class UshmmTest extends AbstractImporterTest{
         ImportLog log = new SaxImportManager(graph, agent, validUser, IcaAtomEadImporter.class, IcaAtomEadHandler.class).setTolerant(Boolean.TRUE).importFile(ios, logMessage);
 
         printGraph(graph);
-        // How many new nodes will have been created? We should have
-        // - 1 more DocumentaryUnit
-        // - 1 more DocumentDescription
-        // - 1 more Date Period
-        // - 2 more import Event links
-        // - 1 more import Event
-        int createCount = origCount + 6;
+        /* How many new nodes will have been created? We should have
+        * 1 more DocumentaryUnit
+        * 1 more DocumentDescription
+        * 1 more Date Period
+        * 2 more import Event links
+        * 1 more import Event
+        * 5 more UndeterminedRelationships
+        */
+        int createCount = origCount + 11;
         assertEquals(createCount, getNodeCount(graph));
 
         // Yet we've only created 1 *logical* item...
@@ -57,7 +63,7 @@ public class UshmmTest extends AbstractImporterTest{
             assertEquals("Spuścizna Bernarda Marka (Syg. S/333) [microform]", d.getName());
 
         for(SystemEvent event : unit.getLatestEvent()){
-            System.out.println("event: " + event.getLogMessage());
+            logger.debug("event: " + event.getLogMessage());
         }
         
         List<SystemEvent> actions = toList(unit.getHistory());

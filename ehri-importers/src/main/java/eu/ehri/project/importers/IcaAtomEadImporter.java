@@ -3,6 +3,7 @@ package eu.ehri.project.importers;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.models.Annotation;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
@@ -14,7 +15,9 @@ import eu.ehri.project.models.base.TemporalEntity;
 import eu.ehri.project.models.idgen.IdGenerator;
 import eu.ehri.project.models.idgen.IdentifiableEntityIdGenerator;
 import eu.ehri.project.persistance.Bundle;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -65,14 +68,18 @@ public class IcaAtomEadImporter extends EaImporter {
             throws ValidationError {
 //        BundleDAO persister = new BundleDAO(framedGraph, permissionScope);
         Bundle unit = new Bundle(EntityClass.DOCUMENTARY_UNIT, extractDocumentaryUnit(itemData));
-        System.out.println("Imported item: " + itemData.get("name"));
+        logger.debug("Imported item: " + itemData.get("name"));
         Bundle descBundle = new Bundle(EntityClass.DOCUMENT_DESCRIPTION, extractUnitDescription(itemData, EntityClass.DOCUMENT_DESCRIPTION));
         // Add dates and descriptions to the bundle since they're @Dependent
         // relations.
         for (Map<String, Object> dpb : extractDates(itemData)) {
             descBundle=descBundle.withRelation(TemporalEntity.HAS_DATE, new Bundle(EntityClass.DATE_PERIOD, dpb));
         }
-        
+        for (Map<String, Object> rel : extractRelations(itemData, unit.getData().get(IdentifiableEntity.IDENTIFIER_KEY).toString())) {
+            logger.debug("relation found " + rel.get(IdentifiableEntity.IDENTIFIER_KEY));
+            descBundle = descBundle.withRelation(Description.RELATESTO, new Bundle(EntityClass.UNDETERMINED_RELATIONSHIP, rel));
+        }
+
         unit=unit.withRelation(Description.DESCRIBES, descBundle);
 
         if (unit.getDataValue(DocumentaryUnit.IDENTIFIER_KEY) == null) {
@@ -83,7 +90,8 @@ public class IcaAtomEadImporter extends EaImporter {
         if (id.equals(permissionScope.getId())) {
             throw new RuntimeException("Generated an id same as scope: " + unit.getData());
         }
-        System.out.println("Generated ID: " + id + " (" + permissionScope.getId() + ")");
+        
+        logger.debug("Generated ID: " + id + " (" + permissionScope.getId() + ")");
         boolean exists = manager.exists(id);
         DocumentaryUnit frame = persister.createOrUpdate(unit.withId(id), DocumentaryUnit.class);
 
@@ -109,13 +117,38 @@ public class IcaAtomEadImporter extends EaImporter {
 
 
     }
+    
+    protected Iterable<Map<String, Object>> extractRelations(Map<String, Object> data, String objectIdentifier) {
+        final String REL = "Access";
+        List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+        for (String key : data.keySet()) {
+            if (key.endsWith(REL)) {
+                if (data.get(key) instanceof List) {
+                    //every item becomes a UndeterminedRelationship, with the key as body
+                    for (String body : (List<String>) data.get(key)) {
+                        list.add(createRelationNode(key, body, objectIdentifier));
+                    }
+                } else {
+                    list.add(createRelationNode(key, data.get(key).toString(), objectIdentifier));
+                }
+            }
+        }
+        return list;
+    }
 
+    private Map<String, Object> createRelationNode(String type, String value, String id) {
+        Map<String, Object> relationNode = new HashMap<String, Object>();
+        relationNode.put(Annotation.ANNOTATION_TYPE, type);
+        relationNode.put(Annotation.NOTES_BODY, value);
+        relationNode.put(IdentifiableEntity.IDENTIFIER_KEY, (id+type+value).replaceAll("\\s", ""));
+        return relationNode;
+
+    }
     protected Map<String, Object> extractDocumentaryUnit(Map<String, Object> itemData, int depth) throws ValidationError {
         Map<String, Object> unit = new HashMap<String, Object>();
         if (itemData.get(OBJECT_ID) != null) {
             unit.put(IdentifiableEntity.IDENTIFIER_KEY, itemData.get(OBJECT_ID));
         }
-
         return unit;
     }
 

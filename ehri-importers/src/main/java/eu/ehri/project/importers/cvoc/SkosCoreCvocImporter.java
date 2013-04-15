@@ -147,6 +147,7 @@ public class SkosCoreCvocImporter {
             if (tolerant)
                 builder.setEntityResolver(new DummyEntityResolver());
             Document doc = builder.parse(ios);
+            logger.debug("xml encoding: " + doc.getXmlEncoding());
             importDocWithinAction(doc, eventContext, log);
         } catch (ParserConfigurationException e) {
             logger.error(e.getMessage());
