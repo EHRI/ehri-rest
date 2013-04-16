@@ -1,4 +1,4 @@
-package eu.ehri.project.test;
+package eu.ehri.project.persistance;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -10,6 +10,7 @@ import java.util.NoSuchElementException;
 import com.google.common.collect.Iterables;
 import eu.ehri.project.models.*;
 import eu.ehri.project.persistance.utils.BundleUtils;
+import eu.ehri.project.test.ModelTestBase;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -27,7 +28,7 @@ import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.persistance.BundleDAO;
 import eu.ehri.project.persistance.Serializer;
 
-public class BundleTest extends ModelTestBase {
+public class BundleDAOTest extends ModelTestBase {
 
     private static final String ID = "c1";
 
@@ -60,10 +61,11 @@ public class BundleTest extends ModelTestBase {
         assertEquals(1, addresses.size());
     }
 
+    @Test
     public void testSaving() throws SerializationError, ValidationError,
             IntegrityError, ItemNotFound {
         DocumentaryUnit c1 = manager.getFrame(ID, DocumentaryUnit.class);
-        assertEquals(1, toList(c1.getDescriptions()).size());
+        assertEquals(2, toList(c1.getDescriptions()).size());
 
         Bundle bundle = serializer.vertexFrameToBundle(c1);
         BundleDAO persister = new BundleDAO(graph);
@@ -74,6 +76,7 @@ public class BundleTest extends ModelTestBase {
                 toList(c1redux.getDescriptions()));
     }
 
+    @Test
     public void testSavingAgent() throws SerializationError, ValidationError,
             IntegrityError, ItemNotFound {
         Repository r1 = manager.getFrame("r1", Repository.class);
