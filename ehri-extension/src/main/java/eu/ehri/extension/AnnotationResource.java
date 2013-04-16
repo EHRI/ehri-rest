@@ -21,8 +21,7 @@ import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.models.Annotation;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistance.Bundle;
-import eu.ehri.project.views.Annotations;
-import eu.ehri.project.views.impl.AnnotationViews;
+import eu.ehri.project.views.AnnotationViews;
 
 /**
  * Provides a RESTfull(ish) interface for creating.
@@ -199,7 +198,7 @@ public class AnnotationResource extends
     @Path("/for/{id:.+}")
     public StreamingOutput listAnnotationsForSubtree(@PathParam("id") String id)
             throws ItemNotFound, BadRequester, PermissionDenied {
-        Annotations annotationViews = new AnnotationViews(graph);
+        AnnotationViews annotationViews = new AnnotationViews(graph);
         ListMultimap<String, Annotation> anns = annotationViews.getFor(id,
                 getRequesterUserProfile());
         return streamingMultimap(anns);

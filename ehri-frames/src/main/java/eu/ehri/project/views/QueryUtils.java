@@ -1,4 +1,4 @@
-package eu.ehri.project.views.impl;
+package eu.ehri.project.views;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Splitter;

@@ -1,11 +1,6 @@
-<eag 
-  audience="internal" 
-  xmlns="http://www.ministryculture.es/" 
-  xsi:schemaLocation="http://www.ministryculture.es/ http://ehri01.dans.knaw.nl/schemas/eag-ehri.xsd" 
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  
+<eag audience="internal" xmlns="http://www.ministryculture.es/" schemaLocation="http://ehri01.dans.knaw.nl/schemas/eag-ehri.xsd" xsi="http://www.w3.org/2001/XMLSchema-instance">
   <eagheader status="draft" langencoding="iso639-2b" countryencoding="iso3166-1" dateencoding="iso8601" scriptencoding="iso15924" repositoryencoding="iso15511">
-    <eagid>NL-2896-desc</eagid>
+    <eagid>NL-002896</eagid>
     <mainhist>
       <mainevent maintype="update">
         <date calendar="gregorian" era="ce" normal="2012-03-09"/>
@@ -17,7 +12,7 @@
         <source>Imported from EHRI spreadsheet</source>
       </mainevent>
       <mainevent maintype="update">
-        <date calendar="gregorian" era="ce" normal="2013-03-05"/>
+        <date calendar="gregorian" era="ce" normal="2013-04-16"/>
         <respevent>
           <surnames>Bryant</surnames>
           <firstname>Mike</firstname>
@@ -32,18 +27,16 @@
   </eagheader>
   <archguide>
     <identity>
-      <repositorid repositorycode="NL-2896" countrycode="NL"/>
+      <repositorid repositorycode="NL-002896" countrycode="NL">r001059NL</repositorid>
       <autform>NIOD Instituut voor Oorlogs-, Holocaust- en Genocidestudies</autform>
-      <parform>NIOD Institute for War, Holocaust, and Genocide Studies</parform>
       <nonpreform>NIOD</nonpreform>
+      <parform>NIOD Institute for War, Holocaust, and Genocide Studies</parform>
     </identity>
     <desc>
-      <geogarea>Netherlands</geogarea>
-      <country>Netherlands</country>
-      <firstdem/>
-      <municipality>Amsterdam</municipality>
-      <street>Herengracht 380</street>
       <postalcode>1016 CJ</postalcode>
+      <street>Herengracht 380</street>
+      <municipality>Amsterdam</municipality>
+      <firstdem/>
       <telephone>31 20 5233800</telephone>
       <fax>(+31) (0)20 - 523 38 88</fax>
       <email href="info@niod.knaw.nl">Email</email>
@@ -55,11 +48,16 @@
         <restaccess/>
       </access>
       <repositorhist>
-        <p/>
+        <p>The National Institute for War Documentation owes its existence to two initiatives. At the time of the occupation of the Netherlands a number of academics discussed and contemplated the creation of a postwar center for war documentation to house and undertake the collection and classification of materials about the Netherlands under German occupation. The key figure behind this initiative was the economic historian Professor N.W. Posthumus. On the other side of the North Sea, the Dutch government-in-exile was thinking along the same lines. At the end of March 1944, Bolkestein, the London Minister of Education, Arts and Sciences, made an appeal to the Dutch population (&#8230;)
+Three days after liberation the Staatscourant reported the establishment of the National Office for War Documentation. (&#8230;) On 1 October 1945, De Jong was appointed as head of the National Institute for War Documentation, as it was now called. In the meantime, a vigorous start had been with collecting materials. The search for archives about the Netherlands led, among other places, to Allied-occupied Germany. (&#8230;) Radio appeals, advertisements in daily newspapers and posters exhorted the Dutch population to send in materials. As a result the Institute received a large number of valuable documents such as diaries, correspondence and photo albums. Research conducted in collaboration with the postwar Special Administration of Justice also produced a large number of documents. (&#8230;)
+Besides conducting research, cataloguing and administering the archives and other collections, the daily activities of the institute generated a third important task. NIOD staff in fact handle numerous requests for information from government agencies, private organizations and private individuals. The work done over the years verifying the many tens of thousands of requests for (war-related) benefits and compensation received by the government certainly deserves a special mention. (&#8230;)
+On 1 January 1999, the RIOD was separated from the Ministry of Education, Culture &amp; Science, under whose jurisdiction it had come until then. RIOD changed its name to Netherlands Institute for War Documentation (NIOD) and was placed under the authority of the Royal Netherlands Academy of Arts and Sciences (KNAW). While the focus remained on the Second World War in Europe and Asia, research projects were grouped into the following clusters: (1) expansion of research in the period from the outbreak of World War I until and including the aftermath of the Second World War; (2) the study of the Netherlands East Indies and Indonesia from an Asian perspective; (3) international comparative research into the after-effects of National Socialist and fascist rule in Europe, and (4) the economic history of the Netherlands during the German occupation. (&#8230;)
+On December 9th, 2010, the Netherlands Institute for War Documentation fused with the Center for Holocaust and Genocide Studies. The institutes will now continue their work in an integrated manner under the name NIOD Institute for War, Holocaust, and Genocide Studies. (&#8230;)</p>
       </repositorhist>
       <repositorguides>
-        <repositorguide>http://www.archieven.nl/nl/search-modonly?miadt=298&amp;&amp;mivast=298
-http://www.archievenwo2.nl/ lemma "jodenvervolging"</repositorguide>
+        <guide>http://www.archieven.nl/nl/search-modonly?miadt=298&amp;&amp;mivast=298
+http://www.archievenwo2.nl/ lemma "jodenvervolging"</guide>
+        <guide>The history of the Second World War in the Netherlands and the Netherlands East Indies is documented in approximately four hundred archives available at the NIOD. The website provides descriptions of the archives of the administration of the German occupation, ministries in the Hague and London, resistance groups, Jewish and National Socialist organizations and prison camps in both Europe and Asia.</guide>
       </repositorguides>
       <buildinginfo>
         <building>
@@ -68,32 +66,26 @@ http://www.archievenwo2.nl/ lemma "jodenvervolging"</repositorguide>
         <searchroom>
           <num unit="volume"/>
         </searchroom>
-        <handicapped question="yes"></handicapped>
+        <handicapped>We strongly recommend you use public transport to reach the NIOD as parking space is limited and costly. From the Central Station you can take tram 1, 2 or 5 and get off at tram stop Spui. From there it&#8217;s a 200-metre walk to the NIOD via the Wijde Heisteeg and the Singel.
+
+The NIOD is accessible to people with physical disabilities.
+
+Parking facilities in the immediate vicinity of the institute are few and expensive. The parking rate is 5 euro an hour. Parking garages within reasonable distance are: the Stopera, the Bijenkorf, the Europarking, the Museumplein and the De Kolk.</handicapped>
       </buildinginfo>
-      <extent><num unit="volume"/></extent>
+      <extent>The history of the Second World War in the Netherlands and the Netherlands East Indies is documented in approximately four hundred archives available at the NIOD. The website provides descriptions of the archives of the administration of the German occupation, ministries in the Hague and London, resistance groups, Jewish and National Socialist organizations and prison camps in both Europe and Asia.<num unit="volume"/></extent>
       <techservices>
-        <restorationlab question="yes"/>
+        <restorationser question="yes"/>
         <reproductionser question="yes"/>
         <library question="yes"/>
-        <!-- <restorationser question="yes"/>-->
       </techservices>
-      <automation question="no"></automation>
       <notes>
-        <p>We strongly recommend you use public transport to reach the NIOD as parking space is limited and costly. From the Central Station you can take tram 1, 2 or 5 and get off at tram stop Spui. From there it&#8217;s a 200-metre walk to the NIOD via the Wijde Heisteeg and the Singel.
-          
-          The NIOD is accessible to people with physical disabilities.
-          
-          Parking facilities in the immediate vicinity of the institute are few and expensive. The parking rate is 5 euro an hour. Parking garages within reasonable distance are: the Stopera, the Bijenkorf, the Europarking, the Museumplein and the De Kolk.
-        </p>
-        <p>
-          The history of the Second World War in the Netherlands and the Netherlands East Indies is documented in approximately four hundred archives available at the NIOD. The website provides descriptions of the archives of the administration of the German occupation, ministries in the Hague and London, resistance groups, Jewish and National Socialist organizations and prison camps in both Europe and Asia.
-          </p>
         <p>Description sources: Claims Conference
 M&#233;morial de la Shoah
 Yad Vashem
 http://www.archievenwo2.nl/
-http://www.niod.knaw.nl
-ICA-AtoM identifier: r001059NL</p>
+http://www.niod.knaw.nl</p>
+        <p>ICA-AtoM identifier: r001059NL</p>
+        <p>Priority: 5</p>
       </notes>
     </desc>
   </archguide>

@@ -1,4 +1,4 @@
-package eu.ehri.project.test;
+package eu.ehri.project.core;
 
 import static org.junit.Assert.*;
 
@@ -30,17 +30,12 @@ import eu.ehri.project.models.EntityClass;
  * 
  */
 public class GraphManagerTest {
-    private static final String NON_EXISTING_ID = "non-existing-id-962b04d7-f093-43df-a58e-25a898bd83be";
-    private static final String TEST_ID1 = "3c73a804-0a3b-4a10-8b7c-01ed285977db";
-    private static final String TEST_ID2 = "734e084a-bcc8-47c7-8896-57497aea0241";
+    private static final String NON_EXISTING_ID = "non-existing-id-12345678";
+    private static final String TEST_ID1 = "12345678";
     private static final String TEST_KEY = "testKey";
     private static final String TEST_VALUE = "testValue";
-    private static final EntityClass TEST_TYPE = EntityClass.USER_PROFILE;// Note:
-                                                                          // should
-                                                                          // we
-                                                                          // mock
-                                                                          // the
-                                                                          // entityclass
+    private static final EntityClass TEST_TYPE = EntityClass.USER_PROFILE;
+
 
     protected FramedGraph<Neo4jGraph> graph;
     protected GraphManager manager;

@@ -12,7 +12,7 @@ import eu.ehri.project.models.base.IdentifiableEntity;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.ConceptDescription;
 import eu.ehri.project.models.cvoc.Vocabulary;
-import eu.ehri.project.views.impl.Query;
+import eu.ehri.project.views.Query;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.List;

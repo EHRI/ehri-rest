@@ -69,7 +69,6 @@ public class EacImporterTest extends AbstractImporterTest {
         for(Description polizeiDesc : feldpolizei.getDescriptions()){
             assertEquals("Geheime Feldpolizei", polizeiDesc.getName());
         }
-        //Geheime Feldpolizei
 
     }
 

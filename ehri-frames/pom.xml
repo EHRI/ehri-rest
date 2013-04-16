@@ -141,7 +141,7 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>12.0</version>
+            <version>14.0</version>
         </dependency>
         <!-- NB: Using ancient version of commons lang because it's
             currently standard on Neo4j -->

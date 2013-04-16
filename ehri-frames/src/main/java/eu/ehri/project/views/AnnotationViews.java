@@ -1,4 +1,4 @@
-package eu.ehri.project.views.impl;
+package eu.ehri.project.views;
 
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
@@ -21,7 +21,6 @@ import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.persistance.BundleDAO;
 import eu.ehri.project.persistance.Serializer;
 import eu.ehri.project.persistance.TraversalCallback;
-import eu.ehri.project.views.Annotations;
 import eu.ehri.project.views.ViewHelper;
 
 /**
@@ -29,7 +28,7 @@ import eu.ehri.project.views.ViewHelper;
  * 
  * @author mike
  */
-public final class AnnotationViews implements Annotations {
+public final class AnnotationViews {
 
     private final FramedGraph<?> graph;
     private final AclManager acl;
@@ -111,7 +110,6 @@ public final class AnnotationViews implements Annotations {
      * @param accessor
      * @return map of ids to annotation lists.
      */
-    @Override
     public ListMultimap<String, Annotation> getFor(String id, Accessor accessor)
             throws ItemNotFound {
         final PipeFunction<Vertex, Boolean> filter = acl

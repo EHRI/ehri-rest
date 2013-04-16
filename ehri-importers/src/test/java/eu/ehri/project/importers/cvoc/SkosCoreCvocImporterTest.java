@@ -11,14 +11,12 @@ import org.junit.Test;
 import com.tinkerpop.blueprints.Vertex;
 
 import eu.ehri.project.importers.ImportLog;
-import eu.ehri.project.importers.cvoc.SkosCoreCvocImporter;
 import eu.ehri.project.importers.AbstractImporterTest;
-import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.ConceptDescription;
 import eu.ehri.project.models.cvoc.Vocabulary;
-import eu.ehri.project.views.impl.Query;
+import eu.ehri.project.views.Query;
 
 /**
  * TODO cleanup this mess

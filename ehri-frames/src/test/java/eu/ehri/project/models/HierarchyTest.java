@@ -1,10 +1,11 @@
-package eu.ehri.project.test;
+package eu.ehri.project.models;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
+import eu.ehri.project.test.ModelTestBase;
 import org.junit.BeforeClass;
 import org.junit.Test;
 

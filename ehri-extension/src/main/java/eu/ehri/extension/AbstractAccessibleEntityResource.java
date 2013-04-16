@@ -30,7 +30,7 @@ import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.utils.ClassUtils;
 import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.views.impl.LoggingCrudViews;
-import eu.ehri.project.views.impl.Query;
+import eu.ehri.project.views.Query;
 
 /**
  * Handle CRUD operations on AccessibleEntity's by using the

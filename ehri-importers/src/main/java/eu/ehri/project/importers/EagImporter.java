@@ -18,7 +18,12 @@ import eu.ehri.project.models.base.TemporalEntity;
 import eu.ehri.project.models.idgen.IdGenerator;
 import eu.ehri.project.models.idgen.IdentifiableEntityIdGenerator;
 import eu.ehri.project.persistance.Bundle;
+
+import java.util.ArrayList;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,6 +33,11 @@ import org.slf4j.LoggerFactory;
  */
 public class EagImporter extends EaImporter{
     private static final Logger logger = LoggerFactory.getLogger(EacImporter.class);
+
+    private Pattern priorityPattern = Pattern.compile("Priority: (-?\\d+)");
+
+    public static String MAINTENANCE_NOTES = "maintenanceNotes";
+    public static String PRIORITY = "priority";
     
     /**
      * Construct an EagImporter object.
@@ -45,6 +55,29 @@ public class EagImporter extends EaImporter{
         return importItem(itemData);
     }
 
+    @Override
+    public Map<String,Object> extractUnit(Map<String,Object> itemData) throws ValidationError{
+        Map<String,Object> data = super.extractUnit(itemData);
+
+        // MB: Hack hack hack - extract EHRI-specific 'priority' field out of the
+        // pattern "Priority: <digit>" in the maintenanceNotes field.
+        Object notes = itemData.get(MAINTENANCE_NOTES);
+        if (notes != null) {
+            if (notes instanceof ArrayList<?>) {
+                for (Object n : (ArrayList<?>)notes) {
+                    if (n instanceof String) {
+                        Matcher m = priorityPattern.matcher((String)n);
+                        if (m.find()) {
+                            data.put(PRIORITY, Integer.parseInt(m.group(1)));
+                        }
+                    }
+                }
+            }
+        }
+
+        return data;
+    }
+
     /**
      *
      *
@@ -57,7 +90,7 @@ public class EagImporter extends EaImporter{
         Bundle unit = new Bundle(EntityClass.REPOSITORY, extractUnit(itemData));
 
         Map<String, Object> descmap = extractUnitDescription(itemData, EntityClass.REPOSITORY_DESCRIPTION);
-//        descmap.put(IdentifiableEntity.IDENTIFIER_KEY, descmap.get(IdentifiableEntity.IDENTIFIER_KEY)+"#desc");
+        descmap.put(IdentifiableEntity.IDENTIFIER_KEY, descmap.get(IdentifiableEntity.IDENTIFIER_KEY)+"#desc");
         Bundle descBundle = new Bundle(EntityClass.REPOSITORY_DESCRIPTION, descmap);
 
 

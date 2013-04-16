@@ -1,7 +1,9 @@
-package eu.ehri.project.test;
+package eu.ehri.project.models;
 
 import eu.ehri.project.models.Group;
 import eu.ehri.project.models.UserProfile;
+import eu.ehri.project.test.AbstractFixtureTest;
+import eu.ehri.project.utils.GraphInitializer;
 import org.junit.Test;
 
 import java.util.List;
@@ -22,7 +24,7 @@ public class GroupTest extends AbstractFixtureTest {
         Group admin = manager.getFrame(Group.ADMIN_GROUP_IDENTIFIER, Group.class);
         // Both identifier and name should initialize to 'admin'
         assertEquals(admin.getIdentifier(), Group.ADMIN_GROUP_IDENTIFIER);
-        assertEquals(admin.getName(), Group.ADMIN_GROUP_IDENTIFIER);
+        assertEquals(admin.getName(), Group.ADMIN_GROUP_NAME);
     }
 
     @Test

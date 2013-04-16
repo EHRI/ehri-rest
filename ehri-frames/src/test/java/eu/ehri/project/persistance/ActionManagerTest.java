@@ -1,4 +1,4 @@
-package eu.ehri.project.test;
+package eu.ehri.project.persistance;
 
 import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.Repository;
@@ -8,6 +8,7 @@ import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.persistance.ActionManager;
 import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.persistance.BundleDAO;
+import eu.ehri.project.test.AbstractFixtureTest;
 import org.junit.Test;
 import org.neo4j.helpers.collection.Iterables;
 

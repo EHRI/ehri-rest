@@ -1,4 +1,4 @@
-package eu.ehri.project.test.views;
+package eu.ehri.project.views;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;

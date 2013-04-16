@@ -15,7 +15,7 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.PermissionGrant;
-import eu.ehri.project.views.impl.AclViews;
+import eu.ehri.project.views.AclViews;
 
 /**
  * Provides a RESTfull interface for the PermissionGrant class.

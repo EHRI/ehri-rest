@@ -1,24 +1,12 @@
-package eu.ehri.project.test;
+package eu.ehri.project.persistance;
 
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.persistance.Bundle;
-import eu.ehri.project.persistance.Serializer;
+import eu.ehri.project.test.AbstractFixtureTest;
 import org.junit.Test;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;

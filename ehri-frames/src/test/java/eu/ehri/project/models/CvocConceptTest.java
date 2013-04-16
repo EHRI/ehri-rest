@@ -1,4 +1,4 @@
-package eu.ehri.project.test;
+package eu.ehri.project.models;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -9,6 +9,7 @@ import java.util.LinkedList;
 import java.util.Map;
 
 import eu.ehri.project.models.base.IdentifiableEntity;
+import eu.ehri.project.test.ModelTestBase;
 import org.junit.Test;
 import org.neo4j.graphdb.Transaction;
 
@@ -28,7 +29,7 @@ import eu.ehri.project.persistance.BundleDAO;
 import eu.ehri.project.views.Crud;
 import eu.ehri.project.views.impl.CrudViews;
 
-public class CvocTest extends ModelTestBase {
+public class CvocConceptTest extends ModelTestBase {
 
     /**
      * Just play a bit with a small 'graph' of concepts.

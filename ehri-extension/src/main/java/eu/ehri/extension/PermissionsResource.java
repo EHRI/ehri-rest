@@ -44,8 +44,8 @@ import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.PermissionGrantTarget;
 import eu.ehri.project.models.base.PermissionScope;
-import eu.ehri.project.views.impl.AclViews;
-import eu.ehri.project.views.impl.Query;
+import eu.ehri.project.views.AclViews;
+import eu.ehri.project.views.Query;
 
 /**
  * Provides a RESTfull(ish) interface for setting PermissionTarget perms.

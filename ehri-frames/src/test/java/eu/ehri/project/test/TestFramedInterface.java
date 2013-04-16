@@ -1,4 +1,4 @@
-package eu.ehri.project.test.models;
+package eu.ehri.project.test;
 
 import com.tinkerpop.frames.Property;
 
