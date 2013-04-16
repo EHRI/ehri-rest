@@ -6,7 +6,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.blueprints.TransactionalGraph.Conclusion;
-import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
 
 import eu.ehri.project.acl.ContentTypes;
@@ -15,7 +14,6 @@ import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Group;
-import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.persistance.ActionManager;
 
@@ -71,25 +69,6 @@ public class GraphInitializer {
                 manager.createVertex(ct.getName(), EntityClass.CONTENT_TYPE,
                         Maps.<String, Object>newHashMap());
             }
-            graph.getBaseGraph().stopTransaction(Conclusion.SUCCESS);
-        } catch (Exception e) {
-            graph.getBaseGraph().stopTransaction(Conclusion.FAILURE);
-            throw new RuntimeException(e);
-        }
-    }
-
-    @SuppressWarnings("serial")
-    public void createAdminUserProfile(final String id, final String name) {
-        try {
-            Vertex user = manager.createVertex(id, EntityClass.USER_PROFILE,
-                    new HashMap<String, Object>() {
-                        {
-                            put(UserProfile.IDENTIFIER_KEY, id);
-                            put(UserProfile.NAME, name);
-                        }
-                    });
-            manager.getFrame(Group.ADMIN_GROUP_IDENTIFIER, Group.class)
-                    .addMember(graph.frame(user, UserProfile.class));
             graph.getBaseGraph().stopTransaction(Conclusion.SUCCESS);
         } catch (Exception e) {
             graph.getBaseGraph().stopTransaction(Conclusion.FAILURE);

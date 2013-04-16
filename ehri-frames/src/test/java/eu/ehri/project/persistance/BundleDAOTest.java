@@ -36,7 +36,7 @@ public class BundleDAOTest extends ModelTestBase {
 
     @Override
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
         super.setUp();
         serializer = new Serializer(graph);
     }

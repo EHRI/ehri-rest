@@ -40,7 +40,7 @@ abstract public class AbstractFixtureTest extends ModelTestBase {
 
     @Before
     @Override
-    public void setUp() {
+    public void setUp() throws Exception {
         super.setUp();
         try {
             item = manager.getFrame("c1", DocumentaryUnit.class);
