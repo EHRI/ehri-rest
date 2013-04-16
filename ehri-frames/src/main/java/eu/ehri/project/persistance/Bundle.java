@@ -325,6 +325,11 @@ public final class Bundle {
         return DataConverter.jsonToBundle(json);
     }
 
+    @Override
+    public String toString() {
+        return "<" + getType() + "> (" + getData() + " + Rels: " + relations.size() + ")";
+    }
+
     /**
      * Serialize a bundle to a JSON string.
      * @return json string
