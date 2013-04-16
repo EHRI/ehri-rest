@@ -32,12 +32,12 @@ import org.slf4j.LoggerFactory;
 public class Eag2896Test extends AbstractImporterTest {
 
     private static final org.slf4j.Logger logger = LoggerFactory.getLogger(Eag2896Test.class);
-    protected final String SINGLE_UNIT = "eag-2896-orig.xml";
+    protected final String SINGLE_UNIT = "eag-2896.xml";
     // Depends on fixtures
     protected final String TEST_REPO = "r1";
     // Depends on SINGLE_UNIT
-    protected final String IMPORTED_ITEM_ID = "NL-2896";
-    protected final String AGENT_DESC_ID = "NL-2896#desc";
+    protected final String IMPORTED_ITEM_ID = "NL-002896";
+    protected final String AGENT_DESC_ID = "NL-002896#desc";
 
     @Test
     public void testImportItemsT() {
@@ -50,7 +50,7 @@ public class Eag2896Test extends AbstractImporterTest {
 
             InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_UNIT);
             ImportLog log = new SaxImportManager(graph, agent, validUser, EagImporter.class, EagHandler.class).importFile(ios, logMessage);
-            printGraph(graph);
+            //printGraph(graph);
             // How many new nodes will have been created? We should have
             // - 1 more Repository
             // - 1 more RepositoryDescription
@@ -72,12 +72,18 @@ public class Eag2896Test extends AbstractImporterTest {
                     getVertexByIdentifier(graph, AGENT_DESC_ID),
                     RepositoryDescription.class);
             assertEquals(Entities.REPOSITORY_DESCRIPTION, c1.getType());
-            Object notes = c1.asVertex().getProperty("maintenanceNotes");
+            Object notes = c1.asVertex().getProperty(EagImporter.MAINTENANCE_NOTES);
             if (notes instanceof String[]) {
                 fail();
             } else {
                 assertTrue(notes instanceof String);
             }
+
+            // MB: Test priority hack - this should be pulled out of the
+            // maintenanceNotes field into its own int field
+            Object priority = unit.asVertex().getProperty(EagImporter.PRIORITY);
+            assertEquals(Integer.valueOf(5), priority);
+
 
             //check whether the description has an Address attached to it
             assertEquals(1, toList(c1.getAddresses()).size());
