@@ -15,6 +15,7 @@ public interface Group extends Accessor, AccessibleEntity, IdentifiableEntity,
     
     public static final String ADMIN_GROUP_IDENTIFIER = "admin";
     public static final String ANONYMOUS_GROUP_IDENTIFIER = "anonymous";
+    String ADMIN_GROUP_NAME = "Administrators";
 
     @Fetch(BELONGS_TO)
     @Adjacency(label = BELONGS_TO)

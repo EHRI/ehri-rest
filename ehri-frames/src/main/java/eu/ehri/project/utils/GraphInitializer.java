@@ -29,7 +29,6 @@ public class GraphInitializer {
     private final GraphManager manager;
 
     private static final String INIT_MESSAGE = "Initialising graph";
-    private static final String ADMIN_GROUP_NAME = "Administrators";
 
     public GraphInitializer(FramedGraph<? extends TransactionalGraph> graph) {
         this.graph = graph;
@@ -54,7 +53,7 @@ public class GraphInitializer {
                     EntityClass.GROUP, new HashMap<String, Object>() {
                 {
                     put(Group.IDENTIFIER_KEY, Group.ADMIN_GROUP_IDENTIFIER);
-                    put(Group.NAME, ADMIN_GROUP_NAME);
+                    put(Group.NAME, Group.ADMIN_GROUP_NAME);
                 }
             });
 
