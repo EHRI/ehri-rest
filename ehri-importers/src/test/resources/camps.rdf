@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:skos="http://www.w3.org/2004/02/skos/core#"
+>
+  <rdf:Description rdf:about="http://ehri01.dans.knaw.nl/989">
+    <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+    <skos:prefLabel xml:lang="en">Böhlerwerk</skos:prefLabel>
+    <skos:altLabel xml:lang="en">Boehlerwerk</skos:altLabel>
+    <skos:editorialNote>source: ITS Arolsen</skos:editorialNote>
+    <skos:inScheme>http://ehri01.dans.knaw.nl/camps/</skos:inScheme>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://ehri01.dans.knaw.nl/386">
+    <skos:altLabel xml:lang="en">Litomerice- Richard II</skos:altLabel>
+    <skos:editorialNote>source: ITS Arolsen</skos:editorialNote>
+    <skos:broader rdf:resource="http://ehri01.dans.knaw.nl/226"/>
+    <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+    <skos:inScheme>http://ehri01.dans.knaw.nl/camps/</skos:inScheme>
+    <skos:prefLabel xml:lang="en">Leitmeritz - Richard II</skos:prefLabel>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://ehri01.dans.knaw.nl/926">
+    <skos:broader rdf:resource="http://ehri01.dans.knaw.nl/875"/>
+    <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+    <skos:editorialNote>source: ITS Arolsen</skos:editorialNote>
+    <skos:altLabel xml:lang="en">Poelitz</skos:altLabel>
+    <skos:prefLabel xml:lang="en">Pölitz</skos:prefLabel>
+    <skos:inScheme>http://ehri01.dans.knaw.nl/camps/</skos:inScheme>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://ehri01.dans.knaw.nl/376">
+    <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+    <skos:inScheme>http://ehri01.dans.knaw.nl/camps/</skos:inScheme>
+    <skos:altLabel xml:lang="en">Hradistko</skos:altLabel>
+    <skos:prefLabel xml:lang="en">Hradischko</skos:prefLabel>
+    <skos:broader rdf:resource="http://ehri01.dans.knaw.nl/226"/>
+    <skos:editorialNote>source: ITS Arolsen</skos:editorialNote>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://ehri01.dans.knaw.nl/1571">
+    <skos:altLabel xml:lang="en">Novogrodek</skos:altLabel>
+    <skos:inScheme>http://ehri01.dans.knaw.nl/camps/</skos:inScheme>
+    <skos:prefLabel xml:lang="en">Nowogrudok</skos:prefLabel>
+    <skos:editorialNote>source: ITS Arolsen</skos:editorialNote>
+    <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://ehri01.dans.knaw.nl/648">
+    <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+    <skos:prefLabel xml:lang="en">Dornfeld</skos:prefLabel>
+    <skos:editorialNote>source: ITS Arolsen</skos:editorialNote>
+    <skos:inScheme>http://ehri01.dans.knaw.nl/camps/</skos:inScheme>
+<skos:narrower rdf:resource="http://ehri01.dans.knaw.nl/675"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://ehri01.dans.knaw.nl/675">
+    <skos:prefLabel xml:lang="en">Rastatt</skos:prefLabel>
+    <skos:editorialNote>source: ITS Arolsen</skos:editorialNote>
+    <skos:inScheme>http://ehri01.dans.knaw.nl/camps/</skos:inScheme>
+    <skos:broader rdf:resource="http://ehri01.dans.knaw.nl/648"/>
+    <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://ehri01.dans.knaw.nl/353">
+    <skos:narrower>Dresden - Zeiss-Ikon, Werk Goehle</skos:narrower>
+    <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+    <skos:narrower rdf:resource="http://ehri01.dans.knaw.nl/214"/>
+    <skos:inScheme>http://ehri01.dans.knaw.nl/camps/</skos:inScheme>
+    <skos:broader rdf:resource="http://ehri01.dans.knaw.nl/226"/>
+    <skos:prefLabel xml:lang="en">Dresden</skos:prefLabel>
+    <rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
+    <skos:editorialNote>source: ITS Arolsen</skos:editorialNote>
+  </rdf:Description>
+</rdf:RDF>

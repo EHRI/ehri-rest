@@ -175,7 +175,7 @@ public class SkosCoreCvocImporter {
             InvalidInputFormatError, IntegrityError {
 
     	 createConcepts(doc, eventContext, manifest);
-    	 createVocabularyStruture(doc, eventContext, manifest);
+    	 createVocabularyStructure(doc, eventContext, manifest);
     }
 
     /**
@@ -206,6 +206,7 @@ public class SkosCoreCvocImporter {
             	  Element element = (Element) childNode; // it should be!
             	  
             	  if (isConceptElement(element)) {
+                      logger.debug("---------------");
             		 // extract ... data for concept 
             		 // in Map<String, Object>
             		 // then use BundleDAO.createOrUpdate and use the framed Entity = CvocConcept  
@@ -236,7 +237,8 @@ public class SkosCoreCvocImporter {
             				 + " related ids: " + relatedIds.toString());
             		 
             		 String storeId = unit.getId();//id;
-            		 String skosId = frame.getId(); // the identifier used in the Skos file and is used for internal
+//            		 String skosId = frame.getId(); // the identifier used in the Skos file and is used for internal
+                         String skosId = unit.getData().get(IdentifiableEntity.IDENTIFIER_KEY).toString();
             		 // referal
             		 logger.debug("Concept store id = " + storeId + ", skos id = " + skosId);
             		 conceptLookup.put(skosId, new ConceptPlaceholder(storeId, broaderIds, relatedIds, frame));
@@ -330,7 +332,7 @@ public class SkosCoreCvocImporter {
      * @throws InvalidInputFormatError
      * @throws IntegrityError
      */
-    private void createVocabularyStruture(Document doc, final EventContext eventContext,
+    private void createVocabularyStructure(Document doc, final EventContext eventContext,
             final ImportLog manifest) throws ValidationError,
             InvalidInputFormatError, IntegrityError {
     	
@@ -360,9 +362,10 @@ public class SkosCoreCvocImporter {
 	    	 ConceptPlaceholder conceptPlaceholder = conceptLookup.get(skosId);
 	    	 if (!conceptPlaceholder.broaderIds.isEmpty()) {
 	    		 logger.debug("Concept with skos id [" + skosId 
-	    				 + "] has broader concepts");
+	    				 + "] has broader concepts of " + conceptPlaceholder.broaderIds.size());
 	    		 // find them in the lookup
 	    		 for (String bsId: conceptPlaceholder.broaderIds) {
+                             logger.debug(bsId);
 	    			 if (conceptLookup.containsKey(bsId)) {
 	    				 // found
 	    				 logger.debug("Found mapping from: " + bsId 
