@@ -1,4 +1,4 @@
-package eu.ehri.project.test.views;
+package eu.ehri.project.views;
 
 import java.util.Iterator;
 

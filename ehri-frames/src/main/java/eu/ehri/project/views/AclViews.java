@@ -1,4 +1,4 @@
-package eu.ehri.project.views.impl;
+package eu.ehri.project.views;
 
 import java.util.List;
 import java.util.Map;
@@ -26,10 +26,9 @@ import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionGrantTarget;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistance.ActionManager;
-import eu.ehri.project.views.Acl;
 import eu.ehri.project.views.ViewHelper;
 
-public final class AclViews implements Acl {
+public final class AclViews {
 
     private final FramedGraph<? extends TransactionalGraph> graph;
     private final AclManager acl;

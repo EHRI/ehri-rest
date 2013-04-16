@@ -1,4 +1,4 @@
-package eu.ehri.project.test;
+package eu.ehri.project.core;
 
 import static org.junit.Assert.*;
 

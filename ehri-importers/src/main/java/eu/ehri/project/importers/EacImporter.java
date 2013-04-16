@@ -16,7 +16,7 @@ import eu.ehri.project.models.base.*;
 import eu.ehri.project.models.idgen.IdentifiableEntityIdGenerator;
 import eu.ehri.project.models.idgen.IdGenerator;
 import eu.ehri.project.persistance.Bundle;
-import eu.ehri.project.views.impl.AnnotationViews;
+import eu.ehri.project.views.AnnotationViews;
 
 import java.util.Map;
 

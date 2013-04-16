@@ -84,7 +84,7 @@ public class BundleTest {
         HashMap<String,Object> map = Maps.newHashMap();
         map.put("foo", "bar");
         Bundle b2 = bundle.withData(map);
-        assertNull(bundle.getDataValue(IdentifiableEntity.IDENTIFIER_KEY));
+        assertNull(b2.getDataValue(IdentifiableEntity.IDENTIFIER_KEY));
         assertEquals("bar", b2.getDataValue("foo"));
     }
 

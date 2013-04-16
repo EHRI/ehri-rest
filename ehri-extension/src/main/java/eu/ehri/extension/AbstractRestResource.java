@@ -30,7 +30,7 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistance.Serializer;
-import eu.ehri.project.views.impl.Query;
+import eu.ehri.project.views.Query;
 
 public abstract class AbstractRestResource {
 

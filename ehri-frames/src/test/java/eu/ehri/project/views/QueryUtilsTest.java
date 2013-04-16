@@ -1,7 +1,6 @@
-package eu.ehri.project.test;
+package eu.ehri.project.views;
 
 import com.google.common.base.Optional;
-import eu.ehri.project.views.impl.QueryUtils;
 
 import static org.junit.Assert.*;
 import org.junit.Test;

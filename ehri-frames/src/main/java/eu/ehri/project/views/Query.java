@@ -1,4 +1,4 @@
-package eu.ehri.project.views.impl;
+package eu.ehri.project.views;
 
 import java.util.*;
 import java.util.Map.Entry;
@@ -30,8 +30,6 @@ import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.utils.ClassUtils;
-import eu.ehri.project.views.Search;
-import eu.ehri.project.views.ViewHelper;
 
 /**
  * Handles querying Accessible Entities, with ACL semantics.
@@ -41,7 +39,7 @@ import eu.ehri.project.views.ViewHelper;
  * @param <E>
  * @author mike
  */
-public final class Query<E extends AccessibleEntity> implements Search<E> {
+public final class Query<E extends AccessibleEntity> {
 
     public static final int DEFAULT_LIST_LIMIT = 20;
 

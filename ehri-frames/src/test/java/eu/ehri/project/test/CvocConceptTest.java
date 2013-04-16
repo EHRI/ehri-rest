@@ -28,7 +28,7 @@ import eu.ehri.project.persistance.BundleDAO;
 import eu.ehri.project.views.Crud;
 import eu.ehri.project.views.impl.CrudViews;
 
-public class CvocTest extends ModelTestBase {
+public class CvocConceptTest extends ModelTestBase {
 
     /**
      * Just play a bit with a small 'graph' of concepts.

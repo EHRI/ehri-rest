@@ -28,11 +28,9 @@ import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Group;
 import eu.ehri.project.models.UserProfile;
-import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.persistance.Serializer;
-import eu.ehri.project.views.Crud;
 import eu.ehri.project.views.impl.LoggingCrudViews;
 
 /**
@@ -77,7 +75,7 @@ public class AdminResource {
             // NB: This assumes that admin's ID is the same as its identifier.
             Accessor accessor = manager.getFrame(Group.ADMIN_GROUP_IDENTIFIER,
                     Accessor.class);
-            Crud<UserProfile> view = new LoggingCrudViews<UserProfile>(graph,
+            LoggingCrudViews<UserProfile> view = new LoggingCrudViews<UserProfile>(graph,
                     UserProfile.class);
             UserProfile user = view.create(bundle, accessor);
             // Grant them owner permissions on their own account.

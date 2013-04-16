@@ -1,4 +1,4 @@
-package eu.ehri.project.test.views;
+package eu.ehri.project.views;
 
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.acl.PermissionType;
@@ -7,7 +7,7 @@ import eu.ehri.project.models.Group;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.PermissionGrantTarget;
 import eu.ehri.project.test.AbstractFixtureTest;
-import eu.ehri.project.views.impl.AclViews;
+import eu.ehri.project.views.AclViews;
 import org.junit.Test;
 
 import static org.junit.Assert.assertFalse;

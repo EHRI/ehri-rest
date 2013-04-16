@@ -1,4 +1,4 @@
-package eu.ehri.project.test;
+package eu.ehri.project.persistance.utils;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -9,6 +9,8 @@ import java.util.Map;
 
 import eu.ehri.project.models.base.IdentifiableEntity;
 import eu.ehri.project.models.base.NamedEntity;
+import eu.ehri.project.test.AbstractFixtureTest;
+import org.junit.Assert;
 import org.junit.Test;
 
 import eu.ehri.project.definitions.Entities;
@@ -23,26 +25,26 @@ public class BundleUtilsTest extends AbstractFixtureTest {
     @Test
     public void testGetPath() throws Exception {
         Bundle bundle = Bundle.fromData(getTestBundle());
-        assertEquals(TEST_COLLECTION_NAME,
+        Assert.assertEquals(AbstractFixtureTest.TEST_COLLECTION_NAME,
                 BundleUtils.get(bundle, NamedEntity.NAME));
-        assertEquals(TEST_START_DATE,
+        Assert.assertEquals(AbstractFixtureTest.TEST_START_DATE,
                 BundleUtils.get(bundle, "describes[0]/hasDate[0]/startDate"));
-        assertEquals(TEST_START_DATE, BundleUtils.get(bundle,
+        Assert.assertEquals(AbstractFixtureTest.TEST_START_DATE, BundleUtils.get(bundle,
                 "describes[0]/hasDate[0]/hasDate[0]/startDate"));
-        assertEquals("en", BundleUtils.get(bundle, "describes[0]/languageCode"));
+        Assert.assertEquals("en", BundleUtils.get(bundle, "describes[0]/languageCode"));
     }
 
     @Test(expected = BundleUtils.BundlePathError.class)
     public void testGetPathWithBadPath() throws Exception {
         Bundle bundle = Bundle.fromData(getTestBundle());
-        assertEquals("en",
+        Assert.assertEquals("en",
                 BundleUtils.get(bundle, "idontexist[0]/languageCode"));
     }
 
     @Test(expected = BundleUtils.BundleIndexError.class)
     public void testGetPathWithBadIndex() throws Exception {
         Bundle bundle = Bundle.fromData(getTestBundle());
-        assertEquals("en", BundleUtils.get(bundle, "describes[2]/languageCode"));
+        Assert.assertEquals("en", BundleUtils.get(bundle, "describes[2]/languageCode"));
     }
 
     @Test
@@ -51,19 +53,19 @@ public class BundleUtilsTest extends AbstractFixtureTest {
         Bundle bundle = Bundle.fromData(getTestBundle());
         Bundle newBundle = BundleUtils.set(bundle, "describes[0]/languageCode",
                 "fr");
-        assertEquals("fr",
+        Assert.assertEquals("fr",
                 BundleUtils.get(newBundle, "describes[0]/languageCode"));
         newBundle = BundleUtils.set(bundle,
                 "describes[0]/hasDate[0]/startDate", testDate);
-        assertEquals(testDate,
+        Assert.assertEquals(testDate,
                 BundleUtils.get(newBundle, "describes[0]/hasDate[0]/startDate"));
-        assertEquals(TEST_START_DATE,
+        Assert.assertEquals(AbstractFixtureTest.TEST_START_DATE,
                 BundleUtils.get(bundle, "describes[0]/hasDate[0]/startDate"));
         newBundle = BundleUtils.set(bundle,
                 "describes[0]/hasDate[0]/hasDate[0]/startDate", testDate);
-        assertEquals(testDate, BundleUtils.get(newBundle,
+        Assert.assertEquals(testDate, BundleUtils.get(newBundle,
                 "describes[0]/hasDate[0]/hasDate[0]/startDate"));
-        assertEquals(TEST_START_DATE, BundleUtils.get(bundle,
+        Assert.assertEquals(AbstractFixtureTest.TEST_START_DATE, BundleUtils.get(bundle,
                 "describes[0]/hasDate[0]/hasDate[0]/startDate"));
     }
 
@@ -74,27 +76,27 @@ public class BundleUtilsTest extends AbstractFixtureTest {
                 "describes[0]/hasDate[0]").withDataValue("testattr", "testval");
         Bundle newBundle = BundleUtils.setBundle(bundle,
                 "describes[0]/hasDate[0]/hasDate[0]", dateBundle);
-        assertEquals("testval", BundleUtils.get(newBundle,
+        Assert.assertEquals("testval", BundleUtils.get(newBundle,
                 "describes[0]/hasDate[0]/hasDate[0]/testattr"));
     }
 
     @Test
     public void testDeletePath() throws Exception {
         Bundle bundle = Bundle.fromData(getTestBundle());
-        assertEquals("en", BundleUtils.get(bundle, "describes[0]/languageCode"));
+        Assert.assertEquals("en", BundleUtils.get(bundle, "describes[0]/languageCode"));
         Bundle newBundle = BundleUtils.delete(bundle,
                 "describes[0]/languageCode");
-        assertNull(BundleUtils.get(newBundle, "describes[0]/languageCode"));
+        Assert.assertNull(BundleUtils.get(newBundle, "describes[0]/languageCode"));
     }
 
     @Test(expected = BundleUtils.BundlePathError.class)
     public void testDeleteNode() throws Exception {
         Bundle bundle = Bundle.fromData(getTestBundle());
-        assertEquals(TEST_START_DATE,
+        Assert.assertEquals(AbstractFixtureTest.TEST_START_DATE,
                 BundleUtils.get(bundle, "describes[0]/hasDate[0]/startDate"));
         Bundle newBundle = BundleUtils.deleteBundle(bundle,
                 "describes[0]/hasDate[0]");
-        assertEquals(TEST_START_DATE,
+        Assert.assertEquals(AbstractFixtureTest.TEST_START_DATE,
                 BundleUtils.get(newBundle, "describes[0]/hasDate[0]/startDate"));
     }
 
@@ -121,7 +123,7 @@ public class BundleUtilsTest extends AbstractFixtureTest {
         return new HashMap<String, Object>() {{
             put("type", Entities.DOCUMENTARY_UNIT);
             put("data", new HashMap<String, Object>() {{
-                put(NamedEntity.NAME, TEST_COLLECTION_NAME);
+                put(NamedEntity.NAME, AbstractFixtureTest.TEST_COLLECTION_NAME);
                 put(IdentifiableEntity.IDENTIFIER_KEY, "someid-01");
             }});
             put("relationships", new HashMap<String, Object>() {{
@@ -138,16 +140,16 @@ public class BundleUtilsTest extends AbstractFixtureTest {
                                 add(new HashMap<String, Object>() {{
                                     put("type", Entities.DATE_PERIOD);
                                     put("data", new HashMap<String, Object>() {{
-                                        put(DatePeriod.START_DATE, TEST_START_DATE);
-                                        put(DatePeriod.END_DATE, TEST_START_DATE);
+                                        put(DatePeriod.START_DATE, AbstractFixtureTest.TEST_START_DATE);
+                                        put(DatePeriod.END_DATE, AbstractFixtureTest.TEST_START_DATE);
                                     }});
                                     put("relationships", new HashMap<String, Object>() {{
                                         put("hasDate", new LinkedList<HashMap<String, Object>>() {{
                                             add(new HashMap<String, Object>() {{
                                                 put("type", Entities.DATE_PERIOD);
                                                 put("data", new HashMap<String, Object>() {{
-                                                    put(DatePeriod.START_DATE, TEST_START_DATE);
-                                                    put(DatePeriod.END_DATE, TEST_START_DATE);
+                                                    put(DatePeriod.START_DATE, AbstractFixtureTest.TEST_START_DATE);
+                                                    put(DatePeriod.END_DATE, AbstractFixtureTest.TEST_START_DATE);
                                                 }});
                                             }});
                                         }});
@@ -161,8 +163,8 @@ public class BundleUtilsTest extends AbstractFixtureTest {
                     add(new HashMap<String, Object>() {{
                         put("type", Entities.DATE_PERIOD);
                         put("data", new HashMap<String, Object>() {{
-                            put(DatePeriod.START_DATE, TEST_START_DATE);
-                            put(DatePeriod.END_DATE, TEST_START_DATE);
+                            put(DatePeriod.START_DATE, AbstractFixtureTest.TEST_START_DATE);
+                            put(DatePeriod.END_DATE, AbstractFixtureTest.TEST_START_DATE);
                         }});
                     }});
                 }});
