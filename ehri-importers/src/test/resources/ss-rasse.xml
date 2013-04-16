@@ -77,29 +77,25 @@
 
       <entityType>corporateBody</entityType>
 
-      <nameEntry>
+      <nameEntry type="authorized">
 
         <part>SS Rasse- und Siedlungshauptamt</part>
 
-        <authorizedForm>conventionDeclaration</authorizedForm>
-
       </nameEntry>
 
-              <nameEntry>
+              <nameEntry type="parallel">
 
           <part>Race and Resettlement Main Office</part>
 
-          <alternativeForm>conventionDeclaration</alternativeForm>
-
         </nameEntry>
-              <nameEntry>
+      
+              <nameEntry type="other">
 
           <part>RuSHA</part>
 
-          <alternativeForm>conventionDeclaration</alternativeForm>
-
         </nameEntry>
       
+
     </identity>
 
     <description>

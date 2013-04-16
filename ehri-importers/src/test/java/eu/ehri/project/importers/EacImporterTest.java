@@ -41,11 +41,14 @@ public class EacImporterTest extends AbstractImporterTest {
                 EacHandler.class).setTolerant(Boolean.TRUE).importFile(ClassLoader.getSystemResourceAsStream("ss-rasse.xml"), logMessage);
         ImportLog log = new SaxImportManager(graph, SystemScope.getInstance(), validUser, EacImporter.class,
                 EacHandler.class).setTolerant(Boolean.TRUE).importFile(ios, logMessage);
-//        printGraph(graph);
+        printGraph(graph);
         HistoricalAgent abwehr = manager.getFrame("381", HistoricalAgent.class);
         logger.debug(abwehr.getId());
         assertEquals(Entities.HISTORICAL_AGENT, abwehr.getType());
         assertTrue(abwehr != null);
+        for(Description abwehrDesc : abwehr.getDescriptions()){
+            logger.debug(abwehrDesc.getName());
+        }
         for(Annotation a : abwehr.getAnnotations()){
             logger.info(a.getId() + " has targets: " + toList(a.getTargets()).size());
             for (AnnotatableEntity e : a.getTargets()){
@@ -63,6 +66,10 @@ public class EacImporterTest extends AbstractImporterTest {
         logger.debug(feldpolizei.getId());
         assertEquals(Entities.HISTORICAL_AGENT, feldpolizei.getType());
         assertEquals(1, toList(feldpolizei.getAnnotations()).size());
+        for(Description polizeiDesc : feldpolizei.getDescriptions()){
+            assertEquals("Geheime Feldpolizei", polizeiDesc.getName());
+        }
+        //Geheime Feldpolizei
 
     }
 

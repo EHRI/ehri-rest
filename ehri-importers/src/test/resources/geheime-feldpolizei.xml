@@ -77,29 +77,25 @@
 
       <entityType>corporateBody</entityType>
 
-      <nameEntry>
+      <nameEntry type="authorized">
 
         <part>Geheime Feldpolizei</part>
 
-        <authorizedForm>conventionDeclaration</authorizedForm>
-
       </nameEntry>
 
-              <nameEntry>
+              <nameEntry type="parallel">
 
           <part>Secret military police</part>
 
-          <alternativeForm>conventionDeclaration</alternativeForm>
-
         </nameEntry>
-              <nameEntry>
+      
+              <nameEntry type="other">
 
           <part>GFP</part>
 
-          <alternativeForm>conventionDeclaration</alternativeForm>
-
         </nameEntry>
       
+
     </identity>
 
     <description>
@@ -144,7 +140,7 @@
 
     </description>
 
-<!--    <relations>
+    <relations>
 
               <cpfRelation cpfRelationType="associative" xlink:href="http://authorities.ehri-project.eu/index.php/abwehr;eac" xlink:type="simple">
           <relationEntry>Abwehr</relationEntry>
@@ -153,7 +149,7 @@
       
       
       
-    </relations>-->
+    </relations>
 
   </cpfDescription>
 

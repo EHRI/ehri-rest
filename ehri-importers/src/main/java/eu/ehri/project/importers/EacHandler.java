@@ -8,6 +8,7 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.Annotation;
 import eu.ehri.project.models.MaintenanceEvent;
+import eu.ehri.project.models.Property;
 import eu.ehri.project.models.base.Description;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -38,6 +39,7 @@ public class EacHandler extends EaHandler {
 
         possibleSubnodes.put("maintenanceEvent", MaintenanceEvent.class);
         possibleSubnodes.put("relation", Annotation.class);
+        possibleSubnodes.put("name", Property.class);
     }
 
     @Override
@@ -67,11 +69,11 @@ public class EacHandler extends EaHandler {
                 }
 
                 //TODO: name can have only 1 value, others are otherFormsOfName
-                if (currentGraphPath.peek().containsKey(Description.NAME)) {
-                    String name = chooseName(currentGraphPath.peek().get(Description.NAME));
-                    overwritePropertyInCurrentGraph(Description.NAME, name);
-
-                }
+//                if (currentGraphPath.peek().containsKey(Description.NAME)) {
+//                    String name = chooseName(currentGraphPath.peek().get(Description.NAME));
+//                    overwritePropertyInCurrentGraph(Description.NAME, name);
+//
+//                }
                 if (!currentGraphPath.peek().containsKey(Description.LANGUAGE_CODE)) {
                     logger.debug("no " + Description.LANGUAGE_CODE + " found");
                     putPropertyInCurrentGraph(Description.LANGUAGE_CODE, "en");

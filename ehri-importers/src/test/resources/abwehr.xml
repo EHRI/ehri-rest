@@ -77,22 +77,20 @@
 
       <entityType>corporateBody</entityType>
 
-      <nameEntry>
+      <nameEntry type="authorized">
 
         <part>Abwehr</part>
 
-        <authorizedForm>conventionDeclaration</authorizedForm>
-
       </nameEntry>
 
-              <nameEntry>
+              <nameEntry type="parallel">
 
           <part>Self-defense</part>
 
-          <alternativeForm>conventionDeclaration</alternativeForm>
-
         </nameEntry>
       
+      
+
     </identity>
 
     <description>

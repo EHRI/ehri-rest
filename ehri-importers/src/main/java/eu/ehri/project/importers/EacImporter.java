@@ -18,6 +18,8 @@ import eu.ehri.project.models.idgen.IdGenerator;
 import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.views.impl.AnnotationViews;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -108,7 +110,45 @@ public class EacImporter extends EaImporter {
         return frame;
 
     }
-
+    @Override
+    protected Map<String, Object> extractUnitDescription(Map<String, Object> itemData, EntityClass entity) {
+        Map<String, Object> description = new HashMap<String, Object>();
+        for (String key : itemData.keySet()) {
+            if (key.equals("descriptionIdentifier")) {
+                description.put(IdentifiableEntity.IDENTIFIER_KEY, itemData.get(key));
+            }else if(key.startsWith("name")){
+                Object name =  itemData.get(key);
+                logger.debug(key + " " + name.getClass());
+                if(name instanceof List){
+                    for(Object nameentry : (List) name){
+                        logger.debug(key + " " + nameentry.getClass());
+                        if(nameentry instanceof Map){
+                            for(String nameKey: ((Map<String, Object>) nameentry).keySet()){
+                                logger.debug(nameKey);
+                            }
+                            String nameType =  ((Map<String, Object>) nameentry).get("name/nameType").toString();
+                            String namePart =  ((Map<String, Object>) nameentry).get("name/namePart").toString();
+                            if(nameType.equals("authorized"))
+                                description.put(Description.NAME, namePart);
+                            else
+                                description.put("otherFormsOfName", namePart);
+                        }
+                    }
+                }
+            }else if ( !key.startsWith(SaxXmlHandler.UNKNOWN) 
+                    && ! key.equals("objectIdentifier") 
+                    && ! key.equals(IdentifiableEntity.IDENTIFIER_KEY)
+                    && ! key.startsWith("maintenanceEvent") 
+                    && ! key.startsWith("relation")
+                    && ! key.startsWith("address/")
+                    && ! key.startsWith("name")) {
+               description.put(key, changeForbiddenMultivaluedProperties(key, itemData.get(key), entity));
+            }
+            
+        }
+//        assert(description.containsKey(IdentifiableEntity.IDENTIFIER_KEY));
+        return description;
+    }
     /**
      * Tries to resolve the undetermined relationships for IcaAtoM eac files by iterating through all UndeterminedRelationships,
      * finding the DescribedEntity meant by the 'targetUrl' in the Relationship and creating an Annotation for it.
