@@ -15,15 +15,18 @@ import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.IdentifiableEntity;
 import eu.ehri.project.models.events.SystemEvent;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+
 import org.junit.Test;
+
 import static org.junit.Assert.*;
+
 import org.slf4j.LoggerFactory;
 
 /**
- *
  * @author linda
  */
 public class Eag2896Test extends AbstractImporterTest {
@@ -47,7 +50,7 @@ public class Eag2896Test extends AbstractImporterTest {
 
             InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_UNIT);
             ImportLog log = new SaxImportManager(graph, agent, validUser, EagImporter.class, EagHandler.class).importFile(ios, logMessage);
-          printGraph(graph);
+            printGraph(graph);
             // How many new nodes will have been created? We should have
             // - 1 more Repository
             // - 1 more RepositoryDescription
@@ -62,14 +65,14 @@ public class Eag2896Test extends AbstractImporterTest {
             Repository unit = graph.frame(
                     getVertexByIdentifier(graph, IMPORTED_ITEM_ID),
                     Repository.class);
-            assertEquals(Entities.REPOSITORY, unit.asVertex().getProperty("__ISA__"));
+            assertEquals(Entities.REPOSITORY, unit.getType());
 
             // check the child items
             RepositoryDescription c1 = graph.frame(
                     getVertexByIdentifier(graph, AGENT_DESC_ID),
                     RepositoryDescription.class);
-            assertEquals(Entities.REPOSITORY_DESCRIPTION, c1.asVertex().getProperty("__ISA__"));
-            Object notes = c1.asVertex().getProperty("generalContext");
+            assertEquals(Entities.REPOSITORY_DESCRIPTION, c1.getType());
+            Object notes = c1.asVertex().getProperty("maintenanceNotes");
             if (notes instanceof String[]) {
                 fail();
             } else {
@@ -95,8 +98,6 @@ public class Eag2896Test extends AbstractImporterTest {
             assertEquals(1, subjects.size());
             assertEquals(log.getSuccessful(), subjects.size());
 
-
-            //        logger.debug("created: " + log.getCreated());
         } catch (IOException ex) {
             logger.error(ex.getMessage());
             fail();
@@ -110,6 +111,5 @@ public class Eag2896Test extends AbstractImporterTest {
             logger.error(ex.getMessage());
             fail();
         }
-
     }
 }
