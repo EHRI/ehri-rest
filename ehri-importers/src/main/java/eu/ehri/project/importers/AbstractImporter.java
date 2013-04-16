@@ -1,5 +1,6 @@
 package eu.ehri.project.importers;
 
+import com.google.common.base.Joiner;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.core.GraphManager;
@@ -46,6 +47,7 @@ public abstract class AbstractImporter<T> {
     protected BundleDAO persister;
 
     private NodeProperties pc;
+    private Joiner stringJoiner = Joiner.on("\n\n").skipNulls();
 
     /**
      * Constructor.
@@ -135,12 +137,7 @@ public abstract class AbstractImporter<T> {
         }
         if (value instanceof List
                 && (!pc.hasProperty(entity.getName(), key) || !pc.isMultivaluedProperty(entity.getName(), key))) {
-            String output = "";
-            for (String l : (List<String>) value) {
-                output += l + ", ";
-            }
-            logger.debug(key + " should have only 1 value. " + output.substring(0, output.length() - 2));
-            return output.substring(0, output.length() - 2);
+            return stringJoiner.join((List<String>) value);
         } else {
             return value.toString();
         }
