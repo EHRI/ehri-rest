@@ -1,7 +1,8 @@
-package eu.ehri.project.test;
+package eu.ehri.project.models;
 
 import eu.ehri.project.models.Group;
 import eu.ehri.project.models.UserProfile;
+import eu.ehri.project.test.AbstractFixtureTest;
 import org.junit.Test;
 
 import java.util.List;

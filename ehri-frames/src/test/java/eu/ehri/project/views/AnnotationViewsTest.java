@@ -1,7 +1,8 @@
-package eu.ehri.project.test;
+package eu.ehri.project.views;
 
 import static org.junit.Assert.*;
 
+import eu.ehri.project.test.AbstractFixtureTest;
 import org.junit.Test;
 
 import com.google.common.collect.ListMultimap;

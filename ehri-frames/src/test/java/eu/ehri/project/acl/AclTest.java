@@ -1,4 +1,4 @@
-package eu.ehri.project.test;
+package eu.ehri.project.acl;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -11,6 +11,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import eu.ehri.project.test.ModelTestBase;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;

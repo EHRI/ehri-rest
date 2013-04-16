@@ -1,9 +1,10 @@
-package eu.ehri.project.test;
+package eu.ehri.project.models;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import com.google.common.collect.Iterables;
+import eu.ehri.project.test.ModelTestBase;
 import org.junit.Test;
 
 import eu.ehri.project.exceptions.ItemNotFound;
