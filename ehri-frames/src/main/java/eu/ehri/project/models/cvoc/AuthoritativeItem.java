@@ -11,11 +11,11 @@ import eu.ehri.project.models.annotations.Fetch;
  *
  * @author linda
  */
-public interface AuthorativeItem {
-    @Fetch(AuthorativeSet.IN_SET)
+public interface AuthoritativeItem {
+    @Fetch(AuthoritativeSet.IN_SET)
     @Adjacency(label = Vocabulary.IN_CVOC)
-    public AuthorativeSet getAuthorativeSet();
+    public AuthoritativeSet getAuthorativeSet();
 
-    @Adjacency(label = AuthorativeSet.IN_SET)
-    public void setAuthorativeSet(final AuthorativeSet authorativeSet); 
+    @Adjacency(label = AuthoritativeSet.IN_SET)
+    public void setAuthorativeSet(final AuthoritativeSet authorativeSet);
 }

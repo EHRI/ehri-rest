@@ -14,14 +14,13 @@ import eu.ehri.project.models.base.PermissionScope;
  *
  * @author linda
  */
-public interface AuthorativeSet extends AccessibleEntity, IdentifiableEntity, PermissionScope {
-    public static final String LABEL = "authorativelist";
-    public static final String IN_SET = "inAuthorativeList";
+public interface AuthoritativeSet extends AccessibleEntity, IdentifiableEntity, PermissionScope {
+    public static final String IN_SET = "inAuthoritativeList";
 
     @Adjacency(label = IN_SET, direction = Direction.IN)
-    public Iterable<AuthorativeItem> getAuthorativeItems();
+    public Iterable<AuthoritativeItem> getAuthoritativeItems();
 
     @Adjacency(label = IN_SET, direction = Direction.IN)
-    public void addAuthorativeItem(final AuthorativeItem authorativeItem);
+    public void addAuthoritativeItem(final AuthoritativeItem authoritativeItem);
     
 }

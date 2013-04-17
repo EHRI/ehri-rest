@@ -34,7 +34,7 @@ public abstract class ImportCsvCommand extends BaseCommand implements Command{
     @Override
     protected void setCustomOptions() {
         options.addOption(new Option("scope", true,
-                "Identifier of scope to import into, i.e. AuthorativeSet"));
+                "Identifier of scope to import into, i.e. AuthoritativeSet"));
         options.addOption(new Option("user", true,
                 "Identifier of user to import as"));
         options.addOption(new Option("logMessage", false,

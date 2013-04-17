@@ -5,11 +5,9 @@
 package eu.ehri.project.importers;
 
 import eu.ehri.project.importers.properties.XmlImportProperties;
-import eu.ehri.project.models.HistoricalAgent;
-import eu.ehri.project.models.Repository;
-import eu.ehri.project.models.cvoc.AuthorativeItem;
-import eu.ehri.project.models.cvoc.AuthorativeSet;
+import eu.ehri.project.models.cvoc.AuthoritativeSet;
 import java.io.InputStream;
+
 import org.junit.Test;
 import static org.junit.Assert.*;
 import org.slf4j.Logger;
@@ -28,8 +26,8 @@ public class PersonalitiesImporterTest extends AbstractImporterTest{
 
     @Test
     public void testImportItemsT() throws Exception {
-        AuthorativeSet authorativeSet = manager.getFrame("cvoc1", AuthorativeSet.class);
-        int voccount = toList(authorativeSet.getAuthorativeItems()).size();
+        AuthoritativeSet authorativeSet = manager.getFrame("cvoc1", AuthoritativeSet.class);
+        int voccount = toList(authorativeSet.getAuthoritativeItems()).size();
         logger.debug("number of items: " + voccount);
         
         final String logMessage = "Importing some WP18 Personalities records";
@@ -50,7 +48,7 @@ public class PersonalitiesImporterTest extends AbstractImporterTest{
          * 1 more import Event
          */
         assertEquals(count+26, getNodeCount(graph));
-        assertEquals(voccount+8, toList(authorativeSet.getAuthorativeItems()).size());
+        assertEquals(voccount+8, toList(authorativeSet.getAuthoritativeItems()).size());
        
     }
 }
