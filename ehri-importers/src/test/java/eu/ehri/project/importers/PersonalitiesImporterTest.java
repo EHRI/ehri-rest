@@ -5,7 +5,10 @@
 package eu.ehri.project.importers;
 
 import eu.ehri.project.importers.properties.XmlImportProperties;
+import eu.ehri.project.models.HistoricalAgent;
 import eu.ehri.project.models.Repository;
+import eu.ehri.project.models.cvoc.AuthorativeItem;
+import eu.ehri.project.models.cvoc.AuthorativeSet;
 import java.io.InputStream;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -18,15 +21,18 @@ import org.slf4j.LoggerFactory;
  */
 public class PersonalitiesImporterTest extends AbstractImporterTest{
     
-    private static final Logger logger = LoggerFactory.getLogger(IcaAtomEadImporterTest.class);
+    private static final Logger logger = LoggerFactory.getLogger(PersonalitiesImporterTest.class);
     protected final String SINGLE_EAD = "Personalities_small.csv";
     // Depends on fixtures
     protected final String TEST_REPO = "r1";
 
     @Test
     public void testImportItemsT() throws Exception {
-         Repository agent = manager.getFrame(TEST_REPO, Repository.class);
-        final String logMessage = "Importing a some WP18 Personalities records";
+        AuthorativeSet authorativeSet = manager.getFrame("cvoc1", AuthorativeSet.class);
+        int voccount = toList(authorativeSet.getAuthorativeItems()).size();
+        logger.debug("number of items: " + voccount);
+        
+        final String logMessage = "Importing some WP18 Personalities records";
         XmlImportProperties p = new XmlImportProperties("personalities.properties");
         assertTrue(p.containsProperty("Othernames"));
         assertTrue(p.containsProperty("DateofbirthYYYY-MM-DD"));
@@ -35,7 +41,7 @@ public class PersonalitiesImporterTest extends AbstractImporterTest{
 
         int count = getNodeCount(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        ImportLog log = new CsvImportManager(graph, agent, validUser, PersonalitiesImporter.class).importFile(ios, logMessage);
+        ImportLog log = new CsvImportManager(graph, authorativeSet, validUser, PersonalitiesImporter.class).importFile(ios, logMessage);
 
         /*
          * 8 HistAgent
@@ -44,5 +50,7 @@ public class PersonalitiesImporterTest extends AbstractImporterTest{
          * 1 more import Event
          */
         assertEquals(count+26, getNodeCount(graph));
+        assertEquals(voccount+8, toList(authorativeSet.getAuthorativeItems()).size());
+       
     }
 }

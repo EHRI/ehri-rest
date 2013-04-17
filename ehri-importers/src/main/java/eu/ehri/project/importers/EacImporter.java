@@ -118,14 +118,9 @@ public class EacImporter extends EaImporter {
                 description.put(IdentifiableEntity.IDENTIFIER_KEY, itemData.get(key));
             }else if(key.startsWith("name")){
                 Object name =  itemData.get(key);
-                logger.debug(key + " " + name.getClass());
                 if(name instanceof List){
                     for(Object nameentry : (List) name){
-                        logger.debug(key + " " + nameentry.getClass());
                         if(nameentry instanceof Map){
-                            for(String nameKey: ((Map<String, Object>) nameentry).keySet()){
-                                logger.debug(nameKey);
-                            }
                             String nameType =  ((Map<String, Object>) nameentry).get("name/nameType").toString();
                             String namePart =  ((Map<String, Object>) nameentry).get("name/namePart").toString();
                             if(nameType.equals("authorized"))
@@ -140,8 +135,7 @@ public class EacImporter extends EaImporter {
                     && ! key.equals(IdentifiableEntity.IDENTIFIER_KEY)
                     && ! key.startsWith("maintenanceEvent") 
                     && ! key.startsWith("relation")
-                    && ! key.startsWith("address/")
-                    && ! key.startsWith("name")) {
+                    && ! key.startsWith("address/")){
                description.put(key, changeForbiddenMultivaluedProperties(key, itemData.get(key), entity));
             }
             

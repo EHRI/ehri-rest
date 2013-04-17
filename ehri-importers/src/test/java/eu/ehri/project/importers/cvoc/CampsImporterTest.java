@@ -36,6 +36,7 @@ public class CampsImporterTest extends AbstractImporterTest{
         Vocabulary vocabulary = manager.getFrame("cvoc1", Vocabulary.class);
         
         int count = getNodeCount(graph);
+        int voccount = toList(vocabulary.getConcepts()).size();
         InputStream ios = ClassLoader.getSystemResourceAsStream(SKOS_FILE);
         SkosCoreCvocImporter importer = new SkosCoreCvocImporter(graph, validUser, vocabulary);
         importer.setTolerant(true);
@@ -49,6 +50,7 @@ public class CampsImporterTest extends AbstractImporterTest{
         * 1 more import Event
         */
         assertEquals(count + 26, getNodeCount(graph));
+        assertEquals(voccount + 8, toList(vocabulary.getConcepts()).size());
         // get a top concept
 
         String skosConceptId = "http://ehri01.dans.knaw.nl/675";

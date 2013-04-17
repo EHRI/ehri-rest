@@ -11,14 +11,14 @@ import eu.ehri.project.importers.EacImporter;
  *
  * @author linda
  */
-public class EacImport extends ImportCommand implements Command {
+public class PersonalitiesImport extends ImportCommand implements Command {
 
     final static String NAME = "eac-import";
 
     /**
      * Constructor.
      */
-    public EacImport() {
+    public PersonalitiesImport() {
         super(EacHandler.class, EacImporter.class);
     }
 

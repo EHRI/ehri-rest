@@ -20,7 +20,6 @@ import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.cvoc.SkosCoreCvocImporter;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.UserProfile;
-import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.persistance.BundleDAO;

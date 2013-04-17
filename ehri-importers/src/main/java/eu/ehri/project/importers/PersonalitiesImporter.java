@@ -15,6 +15,7 @@ import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.IdentifiableEntity;
 import eu.ehri.project.models.base.PermissionScope;
+import eu.ehri.project.models.cvoc.AuthorativeSet;
 import eu.ehri.project.models.idgen.IdGenerator;
 import eu.ehri.project.models.idgen.IdentifiableEntityIdGenerator;
 import eu.ehri.project.persistance.Bundle;
@@ -33,11 +34,17 @@ import org.slf4j.LoggerFactory;
 public class PersonalitiesImporter extends XmlImporter<Object> {
     
     private XmlImportProperties p;
+    private AuthorativeSet authorativeSet;
     private static final Logger logger = LoggerFactory.getLogger(PersonalitiesImporter.class);
     
+    //TODO: this is not the way ...
     public PersonalitiesImporter(FramedGraph<Neo4jGraph> framedGraph, PermissionScope permissionScope, ImportLog log) {
+        this(framedGraph, (AuthorativeSet)permissionScope, log);
+    }
+    public PersonalitiesImporter(FramedGraph<Neo4jGraph> framedGraph, AuthorativeSet permissionScope, ImportLog log) {
         super(framedGraph, permissionScope, log);
         p = new XmlImportProperties("personalities.properties");
+        authorativeSet = permissionScope;
     }
     
     @Override
@@ -53,6 +60,8 @@ public class PersonalitiesImporter extends XmlImporter<Object> {
         String id = generator.generateId(EntityClass.HISTORICAL_AGENT, SystemScope.getInstance(), unit);
         boolean exists = manager.exists(id);
         HistoricalAgent frame = persister.createOrUpdate(unit.withId(id), HistoricalAgent.class);
+        frame.setAuthorativeSet(authorativeSet);
+        frame.setPermissionScope(authorativeSet);
         
         if (exists) {
             for (ImportCallback cb : updateCallbacks) {

@@ -10,9 +10,8 @@ import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.importers.AbstractImporter;
+import eu.ehri.project.importers.CsvImportManager;
 import eu.ehri.project.importers.ImportLog;
-import eu.ehri.project.importers.SaxImportManager;
-import eu.ehri.project.importers.SaxXmlHandler;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.PermissionScope;
 import java.util.LinkedList;
@@ -25,23 +24,19 @@ import org.apache.commons.cli.Option;
  *
  * @author linda
  */
-public abstract class ImportCommand extends BaseCommand implements Command{
-    private Class<? extends SaxXmlHandler> handler;
-    Class<? extends AbstractImporter> importer;
+public abstract class ImportCsvCommand extends BaseCommand implements Command{
+    Class<? extends AbstractImporter<Object>> importer;
     
-    public ImportCommand(Class<? extends SaxXmlHandler> handler, Class<? extends AbstractImporter> importer){
-        this.handler = handler;
+    public ImportCsvCommand(Class<? extends AbstractImporter<Object>> importer){
         this.importer = importer;
     }
     
     @Override
     protected void setCustomOptions() {
         options.addOption(new Option("scope", true,
-                "Identifier of scope to import into, i.e. repository"));
+                "Identifier of scope to import into, i.e. AuthorativeSet"));
         options.addOption(new Option("user", true,
                 "Identifier of user to import as"));
-        options.addOption(new Option("tolerant", false,
-                "Don't error if a file is not valid."));
         options.addOption(new Option("logMessage", false,
                 "Log message for import action."));
     }
@@ -73,10 +68,7 @@ public abstract class ImportCommand extends BaseCommand implements Command{
             UserProfile user = manager.getFrame(cmdLine.getOptionValue("user"),
                     UserProfile.class);
 
-            ImportLog log = new SaxImportManager(graph, scope, user, importer, handler).setTolerant(cmdLine.hasOption
-                    ("tolerant"))
-            	.importFiles(filePaths, logMessage);
-            //ImportLog log = new SaxImportManager(graph, agent, validUser, EagImporter.class, EagHandler.class).importFile(ios, logMessage);
+            ImportLog log = new CsvImportManager(graph, scope, user, importer).importFiles(filePaths, logMessage);
             
             System.out.println("Import completed. Created: " + log.getCreated()
                     + ", Updated: " + log.getUpdated());
