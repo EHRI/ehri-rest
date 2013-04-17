@@ -21,13 +21,11 @@ public class PersonalitiesImporterTest extends AbstractImporterTest{
     
     private static final Logger logger = LoggerFactory.getLogger(PersonalitiesImporterTest.class);
     protected final String SINGLE_EAD = "Personalities_small.csv";
-    // Depends on fixtures
-    protected final String TEST_REPO = "r1";
 
     @Test
     public void testImportItemsT() throws Exception {
-        AuthoritativeSet authorativeSet = manager.getFrame("cvoc1", AuthoritativeSet.class);
-        int voccount = toList(authorativeSet.getAuthoritativeItems()).size();
+        AuthoritativeSet authoritativeSet = manager.getFrame("cvoc1", AuthoritativeSet.class);
+        int voccount = toList(authoritativeSet.getAuthoritativeItems()).size();
         logger.debug("number of items: " + voccount);
         
         final String logMessage = "Importing some WP18 Personalities records";
@@ -39,7 +37,7 @@ public class PersonalitiesImporterTest extends AbstractImporterTest{
 
         int count = getNodeCount(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        ImportLog log = new CsvImportManager(graph, authorativeSet, validUser, PersonalitiesImporter.class).importFile(ios, logMessage);
+        ImportLog log = new CsvImportManager(graph, authoritativeSet, validUser, PersonalitiesImporter.class).importFile(ios, logMessage);
 
         /*
          * 8 HistAgent
@@ -48,7 +46,7 @@ public class PersonalitiesImporterTest extends AbstractImporterTest{
          * 1 more import Event
          */
         assertEquals(count+26, getNodeCount(graph));
-        assertEquals(voccount+8, toList(authorativeSet.getAuthoritativeItems()).size());
+        assertEquals(voccount + 8, toList(authoritativeSet.getAuthoritativeItems()).size());
        
     }
 }

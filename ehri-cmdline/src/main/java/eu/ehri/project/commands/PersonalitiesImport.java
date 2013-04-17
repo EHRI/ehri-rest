@@ -12,7 +12,7 @@ import eu.ehri.project.importers.PersonalitiesImporter;
  */
 public class PersonalitiesImport extends ImportCsvCommand implements Command {
 
-    final static String NAME = "personalities-import";
+    final static String NAME = "csv-import";
 
     /**
      * Constructor.
@@ -23,14 +23,15 @@ public class PersonalitiesImport extends ImportCsvCommand implements Command {
 
     @Override
     public String getHelp() {
-        return "Usage: " + NAME + " [OPTIONS] <neo4j-graph-dir> -user <user-id> -scope <authorative-set-id> <personalities.csv>";
+        return "Usage: " + NAME + " [OPTIONS] <neo4j-graph-dir> -user <user-id> -scope <scope-id> <csv-file1> " +
+                "<csv-file2> ... <csv-fileN>";
     }
 
     @Override
     public String getUsage() {
         String sep = System.getProperty("line.separator");
-        String help = "Import the Personalities file into the graph database, using the specified"
-                + sep + "AuthorativeSet and User.";
+        String help = "Import a CSV file into the graph database, using the specified"
+                + sep + "scope and user.";
         return help;
     }
 
