@@ -121,12 +121,16 @@ public class EacImporter extends EaImporter {
                 if(name instanceof List){
                     for(Object nameentry : (List) name){
                         if(nameentry instanceof Map){
-                            String nameType =  ((Map<String, Object>) nameentry).get("name/nameType").toString();
-                            String namePart =  ((Map<String, Object>) nameentry).get("name/namePart").toString();
-                            if(nameType.equals("authorized"))
-                                description.put(Description.NAME, namePart);
-                            else
-                                description.put("otherFormsOfName", namePart);
+                            String nameType =  (String)((Map<String, Object>) nameentry).get("name/nameType");
+                            String namePart =  (String)((Map<String, Object>) nameentry).get("name/namePart");
+                            if (namePart != null && nameType != null) {
+                                if(nameType.equals("authorized"))
+                                    description.put(Description.NAME, namePart);
+                                else if (nameType.equals("parallel"))
+                                    description.put("parallelFormsOfName", namePart);
+                                else
+                                    description.put("otherFormsOfName", namePart);
+                            }
                         }
                     }
                 }
