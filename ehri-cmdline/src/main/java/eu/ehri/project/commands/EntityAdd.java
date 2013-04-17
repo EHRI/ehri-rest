@@ -10,9 +10,7 @@ import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Group;
 import eu.ehri.project.models.UserProfile;
-import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.models.base.NamedEntity;
-import eu.ehri.project.models.base.PermissionScope;
+import eu.ehri.project.models.base.*;
 import eu.ehri.project.models.idgen.IdentifiableEntityIdGenerator;
 import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.views.impl.LoggingCrudViews;
@@ -107,7 +105,11 @@ public class EntityAdd extends BaseCommand implements Command {
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
             LoggingCrudViews<?> view = new LoggingCrudViews(graph, entityClass.getEntityClass());
-            view.create(bundle.withId(id), user, logMessage);
+            Frame t = view.create(bundle.withId(id), user, logMessage);
+            // FIXME: This is tres-ugly...
+            if (!scope.equals(SystemScope.getInstance())) {
+                graph.frame(t.asVertex(), AccessibleEntity.class).setPermissionScope(scope);
+            }
             tx.success();
         } catch (IntegrityError e) {
             tx.failure();
