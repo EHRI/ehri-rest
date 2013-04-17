@@ -34,19 +34,13 @@ import org.slf4j.LoggerFactory;
 public class PersonalitiesImporter extends XmlImporter<Object> {
     
     private XmlImportProperties p;
-    private AuthoritativeSet authorativeSet;
     private static final Logger logger = LoggerFactory.getLogger(PersonalitiesImporter.class);
     
-    //TODO: this is not the way ...
     public PersonalitiesImporter(FramedGraph<Neo4jGraph> framedGraph, PermissionScope permissionScope, ImportLog log) {
-        this(framedGraph, (AuthoritativeSet)permissionScope, log);
-    }
-    public PersonalitiesImporter(FramedGraph<Neo4jGraph> framedGraph, AuthoritativeSet permissionScope, ImportLog log) {
         super(framedGraph, permissionScope, log);
         p = new XmlImportProperties("personalities.properties");
-        authorativeSet = permissionScope;
     }
-    
+
     @Override
     public AccessibleEntity importItem(Map<String, Object> itemData) throws ValidationError {
         logger.debug("-----------------------------------");
@@ -60,8 +54,10 @@ public class PersonalitiesImporter extends XmlImporter<Object> {
         String id = generator.generateId(EntityClass.HISTORICAL_AGENT, SystemScope.getInstance(), unit);
         boolean exists = manager.exists(id);
         HistoricalAgent frame = persister.createOrUpdate(unit.withId(id), HistoricalAgent.class);
-        frame.setAuthoritativeSet(authorativeSet);
-        frame.setPermissionScope(authorativeSet);
+        if (!permissionScope.equals(SystemScope.getInstance())) {
+            frame.setAuthoritativeSet(framedGraph.frame(permissionScope.asVertex(), AuthoritativeSet.class));
+            frame.setPermissionScope(permissionScope);
+        }
         
         if (exists) {
             for (ImportCallback cb : updateCallbacks) {
@@ -107,11 +103,28 @@ public class PersonalitiesImporter extends XmlImporter<Object> {
         }
         return item;
     }
+
+    private String getName(Map<String, Object> itemData) {
+        // FIXME: This all sucks
+        String firstName = (String)itemData.get("Firstname");
+        String lastName = (String)itemData.get("Lastname");
+        if (firstName == null && lastName == null) {
+            return null;
+        }
+        String name = "";
+        if (lastName != null) {
+            name = lastName;
+        }
+        if (firstName != null) {
+            name = firstName + " " + name;
+        }
+        return name;
+    }
     
     private Map<String, Object> extractUnitDescription(Map<String, Object> itemData, EntityClass entityClass) {
         Map<String, Object> item = new HashMap<String, Object>();
         
-        SaxXmlHandler.putPropertyInGraph(item, Description.NAME, itemData.get("Firstname") + (itemData.containsKey("Firstname") && itemData.containsKey("Lastname") ? " " : "") + itemData.get("Lastname"));
+        SaxXmlHandler.putPropertyInGraph(item, Description.NAME, getName(itemData));
         for (String key : itemData.keySet()) {
             if (!key.equals("id")) {
                 if (!p.containsProperty(key)) {

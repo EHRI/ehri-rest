@@ -25,7 +25,7 @@ public class CmdEntryPoint extends BaseCommand {
         Map<String, Class<? extends Command>> mmap = new HashMap<String, Class<? extends Command>>();
         mmap.put(SkosVocabularyImport.NAME, SkosVocabularyImport.class);
         mmap.put(EadImport.NAME, EadImport.class);
-        mmap.put(PersonalitiesImport.NAME, PersonalitiesImport.class);
+        mmap.put(EacImport.NAME, EacImport.class);
         mmap.put(EagImport.NAME, EagImport.class);
         mmap.put(UserListEntities.NAME, UserListEntities.class);
         mmap.put(ListEntities.NAME, ListEntities.class);
@@ -36,6 +36,7 @@ public class CmdEntryPoint extends BaseCommand {
         mmap.put(UserAdd.NAME, UserAdd.class);
         mmap.put(UserMod.NAME, UserMod.class);
         mmap.put(EntityAdd.NAME, EntityAdd.class);
+        mmap.put(PersonalitiesImport.NAME, PersonalitiesImport.class);
         COMMANDS = Collections.unmodifiableMap(mmap);
     }
 

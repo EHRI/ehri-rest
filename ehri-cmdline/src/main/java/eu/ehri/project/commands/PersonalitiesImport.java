@@ -6,32 +6,34 @@ package eu.ehri.project.commands;
 
 import eu.ehri.project.importers.EacHandler;
 import eu.ehri.project.importers.EacImporter;
+import eu.ehri.project.importers.PersonalitiesImporter;
 
 /**
  *
  * @author linda
  */
-public class PersonalitiesImport extends ImportCommand implements Command {
+public class PersonalitiesImport extends ImportCsvCommand implements Command {
 
-    final static String NAME = "eac-import";
+    final static String NAME = "csv-import";
 
     /**
      * Constructor.
      */
     public PersonalitiesImport() {
-        super(EacHandler.class, EacImporter.class);
+        super(PersonalitiesImporter.class);
     }
 
     @Override
     public String getHelp() {
-        return "Usage: " + NAME + " [OPTIONS] <neo4j-graph-dir> -user <user-id> -repo <agent-id> <eac1.xml> <eac2.xml> ... <eacN.xml>";
+        return "Usage: " + NAME + " [OPTIONS] <neo4j-graph-dir> -user <user-id> -scope <scope-id> <csv-file1> " +
+                "<csv-file2> ... <csv-fileN>";
     }
 
     @Override
     public String getUsage() {
         String sep = System.getProperty("line.separator");
-        String help = "Import an EAC file into the graph database, using the specified"
-                + sep + "Repository and User.";
+        String help = "Import a CSV file into the graph database, using the specified"
+                + sep + "scope and user.";
         return help;
     }
 
