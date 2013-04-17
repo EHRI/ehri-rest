@@ -92,11 +92,16 @@ public class EacImporter extends EaImporter {
         unit = unit.withRelation(Description.DESCRIBES, descBundle);
 
         IdGenerator generator = IdentifiableEntityIdGenerator.INSTANCE;
-        String id = generator.generateId(EntityClass.HISTORICAL_AGENT, SystemScope.getInstance(), unit);
+        String id = generator.generateId(EntityClass.HISTORICAL_AGENT, permissionScope, unit);
         boolean exists = manager.exists(id);
         HistoricalAgent frame = persister.createOrUpdate(unit.withId(id), HistoricalAgent.class);
 
         solveUndeterminedRelationships(id, frame, descBundle);
+
+        // There may or may not be a specific scope here...
+        if (!permissionScope.equals(SystemScope.getInstance())) {
+            frame.setPermissionScope(permissionScope);
+        }
 
         if (exists) {
             for (ImportCallback cb : updateCallbacks) {

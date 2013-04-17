@@ -25,4 +25,5 @@ public class Entities {
     public static final String SYSTEM = "system";
     public static final String MAINTENANCE_EVENT ="maintenanceEvent";
     public static final String UNDETERMINED_RELATIONSHIP = "relationship";
+    public static final String AUTHORITATIVE_SET = "authoritativeSet";
 }

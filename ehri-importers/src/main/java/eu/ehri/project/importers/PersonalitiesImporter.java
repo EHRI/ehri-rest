@@ -60,7 +60,7 @@ public class PersonalitiesImporter extends XmlImporter<Object> {
         String id = generator.generateId(EntityClass.HISTORICAL_AGENT, SystemScope.getInstance(), unit);
         boolean exists = manager.exists(id);
         HistoricalAgent frame = persister.createOrUpdate(unit.withId(id), HistoricalAgent.class);
-        frame.setAuthorativeSet(authorativeSet);
+        frame.setAuthoritativeSet(authorativeSet);
         frame.setPermissionScope(authorativeSet);
         
         if (exists) {

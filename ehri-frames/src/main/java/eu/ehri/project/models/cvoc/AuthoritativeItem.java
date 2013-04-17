@@ -14,8 +14,8 @@ import eu.ehri.project.models.annotations.Fetch;
 public interface AuthoritativeItem {
     @Fetch(AuthoritativeSet.IN_SET)
     @Adjacency(label = Vocabulary.IN_CVOC)
-    public AuthoritativeSet getAuthorativeSet();
+    public AuthoritativeSet getAuthoritativeSet();
 
     @Adjacency(label = AuthoritativeSet.IN_SET)
-    public void setAuthorativeSet(final AuthoritativeSet authorativeSet);
+    public void setAuthoritativeSet(final AuthoritativeSet authoritativeSet);
 }

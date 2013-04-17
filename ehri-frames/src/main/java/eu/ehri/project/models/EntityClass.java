@@ -2,6 +2,7 @@ package eu.ehri.project.models;
 
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.models.base.Frame;
+import eu.ehri.project.models.cvoc.AuthoritativeSet;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.ConceptDescription;
 import eu.ehri.project.models.cvoc.Vocabulary;
@@ -26,6 +27,7 @@ public enum EntityClass {
     HISTORICAL_AGENT(Entities.HISTORICAL_AGENT, "a", HistoricalAgent.class, IdentifiableEntityIdGenerator.INSTANCE),
     GROUP(Entities.GROUP, "g", Group.class, IdentifiableEntityIdGenerator.INSTANCE),
     USER_PROFILE(Entities.USER_PROFILE, "u", UserProfile.class, IdentifiableEntityIdGenerator.INSTANCE),
+    AUTHORITATIVE_SET(Entities.AUTHORITATIVE_SET, "as", AuthoritativeSet.class, IdentifiableEntityIdGenerator.INSTANCE),
     
     // Generic entities.
     DOCUMENT_DESCRIPTION(Entities.DOCUMENT_DESCRIPTION, "dd", DocumentDescription.class),

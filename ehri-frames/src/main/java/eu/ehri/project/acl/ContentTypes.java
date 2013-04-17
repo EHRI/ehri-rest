@@ -13,6 +13,7 @@ public enum ContentTypes {
     USER_PROFILE(Entities.USER_PROFILE),
     ANNOTATION(Entities.ANNOTATION),
     SYSTEM_EVENT(Entities.SYSTEM_EVENT),
+    AUTHORITATIVE_SET(Entities.AUTHORITATIVE_SET),
     CVOC_VOCABULARY(Entities.CVOC_VOCABULARY),
     CVOC_CONCEPT(Entities.CVOC_CONCEPT);
     
@@ -37,6 +38,6 @@ public enum ContentTypes {
             if (c.getName().equals(name))
                 return c;
         }
-        throw new IllegalArgumentException("Invalid content type type: " + name);
+        throw new IllegalArgumentException("Invalid content type type: '" + name + "'");
     }
 }
