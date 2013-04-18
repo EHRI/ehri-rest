@@ -44,13 +44,14 @@ public interface Description extends NamedEntity {
     @Adjacency(label = MUTATES)
     public abstract void addMaintenanceEvent(final MaintenanceEvent maintenanceEvent);
     
+    @Fetch(RELATES_TO)
     @Dependent
-    @Adjacency(label = RELATES_TO, direction=Direction.IN)
-    public abstract Iterable<UndeterminedRelationship> getUndeterminedRelationships();
+    @Adjacency(label = RELATES_TO)
+    public Iterable<UndeterminedRelationship> getUndeterminedRelationships();
 
     @Adjacency(label = RELATES_TO)
-    public abstract void setUndeterminedRelationships(final Iterable<UndeterminedRelationship> relationship);
+    public void setUndeterminedRelationships(final Iterable<UndeterminedRelationship> relationship);
 
     @Adjacency(label = RELATES_TO)
-    public abstract void addUndeterminedRelationship(final UndeterminedRelationship relationship);
+    public void addUndeterminedRelationship(final UndeterminedRelationship relationship);
 }
