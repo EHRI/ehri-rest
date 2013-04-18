@@ -32,6 +32,7 @@ public class GhettosImporterTest extends AbstractImporterTest{
         Vocabulary vocabulary = manager.getFrame("cvoc1", Vocabulary.class);
         
         int count = getNodeCount(graph);
+        int voccount = toList(vocabulary.getConcepts()).size();
         InputStream ios = ClassLoader.getSystemResourceAsStream(SKOS_FILE);
         SkosCoreCvocImporter importer = new SkosCoreCvocImporter(graph, validUser, vocabulary);
         importer.setTolerant(true);
@@ -41,18 +42,30 @@ public class GhettosImporterTest extends AbstractImporterTest{
         /*  How many new nodes will have been created? We should have
         * 2 more Concepts
        	* 4 more ConceptDescription
+        * 4 UndeterminedRelationships
 	* 3 more import Event links (2 for every Unit, 1 for the User)
         * 1 more import Event
         */
-        assertEquals(count + 10, getNodeCount(graph));
-        // get a top concept
+        assertEquals(count + 14, getNodeCount(graph));
+        assertEquals(voccount+2, toList(vocabulary.getConcepts()).size());
 
+        // get a top concept
         String skosConceptId = "http://ehri01.dans.knaw.nl/ghettos/0";
         Query<Concept> query = new Query<Concept>(graph, Concept.class);
+        
         // Query for document identifier.
         List<Concept> list = toList(query.setLimit(1).list(
                 IdentifiableEntity.IDENTIFIER_KEY, skosConceptId, validUser));
         // and print the tree
+        Concept ghetto0 = list.get(0);
+//      <geo:lat>52.43333333333333</geo:lat>
+//	<geo:long>20.716666666666665</geo:long>
+        Iterable<Description> ghetto0desc = ghetto0.getDescriptions();
+        for (Description d : ghetto0desc) {
+           assertEquals("52.43333333333333", d.asVertex().getProperty("latitude"));
+           assertEquals("20.716666666666665", d.asVertex().getProperty("longitude"));
+        }
+        
         printConceptTree(System.out, list.get(0));
         
         // output RDF

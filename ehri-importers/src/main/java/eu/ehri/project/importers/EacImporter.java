@@ -168,7 +168,6 @@ public class EacImporter extends EaImporter {
         AnnotationViews ann = new AnnotationViews(framedGraph, permissionScope);
         Description histdesc = null;
         //we need the id (not the identifier) of the description, this requires some checking
-        //is thisAgentDescription the one we just created?
         for (Description thisAgentDescription : frame.getDescriptions()) {
             //is thisAgentDescription the one we just created?
             if (thisAgentDescription.asVertex().getProperty(IdentifiableEntity.IDENTIFIER_KEY).equals(descBundle.getData().get(IdentifiableEntity.IDENTIFIER_KEY))) {
@@ -184,8 +183,6 @@ public class EacImporter extends EaImporter {
                 //our own ica-atom generated eac files have as target of a relation the url of the ica-atom
                 //this must be matched back to descriptionUrl property in a previously created HistoricalAgentDescription
                 String targetUrl = rel.asVertex().getProperty(ANNOTATION_TARGET).toString();
-                //Iterable<Vertex> docs = manager.getVertices("descriptionUrl", targetUrl,
-                // EntityClass.HISTORICAL_AGENT);
                 Iterable<Vertex> docs = framedGraph.getVertices("descriptionUrl", targetUrl);
                 if (docs.iterator().hasNext()) {
                     DescribedEntity targetEntity = framedGraph.frame(docs.iterator().next(), Description.class).getEntity();
