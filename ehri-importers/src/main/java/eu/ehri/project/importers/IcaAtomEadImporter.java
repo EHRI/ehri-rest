@@ -75,7 +75,8 @@ public class IcaAtomEadImporter extends EaImporter {
         for (Map<String, Object> dpb : extractDates(itemData)) {
             descBundle=descBundle.withRelation(TemporalEntity.HAS_DATE, new Bundle(EntityClass.DATE_PERIOD, dpb));
         }
-        for (Map<String, Object> rel : extractRelations(itemData, unit.getData().get(IdentifiableEntity.IDENTIFIER_KEY).toString())) {
+        for (Map<String, Object> rel : extractRelations(itemData, (String)unit.getData().get(IdentifiableEntity
+                .IDENTIFIER_KEY))) {
             logger.debug("relation found " + rel.get(IdentifiableEntity.IDENTIFIER_KEY));
             descBundle = descBundle.withRelation(Description.RELATES_TO, new Bundle(EntityClass.UNDETERMINED_RELATIONSHIP, rel));
         }
@@ -129,7 +130,7 @@ public class IcaAtomEadImporter extends EaImporter {
                         list.add(createRelationNode(key, body, objectIdentifier));
                     }
                 } else {
-                    list.add(createRelationNode(key, data.get(key).toString(), objectIdentifier));
+                    list.add(createRelationNode(key, (String)data.get(key), objectIdentifier));
                 }
             }
         }
