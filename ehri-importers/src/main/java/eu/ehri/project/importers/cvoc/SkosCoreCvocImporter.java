@@ -206,43 +206,50 @@ public class SkosCoreCvocImporter {
             	  Element element = (Element) childNode; // it should be!
             	  
             	  if (isConceptElement(element)) {
-                      logger.debug("---------------");
-            		 // extract ... data for concept 
-            		 // in Map<String, Object>
-            		 // then use BundleDAO.createOrUpdate and use the framed Entity = CvocConcept  
-            		 // see: AbstractImporter.importItem
-            		   
-            		 Bundle unit = constructBundleForConcept(element);
-        	        
-            		 BundleDAO persister = new BundleDAO(framedGraph);
-            		 Concept frame = persister.createOrUpdate(unit,
-            				 Concept.class);
-            		 
-            		 // Set the vocabulary/concept relationship
-            		 PermissionScope scope = vocabulary;
-            		 frame.setVocabulary(vocabulary);
-            		 frame.setPermissionScope(scope);
+                      try {
+                          logger.debug("---------------");
+                          // extract ... data for concept
+                          // in Map<String, Object>
+                          // then use BundleDAO.createOrUpdate and use the framed Entity = CvocConcept
+                          // see: AbstractImporter.importItem
 
-            		 // when concept was successfully persisted!
-            		 action.addSubjects(frame);
-            		 manifest.addCreated();
-            		 
-            	     // Create and add a ConceptPlaceholder 
-            		 // for making the vocabulary (relation) structure in the next step
-            		 List<String> broaderIds = getBroaderConceptIds(element);
-            		 logger.debug("Concept has " + broaderIds.size() 
-            				 + " broader ids: " + broaderIds.toString());
-            		 List<String> relatedIds = getRelatedConceptIds(element);
-            		 logger.debug("Concept has " + relatedIds.size() 
-            				 + " related ids: " + relatedIds.toString());
-            		 
-            		 String storeId = unit.getId();//id;
-//            		 String skosId = frame.getId(); // the identifier used in the Skos file and is used for internal
-                         String skosId = unit.getData().get(IdentifiableEntity.IDENTIFIER_KEY).toString();
-            		 // referal
-            		 logger.debug("Concept store id = " + storeId + ", skos id = " + skosId);
-            		 conceptLookup.put(skosId, new ConceptPlaceholder(storeId, broaderIds, relatedIds, frame));
-            	  } 
+                          Bundle unit = constructBundleForConcept(element);
+
+                          BundleDAO persister = new BundleDAO(framedGraph);
+                          Concept frame = persister.createOrUpdate(unit,
+                                  Concept.class);
+
+                          // Set the vocabulary/concept relationship
+                          PermissionScope scope = vocabulary;
+                          frame.setVocabulary(vocabulary);
+                          frame.setPermissionScope(scope);
+
+                          // when concept was successfully persisted!
+                          action.addSubjects(frame);
+                          manifest.addCreated();
+
+                          // Create and add a ConceptPlaceholder
+                          // for making the vocabulary (relation) structure in the next step
+                          List<String> broaderIds = getBroaderConceptIds(element);
+                          logger.debug("Concept has " + broaderIds.size()
+                                  + " broader ids: " + broaderIds.toString());
+                          List<String> relatedIds = getRelatedConceptIds(element);
+                          logger.debug("Concept has " + relatedIds.size()
+                                  + " related ids: " + relatedIds.toString());
+
+                          String storeId = unit.getId();//id;
+                          String skosId = (String)unit.getData().get(IdentifiableEntity.IDENTIFIER_KEY);
+                          // referal
+                          logger.debug("Concept store id = " + storeId + ", skos id = " + skosId);
+                          conceptLookup.put(skosId, new ConceptPlaceholder(storeId, broaderIds, relatedIds, frame));
+                      } catch (ValidationError validationError) {
+                          if (tolerant) {
+                              logger.error(validationError.getMessage());
+                          } else {
+                              throw validationError;
+                          }
+                      }
+                  }
              }
          }    	
     }
