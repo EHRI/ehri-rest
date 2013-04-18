@@ -22,9 +22,9 @@ import org.w3c.dom.Document;
 
 /**
  * Class that represents a graph entity and subtree relations.
- * 
+ *
  * @author michaelb
- * 
+ *
  */
 public final class Bundle {
     private final String id;
@@ -42,7 +42,7 @@ public final class Bundle {
 
     /**
      * Constructor.
-     * 
+     *
      * @param id
      * @param type
      * @param data
@@ -52,13 +52,13 @@ public final class Bundle {
             final ListMultimap<String, Bundle> relations) {
         this.id = id;
         this.type = type;
-        this.data = ImmutableMap.copyOf(data);
+        this.data = filterData(data);
         this.relations = ImmutableListMultimap.copyOf(relations);
     }
 
     /**
      * Constructor for bundle without existing id.
-     * 
+     *
      * @param type
      * @param data
      * @param relations
@@ -70,7 +70,7 @@ public final class Bundle {
 
     /**
      * Constructor for just a type.
-     * 
+     *
      * @param type
      */
     public Bundle(EntityClass type) {
@@ -80,7 +80,7 @@ public final class Bundle {
 
     /**
      * Constructor for bundle without existing id or relations.
-     * 
+     *
      * @param type
      * @param data
      */
@@ -91,7 +91,7 @@ public final class Bundle {
     /**
      * Get the id of the bundle's graph vertex (or null if it does not yet
      * exist.
-     * 
+     *
      * @return
      */
     public String getId() {
@@ -100,7 +100,7 @@ public final class Bundle {
 
     /**
      * Get a bundle with the given id.
-     * 
+     *
      * @param id
      */
     public Bundle withId(String id) {
@@ -111,7 +111,7 @@ public final class Bundle {
     /**
      * Get the type of entity this bundle represents as per the target class's
      * entity type key.
-     * 
+     *
      * @return
      */
     public EntityClass getType() {
@@ -120,7 +120,7 @@ public final class Bundle {
 
     /**
      * Get a data value.
-     * 
+     *
      * @return
      */
     public Object getDataValue(String key) {
@@ -130,7 +130,7 @@ public final class Bundle {
 
     /**
      * Set a value in the bundle's data.
-     * 
+     *
      * @param key
      * @param value
      * @return
@@ -147,7 +147,7 @@ public final class Bundle {
 
     /**
      * Remove a value in the bundle's data.
-     * 
+     *
      * @param key
      * @return
      */
@@ -159,7 +159,7 @@ public final class Bundle {
 
     /**
      * Get the bundle data.
-     * 
+     *
      * @return
      */
     public Map<String, Object> getData() {
@@ -168,7 +168,7 @@ public final class Bundle {
 
     /**
      * Set the entire data map for this bundle.
-     * 
+     *
      * @param data
      * @return
      */
@@ -178,7 +178,7 @@ public final class Bundle {
 
     /**
      * Get the bundle's relation bundles.
-     * 
+     *
      * @return
      */
     public ListMultimap<String, Bundle> getRelations() {
@@ -187,7 +187,7 @@ public final class Bundle {
 
     /**
      * Set entire set of relations.
-     * 
+     *
      * @param relations
      * @return
      */
@@ -197,7 +197,7 @@ public final class Bundle {
 
     /**
      * Get a set of relations.
-     * 
+     *
      * @param relation
      * @return
      */
@@ -207,7 +207,7 @@ public final class Bundle {
 
     /**
      * Set bundles for a particular relation.
-     * 
+     *
      * @param relation
      * @param others
      * @return
@@ -221,7 +221,7 @@ public final class Bundle {
 
     /**
      * Add a bundle for a particular relation.
-     * 
+     *
      * @param relation
      * @param other
      */
@@ -234,7 +234,7 @@ public final class Bundle {
 
     /**
      * Check if this bundle contains the given relation set.
-     * 
+     *
      * @param relation
      * @return
      */
@@ -244,7 +244,7 @@ public final class Bundle {
 
     /**
      * Remove a single relation.
-     * 
+     *
      * @param relation
      * @return
      */
@@ -256,7 +256,7 @@ public final class Bundle {
 
     /**
      * Remove a set of relationships.
-     * 
+     *
      * @param relation
      * @return
      */
@@ -268,7 +268,7 @@ public final class Bundle {
 
     /**
      * Get the target class.
-     * 
+     *
      * @return
      */
     public Class<?> getBundleClass() {
@@ -278,7 +278,7 @@ public final class Bundle {
     /**
      * Return a list of names for mandatory properties, as represented in the
      * graph.
-     * 
+     *
      * @return
      */
     public Iterable<String> getPropertyKeys() {
@@ -287,7 +287,7 @@ public final class Bundle {
 
     /**
      * Return a list of property keys which must be unique.
-     * 
+     *
      * @return
      */
     public Iterable<String> getUniquePropertyKeys() {
@@ -296,7 +296,7 @@ public final class Bundle {
 
     /**
      * Create a bundle from raw data.
-     * 
+     *
      * @param data
      * @return
      * @throws DeserializationError
@@ -307,7 +307,7 @@ public final class Bundle {
 
     /**
      * Serialize a bundle to raw data.
-     * 
+     *
      * @return
      */
     public Map<String, Object> toData() {
@@ -316,7 +316,7 @@ public final class Bundle {
 
     /**
      * Create a bundle from a (JSON) string.
-     * 
+     *
      * @param json
      * @return
      * @throws DeserializationError
@@ -414,5 +414,20 @@ public final class Bundle {
         Hasher hasher = hf.newHasher();
         hasher.putObject(this, bundleFunnel);
         return hasher.hash();
+    }
+
+    /**
+     * Return an immutable copy of the given data map with nulls removed.
+     * @param data
+     * @return
+     */
+    private ImmutableMap<String, Object> filterData(Map<String, Object> data) {
+        Map<String,Object> filtered = Maps.newHashMap();
+        for (Map.Entry<? extends String,Object> entry : data.entrySet()) {
+            if (entry.getValue() != null) {
+                filtered.put(entry.getKey(), entry.getValue());
+            }
+        }
+        return ImmutableMap.copyOf(filtered);
     }
 }

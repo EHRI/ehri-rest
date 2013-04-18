@@ -17,6 +17,7 @@ import java.util.Map;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotSame;
 import static junit.framework.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 
 /**
  * User: michaelb
@@ -37,6 +38,14 @@ public class BundleTest {
     @After
     public void tearDown() throws Exception {
 
+    }
+
+    @Test
+    public void testCreationWithNullValues() throws Exception {
+        Map<String,Object> data = Maps.newHashMap();
+        data.put("identifier", null);
+        Bundle b2 = new Bundle(EntityClass.DOCUMENTARY_UNIT, data);
+        assertSame(data.get("identifier"), b2.getDataValue("identifier"));
     }
 
     @Test
