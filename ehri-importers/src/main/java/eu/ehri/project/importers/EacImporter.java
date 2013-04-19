@@ -156,12 +156,12 @@ public class EacImporter extends EaImporter {
      * Tries to resolve the undetermined relationships for IcaAtoM eac files by iterating through all UndeterminedRelationships,
      * finding the DescribedEntity meant by the 'targetUrl' in the Relationship and creating an Annotation for it.
      *
-     * @param id
+     * @param historicalAgentId
      * @param frame
      * @param descBundle
      * @throws ValidationError
      */
-    private void solveUndeterminedRelationships(String id, HistoricalAgent frame, Bundle descBundle) throws ValidationError {
+    private void solveUndeterminedRelationships(String historicalAgentId, HistoricalAgent frame, Bundle descBundle) throws ValidationError {
         //Try to resolve the undetermined relationships
         //we can only create the annotations after the HistoricalAgent and it Description have been added to the graph,
         //so they have id's. 
@@ -185,14 +185,28 @@ public class EacImporter extends EaImporter {
                 String targetUrl = rel.asVertex().getProperty(ANNOTATION_TARGET).toString();
                 Iterable<Vertex> docs = framedGraph.getVertices("descriptionUrl", targetUrl);
                 if (docs.iterator().hasNext()) {
+                    String annotationType = rel.asVertex().getProperty(Annotation.ANNOTATION_TYPE).toString();
                     DescribedEntity targetEntity = framedGraph.frame(docs.iterator().next(), Description.class).getEntity();
                     try {
                         Bundle annotationBundle = new Bundle(EntityClass.ANNOTATION)
-                                .withDataValue(Annotation.ANNOTATION_TYPE, rel.asVertex().getProperty(Annotation.ANNOTATION_TYPE))
+                                .withDataValue(Annotation.ANNOTATION_TYPE, annotationType)
                                 .withDataValue(Annotation.NOTES_BODY, rel.asVertex().getProperty(Annotation
                                         .NOTES_BODY));
-                        Annotation annotation = ann.createLink(id, rel.getId(), annotationBundle, userProfile);
+                        Annotation annotation = ann.createLink(historicalAgentId, rel.getId(), annotationBundle, userProfile);
                         targetEntity.addAnnotation(annotation);
+                        
+                         //attach the mirror Undetermined Relationship as a body to this Annotation
+                        String thisUrl = descBundle.getData().get("descriptionUrl").toString();
+                        for(Description targetEntityDescription : targetEntity.getDescriptions()){
+                            for(UndeterminedRelationship remoteRel : Sets.newHashSet(targetEntityDescription.getUndeterminedRelationships())){
+                                //check that both the body targeturl and the type are the same
+                                if(thisUrl.equals(remoteRel.asVertex().getProperty(ANNOTATION_TARGET).toString())
+                                        && annotationType.equals(remoteRel.asVertex().getProperty(Annotation.ANNOTATION_TYPE).toString())){
+                                    annotation.addSource(remoteRel);
+                                }
+                            }
+                        }
+
                     } catch (ItemNotFound ex) {
                         logger.error(ex.getMessage());
                         throw new RuntimeException(ex);

@@ -33,12 +33,12 @@ public interface Annotation extends AnnotatableEntity, AccessibleEntity {
     @Adjacency(label = ANNOTATES)
     public Iterable<AnnotatableEntity> getTargets();
     
-    @Fetch(HAS_SOURCE)
+   @Fetch(HAS_SOURCE)
     @Adjacency(label = HAS_SOURCE)
-    public AnnotatableEntity getSource();
+    public Iterable<AnnotatableEntity> getSources();
 
     @Adjacency(label = HAS_SOURCE)
-    public void setSource(final Annotator annotator);
+    public void addSource(final Annotator annotator);
 
     @Property(NOTES_BODY)
     public String getBody();
