@@ -39,20 +39,6 @@ public class LinkManager {
             }
         }
 
-        // Damn, try and go the other way, from the
-        // item - annotation-with-rel-body - other item
-        // Remove this when linking is better figured out.
-        for (Annotation annotation : item.getAnnotations()) {
-            AnnotatableEntity source = annotation.getSource();
-            if (source != null && manager.getEntityClass(source).equals(EntityClass.UNDETERMINED_RELATIONSHIP)) {
-                for (AnnotatableEntity otherItem : annotation.getTargets()) {
-                    if (!otherItem.asVertex().equals(item.asVertex())) {
-                        return Optional.fromNullable(otherItem.asVertex());
-                    }
-                }
-            }
-        }
-
         return Optional.absent();
     }
 }
