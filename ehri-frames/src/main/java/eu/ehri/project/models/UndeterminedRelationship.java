@@ -4,6 +4,8 @@
  */
 package eu.ehri.project.models;
 
+import com.tinkerpop.blueprints.Direction;
+import com.tinkerpop.frames.Adjacency;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Annotator;
@@ -16,8 +18,9 @@ import eu.ehri.project.models.base.Annotator;
  * @author linda
  */
 @EntityType(EntityClass.UNDETERMINED_RELATIONSHIP)
-public interface UndeterminedRelationship extends AccessibleEntity, Annotator{
-    
+public interface UndeterminedRelationship extends AccessibleEntity, Annotator {
+    @Adjacency(label = Annotation.HAS_SOURCE, direction = Direction.IN)
+    public Iterable<Annotation> getLinkedAnnotations();
 }
 
 

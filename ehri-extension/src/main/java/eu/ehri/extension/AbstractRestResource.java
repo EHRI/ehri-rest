@@ -3,6 +3,7 @@ package eu.ehri.extension;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
+import java.util.Map;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
@@ -236,6 +237,39 @@ public abstract class AbstractRestResource {
                     }
                 }
                 g.writeEndArray();
+                g.close();
+            }
+        };
+    }
+
+    /**
+     * Return a streaming response from an iterable, using the given
+     * entity converter.
+     *
+     * FIXME: I shouldn't be here, or the other method should. Redesign API.
+     *
+     * @param map
+     * @return
+     */
+    protected StreamingOutput streamingVertexMap(
+            final Map<String, Vertex> map, final Serializer serializer) {
+        final ObjectMapper mapper = new ObjectMapper();
+        final JsonFactory f = new JsonFactory();
+        return new StreamingOutput() {
+            @Override
+            public void write(OutputStream arg0) throws IOException,
+                    WebApplicationException {
+                JsonGenerator g = f.createJsonGenerator(arg0);
+                g.writeStartObject();
+                for (Map.Entry<String,Vertex> keypair: map.entrySet()) {
+                    try {
+                        g.writeFieldName(keypair.getKey());
+                        mapper.writeValue(g, serializer.vertexToData(keypair.getValue()));
+                    } catch (SerializationError e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+                g.writeEndObject();
                 g.close();
             }
         };

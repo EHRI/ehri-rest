@@ -30,10 +30,10 @@ public interface Annotation extends AnnotatableEntity, AccessibleEntity {
     @Adjacency(label = Annotator.HAS_ANNOTATION, direction = Direction.IN)
     public Annotator setAnnotator(final Annotator annotator);
 
+    @Fetch(ANNOTATES)
     @Adjacency(label = ANNOTATES)
     public Iterable<AnnotatableEntity> getTargets();
     
-   @Fetch(HAS_SOURCE)
     @Adjacency(label = HAS_SOURCE)
     public Iterable<AnnotatableEntity> getSources();
 

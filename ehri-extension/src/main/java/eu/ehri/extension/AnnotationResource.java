@@ -1,6 +1,8 @@
 package eu.ehri.extension;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -9,7 +11,15 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.Response.Status;
 
+import com.google.common.base.Optional;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.exceptions.*;
+import eu.ehri.project.models.UndeterminedRelationship;
+import eu.ehri.project.models.base.*;
+import eu.ehri.project.persistance.LinkManager;
+import eu.ehri.project.persistance.Serializer;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 
@@ -19,7 +29,6 @@ import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.models.Annotation;
-import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.views.AnnotationViews;
 
@@ -212,6 +221,38 @@ public class AnnotationResource extends
     }
 
     /**
+     * Returns a list of items linked to the given description.
+     *
+     * @param id
+     * @return
+     * @throws ItemNotFound
+     * @throws BadRequester
+     * @throws PermissionDenied
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/linksFor/{id:.+}")
+    public StreamingOutput listRelatedItems(@PathParam("id") String id) throws ItemNotFound {
+        // TODO: ACL!!!
+        Description d = manager.getFrame(id, Description.class);
+        DescribedEntity item = d.getEntity();
+        LinkManager linkManager = new LinkManager(graph);
+        if (item == null) {
+            Response.status(Status.BAD_REQUEST.getStatusCode()).build();
+        }
+
+        Map<String,Vertex> rels = Maps.newHashMap();
+        for (UndeterminedRelationship rel : d.getUndeterminedRelationships()) {
+            Optional<Vertex> linkedItem = linkManager.getLinkedItem(item, rel);
+            if (linkedItem.isPresent()) {
+                rels.put(rel.getId(), linkedItem.get());
+            }
+        }
+
+        return streamingVertexMap(rels, new Serializer(graph));
+    }
+
+    /**
      * Delete an annotation.
      * @param id
      * @return
@@ -222,7 +263,7 @@ public class AnnotationResource extends
      */
     @DELETE
     @Path("/{id:.+}")
-    public Response deleteAgent(@PathParam("id") String id)
+    public Response deleteAnnotation(@PathParam("id") String id)
             throws AccessDenied, PermissionDenied, ItemNotFound, ValidationError,
             BadRequester {
         return delete(id);
