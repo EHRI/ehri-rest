@@ -35,6 +35,7 @@ public class EacImporterTest extends AbstractImporterTest {
                 EacHandler.class).setTolerant(Boolean.TRUE).importFile(ClassLoader.getSystemResourceAsStream("geheime-feldpolizei.xml"), logMessage);
         new SaxImportManager(graph, SystemScope.getInstance(), validUser, EacImporter.class,
                 EacHandler.class).setTolerant(Boolean.TRUE).importFile(ClassLoader.getSystemResourceAsStream("ss-rasse.xml"), logMessage);
+        //import abwehr last, so it will find the other UR's
         ImportLog log = new SaxImportManager(graph, SystemScope.getInstance(), validUser, EacImporter.class,
                 EacHandler.class).setTolerant(Boolean.TRUE).importFile(ios, logMessage);
         printGraph(graph);
@@ -50,6 +51,7 @@ public class EacImporterTest extends AbstractImporterTest {
             for (AnnotatableEntity e : a.getTargets()){
                 logger.debug(e.getType());
             }
+            assertEquals(2, toList(a.getSources()).size());
         }
         assertEquals(2, toList(abwehr.getAnnotations()).size());
 

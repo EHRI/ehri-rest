@@ -34,6 +34,7 @@ import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.exceptions.InvalidXmlDocument;
 import eu.ehri.project.importers.exceptions.InvalidInputFormatError;
+import eu.ehri.project.models.Annotation;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.cvoc.Concept;
@@ -261,31 +262,38 @@ public class SkosCoreCvocImporter {
      * @throws ValidationError
      */
     private Bundle constructBundleForConcept(Element element) throws ValidationError {
-		  Bundle unit = new Bundle(EntityClass.CVOC_CONCEPT,
-				  extractCvocConcept(element));
-		 
-		  // add the description data to the concept as relationship
-		  Map<String, Object> descriptions = extractCvocConceptDescriptions(element);
-		  for (String key : descriptions.keySet()) {
-			  logger.debug("description for: " + key);
-			  Map<String, Object> d = (Map<String, Object>)descriptions.get(key);
-			  logger.debug("languageCode = " + d.get(Description.LANGUAGE_CODE));
+        Bundle unit = new Bundle(EntityClass.CVOC_CONCEPT,
+                extractCvocConcept(element));
 
-			  // NOTE maybe test if prefLabel is there?
+        // add the description data to the concept as relationship
+        Map<String, Object> descriptions = extractCvocConceptDescriptions(element);
 
-			  unit = unit.withRelation(Description.DESCRIBES, new Bundle(
-					  EntityClass.CVOC_CONCEPT_DESCRIPTION, d));
-		  }
-		  // NOTE the following gives a lot of output!
-		  //logger.debug("Bundle as JSON: \n" + unit.toJson());
+        for (String key : descriptions.keySet()) {
+            logger.debug("description for: " + key);
+            Map<String, Object> d = (Map<String, Object>) descriptions.get(key);
+            logger.debug("languageCode = " + d.get(Description.LANGUAGE_CODE));
 
-		  // get an ID for the GraphDB
-		  IdGenerator generator = GenericIdGenerator.INSTANCE;//AccessibleEntityIdGenerator.INSTANCE;
-		  PermissionScope scope = vocabulary;
+            Bundle descBundle = new Bundle(EntityClass.CVOC_CONCEPT_DESCRIPTION, d);
+            Map<String, Object> rel = extractRelations(element, "owl:sameAs");
+            if(!rel.isEmpty())
+            descBundle = descBundle.withRelation(Description.RELATES_TO, new Bundle(EntityClass.UNDETERMINED_RELATIONSHIP, rel));
 
-          String id = generator.generateId(EntityClass.CVOC_CONCEPT, scope, unit);
-		  unit = unit.withId(id);
-		  return unit;
+            // NOTE maybe test if prefLabel is there?
+            unit = unit.withRelation(Description.DESCRIBES, descBundle);
+        }
+
+
+
+        // NOTE the following gives a lot of output!
+        //logger.debug("Bundle as JSON: \n" + unit.toJson());
+
+        // get an ID for the GraphDB
+        IdGenerator generator = GenericIdGenerator.INSTANCE;//AccessibleEntityIdGenerator.INSTANCE;
+        PermissionScope scope = vocabulary;
+
+        String id = generator.generateId(EntityClass.CVOC_CONCEPT, scope, unit);
+        unit = unit.withId(id);
+        return unit;
     }
     
     /**
@@ -521,6 +529,23 @@ public class SkosCoreCvocImporter {
         return dataMap;
     }
 
+    private Map<String, Object> extractRelations(Element element, String skosName) {
+        Map<String, Object> relationNode = new HashMap<String, Object>();
+
+        NodeList textNodeList = element.getElementsByTagName(skosName);
+        for (int i = 0; i < textNodeList.getLength(); i++) {
+            Node textNode = textNodeList.item(i);
+            // get value
+            String text = textNode.getTextContent();
+            logger.debug("text: \"" + text + "\", skos name: " + skosName);
+
+            // add to all descriptionData maps
+            relationNode.put(Annotation.ANNOTATION_TYPE, skosName);
+            relationNode.put("target", text);
+            relationNode.put(IdentifiableEntity.IDENTIFIER_KEY, java.util.UUID.randomUUID().toString());
+        }
+        return relationNode;
+    }
     /**
      * Extract the Descriptions information for a concept
      * 
@@ -532,8 +557,7 @@ public class SkosCoreCvocImporter {
         Map<String, Object> descriptionData = new HashMap<String, Object>(); 
         
         // one and only one
-        extractAndAddSingleValuedTextToDescriptionData(descriptionData, 
-        		Description.NAME, "skos:prefLabel", conceptElement);
+        extractAndAddToLanguageMapSingleValuedTextToDescriptionData(descriptionData, Description.NAME, "skos:prefLabel", conceptElement);
         // multiple alternatives is logical
         extractAndAddMultiValuedTextToDescriptionData(descriptionData, 
         		ConceptDescription.ALTLABEL, "skos:altLabel", conceptElement);
@@ -543,12 +567,40 @@ public class SkosCoreCvocImporter {
         // just allow multiple, its not forbidden by Skos
         extractAndAddMultiValuedTextToDescriptionData(descriptionData, 
         		ConceptDescription.DEFINITION, "skos:definition", conceptElement);
-        
+        //<geo:lat>52.43333333333333</geo:lat>
+        extractAndAddToAllMapsSingleValuedTextToDescriptionData(descriptionData, "latitude", "geo:lat", conceptElement);
+	//<geo:long>20.716666666666665</geo:long>
+        extractAndAddToAllMapsSingleValuedTextToDescriptionData(descriptionData, "longitude", "geo:long", conceptElement);
+
+        //<owl:sameAs>http://www.yadvashem.org/yv/he/research/ghettos_encyclopedia/ghetto_details.asp?cid=1</owl:sameAs>
+        //TODO: must be an UndeterminedRelation, which can then later be resolved
+
         // NOTE we could try to also add everything else, using the skos tagname as a key?
         
     	return descriptionData;
     }
+    
+    private void extractAndAddToAllMapsSingleValuedTextToDescriptionData(Map<String, Object> descriptionData, 
+            String textName, String skosName, Element conceptElement) {
+        	NodeList textNodeList = conceptElement.getElementsByTagName(skosName);
+        for(int i=0; i<textNodeList.getLength(); i++){
+        	  Node textNode = textNodeList.item(i);
+        	  // get value
+        	  String text = textNode.getTextContent();
+        	  logger.debug("text: \"" + text + "\", skos name: " + skosName + ", property: " + textName);
 
+        	  // add to all descriptionData maps
+                  for(String key : descriptionData.keySet()){
+                      Object map = descriptionData.get(key);
+                      if(map instanceof Map){
+                          ((Map<String, Object>)map).put(textName, text);
+                      }else{
+                          logger.warn(key + " no description map found");
+                      }
+                  }
+        }    
+    }
+   
     /**
      * Extract a 'single valued' textual description property and add it to the data
      * 
@@ -557,7 +609,7 @@ public class SkosCoreCvocImporter {
      * @param skosName
      * @param conceptElement
      */
-    private void extractAndAddSingleValuedTextToDescriptionData(Map<String, Object> descriptionData, 
+    private void extractAndAddToLanguageMapSingleValuedTextToDescriptionData(Map<String, Object> descriptionData, 
     		String textName, String skosName, Element conceptElement) {
 
        	NodeList textNodeList = conceptElement.getElementsByTagName(skosName);
@@ -629,7 +681,7 @@ public class SkosCoreCvocImporter {
     	}
     	return d;
     }
-        
+     
     /*** ***/
     
     /**

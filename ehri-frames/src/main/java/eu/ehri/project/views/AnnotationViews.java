@@ -72,7 +72,7 @@ public final class AnnotationViews {
     public Annotation createLink(String targetId, String sourceId, Bundle bundle, Accessor user) throws ItemNotFound, ValidationError,
             PermissionDenied {
         Annotation ann = createFor(targetId, bundle, user);
-        ann.setSource(manager.getFrame(sourceId, Annotator.class));
+        ann.addSource(manager.getFrame(sourceId, Annotator.class));
         return ann;
     }
 

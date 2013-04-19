@@ -6,6 +6,7 @@ package eu.ehri.project.models;
 
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Annotator;
 
 /**
  *
@@ -15,7 +16,7 @@ import eu.ehri.project.models.base.AccessibleEntity;
  * @author linda
  */
 @EntityType(EntityClass.UNDETERMINED_RELATIONSHIP)
-public interface UndeterminedRelationship extends AccessibleEntity{
+public interface UndeterminedRelationship extends AccessibleEntity, Annotator{
     
 }
 
