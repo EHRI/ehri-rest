@@ -27,7 +27,7 @@ function replace(){
 	local JARFILE=$name-$version.jar
 	
 	# backup any 'old' versions
-	FILES=`find $NEO4JLIB -type f -maxdepth 1 -name "$name-*.jar" -not -name $JARFILE`
+	FILES=`find $NEO4JLIB -maxdepth 1 -type f -name "$name-*.jar" -not -name $JARFILE`
 	for f in $FILES
 	do
 		echo "Rename $f to $f.bk"
