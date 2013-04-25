@@ -66,7 +66,7 @@ replace pipes 2.2.0
 replace gremlin-groovy 2.2.0
 replace gremlin-java 2.2.0
 # other stuff
-replace guava 12.0
+replace guava 14.0
 replace joda-time 2.1
 
 echo "Done."
