@@ -92,45 +92,45 @@ Now we can start the server again and check everything is working:
 
 We should get the following output (with "mike" replaced by your $USER):
 
-	```json
-	{
-	  "id" : "mike",
-	  "data" : {
-	    "name" : "mike",
-	    "identifier" : "mike"
-	  },
-	  "type" : "userProfile",
-	  "relationships" : {
-	    "lifecycleEvent" : [ {
-	      "id" : "211a5a7e-6430-4b51-b1fb-e8ba562a4118",
-	      "data" : {
-		"timestamp" : "2013-04-25T16:24:41.777+01:00",
-		"logMessage" : "Created via command-line"
-	      },
-	      "type" : "systemEvent",
-	      "relationships" : {
-		"hasActioner" : [ {
-		  "id" : "admin",
-		  "data" : {
-		    "name" : "Administrators",
-		    "identifier" : "admin"
-		  },
-		  "type" : "group",
-		  "relationships" : {
-		  }
-		} ]
-	      }
-	    } ],
-	    "belongsTo" : [ {
-	      "id" : "admin",
-	      "data" : {
-		"name" : "Administrators",
-		"identifier" : "admin"
-	      },
-	      "type" : "group",
-	      "relationships" : {
-	      }
-	    } ]
-	  }
-	}
-	```
+```json
+{
+  "id" : "mike",
+  "data" : {
+    "name" : "mike",
+    "identifier" : "mike"
+  },
+  "type" : "userProfile",
+  "relationships" : {
+    "lifecycleEvent" : [ {
+      "id" : "211a5a7e-6430-4b51-b1fb-e8ba562a4118",
+      "data" : {
+    "timestamp" : "2013-04-25T16:24:41.777+01:00",
+    "logMessage" : "Created via command-line"
+      },
+      "type" : "systemEvent",
+      "relationships" : {
+    "hasActioner" : [ {
+      "id" : "admin",
+      "data" : {
+        "name" : "Administrators",
+        "identifier" : "admin"
+      },
+      "type" : "group",
+      "relationships" : {
+      }
+    } ]
+      }
+    } ],
+    "belongsTo" : [ {
+      "id" : "admin",
+      "data" : {
+    "name" : "Administrators",
+    "identifier" : "admin"
+      },
+      "type" : "group",
+      "relationships" : {
+      }
+    } ]
+  }
+}
+```
