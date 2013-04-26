@@ -206,6 +206,12 @@
               data:
                 startDate: !!str 1939-01-01
                 endDate: !!str 1945-01-01
+          relatesTo:
+            - id: ur1
+              type: relationship
+              data:
+                description: test
+                category: associative
       - id: cd1-2
         type: documentDescription
         data:
@@ -352,6 +358,28 @@
   relationships:
     hasAnnotationTarget: c1
     hasAnnotationBody: mike
+
+--- # Links
+ - id: link1
+   type: link
+   data:
+     category: associative
+     body: Test link
+   relationships:
+     hasLinkTarget: c1
+     hasLinkTarget: c4
+     hasLinker: mike
+
+ - id: link2
+   type: link
+   data:
+     category: associative
+     body: Test link
+   relationships:
+     hasLinkTarget: c1
+     hasLinkTarget: a1
+     hasLinkBody: ur1
+     hasLinker: mike
 
 --- # Permission grants
 

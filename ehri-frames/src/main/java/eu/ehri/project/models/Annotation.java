@@ -33,7 +33,8 @@ public interface Annotation extends AnnotatableEntity, AccessibleEntity {
     @Fetch(ANNOTATES)
     @Adjacency(label = ANNOTATES)
     public Iterable<AnnotatableEntity> getTargets();
-    
+
+    @Fetch(HAS_SOURCE)
     @Adjacency(label = HAS_SOURCE)
     public Iterable<AnnotatableEntity> getSources();
 

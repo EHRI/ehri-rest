@@ -5,22 +5,21 @@ import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.SystemScope;
+import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.models.Annotation;
-import eu.ehri.project.models.HistoricalAgent;
-import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.UndeterminedRelationship;
+import eu.ehri.project.models.*;
 import eu.ehri.project.models.base.*;
 import eu.ehri.project.models.idgen.IdentifiableEntityIdGenerator;
 import eu.ehri.project.models.idgen.IdGenerator;
 import eu.ehri.project.persistance.Bundle;
-import eu.ehri.project.views.AnnotationViews;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import eu.ehri.project.views.impl.CrudViews;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -115,21 +114,22 @@ public class EacImporter extends EaImporter {
         return frame;
 
     }
+
     @Override
     protected Map<String, Object> extractUnitDescription(Map<String, Object> itemData, EntityClass entity) {
         Map<String, Object> description = new HashMap<String, Object>();
         for (String key : itemData.keySet()) {
             if (key.equals("descriptionIdentifier")) {
                 description.put(IdentifiableEntity.IDENTIFIER_KEY, itemData.get(key));
-            }else if(key.startsWith("name")){
-                Object name =  itemData.get(key);
-                if(name instanceof List){
-                    for(Object nameentry : (List) name){
-                        if(nameentry instanceof Map){
-                            String nameType =  (String)((Map<String, Object>) nameentry).get("name/nameType");
-                            String namePart =  (String)((Map<String, Object>) nameentry).get("name/namePart");
+            } else if (key.startsWith("name")) {
+                Object name = itemData.get(key);
+                if (name instanceof List) {
+                    for (Object nameentry : (List) name) {
+                        if (nameentry instanceof Map) {
+                            String nameType = (String) ((Map<String, Object>) nameentry).get("name/nameType");
+                            String namePart = (String) ((Map<String, Object>) nameentry).get("name/namePart");
                             if (namePart != null && nameType != null) {
-                                if(nameType.equals("authorized"))
+                                if (nameType.equals("authorized"))
                                     description.put(Description.NAME, namePart);
                                 else if (nameType.equals("parallel"))
                                     description.put("parallelFormsOfName", namePart);
@@ -139,19 +139,20 @@ public class EacImporter extends EaImporter {
                         }
                     }
                 }
-            }else if ( !key.startsWith(SaxXmlHandler.UNKNOWN) 
-                    && ! key.equals("objectIdentifier") 
-                    && ! key.equals(IdentifiableEntity.IDENTIFIER_KEY)
-                    && ! key.startsWith("maintenanceEvent") 
-                    && ! key.startsWith("relation")
-                    && ! key.startsWith("address/")){
-               description.put(key, changeForbiddenMultivaluedProperties(key, itemData.get(key), entity));
+            } else if (!key.startsWith(SaxXmlHandler.UNKNOWN)
+                    && !key.equals("objectIdentifier")
+                    && !key.equals(IdentifiableEntity.IDENTIFIER_KEY)
+                    && !key.startsWith("maintenanceEvent")
+                    && !key.startsWith("relation")
+                    && !key.startsWith("address/")) {
+                description.put(key, changeForbiddenMultivaluedProperties(key, itemData.get(key), entity));
             }
-            
+
         }
 //        assert(description.containsKey(IdentifiableEntity.IDENTIFIER_KEY));
         return description;
     }
+
     /**
      * Tries to resolve the undetermined relationships for IcaAtoM eac files by iterating through all UndeterminedRelationships,
      * finding the DescribedEntity meant by the 'targetUrl' in the Relationship and creating an Annotation for it.
@@ -161,11 +162,11 @@ public class EacImporter extends EaImporter {
      * @param descBundle
      * @throws ValidationError
      */
-    private void solveUndeterminedRelationships(String historicalAgentId, HistoricalAgent frame, Bundle descBundle) throws ValidationError {
+    private void solveUndeterminedRelationships(String historicalAgentId, HistoricalAgent frame, Bundle descBundle)
+            throws ValidationError {
         //Try to resolve the undetermined relationships
         //we can only create the annotations after the HistoricalAgent and it Description have been added to the graph,
         //so they have id's. 
-        AnnotationViews ann = new AnnotationViews(framedGraph, permissionScope);
         Description histdesc = null;
         //we need the id (not the identifier) of the description, this requires some checking
         for (Description thisAgentDescription : frame.getDescriptions()) {
@@ -182,40 +183,41 @@ public class EacImporter extends EaImporter {
             for (UndeterminedRelationship rel : Sets.newHashSet(histdesc.getUndeterminedRelationships())) {
                 //our own ica-atom generated eac files have as target of a relation the url of the ica-atom
                 //this must be matched back to descriptionUrl property in a previously created HistoricalAgentDescription
-                String targetUrl = rel.asVertex().getProperty(ANNOTATION_TARGET).toString();
+                String targetUrl = (String)rel.asVertex().getProperty(LINK_TARGET);
                 Iterable<Vertex> docs = framedGraph.getVertices("descriptionUrl", targetUrl);
                 if (docs.iterator().hasNext()) {
-                    String annotationType = rel.asVertex().getProperty(Annotation.ANNOTATION_TYPE).toString();
+                    String annotationType = rel.asVertex().getProperty(Link.LINK_TYPE).toString();
                     DescribedEntity targetEntity = framedGraph.frame(docs.iterator().next(), Description.class).getEntity();
                     try {
-                        Bundle annotationBundle = new Bundle(EntityClass.ANNOTATION)
-                                .withDataValue(Annotation.ANNOTATION_TYPE, annotationType)
-                                .withDataValue(Annotation.NOTES_BODY, rel.asVertex().getProperty(Annotation
-                                        .NOTES_BODY));
-                        Annotation annotation = ann.createLink(historicalAgentId, rel.getId(), annotationBundle, userProfile);
-                        targetEntity.addAnnotation(annotation);
-                        
-                         //attach the mirror Undetermined Relationship as a body to this Annotation
+                        Bundle linkBundle = new Bundle(EntityClass.LINK)
+                                .withDataValue(Link.LINK_TYPE, annotationType)
+                                .withDataValue(Link.LINK_DESCRIPTION, rel.asVertex().getProperty(Link.LINK_DESCRIPTION));
+                        Link link = new CrudViews<Link>(framedGraph, Link.class).create(linkBundle, userProfile);
+                        frame.addLink(link);
+                        targetEntity.addLink(link);
+                        link.addLinkBody(rel);
+
+                        //attach the mirror Undetermined Relationship as a body to this Annotation
                         String thisUrl = descBundle.getData().get("descriptionUrl").toString();
-                        for(Description targetEntityDescription : targetEntity.getDescriptions()){
-                            for(UndeterminedRelationship remoteRel : Sets.newHashSet(targetEntityDescription.getUndeterminedRelationships())){
+                        for (Description targetEntityDescription : targetEntity.getDescriptions()) {
+                            for (UndeterminedRelationship remoteRel : Sets.newHashSet(targetEntityDescription.getUndeterminedRelationships())) {
                                 //check that both the body targeturl and the type are the same
-                                if(thisUrl.equals(remoteRel.asVertex().getProperty(ANNOTATION_TARGET).toString())
-                                        && annotationType.equals(remoteRel.asVertex().getProperty(Annotation.ANNOTATION_TYPE).toString())){
-                                    annotation.addSource(remoteRel);
+                                if (thisUrl.equals(remoteRel.asVertex().getProperty(LINK_TARGET))
+                                        && annotationType.equals(remoteRel.asVertex().getProperty(Link.LINK_TYPE))
+                                        ) {
+                                    link.addLinkBody(remoteRel);
                                 }
                             }
                         }
-
-                    } catch (ItemNotFound ex) {
-                        logger.error(ex.getMessage());
-                        throw new RuntimeException(ex);
+                    } catch (IntegrityError e) {
+                        logger.error(e.getMessage());
+                        throw new RuntimeException(e);
                     } catch (PermissionDenied ex) {
                         logger.error(ex.getMessage());
                         throw new RuntimeException(ex);
                     }
                 } else {
-                    logger.info("relation found, but target " + rel.asVertex().getProperty(ANNOTATION_TARGET) + " not in graph");
+                    logger.info("relation found, but target " + rel.asVertex().getProperty(LINK_TARGET) + " not in graph");
                 }
             }
         }

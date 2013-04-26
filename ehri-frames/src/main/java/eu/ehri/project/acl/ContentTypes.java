@@ -15,7 +15,8 @@ public enum ContentTypes {
     SYSTEM_EVENT(Entities.SYSTEM_EVENT),
     AUTHORITATIVE_SET(Entities.AUTHORITATIVE_SET),
     CVOC_VOCABULARY(Entities.CVOC_VOCABULARY),
-    CVOC_CONCEPT(Entities.CVOC_CONCEPT);
+    CVOC_CONCEPT(Entities.CVOC_CONCEPT),
+    LINK(Entities.LINK);
     
     private final String name;
     

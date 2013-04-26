@@ -315,6 +315,7 @@ public class CrudViewsTest extends AbstractFixtureTest {
         for (; descIter.hasNext(); shouldDelete++) {
             DocumentDescription d = graph.frame(descIter.next().asVertex(), DocumentDescription.class);
             for (DatePeriod dp : d.getDatePeriods()) shouldDelete++;
+            for (UndeterminedRelationship r : d.getUndeterminedRelationships()) shouldDelete++;
         }
 
         Integer deleted = docViews.delete(item, validUser);

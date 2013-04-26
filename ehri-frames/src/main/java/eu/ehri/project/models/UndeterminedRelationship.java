@@ -19,8 +19,8 @@ import eu.ehri.project.models.base.Annotator;
  */
 @EntityType(EntityClass.UNDETERMINED_RELATIONSHIP)
 public interface UndeterminedRelationship extends AccessibleEntity, Annotator {
-    @Adjacency(label = Annotation.HAS_SOURCE, direction = Direction.IN)
-    public Iterable<Annotation> getLinkedAnnotations();
+    @Adjacency(label = Link.HAS_LINK_BODY, direction = Direction.IN)
+    public Iterable<Link> getLinks();
 }
 
 

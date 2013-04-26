@@ -3,8 +3,8 @@ package eu.ehri.project.importers;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.models.Annotation;
 import eu.ehri.project.models.EntityClass;
+import eu.ehri.project.models.Link;
 import eu.ehri.project.models.MaintenanceEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
 public abstract class EaImporter extends XmlImporter<Map<String, Object>> {
 
     private static final Logger logger = LoggerFactory.getLogger(EaImporter.class);
-    protected static final String ANNOTATION_TARGET = "target";
+    protected static final String LINK_TARGET = "target";
 
 
     /**
@@ -85,18 +85,18 @@ public abstract class EaImporter extends XmlImporter<Map<String, Object>> {
                     Map<String, Object> relationNode = new HashMap<String, Object>();
                     for (String eventkey : origRelation.keySet()) {
                         if (eventkey.equals(REL + "/type")) {
-                            relationNode.put(Annotation.ANNOTATION_TYPE, origRelation.get(eventkey));
+                            relationNode.put(Link.LINK_TYPE, origRelation.get(eventkey));
                         } else if (eventkey.equals(REL + "/targetUrl")) {
                             //try to find the original identifier
-                            relationNode.put(ANNOTATION_TARGET, origRelation.get(eventkey));
+                            relationNode.put(LINK_TARGET, origRelation.get(eventkey));
                         } else if (eventkey.equals(REL + "/notes")) {
-                            relationNode.put(Annotation.NOTES_BODY, origRelation.get(eventkey));
+                            relationNode.put(Link.LINK_DESCRIPTION, origRelation.get(eventkey));
                         } else {
                             relationNode.put(eventkey, origRelation.get(eventkey));
                         }
                     }
-                    if (!relationNode.containsKey(Annotation.ANNOTATION_TYPE)) {
-                        relationNode.put(Annotation.ANNOTATION_TYPE, "unknown relation type");
+                    if (!relationNode.containsKey(Link.LINK_TYPE)) {
+                        relationNode.put(Link.LINK_TYPE, "unknown relation type");
                     }
                     if(! relationNode.containsKey(IdentifiableEntity.IDENTIFIER_KEY))
                         relationNode.put(IdentifiableEntity.IDENTIFIER_KEY, java.util.UUID.randomUUID().toString());

@@ -3,10 +3,7 @@ package eu.ehri.project.importers;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.models.Annotation;
-import eu.ehri.project.models.Repository;
-import eu.ehri.project.models.DocumentaryUnit;
-import eu.ehri.project.models.EntityClass;
+import eu.ehri.project.models.*;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.IdentifiableEntity;
@@ -139,8 +136,8 @@ public class IcaAtomEadImporter extends EaImporter {
 
     private Map<String, Object> createRelationNode(String type, String value, String id) {
         Map<String, Object> relationNode = new HashMap<String, Object>();
-        relationNode.put(Annotation.ANNOTATION_TYPE, type);
-        relationNode.put(Annotation.NOTES_BODY, value);
+        relationNode.put(Link.LINK_TYPE, type);
+        relationNode.put(Link.LINK_DESCRIPTION, value);
         relationNode.put(IdentifiableEntity.IDENTIFIER_KEY, (id+type+value).replaceAll("\\s", ""));
         return relationNode;
 

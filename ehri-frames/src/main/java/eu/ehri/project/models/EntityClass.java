@@ -46,7 +46,8 @@ public enum EntityClass {
     CVOC_CONCEPT(Entities.CVOC_CONCEPT, "cv", Concept.class),
     CVOC_CONCEPT_DESCRIPTION(Entities.CVOC_CONCEPT_DESCRIPTION, "cvd", ConceptDescription.class),
     MAINTENANCE_EVENT ( Entities.MAINTENANCE_EVENT, "me", MaintenanceEvent.class),
-    UNDETERMINED_RELATIONSHIP (Entities.UNDETERMINED_RELATIONSHIP, "rs", UndeterminedRelationship.class);
+    UNDETERMINED_RELATIONSHIP (Entities.UNDETERMINED_RELATIONSHIP, "rs", UndeterminedRelationship.class),
+    LINK (Entities.LINK, "lnk", Link.class);
     // @formatter:on
 
     // Accessors.

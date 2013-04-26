@@ -6,10 +6,8 @@ import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.models.Annotation;
 import eu.ehri.project.models.HistoricalAgent;
 import eu.ehri.project.models.HistoricalAgentDescription;
-import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.base.AnnotatableEntity;
-import eu.ehri.project.models.base.Description;
-import eu.ehri.project.models.base.IdentifiableEntity;
+import eu.ehri.project.models.Link;
+import eu.ehri.project.models.base.*;
 import eu.ehri.project.models.events.SystemEvent;
 import java.io.InputStream;
 import java.util.List;
@@ -38,7 +36,7 @@ public class EacImporterTest extends AbstractImporterTest {
         //import abwehr last, so it will find the other UR's
         ImportLog log = new SaxImportManager(graph, SystemScope.getInstance(), validUser, EacImporter.class,
                 EacHandler.class).setTolerant(Boolean.TRUE).importFile(ios, logMessage);
-        printGraph(graph);
+        //printGraph(graph);
         HistoricalAgent abwehr = manager.getFrame("381", HistoricalAgent.class);
         logger.debug(abwehr.getId());
         assertEquals(Entities.HISTORICAL_AGENT, abwehr.getType());
@@ -46,24 +44,24 @@ public class EacImporterTest extends AbstractImporterTest {
         for(Description abwehrDesc : abwehr.getDescriptions()){
             logger.debug(abwehrDesc.getName());
         }
-        for(Annotation a : abwehr.getAnnotations()){
-            logger.info(a.getId() + " has targets: " + toList(a.getTargets()).size());
-            for (AnnotatableEntity e : a.getTargets()){
+        for(Link a : abwehr.getLinks()){
+            logger.info(a.getId() + " has targets: " + toList(a.getLinkTargets()).size());
+            for (LinkableEntity e : a.getLinkTargets()){
                 logger.debug(e.getType());
             }
-            assertEquals(2, toList(a.getSources()).size());
+            assertEquals(2, toList(a.getLinkBodies()).size());
         }
-        assertEquals(2, toList(abwehr.getAnnotations()).size());
+        assertEquals(2, toList(abwehr.getLinks()).size());
 
         HistoricalAgent ssrasse = manager.getFrame("418", HistoricalAgent.class);
         logger.debug(ssrasse.getId());
         assertEquals(Entities.HISTORICAL_AGENT, ssrasse.getType());
-        assertEquals(1, toList(ssrasse.getAnnotations()).size());
+        assertEquals(1, toList(ssrasse.getLinks()).size());
 
         HistoricalAgent feldpolizei = manager.getFrame("717", HistoricalAgent.class);
         logger.debug(feldpolizei.getId());
         assertEquals(Entities.HISTORICAL_AGENT, feldpolizei.getType());
-        assertEquals(1, toList(feldpolizei.getAnnotations()).size());
+        assertEquals(1, toList(feldpolizei.getLinks()).size());
         for(Description polizeiDesc : feldpolizei.getDescriptions()){
             assertEquals("Geheime Feldpolizei", polizeiDesc.getName());
         }

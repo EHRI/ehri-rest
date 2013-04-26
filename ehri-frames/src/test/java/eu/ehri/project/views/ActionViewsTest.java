@@ -7,7 +7,7 @@ import static org.junit.Assert.assertNotNull;
 import java.util.Iterator;
 import java.util.List;
 
-import eu.ehri.project.models.DocumentDescription;
+import eu.ehri.project.models.*;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.persistance.Serializer;
 import eu.ehri.project.test.AbstractFixtureTest;
@@ -18,9 +18,6 @@ import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.models.DatePeriod;
-import eu.ehri.project.models.DocumentaryUnit;
-import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.views.impl.LoggingCrudViews;
@@ -147,6 +144,7 @@ public class ActionViewsTest extends AbstractFixtureTest {
         for (; descIter.hasNext(); shouldDelete++) {
             DocumentDescription d = graph.frame(descIter.next().asVertex(), DocumentDescription.class);
             for (DatePeriod dp : d.getDatePeriods()) shouldDelete++;
+            for (UndeterminedRelationship r : d.getUndeterminedRelationships()) shouldDelete++;
         }
 
         Integer deleted = docViews.delete(item, validUser);

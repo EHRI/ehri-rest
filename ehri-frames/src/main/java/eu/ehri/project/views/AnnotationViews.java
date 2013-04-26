@@ -58,25 +58,6 @@ public final class AnnotationViews {
     }
 
     /**
-     * Create a link between two items.
-     * 
-     * @param targetId the identifier of a AccessibleEntity target of this Annotation
-     * @param sourceId the identifier of a Annotator source of this Annotation
-     * @param bundle the annotation itself
-     * @param user
-     * @return
-     * @throws ItemNotFound
-     * @throws ValidationError
-     * @throws PermissionDenied
-     */
-    public Annotation createLink(String targetId, String sourceId, Bundle bundle, Accessor user) throws ItemNotFound, ValidationError,
-            PermissionDenied {
-        Annotation ann = createFor(targetId, bundle, user);
-        ann.addSource(manager.getFrame(sourceId, Annotator.class));
-        return ann;
-    }
-
-    /**
      * Create an annotation for an item.
      * 
      * @param id the identifier of the AccessibleEntity this annotation is attached to, as a target

@@ -1,51 +1,51 @@
 package eu.ehri.extension;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import com.google.common.base.Optional;
+import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Maps;
+import com.tinkerpop.blueprints.Vertex;
+import eu.ehri.extension.errors.BadRequester;
+import eu.ehri.project.acl.AclManager;
+import eu.ehri.project.definitions.Entities;
+import eu.ehri.project.exceptions.*;
+import eu.ehri.project.models.Annotation;
+import eu.ehri.project.models.Link;
+import eu.ehri.project.models.UndeterminedRelationship;
+import eu.ehri.project.models.base.*;
+import eu.ehri.project.persistance.Bundle;
+import eu.ehri.project.persistance.LinkManager;
+import eu.ehri.project.persistance.Serializer;
+import eu.ehri.project.views.AnnotationViews;
+import eu.ehri.project.views.LinkViews;
+import eu.ehri.project.views.Query;
+import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Transaction;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.Response.Status;
-
-import com.google.common.base.Optional;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-import com.tinkerpop.blueprints.Vertex;
-import eu.ehri.project.exceptions.*;
-import eu.ehri.project.models.UndeterminedRelationship;
-import eu.ehri.project.models.base.*;
-import eu.ehri.project.persistance.LinkManager;
-import eu.ehri.project.persistance.Serializer;
-import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Transaction;
-
-import com.google.common.collect.ListMultimap;
-
-import eu.ehri.extension.errors.BadRequester;
-import eu.ehri.project.acl.AclManager;
-import eu.ehri.project.definitions.Entities;
-import eu.ehri.project.models.Annotation;
-import eu.ehri.project.persistance.Bundle;
-import eu.ehri.project.views.AnnotationViews;
+import javax.ws.rs.core.StreamingOutput;
+import java.util.List;
+import java.util.Map;
 
 /**
- * Provides a RESTfull(ish) interface for creating.
+ * Provides a RESTfull(ish) interface for creating/reading item links.
  */
-@Path(Entities.ANNOTATION)
-public class AnnotationResource extends
-        AbstractAccessibleEntityResource<Annotation> {
+@Path(Entities.LINK)
+public class LinkResource extends
+        AbstractAccessibleEntityResource<Link> {
 
-    public AnnotationResource(@Context GraphDatabaseService database) {
-        super(database, Annotation.class);
+    public static final String BODY_PARAM = "body";
+
+    public LinkResource(@Context GraphDatabaseService database) {
+        super(database, Link.class);
     }
 
     /**
      * Retrieve an annotation by id.
-     * 
+     *
      * @param id
      * @return
      * @throws ItemNotFound
@@ -62,7 +62,7 @@ public class AnnotationResource extends
 
     /**
      * List all annotations.
-     * 
+     *
      * @param offset
      * @param limit
      * @param order
@@ -74,7 +74,7 @@ public class AnnotationResource extends
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/list")
-    public StreamingOutput listAnnotations(
+    public StreamingOutput listLinks(
             @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
             @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
             @QueryParam(SORT_PARAM) List<String> order,
@@ -82,12 +82,14 @@ public class AnnotationResource extends
             throws ItemNotFound, BadRequester {
         return list(offset, limit, order, filters);
     }
-    
+
     /**
-     * Create an annotation for a particular item.
-     * 
+     * Create a link between two items.
+     *
      * @param id
+     * @param sourceId
      * @param json
+     * @param bodies optional list of entities to provide the body
      * @param accessors
      * @return
      * @throws PermissionDenied
@@ -100,20 +102,22 @@ public class AnnotationResource extends
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("{id:.+}")
-    public Response createAnnotationFor(@PathParam("id") String id,
-            String json, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
+    @Path("{id:.+}/{sourceId:.+}")
+    public Response createLinkFor(@PathParam("id") String id,
+            @PathParam("sourceId") String sourceId, String json,
+            @QueryParam(BODY_PARAM) List<String> bodies,
+            @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws PermissionDenied, ValidationError, DeserializationError,
             ItemNotFound, BadRequester, SerializationError {
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
             Accessor user = getRequesterUserProfile();
-            Annotation ann = new AnnotationViews(graph).createFor(id,
-                    Bundle.fromString(json), user);
-            new AclManager(graph).setAccessors(ann,
+            Link link = new LinkViews(graph).createLink(id,
+                    sourceId, bodies, Bundle.fromString(json), user);
+            new AclManager(graph).setAccessors(link,
                     getAccessors(accessors, user));
             tx.success();
-            return buildResponseFromAnnotation(ann);
+            return buildResponseFromAnnotation(link);
         } catch (ItemNotFound e) {
             tx.failure();
             throw e;
@@ -130,42 +134,41 @@ public class AnnotationResource extends
             tx.failure();
             throw e;
         } catch (Exception e) {
+            e.printStackTrace();
             throw new WebApplicationException(e);
         } finally {
             tx.finish();
         }
     }
 
-    /**
-     * Return a map of annotations for the subtree of the given item and its
-     * child items.
-     * 
-     * @param id
-     * @return
-     * @throws ItemNotFound
-     * @throws BadRequester
-     * @throws PermissionDenied
-     */
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("/for/{id:.+}")
-    public StreamingOutput listAnnotationsForSubtree(@PathParam("id") String id)
-            throws ItemNotFound, BadRequester, PermissionDenied {
-        AnnotationViews annotationViews = new AnnotationViews(graph);
-        ListMultimap<String, Annotation> anns = annotationViews.getFor(id,
-                getRequesterUserProfile());
-        return streamingMultimap(anns);
-    }
-
-    private Response buildResponseFromAnnotation(Annotation ann)
+    private Response buildResponseFromAnnotation(Link link)
             throws SerializationError {
-        String jsonStr = serializer.vertexFrameToJson(ann);
+        String jsonStr = serializer.vertexFrameToJson(link);
         return Response.status(Status.CREATED).entity((jsonStr).getBytes())
                 .build();
     }
 
     /**
-     * Delete an annotation.
+     * Returns a list of items linked to the given description.
+     *
+     * @param id
+     * @return
+     * @throws ItemNotFound
+     * @throws BadRequester
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/for/{id:.+}")
+    public StreamingOutput listRelatedItems(@PathParam("id") String id)
+                throws ItemNotFound, BadRequester {
+        Query<Link> linkQuery = new Query<Link>(graph, Link.class);
+        return streamingList(linkQuery.list(
+                manager.getFrame(id, LinkableEntity.class).getLinks(),
+                getRequesterUserProfile()));
+    }
+
+    /**
+     * Delete a link.
      * @param id
      * @return
      * @throws PermissionDenied
@@ -175,7 +178,7 @@ public class AnnotationResource extends
      */
     @DELETE
     @Path("/{id:.+}")
-    public Response deleteAnnotation(@PathParam("id") String id)
+    public Response deleteLink(@PathParam("id") String id)
             throws AccessDenied, PermissionDenied, ItemNotFound, ValidationError,
             BadRequester {
         return delete(id);

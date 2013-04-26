@@ -29,16 +29,4 @@ public class LinkManager {
         this.graph = graph;
         this.manager = GraphManagerFactory.getInstance(graph);
     }
-
-    public Optional<Vertex> getLinkedItem(AnnotatableEntity item, UndeterminedRelationship relationship) {
-        for (Annotation annotation : relationship.getLinkedAnnotations()) {
-            for (AnnotatableEntity entity : annotation.getTargets()) {
-                if (!entity.asVertex().equals(item.asVertex())) {
-                    return Optional.fromNullable(entity.asVertex());
-                }
-            }
-        }
-
-        return Optional.absent();
-    }
 }

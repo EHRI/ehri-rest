@@ -6,7 +6,7 @@ import com.tinkerpop.frames.Adjacency;
 import eu.ehri.project.models.annotations.Dependent;
 import eu.ehri.project.models.annotations.Fetch;
 
-public interface DescribedEntity extends AccessibleEntity, IdentifiableEntity, AnnotatableEntity {
+public interface DescribedEntity extends AccessibleEntity, IdentifiableEntity, AnnotatableEntity, LinkableEntity {
 
     public static final String DESCRIBES = "describes";
 
