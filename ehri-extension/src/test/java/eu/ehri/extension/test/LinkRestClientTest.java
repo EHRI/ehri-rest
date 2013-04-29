@@ -17,7 +17,7 @@ public class LinkRestClientTest extends BaseRestClientTest {
     static final String UPDATED_NAME = "UpdatedNameTEST";
 
     private String jsonLinkTestString = "{\"type\": \"link\", \"data\":{\"identifier\": \"39dj28dhs\", " +
-            "\"body\": \"test\", \"category\": \"associate\"}}";
+            "\"body\": \"test\", \"type\": \"associate\"}}";
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
