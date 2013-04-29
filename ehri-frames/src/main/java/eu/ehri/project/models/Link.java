@@ -27,7 +27,7 @@ public interface Link extends AccessibleEntity, AnnotatableEntity {
     public static final String HAS_LINK_BODY = "hasLinkBody";
     public static final String HAS_LINK_TARGET = "hasLinkTarget";
     public static final String HAS_LINKER = "hasLinker";
-    public static final String LINK_TYPE = "category";
+    public static final String LINK_TYPE = "type";
     public static final String LINK_DESCRIPTION = "description";
 
     @Fetch(HAS_LINKER)

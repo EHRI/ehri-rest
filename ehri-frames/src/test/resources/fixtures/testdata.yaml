@@ -211,6 +211,7 @@
               type: relationship
               data:
                 name: test
+                type: subjectAccess
                 description: test description
                 category: associative
       - id: cd1-2
@@ -364,7 +365,7 @@
  - id: link1
    type: link
    data:
-     category: associative
+     type: associative
      body: Test link
    relationships:
      hasLinkTarget: c1
@@ -374,7 +375,7 @@
  - id: link2
    type: link
    data:
-     category: associative
+     type: associative
      body: Test link
    relationships:
      hasLinkTarget: c1

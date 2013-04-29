@@ -95,7 +95,7 @@ public class EacImporter extends EaImporter {
         boolean exists = manager.exists(id);
         HistoricalAgent frame = persister.createOrUpdate(unit.withId(id), HistoricalAgent.class);
 
-        solveUndeterminedRelationships(id, frame, descBundle);
+        solveUndeterminedRelationships(frame, descBundle);
 
         // There may or may not be a specific scope here...
         if (!permissionScope.equals(SystemScope.getInstance())) {
@@ -157,12 +157,12 @@ public class EacImporter extends EaImporter {
      * Tries to resolve the undetermined relationships for IcaAtoM eac files by iterating through all UndeterminedRelationships,
      * finding the DescribedEntity meant by the 'targetUrl' in the Relationship and creating an Annotation for it.
      *
-     * @param historicalAgentId
+     *
      * @param frame
      * @param descBundle
      * @throws ValidationError
      */
-    private void solveUndeterminedRelationships(String historicalAgentId, HistoricalAgent frame, Bundle descBundle)
+    private void solveUndeterminedRelationships(HistoricalAgent frame, Bundle descBundle)
             throws ValidationError {
         //Try to resolve the undetermined relationships
         //we can only create the annotations after the HistoricalAgent and it Description have been added to the graph,

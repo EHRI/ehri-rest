@@ -132,8 +132,8 @@ public class IcaAtomEadImporter extends EaImporter {
 
     private Map<String, Object> createRelationNode(String type, String value, String id) {
         Map<String, Object> relationNode = new HashMap<String, Object>();
-        relationNode.put(Link.LINK_TYPE, type);
-        relationNode.put(NamedEntity.NAME, value);
+        relationNode.put(UndeterminedRelationship.NAME, value);
+        relationNode.put(UndeterminedRelationship.RELATIONSHIP_TYPE, type);
         relationNode.put(IdentifiableEntity.IDENTIFIER_KEY, (id+type+value).replaceAll("\\s", ""));
         return relationNode;
 

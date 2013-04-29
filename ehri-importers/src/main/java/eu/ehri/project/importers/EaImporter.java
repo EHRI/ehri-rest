@@ -12,6 +12,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import eu.ehri.project.models.UndeterminedRelationship;
 import eu.ehri.project.models.base.IdentifiableEntity;
 import eu.ehri.project.models.base.NamedEntity;
 import eu.ehri.project.models.base.PermissionScope;
@@ -86,7 +87,7 @@ public abstract class EaImporter extends XmlImporter<Map<String, Object>> {
                     Map<String, Object> relationNode = new HashMap<String, Object>();
                     for (String eventkey : origRelation.keySet()) {
                         if (eventkey.equals(REL + "/type")) {
-                            relationNode.put(Link.LINK_TYPE, origRelation.get(eventkey));
+                            relationNode.put(UndeterminedRelationship.RELATIONSHIP_TYPE, origRelation.get(eventkey));
                         } else if (eventkey.equals(REL + "/url")) {
                             //try to find the original identifier
                             relationNode.put(LINK_TARGET, origRelation.get(eventkey));
@@ -99,11 +100,9 @@ public abstract class EaImporter extends XmlImporter<Map<String, Object>> {
                             relationNode.put(eventkey, origRelation.get(eventkey));
                         }
                     }
-                    if (!relationNode.containsKey(Link.LINK_TYPE)) {
-                        relationNode.put(Link.LINK_TYPE, "unknown relation type");
+                    if (!relationNode.containsKey(UndeterminedRelationship.RELATIONSHIP_TYPE)) {
+                        relationNode.put(UndeterminedRelationship.RELATIONSHIP_TYPE, "corporateBodyAccess");
                     }
-                    if(! relationNode.containsKey(IdentifiableEntity.IDENTIFIER_KEY))
-                        relationNode.put(IdentifiableEntity.IDENTIFIER_KEY, java.util.UUID.randomUUID().toString());
                     list.add(relationNode);
                 }
             }
