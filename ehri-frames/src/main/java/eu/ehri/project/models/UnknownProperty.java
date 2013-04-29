@@ -8,6 +8,6 @@ import eu.ehri.project.models.base.AccessibleEntity;
  * but we don't specify (in the database) what it exactly means. 
  *
  */
-@EntityType(EntityClass.PROPERTY)
-public interface Property extends AccessibleEntity {
+@EntityType(EntityClass.UNKNOWN_PROPERTY)
+public interface UnknownProperty extends AccessibleEntity {
 }

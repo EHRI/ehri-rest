@@ -38,7 +38,7 @@ public enum EntityClass {
     ADDRESS(Entities.ADDRESS, "adr", Address.class),
     SYSTEM_EVENT(Entities.SYSTEM_EVENT, "ev", SystemEvent.class, GenericIdGenerator.INSTANCE),
     SYSTEM(Entities.SYSTEM, "sys", SystemEventQueue.class),
-    PROPERTY(Entities.PROPERTY, "p", Property.class),
+    UNKNOWN_PROPERTY(Entities.UNKNOWN_PROPERTY, "p", UnknownProperty.class),
     PERMISSION(Entities.PERMISSION, "pm", Permission.class),
     PERMISSION_GRANT(Entities.PERMISSION_GRANT, "pmg", PermissionGrant.class),
     CONTENT_TYPE(Entities.CONTENT_TYPE, "ct", ContentType.class),
