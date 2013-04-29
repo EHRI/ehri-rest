@@ -81,12 +81,15 @@ public final class LinkViews {
         link.addLinkTarget(t1);
         link.addLinkTarget(t2);
         link.setLinker(user);
+        ActionManager.EventContext eventContext = new ActionManager(graph).logEvent(t1, graph.frame(user.asVertex(), Actioner.class),
+                "Added link");
+        eventContext.addSubjects(link).addSubjects(t2);
         for (String body : bodies) {
+            System.out.println("Adding annotation body: " + body);
             AccessibleEntity item = manager.getFrame(body, AccessibleEntity.class);
             link.addLinkBody(item);
+            eventContext.addSubjects(item);
         }
-        new ActionManager(graph).logEvent(t1, graph.frame(user.asVertex(), Actioner.class),
-                "Added link").addSubjects(link).addSubjects(t2);
         return link;
     }
 }
