@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 import eu.ehri.project.models.base.IdentifiableEntity;
+import eu.ehri.project.models.base.NamedEntity;
 import eu.ehri.project.models.base.PermissionScope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,9 +87,12 @@ public abstract class EaImporter extends XmlImporter<Map<String, Object>> {
                     for (String eventkey : origRelation.keySet()) {
                         if (eventkey.equals(REL + "/type")) {
                             relationNode.put(Link.LINK_TYPE, origRelation.get(eventkey));
-                        } else if (eventkey.equals(REL + "/targetUrl")) {
+                        } else if (eventkey.equals(REL + "/url")) {
                             //try to find the original identifier
                             relationNode.put(LINK_TARGET, origRelation.get(eventkey));
+                        } else if (eventkey.equals(REL + "/" + NamedEntity.NAME)) {
+                            //try to find the original identifier
+                            relationNode.put(NamedEntity.NAME, origRelation.get(eventkey));
                         } else if (eventkey.equals(REL + "/notes")) {
                             relationNode.put(Link.LINK_DESCRIPTION, origRelation.get(eventkey));
                         } else {

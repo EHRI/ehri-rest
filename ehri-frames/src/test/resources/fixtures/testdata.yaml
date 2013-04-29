@@ -210,7 +210,8 @@
             - id: ur1
               type: relationship
               data:
-                description: test
+                name: test
+                description: test description
                 category: associative
       - id: cd1-2
         type: documentDescription

@@ -4,11 +4,7 @@ import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.*;
-import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.base.Description;
-import eu.ehri.project.models.base.IdentifiableEntity;
-import eu.ehri.project.models.base.PermissionScope;
-import eu.ehri.project.models.base.TemporalEntity;
+import eu.ehri.project.models.base.*;
 import eu.ehri.project.models.idgen.IdGenerator;
 import eu.ehri.project.models.idgen.IdentifiableEntityIdGenerator;
 import eu.ehri.project.persistance.Bundle;
@@ -137,7 +133,7 @@ public class IcaAtomEadImporter extends EaImporter {
     private Map<String, Object> createRelationNode(String type, String value, String id) {
         Map<String, Object> relationNode = new HashMap<String, Object>();
         relationNode.put(Link.LINK_TYPE, type);
-        relationNode.put(Link.LINK_DESCRIPTION, value);
+        relationNode.put(NamedEntity.NAME, value);
         relationNode.put(IdentifiableEntity.IDENTIFIER_KEY, (id+type+value).replaceAll("\\s", ""));
         return relationNode;
 

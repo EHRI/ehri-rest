@@ -541,8 +541,7 @@ public class SkosCoreCvocImporter {
 
             // add to all descriptionData maps
             relationNode.put(Annotation.ANNOTATION_TYPE, skosName);
-            relationNode.put("target", text);
-            relationNode.put(IdentifiableEntity.IDENTIFIER_KEY, java.util.UUID.randomUUID().toString());
+            relationNode.put(NamedEntity.NAME, text);
         }
         return relationNode;
     }

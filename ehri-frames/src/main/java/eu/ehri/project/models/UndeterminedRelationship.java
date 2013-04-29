@@ -9,6 +9,7 @@ import com.tinkerpop.frames.Adjacency;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Annotator;
+import eu.ehri.project.models.base.NamedEntity;
 
 /**
  *
@@ -18,7 +19,7 @@ import eu.ehri.project.models.base.Annotator;
  * @author linda
  */
 @EntityType(EntityClass.UNDETERMINED_RELATIONSHIP)
-public interface UndeterminedRelationship extends AccessibleEntity, Annotator {
+public interface UndeterminedRelationship extends AccessibleEntity, NamedEntity, Annotator {
     @Adjacency(label = Link.HAS_LINK_BODY, direction = Direction.IN)
     public Iterable<Link> getLinks();
 }
