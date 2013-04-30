@@ -11,6 +11,7 @@ import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Mandatory;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Annotator;
+import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.NamedEntity;
 
 /**
@@ -24,6 +25,10 @@ import eu.ehri.project.models.base.NamedEntity;
 public interface UndeterminedRelationship extends AccessibleEntity, NamedEntity, Annotator {
 
     public static final String RELATIONSHIP_TYPE = "type";
+
+    @Adjacency(label = Description.RELATES_TO, direction = Direction.IN)
+    public Description getDescription();
+
     @Adjacency(label = Link.HAS_LINK_BODY, direction = Direction.IN)
     public Iterable<Link> getLinks();
 

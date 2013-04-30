@@ -38,6 +38,8 @@ public class LinkResource extends
         AbstractAccessibleEntityResource<Link> {
 
     public static final String BODY_PARAM = "body";
+    public static final String BODY_NAME = "bodyName";
+    public static final String BODY_TYPE = "bodyType";
 
     public LinkResource(@Context GraphDatabaseService database) {
         super(database, Link.class);
@@ -114,6 +116,68 @@ public class LinkResource extends
             Accessor user = getRequesterUserProfile();
             Link link = new LinkViews(graph).createLink(id,
                     sourceId, bodies, Bundle.fromString(json), user);
+            new AclManager(graph).setAccessors(link,
+                    getAccessors(accessors, user));
+            tx.success();
+            return buildResponseFromAnnotation(link);
+        } catch (ItemNotFound e) {
+            tx.failure();
+            throw e;
+        } catch (PermissionDenied e) {
+            tx.failure();
+            throw e;
+        } catch (DeserializationError e) {
+            tx.failure();
+            throw e;
+        } catch (BadRequester e) {
+            tx.failure();
+            throw e;
+        } catch (ValidationError e) {
+            tx.failure();
+            throw e;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new WebApplicationException(e);
+        } finally {
+            tx.finish();
+        }
+    }
+
+    /**
+     * Create a link between two items.
+     *
+     * @param id
+     * @param targetId
+     * @param descriptionId the description to add the access point to.
+     * @param json  the link data
+     * @param bodyName name of the access point to create.
+     * @param bodyType type of the access point to create.
+     * @param accessors
+     * @return
+     * @throws PermissionDenied
+     * @throws ValidationError
+     * @throws DeserializationError
+     * @throws ItemNotFound
+     * @throws BadRequester
+     * @throws SerializationError
+     */
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("{id:.+}/{targetId:.+}/{descriptionId:.+}")
+    public Response createAccessPointLinkFor(@PathParam("id") String id,
+            @PathParam("targetId") String targetId, @PathParam("descriptionId") String descriptionId,
+            String json,
+            @QueryParam(BODY_NAME) String bodyName,
+            @QueryParam(BODY_TYPE) String bodyType,
+            @QueryParam(ACCESSOR_PARAM) List<String> accessors)
+            throws PermissionDenied, ValidationError, DeserializationError,
+            ItemNotFound, BadRequester, SerializationError {
+        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
+        try {
+            Accessor user = getRequesterUserProfile();
+            Link link = new LinkViews(graph).createAccessPointLink(id,
+                    targetId, descriptionId, bodyName, bodyType, Bundle.fromString(json), user);
             new AclManager(graph).setAccessors(link,
                     getAccessors(accessors, user));
             tx.success();

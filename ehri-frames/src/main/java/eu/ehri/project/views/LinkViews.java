@@ -14,7 +14,9 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.Annotation;
+import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Link;
+import eu.ehri.project.models.UndeterminedRelationship;
 import eu.ehri.project.models.base.*;
 import eu.ehri.project.persistance.*;
 
@@ -70,9 +72,7 @@ public final class LinkViews {
      *
      */
     public Link createLink(String targetId1, String targetId2, List<String> bodies, Bundle bundle,
-            Accessor user) throws ItemNotFound,
-            ValidationError,
-            PermissionDenied {
+            Accessor user) throws ItemNotFound, ValidationError, PermissionDenied {
         LinkableEntity t1 = manager.getFrame(targetId1, LinkableEntity.class);
         LinkableEntity t2 = manager.getFrame(targetId2, LinkableEntity.class);
         helper.checkEntityPermission(t1, user, PermissionType.ANNOTATE);
@@ -90,6 +90,43 @@ public final class LinkViews {
             link.addLinkBody(item);
             eventContext.addSubjects(item);
         }
+        return link;
+    }
+
+    /**
+     * Create a link between two items, along with an access point on the given description.
+     *
+     * @param targetId1       the identifier of a AccessibleEntity target of this Annotation
+     * @param targetId2 the identifier of a Annotator source of this Annotation
+     * @param bundle   the annotation itself
+     * @param user
+     * @return
+     * @throws ItemNotFound
+     * @throws ValidationError
+     * @throws PermissionDenied
+     */
+    public Link createAccessPointLink(String targetId1, String targetId2, String descriptionId, String bodyName,
+            String bodyType, Bundle bundle, Accessor user) throws ItemNotFound, ValidationError, PermissionDenied {
+        LinkableEntity t1 = manager.getFrame(targetId1, LinkableEntity.class);
+        LinkableEntity t2 = manager.getFrame(targetId2, LinkableEntity.class);
+        Description description = manager.getFrame(descriptionId, Description.class);
+        helper.checkEntityPermission(t1, user, PermissionType.ANNOTATE);
+        helper.checkEntityPermission(t2, user, PermissionType.ANNOTATE);
+        helper.checkEntityPermission(description.getEntity(), user, PermissionType.UPDATE);
+        Link link = new BundleDAO(graph).create(bundle, Link.class);
+        Bundle relBundle = new Bundle(EntityClass.UNDETERMINED_RELATIONSHIP)
+                .withDataValue(UndeterminedRelationship.NAME, bodyName)
+                .withDataValue(UndeterminedRelationship.RELATIONSHIP_TYPE, bodyType)
+                .withDataValue(Link.LINK_DESCRIPTION, link.getDescription());
+        UndeterminedRelationship rel = new BundleDAO(graph).create(relBundle, UndeterminedRelationship.class);
+        description.addUndeterminedRelationship(rel);
+        link.addLinkTarget(t1);
+        link.addLinkTarget(t2);
+        link.setLinker(user);
+        link.addLinkBody(rel);
+        ActionManager.EventContext eventContext = new ActionManager(graph).logEvent(t1, graph.frame(user.asVertex(), Actioner.class),
+                "Added access-point link");
+        eventContext.addSubjects(link).addSubjects(t2).addSubjects(rel);
         return link;
     }
 }
