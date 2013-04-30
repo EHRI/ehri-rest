@@ -2,12 +2,15 @@ package eu.ehri.extension.test;
 
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.core.util.MultivaluedMapImpl;
 import eu.ehri.extension.AbstractRestResource;
+import eu.ehri.extension.LinkResource;
 import eu.ehri.project.definitions.Entities;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
 import static org.junit.Assert.assertEquals;
@@ -52,5 +55,24 @@ public class LinkRestClientTest extends BaseRestClientTest {
                 .post(ClientResponse.class);
         assertEquals(Response.Status.CREATED.getStatusCode(),
                 response.getStatus());        
+    }
+
+    @Test
+    public void testCreateLinkWithAccessPoint() throws Exception {
+        // Create a link annotation between two objects
+        WebResource resource = client.resource(getExtensionEntryPointUri()
+                + "/" + Entities.LINK + "/c1/c4/cd1");
+        MultivaluedMap queryParams = new MultivaluedMapImpl();
+        queryParams.add(LinkResource.BODY_NAME, "Test link name");
+        queryParams.add(LinkResource.BODY_TYPE, "subjectAccess");
+        ClientResponse response = resource
+                .queryParams(queryParams)
+                .accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                        getAdminUserProfileId()).entity(jsonLinkTestString)
+                .post(ClientResponse.class);
+        assertEquals(Response.Status.CREATED.getStatusCode(),
+                response.getStatus());
     }
 }
