@@ -2,12 +2,10 @@ package eu.ehri.project.models;
 
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.frames.Adjacency;
-import com.tinkerpop.frames.Property;
 import com.tinkerpop.frames.annotations.gremlin.GremlinGroovy;
 
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
-import eu.ehri.project.models.annotations.Mandatory;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.DescribedEntity;
 import eu.ehri.project.models.base.PermissionScope;
@@ -29,17 +27,17 @@ public interface DocumentaryUnit extends AccessibleEntity,
      */
     // NB: This is only an iterable until we upgrade to frames 2.3.0
     // which supports GremlinGroovy annotations for single items
-    @Fetch(Repository.HELDBY)
+    @Fetch(Repository.HELD_BY)
     @GremlinGroovy("_().copySplit(_(), _().as('n').out('" + CHILD_OF +"')"
             + ".loop('n'){true}{!it.object.out('" + CHILD_OF +"').hasNext()}"
-            + ").exhaustMerge().out('" + Repository.HELDBY + "')")
+            + ").exhaustMerge().out('" + Repository.HELD_BY + "')")
     public Iterable<Repository> getAgent();
 
     /**
      * Set the repository that holds this documentary unit.
      * @param institution
      */
-    @Adjacency(label = Repository.HELDBY)
+    @Adjacency(label = Repository.HELD_BY)
     public void setRepository(final Repository institution);
 
     /**

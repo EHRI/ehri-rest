@@ -11,16 +11,20 @@ import eu.ehri.project.models.base.*;
 public interface Repository extends AccessibleEntity, DescribedEntity,
         AnnotatableEntity, PermissionScope {
 
-    public static final String HELDBY = "heldBy";
+    public static final String HELD_BY = "heldBy";
+    public static final String HAS_COUNTRY = "hasCountry";
 
-    @Adjacency(label = HELDBY, direction = Direction.IN)
+    @Adjacency(label = HELD_BY, direction = Direction.IN)
     public Iterable<DocumentaryUnit> getCollections();
 
-    @GremlinGroovy("_().in('" + HELDBY + "')"
+    @GremlinGroovy("_().in('" + HELD_BY + "')"
         + ".copySplit(_(), _().as('n').in('" + DocumentaryUnit.CHILD_OF + "')"
                 + ".loop('n'){true}{true}).fairMerge()")
     public Iterable<DocumentaryUnit> getAllCollections();
 
-    @Adjacency(label = HELDBY, direction = Direction.IN)
+    @Adjacency(label = HELD_BY, direction = Direction.IN)
     public void addCollection(final TemporalEntity collection);
+
+    @Adjacency(label = HAS_COUNTRY, direction = Direction.OUT)
+    public Iterable<Country> getCountry();
 }

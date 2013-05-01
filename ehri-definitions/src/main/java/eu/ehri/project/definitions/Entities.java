@@ -9,6 +9,7 @@ public class Entities {
     public static final String REPOSITORY_DESCRIPTION = "repositoryDescription";
     public static final String HISTORICAL_AGENT_DESCRIPTION = "historicalAgentDescription";
     public static final String GROUP = "group";
+    public static final String COUNTRY = "country";
     public static final String USER_PROFILE = "userProfile";
     public static final String DATE_PERIOD = "datePeriod";
     public static final String ANNOTATION = "annotation";
