@@ -9,6 +9,7 @@ import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.exceptions.InputParseError;
+import eu.ehri.project.models.Country;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.RepositoryDescription;
 import eu.ehri.project.models.base.AccessibleEntity;
@@ -34,7 +35,7 @@ public class Eag2896Test extends AbstractImporterTest {
     private static final org.slf4j.Logger logger = LoggerFactory.getLogger(Eag2896Test.class);
     protected final String SINGLE_UNIT = "eag-2896.xml";
     // Depends on fixtures
-    protected final String TEST_REPO = "r1";
+    protected final String TEST_COUNTRY = "r1";
     // Depends on SINGLE_UNIT
     protected final String IMPORTED_ITEM_ID = "NL-002896";
     protected final String AGENT_DESC_ID = "NL-002896#desc";
@@ -42,14 +43,14 @@ public class Eag2896Test extends AbstractImporterTest {
     @Test
     public void testImportItemsT() {
         try {
-            Repository agent = manager.getFrame(TEST_REPO, Repository.class);
+            Country country = manager.getFrame(TEST_COUNTRY, Country.class);
             final String logMessage = "Importing a single EAG";
 
             int count = getNodeCount(graph);
             logger.info("count of nodes before importing: " + count);
 
             InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_UNIT);
-            ImportLog log = new SaxImportManager(graph, agent, validUser, EagImporter.class, EagHandler.class).importFile(ios, logMessage);
+            ImportLog log = new SaxImportManager(graph, country, validUser, EagImporter.class, EagHandler.class).importFile(ios, logMessage);
             //printGraph(graph);
             // How many new nodes will have been created? We should have
             // - 1 more Repository
