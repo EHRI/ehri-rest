@@ -8,6 +8,7 @@ import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.models.Country;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.AddressableEntity;
@@ -124,6 +125,8 @@ public class EagImporter extends EaImporter{
                 cb.itemImported(frame);
             }
         } else {
+            frame.setPermissionScope(permissionScope);
+            frame.setCountry(framedGraph.frame(permissionScope.asVertex(), Country.class));
             for (ImportCallback cb : createCallbacks) {
                 cb.itemImported(frame);
             }
