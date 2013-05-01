@@ -116,7 +116,7 @@ public class EagImporter extends EaImporter{
         unit = unit.withRelation(Description.DESCRIBES, descBundle);
 
         IdGenerator generator = IdentifiableEntityIdGenerator.INSTANCE;
-        String id = generator.generateId(EntityClass.REPOSITORY, SystemScope.getInstance(), unit);
+        String id = generator.generateId(EntityClass.REPOSITORY, permissionScope, unit);
         boolean exists = manager.exists(id);
         Repository frame = persister.createOrUpdate(unit.withId(id), Repository.class);
 
