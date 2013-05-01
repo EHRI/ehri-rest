@@ -58,6 +58,7 @@ public interface Description extends NamedEntity {
     public void addUndeterminedRelationship(final UndeterminedRelationship relationship);
 
     @Fetch(HAS_UNKNOWN_PROPERTY)
+    @Dependent
     @Adjacency(label = HAS_UNKNOWN_PROPERTY)
     public Iterable<UnknownProperty> getUnknownProperties();
 }

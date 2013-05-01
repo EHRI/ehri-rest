@@ -3,10 +3,10 @@ package eu.ehri.project.importers;
 import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.definitions.Entities;
-import eu.ehri.project.models.Annotation;
 import eu.ehri.project.models.HistoricalAgent;
 import eu.ehri.project.models.HistoricalAgentDescription;
 import eu.ehri.project.models.Link;
+import eu.ehri.project.models.UnknownProperty;
 import eu.ehri.project.models.base.*;
 import eu.ehri.project.models.events.SystemEvent;
 import java.io.InputStream;
@@ -36,7 +36,7 @@ public class EacImporterTest extends AbstractImporterTest {
         //import abwehr last, so it will find the other UR's
         ImportLog log = new SaxImportManager(graph, SystemScope.getInstance(), validUser, EacImporter.class,
                 EacHandler.class).setTolerant(Boolean.TRUE).importFile(ios, logMessage);
-        //printGraph(graph);
+        printGraph(graph);
         HistoricalAgent abwehr = manager.getFrame("381", HistoricalAgent.class);
         logger.debug(abwehr.getId());
         assertEquals(Entities.HISTORICAL_AGENT, abwehr.getType());
@@ -68,23 +68,43 @@ public class EacImporterTest extends AbstractImporterTest {
 
     }
 
-//        @Test
+        @Test
     public void testAbwehrWithOUTAllReferredNodes() throws Exception {
         final String SINGLE_EAC = "abwehr.xml";
         final String logMessage = "Importing EAC " + SINGLE_EAC + " without creating any annotation, since the targets are not present in the graph";
+        int count = getNodeCount(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAC);
         ImportLog log = new SaxImportManager(graph, SystemScope.getInstance(), validUser, EacImporter.class,
                 EacHandler.class).setTolerant(Boolean.TRUE).importFile(ios, logMessage);
         printGraph(graph);
+        /**
+         * How many new nodes will have been created? We should have
+         * - 1 more Repository
+         * - 1 more RepositoryDescription
+         * - 1 more UnknownProperty
+         * - 2 more MaintenanceEvent
+         * - 2 more UnknownRelations 
+         * - 2 more linkEvents (1 for the Repository, 1 for the User)
+         * - 1 more SystemEvent        
+        **/
+        assertEquals(count + 10, getNodeCount(graph));
+        
         HistoricalAgent abwehr = manager.getFrame("381", HistoricalAgent.class);
         logger.debug(abwehr.getId());
         assertEquals(Entities.HISTORICAL_AGENT, abwehr.getType());
         assertNotNull(abwehr);
         assertEquals(0, toList(abwehr.getAnnotations()).size());
         
+        for(Description desc : abwehr.getDescriptions()){
+            logger.debug(desc.getLanguageOfDescription());
+            for(UnknownProperty u: desc.getUnknownProperties()){
+                logger.debug(u.getType());
+            }
+        }
+        
     }
 
-    //    @Test
+//        @Test
     public void testImportItemsAlgemeyner() throws Exception {
         final String SINGLE_EAC = "algemeyner-yidisher-arbeter-bund-in-lite-polyn-un-rusland.xml";
         // Depends on fixtures

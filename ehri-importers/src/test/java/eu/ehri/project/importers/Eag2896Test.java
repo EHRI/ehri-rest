@@ -55,10 +55,11 @@ public class Eag2896Test extends AbstractImporterTest {
             // - 1 more Repository
             // - 1 more RepositoryDescription
             // - 1 more Address
+            // - 1 more UnknownProperty
             // - 2 more MaintenanceEvent
             // - 2 more linkEvents (1 for the Repository, 1 for the User)
             // - 1 more SystemEvent        
-            assertEquals(count + 8, getNodeCount(graph));
+            assertEquals(count + 9, getNodeCount(graph));
 
             Iterable<Vertex> docs = graph.getVertices(IdentifiableEntity.IDENTIFIER_KEY, IMPORTED_ITEM_ID);
             assertTrue(docs.iterator().hasNext());

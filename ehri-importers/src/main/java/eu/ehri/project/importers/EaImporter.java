@@ -72,7 +72,7 @@ public abstract class EaImporter extends XmlImporter<Map<String, Object>> {
         Map<String, Object> unknowns = new HashMap<String, Object>();
         for (String key : itemData.keySet()) {
             if (key.startsWith(SaxXmlHandler.UNKNOWN)) {
-                unknowns.put(key, itemData.get(key));
+                unknowns.put(key.substring(SaxXmlHandler.UNKNOWN.length()), itemData.get(key));
             }
         }
         return unknowns;

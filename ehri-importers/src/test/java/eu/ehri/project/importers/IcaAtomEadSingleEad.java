@@ -42,9 +42,13 @@ public class IcaAtomEadSingleEad extends AbstractImporterTest{
         // - 1 more DocumentaryUnit
         // - 1 more DocumentDescription
         // - 1 more DatePeriod
+        //TODO: test these UR's
+        // - 4 more UndeterminedRelationships
+        //TODO: test this UP
+        // - 1 more UnknownProperty
         // - 2 more import Event links
         // - 1 more import Event
-        int createCount = origCount + 6;
+        int createCount = origCount + 11;
         assertEquals(createCount, getNodeCount(graph));
 
         // Yet we've only created 1 *logical* item...

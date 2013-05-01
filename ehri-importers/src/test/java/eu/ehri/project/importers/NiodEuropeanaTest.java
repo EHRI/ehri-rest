@@ -45,9 +45,10 @@ public class NiodEuropeanaTest extends AbstractImporterTest{
         // - 1 more DocumentaryUnits
        	// - 1 more DocumentDescription
 	// - 1 more DatePeriod
+        // - 1 more UnknownProperty
 	// - 2 more import Event links (1 for every Unit, 1 for the User)
         // - 1 more import Event
-        assertEquals(count + 6, getNodeCount(graph));
+        assertEquals(count + 7, getNodeCount(graph));
 
         Iterable<Vertex> docs = graph.getVertices(IdentifiableEntity.IDENTIFIER_KEY,
                 UNIT_IDENTIFIER);

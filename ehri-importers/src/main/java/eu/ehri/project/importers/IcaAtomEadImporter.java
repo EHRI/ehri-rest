@@ -30,10 +30,9 @@ import org.slf4j.LoggerFactory;
 public class IcaAtomEadImporter extends EaImporter {
 
     private static final Logger logger = LoggerFactory.getLogger(IcaAtomEadImporter.class);
-
     /**
-     * Depth of top-level items. For reasons as-yet-undetermined in the bowels
-     * of the SamXmlHandler, top level items are at depth 1 (rather than 0)
+     * Depth of top-level items. For reasons as-yet-undetermined in the bowels of the SamXmlHandler, top level items are
+     * at depth 1 (rather than 0)
      */
     private int TOP_LEVEL_DEPTH = 1;
 
@@ -66,15 +65,18 @@ public class IcaAtomEadImporter extends EaImporter {
         // Add dates and descriptions to the bundle since they're @Dependent
         // relations.
         for (Map<String, Object> dpb : extractDates(itemData)) {
-            descBundle=descBundle.withRelation(TemporalEntity.HAS_DATE, new Bundle(EntityClass.DATE_PERIOD, dpb));
+            descBundle = descBundle.withRelation(TemporalEntity.HAS_DATE, new Bundle(EntityClass.DATE_PERIOD, dpb));
         }
-        for (Map<String, Object> rel : extractRelations(itemData, (String)unit.getData().get(IdentifiableEntity
-                .IDENTIFIER_KEY))) {
+        for (Map<String, Object> rel : extractRelations(itemData, (String) unit.getData().get(IdentifiableEntity.IDENTIFIER_KEY))) {
             logger.debug("relation found " + rel.get(IdentifiableEntity.IDENTIFIER_KEY));
             descBundle = descBundle.withRelation(Description.RELATES_TO, new Bundle(EntityClass.UNDETERMINED_RELATIONSHIP, rel));
         }
-
-        unit=unit.withRelation(Description.DESCRIBES, descBundle);
+        Map<String, Object> unknowns = extractUnknownProperties(itemData);
+        if (!unknowns.isEmpty()) {
+            logger.debug("Unknown Properties found");
+            descBundle = descBundle.withRelation(Description.HAS_UNKNOWN_PROPERTY, new Bundle(EntityClass.UNKNOWN_PROPERTY, unknowns));
+        }
+        unit = unit.withRelation(Description.DESCRIBES, descBundle);
 
         if (unit.getDataValue(DocumentaryUnit.IDENTIFIER_KEY) == null) {
             throw new ValidationError(unit, DocumentaryUnit.IDENTIFIER_KEY, "Missing identifier");
@@ -84,7 +86,7 @@ public class IcaAtomEadImporter extends EaImporter {
         if (id.equals(permissionScope.getId())) {
             throw new RuntimeException("Generated an id same as scope: " + unit.getData());
         }
-        
+
         logger.debug("Generated ID: " + id + " (" + permissionScope.getId() + ")");
         boolean exists = manager.exists(id);
         DocumentaryUnit frame = persister.createOrUpdate(unit.withId(id), DocumentaryUnit.class);
@@ -96,8 +98,8 @@ public class IcaAtomEadImporter extends EaImporter {
             frame.setRepository(repository);
         }
         frame.setPermissionScope(permissionScope);
-        
-        
+
+
         if (exists) {
             for (ImportCallback cb : updateCallbacks) {
                 cb.itemImported(frame);
@@ -111,7 +113,7 @@ public class IcaAtomEadImporter extends EaImporter {
 
 
     }
-    
+
     protected Iterable<Map<String, Object>> extractRelations(Map<String, Object> data, String objectIdentifier) {
         final String REL = "Access";
         List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
@@ -123,7 +125,7 @@ public class IcaAtomEadImporter extends EaImporter {
                         list.add(createRelationNode(key, body, objectIdentifier));
                     }
                 } else {
-                    list.add(createRelationNode(key, (String)data.get(key), objectIdentifier));
+                    list.add(createRelationNode(key, (String) data.get(key), objectIdentifier));
                 }
             }
         }
@@ -134,10 +136,11 @@ public class IcaAtomEadImporter extends EaImporter {
         Map<String, Object> relationNode = new HashMap<String, Object>();
         relationNode.put(UndeterminedRelationship.NAME, value);
         relationNode.put(UndeterminedRelationship.RELATIONSHIP_TYPE, type);
-        relationNode.put(IdentifiableEntity.IDENTIFIER_KEY, (id+type+value).replaceAll("\\s", ""));
+        relationNode.put(IdentifiableEntity.IDENTIFIER_KEY, (id + type + value).replaceAll("\\s", ""));
         return relationNode;
 
     }
+
     protected Map<String, Object> extractDocumentaryUnit(Map<String, Object> itemData, int depth) throws ValidationError {
         Map<String, Object> unit = new HashMap<String, Object>();
         if (itemData.get(OBJECT_ID) != null) {

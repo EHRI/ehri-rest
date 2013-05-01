@@ -74,7 +74,13 @@ public class EacImporter extends EaImporter {
         //add the address to the description bundle
         Map<String, Object> address = extractAddress(itemData);
         if (!address.isEmpty()) {
-            descBundle = descBundle.withRelation(AddressableEntity.HAS_ADDRESS, new Bundle(EntityClass.ADDRESS, extractAddress(itemData)));
+            descBundle = descBundle.withRelation(AddressableEntity.HAS_ADDRESS, new Bundle(EntityClass.ADDRESS, address));
+        }
+
+        Map<String, Object> unknowns = extractUnknownProperties(itemData);
+        if (!unknowns.isEmpty()) {
+            logger.debug("Unknown Properties found");
+            descBundle = descBundle.withRelation(Description.HAS_UNKNOWN_PROPERTY, new Bundle(EntityClass.UNKNOWN_PROPERTY, unknowns));
         }
 
         for (Map<String, Object> dpb : extractMaintenanceEvent(itemData, itemData.get("objectIdentifier").toString())) {

@@ -55,7 +55,11 @@ public class NiodEuropeanaImporter extends EaImporter{
         for (Map<String, Object> dpb : extractDates(itemData)) {
             descBundle=descBundle.withRelation(TemporalEntity.HAS_DATE, new Bundle(EntityClass.DATE_PERIOD, dpb));
         }
-        
+        Map<String, Object> unknowns = extractUnknownProperties(itemData);
+        if (!unknowns.isEmpty()) {
+            logger.debug("Unknown Properties found");
+            descBundle = descBundle.withRelation(Description.HAS_UNKNOWN_PROPERTY, new Bundle(EntityClass.UNKNOWN_PROPERTY, unknowns));
+        }
         unit=unit.withRelation(Description.DESCRIBES, descBundle);
 
         IdGenerator generator = IdentifiableEntityIdGenerator.INSTANCE;
