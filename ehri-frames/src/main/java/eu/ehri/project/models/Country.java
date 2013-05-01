@@ -25,4 +25,7 @@ public interface Country extends DescribedEntity, PermissionScope {
      */
     @Property(COUNTRY_CODE)
     public String getCode();
+
+    @Adjacency(label = Repository.HAS_COUNTRY, direction = Direction.IN)
+    public Iterable<Repository> getRepositories();
 }

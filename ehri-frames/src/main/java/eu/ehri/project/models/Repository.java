@@ -27,4 +27,7 @@ public interface Repository extends AccessibleEntity, DescribedEntity,
 
     @Adjacency(label = HAS_COUNTRY, direction = Direction.OUT)
     public Iterable<Country> getCountry();
+
+    @Adjacency(label = HAS_COUNTRY, direction = Direction.OUT)
+    public void setCountry(final Country country);
 }
