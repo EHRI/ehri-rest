@@ -5,6 +5,7 @@ import com.tinkerpop.frames.Adjacency;
 
 import com.tinkerpop.frames.annotations.gremlin.GremlinGroovy;
 import eu.ehri.project.models.annotations.EntityType;
+import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.base.*;
 
 @EntityType(EntityClass.REPOSITORY)
@@ -25,6 +26,7 @@ public interface Repository extends AccessibleEntity, DescribedEntity,
     @Adjacency(label = HELD_BY, direction = Direction.IN)
     public void addCollection(final TemporalEntity collection);
 
+    @Fetch(HAS_COUNTRY)
     @Adjacency(label = HAS_COUNTRY, direction = Direction.OUT)
     public Iterable<Country> getCountry();
 
