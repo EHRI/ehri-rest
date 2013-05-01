@@ -9,37 +9,16 @@
   type: country
   data:
     identifier: gb
-  relationships:
-    describes:
-      id: gb-d1
-      type: repositoryDescription
-      data:
-        name: Great Britain
-        languageCode: en
 
 - id: nl
   type: country
   data:
     identifier: nl
-  relationships:
-    describes:
-      id: nl-d1
-      type: repositoryDescription
-      data:
-        name: The Netherlands
-        languageCode: nl
 
 - id: be
   type: country
   data:
     identifier: be
-  relationships:
-    describes:
-      id: be-d1
-      type: repositoryDescription
-      data:
-        name: Belgium
-        languageCode: fr
 
 # NIOD. NIOD belongs to admin, so everyone who belongs
 # to the NIOD group also belongs to admin by extension.
