@@ -16,7 +16,8 @@ public enum ContentTypes {
     AUTHORITATIVE_SET(Entities.AUTHORITATIVE_SET),
     CVOC_VOCABULARY(Entities.CVOC_VOCABULARY),
     CVOC_CONCEPT(Entities.CVOC_CONCEPT),
-    LINK(Entities.LINK);
+    LINK(Entities.LINK),
+    COUNTRY(Entities.COUNTRY);
     
     private final String name;
     
