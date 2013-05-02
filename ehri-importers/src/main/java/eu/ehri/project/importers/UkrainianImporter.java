@@ -3,6 +3,7 @@
  * and open the template in the editor.
  */
 package eu.ehri.project.importers;
+
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.SystemScope;
@@ -29,10 +30,11 @@ import org.slf4j.LoggerFactory;
  *
  * @author linda
  */
-public class UkrainianImporter extends CsvImporter<Object>{
+public class UkrainianImporter extends CsvImporter<Object> {
+
     private XmlImportProperties p;
     private static final Logger logger = LoggerFactory.getLogger(UkrainianImporter.class);
-    
+
     public UkrainianImporter(FramedGraph<Neo4jGraph> framedGraph, PermissionScope permissionScope, ImportLog log) {
         super(framedGraph, permissionScope, log);
         p = new XmlImportProperties("ukraine.properties");
@@ -42,12 +44,21 @@ public class UkrainianImporter extends CsvImporter<Object>{
     public AccessibleEntity importItem(Map<String, Object> itemData) throws ValidationError {
         logger.debug("-----------------------------------");
         Bundle unit = new Bundle(EntityClass.DOCUMENTARY_UNIT, extractUnit(itemData));
-        
-        Bundle descBundle = new Bundle(EntityClass.DOCUMENT_DESCRIPTION, extractUnitDescription(itemData));
-        descBundle = descBundle.withRelation(TemporalEntity.HAS_DATE, new Bundle(EntityClass.DATE_PERIOD, constructDateMap(itemData)));
-        
-        unit = unit.withRelation(Description.DESCRIBES, descBundle);
-       
+
+        String lang = itemData.get("language_of_description").toString();
+        if (lang.indexOf(", ") > 0) {
+            String[] langs = lang.split(", ");
+            for (String l : langs) {
+                Bundle descBundle = new Bundle(EntityClass.DOCUMENT_DESCRIPTION, extractUnitDescription(itemData, l));
+                descBundle = descBundle.withRelation(TemporalEntity.HAS_DATE, new Bundle(EntityClass.DATE_PERIOD, constructDateMap(itemData)));
+                unit = unit.withRelation(Description.DESCRIBES, descBundle);
+            }
+        } else {
+            Bundle descBundle = new Bundle(EntityClass.DOCUMENT_DESCRIPTION, extractUnitDescription(itemData, lang));
+            descBundle = descBundle.withRelation(TemporalEntity.HAS_DATE, new Bundle(EntityClass.DATE_PERIOD, constructDateMap(itemData)));
+
+            unit = unit.withRelation(Description.DESCRIBES, descBundle);
+        }
         
         IdGenerator generator = IdentifiableEntityIdGenerator.INSTANCE;
         String id = generator.generateId(EntityClass.DOCUMENTARY_UNIT, permissionScope, unit);
@@ -57,7 +68,7 @@ public class UkrainianImporter extends CsvImporter<Object>{
             frame.setRepository(framedGraph.frame(permissionScope.asVertex(), Repository.class));
             frame.setPermissionScope(permissionScope);
         }
-        
+
         if (exists) {
             for (ImportCallback cb : updateCallbacks) {
                 cb.itemImported(frame);
@@ -68,17 +79,19 @@ public class UkrainianImporter extends CsvImporter<Object>{
             }
         }
         return frame;
-        
+
     }
+
     @Override
-    public String getProperty(String key){
+    public String getProperty(String key) {
         return p.getProperty(key);
     }
-    
+
     @Override
     public AccessibleEntity importItem(Map<String, Object> itemData, int depth) throws ValidationError {
         throw new UnsupportedOperationException("Not supported ever.");
     }
+
     private Map<String, Object> extractUnit(Map<String, Object> itemData) {
         //unit needs at least IDENTIFIER_KEY
         Map<String, Object> item = new HashMap<String, Object>();
@@ -91,44 +104,38 @@ public class UkrainianImporter extends CsvImporter<Object>{
     }
 
     public Map<String, Object> constructDateMap(Map<String, Object> itemData) {
-         Map<String, Object> item = new HashMap<String, Object>();
-         String origDate = itemData.get("dates").toString();
-         if(origDate.indexOf(",,")>0){
-         String[] dates = itemData.get("dates").toString().split(",,");
-         item.put(DatePeriod.START_DATE, dates[0]);
-         item.put(DatePeriod.END_DATE, dates[1]);
-         }
-         else{
-             item.put(DatePeriod.START_DATE, origDate);
-             item.put(DatePeriod.END_DATE, origDate);
-         }
-         return item;
-    }
-    
-    private Map<String, Object> extractUnitDescription(Map<String, Object> itemData) {
         Map<String, Object> item = new HashMap<String, Object>();
-        
-        
+        String origDate = itemData.get("dates").toString();
+        if (origDate.indexOf(",,") > 0) {
+            String[] dates = itemData.get("dates").toString().split(",,");
+            item.put(DatePeriod.START_DATE, dates[0]);
+            item.put(DatePeriod.END_DATE, dates[1]);
+        } else {
+            item.put(DatePeriod.START_DATE, origDate);
+            item.put(DatePeriod.END_DATE, origDate);
+        }
+        return item;
+    }
+
+    private Map<String, Object> extractUnitDescription(Map<String, Object> itemData, String language) {
+        Map<String, Object> item = new HashMap<String, Object>();
+
+
         for (String key : itemData.keySet()) {
-            if ((!key.equals("identifier")) && !(p.getProperty(key).equals("IGNORE")) && (!p.getProperty(key).equals("unitDates"))) {
+            if ((!key.equals("identifier")) && !(p.getProperty(key).equals("IGNORE")) && (!key.equals("dates")) && (!key.equals("language_of_description"))) {
                 if (!p.containsProperty(key)) {
                     SaxXmlHandler.putPropertyInGraph(item, SaxXmlHandler.UNKNOWN + key, itemData.get(key).toString());
                 } else {
                     SaxXmlHandler.putPropertyInGraph(item, p.getProperty(key), itemData.get(key).toString());
                 }
             }
-            
+
         }
-        //create all otherFormsOfName
-        
-        if (!item.containsKey(Description.LANGUAGE_CODE)) {
-            SaxXmlHandler.putPropertyInGraph(item, Description.LANGUAGE_CODE, "en");
-        }
+        //replace the language from the itemData with the one specified in the param
+        SaxXmlHandler.putPropertyInGraph(item, Description.LANGUAGE_CODE, language);
         return item;
     }
-    
-    
-    
+
     @Override
     public Iterable<Map<String, Object>> extractDates(Object data) {
         throw new UnsupportedOperationException("Not supported yet.");
