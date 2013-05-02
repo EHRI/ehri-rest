@@ -42,8 +42,8 @@ public abstract class ImportCommand extends BaseCommand implements Command{
                 "Identifier of user to import as"));
         options.addOption(new Option("tolerant", false,
                 "Don't error if a file is not valid."));
-        options.addOption(new Option("logMessage", false,
-                "Log message for import action."));
+        options.addOption(new Option("log", true,
+                "Log message for action."));
     }
     
      @Override
@@ -51,7 +51,6 @@ public abstract class ImportCommand extends BaseCommand implements Command{
             CommandLine cmdLine) throws Exception {
 
         GraphManager manager = GraphManagerFactory.getInstance(graph);
-        final String logMessage = "Imported from command-line";
 
         if (cmdLine.getArgList().size() < 1)
             throw new RuntimeException(getHelp());
@@ -59,6 +58,11 @@ public abstract class ImportCommand extends BaseCommand implements Command{
         List<String> filePaths = new LinkedList<String>();
         for (int i = 0; i < cmdLine.getArgList().size(); i++) {
             filePaths.add((String) cmdLine.getArgList().get(i));
+        }
+
+        String logMessage = "Imported from command-line";
+        if (cmdLine.hasOption("log")) {
+            logMessage = cmdLine.getOptionValue("log");
         }
 
         try {
