@@ -78,7 +78,7 @@ At this point, if we go to http://localhost:7474 we should be able to see the Ne
 
 Then, referring to the location of the Neo4j _database_ direction rather than the installation home, run the following commands from the EHRI code root:
 
-	./scripts/cmd $NEO4J_DB initialize
+	./scripts/cmd $NEO4J_DB initialize  # NB: This can only be done once!
 
 We also need to create an administrative user account:
 
