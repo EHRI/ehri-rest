@@ -67,7 +67,7 @@ Once that's done, we can run another script to install the EHRI libraries:
 
 Once that has completed the script will warn us that we have to make one configuation change manually:
 
-IMPORTANT: You must manually ensure the /home/mike/apps/neo4j-community-1.9.RC1/conf/neo4j-server.properties configuration contains the line:
+**IMPORTANT**: You must manually ensure the $NEO4J_HOME/conf/neo4j-server.properties configuration contains the line:
    org.neo4j.server.thirdparty_jaxrs_classes=eu.ehri.extension=/ehri
 
 Open that file and add that line below the point where a similar example config is commented out. This step is vital so Neo4j knows to load our EHRI extension code.
