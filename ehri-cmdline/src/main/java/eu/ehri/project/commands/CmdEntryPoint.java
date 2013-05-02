@@ -63,7 +63,7 @@ public class CmdEntryPoint extends BaseCommand {
         return 1;
     }
 
-    public static int main(String[] args) throws Exception {
+    public static int run(String[] args) throws Exception {
 
         if (args.length < 2) {
             return new CmdEntryPoint().exec(null, args);
@@ -104,5 +104,14 @@ public class CmdEntryPoint extends BaseCommand {
             }
         }
         return 0;
+    }
+
+    /**
+     * Application launcher.
+     * @param args
+     * @throws Exception
+     */
+    public static void main(String[] args) throws Exception {
+        System.exit(run(args));
     }
 }
