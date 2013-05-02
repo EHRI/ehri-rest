@@ -73,11 +73,17 @@ public final class AclViews {
         try {
             checkGrantPermission(grantee, permissionMap);
             acl.setPermissionMatrix(accessor, permissionMap);
+            boolean scoped = !scope.equals(SystemScope.INSTANCE);
             // Log the action...
-            new ActionManager(graph).logEvent(
+            ActionManager.EventContext context = new ActionManager(graph).logEvent(
                     graph.frame(accessor.asVertex(), AccessibleEntity.class),
                     graph.frame(grantee.asVertex(), Actioner.class),
-                    "Updated permissions");
+                    String.format("Updated permissions%s",
+                            scoped ? " with scope '" + scope.getId() + "'" : ""));
+            if (scoped) {
+                context.addSubjects(scope);
+            }
+
             graph.getBaseGraph().stopTransaction(Conclusion.SUCCESS);
         } catch (PermissionDenied e) {
             graph.getBaseGraph().stopTransaction(Conclusion.FAILURE);

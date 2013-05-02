@@ -28,6 +28,7 @@ public enum EntityClass {
     GROUP(Entities.GROUP, "g", Group.class, IdentifiableEntityIdGenerator.INSTANCE),
     USER_PROFILE(Entities.USER_PROFILE, "u", UserProfile.class, IdentifiableEntityIdGenerator.INSTANCE),
     AUTHORITATIVE_SET(Entities.AUTHORITATIVE_SET, "as", AuthoritativeSet.class, IdentifiableEntityIdGenerator.INSTANCE),
+    COUNTRY(Entities.COUNTRY, "ct", Country.class, IdentifiableEntityIdGenerator.INSTANCE),
     
     // Generic entities.
     DOCUMENT_DESCRIPTION(Entities.DOCUMENT_DESCRIPTION, "dd", DocumentDescription.class),

@@ -3,6 +3,23 @@
 # database.
 #
 
+# Countries - these are at the top of the entity hierarchy and
+# 'hold' everything else.
+- id: gb
+  type: country
+  data:
+    identifier: gb
+
+- id: nl
+  type: country
+  data:
+    identifier: nl
+
+- id: be
+  type: country
+  data:
+    identifier: be
+
 # NIOD. NIOD belongs to admin, so everyone who belongs
 # to the NIOD group also belongs to admin by extension.
 - id: niod
@@ -13,7 +30,7 @@
   relationships:
     belongsTo:
       - admin
-      
+
 - id: kcl
   type: group
   data:
@@ -95,6 +112,8 @@
     identifier: r1
     name: Repository 1
   relationships:
+    hasCountry: nl
+    hasPermissionScope: nl
     describes:
       - id: rd1
         type: repositoryDescription
@@ -117,6 +136,8 @@
     identifier: r2
     name: King's College London
   relationships:
+    hasCountry: gb
+    hasPermissionScope: gb
     describes:
       - id: rd2
         type: repositoryDescription
@@ -139,6 +160,8 @@
     identifier: r3
     name: DANS
   relationships:
+    hasCountry: nl
+    hasPermissionScope: nl
     describes:
       - id: rd3
         type: repositoryDescription
@@ -160,6 +183,8 @@
     identifier: r4
     name: CEGES SOMA
   relationships:
+    hasCountry: be
+    hasPermissionScope: be
     describes:
       - id: rd4
         type: repositoryDescription

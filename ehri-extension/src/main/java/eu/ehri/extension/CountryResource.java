@@ -1,63 +1,52 @@
 package eu.ehri.extension;
 
-import java.net.URI;
-import java.util.List;
-
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.StreamingOutput;
-import javax.ws.rs.core.UriBuilder;
-
-import eu.ehri.project.exceptions.*;
-import eu.ehri.project.models.EntityClass;
-import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Transaction;
-
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.definitions.Entities;
+import eu.ehri.project.exceptions.*;
+import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Repository;
-import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.base.Accessor;
+import eu.ehri.project.models.Country;
 import eu.ehri.project.persistance.Bundle;
-import eu.ehri.project.views.impl.LoggingCrudViews;
 import eu.ehri.project.views.Query;
+import eu.ehri.project.views.impl.LoggingCrudViews;
+import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Transaction;
+
+import javax.ws.rs.*;
+import javax.ws.rs.core.*;
+import javax.ws.rs.core.Response.Status;
+import java.net.URI;
+import java.util.List;
 
 /**
- * Provides a RESTfull interface for the Repository
+ * Provides a RESTfull interface for managing countries
+ * and creating repositories within them.
+ * 
+ * @author mike
+ * 
  */
-@Path(Entities.REPOSITORY)
-public class RepositoryResource extends AbstractAccessibleEntityResource<Repository> {
+@Path(Entities.COUNTRY)
+public class CountryResource extends
+        AbstractAccessibleEntityResource<Country> {
 
-    public RepositoryResource(@Context GraphDatabaseService database) {
-        super(database, Repository.class);
+    public CountryResource(@Context GraphDatabaseService database) {
+        super(database, Country.class);
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:.+}")
-    public Response getRepository(@PathParam("id") String id) throws ItemNotFound,
-            AccessDenied, BadRequester {
+    public Response getCountry(@PathParam("id") String id)
+            throws ItemNotFound, AccessDenied, BadRequester {
         return retrieve(id);
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/list")
-    public StreamingOutput listRepositories(
+    public StreamingOutput listCountries(
             @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
             @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
             @QueryParam(SORT_PARAM) List<String> order,
@@ -68,46 +57,8 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{id:.+}/list")
-    public StreamingOutput listRepositoryDocumentaryUnits(
-            @PathParam("id") String id,
-            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
-            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
-            @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)
-            throws ItemNotFound, BadRequester, AccessDenied, PermissionDenied {
-        Accessor user = getRequesterUserProfile();
-        Repository repository = views.detail(manager.getFrame(id, cls), user);
-        Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
-                DocumentaryUnit.class).setLimit(limit).setOffset(offset)
-                .orderBy(order)
-                .filter(filters);
-        return streamingList(query.list(repository.getCollections(), user));
-    }
-
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{id:.+}/page")
-    public StreamingOutput pageRepositoryDocumentaryUnits(
-            @PathParam("id") String id,
-            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
-            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
-            @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)
-            throws ItemNotFound, BadRequester, AccessDenied, PermissionDenied {
-        Accessor user = getRequesterUserProfile();
-        Repository repository = views.detail(manager.getFrame(id, cls), user);
-        Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
-                DocumentaryUnit.class).setLimit(limit).setOffset(offset)
-                .orderBy(order)
-                .filter(filters);
-        return streamingPage(query.page(repository.getCollections(), user));
-    }
-
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
     @Path("/page")
-    public StreamingOutput pageRepositories(
+    public StreamingOutput pageCountries(
             @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
             @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
             @QueryParam(SORT_PARAM) List<String> order,
@@ -116,10 +67,57 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
         return page(offset, limit, order, filters);
     }
 
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id:.+}/list")
+    public StreamingOutput listCountryRepositories(
+            @PathParam("id") String id,
+            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
+            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(SORT_PARAM) List<String> order,
+            @QueryParam(FILTER_PARAM) List<String> filters)
+            throws ItemNotFound, BadRequester, AccessDenied {
+        Accessor user = getRequesterUserProfile();
+        Country country = views.detail(manager.getFrame(id, cls), user);
+        Query<Repository> query = new Query<Repository>(graph, Repository.class)
+                .setLimit(limit).setOffset(offset).orderBy(order)
+                .filter(filters);
+        return streamingList(query.list(country.getRepositories(), user));
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id:.+}/page")
+    public StreamingOutput pageCountryRepositories(
+            @PathParam("id") String id,
+            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
+            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(SORT_PARAM) List<String> order,
+            @QueryParam(FILTER_PARAM) List<String> filters)
+            throws ItemNotFound, BadRequester, AccessDenied {
+        Accessor user = getRequesterUserProfile();
+        Country country = views.detail(manager.getFrame(id, cls), user);
+        Query<Repository> query = new Query<Repository>(graph, Repository.class)
+                .setLimit(limit).setOffset(offset).orderBy(order)
+                .filter(filters);
+        return streamingPage(query.page(country.getRepositories(), user));
+    }
+
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response createCountry(String json,
+            @QueryParam(ACCESSOR_PARAM) List<String> accessors)
+            throws PermissionDenied, ValidationError, IntegrityError,
+            DeserializationError, ItemNotFound, BadRequester {
+        return create(json, accessors);
+    }
+
+    // Note: json contains id
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response updateRepository(String json) throws PermissionDenied,
+    public Response updateCountry(String json) throws PermissionDenied,
             IntegrityError, ValidationError, DeserializationError,
             ItemNotFound, BadRequester {
         return update(json);
@@ -129,7 +127,7 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:.+}")
-    public Response updateRepository(@PathParam("id") String id, String json)
+    public Response updateCountry(@PathParam("id") String id, String json)
             throws AccessDenied, PermissionDenied, IntegrityError, ValidationError,
             DeserializationError, ItemNotFound, BadRequester {
         return update(id, json);
@@ -137,15 +135,15 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
 
     @DELETE
     @Path("/{id:.+}")
-    public Response deleteRepository(@PathParam("id") String id)
+    public Response deleteCountry(@PathParam("id") String id)
             throws AccessDenied, PermissionDenied, ItemNotFound, ValidationError,
             BadRequester {
         return delete(id);
     }
 
     /**
-     * Create a documentary unit for this repository.
-     * 
+     * Create a top-level repository unit for this country.
+     *
      * @param id
      * @param json
      * @return
@@ -159,20 +157,21 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{id:.+}/" + Entities.DOCUMENTARY_UNIT)
-    public Response createRepositoryDocumentaryUnit(@PathParam("id") String id,
+    @Path("/{id:.+}/" + Entities.REPOSITORY)
+    public Response createCountryRepository(@PathParam("id") String id,
             String json, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws AccessDenied, PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, ItemNotFound, BadRequester {
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
             Accessor user = getRequesterUserProfile();
-            Repository repository = views.detail(manager.getFrame(id, cls), user);
-            DocumentaryUnit doc = createDocumentaryUnit(json, repository);
-            new AclManager(graph).setAccessors(doc,
+            Country country = new Query<Country>(graph,
+                    Country.class).get(id, user);
+            Repository repository = createRepository(json, country);
+            new AclManager(graph).setAccessors(repository,
                     getAccessors(accessors, user));
             tx.success();
-            return buildResponseFromDocumentaryUnit(doc);
+            return buildResponseFromRepository(repository);
         } catch (SerializationError e) {
             tx.failure();
             throw new WebApplicationException(e);
@@ -183,31 +182,31 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
 
     // Helpers
 
-    private Response buildResponseFromDocumentaryUnit(DocumentaryUnit doc)
+    private Response buildResponseFromRepository(Repository repository)
             throws SerializationError {
-        String jsonStr = serializer.vertexFrameToJson(doc);
+        String jsonStr = serializer.vertexFrameToJson(repository);
         // FIXME: Hide the details of building this path
         URI docUri = UriBuilder.fromUri(uriInfo.getBaseUri())
-                .segment(Entities.DOCUMENTARY_UNIT)
-                .segment(doc.getId())
+                .segment(Entities.REPOSITORY)
+                .segment(repository.getId())
                 .build();
 
         return Response.status(Status.CREATED).location(docUri)
                 .entity((jsonStr).getBytes()).build();
     }
 
-    private DocumentaryUnit createDocumentaryUnit(String json, Repository repository)
+    private Repository createRepository(String json, Country country)
             throws DeserializationError, PermissionDenied, ValidationError,
             IntegrityError, BadRequester {
         Bundle entityBundle = Bundle.fromString(json);
 
-        DocumentaryUnit doc = new LoggingCrudViews<DocumentaryUnit>(graph,
-                DocumentaryUnit.class, repository).create(entityBundle,
-                getRequesterUserProfile(), getLogMessage(
-                    getDefaultCreateMessage(EntityClass.DOCUMENTARY_UNIT)));
-        // Add it to this repository's collections
-        doc.setRepository(repository);
-        doc.setPermissionScope(repository);
-        return doc;
+        Repository repository = new LoggingCrudViews<Repository>(graph, Repository.class,
+                country).create(entityBundle, getRequesterUserProfile(),
+                getLogMessage(getDefaultCreateMessage(EntityClass.REPOSITORY)));
+
+        // Add it to this Vocabulary's concepts
+        repository.setCountry(country);
+        repository.setPermissionScope(country);
+        return repository;
     }
 }
