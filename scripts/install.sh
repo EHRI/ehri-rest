@@ -7,7 +7,7 @@
 
 BLUEPRINTS_VERS="2.2.0"
 BLUEPRINTS_DEPS=( frames blueprints-core blueprints-neo4j-graph pipes )
-EXTRA_DEPS=( guava-14.0.jar joda-time-2.1.jar )
+EXTRA_DEPS=( guava-14.0.jar joda-time-2.1.jar commons-cli-1.2.jar )
 
 if [ $# -ne 1 ]; then
     echo "Usage: `basename $0` <NEO4JPATH>"
@@ -52,22 +52,22 @@ fi
 echo "Attempting package..."
 mvn clean test-compile package -DskipTests || { echo "Maven package exited with non-zero status, install aborted..."; exit 4; }
 
+CMDLINEJAR=`ls ehri-cmdline/target/ehri-cmdline*jar|grep -v test`
 EXTENSIONJAR=`ls ehri-extension/target/ehri-extension*jar|grep -v test`
 FRAMESJAR=`ls ehri-frames/target/ehri-frames*jar|grep -v test` 
+IMPORTJAR=`ls ehri-importers/target/ehri-importers*jar|grep -v test` 
 
-for jar in $FRAMESJAR $EXTENSIONJAR ; do
+for jar in $FRAMESJAR $EXTENSIONJAR $CMDLINEJAR $IMPORTJAR ; do
     if [ $jar == '' ]; then
         echo "Unable to find all jars, check build is correct."
         exit 5
     fi
 done
 
-echo "Copying $EXTENSIONJAR to $NEO4JPATH/plugins" 
-cp ehri-extension/target/ehri*jar $NEO4JPATH/plugins
-echo "Copying $EXTENSIONJAR to $NEO4JPATH/system/lib" 
-cp ehri-extension/target/ehri*jar $NEO4JPATH/system/lib
-echo "Copying $FRAMESJAR to $NEO4JPATH/system/lib" 
-cp ehri-frames/target/ehri*jar $NEO4JPATH/system/lib
+for jar in $FRAMESJAR $EXTENSIONJAR $CMDLINEJAR $IMPORTJAR ; do
+    echo "Copying $jar to $NEO4JPATH/system/lib"
+    cp $jar $NEO4JPATH/system/lib
+done
 
 # Restart server...
 echo "Restarting server..."

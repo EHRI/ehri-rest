@@ -68,5 +68,8 @@ replace gremlin-java 2.2.0
 # other stuff
 replace guava 14.0
 replace joda-time 2.1
+replace commons-cli 1.2
+replace snakeyaml 1.11
+replace opencsv 2.3
 
 echo "Done."
