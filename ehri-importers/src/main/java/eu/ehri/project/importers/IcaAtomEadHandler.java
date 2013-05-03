@@ -1,5 +1,5 @@
-
 package eu.ehri.project.importers;
+
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.DocumentaryUnit;
@@ -22,13 +22,13 @@ import org.xml.sax.SAXException;
  * @author linda
  */
 public class IcaAtomEadHandler extends SaxXmlHandler {
+
     private static final Logger logger = LoggerFactory
             .getLogger(IcaAtomEadHandler.class);
     List<DocumentaryUnit>[] children;
     // Pattern for EAD nodes that represent a child item
     private Pattern childItemPattern = Pattern.compile("^/*c(?:\\d*)$");
 
-    
     @SuppressWarnings("unchecked")
     public IcaAtomEadHandler(AbstractImporter<Map<String, Object>> importer) {
         super(importer, new XmlImportProperties("icaatom.properties"));
@@ -62,65 +62,60 @@ public class IcaAtomEadHandler extends SaxXmlHandler {
     public void endElement(String uri, String localName, String qName) throws SAXException {
         //the child closes, add the new DocUnit to the list, establish some relations
         super.endElement(uri, localName, qName);
-        if(needToCreateSubNode(qName)){
-                        Map<String, Object> currentGraph = currentGraphPath.pop();
 
-        
-        if (childItemPattern.matcher(qName).matches() || qName.equals("archdesc")) {
-            try {
-                //add any mandatory fields not yet there:
-                if (!currentGraph.containsKey(Description.NAME)) {
-                    for(String key: currentGraph.keySet()){
-                        logger.debug(key + ":" + currentGraph.get(key));
-                    }
-                    //finding some name for this unit:
-                    if(currentGraph.containsKey("title"))
-                        currentGraph.put(Description.NAME, currentGraph.get("title"));
-                    else{
-                        logger.error("IcaAtom node without name field: " );
-                        currentGraph.put(Description.NAME, "UNKNOWN title");
-                    }
-                }
-                if (!currentGraph.containsKey(Description.LANGUAGE_CODE)) {
-                    currentGraph.put(Description.LANGUAGE_CODE, "en");
-                }
-                DocumentaryUnit current = (DocumentaryUnit)importer.importItem(currentGraph, depth);
-                logger.debug("importer used: " + importer.getClass());
-                if (depth > 0) { // if not on root level
-                    children[depth - 1].add(current); // add child to parent offspring
-                    //set the parent child relationships by hand, as we don't have the parent Documentary unit yet.
-                    //only when closing a DocUnit, one can set the relationship to its children, but not its parent, as that has not yet been closed.
-                    for (DocumentaryUnit child : children[depth]) {
-                        if (child != null) {
-                            current.addChild(child);
-                            child.setPermissionScope(current);
+        if (needToCreateSubNode(qName)) {
+            Map<String, Object> currentGraph = currentGraphPath.pop();
+            if (childItemPattern.matcher(qName).matches() || qName.equals("archdesc")) {
+                try {
+                    //add any mandatory fields not yet there:
+                    if (!currentGraph.containsKey(Description.NAME)) {
+                        //finding some name for this unit:
+                        if (currentGraph.containsKey("title")) {
+                            currentGraph.put(Description.NAME, currentGraph.get("title"));
+                        } else {
+                            logger.error("IcaAtom node without name field: ");
+                            currentGraph.put(Description.NAME, "UNKNOWN title");
                         }
                     }
+                    if (!currentGraph.containsKey(Description.LANGUAGE_CODE)) {
+                        currentGraph.put(Description.LANGUAGE_CODE, "en");
+                    }
+                    DocumentaryUnit current = (DocumentaryUnit) importer.importItem(currentGraph, depth);
+                    logger.debug("importer used: " + importer.getClass());
+                    if (depth > 0) { // if not on root level
+                        children[depth - 1].add(current); // add child to parent offspring
+                        //set the parent child relationships by hand, as we don't have the parent Documentary unit yet.
+                        //only when closing a DocUnit, one can set the relationship to its children, but not its parent, as that has not yet been closed.
+                        for (DocumentaryUnit child : children[depth]) {
+                            if (child != null) {
+                                current.addChild(child);
+                                child.setPermissionScope(current);
+                            }
+                        }
+                    }
+                } catch (ValidationError ex) {
+                    logger.error(ex.getMessage());
+                } finally {
+                    depth--;
                 }
-
-            } catch (ValidationError ex) {
-                logger.error(ex.getMessage());
-            } finally {
-//                depth--;
+            } else {
+                putSubGraphInCurrentGraph(getImportantPath(currentPath), currentGraph);
+                depth--;
             }
-            
-            }
-        depth--;
         }
-        
+
         currentPath.pop();
     }
 
     @Override
     protected boolean needToCreateSubNode(String qName) {
-        boolean need = childItemPattern.matcher(qName).matches();
-        need = need || qName.equals("archdesc");
-        String v =  getImportantPath(currentPath);
-        if(v != null){
-            need = need || v.endsWith("Access");
+        //child or parent unit:
+        boolean need = childItemPattern.matcher(qName).matches() || qName.equals("archdesc");
+        //controlAccess 
+        String path = getImportantPath(currentPath);
+        if (path != null) {
+            need = need || path.endsWith("Access");
         }
-        if(need)
-            logger.debug(">> subnode: " + qName);
         return need;
     }
 
