@@ -26,7 +26,7 @@ public class IcaAtomEadHandler extends SaxXmlHandler {
             .getLogger(IcaAtomEadHandler.class);
     List<DocumentaryUnit>[] children;
     // Pattern for EAD nodes that represent a child item
-    private Pattern childItemPattern = Pattern.compile("^/*c(?:\\d+)$");
+    private Pattern childItemPattern = Pattern.compile("^/*c(?:\\d*)$");
 
     
     @SuppressWarnings("unchecked")
