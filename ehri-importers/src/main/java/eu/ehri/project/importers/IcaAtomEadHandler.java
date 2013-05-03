@@ -26,7 +26,7 @@ public class IcaAtomEadHandler extends SaxXmlHandler {
             .getLogger(IcaAtomEadHandler.class);
     List<DocumentaryUnit>[] children;
     // Pattern for EAD nodes that represent a child item
-    private Pattern childItemPattern = Pattern.compile("^/*c(?:\\d+)$");
+    private Pattern childItemPattern = Pattern.compile("^/*c(?:\\d*)$");
 
     
     @SuppressWarnings("unchecked")
@@ -62,8 +62,11 @@ public class IcaAtomEadHandler extends SaxXmlHandler {
     public void endElement(String uri, String localName, String qName) throws SAXException {
         //the child closes, add the new DocUnit to the list, establish some relations
         super.endElement(uri, localName, qName);
+        if(needToCreateSubNode(qName)){
+                        Map<String, Object> currentGraph = currentGraphPath.pop();
+
+        
         if (childItemPattern.matcher(qName).matches() || qName.equals("archdesc")) {
-            Map<String, Object> currentGraph = currentGraphPath.pop();
             try {
                 //add any mandatory fields not yet there:
                 if (!currentGraph.containsKey(Description.NAME)) {
@@ -98,8 +101,11 @@ public class IcaAtomEadHandler extends SaxXmlHandler {
             } catch (ValidationError ex) {
                 logger.error(ex.getMessage());
             } finally {
-                depth--;
+//                depth--;
             }
+            
+            }
+        depth--;
         }
         
         currentPath.pop();
@@ -107,7 +113,15 @@ public class IcaAtomEadHandler extends SaxXmlHandler {
 
     @Override
     protected boolean needToCreateSubNode(String qName) {
-        return childItemPattern.matcher(qName).matches() || qName.equals("archdesc");
+        boolean need = childItemPattern.matcher(qName).matches();
+        need = need || qName.equals("archdesc");
+        String v =  getImportantPath(currentPath);
+        if(v != null){
+            need = need || v.endsWith("Access");
+        }
+        if(need)
+            logger.debug(">> subnode: " + qName);
+        return need;
     }
 
     @Override

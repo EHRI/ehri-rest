@@ -60,6 +60,10 @@ public class IcaAtomEadImporter extends EaImporter {
             throws ValidationError {
 //        BundleDAO persister = new BundleDAO(framedGraph, permissionScope);
         Bundle unit = new Bundle(EntityClass.DOCUMENTARY_UNIT, extractDocumentaryUnit(itemData));
+        if (unit.getDataValue(IdentifiableEntity.IDENTIFIER_KEY) == null) {
+            logger.debug("huh?");
+            throw new ValidationError(unit, DocumentaryUnit.IDENTIFIER_KEY, "Missing identifier " + DocumentaryUnit.IDENTIFIER_KEY);
+        }
         logger.debug("Imported item: " + itemData.get("name"));
         Bundle descBundle = new Bundle(EntityClass.DOCUMENT_DESCRIPTION, extractUnitDescription(itemData, EntityClass.DOCUMENT_DESCRIPTION));
         // Add dates and descriptions to the bundle since they're @Dependent
@@ -67,7 +71,7 @@ public class IcaAtomEadImporter extends EaImporter {
         for (Map<String, Object> dpb : extractDates(itemData)) {
             descBundle = descBundle.withRelation(TemporalEntity.HAS_DATE, new Bundle(EntityClass.DATE_PERIOD, dpb));
         }
-        for (Map<String, Object> rel : extractRelations(itemData, (String) unit.getData().get(IdentifiableEntity.IDENTIFIER_KEY))) {
+        for (Map<String, Object> rel : extractRelations(itemData)) {//, (String) unit.getData().get(IdentifiableEntity.IDENTIFIER_KEY)
             logger.debug("relation found " + rel.get(IdentifiableEntity.IDENTIFIER_KEY));
             descBundle = descBundle.withRelation(Description.RELATES_TO, new Bundle(EntityClass.UNDETERMINED_RELATIONSHIP, rel));
         }
@@ -78,9 +82,7 @@ public class IcaAtomEadImporter extends EaImporter {
         }
         unit = unit.withRelation(Description.DESCRIBES, descBundle);
 
-        if (unit.getDataValue(DocumentaryUnit.IDENTIFIER_KEY) == null) {
-            throw new ValidationError(unit, DocumentaryUnit.IDENTIFIER_KEY, "Missing identifier");
-        }
+       
         IdGenerator generator = IdentifiableEntityIdGenerator.INSTANCE;
         String id = generator.generateId(EntityClass.DOCUMENTARY_UNIT, permissionScope, unit);
         if (id.equals(permissionScope.getId())) {
@@ -114,7 +116,8 @@ public class IcaAtomEadImporter extends EaImporter {
 
     }
 
-    protected Iterable<Map<String, Object>> extractRelations(Map<String, Object> data, String objectIdentifier) {
+    @Override
+    protected Iterable<Map<String, Object>> extractRelations(Map<String, Object> data) {
         final String REL = "Access";
         List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
         for (String key : data.keySet()) {
@@ -122,21 +125,21 @@ public class IcaAtomEadImporter extends EaImporter {
                 if (data.get(key) instanceof List) {
                     //every item becomes a UndeterminedRelationship, with the key as body
                     for (String body : (List<String>) data.get(key)) {
-                        list.add(createRelationNode(key, body, objectIdentifier));
+                        list.add(createRelationNode(key, body));
                     }
                 } else {
-                    list.add(createRelationNode(key, (String) data.get(key), objectIdentifier));
+                    list.add(createRelationNode(key, (String) data.get(key)));
                 }
             }
         }
         return list;
     }
 
-    private Map<String, Object> createRelationNode(String type, String value, String id) {
+    private Map<String, Object> createRelationNode(String type, String value) {
         Map<String, Object> relationNode = new HashMap<String, Object>();
         relationNode.put(UndeterminedRelationship.NAME, value);
         relationNode.put(UndeterminedRelationship.RELATIONSHIP_TYPE, type);
-        relationNode.put(IdentifiableEntity.IDENTIFIER_KEY, (id + type + value).replaceAll("\\s", ""));
+        relationNode.put(IdentifiableEntity.IDENTIFIER_KEY, (type + value).replaceAll("\\s", ""));
         return relationNode;
 
     }
