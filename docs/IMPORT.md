@@ -38,7 +38,7 @@ To import some vocabulary terms you need to tell the script:
 * The vocabulary to import into (which can be created if necessary)
 
 ```bash
-./scripts/cmd skos-import --createvocabulary --vocabulary ehri-terms --user $USER <PATH-TO-SKOS>.rdf
+./scripts/cmd skos-import --createvocabulary --vocabulary ehri-terms --user $USER PATH-TO-SKOS.rdf
 ```
 
 **NOTE**: The --createvocabulary flag is deprecated and will be replaced/removed in future when an alternative has been implemented.
@@ -71,7 +71,7 @@ To import an EAD file we use the `ead-import` command, refering to the repositor
 
 ```
 export REPO=gb-wiener-library
-./scripts/cmd ead-import -user $USER --scope $REPO --log "Importing EAD for repository '$REPO'" --tolerant <PATH-TO-EAD-FILE.xml>
+./scripts/cmd ead-import -user $USER --scope $REPO --log "Importing EAD for repository '$REPO'" --tolerant PATH-TO-EAD-FILE.xml
 ```
 
 
