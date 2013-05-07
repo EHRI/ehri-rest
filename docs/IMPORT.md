@@ -45,7 +45,9 @@ To import some vocabulary terms you need to tell the script:
 
 ## Import some EAD
 
-**Note:** The process of importing EAD is currently a bit long-winded due to various database dependencies needing to be in place. In order to import documentary units you first need a "scope" (the repository) to add them to. Repositories likewise need their own scope, which is the country they reside in. (The reason for these dependencies is that the "handle" for any given document is "scoped" by its parents, i.e. the repository and the country item. As a consequence, importing is normally done via scripts that handle this housekeeping automatically, but for this example we'll do it manually:
+**Note:** The process of importing EAD is currently a bit long-winded due to various database dependencies needing to be in place. In order to import documentary units you first need a "scope" (the repository) to add them to. Repositories likewise need their own scope, which is the country they reside in. (The reason for these dependencies is that the "handle" for any given document is "scoped" by its parents, i.e. the repository and the country item.)
+
+ As a consequence, importing is normally done via scripts that handle this housekeeping automatically, but for this example we'll do it manually:
 
 ### Creating a "Country" Item
 
