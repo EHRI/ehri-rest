@@ -27,7 +27,7 @@ Initialisation creates some nodes that are essential to the EHRI environment:
 So you can do stuff within the system, you need to make a yser profile for yourself. Probably you also want to add that profile to the admin group, which can be accomplished like so:
 
 ```bash
-./scripts/cmd useradd mike --group admin
+./scripts/cmd useradd $USER --group admin
 ```
 
 ## Import some SKOS
@@ -38,7 +38,7 @@ To import some vocabulary terms you need to tell the script:
 * The vocabulary to import into (which can be created if necessary)
 
 ```bash
-./scripts/cmd skos-import --createvocabulary --vocabulary ehri-terms --user $USER /path/to/ehri-skos.rdf
+./scripts/cmd skos-import --createvocabulary --vocabulary ehri-terms --user $USER <PATH-TO-SKOS>.rdf
 ```
 
 **NOTE**: The --createvocabulary flag is deprecated and will be replaced/removed in future when an alternative has been implemented.
