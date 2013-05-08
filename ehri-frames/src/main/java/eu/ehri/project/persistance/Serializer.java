@@ -184,7 +184,7 @@ public final class Serializer {
             logger.trace("Serializing {} ({}) at depth {}", id, type, depth);
             ListMultimap<String, Bundle> relations = getRelationData(item,
                     depth, type.getEntityClass());
-            return new Bundle(id, type, getVertexData(item),
+            return new Bundle(id, type, getVertexData(item, type, depth),
                     relations);
         } catch (IllegalArgumentException e) {
             throw new SerializationError("Unable to serialize vertex: " + item,
@@ -281,7 +281,7 @@ public final class Serializer {
     /**
      * Fetch a map of data from a vertex.
      */
-    private Map<String, Object> getVertexData(Vertex item) {
+    private Map<String, Object> getVertexData(Vertex item, EntityClass type, int depth) {
         Map<String, Object> data = Maps.newHashMap();
         for (String key : item.getPropertyKeys()) {
             if (!(key.equals(EntityType.ID_KEY) || key
