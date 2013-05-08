@@ -5,6 +5,8 @@ import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistance.Bundle;
 
+import java.util.List;
+
 /**
  * Generate an ID given an entity type and a vertex.
  * 
@@ -39,4 +41,17 @@ public interface IdGenerator {
      */
     public String generateId(EntityClass type, PermissionScope scope,
             Bundle bundle);
+
+    /**
+     * Generate an ID given an array of scope IDs. This can be used
+     * where the scope might not yet exist.
+     *
+     * @param type
+     * @param scopeIds array of scope ids, ordered parent-to-child.
+     * @param bundle
+     * @return
+     */
+    public String generateId(EntityClass type, List<String> scopeIds,
+            Bundle bundle);
+
 }

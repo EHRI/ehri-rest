@@ -2,6 +2,12 @@
 # Copy the jars needed for EHRI into the NEO4J system lib folder
 
 NEO4JPATH=${1%}
+
+# Default to NEO4J_HOME env var
+if [ "$NEO4PATH" == "" ]; then
+    NEO4JPATH=$NEO4J_HOME
+fi
+
 # on my computer it is NEO4JPATH=/Users/paulboon/Documents/Development/neo4j-community-1.9.M05
 if [ "$NEO4JPATH" == "" ]; then
     echo "Usage: $0 [NEO4J-HOME-PATH]"
@@ -9,6 +15,12 @@ if [ "$NEO4JPATH" == "" ]; then
 fi
 # Maybe check if it exists ?
 NEO4JLIB=$NEO4JPATH/system/lib
+
+if [ ! -e $NEO4JLIB ] || [ ! -d $NEO4JLIB ]; then
+    echo "Error: Neo4j lib path NEO4J_HOME/system/lib does not exist or is not a directory."
+    echo "Maybe \$NEO4J_HOME is set incorrectly?"
+    exit 2
+fi
 
 # Run maven first to be sure we have the jars
 echo "Attempting package..."
