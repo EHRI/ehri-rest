@@ -38,14 +38,22 @@ page = br.open(url + "/index.php/;informationobject/browse?limit=2000")
 html = page.read()
 soup = BeautifulSoup(html)
 for td in soup("table", {"class":"sticky-enabled"})[0].tbody("tr"):
-    rawpath = td("a")[0]["href"]
+    link = td("a")[0]
+    rawpath = link["href"]
+    repository = link["data-repository"]
+    if repository is None or repository.strip() == "":
+        print("Item '%s' has no repository code data" % rawpath, file=sys.stderr)
+        continue
     xmlpath = rawpath.replace(";isad", ";ead?sf_format=xml")
     name = os.path.basename(rawpath.replace(";isad", ""))
     try:
         ead = br.open(xmlpath)
-        with open(os.path.join(outdir, name + ".xml"), "w") as f:
+        outpath = os.path.join(outdir, repository)
+        if not os.path.exists(outpath):
+            os.mkdir(outpath)
+        with open(os.path.join(outpath, name + ".xml"), "w") as f:
             f.write(ead.read())
-            print(url + xmlpath)
+            print("%s -> %s" % (repository, xmlpath))
     except Exception, e:
         print(e, file=sys.stderr)
 
