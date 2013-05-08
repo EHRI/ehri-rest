@@ -9,6 +9,17 @@ The **NEO4J_HOME** env var must be set and point to the Neo4j instance with the 
 A second var that _may_ be set is **NEO4J_DB**, which should point to the actual database directory. If not set,
 this will default to `$NEO4J_HOME/data/graph.db`.
 
+## Make sure the Neo4j Server is stopped
+
+At present, the various commands all use Neo4j in embedded mode. This will not work if the server is running,
+because only one process can write to a graph DB at once. So before running anything, make sure the server is stopped:
+
+**NB**: Also note that the install script, in an effort to be helpful, starts the server at the end.
+
+```bash
+$NEO4J_HOME/bin/neo4j stop
+```
+
 ## Initialise the DB
 
 Initialisation creates some nodes that are essential to the EHRI environment:
