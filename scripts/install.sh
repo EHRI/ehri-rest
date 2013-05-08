@@ -1,20 +1,21 @@
 #!/bin/bash
 
 #
-# Install the EHRI libs into a Neo4j instance. One and only
-# argument should specify the path the the NEO4JPATH which
+# Install the EHRI libs into a Neo4j instance. The (optional)
+# single argument is the NEO4J_HOME, which otherwise defaults
+# to the env var $NEO4J_HOME
 #
 
 BLUEPRINTS_VERS="2.2.0"
 BLUEPRINTS_DEPS=( frames blueprints-core blueprints-neo4j-graph pipes )
 EXTRA_DEPS=( guava-14.0.jar joda-time-2.1.jar commons-cli-1.2.jar )
 
-if [ $# -ne 1 ]; then
-    echo "Usage: `basename $0` <NEO4JPATH>"
-    exit 1
-fi
+NEO4JPATH=${1%}
 
-NEO4JPATH=$1
+# Default to NEO4J_HOME
+if [ "$NEO4PATH" == "" ]; then
+    NEO4JPATH=$NEO4J_HOME
+fi
 
 if [ ! -e $NEO4JPATH -o ! -d $NEO4JPATH ]; then
     echo "Neo4j path '$NEO4JPATH' does not exist, or is not a directory"
