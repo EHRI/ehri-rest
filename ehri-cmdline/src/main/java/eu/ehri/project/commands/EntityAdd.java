@@ -47,8 +47,8 @@ public class EntityAdd extends BaseCommand implements Command {
                 "Identifier of scope to create item in, i.e. a repository"));
         options.addOption(new Option("user", true,
                 "Identifier of user to import as"));
-        options.addOption(new Option("c", "comment", false,
-                "Log message for create action action."));
+        options.addOption(new Option("log", true,
+                "Log message for create action."));
     }
 
     @Override
@@ -75,11 +75,14 @@ public class EntityAdd extends BaseCommand implements Command {
             CommandLine cmdLine) throws ItemNotFound, ValidationError, PermissionDenied, DeserializationError {
 
         GraphManager manager = GraphManagerFactory.getInstance(graph);
-        final String logMessage = cmdLine.getOptionValue("c",
-                "Created via command-line");
 
         if (cmdLine.getArgList().size() < 1)
             throw new RuntimeException(getHelp());
+
+        String logMessage = "Imported from command-line";
+        if (cmdLine.hasOption("log")) {
+            logMessage = cmdLine.getOptionValue("log");
+        }
 
         // Find the agent
         PermissionScope scope = SystemScope.getInstance();
