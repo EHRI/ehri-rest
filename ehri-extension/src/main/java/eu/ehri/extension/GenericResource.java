@@ -1,7 +1,6 @@
 package eu.ehri.extension;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
 
 import javax.ws.rs.*;

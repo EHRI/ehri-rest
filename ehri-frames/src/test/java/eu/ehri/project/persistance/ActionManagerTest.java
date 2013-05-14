@@ -18,8 +18,6 @@ import static org.junit.Assert.*;
 
 public class ActionManagerTest extends AbstractFixtureTest {
 
-    private ActionManager am;
-
     @Test
     public void testSystemNodeExists() {
         assertTrue(manager.exists(ActionManager.GLOBAL_EVENT_ROOT));

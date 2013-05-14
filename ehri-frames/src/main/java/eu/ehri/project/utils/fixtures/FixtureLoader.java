@@ -1,6 +1,5 @@
 package eu.ehri.project.utils.fixtures;
 
-import java.io.IOException;
 import java.io.InputStream;
 
 /**

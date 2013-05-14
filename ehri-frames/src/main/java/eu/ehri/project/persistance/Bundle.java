@@ -358,6 +358,7 @@ public final class Bundle {
         return DataConverter.bundleToXmlString(this);
     }
 
+    @SuppressWarnings("serial")
     private Funnel<Object> objectFunnel = new Funnel<Object>() {
         @Override
         public void funnel(Object data, PrimitiveSink into) {
@@ -379,6 +380,7 @@ public final class Bundle {
         }
     };
 
+    @SuppressWarnings("serial")
     private Funnel<Map.Entry<String,Object>> entryFunnel = new Funnel<Map.Entry<String, Object>>() {
         @Override
         public void funnel(Map.Entry<String, Object> entry, PrimitiveSink into) {
@@ -387,6 +389,7 @@ public final class Bundle {
         }
     };
 
+    @SuppressWarnings("serial")
     private Funnel<Bundle> bundleFunnel = new Funnel<Bundle>() {
         @Override
         public void funnel(Bundle bundle, PrimitiveSink into) {

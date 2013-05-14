@@ -1,21 +1,13 @@
 package eu.ehri.extension;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.ListMultimap;
-import com.google.common.collect.Maps;
-import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.*;
-import eu.ehri.project.models.Annotation;
 import eu.ehri.project.models.Link;
 import eu.ehri.project.models.UndeterminedRelationship;
 import eu.ehri.project.models.base.*;
 import eu.ehri.project.persistance.Bundle;
-import eu.ehri.project.persistance.LinkManager;
-import eu.ehri.project.persistance.Serializer;
-import eu.ehri.project.views.AnnotationViews;
 import eu.ehri.project.views.LinkViews;
 import eu.ehri.project.views.Query;
 import eu.ehri.project.views.impl.CrudViews;
@@ -29,7 +21,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Provides a RESTfull(ish) interface for creating/reading item links.

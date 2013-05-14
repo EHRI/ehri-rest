@@ -1,11 +1,6 @@
 package eu.ehri.project.views;
 
-import com.google.common.collect.LinkedListMultimap;
-import com.google.common.collect.ListMultimap;
-import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
-import com.tinkerpop.pipes.PipeFunction;
-import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.acl.PermissionType;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.core.GraphManager;
@@ -13,7 +8,6 @@ import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.models.Annotation;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Link;
 import eu.ehri.project.models.UndeterminedRelationship;
@@ -30,7 +24,6 @@ import java.util.List;
 public final class LinkViews {
 
     private final FramedGraph<?> graph;
-    private final AclManager acl;
     private final ViewHelper helper;
     private final GraphManager manager;
 
@@ -43,7 +36,7 @@ public final class LinkViews {
     public LinkViews(FramedGraph<?> graph, PermissionScope scope) {
         this.graph = graph;
         helper = new ViewHelper(graph, scope);
-        acl = helper.getAclManager();
+        helper.getAclManager();
         manager = GraphManagerFactory.getInstance(graph);
     }
 

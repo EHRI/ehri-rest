@@ -21,7 +21,6 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Vertex;
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.pipes.PipeFunction;
 
@@ -36,7 +35,6 @@ import eu.ehri.project.models.Group;
 import eu.ehri.project.models.Permission;
 import eu.ehri.project.models.PermissionGrant;
 import eu.ehri.project.models.base.*;
-import eu.ehri.project.models.utils.ClassUtils;
 
 /**
  * Helper class for checking and asserting access and write permissions.
