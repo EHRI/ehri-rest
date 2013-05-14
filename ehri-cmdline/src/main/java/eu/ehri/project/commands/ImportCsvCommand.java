@@ -37,7 +37,7 @@ public abstract class ImportCsvCommand extends BaseCommand implements Command{
                 "Identifier of scope to import into, i.e. AuthoritativeSet"));
         options.addOption(new Option("user", true,
                 "Identifier of user to import as"));
-        options.addOption(new Option("logMessage", false,
+        options.addOption(new Option("log", true,
                 "Log message for import action."));
     }
     
@@ -46,7 +46,10 @@ public abstract class ImportCsvCommand extends BaseCommand implements Command{
             CommandLine cmdLine) throws Exception {
 
         GraphManager manager = GraphManagerFactory.getInstance(graph);
-        final String logMessage = "Imported from command-line";
+        String logMessage = "Imported from command-line";
+        if (cmdLine.hasOption("log")) {
+            logMessage = cmdLine.getOptionValue("log");
+        }
 
         if (cmdLine.getArgList().size() < 1)
             throw new RuntimeException(getHelp());
@@ -57,7 +60,6 @@ public abstract class ImportCsvCommand extends BaseCommand implements Command{
         }
 
         try {
-
             // Find the agent
             PermissionScope scope = SystemScope.getInstance();
             if (cmdLine.hasOption("scope")) {
