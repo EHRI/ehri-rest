@@ -1,9 +1,9 @@
-package eu.ehri.project.test.utils.fixtures;
+package eu.ehri.project.utils.fixtures;
 
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
-import eu.ehri.project.test.utils.fixtures.impl.YamlFixtureLoader;
+import eu.ehri.project.utils.fixtures.impl.YamlFixtureLoader;
 
 /**
  * Factory class for concealing details of Fixture loading

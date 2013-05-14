@@ -1,13 +1,16 @@
 package eu.ehri.project.commands;
 
+import eu.ehri.project.utils.fixtures.FixtureLoaderFactory;
 import org.apache.commons.cli.CommandLine;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
-import eu.ehri.project.test.utils.fixtures.FixtureLoader;
-import eu.ehri.project.test.utils.fixtures.FixtureLoaderFactory;
+
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionBuilder;
+
+import eu.ehri.project.utils.fixtures.FixtureLoader;
+
 
 import java.io.File;
 import java.io.FileInputStream;

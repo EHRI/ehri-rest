@@ -1,4 +1,4 @@
-package eu.ehri.project.test.utils.fixtures.impl;
+package eu.ehri.project.utils.fixtures.impl;
 
 import java.io.*;
 import java.util.HashMap;
@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import eu.ehri.project.models.base.Frame;
+import eu.ehri.project.utils.fixtures.FixtureLoader;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
@@ -32,7 +33,6 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.persistance.BundleDAO;
-import eu.ehri.project.test.utils.fixtures.FixtureLoader;
 import eu.ehri.project.utils.GraphInitializer;
 
 /**

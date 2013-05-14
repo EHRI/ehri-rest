@@ -6,16 +6,10 @@ import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
-import org.neo4j.test.TestGraphDatabaseFactory;
 
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
-import com.tinkerpop.frames.FramedGraph;
-
-import eu.ehri.project.core.GraphManager;
-import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.models.DocumentaryUnit;
-import eu.ehri.project.test.utils.fixtures.FixtureLoader;
-import eu.ehri.project.test.utils.fixtures.FixtureLoaderFactory;
+import eu.ehri.project.utils.fixtures.FixtureLoader;
+import eu.ehri.project.utils.fixtures.FixtureLoaderFactory;
 import eu.ehri.project.views.Crud;
 
 public abstract class ModelTestBase extends GraphTestBase {

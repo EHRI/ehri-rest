@@ -1,4 +1,4 @@
-package eu.ehri.project.test.utils.fixtures;
+package eu.ehri.project.utils.fixtures;
 
 import java.io.IOException;
 import java.io.InputStream;
