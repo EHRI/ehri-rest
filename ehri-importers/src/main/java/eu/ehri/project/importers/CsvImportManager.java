@@ -62,11 +62,11 @@ public class CsvImportManager extends XmlImportManager {
         try {
             importer = importerClass.getConstructor(FramedGraph.class, PermissionScope.class,
                     ImportLog.class).newInstance(framedGraph, permissionScope, log);
-            logger.info("importer of class " + importer.getClass());
+            logger.debug("importer of class " + importer.getClass());
             importer.addCreationCallback(new ImportCallback() {
                 @Override
                 public void itemImported(AccessibleEntity item) {
-                    logger.info("ImportCallback: itemImported creation " + item.getId());
+                    logger.info("Item created: ", item.getId());
                     eventContext.addSubjects(item);
                     log.addCreated();
                 }
@@ -74,7 +74,7 @@ public class CsvImportManager extends XmlImportManager {
             importer.addUpdateCallback(new ImportCallback() {
                 @Override
                 public void itemImported(AccessibleEntity item) {
-                    logger.info("ImportCallback: itemImported updated");
+                    logger.info("Item updated: {}", item.getId());
                     eventContext.addSubjects(item);
                     log.addUpdated();
                 }
