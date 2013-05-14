@@ -33,11 +33,10 @@
                     <include>**/*.xml</include>
                 </includes>
             </resource>
-            <!--  Copy logback config: FIXME: Shouldn't this happen automatically? -->
+            <!--  NB: Logback config is deliberately not copied here -->
             <resource>
                 <directory>src/main/resources</directory>
                 <includes>
-                    <include>**/*.xml</include>
                     <include>**/*.xslt</include>
                 </includes>
             </resource>
@@ -46,7 +45,7 @@
             <testResource>
                 <directory>${project.basedir}/src/test/resources/fixtures</directory>
             </testResource>
-            <!--  Copy logback config: FIXME: Shouldn't this happen automatically? -->
+            <!--  Copy logback config... -->
             <testResource>
                 <directory>src/test/resources</directory>
                 <includes>
