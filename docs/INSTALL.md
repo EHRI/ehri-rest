@@ -57,11 +57,8 @@ We'll need to refer to the installation location a lot so save it:
 	export NEO4J_HOME=$HOME/apps/neo4j-community-${NEO4J_VERSION}
 	export NEO4J_DB=$NEO4J_HOME/data/graph.db
 
-Once both the EHRI server code has been compiled and Neo4j standalone has been downloaded and extracted, we can install the former into the latter. First, however, we need to upgrade some libraries in the Neo4j dependencies. At present, for compatibility reasons, Neo4j uses an old version of a library called Blueprints. EHRI uses a more recent version. While this situation is unfortunate, it should be remedied before long. For the time being we have to replace some jars with newer versions. There is a script for this bundled with the EHRI code:
-
-	./scripts/replacejars.sh
-
-Once that's done, we can run another script to install the EHRI libraries:
+Once both the EHRI server code has been compiled and Neo4j standalone has been downloaded and extracted, we can install the former into the latter. The following script ensures the code is packaged and then installs the EHRI jars and
+various other dependencies into the $NEO4J_HOME/plugin/ehri directory:
 
 	./scripts/install.sh
 
