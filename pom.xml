@@ -16,7 +16,8 @@
 		<module>ehri-cmdline</module>
 		<module>ehri-definitions</module>
 		<module>ehri-searchindex</module>
-	</modules>
+        <module>assembly</module>
+    </modules>
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
@@ -45,7 +46,7 @@
 					<source>1.6</source>
 					<target>1.6</target>
 				</configuration>
-			</plugin>				
+			</plugin>
 		</plugins>
 	</build>
 

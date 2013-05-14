@@ -18,13 +18,20 @@ buildclasspath() {
     exit 1
   fi
 
+  # confirm system jars
+  EHRILIBDIR="$NEO4J_HOME"/plugins/ehri
+  if [ ! -e "$EHRILIBDIR" ] ; then
+    echo "Error: missing EHRI libs, expected at $EHRILIBDIR"
+    exit 1
+  fi
+
   ALL_JARS=""
-  for jar in "$LIBDIR"/*.jar "$SYSLIBDIR"/*.jar ; do
+  for jar in "$LIBDIR"/*.jar "$SYSLIBDIR"/*.jar "$EHRILIBDIR"/*.jar ; do
     [ -z "$ALL_JARS" ] && ALL_JARS="$jar" || ALL_JARS="$ALL_JARS":"$jar"
   done
 
   CLASSPATH=${ALL_JARS}
-
+  #echo "CLASPATH: $CLASSPATH"
   # add useful conf stuff to classpath - always a good idea
   CLASSPATH="$CLASSPATH":"$NEO4J_HOME"/conf/
 }

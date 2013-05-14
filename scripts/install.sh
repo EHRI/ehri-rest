@@ -6,10 +6,6 @@
 # to the env var $NEO4J_HOME
 #
 
-BLUEPRINTS_VERS="2.2.0"
-BLUEPRINTS_DEPS=( frames blueprints-core blueprints-neo4j-graph pipes )
-EXTRA_DEPS=( guava-14.0.jar joda-time-2.1.jar commons-cli-1.2.jar )
-
 NEO4JPATH=${1%}
 
 # Default to NEO4J_HOME
@@ -28,55 +24,39 @@ if [ ! -e $NEO4JPATH/plugins -o ! -e $NEO4JPATH/system/lib ]; then
     exit 2
 fi
 
-# Check blueprints dependencies
-FLAG=0
-for dep in ${BLUEPRINTS_DEPS[@]}; do
-    jar=${dep}-${BLUEPRINTS_VERS}.jar
-    if [ ! -e $NEO4JPATH/system/lib/$jar ] ; then
-        echo "Missing dependency: '$jar'. This must manually be installed in $NEO4JPATH/system/lib."
-        FLAG=1
-    fi
-done
-for dep in ${EXTRA_DEPS[@]}; do
-    if [ ! -e $NEO4JPATH/system/lib/$dep ]; then
-        echo "Missing dependency: '$dep'. This must manually be installed in $NEO4JPATH/system/lib."
-        FLAG=1
-    fi
-done
+# Run maven to package our stuff...
+echo "Attempting package..."
+mvn clean package -DskipTests || { echo "Maven package exited with non-zero status, install aborted..."; exit 4; }
 
-
-if [ $FLAG -eq 1 ] ; then
-    echo "Missing manual dependencies."
+# find archive and untar it...
+archive=`ls assembly/target/assembly*tar.gz`
+if [ "$archive" == "" ]; then
+    echo "Error: archive not found in dist/target... aborting..."
     exit 3
 fi
 
-echo "Attempting package..."
-mvn clean test-compile package -DskipTests || { echo "Maven package exited with non-zero status, install aborted..."; exit 4; }
+echo "Extracting file: $archive"
+outpath=$NEO4JPATH/plugins/ehri
+mkdir -p $outpath
+tar -C $outpath -zxvf $archive
 
-CMDLINEJAR=`ls ehri-cmdline/target/ehri-cmdline*jar|grep -v test`
-EXTENSIONJAR=`ls ehri-extension/target/ehri-extension*jar|grep -v test`
-FRAMESJAR=`ls ehri-frames/target/ehri-frames*jar|grep -v test` 
-IMPORTJAR=`ls ehri-importers/target/ehri-importers*jar|grep -v test` 
-
-for jar in $FRAMESJAR $EXTENSIONJAR $CMDLINEJAR $IMPORTJAR ; do
-    if [ $jar == '' ]; then
-        echo "Unable to find all jars, check build is correct."
-        exit 5
-    fi
-done
-
-for jar in $FRAMESJAR $EXTENSIONJAR $CMDLINEJAR $IMPORTJAR ; do
-    echo "Copying $jar to $NEO4JPATH/system/lib"
-    cp $jar $NEO4JPATH/system/lib
-done
-
-# Restart server...
-echo "Restarting server..."
-$NEO4JPATH/bin/neo4j restart
+echo "EHRI libs installed..."
 
 echo
 echo "IMPORTANT: You must manually ensure the $NEO4JPATH/conf/neo4j-server.properties configuration contains the line:"
 echo "   org.neo4j.server.thirdparty_jaxrs_classes=eu.ehri.extension=/ehri"
 echo
 
+
+# Restart server...
+echo "Restart server?"
+select yn in "Yes" "No"; do
+    case $yn in
+        Yes ) $NEO4JPATH/bin/neo4j restart ; break;;
+        No ) break;;
+    esac
+done
+
 exit 0
+
+
