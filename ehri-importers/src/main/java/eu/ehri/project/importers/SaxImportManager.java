@@ -82,24 +82,24 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
         try {
             importer = importerClass.getConstructor(FramedGraph.class, PermissionScope.class,
                     ImportLog.class).newInstance(framedGraph, permissionScope, log);
-            logger.info("importer of class " + importer.getClass());
+            logger.debug("importer of class {}", importer.getClass());
             importer.addCreationCallback(new ImportCallback() {
                 public void itemImported(AccessibleEntity item) {
-                    logger.info("ImportCallback: itemImported creation " + item.getId());
+                    logger.info("Item created: {}", item.getId());
                     eventContext.addSubjects(item);
                     log.addCreated();
                 }
             });
             importer.addUpdateCallback(new ImportCallback() {
                 public void itemImported(AccessibleEntity item) {
-                    logger.info("ImportCallback: itemImported updated");
+                    logger.info("Item updated: {}", item.getId());
                     eventContext.addSubjects(item);
                     log.addUpdated();
                 }
             });
             //TODO decide which handler to use, HandlerFactory? now part of constructor ...
             SaxXmlHandler handler = handlerClass.getConstructor(AbstractImporter.class).newInstance(importer);
-            logger.info("handler of class " + handler.getClass());
+            logger.debug("handler of class {}", handler.getClass());
 
             SAXParserFactory spf = SAXParserFactory.newInstance();
             spf.setNamespaceAware(false);
