@@ -63,6 +63,14 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
+    @Path("/count")
+    public Response countVocabularies(@QueryParam(FILTER_PARAM) List<String> filters)
+            throws ItemNotFound, BadRequester {
+        return count(filters);
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("/page")
     public StreamingOutput pageGroups(
             @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
@@ -170,28 +178,31 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
             @QueryParam(SORT_PARAM) List<String> order,            
             @QueryParam(FILTER_PARAM) List<String> filters)
             throws ItemNotFound, BadRequester {
-        //return list(offset, limit, order, filters);
-        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
-        try {
-            
-            Group group = manager.getFrame(id, EntityClass.GROUP, Group.class);
-            // TODO list all users of the group
-            // get them from the RelationShip
-            // Iterable<Accessor> members = group.getMembers();
-            // use offset to skip is not efficient... but what else to do
-            // better query and add a filter to reduce for the specified group
-            Query<AccessibleEntity> userQuerier = new Query<AccessibleEntity>(graph, AccessibleEntity.class);
-            Query<AccessibleEntity> query = userQuerier.setOffset(offset).setLimit(limit)
-                    .orderBy(order).filter(filters);
-            
-            tx.success();
-            
-            // TODO
-            //return streamingList(query.list(getRequesterUserProfile()));
-            return streamingList(query.list(group.getMembersAsEntities(), getRequesterUserProfile()));
-        } finally {
-            tx.finish();
-        }
+        Group group = manager.getFrame(id, EntityClass.GROUP, Group.class);
+        // TODO list all users of the group
+        // get them from the RelationShip
+        // Iterable<Accessor> members = group.getMembers();
+        // use offset to skip is not efficient... but what else to do
+        // better query and add a filter to reduce for the specified group
+        Query<AccessibleEntity> userQuerier = new Query<AccessibleEntity>(graph, AccessibleEntity.class);
+        Query<AccessibleEntity> query = userQuerier.setOffset(offset).setLimit(limit)
+                .orderBy(order).filter(filters);
+        return streamingList(query.list(group.getMembersAsEntities(), getRequesterUserProfile()));
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id:.+}/count")
+    public Response countGroupMembers(
+            @PathParam("id") String id,
+            @QueryParam(FILTER_PARAM) List<String> filters)
+            throws ItemNotFound, BadRequester, AccessDenied {
+        Accessor user = getRequesterUserProfile();
+        Group group = views.detail(manager.getFrame(id, cls), user);
+        Query<AccessibleEntity> query = new Query<AccessibleEntity>(graph, AccessibleEntity.class)
+                .filter(filters);
+        return Response.ok((query.count(group.getMembersAsEntities(), user))
+                .toString().getBytes()).build();
     }
 
     /**

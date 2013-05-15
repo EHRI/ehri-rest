@@ -218,6 +218,13 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
     }
 
     @Test
+    public void testCountDocumentaryUnits() throws Exception {
+        Long data = getEntityCount(
+                Entities.DOCUMENTARY_UNIT, getAdminUserProfileId());
+        assertEquals(Long.valueOf(4), data);
+    }
+
+    @Test
     public void testUpdateDocumentaryUnit() throws Exception {
 
         // -create data for testing, making this a child element of c1.

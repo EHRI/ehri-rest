@@ -68,6 +68,26 @@ public class DocumentaryUnitResource extends
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
+    @Path("/page")
+    public StreamingOutput pageDocumentaryUnits(
+            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
+            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(SORT_PARAM) List<String> order,
+            @QueryParam(FILTER_PARAM) List<String> filters)
+            throws ItemNotFound, BadRequester {
+        return page(offset, limit, order, filters);
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/count")
+    public Response countDocumentaryUnits(@QueryParam(FILTER_PARAM) List<String> filters)
+            throws ItemNotFound, BadRequester {
+        return count(filters);
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:.+}/list")
     public StreamingOutput listChildDocumentaryUnits(
             @PathParam("id") String id,
@@ -104,14 +124,16 @@ public class DocumentaryUnitResource extends
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/page")
-    public StreamingOutput pageDocumentaryUnits(
-            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
-            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
-            @QueryParam(SORT_PARAM) List<String> order,
+    @Path("/{id:.+}/count")
+    public Response countChildDocumentaryUnits(
+            @PathParam("id") String id,
             @QueryParam(FILTER_PARAM) List<String> filters)
-            throws ItemNotFound, BadRequester {
-        return page(offset, limit, order, filters);
+            throws ItemNotFound, BadRequester, PermissionDenied {
+        DocumentaryUnit parent = manager.getFrame(id, DocumentaryUnit.class);
+        Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph, cls)
+                .filter(filters);
+        return Response.ok((query.count(parent.getChildren(),
+                getRequesterUserProfile())).toString().getBytes()).build();
     }
 
     @PUT

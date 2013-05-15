@@ -130,6 +130,17 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
     }
 
     /**
+     * Count items accessible to a given user.
+     * @param filters
+     * @return Number of items.
+     * @throws BadRequester
+     */
+    public Response count(Iterable<String> filters) throws BadRequester {
+        Long count = querier.filter(filters).count(getRequesterUserProfile());
+        return Response.ok().entity(count.toString().getBytes()).build();
+    }
+
+    /**
      * Create an instance of the 'entity' in the database
      * 
      * @param json

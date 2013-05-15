@@ -78,6 +78,14 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
+    @Path("/count")
+    public Response countUserProfiles(@QueryParam(FILTER_PARAM) List<String> filters)
+            throws ItemNotFound, BadRequester {
+        return count(filters);
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("/page")
     public StreamingOutput pageUserProfiles(
             @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
