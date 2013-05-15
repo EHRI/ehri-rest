@@ -41,23 +41,19 @@ public class SkosVocabularyImport extends BaseCommand implements Command {
 
     @Override
     protected void setCustomOptions() {
-        options.addOption(new Option("createvocabulary", false,
-                "Create vocabulary with the given ID"));
-        options.addOption(new Option("vocabulary", true,
-                "Identifier of vocabulary to import into"));
-        options.addOption(new Option("createuser", false,
-                "Create user with the given ID"));
+        options.addOption(new Option("scope", true,
+                "Identifier of scope to import into, i.e. the Vocabulary"));
         options.addOption(new Option("user", true,
                 "Identifier of user to import as"));
         options.addOption(new Option("tolerant", false,
                 "Don't error if a file is not valid."));
-        options.addOption(new Option("logMessage", false,
+        options.addOption(new Option("log", true,
                 "Log message for import action."));
     }
 
     @Override
     public String getHelp() {
-        return "Usage: importer [OPTIONS] -user <user-id> -vocabulary <vocabulary-id> <neo4j-graph-dir> <skos.rdf>";
+        return "Usage: skos-import [OPTIONS] -user <user-id> -scope <vocabulary-id> <skos.rdf>";
     }
 
     @Override
@@ -77,48 +73,30 @@ public class SkosVocabularyImport extends BaseCommand implements Command {
                                CommandLine cmdLine) throws Exception {
 
         GraphManager manager = GraphManagerFactory.getInstance(graph);
-        final String logMessage = "Imported from command-line";
+        String logMessage = "Imported from command-line";
+        if (cmdLine.hasOption("log")) {
+            logMessage = cmdLine.getOptionValue("log");
+        }
 
         // at least one file specufied
         if (cmdLine.getArgList().size() < 1)
             throw new RuntimeException(getHelp());
 
-        //List<String> filePaths = new LinkedList<String>();
-        //for (int i = 0; i < cmdLine.getArgList().size(); i++) {
-        //    filePaths.add((String) cmdLine.getArgList().get(i));
-        //}
+        if (!cmdLine.hasOption("scope")) {
+            throw new RuntimeException("No scope (vocabulary) given for SKOS import");
+        }
+
         String filePath = (String) cmdLine.getArgList().get(0);
 
         try {
 
-            // Find the agent
-            Vocabulary vocabulary;
-            try {
-                vocabulary = manager.getFrame(
-                        cmdLine.getOptionValue("vocabulary"), Vocabulary.class);
-            } catch (ItemNotFound e) {
-                if (cmdLine.hasOption("createvocabulary")) {
-                    vocabulary = createVocabulary(graph, cmdLine.getOptionValue("vocabulary"));
-                } else {
-                    throw e;
-                }
-            }
-
+            Vocabulary vocabulary = manager.getFrame(
+                    cmdLine.getOptionValue("scope"), Vocabulary.class);
             // Find the user
-            UserProfile user;
-            try {
-                user = manager.getFrame(
-                        cmdLine.getOptionValue("user"),
-                        UserProfile.class);
-            } catch (ItemNotFound e) {
-                if (cmdLine.hasOption("createuser")) {
-                    user = createUser(graph, cmdLine.getOptionValue("user"));
-                } else {
-                    throw e;
-                }
-            }
+            UserProfile user = manager.getFrame(cmdLine.getOptionValue("user"),
+                    UserProfile.class);
 
-            SkosCoreCvocImporter importer = new SkosCoreCvocImporter(graph, user, vocabulary); //new EadImportManager(graph, vocabulary, user);
+            SkosCoreCvocImporter importer = new SkosCoreCvocImporter(graph, user, vocabulary);
             importer.setTolerant(cmdLine.hasOption("tolerant"));
             ImportLog log = importer.importFile(filePath, logMessage);
 
@@ -138,31 +116,5 @@ public class SkosVocabularyImport extends BaseCommand implements Command {
             graph.shutdown();
         }
         return 0;
-    }
-
-    private static UserProfile createUser(FramedGraph<Neo4jGraph> graph,
-                                          String name) throws ValidationError, IntegrityError {
-        Map<String, Object> userData = new HashMap<String, Object>();
-        userData.put("identifier", name);
-        userData.put("name", name);
-        return new BundleDAO(graph).create(new Bundle(EntityClass.USER_PROFILE,
-                userData), UserProfile.class);
-    }
-
-    private static Vocabulary createVocabulary(FramedGraph<Neo4jGraph> graph, String name)
-            throws ValidationError, IntegrityError {
-        System.out.println("Creating vocabulary: \"" + name + "\" ...");
-        Map<String, Object> vocabularyData = new HashMap<String, Object>();
-        vocabularyData.put(Vocabulary.IDENTIFIER_KEY, name);
-        //vocabularyData.put(EntityType.ID_KEY, name);
-        //vocabularyData.put("name", name);
-        Bundle bundle = new Bundle(EntityClass.CVOC_VOCABULARY, vocabularyData);
-        bundle = bundle.withId(name);
-
-        Vocabulary vocabulary = new BundleDAO(graph).create(bundle, Vocabulary.class);
-        System.out.println("Done Creating vocabulary");
-        System.out.flush();
-        return vocabulary;
-
     }
 }

@@ -64,8 +64,8 @@ various other dependencies into the $NEO4J_HOME/plugin/ehri directory:
 
 Once that has completed the script will warn us that we have to make one configuation change manually:
 
-**IMPORTANT**: You must manually ensure the $NEO4J_HOME/conf/neo4j-server.properties configuration contains the line:
-   org.neo4j.server.thirdparty_jaxrs_classes=eu.ehri.extension=/ehri
+> **IMPORTANT**: You must manually ensure the $NEO4J_HOME/conf/neo4j-server.properties configuration contains the line:
+>   org.neo4j.server.thirdparty_jaxrs_classes=eu.ehri.extension=/ehri
 
 Open that file and add that line below the point where a similar example config is commented out. This step is vital so Neo4j knows to load our EHRI extension code.
 
@@ -73,7 +73,7 @@ At this point, if we go to http://localhost:7474 we should be able to see the Ne
 
 	$NEO4J_HOME/bin/neo4j stop
 
-Then, referring to the location of the Neo4j _database_ direction rather than the installation home, run the following commands from the EHRI code root:
+Then run the following commands from the EHRI code root:
 
 	./scripts/cmd initialize  # NB: This can only be done once!
 
