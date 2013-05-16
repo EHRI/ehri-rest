@@ -6,12 +6,13 @@ package eu.ehri.project.models.cvoc;
 
 import com.tinkerpop.frames.Adjacency;
 import eu.ehri.project.models.annotations.Fetch;
+import eu.ehri.project.models.base.AccessibleEntity;
 
 /**
  *
  * @author linda
  */
-public interface AuthoritativeItem {
+public interface AuthoritativeItem extends AccessibleEntity {
     @Fetch(AuthoritativeSet.IN_SET)
     @Adjacency(label = Vocabulary.IN_CVOC)
     public AuthoritativeSet getAuthoritativeSet();
