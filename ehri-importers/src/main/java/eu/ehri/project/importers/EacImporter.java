@@ -11,6 +11,7 @@ import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.*;
 import eu.ehri.project.models.base.*;
+import eu.ehri.project.models.cvoc.AuthoritativeSet;
 import eu.ehri.project.models.idgen.IdentifiableEntityIdGenerator;
 import eu.ehri.project.models.idgen.IdGenerator;
 import eu.ehri.project.persistance.Bundle;
@@ -106,6 +107,7 @@ public class EacImporter extends EaImporter {
         // There may or may not be a specific scope here...
         if (!permissionScope.equals(SystemScope.getInstance())) {
             frame.setPermissionScope(permissionScope);
+            frame.setAuthoritativeSet(framedGraph.frame(permissionScope.asVertex(), AuthoritativeSet.class));
         }
 
         if (exists) {
