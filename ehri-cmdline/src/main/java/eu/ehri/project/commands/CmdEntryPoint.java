@@ -37,6 +37,7 @@ public class CmdEntryPoint extends BaseCommand {
         mmap.put(UserMod.NAME, UserMod.class);
         mmap.put(EntityAdd.NAME, EntityAdd.class);
         mmap.put(PersonalitiesImport.NAME, PersonalitiesImport.class);
+        mmap.put(DeleteEntities.NAME, DeleteEntities.class);
         COMMANDS = Collections.unmodifiableMap(mmap);
     }
 
