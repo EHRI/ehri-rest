@@ -21,6 +21,8 @@ import eu.ehri.project.models.idgen.IdentifiableEntityIdGenerator;
 import eu.ehri.project.persistance.Bundle;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.neo4j.helpers.collection.Iterables;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +45,6 @@ public class PersonalitiesImporter extends XmlImporter<Object> {
 
     @Override
     public AccessibleEntity importItem(Map<String, Object> itemData) throws ValidationError {
-        logger.debug("-----------------------------------");
         Bundle unit = new Bundle(EntityClass.HISTORICAL_AGENT, extractUnit(itemData));
         
         Bundle descBundle = new Bundle(EntityClass.HISTORICAL_AGENT_DESCRIPTION, extractUnitDescription(itemData, EntityClass.HISTORICAL_AGENT_DESCRIPTION));
@@ -54,9 +55,11 @@ public class PersonalitiesImporter extends XmlImporter<Object> {
         String id = generator.generateId(EntityClass.HISTORICAL_AGENT, permissionScope, unit);
         boolean exists = manager.exists(id);
         HistoricalAgent frame = persister.createOrUpdate(unit.withId(id), HistoricalAgent.class);
+
+        // FIXME: Relationships will be created twice if updating.
         if (!permissionScope.equals(SystemScope.getInstance())) {
-            frame.setAuthoritativeSet(framedGraph.frame(permissionScope.asVertex(), AuthoritativeSet.class));
             frame.setPermissionScope(permissionScope);
+            frame.setAuthoritativeSet(framedGraph.frame(permissionScope.asVertex(), AuthoritativeSet.class));
         }
         
         if (exists) {

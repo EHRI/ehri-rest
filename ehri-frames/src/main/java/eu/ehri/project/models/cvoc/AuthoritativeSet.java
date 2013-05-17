@@ -18,7 +18,7 @@ import eu.ehri.project.models.base.PermissionScope;
  */
 @EntityType(EntityClass.AUTHORITATIVE_SET)
 public interface AuthoritativeSet extends AccessibleEntity, IdentifiableEntity, PermissionScope {
-    public static final String IN_SET = "inAuthoritativeList";
+    public static final String IN_SET = "inAuthoritativeSet";
 
     @Adjacency(label = IN_SET, direction = Direction.IN)
     public Iterable<AuthoritativeItem> getAuthoritativeItems();

@@ -4,6 +4,7 @@
  */
 package eu.ehri.project.models.cvoc;
 
+import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.frames.Adjacency;
 import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.base.AccessibleEntity;
@@ -14,7 +15,7 @@ import eu.ehri.project.models.base.AccessibleEntity;
  */
 public interface AuthoritativeItem extends AccessibleEntity {
     @Fetch(AuthoritativeSet.IN_SET)
-    @Adjacency(label = Vocabulary.IN_CVOC)
+    @Adjacency(label = AuthoritativeSet.IN_SET)
     public AuthoritativeSet getAuthoritativeSet();
 
     @Adjacency(label = AuthoritativeSet.IN_SET)
