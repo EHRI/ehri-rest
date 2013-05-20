@@ -14,6 +14,9 @@ except Exception:
     print("usage: %s <url> <login-email> <login-password> <output-dir>" % sys.argv[0], file=sys.stderr)
     sys.exit(1)
 
+if not os.path.exists(outdir):
+    os.mkdir(outdir)
+
 br = mechanize.Browser()
 cj = cookielib.LWPCookieJar()
 br.set_cookiejar(cj)
