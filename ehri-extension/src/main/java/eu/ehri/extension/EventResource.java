@@ -33,7 +33,6 @@ import eu.ehri.project.views.Query;
  * are created by the system, so we do not have create/update/delete methods
  * here.
  */
-// FIXME: Change this to SYSTEM_EVENT
 @Path(Entities.SYSTEM_EVENT)
 public class EventResource extends AbstractAccessibleEntityResource<SystemEvent> {
 
