@@ -276,7 +276,8 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
         Transaction tx = ((Neo4jGraph)graph.getBaseGraph()).getRawGraph().beginTx();
         try {
             T out = views.updateDependent(bundle, parent, user, dependentClass);
-            actionManager.logEvent(parent, graph.frame(user.asVertex(), Actioner.class), logMessage);
+            ActionManager.EventContext context = actionManager.logEvent(graph.frame(user.asVertex(), Actioner.class), logMessage);
+            context.addSubjects(parent, graph.frame(out.asVertex(), AccessibleEntity.class));
             tx.success();
             return out;
         } catch (IntegrityError ex) {
@@ -338,7 +339,8 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
         Transaction tx = ((Neo4jGraph)graph.getBaseGraph()).getRawGraph().beginTx();
         try {
             T out = views.createDependent(bundle, parent, user, dependentClass);
-            actionManager.logEvent(parent, graph.frame(user.asVertex(), Actioner.class), logMessage);
+            ActionManager.EventContext context = actionManager.logEvent(graph.frame(user.asVertex(), Actioner.class), logMessage);
+            context.addSubjects(parent, graph.frame(out.asVertex(), AccessibleEntity.class));
             tx.success();
             return out;
         } catch (IntegrityError ex) {
