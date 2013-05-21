@@ -16,18 +16,17 @@ import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.models.ContentType;
-import eu.ehri.project.models.Group;
-import eu.ehri.project.models.Permission;
-import eu.ehri.project.models.PermissionGrant;
+import eu.ehri.project.models.*;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionGrantTarget;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistance.ActionManager;
-import eu.ehri.project.views.ViewHelper;
 
+/**
+ * Views class for permission operations.
+ */
 public final class AclViews {
 
     private final FramedGraph<? extends TransactionalGraph> graph;
@@ -197,9 +196,14 @@ public final class AclViews {
         // fact that individual grants can, in theory, have more than one
         // target content type.
         for (PermissionGrantTarget tg : grant.getTargets()) {
-            helper.checkEntityPermission(
-                    graph.frame(tg.asVertex(), AccessibleEntity.class), user,
-                    PermissionType.GRANT);
+            switch (manager.getEntityClass(tg)) {
+                case CONTENT_TYPE:
+                    helper.checkContentPermission(user, ContentTypes.withName(tg.getId()), PermissionType.GRANT);
+                    break;
+                default:
+                    helper.checkEntityPermission(
+                        graph.frame(tg.asVertex(), AccessibleEntity.class), user, PermissionType.GRANT);
+            }
         }
         acl.revokePermissionGrant(grant);
     }

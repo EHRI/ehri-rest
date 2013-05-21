@@ -402,7 +402,7 @@ public final class AclManager {
         Optional<PermissionGrant> maybeGrant = findPermission(accessor, entity,
                 permType);
         if (maybeGrant.isPresent()) {
-            graph.removeVertex(maybeGrant.get().asVertex());
+            manager.deleteVertex(maybeGrant.get().asVertex());
         }
     }
     
@@ -412,7 +412,7 @@ public final class AclManager {
      * @param grant
      */
     public void revokePermissionGrant(PermissionGrant grant) {
-        graph.removeVertex(grant.asVertex());
+        manager.deleteVertex(grant.asVertex());
     }
 
     /**
