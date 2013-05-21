@@ -2,14 +2,18 @@ package eu.ehri.extension;
 
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.acl.AclManager;
+import eu.ehri.project.acl.PermissionType;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.*;
+import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Link;
 import eu.ehri.project.models.UndeterminedRelationship;
 import eu.ehri.project.models.base.*;
+import eu.ehri.project.persistance.ActionManager;
 import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.views.LinkViews;
 import eu.ehri.project.views.Query;
+import eu.ehri.project.views.ViewHelper;
 import eu.ehri.project.views.impl.CrudViews;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
@@ -192,6 +196,49 @@ public class LinkResource extends
     /**
      * Delete a link. If the optional ?accessPoint=[ID] parameter is also given
      * the access point associated with the link will also be deleted.
+     *
+     * @param id id of link to remove
+     * @return
+     * @throws PermissionDenied
+     * @throws ItemNotFound
+     * @throws ValidationError
+     * @throws BadRequester
+     */
+    @DELETE
+    @Path("/for/{id:.+}/{linkId:.+}")
+    public Response deleteLinkForItem(@PathParam("id") String id, @PathParam("linkId") String linkId)
+            throws AccessDenied, PermissionDenied, ItemNotFound, ValidationError,
+            BadRequester {
+        //return delete(id);
+        // FIXME: Because it only takes ANNOTATE permissions to create a link
+        // we need the same to delete them...
+        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
+        try {
+            new ViewHelper(graph).checkEntityPermission(manager.getFrame(id, AccessibleEntity.class),
+                    getRequesterUserProfile(), PermissionType.ANNOTATE);
+            Actioner actioner = graph.frame(getRequesterUserProfile().asVertex(), Actioner.class);
+            Link link = manager.getFrame(linkId, EntityClass.LINK, Link.class);
+            new ActionManager(graph).logEvent(link, actioner, "Deleting link.");
+            manager.deleteVertex(link.asVertex());
+            return Response.ok().build();
+        } catch (ItemNotFound e) {
+            tx.failure();
+            throw e;
+        } catch (PermissionDenied e) {
+            tx.failure();
+            throw e;
+        } catch (BadRequester e) {
+            tx.failure();
+            throw e;        } catch (Exception e) {
+            e.printStackTrace();
+            throw new WebApplicationException(e);
+        } finally {
+            tx.finish();
+        }
+    }
+
+    /**
+     * Delete a link.
      *
      * @param id id of link to remove
      * @return
