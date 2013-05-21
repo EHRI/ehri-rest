@@ -1,5 +1,7 @@
 package eu.ehri.project.views;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
 import com.tinkerpop.frames.FramedGraph;
 
@@ -41,6 +43,7 @@ public final class ViewHelper {
     }
 
     public ViewHelper(FramedGraph<?> graph, PermissionScope scope) {
+        Preconditions.checkNotNull(scope);
         this.graph = graph;
         this.acl = new AclManager(graph, scope);
         this.scope = scope;
@@ -83,7 +86,8 @@ public final class ViewHelper {
         // TODO: Determine behaviour for granular item-level
         // attributes.
         try {
-            checkContentPermission(accessor, getContentType(entity), permType);
+            setScope(entity.getPermissionScope())
+                    .checkContentPermission(accessor, getContentType(entity), permType);
         } catch (PermissionDenied e) {
             Permission permission = getPermission(permType);
             Iterable<PermissionGrant> perms = acl.getPermissionGrants(accessor,
@@ -211,6 +215,7 @@ public final class ViewHelper {
      * @param scope
      */
     public ViewHelper setScope(PermissionScope scope) {
-        return new ViewHelper(graph, scope);
+        return new ViewHelper(graph, Optional
+                .fromNullable(scope).or(SystemScope.INSTANCE));
     }
 }

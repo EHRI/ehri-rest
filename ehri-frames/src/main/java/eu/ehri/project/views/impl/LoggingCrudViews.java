@@ -1,5 +1,7 @@
 package eu.ehri.project.views.impl;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import eu.ehri.project.exceptions.*;
@@ -44,6 +46,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      */
     public LoggingCrudViews(FramedGraph<? extends TransactionalGraph> graph, Class<E> cls,
             PermissionScope scope) {
+        Preconditions.checkNotNull(scope);
         this.graph = graph;
         this.cls = cls;
         this.scope = scope;
@@ -467,8 +470,9 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
     }
 
 
-    public Crud<E> setScope(PermissionScope scope) {
-        return new LoggingCrudViews<E>(graph, cls, scope);
+    public LoggingCrudViews<E> setScope(PermissionScope scope) {
+        return new LoggingCrudViews<E>(graph, cls,
+                Optional.fromNullable(scope).or(SystemScope.INSTANCE));
     }
 
     public E detail(E item, Accessor user) throws AccessDenied {

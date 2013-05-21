@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.common.base.Preconditions;
 import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.blueprints.TransactionalGraph.Conclusion;
 import com.tinkerpop.frames.FramedGraph;
@@ -42,6 +43,7 @@ public final class AclViews {
      * @param scope
      */
     public AclViews(FramedGraph<? extends TransactionalGraph> graph, PermissionScope scope) {
+        Preconditions.checkNotNull(scope);
         this.graph = graph;
         helper = new ViewHelper(graph, scope);
         acl = helper.getAclManager();

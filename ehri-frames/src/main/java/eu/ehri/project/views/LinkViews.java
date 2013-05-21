@@ -69,7 +69,8 @@ public final class LinkViews {
         LinkableEntity t1 = manager.getFrame(targetId1, LinkableEntity.class);
         LinkableEntity t2 = manager.getFrame(targetId2, LinkableEntity.class);
         helper.checkEntityPermission(t1, user, PermissionType.ANNOTATE);
-        helper.checkEntityPermission(t2, user, PermissionType.ANNOTATE);
+        // TODO: Should this require perms to link another item???
+        //helper.checkEntityPermission(t2, user, PermissionType.ANNOTATE);
         Link link = new BundleDAO(graph).create(bundle, Link.class);
         link.addLinkTarget(t1);
         link.addLinkTarget(t2);
@@ -104,7 +105,8 @@ public final class LinkViews {
         LinkableEntity t2 = manager.getFrame(targetId2, LinkableEntity.class);
         Description description = manager.getFrame(descriptionId, Description.class);
         helper.checkEntityPermission(t1, user, PermissionType.ANNOTATE);
-        helper.checkEntityPermission(t2, user, PermissionType.ANNOTATE);
+        // TODO: Should this require perms to link another item???
+        //helper.checkEntityPermission(t2, user, PermissionType.ANNOTATE);
         helper.checkEntityPermission(description.getEntity(), user, PermissionType.UPDATE);
         Link link = new BundleDAO(graph).create(bundle, Link.class);
         Bundle relBundle = new Bundle(EntityClass.UNDETERMINED_RELATIONSHIP)
