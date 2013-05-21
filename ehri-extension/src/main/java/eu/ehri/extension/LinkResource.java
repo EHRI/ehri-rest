@@ -30,11 +30,6 @@ public class LinkResource extends
         AbstractAccessibleEntityResource<Link> {
 
     public static final String BODY_PARAM = "body";
-    public static final String BODY_NAME = "bodyName";
-    public static final String BODY_TYPE = "bodyType";
-    public static final String ACCESS_POINT_PARAM = "accessPoint";
-    public static final String SOURCE_ID = "sourceId";
-    public static final String TARGET_ID = "targetId";
 
     public LinkResource(@Context GraphDatabaseService database) {
         super(database, Link.class);
