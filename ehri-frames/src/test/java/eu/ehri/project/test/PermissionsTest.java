@@ -26,12 +26,15 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.UserProfile;
-import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.persistance.BundleDAO;
 import eu.ehri.project.views.ViewHelper;
 import eu.ehri.project.views.impl.CrudViews;
 
+/**
+ * Exercise various aspects of the permission system.
+ * TODO: Streamline this stuff and make it more comprehensible.
+ */
 public class PermissionsTest extends AbstractFixtureTest {
 
     private UserProfile user;
@@ -102,11 +105,29 @@ public class PermissionsTest extends AbstractFixtureTest {
         c1.setPermissionScope(scope);
         // We should be able to create another item with c1 as the scope,
         // and inherit the perms from r1
-        // FIXME: We have to alter the test data so it doesn't throw a
-        // validation error due to duplicate identifiers
-        Bundle bundle = Bundle.fromData(getTestBundle()).withDataValue(
-                IdentifiableEntity.IDENTIFIER_KEY, "nested-item");
+        Bundle bundle = Bundle.fromData(getTestBundle());
         DocumentaryUnit c2 = views.setScope(c1).create(bundle, user);
+        assertNotNull(c2);
+    }
+
+    @Test
+    public void testCreateAsUserWithGoodDoubleNestedScopedPerms()
+            throws PermissionDenied, ValidationError, DeserializationError,
+            IntegrityError, ItemNotFound {
+        // Same as above, but with the repository as the scope instead of the item.
+        Repository r1 = manager.getFrame("r1", Repository.class);
+        new AclManager(graph, r1).grantPermissions(user,
+                viewHelper.getContentType(EntityClass.DOCUMENTARY_UNIT),
+                PermissionType.CREATE);
+        DocumentaryUnit c1 = views.setScope(r1).create(
+                Bundle.fromData(getTestBundle()), user);
+        // We have to explicitly set the r1 of this new item.
+        c1.setPermissionScope(r1);
+        // We should be able to create another item with c1 as the r1,
+        // and inherit the perms from r1
+        Bundle bundle = Bundle.fromData(getTestBundle())
+                .withDataValue(IdentifiableEntity.IDENTIFIER_KEY, "some-id");
+        DocumentaryUnit c2 = views.setScope(r1).create(bundle, user);
         assertNotNull(c2);
     }
 
