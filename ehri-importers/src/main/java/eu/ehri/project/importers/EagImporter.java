@@ -17,7 +17,6 @@ import eu.ehri.project.models.base.IdentifiableEntity;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.base.TemporalEntity;
 import eu.ehri.project.models.idgen.IdGenerator;
-import eu.ehri.project.models.idgen.IdentifiableEntityIdGenerator;
 import eu.ehri.project.persistance.Bundle;
 
 import java.util.ArrayList;
@@ -118,7 +117,7 @@ public class EagImporter extends EaImporter {
 
         unit = unit.withRelation(Description.DESCRIBES, descBundle);
 
-        IdGenerator generator = IdentifiableEntityIdGenerator.INSTANCE;
+        IdGenerator generator = EntityClass.REPOSITORY.getIdgen();
         String id = generator.generateId(EntityClass.REPOSITORY, permissionScope, unit);
         boolean exists = manager.exists(id);
         Repository frame = persister.createOrUpdate(unit.withId(id), Repository.class);

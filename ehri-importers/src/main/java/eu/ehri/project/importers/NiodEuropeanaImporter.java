@@ -14,7 +14,6 @@ import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.base.TemporalEntity;
 import eu.ehri.project.models.idgen.IdGenerator;
-import eu.ehri.project.models.idgen.IdentifiableEntityIdGenerator;
 import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.persistance.BundleDAO;
 import java.util.Map;
@@ -62,7 +61,7 @@ public class NiodEuropeanaImporter extends EaImporter{
         }
         unit=unit.withRelation(Description.DESCRIBES, descBundle);
 
-        IdGenerator generator = IdentifiableEntityIdGenerator.INSTANCE;
+        IdGenerator generator = EntityClass.DOCUMENTARY_UNIT.getIdgen();
         String id = generator.generateId(EntityClass.DOCUMENTARY_UNIT, permissionScope, unit);
         boolean exists = manager.exists(id);
         DocumentaryUnit frame = persister.createOrUpdate(unit.withId(id), DocumentaryUnit.class);

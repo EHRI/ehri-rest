@@ -40,7 +40,6 @@ import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.ConceptDescription;
 import eu.ehri.project.models.cvoc.Vocabulary;
-import eu.ehri.project.models.idgen.GenericIdGenerator;
 import eu.ehri.project.models.idgen.IdGenerator;
 import eu.ehri.project.persistance.ActionManager;
 import eu.ehri.project.persistance.ActionManager.EventContext;
@@ -288,7 +287,7 @@ public class SkosCoreCvocImporter {
         //logger.debug("Bundle as JSON: \n" + unit.toJson());
 
         // get an ID for the GraphDB
-        IdGenerator generator = GenericIdGenerator.INSTANCE;//AccessibleEntityIdGenerator.INSTANCE;
+        IdGenerator generator = EntityClass.CVOC_CONCEPT.getIdgen();
         PermissionScope scope = vocabulary;
 
         String id = generator.generateId(EntityClass.CVOC_CONCEPT, scope, unit);

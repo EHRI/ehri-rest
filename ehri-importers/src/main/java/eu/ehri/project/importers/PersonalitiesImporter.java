@@ -17,7 +17,6 @@ import eu.ehri.project.models.base.IdentifiableEntity;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.cvoc.AuthoritativeSet;
 import eu.ehri.project.models.idgen.IdGenerator;
-import eu.ehri.project.models.idgen.IdentifiableEntityIdGenerator;
 import eu.ehri.project.persistance.Bundle;
 import java.util.HashMap;
 import java.util.Map;
@@ -51,7 +50,7 @@ public class PersonalitiesImporter extends XmlImporter<Object> {
         
         unit = unit.withRelation(Description.DESCRIBES, descBundle);
         
-        IdGenerator generator = IdentifiableEntityIdGenerator.INSTANCE;
+        IdGenerator generator = EntityClass.HISTORICAL_AGENT.getIdgen();
         String id = generator.generateId(EntityClass.HISTORICAL_AGENT, permissionScope, unit);
         boolean exists = manager.exists(id);
         HistoricalAgent frame = persister.createOrUpdate(unit.withId(id), HistoricalAgent.class);

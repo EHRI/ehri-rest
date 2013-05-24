@@ -6,7 +6,6 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.*;
 import eu.ehri.project.models.cvoc.Concept;
-import eu.ehri.project.models.idgen.IdentifiableEntityIdGenerator;
 import eu.ehri.project.models.idgen.IdGenerator;
 import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.persistance.BundleDAO;
@@ -40,7 +39,6 @@ public class SkosImporter extends XmlImporter<Map<String, Object>> {
      * Import a single item, keeping a reference to the hierarchical depth.
      *
      * @param itemData
-     * @param depth
      * @throws ValidationError
      */
     @Override
@@ -66,7 +64,7 @@ public class SkosImporter extends XmlImporter<Map<String, Object>> {
                     EntityClass.CVOC_CONCEPT_DESCRIPTION, dpb));
         }
 
-        IdGenerator generator = IdentifiableEntityIdGenerator.INSTANCE;
+        IdGenerator generator = EntityClass.CVOC_CONCEPT.getIdgen();
         String id = generator.generateId(EntityClass.CVOC_CONCEPT, permissionScope, unit);
         boolean exists = manager.exists(id);
         Concept frame = persister.createOrUpdate(unit.withId(id),

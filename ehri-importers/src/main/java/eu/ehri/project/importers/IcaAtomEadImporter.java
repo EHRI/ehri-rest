@@ -6,7 +6,6 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.*;
 import eu.ehri.project.models.base.*;
 import eu.ehri.project.models.idgen.IdGenerator;
-import eu.ehri.project.models.idgen.IdentifiableEntityIdGenerator;
 import eu.ehri.project.persistance.Bundle;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -81,7 +80,7 @@ public class IcaAtomEadImporter extends EaImporter {
         if (unit.getDataValue(DocumentaryUnit.IDENTIFIER_KEY) == null) {
             throw new ValidationError(unit, DocumentaryUnit.IDENTIFIER_KEY, "Missing identifier");
         }
-        IdGenerator generator = IdentifiableEntityIdGenerator.INSTANCE;
+        IdGenerator generator = EntityClass.DOCUMENTARY_UNIT.getIdgen();
         String id = generator.generateId(EntityClass.DOCUMENTARY_UNIT, permissionScope, unit);
         if (id.equals(permissionScope.getId())) {
             throw new RuntimeException("Generated an id same as scope: " + unit.getData());
