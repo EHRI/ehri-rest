@@ -49,11 +49,11 @@ Clone the EHRI server code from Github:
 
 While Maven is doing its thing, we can install a standalone version of the Neo4j server. Once the code has been built, we can enable the EHRI REST service within the standalone Neo4j server.
 
-	curl -L -0 "http://download.neo4j.org/artifact?edition=community&version=1.9.RC1&distribution=tarball&dlid=233206" | tar zx -C ~/apps
+	curl -L -0 "http://download.neo4j.org/artifact?edition=community&version=1.9&distribution=tarball&dlid=1957811" | tar zx -C ~/apps
 	
 We'll need to refer to the installation location a lot so save it:
 
-	export NEO4J_VERSION=1.9.RC1
+	export NEO4J_VERSION=1.9
 	export NEO4J_HOME=$HOME/apps/neo4j-community-${NEO4J_VERSION}
 	export NEO4J_DB=$NEO4J_HOME/data/graph.db
 
