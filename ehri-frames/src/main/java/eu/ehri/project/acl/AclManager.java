@@ -28,6 +28,7 @@ import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.exceptions.IdGenerationError;
 import eu.ehri.project.exceptions.IntegrityError;
+import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.ContentType;
 import eu.ehri.project.models.EntityClass;
@@ -35,6 +36,8 @@ import eu.ehri.project.models.Group;
 import eu.ehri.project.models.Permission;
 import eu.ehri.project.models.PermissionGrant;
 import eu.ehri.project.models.base.*;
+import eu.ehri.project.models.utils.ClassUtils;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 /**
  * Helper class for checking and asserting access and write permissions.
@@ -449,6 +452,29 @@ public final class AclManager {
         };
     }
 
+    /**
+     * Check if a user has permission to perform an action on the given content type.
+     * @param contentType       The content type
+     * @param permissionType    The requested permission
+     * @param accessor          The user
+     * @return
+     */
+    public boolean hasPermission(ContentTypes contentType, PermissionType permissionType, Accessor accessor) {
+        throw new NotImplementedException();
+    }
+
+    /**
+     * Check if a user has permission to perform an action on the given item.
+     * @param entity            The item
+     * @param permissionType    The requested permission
+     * @param accessor          The user
+     * @return
+     */
+    public boolean hasPermission(AccessibleEntity entity, PermissionType permissionType, Accessor accessor) {
+
+        throw new NotImplementedException();
+    }
+
     // Helpers...
 
     /**
@@ -745,5 +771,21 @@ public final class AclManager {
             return true;
         return !isSystemScope()
                 && Iterables.contains(scopes, grant.getScope().asVertex());
+    }
+
+    /**
+     * Get the content type with the given id.
+     *
+     * @param type
+     * @return
+     */
+    private ContentType getContentType(EntityClass type) {
+        try {
+            return manager.getFrame(type.getName(), ContentType.class);
+        } catch (ItemNotFound e) {
+            throw new RuntimeException(
+                    String.format("No content type node found for type: '%s'",
+                            type.getName()), e);
+        }
     }
 }
