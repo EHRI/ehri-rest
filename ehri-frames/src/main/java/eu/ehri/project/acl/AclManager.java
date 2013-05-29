@@ -41,6 +41,11 @@ import eu.ehri.project.models.base.*;
  * 
  * TODO: Re-express all this hideousness as Cypher or Gremlin queries, though
  * they will inevitably be quite complex.
+ *
+ * TODO: Greatly simply determining if a permission to do something with
+ * something else exists. At the moment most of this is handled partly
+ * by this class, and partly by the ViewHelper. Separate this logic more
+ * cleanly.
  * 
  * @author mike
  * 
@@ -231,7 +236,6 @@ public final class AclManager {
 
         List<PermissionGrant> grants = Lists.newLinkedList();
         for (PermissionGrant grant : accessor.getPermissionGrants()) {
-
             if (isGlobalOrInScope(grant)
                     && Iterables.contains(grant.getTargets(), target)) {
                 PermissionType gt = enumForPermission(grant.getPermission());
@@ -710,9 +714,14 @@ public final class AclManager {
     // Get a list of the current scope and its parents
     private Collection<Vertex> getAllScopes() {
         Collection<Vertex> all = Lists.newArrayList();
-        for (PermissionScope s : scope.getPermissionScopes())
+        for (PermissionScope s : scope.getPermissionScopes()) {
             all.add(s.asVertex());
-        all.add(scope.asVertex());
+        }
+        // FIXME: This shows the current system is unworkable.
+        // Maybe remove systemscope completely...
+        if (!isSystemScope()) {
+            all.add(scope.asVertex());
+        }
         return all;
     }
 

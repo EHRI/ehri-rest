@@ -90,7 +90,12 @@ public final class ViewHelper {
                     .checkContentPermission(accessor, getContentType(entity), permType);
         } catch (PermissionDenied e) {
             Permission permission = getPermission(permType);
-            Iterable<PermissionGrant> perms = acl.getPermissionGrants(accessor,
+            // TEMP HACK - if the scope is system, use the item's scope!!!
+            AclManager scopeAcl = acl;
+            if (acl.getScope() == SystemScope.getInstance()) {
+                scopeAcl = acl.withScope(entity.getPermissionScope());
+            }
+            Iterable<PermissionGrant> perms = scopeAcl.getPermissionGrants(accessor,
                     entity, permission);
             // Scopes do not apply to entity-level perms...
             if (Iterables.isEmpty(perms)) {

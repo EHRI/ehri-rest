@@ -302,7 +302,7 @@ public class PermissionsTest extends AbstractFixtureTest {
             } catch (PermissionDenied e1) {
                 DocumentaryUnit unit = views.setScope(scope).create(
                         Bundle.fromData(getTestBundle()), user);
-                assertNotNull(unit);
+                    assertNotNull(unit);
                 views.setScope(scope).delete(unit, user);
             }
         }
