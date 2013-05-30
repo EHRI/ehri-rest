@@ -51,14 +51,14 @@ While Maven is doing its thing, we can install a standalone version of the Neo4j
 
 	curl -L -0 "http://download.neo4j.org/artifact?edition=community&version=1.9&distribution=tarball&dlid=1957811" | tar zx -C ~/apps
 	
-We'll need to refer to the installation location a lot so save it:
+We'll need to refer to the installation location a lot so save it as an environment variable:
 
 	export NEO4J_VERSION=1.9
 	export NEO4J_HOME=$HOME/apps/neo4j-community-${NEO4J_VERSION}
 	export NEO4J_DB=$NEO4J_HOME/data/graph.db
 
 Once both the EHRI server code has been compiled and Neo4j standalone has been downloaded and extracted, we can install the former into the latter. The following script ensures the code is packaged and then installs the EHRI jars and
-various other dependencies into the $NEO4J_HOME/plugin/ehri directory:
+various other dependencies into the `$NEO4J_HOME/plugin/ehri` directory:
 
 	./scripts/install.sh
 
