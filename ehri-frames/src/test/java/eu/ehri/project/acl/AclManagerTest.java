@@ -1,6 +1,6 @@
 package eu.ehri.project.acl;
 
-import com.google.common.collect.Iterables;
+import com.google.common.collect.*;
 import eu.ehri.project.models.*;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.IdentifiableEntity;
@@ -16,11 +16,14 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 import static eu.ehri.project.acl.PermissionType.*;
 import static eu.ehri.project.acl.ContentTypes.*;
+import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * User: michaelb
@@ -102,12 +105,40 @@ public class AclManagerTest extends GraphTestBase {
 
     @Test
     public void testGetInheritedGlobalPermissions() throws Exception {
+        loader.loadTestData("permissions.yaml");
+        Group group1 = manager.getFrame("group1", Group.class);
+        Group group2 = manager.getFrame("group2", Group.class);
+        UserProfile user1 = manager.getFrame("user1", UserProfile.class);
+        UserProfile user2 = manager.getFrame("user2", UserProfile.class);
 
+        AclManager acl = new AclManager(graph);
+        List<Map<String,Map<ContentTypes,Collection<PermissionType>>>> getPerms
+                = acl.getInheritedGlobalPermissions(user1);
+        // It should contain two elements - the user, and his group
+        assertEquals(2, getPerms.size());
+        assertEquals(getPerms.get(0).get(user1.getId()), Maps.newHashMap());
+        Map<ContentTypes, Collection<PermissionType>> groupPerms = acl.getGlobalPermissions(group1);
+        assertNestedPermsEqual(groupPerms, getPerms.get(1).get(group1.getId()));
     }
 
     @Test
     public void testGetGlobalPermissions() throws Exception {
+        loader.loadTestData("permissions.yaml");
+        Group group1 = manager.getFrame("group1", Group.class);
+        UserProfile user1 = manager.getFrame("user1", UserProfile.class);
 
+        // Group1 should have create/update/delete for documentaryUnits
+        Map<ContentTypes,Collection<PermissionType>> hasPerms =
+                new ImmutableMap.Builder<ContentTypes,Collection<PermissionType>>()
+                .put(DOCUMENTARY_UNIT, Lists.newArrayList(CREATE, UPDATE, DELETE)).build();
+        Map<ContentTypes,Collection<PermissionType>> getPerms = new AclManager(graph).getGlobalPermissions(group1);
+
+        // Bit of a hassle comparing the data structures..
+        assertNestedPermsEqual(hasPerms, getPerms);
+
+        // User1 should have an empty set of global permissions
+        assertEquals(Maps.newHashMap(), new AclManager(graph)
+                .getGlobalPermissions(user1));
     }
 
     @Test
@@ -239,5 +270,26 @@ public class AclManagerTest extends GraphTestBase {
         assertFalse(acl.hasPermission(userdoc1, DELETE, user2));
         assertFalse(acl.hasPermission(userdoc2, UPDATE, user1));
         assertFalse(acl.hasPermission(userdoc2, DELETE, user1));
+    }
+
+    /**
+     * Helper for comparing a data structure like:
+     *  Map(CONTENT_TYPE -> List(PERM1, PERM2, PERM3))
+     *
+     *  NB: Order of the nested list is ignored.
+     * @param a
+     * @param b
+     * @param <K>
+     * @param <V>
+     */
+    private static <K,V extends Comparable<V>> void assertNestedPermsEqual(Map<K,Collection<V>> a, Map<K,
+            Collection<V>> b) {
+        // Bit of a hassle comparing the data structures...
+        assertEquals(a.keySet(), b.keySet());
+        for (K key : a.keySet()) {
+            assertTrue(Iterables.elementsEqual(
+                    Ordering.natural().sortedCopy(a.get(key)),
+                    Ordering.natural().sortedCopy(b.get(key))));
+        }
     }
 }

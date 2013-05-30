@@ -1,0 +1,85 @@
+#
+# Basic set of permission fixtures...
+#
+#
+
+# Countries - these are at the top of the entity hierarchy and
+# 'hold' everything else.
+- id: gb
+  type: country
+  data:
+    identifier: gb
+
+# Institutions
+- id: repo-gb
+  type: repository
+  data:
+    identifier: repo-gb
+    name: Repository
+  relationships:
+    hasCountry: gb
+    hasPermissionScope: gb
+    describes:
+      - id: rd1
+        type: repositoryDescription
+        data:
+          name: Repository Name
+          languageCode: en
+        relationships:
+
+# Two groups
+
+- id: group1
+  type: group
+  data:
+    identifier: group1
+    name: Group 1
+    description: Group 1
+
+- id: group2
+  type: group
+  data:
+    identifier: group2
+    name: Group 2
+    description: Group 2
+
+- id: user1
+  type: userProfile
+  data:
+    identifier: user1
+    name: User 1
+  relationships:
+    belongsTo: group1
+
+- id: user2
+  type: userProfile
+  data:
+    identifier: user2
+    name: User 2
+  relationships:
+    belongsTo: group2
+
+
+--- # Permission grants
+
+# Allow CUD of repos and docs in GB
+- id: group1DocCreateGrant
+  type: permissionGrant
+  relationships:
+    hasPermission: create
+    hasTarget: documentaryUnit
+    hasAccessor: group1
+    
+- id: group1DocUpdateGrant
+  type: permissionGrant
+  relationships:
+    hasPermission: update
+    hasTarget: documentaryUnit
+    hasAccessor: group1
+
+- id: group1DocDeleteGrant
+  type: permissionGrant
+  relationships:
+    hasPermission: delete
+    hasTarget: documentaryUnit
+    hasAccessor: group1
