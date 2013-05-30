@@ -489,7 +489,7 @@ public final class AclManager {
             PermissionType grantPermissionType = enumForPermission(grant.getPermission());
 
             // If it's not the permission type we want, skip it...
-            if ((grantPermissionType.getMask() & permissionType.getMask()) != permissionType.getMask()) {
+            if (!grantPermissionType.contains(permissionType)) {
                 continue;
             }
 
