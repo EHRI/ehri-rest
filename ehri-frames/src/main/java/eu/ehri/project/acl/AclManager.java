@@ -5,12 +5,7 @@ import java.util.Map.Entry;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.LinkedListMultimap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Sets;
+import com.google.common.collect.*;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
@@ -252,16 +247,16 @@ public final class AclManager {
      * @return List of permission maps for the given accessor and his group
      *         parents.
      */
-    public List<Map<String, Map<ContentTypes, Collection<PermissionType>>>> getInheritedGlobalPermissions(
+    public List<Map<String, GlobalPermissionSet>> getInheritedGlobalPermissions(
             Accessor accessor) {
-        List<Map<String, Map<ContentTypes, Collection<PermissionType>>>> globals = Lists
+        List<Map<String, GlobalPermissionSet>> globals = Lists
                 .newLinkedList();
-        Map<String, Map<ContentTypes, Collection<PermissionType>>> userMap = Maps
+        Map<String, GlobalPermissionSet> userMap = Maps
                 .newHashMap();
         userMap.put(accessor.getId(), getGlobalPermissions(accessor));
         globals.add(userMap);
         for (Accessor parent : accessor.getParents()) {
-            Map<String, Map<ContentTypes, Collection<PermissionType>>> parentMap = Maps
+            Map<String, GlobalPermissionSet> parentMap = Maps
                     .newHashMap();
             parentMap.put(parent.getId(), getGlobalPermissions(parent));
             globals.add(parentMap);
@@ -276,9 +271,9 @@ public final class AclManager {
      * @param accessor
      * @return Permission map for the given accessor
      */
-    public Map<ContentTypes, Collection<PermissionType>> getGlobalPermissions(
-            Accessor accessor) {
-        return isAdmin(accessor) ? getAdminPermissions()
+    public GlobalPermissionSet getGlobalPermissions(Accessor accessor) {
+        return isAdmin(accessor)
+                ? getAdminPermissions()
                 : getAccessorPermissions(accessor);
     }
 
@@ -688,10 +683,9 @@ public final class AclManager {
      * @param accessor
      * @return
      */
-    private Map<ContentTypes, Collection<PermissionType>> getAccessorPermissions(
+    private GlobalPermissionSet getAccessorPermissions(
             Accessor accessor) {
-        Multimap<ContentTypes, PermissionType> permmap = LinkedListMultimap
-                .create();
+        Multimap<ContentTypes, PermissionType> permmap = HashMultimap.create();
         for (PermissionGrant grant : accessor.getPermissionGrants()) {
             // Since these are global perms only include those where the target
             // is a content type. FIXME: if it has been deleted, the target
@@ -707,7 +701,7 @@ public final class AclManager {
                 }
             }
         }
-        return permmap.asMap();
+        return new GlobalPermissionSet(permmap);
     }
 
     /**
@@ -716,14 +710,12 @@ public final class AclManager {
      * 
      * @return
      */
-    private Map<ContentTypes, Collection<PermissionType>> getAdminPermissions() {
-        Multimap<ContentTypes, PermissionType> perms = LinkedListMultimap
-                .create();
+    private GlobalPermissionSet getAdminPermissions() {
+        Multimap<ContentTypes, PermissionType> perms = HashMultimap.create();
         for (ContentTypes ct : ContentTypes.values()) {
-            perms.putAll(ct, Collections.unmodifiableList(Arrays
-                    .asList(PermissionType.values())));
+            perms.putAll(ct, Arrays.asList(PermissionType.values()));
         }
-        return perms.asMap();
+        return new GlobalPermissionSet(perms);
     }
 
     /**

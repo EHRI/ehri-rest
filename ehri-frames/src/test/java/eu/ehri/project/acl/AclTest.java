@@ -1,16 +1,11 @@
 package eu.ehri.project.acl;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.Sets;
 import eu.ehri.project.test.ModelTestBase;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -26,6 +21,8 @@ import eu.ehri.project.models.Group;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
+
+import static org.junit.Assert.*;
 
 public class AclTest extends ModelTestBase {
 
@@ -206,8 +203,7 @@ public class AclTest extends ModelTestBase {
         // Admin can change anything, so ensure the user ISN'T a member of admin
         assertFalse(acl.belongsToAdmin(linda));
 
-        Map<ContentTypes, Collection<PermissionType>> cmap = acl
-                .getGlobalPermissions(linda);
+        GlobalPermissionSet cmap = acl.getGlobalPermissions(linda);
         // linda has been granted CREATE access for documentaryUnits.
         assertTrue(cmap.get(ContentTypes.DOCUMENTARY_UNIT).contains(
                 PermissionType.CREATE));
@@ -234,10 +230,9 @@ public class AclTest extends ModelTestBase {
         assertFalse(acl.belongsToAdmin(accessor));
 
         // Check initial perms are empty...
-        Map<ContentTypes, Collection<PermissionType>> cmap = acl
-                .getGlobalPermissions(accessor);
+        GlobalPermissionSet cmap = acl.getGlobalPermissions(accessor);
         for (ContentTypes type : types) {
-            assertNull(cmap.get(type));
+            assertEquals(cmap.get(type), Sets.newHashSet());
         }
 
         AclManager acl = new AclManager(graph);
@@ -278,8 +273,7 @@ public class AclTest extends ModelTestBase {
         assertTrue(acl.belongsToAdmin(accessor));
 
         // Check initial perms are empty...
-        Map<ContentTypes, Collection<PermissionType>> cmap = acl
-                .getGlobalPermissions(accessor);
+        GlobalPermissionSet cmap = acl.getGlobalPermissions(accessor);
         for (ContentTypes type : types) {
             assertNotNull(cmap.get(type));
         }
