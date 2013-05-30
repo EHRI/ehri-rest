@@ -37,9 +37,9 @@ import eu.ehri.project.utils.GraphInitializer;
 
 /**
  * Load data from YAML fixtures.
- * 
+ * <p/>
  * FIXME: Try and clean up the rather horrible code in here.
- * 
+ * <p/>
  * The YAML fixture format is almost identical to the plain bundle format, but
  * has some extensions to a) allow for creating non-dependent relationships, and
  * b) allow for single relations to be more naturally expressed. For example,
@@ -47,15 +47,14 @@ import eu.ehri.project.utils.GraphInitializer;
  * a list (even if there is typically only one), the YAML format allows using a
  * single item and it will be loaded as if it were a list containing just one
  * item, i.e, instead of writing
- * 
+ * <p/>
  * relationships: heldBy: - some-repo
- * 
+ * <p/>
  * we can just write:
- * 
+ * <p/>
  * relationships: heldBy: some-repo
- * 
+ *
  * @author michaelb
- * 
  */
 public class YamlFixtureLoader implements FixtureLoader {
 
@@ -69,6 +68,7 @@ public class YamlFixtureLoader implements FixtureLoader {
 
     /**
      * Constructor
+     *
      * @param graph
      * @param initialize
      */
@@ -80,6 +80,7 @@ public class YamlFixtureLoader implements FixtureLoader {
 
     /**
      * Constructor.
+     *
      * @param graph
      */
     public YamlFixtureLoader(FramedGraph<Neo4jGraph> graph) {
@@ -96,12 +97,21 @@ public class YamlFixtureLoader implements FixtureLoader {
         loadTestData(ios);
     }
 
-    public void loadTestData(String fixtureFile) {
-        File file = new File(fixtureFile);
-        try {
-            loadTestData(new FileInputStream(file));
-        } catch (FileNotFoundException e) {
-            throw new IllegalArgumentException("File " + fixtureFile + " does not exist.");
+    public void loadTestData(String resourceNameOrPath) {
+        File file = new File(resourceNameOrPath);
+        if (file.exists() && file.isFile()) {
+            try {
+                loadTestData(new FileInputStream(file));
+            } catch (FileNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            InputStream stream = this.getClass().getClassLoader()
+                    .getResourceAsStream(resourceNameOrPath);
+            if (stream == null) {
+                throw new IllegalArgumentException("File or resource " + resourceNameOrPath + " does not exist.");
+            }
+            loadTestData(stream);
         }
     }
 
@@ -122,7 +132,7 @@ public class YamlFixtureLoader implements FixtureLoader {
     public void loadFixtureFileStream(InputStream yamlStream) {
         Yaml yaml = new Yaml();
         try {
-            Map<Vertex, ListMultimap<String,String>> links = Maps.newHashMap();
+            Map<Vertex, ListMultimap<String, String>> links = Maps.newHashMap();
             for (Object data : yaml.loadAll(yamlStream)) {
                 for (Object node : (List<?>) data) {
                     if (node instanceof Map) {
@@ -135,10 +145,10 @@ public class YamlFixtureLoader implements FixtureLoader {
             // Finally, go through and wire up all the non-dependent
             // relationships
             logger.debug("Linking data...");
-            for (Entry<Vertex, ListMultimap<String,String>> entry : links.entrySet()) {
+            for (Entry<Vertex, ListMultimap<String, String>> entry : links.entrySet()) {
                 logger.debug("Setting links for: {}", entry.getKey());
                 Vertex src = entry.getKey();
-                ListMultimap<String,String> rels = entry.getValue();
+                ListMultimap<String, String> rels = entry.getValue();
                 for (String relname : rels.keySet()) {
                     for (String target : rels.get(relname)) {
                         Vertex dst = manager.getVertex(target);
@@ -176,7 +186,7 @@ public class YamlFixtureLoader implements FixtureLoader {
      * @throws IntegrityError
      * @throws ItemNotFound
      */
-    private void importNode(Map<Vertex, ListMultimap<String,String>> links,
+    private void importNode(Map<Vertex, ListMultimap<String, String>> links,
             Map<String, Object> node) throws DeserializationError,
             ValidationError, IntegrityError, ItemNotFound {
         String id = (String) node.get(Bundle.ID_KEY);
@@ -200,7 +210,7 @@ public class YamlFixtureLoader implements FixtureLoader {
         Frame frame = persister.createOrUpdate(entityBundle,
                 Frame.class);
 
-        ListMultimap<String,String> linkRels = getLinkedRelations(nodeRels);
+        ListMultimap<String, String> linkRels = getLinkedRelations(nodeRels);
         if (!linkRels.isEmpty()) {
             links.put(frame.asVertex(), linkRels);
         }
@@ -208,7 +218,7 @@ public class YamlFixtureLoader implements FixtureLoader {
 
     private Bundle createBundle(final String id, final EntityClass type,
             final Map<String, Object> nodeData,
-            final ListMultimap<String,Map<?,?>> dependentRelations) throws DeserializationError {
+            final ListMultimap<String, Map<?, ?>> dependentRelations) throws DeserializationError {
         @SuppressWarnings("serial")
         Map<String, Object> data = new HashMap<String, Object>() {
             {
@@ -223,12 +233,12 @@ public class YamlFixtureLoader implements FixtureLoader {
 
     /**
      * Extract from the relations the IDs of other non-dependent nodes.
-     * 
+     *
      * @param data
      * @return
      */
-    private ListMultimap<String,String> getLinkedRelations(Map<String, Object> data) {
-        ListMultimap<String,String> rels = LinkedListMultimap.create();
+    private ListMultimap<String, String> getLinkedRelations(Map<String, Object> data) {
+        ListMultimap<String, String> rels = LinkedListMultimap.create();
         if (data != null) {
             for (Entry<String, Object> entry : data.entrySet()) {
                 String relName = entry.getKey();
@@ -236,11 +246,11 @@ public class YamlFixtureLoader implements FixtureLoader {
                 if (relValue instanceof List) {
                     for (Object relation : (List<?>) relValue) {
                         if (relation instanceof String) {
-                            rels.put(relName, (String)relation);
+                            rels.put(relName, (String) relation);
                         }
                     }
                 } else if (relValue instanceof String) {
-                    rels.put(relName, (String)relValue);
+                    rels.put(relName, (String) relValue);
                 }
             }
         }
@@ -249,12 +259,12 @@ public class YamlFixtureLoader implements FixtureLoader {
 
     /**
      * Extract from the relations the nested dependent items.
-     * 
+     *
      * @param data
      * @return
      */
-    private ListMultimap<String,Map<?,?>> getDependentRelations(Map<String, Object> data) {
-        ListMultimap<String,Map<?,?>> rels = LinkedListMultimap.create();
+    private ListMultimap<String, Map<?, ?>> getDependentRelations(Map<String, Object> data) {
+        ListMultimap<String, Map<?, ?>> rels = LinkedListMultimap.create();
         if (data != null) {
             for (Entry<String, Object> entry : data.entrySet()) {
                 String relName = entry.getKey();
@@ -262,11 +272,11 @@ public class YamlFixtureLoader implements FixtureLoader {
                 if (relValue instanceof List) {
                     for (Object relation : (List<?>) relValue) {
                         if (relation instanceof Map) {
-                            rels.put(relName, (Map<?,?>)relation);
+                            rels.put(relName, (Map<?, ?>) relation);
                         }
                     }
                 } else if (relValue instanceof Map) {
-                    rels.put(relName, (Map<?,?>)relValue);
+                    rels.put(relName, (Map<?, ?>) relValue);
                 }
             }
         }

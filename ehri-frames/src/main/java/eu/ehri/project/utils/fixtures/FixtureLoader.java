@@ -31,7 +31,7 @@ public interface FixtureLoader {
     /**
      * Load a given file as test data.
      *
-     * @param filePath
+     * @param resourceNameOrPath
      */
-    public void loadTestData(String filePath);
+    public void loadTestData(String resourceNameOrPath);
 }
