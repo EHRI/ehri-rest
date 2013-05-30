@@ -50,14 +50,6 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getUserProfile(@QueryParam("key") String key,
-            @QueryParam("value") String value) throws ItemNotFound,
-            AccessDenied, PermissionDenied, BadRequester {
-        return retrieve(key, value);
-    }
-
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:.+}")
     public Response getUserProfile(@PathParam("id") String id)
             throws AccessDenied, ItemNotFound, PermissionDenied, BadRequester {

@@ -47,9 +47,9 @@ public class DocumentaryUnitResource extends
     }
 
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}")
-    public Response getDocumentaryUnit(@PathParam("id") String id)
+    public Response getDocumentaryUnitJson(@PathParam("id") String id)
             throws ItemNotFound, AccessDenied, BadRequester {
         return retrieve(id);
     }

@@ -50,14 +50,6 @@ public class CvocConceptResource extends
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getCvocConcept(@QueryParam("key") String key,
-            @QueryParam("value") String value) throws ItemNotFound,
-            AccessDenied, BadRequester {
-        return retrieve(key, value);
-    }
-
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:.+}")
     public Response getCvocConcept(@PathParam("id") String id)
             throws ItemNotFound, AccessDenied, BadRequester {
