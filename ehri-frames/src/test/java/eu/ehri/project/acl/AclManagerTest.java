@@ -164,8 +164,10 @@ public class AclManagerTest extends GraphTestBase {
         LoggingCrudViews<Repository> repoViews
                 = new LoggingCrudViews<Repository>(graph, Repository.class);
 
-        Repository gbrepo = repoViews.setScope(gb).create(Bundle.fromData(TestData.getTestAgentBundle()), gbuser);
-        Repository nlrepo = repoViews.setScope(nl).create(Bundle.fromData(TestData.getTestAgentBundle()), nluser);
+        Repository gbrepo = repoViews.setScope(gb).create(
+                Bundle.fromData(TestData.getTestAgentBundle()), gbuser);
+        Repository nlrepo = repoViews.setScope(nl).create(
+                Bundle.fromData(TestData.getTestAgentBundle()), nluser);
 
         assertTrue(acl.withScope(gbrepo).hasPermission(DOCUMENTARY_UNIT, CREATE, gbuser));
         assertTrue(acl.withScope(gbrepo).hasPermission(DOCUMENTARY_UNIT, UPDATE, gbuser));
@@ -173,10 +175,6 @@ public class AclManagerTest extends GraphTestBase {
         assertFalse(acl.withScope(nlrepo).hasPermission(DOCUMENTARY_UNIT, CREATE, gbuser));
         assertFalse(acl.withScope(nlrepo).hasPermission(DOCUMENTARY_UNIT, UPDATE, gbuser));
         assertFalse(acl.withScope(nlrepo).hasPermission(DOCUMENTARY_UNIT, DELETE, gbuser));
-
-
-
-
     }
 
     @Test
