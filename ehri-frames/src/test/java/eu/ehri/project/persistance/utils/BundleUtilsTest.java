@@ -10,26 +10,24 @@ import java.util.Map;
 import eu.ehri.project.models.base.IdentifiableEntity;
 import eu.ehri.project.models.base.NamedEntity;
 import eu.ehri.project.test.AbstractFixtureTest;
+import eu.ehri.project.test.TestData;
 import org.junit.Assert;
 import org.junit.Test;
 
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.models.DatePeriod;
-import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistance.Bundle;
-import eu.ehri.project.persistance.utils.BundleUtils;
 
 public class BundleUtilsTest extends AbstractFixtureTest {
 
     @Test
     public void testGetPath() throws Exception {
         Bundle bundle = Bundle.fromData(getTestBundle());
-        Assert.assertEquals(AbstractFixtureTest.TEST_COLLECTION_NAME,
+        Assert.assertEquals(TestData.TEST_COLLECTION_NAME,
                 BundleUtils.get(bundle, NamedEntity.NAME));
-        Assert.assertEquals(AbstractFixtureTest.TEST_START_DATE,
+        Assert.assertEquals(TestData.TEST_START_DATE,
                 BundleUtils.get(bundle, "describes[0]/hasDate[0]/startDate"));
-        Assert.assertEquals(AbstractFixtureTest.TEST_START_DATE, BundleUtils.get(bundle,
+        Assert.assertEquals(TestData.TEST_START_DATE, BundleUtils.get(bundle,
                 "describes[0]/hasDate[0]/hasDate[0]/startDate"));
         Assert.assertEquals("en", BundleUtils.get(bundle, "describes[0]/languageCode"));
     }
@@ -59,13 +57,13 @@ public class BundleUtilsTest extends AbstractFixtureTest {
                 "describes[0]/hasDate[0]/startDate", testDate);
         Assert.assertEquals(testDate,
                 BundleUtils.get(newBundle, "describes[0]/hasDate[0]/startDate"));
-        Assert.assertEquals(AbstractFixtureTest.TEST_START_DATE,
+        Assert.assertEquals(TestData.TEST_START_DATE,
                 BundleUtils.get(bundle, "describes[0]/hasDate[0]/startDate"));
         newBundle = BundleUtils.set(bundle,
                 "describes[0]/hasDate[0]/hasDate[0]/startDate", testDate);
         Assert.assertEquals(testDate, BundleUtils.get(newBundle,
                 "describes[0]/hasDate[0]/hasDate[0]/startDate"));
-        Assert.assertEquals(AbstractFixtureTest.TEST_START_DATE, BundleUtils.get(bundle,
+        Assert.assertEquals(TestData.TEST_START_DATE, BundleUtils.get(bundle,
                 "describes[0]/hasDate[0]/hasDate[0]/startDate"));
     }
 
@@ -92,11 +90,11 @@ public class BundleUtilsTest extends AbstractFixtureTest {
     @Test(expected = BundleUtils.BundlePathError.class)
     public void testDeleteNode() throws Exception {
         Bundle bundle = Bundle.fromData(getTestBundle());
-        Assert.assertEquals(AbstractFixtureTest.TEST_START_DATE,
+        Assert.assertEquals(TestData.TEST_START_DATE,
                 BundleUtils.get(bundle, "describes[0]/hasDate[0]/startDate"));
         Bundle newBundle = BundleUtils.deleteBundle(bundle,
                 "describes[0]/hasDate[0]");
-        Assert.assertEquals(AbstractFixtureTest.TEST_START_DATE,
+        Assert.assertEquals(TestData.TEST_START_DATE,
                 BundleUtils.get(newBundle, "describes[0]/hasDate[0]/startDate"));
     }
 
@@ -116,14 +114,13 @@ public class BundleUtilsTest extends AbstractFixtureTest {
 
     // @formatter:off
     @SuppressWarnings("serial")
-    @Override
-    protected Map<String, Object> getTestBundle() {
+    private Map<String, Object> getTestBundle() {
         // Data structure representing a not-yet-created collection.
         // Using double-brace initialization to ease the pain.
         return new HashMap<String, Object>() {{
             put("type", Entities.DOCUMENTARY_UNIT);
             put("data", new HashMap<String, Object>() {{
-                put(NamedEntity.NAME, AbstractFixtureTest.TEST_COLLECTION_NAME);
+                put(NamedEntity.NAME, TestData.TEST_COLLECTION_NAME);
                 put(IdentifiableEntity.IDENTIFIER_KEY, "someid-01");
             }});
             put("relationships", new HashMap<String, Object>() {{
@@ -140,16 +137,16 @@ public class BundleUtilsTest extends AbstractFixtureTest {
                                 add(new HashMap<String, Object>() {{
                                     put("type", Entities.DATE_PERIOD);
                                     put("data", new HashMap<String, Object>() {{
-                                        put(DatePeriod.START_DATE, AbstractFixtureTest.TEST_START_DATE);
-                                        put(DatePeriod.END_DATE, AbstractFixtureTest.TEST_START_DATE);
+                                        put(DatePeriod.START_DATE, TestData.TEST_START_DATE);
+                                        put(DatePeriod.END_DATE, TestData.TEST_START_DATE);
                                     }});
                                     put("relationships", new HashMap<String, Object>() {{
                                         put("hasDate", new LinkedList<HashMap<String, Object>>() {{
                                             add(new HashMap<String, Object>() {{
                                                 put("type", Entities.DATE_PERIOD);
                                                 put("data", new HashMap<String, Object>() {{
-                                                    put(DatePeriod.START_DATE, AbstractFixtureTest.TEST_START_DATE);
-                                                    put(DatePeriod.END_DATE, AbstractFixtureTest.TEST_START_DATE);
+                                                    put(DatePeriod.START_DATE, TestData.TEST_START_DATE);
+                                                    put(DatePeriod.END_DATE, TestData.TEST_START_DATE);
                                                 }});
                                             }});
                                         }});
@@ -163,8 +160,8 @@ public class BundleUtilsTest extends AbstractFixtureTest {
                     add(new HashMap<String, Object>() {{
                         put("type", Entities.DATE_PERIOD);
                         put("data", new HashMap<String, Object>() {{
-                            put(DatePeriod.START_DATE, AbstractFixtureTest.TEST_START_DATE);
-                            put(DatePeriod.END_DATE, AbstractFixtureTest.TEST_START_DATE);
+                            put(DatePeriod.START_DATE, TestData.TEST_START_DATE);
+                            put(DatePeriod.END_DATE, TestData.TEST_START_DATE);
                         }});
                     }});
                 }});

@@ -5,10 +5,8 @@ import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.events.SystemEvent;
-import eu.ehri.project.persistance.ActionManager;
-import eu.ehri.project.persistance.Bundle;
-import eu.ehri.project.persistance.BundleDAO;
 import eu.ehri.project.test.AbstractFixtureTest;
+import eu.ehri.project.test.TestData;
 import org.junit.Test;
 import org.neo4j.helpers.collection.Iterables;
 
@@ -27,13 +25,13 @@ public class ActionManagerTest extends AbstractFixtureTest {
     public void testCorrectEventNodesAreCreated() throws DeserializationError, ValidationError {
         ActionManager am = new ActionManager(graph);
         // Create a user and log it
-        Bundle userBundle = Bundle.fromData(getTestUserBundle());
+        Bundle userBundle = Bundle.fromData(TestData.getTestUserBundle());
         UserProfile user = new BundleDAO(graph).create(userBundle, UserProfile.class);
         SystemEvent first = am.logEvent(user,
                 graph.frame(validUser.asVertex(), Actioner.class), "Creating user").getSystemEvent();
 
         // Create a repository and log that too...
-        Bundle repoBundle = Bundle.fromData(getTestAgentBundle());
+        Bundle repoBundle = Bundle.fromData(TestData.getTestAgentBundle());
         Repository repository = new BundleDAO(graph).create(repoBundle, Repository.class);
 
         SystemEvent second = am.logEvent(repository,
