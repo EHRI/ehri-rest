@@ -1,18 +1,10 @@
 package eu.ehri.project.acl;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.Map.Entry;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Lists;
@@ -28,7 +20,6 @@ import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.exceptions.IdGenerationError;
 import eu.ehri.project.exceptions.IntegrityError;
-import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.ContentType;
 import eu.ehri.project.models.EntityClass;
@@ -36,8 +27,6 @@ import eu.ehri.project.models.Group;
 import eu.ehri.project.models.Permission;
 import eu.ehri.project.models.PermissionGrant;
 import eu.ehri.project.models.base.*;
-import eu.ehri.project.models.utils.ClassUtils;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 /**
  * Helper class for checking and asserting access and write permissions.
@@ -214,48 +203,6 @@ public final class AclManager {
                 entity.addAccessor(accessor);
             }
         }
-    }
-
-    /**
-     * Get a list of PermissionGrants for the given user on the given target.
-     * This list includes PermissionGrants inherited from parent groups.
-     * 
-     * @param accessor
-     * @param entity
-     * @param permission
-     * 
-     * @return Iterable of PermissionGrant instances for the given accessor,
-     *         target, and permission
-     */
-    public Iterable<PermissionGrant> getPermissionGrants(Accessor accessor,
-            AccessibleEntity entity, Permission permission) {
-
-        // FIXME: Although passed in as a PermissionGrantTarget, the proxy item
-        // may not originally have been framed as that, but instead as a
-        // subclass.
-        // This means we have to cast it as a PermissionGrantTarget anyway.
-        PermissionGrantTarget target = graph.frame(entity.asVertex(),
-                PermissionGrantTarget.class);
-
-        List<PermissionGrant> grants = Lists.newLinkedList();
-        for (PermissionGrant grant : accessor.getPermissionGrants()) {
-            if (isGlobalOrInScope(grant)
-                    && Iterables.contains(grant.getTargets(), target)) {
-                PermissionType gt = enumForPermission(grant.getPermission());
-                PermissionType pt = enumForPermission(permission);
-                if (((gt.getMask() & pt.getMask()) == pt.getMask())) {
-                    grants.add(grant);
-                }
-            }
-        }
-
-        for (Accessor parent : accessor.getParents()) {
-            for (PermissionGrant grant : getPermissionGrants(parent, entity,
-                    permission)) {
-                grants.add(grant);
-            }
-        }
-        return ImmutableSet.copyOf(grants);
     }
 
     /**
@@ -460,7 +407,7 @@ public final class AclManager {
      * @return
      */
     public boolean hasPermission(ContentTypes contentType, PermissionType permissionType, Accessor accessor) {
-        throw new NotImplementedException();
+        return hasPermission(contentType, permissionType, accessor, scopes);
     }
 
     /**
@@ -472,7 +419,22 @@ public final class AclManager {
      */
     public boolean hasPermission(AccessibleEntity entity, PermissionType permissionType, Accessor accessor) {
 
-        throw new NotImplementedException();
+        // Get a list of our current context scopes, plus
+        // the parent scopes of the item.
+        Set<Vertex> allScopes = Sets.newHashSet(scopes);
+        for (PermissionScope scope : entity.getPermissionScopes()) {
+            allScopes.add(scope.asVertex());
+        }
+
+        // Check if the user has content type permissions on this item, using
+        // the parent scope of the item...
+        ContentTypes contentType = getContentType(manager.getEntityClass(entity));
+        if (hasPermission(contentType, permissionType, accessor, allScopes)) {
+            return true;
+        }
+
+        // Otherwise, we have to check the item's permissions...
+        return hasScopedPermission(entity, permissionType, accessor, allScopes);
     }
 
     // Helpers...
@@ -494,6 +456,65 @@ public final class AclManager {
      */
     public PermissionScope getScope() {
         return scope;
+    }
+
+    /**
+     * Check for a content permission with a given set of scopes.
+     * @param contentType
+     * @param permissionType
+     * @param accessor
+     * @param scopes
+     * @return
+     */
+    private boolean hasPermission(ContentTypes contentType, PermissionType permissionType, Accessor accessor,
+            Collection<Vertex> scopes) {
+
+        ContentType contentTypeNode = enumContentTypeMap.get(contentType);
+        // Check the user themselves...
+        return isAdmin(accessor) || belongsToAdmin(accessor) || hasScopedPermission(contentTypeNode, permissionType, accessor, scopes);
+    }
+
+    /**
+     * Attempt to find a permission, searching the accessor's parent hierarchy.
+     * @param target
+     * @param permissionType
+     * @param accessor
+     * @param scopes
+     * @return
+     */
+    private boolean hasScopedPermission(PermissionGrantTarget target, PermissionType permissionType, Accessor accessor,
+            Collection<Vertex> scopes) {
+
+        for (PermissionGrant grant : accessor.getPermissionGrants()) {
+            PermissionType grantPermissionType = enumForPermission(grant.getPermission());
+
+            // If it's not the permission type we want, skip it...
+            if ((grantPermissionType.getMask() & permissionType.getMask()) != permissionType.getMask()) {
+                continue;
+            }
+
+            // Get the content type node and check it matches the grant target
+            for (PermissionGrantTarget tg : grant.getTargets()) {
+                if (!target.asVertex().equals(tg.asVertex())) {
+                    continue;
+                }
+
+                // Now check the scope - if there is none we're good.
+                if (grant.getScope() == null || scopes.contains(grant.getScope().asVertex())) {
+                    return true;
+                }
+            }
+        }
+
+        // If no joy, check if they inherit the permission...
+        for (Accessor ancestor : accessor.getParents()) {
+            if (hasScopedPermission(target, permissionType, ancestor, scopes)) {
+                return true;
+            }
+        }
+
+        // Default case, return false....
+        return false;
     }
 
     /**
@@ -675,7 +696,7 @@ public final class AclManager {
             // Since these are global perms only include those where the target
             // is a content type. FIXME: if it has been deleted, the target
             // could well be null.
-            if (isGlobalOrInScope(grant)) {
+            if (grant.getScope() == null || scopes.contains(grant.getScope().asVertex())) {
                 for (PermissionGrantTarget target : grant.getTargets()) {
                     if (manager.getEntityClass(target).equals(EntityClass.CONTENT_TYPE)) {
                         ContentTypes ctype = ContentTypes.withName(manager
@@ -743,9 +764,8 @@ public final class AclManager {
         for (PermissionScope s : scope.getPermissionScopes()) {
             all.add(s.asVertex());
         }
-        // FIXME: This shows the current system is unworkable.
-        // Maybe remove systemscope completely...
-        if (!isSystemScope()) {
+        // Maybe remove systemscope completely...???
+        if (!scope.equals(SystemScope.getInstance())) {
             all.add(scope.asVertex());
         }
         return all;
@@ -764,28 +784,18 @@ public final class AclManager {
                         grant.getScope().asVertex()));
     }
 
-    private boolean isGlobalOrInScope(PermissionGrant grant) {
-        // If we're on the system scope, only remove unscoped
-        // permissions. Otherwise, check the scope matches the grant.
-        if (grant.getScope() == null)
-            return true;
-        return !isSystemScope()
-                && Iterables.contains(scopes, grant.getScope().asVertex());
-    }
-
     /**
      * Get the content type with the given id.
      *
      * @param type
      * @return
      */
-    private ContentType getContentType(EntityClass type) {
+    private ContentTypes getContentType(EntityClass type) {
         try {
-            return manager.getFrame(type.getName(), ContentType.class);
-        } catch (ItemNotFound e) {
+            return ContentTypes.withName(type.getName());
+        } catch (NoSuchElementException e) {
             throw new RuntimeException(
-                    String.format("No content type node found for type: '%s'",
-                            type.getName()), e);
+                    String.format("No content type found for type: '%s'", type.getName()), e);
         }
     }
 }

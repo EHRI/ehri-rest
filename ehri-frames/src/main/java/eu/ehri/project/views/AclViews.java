@@ -142,13 +142,9 @@ public final class AclViews {
                 Permission grantPerm = manager.getFrame(
                         PermissionType.GRANT.getName(), Permission.class);
                 for (ContentTypes ctype : permissionMap.keySet()) {
-                    ContentType target = manager.getFrame(ctype.getName(),
-                            ContentType.class);
-                    Iterable<PermissionGrant> grants = acl.getPermissionGrants(
-                            accessor, target, grantPerm);
-                    if (!grants.iterator().hasNext()) {
+                    if (!acl.hasPermission(ctype, PermissionType.GRANT, accessor)) {
                         throw new PermissionDenied(accessor.getId(),
-                                target.getId(), grantPerm.getId(),
+                                ctype.toString(), grantPerm.getId(),
                                 scope.getId());
                     }
                 }
