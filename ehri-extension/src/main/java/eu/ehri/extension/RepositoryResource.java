@@ -231,7 +231,6 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
                     getDefaultCreateMessage(EntityClass.DOCUMENTARY_UNIT)));
         // Add it to this repository's collections
         doc.setRepository(repository);
-        doc.setPermissionScope(repository);
         return doc;
     }
 }

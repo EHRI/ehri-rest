@@ -279,7 +279,6 @@ public class VocabularyResource extends
 
         // Add it to this Vocabulary's concepts
         concept.setVocabulary(vocabulary);
-        concept.setPermissionScope(vocabulary);
         return concept;
     }
 

@@ -128,6 +128,11 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
         // If a user creates an item, grant them OWNER perms on it.
         if (!acl.isAdmin(user))
             acl.grantPermissions(user, item, PermissionType.OWNER);
+        // If the scope is not the system, set the permission scope
+        // of the item too...
+        if (!scope.equals(SystemScope.getInstance())) {
+            item.setPermissionScope(scope);
+        }
         return item;
     }
 

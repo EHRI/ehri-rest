@@ -19,10 +19,6 @@ import org.junit.Test;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
-import eu.ehri.project.acl.AclManager;
-import eu.ehri.project.acl.AnonymousAccessor;
-import eu.ehri.project.acl.ContentTypes;
-import eu.ehri.project.acl.PermissionType;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.DocumentaryUnit;
@@ -224,7 +220,7 @@ public class AclTest extends ModelTestBase {
                 PermissionType.DELETE, PermissionType.UPDATE,
                 PermissionType.GRANT, PermissionType.ANNOTATE };
         ContentTypes[] types = { ContentTypes.DOCUMENTARY_UNIT,
-                ContentTypes.USER_PROFILE, ContentTypes.AGENT,
+                ContentTypes.USER_PROFILE, ContentTypes.REPOSITORY,
                 ContentTypes.GROUP };
         Map<ContentTypes, List<PermissionType>> matrix = Maps.newHashMap();
         for (ContentTypes type : types) {

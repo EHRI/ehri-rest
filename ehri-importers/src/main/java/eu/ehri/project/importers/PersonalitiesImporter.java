@@ -57,7 +57,6 @@ public class PersonalitiesImporter extends XmlImporter<Object> {
 
         // FIXME: Relationships will be created twice if updating.
         if (!permissionScope.equals(SystemScope.getInstance())) {
-            frame.setPermissionScope(permissionScope);
             frame.setAuthoritativeSet(framedGraph.frame(permissionScope.asVertex(), AuthoritativeSet.class));
         }
         

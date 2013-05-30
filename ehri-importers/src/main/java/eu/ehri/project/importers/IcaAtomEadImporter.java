@@ -96,8 +96,6 @@ public class IcaAtomEadImporter extends EaImporter {
             Repository repository = framedGraph.frame(permissionScope.asVertex(), Repository.class);
             frame.setRepository(repository);
         }
-        frame.setPermissionScope(permissionScope);
-
 
         if (exists) {
             for (ImportCallback cb : updateCallbacks) {

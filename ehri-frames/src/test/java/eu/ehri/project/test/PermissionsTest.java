@@ -101,8 +101,6 @@ public class PermissionsTest extends AbstractFixtureTest {
                 PermissionType.CREATE);
         DocumentaryUnit c1 = views.setScope(scope).create(
                 Bundle.fromData(TestData.getTestDocBundle()), user);
-        // We have to explicitly set the scope of this new item.
-        c1.setPermissionScope(scope);
         // We should be able to create another item with c1 as the scope,
         // and inherit the perms from r1
         Bundle bundle = Bundle.fromData(TestData.getTestDocBundle());
@@ -121,8 +119,6 @@ public class PermissionsTest extends AbstractFixtureTest {
                 PermissionType.CREATE);
         DocumentaryUnit c1 = views.setScope(r1).create(
                 Bundle.fromData(TestData.getTestDocBundle()), user);
-        // We have to explicitly set the r1 of this new item.
-        c1.setPermissionScope(r1);
         // We should be able to create another item with c1 as the r1,
         // and inherit the perms from r1
         Bundle bundle = Bundle.fromData(TestData.getTestDocBundle())

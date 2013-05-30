@@ -419,7 +419,6 @@ public class CvocConceptResource extends
         // Add it to this Vocabulary's concepts
         parent.addNarrowerConcept(concept);
         concept.setVocabulary(parent.getVocabulary());
-        concept.setPermissionScope(parent.getPermissionScope());
         return concept;
     }
 }

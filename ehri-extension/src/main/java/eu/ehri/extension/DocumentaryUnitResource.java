@@ -221,7 +221,6 @@ public class DocumentaryUnitResource extends
         // NB: We no longer add this item to the
         // parent's Repository directly.
         parent.addChild(doc);
-        doc.setPermissionScope(parent);
         return doc;
     }
 }

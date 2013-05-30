@@ -90,6 +90,10 @@ public class IcaAtomEadHandler extends SaxXmlHandler {
                     for (DocumentaryUnit child : children[depth]) {
                         if (child != null) {
                             current.addChild(child);
+                            // FIXME: Is this correct??? It should be done automatically
+                            // using the scope of the BundleDAO, but because the actual
+                            // parent doesn't exist, we have to override it and set
+                            // this here...
                             child.setPermissionScope(current);
                         }
                     }

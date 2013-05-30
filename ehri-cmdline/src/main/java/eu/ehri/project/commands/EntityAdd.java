@@ -104,12 +104,8 @@ public class EntityAdd extends BaseCommand implements Command {
 
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
-            LoggingCrudViews<?> view = new LoggingCrudViews(graph, entityClass.getEntityClass());
-            Frame t = view.create(bundle.withId(id), user, logMessage);
-            // FIXME: This is tres-ugly...
-            if (!scope.equals(SystemScope.getInstance())) {
-                graph.frame(t.asVertex(), AccessibleEntity.class).setPermissionScope(scope);
-            }
+            LoggingCrudViews<?> view = new LoggingCrudViews(graph, entityClass.getEntityClass(), scope);
+            view.create(bundle.withId(id), user, logMessage);
             tx.success();
         } catch (IntegrityError e) {
             tx.failure();

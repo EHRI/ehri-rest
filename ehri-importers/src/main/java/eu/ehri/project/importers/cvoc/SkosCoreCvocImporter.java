@@ -215,14 +215,12 @@ public class SkosCoreCvocImporter {
 
                           Bundle unit = constructBundleForConcept(element);
 
-                          BundleDAO persister = new BundleDAO(framedGraph);
+                          BundleDAO persister = new BundleDAO(framedGraph, vocabulary);
                           Concept frame = persister.createOrUpdate(unit,
                                   Concept.class);
 
                           // Set the vocabulary/concept relationship
-                          PermissionScope scope = vocabulary;
                           frame.setVocabulary(vocabulary);
-                          frame.setPermissionScope(scope);
 
                           // when concept was successfully persisted!
                           action.addSubjects(frame);

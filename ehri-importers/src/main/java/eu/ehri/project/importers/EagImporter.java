@@ -127,7 +127,6 @@ public class EagImporter extends EaImporter {
                 cb.itemImported(frame);
             }
         } else {
-            frame.setPermissionScope(permissionScope);
             frame.setCountry(framedGraph.frame(permissionScope.asVertex(), Country.class));
             for (ImportCallback cb : createCallbacks) {
                 cb.itemImported(frame);

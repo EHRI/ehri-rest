@@ -229,7 +229,6 @@ public class CountryResource extends
 
         // Add it to this Vocabulary's concepts
         repository.setCountry(country);
-        repository.setPermissionScope(country);
         return repository;
     }
 }

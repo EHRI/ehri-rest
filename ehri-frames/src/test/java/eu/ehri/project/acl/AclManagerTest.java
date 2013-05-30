@@ -1,10 +1,7 @@
 package eu.ehri.project.acl;
 
 import com.google.common.collect.Iterables;
-import eu.ehri.project.models.DocumentaryUnit;
-import eu.ehri.project.models.Group;
-import eu.ehri.project.models.Repository;
-import eu.ehri.project.models.UserProfile;
+import eu.ehri.project.models.*;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.IdentifiableEntity;
 import eu.ehri.project.persistance.Bundle;
@@ -145,6 +142,40 @@ public class AclManagerTest extends GraphTestBase {
 
     @Test
     public void testGetScope() throws Exception {
+
+    }
+
+    @Test
+    public void testCountryScopeScenario() throws Exception {
+        loader.loadTestData("country-permissions.yaml");
+
+        Country gb = manager.getFrame("gb", Country.class);
+        Country nl = manager.getFrame("nl", Country.class);
+        UserProfile gbuser = manager.getFrame("gbuser", UserProfile.class);
+        UserProfile nluser = manager.getFrame("nluser", UserProfile.class);
+
+        AclManager acl = new AclManager(graph);
+
+        assertTrue(acl.withScope(gb).hasPermission(REPOSITORY, CREATE, gbuser));
+        assertFalse(acl.withScope(nl).hasPermission(REPOSITORY, CREATE, gbuser));
+
+        // Create a repository
+        // New create some stuff
+        LoggingCrudViews<Repository> repoViews
+                = new LoggingCrudViews<Repository>(graph, Repository.class);
+
+        Repository gbrepo = repoViews.setScope(gb).create(Bundle.fromData(TestData.getTestAgentBundle()), gbuser);
+        Repository nlrepo = repoViews.setScope(nl).create(Bundle.fromData(TestData.getTestAgentBundle()), nluser);
+
+        assertTrue(acl.withScope(gbrepo).hasPermission(DOCUMENTARY_UNIT, CREATE, gbuser));
+        assertTrue(acl.withScope(gbrepo).hasPermission(DOCUMENTARY_UNIT, UPDATE, gbuser));
+        assertTrue(acl.withScope(gbrepo).hasPermission(DOCUMENTARY_UNIT, DELETE, gbuser));
+        assertFalse(acl.withScope(nlrepo).hasPermission(DOCUMENTARY_UNIT, CREATE, gbuser));
+        assertFalse(acl.withScope(nlrepo).hasPermission(DOCUMENTARY_UNIT, UPDATE, gbuser));
+        assertFalse(acl.withScope(nlrepo).hasPermission(DOCUMENTARY_UNIT, DELETE, gbuser));
+
+
+
 
     }
 
