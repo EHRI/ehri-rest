@@ -1,7 +1,5 @@
 #!/bin/bash
 
-ARGS="$@"
-
 # Get the current dir...
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
@@ -13,7 +11,7 @@ buildclasspath
 
 JYTHON=/home/michaelb/apps/jython2.7b1/bin/jython
 
-$JYTHON -J-cp "$CLASSPATH" -i scripts/repl.py $ARGS
+$JYTHON -J-cp "$CLASSPATH" -i scripts/repl.py "$@"
 
 
 
