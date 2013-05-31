@@ -11,7 +11,9 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 checkenv
 buildclasspath
 
-java -cp "$CLASSPATH" eu.ehri.project.commands.CmdEntryPoint $NEO4J_DB $ARGS
+JYTHON=/home/michaelb/apps/jython2.7b1/bin/jython
+
+$JYTHON -J-cp "$CLASSPATH" -i scripts/repl.py $ARGS
 
 
 
