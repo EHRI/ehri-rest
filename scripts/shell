@@ -11,7 +11,9 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 checkenv
 buildclasspath
 
-java -cp "$CLASSPATH" eu.ehri.project.commands.CmdEntryPoint $NEO4J_DB $ARGS
+java -cp "$CLASSPATH" groovy.lang.GroovyShell \
+    -Dgroovy.starter.conf=$DIR/init.groovy \
+    -cp "$CLASSPATH" $DIR/groovy-shell.groovy $ARGS --conf $DIR/init.groovy
 
 
 
