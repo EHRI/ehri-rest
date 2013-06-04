@@ -79,8 +79,7 @@ public final class AclViews {
             ActionManager.EventContext context = new ActionManager(graph).logEvent(
                     graph.frame(accessor.asVertex(), AccessibleEntity.class),
                     graph.frame(grantee.asVertex(), Actioner.class),
-                    String.format("Updated permissions%s",
-                            scoped ? " with scope '" + scope.getId() + "'" : ""));
+                    ActionManager.ActionType.setGlobalPermissions);
             if (scoped) {
                 context.addSubjects(scope);
             }
@@ -114,7 +113,7 @@ public final class AclViews {
             new ActionManager(graph).logEvent(
                     graph.frame(entity.asVertex(), AccessibleEntity.class),
                     graph.frame(user.asVertex(), Actioner.class),
-                    "Set visibility");
+                    ActionManager.ActionType.setVisibility);
             graph.getBaseGraph().stopTransaction(Conclusion.SUCCESS);
         } catch (PermissionDenied e) {
             graph.getBaseGraph().stopTransaction(Conclusion.FAILURE);
@@ -175,7 +174,7 @@ public final class AclViews {
             // Log the action...
             new ActionManager(graph).logEvent(item,
                     graph.frame(grantee.asVertex(), Actioner.class),
-                    "Modified item-level permissions").addSubjects(
+                    ActionManager.ActionType.setItemPermissions).addSubjects(
                     graph.frame(accessor.asVertex(), AccessibleEntity.class));
 
             graph.getBaseGraph().stopTransaction(Conclusion.SUCCESS);
@@ -224,7 +223,7 @@ public final class AclViews {
             // Log the action...
             new ActionManager(graph).logEvent(group,
                     graph.frame(grantee.asVertex(), Actioner.class),
-                    "Added user to group").addSubjects(
+                    ActionManager.ActionType.addGroup).addSubjects(
                     graph.frame(user.asVertex(), AccessibleEntity.class));
             graph.getBaseGraph().stopTransaction(Conclusion.SUCCESS);
         } catch (Exception e) {
@@ -251,7 +250,7 @@ public final class AclViews {
             // Log the action...
             new ActionManager(graph).logEvent(group,
                     graph.frame(grantee.asVertex(), Actioner.class),
-                    "Removed user from group").addSubjects(
+                    ActionManager.ActionType.removeGroup).addSubjects(
                     graph.frame(user.asVertex(), AccessibleEntity.class));
             graph.getBaseGraph().stopTransaction(Conclusion.SUCCESS);
         } catch (Exception e) {

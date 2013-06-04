@@ -215,9 +215,7 @@ public class DocumentaryUnitResource extends
 
         DocumentaryUnit doc = new LoggingCrudViews<DocumentaryUnit>(graph,
                 DocumentaryUnit.class, parent).create(entityBundle,
-                getRequesterUserProfile(), getLogMessage(getDefaultCreateMessage(
-                    EntityClass.DOCUMENTARY_UNIT
-        )));
+                getRequesterUserProfile(), getLogMessage());
         // NB: We no longer add this item to the
         // parent's Repository directly.
         parent.addChild(doc);

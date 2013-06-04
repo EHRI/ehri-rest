@@ -2,8 +2,11 @@ package eu.ehri.extension.test.utils;
 
 import java.io.File;
 
+import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.neo4j.kernel.AbstractGraphDatabase;
 import org.neo4j.kernel.EmbeddedGraphDatabase;
+import org.neo4j.kernel.GraphDatabaseAPI;
 import org.neo4j.server.NeoServer;
 import org.neo4j.server.WrappingNeoServerBootstrapper;
 import org.neo4j.server.configuration.ServerConfigurator;
@@ -21,7 +24,7 @@ import eu.ehri.project.utils.fixtures.FixtureLoaderFactory;
  */
 public class ServerRunner {
 
-    protected AbstractGraphDatabase graphDatabase;
+    protected GraphDatabaseAPI graphDatabase;
     protected WrappingNeoServerBootstrapper bootstrapper;
     protected FixtureLoader loader;
     protected GraphCleaner cleaner;
@@ -38,7 +41,8 @@ public class ServerRunner {
     public ServerRunner(String dbName, Integer dbPort) {
         // TODO: Work out a better way to configure the path
         final String dbPath = "target/tmpdb_" + dbName;
-        graphDatabase = new EmbeddedGraphDatabase(dbPath);
+        // FIXME: Can we avoid the case here???
+        graphDatabase = (GraphDatabaseAPI) new GraphDatabaseFactory().newEmbeddedDatabase(dbPath);
         framedGraph = new FramedGraph<Neo4jGraph>(new Neo4jGraph(graphDatabase));
 
         // Initialize the fixture loader and cleaner

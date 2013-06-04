@@ -224,8 +224,7 @@ public class CountryResource extends
         Bundle entityBundle = Bundle.fromString(json);
 
         Repository repository = new LoggingCrudViews<Repository>(graph, Repository.class,
-                country).create(entityBundle, getRequesterUserProfile(),
-                getLogMessage(getDefaultCreateMessage(EntityClass.REPOSITORY)));
+                country).create(entityBundle, getRequesterUserProfile(), getLogMessage());
 
         // Add it to this Vocabulary's concepts
         repository.setCountry(country);

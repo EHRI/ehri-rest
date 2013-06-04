@@ -156,8 +156,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
         try {
             Accessor user = getRequesterUserProfile();
             Bundle entityBundle = Bundle.fromString(json);
-            E entity = views.create(entityBundle, user,
-                    getLogMessage(getDefaultCreateMessage(getEntityType())));
+            E entity = views.create(entityBundle, user, getLogMessage());
             // TODO: Move elsewhere
             new AclManager(graph).setAccessors(entity,
                     getAccessors(accessorIds, user));
@@ -215,8 +214,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
             ItemNotFound, BadRequester {
         try {
             Bundle entityBundle = Bundle.fromString(json);
-            E update = views.update(entityBundle, getRequesterUserProfile(),
-                    getLogMessage(getDefaultUpdateMessage(getEntityType(), entityBundle.getId())));
+            E update = views.update(entityBundle, getRequesterUserProfile(), getLogMessage());
             return Response.status(Status.OK)
                     .entity(getRepresentation(update).getBytes())
                     .build();
@@ -270,8 +268,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
         try {
             E entity = views.detail(manager.getFrame(id, getEntityType(), cls),
                     getRequesterUserProfile());
-            views.delete(entity, getRequesterUserProfile(),
-                    getLogMessage(getDefaultDeleteMessage(getEntityType(), id)));
+            views.delete(entity, getRequesterUserProfile(), getLogMessage());
             return Response.status(Status.OK).build();
         } catch (SerializationError e) {
             throw new WebApplicationException(e);
@@ -306,38 +303,5 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
             accessors.add(current);
         }
         return accessors;
-    }
-
-    /**
-     * Get a default message for an item being created.
-     *
-     * @return
-     */
-    protected String getDefaultCreateMessage(EntityClass entityClass) {
-        return String.format("%s (%s)",
-                LoggingCrudViews.DEFAULT_CREATE_LOG,
-                entityClass.getName());
-    }
-
-    /**
-     * Get a default message for an item being updated.
-     *
-     * @return
-     */
-    protected String getDefaultUpdateMessage(EntityClass entityClass, String id) {
-        return String.format("%s (%s): '%s'",
-                LoggingCrudViews.DEFAULT_UPDATE_LOG,
-                entityClass.getName(), id);
-    }
-
-    /**
-     * Get a default message for an item being deleted.
-     *
-     * @return
-     */
-    protected String getDefaultDeleteMessage(EntityClass entityClass, String id) {
-        return String.format("%s (%s): '%s'",
-                LoggingCrudViews.DEFAULT_DELETE_LOG,
-                entityClass.getName(), id);
     }
 }

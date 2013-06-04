@@ -260,7 +260,7 @@ public class AuthoritativeSetResource extends
 
         HistoricalAgent agent = new LoggingCrudViews<HistoricalAgent>(graph, HistoricalAgent.class,
                 set).create(entityBundle, getRequesterUserProfile(),
-                getLogMessage(getDefaultCreateMessage(EntityClass.HISTORICAL_AGENT)));
+                getLogMessage());
 
         // Add it to this AuthoritativeSet's agents
         agent.setAuthoritativeSet(set);

@@ -121,12 +121,12 @@ public abstract class AbstractRestResource {
      *
      * @return
      */
-    protected String getLogMessage(String defaultMessage) {
+    protected Optional<String> getLogMessage() {
         List<String> list = requestHeaders.getRequestHeader(LOG_MESSAGE_HEADER_NAME);
         if (list != null && !list.isEmpty()) {
-            return list.get(0);
+            return Optional.of(list.get(0));
         }
-        return defaultMessage;
+        return Optional.absent();
     }
 
     /**

@@ -218,7 +218,7 @@ public class LinkResource extends
                     getRequesterUserProfile(), PermissionType.ANNOTATE);
             Actioner actioner = graph.frame(getRequesterUserProfile().asVertex(), Actioner.class);
             Link link = manager.getFrame(linkId, EntityClass.LINK, Link.class);
-            new ActionManager(graph).logEvent(link, actioner, "Deleting link.");
+            new ActionManager(graph).logEvent(link, actioner, ActionManager.ActionType.deleteItem);
             manager.deleteVertex(link.asVertex());
             return Response.ok().build();
         } catch (ItemNotFound e) {

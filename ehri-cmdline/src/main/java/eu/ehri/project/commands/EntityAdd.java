@@ -105,7 +105,7 @@ public class EntityAdd extends BaseCommand implements Command {
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
             LoggingCrudViews<?> view = new LoggingCrudViews(graph, entityClass.getEntityClass(), scope);
-            view.create(bundle.withId(id), user, logMessage);
+            view.create(bundle.withId(id), user, getLogMessage(logMessage));
             tx.success();
         } catch (IntegrityError e) {
             tx.failure();

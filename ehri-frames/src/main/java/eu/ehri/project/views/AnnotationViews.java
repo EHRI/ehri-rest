@@ -1,5 +1,6 @@
 package eu.ehri.project.views;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.tinkerpop.blueprints.Vertex;
@@ -80,7 +81,8 @@ public final class AnnotationViews {
                 Annotator.class));
 
         new ActionManager(graph).logEvent(entity, graph.frame(user.asVertex(), Actioner.class),
-                "Added annotation").addSubjects(annotation);
+                ActionManager.ActionType.annotate, Optional.<String>absent())
+                .addSubjects(annotation);
         return annotation;
     }
 

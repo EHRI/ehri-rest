@@ -13,6 +13,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import com.google.common.base.Optional;
 import eu.ehri.project.models.base.*;
 import org.neo4j.graphdb.Transaction;
 import org.slf4j.Logger;
@@ -68,6 +69,10 @@ public class SkosCoreCvocImporter {
     protected final Vocabulary vocabulary;
     // map from the internal Skos identifier to the placeholder
     protected Map<String, ConceptPlaceholder> conceptLookup = new HashMap<String, ConceptPlaceholder>();
+
+    private Optional<String> getLogMessage(String msg) {
+        return msg.trim().isEmpty() ? Optional.<String>absent() : Optional.of(msg);
+    }
     
     /**
      * Constructor.
@@ -112,7 +117,7 @@ public class SkosCoreCvocImporter {
         try {
             // Create a new action for this import
             final EventContext eventContext = new ActionManager(framedGraph).logEvent(
-                    actioner, logMessage);
+                    actioner, ActionManager.ActionType.importItem, getLogMessage(logMessage));
             // Create a manifest to store the results of the import.
             final ImportLog log = new ImportLog(eventContext);
 

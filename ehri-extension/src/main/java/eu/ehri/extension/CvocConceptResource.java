@@ -405,8 +405,7 @@ public class CvocConceptResource extends
         // the permission scope here, rather than the immediate parent.
         Concept concept = new LoggingCrudViews<Concept>(graph, Concept.class,
                 parent.getPermissionScope()).create(entityBundle,
-                getRequesterUserProfile(),
-                getLogMessage(getDefaultCreateMessage(EntityClass.CVOC_CONCEPT)));
+                getRequesterUserProfile(), getLogMessage());
 
         // Add it to this Vocabulary's concepts
         parent.addNarrowerConcept(concept);

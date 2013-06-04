@@ -92,7 +92,9 @@ public class UserMod extends BaseCommand implements Command {
             UserProfile user = manager.getFrame(userId,
                     EntityClass.USER_PROFILE, UserProfile.class);
 
-            EventContext actionCtx = new ActionManager(graph).logEvent(user, admin, logMessage);
+            EventContext actionCtx = new ActionManager(graph).logEvent(
+                    user, admin, ActionManager.ActionType.updateItem,
+                    getLogMessage(logMessage));
 
             for (String groupId : groups) {
                 Group group = manager.getFrame(groupId, EntityClass.GROUP,

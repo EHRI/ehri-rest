@@ -1,5 +1,6 @@
 package eu.ehri.project.importers;
 
+import com.google.common.base.Optional;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import java.io.FileInputStream;
@@ -122,7 +123,7 @@ abstract public class XmlImportManager implements ImportManager {
         try {
             // Create a new action for this import
             final ActionManager.EventContext action = new ActionManager(framedGraph).logEvent(
-                    actioner, logMessage);
+                    actioner, ActionManager.ActionType.importItem, getLogMessage(logMessage));
             // Create a manifest to store the results of the import.
             final ImportLog log = new ImportLog(action);
 
@@ -162,7 +163,7 @@ abstract public class XmlImportManager implements ImportManager {
         try {
 
             final ActionManager.EventContext action = new ActionManager(framedGraph).logEvent(
-                    actioner, logMessage);
+                    actioner, ActionManager.ActionType.importItem, getLogMessage(logMessage));
             final ImportLog log = new ImportLog(action);
             for (String path : paths) {
                 try {
@@ -220,4 +221,7 @@ abstract public class XmlImportManager implements ImportManager {
             final ImportLog log) throws IOException, ValidationError,
             InputParseError, InvalidXmlDocument, InvalidInputFormatError;
 
+    private Optional<String> getLogMessage(String msg) {
+        return msg.trim().isEmpty() ? Optional.<String>absent() : Optional.of(msg);
+    }
 }

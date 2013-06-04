@@ -21,9 +21,13 @@ public interface SystemEvent extends AccessibleEntity {
 
     public final String TIMESTAMP = "timestamp";
     public final String LOG_MESSAGE = "logMessage";
+    public final String ACTION_TYPE = "actionType";
 
     @Property(TIMESTAMP)
     public String getTimestamp();
+
+    @Property(ACTION_TYPE)
+    public String getActionType();
 
     @Property(LOG_MESSAGE)
     public String getLogMessage();

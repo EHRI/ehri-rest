@@ -101,7 +101,7 @@ public class UserAdd extends BaseCommand implements Command {
         try {
             LoggingCrudViews<UserProfile> view = new LoggingCrudViews<UserProfile>(
                     graph, UserProfile.class);
-            UserProfile newUser = view.create(bundle, admin, logMessage);
+            UserProfile newUser = view.create(bundle, admin, getLogMessage(logMessage));
             for (String groupId : groups) {
                 Group group = manager.getFrame(groupId, EntityClass.GROUP, Group.class);
                 group.addMember(newUser);

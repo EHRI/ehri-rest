@@ -155,8 +155,7 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
         try {
             Accessor user = getRequesterUserProfile();
             Bundle entityBundle = Bundle.fromString(json);
-            UserProfile entity = views.create(entityBundle, user,
-                    getLogMessage(getDefaultCreateMessage(EntityClass.USER_PROFILE)));
+            UserProfile entity = views.create(entityBundle, user,getLogMessage());
             // TODO: Move elsewhere
             new AclManager(graph).setAccessors(entity,
                     getAccessors(accessorIds, user));
@@ -175,7 +174,7 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
                 new ActionManager(graph).logEvent(
                         graph.frame(entity.asVertex(), AccessibleEntity.class),
                         graph.frame(getRequesterUserProfile().asVertex(), Actioner.class),
-                        "Added userProfile to group").addSubjects(group);
+                        ActionManager.ActionType.addGroup).addSubjects(group);
             }
             
             tx.success();

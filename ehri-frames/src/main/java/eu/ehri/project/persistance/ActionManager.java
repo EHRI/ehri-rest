@@ -2,6 +2,7 @@ package eu.ehri.project.persistance;
 
 import java.util.Iterator;
 
+import com.google.common.base.Optional;
 import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.events.SystemEvent;
@@ -41,6 +42,26 @@ public final class ActionManager {
     private final GraphManager manager;
 
     /**
+     * Types of actions the system supports...
+     */
+    public static enum ActionType {
+        createItem,
+        createDescription,
+        updateItem,
+        updateDescription,
+        deleteItem,
+        deleteDescription,
+        link,
+        annotate,
+        setGlobalPermissions,
+        setItemPermissions,
+        setVisibility,
+        addGroup,
+        removeGroup,
+        importItem
+    }
+
+    /**
      * Constructor.
      *
      * @param graph
@@ -60,11 +81,13 @@ public final class ActionManager {
         private final ActionManager actionManager;
         private final SystemEvent systemEvent;
         private final Actioner actioner;
-        private final String logMessage;
+        private final ActionType actionType;
+        private final Optional<String> logMessage;
 
         public EventContext(ActionManager actionManager, SystemEvent systemEvent,
-                Actioner actioner, String logMessage) {
+                Actioner actioner, ActionType type, Optional<String> logMessage) {
             this.actionManager = actionManager;
+            this.actionType = type;
             this.systemEvent = systemEvent;
             this.actioner = actioner;
             this.logMessage = logMessage;
@@ -86,7 +109,7 @@ public final class ActionManager {
          * Get the event context log message.
          * @return
          */
-        public String getLogMessage() {
+        public Optional<String> getLogMessage() {
             return this.logMessage;
         }
 
@@ -146,14 +169,15 @@ public final class ActionManager {
      * @param logMessage
      * @return
      */
-    private SystemEvent createGlobalEvent(Actioner user, String actionType, String logMessage) {
+    private SystemEvent createGlobalEvent(Actioner user, ActionType actionType, Optional<String> logMessage) {
         try {
             Vertex system = manager.getVertex(GLOBAL_EVENT_ROOT, EntityClass.SYSTEM);
             Bundle ge = new Bundle(EntityClass.SYSTEM_EVENT)
+                    .withDataValue(SystemEvent.ACTION_TYPE, actionType.toString())
                     .withDataValue(SystemEvent.TIMESTAMP, getTimestamp())
-                    .withDataValue(SystemEvent.LOG_MESSAGE, logMessage);
+                    .withDataValue(SystemEvent.LOG_MESSAGE, logMessage.or(""));
             SystemEvent ev = new BundleDAO(graph).create(ge, SystemEvent.class);
-            replaceAtHead(system, ev.asVertex(), actionType + "Stream", actionType, Direction.OUT);
+            replaceAtHead(system, ev.asVertex(), LIFECYCLE_ACTION + "Stream", LIFECYCLE_ACTION, Direction.OUT);
             return ev;
         } catch (ItemNotFound e) {
             e.printStackTrace();
@@ -167,19 +191,40 @@ public final class ActionManager {
     }
 
     /**
+     * Create an action with the given type.
+     * @param user
+     * @param type
+     * @return
+     */
+    public EventContext logEvent(Actioner user, ActionType type) {
+        return logEvent(user, type, Optional.<String>absent());
+    }
+
+    /**
      * Create an action node describing something that user U has done.
      *
      * @param user
      * @param logMessage
      * @return
      */
-    public EventContext logEvent(Actioner user, String logMessage) {
+    public EventContext logEvent(Actioner user, ActionType type, Optional<String> logMessage) {
         Vertex vertex = graph.addVertex(null);
         replaceAtHead(user.asVertex(), vertex,
                 LIFECYCLE_ACTION, LIFECYCLE_ACTION, Direction.OUT);
-        SystemEvent ge = createGlobalEvent(user, LIFECYCLE_ACTION, logMessage);
+        SystemEvent ge = createGlobalEvent(user, type, logMessage);
         graph.addEdge(null, vertex, ge.asVertex(), eu.ehri.project.models.events.SystemEvent.HAS_EVENT);
-        return new EventContext(this, ge, user, logMessage);
+        return new EventContext(this, ge, user, type, logMessage);
+    }
+
+    /**
+     * Create an action for the given subject, user, and type.
+     * @param subject
+     * @param user
+     * @param type
+     * @return
+     */
+    public EventContext logEvent(AccessibleEntity subject, Actioner user, ActionType type) {
+        return logEvent(subject, user, type, Optional.<String>absent());
     }
 
     /**
@@ -191,9 +236,9 @@ public final class ActionManager {
      * @param logMessage
      * @return
      */
-    public EventContext logEvent(AccessibleEntity subject, Actioner user,
-            String logMessage) {
-        EventContext context = logEvent(user, logMessage);
+    public EventContext logEvent(AccessibleEntity subject, Actioner user, ActionType type,
+            Optional<String> logMessage) {
+        EventContext context = logEvent(user, type, logMessage);
         context.addSubjects(subject);
         return context;
     }

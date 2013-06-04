@@ -25,12 +25,6 @@ import eu.ehri.project.views.Crud;
  */
 public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
 
-    // Default log strings, needed for compatibility.
-    public static final String DEFAULT_CREATE_LOG = "Creating item";
-    public static final String DEFAULT_UPDATE_LOG = "Updating item";
-    public static final String DEFAULT_DELETE_LOG = "Deleting item";
-    public static final String DEFAULT_IMPORT_LOG = "Importing item";
-
     private final ActionManager actionManager;
     private final CrudViews<E> views;
     private final FramedGraph<? extends TransactionalGraph> graph;
@@ -78,7 +72,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      */
     public E create(Bundle bundle, Accessor user) throws PermissionDenied,
             ValidationError, DeserializationError, IntegrityError {
-        return create(bundle, user, DEFAULT_CREATE_LOG);
+        return create(bundle, user, Optional.<String>absent());
     }
 
     /**
@@ -94,7 +88,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws IntegrityError
      * @throw DeserializationError
      */
-    public E create(Bundle bundle, Accessor user, String logMessage)
+    public E create(Bundle bundle, Accessor user, Optional<String> logMessage)
             throws PermissionDenied, ValidationError, DeserializationError,
             IntegrityError {
         Transaction tx = ((Neo4jGraph)graph.getBaseGraph()).getRawGraph().beginTx();
@@ -103,7 +97,8 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
         try {
 
             E out = views.create(bundle, user);
-            actionManager.logEvent(out, graph.frame(user.asVertex(), Actioner.class), logMessage);
+            actionManager.logEvent(out, graph.frame(user.asVertex(), Actioner.class),
+                    ActionManager.ActionType.createItem, logMessage);
             tx.success();
             return out;
         } catch (IntegrityError ex) {
@@ -138,7 +133,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
     public E createOrUpdate(Bundle bundle, Accessor user)
             throws PermissionDenied, ValidationError, DeserializationError,
             IntegrityError {
-        return createOrUpdate(bundle, user, DEFAULT_IMPORT_LOG);
+        return createOrUpdate(bundle, user, Optional.<String>absent());
     }
 
     /**
@@ -154,14 +149,15 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws IntegrityError
      * @throw DeserializationError
      */
-    public E createOrUpdate(Bundle bundle, Accessor user, String logMessage)
+    public E createOrUpdate(Bundle bundle, Accessor user, Optional<String> logMessage)
             throws PermissionDenied, ValidationError, DeserializationError,
             IntegrityError {
         Transaction tx = ((Neo4jGraph)graph.getBaseGraph()).getRawGraph().beginTx();
         try {
 
             E out = views.createOrUpdate(bundle, user);
-            actionManager.logEvent(out, graph.frame(user.asVertex(), Actioner.class), logMessage);
+            actionManager.logEvent(out, graph.frame(user.asVertex(), Actioner.class),
+                    ActionManager.ActionType.updateItem, logMessage);
             tx.success();
             return out;
         } catch (IntegrityError ex) {
@@ -195,7 +191,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      */
     public E update(Bundle bundle, Accessor user) throws PermissionDenied,
             ValidationError, DeserializationError, IntegrityError {
-        return update(bundle, user, DEFAULT_UPDATE_LOG);
+        return update(bundle, user, Optional.<String>absent());
     }
 
     /**
@@ -211,13 +207,14 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws IntegrityError
      * @throw DeserializationError
      */
-    public E update(Bundle bundle, Accessor user, String logMessage)
+    public E update(Bundle bundle, Accessor user, Optional<String> logMessage)
             throws PermissionDenied, ValidationError, DeserializationError,
             IntegrityError {
         Transaction tx = ((Neo4jGraph)graph.getBaseGraph()).getRawGraph().beginTx();
         try {
             E out = views.update(bundle, user);
-            actionManager.logEvent(out, graph.frame(user.asVertex(), Actioner.class), logMessage);
+            actionManager.logEvent(out, graph.frame(user.asVertex(), Actioner.class),
+                    ActionManager.ActionType.updateItem, logMessage);
             tx.success();
             return out;
         } catch (IntegrityError ex) {
@@ -254,7 +251,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
     public <T extends Frame> T updateDependent(Bundle bundle, E parent, Accessor user,
             Class<T> dependentClass) throws PermissionDenied,
             ValidationError, DeserializationError, IntegrityError {
-        return updateDependent(bundle, parent, user, dependentClass, DEFAULT_UPDATE_LOG);
+        return updateDependent(bundle, parent, user, dependentClass, Optional.<String>absent());
     }
 
     /**
@@ -273,13 +270,14 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throw DeserializationError
      */
     public <T extends Frame> T updateDependent(Bundle bundle, E parent, Accessor user,
-            Class<T> dependentClass, String logMessage)
+            Class<T> dependentClass, Optional<String> logMessage)
             throws PermissionDenied, ValidationError, DeserializationError,
             IntegrityError {
         Transaction tx = ((Neo4jGraph)graph.getBaseGraph()).getRawGraph().beginTx();
         try {
             T out = views.updateDependent(bundle, parent, user, dependentClass);
-            ActionManager.EventContext context = actionManager.logEvent(graph.frame(user.asVertex(), Actioner.class), logMessage);
+            ActionManager.EventContext context = actionManager.logEvent(graph.frame(user.asVertex(),
+                    Actioner.class), ActionManager.ActionType.updateDescription, logMessage);
             context.addSubjects(parent, graph.frame(out.asVertex(), AccessibleEntity.class));
             tx.success();
             return out;
@@ -317,7 +315,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
     public <T extends Frame> T createDependent(Bundle bundle,
             E parent, Accessor user, Class<T> dependentClass) throws PermissionDenied,
             ValidationError, DeserializationError, IntegrityError {
-        return createDependent(bundle, parent, user, dependentClass, DEFAULT_UPDATE_LOG);
+        return createDependent(bundle, parent, user, dependentClass, Optional.<String>absent());
     }
 
     /**
@@ -336,13 +334,15 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throw DeserializationError
      */
     public <T extends Frame> T createDependent(Bundle bundle, E parent, Accessor user,
-                Class<T> dependentClass, String logMessage)
+                Class<T> dependentClass, Optional<String> logMessage)
             throws PermissionDenied, ValidationError, DeserializationError,
             IntegrityError {
         Transaction tx = ((Neo4jGraph)graph.getBaseGraph()).getRawGraph().beginTx();
         try {
             T out = views.createDependent(bundle, parent, user, dependentClass);
-            ActionManager.EventContext context = actionManager.logEvent(graph.frame(user.asVertex(), Actioner.class), logMessage);
+            ActionManager.EventContext context = actionManager.logEvent(
+                    graph.frame(user.asVertex(), Actioner.class),
+                    ActionManager.ActionType.createDescription, logMessage);
             context.addSubjects(parent, graph.frame(out.asVertex(), AccessibleEntity.class));
             tx.success();
             return out;
@@ -376,7 +376,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      */
     public Integer delete(E item, Accessor user) throws PermissionDenied,
             ValidationError, SerializationError {
-        return delete(item, user, DEFAULT_DELETE_LOG);
+        return delete(item, user, Optional.<String>absent());
     }
 
     /**
@@ -391,11 +391,12 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws ValidationError
      * @throws SerializationError
      */
-    public Integer delete(E item, Accessor user, String logMessage)
+    public Integer delete(E item, Accessor user, Optional<String> logMessage)
             throws PermissionDenied, ValidationError, SerializationError {
         Transaction tx = ((Neo4jGraph)graph.getBaseGraph()).getRawGraph().beginTx();
         try {
-            actionManager.logEvent(item, graph.frame(user.asVertex(), Actioner.class), logMessage);
+            actionManager.logEvent(item, graph.frame(user.asVertex(), Actioner.class),
+                    ActionManager.ActionType.deleteItem, logMessage);
             Integer count = views.delete(item, user);
             tx.success();
             return count;
@@ -429,7 +430,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
     public <T extends Frame> Integer deleteDependent(T item, E parent, Accessor user,
             Class<T> dependentClass) throws PermissionDenied,
             ValidationError, SerializationError {
-        return deleteDependent(item, parent, user, dependentClass, DEFAULT_DELETE_LOG);
+        return deleteDependent(item, parent, user, dependentClass, Optional.<String>absent());
     }
 
     /**
@@ -447,11 +448,12 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws SerializationError
      */
     public <T extends Frame> Integer deleteDependent(T item, E parent, Accessor user,
-            Class<T> dependentClass, String logMessage)
+            Class<T> dependentClass, Optional<String> logMessage)
             throws PermissionDenied, ValidationError, SerializationError {
         Transaction tx = ((Neo4jGraph)graph.getBaseGraph()).getRawGraph().beginTx();
         try {
-            actionManager.logEvent(parent, graph.frame(user.asVertex(), Actioner.class), logMessage);
+            actionManager.logEvent(parent, graph.frame(user.asVertex(), Actioner.class),
+                    ActionManager.ActionType.deleteDescription, logMessage);
             Integer count = views.deleteDependent(item, parent, user, dependentClass);
             tx.success();
             return count;

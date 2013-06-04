@@ -28,14 +28,16 @@ public class ActionManagerTest extends AbstractFixtureTest {
         Bundle userBundle = Bundle.fromData(TestData.getTestUserBundle());
         UserProfile user = new BundleDAO(graph).create(userBundle, UserProfile.class);
         SystemEvent first = am.logEvent(user,
-                graph.frame(validUser.asVertex(), Actioner.class), "Creating user").getSystemEvent();
+                graph.frame(validUser.asVertex(), Actioner.class),
+                ActionManager.ActionType.createItem).getSystemEvent();
 
         // Create a repository and log that too...
         Bundle repoBundle = Bundle.fromData(TestData.getTestAgentBundle());
         Repository repository = new BundleDAO(graph).create(repoBundle, Repository.class);
 
         SystemEvent second = am.logEvent(repository,
-                graph.frame(validUser.asVertex(), Actioner.class), "Creating repository")
+                graph.frame(validUser.asVertex(), Actioner.class),
+                ActionManager.ActionType.createItem)
                 .getSystemEvent();
 
         // Check exactly one Event was created

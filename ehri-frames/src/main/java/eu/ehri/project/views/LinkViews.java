@@ -1,5 +1,6 @@
 package eu.ehri.project.views;
 
+import com.google.common.base.Optional;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.PermissionType;
 import eu.ehri.project.acl.SystemScope;
@@ -75,8 +76,9 @@ public final class LinkViews {
         link.addLinkTarget(t1);
         link.addLinkTarget(t2);
         link.setLinker(user);
-        ActionManager.EventContext eventContext = new ActionManager(graph).logEvent(t1, graph.frame(user.asVertex(), Actioner.class),
-                "Added link");
+        ActionManager.EventContext eventContext = new ActionManager(graph).logEvent(
+                t1, graph.frame(user.asVertex(), Actioner.class),
+                ActionManager.ActionType.link, Optional.<String>absent());
         eventContext.addSubjects(link).addSubjects(t2);
         for (String body : bodies) {
             System.out.println("Adding annotation body: " + body);
@@ -119,8 +121,8 @@ public final class LinkViews {
         link.addLinkTarget(t2);
         link.setLinker(user);
         link.addLinkBody(rel);
-        ActionManager.EventContext eventContext = new ActionManager(graph).logEvent(t1, graph.frame(user.asVertex(), Actioner.class),
-                "Added access-point link");
+        ActionManager.EventContext eventContext = new ActionManager(graph).logEvent(
+                t1, graph.frame(user.asVertex(), Actioner.class), ActionManager.ActionType.link);
         eventContext.addSubjects(link).addSubjects(t2).addSubjects(rel);
         return link;
     }

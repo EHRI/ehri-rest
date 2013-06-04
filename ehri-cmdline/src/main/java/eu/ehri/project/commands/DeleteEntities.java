@@ -85,7 +85,9 @@ public class DeleteEntities extends BaseCommand implements Command {
 
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
-            new ActionManager(graph).logEvent(user, logMessage);
+            new ActionManager(graph).logEvent(user,
+                    ActionManager.ActionType.deleteItem,
+                    getLogMessage(logMessage));
             deleteIds(graph, manager, type, user);
             tx.success();
         } catch (Exception e) {

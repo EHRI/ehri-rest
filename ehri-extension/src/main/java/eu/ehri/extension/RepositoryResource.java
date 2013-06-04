@@ -227,8 +227,7 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
 
         DocumentaryUnit doc = new LoggingCrudViews<DocumentaryUnit>(graph,
                 DocumentaryUnit.class, repository).create(entityBundle,
-                getRequesterUserProfile(), getLogMessage(
-                    getDefaultCreateMessage(EntityClass.DOCUMENTARY_UNIT)));
+                getRequesterUserProfile(), getLogMessage());
         // Add it to this repository's collections
         doc.setRepository(repository);
         return doc;

@@ -274,8 +274,7 @@ public class VocabularyResource extends
         Bundle entityBundle = Bundle.fromString(json);
 
         Concept concept = new LoggingCrudViews<Concept>(graph, Concept.class,
-                vocabulary).create(entityBundle, getRequesterUserProfile(),
-                getLogMessage(getDefaultCreateMessage(EntityClass.CVOC_CONCEPT)));
+                vocabulary).create(entityBundle, getRequesterUserProfile(), getLogMessage());
 
         // Add it to this Vocabulary's concepts
         concept.setVocabulary(vocabulary);

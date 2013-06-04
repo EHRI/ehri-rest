@@ -39,8 +39,7 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
             DescribedEntity doc = views.detail(
                     manager.getFrame(id, DescribedEntity.class), user);
             Description desc = views.createDependent(Bundle.fromString(json),
-                    doc, user, Description.class,
-                    getLogMessage("Created description for item: {" + id + "}"));
+                    doc, user, Description.class, getLogMessage());
             doc.addDescription(desc);
             tx.success();
             return buildResponse(desc, Response.Status.CREATED);
@@ -63,7 +62,7 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
         DescribedEntity doc = views.detail(
                 manager.getFrame(id, DescribedEntity.class), user);
         Description desc = views.updateDependent(Bundle.fromString(json), doc, user, Description.class,
-                getLogMessage("Updated description for item: {" + id + "}"));
+                getLogMessage());
         return buildResponse(desc, Response.Status.OK);
     }
 
@@ -90,8 +89,7 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
         DescribedEntity doc = views.detail(manager.getFrame(id, DescribedEntity.class), user);
         Description desc = manager.getFrame(did, EntityClass.DOCUMENT_DESCRIPTION,
                 Description.class);
-        views.deleteDependent(desc, doc, user, Description.class,
-                getLogMessage("Deleted description for item {" + id + "}"));
+        views.deleteDependent(desc, doc, user, Description.class, getLogMessage());
         return Response.ok().build();
     }
 
@@ -122,8 +120,7 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
                     manager.getFrame(id, DescribedEntity.class), user);
             Description desc = manager.getFrame(did, Description.class);
             UndeterminedRelationship rel = views.createDependent(Bundle.fromString(json),
-                    doc, user, UndeterminedRelationship.class,
-                    getLogMessage("Created access point for item: {" + id + "}"));
+                    doc, user, UndeterminedRelationship.class, getLogMessage());
             desc.addUndeterminedRelationship(rel);
             tx.success();
             return buildResponse(rel, Response.Status.CREATED);
@@ -152,9 +149,7 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
                 throw new WebApplicationException(
                         new Exception("Access point does not belong to given description."));
             }
-            views.deleteDependent(rel,
-                    doc, user, UndeterminedRelationship.class,
-                    getLogMessage("Deleting access point for item: {" + id + "}"));
+            views.deleteDependent(rel, doc, user, UndeterminedRelationship.class, getLogMessage());
             return Response.ok().build();
         } catch (SerializationError e) {
             tx.failure();
