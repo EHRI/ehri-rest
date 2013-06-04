@@ -201,9 +201,21 @@ public final class ActionManager {
     }
 
     /**
+     * Create an action with the given type and a log message.
+     * @param user
+     * @param type
+     * @param logMessage
+     * @return
+     */
+    public EventContext logEvent(Actioner user, ActionType type, String logMessage) {
+        return logEvent(user, type, Optional.of(logMessage));
+    }
+
+    /**
      * Create an action node describing something that user U has done.
      *
      * @param user
+     * @param type
      * @param logMessage
      * @return
      */
@@ -211,9 +223,9 @@ public final class ActionManager {
         Vertex vertex = graph.addVertex(null);
         replaceAtHead(user.asVertex(), vertex,
                 LIFECYCLE_ACTION, LIFECYCLE_ACTION, Direction.OUT);
-        SystemEvent ge = createGlobalEvent(user, type, logMessage);
-        graph.addEdge(null, vertex, ge.asVertex(), eu.ehri.project.models.events.SystemEvent.HAS_EVENT);
-        return new EventContext(this, ge, user, type, logMessage);
+        SystemEvent globalEvent = createGlobalEvent(user, type, logMessage);
+        graph.addEdge(null, vertex, globalEvent.asVertex(), SystemEvent.HAS_EVENT);
+        return new EventContext(this, globalEvent, user, type, logMessage);
     }
 
     /**
@@ -223,8 +235,22 @@ public final class ActionManager {
      * @param type
      * @return
      */
-    public EventContext logEvent(AccessibleEntity subject, Actioner user, ActionType type) {
+    public EventContext logEvent(AccessibleEntity subject, Actioner user,
+            ActionType type) {
         return logEvent(subject, user, type, Optional.<String>absent());
+    }
+
+    /**
+     * Create an action for the given subject, user, and type and a log message.
+     * @param subject
+     * @param user
+     * @param type
+     * @param logMessage
+     * @return
+     */
+    public EventContext logEvent(AccessibleEntity subject, Actioner user,
+            ActionType type, String logMessage) {
+        return logEvent(subject, user, type, Optional.of(logMessage));
     }
 
     /**
@@ -236,8 +262,8 @@ public final class ActionManager {
      * @param logMessage
      * @return
      */
-    public EventContext logEvent(AccessibleEntity subject, Actioner user, ActionType type,
-            Optional<String> logMessage) {
+    public EventContext logEvent(AccessibleEntity subject, Actioner user,
+            ActionType type, Optional<String> logMessage) {
         EventContext context = logEvent(user, type, logMessage);
         context.addSubjects(subject);
         return context;
