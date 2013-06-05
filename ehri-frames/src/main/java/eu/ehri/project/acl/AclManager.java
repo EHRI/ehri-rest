@@ -42,7 +42,7 @@ public final class AclManager {
     private final FramedGraph<?> graph;
     private final GraphManager manager;
     private final PermissionScope scope;
-    private final Collection<Vertex> scopes;
+    private final HashSet<Vertex> scopes;
 
     // Lookups to convert between the enum and node representations
     // of content and permission types.
@@ -690,13 +690,16 @@ public final class AclManager {
             // Since these are global perms only include those where the target
             // is a content type. FIXME: if it has been deleted, the target
             // could well be null.
-            if (grant.getScope() == null || scopes.contains(grant.getScope().asVertex())) {
+            PermissionScope scope = grant.getScope();
+            if (scope == null || scopes.contains(scope.asVertex())) {
                 for (PermissionGrantTarget target : grant.getTargets()) {
                     if (manager.getEntityClass(target).equals(EntityClass.CONTENT_TYPE)) {
-                        ContentTypes ctype = ContentTypes.withName(manager
-                                .getId(target));
-                        permmap.put(ctype, PermissionType.withName(manager
-                                .getId(grant.getPermission())));
+                        Permission permission = grant.getPermission();
+                        if (permission != null) {
+                            permmap.put(
+                                    contentTypeEnumMap.get(target.asVertex()),
+                                    permissionEnumMap.get(permission.asVertex()));
+                        }
                     }
                 }
             }
@@ -751,8 +754,8 @@ public final class AclManager {
     }
 
     // Get a list of the current scope and its parents
-    private Collection<Vertex> getAllScopes() {
-        Collection<Vertex> all = Lists.newArrayList();
+    private HashSet<Vertex> getAllScopes() {
+        HashSet<Vertex> all = Sets.newHashSet();
         for (PermissionScope s : scope.getPermissionScopes()) {
             all.add(s.asVertex());
         }
