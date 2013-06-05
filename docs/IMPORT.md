@@ -43,16 +43,21 @@ So you can do stuff within the system, you need to make a yser profile for yours
 
 ## Import some SKOS
 
-To import some vocabulary terms you need to tell the script:
-
-* The user doing the importing
-* The vocabulary to import into (which can be created if necessary)
+To import some vocabulary terms you first need to create a vocabulary to which they will belong. We do this with the
+generic "add" command:
 
 ```bash
-./scripts/cmd skos-import --createvocabulary --vocabulary ehri-terms --user $USER PATH-TO-SKOS.rdf
+./scripts/cmd add cvocVocabulary -Pidentifier=ehri-terms --user $USER --log "Creating vocabulary for ehri terms."
 ```
 
-**NOTE**: The --createvocabulary flag is deprecated and will be replaced/removed in future when an alternative has been implemented.
+The `id` handle of the created vocabulary will be derived from the "identifier" field. Since there is no enclosing
+scope, the resulting id will just be `ehri-terms`. We reference this for the scope parameter for the SKOS import
+command:
+
+```bash
+./scripts/cmd skos-import --scope ehri-terms --user $USER --tolerant --user $USER  --log "Importing EHRI SKOS" PATH-TO-SKOS.rdf
+```
+
 
 ## Import some EAD
 
