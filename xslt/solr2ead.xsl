@@ -81,7 +81,7 @@
 		<archdesc>
 			<did>
 				<unitid>
-					<xsl:value-of select="field[@name = 'accession_number']/normalize-space()" />
+					<xsl:value-of select="field[@name = 'irn']/normalize-space()" />
 				</unitid>
 				<unittitle>
 					<xsl:value-of select="field[@name = 'unit_title']/normalize-space()" />
@@ -108,6 +108,12 @@
 					<xsl:value-of select="field[@name = 'brief_desc']/normalize-space()" />
 				</abstract>
 			</did>
+
+            <acqinfo>
+                <p>
+                    <xsl:value-of select="field[@name = 'accession_number']/normalize-space()" />
+                </p>
+            </acqinfo>
 
 			<!-- biographic description of the person or organization -->
 			<bioghist>
