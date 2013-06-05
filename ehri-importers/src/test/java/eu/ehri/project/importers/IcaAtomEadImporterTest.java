@@ -5,10 +5,10 @@
 package eu.ehri.project.importers;
 
 import com.tinkerpop.blueprints.Vertex;
-import eu.ehri.project.importers.test.AbstractImporterTest;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.IdentifiableEntity;
 import eu.ehri.project.models.events.SystemEvent;
 
 import java.io.InputStream;
@@ -42,17 +42,18 @@ public class IcaAtomEadImporterTest extends AbstractImporterTest{
 
         int count = getNodeCount(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        ImportLog log = new SaxImportManager(graph, agent, validUser, IcaAtomEadImporter.class, IcaAtomEadHandler.class).importFile(ios, logMessage);
+        ImportLog log = new SaxImportManager(graph, agent, validUser, IcaAtomEadImporter.class, IcaAtomEadHandler.class).setTolerant(Boolean.TRUE).importFile(ios, logMessage);
 
         // How many new nodes will have been created? We should have
         // - 5 more DocumentaryUnits
        	// - 5 more DocumentDescription
 	// - 1 more DatePeriod
+        // - 2 more UnknownProperties
 	// - 6 more import Event links (4 for every Unit, 1 for the User)
         // - 1 more import Event
-        assertEquals(count + 18, getNodeCount(graph));
+        assertEquals(count + 20, getNodeCount(graph));
 
-        Iterable<Vertex> docs = graph.getVertices(AccessibleEntity.IDENTIFIER_KEY,
+        Iterable<Vertex> docs = graph.getVertices(IdentifiableEntity.IDENTIFIER_KEY,
                 FONDS_LEVEL);
         assertTrue(docs.iterator().hasNext());
         DocumentaryUnit fonds_unit = graph.frame(
@@ -94,7 +95,7 @@ public class IcaAtomEadImporterTest extends AbstractImporterTest{
 
         List<AccessibleEntity> subjects = toList(log.getAction().getSubjects());
         for(AccessibleEntity subject  : subjects)
-            logger.info("identifier: " + subject.getIdentifier());
+            logger.info("identifier: " + subject.getId());
         
         assertEquals(5, subjects.size());
         assertEquals(log.getSuccessful(), subjects.size());

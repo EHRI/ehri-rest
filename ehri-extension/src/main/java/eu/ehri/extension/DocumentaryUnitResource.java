@@ -22,7 +22,6 @@ import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriBuilder;
 
 import eu.ehri.project.exceptions.*;
-import eu.ehri.project.models.DocumentDescription;
 import eu.ehri.project.models.EntityClass;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
@@ -34,7 +33,7 @@ import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.views.impl.LoggingCrudViews;
-import eu.ehri.project.views.impl.Query;
+import eu.ehri.project.views.Query;
 
 /**
  * Provides a RESTfull interface for the DocumentaryUnit
@@ -48,9 +47,9 @@ public class DocumentaryUnitResource extends
     }
 
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}")
-    public Response getDocumentaryUnit(@PathParam("id") String id)
+    public Response getDocumentaryUnitJson(@PathParam("id") String id)
             throws ItemNotFound, AccessDenied, BadRequester {
         return retrieve(id);
     }
@@ -65,6 +64,26 @@ public class DocumentaryUnitResource extends
             @QueryParam(FILTER_PARAM) List<String> filters)
             throws ItemNotFound, BadRequester {
         return list(offset, limit, order, filters);
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/page")
+    public StreamingOutput pageDocumentaryUnits(
+            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
+            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(SORT_PARAM) List<String> order,
+            @QueryParam(FILTER_PARAM) List<String> filters)
+            throws ItemNotFound, BadRequester {
+        return page(offset, limit, order, filters);
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/count")
+    public Response countDocumentaryUnits(@QueryParam(FILTER_PARAM) List<String> filters)
+            throws ItemNotFound, BadRequester {
+        return count(filters);
     }
 
     @GET
@@ -105,14 +124,16 @@ public class DocumentaryUnitResource extends
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/page")
-    public StreamingOutput pageDocumentaryUnits(
-            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
-            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
-            @QueryParam(SORT_PARAM) List<String> order,
+    @Path("/{id:.+}/count")
+    public Response countChildDocumentaryUnits(
+            @PathParam("id") String id,
             @QueryParam(FILTER_PARAM) List<String> filters)
-            throws ItemNotFound, BadRequester {
-        return page(offset, limit, order, filters);
+            throws ItemNotFound, BadRequester, PermissionDenied {
+        DocumentaryUnit parent = manager.getFrame(id, DocumentaryUnit.class);
+        Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph, cls)
+                .filter(filters);
+        return Response.ok((query.count(parent.getChildren(),
+                getRequesterUserProfile())).toString().getBytes()).build();
     }
 
     @PUT
@@ -168,75 +189,6 @@ public class DocumentaryUnitResource extends
         }
     }
 
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{id:.+}/" + Entities.DOCUMENT_DESCRIPTION)
-    public Response createDescription(@PathParam("id") String id, String json)
-            throws AccessDenied, PermissionDenied, ValidationError, IntegrityError,
-            DeserializationError, ItemNotFound, BadRequester {
-        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
-        try {
-            Accessor user = getRequesterUserProfile();
-            DocumentaryUnit doc = views.detail(
-                    manager.getFrame(id, EntityClass.DOCUMENTARY_UNIT, DocumentaryUnit.class), user);
-            DocumentDescription desc = views.createDependent(Bundle.fromString(json),
-                    doc, user, DocumentDescription.class,
-                    getLogMessage(getDefaultUpdateMessage(EntityClass.DOCUMENT_DESCRIPTION, id)));
-            doc.addDescription(desc);
-            tx.success();
-            return buildResponseFromDocumentaryUnit(doc);
-        } catch (SerializationError e) {
-            tx.failure();
-            throw new WebApplicationException(e);
-        } finally {
-            tx.finish();
-        }
-    }
-
-    @PUT
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{id:.+}/" + Entities.DOCUMENT_DESCRIPTION)
-    public Response updateDescription(@PathParam("id") String id, String json)
-            throws AccessDenied, PermissionDenied, ValidationError, IntegrityError,
-            DeserializationError, ItemNotFound, BadRequester, SerializationError {
-        Accessor user = getRequesterUserProfile();
-        DocumentaryUnit doc = views.detail(
-                manager.getFrame(id, EntityClass.DOCUMENTARY_UNIT, DocumentaryUnit.class), user);
-        views.updateDependent(Bundle.fromString(json), doc, user, DocumentDescription.class,
-                getLogMessage(getDefaultUpdateMessage(EntityClass.DOCUMENT_DESCRIPTION, id)));
-        return retrieve(id);
-    }
-
-    @PUT
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{id:.+}/" + Entities.DOCUMENT_DESCRIPTION + "/{did:.+}")
-    public Response updateDescriptionWithId(@PathParam("id") String id,
-                @PathParam("did") String did, String json)
-            throws AccessDenied, PermissionDenied, ValidationError, IntegrityError,
-            DeserializationError, ItemNotFound, BadRequester, SerializationError {
-        // FIXME: Inefficient conversion to/from JSON just to insert the ID. We
-        // should rethink this somehow.
-        return updateDescription(id, Bundle.fromString(json).withId(did).toJson());
-    }
-
-    @DELETE
-    @Path("/{id:.+}/" + Entities.DOCUMENT_DESCRIPTION + "/{did:.+}")
-    public Response deleteDocumentaryUnitDescription(@PathParam("id") String id, @PathParam("did") String did)
-            throws AccessDenied, PermissionDenied, ItemNotFound, ValidationError,
-            BadRequester, SerializationError {
-        Accessor user = getRequesterUserProfile();
-        DocumentaryUnit doc = views.detail(manager.getFrame(id, EntityClass.DOCUMENTARY_UNIT,
-                DocumentaryUnit.class), user);
-        DocumentDescription desc = manager.getFrame(did, EntityClass.DOCUMENT_DESCRIPTION,
-                DocumentDescription.class);
-        views.deleteDependent(desc, doc, user, DocumentDescription.class,
-                getLogMessage(getDefaultDeleteMessage(EntityClass.DOCUMENT_DESCRIPTION, id)));
-        return retrieve(id);
-    }
-
     // Helpers
 
     private Response buildResponseFromDocumentaryUnit(DocumentaryUnit doc)
@@ -269,7 +221,6 @@ public class DocumentaryUnitResource extends
         // NB: We no longer add this item to the
         // parent's Repository directly.
         parent.addChild(doc);
-        doc.setPermissionScope(parent);
         return doc;
     }
 }

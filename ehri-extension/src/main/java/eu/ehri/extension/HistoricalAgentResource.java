@@ -42,6 +42,14 @@ public class HistoricalAgentResource extends AbstractAccessibleEntityResource<Hi
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
+    @Path("/count")
+    public Response countHistoricalAgents(@QueryParam(FILTER_PARAM) List<String> filters)
+            throws ItemNotFound, BadRequester {
+        return count(filters);
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("/page")
     public StreamingOutput pageAuthorities(
             @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,

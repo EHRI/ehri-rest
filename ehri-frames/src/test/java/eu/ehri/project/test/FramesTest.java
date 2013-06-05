@@ -5,8 +5,6 @@ import org.junit.Test;
 
 import com.tinkerpop.blueprints.Vertex;
 
-import eu.ehri.project.test.models.TestFramedInterface;
-
 public class FramesTest extends ModelTestBase {
 
     @Test(expected=ArrayIndexOutOfBoundsException.class)

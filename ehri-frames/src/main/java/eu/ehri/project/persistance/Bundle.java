@@ -2,6 +2,7 @@ package eu.ehri.project.persistance;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -11,19 +12,21 @@ import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Maps;
 
+import com.google.common.hash.*;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.models.EntityClass;
+import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.utils.ClassUtils;
 import org.w3c.dom.Document;
 
 /**
  * Class that represents a graph entity and subtree relations.
- * 
+ *
  * @author michaelb
- * 
+ *
  */
-public class Bundle {
+public final class Bundle {
     private final String id;
     private final EntityClass type;
     private final ImmutableMap<String, Object> data;
@@ -39,7 +42,7 @@ public class Bundle {
 
     /**
      * Constructor.
-     * 
+     *
      * @param id
      * @param type
      * @param data
@@ -49,13 +52,13 @@ public class Bundle {
             final ListMultimap<String, Bundle> relations) {
         this.id = id;
         this.type = type;
-        this.data = ImmutableMap.copyOf(data);
+        this.data = filterData(data);
         this.relations = ImmutableListMultimap.copyOf(relations);
     }
 
     /**
      * Constructor for bundle without existing id.
-     * 
+     *
      * @param type
      * @param data
      * @param relations
@@ -67,7 +70,7 @@ public class Bundle {
 
     /**
      * Constructor for just a type.
-     * 
+     *
      * @param type
      */
     public Bundle(EntityClass type) {
@@ -77,7 +80,7 @@ public class Bundle {
 
     /**
      * Constructor for bundle without existing id or relations.
-     * 
+     *
      * @param type
      * @param data
      */
@@ -88,7 +91,7 @@ public class Bundle {
     /**
      * Get the id of the bundle's graph vertex (or null if it does not yet
      * exist.
-     * 
+     *
      * @return
      */
     public String getId() {
@@ -97,7 +100,7 @@ public class Bundle {
 
     /**
      * Get a bundle with the given id.
-     * 
+     *
      * @param id
      */
     public Bundle withId(String id) {
@@ -108,7 +111,7 @@ public class Bundle {
     /**
      * Get the type of entity this bundle represents as per the target class's
      * entity type key.
-     * 
+     *
      * @return
      */
     public EntityClass getType() {
@@ -117,7 +120,7 @@ public class Bundle {
 
     /**
      * Get a data value.
-     * 
+     *
      * @return
      */
     public Object getDataValue(String key) {
@@ -127,20 +130,24 @@ public class Bundle {
 
     /**
      * Set a value in the bundle's data.
-     * 
+     *
      * @param key
      * @param value
      * @return
      */
     public Bundle withDataValue(String key, Object value) {
-        Map<String, Object> newData = Maps.newHashMap(data);
-        newData.put(key, value);
-        return withData(newData);
+        if (value == null) {
+            return this;
+        } else {
+            Map<String, Object> newData = Maps.newHashMap(data);
+            newData.put(key, value);
+            return withData(newData);
+        }
     }
 
     /**
      * Remove a value in the bundle's data.
-     * 
+     *
      * @param key
      * @return
      */
@@ -152,7 +159,7 @@ public class Bundle {
 
     /**
      * Get the bundle data.
-     * 
+     *
      * @return
      */
     public Map<String, Object> getData() {
@@ -161,7 +168,7 @@ public class Bundle {
 
     /**
      * Set the entire data map for this bundle.
-     * 
+     *
      * @param data
      * @return
      */
@@ -171,7 +178,7 @@ public class Bundle {
 
     /**
      * Get the bundle's relation bundles.
-     * 
+     *
      * @return
      */
     public ListMultimap<String, Bundle> getRelations() {
@@ -180,7 +187,7 @@ public class Bundle {
 
     /**
      * Set entire set of relations.
-     * 
+     *
      * @param relations
      * @return
      */
@@ -190,7 +197,7 @@ public class Bundle {
 
     /**
      * Get a set of relations.
-     * 
+     *
      * @param relation
      * @return
      */
@@ -200,7 +207,7 @@ public class Bundle {
 
     /**
      * Set bundles for a particular relation.
-     * 
+     *
      * @param relation
      * @param others
      * @return
@@ -214,7 +221,7 @@ public class Bundle {
 
     /**
      * Add a bundle for a particular relation.
-     * 
+     *
      * @param relation
      * @param other
      */
@@ -227,7 +234,7 @@ public class Bundle {
 
     /**
      * Check if this bundle contains the given relation set.
-     * 
+     *
      * @param relation
      * @return
      */
@@ -237,7 +244,7 @@ public class Bundle {
 
     /**
      * Remove a single relation.
-     * 
+     *
      * @param relation
      * @return
      */
@@ -249,7 +256,7 @@ public class Bundle {
 
     /**
      * Remove a set of relationships.
-     * 
+     *
      * @param relation
      * @return
      */
@@ -261,7 +268,7 @@ public class Bundle {
 
     /**
      * Get the target class.
-     * 
+     *
      * @return
      */
     public Class<?> getBundleClass() {
@@ -271,7 +278,7 @@ public class Bundle {
     /**
      * Return a list of names for mandatory properties, as represented in the
      * graph.
-     * 
+     *
      * @return
      */
     public Iterable<String> getPropertyKeys() {
@@ -280,7 +287,7 @@ public class Bundle {
 
     /**
      * Return a list of property keys which must be unique.
-     * 
+     *
      * @return
      */
     public Iterable<String> getUniquePropertyKeys() {
@@ -289,7 +296,7 @@ public class Bundle {
 
     /**
      * Create a bundle from raw data.
-     * 
+     *
      * @param data
      * @return
      * @throws DeserializationError
@@ -300,7 +307,7 @@ public class Bundle {
 
     /**
      * Serialize a bundle to raw data.
-     * 
+     *
      * @return
      */
     public Map<String, Object> toData() {
@@ -309,13 +316,18 @@ public class Bundle {
 
     /**
      * Create a bundle from a (JSON) string.
-     * 
+     *
      * @param json
      * @return
      * @throws DeserializationError
      */
     public static Bundle fromString(String json) throws DeserializationError {
         return DataConverter.jsonToBundle(json);
+    }
+
+    @Override
+    public String toString() {
+        return "<" + getType() + "> (" + getData() + " + Rels: " + relations.size() + ")";
     }
 
     /**
@@ -344,5 +356,81 @@ public class Bundle {
      */
     public String toXmlString() {
         return DataConverter.bundleToXmlString(this);
+    }
+
+    @SuppressWarnings("serial")
+    private Funnel<Object> objectFunnel = new Funnel<Object>() {
+        @Override
+        public void funnel(Object data, PrimitiveSink into) {
+            if (data instanceof Object[]) {
+                for (Object sd : (Object[])data) {
+                    funnel(sd, into);
+                }
+            } else if (data instanceof String) {
+                into.putString((String)data);
+            } else if (data instanceof Long) {
+                into.putLong((Long)data);
+            } else if (data instanceof Integer) {
+                into.putInt((Integer)data);
+            } else if (data instanceof Long) {
+                into.putLong((Long)data);
+            } else {
+                into.putString(data.toString());
+            }
+        }
+    };
+
+    @SuppressWarnings("serial")
+    private Funnel<Map.Entry<String,Object>> entryFunnel = new Funnel<Map.Entry<String, Object>>() {
+        @Override
+        public void funnel(Map.Entry<String, Object> entry, PrimitiveSink into) {
+            into.putString(entry.getKey());
+            objectFunnel.funnel(entry.getValue(), into);
+        }
+    };
+
+    @SuppressWarnings("serial")
+    private Funnel<Bundle> bundleFunnel = new Funnel<Bundle>() {
+        @Override
+        public void funnel(Bundle bundle, PrimitiveSink into) {
+            for (Map.Entry<String,Object> entry : bundle.getData().entrySet()) {
+                if (!entry.getKey().equals(EntityType.ID_KEY)
+                        && !entry.getKey().equals(EntityType.HASH_KEY)) {
+                    entryFunnel.funnel(entry, into);
+                }
+            }
+            for (Map.Entry<String,Collection<Bundle>> rels : getRelations().asMap().entrySet()) {
+                into.putString(rels.getKey());
+                for (Bundle r : rels.getValue()) {
+                    into.putString(r.getDataHash().toString());
+                }
+            }
+        }
+    };
+
+    /**
+     * Get a hashCode for this bundle.
+     * @return
+     */
+    public HashCode getDataHash() {
+        HashFunction hf = Hashing.md5();
+        Hasher hasher = hf.newHasher();
+        hasher.putObject(this, bundleFunnel);
+        return hasher.hash();
+    }
+
+    /**
+     * Return an immutable copy of the given data map with nulls removed.
+     * @param data
+     * @return
+     */
+    private ImmutableMap<String, Object> filterData(Map<String, Object> data) {
+        Map<String,Object> filtered = Maps.newHashMap();
+        for (Map.Entry<? extends String,Object> entry : data.entrySet()) {
+            if (entry.getValue() != null) {
+                filtered.put(entry.getKey(), entry.getValue());
+            }
+        }
+        return ImmutableMap.copyOf(filtered);
     }
 }

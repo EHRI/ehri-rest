@@ -26,6 +26,7 @@ import eu.ehri.project.persistance.Bundle;
 
 public class RepositoryRestClientTest extends BaseRestClientTest {
 
+    static final String COUNTRY_CODE = "nl";
     static final String ID = "r1";
     static final String LIMITED_USER_NAME = "reto";
     static final String UPDATED_NAME = "UpdatedNameTEST";
@@ -45,10 +46,10 @@ public class RepositoryRestClientTest extends BaseRestClientTest {
     }
 
     @Test
-    public void testCreateAgent() throws Exception {
+    public void testCreateRepository() throws Exception {
         // Create
         WebResource resource = client.resource(getExtensionEntryPointUri()
-                + "/" + Entities.REPOSITORY);
+                + "/" + Entities.COUNTRY + "/" + COUNTRY_CODE + "/" + Entities.REPOSITORY);
         ClientResponse response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
@@ -71,12 +72,21 @@ public class RepositoryRestClientTest extends BaseRestClientTest {
     }
 
     @Test
-    public void testCreateAgentWithExistingIdentifier() throws Exception {
+    public void testCreateRepositoryWithExistingIdentifier() throws Exception {
         String json = Bundle.fromString(agentTestData)
                 .withDataValue(Repository.IDENTIFIER_KEY, "r1").toJson();
         WebResource resource = client.resource(getExtensionEntryPointUri()
-                + "/" + Entities.REPOSITORY);
+                + "/" + Entities.COUNTRY + "/" + COUNTRY_CODE + "/" + Entities.REPOSITORY);
         ClientResponse response = resource
+                .accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                        getAdminUserProfileId()).entity(json)
+                .post(ClientResponse.class);
+        assertEquals(Response.Status.CREATED.getStatusCode(),
+                response.getStatus());
+        // Now do it again!
+        response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
                 .header(AbstractRestResource.AUTH_HEADER_NAME,
@@ -88,10 +98,10 @@ public class RepositoryRestClientTest extends BaseRestClientTest {
     }
 
     @Test
-    public void testUpdateAgentByIdentifier() throws Exception {
+    public void testUpdateRepositoryByIdentifier() throws Exception {
         // Create
         WebResource resource = client.resource(getExtensionEntryPointUri()
-                + "/" + Entities.REPOSITORY);
+                + "/" + Entities.COUNTRY + "/" + COUNTRY_CODE + "/" + Entities.REPOSITORY);
         ClientResponse response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
@@ -100,7 +110,7 @@ public class RepositoryRestClientTest extends BaseRestClientTest {
                 .post(ClientResponse.class);
         assertEquals(Response.Status.CREATED.getStatusCode(),
                 response.getStatus());
-
+        System.out.println("LOC: " + response.getLocation());
         // Obtain some update data.
         String updateData = Bundle.fromString(agentTestData)
                 .withDataValue("name", UPDATED_NAME).toJson();
@@ -116,16 +126,16 @@ public class RepositoryRestClientTest extends BaseRestClientTest {
     }
 
     @Test
-    public void testCreateAgentWithDeserializationError() throws Exception {
+    public void testCreateRepositoryWithDeserializationError() throws Exception {
         // Create
         WebResource resource = client.resource(getExtensionEntryPointUri()
-                + "/" + Entities.REPOSITORY);
-        String badAgentTestData = "{\"data\":{\"identifier\": \"jmp\"}}";
+                + "/" + Entities.COUNTRY + "/" + COUNTRY_CODE + "/" + Entities.REPOSITORY);
+        String badRepositoryTestData = "{\"data\":{\"identifier\": \"jmp\"}}";
         ClientResponse response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
                 .header(AbstractRestResource.AUTH_HEADER_NAME,
-                        getAdminUserProfileId()).entity(badAgentTestData)
+                        getAdminUserProfileId()).entity(badRepositoryTestData)
                 .post(ClientResponse.class);
 
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(),
@@ -142,7 +152,7 @@ public class RepositoryRestClientTest extends BaseRestClientTest {
     }
 
     @Test
-    public void testDeleteAgent() throws Exception {
+    public void testDeleteRepository() throws Exception {
         // Create
         WebResource resource = client.resource(getExtensionEntryPointUri()
                 + "/" + Entities.REPOSITORY + "/" + ID);
@@ -164,7 +174,7 @@ public class RepositoryRestClientTest extends BaseRestClientTest {
     }
 
     @Test
-    public void testGrantPermsForAgentScope() throws Exception {
+    public void testGrantPermsForRepositoryScope() throws Exception {
         // Grant permissions for a user to create items within this scope.
 
         // The user shouldn't be able to create docs with r2

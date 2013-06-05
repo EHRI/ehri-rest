@@ -19,6 +19,7 @@ import eu.ehri.project.definitions.Entities;
 
 public class SystemEventRestClientTest extends BaseRestClientTest {
 
+    static final String COUNTRY_CODE = "nl";
     static final String UPDATED_NAME = "UpdatedNameTEST";
 
     private String jsonAgentTestString = "{\"type\": \"repository\", \"data\":{\"identifier\": \"jmp\"}}";
@@ -37,7 +38,7 @@ public class SystemEventRestClientTest extends BaseRestClientTest {
                 Entities.SYSTEM_EVENT, getAdminUserProfileId());
 
         WebResource resource = client.resource(getExtensionEntryPointUri()
-                + "/" + Entities.REPOSITORY);
+                + "/" + Entities.COUNTRY + "/" + COUNTRY_CODE + "/" +  Entities.REPOSITORY);
         ClientResponse response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
@@ -60,7 +61,7 @@ public class SystemEventRestClientTest extends BaseRestClientTest {
 
         // Create an item
         WebResource resource = client.resource(getExtensionEntryPointUri()
-                + "/" + Entities.REPOSITORY);
+                + "/" + Entities.COUNTRY + "/" + COUNTRY_CODE + "/" + Entities.REPOSITORY);
         ClientResponse response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)

@@ -53,19 +53,4 @@ public class AnnotationRestClientTest extends BaseRestClientTest {
         assertEquals(Response.Status.CREATED.getStatusCode(),
                 response.getStatus());        
     }
-    
-    @Test
-    public void testCreateLinkAnnotation() throws Exception {
-        // Create a link annotation between two objects
-        WebResource resource = client.resource(getExtensionEntryPointUri()
-                + "/annotation/c1/r1");
-        ClientResponse response = resource
-                .accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME,
-                        getAdminUserProfileId()).entity(jsonAnnotationTestString)
-                .post(ClientResponse.class);
-        assertEquals(Response.Status.CREATED.getStatusCode(),
-                response.getStatus());        
-    }
 }

@@ -8,6 +8,7 @@ import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.DescribedEntity;
+import eu.ehri.project.models.base.IdentifiableEntity;
 
 /**
  * This models the thesaurus terms or keywords in a way that is better managing multi-linguality. 
@@ -26,16 +27,16 @@ import eu.ehri.project.models.base.DescribedEntity;
  *
  */
 @EntityType(EntityClass.CVOC_CONCEPT)
-public interface Concept extends AccessibleEntity, DescribedEntity {
+public interface Concept extends AccessibleEntity, IdentifiableEntity, DescribedEntity, AuthoritativeItem {
     public static final String BROADER = "broader";
     public static final String NARROWER = "narrower";
     public static final String RELATED = "related";
-    
-    @Fetch(Vocabulary.IN_CVOC)
-    @Adjacency(label = Vocabulary.IN_CVOC)
+
+    // NB: As an AuthoritativeItem the set will be @Fetched automatically
+    @Adjacency(label = AuthoritativeSet.IN_SET)
     public Vocabulary getVocabulary();
 
-    @Adjacency(label = Vocabulary.IN_CVOC)
+    @Adjacency(label = AuthoritativeSet.IN_SET)
     public void setVocabulary(final Vocabulary vocabulary);
 
 

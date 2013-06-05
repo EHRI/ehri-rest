@@ -39,7 +39,7 @@ import eu.ehri.project.models.utils.ClassUtils;
  */
 public final class BundleDAO {
 
-    private final FramedGraph<Neo4jGraph> graph;
+    private final FramedGraph<?> graph;
     private final PermissionScope scope;
     private final GraphManager manager;
 
@@ -49,7 +49,7 @@ public final class BundleDAO {
      * @param graph
      * @param scope
      */
-    public BundleDAO(FramedGraph<Neo4jGraph> graph, PermissionScope scope) {
+    public BundleDAO(FramedGraph<?> graph, PermissionScope scope) {
         this.graph = graph;
         this.scope = scope;
         manager = GraphManagerFactory.getInstance(graph);
@@ -60,7 +60,7 @@ public final class BundleDAO {
      *
      * @param graph
      */
-    public BundleDAO(FramedGraph<Neo4jGraph> graph) {
+    public BundleDAO(FramedGraph<?> graph) {
         this(graph, SystemScope.getInstance());
     }
 
@@ -108,7 +108,7 @@ public final class BundleDAO {
      * @return
      */
     public Integer delete(Bundle bundle) {
-        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
+        Transaction tx = ((Neo4jGraph)graph.getBaseGraph()).getRawGraph().beginTx();
         try {
             Integer count = deleteCount(bundle, 0);
             tx.success();

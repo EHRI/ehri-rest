@@ -5,8 +5,12 @@
 package eu.ehri.project.importers;
 
 import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.importers.properties.XmlImportProperties;
+import eu.ehri.project.models.Annotation;
 import eu.ehri.project.models.MaintenanceEvent;
+import eu.ehri.project.models.UnknownProperty;
 import eu.ehri.project.models.base.Description;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,22 +27,25 @@ import org.xml.sax.SAXException;
  *
  * @author linda
  */
-public class EacHandler extends SaxXmlHandler {
+public class EacHandler extends EaHandler {
 
     Map<String, Class<? extends Frame>> possibleSubnodes;
     private static final Logger logger = LoggerFactory.getLogger(EacHandler.class);
 
     public EacHandler(AbstractImporter<Map<String, Object>> importer) {
-        super(importer, new PropertiesConfig("eac.properties"));
+
+        super(importer, new XmlImportProperties("eac.properties"));
         possibleSubnodes = new HashMap<String, Class<? extends Frame>>();
+
         possibleSubnodes.put("maintenanceEvent", MaintenanceEvent.class);
+        possibleSubnodes.put("relation", Annotation.class);
+        possibleSubnodes.put("name", UnknownProperty.class);
     }
 
     @Override
     protected boolean needToCreateSubNode(String key) {
         return possibleSubnodes.containsKey(getImportantPath(currentPath));
     }
-
 
     @Override
     public void endElement(String uri, String localName, String qName) throws SAXException {
@@ -60,19 +67,13 @@ public class EacHandler extends SaxXmlHandler {
                 if (!currentGraphPath.peek().containsKey("objectIdentifier")) {
                     putPropertyInCurrentGraph("objectIdentifier", "id");
                 }
-                if (!currentGraphPath.peek().containsKey(Description.NAME)) {
-                    if(currentGraphPath.peek().containsKey("otherFormsOfName")){
-                        Object names =  currentGraphPath.peek().get("otherFormsOfName");
-                        if(names instanceof String){
-                            putPropertyInCurrentGraph(Description.NAME, names.toString());
-                        }else if(names instanceof List){
-                            putPropertyInCurrentGraph(Description.NAME, ((List<?>)names).get(0).toString());
-                        }else{
-                            logger.warn("no " + Description.NAME + " found");
-                            putPropertyInCurrentGraph(Description.NAME, "title");
-                        }
-                    }
-                }
+
+                //TODO: name can have only 1 value, others are otherFormsOfName
+//                if (currentGraphPath.peek().containsKey(Description.NAME)) {
+//                    String name = chooseName(currentGraphPath.peek().get(Description.NAME));
+//                    overwritePropertyInCurrentGraph(Description.NAME, name);
+//
+//                }
                 if (!currentGraphPath.peek().containsKey(Description.LANGUAGE_CODE)) {
                     logger.debug("no " + Description.LANGUAGE_CODE + " found");
                     putPropertyInCurrentGraph(Description.LANGUAGE_CODE, "en");
@@ -84,5 +85,11 @@ public class EacHandler extends SaxXmlHandler {
             }
         }
     }
-}
 
+    @Override
+    protected List<String> getSchemas() {
+        List<String> schemas = new ArrayList<String>();
+        schemas.add("eac.xsd");
+        return schemas;
+    }
+}

@@ -33,7 +33,7 @@ import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.views.impl.LoggingCrudViews;
-import eu.ehri.project.views.impl.Query;
+import eu.ehri.project.views.Query;
 
 /**
  * Provides a RESTfull interface for the cvoc.Concept. Note that the concept
@@ -46,14 +46,6 @@ public class CvocConceptResource extends
 
     public CvocConceptResource(@Context GraphDatabaseService database) {
         super(database, Concept.class);
-    }
-
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response getCvocConcept(@QueryParam("key") String key,
-            @QueryParam("value") String value) throws ItemNotFound,
-            AccessDenied, BadRequester {
-        return retrieve(key, value);
     }
 
     @GET
@@ -74,6 +66,14 @@ public class CvocConceptResource extends
             @QueryParam(FILTER_PARAM) List<String> filters)
             throws ItemNotFound, BadRequester {
         return list(offset, limit, order, filters);
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/count")
+    public Response countCvocConcepts(@QueryParam(FILTER_PARAM) List<String> filters)
+            throws ItemNotFound, BadRequester {
+        return count(filters);
     }
 
     @GET
@@ -121,11 +121,9 @@ public class CvocConceptResource extends
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:.+}/narrower/list")
     public StreamingOutput getCvocNarrowerConcepts(@PathParam("id") String id)
-            throws ItemNotFound, AccessDenied, PermissionDenied, BadRequester {
-
+            throws ItemNotFound, AccessDenied, BadRequester {
         Concept concept = views.detail(manager.getFrame(id, cls),
                 getRequesterUserProfile());
-
         return streamingList(concept.getNarrowerConcepts());
     }
 
@@ -139,13 +137,28 @@ public class CvocConceptResource extends
             @QueryParam(SORT_PARAM) List<String> order,
             @QueryParam(FILTER_PARAM) List<String> filters)
 
-    throws ItemNotFound, AccessDenied, PermissionDenied, BadRequester {
+    throws ItemNotFound, AccessDenied, BadRequester {
         Accessor user = getRequesterUserProfile();
         Concept concept = views.detail(manager.getFrame(id, cls), user);
         Query<Concept> query = new Query<Concept>(graph, Concept.class)
                 .setLimit(limit).setOffset(offset).orderBy(order)
                 .filter(filters);
         return streamingList(query.list(concept.getNarrowerConcepts(), user));
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id:.+}/count")
+    public Response countCvocNarrowerConcepts(
+            @PathParam("id") String id,
+            @QueryParam(FILTER_PARAM) List<String> filters)
+            throws ItemNotFound, BadRequester, AccessDenied {
+        Accessor user = getRequesterUserProfile();
+        Concept concept = views.detail(manager.getFrame(id, cls), user);
+        Query<Concept> query = new Query<Concept>(graph, Concept.class)
+                .filter(filters);
+        return Response.ok((query.count(concept.getNarrowerConcepts(), user))
+                .toString().getBytes()).build();
     }
 
     @GET
@@ -158,7 +171,7 @@ public class CvocConceptResource extends
             @QueryParam(SORT_PARAM) List<String> order,
             @QueryParam(FILTER_PARAM) List<String> filters)
 
-    throws ItemNotFound, AccessDenied, PermissionDenied, BadRequester {
+    throws ItemNotFound, AccessDenied, BadRequester {
         Accessor user = getRequesterUserProfile();
         Concept concept = views.detail(manager.getFrame(id, cls), user);
         Query<Concept> query = new Query<Concept>(graph, Concept.class)
@@ -398,7 +411,6 @@ public class CvocConceptResource extends
         // Add it to this Vocabulary's concepts
         parent.addNarrowerConcept(concept);
         concept.setVocabulary(parent.getVocabulary());
-        concept.setPermissionScope(parent.getPermissionScope());
         return concept;
     }
 }

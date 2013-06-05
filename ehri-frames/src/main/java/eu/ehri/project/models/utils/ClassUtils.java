@@ -6,8 +6,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.Maps;
 import eu.ehri.project.models.annotations.*;
-import eu.ehri.project.models.base.Frame;
 import org.neo4j.helpers.collection.Iterables;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +31,13 @@ public class ClassUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(ClassUtils.class);
 
+    private static Map<Class<?>,Map<String,Method>> fetchMethodCache = Maps.newHashMap();
+    private static Map<Class<?>,Iterable<String>> propertyKeysCache = Maps.newHashMap();
+    private static Map<Class<?>,Iterable<String>> mandatoryPropertyKeysCache = Maps.newHashMap();
+    private static Map<Class<?>,Iterable<String>> uniquePropertyKeysCache = Maps.newHashMap();
+    private static Map<Class<?>,Map<String, Direction>> dependentRelationsCache = Maps.newHashMap();
+    private static Map<Class<?>,EntityClass> entityClassCache = Maps.newHashMap();
+
     /**
      * Get the entity type string for a given class.
      *
@@ -38,6 +45,48 @@ public class ClassUtils {
      * @return
      */
     public static EntityClass getEntityType(Class<?> cls) {
+        if (!entityClassCache.containsKey(cls)) {
+            entityClassCache.put(cls, getEntityTypeInternal(cls));
+        }
+        return entityClassCache.get(cls);
+    }
+
+    public static Map<String,Direction> getDependentRelations(Class<?> cls) {
+        if (!dependentRelationsCache.containsKey(cls)) {
+            dependentRelationsCache.put(cls, getDependentRelationsInternal(cls));
+        }
+        return dependentRelationsCache.get(cls);
+    }
+
+    public static Map<String, Method> getFetchMethods(Class<?> cls) {
+        if (!fetchMethodCache.containsKey(cls)) {
+            fetchMethodCache.put(cls, getFetchMethodsInternal(cls));
+        }
+        return fetchMethodCache.get(cls);
+    }
+
+    public static Iterable<String> getPropertyKeys(Class<?> cls) {
+        if (!propertyKeysCache.containsKey(cls)) {
+            propertyKeysCache.put(cls, getPropertyKeysInternal(cls));
+        }
+        return propertyKeysCache.get(cls);
+    }
+
+    public static Iterable<String> getMandatoryPropertyKeys(Class<?> cls) {
+        if (!mandatoryPropertyKeysCache.containsKey(cls)) {
+            mandatoryPropertyKeysCache.put(cls, getMandatoryPropertyKeysInternal(cls));
+        }
+        return mandatoryPropertyKeysCache.get(cls);
+    }
+
+    public static Iterable<String> getUniquePropertyKeys(Class<?> cls) {
+        if (!uniquePropertyKeysCache.containsKey(cls)) {
+            uniquePropertyKeysCache.put(cls, getUniquePropertyKeysInternal(cls));
+        }
+        return uniquePropertyKeysCache.get(cls);
+    }
+
+    private static EntityClass getEntityTypeInternal(Class<?> cls) {
         EntityType ann = cls.getAnnotation(EntityType.class);
         if (ann == null)
             throw new RuntimeException(String.format(
@@ -45,7 +94,7 @@ public class ClassUtils {
         return ann.value();
     }
 
-    public static Map<String, Direction> getDependentRelations(Class<?> cls) {
+    private static Map<String, Direction> getDependentRelationsInternal(Class<?> cls) {
         Map<String, Direction> out = new HashMap<String, Direction>();
         for (Method method : cls.getMethods()) {
             if (method.getAnnotation(Dependent.class) != null) {
@@ -57,18 +106,7 @@ public class ClassUtils {
         return out;
     }
 
-    public static List<String> getFetchedRelations(Class<?> cls) {
-        List<String> out = new LinkedList<String>();
-        for (Method method : cls.getMethods()) {
-            Fetch ann = method.getAnnotation(Fetch.class);
-            if (ann != null) {
-                out.add(ann.value());
-            }
-        }
-        return out;
-    }
-
-    public static Map<String, Method> getFetchMethods(Class<?> cls) {
+    private static Map<String, Method> getFetchMethodsInternal(Class<?> cls) {
         logger.trace(" - checking for @Fetch methods: {}", cls.getCanonicalName());
         Map<String, Method> out = new HashMap<String, Method>();
         for (Method method : cls.getMethods()) {
@@ -81,31 +119,12 @@ public class ClassUtils {
         }
 
         for (Class<?> s : cls.getInterfaces()) {
-            out.putAll(getFetchMethods(s));
+            out.putAll(getFetchMethodsInternal(s));
         }
-
         return out;
     }
 
-    public static Map<String, Method> getDependentMethods(Class<?> cls) {
-        Map<String, Method> out = new HashMap<String, Method>();
-        for (Method method : cls.getMethods()) {
-            if (method.getAnnotation(Dependent.class) != null
-                    && method.getName().startsWith(FETCH_METHOD_PREFIX)) {
-                Adjacency ann = method.getAnnotation(Adjacency.class);
-                if (ann != null)
-                    out.put(ann.label(), method);
-            }
-        }
-
-        for (Class<?> s : cls.getInterfaces()) {
-            out.putAll(getDependentMethods(s));
-        }
-
-        return out;
-    }
-
-    public static Iterable<String> getPropertyKeys(Class<?> cls) {
+    private static Iterable<String> getPropertyKeysInternal(Class<?> cls) {
         List<String> out = Lists.newLinkedList();
         for (Method method : cls.getMethods()) {
             Property ann = method.getAnnotation(Property.class);
@@ -114,13 +133,13 @@ public class ClassUtils {
         }
 
         for (Class<?> s : cls.getInterfaces()) {
-            Iterables.addAll(out, getPropertyKeys(s));
+            Iterables.addAll(out, getPropertyKeysInternal(s));
         }
 
         return ImmutableSet.copyOf(out);
     }
 
-    public static Iterable<String> getMandatoryPropertyKeys(Class<?> cls) {
+    private static Iterable<String> getMandatoryPropertyKeysInternal(Class<?> cls) {
         List<String> out = new LinkedList<String>();
         for (Method method : cls.getMethods()) {
             Mandatory mandatory = method.getAnnotation(Mandatory.class);
@@ -133,13 +152,13 @@ public class ClassUtils {
         }
 
         for (Class<?> s : cls.getInterfaces()) {
-            Iterables.addAll(out, getMandatoryPropertyKeys(s));
+            Iterables.addAll(out, getMandatoryPropertyKeysInternal(s));
         }
 
         return ImmutableSet.copyOf(out);
     }
 
-    public static Iterable<String> getUniquePropertyKeys(Class<?> cls) {
+    private static Iterable<String> getUniquePropertyKeysInternal(Class<?> cls) {
         List<String> out = new LinkedList<String>();
         for (Method method : cls.getMethods()) {
             Unique unique = method.getAnnotation(Unique.class);
@@ -152,21 +171,9 @@ public class ClassUtils {
         }
 
         for (Class<?> s : cls.getInterfaces()) {
-            Iterables.addAll(out, getUniquePropertyKeys(s));
+            Iterables.addAll(out, getUniquePropertyKeysInternal(s));
         }
 
         return ImmutableSet.copyOf(out);
-    }
-
-    /**
-     * Check if a given vertex is of a particular type.
-     *
-     * @param frame
-     * @param type
-     * @return
-     */
-    public static boolean hasType(Frame frame, EntityClass type) {
-        String isa = (String) frame.asVertex().getProperty(EntityType.TYPE_KEY);
-        return type.getName().equals(isa);
     }
 }

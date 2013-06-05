@@ -7,17 +7,15 @@ import com.tinkerpop.frames.annotations.gremlin.GremlinGroovy;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
-import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.models.base.NamedEntity;
-import eu.ehri.project.models.base.PermissionScope;
+import eu.ehri.project.models.base.*;
 
 @EntityType(EntityClass.GROUP)
-public interface Group extends Accessor, AccessibleEntity,
+public interface Group extends Accessor, AccessibleEntity, IdentifiableEntity,
         PermissionScope, NamedEntity {
     
     public static final String ADMIN_GROUP_IDENTIFIER = "admin";
     public static final String ANONYMOUS_GROUP_IDENTIFIER = "anonymous";
+    String ADMIN_GROUP_NAME = "Administrators";
 
     @Fetch(BELONGS_TO)
     @Adjacency(label = BELONGS_TO)
@@ -32,6 +30,10 @@ public interface Group extends Accessor, AccessibleEntity,
     @Adjacency(label = BELONGS_TO, direction = Direction.IN)
     public Iterable<Accessor> getMembers();
 
+    /**
+     * adds a Accessor as a member to this Group, so it has the permissions of the Group.
+     * @param accessor 
+     */
     @Adjacency(label = BELONGS_TO, direction = Direction.IN)
     public void addMember(final Accessor accessor);
     

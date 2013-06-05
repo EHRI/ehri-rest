@@ -3,12 +3,10 @@ package eu.ehri.extension;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
+import java.util.Map;
 
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.StreamingOutput;
-import javax.ws.rs.core.UriInfo;
+import javax.ws.rs.core.*;
 
 import com.google.common.base.Optional;
 import com.tinkerpop.blueprints.Vertex;
@@ -30,7 +28,7 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistance.Serializer;
-import eu.ehri.project.views.impl.Query;
+import eu.ehri.project.views.Query;
 
 public abstract class AbstractRestResource {
 
@@ -59,6 +57,29 @@ public abstract class AbstractRestResource {
      */
     @Context
     private HttpHeaders requestHeaders;
+
+    @Context
+    private Request request;
+
+
+    protected MediaType checkMediaType() {
+        MediaType applicationJson = MediaType.APPLICATION_JSON_TYPE;
+        MediaType applicationXml = MediaType.TEXT_XML_TYPE;
+
+        // NB: Json is default so it's first...
+        MediaType[] supportedTypes = new MediaType[]{applicationJson, applicationXml};
+        List<Variant> variants = Variant.VariantListBuilder.newInstance()
+                .mediaTypes(supportedTypes).add().build();
+
+        Variant variant = request.selectVariant(variants);
+
+        if (variant == null) {
+            return null;
+        } else {
+            return variant.getMediaType();
+        }
+    }
+
     /**
      * With each request URI info is injected into the uriInfo parameter.
      */
@@ -242,6 +263,39 @@ public abstract class AbstractRestResource {
     }
 
     /**
+     * Return a streaming response from an iterable, using the given
+     * entity converter.
+     *
+     * FIXME: I shouldn't be here, or the other method should. Redesign API.
+     *
+     * @param map
+     * @return
+     */
+    protected StreamingOutput streamingVertexMap(
+            final Map<String, Vertex> map, final Serializer serializer) {
+        final ObjectMapper mapper = new ObjectMapper();
+        final JsonFactory f = new JsonFactory();
+        return new StreamingOutput() {
+            @Override
+            public void write(OutputStream arg0) throws IOException,
+                    WebApplicationException {
+                JsonGenerator g = f.createJsonGenerator(arg0);
+                g.writeStartObject();
+                for (Map.Entry<String,Vertex> keypair: map.entrySet()) {
+                    try {
+                        g.writeFieldName(keypair.getKey());
+                        mapper.writeValue(g, serializer.vertexToData(keypair.getValue()));
+                    } catch (SerializationError e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+                g.writeEndObject();
+                g.close();
+            }
+        };
+    }
+
+    /**
      * Return a streaming response from an iterable.
      * 
      * @param map
@@ -286,5 +340,17 @@ public abstract class AbstractRestResource {
                 g.close();
             }
         };
-    }    
+    }
+
+
+    /**
+     * Get a string representation (JSON or XML) of a given frame.
+     * @param frame
+     * @return
+     */
+    protected String getRepresentation(Frame frame) throws SerializationError {
+        return MediaType.TEXT_XML_TYPE.equals(checkMediaType())
+                ? serializer.vertexFrameToXmlString(frame)
+                : serializer.vertexFrameToJson(frame);
+    }
 }

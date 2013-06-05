@@ -1,11 +1,19 @@
 package eu.ehri.project.commands;
 
+import eu.ehri.project.utils.fixtures.FixtureLoaderFactory;
 import org.apache.commons.cli.CommandLine;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
-import eu.ehri.project.test.utils.fixtures.FixtureLoader;
-import eu.ehri.project.test.utils.fixtures.FixtureLoaderFactory;
+
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.OptionBuilder;
+
+import eu.ehri.project.utils.fixtures.FixtureLoader;
+
+
+import java.io.File;
+import java.io.FileInputStream;
 
 /**
  * Import EAD from the command line...
@@ -24,6 +32,8 @@ public class LoadFixtures extends BaseCommand implements Command {
 
     @Override
     protected void setCustomOptions() {
+        options.addOption(new Option("init",
+                "Initialize graph before loading fixtures"));
     }
 
     @Override
@@ -45,8 +55,21 @@ public class LoadFixtures extends BaseCommand implements Command {
     @Override
     public int execWithOptions(final FramedGraph<Neo4jGraph> graph,
             CommandLine cmdLine) throws Exception {
-        FixtureLoader loader = FixtureLoaderFactory.getInstance(graph);
-        loader.loadTestData();
+        boolean initialize = cmdLine.hasOption("init");
+        FixtureLoader loader = FixtureLoaderFactory.getInstance(graph, initialize);
+        if (cmdLine.getArgList().size() == 1) {
+            String path = (String)cmdLine.getArgs()[0];
+            File file = new File(path);
+            if (!file.exists() || !file.isFile()) {
+                throw new RuntimeException(String.format(
+                        "Fixture file: '%s does not exist or is not a file", path));
+            }
+            System.err.println("Loading fixture file: " + path);
+            loader.loadTestData(new FileInputStream(file));
+        } else {
+            // Load default fixtures...
+            loader.loadTestData();
+        }
 
         return 0;
     }

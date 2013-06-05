@@ -18,7 +18,7 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.views.impl.AclViews;
+import eu.ehri.project.views.AclViews;
 
 /**
  * Provides a RESTfull(ish) interface for setting PermissionTarget perms.

@@ -4,7 +4,6 @@
  */
 package eu.ehri.project.importers;
 
-import eu.ehri.project.importers.test.AbstractImporterTest;
 
 import java.io.InputStream;
 
@@ -42,8 +41,10 @@ public class IcaAtomJohnCageTest extends AbstractImporterTest {
         // - 1 more DocumentaryUnits
        	// - 1 more DocumentDescription
 	// - 1 more DatePeriod
+        // - 1 more UnknownProperty
 	// - 2 more import Event links (1 for every Unit, 1 for the User)
         // - 1 more import Event
-        assertEquals(count + 6, getNodeCount(graph));
+        // - 4 UndeterminedRelationships
+        assertEquals(count + 11, getNodeCount(graph));
     }
 }

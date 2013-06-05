@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import eu.ehri.project.models.base.IdentifiableEntity;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -42,7 +43,7 @@ public class AdminRestClientTest extends BaseRestClientTest {
         String json = response.getEntity(String.class);
         Bundle bundle = Bundle.fromString(json);
         String ident = (String) bundle.getData().get(
-                AccessibleEntity.IDENTIFIER_KEY);
+                IdentifiableEntity.IDENTIFIER_KEY);
         assertTrue(ident != null);
         assertTrue(ident.startsWith(AdminResource.DEFAULT_USER_ID_PREFIX));
 
@@ -58,7 +59,7 @@ public class AdminRestClientTest extends BaseRestClientTest {
         String json2 = response2.getEntity(String.class);
         Bundle bundle2 = Bundle.fromString(json2);
         String ident2 = (String) bundle2.getData().get(
-                AccessibleEntity.IDENTIFIER_KEY);
+                IdentifiableEntity.IDENTIFIER_KEY);
         assertEquals(parseUserId(ident) + 1L, parseUserId(ident2));
         assertTrue(ident.startsWith(AdminResource.DEFAULT_USER_ID_PREFIX));
 

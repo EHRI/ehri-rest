@@ -1,6 +1,7 @@
 package eu.ehri.project.views.impl;
 
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.tinkerpop.frames.FramedGraph;
 
 import eu.ehri.project.acl.AclManager;
@@ -20,7 +21,7 @@ import eu.ehri.project.views.Crud;
 import eu.ehri.project.views.ViewHelper;
 
 public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
-    private final FramedGraph<Neo4jGraph> graph;
+    private final FramedGraph<?> graph;
     private final Class<E> cls;
     private final ViewHelper helper;
     private final GraphManager manager;
@@ -34,8 +35,9 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @param graph
      * @param cls
      */
-    public CrudViews(FramedGraph<Neo4jGraph> graph, Class<E> cls,
+    public CrudViews(FramedGraph<?> graph, Class<E> cls,
             PermissionScope scope) {
+        Preconditions.checkNotNull(scope);
         this.graph = graph;
         this.cls = cls;
         this.scope = scope;
@@ -51,7 +53,7 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @param graph
      * @param cls
      */
-    public CrudViews(FramedGraph<Neo4jGraph> graph, Class<E> cls) {
+    public CrudViews(FramedGraph<?> graph, Class<E> cls) {
         this(graph, cls, SystemScope.getInstance());
     }
 
@@ -126,6 +128,11 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
         // If a user creates an item, grant them OWNER perms on it.
         if (!acl.isAdmin(user))
             acl.grantPermissions(user, item, PermissionType.OWNER);
+        // If the scope is not the system, set the permission scope
+        // of the item too...
+        if (!scope.equals(SystemScope.getInstance())) {
+            item.setPermissionScope(scope);
+        }
         return item;
     }
 
@@ -209,6 +216,7 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
     }
 
     public Crud<E> setScope(PermissionScope scope) {
-        return new CrudViews<E>(graph, cls, scope);
+        return new CrudViews<E>(graph, cls,
+                Optional.fromNullable(scope).or(SystemScope.INSTANCE));
     }
 }

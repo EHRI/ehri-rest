@@ -12,8 +12,8 @@ import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
 import eu.ehri.project.test.utils.GraphCleaner;
-import eu.ehri.project.test.utils.fixtures.FixtureLoader;
-import eu.ehri.project.test.utils.fixtures.FixtureLoaderFactory;
+import eu.ehri.project.utils.fixtures.FixtureLoader;
+import eu.ehri.project.utils.fixtures.FixtureLoaderFactory;
 
 /**
  * Class that handles running a test Neo4j server.

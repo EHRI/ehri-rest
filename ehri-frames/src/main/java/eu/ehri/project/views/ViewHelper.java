@@ -1,7 +1,8 @@
 package eu.ehri.project.views;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
 import eu.ehri.project.acl.AclManager;
@@ -32,16 +33,17 @@ import eu.ehri.project.models.utils.ClassUtils;
  */
 public final class ViewHelper {
 
-    private final FramedGraph<Neo4jGraph> graph;
+    private final FramedGraph<?> graph;
     private final PermissionScope scope;
     private final AclManager acl;
     private final GraphManager manager;
 
-    public ViewHelper(FramedGraph<Neo4jGraph> graph) {
+    public ViewHelper(FramedGraph<?> graph) {
         this(graph, SystemScope.getInstance());
     }
 
-    public ViewHelper(FramedGraph<Neo4jGraph> graph, PermissionScope scope) {
+    public ViewHelper(FramedGraph<?> graph, PermissionScope scope) {
+        Preconditions.checkNotNull(scope);
         this.graph = graph;
         this.acl = new AclManager(graph, scope);
         this.scope = scope;
@@ -58,18 +60,8 @@ public final class ViewHelper {
      */
     public void checkContentPermission(Accessor accessor, ContentTypes ctype,
             PermissionType permType) throws PermissionDenied {
-        // If we're admin, the answer is always "no problem"!
-        if (!acl.belongsToAdmin(accessor)) {
-            Permission permission = getPermission(permType);
-
-            ContentType contentType = getContentType(ctype);
-
-            Iterable<PermissionGrant> perms = acl.getPermissionGrants(accessor,
-                    contentType, permission);
-            if (Iterables.isEmpty(perms)) {
-                throw new PermissionDenied(accessor.getId(), contentType.getId(),
-                        permission.getId(), scope.getId());
-            }
+        if (!acl.hasPermission(ctype, permType, accessor)) {
+            throw new PermissionDenied(accessor.getId(), ctype.toString(), permType.toString(), scope.getId());
         }
     }
 
@@ -80,22 +72,10 @@ public final class ViewHelper {
      */
     public void checkEntityPermission(AccessibleEntity entity,
             Accessor accessor, PermissionType permType) throws PermissionDenied {
-
-        // TODO: Determine behaviour for granular item-level
-        // attributes.
-        try {
-            checkContentPermission(accessor, getContentType(entity), permType);
-        } catch (PermissionDenied e) {
-            Permission permission = getPermission(permType);
-            Iterable<PermissionGrant> perms = acl.getPermissionGrants(accessor,
-                    entity, permission);
-            // Scopes do not apply to entity-level perms...
-            if (Iterables.isEmpty(perms)) {
-                throw new PermissionDenied(accessor.getId(), entity.getId(),
-                        permission.getId(), scope.getId());
-            }
+        if (!acl.hasPermission(entity, permType, accessor)) {
+            throw new PermissionDenied(accessor.getId(), entity.getId(),
+                        permType.toString(), scope.getId());
         }
-
     }
 
     /**
@@ -141,43 +121,8 @@ public final class ViewHelper {
         }
     }
 
-    /**
-     * Deduce content type from the given enum.
-     *
-     * @param type
-     * @return
-     */
-    public ContentType getContentType(ContentTypes type) {
-        return getContentType(type.getName());
-    }
-
-    /**
-     * Get the content type node for the given enum.
-     *
-     * @param typeName
-     * @return
-     */
-    public ContentType getContentType(String typeName) {
-        try {
-            return manager.getFrame(typeName, ContentType.class);
-        } catch (ItemNotFound e) {
-            throw new RuntimeException(String.format(
-                    "No content type node found for type: '%s'", typeName), e);
-        }
-    }
-
     public ContentTypes getContentType(Class<?> cls) {
         return ContentTypes.withName(ClassUtils.getEntityType(cls).getName());
-    }
-
-    public ContentTypes getContentType(Frame frame) {
-        EntityClass et = manager.getEntityClass(frame);
-        try {
-            return ContentTypes.withName(et.getName());
-        } catch (IllegalArgumentException e) {
-            throw new RuntimeException(String.format(
-                    "No content type found for node of class: '%s'", et), e);
-        }
     }
 
     /**
@@ -185,22 +130,6 @@ public final class ViewHelper {
      */
     public AclManager getAclManager() {
         return acl;
-    }
-
-    /**
-     * Get the permission with the given string.
-     *
-     * @param permission
-     * @return
-     */
-    public Permission getPermission(PermissionType permission) {
-        try {
-            return manager.getFrame(permission.getName(), EntityClass.PERMISSION,
-                    Permission.class);
-        } catch (ItemNotFound e) {
-            throw new RuntimeException(String.format(
-                    "No permission found for name: '%s'", permission.getName()), e);
-        }
     }
 
     /**
@@ -212,6 +141,7 @@ public final class ViewHelper {
      * @param scope
      */
     public ViewHelper setScope(PermissionScope scope) {
-        return new ViewHelper(graph, scope);
+        return new ViewHelper(graph, Optional
+                .fromNullable(scope).or(SystemScope.INSTANCE));
     }
 }

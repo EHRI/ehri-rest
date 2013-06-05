@@ -1,4 +1,8 @@
+nb-configuration.xml
+nbactions.xml
 *.class
+*.java.orig
+*.xml.orig
 
 # Package Files #
 *.jar
@@ -53,3 +57,6 @@ Thumbs.db
 
 
 neo4j-community-1.9*
+
+# Ignore test data folder
+testdata

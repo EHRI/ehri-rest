@@ -1,12 +1,14 @@
 package eu.ehri.extension;
 
-import javax.ws.rs.DELETE;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import eu.ehri.project.acl.AclManager;
+import eu.ehri.project.exceptions.SerializationError;
+import eu.ehri.project.views.ViewHelper;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import eu.ehri.extension.errors.BadRequester;
@@ -15,7 +17,7 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.PermissionGrant;
-import eu.ehri.project.views.impl.AclViews;
+import eu.ehri.project.views.AclViews;
 
 /**
  * Provides a RESTfull interface for the PermissionGrant class.
@@ -32,6 +34,26 @@ public class PermissionGrantResource extends AbstractRestResource {
     }
 
     /**
+     * Fetch a given permission grant.
+     *
+     * @param id
+     * @return
+     * @throws ItemNotFound
+     * @throws PermissionDenied
+     * @throws BadRequester
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id:.+}")
+    public Response getPermissionGrant(@PathParam("id") String id)
+            throws ItemNotFound, PermissionDenied, BadRequester, SerializationError {
+        // TODO: Should we add ACL checks here???
+        PermissionGrant grant = manager.getFrame(id,
+                EntityClass.PERMISSION_GRANT, PermissionGrant.class);
+        return Response.status(Status.OK).entity(
+                serializer.vertexFrameToJson(grant).getBytes()).build();
+    }
+    /**
      * Revoke a particular permission grant.
      * 
      * @param id
@@ -42,7 +64,7 @@ public class PermissionGrantResource extends AbstractRestResource {
      */
     @DELETE
     @Path("/{id:.+}")
-    public Response getContentType(@PathParam("id") String id)
+    public Response revokePermissionGrant(@PathParam("id") String id)
             throws ItemNotFound, PermissionDenied, BadRequester {
         new AclViews(graph).revokePermissionGrant(manager.getFrame(id,
                 EntityClass.PERMISSION_GRANT, PermissionGrant.class),

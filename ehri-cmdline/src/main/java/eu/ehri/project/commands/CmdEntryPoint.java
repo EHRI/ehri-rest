@@ -35,6 +35,9 @@ public class CmdEntryPoint extends BaseCommand {
         mmap.put(Initialize.NAME, Initialize.class);
         mmap.put(UserAdd.NAME, UserAdd.class);
         mmap.put(UserMod.NAME, UserMod.class);
+        mmap.put(EntityAdd.NAME, EntityAdd.class);
+        mmap.put(PersonalitiesImport.NAME, PersonalitiesImport.class);
+        mmap.put(DeleteEntities.NAME, DeleteEntities.class);
         COMMANDS = Collections.unmodifiableMap(mmap);
     }
 
@@ -61,7 +64,7 @@ public class CmdEntryPoint extends BaseCommand {
         return 1;
     }
 
-    public static int main(String[] args) throws Exception {
+    public static int run(String[] args) throws Exception {
 
         if (args.length < 2) {
             return new CmdEntryPoint().exec(null, args);
@@ -102,5 +105,14 @@ public class CmdEntryPoint extends BaseCommand {
             }
         }
         return 0;
+    }
+
+    /**
+     * Application launcher.
+     * @param args
+     * @throws Exception
+     */
+    public static void main(String[] args) throws Exception {
+        System.exit(run(args));
     }
 }

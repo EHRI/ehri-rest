@@ -7,7 +7,7 @@ import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.persistance.ActionManager;
 
-public interface AccessibleEntity extends IdentifiableEntity, PermissionGrantTarget {
+public interface AccessibleEntity extends PermissionGrantTarget {
 
     public static final String ACCESS = "access";
     public static final String HAS_PERMISSION_SCOPE = "hasPermissionScope";
@@ -16,6 +16,11 @@ public interface AccessibleEntity extends IdentifiableEntity, PermissionGrantTar
     @Adjacency(label = ACCESS)
     public Iterable<Accessor> getAccessors();
 
+    /**
+     * only Accessor accessor can access this AccessibleEntity.
+     * This is NOT the way to add an Accessor to a Group, use Group.addMember()
+     * @param accessor 
+     */
     @Adjacency(label = ACCESS)
     public void addAccessor(final Accessor accessor);
 
@@ -43,7 +48,7 @@ public interface AccessibleEntity extends IdentifiableEntity, PermissionGrantTar
 
     // FIXME: This should be a single item return but frames doesn't currently
     // support those...
-    @Fetch(value = ActionManager.LIFECYCLE_EVENT, ifDepth = 1)
+    @Fetch(value = ActionManager.LIFECYCLE_EVENT, ifDepth = 0)
     @GremlinGroovy("_().as('n').out('" + ActionManager.LIFECYCLE_EVENT + "')"
             + ".out('" + eu.ehri.project.models.events.SystemEvent.HAS_EVENT + "')")
     public Iterable<SystemEvent> getLatestEvent();

@@ -35,6 +35,8 @@ import javax.xml.transform.stream.StreamResult;
 
 class DataConverter {
 
+    private static ObjectMapper mapper = new ObjectMapper();
+
     /**
      * Convert a bundle to a generic data structure.
      * 
@@ -71,7 +73,6 @@ class DataConverter {
     public static String bundleToJson(Bundle bundle) throws SerializationError {
         Map<String, Object> data = bundleToData(bundle);
         try {
-            ObjectMapper mapper = new ObjectMapper();
             // Note: defaultPrettyPrintWriter has been replaced by
             // writerWithDefaultPrettyPrinter in newer versions of
             // Jackson, though not the one available in Neo4j.
@@ -97,7 +98,6 @@ class DataConverter {
             // When I add one in for HashMap<String,Object>, the return value of
             // readValue
             // just seems to be Object ???
-            ObjectMapper mapper = new ObjectMapper();
             return dataToBundle(mapper.readValue(json, Map.class));
         } catch (DeserializationError e) {
             throw e;

@@ -22,6 +22,7 @@ import javax.ws.rs.core.StreamingOutput;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import eu.ehri.project.acl.GlobalPermissionSet;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
@@ -44,8 +45,8 @@ import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.PermissionGrantTarget;
 import eu.ehri.project.models.base.PermissionScope;
-import eu.ehri.project.views.impl.AclViews;
-import eu.ehri.project.views.impl.Query;
+import eu.ehri.project.views.AclViews;
+import eu.ehri.project.views.Query;
 
 /**
  * Provides a RESTfull(ish) interface for setting PermissionTarget perms.
@@ -472,14 +473,13 @@ public class PermissionsResource extends AbstractRestResource {
     }
 
     private List<Map<String, Map<String, List<String>>>> stringifyInheritedGlobalMatrix(
-            List<Map<String, Map<ContentTypes, Collection<PermissionType>>>> list2) {
+            List<Map<String, GlobalPermissionSet>> list2) {
         List<Map<String, Map<String, List<String>>>> list = Lists
                 .newLinkedList();
-        for (Map<String, Map<ContentTypes, Collection<PermissionType>>> item : list2) {
+        for (Map<String, GlobalPermissionSet> item : list2) {
             Map<String, Map<String, List<String>>> tmp = Maps.newHashMap();
-            for (Map.Entry<String, Map<ContentTypes, Collection<PermissionType>>> entry : item
-                    .entrySet()) {
-                tmp.put(entry.getKey(), stringifyGlobalMatrix(entry.getValue()));
+            for (Map.Entry<String, GlobalPermissionSet> entry : item.entrySet()) {
+                tmp.put(entry.getKey(), stringifyGlobalMatrix(entry.getValue().asMap()));
             }
             list.add(tmp);
         }

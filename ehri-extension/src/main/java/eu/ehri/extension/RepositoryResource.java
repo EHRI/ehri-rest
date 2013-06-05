@@ -34,7 +34,7 @@ import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.views.impl.LoggingCrudViews;
-import eu.ehri.project.views.impl.Query;
+import eu.ehri.project.views.Query;
 
 /**
  * Provides a RESTfull interface for the Repository
@@ -49,7 +49,7 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:.+}")
-    public Response getAgent(@PathParam("id") String id) throws ItemNotFound,
+    public Response getRepository(@PathParam("id") String id) throws ItemNotFound,
             AccessDenied, BadRequester {
         return retrieve(id);
     }
@@ -57,7 +57,7 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/list")
-    public StreamingOutput listAgents(
+    public StreamingOutput listRepositories(
             @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
             @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
             @QueryParam(SORT_PARAM) List<String> order,
@@ -68,14 +68,22 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
+    @Path("/count")
+    public Response countDocumentaryUnits(@QueryParam(FILTER_PARAM) List<String> filters)
+            throws ItemNotFound, BadRequester {
+        return count(filters);
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:.+}/list")
-    public StreamingOutput listAgentDocumentaryUnits(
+    public StreamingOutput listRepositoryDocumentaryUnits(
             @PathParam("id") String id,
             @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
             @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
             @QueryParam(SORT_PARAM) List<String> order,
             @QueryParam(FILTER_PARAM) List<String> filters)
-            throws ItemNotFound, BadRequester, AccessDenied, PermissionDenied {
+            throws ItemNotFound, BadRequester, AccessDenied {
         Accessor user = getRequesterUserProfile();
         Repository repository = views.detail(manager.getFrame(id, cls), user);
         Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
@@ -87,8 +95,24 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id:.+}/count")
+    public Response countRepositoryDocumentaryUnits(
+            @PathParam("id") String id,
+            @QueryParam(FILTER_PARAM) List<String> filters)
+            throws ItemNotFound, BadRequester, AccessDenied {
+        Accessor user = getRequesterUserProfile();
+        Repository repository = views.detail(manager.getFrame(id, cls), user);
+        Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
+                DocumentaryUnit.class)
+                .filter(filters);
+        return Response.ok((query.count(repository.getCollections(), user))
+                .toString().getBytes()).build();
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:.+}/page")
-    public StreamingOutput pageAgentDocumentaryUnits(
+    public StreamingOutput pageRepositoryDocumentaryUnits(
             @PathParam("id") String id,
             @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
             @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
@@ -107,7 +131,7 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/page")
-    public StreamingOutput pageAgents(
+    public StreamingOutput pageRepositories(
             @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
             @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
             @QueryParam(SORT_PARAM) List<String> order,
@@ -116,20 +140,10 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
         return page(offset, limit, order, filters);
     }
 
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response createAgent(String json,
-            @QueryParam(ACCESSOR_PARAM) List<String> accessors)
-            throws PermissionDenied, ValidationError, IntegrityError,
-            DeserializationError, ItemNotFound, BadRequester {
-        return create(json, accessors);
-    }
-
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response updateAgent(String json) throws PermissionDenied,
+    public Response updateRepository(String json) throws PermissionDenied,
             IntegrityError, ValidationError, DeserializationError,
             ItemNotFound, BadRequester {
         return update(json);
@@ -139,7 +153,7 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:.+}")
-    public Response updateAgent(@PathParam("id") String id, String json)
+    public Response updateRepository(@PathParam("id") String id, String json)
             throws AccessDenied, PermissionDenied, IntegrityError, ValidationError,
             DeserializationError, ItemNotFound, BadRequester {
         return update(id, json);
@@ -147,7 +161,7 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
 
     @DELETE
     @Path("/{id:.+}")
-    public Response deleteAgent(@PathParam("id") String id)
+    public Response deleteRepository(@PathParam("id") String id)
             throws AccessDenied, PermissionDenied, ItemNotFound, ValidationError,
             BadRequester {
         return delete(id);
@@ -170,7 +184,7 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:.+}/" + Entities.DOCUMENTARY_UNIT)
-    public Response createAgentDocumentaryUnit(@PathParam("id") String id,
+    public Response createRepositoryDocumentaryUnit(@PathParam("id") String id,
             String json, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws AccessDenied, PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, ItemNotFound, BadRequester {
@@ -217,7 +231,6 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
                     getDefaultCreateMessage(EntityClass.DOCUMENTARY_UNIT)));
         // Add it to this repository's collections
         doc.setRepository(repository);
-        doc.setPermissionScope(repository);
         return doc;
     }
 }

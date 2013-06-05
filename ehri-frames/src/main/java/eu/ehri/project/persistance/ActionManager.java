@@ -1,7 +1,6 @@
 package eu.ehri.project.persistance;
 
 import java.util.Iterator;
-import java.util.UUID;
 
 import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.exceptions.ItemNotFound;
@@ -12,7 +11,6 @@ import org.joda.time.format.ISODateTimeFormat;
 
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
 import eu.ehri.project.core.GraphManager;
@@ -39,7 +37,7 @@ public final class ActionManager {
     public static final String LIFECYCLE_ACTION = "lifecycleAction";
     public static final String LIFECYCLE_EVENT = "lifecycleEvent";
 
-    private final FramedGraph<Neo4jGraph> graph;
+    private final FramedGraph<?> graph;
     private final GraphManager manager;
 
     /**
@@ -47,7 +45,7 @@ public final class ActionManager {
      *
      * @param graph
      */
-    public ActionManager(FramedGraph<Neo4jGraph> graph) {
+    public ActionManager(FramedGraph<?> graph) {
         this.graph = graph;
         this.manager = GraphManagerFactory.getInstance(graph);
     }
@@ -153,8 +151,7 @@ public final class ActionManager {
             Vertex system = manager.getVertex(GLOBAL_EVENT_ROOT, EntityClass.SYSTEM);
             Bundle ge = new Bundle(EntityClass.SYSTEM_EVENT)
                     .withDataValue(SystemEvent.TIMESTAMP, getTimestamp())
-                    .withDataValue(SystemEvent.LOG_MESSAGE, logMessage)
-                    .withDataValue(SystemEvent.IDENTIFIER_KEY, UUID.randomUUID().toString());
+                    .withDataValue(SystemEvent.LOG_MESSAGE, logMessage);
             SystemEvent ev = new BundleDAO(graph).create(ge, SystemEvent.class);
             replaceAtHead(system, ev.asVertex(), actionType + "Stream", actionType, Direction.OUT);
             return ev;

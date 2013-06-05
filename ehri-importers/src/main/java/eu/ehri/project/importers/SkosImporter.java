@@ -4,12 +4,8 @@ import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.base.Description;
-import eu.ehri.project.models.base.PermissionScope;
-import eu.ehri.project.models.base.TemporalEntity;
+import eu.ehri.project.models.base.*;
 import eu.ehri.project.models.cvoc.Concept;
-import eu.ehri.project.models.idgen.AccessibleEntityIdGenerator;
 import eu.ehri.project.models.idgen.IdGenerator;
 import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.persistance.BundleDAO;
@@ -43,12 +39,10 @@ public class SkosImporter extends XmlImporter<Map<String, Object>> {
      * Import a single item, keeping a reference to the hierarchical depth.
      *
      * @param itemData
-     * @param depth
      * @throws ValidationError
      */
     @Override
-    public Concept importItem(Map<String, Object> itemData,
-            int depth) throws ValidationError {
+    public Concept importItem(Map<String, Object> itemData) throws ValidationError {
 
         // Note pboon: 
         // What was the 'repository' and 'scope' should eventually be the Vocabulary!
@@ -56,7 +50,7 @@ public class SkosImporter extends XmlImporter<Map<String, Object>> {
         logger.info("import item with objectIdentifier: " + itemData.get("objectIdentifier"));
 
         Bundle unit = new Bundle(EntityClass.CVOC_CONCEPT,
-                extractConcept(itemData, depth));
+                extractConcept(itemData));
         BundleDAO persister = new BundleDAO(framedGraph, permissionScope);
 
         // Add dates and descriptions to the bundle since they're @Dependent
@@ -70,7 +64,7 @@ public class SkosImporter extends XmlImporter<Map<String, Object>> {
                     EntityClass.CVOC_CONCEPT_DESCRIPTION, dpb));
         }
 
-        IdGenerator generator = AccessibleEntityIdGenerator.INSTANCE;
+        IdGenerator generator = EntityClass.CVOC_CONCEPT.getIdgen();
         String id = generator.generateId(EntityClass.CVOC_CONCEPT, permissionScope, unit);
         boolean exists = manager.exists(id);
         Concept frame = persister.createOrUpdate(unit.withId(id),
@@ -79,7 +73,6 @@ public class SkosImporter extends XmlImporter<Map<String, Object>> {
         // Set the repository/item relationship
         //frame.setRepository(repository); // SHOULD set the Vocabulary at some point!
 
-        frame.setPermissionScope(permissionScope);
         // Set the parent child relationship
         //if (parent != null)
         //    parent.addChild(frame);
@@ -101,13 +94,12 @@ public class SkosImporter extends XmlImporter<Map<String, Object>> {
      * The 'item' or entities to import (Described Entity?)
      *
      * @param itemData
-     * @param depth
      * @return returns a Map of Concept key-value pairs
      * @throws ValidationError
      */
-    protected Map<String, Object> extractConcept(Map<String, Object> itemData, int depth) throws ValidationError {
+    protected Map<String, Object> extractConcept(Map<String, Object> itemData) throws ValidationError {
         Map<String, Object> unit = new HashMap<String, Object>();
-        unit.put(AccessibleEntity.IDENTIFIER_KEY, itemData.get("objectIdentifier"));
+        unit.put(IdentifiableEntity.IDENTIFIER_KEY, itemData.get("objectIdentifier"));
         return unit;
     }
 
@@ -128,7 +120,7 @@ public class SkosImporter extends XmlImporter<Map<String, Object>> {
         for (String key : itemData.keySet()) {
             logger.debug("extract: " + key);
             if (key.equals("descriptionIdentifier")) {
-                unit.put(AccessibleEntity.IDENTIFIER_KEY, itemData.get(key));
+                unit.put(IdentifiableEntity.IDENTIFIER_KEY, itemData.get(key));
             } else if (key.equals("languageCode")) {
                 if (itemData.get(key) instanceof Map) {
                     for (String language : ((Map<String, Map<String, Object>>) itemData.get(key)).keySet()) {
@@ -141,10 +133,10 @@ public class SkosImporter extends XmlImporter<Map<String, Object>> {
         }
         for (Map<String, Object> lang : langs) {
             lang.putAll(unit);
-            if (unit.containsKey(AccessibleEntity.IDENTIFIER_KEY)) {
-                lang.put(AccessibleEntity.IDENTIFIER_KEY, unit.get(AccessibleEntity.IDENTIFIER_KEY).toString() + lang.get("languageCode"));
+            if (unit.containsKey(IdentifiableEntity.IDENTIFIER_KEY)) {
+                lang.put(IdentifiableEntity.IDENTIFIER_KEY, unit.get(IdentifiableEntity.IDENTIFIER_KEY).toString() + lang.get("languageCode"));
             } else {
-                lang.put(AccessibleEntity.IDENTIFIER_KEY, itemData.get("objectIdentifier") + "#description_" + lang.get("languageCode"));
+                lang.put(IdentifiableEntity.IDENTIFIER_KEY, itemData.get("objectIdentifier") + "#description_" + lang.get("languageCode"));
             }
 
         }
@@ -158,5 +150,10 @@ public class SkosImporter extends XmlImporter<Map<String, Object>> {
             lst.add(it.next());
         }
         return lst;
+    }
+
+    @Override
+    public AccessibleEntity importItem(Map<String, Object> itemData, int depth) throws ValidationError {
+        throw new UnsupportedOperationException("Not supported ever.");
     }
 }

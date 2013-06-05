@@ -26,14 +26,13 @@ import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistance.Serializer;
 import eu.ehri.project.views.impl.LoggingCrudViews;
-import eu.ehri.project.views.impl.Query;
+import eu.ehri.project.views.Query;
 
 /**
  * Provides a RESTfull interface for the Event class. Note: Event instances
  * are created by the system, so we do not have create/update/delete methods
  * here.
  */
-// FIXME: Change this to SYSTEM_EVENT
 @Path(Entities.SYSTEM_EVENT)
 public class EventResource extends AbstractAccessibleEntityResource<SystemEvent> {
 

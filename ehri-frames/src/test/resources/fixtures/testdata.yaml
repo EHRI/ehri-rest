@@ -3,6 +3,23 @@
 # database.
 #
 
+# Countries - these are at the top of the entity hierarchy and
+# 'hold' everything else.
+- id: gb
+  type: country
+  data:
+    identifier: gb
+
+- id: nl
+  type: country
+  data:
+    identifier: nl
+
+- id: be
+  type: country
+  data:
+    identifier: be
+
 # NIOD. NIOD belongs to admin, so everyone who belongs
 # to the NIOD group also belongs to admin by extension.
 - id: niod
@@ -13,7 +30,7 @@
   relationships:
     belongsTo:
       - admin
-      
+
 - id: kcl
   type: group
   data:
@@ -32,7 +49,7 @@
     identifier: soma-group
     name: CEGES-SOMA
 
---- # Users Mike, Tim, Linda, and Reto
+--- # Users Mike, Tim, Linda, and Reto, ehriimporter
 
 # Mike is a member of the KCL group, but he is ALSO a member of Admin
 # separately
@@ -95,6 +112,8 @@
     identifier: r1
     name: Repository 1
   relationships:
+    hasCountry: nl
+    hasPermissionScope: nl
     describes:
       - id: rd1
         type: repositoryDescription
@@ -117,6 +136,8 @@
     identifier: r2
     name: King's College London
   relationships:
+    hasCountry: gb
+    hasPermissionScope: gb
     describes:
       - id: rd2
         type: repositoryDescription
@@ -139,6 +160,8 @@
     identifier: r3
     name: DANS
   relationships:
+    hasCountry: nl
+    hasPermissionScope: nl
     describes:
       - id: rd3
         type: repositoryDescription
@@ -160,6 +183,8 @@
     identifier: r4
     name: CEGES SOMA
   relationships:
+    hasCountry: be
+    hasPermissionScope: be
     describes:
       - id: rd4
         type: repositoryDescription
@@ -206,6 +231,14 @@
               data:
                 startDate: !!str 1939-01-01
                 endDate: !!str 1945-01-01
+          relatesTo:
+            - id: ur1
+              type: relationship
+              data:
+                name: test
+                type: subjectAccess
+                description: test description
+                category: associative
       - id: cd1-2
         type: documentDescription
         data:
@@ -298,7 +331,13 @@
                 endDate: !!str 1945-01-01
     heldBy: r1
     hasPermissionScope: r1
-    
+
+--- # Authority Set
+- id: auths
+  type: authoritativeSet
+  data:
+    identifier: auths
+
 --- # Authorities
 - id: a1
   type: historicalAgent
@@ -312,6 +351,8 @@
           typeOfEntity: person
           name: An Authority 1
           languageCode: en
+    inAuthoritativeSet: auths
+    hasPermissionScope: auths
 
 - id: a2
   type: historicalAgent
@@ -325,6 +366,8 @@
           typeOfEntity: person
           name: An Authority 2
           languageCode: en
+    inAuthoritativeSet: auths
+    hasPermissionScope: auths
 
 
 --- # Annotations
@@ -352,6 +395,28 @@
   relationships:
     hasAnnotationTarget: c1
     hasAnnotationBody: mike
+
+--- # Links
+ - id: link1
+   type: link
+   data:
+     type: associative
+     body: Test link
+   relationships:
+     hasLinkTarget: c1
+     hasLinkTarget: c4
+     hasLinker: mike
+
+ - id: link2
+   type: link
+   data:
+     type: associative
+     body: Test link
+   relationships:
+     hasLinkTarget: c1
+     hasLinkTarget: a1
+     hasLinkBody: ur1
+     hasLinker: mike
 
 --- # Permission grants
 
@@ -391,5 +456,5 @@
   data:
     identifier: cvocc1
   relationships:
-    inCvoc: cvoc1
+    inAuthoritativeSet: cvoc1
 

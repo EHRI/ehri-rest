@@ -5,9 +5,9 @@
 package eu.ehri.project.importers;
 
 import com.tinkerpop.blueprints.Vertex;
-import eu.ehri.project.importers.test.AbstractImporterTest;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.events.SystemEvent;
 import java.io.InputStream;
 import java.util.List;
@@ -35,16 +35,24 @@ public class IcaAtomEadSingleEad extends AbstractImporterTest{
         int origCount = getNodeCount(graph);
 
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        ImportLog log = new SaxImportManager(graph, agent, validUser, IcaAtomEadImporter.class, IcaAtomEadHandler.class).importFile(ios, logMessage);
+        ImportLog log = new SaxImportManager(graph, agent, validUser, IcaAtomEadImporter.class, IcaAtomEadHandler.class).setTolerant(Boolean.TRUE).importFile(ios, logMessage);
 
         printGraph(graph);
         // How many new nodes will have been created? We should have
         // - 1 more DocumentaryUnit
         // - 1 more DocumentDescription
         // - 1 more DatePeriod
+        //TODO: test these UR's
+        // - 4 more UndeterminedRelationships
+        //TODO: test this UP
+        // - 1 more UnknownProperty
         // - 2 more import Event links
         // - 1 more import Event
-        int createCount = origCount + 6;
+
+        int createCount = origCount + 11;
+
+        // - 4 more UnderterminedRelationship nodes
+
         assertEquals(createCount, getNodeCount(graph));
 
         // Yet we've only created 1 *logical* item...
@@ -54,7 +62,8 @@ public class IcaAtomEadSingleEad extends AbstractImporterTest{
                 IMPORTED_ITEM_ID);
         assertTrue(docs.iterator().hasNext());
         DocumentaryUnit unit = graph.frame(docs.iterator().next(), DocumentaryUnit.class);
-        assertEquals("Test EAD Item", unit.getName());
+        for(Description d : unit.getDocumentDescriptions())
+            assertEquals("Test EAD Item", d.getName());
 
         for(SystemEvent event : unit.getLatestEvent()){
             System.out.println("event: " + event.getLogMessage());

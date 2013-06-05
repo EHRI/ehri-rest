@@ -1,13 +1,10 @@
 package eu.ehri.project.commands;
 
-import java.util.Map;
-
 import eu.ehri.project.models.base.NamedEntity;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.neo4j.graphdb.Transaction;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
@@ -23,9 +20,7 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Group;
 import eu.ehri.project.models.UserProfile;
-import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.models.idgen.AccessibleEntityIdGenerator;
 import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.views.impl.LoggingCrudViews;
 
@@ -94,14 +89,11 @@ public class UserAdd extends BaseCommand implements Command {
             groups = cmdLine.getOptionValues("group");
         }
 
-        Map<String, Object> data = ImmutableMap.<String, Object> of(
-                AccessibleEntity.IDENTIFIER_KEY, userId, NamedEntity.NAME,
-                userName);
         Bundle bundle = new Bundle(EntityClass.USER_PROFILE,
                 Maps.<String, Object> newHashMap())
-                .withDataValue(AccessibleEntity.IDENTIFIER_KEY, userId)
+                .withDataValue(UserProfile.IDENTIFIER_KEY, userId)
                 .withDataValue(NamedEntity.NAME, userName);
-        String nodeId = AccessibleEntityIdGenerator.INSTANCE.generateId(
+        String nodeId = EntityClass.USER_PROFILE.getIdgen().generateId(
                 EntityClass.USER_PROFILE, SystemScope.getInstance(), bundle);
         bundle = bundle.withId(nodeId);
 
