@@ -19,6 +19,13 @@ java_import "eu.ehri.project.persistance.Bundle"
 java_import "eu.ehri.project.persistance.BundleDAO"
 java_import "eu.ehri.project.persistance.Serializer"
 
+# Wildcard import of a package like so. Note, the stuff
+# imported will be used with the given module namespace, i.e.
+# EhriModels::DocumentaryUnit
+module EhriModels
+    include_package "eu.ehri.project.models"
+end
+
 # Abort if we don't have NEO4J_HOME
 if ENV['NEO4J_HOME'].empty? then
     abort "NEO4J_HOME environment variable must be defined."
@@ -26,13 +33,6 @@ end
 
 # Use the default if NEO4J_DB isn't set...
 DB_PATH = ENV['NEO4J_DB'] ||= "#{ENV['NEO4J_HOME']}/data/graph.db"
-
-# Wildcard import of a package like so. Note, the stuff
-# imported will be used with the given module namespace, i.e.
-# EhriModels::DocumentaryUnit
-module EhriModels
-    include_package "eu.ehri.project.models"
-end
 
 # Initialise a graph and the manager.
 # Note: the graph must not be being used elsewhere (i.e. by the server)
