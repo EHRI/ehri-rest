@@ -1,5 +1,6 @@
 package eu.ehri.project.commands;
 
+import eu.ehri.project.definitions.EventTypes;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.neo4j.graphdb.Transaction;
@@ -93,7 +94,7 @@ public class UserMod extends BaseCommand implements Command {
                     EntityClass.USER_PROFILE, UserProfile.class);
 
             EventContext actionCtx = new ActionManager(graph).logEvent(
-                    user, admin, ActionManager.ActionType.updateItem,
+                    user, admin, EventTypes.modification,
                     getLogMessage(logMessage));
 
             for (String groupId : groups) {

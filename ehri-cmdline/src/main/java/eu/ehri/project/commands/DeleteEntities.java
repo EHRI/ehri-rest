@@ -4,6 +4,7 @@ import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
+import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
@@ -86,7 +87,7 @@ public class DeleteEntities extends BaseCommand implements Command {
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
             new ActionManager(graph).logEvent(user,
-                    ActionManager.ActionType.deleteItem,
+                    EventTypes.deletion,
                     getLogMessage(logMessage));
             deleteIds(graph, manager, type, user);
             tx.success();

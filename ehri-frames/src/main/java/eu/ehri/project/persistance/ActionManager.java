@@ -4,7 +4,11 @@ import java.util.Iterator;
 
 import com.google.common.base.Optional;
 import com.tinkerpop.blueprints.Vertex;
+import eu.ehri.project.acl.SystemScope;
+import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.exceptions.ItemNotFound;
+import eu.ehri.project.models.base.Frame;
+import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.models.events.SystemEventQueue;
 import org.joda.time.DateTime;
@@ -40,25 +44,17 @@ public final class ActionManager {
 
     private final FramedGraph<?> graph;
     private final GraphManager manager;
+    private final Frame scope;
 
     /**
-     * Types of actions the system supports...
+     * Constructor with scope.
+     *
+     * @param graph
      */
-    public static enum ActionType {
-        createItem,
-        createDescription,
-        updateItem,
-        updateDescription,
-        deleteItem,
-        deleteDescription,
-        link,
-        annotate,
-        setGlobalPermissions,
-        setItemPermissions,
-        setVisibility,
-        addGroup,
-        removeGroup,
-        importItem
+    public ActionManager(final FramedGraph<?> graph, final Frame scope) {
+        this.graph = graph;
+        this.manager = GraphManagerFactory.getInstance(graph);
+        this.scope = Optional.fromNullable(scope).or(SystemScope.getInstance());
     }
 
     /**
@@ -67,8 +63,7 @@ public final class ActionManager {
      * @param graph
      */
     public ActionManager(FramedGraph<?> graph) {
-        this.graph = graph;
-        this.manager = GraphManagerFactory.getInstance(graph);
+        this(graph, SystemScope.getInstance());
     }
 
     /**
@@ -81,11 +76,11 @@ public final class ActionManager {
         private final ActionManager actionManager;
         private final SystemEvent systemEvent;
         private final Actioner actioner;
-        private final ActionType actionType;
+        private final EventTypes actionType;
         private final Optional<String> logMessage;
 
         public EventContext(ActionManager actionManager, SystemEvent systemEvent,
-                Actioner actioner, ActionType type, Optional<String> logMessage) {
+                Actioner actioner, EventTypes type, Optional<String> logMessage) {
             this.actionManager = actionManager;
             this.actionType = type;
             this.systemEvent = systemEvent;
@@ -169,7 +164,7 @@ public final class ActionManager {
      * @param logMessage
      * @return
      */
-    private SystemEvent createGlobalEvent(Actioner user, ActionType actionType, Optional<String> logMessage) {
+    private SystemEvent createGlobalEvent(Actioner user, EventTypes actionType, Optional<String> logMessage) {
         try {
             Vertex system = manager.getVertex(GLOBAL_EVENT_ROOT, EntityClass.SYSTEM);
             Bundle ge = new Bundle(EntityClass.SYSTEM_EVENT)
@@ -177,6 +172,9 @@ public final class ActionManager {
                     .withDataValue(SystemEvent.TIMESTAMP, getTimestamp())
                     .withDataValue(SystemEvent.LOG_MESSAGE, logMessage.or(""));
             SystemEvent ev = new BundleDAO(graph).create(ge, SystemEvent.class);
+            if (!scope.equals(SystemScope.getInstance())) {
+                ev.setEventScope(scope);
+            }
             replaceAtHead(system, ev.asVertex(), LIFECYCLE_ACTION + "Stream", LIFECYCLE_ACTION, Direction.OUT);
             return ev;
         } catch (ItemNotFound e) {
@@ -196,7 +194,7 @@ public final class ActionManager {
      * @param type
      * @return
      */
-    public EventContext logEvent(Actioner user, ActionType type) {
+    public EventContext logEvent(Actioner user, EventTypes type) {
         return logEvent(user, type, Optional.<String>absent());
     }
 
@@ -207,7 +205,7 @@ public final class ActionManager {
      * @param logMessage
      * @return
      */
-    public EventContext logEvent(Actioner user, ActionType type, String logMessage) {
+    public EventContext logEvent(Actioner user, EventTypes type, String logMessage) {
         return logEvent(user, type, Optional.of(logMessage));
     }
 
@@ -219,7 +217,7 @@ public final class ActionManager {
      * @param logMessage
      * @return
      */
-    public EventContext logEvent(Actioner user, ActionType type, Optional<String> logMessage) {
+    public EventContext logEvent(Actioner user, EventTypes type, Optional<String> logMessage) {
         Vertex vertex = graph.addVertex(null);
         replaceAtHead(user.asVertex(), vertex,
                 LIFECYCLE_ACTION, LIFECYCLE_ACTION, Direction.OUT);
@@ -236,7 +234,7 @@ public final class ActionManager {
      * @return
      */
     public EventContext logEvent(AccessibleEntity subject, Actioner user,
-            ActionType type) {
+            EventTypes type) {
         return logEvent(subject, user, type, Optional.<String>absent());
     }
 
@@ -249,7 +247,7 @@ public final class ActionManager {
      * @return
      */
     public EventContext logEvent(AccessibleEntity subject, Actioner user,
-            ActionType type, String logMessage) {
+            EventTypes type, String logMessage) {
         return logEvent(subject, user, type, Optional.of(logMessage));
     }
 
@@ -263,10 +261,15 @@ public final class ActionManager {
      * @return
      */
     public EventContext logEvent(AccessibleEntity subject, Actioner user,
-            ActionType type, Optional<String> logMessage) {
+            EventTypes type, Optional<String> logMessage) {
         EventContext context = logEvent(user, type, logMessage);
         context.addSubjects(subject);
         return context;
+    }
+
+    public ActionManager setScope(Frame frame) {
+        return new ActionManager(graph,
+                Optional.fromNullable(frame).or(SystemScope.getInstance()));
     }
 
 

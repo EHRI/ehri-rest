@@ -4,6 +4,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
+import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.base.*;
 import org.neo4j.graphdb.Transaction;
@@ -44,7 +45,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
         this.graph = graph;
         this.cls = cls;
         this.scope = scope;
-        actionManager = new ActionManager(graph);
+        actionManager = new ActionManager(graph, scope);
         views = new CrudViews<E>(graph, cls, scope);
     }
 
@@ -98,7 +99,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
 
             E out = views.create(bundle, user);
             actionManager.logEvent(out, graph.frame(user.asVertex(), Actioner.class),
-                    ActionManager.ActionType.createItem, logMessage);
+                    EventTypes.creation, logMessage);
             tx.success();
             return out;
         } catch (IntegrityError ex) {
@@ -157,7 +158,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
 
             E out = views.createOrUpdate(bundle, user);
             actionManager.logEvent(out, graph.frame(user.asVertex(), Actioner.class),
-                    ActionManager.ActionType.updateItem, logMessage);
+                    EventTypes.modification, logMessage);
             tx.success();
             return out;
         } catch (IntegrityError ex) {
@@ -214,7 +215,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
         try {
             E out = views.update(bundle, user);
             actionManager.logEvent(out, graph.frame(user.asVertex(), Actioner.class),
-                    ActionManager.ActionType.updateItem, logMessage);
+                    EventTypes.modification, logMessage);
             tx.success();
             return out;
         } catch (IntegrityError ex) {
@@ -276,9 +277,8 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
         Transaction tx = ((Neo4jGraph)graph.getBaseGraph()).getRawGraph().beginTx();
         try {
             T out = views.updateDependent(bundle, parent, user, dependentClass);
-            ActionManager.EventContext context = actionManager.logEvent(graph.frame(user.asVertex(),
-                    Actioner.class), ActionManager.ActionType.updateDescription, logMessage);
-            context.addSubjects(parent, graph.frame(out.asVertex(), AccessibleEntity.class));
+            actionManager.setScope(parent).logEvent(graph.frame(user.asVertex(),
+                    Actioner.class), EventTypes.modification, logMessage);
             tx.success();
             return out;
         } catch (IntegrityError ex) {
@@ -340,10 +340,8 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
         Transaction tx = ((Neo4jGraph)graph.getBaseGraph()).getRawGraph().beginTx();
         try {
             T out = views.createDependent(bundle, parent, user, dependentClass);
-            ActionManager.EventContext context = actionManager.logEvent(
-                    graph.frame(user.asVertex(), Actioner.class),
-                    ActionManager.ActionType.createDescription, logMessage);
-            context.addSubjects(parent, graph.frame(out.asVertex(), AccessibleEntity.class));
+            actionManager.setScope(parent).logEvent(
+                    graph.frame(user.asVertex(), Actioner.class), EventTypes.creation, logMessage);
             tx.success();
             return out;
         } catch (IntegrityError ex) {
@@ -396,7 +394,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
         Transaction tx = ((Neo4jGraph)graph.getBaseGraph()).getRawGraph().beginTx();
         try {
             actionManager.logEvent(item, graph.frame(user.asVertex(), Actioner.class),
-                    ActionManager.ActionType.deleteItem, logMessage);
+                    EventTypes.deletion, logMessage);
             Integer count = views.delete(item, user);
             tx.success();
             return count;
@@ -452,8 +450,8 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
             throws PermissionDenied, ValidationError, SerializationError {
         Transaction tx = ((Neo4jGraph)graph.getBaseGraph()).getRawGraph().beginTx();
         try {
-            actionManager.logEvent(parent, graph.frame(user.asVertex(), Actioner.class),
-                    ActionManager.ActionType.deleteDescription, logMessage);
+            actionManager.setScope(parent).logEvent(graph.frame(user.asVertex(), Actioner.class),
+                    EventTypes.deletion, logMessage);
             Integer count = views.deleteDependent(item, parent, user, dependentClass);
             tx.success();
             return count;

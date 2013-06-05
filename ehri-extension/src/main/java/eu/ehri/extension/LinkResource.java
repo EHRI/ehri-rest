@@ -3,6 +3,7 @@ package eu.ehri.extension;
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.acl.PermissionType;
+import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.EntityClass;
@@ -218,7 +219,7 @@ public class LinkResource extends
                     getRequesterUserProfile(), PermissionType.ANNOTATE);
             Actioner actioner = graph.frame(getRequesterUserProfile().asVertex(), Actioner.class);
             Link link = manager.getFrame(linkId, EntityClass.LINK, Link.class);
-            new ActionManager(graph).logEvent(link, actioner, ActionManager.ActionType.deleteItem);
+            new ActionManager(graph).logEvent(link, actioner, EventTypes.deletion);
             manager.deleteVertex(link.asVertex());
             return Response.ok().build();
         } catch (ItemNotFound e) {

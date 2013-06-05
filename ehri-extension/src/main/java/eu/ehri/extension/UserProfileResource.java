@@ -22,6 +22,7 @@ import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.Response.Status;
 
+import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.exceptions.*;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
@@ -174,7 +175,7 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
                 new ActionManager(graph).logEvent(
                         graph.frame(entity.asVertex(), AccessibleEntity.class),
                         graph.frame(getRequesterUserProfile().asVertex(), Actioner.class),
-                        ActionManager.ActionType.addGroup).addSubjects(group);
+                        EventTypes.addGroup).addSubjects(group);
             }
             
             tx.success();

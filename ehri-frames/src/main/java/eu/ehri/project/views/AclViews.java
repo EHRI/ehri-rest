@@ -15,6 +15,7 @@ import eu.ehri.project.acl.PermissionType;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
+import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.*;
@@ -79,7 +80,7 @@ public final class AclViews {
             ActionManager.EventContext context = new ActionManager(graph).logEvent(
                     graph.frame(accessor.asVertex(), AccessibleEntity.class),
                     graph.frame(grantee.asVertex(), Actioner.class),
-                    ActionManager.ActionType.setGlobalPermissions);
+                    EventTypes.setGlobalPermissions);
             if (scoped) {
                 context.addSubjects(scope);
             }
@@ -113,7 +114,7 @@ public final class AclViews {
             new ActionManager(graph).logEvent(
                     graph.frame(entity.asVertex(), AccessibleEntity.class),
                     graph.frame(user.asVertex(), Actioner.class),
-                    ActionManager.ActionType.setVisibility);
+                    EventTypes.setVisibility);
             graph.getBaseGraph().stopTransaction(Conclusion.SUCCESS);
         } catch (PermissionDenied e) {
             graph.getBaseGraph().stopTransaction(Conclusion.FAILURE);
@@ -174,7 +175,7 @@ public final class AclViews {
             // Log the action...
             new ActionManager(graph).logEvent(item,
                     graph.frame(grantee.asVertex(), Actioner.class),
-                    ActionManager.ActionType.setItemPermissions).addSubjects(
+                    EventTypes.setItemPermissions).addSubjects(
                     graph.frame(accessor.asVertex(), AccessibleEntity.class));
 
             graph.getBaseGraph().stopTransaction(Conclusion.SUCCESS);
@@ -223,7 +224,7 @@ public final class AclViews {
             // Log the action...
             new ActionManager(graph).logEvent(group,
                     graph.frame(grantee.asVertex(), Actioner.class),
-                    ActionManager.ActionType.addGroup).addSubjects(
+                    EventTypes.addGroup).addSubjects(
                     graph.frame(user.asVertex(), AccessibleEntity.class));
             graph.getBaseGraph().stopTransaction(Conclusion.SUCCESS);
         } catch (Exception e) {
@@ -250,7 +251,7 @@ public final class AclViews {
             // Log the action...
             new ActionManager(graph).logEvent(group,
                     graph.frame(grantee.asVertex(), Actioner.class),
-                    ActionManager.ActionType.removeGroup).addSubjects(
+                    EventTypes.removeGroup).addSubjects(
                     graph.frame(user.asVertex(), AccessibleEntity.class));
             graph.getBaseGraph().stopTransaction(Conclusion.SUCCESS);
         } catch (Exception e) {

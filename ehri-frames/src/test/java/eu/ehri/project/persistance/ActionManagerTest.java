@@ -1,6 +1,8 @@
 package eu.ehri.project.persistance;
 
+import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.exceptions.*;
+import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.Actioner;
@@ -29,7 +31,7 @@ public class ActionManagerTest extends AbstractFixtureTest {
         UserProfile user = new BundleDAO(graph).create(userBundle, UserProfile.class);
         SystemEvent first = am.logEvent(user,
                 graph.frame(validUser.asVertex(), Actioner.class),
-                ActionManager.ActionType.createItem).getSystemEvent();
+                EventTypes.creation).getSystemEvent();
 
         // Create a repository and log that too...
         Bundle repoBundle = Bundle.fromData(TestData.getTestAgentBundle());
@@ -37,7 +39,7 @@ public class ActionManagerTest extends AbstractFixtureTest {
 
         SystemEvent second = am.logEvent(repository,
                 graph.frame(validUser.asVertex(), Actioner.class),
-                ActionManager.ActionType.createItem)
+                EventTypes.creation)
                 .getSystemEvent();
 
         // Check exactly one Event was created
@@ -56,5 +58,19 @@ public class ActionManagerTest extends AbstractFixtureTest {
         assertEquals(2, events.size());
         assertEquals(second, events.get(0));
         assertEquals(first, events.get(1));
+    }
+
+    @Test
+    public void testEventsHaveCorrectScope() throws Exception {
+        Repository r1 = manager.getFrame("r1", Repository.class);
+        ActionManager am = new ActionManager(graph, r1);
+
+        Bundle docBundle = Bundle.fromData(TestData.getTestDocBundle());
+        DocumentaryUnit doc = new BundleDAO(graph).create(docBundle, DocumentaryUnit.class);
+        SystemEvent log = am.logEvent(doc,
+                graph.frame(validUser.asVertex(), Actioner.class),
+                EventTypes.creation).getSystemEvent();
+        assertNotNull(log.getEventScope());
+        assertEquals(r1.asVertex(), log.getEventScope().asVertex());
     }
 }

@@ -14,6 +14,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import com.google.common.base.Optional;
+import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.models.base.*;
 import org.neo4j.graphdb.Transaction;
 import org.slf4j.Logger;
@@ -116,8 +117,8 @@ public class SkosCoreCvocImporter {
         Transaction tx = framedGraph.getBaseGraph().getRawGraph().beginTx();
         try {
             // Create a new action for this import
-            final EventContext eventContext = new ActionManager(framedGraph).logEvent(
-                    actioner, ActionManager.ActionType.importItem, getLogMessage(logMessage));
+            final EventContext eventContext = new ActionManager(framedGraph, vocabulary).logEvent(
+                    actioner, EventTypes.ingest, getLogMessage(logMessage));
             // Create a manifest to store the results of the import.
             final ImportLog log = new ImportLog(eventContext);
 
