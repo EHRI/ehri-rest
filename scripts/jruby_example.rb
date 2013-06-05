@@ -5,6 +5,11 @@
 #  - make sure the CLASSPATH env var is set for the given NEO4J
 #  - make sure the NEO4J_HOME env var is set
 
+# Abort if we don't have NEO4J_HOME
+if ENV['NEO4J_HOME'].nil? or ENV['NEO4J_HOME'].empty? then
+    abort "Error: NEO4J_HOME environment variable must be defined."
+end
+
 # The magic necessary to do Java stuff...
 require "java"
 
@@ -24,11 +29,6 @@ java_import "eu.ehri.project.persistance.Serializer"
 # EhriModels::DocumentaryUnit
 module EhriModels
     include_package "eu.ehri.project.models"
-end
-
-# Abort if we don't have NEO4J_HOME
-if ENV['NEO4J_HOME'].empty? then
-    abort "NEO4J_HOME environment variable must be defined."
 end
 
 # Use the default if NEO4J_DB isn't set...
