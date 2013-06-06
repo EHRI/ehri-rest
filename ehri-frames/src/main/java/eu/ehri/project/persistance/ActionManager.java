@@ -8,7 +8,6 @@ import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.base.Frame;
-import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.models.events.SystemEventQueue;
 import org.joda.time.DateTime;
@@ -168,7 +167,7 @@ public final class ActionManager {
         try {
             Vertex system = manager.getVertex(GLOBAL_EVENT_ROOT, EntityClass.SYSTEM);
             Bundle ge = new Bundle(EntityClass.SYSTEM_EVENT)
-                    .withDataValue(SystemEvent.ACTION_TYPE, actionType.toString())
+                    .withDataValue(SystemEvent.EVENT_TYPE, actionType.toString())
                     .withDataValue(SystemEvent.TIMESTAMP, getTimestamp())
                     .withDataValue(SystemEvent.LOG_MESSAGE, logMessage.or(""));
             SystemEvent ev = new BundleDAO(graph).create(ge, SystemEvent.class);
