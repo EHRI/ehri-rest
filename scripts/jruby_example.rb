@@ -10,6 +10,11 @@ if ENV['NEO4J_HOME'].nil? or ENV['NEO4J_HOME'].empty? then
     abort "Error: NEO4J_HOME environment variable must be defined."
 end
 
+# Abort if we don't have a CLASSPATH env
+if ENV['CLASSPATH'].nil? or ENV['CLASSPATH'].empty? then
+    abort "Error: CLASSPATH environment variable must be defined."
+end
+
 # The magic necessary to do Java stuff...
 require "java"
 
