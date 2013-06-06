@@ -6,7 +6,6 @@ package eu.ehri.project.importers;
 
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
-import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.Country;
 import eu.ehri.project.models.Repository;
@@ -34,9 +33,9 @@ import org.slf4j.LoggerFactory;
 public class EagImporter extends EaImporter {
 
     private static final Logger logger = LoggerFactory.getLogger(EacImporter.class);
-    private Pattern priorityPattern = Pattern.compile("Priority: (-?\\d+)");
-    public static String MAINTENANCE_NOTES = "maintenanceNotes";
-    public static String PRIORITY = "priority";
+    private final Pattern priorityPattern = Pattern.compile("Priority: (-?\\d+)");
+    public static final String MAINTENANCE_NOTES = "maintenanceNotes";
+    public static final String PRIORITY = "priority";
 
     /**
      * Construct an EagImporter object.
@@ -133,6 +132,5 @@ public class EagImporter extends EaImporter {
             }
         }
         return frame;
-
     }
 }

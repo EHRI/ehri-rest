@@ -1,7 +1,6 @@
 package eu.ehri.project.importers;
 
 import eu.ehri.project.importers.properties.XmlImportProperties;
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.DatePeriod;
@@ -31,9 +30,9 @@ public abstract class XmlImporter<T> extends AbstractImporter<T> {
     private static final Logger logger = LoggerFactory.getLogger(XmlImporter.class);
     protected final String OBJECT_ID = "objectIdentifier";
     protected final String DESCRIPTION_ID = "descriptionIdentifier";
-    private XmlImportProperties dates = new XmlImportProperties("dates.properties");
+    private final XmlImportProperties dates = new XmlImportProperties("dates.properties");
     // Various date patterns
-    private Pattern[] datePatterns = {
+    private final Pattern[] datePatterns = {
         // Yad Vashem, ICA-Atom style: 1924-1-1 - 1947-12-31
         Pattern.compile("^(\\d{4}-\\d{1,2}-\\d{1,2})\\s?-\\s?(\\d{4}-\\d{1,2}-\\d{1,2})$"),
         Pattern.compile("^(\\d{4})\\s?-\\s?(\\d{4})$"),
@@ -45,7 +44,7 @@ public abstract class XmlImporter<T> extends AbstractImporter<T> {
         Pattern.compile("^\\s*(\\d{4})\\s*-\\s*(\\d{4})")
     };
 
-    public XmlImporter(FramedGraph<Neo4jGraph> framedGraph, PermissionScope permissionScope, ImportLog log) {
+    public XmlImporter(FramedGraph<?> framedGraph, PermissionScope permissionScope, ImportLog log) {
         super(framedGraph, permissionScope, log);
     }
 

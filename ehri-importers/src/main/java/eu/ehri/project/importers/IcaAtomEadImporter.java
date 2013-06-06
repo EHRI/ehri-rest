@@ -33,7 +33,7 @@ public class IcaAtomEadImporter extends EaImporter {
      * Depth of top-level items. For reasons as-yet-undetermined in the bowels of the SamXmlHandler, top level items are
      * at depth 1 (rather than 0)
      */
-    private int TOP_LEVEL_DEPTH = 1;
+    private final int TOP_LEVEL_DEPTH = 1;
 
     /**
      * Construct an EadImporter object.

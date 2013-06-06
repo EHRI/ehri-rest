@@ -1,5 +1,6 @@
 
 package eu.ehri.project.importers;
+import com.google.common.collect.Lists;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.DocumentaryUnit;
@@ -24,7 +25,7 @@ import org.xml.sax.SAXException;
 public class IcaAtomEadHandler extends SaxXmlHandler {
     private static final Logger logger = LoggerFactory
             .getLogger(IcaAtomEadHandler.class);
-    List<DocumentaryUnit>[] children;
+    private final List<DocumentaryUnit>[] children = new ArrayList[12];
     // Pattern for EAD nodes that represent a child item
     private Pattern childItemPattern = Pattern.compile("^/*c(?:\\d*)$");
 
@@ -32,12 +33,7 @@ public class IcaAtomEadHandler extends SaxXmlHandler {
     @SuppressWarnings("unchecked")
     public IcaAtomEadHandler(AbstractImporter<Map<String, Object>> importer) {
         super(importer, new XmlImportProperties("icaatom.properties"));
-        this.importer = importer;
-        currentGraphPath = new Stack<Map<String, Object>>();
-        currentGraphPath.push(new HashMap<String, Object>());
-        children = new ArrayList[12]; //12 is the deepest ead child levels go
         children[depth] = new ArrayList<DocumentaryUnit>();
-        currentPath = new Stack<String>();
     }
 
     @Override

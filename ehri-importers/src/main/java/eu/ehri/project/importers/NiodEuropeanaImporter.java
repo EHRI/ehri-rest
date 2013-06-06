@@ -70,7 +70,6 @@ public class NiodEuropeanaImporter extends EaImporter{
         // Then we need to add a relationship to the repository
         frame.setRepository(framedGraph.frame(permissionScope.asVertex(), Repository.class));
 
-        
         if (exists) {
             for (ImportCallback cb : updateCallbacks) {
                 cb.itemImported(frame);
@@ -81,9 +80,5 @@ public class NiodEuropeanaImporter extends EaImporter{
             }
         }
         return frame;
-
-
     }
-
-    
 }
