@@ -83,14 +83,13 @@ begin
                     else
                         nil
                 end
-                 
-                puts "#{event} #{event.get_log_message} => #{type}"
-                bundle = serializer.vertex_frame_to_bundle(event).with_data_value(
-                            SystemEvent::EVENT_TYPE, type.to_string)
-                
-                BundleDAO.new(graph).update(bundle, SystemEvent.java_class)
-                if type.nil?
-                   puts "No type found: #{msg}"
+                if not type.nil?                    
+                    puts "#{event} #{event.get_log_message} => #{type}"
+                    bundle = serializer.vertex_frame_to_bundle(event).with_data_value(
+                                SystemEvent::EVENT_TYPE, type.to_string)
+                    BundleDAO.new(graph).update(bundle, SystemEvent.java_class)
+                else
+                    puts "ERROR: unable to find type for #{msg}"
                 end
             end
         rescue Exception => msg
