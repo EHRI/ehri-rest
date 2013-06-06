@@ -84,7 +84,7 @@
                                 <xsl:value-of select="field[@name = 'irn']/normalize-space()" />
                             </unitid>
                             <unittitle>
-                                <xsl:value-of select="field[@name = 'unit_title']/normalize-space()" />
+                                <xsl:value-of select="field[@name = 'title']/normalize-space()" />
                             </unittitle>
                             <origination>
                                 <xsl:value-of select="field[@name = 'provenance']/normalize-space()" />
