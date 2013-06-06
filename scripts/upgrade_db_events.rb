@@ -1,10 +1,5 @@
 #!/usr/bin/env jruby
 
-# NB: Things to do before running this script:
-#  - make sure jruby is on the PATH
-#  - make sure the CLASSPATH env var is set for the given NEO4J
-#  - make sure the NEO4J_HOME env var is set
-
 # Abort if we don't have NEO4J_HOME
 if ENV['NEO4J_HOME'].nil? or ENV['NEO4J_HOME'].empty? then
     abort "Error: NEO4J_HOME environment variable must be defined."
@@ -28,16 +23,7 @@ java_import "eu.ehri.project.models.events.SystemEvent"
 java_import "eu.ehri.project.persistance.Bundle"
 java_import "eu.ehri.project.persistance.BundleDAO"
 java_import "eu.ehri.project.persistance.Serializer"
-java_import "eu.ehri.project.exceptions.SerializationError"
-java_import "java.lang.IllegalArgumentException"
 java_import "eu.ehri.project.definitions.EventTypes"
-
-# Wildcard import of a package like so. Note, the stuff
-# imported will be used with the given module namespace, i.e.
-# EhriModels::DocumentaryUnit
-module EhriModels
-    include_package "eu.ehri.project.models"
-end
 
 # Use the default if NEO4J_DB isn't set...
 DB_PATH = ENV['NEO4J_DB'] ||= "#{ENV['NEO4J_HOME']}/data/graph.db"
@@ -46,12 +32,11 @@ DB_PATH = ENV['NEO4J_DB'] ||= "#{ENV['NEO4J_HOME']}/data/graph.db"
 # Note: the graph must not be being used elsewhere (i.e. by the server)
 graph = FramedGraph.new(Neo4jGraph.new DB_PATH)
 manager = GraphManagerFactory.get_instance graph
-
-# Test the serializer. Note that the CamelCase Java methods
-# can be converted to the snake_case Ruby style automatically.
 serializer = Serializer.new graph
 
-# List the types of events and their log message...
+# Go through the system events looking for ones that don't have a type.
+# Then try and guess/infer the correct type from the string contents of
+# the log message. Nasty, but effective.
 tx = graph.get_base_graph.get_raw_graph.begin_tx
 begin
     manager.get_frames(EntityClass::SYSTEM_EVENT, SystemEvent.java_class).each do |event|
@@ -99,7 +84,7 @@ begin
     tx.success
 rescue
     tx.failure
-else
+ensure
    tx.finish
 end
 
