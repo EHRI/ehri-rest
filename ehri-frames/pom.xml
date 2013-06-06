@@ -53,8 +53,7 @@
                 </includes>
             </testResource>
         </testResources>
-        <plugins>
-        
+        <plugins>     
  			<!--  use surefire instead of maven-jar-plugin 2.2
  			      surfire plugin worked better with eclipse 
  			      also used by ehri-importers project-->
@@ -78,8 +77,7 @@
 					<excludes>
 					</excludes>
 				</configuration>
-			</plugin>
-			             
+			</plugin>			       
         </plugins>
     </build>
     <dependencies>
