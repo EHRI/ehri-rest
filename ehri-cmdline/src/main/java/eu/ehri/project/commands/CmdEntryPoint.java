@@ -38,6 +38,9 @@ public class CmdEntryPoint extends BaseCommand {
         mmap.put(EntityAdd.NAME, EntityAdd.class);
         mmap.put(PersonalitiesImport.NAME, PersonalitiesImport.class);
         mmap.put(DeleteEntities.NAME, DeleteEntities.class);
+        // new command, could we use reflection code to try find all Command interface implementing classes
+        mmap.put(GraphML.NAME, GraphML.class);
+        
         COMMANDS = Collections.unmodifiableMap(mmap);
     }
 
@@ -92,6 +95,10 @@ public class CmdEntryPoint extends BaseCommand {
 
                 try {
                     cmd.exec(graph, newArgs.toArray(new String[newArgs.size()]));
+                } catch (IllegalArgumentException e) {
+                	// options or parameters where not correct, so print the correct usage
+                	System.err.println(cmd.getUsage());
+                	return 1;
                 } catch(Exception e) {
                     e.printStackTrace();
                     System.err.println("Error: " + e.getMessage());
