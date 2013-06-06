@@ -4,6 +4,7 @@
  */
 package eu.ehri.project.importers;
 
+import com.google.common.collect.ImmutableMap;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.Annotation;
@@ -11,7 +12,6 @@ import eu.ehri.project.models.MaintenanceEvent;
 import eu.ehri.project.models.UnknownProperty;
 import eu.ehri.project.models.base.Description;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -29,17 +29,16 @@ import org.xml.sax.SAXException;
  */
 public class EacHandler extends EaHandler {
 
-    Map<String, Class<? extends Frame>> possibleSubnodes;
+    private final ImmutableMap<String, Class<? extends Frame>> possibleSubnodes
+            = ImmutableMap.<String, Class<? extends Frame>>builder()
+                .put("maintenanceEvent", MaintenanceEvent.class)
+                .put("relation", Annotation.class)
+                .put("name", UnknownProperty.class).build();
+
     private static final Logger logger = LoggerFactory.getLogger(EacHandler.class);
 
     public EacHandler(AbstractImporter<Map<String, Object>> importer) {
-
         super(importer, new XmlImportProperties("eac.properties"));
-        possibleSubnodes = new HashMap<String, Class<? extends Frame>>();
-
-        possibleSubnodes.put("maintenanceEvent", MaintenanceEvent.class);
-        possibleSubnodes.put("relation", Annotation.class);
-        possibleSubnodes.put("name", UnknownProperty.class);
     }
 
     @Override

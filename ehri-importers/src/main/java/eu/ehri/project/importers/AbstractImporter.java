@@ -1,7 +1,6 @@
 package eu.ehri.project.importers;
 
 import com.google.common.base.Joiner;
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
@@ -38,7 +37,7 @@ public abstract class AbstractImporter<T> {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractImporter.class);
     protected final PermissionScope permissionScope;
-    protected final FramedGraph<Neo4jGraph> framedGraph;
+    protected final FramedGraph<?> framedGraph;
     protected final GraphManager manager;
     protected final ImportLog log;
     protected final T documentContext;
@@ -57,7 +56,8 @@ public abstract class AbstractImporter<T> {
      * @param log
      * @param documentContext
      */
-    public AbstractImporter(FramedGraph<Neo4jGraph> framedGraph, PermissionScope permissionScope, ImportLog log, T documentContext) {
+    public AbstractImporter(FramedGraph<?> framedGraph, PermissionScope permissionScope, ImportLog log,
+            T documentContext) {
         this.permissionScope = permissionScope;
         this.framedGraph = framedGraph;
         this.log = log;
@@ -72,7 +72,7 @@ public abstract class AbstractImporter<T> {
      * @param permissionScope
      * @param log
      */
-    public AbstractImporter(FramedGraph<Neo4jGraph> framedGraph, PermissionScope permissionScope, ImportLog log) {
+    public AbstractImporter(FramedGraph<?> framedGraph, PermissionScope permissionScope, ImportLog log) {
         this(framedGraph, permissionScope, log, null);
     }
 
@@ -142,5 +142,4 @@ public abstract class AbstractImporter<T> {
             return value.toString();
         }
     }
-
 }

@@ -2,7 +2,6 @@ package eu.ehri.project.importers;
 
 import com.google.common.collect.Sets;
 import com.tinkerpop.blueprints.Vertex;
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.exceptions.IntegrityError;
@@ -40,7 +39,7 @@ public class EacImporter extends EaImporter {
      * @param permissionScope
      * @param log
      */
-    public EacImporter(FramedGraph<Neo4jGraph> framedGraph, PermissionScope permissionScope, ImportLog log) {
+    public EacImporter(FramedGraph<?> framedGraph, PermissionScope permissionScope, ImportLog log) {
         super(framedGraph, permissionScope, log);
         try {
             userProfile = manager.getFrame(log.getActioner().getId(), Accessor.class);

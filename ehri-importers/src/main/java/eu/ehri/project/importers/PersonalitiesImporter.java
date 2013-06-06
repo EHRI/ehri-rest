@@ -34,12 +34,11 @@ import org.slf4j.LoggerFactory;
  */
 public class PersonalitiesImporter extends XmlImporter<Object> {
     
-    private XmlImportProperties p;
+    private final XmlImportProperties p = new XmlImportProperties("personalities.properties");
     private static final Logger logger = LoggerFactory.getLogger(PersonalitiesImporter.class);
     
     public PersonalitiesImporter(FramedGraph<Neo4jGraph> framedGraph, PermissionScope permissionScope, ImportLog log) {
         super(framedGraph, permissionScope, log);
-        p = new XmlImportProperties("personalities.properties");
     }
 
     @Override
