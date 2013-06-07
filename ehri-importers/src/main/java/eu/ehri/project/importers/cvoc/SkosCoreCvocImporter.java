@@ -13,6 +13,8 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import com.google.common.base.Optional;
+import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.models.base.*;
 import org.neo4j.graphdb.Transaction;
 import org.slf4j.Logger;
@@ -40,7 +42,6 @@ import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.ConceptDescription;
 import eu.ehri.project.models.cvoc.Vocabulary;
-import eu.ehri.project.models.idgen.GenericIdGenerator;
 import eu.ehri.project.models.idgen.IdGenerator;
 import eu.ehri.project.persistance.ActionManager;
 import eu.ehri.project.persistance.ActionManager.EventContext;
@@ -69,6 +70,10 @@ public class SkosCoreCvocImporter {
     protected final Vocabulary vocabulary;
     // map from the internal Skos identifier to the placeholder
     protected Map<String, ConceptPlaceholder> conceptLookup = new HashMap<String, ConceptPlaceholder>();
+
+    private Optional<String> getLogMessage(String msg) {
+        return msg.trim().isEmpty() ? Optional.<String>absent() : Optional.of(msg);
+    }
     
     /**
      * Constructor.
@@ -112,8 +117,8 @@ public class SkosCoreCvocImporter {
         Transaction tx = framedGraph.getBaseGraph().getRawGraph().beginTx();
         try {
             // Create a new action for this import
-            final EventContext eventContext = new ActionManager(framedGraph).logEvent(
-                    actioner, logMessage);
+            final EventContext eventContext = new ActionManager(framedGraph, vocabulary).logEvent(
+                    actioner, EventTypes.ingest, getLogMessage(logMessage));
             // Create a manifest to store the results of the import.
             final ImportLog log = new ImportLog(eventContext);
 
@@ -216,14 +221,12 @@ public class SkosCoreCvocImporter {
 
                           Bundle unit = constructBundleForConcept(element);
 
-                          BundleDAO persister = new BundleDAO(framedGraph);
+                          BundleDAO persister = new BundleDAO(framedGraph, vocabulary);
                           Concept frame = persister.createOrUpdate(unit,
                                   Concept.class);
 
                           // Set the vocabulary/concept relationship
-                          PermissionScope scope = vocabulary;
                           frame.setVocabulary(vocabulary);
-                          frame.setPermissionScope(scope);
 
                           // when concept was successfully persisted!
                           action.addSubjects(frame);
@@ -288,7 +291,7 @@ public class SkosCoreCvocImporter {
         //logger.debug("Bundle as JSON: \n" + unit.toJson());
 
         // get an ID for the GraphDB
-        IdGenerator generator = GenericIdGenerator.INSTANCE;//AccessibleEntityIdGenerator.INSTANCE;
+        IdGenerator generator = EntityClass.CVOC_CONCEPT.getIdgen();
         PermissionScope scope = vocabulary;
 
         String id = generator.generateId(EntityClass.CVOC_CONCEPT, scope, unit);

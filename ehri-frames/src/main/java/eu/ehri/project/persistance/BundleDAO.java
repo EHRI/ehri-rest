@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import com.tinkerpop.blueprints.TransactionalGraph;
 import eu.ehri.project.models.base.Frame;
 import eu.ehri.project.models.idgen.IdGenerator;
 import org.neo4j.graphdb.Transaction;

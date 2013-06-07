@@ -1,5 +1,6 @@
 package eu.ehri.project.views;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.tinkerpop.blueprints.Vertex;
@@ -11,6 +12,7 @@ import eu.ehri.project.acl.PermissionType;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
+import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
@@ -21,7 +23,6 @@ import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.persistance.BundleDAO;
 import eu.ehri.project.persistance.Serializer;
 import eu.ehri.project.persistance.TraversalCallback;
-import eu.ehri.project.views.ViewHelper;
 
 /**
  * View class for handling annotation-related operations.
@@ -79,8 +80,9 @@ public final class AnnotationViews {
         annotation.setAnnotator(graph.frame(user.asVertex(),
                 Annotator.class));
 
-        new ActionManager(graph).logEvent(entity, graph.frame(user.asVertex(), Actioner.class),
-                "Added annotation").addSubjects(annotation);
+        new ActionManager(graph, entity).logEvent(annotation,
+                graph.frame(user.asVertex(), Actioner.class),
+                EventTypes.annotation, Optional.<String>absent());
         return annotation;
     }
 

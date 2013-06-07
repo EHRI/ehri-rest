@@ -1,0 +1,118 @@
+#
+# This set of fixtures outlines a scenario:
+#
+#  A repository has two types of users. Head archivists, who can create, update, and delete
+#  any items at all, and regular archivists, who can create items, and update/delete their
+#  own items, but not update/delete those of other archivists.
+#
+#
+
+# Countries - these are at the top of the entity hierarchy and
+# 'hold' everything else.
+- id: gb
+  type: country
+  data:
+    identifier: gb
+
+# Institution
+- id: repo
+  type: repository
+  data:
+    identifier: repo
+    name: Repository
+  relationships:
+    hasCountry: gb
+    hasPermissionScope: gb
+    describes:
+      - id: rd1
+        type: repositoryDescription
+        data:
+          name: Repository Name
+          languageCode: en
+        relationships:
+
+# Two groups
+
+- id: head-archivists
+  type: group
+  data:
+    identifier: head-archivists
+    name: Head Archivists
+    description: The head archivists, with permission to modify all items.
+
+- id: archivists
+  type: group
+  data:
+    identifier: archivisits
+    name: Archivists
+    description: Archivists, who cannot alter each other's items.
+
+- id: hauser
+  type: userProfile
+  data:
+    identifier: hauser
+    name: Head Archivist User
+    description: User who belongs to head archivists group
+  relationships:
+    belongsTo:
+     - head-archivists
+     - archivists
+
+- id: auser1
+  type: userProfile
+  data:
+    identifier: auser1
+    name: Archivist User 1
+    description: User who belongs to archivists group
+  relationships:
+    belongsTo:
+     - archivists
+
+- id: auser2
+  type: userProfile
+  data:
+    identifier: auser2
+    name: Archivist User 1
+    description: User who belongs to archivists group
+  relationships:
+    belongsTo:
+     - archivists
+
+
+--- # Permission grants
+
+# Allow head archivist to create, update, delete all docs within repo scope
+- id: haCreateGrant
+  type: permissionGrant
+  relationships:
+    hasPermission: create
+    hasTarget: documentaryUnit
+    hasScope: repo
+    hasAccessor: head-archivists
+    
+- id: haUpdateGrant
+  type: permissionGrant
+  relationships:
+    hasPermission: update
+    hasTarget: documentaryUnit
+    hasScope: repo
+    hasAccessor: head-archivists
+
+- id: haDeleteGrant
+  type: permissionGrant
+  relationships:
+    hasPermission: delete
+    hasTarget: documentaryUnit
+    hasScope: repo
+    hasAccessor: head-archivists
+
+# Give archivists ONLY create grant within repo scope. They will be able
+# to modify their own docs via implicit owner perm.
+
+- id: aCreateGrant
+  type: permissionGrant
+  relationships:
+    hasPermission: create
+    hasTarget: documentaryUnit
+    hasScope: repo
+    hasAccessor: archivists

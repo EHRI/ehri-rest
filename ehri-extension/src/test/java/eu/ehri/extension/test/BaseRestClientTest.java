@@ -124,6 +124,20 @@ public class BaseRestClientTest extends AbstractRestClientTest {
         return mapper.readValue(json, typeRef);
     }
 
+    protected Long getEntityCount(String entityType,
+                                                      String userId) throws Exception {
+        WebResource resource = client.resource(getExtensionEntryPointUri()
+                + "/" + entityType + "/count");
+        ClientResponse response = resource.accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .header(AbstractRestResource.AUTH_HEADER_NAME, userId)
+                .get(ClientResponse.class);
+        String json = response.getEntity(String.class);
+        ObjectMapper mapper = new ObjectMapper();
+        TypeReference<Long> typeRef = new TypeReference<Long>() {};
+        return mapper.readValue(json, typeRef);
+    }
+
     /**
      * Function for deleting an entire database folder. USE WITH CARE!!!
      * 

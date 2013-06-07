@@ -11,7 +11,7 @@ import eu.ehri.project.models.annotations.Dependent;
 import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.annotations.Mandatory;
 
-public interface Description extends NamedEntity {
+public interface Description extends NamedEntity, AccessibleEntity {
     public static final String DESCRIBES = DescribedEntity.DESCRIBES;
     public static final String LANGUAGE_CODE = "languageCode";
     public static final String MUTATES = "maintenance"; //links to MaintenanceEvent
@@ -57,7 +57,7 @@ public interface Description extends NamedEntity {
     @Adjacency(label = RELATES_TO)
     public void addUndeterminedRelationship(final UndeterminedRelationship relationship);
 
-    @Fetch(HAS_UNKNOWN_PROPERTY)
+    @Fetch(value = HAS_UNKNOWN_PROPERTY, ifDepth = 1)
     @Dependent
     @Adjacency(label = HAS_UNKNOWN_PROPERTY)
     public Iterable<UnknownProperty> getUnknownProperties();

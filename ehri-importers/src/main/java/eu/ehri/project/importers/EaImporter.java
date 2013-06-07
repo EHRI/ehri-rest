@@ -1,6 +1,5 @@
 package eu.ehri.project.importers;
 
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.EntityClass;
@@ -38,7 +37,7 @@ public abstract class EaImporter extends XmlImporter<Map<String, Object>> {
      * @param permissionScope
      * @param log
      */
-    public EaImporter(FramedGraph<Neo4jGraph> framedGraph, PermissionScope permissionScope, ImportLog log) {
+    public EaImporter(FramedGraph<?> framedGraph, PermissionScope permissionScope, ImportLog log) {
         super(framedGraph, permissionScope, log);
     }
 

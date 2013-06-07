@@ -17,15 +17,10 @@ import eu.ehri.project.models.base.PermissionScope;
  *
  */
 @EntityType(EntityClass.CVOC_VOCABULARY)
-public interface Vocabulary extends AccessibleEntity, IdentifiableEntity, PermissionScope {
-    public static final String LABEL = "cvocLabel";
-    public static final String IN_CVOC = "inCvoc";
-
-    @Adjacency(label = IN_CVOC, direction = Direction.IN)
+public interface Vocabulary extends AccessibleEntity, IdentifiableEntity, PermissionScope, AuthoritativeSet {
+    @Adjacency(label = IN_SET, direction = Direction.IN)
     public Iterable<Concept> getConcepts();
 
-    @Adjacency(label = IN_CVOC, direction = Direction.IN)
+    @Adjacency(label = IN_SET, direction = Direction.IN)
     public void addConcept(final Concept concept);
-    
-    // Note: for textual information a Description could be used
 }

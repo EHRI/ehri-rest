@@ -6,29 +6,31 @@ package eu.ehri.project.importers;
 
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.base.Description;
+
 import java.util.List;
 import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
  * @author linda
  */
-public abstract class EaHandler extends SaxXmlHandler{
+public abstract class EaHandler extends SaxXmlHandler {
     private static final Logger logger = LoggerFactory.getLogger(EaHandler.class);
-    public EaHandler(AbstractImporter<Map<String, Object>> importer, XmlImportProperties properties){
+
+    public EaHandler(AbstractImporter<Map<String, Object>> importer, XmlImportProperties properties) {
         super(importer, properties);
     }
-    
-     protected String chooseName(Object names) {
+
+    protected String chooseName(Object names) {
         String nameValue;
         if (names instanceof String) {
             nameValue = names.toString();
         } else if (names instanceof List) {
             nameValue = ((List) names).get(0).toString();
-            for(int i = 1 ; i < ((List) names).size(); i++){
-                putPropertyInCurrentGraph("otherFormsOfName", ((List)names).get(i).toString());
+            for (int i = 1; i < ((List) names).size(); i++) {
+                putPropertyInCurrentGraph("otherFormsOfName", ((List) names).get(i).toString());
             }
         } else {
             logger.warn("no " + Description.NAME + " found");

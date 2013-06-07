@@ -16,7 +16,8 @@
 		<module>ehri-cmdline</module>
 		<module>ehri-definitions</module>
 		<module>ehri-searchindex</module>
-	</modules>
+        <module>assembly</module>
+    </modules>
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
@@ -27,7 +28,7 @@
 		</dependencies>
 	</dependencyManagement>
 	<properties>
-	<neo4j-version>1.9.M05</neo4j-version>
+	<neo4j-version>1.9</neo4j-version>
 	<tinkerpop-version>2.2.0</tinkerpop-version>
 
 		<!-- The directory where the yWorks doclet (for uml schema's in javadoc)
@@ -45,7 +46,7 @@
 					<source>1.6</source>
 					<target>1.6</target>
 				</configuration>
-			</plugin>				
+			</plugin>
 		</plugins>
 	</build>
 

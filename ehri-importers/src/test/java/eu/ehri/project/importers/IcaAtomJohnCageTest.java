@@ -42,9 +42,10 @@ public class IcaAtomJohnCageTest extends AbstractImporterTest {
        	// - 1 more DocumentDescription
 	// - 1 more DatePeriod
         // - 1 more UnknownProperty
+        // - 1 more creatorAccess relation        
 	// - 2 more import Event links (1 for every Unit, 1 for the User)
         // - 1 more import Event
         // - 4 UndeterminedRelationships
-        assertEquals(count + 11, getNodeCount(graph));
+        assertEquals(count + 12, getNodeCount(graph));
     }
 }

@@ -43,6 +43,21 @@ public class LinkRestClientTest extends BaseRestClientTest {
     }
 
     @Test
+    public void testDeleteAccessPoint() throws Exception {
+        // Create a link annotation between two objects
+        WebResource resource = client.resource(getExtensionEntryPointUri()
+                + "/" + Entities.LINK + "/accessPoint/ur1");
+        ClientResponse response = resource
+                .accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                        getAdminUserProfileId())
+                .delete(ClientResponse.class);
+        assertEquals(Response.Status.OK.getStatusCode(),
+                response.getStatus());
+    }
+
+    @Test
     public void testCreateLink() throws Exception {
         // Create a link annotation between two objects
         WebResource resource = client.resource(getExtensionEntryPointUri()
@@ -55,24 +70,5 @@ public class LinkRestClientTest extends BaseRestClientTest {
                 .post(ClientResponse.class);
         assertEquals(Response.Status.CREATED.getStatusCode(),
                 response.getStatus());        
-    }
-
-    @Test
-    public void testCreateLinkWithAccessPoint() throws Exception {
-        // Create a link annotation between two objects
-        WebResource resource = client.resource(getExtensionEntryPointUri()
-                + "/" + Entities.LINK + "/c1/c4/cd1");
-        MultivaluedMap queryParams = new MultivaluedMapImpl();
-        queryParams.add(LinkResource.BODY_NAME, "Test link name");
-        queryParams.add(LinkResource.BODY_TYPE, "subjectAccess");
-        ClientResponse response = resource
-                .queryParams(queryParams)
-                .accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME,
-                        getAdminUserProfileId()).entity(jsonLinkTestString)
-                .post(ClientResponse.class);
-        assertEquals(Response.Status.CREATED.getStatusCode(),
-                response.getStatus());
     }
 }

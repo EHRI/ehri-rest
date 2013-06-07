@@ -4,6 +4,7 @@
  */
 package eu.ehri.project.commands;
 
+import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.SystemScope;
@@ -15,6 +16,11 @@ import eu.ehri.project.importers.SaxImportManager;
 import eu.ehri.project.importers.SaxXmlHandler;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.PermissionScope;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.InputStreamReader;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +44,8 @@ public abstract class ImportCommand extends BaseCommand implements Command{
     protected void setCustomOptions() {
         options.addOption(new Option("scope", true,
                 "Identifier of scope to import into, i.e. repository"));
+        options.addOption(new Option("F", "files-from", true,
+                "Read list of input files from another file (or standard input, if given '-')"));
         options.addOption(new Option("user", true,
                 "Identifier of user to import as"));
         options.addOption(new Option("tolerant", false,
@@ -52,12 +60,16 @@ public abstract class ImportCommand extends BaseCommand implements Command{
 
         GraphManager manager = GraphManagerFactory.getInstance(graph);
 
-        if (cmdLine.getArgList().size() < 1)
-            throw new RuntimeException(getHelp());
 
-        List<String> filePaths = new LinkedList<String>();
-        for (int i = 0; i < cmdLine.getArgList().size(); i++) {
-            filePaths.add((String) cmdLine.getArgList().get(i));
+        List<String> filePaths = Lists.newArrayList();
+        if (cmdLine.hasOption("files-from")) {
+            getPathsFromFile(cmdLine.getOptionValue("files-from"), filePaths);
+        } else if (cmdLine.getArgList().size() > 0) {
+            for (int i = 0; i < cmdLine.getArgList().size(); i++) {
+                filePaths.add((String) cmdLine.getArgList().get(i));
+            }
+        } else {
+            throw new RuntimeException(getHelp());
         }
 
         String logMessage = "Imported from command-line";
@@ -98,5 +110,27 @@ public abstract class ImportCommand extends BaseCommand implements Command{
             graph.shutdown();
         }
         return 0;
+    }
+
+    /**
+     * Read a set of file paths from an input, either a file or standard in
+     * if given the path '-'.
+     * @param listFile
+     * @param filePaths
+     * @throws Exception
+     */
+    private void getPathsFromFile(String listFile, List<String> filePaths) throws Exception {
+        InputStreamReader reader = listFile.contentEquals("-")
+                ? new InputStreamReader(System.in)
+                : new FileReader(new File(listFile));
+        BufferedReader br = new BufferedReader(reader);
+        try {
+            String file = null;
+            while ((file = br.readLine()) != null) {
+                filePaths.add(file);
+            }
+        } finally {
+            br.close();
+        }
     }
 }

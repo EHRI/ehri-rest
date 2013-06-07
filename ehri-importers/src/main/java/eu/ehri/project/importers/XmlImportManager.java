@@ -1,5 +1,6 @@
 package eu.ehri.project.importers;
 
+import com.google.common.base.Optional;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import java.io.FileInputStream;
@@ -7,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
+import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.exceptions.InvalidInputFormatError;
@@ -121,8 +123,9 @@ abstract public class XmlImportManager implements ImportManager {
         Transaction tx = framedGraph.getBaseGraph().getRawGraph().beginTx();
         try {
             // Create a new action for this import
-            final ActionManager.EventContext action = new ActionManager(framedGraph).logEvent(
-                    actioner, logMessage);
+            final ActionManager.EventContext action = new ActionManager(
+                    framedGraph, permissionScope).logEvent(
+                        actioner, EventTypes.ingest, getLogMessage(logMessage));
             // Create a manifest to store the results of the import.
             final ImportLog log = new ImportLog(action);
 
@@ -161,8 +164,9 @@ abstract public class XmlImportManager implements ImportManager {
         Transaction tx = framedGraph.getBaseGraph().getRawGraph().beginTx();
         try {
 
-            final ActionManager.EventContext action = new ActionManager(framedGraph).logEvent(
-                    actioner, logMessage);
+            final ActionManager.EventContext action = new ActionManager(
+                    framedGraph, permissionScope).logEvent(
+                        actioner, EventTypes.ingest, getLogMessage(logMessage));
             final ImportLog log = new ImportLog(action);
             for (String path : paths) {
                 try {
@@ -220,4 +224,7 @@ abstract public class XmlImportManager implements ImportManager {
             final ImportLog log) throws IOException, ValidationError,
             InputParseError, InvalidXmlDocument, InvalidInputFormatError;
 
+    private Optional<String> getLogMessage(String msg) {
+        return msg.trim().isEmpty() ? Optional.<String>absent() : Optional.of(msg);
+    }
 }

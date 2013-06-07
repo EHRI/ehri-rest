@@ -7,10 +7,12 @@ import static org.junit.Assert.assertNotNull;
 import java.util.Iterator;
 import java.util.List;
 
+import com.google.common.base.Optional;
 import eu.ehri.project.models.*;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.persistance.Serializer;
 import eu.ehri.project.test.AbstractFixtureTest;
+import eu.ehri.project.test.TestData;
 import org.junit.Test;
 
 import eu.ehri.project.exceptions.DeserializationError;
@@ -38,11 +40,11 @@ public class ActionViewsTest extends AbstractFixtureTest {
             DeserializationError, IntegrityError {
         LoggingCrudViews<DocumentaryUnit> docViews = new LoggingCrudViews<DocumentaryUnit>(
                 graph, DocumentaryUnit.class);
-        Bundle bundle = Bundle.fromData(getTestBundle());
+        Bundle bundle = Bundle.fromData(TestData.getTestDocBundle());
         DocumentaryUnit unit = docViews.create(bundle, validUser);
-        assertEquals(TEST_COLLECTION_NAME, unit.asVertex().getProperty("name"));
+        assertEquals(TestData.TEST_COLLECTION_NAME, unit.asVertex().getProperty("name"));
 
-        String newName = TEST_COLLECTION_NAME + " with new stuff";
+        String newName = TestData.TEST_COLLECTION_NAME + " with new stuff";
         Bundle newBundle = bundle.withId(unit.getId()).withDataValue("name", newName);
 
         DocumentaryUnit changedUnit = docViews.update(newBundle, validUser);
@@ -55,7 +57,7 @@ public class ActionViewsTest extends AbstractFixtureTest {
         // Check the nested item was created correctly
         DatePeriod datePeriod = desc.getDatePeriods().iterator().next();
         assertTrue(datePeriod != null);
-        assertEquals(TEST_START_DATE, datePeriod.getStartDate());
+        assertEquals(TestData.TEST_START_DATE, datePeriod.getStartDate());
 
         // And that the reverse relationship works.
         assertEquals(desc.asVertex(), datePeriod.getEntity().asVertex());
@@ -74,11 +76,11 @@ public class ActionViewsTest extends AbstractFixtureTest {
             DeserializationError, IntegrityError {
         LoggingCrudViews<UserProfile> userViews = new LoggingCrudViews<UserProfile>(
                 graph, UserProfile.class);
-        Bundle bundle = Bundle.fromData(getTestUserBundle());
+        Bundle bundle = Bundle.fromData(TestData.getTestUserBundle());
         UserProfile user = userViews.create(bundle, validUser);
-        assertEquals(TEST_USER_NAME, user.getName());
+        assertEquals(TestData.TEST_USER_NAME, user.getName());
 
-        String newName = TEST_USER_NAME + " with new stuff";
+        String newName = TestData.TEST_USER_NAME + " with new stuff";
         Bundle newBundle = bundle.withId(user.getId()).withDataValue("name", newName);
 
         UserProfile changedUser = userViews.update(newBundle, validUser);
@@ -96,7 +98,6 @@ public class ActionViewsTest extends AbstractFixtureTest {
         assertEquals(changedUser.asVertex(), event.getSubjects().iterator().next().asVertex());
         assertTrue(changedUser.getHistory().iterator().hasNext());
 
-        System.out.println("User: " + user.asVertex());
         // We should have exactly two actions now; one for create, one for
         // update...
         List<SystemEvent> events = toList(changedUser.getHistory());
@@ -117,9 +118,6 @@ public class ActionViewsTest extends AbstractFixtureTest {
         } catch (SerializationError serializationError) {
             serializationError.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
-        // They should have default log messages, and come out latest-first.
-        assertEquals(LoggingCrudViews.DEFAULT_UPDATE_LOG, events.get(0).getLogMessage());
-        assertEquals(LoggingCrudViews.DEFAULT_CREATE_LOG, events.get(1).getLogMessage());
     }
 
     /**
@@ -147,7 +145,8 @@ public class ActionViewsTest extends AbstractFixtureTest {
             for (UndeterminedRelationship r : d.getUndeterminedRelationships()) shouldDelete++;
         }
 
-        Integer deleted = docViews.delete(item, validUser);
+        String log = "Deleting item";
+        Integer deleted = docViews.delete(item, validUser, Optional.of(log));
         assertEquals(shouldDelete, deleted);
 
         List<SystemEvent> actions = toList(validUser.getActions());
@@ -158,7 +157,6 @@ public class ActionViewsTest extends AbstractFixtureTest {
         // Assumes the action is the last in the list,
         // which it should be as the most recent.
         SystemEvent deleteAction = actions.get(actions.size() - 1);
-        assertEquals(LoggingCrudViews.DEFAULT_DELETE_LOG,
-                deleteAction.getLogMessage());
+        assertEquals(log, deleteAction.getLogMessage());
     }
 }

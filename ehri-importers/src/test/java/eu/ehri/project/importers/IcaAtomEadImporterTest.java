@@ -49,9 +49,10 @@ public class IcaAtomEadImporterTest extends AbstractImporterTest{
        	// - 5 more DocumentDescription
 	// - 1 more DatePeriod
         // - 2 more UnknownProperties
-	// - 6 more import Event links (4 for every Unit, 1 for the User)
+        // - 1 more creatorAccess relation
+	// - 6 more import Event links (5 for every Unit, 1 for the User)
         // - 1 more import Event
-        assertEquals(count + 20, getNodeCount(graph));
+        assertEquals(count + 21, getNodeCount(graph));
 
         Iterable<Vertex> docs = graph.getVertices(IdentifiableEntity.IDENTIFIER_KEY,
                 FONDS_LEVEL);
@@ -59,7 +60,7 @@ public class IcaAtomEadImporterTest extends AbstractImporterTest{
         DocumentaryUnit fonds_unit = graph.frame(
                 getVertexByIdentifier(graph,FONDS_LEVEL),
                 DocumentaryUnit.class);
-
+//printGraph(graph);
         // check the child items
         DocumentaryUnit c1 = graph.frame(
                 getVertexByIdentifier(graph,SUBFONDS_LEVEL),

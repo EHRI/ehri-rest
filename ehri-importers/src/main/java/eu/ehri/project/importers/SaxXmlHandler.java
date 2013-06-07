@@ -4,6 +4,8 @@
  */
 package eu.ehri.project.importers;
 
+import com.google.common.base.Optional;
+import com.google.common.collect.Maps;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,6 +17,8 @@ import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
+
+import static eu.ehri.project.models.base.Description.LANGUAGE_CODE;
 
 /**
  *
@@ -39,27 +43,24 @@ public abstract class SaxXmlHandler extends DefaultHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(SaxXmlHandler.class);
     public static final String UNKNOWN = "UNKNOWN_";
-    Stack<Map<String, Object>> currentGraphPath;
-    Map<String, Map<String, Object>> languageMap;
-    XmlImportProperties p;
-    Stack<String> currentPath;
-    AbstractImporter<Map<String, Object>> importer;
-    String languagePrefix;
-    int depth = 0;
-    boolean inSubnode = false;
-    private Stack<String> currentText ;
-    
+    protected final Stack<Map<String, Object>> currentGraphPath = new Stack<Map<String, Object>>();
+    protected final Map<String, Map<String, Object>> languageMap = Maps.newHashMap();
+    protected final Stack<String> currentPath = new Stack<String>();
+    protected final Stack<String> currentText = new Stack<String>();
+
+    protected final AbstractImporter<Map<String, Object>> importer;
+    protected final XmlImportProperties properties;
+
+    protected int depth = 0;
+    private String languagePrefix;
+
     protected abstract List<String> getSchemas();
 
     public SaxXmlHandler(AbstractImporter<Map<String, Object>> importer, XmlImportProperties properties) {
         super();
         this.importer = importer;
-        currentGraphPath = new Stack<Map<String, Object>>();
+        this.properties = properties;
         currentGraphPath.push(new HashMap<String, Object>());
-        p = properties;
-        currentPath = new Stack<String>();
-        languageMap = new HashMap<String, Map<String, Object>>();
-        currentText = new Stack<String>();
     }
 
     protected abstract boolean needToCreateSubNode(String qName);
@@ -67,15 +68,15 @@ public abstract class SaxXmlHandler extends DefaultHandler {
     @Override
     public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
         currentText.push("");
-        String lang = languageAttribute(attributes);
-        if (lang != null) {
-            languagePrefix = lang;
+        Optional<String> lang = languageAttribute(attributes);
+        if (lang.isPresent()) {
+            languagePrefix = lang.get();
             if (!languageMap.containsKey(languagePrefix)) {
                 if (languageMap.isEmpty()) {
-                    currentGraphPath.peek().put("languageCode", languageMap);
+                    currentGraphPath.peek().put(LANGUAGE_CODE, languageMap);
                 }
                 Map<String, Object> m = new HashMap<String, Object>();
-                m.put("languageCode", languagePrefix);
+                m.put(LANGUAGE_CODE, languagePrefix);
                 languageMap.put(languagePrefix, m);
             }
         }
@@ -89,8 +90,8 @@ public abstract class SaxXmlHandler extends DefaultHandler {
 
         for (int attr = 0; attr < attributes.getLength(); attr++) { // only certain attributes get stored
             String attribute = withoutNamespace(attributes.getLocalName(attr));
-            if (p.hasAttributeProperty(attribute) && !p.getAttributeProperty(attribute).equals("languageCode")) {
-                putPropertyInCurrentGraph(getImportantPath(currentPath, "@"+p.getAttributeProperty(attribute)), attributes.getValue(attr));
+            if (properties.hasAttributeProperty(attribute) && !properties.getAttributeProperty(attribute).equals(LANGUAGE_CODE)) {
+                putPropertyInCurrentGraph(getImportantPath(currentPath, "@"+ properties.getAttributeProperty(attribute)), attributes.getValue(attr));
             }
         }
 
@@ -123,16 +124,16 @@ public abstract class SaxXmlHandler extends DefaultHandler {
         }
     }
 
-    private String languageAttribute(Attributes attributes) {
+    private Optional<String> languageAttribute(Attributes attributes) {
         for (int attr = 0; attr < attributes.getLength(); attr++) { // only certain attributes get stored
             String attribute = withoutNamespace(attributes.getLocalName(attr));
-            
-            if (p.getAttributeProperty(attribute) != null && p.getAttributeProperty(attribute).equals("languageCode")) {
+            String prop = properties.getAttributeProperty(attribute);
+            if (prop != null && prop.equals(LANGUAGE_CODE)) {
                 logger.debug("Language detected!");
-                return attributes.getValue(attr);
+                return Optional.of(attributes.getValue(attr));
             }
         }
-        return null;
+        return Optional.absent();
     }
 
     private String withoutNamespace(String qName) {
@@ -225,8 +226,8 @@ public abstract class SaxXmlHandler extends DefaultHandler {
         String all = "";
         for (int i = path.size(); i > 0; i--) {
             all = path.get(i - 1) + "/" + all;
-            if (p.getProperty(all+attribute) != null) {
-                return p.getProperty(all+attribute);
+            if (properties.getProperty(all+attribute) != null) {
+                return properties.getProperty(all+attribute);
             }
         }
         return UNKNOWN + all.replace("/", "_");

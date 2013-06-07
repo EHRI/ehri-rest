@@ -378,6 +378,15 @@ public final class Query<E extends AccessibleEntity> {
     }
 
     /**
+     * Count items accessible to a given user.
+     * @param user
+     * @return
+     */
+    public Long count(Accessor user) {
+        return count(ClassUtils.getEntityType(cls), user);
+    }
+
+    /**
      * List items accessible to a given user.
      *
      * @param user
@@ -430,6 +439,19 @@ public final class Query<E extends AccessibleEntity> {
     }
 
     /**
+     * Count items accessible to a given user.
+     *
+     * @param vertices
+     * @param user
+     * @return Long count of items accessible to the given accessor
+     */
+    public <T> Long count(Iterable<T> vertices, Accessor user) {
+        GremlinPipeline<T, Vertex> filter = new GremlinPipeline<T, Vertex>(vertices)
+                .filter(new AclManager(graph).getAclFilterFunction(user));
+        return applyFilters(filter).count();
+    }
+
+    /**
      * Return an iterable for all items accessible to the user.
      *
      * @param user
@@ -437,6 +459,16 @@ public final class Query<E extends AccessibleEntity> {
      */
     public Iterable<E> list(EntityClass type, Accessor user) {
         return list(manager.getFrames(type, cls), user);
+    }
+
+    /**
+     * Return an iterable for all items accessible to the user.
+     *
+     * @param user
+     * @return Iterable of framed vertices accessible to the given user
+     */
+    public Long count(EntityClass type, Accessor user) {
+        return count(manager.getVertices(type), user);
     }
 
     /**

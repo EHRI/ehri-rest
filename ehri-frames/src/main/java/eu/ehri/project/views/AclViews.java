@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.common.base.Preconditions;
 import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.blueprints.TransactionalGraph.Conclusion;
 import com.tinkerpop.frames.FramedGraph;
@@ -14,20 +15,20 @@ import eu.ehri.project.acl.PermissionType;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
+import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.models.ContentType;
-import eu.ehri.project.models.Group;
-import eu.ehri.project.models.Permission;
-import eu.ehri.project.models.PermissionGrant;
+import eu.ehri.project.models.*;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionGrantTarget;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistance.ActionManager;
-import eu.ehri.project.views.ViewHelper;
 
+/**
+ * Views class for permission operations.
+ */
 public final class AclViews {
 
     private final FramedGraph<? extends TransactionalGraph> graph;
@@ -43,6 +44,7 @@ public final class AclViews {
      * @param scope
      */
     public AclViews(FramedGraph<? extends TransactionalGraph> graph, PermissionScope scope) {
+        Preconditions.checkNotNull(scope);
         this.graph = graph;
         helper = new ViewHelper(graph, scope);
         acl = helper.getAclManager();
@@ -78,8 +80,7 @@ public final class AclViews {
             ActionManager.EventContext context = new ActionManager(graph).logEvent(
                     graph.frame(accessor.asVertex(), AccessibleEntity.class),
                     graph.frame(grantee.asVertex(), Actioner.class),
-                    String.format("Updated permissions%s",
-                            scoped ? " with scope '" + scope.getId() + "'" : ""));
+                    EventTypes.setGlobalPermissions);
             if (scoped) {
                 context.addSubjects(scope);
             }
@@ -113,7 +114,7 @@ public final class AclViews {
             new ActionManager(graph).logEvent(
                     graph.frame(entity.asVertex(), AccessibleEntity.class),
                     graph.frame(user.asVertex(), Actioner.class),
-                    "Set visibility");
+                    EventTypes.setVisibility);
             graph.getBaseGraph().stopTransaction(Conclusion.SUCCESS);
         } catch (PermissionDenied e) {
             graph.getBaseGraph().stopTransaction(Conclusion.FAILURE);
@@ -141,13 +142,9 @@ public final class AclViews {
                 Permission grantPerm = manager.getFrame(
                         PermissionType.GRANT.getName(), Permission.class);
                 for (ContentTypes ctype : permissionMap.keySet()) {
-                    ContentType target = manager.getFrame(ctype.getName(),
-                            ContentType.class);
-                    Iterable<PermissionGrant> grants = acl.getPermissionGrants(
-                            accessor, target, grantPerm);
-                    if (!grants.iterator().hasNext()) {
+                    if (!acl.hasPermission(ctype, PermissionType.GRANT, accessor)) {
                         throw new PermissionDenied(accessor.getId(),
-                                target.getId(), grantPerm.getId(),
+                                ctype.toString(), grantPerm.getId(),
                                 scope.getId());
                     }
                 }
@@ -178,7 +175,7 @@ public final class AclViews {
             // Log the action...
             new ActionManager(graph).logEvent(item,
                     graph.frame(grantee.asVertex(), Actioner.class),
-                    "Modified item-level permissions").addSubjects(
+                    EventTypes.setItemPermissions).addSubjects(
                     graph.frame(accessor.asVertex(), AccessibleEntity.class));
 
             graph.getBaseGraph().stopTransaction(Conclusion.SUCCESS);
@@ -197,9 +194,14 @@ public final class AclViews {
         // fact that individual grants can, in theory, have more than one
         // target content type.
         for (PermissionGrantTarget tg : grant.getTargets()) {
-            helper.checkEntityPermission(
-                    graph.frame(tg.asVertex(), AccessibleEntity.class), user,
-                    PermissionType.GRANT);
+            switch (manager.getEntityClass(tg)) {
+                case CONTENT_TYPE:
+                    helper.checkContentPermission(user, ContentTypes.withName(tg.getId()), PermissionType.GRANT);
+                    break;
+                default:
+                    helper.checkEntityPermission(
+                        graph.frame(tg.asVertex(), AccessibleEntity.class), user, PermissionType.GRANT);
+            }
         }
         acl.revokePermissionGrant(grant);
     }
@@ -222,7 +224,7 @@ public final class AclViews {
             // Log the action...
             new ActionManager(graph).logEvent(group,
                     graph.frame(grantee.asVertex(), Actioner.class),
-                    "Added user to group").addSubjects(
+                    EventTypes.addGroup).addSubjects(
                     graph.frame(user.asVertex(), AccessibleEntity.class));
             graph.getBaseGraph().stopTransaction(Conclusion.SUCCESS);
         } catch (Exception e) {
@@ -249,7 +251,7 @@ public final class AclViews {
             // Log the action...
             new ActionManager(graph).logEvent(group,
                     graph.frame(grantee.asVertex(), Actioner.class),
-                    "Removed user from group").addSubjects(
+                    EventTypes.removeGroup).addSubjects(
                     graph.frame(user.asVertex(), AccessibleEntity.class));
             graph.getBaseGraph().stopTransaction(Conclusion.SUCCESS);
         } catch (Exception e) {

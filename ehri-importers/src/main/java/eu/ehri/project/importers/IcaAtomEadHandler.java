@@ -5,10 +5,8 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.base.Description;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Stack;
 import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,19 +23,28 @@ public class IcaAtomEadHandler extends SaxXmlHandler {
 
     private static final Logger logger = LoggerFactory
             .getLogger(IcaAtomEadHandler.class);
-    List<DocumentaryUnit>[] children;
+    private final List<DocumentaryUnit>[] children = new ArrayList[12];
     // Pattern for EAD nodes that represent a child item
     private Pattern childItemPattern = Pattern.compile("^/*c(?:\\d*)$");
+
+    /**
+     * Set a custom resolver so EAD DTDs are never looked up online.
+     * @param publicId
+     * @param systemId
+     * @return
+     * @throws org.xml.sax.SAXException
+     * @throws java.io.IOException
+     */
+    public org.xml.sax.InputSource resolveEntity(String publicId, String systemId)
+            throws org.xml.sax.SAXException, java.io.IOException {
+        // This is the equivalent of returning a null dtd.
+        return new org.xml.sax.InputSource(new java.io.StringReader(""));
+    }
 
     @SuppressWarnings("unchecked")
     public IcaAtomEadHandler(AbstractImporter<Map<String, Object>> importer) {
         super(importer, new XmlImportProperties("icaatom.properties"));
-        this.importer = importer;
-        currentGraphPath = new Stack<Map<String, Object>>();
-        currentGraphPath.push(new HashMap<String, Object>());
-        children = new ArrayList[12]; //12 is the deepest ead child levels go
         children[depth] = new ArrayList<DocumentaryUnit>();
-        currentPath = new Stack<String>();
     }
 
     @Override
@@ -80,19 +87,26 @@ public class IcaAtomEadHandler extends SaxXmlHandler {
                     if (!currentGraph.containsKey(Description.LANGUAGE_CODE)) {
                         currentGraph.put(Description.LANGUAGE_CODE, "en");
                     }
-                    DocumentaryUnit current = (DocumentaryUnit) importer.importItem(currentGraph, depth);
-                    logger.debug("importer used: " + importer.getClass());
-                    if (depth > 0) { // if not on root level
-                        children[depth - 1].add(current); // add child to parent offspring
-                        //set the parent child relationships by hand, as we don't have the parent Documentary unit yet.
-                        //only when closing a DocUnit, one can set the relationship to its children, but not its parent, as that has not yet been closed.
-                        for (DocumentaryUnit child : children[depth]) {
-                            if (child != null) {
-                                current.addChild(child);
-                                child.setPermissionScope(current);
-                            }
+                if (!currentGraph.containsKey(Description.LANGUAGE_CODE)) {
+                    currentGraph.put(Description.LANGUAGE_CODE, "en");
+                }
+                DocumentaryUnit current = (DocumentaryUnit)importer.importItem(currentGraph, depth);
+                logger.debug("importer used: " + importer.getClass());
+                if (depth > 0) { // if not on root level
+                    children[depth - 1].add(current); // add child to parent offspring
+                    //set the parent child relationships by hand, as we don't have the parent Documentary unit yet.
+                    //only when closing a DocUnit, one can set the relationship to its children, but not its parent, as that has not yet been closed.
+                    for (DocumentaryUnit child : children[depth]) {
+                        if (child != null) {
+                            current.addChild(child);
+                            // FIXME: Is this correct??? It should be done automatically
+                            // using the scope of the BundleDAO, but because the actual
+                            // parent doesn't exist, we have to override it and set
+                            // this here...
+                            child.setPermissionScope(current);
                         }
                     }
+                }
                 } catch (ValidationError ex) {
                     logger.error(ex.getMessage());
                 } finally {

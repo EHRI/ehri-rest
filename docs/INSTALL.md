@@ -49,26 +49,23 @@ Clone the EHRI server code from Github:
 
 While Maven is doing its thing, we can install a standalone version of the Neo4j server. Once the code has been built, we can enable the EHRI REST service within the standalone Neo4j server.
 
-	curl -L -0 "http://download.neo4j.org/artifact?edition=community&version=1.9.RC1&distribution=tarball&dlid=233206" | tar zx -C ~/apps
+	curl -L -0 "http://download.neo4j.org/artifact?edition=community&version=1.9&distribution=tarball&dlid=1957811" | tar zx -C ~/apps
 	
-We'll need to refer to the installation location a lot so save it:
+We'll need to refer to the installation location a lot so save it as an environment variable:
 
-	export NEO4J_VERSION=1.9.RC1
+	export NEO4J_VERSION=1.9
 	export NEO4J_HOME=$HOME/apps/neo4j-community-${NEO4J_VERSION}
 	export NEO4J_DB=$NEO4J_HOME/data/graph.db
 
-Once both the EHRI server code has been compiled and Neo4j standalone has been downloaded and extracted, we can install the former into the latter. First, however, we need to upgrade some libraries in the Neo4j dependencies. At present, for compatibility reasons, Neo4j uses an old version of a library called Blueprints. EHRI uses a more recent version. While this situation is unfortunate, it should be remedied before long. For the time being we have to replace some jars with newer versions. There is a script for this bundled with the EHRI code:
-
-	./scripts/replacejars.sh
-
-Once that's done, we can run another script to install the EHRI libraries:
+Once both the EHRI server code has been compiled and Neo4j standalone has been downloaded and extracted, we can install the former into the latter. The following script ensures the code is packaged and then installs the EHRI jars and
+various other dependencies into the `$NEO4J_HOME/plugin/ehri` directory:
 
 	./scripts/install.sh
 
 Once that has completed the script will warn us that we have to make one configuation change manually:
 
-**IMPORTANT**: You must manually ensure the $NEO4J_HOME/conf/neo4j-server.properties configuration contains the line:
-   org.neo4j.server.thirdparty_jaxrs_classes=eu.ehri.extension=/ehri
+> **IMPORTANT**: You must manually ensure the $NEO4J_HOME/conf/neo4j-server.properties configuration contains the line:
+>   org.neo4j.server.thirdparty_jaxrs_classes=eu.ehri.extension=/ehri
 
 Open that file and add that line below the point where a similar example config is commented out. This step is vital so Neo4j knows to load our EHRI extension code.
 
@@ -76,7 +73,7 @@ At this point, if we go to http://localhost:7474 we should be able to see the Ne
 
 	$NEO4J_HOME/bin/neo4j stop
 
-Then, referring to the location of the Neo4j _database_ direction rather than the installation home, run the following commands from the EHRI code root:
+Then run the following commands from the EHRI code root:
 
 	./scripts/cmd initialize  # NB: This can only be done once!
 
