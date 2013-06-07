@@ -24,7 +24,7 @@ dateperiod,type,,,
 dateperiod,startDate,,,
 dateperiod,endDate,,,
 documentDescription,creationDate,,,1
-documentDescription,rules,,,
+documentDescription,rulesAndConventions,,,
 documentDescription,accruals,,,
 documentDescription,acquisition,,,
 documentDescription,appraisal,,,
@@ -35,6 +35,7 @@ documentDescription,conditionsOfReproduction,,,
 documentDescription,extentAndMedium,,,
 documentDescription,locationOfCopies,,,1
 documentDescription,locationOfOriginals,,,1
+documentDescription,notes,,,1
 documentDescription,physicalCharacteristics,,,
 documentDescription,scopeAndContent,,,
 documentDescription,systemOfArrangement,,,
