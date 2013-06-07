@@ -103,8 +103,9 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
 
             SAXParserFactory spf = SAXParserFactory.newInstance();
             spf.setNamespaceAware(false);
-            if (!isTolerant()) {
-                spf.setValidating(!isTolerant());
+            if (isTolerant()) {
+                logger.debug("Turning off validation and setting schema to null");
+                spf.setValidating(false);
                 spf.setSchema(null);
             }
             logger.debug("isValidating: " + spf.isValidating());
