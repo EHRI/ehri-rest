@@ -211,10 +211,28 @@ class DataConverter {
     private static Map<String, Object> sanitiseProperties(Map<?, ?> data) {
         Map<String, Object> cleaned = Maps.newHashMap();
         for (Entry<?, ?> entry : data.entrySet()) {
-            if (entry.getKey() instanceof String && entry.getValue() != null)
+            Object value = entry.getValue();
+            // Allow any null value, as long as it's not an empty array
+            if (value != null && !isEmptySequence(value)) {
                 cleaned.put((String) entry.getKey(), entry.getValue());
+            }
         }
         return cleaned;
+    }
+
+    /**
+     * Ensure a value isn't an empty array or list, which will
+     * cause Neo4j to barf.
+     * @param value
+     * @return
+     */
+    private static boolean isEmptySequence(Object value) {
+        if (value instanceof Object[]) {
+            return ((Object[]) value).length == 0;
+        } else if (value instanceof List<?>) {
+            return ((List) value).isEmpty();
+        }
+        return false;
     }
 
     /**
