@@ -1,15 +1,12 @@
-
 package eu.ehri.project.importers;
-import com.google.common.collect.Lists;
+
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.base.Description;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Stack;
 import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +20,7 @@ import org.xml.sax.SAXException;
  * @author linda
  */
 public class IcaAtomEadHandler extends SaxXmlHandler {
+
     private static final Logger logger = LoggerFactory
             .getLogger(IcaAtomEadHandler.class);
     private final List<DocumentaryUnit>[] children = new ArrayList[12];
@@ -71,22 +69,24 @@ public class IcaAtomEadHandler extends SaxXmlHandler {
     public void endElement(String uri, String localName, String qName) throws SAXException {
         //the child closes, add the new DocUnit to the list, establish some relations
         super.endElement(uri, localName, qName);
-        if (childItemPattern.matcher(qName).matches() || qName.equals("archdesc")) {
+
+        if (needToCreateSubNode(qName)) {
             Map<String, Object> currentGraph = currentGraphPath.pop();
-            try {
-                //add any mandatory fields not yet there:
-                if (!currentGraph.containsKey(Description.NAME)) {
-                    for(String key: currentGraph.keySet()){
-                        logger.debug(key + ":" + currentGraph.get(key));
+            if (childItemPattern.matcher(qName).matches() || qName.equals("archdesc")) {
+                try {
+                    //add any mandatory fields not yet there:
+                    if (!currentGraph.containsKey(Description.NAME)) {
+                        //finding some name for this unit:
+                        if (currentGraph.containsKey("title")) {
+                            currentGraph.put(Description.NAME, currentGraph.get("title"));
+                        } else {
+                            logger.error("IcaAtom node without name field: ");
+                            currentGraph.put(Description.NAME, "UNKNOWN title");
+                        }
                     }
-                    //finding some name for this unit:
-                    if(currentGraph.containsKey("title"))
-                        currentGraph.put(Description.NAME, currentGraph.get("title"));
-                    else{
-                        logger.error("IcaAtom node without name field: " );
-                        currentGraph.put(Description.NAME, "UNKNOWN title");
+                    if (!currentGraph.containsKey(Description.LANGUAGE_CODE)) {
+                        currentGraph.put(Description.LANGUAGE_CODE, "en");
                     }
-                }
                 if (!currentGraph.containsKey(Description.LANGUAGE_CODE)) {
                     currentGraph.put(Description.LANGUAGE_CODE, "en");
                 }
@@ -107,20 +107,30 @@ public class IcaAtomEadHandler extends SaxXmlHandler {
                         }
                     }
                 }
-
-            } catch (ValidationError ex) {
-                logger.error(ex.getMessage());
-            } finally {
+                } catch (ValidationError ex) {
+                    logger.error(ex.getMessage());
+                } finally {
+                    depth--;
+                }
+            } else {
+                putSubGraphInCurrentGraph(getImportantPath(currentPath), currentGraph);
                 depth--;
             }
         }
-        
+
         currentPath.pop();
     }
 
     @Override
     protected boolean needToCreateSubNode(String qName) {
-        return childItemPattern.matcher(qName).matches() || qName.equals("archdesc");
+        //child or parent unit:
+        boolean need = childItemPattern.matcher(qName).matches() || qName.equals("archdesc");
+        //controlAccess 
+        String path = getImportantPath(currentPath);
+        if (path != null) {
+            need = need || path.endsWith("Access");
+        }
+        return need;
     }
 
     @Override

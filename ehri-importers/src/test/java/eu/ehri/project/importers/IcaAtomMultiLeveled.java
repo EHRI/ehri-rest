@@ -7,21 +7,24 @@ package eu.ehri.project.importers;
 import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Repository;
+import eu.ehri.project.models.UndeterminedRelationship;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.events.SystemEvent;
 import java.io.InputStream;
 import java.util.List;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author linda
  */
 public class IcaAtomMultiLeveled extends AbstractImporterTest{
-    
+    private static final Logger logger = LoggerFactory.getLogger(IcaAtomMultiLeveled.class);
      protected final String SINGLE_EAD = "zbirka-gradiva-za-povijest-zidova-collection-of-material-concerning-history-of-jews.xml";
-
+private final String UN_REL = "HR-HDA145corporateBodyAccessCroatianStateArchive";
     // Depends on fixtures
     protected final String TEST_REPO = "r1";
 
@@ -65,7 +68,11 @@ public class IcaAtomMultiLeveled extends AbstractImporterTest{
         DocumentaryUnit unit = graph.frame(docs.iterator().next(), DocumentaryUnit.class);
         for(Description d : unit.getDocumentDescriptions())
             assertEquals("Zbirka gradiva za povijest Židova (Collection of material concerning the history of Jews)", d.getName());
-
+//  UndeterminedRelationship creator = graph.frame(graph.getVertices("identifier", UN_REL).iterator().next(), UndeterminedRelationship.class);
+//        for(String key : creator.asVertex().getPropertyKeys()){
+//            logger.debug(key + ": " + creator.asVertex().getProperty(key));
+//        }
+//        assertTrue(creator.asVertex().getPropertyKeys().contains("role"));
         for(SystemEvent event : unit.getLatestEvent()){
             System.out.println("event: " + event.getLogMessage());
         }
