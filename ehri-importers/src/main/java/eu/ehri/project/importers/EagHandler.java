@@ -89,5 +89,4 @@ public class EagHandler extends SaxXmlHandler {
         schemas.add("eag.xsd");
         return schemas;
     }
-
 }
