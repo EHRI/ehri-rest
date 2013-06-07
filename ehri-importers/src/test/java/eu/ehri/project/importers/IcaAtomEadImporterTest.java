@@ -49,9 +49,10 @@ public class IcaAtomEadImporterTest extends AbstractImporterTest{
        	// - 5 more DocumentDescription
 	// - 1 more DatePeriod
         // - 2 more UnknownProperties
+        // - 1 UndeterminedRelationship, from origination/name
 	// - 6 more import Event links (4 for every Unit, 1 for the User)
         // - 1 more import Event
-        assertEquals(count + 20, getNodeCount(graph));
+        assertEquals(count + 21, getNodeCount(graph));
 
         Iterable<Vertex> docs = graph.getVertices(IdentifiableEntity.IDENTIFIER_KEY,
                 FONDS_LEVEL);
