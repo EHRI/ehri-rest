@@ -115,7 +115,7 @@ public abstract class AbstractImporter<T> {
      * @param value
      * @param entity - the EntityClass with which this frameMap must comply
      */
-    protected String changeForbiddenMultivaluedProperties(String key, Object value, EntityClass entity) {
+    protected Object changeForbiddenMultivaluedProperties(String key, Object value, EntityClass entity) {
         if (pc == null) {
             pc = new NodeProperties();
             try {
@@ -139,7 +139,7 @@ public abstract class AbstractImporter<T> {
                 && (!pc.hasProperty(entity.getName(), key) || !pc.isMultivaluedProperty(entity.getName(), key))) {
             return stringJoiner.join((List<String>) value);
         } else {
-            return value.toString();
+            return value;
         }
     }
 }

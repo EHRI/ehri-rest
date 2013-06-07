@@ -20,6 +20,8 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import javax.sound.midi.SoundbankResource;
+
 import static eu.ehri.project.models.base.Description.LANGUAGE_CODE;
 
 /**
@@ -179,11 +181,12 @@ public abstract class SaxXmlHandler extends DefaultHandler {
         // FIXME: Badness alert. Need to find a letter way to detect these transformations
         // then relying on the name of the property containing 'language'
         // MB: Egregious hack - translate 3-letter language codes to 2-letter ones!!!
+
         if (property.startsWith("language")) {
-            value = Helpers.iso639Three2Two(value.trim());
+            valuetrimmed = Helpers.iso639Three2Two(valuetrimmed);
         }
 
-        logger.debug("putProp: " + property + " " + value);
+        logger.debug("putProp: " + property + " " + valuetrimmed);
 
         Object propertyList;
         if (c.containsKey(property)) {
