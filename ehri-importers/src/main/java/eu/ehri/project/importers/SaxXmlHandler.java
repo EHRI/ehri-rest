@@ -12,6 +12,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
+
+import eu.ehri.project.importers.util.Helpers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
@@ -90,8 +92,9 @@ public abstract class SaxXmlHandler extends DefaultHandler {
 
         for (int attr = 0; attr < attributes.getLength(); attr++) { // only certain attributes get stored
             String attribute = withoutNamespace(attributes.getLocalName(attr));
-            if (properties.hasAttributeProperty(attribute) && !properties.getAttributeProperty(attribute).equals(LANGUAGE_CODE)) {
-                putPropertyInCurrentGraph(getImportantPath(currentPath, "@"+ properties.getAttributeProperty(attribute)), attributes.getValue(attr));
+            if (properties.hasAttributeProperty(attribute)
+                    && !properties.getAttributeProperty(attribute).equals(LANGUAGE_CODE)) {
+                putPropertyInCurrentGraph(getImportantPath(currentPath, "@" + properties.getAttributeProperty(attribute)), attributes.getValue(attr));
             }
         }
 
@@ -172,6 +175,14 @@ public abstract class SaxXmlHandler extends DefaultHandler {
         if (valuetrimmed.isEmpty()) {
             return;
         }
+
+        // FIXME: Badness alert. Need to find a letter way to detect these transformations
+        // then relying on the name of the property containing 'language'
+        // MB: Egregious hack - translate 3-letter language codes to 2-letter ones!!!
+        if (property.startsWith("language")) {
+            value = Helpers.iso639Three2Two(value.trim());
+        }
+
         logger.debug("putProp: " + property + " " + value);
 
         Object propertyList;
