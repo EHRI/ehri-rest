@@ -29,7 +29,20 @@ public class IcaAtomEadHandler extends SaxXmlHandler {
     // Pattern for EAD nodes that represent a child item
     private Pattern childItemPattern = Pattern.compile("^/*c(?:\\d*)$");
 
-    
+    /**
+     * Set a custom resolver so EAD DTDs are never looked up online.
+     * @param publicId
+     * @param systemId
+     * @return
+     * @throws org.xml.sax.SAXException
+     * @throws java.io.IOException
+     */
+    public org.xml.sax.InputSource resolveEntity(String publicId, String systemId)
+            throws org.xml.sax.SAXException, java.io.IOException {
+        // This is the equivalent of returning a null dtd.
+        return new org.xml.sax.InputSource(new java.io.StringReader(""));
+    }
+
     @SuppressWarnings("unchecked")
     public IcaAtomEadHandler(AbstractImporter<Map<String, Object>> importer) {
         super(importer, new XmlImportProperties("icaatom.properties"));
