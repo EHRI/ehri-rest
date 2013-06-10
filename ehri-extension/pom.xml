@@ -8,7 +8,16 @@
 		<version>1.0</version>
 	</parent>
 
-	<artifactId>ehri-extension</artifactId>
+    <properties>
+        <sesame.version>2.6.10</sesame.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!-- Jar Versions -->
+        <!-- was 1.8-SNAPSHOT -->
+        <!-- <neo4j.version>1.8.M07</neo4j.version> -->
+    </properties>
+
+
+    <artifactId>ehri-extension</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 
 	<!-- TODO add license info and more -->
@@ -150,6 +159,74 @@
 			</exclusions>
 		</dependency>
 
+        <dependency>
+            <groupId>com.tinkerpop.blueprints</groupId>
+            <artifactId>blueprints-sail-graph</artifactId>
+            <version>${tinkerpop-version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>slf4j-log4j12</artifactId>
+                    <groupId>org.slf4j</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>log4j</artifactId>
+                    <groupId>log4j</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>neo4j-ha</artifactId>
+                    <groupId>org.neo4j</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>neo4j-management</artifactId>
+                    <groupId>org.neo4j</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.tinkerpop.blueprints</groupId>
+            <artifactId>blueprints-graph-sail</artifactId>
+            <version>${tinkerpop-version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>log4j</artifactId>
+                    <groupId>log4j</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>neo4j-ha</artifactId>
+                    <groupId>org.neo4j</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>neo4j-management</artifactId>
+                    <groupId>org.neo4j</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.openrdf.sesame</groupId>
+            <artifactId>sesame-rio-ntriples</artifactId>
+            <version>${sesame.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openrdf.sesame</groupId>
+            <artifactId>sesame-repository-api</artifactId>
+            <version>${sesame.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openrdf.sesame</groupId>
+            <artifactId>sesame-repository-sail</artifactId>
+            <version>${sesame.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openrdf.sesame</groupId>
+            <artifactId>sesame-query</artifactId>
+            <version>${sesame.version}</version>
+        </dependency>
+
+
         <!-- logging -->
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
@@ -201,14 +278,15 @@
 			<name>Neo4j Maven 2 snapshot repository</name>
 			<url>http://m2.neo4j.org/content/repositories/snapshots/</url>
 		</repository>
+        <repository>
+            <id>sonatype-nexus-snapshots</id>
+            <name>Sonatype Nexus Snapshots</name>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </repository>
+        <repository>
+            <id>openrdf</id>
+            <name>openrdf</name>
+            <url>http://repo.aduna-software.org/maven2/releases/</url>
+        </repository>
 	</repositories>
-
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<!-- Jar Versions -->
-		<!-- was 1.8-SNAPSHOT -->
-		<!-- <neo4j.version>1.8.M07</neo4j.version> -->
-	</properties>
-
-
 </project>
