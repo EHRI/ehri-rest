@@ -1,5 +1,7 @@
 package eu.ehri.extension;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraphFactory;
 import com.tinkerpop.blueprints.oupls.sail.pg.PropertyGraphSail;
@@ -7,6 +9,7 @@ import info.aduna.iteration.CloseableIteration;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.type.TypeReference;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.openrdf.model.Literal;
 import org.openrdf.model.URI;
@@ -28,9 +31,12 @@ import org.openrdf.sail.Sail;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by michaelb on 10/06/13.
@@ -60,7 +66,7 @@ public class SparQLResource extends AbstractRestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/")
-    public StreamingOutput sparqlQuery(
+    public Response sparqlQuery(
             @DefaultValue("") @QueryParam("q") String queryString) throws Exception {
         System.out.println("SPARQL: " + queryString);
         initSail();
@@ -74,14 +80,35 @@ public class SparQLResource extends AbstractRestResource {
                     query.getTupleExpr(), query.getDataset(),
                     bindings, false);*/
 
+            /*test2(queryString);
+
+
             SailTupleQuery tupleQuery = repo.getConnection().prepareTupleQuery(
                     QueryLanguage.SPARQL, queryString, "http://example.org/bogus");
-            TupleQueryResult result = tupleQuery.evaluate();
+            TupleQueryResult result = tupleQuery.evaluate();*/
 
+            ParsedQuery query = new SPARQLParser().parseQuery(queryString, "http://example.org/bogus/");
+            CloseableIteration<? extends BindingSet, QueryEvaluationException> results
+                    = sail.getConnection().evaluate(query.getTupleExpr(), query.getDataset(), new EmptyBindingSet(), false);
             try {
-                return streamingResults(result);
+                List<Map<String,String>> out = Lists.newArrayList();
+                while (results.hasNext()) {
+                    BindingSet next = results.next();
+                    Map<String,String> set = Maps.newHashMap();
+                    for (String name : next.getBindingNames()) {
+                        System.out.println("key = " + name + ", value = " + next.getValue(name).stringValue());
+                        set.put(name, next.getValue(name).stringValue());
+                    }
+                    out.add(set);
+                }
+                JsonFactory factory = new JsonFactory();
+                ObjectMapper mapper = new ObjectMapper(factory);
+                TypeReference<List<Map<String,String>>> typeRef = new TypeReference<List<Map<String,String>>>() {
+                };
+
+                return Response.ok(mapper.writeValueAsBytes(out)).build();
             } finally {
-                result.close();
+                results.close();
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -117,18 +144,35 @@ public class SparQLResource extends AbstractRestResource {
                 .evaluate(query.getTupleExpr(), query.getDataset(), new EmptyBindingSet(), false);
 */
 
-        SailTupleQuery tupleQuery = repo.getConnection().prepareTupleQuery(QueryLanguage.SPARQL, queryStr, "http://example.org/bogus");
+        SailTupleQuery tupleQuery = repo.getConnection()
+                .prepareTupleQuery(QueryLanguage.SPARQL, queryStr, "http://example.org/bogus");
         TupleQueryResult result = tupleQuery.evaluate();
 
         try {
             while (result.hasNext()) {
                 BindingSet next = result.next();
                 for (String name : next.getBindingNames()) {
-                    System.out.println("key = " + name + ", value = " + name);
+                    System.out.println("key = " + name + ", value = " + next.getValue(name).stringValue());
                 }
             }
         } finally {
             result.close();
+        }
+    }
+
+    private void test2(String queryStr) throws Exception {
+        ParsedQuery query = new SPARQLParser().parseQuery(queryStr, "http://example.org/bogus/");
+        CloseableIteration<? extends BindingSet, QueryEvaluationException> results
+                = sail.getConnection().evaluate(query.getTupleExpr(), query.getDataset(), new EmptyBindingSet(), false);
+        try {
+            while (results.hasNext()) {
+                BindingSet set = results.next();
+                URI project = (URI) set.getValue("project");
+                Literal name = (Literal) set.getValue("name");
+                System.out.println("project = " + project + ", name = " + name);
+            }
+        } finally {
+            results.close();
         }
     }
 
@@ -148,7 +192,7 @@ public class SparQLResource extends AbstractRestResource {
         }
     }
 
-    private StreamingOutput streamingResults(final CloseableIteration iterable) {
+    private StreamingOutput streamingResults(final CloseableIteration iterable) throws Exception{
         final ObjectMapper mapper = new ObjectMapper();
         final JsonFactory f = new JsonFactory();
         return new StreamingOutput() {
@@ -170,7 +214,7 @@ public class SparQLResource extends AbstractRestResource {
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
-                    throw new WebApplicationException(e);
+                    throw new RuntimeException(e);
                 }
                 g.writeEndArray();
                 g.close();
