@@ -3,6 +3,7 @@ package eu.ehri.project.core.impl;
 import java.util.*;
 
 import com.tinkerpop.blueprints.*;
+
 import eu.ehri.project.models.base.Frame;
 import org.apache.lucene.queryParser.QueryParser;
 import org.neo4j.graphdb.Node;
