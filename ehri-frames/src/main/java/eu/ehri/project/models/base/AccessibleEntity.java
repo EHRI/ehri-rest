@@ -33,7 +33,7 @@ public interface AccessibleEntity extends PermissionGrantTarget {
     @Adjacency(label = HAS_PERMISSION_SCOPE)
     public void setPermissionScope(final PermissionScope scope);
 
-    @GremlinGroovy("_().as('n').out('" + HAS_PERMISSION_SCOPE
+    @GremlinGroovy("it.as('n').out('" + HAS_PERMISSION_SCOPE
             + "').loop('n'){it.loops < 20}{true}")
     public Iterable<PermissionScope> getPermissionScopes();
 
@@ -42,14 +42,14 @@ public interface AccessibleEntity extends PermissionGrantTarget {
      * 
      * @return
      */
-    @GremlinGroovy("_().as('n').out('" + ActionManager.LIFECYCLE_EVENT + "')"
+    @GremlinGroovy("it.as('n').out('" + ActionManager.LIFECYCLE_EVENT + "')"
             + ".loop('n'){true}{true}.out('" + eu.ehri.project.models.events.SystemEvent.HAS_EVENT + "')")
     public Iterable<SystemEvent> getHistory();
 
     // FIXME: This should be a single item return but frames doesn't currently
     // support those...
     @Fetch(value = ActionManager.LIFECYCLE_EVENT, ifDepth = 0)
-    @GremlinGroovy("_().as('n').out('" + ActionManager.LIFECYCLE_EVENT + "')"
+    @GremlinGroovy("it.as('n').out('" + ActionManager.LIFECYCLE_EVENT + "')"
             + ".out('" + eu.ehri.project.models.events.SystemEvent.HAS_EVENT + "')")
     public Iterable<SystemEvent> getLatestEvent();
 }

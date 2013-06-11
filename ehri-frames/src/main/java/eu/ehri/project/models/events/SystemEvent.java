@@ -37,12 +37,12 @@ public interface SystemEvent extends AccessibleEntity {
     public String getLogMessage();
 
     @Fetch(HAS_ACTIONER)
-    @GremlinGroovy("_().in('" + HAS_EVENT + "')"
+    @GremlinGroovy("it.in('" + HAS_EVENT + "')"
             + ".as('n').in('" + ActionManager.LIFECYCLE_ACTION
             + "').loop('n'){true}{!it.object.in('" + ActionManager.LIFECYCLE_ACTION + "').hasNext()}")
     public Iterable<Actioner> getActioners();
 
-    @GremlinGroovy("_().in('" + HAS_EVENT + "')"
+    @GremlinGroovy("it.in('" + HAS_EVENT + "')"
             + ".as('n').in('" + ActionManager.LIFECYCLE_EVENT
             + "').loop('n'){true}{!it.object.in('" + ActionManager.LIFECYCLE_EVENT + "').hasNext()}")
     public Iterable<AccessibleEntity> getSubjects();

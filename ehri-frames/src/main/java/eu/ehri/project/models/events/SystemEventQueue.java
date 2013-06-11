@@ -14,7 +14,7 @@ import eu.ehri.project.models.base.Frame;
 @EntityType(EntityClass.SYSTEM)
 public interface SystemEventQueue extends Frame {
 
-    @GremlinGroovy("_().out('lifecycleActionStream')._()"
+    @GremlinGroovy("it.out('lifecycleActionStream')._()"
             + ".copySplit(_(), _().as('n').out('lifecycleAction')"
             + ".loop('n'){true}{true}).exhaustMerge")
     public Iterable<SystemEvent> getSystemEvents();
