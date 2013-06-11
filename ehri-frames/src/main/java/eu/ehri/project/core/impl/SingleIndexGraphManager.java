@@ -169,31 +169,18 @@ public final class SingleIndexGraphManager implements GraphManager {
         Index<Vertex> index = getIndex();
         Map<String, Object> indexData = getVertexData(id, type, data);
         Collection<String> indexKeys = getVertexKeys(keys);
-        try {
-            checkExists(index, id);
-            Vertex node = graph.addVertex(null);
-            for (Map.Entry<String, Object> entry : indexData.entrySet()) {
-                if (entry.getValue() == null)
-                    continue;
-                node.setProperty(entry.getKey(), entry.getValue());
-                if (keys == null || indexKeys.contains(entry.getKey())) {
-                    index.put(entry.getKey(), String.valueOf(entry.getValue()),
-                            node);
-                }
+        checkExists(index, id);
+        Vertex node = graph.addVertex(null);
+        for (Map.Entry<String, Object> entry : indexData.entrySet()) {
+            if (entry.getValue() == null)
+                continue;
+            node.setProperty(entry.getKey(), entry.getValue());
+            if (keys == null || indexKeys.contains(entry.getKey())) {
+                index.put(entry.getKey(), String.valueOf(entry.getValue()),
+                        node);
             }
-            graph.getBaseGraph().stopTransaction(
-                    TransactionalGraph.Conclusion.SUCCESS);
-            return node;
-        } catch (IntegrityError e) {
-            graph.getBaseGraph().stopTransaction(
-                    TransactionalGraph.Conclusion.FAILURE);
-            throw e;
-        } catch (Exception e) {
-            graph.getBaseGraph().stopTransaction(
-                    TransactionalGraph.Conclusion.FAILURE);
-            e.printStackTrace();
-            throw new RuntimeException(e);
         }
+        return node;
     }
 
     public Vertex updateVertex(String id, EntityClass type,
@@ -212,20 +199,12 @@ public final class SingleIndexGraphManager implements GraphManager {
             try {
                 Vertex node = get.iterator().next();
                 replaceProperties(index, node, indexData, indexKeys);
-                graph.getBaseGraph().stopTransaction(
-                        TransactionalGraph.Conclusion.SUCCESS);
                 return node;
 
             } catch (NoSuchElementException e) {
-                graph.getBaseGraph().stopTransaction(
-                        TransactionalGraph.Conclusion.FAILURE);
                 throw new RuntimeException(String.format(
                         "Item with id '%s' not found in index: %s", id,
                         INDEX_NAME));
-            } catch (Exception e) {
-                graph.getBaseGraph().stopTransaction(
-                        TransactionalGraph.Conclusion.FAILURE);
-                throw new RuntimeException(e);
             }
         } finally {
             get.close();
@@ -259,8 +238,6 @@ public final class SingleIndexGraphManager implements GraphManager {
             index.remove(key, vertex.getProperty(key), vertex);
         }
         graph.removeVertex(vertex);
-        graph.getBaseGraph().stopTransaction(
-                TransactionalGraph.Conclusion.SUCCESS);
     }
 
     /**

@@ -3,11 +3,9 @@ package eu.ehri.project.views.impl;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.tinkerpop.blueprints.TransactionalGraph;
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.base.*;
-import org.neo4j.graphdb.Transaction;
 
 import com.tinkerpop.frames.FramedGraph;
 
@@ -92,31 +90,12 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
     public E create(Bundle bundle, Accessor user, Optional<String> logMessage)
             throws PermissionDenied, ValidationError, DeserializationError,
             IntegrityError {
-        Transaction tx = ((Neo4jGraph)graph.getBaseGraph()).getRawGraph().beginTx();
         // Behold: A compelling reason to upgrade to Java 7
         // http://docs.oracle.com/javase/7/docs/technotes/guides/language/catch-multiple.html
-        try {
-
-            E out = views.create(bundle, user);
-            actionManager.logEvent(out, graph.frame(user.asVertex(), Actioner.class),
-                    EventTypes.creation, logMessage);
-            tx.success();
-            return out;
-        } catch (IntegrityError ex) {
-            tx.failure();
-            throw ex;
-        } catch (PermissionDenied ex) {
-            tx.failure();
-            throw ex;
-        } catch (ValidationError ex) {
-            tx.failure();
-            throw ex;
-        } catch (Exception ex) {
-            tx.failure();
-            throw new RuntimeException(ex);
-        } finally {
-            tx.finish();
-        }
+        E out = views.create(bundle, user);
+        actionManager.logEvent(out, graph.frame(user.asVertex(), Actioner.class),
+                EventTypes.creation, logMessage);
+        return out;
     }
 
     /**
@@ -153,29 +132,10 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
     public E createOrUpdate(Bundle bundle, Accessor user, Optional<String> logMessage)
             throws PermissionDenied, ValidationError, DeserializationError,
             IntegrityError {
-        Transaction tx = ((Neo4jGraph)graph.getBaseGraph()).getRawGraph().beginTx();
-        try {
-
-            E out = views.createOrUpdate(bundle, user);
-            actionManager.logEvent(out, graph.frame(user.asVertex(), Actioner.class),
-                    EventTypes.modification, logMessage);
-            tx.success();
-            return out;
-        } catch (IntegrityError ex) {
-            tx.failure();
-            throw ex;
-        } catch (PermissionDenied ex) {
-            tx.failure();
-            throw ex;
-        } catch (ValidationError ex) {
-            tx.failure();
-            throw ex;
-        } catch (Exception ex) {
-            tx.failure();
-            throw new RuntimeException(ex);
-        } finally {
-            tx.finish();
-        }
+        E out = views.createOrUpdate(bundle, user);
+        actionManager.logEvent(out, graph.frame(user.asVertex(), Actioner.class),
+                EventTypes.modification, logMessage);
+        return out;
     }
 
     /**
@@ -211,27 +171,13 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
     public E update(Bundle bundle, Accessor user, Optional<String> logMessage)
             throws PermissionDenied, ValidationError, DeserializationError,
             IntegrityError {
-        Transaction tx = ((Neo4jGraph)graph.getBaseGraph()).getRawGraph().beginTx();
         try {
             E out = views.update(bundle, user);
             actionManager.logEvent(out, graph.frame(user.asVertex(), Actioner.class),
                     EventTypes.modification, logMessage);
-            tx.success();
             return out;
-        } catch (IntegrityError ex) {
-            tx.failure();
-            throw ex;
-        } catch (PermissionDenied ex) {
-            tx.failure();
-            throw ex;
-        } catch (ValidationError ex) {
-            tx.failure();
-            throw ex;
-        } catch (Exception ex) {
-            tx.failure();
-            throw new RuntimeException(ex);
-        } finally {
-            tx.finish();
+        } catch (ItemNotFound ex) {
+            throw new RuntimeException(ex); // FIXME: Remove this...
         }
     }
 
@@ -274,27 +220,13 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
             Class<T> dependentClass, Optional<String> logMessage)
             throws PermissionDenied, ValidationError, DeserializationError,
             IntegrityError {
-        Transaction tx = ((Neo4jGraph)graph.getBaseGraph()).getRawGraph().beginTx();
         try {
             T out = views.updateDependent(bundle, parent, user, dependentClass);
             actionManager.setScope(parent).logEvent(graph.frame(user.asVertex(),
                     Actioner.class), EventTypes.modification, logMessage);
-            tx.success();
             return out;
-        } catch (IntegrityError ex) {
-            tx.failure();
-            throw ex;
-        } catch (PermissionDenied ex) {
-            tx.failure();
-            throw ex;
-        } catch (ValidationError ex) {
-            tx.failure();
-            throw ex;
-        } catch (Exception ex) {
-            tx.failure();
+        } catch (ItemNotFound ex) {
             throw new RuntimeException(ex);
-        } finally {
-            tx.finish();
         }
     }
 
@@ -337,28 +269,10 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
                 Class<T> dependentClass, Optional<String> logMessage)
             throws PermissionDenied, ValidationError, DeserializationError,
             IntegrityError {
-        Transaction tx = ((Neo4jGraph)graph.getBaseGraph()).getRawGraph().beginTx();
-        try {
-            T out = views.createDependent(bundle, parent, user, dependentClass);
-            actionManager.setScope(parent).logEvent(
-                    graph.frame(user.asVertex(), Actioner.class), EventTypes.creation, logMessage);
-            tx.success();
-            return out;
-        } catch (IntegrityError ex) {
-            tx.failure();
-            throw ex;
-        } catch (PermissionDenied ex) {
-            tx.failure();
-            throw ex;
-        } catch (ValidationError ex) {
-            tx.failure();
-            throw ex;
-        } catch (Exception ex) {
-            tx.failure();
-            throw new RuntimeException(ex);
-        } finally {
-            tx.finish();
-        }
+        T out = views.createDependent(bundle, parent, user, dependentClass);
+        actionManager.setScope(parent).logEvent(
+                graph.frame(user.asVertex(), Actioner.class), EventTypes.creation, logMessage);
+        return out;
     }
 
     /**
@@ -391,25 +305,9 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      */
     public Integer delete(E item, Accessor user, Optional<String> logMessage)
             throws PermissionDenied, ValidationError, SerializationError {
-        Transaction tx = ((Neo4jGraph)graph.getBaseGraph()).getRawGraph().beginTx();
-        try {
-            actionManager.logEvent(item, graph.frame(user.asVertex(), Actioner.class),
-                    EventTypes.deletion, logMessage);
-            Integer count = views.delete(item, user);
-            tx.success();
-            return count;
-        } catch (PermissionDenied ex) {
-            tx.failure();
-            throw ex;
-        } catch (ValidationError ex) {
-            tx.failure();
-            throw ex;
-        } catch (Exception ex) {
-            tx.failure();
-            throw new RuntimeException(ex);
-        } finally {
-            tx.finish();
-        }
+        actionManager.logEvent(item, graph.frame(user.asVertex(), Actioner.class),
+                EventTypes.deletion, logMessage);
+        return views.delete(item, user);
     }
 
     /**
@@ -448,25 +346,9 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
     public <T extends Frame> Integer deleteDependent(T item, E parent, Accessor user,
             Class<T> dependentClass, Optional<String> logMessage)
             throws PermissionDenied, ValidationError, SerializationError {
-        Transaction tx = ((Neo4jGraph)graph.getBaseGraph()).getRawGraph().beginTx();
-        try {
-            actionManager.setScope(parent).logEvent(graph.frame(user.asVertex(), Actioner.class),
-                    EventTypes.deletion, logMessage);
-            Integer count = views.deleteDependent(item, parent, user, dependentClass);
-            tx.success();
-            return count;
-        } catch (PermissionDenied ex) {
-            tx.failure();
-            throw ex;
-        } catch (ValidationError ex) {
-            tx.failure();
-            throw ex;
-        } catch (Exception ex) {
-            tx.failure();
-            throw new RuntimeException(ex);
-        } finally {
-            tx.finish();
-        }
+        actionManager.setScope(parent).logEvent(graph.frame(user.asVertex(), Actioner.class),
+                EventTypes.deletion, logMessage);
+        return views.deleteDependent(item, parent, user, dependentClass);
     }
 
 
