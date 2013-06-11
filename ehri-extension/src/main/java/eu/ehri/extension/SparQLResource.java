@@ -89,15 +89,10 @@ public class SparQLResource extends AbstractRestResource {
     /**
      * Initialise the PropertySailGraph
      */
-    private void initSail() {
+    private void initSail() throws Exception {
         if (sail == null) {
             sail = new PropertyGraphSail(graph.getBaseGraph());
-            try {
-                sail.initialize();
-            } catch (Exception e) {
-                e.printStackTrace();
-                throw new WebApplicationException(e);
-            }
+            sail.initialize();
         }
     }
 
