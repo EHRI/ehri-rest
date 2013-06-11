@@ -34,7 +34,24 @@ import java.util.Map;
  * Resource for executing SparQL queries on the graph
  * database.
  * <p/>
- * * Insecure and SHOULD NOT be a public endpoint
+ * * Insecure and SHOULD NOT be a public endpoint.
+ * <p/>
+ * Example query:
+ * <p/>
+ * PREFIX edge:   <http://tinkerpop.com/pgm/edge/>
+ * PREFIX vertex: <http://tinkerpop.com/pgm/vertex/>
+ * PREFIX prop:   <http://tinkerpop.com/pgm/property/>
+ * PREFIX pgm:    <http://tinkerpop.com/pgm/ontology#>
+ * PREFIX rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+ * <p/>
+ * # Select all the userProfile nodes and their name properties...
+ * SELECT ?n ?u WHERE {
+ *    ?u a pgm:Vertex ;
+ *       prop:__ISA__  "userProfile" ;
+ *       prop:name     ?n .
+ * }
+ * <p/>
+ * LIMIT 100
  */
 @Path("sparql")
 public class SparQLResource extends AbstractRestResource {
@@ -54,6 +71,7 @@ public class SparQLResource extends AbstractRestResource {
 
     /**
      * Run a sparql query.
+     *
      * @param queryString
      * @return
      * @throws Exception
@@ -69,12 +87,12 @@ public class SparQLResource extends AbstractRestResource {
         ParsedQuery query = parser.parseQuery(queryString, "http://ehri-project.eu");
         CloseableIteration<? extends BindingSet, QueryEvaluationException> results
                 = sail.getConnection().evaluate(
-                    query.getTupleExpr(), query.getDataset(), new EmptyBindingSet(), false);
+                query.getTupleExpr(), query.getDataset(), new EmptyBindingSet(), false);
         try {
-            List<Map<String,String>> out = Lists.newArrayList();
+            List<Map<String, String>> out = Lists.newArrayList();
             while (results.hasNext()) {
                 BindingSet next = results.next();
-                Map<String,String> set = Maps.newHashMap();
+                Map<String, String> set = Maps.newHashMap();
                 for (String name : next.getBindingNames()) {
                     set.put(name, next.getValue(name).stringValue());
                 }
