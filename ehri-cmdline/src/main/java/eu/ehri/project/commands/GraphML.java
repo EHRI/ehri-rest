@@ -17,6 +17,7 @@ import com.tinkerpop.frames.FramedGraph;
 
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
+import eu.ehri.project.core.impl.GraphReindexer;
 
 /**
  * Dump the complete graph as graphml file or import such a dump
@@ -63,6 +64,9 @@ public class GraphML extends BaseCommand implements Command {
     protected void setCustomOptions() {
         options.addOption(new Option("d", true,
                 "Output or input a dump"));
+        
+//        options.addOption(new Option("log", true,
+//                "Log message for action."));
     }
     
     /**
@@ -75,6 +79,12 @@ public class GraphML extends BaseCommand implements Command {
     public int execWithOptions(final FramedGraph<Neo4jGraph> graph,
             CommandLine cmdLine) throws Exception {
 
+//        String logMessage = "";
+//        if (cmdLine.hasOption("log")) {
+//            logMessage = cmdLine.getOptionValue("log");
+//            System.err.println("log: {" + logMessage + "}");
+//        }
+        
         if (cmdLine.getArgList().size() < 1) {
             // throw new RuntimeException(getHelp());
             throw new IllegalArgumentException();
@@ -131,6 +141,8 @@ public class GraphML extends BaseCommand implements Command {
 
 	   InputStream in = new FileInputStream(filepath);
 	   reader.inputGraph(in);
+	   
+	   GraphReindexer.reindex(graph);
    }
     
 }
