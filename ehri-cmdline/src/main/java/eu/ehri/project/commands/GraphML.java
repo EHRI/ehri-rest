@@ -2,6 +2,7 @@ package eu.ehri.project.commands;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -113,23 +114,27 @@ public class GraphML extends BaseCommand implements Command {
         final GraphManager manager = GraphManagerFactory.getInstance(graph);
         GraphDatabaseService neo4jGraph = graph.getBaseGraph().getRawGraph();
  
-        OutputStream out = new ByteArrayOutputStream();
+//        OutputStream out = new ByteArrayOutputStream();
         GraphMLWriter writer = new GraphMLWriter(graph);
-
         writer.setNormalize(true);
-        writer.outputGraph(out); // Note its all in memmory now!
+
+//        writer.outputGraph(out); // Note its all in memmory now!
         
         String filepath = (String)cmdLine.getArgList().get(0);
         
         // if the file is '-' that means we do standard out
         if (filepath.contentEquals("-")) {
             // to stdout
-            System.out.println(out.toString());  	
+//            System.out.println(out.toString()); 
+            writer.outputGraph(System.out); 
         } else {
             // try to open or create the file for writing
-            FileWriter fileWriter = new FileWriter(filepath);
-            fileWriter.write(out.toString());   
-            fileWriter.close(); // also flushes
+//            FileWriter fileWriter = new FileWriter(filepath);
+//            fileWriter.write(out.toString());   
+//            fileWriter.close(); // also flushes
+            OutputStream out = new FileOutputStream(filepath);
+            writer.outputGraph(out); 
+            out.close();
         }        
     } 
     
