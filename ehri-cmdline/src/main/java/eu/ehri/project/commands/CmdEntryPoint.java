@@ -6,7 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.*;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
@@ -95,10 +95,24 @@ public class CmdEntryPoint extends BaseCommand {
 
                 try {
                     cmd.exec(graph, newArgs.toArray(new String[newArgs.size()]));
-                } catch (IllegalArgumentException e) {
+                } catch (MissingArgumentException e) {
                 	// options or parameters where not correct, so print the correct usage
-                	System.err.println(cmd.getUsage());
+                    System.err.println(e.getMessage());
+                    System.err.println(cmd.getUsage());
                 	return 1;
+                } catch (MissingOptionException e) {
+                    System.err.println(e.getMessage());
+                    System.err.println(cmd.getUsage());
+                    return 1;
+                } catch (AlreadySelectedException e) {
+                    System.err.println(e.getMessage());
+                    System.err.println(cmd.getUsage());
+                    return 1;
+                } catch (UnrecognizedOptionException e) {
+                    // options or parameters where not correct, so print the correct usage
+                    System.err.println(e.getMessage());
+                    System.err.println(cmd.getUsage());
+                    return 1;
                 } catch(Exception e) {
                     e.printStackTrace();
                     System.err.println("Error: " + e.getMessage());

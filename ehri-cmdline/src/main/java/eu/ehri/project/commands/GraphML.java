@@ -1,14 +1,14 @@
 package eu.ehri.project.commands;
 
-import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.OutputStream;
 
 import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.MissingArgumentException;
 import org.apache.commons.cli.Option;
+import org.apache.commons.cli.UnrecognizedOptionException;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
@@ -65,9 +65,6 @@ public class GraphML extends BaseCommand implements Command {
     protected void setCustomOptions() {
         options.addOption(new Option("d", true,
                 "Output or input a dump"));
-        
-//        options.addOption(new Option("log", true,
-//                "Log message for action."));
     }
     
     /**
@@ -80,15 +77,8 @@ public class GraphML extends BaseCommand implements Command {
     public int execWithOptions(final FramedGraph<Neo4jGraph> graph,
             CommandLine cmdLine) throws Exception {
 
-//        String logMessage = "";
-//        if (cmdLine.hasOption("log")) {
-//            logMessage = cmdLine.getOptionValue("log");
-//            System.err.println("log: {" + logMessage + "}");
-//        }
-        
         if (cmdLine.getArgList().size() < 1) {
-            // throw new RuntimeException(getHelp());
-            throw new IllegalArgumentException();
+            throw new MissingArgumentException("Graph file path missing");
         }
         
         String dumpMode = "out"; //defaults might also be handled by the parser?
@@ -97,13 +87,13 @@ public class GraphML extends BaseCommand implements Command {
         	dumpMode = cmdLine.getOptionValue("d");
         }
         
-        // check if option is usefull, otherwise print the help and bail out
+        // check if option is useful, otherwise print the help and bail out
         if (dumpMode.contentEquals("out")) {
         	saveDump(graph, cmdLine);
         } else if (dumpMode.contentEquals("in")) {
         	loadDump(graph, cmdLine);
         } else {
-        	throw new IllegalArgumentException();
+            throw new UnrecognizedOptionException("Unrecognised dump mode: '" + dumpMode + "'");
         }
         
         return 0;
@@ -114,24 +104,17 @@ public class GraphML extends BaseCommand implements Command {
         final GraphManager manager = GraphManagerFactory.getInstance(graph);
         GraphDatabaseService neo4jGraph = graph.getBaseGraph().getRawGraph();
  
-//        OutputStream out = new ByteArrayOutputStream();
         GraphMLWriter writer = new GraphMLWriter(graph);
         writer.setNormalize(true);
 
-//        writer.outputGraph(out); // Note its all in memmory now!
-        
         String filepath = (String)cmdLine.getArgList().get(0);
         
         // if the file is '-' that means we do standard out
         if (filepath.contentEquals("-")) {
             // to stdout
-//            System.out.println(out.toString()); 
-            writer.outputGraph(System.out); 
+            writer.outputGraph(System.out);
         } else {
             // try to open or create the file for writing
-//            FileWriter fileWriter = new FileWriter(filepath);
-//            fileWriter.write(out.toString());   
-//            fileWriter.close(); // also flushes
             OutputStream out = new FileOutputStream(filepath);
             writer.outputGraph(out); 
             out.close();
@@ -140,14 +123,10 @@ public class GraphML extends BaseCommand implements Command {
     
    public void loadDump(final FramedGraph<Neo4jGraph> graph,
            CommandLine cmdLine) throws Exception {
-	   GraphMLReader reader = new GraphMLReader(graph);
-	   
+       GraphMLReader reader = new GraphMLReader(graph);
        String filepath = (String)cmdLine.getArgList().get(0);
-
 	   InputStream in = new FileInputStream(filepath);
 	   reader.inputGraph(in);
-	   
 	   GraphReindexer.reindex(graph);
    }
-    
 }
