@@ -6,8 +6,10 @@ import static org.junit.Assert.assertNotNull;
 
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.Lists;
 import eu.ehri.project.models.base.IdentifiableEntity;
 import eu.ehri.project.test.ModelTestBase;
 import org.junit.Test;
@@ -141,9 +143,9 @@ public class CvocConceptTest extends ModelTestBase {
                             put(Description.LANGUAGE_CODE, TEST_LABEL_LANG);
                             put(ConceptDescription.PREFLABEL, "pref1");
                             // other properties are optional, but we put them in
-                            put("altLabel", new String[]{"alt1","alt2"});
-                            put(ConceptDescription.DEFINITION, new String[]{"def1"}); // allow multiple
-                            put(ConceptDescription.SCOPENOTE, new String[]{"sn1"}); // allow multiple
+                            put("altLabel", Lists.<String>newArrayList("alt1", "alt2"));
+                            put(ConceptDescription.DEFINITION, Lists.<String>newArrayList("def1")); // allow multiple
+                            put(ConceptDescription.SCOPENOTE, Lists.<String>newArrayList("sn1")); // allow multiple
                         }});
                     }});
                 }});
@@ -181,10 +183,10 @@ public class CvocConceptTest extends ModelTestBase {
 		//String[] altLabels = descr.getAltLabels();		
 		//assertEquals("alt2", altLabels[1]);
 		// NOTE we can't call getAltLabels() on the interface, because it is optional
-		String[] altLabels = (String[])descr.asVertex().getProperty(ConceptDescription.ALTLABEL);
+		List<String> altLabels = descr.asVertex().getProperty(ConceptDescription.ALTLABEL);
 		assertFalse(altLabels == null);
-		assertEquals(2, altLabels.length);
-		assertEquals("alt2", altLabels[1]);
+		assertEquals(2, altLabels.size());
+		assertEquals("alt2", altLabels.get(1));
 	}
     
 	@SuppressWarnings("serial")
