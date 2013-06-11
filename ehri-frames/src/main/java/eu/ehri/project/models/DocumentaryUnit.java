@@ -28,7 +28,7 @@ public interface DocumentaryUnit extends AccessibleEntity,
     // NB: This is only an iterable until we upgrade to frames 2.3.0
     // which supports GremlinGroovy annotations for single items
     @Fetch(Repository.HELD_BY)
-    @GremlinGroovy("_().copySplit(_(), _().as('n').out('" + CHILD_OF +"')"
+    @GremlinGroovy("it.copySplit(_(), _().as('n').out('" + CHILD_OF +"')"
             + ".loop('n'){true}{!it.object.out('" + CHILD_OF +"').hasNext()}"
             + ").exhaustMerge().out('" + Repository.HELD_BY + "')")
     public Iterable<Repository> getAgent();
@@ -54,7 +54,7 @@ public interface DocumentaryUnit extends AccessibleEntity,
     /*
      * Fetches a list of all ancestors (parent -> parent -> parent)
      */
-    @GremlinGroovy("_().as('n').out('" + CHILD_OF
+    @GremlinGroovy("it.as('n').out('" + CHILD_OF
             + "').loop('n'){it.loops < 20}{true}")
     public Iterable<DocumentaryUnit> getAncestors();
 

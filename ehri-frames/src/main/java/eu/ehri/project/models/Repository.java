@@ -18,7 +18,7 @@ public interface Repository extends AccessibleEntity, DescribedEntity,
     @Adjacency(label = HELD_BY, direction = Direction.IN)
     public Iterable<DocumentaryUnit> getCollections();
 
-    @GremlinGroovy("_().in('" + HELD_BY + "')"
+    @GremlinGroovy("it.in('" + HELD_BY + "')"
         + ".copySplit(_(), _().as('n').in('" + DocumentaryUnit.CHILD_OF + "')"
                 + ".loop('n'){true}{true}).fairMerge()")
     public Iterable<DocumentaryUnit> getAllCollections();
