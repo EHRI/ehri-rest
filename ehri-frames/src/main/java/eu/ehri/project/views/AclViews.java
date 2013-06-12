@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.common.base.Preconditions;
-import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.frames.FramedGraph;
 
 import eu.ehri.project.acl.AclManager;
@@ -30,7 +29,7 @@ import eu.ehri.project.persistance.ActionManager;
  */
 public final class AclViews {
 
-    private final FramedGraph<? extends TransactionalGraph> graph;
+    private final FramedGraph<?> graph;
     private final AclManager acl;
     private final ViewHelper helper;
     private final GraphManager manager;
@@ -42,7 +41,7 @@ public final class AclViews {
      * @param graph
      * @param scope
      */
-    public AclViews(FramedGraph<? extends TransactionalGraph> graph, PermissionScope scope) {
+    public AclViews(FramedGraph<?> graph, PermissionScope scope) {
         Preconditions.checkNotNull(scope);
         this.graph = graph;
         helper = new ViewHelper(graph, scope);
@@ -56,7 +55,7 @@ public final class AclViews {
      * 
      * @param graph
      */
-    public AclViews(FramedGraph<? extends TransactionalGraph> graph) {
+    public AclViews(FramedGraph<?> graph) {
         this(graph, SystemScope.getInstance());
     }
 

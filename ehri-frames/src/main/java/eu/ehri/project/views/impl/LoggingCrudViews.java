@@ -2,7 +2,6 @@ package eu.ehri.project.views.impl;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.tinkerpop.blueprints.TransactionalGraph;
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.base.*;
@@ -26,7 +25,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
 
     private final ActionManager actionManager;
     private final CrudViews<E> views;
-    private final FramedGraph<? extends TransactionalGraph> graph;
+    private final FramedGraph<?> graph;
     private final Class<E> cls;
     @SuppressWarnings("unused")
     private final PermissionScope scope;
@@ -37,7 +36,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @param graph
      * @param cls
      */
-    public LoggingCrudViews(FramedGraph<? extends TransactionalGraph> graph, Class<E> cls,
+    public LoggingCrudViews(FramedGraph<?> graph, Class<E> cls,
             PermissionScope scope) {
         Preconditions.checkNotNull(scope);
         this.graph = graph;
@@ -53,7 +52,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @param graph
      * @param cls
      */
-    public LoggingCrudViews(FramedGraph<? extends TransactionalGraph> graph, Class<E> cls) {
+    public LoggingCrudViews(FramedGraph<?> graph, Class<E> cls) {
         this(graph, cls, SystemScope.getInstance());
     }
 
