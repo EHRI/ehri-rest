@@ -73,6 +73,14 @@ public class VocabularyResource extends
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
+    @Path("/count")
+    public Response countVocabularies(@QueryParam(FILTER_PARAM) List<String> filters)
+            throws ItemNotFound, BadRequester {
+        return count(filters);
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("/page")
     public StreamingOutput pageVocabularies(
             @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
@@ -99,6 +107,21 @@ public class VocabularyResource extends
                 .setLimit(limit).setOffset(offset).orderBy(order)
                 .filter(filters);
         return streamingList(query.list(vocabulary.getConcepts(), user));
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id:.+}/count")
+    public Response countVocabularyConcepts(
+            @PathParam("id") String id,
+            @QueryParam(FILTER_PARAM) List<String> filters)
+            throws ItemNotFound, BadRequester, AccessDenied {
+        Accessor user = getRequesterUserProfile();
+        Vocabulary vocabulary = views.detail(manager.getFrame(id, cls), user);
+        Query<Concept> query = new Query<Concept>(graph, Concept.class)
+                .filter(filters);
+        return Response.ok((query.count(vocabulary.getConcepts(), user))
+                .toString().getBytes()).build();
     }
 
     @GET
@@ -251,12 +274,10 @@ public class VocabularyResource extends
         Bundle entityBundle = Bundle.fromString(json);
 
         Concept concept = new LoggingCrudViews<Concept>(graph, Concept.class,
-                vocabulary).create(entityBundle, getRequesterUserProfile(),
-                getLogMessage(getDefaultCreateMessage(EntityClass.CVOC_CONCEPT)));
+                vocabulary).create(entityBundle, getRequesterUserProfile(), getLogMessage());
 
         // Add it to this Vocabulary's concepts
         concept.setVocabulary(vocabulary);
-        concept.setPermissionScope(vocabulary);
         return concept;
     }
 

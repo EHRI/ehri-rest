@@ -5,7 +5,7 @@ Strategy for indexing EHRI graph data into Solr.
 --------------
 Solr has an API for updating the index with XML data and the EHRI neo4j extension has an API for extracting the data as XML. 
 Therfore it was a natural choice to transform the neo4j output to Solr input using XSLT. 
-The transformation is then specified by an XSL file and we can provide different fikles for different transforms.   
+The transformation is then specified by an XSL file and we can provide different files for different transforms.   
 
 Updating (or constructing) the Solr index from the command line is done in the following steps.
 

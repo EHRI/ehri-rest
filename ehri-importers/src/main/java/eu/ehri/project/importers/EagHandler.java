@@ -4,12 +4,12 @@
  */
 package eu.ehri.project.importers;
 
+import com.google.common.collect.ImmutableMap;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.MaintenanceEvent;
 import eu.ehri.project.models.base.Description;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -26,14 +26,13 @@ import org.xml.sax.SAXException;
  */
 public class EagHandler extends SaxXmlHandler {
 
-    Map<String, Class<? extends Frame>> possibleSubnodes;
+    private final ImmutableMap<String, Class<? extends Frame>> possibleSubnodes
+            = ImmutableMap.<String, Class<? extends Frame>>builder().put(
+            "maintenanceEvent", MaintenanceEvent.class).build();
     private static final Logger logger = LoggerFactory.getLogger(EagHandler.class);
 
     public EagHandler(AbstractImporter<Map<String, Object>> importer) {
-
         super(importer, new XmlImportProperties("eag.properties"));
-        possibleSubnodes = new HashMap<String, Class<? extends Frame>>();
-        possibleSubnodes.put("maintenanceEvent", MaintenanceEvent.class);
     }
 
     @Override
@@ -90,5 +89,4 @@ public class EagHandler extends SaxXmlHandler {
         schemas.add("eag.xsd");
         return schemas;
     }
-
 }

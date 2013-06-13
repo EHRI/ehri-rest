@@ -1,9 +1,6 @@
 package eu.ehri.extension;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -11,15 +8,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.Response.Status;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.exceptions.*;
-import eu.ehri.project.models.UndeterminedRelationship;
 import eu.ehri.project.models.base.*;
-import eu.ehri.project.persistance.LinkManager;
-import eu.ehri.project.persistance.Serializer;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 

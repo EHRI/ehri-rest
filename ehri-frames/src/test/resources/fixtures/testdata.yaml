@@ -331,7 +331,13 @@
                 endDate: !!str 1945-01-01
     heldBy: r1
     hasPermissionScope: r1
-    
+
+--- # Authority Set
+- id: auths
+  type: authoritativeSet
+  data:
+    identifier: auths
+
 --- # Authorities
 - id: a1
   type: historicalAgent
@@ -345,6 +351,8 @@
           typeOfEntity: person
           name: An Authority 1
           languageCode: en
+    inAuthoritativeSet: auths
+    hasPermissionScope: auths
 
 - id: a2
   type: historicalAgent
@@ -358,6 +366,8 @@
           typeOfEntity: person
           name: An Authority 2
           languageCode: en
+    inAuthoritativeSet: auths
+    hasPermissionScope: auths
 
 
 --- # Annotations
@@ -446,5 +456,5 @@
   data:
     identifier: cvocc1
   relationships:
-    inCvoc: cvoc1
+    inAuthoritativeSet: cvoc1
 

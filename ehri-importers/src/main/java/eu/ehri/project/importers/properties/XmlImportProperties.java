@@ -24,13 +24,17 @@ import org.slf4j.LoggerFactory;
 public class XmlImportProperties implements ImportProperties {
 
     private String configFileName;
+    private Properties cachedProperties = null;
 
     public XmlImportProperties(String configFile) {
         setConfigFileName(configFile);
     }
 
     private Properties getProperties() {
-        return PropertyLoader.loadProperties(this.configFileName);
+        if (cachedProperties == null) {
+            cachedProperties = PropertyLoader.loadProperties(this.configFileName);
+        }
+        return cachedProperties;
     }
 
     @Override

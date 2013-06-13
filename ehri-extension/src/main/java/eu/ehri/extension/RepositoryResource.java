@@ -68,6 +68,14 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
+    @Path("/count")
+    public Response countDocumentaryUnits(@QueryParam(FILTER_PARAM) List<String> filters)
+            throws ItemNotFound, BadRequester {
+        return count(filters);
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:.+}/list")
     public StreamingOutput listRepositoryDocumentaryUnits(
             @PathParam("id") String id,
@@ -75,7 +83,7 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
             @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
             @QueryParam(SORT_PARAM) List<String> order,
             @QueryParam(FILTER_PARAM) List<String> filters)
-            throws ItemNotFound, BadRequester, AccessDenied, PermissionDenied {
+            throws ItemNotFound, BadRequester, AccessDenied {
         Accessor user = getRequesterUserProfile();
         Repository repository = views.detail(manager.getFrame(id, cls), user);
         Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
@@ -83,6 +91,22 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
                 .orderBy(order)
                 .filter(filters);
         return streamingList(query.list(repository.getCollections(), user));
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id:.+}/count")
+    public Response countRepositoryDocumentaryUnits(
+            @PathParam("id") String id,
+            @QueryParam(FILTER_PARAM) List<String> filters)
+            throws ItemNotFound, BadRequester, AccessDenied {
+        Accessor user = getRequesterUserProfile();
+        Repository repository = views.detail(manager.getFrame(id, cls), user);
+        Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
+                DocumentaryUnit.class)
+                .filter(filters);
+        return Response.ok((query.count(repository.getCollections(), user))
+                .toString().getBytes()).build();
     }
 
     @GET
@@ -203,11 +227,9 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
 
         DocumentaryUnit doc = new LoggingCrudViews<DocumentaryUnit>(graph,
                 DocumentaryUnit.class, repository).create(entityBundle,
-                getRequesterUserProfile(), getLogMessage(
-                    getDefaultCreateMessage(EntityClass.DOCUMENTARY_UNIT)));
+                getRequesterUserProfile(), getLogMessage());
         // Add it to this repository's collections
         doc.setRepository(repository);
-        doc.setPermissionScope(repository);
         return doc;
     }
 }

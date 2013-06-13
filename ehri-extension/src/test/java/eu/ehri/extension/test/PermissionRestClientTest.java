@@ -400,7 +400,7 @@ public class PermissionRestClientTest extends BaseRestClientTest {
                 add(PermissionType.DELETE.getName());
                 add(PermissionType.UPDATE.getName());
             }});
-            put(ContentTypes.AGENT.getName(), new LinkedList<String>() {{
+            put(ContentTypes.REPOSITORY.getName(), new LinkedList<String>() {{
                 add(PermissionType.CREATE.getName());
                 add(PermissionType.DELETE.getName());
                 add(PermissionType.UPDATE.getName());

@@ -4,8 +4,8 @@
  */
 package eu.ehri.project.importers;
 
+import com.google.common.collect.ImmutableMap;
 import eu.ehri.project.importers.properties.XmlImportProperties;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
@@ -16,7 +16,6 @@ import org.xml.sax.SAXException;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.cvoc.Concept;
 import java.util.ArrayList;
-import java.util.Set;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -28,14 +27,12 @@ import org.slf4j.LoggerFactory;
 public class SkosHandler extends SaxXmlHandler {
 
     private static final org.slf4j.Logger logger = LoggerFactory.getLogger(SkosHandler.class);
-    Map<String, Class<? extends Frame>> possibleSubnodes;
-    Stack<String> prefixStack;
+    ImmutableMap<String, Class<? extends Frame>> possibleSubnodes
+            = ImmutableMap.<String, Class<? extends Frame>>builder().put("concept", Concept.class).build();
+    private final Stack<String> prefixStack = new Stack<String>();
 
     public SkosHandler(AbstractImporter<Map<String, Object>> importer) {
         super(importer, new XmlImportProperties("skos.properties"));
-        prefixStack = new Stack<String>();
-        possibleSubnodes = new HashMap<String, Class<? extends Frame>>();
-        possibleSubnodes.put("concept", Concept.class);
     }
 
     protected boolean needToCreateSubNode() {

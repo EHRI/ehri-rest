@@ -4,7 +4,6 @@ import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
-import eu.ehri.project.test.utils.fixtures.FixtureLoaderFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.neo4j.test.TestGraphDatabaseFactory;

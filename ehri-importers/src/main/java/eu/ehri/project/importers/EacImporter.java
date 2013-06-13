@@ -2,7 +2,6 @@ package eu.ehri.project.importers;
 
 import com.google.common.collect.Sets;
 import com.tinkerpop.blueprints.Vertex;
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.exceptions.IntegrityError;
@@ -11,7 +10,7 @@ import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.*;
 import eu.ehri.project.models.base.*;
-import eu.ehri.project.models.idgen.IdentifiableEntityIdGenerator;
+import eu.ehri.project.models.cvoc.AuthoritativeSet;
 import eu.ehri.project.models.idgen.IdGenerator;
 import eu.ehri.project.persistance.Bundle;
 
@@ -40,7 +39,7 @@ public class EacImporter extends EaImporter {
      * @param permissionScope
      * @param log
      */
-    public EacImporter(FramedGraph<Neo4jGraph> framedGraph, PermissionScope permissionScope, ImportLog log) {
+    public EacImporter(FramedGraph<?> framedGraph, PermissionScope permissionScope, ImportLog log) {
         super(framedGraph, permissionScope, log);
         try {
             userProfile = manager.getFrame(log.getActioner().getId(), Accessor.class);
@@ -96,7 +95,7 @@ public class EacImporter extends EaImporter {
 
         unit = unit.withRelation(Description.DESCRIBES, descBundle);
 
-        IdGenerator generator = IdentifiableEntityIdGenerator.INSTANCE;
+        IdGenerator generator = EntityClass.HISTORICAL_AGENT.getIdgen();
         String id = generator.generateId(EntityClass.HISTORICAL_AGENT, permissionScope, unit);
         boolean exists = manager.exists(id);
         HistoricalAgent frame = persister.createOrUpdate(unit.withId(id), HistoricalAgent.class);
@@ -105,7 +104,7 @@ public class EacImporter extends EaImporter {
 
         // There may or may not be a specific scope here...
         if (!permissionScope.equals(SystemScope.getInstance())) {
-            frame.setPermissionScope(permissionScope);
+            frame.setAuthoritativeSet(framedGraph.frame(permissionScope.asVertex(), AuthoritativeSet.class));
         }
 
         if (exists) {

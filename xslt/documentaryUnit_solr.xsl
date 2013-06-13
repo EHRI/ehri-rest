@@ -53,14 +53,15 @@
                             <field name="accessibleTo_ss"><xsl:value-of select="@id" /></field>
                         </xsl:for-each>
                         
+                        <!--  DATE formatting problems, skip dates for now 
                         <xsl:if test="$lastUpdated">
                             <field name="lastUpdated_dt"><xsl:value-of select="$lastUpdated" /></field>
                         </xsl:if>
-                        <!-- skip these, if no *_dts  in our schema.xml -->
                         <xsl:for-each select="relationships/hasDate">
                             <field name="datePeriod_dts"><xsl:value-of select="." /></field>
                         </xsl:for-each>
-                        
+ 						 -->
+                         
                         <!-- all properties -->
                         <!-- Also using dynamic fields, so we don't need to change the schema -->
 

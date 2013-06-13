@@ -6,4 +6,5 @@ import eu.ehri.project.models.base.Description;
 
 @EntityType(EntityClass.HISTORICAL_AGENT_DESCRIPTION)
 public interface HistoricalAgentDescription extends Description, AddressableEntity {
+    public final static String DATES_OF_EXISTENCE = "datesOfExistence";
 }

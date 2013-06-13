@@ -6,7 +6,6 @@ package eu.ehri.project.importers;
 
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
-import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.Country;
 import eu.ehri.project.models.Repository;
@@ -17,7 +16,6 @@ import eu.ehri.project.models.base.IdentifiableEntity;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.base.TemporalEntity;
 import eu.ehri.project.models.idgen.IdGenerator;
-import eu.ehri.project.models.idgen.IdentifiableEntityIdGenerator;
 import eu.ehri.project.persistance.Bundle;
 
 import java.util.ArrayList;
@@ -35,9 +33,9 @@ import org.slf4j.LoggerFactory;
 public class EagImporter extends EaImporter {
 
     private static final Logger logger = LoggerFactory.getLogger(EacImporter.class);
-    private Pattern priorityPattern = Pattern.compile("Priority: (-?\\d+)");
-    public static String MAINTENANCE_NOTES = "maintenanceNotes";
-    public static String PRIORITY = "priority";
+    private final Pattern priorityPattern = Pattern.compile("Priority: (-?\\d+)");
+    public static final String MAINTENANCE_NOTES = "maintenanceNotes";
+    public static final String PRIORITY = "priority";
 
     /**
      * Construct an EagImporter object.
@@ -118,7 +116,7 @@ public class EagImporter extends EaImporter {
 
         unit = unit.withRelation(Description.DESCRIBES, descBundle);
 
-        IdGenerator generator = IdentifiableEntityIdGenerator.INSTANCE;
+        IdGenerator generator = EntityClass.REPOSITORY.getIdgen();
         String id = generator.generateId(EntityClass.REPOSITORY, permissionScope, unit);
         boolean exists = manager.exists(id);
         Repository frame = persister.createOrUpdate(unit.withId(id), Repository.class);
@@ -128,13 +126,11 @@ public class EagImporter extends EaImporter {
                 cb.itemImported(frame);
             }
         } else {
-            frame.setPermissionScope(permissionScope);
             frame.setCountry(framedGraph.frame(permissionScope.asVertex(), Country.class));
             for (ImportCallback cb : createCallbacks) {
                 cb.itemImported(frame);
             }
         }
         return frame;
-
     }
 }

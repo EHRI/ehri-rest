@@ -1,6 +1,5 @@
 package eu.ehri.project.commands;
 
-import com.google.common.collect.Maps;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.SystemScope;
@@ -8,10 +7,8 @@ import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.Group;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.*;
-import eu.ehri.project.models.idgen.IdentifiableEntityIdGenerator;
 import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.views.impl.LoggingCrudViews;
 import org.apache.commons.cli.CommandLine;
@@ -47,8 +44,8 @@ public class EntityAdd extends BaseCommand implements Command {
                 "Identifier of scope to create item in, i.e. a repository"));
         options.addOption(new Option("user", true,
                 "Identifier of user to import as"));
-        options.addOption(new Option("c", "comment", false,
-                "Log message for create action action."));
+        options.addOption(new Option("log", true,
+                "Log message for create action."));
     }
 
     @Override
@@ -75,11 +72,14 @@ public class EntityAdd extends BaseCommand implements Command {
             CommandLine cmdLine) throws ItemNotFound, ValidationError, PermissionDenied, DeserializationError {
 
         GraphManager manager = GraphManagerFactory.getInstance(graph);
-        final String logMessage = cmdLine.getOptionValue("c",
-                "Created via command-line");
 
         if (cmdLine.getArgList().size() < 1)
             throw new RuntimeException(getHelp());
+
+        String logMessage = "Imported from command-line";
+        if (cmdLine.hasOption("log")) {
+            logMessage = cmdLine.getOptionValue("log");
+        }
 
         // Find the agent
         PermissionScope scope = SystemScope.getInstance();
@@ -104,12 +104,8 @@ public class EntityAdd extends BaseCommand implements Command {
 
         Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
-            LoggingCrudViews<?> view = new LoggingCrudViews(graph, entityClass.getEntityClass());
-            Frame t = view.create(bundle.withId(id), user, logMessage);
-            // FIXME: This is tres-ugly...
-            if (!scope.equals(SystemScope.getInstance())) {
-                graph.frame(t.asVertex(), AccessibleEntity.class).setPermissionScope(scope);
-            }
+            LoggingCrudViews<?> view = new LoggingCrudViews(graph, entityClass.getEntityClass(), scope);
+            view.create(bundle.withId(id), user, getLogMessage(logMessage));
             tx.success();
         } catch (IntegrityError e) {
             tx.failure();

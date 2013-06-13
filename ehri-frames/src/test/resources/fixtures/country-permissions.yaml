@@ -1,0 +1,190 @@
+#
+# This set of fixtures outlines a scenario:
+#
+#  A repository has two types of users. Head archivists, who can create, update, and delete
+#  any items at all, and regular archivists, who can create items, and update/delete their
+#  own items, but not update/delete those of other archivists.
+#
+#
+
+# Countries - these are at the top of the entity hierarchy and
+# 'hold' everything else.
+- id: gb
+  type: country
+  data:
+    identifier: gb
+
+- id: nl
+  type: country
+  data:
+    identifier: nl
+
+# Institutions
+- id: repo-gb
+  type: repository
+  data:
+    identifier: repo-gb
+    name: Repository
+  relationships:
+    hasCountry: gb
+    hasPermissionScope: gb
+    describes:
+      - id: rd1
+        type: repositoryDescription
+        data:
+          name: Repository Name
+          languageCode: en
+        relationships:
+
+- id: repo-nl
+  type: repository
+  data:
+    identifier: repo-nl
+    name: Repository
+  relationships:
+    hasCountry: gb
+    hasPermissionScope: nl
+    describes:
+      - id: rd2
+        type: repositoryDescription
+        data:
+          name: Repository Name
+          languageCode: nl
+        relationships:
+
+# Two groups
+
+- id: gb-users
+  type: group
+  data:
+    identifier: gb-users
+    name: GB Archivists
+    description: Archivists who can write to stuff in country GB
+
+- id: nl-users
+  type: group
+  data:
+    identifier: nl-users
+    name: NL Archivists
+    description: Archivists who can write to stuff in country NL
+
+
+- id: gbuser
+  type: userProfile
+  data:
+    identifier: gbuser
+    name: User GB
+  relationships:
+    belongsTo: gb-users
+
+- id: nluser
+  type: userProfile
+  data:
+    identifier: nluser
+    name: User NL
+  relationships:
+    belongsTo: nl-users
+
+
+--- # Permission grants
+
+# Allow CUD of repos and docs in GB
+- id: gbDocCreateGrant
+  type: permissionGrant
+  relationships:
+    hasPermission: create
+    hasTarget: documentaryUnit
+    hasScope: gb
+    hasAccessor: gb-users
+    
+- id: gbDocUpdateGrant
+  type: permissionGrant
+  relationships:
+    hasPermission: update
+    hasTarget: documentaryUnit
+    hasScope: gb
+    hasAccessor: gb-users
+
+- id: gbDocDeleteGrant
+  type: permissionGrant
+  relationships:
+    hasPermission: delete
+    hasTarget: documentaryUnit
+    hasScope: gb
+    hasAccessor: gb-users
+
+- id: gbRepoCreateGrant
+  type: permissionGrant
+  relationships:
+    hasPermission: create
+    hasTarget: repository
+    hasScope: gb
+    hasAccessor: gb-users
+    
+- id: gbRepoUpdateGrant
+  type: permissionGrant
+  relationships:
+    hasPermission: update
+    hasTarget: repository
+    hasScope: gb
+    hasAccessor: gb-users
+
+- id: gbRepoDeleteGrant
+  type: permissionGrant
+  relationships:
+    hasPermission: delete
+    hasTarget: repository
+    hasScope: gb
+    hasAccessor: gb-users
+
+# Do the same for NL
+
+# Allow CUD of repos and docs in NL
+- id: nlDocCreateGrant
+  type: permissionGrant
+  relationships:
+    hasPermission: create
+    hasTarget: documentaryUnit
+    hasScope: nl
+    hasAccessor: nl-users
+    
+- id: nlDocUpdateGrant
+  type: permissionGrant
+  relationships:
+    hasPermission: update
+    hasTarget: documentaryUnit
+    hasScope: nl
+    hasAccessor: nl-users
+
+- id: nlDocDeleteGrant
+  type: permissionGrant
+  relationships:
+    hasPermission: delete
+    hasTarget: documentaryUnit
+    hasScope: nl
+    hasAccessor: nl-users
+
+- id: nlRepoCreateGrant
+  type: permissionGrant
+  relationships:
+    hasPermission: create
+    hasTarget: repository
+    hasScope: nl
+    hasAccessor: nl-users
+    
+- id: nlRepoUpdateGrant
+  type: permissionGrant
+  relationships:
+    hasPermission: update
+    hasTarget: repository
+    hasScope: nl
+    hasAccessor: nl-users
+
+- id: nlRepoDeleteGrant
+  type: permissionGrant
+  relationships:
+    hasPermission: delete
+    hasTarget: repository
+    hasScope: nl
+    hasAccessor: nl-users
+

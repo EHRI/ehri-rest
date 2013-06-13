@@ -1,5 +1,7 @@
 package eu.ehri.project.views.impl;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.tinkerpop.frames.FramedGraph;
 
 import eu.ehri.project.acl.AclManager;
@@ -35,6 +37,7 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
      */
     public CrudViews(FramedGraph<?> graph, Class<E> cls,
             PermissionScope scope) {
+        Preconditions.checkNotNull(scope);
         this.graph = graph;
         this.cls = cls;
         this.scope = scope;
@@ -125,6 +128,11 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
         // If a user creates an item, grant them OWNER perms on it.
         if (!acl.isAdmin(user))
             acl.grantPermissions(user, item, PermissionType.OWNER);
+        // If the scope is not the system, set the permission scope
+        // of the item too...
+        if (!scope.equals(SystemScope.getInstance())) {
+            item.setPermissionScope(scope);
+        }
         return item;
     }
 
@@ -208,6 +216,7 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
     }
 
     public Crud<E> setScope(PermissionScope scope) {
-        return new CrudViews<E>(graph, cls, scope);
+        return new CrudViews<E>(graph, cls,
+                Optional.fromNullable(scope).or(SystemScope.INSTANCE));
     }
 }

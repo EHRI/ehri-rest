@@ -70,7 +70,5 @@ public class NiodEuropeanaHandler extends EaHandler {
                 logger.error(ex.getMessage());
             }
         }
-        
     }
-    
 }

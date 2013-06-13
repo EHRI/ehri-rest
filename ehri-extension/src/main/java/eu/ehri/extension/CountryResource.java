@@ -57,6 +57,14 @@ public class CountryResource extends
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
+    @Path("/count")
+    public Response countCountries(@QueryParam(FILTER_PARAM) List<String> filters)
+            throws ItemNotFound, BadRequester {
+        return count(filters);
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("/page")
     public StreamingOutput pageCountries(
             @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
@@ -83,6 +91,21 @@ public class CountryResource extends
                 .setLimit(limit).setOffset(offset).orderBy(order)
                 .filter(filters);
         return streamingList(query.list(country.getRepositories(), user));
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id:.+}/count")
+    public Response countCountryRepositories(
+            @PathParam("id") String id,
+            @QueryParam(FILTER_PARAM) List<String> filters)
+            throws ItemNotFound, BadRequester, AccessDenied {
+        Accessor user = getRequesterUserProfile();
+        Country country = views.detail(manager.getFrame(id, cls), user);
+        Query<Repository> query = new Query<Repository>(graph, Repository.class)
+                .filter(filters);
+        return Response.ok((query.count(country.getRepositories(), user))
+                .toString().getBytes()).build();
     }
 
     @GET
@@ -201,12 +224,10 @@ public class CountryResource extends
         Bundle entityBundle = Bundle.fromString(json);
 
         Repository repository = new LoggingCrudViews<Repository>(graph, Repository.class,
-                country).create(entityBundle, getRequesterUserProfile(),
-                getLogMessage(getDefaultCreateMessage(EntityClass.REPOSITORY)));
+                country).create(entityBundle, getRequesterUserProfile(), getLogMessage());
 
         // Add it to this Vocabulary's concepts
         repository.setCountry(country);
-        repository.setPermissionScope(country);
         return repository;
     }
 }

@@ -22,6 +22,7 @@ import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.Response.Status;
 
+import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.exceptions.*;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
@@ -50,14 +51,6 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getUserProfile(@QueryParam("key") String key,
-            @QueryParam("value") String value) throws ItemNotFound,
-            AccessDenied, PermissionDenied, BadRequester {
-        return retrieve(key, value);
-    }
-
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:.+}")
     public Response getUserProfile(@PathParam("id") String id)
             throws AccessDenied, ItemNotFound, PermissionDenied, BadRequester {
@@ -74,6 +67,14 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
             @QueryParam(FILTER_PARAM) List<String> filters)
             throws ItemNotFound, BadRequester {
         return list(offset, limit, order, filters);
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/count")
+    public Response countUserProfiles(@QueryParam(FILTER_PARAM) List<String> filters)
+            throws ItemNotFound, BadRequester {
+        return count(filters);
     }
 
     @GET
@@ -155,8 +156,7 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
         try {
             Accessor user = getRequesterUserProfile();
             Bundle entityBundle = Bundle.fromString(json);
-            UserProfile entity = views.create(entityBundle, user,
-                    getLogMessage(getDefaultCreateMessage(EntityClass.USER_PROFILE)));
+            UserProfile entity = views.create(entityBundle, user,getLogMessage());
             // TODO: Move elsewhere
             new AclManager(graph).setAccessors(entity,
                     getAccessors(accessorIds, user));
@@ -175,7 +175,7 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
                 new ActionManager(graph).logEvent(
                         graph.frame(entity.asVertex(), AccessibleEntity.class),
                         graph.frame(getRequesterUserProfile().asVertex(), Actioner.class),
-                        "Added userProfile to group").addSubjects(group);
+                        EventTypes.addGroup).addSubjects(group);
             }
             
             tx.success();

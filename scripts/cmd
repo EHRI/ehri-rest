@@ -1,12 +1,15 @@
-#!/bin/sh
-# Load an EAD file
+#!/bin/bash
 
-ARGS="$@"
+# Get the current dir...
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-mvn  -Dexec.classpathScope=compile \
-    -quiet \
-    -pl ehri-cmdline \
-    -Dexec.mainClass="eu.ehri.project.commands.CmdEntryPoint" \
-    -Dlog4j.rootLogger=WARN \
-    -Dexec.args="$ARGS" \
-    exec:java
+# Source the libs (for classpath building etc)
+. $DIR/lib.sh
+
+checkenv
+buildclasspath
+
+java -cp "$CLASSPATH" eu.ehri.project.commands.CmdEntryPoint $NEO4J_DB "$@"
+
+
+

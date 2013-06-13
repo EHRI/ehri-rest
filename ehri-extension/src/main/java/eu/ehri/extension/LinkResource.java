@@ -1,23 +1,21 @@
 package eu.ehri.extension;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.ListMultimap;
-import com.google.common.collect.Maps;
-import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.acl.AclManager;
+import eu.ehri.project.acl.PermissionType;
+import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.*;
-import eu.ehri.project.models.Annotation;
+import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Link;
 import eu.ehri.project.models.UndeterminedRelationship;
 import eu.ehri.project.models.base.*;
+import eu.ehri.project.persistance.ActionManager;
 import eu.ehri.project.persistance.Bundle;
-import eu.ehri.project.persistance.LinkManager;
-import eu.ehri.project.persistance.Serializer;
-import eu.ehri.project.views.AnnotationViews;
 import eu.ehri.project.views.LinkViews;
 import eu.ehri.project.views.Query;
+import eu.ehri.project.views.ViewHelper;
+import eu.ehri.project.views.impl.CrudViews;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 
@@ -28,7 +26,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Provides a RESTfull(ish) interface for creating/reading item links.
@@ -38,8 +35,6 @@ public class LinkResource extends
         AbstractAccessibleEntityResource<Link> {
 
     public static final String BODY_PARAM = "body";
-    public static final String BODY_NAME = "bodyName";
-    public static final String BODY_TYPE = "bodyType";
 
     public LinkResource(@Context GraphDatabaseService database) {
         super(database, Link.class);
@@ -144,65 +139,33 @@ public class LinkResource extends
     }
 
     /**
-     * Create a link between two items.
+     * Delete an access point.
      *
-     * @param id
-     * @param targetId
-     * @param descriptionId the description to add the access point to.
-     * @param json  the link data
-     * @param bodyName name of the access point to create.
-     * @param bodyType type of the access point to create.
-     * @param accessors
-     * @return
+     * TODO: Move this elsewhere when there is a better access point API!!!
      * @throws PermissionDenied
-     * @throws ValidationError
-     * @throws DeserializationError
      * @throws ItemNotFound
+     * @throws ValidationError
      * @throws BadRequester
      * @throws SerializationError
      */
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("{id:.+}/{targetId:.+}/{descriptionId:.+}")
-    public Response createAccessPointLinkFor(@PathParam("id") String id,
-            @PathParam("targetId") String targetId, @PathParam("descriptionId") String descriptionId,
-            String json,
-            @QueryParam(BODY_NAME) String bodyName,
-            @QueryParam(BODY_TYPE) String bodyType,
-            @QueryParam(ACCESSOR_PARAM) List<String> accessors)
-            throws PermissionDenied, ValidationError, DeserializationError,
-            ItemNotFound, BadRequester, SerializationError {
-        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
-        try {
-            Accessor user = getRequesterUserProfile();
-            Link link = new LinkViews(graph).createAccessPointLink(id,
-                    targetId, descriptionId, bodyName, bodyType, Bundle.fromString(json), user);
-            new AclManager(graph).setAccessors(link,
-                    getAccessors(accessors, user));
-            tx.success();
-            return buildResponseFromAnnotation(link);
-        } catch (ItemNotFound e) {
-            tx.failure();
-            throw e;
-        } catch (PermissionDenied e) {
-            tx.failure();
-            throw e;
-        } catch (DeserializationError e) {
-            tx.failure();
-            throw e;
-        } catch (BadRequester e) {
-            tx.failure();
-            throw e;
-        } catch (ValidationError e) {
-            tx.failure();
-            throw e;
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new WebApplicationException(e);
-        } finally {
-            tx.finish();
+    @DELETE
+    @Path("/accessPoint/{id:.+}")
+    public Response deleteAccessPoint(@PathParam("id") String id)
+            throws AccessDenied, PermissionDenied, ItemNotFound, ValidationError,
+            BadRequester, SerializationError {
+        Accessor userProfile = getRequesterUserProfile();
+        UndeterminedRelationship rel = manager.getFrame(id, UndeterminedRelationship.class);
+        Description description = rel.getDescription();
+        if (description == null) {
+            throw new ItemNotFound(id);
         }
+        AccessibleEntity item = description.getEntity();
+        if (item == null) {
+            throw new ItemNotFound(id);
+        }
+        new CrudViews<AccessibleEntity>(graph, AccessibleEntity.class)
+                .deleteDependent(rel, item, userProfile, UndeterminedRelationship.class);
+        return Response.status(Status.OK).build();
     }
 
     private Response buildResponseFromAnnotation(Link link)
@@ -232,8 +195,53 @@ public class LinkResource extends
     }
 
     /**
+     * Delete a link. If the optional ?accessPoint=[ID] parameter is also given
+     * the access point associated with the link will also be deleted.
+     *
+     * @param id id of link to remove
+     * @return
+     * @throws PermissionDenied
+     * @throws ItemNotFound
+     * @throws ValidationError
+     * @throws BadRequester
+     */
+    @DELETE
+    @Path("/for/{id:.+}/{linkId:.+}")
+    public Response deleteLinkForItem(@PathParam("id") String id, @PathParam("linkId") String linkId)
+            throws AccessDenied, PermissionDenied, ItemNotFound, ValidationError,
+            BadRequester {
+        //return delete(id);
+        // FIXME: Because it only takes ANNOTATE permissions to create a link
+        // we need the same to delete them...
+        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
+        try {
+            new ViewHelper(graph).checkEntityPermission(manager.getFrame(id, AccessibleEntity.class),
+                    getRequesterUserProfile(), PermissionType.ANNOTATE);
+            Actioner actioner = graph.frame(getRequesterUserProfile().asVertex(), Actioner.class);
+            Link link = manager.getFrame(linkId, EntityClass.LINK, Link.class);
+            new ActionManager(graph).logEvent(link, actioner, EventTypes.deletion);
+            manager.deleteVertex(link.asVertex());
+            return Response.ok().build();
+        } catch (ItemNotFound e) {
+            tx.failure();
+            throw e;
+        } catch (PermissionDenied e) {
+            tx.failure();
+            throw e;
+        } catch (BadRequester e) {
+            tx.failure();
+            throw e;        } catch (Exception e) {
+            e.printStackTrace();
+            throw new WebApplicationException(e);
+        } finally {
+            tx.finish();
+        }
+    }
+
+    /**
      * Delete a link.
-     * @param id
+     *
+     * @param id id of link to remove
      * @return
      * @throws PermissionDenied
      * @throws ItemNotFound

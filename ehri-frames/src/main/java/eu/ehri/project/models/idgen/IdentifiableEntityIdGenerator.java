@@ -2,6 +2,7 @@ package eu.ehri.project.models.idgen;
 
 import java.text.MessageFormat;
 import java.util.LinkedList;
+import java.util.List;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.LinkedListMultimap;
@@ -57,6 +58,19 @@ public enum IdentifiableEntityIdGenerator implements IdGenerator {
                 scopeIds.addFirst(s.getIdentifier());
             scopeIds.add(scope.getIdentifier());            
         }
+        return generateId(type, scopeIds, bundle);
+    }
+
+    /**
+     * Use an array of scope IDs and the bundle data to generate a unique
+     * id within a given scope.
+     *
+     * @param type
+     * @param scopeIds array of scope ids
+     * @param bundle
+     * @return
+     */
+    public String generateId(EntityClass type, List<String> scopeIds, Bundle bundle) {
         // TODO: Should be slugify IDs? This would make relating items to
         // their ID a bit harder but lead to cleaner IDs. Not doing this now
         // because having dirty IDs is an effective way of debugging (via

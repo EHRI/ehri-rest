@@ -27,16 +27,16 @@ import eu.ehri.project.models.base.IdentifiableEntity;
  *
  */
 @EntityType(EntityClass.CVOC_CONCEPT)
-public interface Concept extends AccessibleEntity, IdentifiableEntity, DescribedEntity {
+public interface Concept extends AccessibleEntity, IdentifiableEntity, DescribedEntity, AuthoritativeItem {
     public static final String BROADER = "broader";
     public static final String NARROWER = "narrower";
     public static final String RELATED = "related";
-    
-    @Fetch(Vocabulary.IN_CVOC)
-    @Adjacency(label = Vocabulary.IN_CVOC)
+
+    // NB: As an AuthoritativeItem the set will be @Fetched automatically
+    @Adjacency(label = AuthoritativeSet.IN_SET)
     public Vocabulary getVocabulary();
 
-    @Adjacency(label = Vocabulary.IN_CVOC)
+    @Adjacency(label = AuthoritativeSet.IN_SET)
     public void setVocabulary(final Vocabulary vocabulary);
 
 

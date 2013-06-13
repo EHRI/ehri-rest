@@ -29,7 +29,6 @@ import eu.ehri.extension.AbstractRestResource;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.BundleError;
 import eu.ehri.project.models.DatePeriod;
-import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.TemporalEntity;
 import eu.ehri.project.persistance.Bundle;
 
@@ -37,12 +36,10 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
 
     private String jsonDocumentaryUnitTestStr;
     private String invalidJsonDocumentaryUnitTestStr;
-    private String descriptionTestStr;
     static final String UPDATED_NAME = "UpdatedNameTEST";
     static final String TEST_JSON_IDENTIFIER = "c1";
     static final String FIRST_DOC_ID = "c1";
     static final String TEST_HOLDER_IDENTIFIER = "r1";
-    static final String TEST_DESCRIPTION_IDENTIFIER = "another-description";
     // FIXME: This ID is temporaty and will break when we decide on a proper
     // prefix ID scheme
     static final String CREATED_ID = "some-id";
@@ -56,7 +53,6 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
     public void setUp() throws Exception {
         jsonDocumentaryUnitTestStr = readFileAsString("documentaryUnit.json");
         invalidJsonDocumentaryUnitTestStr = readFileAsString("invalidDocumentaryUnit.json");
-        descriptionTestStr = readFileAsString("documentDescription.json");
     }
 
     /**
@@ -222,6 +218,13 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
     }
 
     @Test
+    public void testCountDocumentaryUnits() throws Exception {
+        Long data = getEntityCount(
+                Entities.DOCUMENTARY_UNIT, getAdminUserProfileId());
+        assertEquals(Long.valueOf(4), data);
+    }
+
+    @Test
     public void testUpdateDocumentaryUnit() throws Exception {
 
         // -create data for testing, making this a child element of c1.
@@ -276,87 +279,6 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
         String updatedJson = response.getEntity(String.class);
         Bundle updatedEntityBundle = Bundle.fromString(updatedJson);
         assertEquals(UPDATED_NAME, updatedEntityBundle.getDataValue("name"));
-    }
-
-    @Test
-    public void testCreateDescription() throws Exception {
-        // Create additional description for c2
-        // C2 initially has one description, so it should have two afterwards
-        WebResource resource = client.resource(getExtensionEntryPointUri()
-                + "/" + Entities.DOCUMENTARY_UNIT + "/c2/"
-                + Entities.DOCUMENT_DESCRIPTION);
-        ClientResponse response = resource
-                .accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME,
-                        getAdminUserProfileId())
-                .entity(descriptionTestStr).post(ClientResponse.class);
-        assertEquals(Response.Status.CREATED.getStatusCode(), response.getStatus());
-
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode rootNode = mapper.readValue(response.getEntity(String.class),
-                JsonNode.class);
-        JsonNode idValue = rootNode.path(Bundle.REL_KEY).path(
-                DescribedEntity.DESCRIBES).path(1)
-                .path(Bundle.DATA_KEY)
-                .path(IdentifiableEntity.IDENTIFIER_KEY);
-        assertFalse(idValue.isMissingNode());
-        assertEquals(TEST_DESCRIPTION_IDENTIFIER, idValue.getTextValue());
-    }
-
-    @Test
-    public void testUpdateDescription() throws Exception {
-        // Update description for c2
-        // C2 initially has one description, and should still have one afterwards
-        WebResource resource = client.resource(getExtensionEntryPointUri()
-                + "/" + Entities.DOCUMENTARY_UNIT + "/c2/"
-                + Entities.DOCUMENT_DESCRIPTION + "/cd2");
-        ClientResponse response = resource
-                .accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME,
-                        getAdminUserProfileId())
-                .entity(descriptionTestStr).put(ClientResponse.class);
-        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
-
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode rootNode = mapper.readValue(response.getEntity(String.class),
-                JsonNode.class);
-        JsonNode idValue = rootNode.path(Bundle.REL_KEY).path(
-                DescribedEntity.DESCRIBES).path(0)
-                .path(Bundle.DATA_KEY)
-                .path(IdentifiableEntity.IDENTIFIER_KEY);
-        assertFalse(idValue.isMissingNode());
-        assertEquals(TEST_DESCRIPTION_IDENTIFIER, idValue.getTextValue());
-        // Assert there are no extra descriptions
-        assertTrue(rootNode.path(Bundle.REL_KEY).path(
-                DescribedEntity.DESCRIBES).path(1).isMissingNode());
-    }
-
-    @Test
-    public void testDeleteDescription() throws Exception {
-        // Delete description for c2
-        // C2 initially has one description, so there should be none afterwards
-        WebResource resource = client.resource(getExtensionEntryPointUri()
-                + "/" + Entities.DOCUMENTARY_UNIT + "/c2/"
-                + Entities.DOCUMENT_DESCRIPTION + "/cd2");
-        ClientResponse response = resource
-                .accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME,
-                        getAdminUserProfileId())
-                .delete(ClientResponse.class);
-        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
-
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode rootNode = mapper.readValue(response.getEntity(String.class),
-                JsonNode.class);
-        JsonNode idValue = rootNode.path(Bundle.REL_KEY).path(
-                DescribedEntity.DESCRIBES).path(0)
-                .path(Bundle.DATA_KEY)
-                .path(IdentifiableEntity.IDENTIFIER_KEY);
-        // Assert there are no descriptions at all now.
-        assertTrue(idValue.isMissingNode());
     }
 
     private URI getCreationUri() {
