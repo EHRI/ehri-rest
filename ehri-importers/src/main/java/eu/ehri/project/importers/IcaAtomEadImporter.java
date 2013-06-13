@@ -97,8 +97,16 @@ public class IcaAtomEadImporter extends EaImporter {
         // Set the repository/item relationship
         //TODO: figure out another way to determine we're at the root, so we can get rid of the depth param
         if (depth == TOP_LEVEL_DEPTH) {
-            Repository repository = framedGraph.frame(permissionScope.asVertex(), Repository.class);
-            frame.setRepository(repository);
+            EntityClass scopeType = manager.getEntityClass(permissionScope);
+            if (scopeType.equals(EntityClass.REPOSITORY)) {
+                Repository repository = framedGraph.frame(permissionScope.asVertex(), Repository.class);
+                frame.setRepository(repository);
+            } else if (scopeType.equals(EntityClass.DOCUMENTARY_UNIT)) {
+                DocumentaryUnit parent = framedGraph.frame(permissionScope.asVertex(), DocumentaryUnit.class);
+                frame.addChild(frame);
+            } else {
+                logger.error("Unknown scope type for documentary unit: {}", scopeType);
+            }
         }
 
         if (exists) {
