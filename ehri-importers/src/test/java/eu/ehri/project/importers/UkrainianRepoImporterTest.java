@@ -6,14 +6,6 @@ package eu.ehri.project.importers;
 
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.Country;
-import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.Link;
-import eu.ehri.project.models.Repository;
-import eu.ehri.project.models.base.DescribedEntity;
-import eu.ehri.project.models.base.Description;
-import eu.ehri.project.models.cvoc.AuthoritativeSet;
-import eu.ehri.project.persistance.Bundle;
-import eu.ehri.project.views.impl.CrudViews;
 import java.io.InputStream;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -43,7 +35,7 @@ public class UkrainianRepoImporterTest extends AbstractImporterTest{
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
         Country country = manager.getFrame(TEST_COUNTRY, Country.class);
 
-        ImportLog log = new CsvImportManager(graph, country, validUser, UkranianRepoImporter.class).importFile(ios, logMessage);
+        ImportLog log = new CsvImportManager(graph, country, validUser, UkrainianRepoImporter.class).importFile(ios, logMessage);
 
         /*
          * 1 Repository Unit

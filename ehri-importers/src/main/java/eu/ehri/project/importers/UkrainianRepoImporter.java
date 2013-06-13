@@ -25,15 +25,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * the ukrainian file has both repository info and collection info per row.
+ * so it is done in two steps: first the UkrainianRepoImporter imports the repository info, en then passes the map 
+ * to the UkranianUnitImporter which imports the DocumentaryUnit and related stuff.
+ * 
  * @author linda
  */
-public class UkranianRepoImporter extends CsvImporter<Object> {
+public class UkrainianRepoImporter extends CsvImporter<Object> {
 
     private XmlImportProperties p;
-    private static final Logger logger = LoggerFactory.getLogger(UkranianRepoImporter.class);
+    private static final Logger logger = LoggerFactory.getLogger(UkrainianRepoImporter.class);
 
-    public UkranianRepoImporter(FramedGraph<Neo4jGraph> framedGraph, PermissionScope permissionScope, ImportLog log) {
+    public UkrainianRepoImporter(FramedGraph<Neo4jGraph> framedGraph, PermissionScope permissionScope, ImportLog log) {
         super(framedGraph, permissionScope, log);
         p = new XmlImportProperties("ukraine_repo.properties");
     }
