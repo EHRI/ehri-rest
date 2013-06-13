@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author linda
  */
-public class PersonalitiesImporter extends CsvImporter<Map<String, Object>> {
+public class PersonalitiesImporter extends XmlImporter<Object> {
     
     private final XmlImportProperties p = new XmlImportProperties("personalities.properties");
     
@@ -165,10 +165,11 @@ public class PersonalitiesImporter extends CsvImporter<Map<String, Object>> {
     }
 
     @Override
-    public String getProperty(String key) {
-        return p.getProperty(key);
+    public Iterable<Map<String, Object>> extractDates(Object data) {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
+ 
     
 
 }

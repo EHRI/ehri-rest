@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author linda
  */
-public class UkrainianRepoImporter extends CsvImporter<Object> {
+public class UkrainianRepoImporter extends XmlImporter<Object> {
 
     private XmlImportProperties p;
     private static final Logger logger = LoggerFactory.getLogger(UkrainianRepoImporter.class);
@@ -75,10 +75,6 @@ public class UkrainianRepoImporter extends CsvImporter<Object> {
 
     }
 
-    @Override
-    public String getProperty(String key) {
-        return p.getProperty(key);
-    }
 
     @Override
     public AccessibleEntity importItem(Map<String, Object> itemData, int depth) throws ValidationError {

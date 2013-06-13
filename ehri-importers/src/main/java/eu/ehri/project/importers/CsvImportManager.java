@@ -32,11 +32,11 @@ public class CsvImportManager extends XmlImportManager {
     public static final Character VALUE_DELIMITER = ';';
 
     private static final Logger logger = LoggerFactory.getLogger(CsvImportManager.class);
-    private CsvImporter<Map<String, Object>> importer;
-    private Class<? extends CsvImporter> importerClass;
+    private XmlImporter<Map<String, Object>> importer;
+    private Class<? extends XmlImporter> importerClass;
 
     public CsvImportManager(FramedGraph<Neo4jGraph> framedGraph,
-            final PermissionScope permissionScope, final Actioner actioner, Class<? extends CsvImporter> importerClass) {
+            final PermissionScope permissionScope, final Actioner actioner, Class<? extends XmlImporter> importerClass) {
         super(framedGraph, permissionScope, actioner);
         this.importerClass = importerClass;
     }
