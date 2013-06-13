@@ -12,7 +12,6 @@ import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.HistoricalAgent;
-import eu.ehri.project.models.HistoricalAgentDescription;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.IdentifiableEntity;
@@ -26,7 +25,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.neo4j.helpers.collection.Iterables;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,9 +35,10 @@ import org.slf4j.LoggerFactory;
  * 
  * @author linda
  */
-public class PersonalitiesImporter extends XmlImporter<Map<String, Object>> {
+public class PersonalitiesImporter extends CsvImporter<Map<String, Object>> {
     
     private final XmlImportProperties p = new XmlImportProperties("personalities.properties");
+    
     private static final Logger logger = LoggerFactory.getLogger(PersonalitiesImporter.class);
     
     public PersonalitiesImporter(FramedGraph<Neo4jGraph> framedGraph, PermissionScope permissionScope, ImportLog log) {
@@ -163,6 +162,11 @@ public class PersonalitiesImporter extends XmlImporter<Map<String, Object>> {
         List<Map<String,Object>> l = new ArrayList<Map<String,Object>>();
         l.add(items);
         return l;
+    }
+
+    @Override
+    public String getProperty(String key) {
+        return p.getProperty(key);
     }
 
     
