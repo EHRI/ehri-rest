@@ -54,6 +54,10 @@ private static final org.slf4j.Logger logger = LoggerFactory.getLogger(TestAllPr
         assertTrue(p.check(new XmlImportProperties("eac.properties"), EntityClass.HISTORICAL_AGENT_DESCRIPTION));
     }
     @Test
+    public void testPersonalitiesProperties() {
+        assertTrue(p.check(new XmlImportProperties("personalities.properties"), EntityClass.HISTORICAL_AGENT_DESCRIPTION));
+    }
+    @Test
     public void testEagXmlProperties() {
         assertTrue(p.check(new XmlImportProperties("eag.properties"), EntityClass.REPOSITORY_DESCRIPTION));
     }
