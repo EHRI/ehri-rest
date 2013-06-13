@@ -7,11 +7,9 @@ package eu.ehri.project.importers;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.Country;
 import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.Link;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.base.DescribedEntity;
 import eu.ehri.project.models.base.Description;
-import eu.ehri.project.models.cvoc.AuthoritativeSet;
 import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.views.impl.CrudViews;
 import java.io.InputStream;
@@ -24,7 +22,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author linda
  */
-public class UkrainianImporterTest extends AbstractImporterTest{
+public class UkrainianUnitImporterTest extends AbstractImporterTest{
     
     private static final Logger logger = LoggerFactory.getLogger(PersonalitiesImporterTest.class);
     protected final String SINGLE_EAD = "ukraine_small.csv";
@@ -51,16 +49,17 @@ public class UkrainianImporterTest extends AbstractImporterTest{
         assertTrue(p.containsProperty("project_judaica"));
         
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        ImportLog log = new CsvImportManager(graph, repo, validUser, UkrainianImporter.class).importFile(ios, logMessage);
+        ImportLog log = new CsvImportManager(graph, repo, validUser, UkrainianUnitImporter.class).importFile(ios, logMessage);
 
         /*
          * 17 DocumentaryUnits
-         * 17 + 3 DocumentsDescription
+         * 17 + 3 DocumentsDescription (there are 3 desc's with 2 languages)
          * 17 + 3 DatePeriods
+         * 17 + 3 UnknownProperties
          * 18 more import Event links (1 for every Unit, 1 for the User)
          * 1 more import Event
          */
-        assertEquals(count+76, getNodeCount(graph));
+        assertEquals(count+96, getNodeCount(graph));
         printGraph(graph);
 //        assertEquals(voccount + 8, toList(authoritativeSet.getAuthoritativeItems()).size());
        
