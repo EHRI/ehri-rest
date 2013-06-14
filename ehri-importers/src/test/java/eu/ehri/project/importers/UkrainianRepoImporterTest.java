@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
  */
 public class UkrainianRepoImporterTest extends AbstractImporterTest{
     
-    private static final Logger logger = LoggerFactory.getLogger(PersonalitiesImporterTest.class);
+    private static final Logger logger = LoggerFactory.getLogger(UkrainianRepoImporterTest.class);
     protected final String SINGLE_EAD = "ukraine_small.csv";
     protected final String TEST_COUNTRY = "r1";
 
