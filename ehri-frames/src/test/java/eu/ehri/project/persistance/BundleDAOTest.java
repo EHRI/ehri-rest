@@ -9,6 +9,7 @@ import java.util.NoSuchElementException;
 
 import com.google.common.collect.Iterables;
 import eu.ehri.project.models.*;
+import eu.ehri.project.models.base.NamedEntity;
 import eu.ehri.project.persistance.utils.BundleUtils;
 import eu.ehri.project.test.ModelTestBase;
 import org.junit.Before;
@@ -181,16 +182,11 @@ public class BundleDAOTest extends ModelTestBase {
             ValidationError, ItemNotFound, IntegrityError {
         DocumentaryUnit c1 = manager.getFrame(ID, DocumentaryUnit.class);
         Bundle bundle = serializer.vertexFrameToBundle(c1);
-
-        List<Bundle> dates = BundleUtils.getRelations(bundle, "describes[0]/hasDate");
-        // remove the start date key from a date
-        Bundle invalidDate = dates.get(0).withData(
-                Maps.<String, Object> newHashMap());
-        Bundle newBundle = BundleUtils.setBundle(bundle,
-                "describes[0]/hasDate[0]", invalidDate);
+        Bundle desc = BundleUtils.getBundle(bundle, "describes[0]");
+        Bundle newBundle = desc.removeDataValue(NamedEntity.NAME);
 
         BundleDAO persister = new BundleDAO(graph);
         persister.update(newBundle, DocumentaryUnit.class);
-        fail("Bundle with invalid dates did not throw a ValidationError");
+        fail("Bundle with no description name did not throw a ValidationError");
     }
 }

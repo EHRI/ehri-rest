@@ -45,10 +45,11 @@ public class PersonalitiesImporterTest extends AbstractImporterTest{
         /*
          * 8 HistAgent
          * 8 HistAgentDesc
+         * 8 more DatePeriods
          * 9 more import Event links (1 for every Unit, 1 for the User)
          * 1 more import Event
          */
-        assertEquals(count+26, getNodeCount(graph));
+        assertEquals(count+34, getNodeCount(graph));
         assertEquals(voccount + 8, toList(authoritativeSet.getAuthoritativeItems()).size());
        
     }
