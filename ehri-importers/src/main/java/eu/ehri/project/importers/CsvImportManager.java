@@ -9,9 +9,7 @@ import com.google.common.collect.Maps;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.exceptions.InvalidInputFormatError;
-import eu.ehri.project.importers.exceptions.InvalidXmlDocument;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
@@ -21,9 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Scanner;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,11 +32,11 @@ public class CsvImportManager extends XmlImportManager {
     public static final Character VALUE_DELIMITER = ';';
 
     private static final Logger logger = LoggerFactory.getLogger(CsvImportManager.class);
-    private AbstractImporter<Map<String, Object>> importer;
-    private Class<? extends AbstractImporter> importerClass;
+    private XmlImporter<Map<String, Object>> importer;
+    private Class<? extends XmlImporter> importerClass;
 
     public CsvImportManager(FramedGraph<Neo4jGraph> framedGraph,
-            final PermissionScope permissionScope, final Actioner actioner, Class<? extends AbstractImporter> importerClass) {
+            final PermissionScope permissionScope, final Actioner actioner, Class<? extends XmlImporter> importerClass) {
         super(framedGraph, permissionScope, actioner);
         this.importerClass = importerClass;
     }
@@ -92,6 +88,7 @@ public class CsvImportManager extends XmlImportManager {
 
 //            importer.checkProperties(headers);
             //per record, call importer.importItem(Map<String, Object> itemData
+            
             String[] data;
             while ((data = reader.readNext()) != null) {
                 Map<String, Object> dataMap = Maps.newHashMap();
