@@ -16,6 +16,7 @@ import javax.ws.rs.core.UriBuilder;
 
 import eu.ehri.project.models.base.DescribedEntity;
 import eu.ehri.project.models.base.IdentifiableEntity;
+import eu.ehri.project.models.base.NamedEntity;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Before;
@@ -146,9 +147,7 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
         JsonNode rootNode = mapper.readValue(errorJson, JsonNode.class);
         JsonNode errValue1 = rootNode.path(BundleError.REL_KEY)
                 .path(DescribedEntity.DESCRIBES).path(0)
-                .path(BundleError.REL_KEY)
-                .path(TemporalEntity.HAS_DATE).path(0)
-                .path(BundleError.ERROR_KEY).path(DatePeriod.START_DATE);
+                .path(BundleError.ERROR_KEY).path(NamedEntity.NAME);
         assertFalse(errValue1.isMissingNode());
     }
 

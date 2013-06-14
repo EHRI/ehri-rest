@@ -10,7 +10,6 @@
         "type": "documentDescription",
         "data": {
           "languageCode": "en",
-          "name": "a description",
           "identifier": "some-id"
         },
         "relationships": {
