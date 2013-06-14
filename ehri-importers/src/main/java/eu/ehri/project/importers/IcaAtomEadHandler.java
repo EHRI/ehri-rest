@@ -31,7 +31,7 @@ public class IcaAtomEadHandler extends SaxXmlHandler {
      * Set a custom resolver so EAD DTDs are never looked up online.
      * @param publicId
      * @param systemId
-     * @return
+     * @return returns essentially an empty dtd file
      * @throws org.xml.sax.SAXException
      * @throws java.io.IOException
      */
