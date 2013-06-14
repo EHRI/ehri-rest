@@ -20,7 +20,8 @@ import org.slf4j.LoggerFactory;
  * @author linda
  */
 public class TestAllPropertiesFiles {
-private static final org.slf4j.Logger logger = LoggerFactory.getLogger(TestAllPropertiesFiles.class);
+
+    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(TestAllPropertiesFiles.class);
     PropertiesChecker p;
 
     public TestAllPropertiesFiles() {
@@ -53,20 +54,45 @@ private static final org.slf4j.Logger logger = LoggerFactory.getLogger(TestAllPr
     public void testEacXmlProperties() {
         assertTrue(p.check(new XmlImportProperties("eac.properties"), EntityClass.HISTORICAL_AGENT_DESCRIPTION));
     }
+
+    @Test
+    public void testPersonalitiesProperties() {
+        assertTrue(p.check(new XmlImportProperties("personalities.properties"), EntityClass.HISTORICAL_AGENT_DESCRIPTION));
+    }
+
     @Test
     public void testEagXmlProperties() {
         assertTrue(p.check(new XmlImportProperties("eag.properties"), EntityClass.REPOSITORY_DESCRIPTION));
     }
+
     @Test
     public void testEadXmlProperties() {
         assertTrue(p.check(new XmlImportProperties("icaatom.properties"), EntityClass.DOCUMENT_DESCRIPTION));
     }
+
     @Test
     public void testSkosXmlProperties() {
         assertTrue(p.check(new XmlImportProperties("skos.properties"), EntityClass.CVOC_CONCEPT_DESCRIPTION));
     }
+
     @Test
     public void testNiodXmlProperties() {
-        assertTrue(p.check(new XmlImportProperties("niod.properties"), EntityClass.DOCUMENT_DESCRIPTION));
+        String propfile = "niod.properties";
+        logger.debug(propfile);
+        assertTrue(p.check(new XmlImportProperties(propfile), EntityClass.DOCUMENT_DESCRIPTION));
+    }
+
+    @Test
+    public void testUkrainianDescXmlProperties() {
+        String propfile = "ukraine.properties";
+        logger.debug(propfile);
+        assertTrue(p.check(new XmlImportProperties(propfile), EntityClass.DOCUMENT_DESCRIPTION));
+    }
+
+    @Test
+    public void testUkrainianRepoXmlProperties() {
+        String propfile = "ukraine_repo.properties";
+        logger.debug(propfile);
+        assertTrue(p.check(new XmlImportProperties(propfile), EntityClass.REPOSITORY_DESCRIPTION));
     }
 }
