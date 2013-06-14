@@ -26,6 +26,8 @@ import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.utils.ClassUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Class responsible for persisting and deleting a Bundle - a data structure representing a graph node and its relations
@@ -38,6 +40,8 @@ import eu.ehri.project.models.utils.ClassUtils;
  *
  */
 public final class BundleDAO {
+
+    private static final Logger logger = LoggerFactory.getLogger(BundleDAO.class);
 
     private final FramedGraph<?> graph;
     private final PermissionScope scope;
@@ -238,7 +242,6 @@ public final class BundleDAO {
 
         // Accumulate child errors before re-throwing...
         ListMultimap<String, BundleError> errors = LinkedListMultimap.create();
-
         for (String relation : relations.keySet()) {
             if (dependents.containsKey(relation)) {
                 for (Bundle bundle : relations.get(relation)) {
@@ -252,6 +255,8 @@ public final class BundleDAO {
                         errors.put(relation, e);
                     }
                 }
+            } else {
+                logger.error("Nested data being ignored on creation because it is not a dependent relation: {}: {}", relation, relations.get(relation));
             }
         }
         return errors;
@@ -310,6 +315,8 @@ public final class BundleDAO {
                         errors.put(relation, e);
                     }
                 }
+            } else {
+                logger.error("Nested data being ignored on update because it is not a dependent relation: {}: {}", relation, relations.get(relation));
             }
         }
 

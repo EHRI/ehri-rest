@@ -15,11 +15,9 @@ public interface DatePeriod extends AnnotatableEntity {
     static final String START_DATE = "startDate";
     static final String END_DATE = "endDate";
 
-    @Mandatory
     @Property(START_DATE)
     public String getStartDate();
 
-    @Mandatory
     @Property(END_DATE)
     public String getEndDate();
 

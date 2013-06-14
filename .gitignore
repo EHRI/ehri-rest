@@ -3,6 +3,7 @@ nbactions.xml
 *.class
 *.java.orig
 *.xml.orig
+*.~lock.*#
 
 # Package Files #
 *.jar

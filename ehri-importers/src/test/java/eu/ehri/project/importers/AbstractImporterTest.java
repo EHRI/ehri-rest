@@ -24,8 +24,9 @@ public class AbstractImporterTest extends AbstractFixtureTest {
     
    
     protected void printGraph(FramedGraph<Neo4jGraph> graph) {
+        int vcount = 0;
         for (Vertex v : graph.getVertices()) {
-            logger.debug("-------------------------");
+            logger.debug(++vcount + " -------------------------");
             for (String key : v.getPropertyKeys()) {
                 String value = "";
                 if (v.getProperty(key) instanceof String[]) {

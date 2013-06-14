@@ -12,6 +12,7 @@ import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.importers.AbstractImporter;
 import eu.ehri.project.importers.CsvImportManager;
 import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.importers.XmlImporter;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.PermissionScope;
 import java.util.LinkedList;
@@ -25,9 +26,9 @@ import org.apache.commons.cli.Option;
  * @author linda
  */
 public abstract class ImportCsvCommand extends BaseCommand implements Command{
-    Class<? extends AbstractImporter<Object>> importer;
+    Class<? extends XmlImporter<Object>> importer;
     
-    public ImportCsvCommand(Class<? extends AbstractImporter<Object>> importer){
+    public ImportCsvCommand(Class<? extends XmlImporter<Object>> importer){
         this.importer = importer;
     }
     

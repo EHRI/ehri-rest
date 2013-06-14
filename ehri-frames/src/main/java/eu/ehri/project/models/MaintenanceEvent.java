@@ -28,7 +28,6 @@ public interface MaintenanceEvent extends TemporalEntity, AccessibleEntity{
     @Property(EVENTTYPE)
     public void setEventType(EventType eventType);
 
-    @Mandatory
     @Property(AGENTTYPE)
     public void setAgentType(AgentType agentType);
 
