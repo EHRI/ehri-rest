@@ -4,6 +4,8 @@
  */
 package eu.ehri.project.importers;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.SystemScope;
@@ -20,7 +22,6 @@ import eu.ehri.project.models.base.TemporalEntity;
 import eu.ehri.project.models.cvoc.AuthoritativeSet;
 import eu.ehri.project.models.idgen.IdGenerator;
 import eu.ehri.project.persistance.Bundle;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -144,9 +145,13 @@ public class PersonalitiesImporter extends XmlImporter<Object> {
      */
     @Override
     public List<Map<String, Object>> extractDates(Map<String, Object> itemData) {
-        Map<String, Object> items = new HashMap<String, Object>();
-        String end = itemData.get("DateofdeathYYYY-MM-DD").toString();
-        String start = itemData.get("DateofbirthYYYY-MM-DD").toString();
+
+        List<Map<String,Object>> l = Lists.newArrayList();
+        Map<String, Object> items = Maps.newHashMap();
+
+        String end = (String)itemData.get("DateofdeathYYYY-MM-DD");
+        String start = (String)itemData.get("DateofbirthYYYY-MM-DD");
+
         if (start != null && start.endsWith("00-00")) {
             start = start.substring(0, 4);
         }
@@ -158,9 +163,8 @@ public class PersonalitiesImporter extends XmlImporter<Object> {
                 items.put(DatePeriod.START_DATE, start );
             if(end != null)
                 items.put(DatePeriod.END_DATE,end);
+            l.add(items);
         }
-        List<Map<String,Object>> l = new ArrayList<Map<String,Object>>();
-        l.add(items);
         return l;
     }
 
@@ -168,8 +172,4 @@ public class PersonalitiesImporter extends XmlImporter<Object> {
     public Iterable<Map<String, Object>> extractDates(Object data) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
-
- 
-    
-
 }
