@@ -150,6 +150,7 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
                         new Exception("Access point does not belong to given description."));
             }
             views.deleteDependent(rel, doc, user, UndeterminedRelationship.class, getLogMessage());
+            tx.success();
             return Response.ok().build();
         } catch (SerializationError e) {
             tx.failure();
