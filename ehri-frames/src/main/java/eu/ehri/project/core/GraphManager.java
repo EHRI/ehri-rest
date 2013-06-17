@@ -17,7 +17,7 @@ public interface GraphManager {
     /**
      * Get a pointer to the underlying graph.
      */
-    public FramedGraph<? extends TransactionalGraph> getGraph();
+    public FramedGraph<?> getGraph();
 
     /**
      * Get the id of a given vertex.
@@ -111,7 +111,7 @@ public interface GraphManager {
      * @param ids
      * @return
      */
-    public Iterable<Vertex> getVertices(Iterable<String> ids) throws ItemNotFound;
+    public CloseableIterable<Vertex> getVertices(Iterable<String> ids) throws ItemNotFound;
 
     /**
      * Get a CloseableIterable of vertices with the given type, and the given
@@ -130,7 +130,7 @@ public interface GraphManager {
      * @param type
      * @return
      */
-    public <T> Iterable<T> getFrames(EntityClass type, Class<T> cls);
+    public <T> CloseableIterable<T> getFrames(EntityClass type, Class<T> cls);
 
     // CRUD functions
 

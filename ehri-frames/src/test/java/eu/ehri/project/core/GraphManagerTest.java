@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import com.tinkerpop.blueprints.TransactionalGraph;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -177,6 +178,7 @@ public class GraphManagerTest {
         };
 
         Vertex joe = manager.createVertex(TEST_ID1, TEST_TYPE, data, keys);
+        graph.getBaseGraph().stopTransaction(TransactionalGraph.Conclusion.SUCCESS);
 
         // try and find joe via name and age...
         CloseableIterable<Vertex> query1 = manager.getVertices("name",
