@@ -60,7 +60,7 @@ public class YamlFixtureLoader implements FixtureLoader {
 
     public static final String DEFAULT_FIXTURE_FILE = "testdata.yaml";
 
-    private final FramedGraph<Neo4jGraph> graph;
+    private final FramedGraph<? extends TransactionalGraph> graph;
     private final GraphManager manager;
     private static final Logger logger = LoggerFactory
             .getLogger(YamlFixtureLoader.class);
@@ -72,7 +72,7 @@ public class YamlFixtureLoader implements FixtureLoader {
      * @param graph
      * @param initialize
      */
-    public YamlFixtureLoader(FramedGraph<Neo4jGraph> graph, boolean initialize) {
+    public YamlFixtureLoader(FramedGraph<? extends TransactionalGraph> graph, boolean initialize) {
         this.graph = graph;
         this.initialize = initialize;
         manager = GraphManagerFactory.getInstance(graph);
@@ -83,7 +83,7 @@ public class YamlFixtureLoader implements FixtureLoader {
      *
      * @param graph
      */
-    public YamlFixtureLoader(FramedGraph<Neo4jGraph> graph) {
+    public YamlFixtureLoader(FramedGraph<? extends TransactionalGraph> graph) {
         this(graph, true);
     }
 
@@ -117,14 +117,21 @@ public class YamlFixtureLoader implements FixtureLoader {
 
     public void loadTestData(InputStream stream) {
         // Initialize the DB
-        if (initialize) {
-            new GraphInitializer(graph).initialize();
-        }
         try {
-            loadFixtureFileStream(stream);
-            stream.close();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+            if (initialize) {
+                new GraphInitializer(graph).initialize();
+            }
+            try {
+                loadFixtureFileStream(stream);
+                stream.close();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            graph.getBaseGraph().stopTransaction(TransactionalGraph.Conclusion.SUCCESS);
+        } catch (RuntimeException e) {
+            graph.getBaseGraph().stopTransaction(TransactionalGraph.Conclusion.SUCCESS);
+            e.printStackTrace();
+            throw e;
         }
     }
 
@@ -296,16 +303,7 @@ public class YamlFixtureLoader implements FixtureLoader {
     }
 
     public void loadTestData() {
-        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
-        try {
             loadFixtures();
-            tx.success();
-        } catch (Exception e) {
-            tx.failure();
-            throw new RuntimeException(e);
-        } finally {
-            tx.finish();
-        }
     }
 
     public static void main(String[] args) {
