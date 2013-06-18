@@ -43,6 +43,8 @@ public class GraphML extends BaseCommand implements Command {
 
     final static String NAME = "graphml";
 
+    private static final String INDEX_NAME = "entities"; // FIXME!!
+
     /**
      * Constructor.
      */
@@ -127,6 +129,6 @@ public class GraphML extends BaseCommand implements Command {
        String filepath = (String)cmdLine.getArgList().get(0);
 	   InputStream in = new FileInputStream(filepath);
 	   reader.inputGraph(in);
-	   GraphReindexer.reindex(graph);
+	   new GraphReindexer(graph).reindex(INDEX_NAME);
    }
 }

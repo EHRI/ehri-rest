@@ -47,6 +47,7 @@ import eu.ehri.project.models.base.PermissionGrantTarget;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.views.AclViews;
 import eu.ehri.project.views.Query;
+import org.neo4j.graphdb.Transaction;
 
 /**
  * Provides a RESTfull(ish) interface for setting PermissionTarget perms.
@@ -388,14 +389,18 @@ public class PermissionsResource extends AbstractRestResource {
     public Response setScopedPermissions(@PathParam("userId") String userId,
             @PathParam("id") String id, String json) throws PermissionDenied,
             IOException, ItemNotFound, DeserializationError, BadRequester {
-
-        HashMap<String, List<String>> globals = parseMatrix(json);
-        Accessor accessor = manager.getFrame(userId, Accessor.class);
-        PermissionScope scope = manager.getFrame(id, PermissionScope.class);
-        Accessor grantee = getRequesterUserProfile();
-        AclViews acl = new AclViews(graph, scope);
-
-        acl.setGlobalPermissionMatrix(accessor, enumifyMatrix(globals), grantee);
+        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
+        try {
+            HashMap<String, List<String>> globals = parseMatrix(json);
+            Accessor accessor = manager.getFrame(userId, Accessor.class);
+            PermissionScope scope = manager.getFrame(id, PermissionScope.class);
+            Accessor grantee = getRequesterUserProfile();
+            AclViews acl = new AclViews(graph, scope);
+            acl.setGlobalPermissionMatrix(accessor, enumifyMatrix(globals), grantee);
+            tx.success();
+        } finally {
+            tx.finish();
+        }
         return getScopedMatrix(userId, id);
     }
 
@@ -436,12 +441,19 @@ public class PermissionsResource extends AbstractRestResource {
         }
 
         Accessor accessor = manager.getFrame(userId, Accessor.class);
-        AccessibleEntity item = manager.getFrame(id, PermissionScope.class);
-        Accessor grantee = getRequesterUserProfile();
-        AclViews acl = new AclViews(graph);
 
-        acl.setItemPermissions(item, accessor,
-                enumifyPermissionList(scopedPerms), grantee);
+        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
+        try {
+            AccessibleEntity item = manager.getFrame(id, PermissionScope.class);
+            Accessor grantee = getRequesterUserProfile();
+            AclViews acl = new AclViews(graph);
+
+            acl.setItemPermissions(item, accessor,
+                    enumifyPermissionList(scopedPerms), grantee);
+            tx.success();
+        } finally {
+            tx.finish();
+        }
 
         return Response
                 .status(Response.Status.OK)

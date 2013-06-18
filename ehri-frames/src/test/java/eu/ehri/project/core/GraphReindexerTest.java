@@ -18,6 +18,7 @@ import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.test.ModelTestBase;
 
+
 public class GraphReindexerTest extends ModelTestBase {
     private static Logger logger = LoggerFactory.getLogger(GraphReindexerTest.class);
 
@@ -25,7 +26,7 @@ public class GraphReindexerTest extends ModelTestBase {
     public void reindex() {
     	HashMap<EntityClass, Long> countBefore = countTypes();
 
-    	GraphReindexer.reindex(graph);
+    	new GraphReindexer(graph).reindex(GraphReindexer.INDEX_NAME);
     	
     	// If the counts are the same, it is likely that we have all nodes indexed
     	assertTrue(countTypes().equals(countBefore));

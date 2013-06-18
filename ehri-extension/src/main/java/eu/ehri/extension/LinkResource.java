@@ -221,6 +221,7 @@ public class LinkResource extends
             Link link = manager.getFrame(linkId, EntityClass.LINK, Link.class);
             new ActionManager(graph).logEvent(link, actioner, EventTypes.deletion);
             manager.deleteVertex(link.asVertex());
+            tx.success();
             return Response.ok().build();
         } catch (ItemNotFound e) {
             tx.failure();

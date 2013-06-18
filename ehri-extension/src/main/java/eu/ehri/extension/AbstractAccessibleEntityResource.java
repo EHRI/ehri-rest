@@ -12,7 +12,6 @@ import javax.ws.rs.core.Response.Status;
 
 //import org.apache.log4j.Logger;
 import eu.ehri.project.exceptions.*;
-import eu.ehri.project.models.base.Frame;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 
@@ -61,7 +60,6 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
         this.cls = cls;
         views = new LoggingCrudViews<E>(graph, cls);
         querier = new Query<E>(graph, cls);
-
     }
 
     /**
@@ -212,14 +210,19 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
     public Response update(String json) throws PermissionDenied,
             IntegrityError, ValidationError, DeserializationError,
             ItemNotFound, BadRequester {
+        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
             Bundle entityBundle = Bundle.fromString(json);
             E update = views.update(entityBundle, getRequesterUserProfile(), getLogMessage());
+            tx.success();
             return Response.status(Status.OK)
                     .entity(getRepresentation(update).getBytes())
                     .build();
         } catch (SerializationError e) {
+            tx.failure();
             throw new WebApplicationException(e);
+        } finally {
+            tx.finish();
         }
     }
 
@@ -265,13 +268,18 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      */
     protected Response delete(String id) throws AccessDenied, PermissionDenied, ItemNotFound,
             ValidationError, BadRequester {
+        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
             E entity = views.detail(manager.getFrame(id, getEntityType(), cls),
                     getRequesterUserProfile());
             views.delete(entity, getRequesterUserProfile(), getLogMessage());
+            tx.success();
             return Response.status(Status.OK).build();
         } catch (SerializationError e) {
+            tx.failure();
             throw new WebApplicationException(e);
+        } finally {
+            tx.finish();
         }
     }
 

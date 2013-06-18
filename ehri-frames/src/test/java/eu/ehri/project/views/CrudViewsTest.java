@@ -349,9 +349,17 @@ public class CrudViewsTest extends AbstractFixtureTest {
         DocumentDescription changedDesc = docViews.createDependent(descBundle, unit, validUser,
                 DocumentDescription.class);
         unit.addDescription(changedDesc);
-        assertEquals("some-new-id", new Serializer(graph)
-                .vertexFrameToBundle(unit).getRelations(DescribedEntity
-                .DESCRIBES).get((int)descCount).getDataValue(IdentifiableEntity.IDENTIFIER_KEY));
+
+        // The order in which items are serialized is undefined, so we just have to throw
+        // an error if we don't fine the right item...
+        for (Bundle b : new Serializer(graph)
+                     .vertexFrameToBundle(unit).getRelations(DescribedEntity
+                        .DESCRIBES)) {
+            if (b.getDataValue(IdentifiableEntity.IDENTIFIER_KEY).equals("some-new-id")) {
+                return;
+            }
+        }
+        throw new RuntimeException("Item does not have description with identifier: some-new-id");
     }
 
     /**
