@@ -15,7 +15,9 @@ import eu.ehri.project.exceptions.IntegrityError;
 @Provider
 public class IntegrityErrorMapper implements ExceptionMapper<IntegrityError> {
 
-	@SuppressWarnings("serial")
+    private final ObjectMapper mapper = new ObjectMapper();
+
+    @SuppressWarnings("serial")
     @Override
 	public Response toResponse(final IntegrityError e) {
         Map<String, Object> out = new HashMap<String, Object>() {
@@ -26,7 +28,7 @@ public class IntegrityErrorMapper implements ExceptionMapper<IntegrityError> {
         };
         try {
             return Response.status(Status.BAD_REQUEST)
-                .entity(new ObjectMapper().writeValueAsBytes(out)).build();
+                .entity(mapper.writeValueAsBytes(out)).build();
         } catch (Exception e1) {
             throw new RuntimeException(e1);
         }

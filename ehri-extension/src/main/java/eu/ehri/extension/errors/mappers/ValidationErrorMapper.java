@@ -47,12 +47,15 @@ import eu.ehri.project.exceptions.BundleError;
  */
 @Provider
 public class ValidationErrorMapper implements ExceptionMapper<BundleError> {
+
+    private final ObjectMapper mapper = new ObjectMapper();
+
     @Override
     public Response toResponse(final BundleError e) {
         Map<String, Object> out = BundleError.getErrorTree(e.getErrors(), e.getRelations());
         try {
             return Response.status(Status.BAD_REQUEST)
-                    .entity(new ObjectMapper().writeValueAsBytes(out)).build();
+                    .entity(mapper.writeValueAsBytes(out)).build();
         } catch (Exception e1) {
             e1.printStackTrace();
             throw new RuntimeException(e1);

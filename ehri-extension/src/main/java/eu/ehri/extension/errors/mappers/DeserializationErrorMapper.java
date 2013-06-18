@@ -18,6 +18,8 @@ import eu.ehri.project.exceptions.DeserializationError;
 public class DeserializationErrorMapper implements
         ExceptionMapper<DeserializationError> {
 
+    private final ObjectMapper mapper = new ObjectMapper();
+
     @SuppressWarnings("unused")
     private String getStacktrace(Exception e) {
         StringWriter sw = new StringWriter();
@@ -38,7 +40,7 @@ public class DeserializationErrorMapper implements
         try {
             return Response
                     .status(Status.BAD_REQUEST)
-                    .entity(new ObjectMapper().writeValueAsString(out)
+                    .entity(mapper.writeValueAsString(out)
                             .getBytes()).build();
         } catch (Exception e1) {
             throw new RuntimeException(e1);
