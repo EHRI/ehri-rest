@@ -11,7 +11,7 @@ public interface Accessor extends IdentifiableEntity {
     @Adjacency(label = BELONGS_TO)
     public Iterable<Accessor> getParents();
 
-    @GremlinGroovy("_().as('n').out('" + BELONGS_TO
+    @GremlinGroovy("it.as('n').out('" + BELONGS_TO
             + "').loop('n'){it.loops < 20}{true}")
     public Iterable<Accessor> getAllParents();
     

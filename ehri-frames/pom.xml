@@ -102,7 +102,7 @@
         <dependency>
             <groupId>com.tinkerpop</groupId>
             <artifactId>frames</artifactId>
-            <version>${tinkerpop-version}</version>
+            <version>${frames-version}</version>
             <scope>compile</scope>
         </dependency>
         <dependency>

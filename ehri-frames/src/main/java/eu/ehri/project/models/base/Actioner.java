@@ -11,11 +11,11 @@ public interface Actioner extends NamedEntity {
      * 
      * @return
      */
-    @GremlinGroovy("_().as('n').out('" + ActionManager.LIFECYCLE_ACTION + "')" +
+    @GremlinGroovy("it.as('n').out('" + ActionManager.LIFECYCLE_ACTION + "')" +
             ".loop('n'){true}{true}.out('" + SystemEvent.HAS_EVENT + "')")
     public Iterable<SystemEvent> getActions();
 
-    @GremlinGroovy("_().as('n').out('" + ActionManager.LIFECYCLE_ACTION + "')"
+    @GremlinGroovy("it.as('n').out('" + ActionManager.LIFECYCLE_ACTION + "')"
             + ".out('" + SystemEvent.HAS_EVENT + "')")
     public Iterable<SystemEvent> getLatestAction();
 }

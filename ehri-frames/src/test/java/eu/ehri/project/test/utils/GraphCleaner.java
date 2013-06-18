@@ -1,10 +1,6 @@
 package eu.ehri.project.test.utils;
 
-import org.neo4j.graphdb.Transaction;
-import org.neo4j.graphdb.index.IndexManager;
-
-import com.tinkerpop.blueprints.Vertex;
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
+import com.tinkerpop.blueprints.*;
 import com.tinkerpop.frames.FramedGraph;
 
 /**
@@ -15,16 +11,16 @@ import com.tinkerpop.frames.FramedGraph;
  * @author michaelb
  * 
  */
-public class GraphCleaner {
+public class GraphCleaner<T extends TransactionalGraph & IndexableGraph> {
         
-    private FramedGraph<Neo4jGraph> graph;
+    private FramedGraph<T> graph;
     
     /**
      * Constructor.
      * 
      * @param graph
      */
-    public GraphCleaner(FramedGraph<Neo4jGraph> graph) {
+    public GraphCleaner(FramedGraph<T> graph) {
         this.graph = graph;
     }
     
@@ -32,24 +28,17 @@ public class GraphCleaner {
      * Delete all nodes and indices from the graph.
      */
     public void clean() {
-        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
-            IndexManager manager = graph.getBaseGraph().getRawGraph().index();
-            for (String nodeIndex : manager.nodeIndexNames()) {
-                graph.getBaseGraph().dropIndex(nodeIndex);
-            }
-            for (String relIndex : manager.relationshipIndexNames()) {
-                graph.getBaseGraph().dropIndex(relIndex);
+            for (Index<? extends Element> idx : graph.getBaseGraph().getIndices()) {
+                graph.getBaseGraph().dropIndex(idx.getIndexName());
             }
             for (Vertex v : graph.getVertices()) {
                 graph.removeVertex(v);
             }
-            tx.success();
+            graph.getBaseGraph().stopTransaction(TransactionalGraph.Conclusion.SUCCESS);
         } catch (Exception e) {
-            tx.failure();
+            graph.getBaseGraph().stopTransaction(TransactionalGraph.Conclusion.FAILURE);
             throw new RuntimeException(e);
-        } finally {
-            tx.finish();
         }
     }
 }

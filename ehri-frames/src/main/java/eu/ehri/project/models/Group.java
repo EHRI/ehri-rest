@@ -41,7 +41,7 @@ public interface Group extends Accessor, AccessibleEntity, IdentifiableEntity,
     public void removeMember(final Accessor accessor);
 
     // FIXME: Use of __ISA__ here breaks encapsulation of indexing details quite horribly
-    @GremlinGroovy("_().as('n').in('" + BELONGS_TO +"')" +
+    @GremlinGroovy("it.as('n').in('" + BELONGS_TO +"')" +
             ".loop('n'){true}{it.object.getProperty('" + EntityType.TYPE_KEY +
             "') == '" + Entities.USER_PROFILE + "'}")
     public Iterable<UserProfile> getAllUserProfileMembers();

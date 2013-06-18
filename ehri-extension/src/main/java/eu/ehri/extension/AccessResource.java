@@ -10,6 +10,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import com.google.common.collect.Sets;
+import com.tinkerpop.blueprints.TransactionalGraph;
 import eu.ehri.project.exceptions.SerializationError;
 import org.neo4j.graphdb.GraphDatabaseService;
 
@@ -52,6 +53,9 @@ public class AccessResource extends
         Set<Accessor> accessors = extractAccessors(accessorIds);
         AclViews acl = new AclViews(graph);
         acl.setAccessors(item, accessors, getRequesterUserProfile());
+
+        // FIXME: This is deprecated in 2.3
+        graph.getBaseGraph().stopTransaction(TransactionalGraph.Conclusion.SUCCESS);
         return Response.status(Status.OK)
                 .entity((serializer.vertexFrameToJson(item)).getBytes())
                 .build();

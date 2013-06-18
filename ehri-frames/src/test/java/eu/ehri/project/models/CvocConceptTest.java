@@ -84,16 +84,9 @@ public class CvocConceptTest extends ModelTestBase {
         Concept trees = graph.frame(v_trees, Concept.class);
 
         // OK, framed, now construct relations etc.
-        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
-        try {
-            fruit.addNarrowerConcept(apples);
-            fruit.addNarrowerConcept(bananas);
-            tx.success();
-        } catch (Exception e) {
-            tx.failure();
-        } finally {
-            tx.finish();
-        }
+        fruit.addNarrowerConcept(apples);
+        fruit.addNarrowerConcept(bananas);
+        graph.getBaseGraph().stopTransaction(Conclusion.SUCCESS);
 
         // fruit should now be the broader concept
         assertEquals(fruit.getId(), apples.getBroaderConcepts()
@@ -102,15 +95,8 @@ public class CvocConceptTest extends ModelTestBase {
                 .iterator().next().getId());
 
         // make a relation to Trees concept
-        tx = graph.getBaseGraph().getRawGraph().beginTx();
-        try {
-            apples.addRelatedConcept(trees);
-            tx.success();
-        } catch (Exception e) {
-            tx.failure();
-        } finally {
-            tx.finish();
-        }
+        apples.addRelatedConcept(trees);
+        graph.getBaseGraph().stopTransaction(Conclusion.SUCCESS);
 
         // is it symmetric?
         assertEquals(apples.getId(), trees.getRelatedByConcepts()
@@ -202,17 +188,8 @@ public class CvocConceptTest extends ModelTestBase {
 		Concept apples = graph.frame(v_apples, Concept.class);
 
 		// now add the apples to the vocabulary
-		Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
-		try {
-			vocabulary.addConcept(apples);
-			tx.success();
-		} catch (Exception e) {
-			tx.failure();
-		} finally {
-			tx.finish();
-		}
+        vocabulary.addConcept(apples);
         assertEquals(vocabulary.getIdentifier(), apples.getVocabulary().getIdentifier());
-
 	}
 	
 	// test creation of a vocabulary using the BundleDAO

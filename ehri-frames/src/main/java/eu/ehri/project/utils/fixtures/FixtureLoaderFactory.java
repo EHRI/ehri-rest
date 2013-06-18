@@ -1,5 +1,6 @@
 package eu.ehri.project.utils.fixtures;
 
+import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
@@ -19,7 +20,7 @@ public class FixtureLoaderFactory {
      * @param graph
      * @return
      */
-    public static FixtureLoader getInstance(FramedGraph<Neo4jGraph> graph) {
+    public static FixtureLoader getInstance(FramedGraph<? extends TransactionalGraph> graph) {
         return new YamlFixtureLoader(graph);
     }
 
@@ -31,7 +32,7 @@ public class FixtureLoaderFactory {
      * @param initialize
      * @return
      */
-    public static FixtureLoader getInstance(FramedGraph<Neo4jGraph> graph, boolean initialize) {
+    public static FixtureLoader getInstance(FramedGraph<? extends TransactionalGraph> graph, boolean initialize) {
         return new YamlFixtureLoader(graph, initialize);
     }
 }
