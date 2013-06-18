@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
  */
 public class UkrainianUnitImporter extends XmlImporter<Object> {
 
+    public static final String MULTIVALUE_SEP = ",,";
     private XmlImportProperties p;
     private static final Logger logger = LoggerFactory.getLogger(UkrainianUnitImporter.class);
 
@@ -122,8 +123,8 @@ public class UkrainianUnitImporter extends XmlImporter<Object> {
     public Map<String, Object> constructDateMap(Map<String, Object> itemData) {
         Map<String, Object> item = new HashMap<String, Object>();
         String origDate = itemData.get("dates").toString();
-        if (origDate.indexOf(",,") > 0) {
-            String[] dates = itemData.get("dates").toString().split(",,");
+        if (origDate.indexOf(MULTIVALUE_SEP) > 0) {
+            String[] dates = itemData.get("dates").toString().split(MULTIVALUE_SEP);
             item.put(DatePeriod.START_DATE, dates[0]);
             item.put(DatePeriod.END_DATE, dates[1]);
         } else {
@@ -147,7 +148,15 @@ public class UkrainianUnitImporter extends XmlImporter<Object> {
                 if (!p.containsProperty(key)) {
                     SaxXmlHandler.putPropertyInGraph(item, SaxXmlHandler.UNKNOWN + key, itemData.get(key).toString());
                 } else {
-                    SaxXmlHandler.putPropertyInGraph(item, p.getProperty(key), itemData.get(key).toString());
+                    Object value = itemData.get(key);
+                    // TODO: Check if the property is an allowedMultivalue one...
+                    if (value.toString().contains(MULTIVALUE_SEP)) {
+                        for (String v : value.toString().split(MULTIVALUE_SEP)) {
+                            SaxXmlHandler.putPropertyInGraph(item, p.getProperty(key), v);
+                        }
+                    } else {
+                        SaxXmlHandler.putPropertyInGraph(item, p.getProperty(key), value.toString());
+                    }
                 }
             }
 
