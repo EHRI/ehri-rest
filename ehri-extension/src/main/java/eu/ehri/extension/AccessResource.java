@@ -53,9 +53,7 @@ public class AccessResource extends
         Set<Accessor> accessors = extractAccessors(accessorIds);
         AclViews acl = new AclViews(graph);
         acl.setAccessors(item, accessors, getRequesterUserProfile());
-
-        // FIXME: This is deprecated in 2.3
-        graph.getBaseGraph().stopTransaction(TransactionalGraph.Conclusion.SUCCESS);
+        graph.getBaseGraph().commit();
         return Response.status(Status.OK)
                 .entity((serializer.vertexFrameToJson(item)).getBytes())
                 .build();

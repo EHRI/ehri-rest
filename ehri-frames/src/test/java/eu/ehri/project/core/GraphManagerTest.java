@@ -178,7 +178,7 @@ public class GraphManagerTest {
         };
 
         Vertex joe = manager.createVertex(TEST_ID1, TEST_TYPE, data, keys);
-        graph.getBaseGraph().stopTransaction(TransactionalGraph.Conclusion.SUCCESS);
+        graph.getBaseGraph().commit();
 
         // try and find joe via name and age...
         CloseableIterable<Vertex> query1 = manager.getVertices("name",

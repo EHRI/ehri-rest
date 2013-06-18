@@ -15,23 +15,16 @@ public interface DocumentaryUnit extends AccessibleEntity,
         DescribedEntity, PermissionScope {
 
     public static final String CHILD_OF = "childOf";
-//    public static final String NAME = "name";
-
-//    @Mandatory
-//    @Property(NAME)
-//    public String getName();
 
     /**
      * Get the repository that holds this documentary unit.
      * @return
      */
-    // NB: This is only an iterable until we upgrade to frames 2.3.0
-    // which supports GremlinGroovy annotations for single items
     @Fetch(Repository.HELD_BY)
     @GremlinGroovy("it.copySplit(_(), _().as('n').out('" + CHILD_OF +"')"
             + ".loop('n'){true}{!it.object.out('" + CHILD_OF +"').hasNext()}"
             + ").exhaustMerge().out('" + Repository.HELD_BY + "')")
-    public Iterable<Repository> getAgent();
+    public Repository getRepository();
 
     /**
      * Set the repository that holds this documentary unit.

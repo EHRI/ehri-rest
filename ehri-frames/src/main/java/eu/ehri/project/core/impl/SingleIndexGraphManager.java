@@ -238,7 +238,7 @@ public final class SingleIndexGraphManager implements GraphManager {
         for (String key : vertex.getPropertyKeys()) {
             index.remove(key, vertex.getProperty(key), vertex);
         }
-        graph.removeVertex(vertex);
+        vertex.remove();
     }
 
     /**
@@ -255,10 +255,11 @@ public final class SingleIndexGraphManager implements GraphManager {
             Map<String, Object> data, Collection<String> keys) {
         // remove 'old' properties
         for (String key : item.getPropertyKeys()) {
-            if (keys == null || keys.contains(key)) {
-                index.remove(key, item.getProperty(key), item);
-            }
+            Object value = item.getProperty(key);
             item.removeProperty(key);
+            if (keys == null || keys.contains(key)) {
+                index.remove(key, value, item);
+            }
         }
 
         // add all 'new' properties to the relationship and index

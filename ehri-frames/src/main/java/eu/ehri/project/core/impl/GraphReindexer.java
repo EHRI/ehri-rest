@@ -52,11 +52,9 @@ public class GraphReindexer<T extends TransactionalGraph & IndexableGraph> {
                 }
             };
 
-            graph.getBaseGraph().stopTransaction(
-                    TransactionalGraph.Conclusion.SUCCESS);
+            graph.getBaseGraph().commit();
         } catch (Exception e) {
-            graph.getBaseGraph().stopTransaction(
-                    TransactionalGraph.Conclusion.FAILURE);
+            graph.getBaseGraph().rollback();
         }
     }
     

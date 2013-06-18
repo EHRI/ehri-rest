@@ -1,9 +1,5 @@
 package eu.ehri.project.models;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertEquals;
-
 import java.util.List;
 
 import com.google.common.collect.Iterables;
@@ -11,13 +7,9 @@ import eu.ehri.project.test.ModelTestBase;
 import org.junit.Test;
 
 import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.models.Address;
-import eu.ehri.project.models.Repository;
-import eu.ehri.project.models.RepositoryDescription;
-import eu.ehri.project.models.DocumentaryUnit;
-import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.Group;
 import eu.ehri.project.models.base.Accessor;
+
+import static org.junit.Assert.*;
 
 public class FixtureTest extends ModelTestBase {
     @Test
@@ -41,9 +33,7 @@ public class FixtureTest extends ModelTestBase {
     @Test
     public void testCollectionHelpByRepo() throws ItemNotFound {
         DocumentaryUnit unit = manager.getFrame("c1", DocumentaryUnit.class);
-        // FIXME: When we upgrade to frames 2.3.0 getAgent will again
-        // return a single Repository item (or null)
-        assertTrue(unit.getAgent().iterator().hasNext());
+        assertNotNull(unit.getRepository());
         // and have a description
         assertFalse(toList(unit.getDescriptions()).isEmpty());
     }
@@ -52,12 +42,9 @@ public class FixtureTest extends ModelTestBase {
     public void testChildDocsCanAccessTheirAgent() throws ItemNotFound {
         DocumentaryUnit unit = manager.getFrame("c1", DocumentaryUnit.class);
         DocumentaryUnit child = manager.getFrame("c3", DocumentaryUnit.class);
-        // FIXME: When we upgrade to frames 2.3.0 getAgent will again
-        // return a single Repository item (or null)
-        assertTrue(child.getAgent().iterator().hasNext());
-        assertTrue(unit.getAgent().iterator().hasNext());
-        assertEquals(unit.getAgent().iterator().next(),
-                child.getAgent().iterator().next());
+        assertNotNull(child.getRepository());
+        assertNotNull(unit.getRepository());
+        assertEquals(unit.getRepository(), child.getRepository());
     }
 
     @Test

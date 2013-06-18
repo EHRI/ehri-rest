@@ -9,7 +9,6 @@ import java.util.Map.Entry;
 import eu.ehri.project.models.base.Frame;
 import eu.ehri.project.utils.fixtures.FixtureLoader;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -116,6 +115,10 @@ public class YamlFixtureLoader implements FixtureLoader {
     }
 
     public void loadTestData(InputStream stream) {
+
+        // Ensure we're not currently in a transaction!
+        graph.getBaseGraph().rollback();
+
         // Initialize the DB
         try {
             if (initialize) {
@@ -127,9 +130,9 @@ public class YamlFixtureLoader implements FixtureLoader {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-            graph.getBaseGraph().stopTransaction(TransactionalGraph.Conclusion.SUCCESS);
+            graph.getBaseGraph().commit();
         } catch (RuntimeException e) {
-            graph.getBaseGraph().stopTransaction(TransactionalGraph.Conclusion.SUCCESS);
+            graph.getBaseGraph().rollback();
             e.printStackTrace();
             throw e;
         }
@@ -180,8 +183,6 @@ public class YamlFixtureLoader implements FixtureLoader {
             logger.debug(String.format(" - %s -[%s]-> %s", src, dst,
                     relname));
             graph.addEdge(null, src, dst, relname);
-            graph.getBaseGraph().stopTransaction(
-                    TransactionalGraph.Conclusion.SUCCESS);
         }
     }
 
