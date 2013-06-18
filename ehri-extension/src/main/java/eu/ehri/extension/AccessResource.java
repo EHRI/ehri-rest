@@ -49,6 +49,7 @@ public class AccessResource extends
     public Response setVisibility(@PathParam("id") String id,
             @QueryParam(ACCESSOR_PARAM) List<String> accessorIds)
             throws PermissionDenied, ItemNotFound, BadRequester, SerializationError {
+        graph.getBaseGraph().clearTxThreadVar();
         AccessibleEntity item = manager.getFrame(id, AccessibleEntity.class);
         Set<Accessor> accessors = extractAccessors(accessorIds);
         AclViews acl = new AclViews(graph);

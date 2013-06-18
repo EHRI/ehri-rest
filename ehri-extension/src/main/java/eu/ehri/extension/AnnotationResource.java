@@ -44,7 +44,8 @@ public class AnnotationResource extends
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{id:.+}")
+    @Path("/{id:.+}"
+    )
     public Response getAction(@PathParam("id") String id) throws ItemNotFound,
             AccessDenied, BadRequester {
         return retrieve(id);
@@ -95,34 +96,33 @@ public class AnnotationResource extends
             String json, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws PermissionDenied, ValidationError, DeserializationError,
             ItemNotFound, BadRequester, SerializationError {
-        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
+        graph.getBaseGraph().clearTxThreadVar();
         try {
             Accessor user = getRequesterUserProfile();
             Annotation ann = new AnnotationViews(graph).createFor(id,
                     Bundle.fromString(json), user);
             new AclManager(graph).setAccessors(ann,
                     getAccessors(accessors, user));
-            tx.success();
+            graph.getBaseGraph().commit();
             return buildResponseFromAnnotation(ann);
         } catch (ItemNotFound e) {
-            tx.failure();
+            graph.getBaseGraph().rollback();
             throw e;
         } catch (PermissionDenied e) {
-            tx.failure();
+            graph.getBaseGraph().rollback();
             throw e;
         } catch (DeserializationError e) {
-            tx.failure();
+            graph.getBaseGraph().rollback();
             throw e;
         } catch (BadRequester e) {
-            tx.failure();
+            graph.getBaseGraph().rollback();
             throw e;
         } catch (ValidationError e) {
-            tx.failure();
+            graph.getBaseGraph().rollback();
             throw e;
         } catch (Exception e) {
+            graph.getBaseGraph().rollback();
             throw new WebApplicationException(e);
-        } finally {
-            tx.finish();
         }
     }
 

@@ -13,6 +13,7 @@ import javax.ws.rs.core.Response.Status;
 
 import eu.ehri.project.models.base.IdentifiableEntity;
 import eu.ehri.project.models.base.NamedEntity;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.server.database.Database;
 
@@ -37,23 +38,15 @@ import eu.ehri.project.views.impl.LoggingCrudViews;
  * Provides additional Admin methods needed by client systems.
  */
 @Path("admin")
-public class AdminResource {
+public class AdminResource extends AbstractRestResource {
 
     public static String DEFAULT_USER_ID_PREFIX = "user";
     public static String DEFAULT_USER_ID_FORMAT = "%s%06d";
 
-    private Database database;
-    private FramedGraph<Neo4jGraph> graph;
-    private Serializer serializer;
-    private GraphManager manager;
-
-    public AdminResource(@Context Database database) {
-        this.database = database;
-        this.graph = new FramedGraph<Neo4jGraph>(new Neo4jGraph(
-                database.getGraph()));
-        serializer = new Serializer(graph);
-        manager = GraphManagerFactory.getInstance(graph);
+    public AdminResource(@Context GraphDatabaseService database) {
+        super(database);
     }
+
 
     /**
      * Create a new user with a default name and identifier.
@@ -65,7 +58,8 @@ public class AdminResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/createDefaultUserProfile")
     public Response createDefaultUserProfile() throws Exception {
-        Transaction tx = database.getGraph().beginTx();
+        graph.getBaseGraph().clearTxThreadVar();
+        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
             String ident = getNextDefaultUserId();
             Bundle bundle = new Bundle(EntityClass.USER_PROFILE)

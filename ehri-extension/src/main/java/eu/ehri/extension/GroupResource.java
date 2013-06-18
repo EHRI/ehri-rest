@@ -125,10 +125,17 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
     public Response addMember(@PathParam("id") String id,
             @PathParam("atype") String atype, @PathParam("aid") String aid)
             throws PermissionDenied, ItemNotFound, BadRequester {
+        graph.getBaseGraph().clearTxThreadVar();
         Group group = manager.getFrame(id, EntityClass.GROUP, Group.class);
         Accessor accessor = manager.getFrame(aid, Accessor.class);
-        new AclViews(graph).addAccessorToGroup(group, accessor, getRequesterUserProfile());
-        return Response.status(Status.OK).build();
+        try {
+            new AclViews(graph).addAccessorToGroup(group, accessor, getRequesterUserProfile());
+            graph.getBaseGraph().commit();
+            return Response.status(Status.OK).build();
+        } catch (PermissionDenied permissionDenied) {
+            graph.getBaseGraph().rollback();
+            throw permissionDenied;
+        }
     }
 
     /**
@@ -147,11 +154,17 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
     public Response removeMember(@PathParam("id") String id,
             @PathParam("aid") String aid) throws PermissionDenied,
             ItemNotFound, BadRequester {
-
+        graph.getBaseGraph().clearTxThreadVar();
         Group group = manager.getFrame(id, EntityClass.GROUP, Group.class);
         Accessor accessor = manager.getFrame(aid, Accessor.class);
-        new AclViews(graph).removeAccessorFromGroup(group, accessor, getRequesterUserProfile());
-        return Response.status(Status.OK).build();
+        try {
+            new AclViews(graph).removeAccessorFromGroup(group, accessor, getRequesterUserProfile());
+            graph.getBaseGraph().commit();
+            return Response.status(Status.OK).build();
+        } catch (PermissionDenied permissionDenied) {
+            graph.getBaseGraph().rollback();
+            throw permissionDenied;
+        }
     }
 
     /**

@@ -72,6 +72,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
     public StreamingOutput page(Integer offset, Integer limit,
             Iterable<String> order, Iterable<String> filters)
             throws ItemNotFound, BadRequester {
+        graph.getBaseGraph().clearTxThreadVar();
         final Query.Page<E> page = querier.setOffset(offset).setLimit(limit)
                 .orderBy(order).filter(filters).page(getRequesterUserProfile());
         return streamingPage(page);
@@ -102,6 +103,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
     public StreamingOutput list(Integer offset, Integer limit,
             Iterable<String> order, Iterable<String> filters)
             throws ItemNotFound, BadRequester {
+        graph.getBaseGraph().clearTxThreadVar();
         final Query<E> query = querier.setOffset(offset).setLimit(limit)
                 .orderBy(order).filter(filters);
         return streamingList(query.list(getRequesterUserProfile()));
@@ -116,6 +118,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      */
     public StreamingOutput list(Integer offset, Integer limit)
             throws ItemNotFound, BadRequester {
+        graph.getBaseGraph().clearTxThreadVar();
         return list(offset, limit, Lists.<String>newArrayList(),
                 Lists.<String>newArrayList());
     }
@@ -129,6 +132,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      */
     public Response count(Iterable<String> filters) throws BadRequester {
         Long count = querier.filter(filters).count(getRequesterUserProfile());
+        graph.getBaseGraph().clearTxThreadVar();
         return Response.ok().entity(count.toString().getBytes()).build();
     }
 
@@ -149,11 +153,10 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
     public Response create(String json, List<String> accessorIds)
             throws PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, BadRequester {
-
-        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
-        try {
+        graph.getBaseGraph().clearTxThreadVar();
             Accessor user = getRequesterUserProfile();
             Bundle entityBundle = Bundle.fromString(json);
+        try {
             E entity = views.create(entityBundle, user, getLogMessage());
             // TODO: Move elsewhere
             new AclManager(graph).setAccessors(entity,
@@ -161,15 +164,21 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
 
             UriBuilder ub = uriInfo.getAbsolutePathBuilder();
             URI docUri = ub.path(entity.getId()).build();
-            tx.success();
+            graph.getBaseGraph().commit();
             return Response.status(Status.CREATED).location(docUri)
                     .entity(getRepresentation(entity).getBytes()).build();
-        } catch (SerializationError e) {
-            tx.failure();
-            return Response.status(Status.INTERNAL_SERVER_ERROR)
-                    .entity((produceErrorMessageJson(e)).getBytes()).build();
-        } finally {
-            tx.finish();
+        } catch (PermissionDenied permissionDenied) {
+            graph.getBaseGraph().rollback();
+            throw permissionDenied;
+        } catch (ValidationError validationError) {
+            graph.getBaseGraph().rollback();
+            throw validationError;
+        } catch (IntegrityError integrityError) {
+            graph.getBaseGraph().rollback();
+            throw integrityError;
+        } catch (SerializationError serializationError) {
+            graph.getBaseGraph().rollback();
+            throw new RuntimeException(serializationError);
         }
     }
 
@@ -185,6 +194,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      */
     public Response retrieve(String id) throws AccessDenied, ItemNotFound,
             BadRequester {
+        graph.getBaseGraph().clearTxThreadVar();
         try {
             E entity = views.detail(manager.getFrame(id, getEntityType(), cls),
                     getRequesterUserProfile());
@@ -209,20 +219,26 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      */
     public Response update(String json) throws PermissionDenied,
             IntegrityError, ValidationError, DeserializationError,
-            ItemNotFound, BadRequester {
-        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
+            BadRequester {
         try {
             Bundle entityBundle = Bundle.fromString(json);
             E update = views.update(entityBundle, getRequesterUserProfile(), getLogMessage());
-            tx.success();
+            graph.getBaseGraph().commit();
             return Response.status(Status.OK)
                     .entity(getRepresentation(update).getBytes())
                     .build();
-        } catch (SerializationError e) {
-            tx.failure();
-            throw new WebApplicationException(e);
-        } finally {
-            tx.finish();
+        } catch (PermissionDenied permissionDenied) {
+            graph.getBaseGraph().rollback();
+            throw permissionDenied;
+        } catch (ValidationError validationError) {
+            graph.getBaseGraph().rollback();
+            throw validationError;
+        } catch (IntegrityError integrityError) {
+            graph.getBaseGraph().rollback();
+            throw integrityError;
+        } catch (SerializationError serializationError) {
+            graph.getBaseGraph().rollback();
+            throw new RuntimeException(serializationError);
         }
     }
 
@@ -268,18 +284,22 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      */
     protected Response delete(String id) throws AccessDenied, PermissionDenied, ItemNotFound,
             ValidationError, BadRequester {
-        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
+        graph.getBaseGraph().clearTxThreadVar();
         try {
             E entity = views.detail(manager.getFrame(id, getEntityType(), cls),
                     getRequesterUserProfile());
             views.delete(entity, getRequesterUserProfile(), getLogMessage());
-            tx.success();
+            graph.getBaseGraph().commit();
             return Response.status(Status.OK).build();
-        } catch (SerializationError e) {
-            tx.failure();
-            throw new WebApplicationException(e);
-        } finally {
-            tx.finish();
+        } catch (PermissionDenied permissionDenied) {
+            graph.getBaseGraph().rollback();
+            throw permissionDenied;
+        } catch (ValidationError validationError) {
+            graph.getBaseGraph().rollback();
+            throw validationError;
+        } catch (SerializationError serializationError) {
+            graph.getBaseGraph().rollback();
+            throw new RuntimeException(serializationError);
         }
     }
 
