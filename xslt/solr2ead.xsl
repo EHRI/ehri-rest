@@ -13,15 +13,30 @@
 
     <xsl:template match="/add">
         <xsl:for-each select="//doc">
-            <xsl:variable name="filename" select="concat('ead/' , field[@name = 'id'] , '.xml')" />
-            <xsl:result-document href="{$filename}" method="xml">
-                <ead>
-                    <xsl:call-template name="header"/>
-                    <xsl:call-template name="fm"/>
-                    <xsl:call-template name="description"/>
-                    <xsl:apply-templates />
-                </ead>
-            </xsl:result-document>
+            <xsl:variable name="parent" select="field[@name = 'assoc_parent_irn']/normalize-space()" />
+            <xsl:if test="$parent != ''">
+                <xsl:variable name="filename" select="concat('ead/', $parent, '/' , field[@name = 'id'] , '.xml')" />
+                <xsl:result-document href="{$filename}" method="xml">
+                    <ead>
+                        <xsl:call-template name="header"/>
+                        <xsl:call-template name="fm"/>
+                        <xsl:call-template name="description"/>
+                        <xsl:apply-templates />
+                    </ead>
+                </xsl:result-document>
+            </xsl:if>
+            <xsl:if test="not($parent)">
+                <xsl:variable name="filename" select="concat('ead/', field[@name = 'id'] , '.xml')" />
+                <xsl:result-document href="{$filename}" method="xml">
+                    <ead>
+                        <xsl:call-template name="header"/>
+                        <xsl:call-template name="fm"/>
+                        <xsl:call-template name="description"/>
+                        <xsl:apply-templates />
+                    </ead>
+                </xsl:result-document>
+            </xsl:if>
+
         </xsl:for-each>
     </xsl:template>
 
