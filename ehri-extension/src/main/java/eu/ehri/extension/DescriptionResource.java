@@ -33,21 +33,28 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
     public Response createDescription(@PathParam("id") String id, String json)
             throws AccessDenied, PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, ItemNotFound, BadRequester {
-        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
+        graph.getBaseGraph().clearTxThreadVar();
+        Accessor user = getRequesterUserProfile();
         try {
-            Accessor user = getRequesterUserProfile();
             DescribedEntity doc = views.detail(
                     manager.getFrame(id, DescribedEntity.class), user);
             Description desc = views.createDependent(Bundle.fromString(json),
                     doc, user, Description.class, getLogMessage());
             doc.addDescription(desc);
-            tx.success();
+            graph.getBaseGraph().commit();
             return buildResponse(desc, Response.Status.CREATED);
-        } catch (SerializationError e) {
-            tx.failure();
-            throw new WebApplicationException(e);
-        } finally {
-            tx.finish();
+        } catch (PermissionDenied permissionDenied) {
+            graph.getBaseGraph().rollback();
+            throw permissionDenied;
+        } catch (DeserializationError deserializationError) {
+            graph.getBaseGraph().rollback();
+            throw deserializationError;
+        } catch (ValidationError validationError) {
+            graph.getBaseGraph().rollback();
+            throw validationError;
+        } catch (SerializationError serializationError) {
+            graph.getBaseGraph().rollback();
+            throw new RuntimeException(serializationError);
         }
     }
 
@@ -58,12 +65,28 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
     public Response updateDescription(@PathParam("id") String id, String json)
             throws AccessDenied, PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, ItemNotFound, BadRequester, SerializationError {
+        graph.getBaseGraph().clearTxThreadVar();
         Accessor user = getRequesterUserProfile();
         DescribedEntity doc = views.detail(
                 manager.getFrame(id, DescribedEntity.class), user);
-        Description desc = views.updateDependent(Bundle.fromString(json), doc, user, Description.class,
-                getLogMessage());
-        return buildResponse(desc, Response.Status.OK);
+        try {
+            Description desc = views.updateDependent(Bundle.fromString(json), doc, user, Description.class,
+                    getLogMessage());
+            graph.getBaseGraph().commit();
+            return buildResponse(desc, Response.Status.OK);
+        } catch (PermissionDenied permissionDenied) {
+            graph.getBaseGraph().rollback();
+            throw permissionDenied;
+        } catch (DeserializationError deserializationError) {
+            graph.getBaseGraph().rollback();
+            throw deserializationError;
+        } catch (ValidationError validationError) {
+            graph.getBaseGraph().rollback();
+            throw validationError;
+        } catch (SerializationError serializationError) {
+            graph.getBaseGraph().rollback();
+            throw new RuntimeException(serializationError);
+        }
     }
 
     @PUT
@@ -85,12 +108,25 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
             @PathParam("id") String id, @PathParam("did") String did)
             throws AccessDenied, PermissionDenied, ItemNotFound, ValidationError,
             BadRequester, SerializationError {
+        graph.getBaseGraph().clearTxThreadVar();
         Accessor user = getRequesterUserProfile();
         DescribedEntity doc = views.detail(manager.getFrame(id, DescribedEntity.class), user);
         Description desc = manager.getFrame(did, EntityClass.DOCUMENT_DESCRIPTION,
                 Description.class);
-        views.deleteDependent(desc, doc, user, Description.class, getLogMessage());
-        return Response.ok().build();
+        try {
+            views.deleteDependent(desc, doc, user, Description.class, getLogMessage());
+            graph.getBaseGraph().commit();
+            return Response.ok().build();
+        } catch (PermissionDenied permissionDenied) {
+            graph.getBaseGraph().rollback();
+            throw permissionDenied;
+        } catch (ValidationError validationError) {
+            graph.getBaseGraph().rollback();
+            throw validationError;
+        } catch (SerializationError serializationError) {
+            graph.getBaseGraph().rollback();
+            throw new RuntimeException(serializationError);
+        }
     }
 
 
@@ -113,7 +149,7 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
                 @PathParam("did") String did, String json)
             throws AccessDenied, PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, ItemNotFound, BadRequester {
-        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
+        graph.getBaseGraph().clearTxThreadVar();
         try {
             Accessor user = getRequesterUserProfile();
             DescribedEntity doc = views.detail(
@@ -122,13 +158,23 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
             UndeterminedRelationship rel = views.createDependent(Bundle.fromString(json),
                     doc, user, UndeterminedRelationship.class, getLogMessage());
             desc.addUndeterminedRelationship(rel);
-            tx.success();
+            graph.getBaseGraph().commit();
             return buildResponse(rel, Response.Status.CREATED);
-        } catch (SerializationError e) {
-            tx.failure();
-            throw new WebApplicationException(e);
-        } finally {
-            tx.finish();
+        } catch (ItemNotFound itemNotFound) {
+            graph.getBaseGraph().rollback();
+            throw itemNotFound;
+        } catch (IntegrityError integrityError) {
+            graph.getBaseGraph().rollback();
+            throw integrityError;
+        } catch (PermissionDenied permissionDenied) {
+            graph.getBaseGraph().rollback();
+            throw permissionDenied;
+        } catch (ValidationError validationError) {
+            graph.getBaseGraph().rollback();
+            throw validationError;
+        } catch (SerializationError serializationError) {
+            graph.getBaseGraph().rollback();
+            throw new RuntimeException(serializationError);
         }
     }
 
@@ -138,7 +184,7 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
             @PathParam("did") String did, @PathParam("did") String apid, String json)
             throws AccessDenied, PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, ItemNotFound, BadRequester {
-        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
+        graph.getBaseGraph().clearTxThreadVar();
         try {
             Accessor user = getRequesterUserProfile();
             DescribedEntity doc = views.detail(
@@ -150,12 +196,20 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
                         new Exception("Access point does not belong to given description."));
             }
             views.deleteDependent(rel, doc, user, UndeterminedRelationship.class, getLogMessage());
+            graph.getBaseGraph().commit();
             return Response.ok().build();
-        } catch (SerializationError e) {
-            tx.failure();
-            throw new WebApplicationException(e);
-        } finally {
-            tx.finish();
+        } catch (ItemNotFound itemNotFound) {
+            graph.getBaseGraph().rollback();
+            throw itemNotFound;
+        } catch (PermissionDenied permissionDenied) {
+            graph.getBaseGraph().rollback();
+            throw permissionDenied;
+        } catch (ValidationError validationError) {
+            graph.getBaseGraph().rollback();
+            throw validationError;
+        } catch (SerializationError serializationError) {
+            graph.getBaseGraph().rollback();
+            throw new RuntimeException(serializationError);
         }
     }
 }

@@ -132,8 +132,7 @@ public final class AclManager {
         // itself
         // FIXME: Tidy up the logic here.
         if (belongsToAdmin(accessor)
-                || (!isAnonymous(accessor) && accessor.asVertex().equals(
-                        entity.asVertex()))) {
+                || (!isAnonymous(accessor) && accessor.equals(entity))) {
             return true;
         }
 
@@ -162,7 +161,7 @@ public final class AclManager {
      */
     public void removeAccessControl(AccessibleEntity entity, Accessor accessor) {
         for (Accessor acc : entity.getAccessors()) {
-            if (acc.asVertex().equals(accessor.asVertex()))
+            if (acc.equals(accessor))
                 entity.removeAccessor(accessor);
         }
     }
@@ -490,7 +489,7 @@ public final class AclManager {
 
             // Get the content type node and check it matches the grant target
             for (PermissionGrantTarget tg : grant.getTargets()) {
-                if (!target.asVertex().equals(tg.asVertex())) {
+                if (!target.equals(tg)) {
                     continue;
                 }
 

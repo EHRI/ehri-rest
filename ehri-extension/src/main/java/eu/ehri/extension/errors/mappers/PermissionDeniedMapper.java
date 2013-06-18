@@ -15,7 +15,9 @@ import eu.ehri.project.exceptions.PermissionDenied;
 @Provider
 public class PermissionDeniedMapper implements ExceptionMapper<PermissionDenied> {
 
-	@SuppressWarnings("serial")
+    private final ObjectMapper mapper = new ObjectMapper();
+
+    @SuppressWarnings("serial")
     @Override
 	public Response toResponse(final PermissionDenied e) {
         Map<String, Object> out = new HashMap<String, Object>() {
@@ -33,7 +35,7 @@ public class PermissionDeniedMapper implements ExceptionMapper<PermissionDenied>
         };
 		try {
             return Response.status(Status.UNAUTHORIZED)
-            	.entity(new ObjectMapper().writeValueAsBytes(out)).build();
+            	.entity(mapper.writeValueAsBytes(out)).build();
         } catch (Exception e1) {
             throw new RuntimeException(e1);
         }

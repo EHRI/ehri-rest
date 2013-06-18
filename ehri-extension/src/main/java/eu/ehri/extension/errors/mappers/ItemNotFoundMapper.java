@@ -15,7 +15,9 @@ import eu.ehri.project.exceptions.ItemNotFound;
 @Provider
 public class ItemNotFoundMapper implements ExceptionMapper<ItemNotFound> {
 
-	@SuppressWarnings("serial")
+    private final ObjectMapper mapper = new ObjectMapper();
+
+    @SuppressWarnings("serial")
     @Override
 	public Response toResponse(final ItemNotFound e) {
         Map<String, Object> out = new HashMap<String, Object>() {
@@ -32,7 +34,7 @@ public class ItemNotFoundMapper implements ExceptionMapper<ItemNotFound> {
         };
         try {
             return Response.status(Status.NOT_FOUND)
-                .entity(new ObjectMapper().writeValueAsString(out).getBytes()).build();
+                .entity(mapper.writeValueAsString(out).getBytes()).build();
         } catch (Exception e1) {
             throw new RuntimeException(e1);
         }

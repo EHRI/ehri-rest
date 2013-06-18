@@ -13,15 +13,9 @@ import com.google.common.collect.Lists;
 import eu.ehri.project.models.base.IdentifiableEntity;
 import eu.ehri.project.test.ModelTestBase;
 import org.junit.Test;
-import org.neo4j.graphdb.Transaction;
-
-import com.tinkerpop.blueprints.TransactionalGraph.Conclusion;
 import com.tinkerpop.blueprints.Vertex;
 
 import eu.ehri.project.definitions.Entities;
-import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.UserProfile;
-import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.ConceptDescription;
@@ -86,16 +80,9 @@ public class CvocConceptTest extends ModelTestBase {
         Concept trees = graph.frame(v_trees, Concept.class);
 
         // OK, framed, now construct relations etc.
-        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
-        try {
-            fruit.addNarrowerConcept(apples);
-            fruit.addNarrowerConcept(bananas);
-            tx.success();
-        } catch (Exception e) {
-            tx.failure();
-        } finally {
-            tx.finish();
-        }
+        fruit.addNarrowerConcept(apples);
+        fruit.addNarrowerConcept(bananas);
+        graph.getBaseGraph().commit();
 
         // fruit should now be the broader concept
         assertEquals(fruit.getId(), apples.getBroaderConcepts()
@@ -104,15 +91,8 @@ public class CvocConceptTest extends ModelTestBase {
                 .iterator().next().getId());
 
         // make a relation to Trees concept
-        tx = graph.getBaseGraph().getRawGraph().beginTx();
-        try {
-            apples.addRelatedConcept(trees);
-            tx.success();
-        } catch (Exception e) {
-            tx.failure();
-        } finally {
-            tx.finish();
-        }
+        apples.addRelatedConcept(trees);
+        graph.getBaseGraph().commit();
 
         // is it symmetric?
         assertEquals(apples.getId(), trees.getRelatedByConcepts()
@@ -163,7 +143,7 @@ public class CvocConceptTest extends ModelTestBase {
 
         Concept concept = null;
         concept = conceptViews.create(bundle, validUser);
-        graph.getBaseGraph().stopTransaction(Conclusion.SUCCESS);
+        graph.getBaseGraph().commit();
 
 		// Does the label have the correct properties
 		assertNotNull(concept);
@@ -204,17 +184,8 @@ public class CvocConceptTest extends ModelTestBase {
 		Concept apples = graph.frame(v_apples, Concept.class);
 
 		// now add the apples to the vocabulary
-		Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
-		try {
-			vocabulary.addConcept(apples);
-			tx.success();
-		} catch (Exception e) {
-			tx.failure();
-		} finally {
-			tx.finish();
-		}
+        vocabulary.addConcept(apples);
         assertEquals(vocabulary.getIdentifier(), apples.getVocabulary().getIdentifier());
-
 	}
 	
 	// test creation of a vocabulary using the BundleDAO

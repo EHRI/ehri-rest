@@ -7,13 +7,11 @@ import java.util.Set;
 
 import eu.ehri.project.models.base.Frame;
 import eu.ehri.project.models.idgen.IdGenerator;
-import org.neo4j.graphdb.Transaction;
 
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Vertex;
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
 import eu.ehri.project.acl.SystemScope;
@@ -112,16 +110,10 @@ public final class BundleDAO {
      * @return
      */
     public Integer delete(Bundle bundle) {
-        Transaction tx = ((Neo4jGraph)graph.getBaseGraph()).getRawGraph().beginTx();
         try {
-            Integer count = deleteCount(bundle, 0);
-            tx.success();
-            return count;
+            return deleteCount(bundle, 0);
         } catch (Exception e) {
-            tx.failure();
             throw new RuntimeException(e);
-        } finally {
-            tx.finish();
         }
     }
 

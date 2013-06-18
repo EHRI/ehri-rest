@@ -68,9 +68,9 @@ public class GraphInitializer {
                 manager.createVertex(ct.getName(), EntityClass.CONTENT_TYPE,
                         Maps.<String, Object>newHashMap());
             }
-            graph.getBaseGraph().stopTransaction(Conclusion.SUCCESS);
+            graph.getBaseGraph().commit();
         } catch (Exception e) {
-            graph.getBaseGraph().stopTransaction(Conclusion.FAILURE);
+            graph.getBaseGraph().rollback();
             throw new RuntimeException(e);
         }
     }

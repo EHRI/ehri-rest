@@ -9,7 +9,6 @@ import java.util.Map.Entry;
 import eu.ehri.project.models.base.Frame;
 import eu.ehri.project.utils.fixtures.FixtureLoader;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,7 +59,7 @@ public class YamlFixtureLoader implements FixtureLoader {
 
     public static final String DEFAULT_FIXTURE_FILE = "testdata.yaml";
 
-    private final FramedGraph<Neo4jGraph> graph;
+    private final FramedGraph<? extends TransactionalGraph> graph;
     private final GraphManager manager;
     private static final Logger logger = LoggerFactory
             .getLogger(YamlFixtureLoader.class);
@@ -72,7 +71,7 @@ public class YamlFixtureLoader implements FixtureLoader {
      * @param graph
      * @param initialize
      */
-    public YamlFixtureLoader(FramedGraph<Neo4jGraph> graph, boolean initialize) {
+    public YamlFixtureLoader(FramedGraph<? extends TransactionalGraph> graph, boolean initialize) {
         this.graph = graph;
         this.initialize = initialize;
         manager = GraphManagerFactory.getInstance(graph);
@@ -83,7 +82,7 @@ public class YamlFixtureLoader implements FixtureLoader {
      *
      * @param graph
      */
-    public YamlFixtureLoader(FramedGraph<Neo4jGraph> graph) {
+    public YamlFixtureLoader(FramedGraph<? extends TransactionalGraph> graph) {
         this(graph, true);
     }
 
@@ -116,15 +115,26 @@ public class YamlFixtureLoader implements FixtureLoader {
     }
 
     public void loadTestData(InputStream stream) {
+
+        // Ensure we're not currently in a transaction!
+        graph.getBaseGraph().rollback();
+
         // Initialize the DB
-        if (initialize) {
-            new GraphInitializer(graph).initialize();
-        }
         try {
-            loadFixtureFileStream(stream);
-            stream.close();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+            if (initialize) {
+                new GraphInitializer(graph).initialize();
+            }
+            try {
+                loadFixtureFileStream(stream);
+                stream.close();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            graph.getBaseGraph().commit();
+        } catch (RuntimeException e) {
+            graph.getBaseGraph().rollback();
+            e.printStackTrace();
+            throw e;
         }
     }
 
@@ -173,8 +183,6 @@ public class YamlFixtureLoader implements FixtureLoader {
             logger.debug(String.format(" - %s -[%s]-> %s", src, dst,
                     relname));
             graph.addEdge(null, src, dst, relname);
-            graph.getBaseGraph().stopTransaction(
-                    TransactionalGraph.Conclusion.SUCCESS);
         }
     }
 
@@ -296,16 +304,7 @@ public class YamlFixtureLoader implements FixtureLoader {
     }
 
     public void loadTestData() {
-        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
-        try {
             loadFixtures();
-            tx.success();
-        } catch (Exception e) {
-            tx.failure();
-            throw new RuntimeException(e);
-        } finally {
-            tx.finish();
-        }
     }
 
     public static void main(String[] args) {

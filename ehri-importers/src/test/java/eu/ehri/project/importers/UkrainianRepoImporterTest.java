@@ -59,6 +59,7 @@ public class UkrainianRepoImporterTest extends AbstractImporterTest{
          * 1 import Event
          * 17 import Event links (for the Documentary Units, as they are now imported as part of the RepoUnit)
          */
+        graph.getBaseGraph().commit();
 
         printGraph(graph);
         assertEquals(count+21+96-2-17, getNodeCount(graph));

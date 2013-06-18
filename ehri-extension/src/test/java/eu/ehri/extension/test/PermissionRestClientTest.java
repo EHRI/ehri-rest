@@ -261,6 +261,7 @@ public class PermissionRestClientTest extends BaseRestClientTest {
                 .header(AbstractRestResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId()).entity(permData)
                 .post(ClientResponse.class);
+        System.out.println(response.getEntity(String.class));
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
 
         // Now creation should succeed...

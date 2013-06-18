@@ -23,4 +23,16 @@ public class FramesTest extends ModelTestBase {
         // Setting an empty list should barf...
         test.setList(badTestData);
     }
+
+    @Test
+    public void testFramesComparison() {
+        Vertex v = graph.getBaseGraph().addVertex(null);
+        TestFramedInterface f1 = graph.frame(v, TestFramedInterface.class);
+        TestFramedInterface2 f2 = graph.frame(v, TestFramedInterface2.class);
+
+        // These should be equal because they frame the same vertex, despite
+        // being different interfaces.
+        assertEquals(f1, f2);
+        assertTrue(f1.equals(f2));
+    }
 }

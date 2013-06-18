@@ -5,8 +5,6 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.common.base.Preconditions;
-import com.tinkerpop.blueprints.TransactionalGraph;
-import com.tinkerpop.blueprints.TransactionalGraph.Conclusion;
 import com.tinkerpop.frames.FramedGraph;
 
 import eu.ehri.project.acl.AclManager;
@@ -31,7 +29,7 @@ import eu.ehri.project.persistance.ActionManager;
  */
 public final class AclViews {
 
-    private final FramedGraph<? extends TransactionalGraph> graph;
+    private final FramedGraph<?> graph;
     private final AclManager acl;
     private final ViewHelper helper;
     private final GraphManager manager;
@@ -43,7 +41,7 @@ public final class AclViews {
      * @param graph
      * @param scope
      */
-    public AclViews(FramedGraph<? extends TransactionalGraph> graph, PermissionScope scope) {
+    public AclViews(FramedGraph<?> graph, PermissionScope scope) {
         Preconditions.checkNotNull(scope);
         this.graph = graph;
         helper = new ViewHelper(graph, scope);
@@ -57,7 +55,7 @@ public final class AclViews {
      * 
      * @param graph
      */
-    public AclViews(FramedGraph<? extends TransactionalGraph> graph) {
+    public AclViews(FramedGraph<?> graph) {
         this(graph, SystemScope.getInstance());
     }
 
@@ -72,26 +70,16 @@ public final class AclViews {
     public void setGlobalPermissionMatrix(Accessor accessor,
             Map<ContentTypes, List<PermissionType>> permissionMap,
             Accessor grantee) throws PermissionDenied {
-        try {
-            checkGrantPermission(grantee, permissionMap);
-            acl.setPermissionMatrix(accessor, permissionMap);
-            boolean scoped = !scope.equals(SystemScope.INSTANCE);
-            // Log the action...
-            ActionManager.EventContext context = new ActionManager(graph).logEvent(
-                    graph.frame(accessor.asVertex(), AccessibleEntity.class),
-                    graph.frame(grantee.asVertex(), Actioner.class),
-                    EventTypes.setGlobalPermissions);
-            if (scoped) {
-                context.addSubjects(scope);
-            }
-
-            graph.getBaseGraph().stopTransaction(Conclusion.SUCCESS);
-        } catch (PermissionDenied e) {
-            graph.getBaseGraph().stopTransaction(Conclusion.FAILURE);
-            throw e;
-        } catch (Exception e) {
-            graph.getBaseGraph().stopTransaction(Conclusion.FAILURE);
-            throw new RuntimeException(e);
+        checkGrantPermission(grantee, permissionMap);
+        acl.setPermissionMatrix(accessor, permissionMap);
+        boolean scoped = !scope.equals(SystemScope.INSTANCE);
+        // Log the action...
+        ActionManager.EventContext context = new ActionManager(graph).logEvent(
+                graph.frame(accessor.asVertex(), AccessibleEntity.class),
+                graph.frame(grantee.asVertex(), Actioner.class),
+                EventTypes.setGlobalPermissions);
+        if (scoped) {
+            context.addSubjects(scope);
         }
     }
 
@@ -107,22 +95,13 @@ public final class AclViews {
      */
     public void setAccessors(AccessibleEntity entity, Set<Accessor> accessors,
             Accessor user) throws PermissionDenied {
-        try {
-            helper.checkEntityPermission(entity, user, PermissionType.UPDATE);
-            acl.setAccessors(entity, accessors);
-            // Log the action...
-            new ActionManager(graph).logEvent(
-                    graph.frame(entity.asVertex(), AccessibleEntity.class),
-                    graph.frame(user.asVertex(), Actioner.class),
-                    EventTypes.setVisibility);
-            graph.getBaseGraph().stopTransaction(Conclusion.SUCCESS);
-        } catch (PermissionDenied e) {
-            graph.getBaseGraph().stopTransaction(Conclusion.FAILURE);
-            throw e;
-        } catch (Exception e) {
-            graph.getBaseGraph().stopTransaction(Conclusion.FAILURE);
-            throw new RuntimeException(e);
-        }
+        helper.checkEntityPermission(entity, user, PermissionType.UPDATE);
+        acl.setAccessors(entity, accessors);
+        // Log the action...
+        new ActionManager(graph).logEvent(
+                graph.frame(entity.asVertex(), AccessibleEntity.class),
+                graph.frame(user.asVertex(), Actioner.class),
+                EventTypes.setVisibility);
     }
 
     /**
@@ -169,23 +148,13 @@ public final class AclViews {
     public void setItemPermissions(AccessibleEntity item, Accessor accessor,
             Set<PermissionType> permissionList, Accessor grantee)
             throws PermissionDenied {
-        try {
-            helper.checkEntityPermission(item, grantee, PermissionType.GRANT);
-            acl.setEntityPermissions(accessor, item, permissionList);
-            // Log the action...
-            new ActionManager(graph).logEvent(item,
-                    graph.frame(grantee.asVertex(), Actioner.class),
-                    EventTypes.setItemPermissions).addSubjects(
-                    graph.frame(accessor.asVertex(), AccessibleEntity.class));
-
-            graph.getBaseGraph().stopTransaction(Conclusion.SUCCESS);
-        } catch (PermissionDenied e) {
-            graph.getBaseGraph().stopTransaction(Conclusion.FAILURE);
-            throw e;
-        } catch (Exception e) {
-            graph.getBaseGraph().stopTransaction(Conclusion.FAILURE);
-            throw new RuntimeException(e);
-        }
+        helper.checkEntityPermission(item, grantee, PermissionType.GRANT);
+        acl.setEntityPermissions(accessor, item, permissionList);
+        // Log the action...
+        new ActionManager(graph).logEvent(item,
+                graph.frame(grantee.asVertex(), Actioner.class),
+                EventTypes.setItemPermissions).addSubjects(
+                graph.frame(accessor.asVertex(), AccessibleEntity.class));
     }
 
     public void revokePermissionGrant(PermissionGrant grant, Accessor user)
@@ -219,19 +188,12 @@ public final class AclViews {
     public void addAccessorToGroup(Group group, Accessor user, Accessor grantee)
             throws PermissionDenied {
         ensureCanModifyGroupMembership(group, user, grantee);
-        try {
-            group.addMember(graph.frame(user.asVertex(), Accessor.class));
-            // Log the action...
-            new ActionManager(graph).logEvent(group,
-                    graph.frame(grantee.asVertex(), Actioner.class),
-                    EventTypes.addGroup).addSubjects(
-                    graph.frame(user.asVertex(), AccessibleEntity.class));
-            graph.getBaseGraph().stopTransaction(Conclusion.SUCCESS);
-        } catch (Exception e) {
-            graph.getBaseGraph().stopTransaction(Conclusion.FAILURE);
-            throw new RuntimeException(e);
-        }
-
+        group.addMember(graph.frame(user.asVertex(), Accessor.class));
+        // Log the action...
+        new ActionManager(graph).logEvent(group,
+                graph.frame(grantee.asVertex(), Actioner.class),
+                EventTypes.addGroup).addSubjects(
+                graph.frame(user.asVertex(), AccessibleEntity.class));
     }
 
     /**
@@ -246,18 +208,12 @@ public final class AclViews {
     public void removeAccessorFromGroup(Group group, Accessor user, Accessor grantee)
             throws PermissionDenied {
         ensureCanModifyGroupMembership(group, user, grantee);
-        try {
-            group.removeMember(graph.frame(user.asVertex(), Accessor.class));
-            // Log the action...
-            new ActionManager(graph).logEvent(group,
-                    graph.frame(grantee.asVertex(), Actioner.class),
-                    EventTypes.removeGroup).addSubjects(
-                    graph.frame(user.asVertex(), AccessibleEntity.class));
-            graph.getBaseGraph().stopTransaction(Conclusion.SUCCESS);
-        } catch (Exception e) {
-            graph.getBaseGraph().stopTransaction(Conclusion.FAILURE);
-            throw new RuntimeException(e);
-        }
+        group.removeMember(graph.frame(user.asVertex(), Accessor.class));
+        // Log the action...
+        new ActionManager(graph).logEvent(group,
+                graph.frame(grantee.asVertex(), Actioner.class),
+                EventTypes.removeGroup).addSubjects(
+                graph.frame(user.asVertex(), AccessibleEntity.class));
     }
 
     private void ensureCanModifyGroupMembership(Group group, Accessor user, Accessor grantee)
@@ -270,7 +226,7 @@ public final class AclViews {
             // FIXME: With TP 2.3.0 update this comparing of vertices shouldn't be necessary
             boolean found = false;
             for (Accessor acc : grantee.getAllParents()) {
-                if (group.asVertex().equals(acc.asVertex())) {
+                if (group.equals(acc)) {
                     found = true;
                     break;
                 }

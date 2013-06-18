@@ -10,6 +10,7 @@ import javax.ws.rs.core.*;
 
 import com.google.common.base.Optional;
 import com.tinkerpop.blueprints.Vertex;
+import eu.ehri.extension.utils.TxCheckedNeo4jGraph;
 import eu.ehri.project.models.base.Frame;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
@@ -30,7 +31,7 @@ import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistance.Serializer;
 import eu.ehri.project.views.Query;
 
-public abstract class AbstractRestResource {
+public abstract class AbstractRestResource implements TxCheckedResource {
 
     public static final int DEFAULT_LIST_LIMIT = 20;
     
@@ -86,15 +87,19 @@ public abstract class AbstractRestResource {
     @Context
     protected UriInfo uriInfo;
     protected final GraphDatabaseService database;
-    protected final FramedGraph<Neo4jGraph> graph;
+    protected final FramedGraph<TxCheckedNeo4jGraph> graph;
     protected final GraphManager manager;
     protected final Serializer serializer;
 
     public AbstractRestResource(@Context GraphDatabaseService database) {
         this.database = database;
-        graph = new FramedGraph<Neo4jGraph>(new Neo4jGraph(database));
+        graph = new FramedGraph<TxCheckedNeo4jGraph>(new TxCheckedNeo4jGraph(database));
         manager = GraphManagerFactory.getInstance(graph);
         serializer  = new Serializer(graph);
+    }
+
+    public FramedGraph<TxCheckedNeo4jGraph> getGraph() {
+        return graph;
     }
 
     /**
