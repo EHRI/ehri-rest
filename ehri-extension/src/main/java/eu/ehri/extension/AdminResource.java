@@ -3,8 +3,6 @@ package eu.ehri.extension;
 // Borrowed, temporarily, from Michael Hunger:
 // https://github.com/jexp/neo4j-clean-remote-db-addon
 
-import java.util.Map;
-
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -13,6 +11,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import eu.ehri.project.models.base.IdentifiableEntity;
+import eu.ehri.project.models.base.NamedEntity;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.server.database.Database;
 
@@ -28,17 +28,13 @@ import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Group;
 import eu.ehri.project.models.UserProfile;
-import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistance.Bundle;
-import eu.ehri.project.persistance.Converter;
-import eu.ehri.project.views.Crud;
+import eu.ehri.project.persistance.Serializer;
 import eu.ehri.project.views.impl.LoggingCrudViews;
 
 /**
- * Provides a RESTfull interface for the Action class. Note: Action instances
- * are created by the system, so we do not have create/update/delete methods
- * here.
+ * Provides additional Admin methods needed by client systems.
  */
 @Path("admin")
 public class AdminResource {
@@ -48,14 +44,14 @@ public class AdminResource {
 
     private Database database;
     private FramedGraph<Neo4jGraph> graph;
-    private Converter converter;
+    private Serializer serializer;
     private GraphManager manager;
 
     public AdminResource(@Context Database database) {
         this.database = database;
         this.graph = new FramedGraph<Neo4jGraph>(new Neo4jGraph(
                 database.getGraph()));
-        converter = new Converter(graph);
+        serializer = new Serializer(graph);
         manager = GraphManagerFactory.getInstance(graph);
     }
 
@@ -72,22 +68,21 @@ public class AdminResource {
         Transaction tx = database.getGraph().beginTx();
         try {
             String ident = getNextDefaultUserId();
-            Map<String, Object> data = converter.bundleToData(new Bundle(
-                    EntityClass.USER_PROFILE).withDataValue(
-                    AccessibleEntity.IDENTIFIER_KEY, ident).withDataValue(
-                    Accessor.NAME, ident));
+            Bundle bundle = new Bundle(EntityClass.USER_PROFILE)
+                    .withDataValue(IdentifiableEntity.IDENTIFIER_KEY, ident)
+                    .withDataValue(NamedEntity.NAME, ident);
 
             // NB: This assumes that admin's ID is the same as its identifier.
             Accessor accessor = manager.getFrame(Group.ADMIN_GROUP_IDENTIFIER,
                     Accessor.class);
-            Crud<UserProfile> view = new LoggingCrudViews<UserProfile>(graph,
+            LoggingCrudViews<UserProfile> view = new LoggingCrudViews<UserProfile>(graph,
                     UserProfile.class);
-            UserProfile user = view.create(data, accessor);
+            UserProfile user = view.create(bundle, accessor);
             // Grant them owner permissions on their own account.
             new AclManager(graph).grantPermissions(user, user,
                     PermissionType.OWNER);
 
-            String jsonStr = converter.vertexFrameToJson(user);
+            String jsonStr = serializer.vertexFrameToJson(user);
             tx.success();
             return Response.status(Status.CREATED).entity((jsonStr).getBytes())
                     .build();

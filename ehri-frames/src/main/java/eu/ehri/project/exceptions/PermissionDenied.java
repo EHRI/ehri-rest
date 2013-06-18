@@ -1,22 +1,17 @@
 package eu.ehri.project.exceptions;
 
-import eu.ehri.project.models.Permission;
-import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.models.base.PermissionScope;
-
 public class PermissionDenied extends Exception {
 
     private static final long serialVersionUID = -3948097018322416889L;
 
-    private Accessor accessor = null;
-    private AccessibleEntity entity = null;
-    private PermissionScope scope = null;
-    private Permission permission = null;
+    private String accessor = null;
+    private String entity = null;
+    private String scope = null;
+    private String permission = null;
 
-    public PermissionDenied(Accessor accessor, String message) {
+    public PermissionDenied(String accessor, String message) {
         super(String.format("Permission denied accessing resource as '%s': %s",
-                accessor.getIdentifier(), message));
+                accessor, message));
         this.accessor = accessor;
     }
 
@@ -24,40 +19,40 @@ public class PermissionDenied extends Exception {
         super(message);
     }
 
-    public PermissionDenied(Accessor accessor, AccessibleEntity entity) {
+    public PermissionDenied(String accessor, String entity, String message) {
         super(String.format(
-                "Permission denied accessing resource '%s' as '%s'",
-                entity.toString(), accessor.toString()));
+                "Permission denied accessing resource '%s' as '%s': %s",
+                entity, accessor, message));
         this.accessor = accessor;
         this.entity = entity;
     }
 
-    public PermissionDenied(Accessor accessor, AccessibleEntity entity,
-            Permission permission, PermissionScope scope) {
+    public PermissionDenied(String accessor, String entity,
+            String permission, String scope) {
         super(
                 String.format(
                         "Permission '%s' denied for resource '%s' as '%s' with scope '%s'",
-                        permission.getIdentifier(), entity.getIdentifier(),
-                        accessor.getIdentifier(), scope.getIdentifier()));
+                        permission, entity,
+                        accessor, scope));
         this.accessor = accessor;
         this.entity = entity;
         this.scope = scope;
         this.permission = permission;
     }
 
-    public Accessor getAccessor() {
+    public String getAccessor() {
         return accessor;
     }
 
-    public AccessibleEntity getEntity() {
+    public String getEntity() {
         return entity;
     }
 
-    public PermissionScope getScope() {
+    public String getScope() {
         return scope;
     }
 
-    public Permission getPermission() {
+    public String getPermission() {
         return permission;
     }
 }

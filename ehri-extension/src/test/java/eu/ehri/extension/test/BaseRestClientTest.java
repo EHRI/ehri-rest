@@ -21,7 +21,7 @@ import com.sun.jersey.api.client.WebResource;
 
 import eu.ehri.extension.AbstractAccessibleEntityResource;
 import eu.ehri.extension.AbstractRestResource;
-import eu.ehri.plugin.test.utils.ServerRunner;
+import eu.ehri.extension.test.utils.ServerRunner;
 
 /**
  * Base class for testing the REST interface on a 'embedded' neo4j server.
@@ -38,12 +38,15 @@ public class BaseRestClientTest extends AbstractRestClientTest {
     // Admin user prefix - depends on fixture data
     final static private String adminUserProfileId = "mike";
 
+    // Regular user
+    final static private String regularUserProfileId = "reto";
+
     protected static ServerRunner runner;
 
     protected String getBaseUri() {
         return baseUri;
     }
-    
+
     @Override
     String getExtensionEntryPointUri() {
         return extensionEntryPointUri;
@@ -52,6 +55,10 @@ public class BaseRestClientTest extends AbstractRestClientTest {
     @Override
     String getAdminUserProfileId() {
         return adminUserProfileId;
+    }
+
+    String getRegularUserProfileId() {
+        return regularUserProfileId;
     }
 
     @BeforeClass
@@ -81,8 +88,9 @@ public class BaseRestClientTest extends AbstractRestClientTest {
         runner = new ServerRunner(dbName, testServerPort);
         runner.getConfigurator()
                 .getThirdpartyJaxRsClasses()
-                .add(new ThirdPartyJaxRsPackage(AbstractAccessibleEntityResource.class
-                        .getPackage().getName(), mountPoint));
+                .add(new ThirdPartyJaxRsPackage(
+                        AbstractAccessibleEntityResource.class.getPackage()
+                                .getName(), mountPoint));
         runner.start();
     }
 
@@ -113,6 +121,20 @@ public class BaseRestClientTest extends AbstractRestClientTest {
         ObjectMapper mapper = new ObjectMapper();
         TypeReference<LinkedList<HashMap<String, Object>>> typeRef = new TypeReference<LinkedList<HashMap<String, Object>>>() {
         };
+        return mapper.readValue(json, typeRef);
+    }
+
+    protected Long getEntityCount(String entityType,
+                                                      String userId) throws Exception {
+        WebResource resource = client.resource(getExtensionEntryPointUri()
+                + "/" + entityType + "/count");
+        ClientResponse response = resource.accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .header(AbstractRestResource.AUTH_HEADER_NAME, userId)
+                .get(ClientResponse.class);
+        String json = response.getEntity(String.class);
+        ObjectMapper mapper = new ObjectMapper();
+        TypeReference<Long> typeRef = new TypeReference<Long>() {};
         return mapper.readValue(json, typeRef);
     }
 

@@ -1,0 +1,51 @@
+{
+	"id" : null,
+	"type":"repository",
+	"data": {
+		"identifier":"some-repository",
+		"name":"King's College London",
+		"publicationStatus":"Draft"
+	},
+	"relationships":{
+		"describes":[
+			{
+				"id":null,
+				"type":"repositoryDescription",
+				"data":{
+					"buildings":null,
+					"generalContext":null,
+					"name":"KCL Description",
+					"findingAids":null,
+					"history":null,
+					"parallelFormsOfName":null,
+					"languageCode":"en",
+					"mandates":null,
+					"holdings":null,
+					"records":null,
+					"administrativeStructure":null,
+					"otherFormsOfName":null
+				},
+				"relationships":{
+					"hasAddress":[
+						{
+							"id":null,
+							"type":"address",
+							"data":{
+								"city":"London",
+								"name":"An Address",
+								"email":null,
+								"url":null,
+								"streetAddress":"Strand",
+								"fax":null,
+								"countryCode":null,
+								"region":null,
+								"telephone":null,
+								"contactPerson":"Mike Bryant"
+							}
+						}
+					]
+				}
+			}
+		]
+	}
+}

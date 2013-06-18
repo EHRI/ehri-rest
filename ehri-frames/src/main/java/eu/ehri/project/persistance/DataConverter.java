@@ -1,12 +1,14 @@
 package eu.ehri.project.persistance;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.ObjectWriter;
 
@@ -18,8 +20,22 @@ import com.google.common.collect.Maps;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.models.EntityClass;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 class DataConverter {
+
+    private static ObjectMapper mapper = new ObjectMapper();
 
     /**
      * Convert a bundle to a generic data structure.
@@ -40,7 +56,7 @@ class DataConverter {
             for (Bundle subbundle : crelations.get(key)) {
                 rels.add(bundleToData(subbundle));
             }
-            relations.put((String) key, rels);
+            relations.put(key, rels);
         }
         data.put(Bundle.REL_KEY, relations);
         return data;
@@ -57,7 +73,6 @@ class DataConverter {
     public static String bundleToJson(Bundle bundle) throws SerializationError {
         Map<String, Object> data = bundleToData(bundle);
         try {
-            ObjectMapper mapper = new ObjectMapper();
             // Note: defaultPrettyPrintWriter has been replaced by
             // writerWithDefaultPrettyPrinter in newer versions of
             // Jackson, though not the one available in Neo4j.
@@ -74,9 +89,6 @@ class DataConverter {
      * 
      * @param json
      * @return
-     * @throws JsonParseException
-     * @throws JsonMappingException
-     * @throws IOException
      * @throws DeserializationError
      */
     public static Bundle jsonToBundle(String json) throws DeserializationError {
@@ -86,7 +98,6 @@ class DataConverter {
             // When I add one in for HashMap<String,Object>, the return value of
             // readValue
             // just seems to be Object ???
-            ObjectMapper mapper = new ObjectMapper();
             return dataToBundle(mapper.readValue(json, Map.class));
         } catch (DeserializationError e) {
             throw e;
@@ -200,9 +211,138 @@ class DataConverter {
     private static Map<String, Object> sanitiseProperties(Map<?, ?> data) {
         Map<String, Object> cleaned = Maps.newHashMap();
         for (Entry<?, ?> entry : data.entrySet()) {
-            if (entry.getKey() instanceof String && entry.getValue() != null)
+            Object value = entry.getValue();
+            // Allow any null value, as long as it's not an empty array
+            if (value != null && !isEmptySequence(value)) {
                 cleaned.put((String) entry.getKey(), entry.getValue());
+            }
         }
         return cleaned;
+    }
+
+    /**
+     * Ensure a value isn't an empty array or list, which will
+     * cause Neo4j to barf.
+     * @param value
+     * @return
+     */
+    private static boolean isEmptySequence(Object value) {
+        if (value instanceof Object[]) {
+            return ((Object[]) value).length == 0;
+        } else if (value instanceof List<?>) {
+            return ((List) value).isEmpty();
+        }
+        return false;
+    }
+
+    /**
+     * Convert a bundle to an XML document (currently with a very ad-hoc schema.)
+     * @param bundle
+     * @return
+     */
+    public static Document bundleToXml(Bundle bundle) {
+        DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+        try {
+            DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+            Document doc = docBuilder.newDocument();
+            Element root = bundleDataToElement(doc, bundle);
+            doc.appendChild(root);
+            return doc;
+        } catch (ParserConfigurationException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static String bundleToXmlString(Bundle bundle) {
+        Document doc = bundleToXml(bundle);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try {
+            printDocument(doc, baos);
+            return baos.toString("UTF-8");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (TransformerException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Pretty-print an XML document.
+     *
+     * @param doc
+     * @param out
+     * @throws IOException
+     * @throws TransformerException
+     */
+    public static void printDocument(Document doc, OutputStream out) throws IOException, TransformerException {
+        TransformerFactory tf = TransformerFactory.newInstance();
+        Transformer transformer = tf.newTransformer();
+        transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+        transformer.setOutputProperty(OutputKeys.METHOD, "xml");
+        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+        transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+        transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
+
+        transformer.transform(new DOMSource(doc),
+                new StreamResult(new OutputStreamWriter(out, "UTF-8")));
+    }
+
+    private static Element bundleDataToElement(final Document document, final Bundle bundle) {
+        Element root = document.createElement("item");
+        root.setAttribute(Bundle.ID_KEY, bundle.getId());
+        root.setAttribute(Bundle.TYPE_KEY, bundle.getType().getName());
+        Element data = document.createElement(Bundle.DATA_KEY);
+        root.appendChild(data);
+        for (Entry<String,Object> entry : bundle.getData().entrySet()) {
+            String key = entry.getKey();
+            Object value = entry.getValue();
+            if (value != null) {
+                Element dataValue = bundleDataValueToElement(document, key, value);
+                data.appendChild(dataValue);
+            }
+        }
+        if (!bundle.getRelations().isEmpty()) {
+            Element relations = document.createElement(Bundle.REL_KEY);
+            root.appendChild(relations);
+            for (Entry<String,Collection<Bundle>> entry : bundle.getRelations().asMap().entrySet()) {
+                Element relation = document.createElement(entry.getKey());
+                relations.appendChild(relation);
+                for (Bundle relationBundle : entry.getValue()) {
+                    relation.appendChild(bundleDataToElement(document, relationBundle));
+                }
+            }
+        }
+
+        return root;
+    }
+
+    private  static Element bundleDataValueToElement(final Document document, String key, Object value) {
+        if (value instanceof  Object[]) {
+            Element dataValue = document.createElement("propertySequence");
+            for (Object item : (Object[])value) {
+                dataValue.appendChild(bundleDataValueToElement(document, key, item));
+            }
+            return dataValue;
+        } else {
+            Element dataValue = document.createElement("property");
+            if (value instanceof String) {
+                dataValue.setAttribute("name", key);
+                dataValue.setAttribute("type", "xs:string");
+                dataValue.appendChild(document.createTextNode(String.valueOf(value)));
+            } else if (value instanceof Integer) {
+                dataValue.setAttribute("name", key);
+                dataValue.setAttribute("type", "xs:int");
+                dataValue.appendChild(document.createTextNode(String.valueOf(value)));
+            } else if (value instanceof Long) {
+                dataValue.setAttribute("name", key);
+                dataValue.setAttribute("type", "xs:long");
+                dataValue.appendChild(document.createTextNode(String.valueOf(value)));
+            } else { // Mmmn, what should we do for other types???
+                dataValue.setAttribute("type", "unknown");
+                dataValue.appendChild(document.createTextNode(String.valueOf(value)));
+            }
+            return dataValue;
+        }
     }
 }

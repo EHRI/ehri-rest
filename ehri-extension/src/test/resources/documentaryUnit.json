@@ -10,17 +10,19 @@
         "type": "documentDescription",
         "data": {
           "languageCode": "en",
-          "title": "a description",
+          "name": "a description",
           "identifier": "some-id"
-        }
-      }
-    ],
-    "hasDate": [
-      {
-        "type": "datePeriod",
-        "data": {
-          "startDate": "1940-01-01T00:00:00Z",
-          "endDate": "1945-01-01T00:00:00Z"
+        },
+        "relationships": {
+          "hasDate": [
+            {
+              "type": "datePeriod",
+              "data": {
+                "startDate": "1940-01-01T00:00:00Z",
+                "endDate": "1945-01-01T00:00:00Z"
+              }
+            }
+          ]
         }
       }
     ]

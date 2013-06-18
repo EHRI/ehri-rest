@@ -6,7 +6,7 @@ import com.tinkerpop.frames.Adjacency;
 import eu.ehri.project.models.annotations.Dependent;
 import eu.ehri.project.models.annotations.Fetch;
 
-public interface DescribedEntity extends AccessibleEntity, AnnotatableEntity {
+public interface DescribedEntity extends AccessibleEntity, IdentifiableEntity, AnnotatableEntity, LinkableEntity {
 
     public static final String DESCRIBES = "describes";
 
@@ -19,7 +19,7 @@ public interface DescribedEntity extends AccessibleEntity, AnnotatableEntity {
     @Adjacency(label = DESCRIBES, direction = Direction.IN)
     public void removeDescription(final Description description);
 
-    @Fetch
+    @Fetch(DESCRIBES)
     @Dependent
     @Adjacency(label = DESCRIBES, direction = Direction.IN)
     public Iterable<Description> getDescriptions();

@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.ws.rs.Consumes;
@@ -19,9 +18,11 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import eu.ehri.project.acl.GlobalPermissionSet;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
@@ -29,8 +30,6 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 import org.neo4j.graphdb.GraphDatabaseService;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 import eu.ehri.extension.errors.BadRequester;
@@ -44,17 +43,18 @@ import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.PermissionGrant;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
+import eu.ehri.project.models.base.PermissionGrantTarget;
 import eu.ehri.project.models.base.PermissionScope;
-import eu.ehri.project.views.impl.AclViews;
-import eu.ehri.project.views.impl.Query;
+import eu.ehri.project.views.AclViews;
+import eu.ehri.project.views.Query;
+import org.neo4j.graphdb.Transaction;
 
 /**
  * Provides a RESTfull(ish) interface for setting PermissionTarget perms.
- * 
+ * <p/>
  * TODO: These functions will typically be called quite frequently for the
  * portal. We should possibly implement some kind of caching system for ACL
  * permissions.
- * 
  */
 @Path(Entities.PERMISSION)
 public class PermissionsResource extends AbstractRestResource {
@@ -66,12 +66,9 @@ public class PermissionsResource extends AbstractRestResource {
     /**
      * Get the global permission matrix for the user making the request, based
      * on the Authorization header.
-     * 
+     *
      * @return
      * @throws PermissionDenied
-     * @throws JsonGenerationException
-     * @throws JsonMappingException
-     * @throws IOException
      * @throws ItemNotFound
      * @throws BadRequester
      */
@@ -80,21 +77,162 @@ public class PermissionsResource extends AbstractRestResource {
     @Path("/list/{id:.+}")
     public StreamingOutput listPermissionGrants(
             @PathParam("id") String id,
-            @QueryParam("offset") @DefaultValue("0") int offset,
-            @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit)
+            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
+            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(SORT_PARAM) List<String> order,
+            @QueryParam(FILTER_PARAM) List<String> filters)
             throws PermissionDenied, ItemNotFound, BadRequester {
         Accessor user = manager.getFrame(id, Accessor.class);
         Accessor accessor = getRequesterUserProfile();
         Query<AccessibleEntity> query = new Query<AccessibleEntity>(graph,
-                AccessibleEntity.class);
-        return streamingPage(query.page(user.getPermissionGrants(), accessor,
+                AccessibleEntity.class).setOffset(offset).setLimit(limit)
+                .orderBy(order).filter(filters);
+        return streamingList(query.list(user.getPermissionGrants(), accessor,
                 PermissionGrant.class));
     }
 
     /**
      * Get the global permission matrix for the user making the request, based
      * on the Authorization header.
-     * 
+     *
+     * @return
+     * @throws PermissionDenied
+     * @throws ItemNotFound
+     * @throws BadRequester
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/page/{id:.+}")
+    public StreamingOutput pagePermissionGrants(
+            @PathParam("id") String id,
+            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
+            @QueryParam(SORT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(SORT_PARAM) List<String> order,
+            @QueryParam(FILTER_PARAM) List<String> filters)
+            throws PermissionDenied, ItemNotFound, BadRequester {
+        Accessor user = manager.getFrame(id, Accessor.class);
+        Accessor accessor = getRequesterUserProfile();
+        Query<AccessibleEntity> query = new Query<AccessibleEntity>(graph,
+                AccessibleEntity.class).setOffset(offset).setLimit(limit)
+                .orderBy(order).filter(filters);
+        return streamingPage(query.page(user.getPermissionGrants(), accessor,
+                PermissionGrant.class));
+    }
+
+    /**
+     * List all the permission grants that relate specifically to this item.
+     *
+     * @return
+     * @throws PermissionDenied
+     * @throws ItemNotFound
+     * @throws BadRequester
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/listForItem/{id:.+}")
+    public StreamingOutput listPermissionGrantsForItem(
+            @PathParam("id") String id,
+            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
+            @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(SORT_PARAM) List<String> order,
+            @QueryParam(FILTER_PARAM) List<String> filters)
+            throws PermissionDenied, ItemNotFound, BadRequester {
+        PermissionGrantTarget target = manager.getFrame(id,
+                PermissionGrantTarget.class);
+        Accessor accessor = getRequesterUserProfile();
+        Query<AccessibleEntity> query = new Query<AccessibleEntity>(graph,
+                AccessibleEntity.class).setOffset(offset).setLimit(limit)
+                .orderBy(order).filter(filters);
+        return streamingList(query.list(target.getPermissionGrants(), accessor,
+                PermissionGrant.class));
+    }
+
+    /**
+     * List all the permission grants that relate specifically to this item.
+     *
+     * @return
+     * @throws PermissionDenied
+     * @throws ItemNotFound
+     * @throws BadRequester
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/pageForItem/{id:.+}")
+    public StreamingOutput pagePermissionGrantsForItem(
+            @PathParam("id") String id,
+            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
+            @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(SORT_PARAM) List<String> order,
+            @QueryParam(FILTER_PARAM) List<String> filters)
+            throws PermissionDenied, ItemNotFound, BadRequester {
+        PermissionGrantTarget target = manager.getFrame(id,
+                PermissionGrantTarget.class);
+        Accessor accessor = getRequesterUserProfile();
+        Query<AccessibleEntity> query = new Query<AccessibleEntity>(graph,
+                AccessibleEntity.class).setOffset(offset).setLimit(limit)
+                .orderBy(order).filter(filters);
+        return streamingPage(query.page(target.getPermissionGrants(), accessor,
+                PermissionGrant.class));
+    }
+
+    /**
+     * List all the permission grants that relate specifically to this scope.
+     *
+     * @return
+     * @throws PermissionDenied
+     * @throws ItemNotFound
+     * @throws BadRequester
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/listForScope/{id:.+}")
+    public StreamingOutput listPermissionGrantsForScope(
+            @PathParam("id") String id,
+            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
+            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(SORT_PARAM) List<String> order,
+            @QueryParam(FILTER_PARAM) List<String> filters)
+            throws PermissionDenied, ItemNotFound, BadRequester {
+        PermissionScope scope = manager.getFrame(id, PermissionScope.class);
+        Accessor accessor = getRequesterUserProfile();
+        Query<AccessibleEntity> query = new Query<AccessibleEntity>(graph,
+                AccessibleEntity.class).setOffset(offset).setLimit(limit)
+                .orderBy(order).filter(filters);
+        return streamingList(query.list(scope.getPermissionGrants(), accessor,
+                PermissionGrant.class));
+    }
+
+    /**
+     * List all the permission grants that relate specifically to this scope.
+     *
+     * @return
+     * @throws PermissionDenied
+     * @throws ItemNotFound
+     * @throws BadRequester
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/pageForScope/{id:.+}")
+    public StreamingOutput pagePermissionGrantsForScope(
+            @PathParam("id") String id,
+            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
+            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(SORT_PARAM) List<String> order,
+            @QueryParam(FILTER_PARAM) List<String> filters)
+            throws PermissionDenied, ItemNotFound, BadRequester {
+        PermissionScope scope = manager.getFrame(id, PermissionScope.class);
+        Accessor accessor = getRequesterUserProfile();
+        Query<AccessibleEntity> query = new Query<AccessibleEntity>(graph,
+                AccessibleEntity.class).setOffset(offset).setLimit(limit)
+                .orderBy(order).filter(filters);
+        return streamingPage(query.page(scope.getPermissionGrants(), accessor,
+                PermissionGrant.class));
+    }
+
+    /**
+     * Get the global permission matrix for the user making the request, based
+     * on the Authorization header.
+     *
      * @return
      * @throws PermissionDenied
      * @throws JsonGenerationException
@@ -108,13 +246,13 @@ public class PermissionsResource extends AbstractRestResource {
     public Response getGlobalMatrix() throws PermissionDenied, IOException,
             ItemNotFound, BadRequester {
         Accessor accessor = getRequesterUserProfile();
-        return getGlobalMatrix(manager.getId(accessor));
+        return getGlobalMatrix(accessor.getId());
     }
 
     /**
      * Get the global permission matrix for the given accessor.
-     * 
-     * @param id
+     *
+     * @param userId
      * @return
      * @throws PermissionDenied
      * @throws JsonGenerationException
@@ -132,7 +270,7 @@ public class PermissionsResource extends AbstractRestResource {
         AclManager acl = new AclManager(graph);
 
         return Response
-                .status(Status.OK)
+                .status(Response.Status.OK)
                 .entity(new ObjectMapper()
                         .writeValueAsBytes(stringifyInheritedGlobalMatrix(acl
                                 .getInheritedGlobalPermissions(accessor))))
@@ -141,8 +279,8 @@ public class PermissionsResource extends AbstractRestResource {
 
     /**
      * Set a user's global permission matrix.
-     * 
-     * @param id
+     *
+     * @param userId
      * @param json
      * @return
      * @throws PermissionDenied
@@ -169,7 +307,7 @@ public class PermissionsResource extends AbstractRestResource {
 
     /**
      * Get the permission matrix for a given user on the given entity.
-     * 
+     *
      * @param userId
      * @param id
      * @return
@@ -188,10 +326,10 @@ public class PermissionsResource extends AbstractRestResource {
 
         Accessor accessor = manager.getFrame(userId, Accessor.class);
         AccessibleEntity entity = manager.getFrame(id, AccessibleEntity.class);
-        AclManager acl = new AclManager(graph, entity.getScope());
+        AclManager acl = new AclManager(graph, entity.getPermissionScope());
 
         return Response
-                .status(Status.OK)
+                .status(Response.Status.OK)
                 .entity(new ObjectMapper().writeValueAsBytes(stringifyInheritedMatrix(acl
                         .getInheritedEntityPermissions(accessor, entity))))
                 .build();
@@ -199,9 +337,9 @@ public class PermissionsResource extends AbstractRestResource {
 
     /**
      * Get the user's permissions for a given scope.
-     * 
+     *
      * @param userId
-     * @param scopeId
+     * @param id
      * @return
      * @throws IOException
      * @throws JsonMappingException
@@ -221,7 +359,7 @@ public class PermissionsResource extends AbstractRestResource {
         AclManager acl = new AclManager(graph, scope);
 
         return Response
-                .status(Status.OK)
+                .status(Response.Status.OK)
                 .entity(new ObjectMapper()
                         .writeValueAsBytes(stringifyInheritedGlobalMatrix(acl
                                 .getInheritedGlobalPermissions(accessor))))
@@ -230,13 +368,11 @@ public class PermissionsResource extends AbstractRestResource {
 
     /**
      * Set a user's permissions on a content type with a given scope.
-     * 
+     *
+     * @param userId
+     *            the user
      * @param id
      *            the scope id
-     * @param type
-     *            the content type
-     * @param user
-     *            the user id
      * @param json
      *            the serialized permission list
      * @return
@@ -253,20 +389,24 @@ public class PermissionsResource extends AbstractRestResource {
     public Response setScopedPermissions(@PathParam("userId") String userId,
             @PathParam("id") String id, String json) throws PermissionDenied,
             IOException, ItemNotFound, DeserializationError, BadRequester {
-
-        HashMap<String, List<String>> globals = parseMatrix(json);
-        Accessor accessor = manager.getFrame(userId, Accessor.class);
-        PermissionScope scope = manager.getFrame(id, PermissionScope.class);
-        Accessor grantee = getRequesterUserProfile();
-        AclViews acl = new AclViews(graph, scope);
-
-        acl.setGlobalPermissionMatrix(accessor, enumifyMatrix(globals), grantee);
+        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
+        try {
+            HashMap<String, List<String>> globals = parseMatrix(json);
+            Accessor accessor = manager.getFrame(userId, Accessor.class);
+            PermissionScope scope = manager.getFrame(id, PermissionScope.class);
+            Accessor grantee = getRequesterUserProfile();
+            AclViews acl = new AclViews(graph, scope);
+            acl.setGlobalPermissionMatrix(accessor, enumifyMatrix(globals), grantee);
+            tx.success();
+        } finally {
+            tx.finish();
+        }
         return getScopedMatrix(userId, id);
     }
 
     /**
      * Set a user's permissions on a given item.
-     * 
+     *
      * @param id
      *            the item id
      * @param userId
@@ -274,7 +414,7 @@ public class PermissionsResource extends AbstractRestResource {
      * @param json
      *            the serialized permission list
      * @return
-     * 
+     *
      * @throws PermissionDenied
      * @throws IOException
      * @throws ItemNotFound
@@ -301,15 +441,22 @@ public class PermissionsResource extends AbstractRestResource {
         }
 
         Accessor accessor = manager.getFrame(userId, Accessor.class);
-        AccessibleEntity item = manager.getFrame(id, PermissionScope.class);
-        Accessor grantee = getRequesterUserProfile();
-        AclViews acl = new AclViews(graph);
 
-        acl.setItemPermissions(item, accessor,
-                enumifyPermissionList(scopedPerms), grantee);
+        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
+        try {
+            AccessibleEntity item = manager.getFrame(id, PermissionScope.class);
+            Accessor grantee = getRequesterUserProfile();
+            AclViews acl = new AclViews(graph);
+
+            acl.setItemPermissions(item, accessor,
+                    enumifyPermissionList(scopedPerms), grantee);
+            tx.success();
+        } finally {
+            tx.finish();
+        }
 
         return Response
-                .status(Status.OK)
+                .status(Response.Status.OK)
                 .entity(new ObjectMapper()
                         .writeValueAsBytes(stringifyInheritedMatrix(new AclManager(
                                 graph).getInheritedEntityPermissions(accessor,
@@ -338,14 +485,13 @@ public class PermissionsResource extends AbstractRestResource {
     }
 
     private List<Map<String, Map<String, List<String>>>> stringifyInheritedGlobalMatrix(
-            List<Map<String, Map<ContentTypes, Collection<PermissionType>>>> list2) {
+            List<Map<String, GlobalPermissionSet>> list2) {
         List<Map<String, Map<String, List<String>>>> list = Lists
                 .newLinkedList();
-        for (Map<String, Map<ContentTypes, Collection<PermissionType>>> item : list2) {
+        for (Map<String, GlobalPermissionSet> item : list2) {
             Map<String, Map<String, List<String>>> tmp = Maps.newHashMap();
-            for (Entry<String, Map<ContentTypes, Collection<PermissionType>>> entry : item
-                    .entrySet()) {
-                tmp.put(entry.getKey(), stringifyGlobalMatrix(entry.getValue()));
+            for (Map.Entry<String, GlobalPermissionSet> entry : item.entrySet()) {
+                tmp.put(entry.getKey(), stringifyGlobalMatrix(entry.getValue().asMap()));
             }
             list.add(tmp);
         }
@@ -355,7 +501,7 @@ public class PermissionsResource extends AbstractRestResource {
     private Map<String, List<String>> stringifyGlobalMatrix(
             Map<ContentTypes, Collection<PermissionType>> map) {
         Map<String, List<String>> tmp = Maps.newHashMap();
-        for (Entry<ContentTypes, Collection<PermissionType>> entry : map
+        for (Map.Entry<ContentTypes, Collection<PermissionType>> entry : map
                 .entrySet()) {
             List<String> ptmp = Lists.newLinkedList();
             for (PermissionType pt : entry.getValue()) {
@@ -378,7 +524,7 @@ public class PermissionsResource extends AbstractRestResource {
     private Map<String, List<String>> stringifyMatrix(
             Map<String, List<PermissionType>> matrix) {
         Map<String, List<String>> out = Maps.newHashMap();
-        for (Entry<String, List<PermissionType>> entry : matrix.entrySet()) {
+        for (Map.Entry<String, List<PermissionType>> entry : matrix.entrySet()) {
             List<String> tmp = Lists.newLinkedList();
             for (PermissionType t : entry.getValue()) {
                 tmp.add(t.getName());
@@ -393,7 +539,7 @@ public class PermissionsResource extends AbstractRestResource {
      * and permission type enum values to the enum version. If Jackson 1.9 were
      * available in Neo4j we wouldn't need this, since its @JsonCreator
      * annotation allows specifying how to deserialize those enums properly.
-     * 
+     *
      * @param matrix
      * @return
      * @throws DeserializationError
@@ -402,7 +548,7 @@ public class PermissionsResource extends AbstractRestResource {
             Map<String, List<String>> matrix) throws DeserializationError {
         try {
             Map<ContentTypes, List<PermissionType>> out = Maps.newHashMap();
-            for (Entry<String, List<String>> entry : matrix.entrySet()) {
+            for (Map.Entry<String, List<String>> entry : matrix.entrySet()) {
                 List<PermissionType> tmp = Lists.newLinkedList();
                 for (String t : entry.getValue()) {
                     tmp.add(PermissionType.withName(t));

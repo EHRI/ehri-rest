@@ -1,5 +1,10 @@
 package eu.ehri.extension;
 
+import static eu.ehri.extension.RestHelpers.produceErrorMessageJson;
+
+import java.net.URI;
+import java.util.List;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
@@ -14,17 +19,25 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
+import javax.ws.rs.core.UriBuilder;
+import javax.ws.rs.core.Response.Status;
 
+import eu.ehri.project.definitions.EventTypes;
+import eu.ehri.project.exceptions.*;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Transaction;
 
 import eu.ehri.extension.errors.BadRequester;
+import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.definitions.Entities;
-import eu.ehri.project.exceptions.DeserializationError;
-import eu.ehri.project.exceptions.IntegrityError;
-import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.models.EntityClass;
+import eu.ehri.project.models.Group;
 import eu.ehri.project.models.UserProfile;
+import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessor;
+import eu.ehri.project.models.base.Actioner;
+import eu.ehri.project.persistance.ActionManager;
+import eu.ehri.project.persistance.Bundle;
 
 /**
  * Provides a RESTfull interface for the UserProfile.
@@ -38,25 +51,9 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getUserProfile(@QueryParam("key") String key,
-            @QueryParam("value") String value) throws ItemNotFound,
-            PermissionDenied, BadRequester {
-        return retrieve(key, value);
-    }
-
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{id:\\d+}")
-    public Response getUserProfile(@PathParam("id") long id)
-            throws PermissionDenied, BadRequester {
-        return retrieve(id);
-    }
-
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:.+}")
     public Response getUserProfile(@PathParam("id") String id)
-            throws ItemNotFound, PermissionDenied, BadRequester {
+            throws AccessDenied, ItemNotFound, PermissionDenied, BadRequester {
         return retrieve(id);
     }
 
@@ -64,31 +61,56 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/list")
     public StreamingOutput listUserProfiles(
-            @QueryParam("offset") @DefaultValue("0") int offset,
-            @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit)
+            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
+            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(SORT_PARAM) List<String> order,            
+            @QueryParam(FILTER_PARAM) List<String> filters)
             throws ItemNotFound, BadRequester {
-        return list(offset, limit);
+        return list(offset, limit, order, filters);
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/count")
+    public Response countUserProfiles(@QueryParam(FILTER_PARAM) List<String> filters)
+            throws ItemNotFound, BadRequester {
+        return count(filters);
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/page")
     public StreamingOutput pageUserProfiles(
-            @QueryParam("offset") @DefaultValue("0") int offset,
-            @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit)
+            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
+            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(SORT_PARAM) List<String> order,
+            @QueryParam(FILTER_PARAM) List<String> filters)
             throws ItemNotFound, BadRequester {
-        return page(offset, limit);
+        return page(offset, limit, order, filters);
     }
     
+    /*
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response createUserProfile(String json) throws PermissionDenied,
+    public Response createUserProfile(String json,
+            @QueryParam(ACCESSOR_PARAM) List<String> accessors) throws PermissionDenied,
             ValidationError, IntegrityError, DeserializationError,
             ItemNotFound, BadRequester {
-        return create(json);
+        return create(json, accessors);
     }
-
+    */
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response createUserProfile(String json,
+    		@QueryParam(GROUP_PARAM) List<String> groups, 
+    		@QueryParam(ACCESSOR_PARAM) List<String> accessors) throws PermissionDenied,
+            ValidationError, IntegrityError, DeserializationError,
+            ItemNotFound, BadRequester {
+        return createWithGroups(json, groups, accessors);
+    }
+    
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
@@ -103,24 +125,74 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id:.+}")
     public Response updateUserProfile(@PathParam("id") String id, String json)
-            throws PermissionDenied, IntegrityError, ValidationError,
+            throws AccessDenied, PermissionDenied, IntegrityError, ValidationError,
             DeserializationError, ItemNotFound, BadRequester {
         return update(id, json);
     }
 
     @DELETE
-    @Path("/{id:\\d+}")
-    public Response deleteUserProfile(@PathParam("id") long id)
-            throws PermissionDenied, ValidationError, ItemNotFound,
-            BadRequester {
-        return delete(id);
-    }
-
-    @DELETE
     @Path("/{id:.+}")
     public Response deleteUserProfile(@PathParam("id") String id)
-            throws PermissionDenied, ItemNotFound, ValidationError,
+            throws AccessDenied, PermissionDenied, ItemNotFound, ValidationError,
             BadRequester {
         return delete(id);
     }
+    
+    
+    /*** helpers ***/
+    
+    /* 
+     * This code is similar to the create method of AbstractAccessibleEntityResource 
+     * but also allows specifying groups to which the new userProfile will be added. 
+     * 
+     * TODO needs to be refactored, but for now ... its not clear if it will be used elsewhere;  
+     * maybe on group's?
+     */
+    private Response createWithGroups(String json, List<String> groupIds, List<String> accessorIds)
+            throws PermissionDenied, ValidationError, IntegrityError,
+            DeserializationError, BadRequester {
+
+        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
+        try {
+            Accessor user = getRequesterUserProfile();
+            Bundle entityBundle = Bundle.fromString(json);
+            UserProfile entity = views.create(entityBundle, user,getLogMessage());
+            // TODO: Move elsewhere
+            new AclManager(graph).setAccessors(entity,
+                    getAccessors(accessorIds, user));
+
+            String jsonStr = serializer.vertexFrameToJson(entity);
+            UriBuilder ub = uriInfo.getAbsolutePathBuilder();
+            URI docUri = ub.path(entity.getId()).build();
+            
+            // add to the groups
+            for (String groupId: groupIds) {
+            	Group group = manager.getFrame(groupId, EntityClass.GROUP, Group.class);
+            	// TODO checking the creator has permission to add the user to the group 
+            	// see GroupResource.addMember
+            	group.addMember(entity);
+                // note that group addition is now logged separately
+                new ActionManager(graph).logEvent(
+                        graph.frame(entity.asVertex(), AccessibleEntity.class),
+                        graph.frame(getRequesterUserProfile().asVertex(), Actioner.class),
+                        EventTypes.addGroup).addSubjects(group);
+            }
+            
+            tx.success();
+            return Response.status(Status.CREATED).location(docUri)
+                    .entity((jsonStr).getBytes()).build();
+        } catch (SerializationError e) {
+            tx.failure();
+            return Response.status(Status.INTERNAL_SERVER_ERROR)
+                    .entity((produceErrorMessageJson(e)).getBytes()).build();
+        } catch (ItemNotFound e) {
+        	// group for addition was not found
+            tx.failure();
+            return Response.status(Status.BAD_REQUEST)
+                    .entity((produceErrorMessageJson(e)).getBytes()).build();
+ 		} finally {
+            tx.finish();
+        }
+    }
+
 }

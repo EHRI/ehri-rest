@@ -4,57 +4,25 @@
     "identifier": "apple"
   },
   "relationships": {
-    "prefLabel": [
+    "describes": [
       {
-        "type": "cvocText",
+        "type": "cvocConceptDescription",
         "data": {
-          "identifier": "apple-someid1", 
-          "languageCode": "en-US",
-          "content": "apple"
+          "languageCode": "en",
+          "name": "apples",
+          "altLabel": ["alt1", "alt2"],
+          "definition": "The apple is the pomaceous fruit of the apple tree, species Malus domestica in the rose family (Rosaceae).",
+          "scopeNote": "sn1"
         }
       },
       {
-        "type": "cvocText",
+        "type": "cvocConceptDescription",
         "data": {
-          "identifier": "apple-someid2", 
-          "languageCode": "nl-nl",
-          "content": "appel"
-        }
-      },
-      {
-        "type": "cvocText",
-        "data": {
-          "identifier": "apple-someid3", 
-          "languageCode": "du",
-          "content": "Apfel"
-        }
-      },
-      {
-        "type": "cvocText",
-        "data": {
-          "identifier": "apple-someid4", 
-          "languageCode": "fr",
-          "content": "pommier"
-        }
-      }
-    ],
-    "definition": [
-      {
-        "type": "cvocText",
-        "data": {
-          "identifier": "apple-someid5", 
-          "content": "The apple is the pomaceous fruit of the apple tree, species Malus domestica in the rose family (Rosaceae).", 
-          "languageCode":"en"
-        }
-      }
-    ],
-    "scopeNote": [
-      {
-        "type": "cvocText",
-        "data": {
-          "identifier": "apple-someid6", 
-          "content": "De appel is de belangrijkste vrucht in de geschiedenis van legendes en sprookjes: de appel van Adam en Eva, de appel van Willem Tell en de appel van Sneeuwwitje zijn de belangrijkste voorbeelden.", 
-          "languageCode":"nl"
+          "languageCode": "nl",
+          "name": "appel",
+          "altLabel": ["alt1", "alt2"],
+          "definition": "def1",
+          "scopeNote": "De appel is de belangrijkste vrucht in de geschiedenis van legendes en sprookjes: de appel van Adam en Eva, de appel van Willem Tell en de appel van Sneeuwwitje zijn de belangrijkste voorbeelden."
         }
       }
     ]

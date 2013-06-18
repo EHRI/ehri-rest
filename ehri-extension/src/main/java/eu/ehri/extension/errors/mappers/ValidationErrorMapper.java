@@ -47,35 +47,14 @@ import eu.ehri.project.exceptions.BundleError;
  */
 @Provider
 public class ValidationErrorMapper implements ExceptionMapper<BundleError> {
-
-    private Map<String, List<Object>> getRelations(
-            ListMultimap<String, BundleError> rels) {
-        Map<String, List<Object>> out = Maps.newHashMap();
-        if (rels != null) {
-            for (String relation : rels.keys()) {
-                LinkedList<Object> errList = Lists.newLinkedList();
-                for (BundleError e : rels.get(relation)) {
-                    errList.add(e == null ? Maps.newHashMap() : getErrorTree(e));
-                }
-                out.put(relation, errList);
-            }            
-        }
-        return out;
-    }
-
-    private Map<String, Object> getErrorTree(BundleError e) {
-        return Maps.newHashMap(new ImmutableMap.Builder<String, Object>()
-                .put(BundleError.ERROR_KEY, e.getErrors().asMap())
-                .put(BundleError.REL_KEY, getRelations(e.getRelations())).build());
-    }
-
     @Override
     public Response toResponse(final BundleError e) {
-        Map<String, Object> out = getErrorTree(e);
+        Map<String, Object> out = BundleError.getErrorTree(e.getErrors(), e.getRelations());
         try {
             return Response.status(Status.BAD_REQUEST)
                     .entity(new ObjectMapper().writeValueAsBytes(out)).build();
         } catch (Exception e1) {
+            e1.printStackTrace();
             throw new RuntimeException(e1);
         }
     }

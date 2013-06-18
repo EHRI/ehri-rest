@@ -1,11 +1,20 @@
 package eu.ehri.project.test.utils;
 
-import org.neo4j.graphdb.Transaction;
-import org.neo4j.graphdb.index.IndexManager;
-
-import com.tinkerpop.blueprints.Vertex;
+import com.google.common.collect.Lists;
+import com.tinkerpop.blueprints.*;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
+import org.neo4j.cypher.ExecutionEngine;
+import org.neo4j.cypher.ExecutionResult;
+import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Relationship;
+import org.neo4j.graphdb.Transaction;
+import org.neo4j.kernel.AbstractGraphDatabase;
+import org.neo4j.kernel.impl.util.StringLogger;
+import org.neo4j.tooling.GlobalGraphOperations;
+
+import java.util.List;
 
 /**
  * Deletes all nodes and indices from a Neo4j graph. Use with care.
@@ -15,16 +24,16 @@ import com.tinkerpop.frames.FramedGraph;
  * @author michaelb
  * 
  */
-public class GraphCleaner {
+public class GraphCleaner<T extends TransactionalGraph & IndexableGraph> {
         
-    private FramedGraph<Neo4jGraph> graph;
+    private FramedGraph<T> graph;
     
     /**
      * Constructor.
      * 
      * @param graph
      */
-    public GraphCleaner(FramedGraph<Neo4jGraph> graph) {
+    public GraphCleaner(FramedGraph<T> graph) {
         this.graph = graph;
     }
     
@@ -32,25 +41,24 @@ public class GraphCleaner {
      * Delete all nodes and indices from the graph.
      */
     public void clean() {
-        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
-            IndexManager manager = graph.getBaseGraph().getRawGraph().index();
-            for (String nodeIndex : manager.nodeIndexNames()) {
-                graph.getBaseGraph().dropIndex(nodeIndex);
+            for (Index<? extends Element> idx : graph.getBaseGraph().getIndices()) {
+                graph.getBaseGraph().dropIndex(idx.getIndexName());
             }
-            for (String relIndex : manager.relationshipIndexNames()) {
-                graph.getBaseGraph().dropIndex(relIndex);
-            }
-            for (Vertex v : graph.getVertices()) {
-                if (!v.getId().equals(0L))
-                    graph.removeVertex(v);
-            }
-            tx.success();
+            /*for (Vertex v : graph.getVertices()) {
+                // FIXME: Neo4j deadlocks when attempting to delete all nodes,
+                // whether it's done directly, or with Cypher, or whatever.
+                // So just hope that deindexing then will suffice here.
+                //graph.removeVertex(v);
+                for (String key : v.getPropertyKeys()) {
+                    System.out.println(" - removing prop : " + key + " (" + v.getId() + ")");
+                    v.removeProperty(key);
+                }
+            }*/
+            graph.getBaseGraph().commit();
         } catch (Exception e) {
-            tx.failure();
+            graph.getBaseGraph().rollback();
             throw new RuntimeException(e);
-        } finally {
-            tx.finish();
         }
     }
 }

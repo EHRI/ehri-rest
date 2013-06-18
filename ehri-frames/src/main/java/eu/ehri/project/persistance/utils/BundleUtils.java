@@ -207,7 +207,6 @@ public class BundleUtils {
      * 
      * @param bundle
      * @param path
-     * @param op
      * @return
      */
     private static Bundle fetchNode(Bundle bundle, BundlePath path) {
@@ -275,7 +274,7 @@ public class BundleUtils {
      * 
      * @param bundle
      * @param path
-     * @param op
+     * @param newNode
      * @return
      */
     private static Bundle setNode(Bundle bundle, BundlePath path, Bundle newNode) {

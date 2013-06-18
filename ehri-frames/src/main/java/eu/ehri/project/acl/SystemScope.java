@@ -2,11 +2,12 @@ package eu.ehri.project.acl;
 
 import com.tinkerpop.blueprints.Vertex;
 
-import eu.ehri.project.models.Action;
+import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.models.PermissionGrant;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.PermissionScope;
+import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.models.utils.EmptyIterable;
 
 /**
@@ -28,10 +29,16 @@ public enum SystemScope implements PermissionScope, AccessibleEntity {
         return INSTANCE;
     }
     
-    public static final String SYSTEM = "system";
+    public String getId() {
+        return Entities.SYSTEM;
+    }
+
+    public String getType() {
+        return Entities.SYSTEM;
+    }
 
     public String getIdentifier() {
-        return SYSTEM;
+        return Entities.SYSTEM;
     }
 
     public Vertex asVertex() {
@@ -65,19 +72,25 @@ public enum SystemScope implements PermissionScope, AccessibleEntity {
         return new EmptyIterable<PermissionGrant>();
     }
 
-    public Iterable<Action> getHistory() {
-        return new EmptyIterable<Action>();
-    }
-
-    public PermissionScope getScope() {
+    public PermissionScope getPermissionScope() {
         return null;
     }
 
-    public void setScope(PermissionScope scope) {
+    public void setPermissionScope(PermissionScope scope) {
         throw new UnsupportedOperationException();
     }
 
-    public Iterable<PermissionScope> getScopes() {
+    public Iterable<PermissionScope> getPermissionScopes() {
         return new EmptyIterable<PermissionScope>();
+    }
+
+    public Iterable<SystemEvent> getLatestEvent() {
+        // FIXME: Refactor frames hierarchy to make
+        // AccessibleEntity less important.
+        throw new UnsupportedOperationException();
+    }
+
+    public Iterable<SystemEvent> getHistory() {
+        return new EmptyIterable<SystemEvent>();
     }
 }

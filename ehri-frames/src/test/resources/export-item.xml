@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<item id="wiener-library-GB 1556 WL 502" type="documentaryUnit">
+  <data>
+    <property name="identifier" type="xs:string">GB 1556 WL 502</property>
+    <property name="name" type="xs:string">Comité voor Joodsche Vluechtlingen Papers</property>
+  </data>
+  <relationships>
+    <describes>
+      <item id="3d9b94aa-b516-4c6c-956c-5868f95580c3" type="documentDescription">
+        <data>
+          <property name="systemOfArrangement" type="xs:string"/>
+          <property name="physicalCharacteristics" type="xs:string"/>
+          <property name="locationOfOriginals" type="xs:string"/>
+          <property name="conditionsOfReproduction" type="xs:string">Copies can be made for personal use. Permission must be sought for publication.</property>
+          <propertySequence>
+            <property name="languagesOfMaterial" type="xs:string">en</property>
+          </propertySequence>
+          <property name="conditionsOfAccess" type="xs:string">Open</property>
+          <property name="rules" type="xs:string"/>
+          <property name="publisher" type="xs:string">Wiener Library</property>
+          <property name="creationDate" type="xs:string"/>
+          <property name="accruals" type="xs:string"/>
+          <property name="acquisition" type="xs:string"/>
+          <property name="archivalHistory" type="xs:string">The main archive of the Comité voor Joodsche Vluechtlingen, which was obtained by the Wiener Library in 1959, is now located at the Nederlands Instituut voor Oorlogsdocumentatie in the Netherlands.</property>
+          <property name="title" type="xs:string">Comité voor Joodsche Vluechtlingen Papers</property>
+          <property name="languageCode" type="xs:string">en</property>
+          <property name="depthOfDescription" type="xs:int">0</property>
+          <property name="extentAndMedium" type="xs:string">1300 frames; 1 file</property>
+          <property name="levelOfDescription" type="xs:string">fonds</property>
+          <property name="scopeAndContent" type="xs:string">Mostly microfilm and 1 file of papers of the Comité voor Joodsche Vluechtlingen and predecessor organisation consisting of reports, memoranda and correspondence mostly on the subject of emigration of German Jews to the Netherlands from 1933 to 1940 and conditions for Jews still in Germany.</property>
+          <property name="identifier" type="xs:string">GB 1556 WL 502</property>
+          <property name="appraisal" type="xs:string"/>
+          <property name="publicationDate" type="xs:string"/>
+          <property name="locationOfCopies" type="xs:string"/>
+        </data>
+        <relationships>
+          <hasDate>
+            <item id="ceaf89f0-75b6-4ab5-9d24-18083f7ae552" type="datePeriod">
+              <data>
+                <property name="startDate" type="xs:string">1933-01-01</property>
+                <property name="endDate" type="xs:string">1959-01-01</property>
+              </data>
+            </item>
+          </hasDate>
+        </relationships>
+      </item>
+    </describes>
+    <heldBy>
+      <item id="wiener-library" type="repository">
+        <data>
+          <property name="publicationStatus" type="xs:string">Draft</property>
+          <property name="name" type="xs:string">Wiener Library</property>
+          <property name="identifier" type="xs:string">wiener-library</property>
+        </data>
+        <relationships>
+          <describes>
+            <item id="ba926203-72ea-461c-a98b-8f4a3320d552" type="repositoryDescription">
+              <data>
+                <property name="history" type="xs:string">The Wiener Library is one of the world's leading and most extensive archives on the Holocaust and Nazi era.  Formed in 1933, the Library's unique collection of over one million items includes published and unpublished works, press cuttings, photographs and eyewitness testimony.</property>
+                <propertySequence>
+                  <property name="otherFormsOfName" type="xs:string">The Wiener Library for the Study of the Holocaust &amp; Genocide</property>
+                </propertySequence>
+                <propertySequence>
+                  <property name="languages" type="xs:string">en</property>
+                </propertySequence>
+                <propertySequence>
+                  <property name="scripts" type="xs:string">Latn</property>
+                </propertySequence>
+                <property name="languageCode" type="xs:string">en</property>
+                <property name="openingTimes" type="xs:string">* Mon - Fri    10am - 5pm&#13;
+* Tuesday     10am - 7.30pm&#13;
+* Sat - Sun    CLOSED&#13;
+</property>
+                <property name="name" type="xs:string">The Wiener Library</property>
+              </data>
+              <relationships>
+                <hasAddress>
+                  <item id="09bcf488-9b2c-4736-b8c6-fadbbb6a3626" type="address">
+                    <data>
+                      <property name="streetAddress" type="xs:string">29 Russell Square</property>
+                      <property name="fax" type="xs:string">+44 (0) 20 7436 6428</property>
+                      <property name="name" type="xs:string">Primary</property>
+                      <property name="countryCode" type="xs:string">en</property>
+                      <property name="telephone" type="xs:string">+44 (0) 20 7636 7247</property>
+                      <property name="url" type="xs:string">www.wienerlibrary.co.uk</property>
+                      <property name="city" type="xs:string">London</property>
+                    </data>
+                  </item>
+                </hasAddress>
+              </relationships>
+            </item>
+          </describes>
+        </relationships>
+      </item>
+    </heldBy>
+    <lifecycleEvent>
+      <item id="be74385f-05b0-484f-bd2d-4a1b2be8b19e" type="systemEvent">
+        <data>
+          <property name="timestamp" type="xs:string">2013-02-13T14:13:38.257Z</property>
+          <property name="identifier" type="xs:string">577cbb9e-6eee-4d92-8c7e-40ba91873083</property>
+          <property name="logMessage" type="xs:string">Imported from command-line</property>
+        </data>
+        <relationships>
+          <hasActioner>
+            <item id="mike" type="userProfile">
+              <data>
+                <property name="name" type="xs:string">mike</property>
+                <property name="identifier" type="xs:string">mike</property>
+              </data>
+              <relationships>
+                <belongsTo>
+                  <item id="admin" type="group">
+                    <data>
+                      <property name="name" type="xs:string">Administrators</property>
+                      <property name="identifier" type="xs:string">admin</property>
+                    </data>
+                  </item>
+                </belongsTo>
+              </relationships>
+            </item>
+          </hasActioner>
+        </relationships>
+      </item>
+    </lifecycleEvent>
+    <access>
+      <item id="mike" type="userProfile">
+        <data>
+          <property name="name" type="xs:string">mike</property>
+          <property name="identifier" type="xs:string">mike</property>
+        </data>
+        <relationships>
+          <belongsTo>
+            <item id="admin" type="group">
+              <data>
+                <property name="name" type="xs:string">Administrators</property>
+                <property name="identifier" type="xs:string">admin</property>
+              </data>
+            </item>
+          </belongsTo>
+        </relationships>
+      </item>
+    </access>
+  </relationships>
+</item>

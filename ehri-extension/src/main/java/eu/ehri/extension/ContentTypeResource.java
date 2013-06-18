@@ -1,5 +1,7 @@
 package eu.ehri.extension;
 
+import java.util.List;
+
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -11,16 +13,16 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
+import eu.ehri.project.exceptions.AccessDenied;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.ContentType;
 
 /**
- * Provides a RESTfull interface for the Action class. Note: Action instances
+ * Provides a RESTfull interface for the ContentType class. Note: ContentType instances
  * are created by the system, so we do not have create/update/delete methods
  * here.
  */
@@ -33,17 +35,9 @@ public class ContentTypeResource extends AbstractAccessibleEntityResource<Conten
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{id:\\d+}")
-    public Response getContentType(@PathParam("id") long id)
-            throws PermissionDenied, BadRequester {
-        return retrieve(id);
-    }
-
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{id:[\\w-]+}")
+    @Path("/{id:.+}")
     public Response getContentType(@PathParam("id") String id)
-            throws ItemNotFound, PermissionDenied, BadRequester {
+            throws ItemNotFound, AccessDenied, BadRequester {
         return retrieve(id);
     }
 
@@ -51,19 +45,23 @@ public class ContentTypeResource extends AbstractAccessibleEntityResource<Conten
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/list")
     public StreamingOutput listContentTypes(
-            @QueryParam("offset") @DefaultValue("0") int offset,
-            @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit)
+            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
+            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(SORT_PARAM) List<String> order,            
+            @QueryParam(FILTER_PARAM) List<String> filters)
             throws ItemNotFound, BadRequester {
-        return list(offset, limit);
+        return list(offset, limit, order, filters);
     }
     
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/page")
     public StreamingOutput pageContentTypes(
-            @QueryParam("offset") @DefaultValue("0") int offset,
-            @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit)
+            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
+            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(SORT_PARAM) List<String> order,            
+            @QueryParam(FILTER_PARAM) List<String> filters)
             throws ItemNotFound, BadRequester {
-        return page(offset, limit);
+        return page(offset, limit, order, filters);
     }    
 }

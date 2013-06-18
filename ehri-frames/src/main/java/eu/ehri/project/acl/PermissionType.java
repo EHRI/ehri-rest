@@ -24,12 +24,18 @@ public enum PermissionType {
         return name;
     }
 
-    public int getMask() {
-        return mask;
-    }
-    
     @Override public String toString() {
         return name;
+    }
+
+    /**
+     * Return whether a given other permission is encompassed
+     * by the current one...
+     * @param other
+     * @return
+     */
+    public boolean contains(PermissionType other) {
+        return (mask & other.mask) == other.mask;
     }
     
     @JsonCreator

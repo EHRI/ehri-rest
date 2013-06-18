@@ -1,8 +1,6 @@
 package eu.ehri.project.commands;
 
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.ParseException;
-
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
@@ -16,12 +14,7 @@ public class Initialize extends BaseCommand implements Command {
     
     final static String NAME = "initialize";
 
-    /**
-     * Constructor.
-     * 
-     * @param args
-     * @throws ParseException
-     */
+
     public Initialize() {
     }
 
@@ -43,9 +36,11 @@ public class Initialize extends BaseCommand implements Command {
     /**
      * Command-line entry-point (for testing.)
      * 
-     * @param args
-     * @throws Exception
+     * @param graph
+     * @param cmdLine
+     * @throws Exception 
      */
+    @Override
     public int execWithOptions(final FramedGraph<Neo4jGraph> graph, CommandLine cmdLine) throws Exception {
         GraphInitializer initializer = new GraphInitializer(graph);
         initializer.initialize();

@@ -1,49 +1,55 @@
 package eu.ehri.project.models.base;
 
-import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.frames.Adjacency;
-import com.tinkerpop.frames.Property;
-import com.tinkerpop.frames.VertexFrame;
 import com.tinkerpop.frames.annotations.gremlin.GremlinGroovy;
 
-import eu.ehri.project.models.Action;
-import eu.ehri.project.models.PermissionGrant;
 import eu.ehri.project.models.annotations.Fetch;
-import eu.ehri.project.models.annotations.Unique;
+import eu.ehri.project.models.events.SystemEvent;
+import eu.ehri.project.persistance.ActionManager;
 
-public interface AccessibleEntity extends VertexFrame, PermissionGrantTarget {
+public interface AccessibleEntity extends PermissionGrantTarget {
 
     public static final String ACCESS = "access";
-    public static final String IDENTIFIER_KEY = "identifier";
-    public static final String HAS_SCOPE = "hasScope";
+    public static final String HAS_PERMISSION_SCOPE = "hasPermissionScope";
 
-    @Unique
-    @Property(IDENTIFIER_KEY)
-    public String getIdentifier();
-
-    @Fetch(depth=1)
+    @Fetch(value = ACCESS, depth = 1)
     @Adjacency(label = ACCESS)
     public Iterable<Accessor> getAccessors();
 
+    /**
+     * only Accessor accessor can access this AccessibleEntity.
+     * This is NOT the way to add an Accessor to a Group, use Group.addMember()
+     * @param accessor 
+     */
     @Adjacency(label = ACCESS)
     public void addAccessor(final Accessor accessor);
 
     @Adjacency(label = ACCESS)
     public void removeAccessor(final Accessor accessor);
 
-    @Adjacency(label = PermissionGrant.HAS_ENTITY)
-    public Iterable<PermissionGrant> getPermissionAssertions();
+    @Adjacency(label = HAS_PERMISSION_SCOPE)
+    public PermissionScope getPermissionScope();
 
-    @Adjacency(label = Action.HAS_SUBJECT, direction = Direction.IN)
-    public Iterable<Action> getHistory();
-    
-    @Adjacency(label = HAS_SCOPE)
-    public PermissionScope getScope();
-    
-    @Adjacency(label = HAS_SCOPE)
-    public void setScope(final PermissionScope scope);
-    
-    @GremlinGroovy("_().as('n').out('" + HAS_SCOPE
+    @Adjacency(label = HAS_PERMISSION_SCOPE)
+    public void setPermissionScope(final PermissionScope scope);
+
+    @GremlinGroovy("it.as('n').out('" + HAS_PERMISSION_SCOPE
             + "').loop('n'){it.loops < 20}{true}")
-    public Iterable<PermissionScope> getScopes();    
+    public Iterable<PermissionScope> getPermissionScopes();
+
+    /**
+     * Fetch a list of Actions for this entity in order.
+     * 
+     * @return
+     */
+    @GremlinGroovy("it.as('n').out('" + ActionManager.LIFECYCLE_EVENT + "')"
+            + ".loop('n'){true}{true}.out('" + eu.ehri.project.models.events.SystemEvent.HAS_EVENT + "')")
+    public Iterable<SystemEvent> getHistory();
+
+    // FIXME: This should be a single item return but frames doesn't currently
+    // support those...
+    @Fetch(value = ActionManager.LIFECYCLE_EVENT, ifDepth = 0)
+    @GremlinGroovy("it.as('n').out('" + ActionManager.LIFECYCLE_EVENT + "')"
+            + ".out('" + eu.ehri.project.models.events.SystemEvent.HAS_EVENT + "')")
+    public Iterable<SystemEvent> getLatestEvent();
 }

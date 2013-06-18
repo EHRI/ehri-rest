@@ -1,10 +1,11 @@
 package eu.ehri.project.models.idgen;
 
-import java.util.Map;
-
-import eu.ehri.project.exceptions.IdGenerationError;
+import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.PermissionScope;
+import eu.ehri.project.persistance.Bundle;
+
+import java.util.List;
 
 /**
  * Generate an ID given an entity type and a vertex.
@@ -17,18 +18,40 @@ public interface IdGenerator {
     /**
      * Separate or ID components.
      */
-    public static final String SEPERATOR = "-";
-    
+    public static final String SEPARATOR = "-";
+
+
+    /**
+     * Handle an id collision by either a validation error depending
+     * on how the id was generated, or a RuntimeError.
+     * @param type
+     * @param scope
+     * @param bundle
+     */
+    public void handleIdCollision(EntityClass type, PermissionScope scope,
+            Bundle bundle) throws ValidationError;
+
     /**
      * Generate an ID given an entity type prefix and a vertex.
      * 
      * @param type
      * @param scope
-     * @param data
+     * @param bundle
      * @return
-     * @throws IdGenerationError
-     *             TODO
      */
     public String generateId(EntityClass type, PermissionScope scope,
-            Map<String, Object> data) throws IdGenerationError;
+            Bundle bundle);
+
+    /**
+     * Generate an ID given an array of scope IDs. This can be used
+     * where the scope might not yet exist.
+     *
+     * @param type
+     * @param scopeIds array of scope ids, ordered parent-to-child.
+     * @param bundle
+     * @return
+     */
+    public String generateId(EntityClass type, List<String> scopeIds,
+            Bundle bundle);
+
 }

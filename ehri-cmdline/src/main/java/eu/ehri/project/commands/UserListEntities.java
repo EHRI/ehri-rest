@@ -2,8 +2,6 @@ package eu.ehri.project.commands;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
-import org.apache.commons.cli.ParseException;
-
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
@@ -12,7 +10,7 @@ import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.views.impl.Query;
+import eu.ehri.project.views.Query;
 
 /**
  * Import EAD from the command line...
@@ -25,8 +23,6 @@ public class UserListEntities extends BaseCommand implements Command {
     /**
      * Constructor.
      * 
-     * @param args
-     * @throws ParseException
      */
     public UserListEntities() {
     }
@@ -51,9 +47,11 @@ public class UserListEntities extends BaseCommand implements Command {
     /**
      * Command-line entry-point (for testing.)
      * 
-     * @param args
+     * @param graph
+     * @param cmdLine
      * @throws Exception
      */
+    @Override
     public int execWithOptions(final FramedGraph<Neo4jGraph> graph,
             CommandLine cmdLine) throws Exception {
 
@@ -74,7 +72,7 @@ public class UserListEntities extends BaseCommand implements Command {
         Query<AccessibleEntity> query = new Query<AccessibleEntity>(graph,
                 (Class<AccessibleEntity>) cls);
         for (AccessibleEntity acc : query.list(user)) {
-            System.out.println(manager.getId(acc));
+            System.out.println(acc.getId());
         }
 
         return 0;

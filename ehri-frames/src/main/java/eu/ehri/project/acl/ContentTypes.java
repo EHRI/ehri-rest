@@ -7,13 +7,17 @@ import eu.ehri.project.definitions.Entities;
 
 public enum ContentTypes {
     DOCUMENTARY_UNIT(Entities.DOCUMENTARY_UNIT),
-    AGENT(Entities.AGENT),
-    AUTHORITY(Entities.AUTHORITY),
+    REPOSITORY(Entities.REPOSITORY),
+    AUTHORITY(Entities.HISTORICAL_AGENT),
     GROUP(Entities.GROUP),
     USER_PROFILE(Entities.USER_PROFILE),
     ANNOTATION(Entities.ANNOTATION),
-    ACTION(Entities.ACTION),
-    CVOC_CONCEPT(Entities.CVOC_CONCEPT);
+    SYSTEM_EVENT(Entities.SYSTEM_EVENT),
+    AUTHORITATIVE_SET(Entities.AUTHORITATIVE_SET),
+    CVOC_VOCABULARY(Entities.CVOC_VOCABULARY),
+    CVOC_CONCEPT(Entities.CVOC_CONCEPT),
+    LINK(Entities.LINK),
+    COUNTRY(Entities.COUNTRY);
     
     private final String name;
     
@@ -36,6 +40,6 @@ public enum ContentTypes {
             if (c.getName().equals(name))
                 return c;
         }
-        throw new IllegalArgumentException("Invalid content type type: " + name);
+        throw new IllegalArgumentException("Invalid content type type: '" + name + "'");
     }
 }

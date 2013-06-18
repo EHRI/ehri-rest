@@ -1,65 +1,84 @@
 package eu.ehri.project.importers;
 
+import com.google.common.base.Joiner;
+import com.tinkerpop.frames.FramedGraph;
+import eu.ehri.project.core.GraphManager;
+import eu.ehri.project.core.GraphManagerFactory;
+import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.importers.properties.NodeProperties;
+import eu.ehri.project.models.EntityClass;
+import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.PermissionScope;
+
+import eu.ehri.project.persistance.BundleDAO;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
-import com.tinkerpop.frames.FramedGraph;
-
-import eu.ehri.project.core.GraphManager;
-import eu.ehri.project.core.GraphManagerFactory;
-import eu.ehri.project.exceptions.IntegrityError;
-import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.models.Agent;
-import eu.ehri.project.models.DocumentaryUnit;
-import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.base.Description;
-import eu.ehri.project.models.base.PermissionScope;
-import eu.ehri.project.models.base.TemporalEntity;
-import eu.ehri.project.models.idgen.AccessibleEntityIdGenerator;
-import eu.ehri.project.models.idgen.IdGenerator;
-import eu.ehri.project.persistance.Bundle;
-import eu.ehri.project.persistance.BundleDAO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Base class for importers that import documentary units, with their
  * constituent logical data, description(s), and date periods.
- * 
- * @author michaelb
- * 
+ *
  * @param <T>
+ * @author michaelb
  */
 public abstract class AbstractImporter<T> {
 
-    protected final Agent repository;
-    protected final FramedGraph<Neo4jGraph> framedGraph;
+    private static final String NODE_PROPERTIES = "allowedNodeProperties.csv";
+
+    private static final Logger logger = LoggerFactory.getLogger(AbstractImporter.class);
+    protected final PermissionScope permissionScope;
+    protected final FramedGraph<?> framedGraph;
     protected final GraphManager manager;
     protected final ImportLog log;
     protected final T documentContext;
-    private List<ImportCallback> createCallbacks = new LinkedList<ImportCallback>();
-    private List<ImportCallback> updateCallbacks = new LinkedList<ImportCallback>();
+    protected List<ImportCallback> createCallbacks = new LinkedList<ImportCallback>();
+    protected List<ImportCallback> updateCallbacks = new LinkedList<ImportCallback>();
+    protected BundleDAO persister;
+
+    private NodeProperties pc;
+    private Joiner stringJoiner = Joiner.on("\n\n").skipNulls();
 
     /**
      * Constructor.
-     * 
+     *
      * @param framedGraph
-     * @param repository
+     * @param permissionScope
      * @param log
      * @param documentContext
      */
-    public AbstractImporter(FramedGraph<Neo4jGraph> framedGraph,
-            Agent repository, ImportLog log, T documentContext) {
-        this.repository = repository;
+    public AbstractImporter(FramedGraph<?> framedGraph, PermissionScope permissionScope, ImportLog log,
+            T documentContext) {
+        this.permissionScope = permissionScope;
         this.framedGraph = framedGraph;
         this.log = log;
         this.documentContext = documentContext;
         manager = GraphManagerFactory.getInstance(framedGraph);
+        persister = new BundleDAO(framedGraph, permissionScope);
+    }
+
+    /**
+     * Constructor without a document context.
+     * @param framedGraph
+     * @param permissionScope
+     * @param log
+     */
+    public AbstractImporter(FramedGraph<?> framedGraph, PermissionScope permissionScope, ImportLog log) {
+        this(framedGraph, permissionScope, log, null);
     }
 
     /**
      * Add a callback to run when an item is created.
-     * 
+     *
      * @param cb
      */
     public void addCreationCallback(final ImportCallback cb) {
@@ -68,96 +87,59 @@ public abstract class AbstractImporter<T> {
 
     /**
      * Add a callback to run when an item is updated.
-     * 
+     *
      * @param cb
      */
     public void addUpdateCallback(final ImportCallback cb) {
         updateCallbacks.add(cb);
     }
 
-    /**
-     * Extract the logical DocumentaryUnit at a given depth.
-     * 
-     * @param itemData
-     * @param depth
-     * @return
-     * @throws ValidationError
-     */
-    protected abstract Map<String, Object> extractDocumentaryUnit(T itemData,
-            int depth) throws ValidationError;
+    abstract public AccessibleEntity importItem(Map<String, Object> itemData) throws ValidationError;
 
-    /**
-     * Extract DocumentDescriptions at a given depth from the input data.
-     * 
-     * @param itemData
-     * @param depth
-     * @return
-     * @throws ValidationError
-     */
-    protected abstract Iterable<Map<String, Object>> extractDocumentDescriptions(
-            T itemData, int depth) throws ValidationError;
+    abstract public AccessibleEntity importItem(Map<String, Object> itemData, int depth) throws ValidationError;
 
     /**
      * Extract a list of DatePeriod bundles from an item's data.
-     * 
+     *
      * @param data
-     * @return
+     * @return returns a List of Maps with DatePeriod.START_DATE and DatePeriod.END_DATE values
      */
     public abstract Iterable<Map<String, Object>> extractDates(T data);
 
+
     /**
-     * Import a single archdesc or c01-12 item, keeping a reference to the
-     * hierarchical depth.
-     * 
-     * @param itemData
-     * @param parent
-     * @param depth
-     * @throws ValidationError
-     * @throws IntegrityError
+     * only properties that have the multivalued-status can actually be multivalued. all other properties will be
+     * flattened by this method.
+     *
+     * @param key
+     * @param value
+     * @param entity - the EntityClass with which this frameMap must comply
      */
-    protected DocumentaryUnit importItem(T itemData, DocumentaryUnit parent,
-            int depth) throws ValidationError, IntegrityError {
-        Bundle unit = new Bundle(EntityClass.DOCUMENTARY_UNIT,
-                extractDocumentaryUnit(itemData, depth));
-        BundleDAO persister = new BundleDAO(framedGraph, repository);
+    protected Object changeForbiddenMultivaluedProperties(String key, Object value, EntityClass entity) {
+        if (pc == null) {
+            pc = new NodeProperties();
+            try {
+                InputStream fis = getClass().getClassLoader().getResourceAsStream(NODE_PROPERTIES);
+                if (fis == null) {
+                    throw new RuntimeException("Missing properties file: " + NODE_PROPERTIES);
+                }
+                BufferedReader br = new BufferedReader(new InputStreamReader(fis, Charset.forName("UTF-8")));
+                String firstline = br.readLine();
+                pc.setTitles(firstline);
 
-        // Add dates and descriptions to the bundle since they're @Dependent
-        // relations.
-        for (Map<String, Object> dpb : extractDates(itemData)) {
-            unit = unit.withRelation(TemporalEntity.HAS_DATE, new Bundle(
-                    EntityClass.DATE_PERIOD, dpb));
-        }
-        for (Map<String, Object> dpb : extractDocumentDescriptions(itemData,
-                depth)) {
-            unit = unit.withRelation(Description.DESCRIBES, new Bundle(
-                    EntityClass.DOCUMENT_DESCRIPTION, dpb));
-        }
-
-        PermissionScope scope = parent != null ? parent : repository;
-        IdGenerator generator = AccessibleEntityIdGenerator.INSTANCE;
-        String id = generator.generateId(EntityClass.DOCUMENTARY_UNIT, scope,
-                    unit.getData());
-        boolean exists = manager.exists(id);
-        DocumentaryUnit frame = persister.createOrUpdate(unit.withId(id),
-                DocumentaryUnit.class);
-
-        // Set the repository/item relationship
-        frame.setAgent(repository);
-        frame.setScope(scope);
-        // Set the parent child relationship
-        if (parent != null)
-            parent.addChild(frame);
-
-        // Run creation callbacks for the new item...
-        if (exists) {
-            for (ImportCallback cb : updateCallbacks) {
-                cb.itemImported(frame);
+                String line;
+                while ((line = br.readLine()) != null) {
+                    pc.addRow(line);
+                }
+            } catch (IOException ex) {
+                logger.error(ex.getMessage());
             }
+        }
+        if (value instanceof List
+                && (!pc.hasProperty(entity.getName(), key) || !pc.isMultivaluedProperty(entity.getName(), key))) {
+            return stringJoiner.join((List<String>) value);
         } else {
-            for (ImportCallback cb : createCallbacks) {
-                cb.itemImported(frame);
-            }
+            return value;
         }
-        return frame;
     }
 }

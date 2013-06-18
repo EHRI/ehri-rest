@@ -1,0 +1,17 @@
+#!/bin/bash
+
+# Get the current dir...
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+# Source the libs (for classpath building etc)
+. $DIR/lib.sh
+
+checkenv
+buildclasspath
+
+java -cp "$CLASSPATH" groovy.lang.GroovyShell \
+    -Dgroovy.starter.conf=$DIR/init.groovy \
+    -cp "$CLASSPATH" $DIR/groovy-shell.groovy "$@" --conf $DIR/init.groovy
+
+
+

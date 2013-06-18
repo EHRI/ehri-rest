@@ -6,23 +6,15 @@ import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
-import org.neo4j.test.TestGraphDatabaseFactory;
 
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
-import com.tinkerpop.frames.FramedGraph;
-
-import eu.ehri.project.core.GraphManager;
-import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.models.DocumentaryUnit;
-import eu.ehri.project.test.utils.fixtures.FixtureLoader;
-import eu.ehri.project.test.utils.fixtures.FixtureLoaderFactory;
+import eu.ehri.project.utils.fixtures.FixtureLoader;
+import eu.ehri.project.utils.fixtures.FixtureLoaderFactory;
 import eu.ehri.project.views.Crud;
 
-public class ModelTestBase {
+public abstract class ModelTestBase extends GraphTestBase {
 
-    protected FramedGraph<Neo4jGraph> graph;
     protected Crud<DocumentaryUnit> views;
-    protected GraphManager manager;
     protected FixtureLoader helper;
 
     protected <T> List<T> toList(Iterable<T> iter) {
@@ -33,18 +25,19 @@ public class ModelTestBase {
         return lst;
     }
 
+    @Override
     @Before
-    public void setUp() {
-        graph = new FramedGraph<Neo4jGraph>(new Neo4jGraph(
-                new TestGraphDatabaseFactory().newImpermanentDatabaseBuilder()
-                        .newGraphDatabase()));
-        manager = GraphManagerFactory.getInstance(graph);
+    public void setUp() throws Exception {
+        super.setUp();
         helper = FixtureLoaderFactory.getInstance(graph);
         helper.loadTestData();
     }
-    
+
+    @Override
     @After
-    public void tearDown() {
-        graph.shutdown();
+    public void tearDown() throws Exception {
+        super.tearDown();
     }
+
+
 }

@@ -1,0 +1,17 @@
+#!/bin/bash
+
+# Get the current dir...
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+# Source the libs (for classpath building etc)
+. $DIR/lib.sh
+
+checkenv
+buildclasspath
+
+JYTHON=$HOME/apps/jython2.7b1/bin/jython
+
+$JYTHON -J-cp "$CLASSPATH" -i scripts/repl.py "$@"
+
+
+

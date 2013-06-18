@@ -3,6 +3,23 @@
 # database.
 #
 
+# Countries - these are at the top of the entity hierarchy and
+# 'hold' everything else.
+- id: gb
+  type: country
+  data:
+    identifier: gb
+
+- id: nl
+  type: country
+  data:
+    identifier: nl
+
+- id: be
+  type: country
+  data:
+    identifier: be
+
 # NIOD. NIOD belongs to admin, so everyone who belongs
 # to the NIOD group also belongs to admin by extension.
 - id: niod
@@ -13,7 +30,7 @@
   relationships:
     belongsTo:
       - admin
-      
+
 - id: kcl
   type: group
   data:
@@ -32,7 +49,7 @@
     identifier: soma-group
     name: CEGES-SOMA
 
---- # Users Mike, Tim, Linda, and Reto
+--- # Users Mike, Tim, Linda, and Reto, ehriimporter
 
 # Mike is a member of the KCL group, but he is ALSO a member of Admin
 # separately
@@ -90,14 +107,16 @@
 
 # Institutions
 - id: r1 # should be renamed niod
-  type: agent
+  type: repository
   data:
     identifier: r1
     name: Repository 1
   relationships:
+    hasCountry: nl
+    hasPermissionScope: nl
     describes:
       - id: rd1
-        type: agentDescription
+        type: repositoryDescription
         data:
           identifier: niod-en
           name: NIOD Description
@@ -112,14 +131,16 @@
                 city: Amsterdam
 
 - id: r2 # should be named kcl
-  type: agent
+  type: repository
   data:
     identifier: r2
     name: King's College London
   relationships:
+    hasCountry: gb
+    hasPermissionScope: gb
     describes:
       - id: rd2
-        type: agentDescription
+        type: repositoryDescription
         data:
           identifier: kcl-en
           name: KCL Description
@@ -134,14 +155,16 @@
                 city: London
                          
 - id: r3 # should be dans
-  type: agent
+  type: repository
   data:
     identifier: r3
     name: DANS
   relationships:
+    hasCountry: nl
+    hasPermissionScope: nl
     describes:
       - id: rd3
-        type: agentDescription
+        type: repositoryDescription
         data:
           identifier: dans-en
           name: DANS Description
@@ -155,14 +178,16 @@
                 city: The Hague
 
 - id: r4 # should be soma
-  type: agent
+  type: repository
   data:
     identifier: r4
     name: CEGES SOMA
   relationships:
+    hasCountry: be
+    hasPermissionScope: be
     describes:
       - id: rd4
-        type: agentDescription
+        type: repositoryDescription
         data:
           identifier: soma-en
           name: SOMA Description
@@ -191,21 +216,38 @@
         type: documentDescription
         data:
           identifier: c1-desc
-          title: Documentary Unit 1
+          name: Documentary Unit 1
           languageCode: en
-    hasDate:
-      - id: c1-dp1
-        type: datePeriod
+          scopeAndContent: Some description text for c1
+        relationships:
+          hasDate:
+            - id: c1-dp1
+              type: datePeriod
+              data:
+                startDate: !!str 1939-01-01
+                endDate: !!str 1945-01-01
+            - id: c1-dp2
+              type: datePeriod
+              data:
+                startDate: !!str 1939-01-01
+                endDate: !!str 1945-01-01
+          relatesTo:
+            - id: ur1
+              type: relationship
+              data:
+                name: test
+                type: subjectAccess
+                description: test description
+                category: associative
+      - id: cd1-2
+        type: documentDescription
         data:
-          startDate: !!str 1939-01-01
-          endDate: !!str 1945-01-01
-      - id: c1-dp2
-        type: datePeriod
-        data:
-          startDate: !!str 1939-01-01
-          endDate: !!str 1945-01-01
+          identifier: c1-desc2
+          name: Documentary Unit 1
+          languageCode: en
+          scopeAndContent: Some alternate description text for c1
     heldBy: r1
-    hasScope: r1
+    hasPermissionScope: r1
     access:
       - mike
       - admin
@@ -222,17 +264,18 @@
         type: documentDescription
         data:
           identifier: c2-desc
-          title: Documentary Unit 2
+          name: Documentary Unit 2
           languageCode: en
-    hasDate:
-      - id: c2-dp1
-        type: datePeriod
-        data:
-          startDate: !!str 1939-01-01
-          endDate: !!str 1945-01-01
-    heldBy: r1
+          scopeAndContent: Some description text for c2
+        relationships:
+          hasDate:
+            - id: c2-dp1
+              type: datePeriod
+              data:
+                startDate: !!str 1939-01-01
+                endDate: !!str 1945-01-01
     childOf: c1
-    hasScope: c1
+    hasPermissionScope: c1
     access:
       - tim
       - admin
@@ -249,17 +292,18 @@
         type: documentDescription
         data:
           identifier: c3-desc
-          title: Documentary Unit 3
+          name: Documentary Unit 3
           languageCode: en
-    hasDate:
-      - id: c3-dp1
-        type: datePeriod
-        data:
-          startDate: !!str 1939-01-01
-          endDate: !!str 1945-01-01
-    heldBy: r1
+          scopeAndContent: Some description text for c3
+        relationships:
+          hasDate:
+            - id: c3-dp1
+              type: datePeriod
+              data:
+                startDate: !!str 1939-01-01
+                endDate: !!str 1945-01-01
     childOf: c2
-    hasScope: c2    
+    hasPermissionScope: c2    
     access:
       - tim
 
@@ -275,46 +319,56 @@
         type: documentDescription
         data:
           identifier: c4-desc
-          title: Documentary Unit 4
+          name: Documentary Unit 4
           languageCode: en
-    hasDate:
-      - id: c4-dp1
-        type: datePeriod
-        data:
-          startDate: !!str 1939-01-01
-          endDate: !!str 1945-01-01
+          scopeAndContent: Some description text for c4
+        relationships:
+          hasDate:
+            - id: c4-dp1
+              type: datePeriod
+              data:
+                startDate: !!str 1939-01-01
+                endDate: !!str 1945-01-01
     heldBy: r1
-    hasScope: r1
-    
+    hasPermissionScope: r1
+
+--- # Authority Set
+- id: auths
+  type: authoritativeSet
+  data:
+    identifier: auths
+
 --- # Authorities
 - id: a1
-  type: authority
+  type: historicalAgent
   data:
     identifier: a1
-    typeOfEntity: person
   relationships:
     describes:
       - id: ad1
-        type: authorityDescription
+        type: historicalAgentDescription
         data:
-          title: An Authority 1
+          typeOfEntity: person
+          name: An Authority 1
           languageCode: en
-    created: c1
-    
+    inAuthoritativeSet: auths
+    hasPermissionScope: auths
+
 - id: a2
-  type: authority
+  type: historicalAgent
   data:
     identifier: a2
-    typeOfEntity: person
   relationships:
     describes:
       - id: ad2
-        type: authorityDescription
+        type: historicalAgentDescription
         data:
-          title: An Authority 2
+          typeOfEntity: person
+          name: An Authority 2
           languageCode: en
-    mentionedIn: c1
-    
+    inAuthoritativeSet: auths
+    hasPermissionScope: auths
+
 
 --- # Annotations
 - id: ann1
@@ -323,7 +377,7 @@
     identifier: ann1
     body: Test Annotation
   relationships:
-    annotates: c1
+    hasAnnotationTarget: c1
     
 - id: ann2
   type: annotation
@@ -331,7 +385,38 @@
     identifier: ann2
     body: Test Annotation of Annotation
   relationships:
-    annotates: ann1
+    hasAnnotationTarget: ann1
+    
+- id: ann3
+  type: annotation
+  data:
+    identifier: ann3
+    body: Created by
+  relationships:
+    hasAnnotationTarget: c1
+    hasAnnotationBody: mike
+
+--- # Links
+ - id: link1
+   type: link
+   data:
+     type: associative
+     body: Test link
+   relationships:
+     hasLinkTarget: c1
+     hasLinkTarget: c4
+     hasLinker: mike
+
+ - id: link2
+   type: link
+   data:
+     type: associative
+     body: Test link
+   relationships:
+     hasLinkTarget: c1
+     hasLinkTarget: a1
+     hasLinkBody: ur1
+     hasLinker: mike
 
 --- # Permission grants
 
@@ -354,4 +439,22 @@
     hasAccessor: linda
     hasGrantee: mike
 
-    
+--- # Vocabularies
+- id: cvoc1
+  type: cvocVocabulary
+  data:
+    identifier: cvoc1
+
+- id: cvoc2
+  type: cvocVocabulary
+  data:
+    identifier: cvoc2
+
+--- # Concepts
+- id: cvocc1
+  type: cvocConcept
+  data:
+    identifier: cvocc1
+  relationships:
+    inAuthoritativeSet: cvoc1
+

@@ -1,11 +1,14 @@
 package eu.ehri.project.models;
 
-import com.tinkerpop.frames.VertexFrame;
-
 import eu.ehri.project.definitions.Entities;
+import eu.ehri.project.models.base.Frame;
+import eu.ehri.project.models.cvoc.AuthoritativeSet;
 import eu.ehri.project.models.cvoc.Concept;
-import eu.ehri.project.models.cvoc.Text;
-import eu.ehri.project.models.idgen.AccessibleEntityIdGenerator;
+import eu.ehri.project.models.cvoc.ConceptDescription;
+import eu.ehri.project.models.cvoc.Vocabulary;
+import eu.ehri.project.models.events.SystemEvent;
+import eu.ehri.project.models.events.SystemEventQueue;
+import eu.ehri.project.models.idgen.IdentifiableEntityIdGenerator;
 import eu.ehri.project.models.idgen.GenericIdGenerator;
 import eu.ehri.project.models.idgen.IdGenerator;
 
@@ -19,28 +22,33 @@ import eu.ehri.project.models.idgen.IdGenerator;
 public enum EntityClass {
 
     // @formatter:off
-    DOCUMENTARY_UNIT(Entities.DOCUMENTARY_UNIT, "c", DocumentaryUnit.class, AccessibleEntityIdGenerator.INSTANCE),
-    AGENT(Entities.AGENT, "r", Agent.class, AccessibleEntityIdGenerator.INSTANCE),
-    AUTHORITY(Entities.AUTHORITY, "a", Authority.class, AccessibleEntityIdGenerator.INSTANCE),
-    GROUP(Entities.GROUP, "g", Group.class, AccessibleEntityIdGenerator.INSTANCE),
-    USER_PROFILE(Entities.USER_PROFILE, "u", UserProfile.class, AccessibleEntityIdGenerator.INSTANCE),
-    
+    DOCUMENTARY_UNIT(Entities.DOCUMENTARY_UNIT, "c", DocumentaryUnit.class, IdentifiableEntityIdGenerator.INSTANCE),
+    REPOSITORY(Entities.REPOSITORY, "r", Repository.class, IdentifiableEntityIdGenerator.INSTANCE),
+    HISTORICAL_AGENT(Entities.HISTORICAL_AGENT, "a", HistoricalAgent.class, IdentifiableEntityIdGenerator.INSTANCE),
+    GROUP(Entities.GROUP, "g", Group.class, IdentifiableEntityIdGenerator.INSTANCE),
+    USER_PROFILE(Entities.USER_PROFILE, "u", UserProfile.class, IdentifiableEntityIdGenerator.INSTANCE),
+    AUTHORITATIVE_SET(Entities.AUTHORITATIVE_SET, "as", AuthoritativeSet.class, IdentifiableEntityIdGenerator.INSTANCE),
+    COUNTRY(Entities.COUNTRY, "ct", Country.class, IdentifiableEntityIdGenerator.INSTANCE),
+    CVOC_VOCABULARY(Entities.CVOC_VOCABULARY, "cvv", Vocabulary.class, IdentifiableEntityIdGenerator.INSTANCE),
+
     // Generic entities.
     DOCUMENT_DESCRIPTION(Entities.DOCUMENT_DESCRIPTION, "dd", DocumentDescription.class),
-    AGENT_DESCRIPTION(Entities.AGENT_DESCRIPTION, "rd", AgentDescription.class),
-    AUTHORITY_DESCRIPTION(Entities.AUTHORITY_DESCRIPTION, "ad", AuthorityDescription.class),
+    REPOSITORY_DESCRIPTION(Entities.REPOSITORY_DESCRIPTION, "rd", RepositoryDescription.class),
+    HISTORICAL_AGENT_DESCRIPTION(Entities.HISTORICAL_AGENT_DESCRIPTION, "ad", HistoricalAgentDescription.class),
     DATE_PERIOD(Entities.DATE_PERIOD, "dp", DatePeriod.class),
     ANNOTATION(Entities.ANNOTATION, "ann", Annotation.class),
     ADDRESS(Entities.ADDRESS, "adr", Address.class),
-    ACTION(Entities.ACTION, "act", Action.class),
-    IMPORT(Entities.IMPORT, "imp", Import.class),
-    PROPERTY(Entities.PROPERTY, "p", Property.class),
+    SYSTEM_EVENT(Entities.SYSTEM_EVENT, "ev", SystemEvent.class, GenericIdGenerator.INSTANCE),
+    SYSTEM(Entities.SYSTEM, "sys", SystemEventQueue.class),
+    UNKNOWN_PROPERTY(Entities.UNKNOWN_PROPERTY, "p", UnknownProperty.class),
     PERMISSION(Entities.PERMISSION, "pm", Permission.class),
     PERMISSION_GRANT(Entities.PERMISSION_GRANT, "pmg", PermissionGrant.class),
     CONTENT_TYPE(Entities.CONTENT_TYPE, "ct", ContentType.class),
-    REVISION(Entities.REVISION, "rv", Revision.class),
     CVOC_CONCEPT(Entities.CVOC_CONCEPT, "cv", Concept.class),
-    CVOC_TEXT(Entities.CVOC_TEXT, "cvt", Text.class);
+    CVOC_CONCEPT_DESCRIPTION(Entities.CVOC_CONCEPT_DESCRIPTION, "cvd", ConceptDescription.class),
+    MAINTENANCE_EVENT ( Entities.MAINTENANCE_EVENT, "me", MaintenanceEvent.class),
+    UNDETERMINED_RELATIONSHIP (Entities.UNDETERMINED_RELATIONSHIP, "rs", UndeterminedRelationship.class),
+    LINK (Entities.LINK, "lnk", Link.class);
     // @formatter:on
 
     // Accessors.
@@ -68,7 +76,7 @@ public enum EntityClass {
      * 
      * @return
      */
-    public Class<? extends VertexFrame> getEntityClass() {
+    public Class<? extends Frame> getEntityClass() {
         return cls;
     }
 
@@ -91,11 +99,11 @@ public enum EntityClass {
 
     private final String name;
     private final String abbr;
-    private final Class<? extends VertexFrame> cls;
+    private final Class<? extends Frame> cls;
     private final IdGenerator idgen;
 
     private EntityClass(String name, String abbr,
-            Class<? extends VertexFrame> cls, IdGenerator idgen) {
+            Class<? extends Frame> cls, IdGenerator idgen) {
         this.name = name;
         this.abbr = abbr;
         this.cls = cls;
@@ -110,7 +118,7 @@ public enum EntityClass {
      * @param cls
      */
     private EntityClass(String name, String abbr,
-            Class<? extends VertexFrame> cls) {
+            Class<? extends Frame> cls) {
         this(name, abbr, cls, GenericIdGenerator.INSTANCE);
     }
 

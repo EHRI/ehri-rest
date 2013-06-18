@@ -2,8 +2,6 @@ package eu.ehri.project.models;
 
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.frames.Adjacency;
-import com.tinkerpop.frames.Property;
-import com.tinkerpop.frames.VertexFrame;
 import com.tinkerpop.frames.annotations.gremlin.GremlinGroovy;
 
 import eu.ehri.project.models.annotations.EntityType;
@@ -11,30 +9,36 @@ import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.DescribedEntity;
 import eu.ehri.project.models.base.PermissionScope;
-import eu.ehri.project.models.base.TemporalEntity;
 
 @EntityType(EntityClass.DOCUMENTARY_UNIT)
-public interface DocumentaryUnit extends VertexFrame, AccessibleEntity,
-        DescribedEntity, TemporalEntity, PermissionScope {
+public interface DocumentaryUnit extends AccessibleEntity,
+        DescribedEntity, PermissionScope {
 
     public static final String CHILD_OF = "childOf";
-    public static final String NAME = "name";
 
-    @Property(NAME)
-    public String getName();
+    /**
+     * Get the repository that holds this documentary unit.
+     * @return
+     */
+    @Fetch(Repository.HELD_BY)
+    @GremlinGroovy("it.copySplit(_(), _().as('n').out('" + CHILD_OF +"')"
+            + ".loop('n'){true}{!it.object.out('" + CHILD_OF +"').hasNext()}"
+            + ").exhaustMerge().out('" + Repository.HELD_BY + "')")
+    public Repository getRepository();
 
-    @Property(NAME)
-    public void setName(String name);
+    /**
+     * Set the repository that holds this documentary unit.
+     * @param institution
+     */
+    @Adjacency(label = Repository.HELD_BY)
+    public void setRepository(final Repository institution);
 
-    @Fetch
-    @Adjacency(label = Agent.HELDBY)
-    public Agent getAgent();
-
-    @Adjacency(label = Agent.HELDBY)
-    public void setAgent(final Agent institution);
-
-    @Fetch
-    @Adjacency(label = DocumentaryUnit.CHILD_OF)
+    /**
+     * Get parent documentary unit, if any
+     * @return
+     */
+    @Fetch(CHILD_OF)
+    @Adjacency(label = CHILD_OF)
     public DocumentaryUnit getParent();
 
     @Adjacency(label = DocumentaryUnit.CHILD_OF, direction = Direction.IN)
@@ -43,24 +47,17 @@ public interface DocumentaryUnit extends VertexFrame, AccessibleEntity,
     /*
      * Fetches a list of all ancestors (parent -> parent -> parent)
      */
-    @GremlinGroovy("_().as('n').out('" + CHILD_OF
+    @GremlinGroovy("it.as('n').out('" + CHILD_OF
             + "').loop('n'){it.loops < 20}{true}")
     public Iterable<DocumentaryUnit> getAncestors();
 
+    /**
+     * Get child documentary units
+     * @return
+     */
     @Adjacency(label = DocumentaryUnit.CHILD_OF, direction = Direction.IN)
     public Iterable<DocumentaryUnit> getChildren();
 
-    @Fetch
-    @Adjacency(label = Authority.CREATED, direction = Direction.IN)
-    public Iterable<Authority> getCreators();
-
-    @Adjacency(label = Authority.CREATED, direction = Direction.IN)
-    public void addCreator(final Authority creator);
-
-    @Fetch
-    @Adjacency(label = Authority.MENTIONED_IN, direction = Direction.IN)
-    public Iterable<Authority> getNameAccess();
-
-    @Adjacency(label = Authority.MENTIONED_IN, direction = Direction.IN)
-    public void addNameAccess(final Authority nameAccess);
+    @Adjacency(label = DescribedEntity.DESCRIBES, direction = Direction.IN)
+    public Iterable<DocumentDescription> getDocumentDescriptions();
 }

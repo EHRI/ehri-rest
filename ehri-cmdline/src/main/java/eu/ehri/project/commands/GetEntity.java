@@ -1,8 +1,6 @@
 package eu.ehri.project.commands;
 
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.ParseException;
-
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
@@ -10,7 +8,7 @@ import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.persistance.Converter;
+import eu.ehri.project.persistance.Serializer;
 
 /**
  * Import EAD from the command line...
@@ -22,9 +20,6 @@ public class GetEntity extends BaseCommand implements Command {
 
     /**
      * Constructor.
-     * 
-     * @param args
-     * @throws ParseException
      */
     public GetEntity() {
     }
@@ -40,18 +35,23 @@ public class GetEntity extends BaseCommand implements Command {
         return help;
     }
 
+    @Override
+    public boolean isReadOnly() {
+        return true;
+    }
+
     /**
      * Command-line entry-point (for testing.)
      * 
-     * @param args
      * @throws Exception
      */
+    @Override
     @SuppressWarnings("unchecked")
     public int execWithOptions(final FramedGraph<Neo4jGraph> graph,
             CommandLine cmdLine) throws Exception {
 
         GraphManager manager = GraphManagerFactory.getInstance(graph);
-        Converter converter = new Converter(graph);
+        Serializer serializer = new Serializer(graph);
 
         if (cmdLine.getArgList().size() < 2)
             throw new RuntimeException(getHelp());
@@ -63,7 +63,7 @@ public class GetEntity extends BaseCommand implements Command {
         if (!AccessibleEntity.class.isAssignableFrom(cls))
             throw new RuntimeException("Unknown accessible entity: " + type);
 
-        System.out.println(converter.vertexFrameToJson(manager.getFrame(id,
+        System.out.println(serializer.vertexFrameToJson(manager.getFrame(id,
                 type, (Class<AccessibleEntity>)cls)));
         return 0;
     }

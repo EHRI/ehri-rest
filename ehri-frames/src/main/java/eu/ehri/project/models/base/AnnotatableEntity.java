@@ -2,19 +2,9 @@ package eu.ehri.project.models.base;
 
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.frames.Adjacency;
-import com.tinkerpop.frames.Incidence;
-import com.tinkerpop.frames.VertexFrame;
-
 import eu.ehri.project.models.Annotation;
-import eu.ehri.project.relationships.Annotates;
 
-public interface AnnotatableEntity extends VertexFrame {
-    @Incidence(label = Annotation.ANNOTATES, direction = Direction.IN)
-    public Iterable<Annotates> getAnnotationContexts();
-
-    @Incidence(label = Annotation.ANNOTATES, direction = Direction.IN)
-    public void addAnnotationContext(final Annotates annotates);
-
+public interface AnnotatableEntity extends Frame {
     @Adjacency(label = Annotation.ANNOTATES, direction = Direction.IN)
     public Iterable<Annotation> getAnnotations();
 

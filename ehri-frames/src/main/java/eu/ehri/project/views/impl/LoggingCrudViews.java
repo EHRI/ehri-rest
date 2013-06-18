@@ -1,23 +1,16 @@
 package eu.ehri.project.views.impl;
 
-import java.util.Map;
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import eu.ehri.project.definitions.EventTypes;
+import eu.ehri.project.exceptions.*;
+import eu.ehri.project.models.base.*;
 
-import org.neo4j.graphdb.Transaction;
-
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
 import eu.ehri.project.acl.SystemScope;
-import eu.ehri.project.exceptions.DeserializationError;
-import eu.ehri.project.exceptions.IntegrityError;
-import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.exceptions.SerializationError;
-import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.models.UserProfile;
-import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistance.ActionManager;
+import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.views.Crud;
 
 /**
@@ -30,15 +23,9 @@ import eu.ehri.project.views.Crud;
  */
 public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
 
-    // Default log strings, needed for compatibility.
-    public static final String DEFAULT_CREATE_LOG = "Creating item";
-    public static final String DEFAULT_UPDATE_LOG = "Updating item";
-    public static final String DEFAULT_DELETE_LOG = "Deleting item";
-    public static final String DEFAULT_IMPORT_LOG = "Importing item";
-
     private final ActionManager actionManager;
     private final CrudViews<E> views;
-    private final FramedGraph<Neo4jGraph> graph;
+    private final FramedGraph<?> graph;
     private final Class<E> cls;
     @SuppressWarnings("unused")
     private final PermissionScope scope;
@@ -49,12 +36,13 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @param graph
      * @param cls
      */
-    public LoggingCrudViews(FramedGraph<Neo4jGraph> graph, Class<E> cls,
+    public LoggingCrudViews(FramedGraph<?> graph, Class<E> cls,
             PermissionScope scope) {
+        Preconditions.checkNotNull(scope);
         this.graph = graph;
         this.cls = cls;
         this.scope = scope;
-        actionManager = new ActionManager(graph);
+        actionManager = new ActionManager(graph, scope);
         views = new CrudViews<E>(graph, cls, scope);
     }
 
@@ -64,7 +52,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @param graph
      * @param cls
      */
-    public LoggingCrudViews(FramedGraph<Neo4jGraph> graph, Class<E> cls) {
+    public LoggingCrudViews(FramedGraph<?> graph, Class<E> cls) {
         this(graph, cls, SystemScope.getInstance());
     }
 
@@ -72,7 +60,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * Create a new object of type `E` from the given data, saving an Action log
      * with the default creation message.
      * 
-     * @param data
+     * @param bundle
      * @param user
      * @return The created framed vertex
      * @throws PermissionDenied
@@ -80,17 +68,16 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws IntegrityError
      * @throws DeserializationError
      */
-    public E create(Map<String, Object> data, Accessor user)
-            throws PermissionDenied, ValidationError, DeserializationError,
-            IntegrityError {
-        return create(data, user, DEFAULT_CREATE_LOG);
+    public E create(Bundle bundle, Accessor user) throws PermissionDenied,
+            ValidationError, DeserializationError, IntegrityError {
+        return create(bundle, user, Optional.<String>absent());
     }
 
     /**
      * Create a new object of type `E` from the given data, saving an Action log
      * with the given log message.
      * 
-     * @param data
+     * @param bundle
      * @param user
      * @param logMessage
      * @return The created framed vertex
@@ -99,46 +86,22 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws IntegrityError
      * @throw DeserializationError
      */
-    public E create(Map<String, Object> data, Accessor user, String logMessage)
+    public E create(Bundle bundle, Accessor user, Optional<String> logMessage)
             throws PermissionDenied, ValidationError, DeserializationError,
             IntegrityError {
-        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         // Behold: A compelling reason to upgrade to Java 7
         // http://docs.oracle.com/javase/7/docs/technotes/guides/language/catch-multiple.html
-        try {
-
-            E out = views.create(data, user);
-            actionManager
-                    .createAction(out,
-                            graph.frame(user.asVertex(), UserProfile.class),
-                            logMessage);
-            tx.success();
-            return out;
-        } catch (IntegrityError ex) {
-            tx.failure();
-            throw ex;
-        } catch (PermissionDenied ex) {
-            tx.failure();
-            throw ex;
-        } catch (ValidationError ex) {
-            tx.failure();
-            throw ex;
-        } catch (DeserializationError ex) {
-            tx.failure();
-            throw ex;
-        } catch (Exception ex) {
-            tx.failure();
-            throw new RuntimeException(ex);
-        } finally {
-            tx.finish();
-        }
+        E out = views.create(bundle, user);
+        actionManager.logEvent(out, graph.frame(user.asVertex(), Actioner.class),
+                EventTypes.creation, logMessage);
+        return out;
     }
 
     /**
      * Create or update a new object of type `E` from the given data, saving an
      * Action log with the default creation message.
      * 
-     * @param data
+     * @param bundle
      * @param user
      * @return The created framed vertex
      * @throws PermissionDenied
@@ -146,17 +109,17 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws IntegrityError
      * @throws DeserializationError
      */
-    public E createOrUpdate(Map<String, Object> data, Accessor user)
+    public E createOrUpdate(Bundle bundle, Accessor user)
             throws PermissionDenied, ValidationError, DeserializationError,
             IntegrityError {
-        return createOrUpdate(data, user, DEFAULT_IMPORT_LOG);
+        return createOrUpdate(bundle, user, Optional.<String>absent());
     }
 
     /**
      * Create or update a new object of type `E` from the given data, saving an
      * Action log with the given log message.
      * 
-     * @param data
+     * @param bundle
      * @param user
      * @param logMessage
      * @return The created framed vertex
@@ -165,44 +128,20 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws IntegrityError
      * @throw DeserializationError
      */
-    public E createOrUpdate(Map<String, Object> data, Accessor user,
-            String logMessage) throws PermissionDenied, ValidationError,
-            DeserializationError, IntegrityError {
-        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
-        try {
-
-            E out = views.createOrUpdate(data, user);
-            actionManager
-                    .createAction(out,
-                            graph.frame(user.asVertex(), UserProfile.class),
-                            logMessage);
-            tx.success();
-            return out;
-        } catch (IntegrityError ex) {
-            tx.failure();
-            throw ex;
-        } catch (PermissionDenied ex) {
-            tx.failure();
-            throw ex;
-        } catch (ValidationError ex) {
-            tx.failure();
-            throw ex;
-        } catch (DeserializationError ex) {
-            tx.failure();
-            throw ex;
-        } catch (Exception ex) {
-            tx.failure();
-            throw new RuntimeException(ex);
-        } finally {
-            tx.finish();
-        }
+    public E createOrUpdate(Bundle bundle, Accessor user, Optional<String> logMessage)
+            throws PermissionDenied, ValidationError, DeserializationError,
+            IntegrityError {
+        E out = views.createOrUpdate(bundle, user);
+        actionManager.logEvent(out, graph.frame(user.asVertex(), Actioner.class),
+                EventTypes.modification, logMessage);
+        return out;
     }
 
     /**
      * Update an object of type `E` from the given data, saving an Action log
      * with the default update message.
      * 
-     * @param data
+     * @param bundle
      * @param user
      * @return The updated framed vertex
      * @throws PermissionDenied
@@ -210,17 +149,16 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws IntegrityError
      * @throws DeserializationError
      */
-    public E update(Map<String, Object> data, Accessor user)
-            throws PermissionDenied, ValidationError, DeserializationError,
-            IntegrityError {
-        return update(data, user, DEFAULT_UPDATE_LOG);
+    public E update(Bundle bundle, Accessor user) throws PermissionDenied,
+            ValidationError, DeserializationError, IntegrityError {
+        return update(bundle, user, Optional.<String>absent());
     }
 
     /**
      * Update an object of type `E` from the given data, saving an Action log
      * with the given log message.
      * 
-     * @param data
+     * @param bundle
      * @param user
      * @param logMessage
      * @return The updated framed vertex
@@ -229,36 +167,111 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws IntegrityError
      * @throw DeserializationError
      */
-    public E update(Map<String, Object> data, Accessor user, String logMessage)
+    public E update(Bundle bundle, Accessor user, Optional<String> logMessage)
             throws PermissionDenied, ValidationError, DeserializationError,
             IntegrityError {
-        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
-            E out = views.update(data, user);
-            actionManager
-                    .createAction(out,
-                            graph.frame(user.asVertex(), UserProfile.class),
-                            logMessage);
-            tx.success();
+            E out = views.update(bundle, user);
+            actionManager.logEvent(out, graph.frame(user.asVertex(), Actioner.class),
+                    EventTypes.modification, logMessage);
             return out;
-        } catch (IntegrityError ex) {
-            tx.failure();
-            throw ex;
-        } catch (PermissionDenied ex) {
-            tx.failure();
-            throw ex;
-        } catch (ValidationError ex) {
-            tx.failure();
-            throw ex;
-        } catch (DeserializationError ex) {
-            tx.failure();
-            throw ex;
-        } catch (Exception ex) {
-            tx.failure();
-            throw new RuntimeException(ex);
-        } finally {
-            tx.finish();
+        } catch (ItemNotFound ex) {
+            throw new RuntimeException(ex); // FIXME: Remove this...
         }
+    }
+
+    /**
+     * Update an object of type `E` from the given data, saving an Action log
+     * with the default update message.
+     *
+     * @param bundle
+     * @param parent
+     * @param user
+     * @param dependentClass
+     * @return The updated framed vertex
+     * @throws PermissionDenied
+     * @throws ValidationError
+     * @throws IntegrityError
+     * @throws DeserializationError
+     */
+    public <T extends Frame> T updateDependent(Bundle bundle, E parent, Accessor user,
+            Class<T> dependentClass) throws PermissionDenied,
+            ValidationError, DeserializationError, IntegrityError {
+        return updateDependent(bundle, parent, user, dependentClass, Optional.<String>absent());
+    }
+
+    /**
+     * Update an object of type `E` from the given data, saving an Action log
+     * with the given log message.
+     *
+     * @param bundle
+     * @param parent
+     * @param user
+     * @param dependentClass
+     * @param logMessage
+     * @return The updated framed vertex
+     * @throws PermissionDenied
+     * @throws ValidationError
+     * @throws IntegrityError
+     * @throw DeserializationError
+     */
+    public <T extends Frame> T updateDependent(Bundle bundle, E parent, Accessor user,
+            Class<T> dependentClass, Optional<String> logMessage)
+            throws PermissionDenied, ValidationError, DeserializationError,
+            IntegrityError {
+        try {
+            T out = views.updateDependent(bundle, parent, user, dependentClass);
+            actionManager.setScope(parent).logEvent(graph.frame(user.asVertex(),
+                    Actioner.class), EventTypes.modification, logMessage);
+            return out;
+        } catch (ItemNotFound ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
+    /**
+     * Update an object of type `E` from the given data, saving an Action log
+     * with the default update message.
+     *
+     * @param bundle
+     * @param parent
+     * @param user
+     * @param dependentClass
+     * @return The updated framed vertex
+     * @throws PermissionDenied
+     * @throws ValidationError
+     * @throws IntegrityError
+     * @throws DeserializationError
+     */
+    public <T extends Frame> T createDependent(Bundle bundle,
+            E parent, Accessor user, Class<T> dependentClass) throws PermissionDenied,
+            ValidationError, DeserializationError, IntegrityError {
+        return createDependent(bundle, parent, user, dependentClass, Optional.<String>absent());
+    }
+
+    /**
+     * Update an object of type `E` from the given data, saving an Action log
+     * with the given log message.
+     *
+     * @param bundle
+     * @param parent
+     * @param user
+     * @param dependentClass
+     * @param logMessage
+     * @return The updated framed vertex
+     * @throws PermissionDenied
+     * @throws ValidationError
+     * @throws IntegrityError
+     * @throw DeserializationError
+     */
+    public <T extends Frame> T createDependent(Bundle bundle, E parent, Accessor user,
+                Class<T> dependentClass, Optional<String> logMessage)
+            throws PermissionDenied, ValidationError, DeserializationError,
+            IntegrityError {
+        T out = views.createDependent(bundle, parent, user, dependentClass);
+        actionManager.setScope(parent).logEvent(
+                graph.frame(user.asVertex(), Actioner.class), EventTypes.creation, logMessage);
+        return out;
     }
 
     /**
@@ -274,7 +287,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      */
     public Integer delete(E item, Accessor user) throws PermissionDenied,
             ValidationError, SerializationError {
-        return delete(item, user, DEFAULT_DELETE_LOG);
+        return delete(item, user, Optional.<String>absent());
     }
 
     /**
@@ -289,36 +302,61 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws ValidationError
      * @throws SerializationError
      */
-    public Integer delete(E item, Accessor user, String logMessage)
+    public Integer delete(E item, Accessor user, Optional<String> logMessage)
             throws PermissionDenied, ValidationError, SerializationError {
-        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
-        try {
-            actionManager
-                    .createAction(item,
-                            graph.frame(user.asVertex(), UserProfile.class),
-                            logMessage);
-            Integer count = views.delete(item, user);
-            tx.success();
-            return count;
-        } catch (PermissionDenied ex) {
-            tx.failure();
-            throw ex;
-        } catch (ValidationError ex) {
-            tx.failure();
-            throw ex;
-        } catch (Exception ex) {
-            tx.failure();
-            throw new RuntimeException(ex);
-        } finally {
-            tx.finish();
-        }
+        actionManager.logEvent(item, graph.frame(user.asVertex(), Actioner.class),
+                EventTypes.deletion, logMessage);
+        return views.delete(item, user);
     }
 
-    public Crud<E> setScope(PermissionScope scope) {
-        return new LoggingCrudViews<E>(graph, cls, scope);
+    /**
+     * Delete an object bundle, following dependency cascades, saving an Action
+     * log with the default deletion message.
+     *
+     * @param item
+     * @param parent
+     * @param user
+     * @param dependentClass
+     * @return The number of vertices deleted
+     * @throws PermissionDenied
+     * @throws ValidationError
+     * @throws SerializationError
+     */
+    public <T extends Frame> Integer deleteDependent(T item, E parent, Accessor user,
+            Class<T> dependentClass) throws PermissionDenied,
+            ValidationError, SerializationError {
+        return deleteDependent(item, parent, user, dependentClass, Optional.<String>absent());
     }
 
-    public E detail(E item, Accessor user) throws PermissionDenied {
+    /**
+     * Delete an object bundle, following dependency cascades, saving an Action
+     * log with the given deletion message.
+     *
+     * @param item
+     * @param parent
+     * @param user
+     * @param dependentClass
+     * @param logMessage
+     * @return The number of vertices deleted
+     * @throws PermissionDenied
+     * @throws ValidationError
+     * @throws SerializationError
+     */
+    public <T extends Frame> Integer deleteDependent(T item, E parent, Accessor user,
+            Class<T> dependentClass, Optional<String> logMessage)
+            throws PermissionDenied, ValidationError, SerializationError {
+        actionManager.setScope(parent).logEvent(graph.frame(user.asVertex(), Actioner.class),
+                EventTypes.deletion, logMessage);
+        return views.deleteDependent(item, parent, user, dependentClass);
+    }
+
+
+    public LoggingCrudViews<E> setScope(PermissionScope scope) {
+        return new LoggingCrudViews<E>(graph, cls,
+                Optional.fromNullable(scope).or(SystemScope.INSTANCE));
+    }
+
+    public E detail(E item, Accessor user) throws AccessDenied {
         return views.detail(item, user);
     }
 }

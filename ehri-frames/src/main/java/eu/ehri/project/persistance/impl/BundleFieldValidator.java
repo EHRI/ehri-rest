@@ -6,6 +6,9 @@ import java.util.Map;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 
+import com.tinkerpop.blueprints.CloseableIterable;
+import com.tinkerpop.blueprints.Vertex;
+import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.utils.ClassUtils;
 import eu.ehri.project.persistance.Bundle;
@@ -20,12 +23,14 @@ import eu.ehri.project.persistance.BundleValidator;
 public final class BundleFieldValidator implements BundleValidator {
 
     private final Bundle bundle;
+    private final GraphManager manager;
 
     private final ListMultimap<String, String> errors = ArrayListMultimap
             .create();
 
-    public BundleFieldValidator(Bundle bundle) {
+    public BundleFieldValidator(GraphManager manager, Bundle bundle) {
         this.bundle = bundle;
+        this.manager = manager;
     }
 
     /**
@@ -39,7 +44,10 @@ public final class BundleFieldValidator implements BundleValidator {
         if (bundle.getId() == null)
             errors.put(Bundle.ID_KEY, Messages
                     .getString("BundleFieldValidator.missingIdForUpdate")); //$NON-NLS-1$
-        return validate();
+        checkFields();
+        checkEntityType();
+        checkUniquenessOnUpdate();
+        return errors;
     }
 
     /**
@@ -50,16 +58,15 @@ public final class BundleFieldValidator implements BundleValidator {
     public ListMultimap<String, String> validate() {
         checkFields();
         checkEntityType();
+        checkUniqueness();
         return errors;
     }
 
     /**
-     * @param data
-     * @param cls
-     * @param errors
+     * Check a bundle's fields validate.
      */
     private void checkFields() {
-        for (String key : ClassUtils.getPropertyKeys(bundle.getBundleClass())) {
+        for (String key : ClassUtils.getMandatoryPropertyKeys(bundle.getBundleClass())) {
             checkField(key);
         }
     }
@@ -101,4 +108,48 @@ public final class BundleFieldValidator implements BundleValidator {
         }
     }
 
+    /**
+     * Check uniqueness constrains for a bundle's fields.
+     */
+    private void checkUniqueness() {
+        for (String ukey : bundle.getUniquePropertyKeys()) {
+            Object uval = bundle.getDataValue(ukey);
+            if (uval != null) {
+                CloseableIterable<Vertex> vertices = manager.getVertices(ukey, uval, bundle.getType());
+                try {
+                    if (vertices.iterator().hasNext()) {
+                        errors.put(ukey, MessageFormat.format(Messages
+                                .getString("BundleFieldValidator.uniquenessError"), uval));
+                    }
+                } finally {
+                    vertices.close();
+                }
+            }
+        }
+    }
+
+    /**
+     * Check uniqueness constrains for a bundle's fields.
+     */
+    private void checkUniquenessOnUpdate() {
+        for (String ukey : bundle.getUniquePropertyKeys()) {
+            Object uval = bundle.getDataValue(ukey);
+            if (uval != null) {
+                CloseableIterable<Vertex> vertices = manager.getVertices(ukey, uval, bundle.getType());
+                try {
+                    if (vertices.iterator().hasNext()) {
+                        Vertex v = vertices.iterator().next();
+                        // If it's the same vertex, we don't have a problem...
+                        if (!manager.getId(v).equals(bundle.getId())) {
+                            errors.put(ukey, MessageFormat.format(Messages
+                                    .getString("BundleFieldValidator.uniquenessError"), uval));
+
+                        }
+                    }
+                } finally {
+                    vertices.close();
+                }
+            }
+        }
+    }
 }

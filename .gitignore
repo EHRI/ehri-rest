@@ -1,4 +1,9 @@
+nb-configuration.xml
+nbactions.xml
 *.class
+*.java.orig
+*.xml.orig
+*.~lock.*#
 
 # Package Files #
 *.jar
@@ -36,7 +41,9 @@ local.properties
 **/target/*
 
 Intellij
-**/*iml
+*iml
+.idea
+
 
 # OS generated files #
 ######################
@@ -49,3 +56,8 @@ Icon?
 ehthumbs.db
 Thumbs.db
 
+
+neo4j-community-1.9*
+
+# Ignore test data folder
+testdata

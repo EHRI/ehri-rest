@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="utf-8"?>
+<eac xmlns="urn:isbn:1-931666-22-9" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+    <control>
+
+        <recordId>159</recordId>
+
+        <maintenanceStatus>new</maintenanceStatus>
+
+        <publicationStatus>approved</publicationStatus>
+
+        <maintenanceAgency>
+
+            <agencyName/>
+
+        </maintenanceAgency>
+
+    
+
+        <conventionDeclaration>
+
+            <abbreviation>conventionDeclaration</abbreviation>
+
+            <citation/>
+
+        </conventionDeclaration>
+
+        <localTypeDeclaration>
+
+            <abbreviation>detailLevel</abbreviation>
+
+            <citation>http://ica-atom.org/doc/RS-2#5.4</citation>
+
+        </localTypeDeclaration>
+
+        <localControl localType="detailLevel">
+
+            <term/>
+
+        </localControl>
+
+        <maintenanceHistory>
+            <maintenanceEvent>
+                <eventType>created</eventType>
+                <eventDateTime standardDateTime="2012-03-22T10:09:29">March 22, 2012 10:09:29 AM CET</eventDateTime>
+                <agentType>human</agentType>
+                <agent/>
+            </maintenanceEvent>
+
+            <maintenanceEvent>
+                <eventType>revised</eventType>
+                <eventDateTime standardDateTime="2012-06-07T14:39:16">June 7, 2012 2:39:16 PM CEST</eventDateTime>
+                <agentType>human</agentType>
+                <agent/>
+            </maintenanceEvent>
+        </maintenanceHistory>
+
+        <sources>
+
+            <source>
+
+                <sourceEntry>The Holocaust : Roots, History, and Aftermath / D.M. Crowe. - Colorado, 2008. - p. 73</sourceEntry>
+
+            </source>
+
+        </sources>
+
+    </control>
+
+    <cpfDescription>
+
+        <identity>
+
+            <entityId>159#object</entityId>
+
+            <entityType>corporateBody</entityType>
+
+            <nameEntry>
+
+                <part>Algemeyner Yidisher Arbeter Bund in Lite, Polyn un Rusland</part>
+
+                <authorizedForm>conventionDeclaration</authorizedForm>
+
+            </nameEntry>
+
+            <nameEntry>
+
+                <part>General Jewish Labor Union of Lithuania, Poland, and Russia</part>
+
+                <alternativeForm>conventionDeclaration</alternativeForm>
+
+            </nameEntry>
+            <nameEntry>
+
+                <part>Jewish Bund</part>
+
+                <alternativeForm>conventionDeclaration</alternativeForm>
+
+            </nameEntry>
+      
+        </identity>
+
+        <description>
+
+            <existDates>
+                <date standardDate="1765-09-18">September 18, 1765</date>
+            </existDates>
+
+            <place>
+
+                <placeEntry/>
+
+            </place>
+
+            <legalStatus>
+
+                <term/>
+
+            </legalStatus>
+
+            <function>
+
+                <descriptiveNote/>
+
+            </function>
+
+            <occupation>
+
+                <descriptiveNote/>
+
+            </occupation>
+
+            <mandate>
+
+                <term/>
+
+            </mandate>
+
+            <structureOrGenealogy>
+                <p/>
+            </structureOrGenealogy>
+
+            <generalContext>
+                <p/>
+            </generalContext>
+
+            <biogHist>
+                <p>The Algemeyner Yidisher Arbeter Bund in Lite, Polyn un Rusland became involved in labor organization and Jewish political activity. This and other developments emboldened many Jews to become more aggressive in their response to the violence and discrimination.</p>
+            </biogHist>
+
+        </description>
+
+        <relations>
+
+      
+      
+      
+        </relations>
+
+    </cpfDescription>
+
+</eac>
