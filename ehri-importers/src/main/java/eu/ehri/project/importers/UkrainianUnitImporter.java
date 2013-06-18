@@ -18,11 +18,12 @@ import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.IdentifiableEntity;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.base.TemporalEntity;
-import eu.ehri.project.models.idgen.IdGenerator;
-import eu.ehri.project.models.idgen.IdentifiableEntityIdGenerator;
 import eu.ehri.project.persistance.Bundle;
 import java.util.HashMap;
 import java.util.Map;
+
+import eu.ehri.project.persistance.BundleValidator;
+import eu.ehri.project.persistance.BundleValidatorFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,8 +67,11 @@ public class UkrainianUnitImporter extends XmlImporter<Object> {
 
             unit = unit.withRelation(Description.DESCRIBES, descBundle);
         }
-        IdGenerator generator = IdentifiableEntityIdGenerator.INSTANCE;
-        String id = generator.generateId(EntityClass.DOCUMENTARY_UNIT, permissionScope, unit);
+
+        BundleValidator validator = BundleValidatorFactory.getInstance(manager, unit);
+        validator.validateTree();
+
+        String id = unit.getType().getIdgen().generateId(EntityClass.DOCUMENTARY_UNIT, permissionScope, unit);
         boolean exists = manager.exists(id);
         DocumentaryUnit frame = persister.createOrUpdate(unit.withId(id), DocumentaryUnit.class);
         if (!permissionScope.equals(SystemScope.getInstance())) {
