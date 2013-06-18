@@ -38,6 +38,8 @@ public abstract class ImportCsvCommand extends BaseCommand implements Command{
                 "Identifier of scope to import into, i.e. AuthoritativeSet"));
         options.addOption(new Option("user", true,
                 "Identifier of user to import as"));
+        options.addOption(new Option("tolerant", false,
+                "Don't fail on individual row errors."));
         options.addOption(new Option("log", true,
                 "Log message for import action."));
     }
@@ -51,6 +53,8 @@ public abstract class ImportCsvCommand extends BaseCommand implements Command{
         if (cmdLine.hasOption("log")) {
             logMessage = cmdLine.getOptionValue("log");
         }
+
+        boolean tolerant = cmdLine.hasOption("tolerant");
 
         if (cmdLine.getArgList().size() < 1)
             throw new RuntimeException(getHelp());
@@ -71,7 +75,8 @@ public abstract class ImportCsvCommand extends BaseCommand implements Command{
             UserProfile user = manager.getFrame(cmdLine.getOptionValue("user"),
                     UserProfile.class);
 
-            ImportLog log = new CsvImportManager(graph, scope, user, importer).importFiles(filePaths, logMessage);
+            ImportLog log = new CsvImportManager(graph, scope, user, importer)
+                    .setTolerant(tolerant).importFiles(filePaths, logMessage);
             
             System.out.println("Import completed. Created: " + log.getCreated()
                     + ", Updated: " + log.getUpdated());
