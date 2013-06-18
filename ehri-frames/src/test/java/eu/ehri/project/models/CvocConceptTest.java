@@ -13,15 +13,9 @@ import com.google.common.collect.Lists;
 import eu.ehri.project.models.base.IdentifiableEntity;
 import eu.ehri.project.test.ModelTestBase;
 import org.junit.Test;
-import org.neo4j.graphdb.Transaction;
-
-import com.tinkerpop.blueprints.TransactionalGraph.Conclusion;
 import com.tinkerpop.blueprints.Vertex;
 
 import eu.ehri.project.definitions.Entities;
-import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.UserProfile;
-import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.ConceptDescription;
@@ -88,7 +82,7 @@ public class CvocConceptTest extends ModelTestBase {
         // OK, framed, now construct relations etc.
         fruit.addNarrowerConcept(apples);
         fruit.addNarrowerConcept(bananas);
-        graph.getBaseGraph().stopTransaction(Conclusion.SUCCESS);
+        graph.getBaseGraph().commit();
 
         // fruit should now be the broader concept
         assertEquals(fruit.getId(), apples.getBroaderConcepts()
@@ -98,7 +92,7 @@ public class CvocConceptTest extends ModelTestBase {
 
         // make a relation to Trees concept
         apples.addRelatedConcept(trees);
-        graph.getBaseGraph().stopTransaction(Conclusion.SUCCESS);
+        graph.getBaseGraph().commit();
 
         // is it symmetric?
         assertEquals(apples.getId(), trees.getRelatedByConcepts()
@@ -149,7 +143,7 @@ public class CvocConceptTest extends ModelTestBase {
 
         Concept concept = null;
         concept = conceptViews.create(bundle, validUser);
-        graph.getBaseGraph().stopTransaction(Conclusion.SUCCESS);
+        graph.getBaseGraph().commit();
 
 		// Does the label have the correct properties
 		assertNotNull(concept);

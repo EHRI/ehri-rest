@@ -226,7 +226,7 @@ public final class AclViews {
             // FIXME: With TP 2.3.0 update this comparing of vertices shouldn't be necessary
             boolean found = false;
             for (Accessor acc : grantee.getAllParents()) {
-                if (group.asVertex().equals(acc.asVertex())) {
+                if (group.equals(acc)) {
                     found = true;
                     break;
                 }
