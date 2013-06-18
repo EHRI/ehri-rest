@@ -100,6 +100,8 @@ public class CsvImportManager extends XmlImportManager {
                 } catch (ValidationError e) {
                     if (isTolerant()) {
                         logger.error("Validation error importing item: {}", e);
+                    } else {
+                        throw e;
                     }
                 }
             }
