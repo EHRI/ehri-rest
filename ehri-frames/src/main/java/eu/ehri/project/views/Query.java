@@ -446,8 +446,10 @@ public final class Query<E extends AccessibleEntity> {
      * @return Long count of items accessible to the given accessor
      */
     public <T> Long count(Iterable<T> vertices, Accessor user) {
-        GremlinPipeline<T, Vertex> filter = new GremlinPipeline<T, Vertex>(vertices)
-                .filter(new AclManager(graph).getAclFilterFunction(user));
+        GremlinPipeline<T, Vertex> filter = new GremlinPipeline<T, Vertex>(vertices);
+
+        // FIXME! Count doesn't 'account' for ACL privileges!
+                //.filter(new AclManager(graph).getAclFilterFunction(user));
         return applyFilters(filter).count();
     }
 
