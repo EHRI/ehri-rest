@@ -62,7 +62,7 @@ public class CsvImportManager extends XmlImportManager {
             importer.addCreationCallback(new ImportCallback() {
                 @Override
                 public void itemImported(AccessibleEntity item) {
-                    logger.info("Item created: ", item.getId());
+                    logger.info("Item created: {}", item.getId());
                     eventContext.addSubjects(item);
                     log.addCreated();
                 }
