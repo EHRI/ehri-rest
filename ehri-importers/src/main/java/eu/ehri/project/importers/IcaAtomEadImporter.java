@@ -103,7 +103,7 @@ public class IcaAtomEadImporter extends EaImporter {
                 frame.setRepository(repository);
             } else if (scopeType.equals(EntityClass.DOCUMENTARY_UNIT)) {
                 DocumentaryUnit parent = framedGraph.frame(permissionScope.asVertex(), DocumentaryUnit.class);
-                frame.addChild(frame);
+                parent.addChild(frame);
             } else {
                 logger.error("Unknown scope type for documentary unit: {}", scopeType);
             }
