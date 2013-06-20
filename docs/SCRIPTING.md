@@ -97,8 +97,8 @@ export CLASSPATH=$CLASSPATH  # Exports the CLASSPATH var created by buildclasspa
 #### Using the 'Ehri' module
 
 Much of the heavy lifting of setting up the EHRI environment has been placed in a module called `Ehri` inside the
-`scripts/ruby/lib` directory of the EHRI Neo4j server code root. You can pull this into your current environment like
- so:
+`scripts/ruby/lib` directory of the EHRI Neo4j server code root. You can pull this into your Ruby script environment
+like so:
 
 ```ruby
 require "scripts/lib/ehri"
@@ -205,6 +205,29 @@ require "scripts/ruby/lib/myimporter"
 
 DIRECTORY = ARGV.shift # get the dir from a argument
 Ehri::MyImporter::import(DIRECTORY)
+```
+
+In the EHRI Neo4j server dev system we have some existing management commands, for doing things like initialising the
+ graph and importing files. There can be run directly (although perhaps not in the nicest manner) like so:
+
+```ruby
+# Runs the 'Initialize' command, with an empty set of arguments
+# as if they were provided via the command-line...
+#
+# Note the the [].to_java(:string) bit is how a Java String[] is
+# constructed in JRuby...
+
+Commands::Initialize.new.exec(Graph, [].to_java(:string))
+```
+
+Note that the `Graph` constant (which is a `FramedGraph<Neo4jGraph>` initialised when `require`ing the `Ehri` module)
+is the first argument.
+
+Another, more complex example, is running the LoadFixtures command, with an argument that gives the YAML fixture file
+ to load:
+
+```ruby
+Commands::LoadFixtures.new.exec(Graph, ["#{ENV["HOME"]}/Dropbox/EHRI/users.yaml"].to_java(:string))
 ```
 
 More documentation to follow...
