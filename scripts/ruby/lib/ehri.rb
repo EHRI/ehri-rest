@@ -1,17 +1,10 @@
 #!/usr/bin/env ruby
 
+require "#{File.dirname(__FILE__)}/ehriutils"
 
 module Ehri
 
-    # Abort if we don't have NEO4J_HOME
-    if ENV['NEO4J_HOME'].nil? or ENV['NEO4J_HOME'].empty? then
-        abort "Error: NEO4J_HOME environment variable must be defined."
-    end
-
-    # Abort if we don't have NEO4J_HOME
-    if ENV['CLASSPATH'].nil? or ENV['CLASSPATH'].empty? then
-        abort "Error: CLASSPATH environment variable must be defined."
-    end
+    EhriUtils::check_env
 
     # The magic necessary to do Java stuff...
     require "java"
@@ -54,7 +47,6 @@ module Ehri
        include_package "eu.ehri.project.views"
     end
 
-    # Use the default if NEO4J_DB isn't set...
     DB_PATH = ENV['NEO4J_DB'] ||= "#{ENV['NEO4J_HOME']}/data/graph.db"
 
     # Initialise a graph and the manager.

@@ -3,11 +3,7 @@
 
 $:.unshift File.join(File.dirname(__FILE__), "ruby", "lib")
 
-require "ehri"
-require "ushmmimporter"
-require "icaatomimporter"
-require "eagimporter"
-
+require "ehriutils"
 require "fileutils"
 
 USER_ID = ARGV.shift || ENV["USER"]
@@ -17,25 +13,26 @@ EAD_DATA_DIR = "icaatom-export"
 USHMM_ID = "us-005578"
 USER_FIXTURES = "#{ENV["HOME"]}/Dropbox/EHRI/users.yaml"
 
-include Ehri
-
-# Check if the graph DB exists
-DELETE_OPTS = {
-    1 => "Yes",
-    2 => "No",
-    3 => "Backup",
-    4 => "Delete"
-}
+# Check stuff works
+EhriUtils::check_env
 
 if Dir.exist?(ENV["NEO4J_DB"])
+    # Check if the graph DB exists
+    OPTS = {
+        1 => "Yes",
+        2 => "No",
+        3 => "Backup",
+        4 => "Delete"
+    }
+
     puts "Neo4j database \"#{ENV["NEO4J_DB"]}\" already exists. Continue?"
-    DELETE_OPTS.each { |opt, text|
+    OPTS.each { |opt, text|
         puts "#{opt}) #{text}"
     }
     while true
         print "> "
         choice = gets.chomp.to_i
-        if DELETE_OPTS.keys.include?(choice)
+        if OPTS.keys.include?(choice)
             case choice
             when 2
                 exit
@@ -49,6 +46,15 @@ if Dir.exist?(ENV["NEO4J_DB"])
     end
 end
 
+require "ehri"
+require "ushmmimporter"
+require "icaatomimporter"
+require "eagimporter"
+
+# Load the environment. Order of execution is important
+# here because we can't delete/backup the graph once it
+# is loaded.
+include Ehri
 
 puts "Initializing..."
 Commands::Initialize.new.exec(Graph, [].to_java(:string))
