@@ -135,6 +135,7 @@ public final class SingleIndexGraphManager implements GraphManager {
     }
 
     public CloseableIterable<Vertex> getVertices(EntityClass type) {
+        Preconditions.checkNotNull(type, "EntityClass is null in vertex/type count!");
         return getIndex().get(EntityType.TYPE_KEY, type.getName());
     }
 

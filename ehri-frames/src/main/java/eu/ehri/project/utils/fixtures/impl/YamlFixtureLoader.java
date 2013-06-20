@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.google.common.collect.Lists;
 import eu.ehri.project.models.base.Frame;
 import eu.ehri.project.utils.fixtures.FixtureLoader;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -58,6 +59,8 @@ import eu.ehri.project.utils.GraphInitializer;
 public class YamlFixtureLoader implements FixtureLoader {
 
     public static final String DEFAULT_FIXTURE_FILE = "testdata.yaml";
+
+    public static final String GENERATE_ID_PLACEHOLDER = "?";
 
     private final FramedGraph<? extends TransactionalGraph> graph;
     private final GraphManager manager;
@@ -197,9 +200,11 @@ public class YamlFixtureLoader implements FixtureLoader {
     private void importNode(Map<Vertex, ListMultimap<String, String>> links,
             Map<String, Object> node) throws DeserializationError,
             ValidationError, IntegrityError, ItemNotFound {
-        String id = (String) node.get(Bundle.ID_KEY);
         EntityClass isa = EntityClass.withName((String) node
                 .get(Bundle.TYPE_KEY));
+
+        String id = (String) node.get(Bundle.ID_KEY);
+
         @SuppressWarnings("unchecked")
         Map<String, Object> nodeData = (Map<String, Object>) node
                 .get(Bundle.DATA_KEY);
@@ -236,7 +241,15 @@ public class YamlFixtureLoader implements FixtureLoader {
                 put(Bundle.REL_KEY, dependentRelations.asMap());
             }
         };
-        return Bundle.fromData(data);
+        Bundle b = Bundle.fromData(data);
+
+        // If the given id is a placeholder, generate it according to type rules
+        if (id.trim().contentEquals(GENERATE_ID_PLACEHOLDER)) {
+            String newId = type.getIdgen().generateId(
+                    type, Lists.<String>newArrayList(), b);
+            b = b.withId(newId);
+        }
+        return b;
     }
 
     /**

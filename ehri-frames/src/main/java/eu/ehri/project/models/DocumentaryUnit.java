@@ -22,7 +22,7 @@ public interface DocumentaryUnit extends AccessibleEntity,
      */
     @Fetch(Repository.HELD_BY)
     @GremlinGroovy("it.copySplit(_(), _().as('n').out('" + CHILD_OF +"')"
-            + ".loop('n'){true}{!it.object.out('" + CHILD_OF +"').hasNext()}"
+            + ".loop('n'){it.loops < 40}{!it.object.out('" + CHILD_OF +"').hasNext()}"
             + ").exhaustMerge().out('" + Repository.HELD_BY + "')")
     public Repository getRepository();
 
