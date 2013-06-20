@@ -88,7 +88,7 @@ public class CsvImportManager extends XmlImportManager {
 
 //            importer.checkProperties(headers);
             //per record, call importer.importItem(Map<String, Object> itemData
-            
+
             String[] data;
             while ((data = reader.readNext()) != null) {
                 Map<String, Object> dataMap = Maps.newHashMap();
@@ -105,13 +105,21 @@ public class CsvImportManager extends XmlImportManager {
                     }
                 }
             }
+            framedGraph.getBaseGraph().commit();
+        } catch (ValidationError e) {
+            framedGraph.getBaseGraph().rollback();
+            throw e;
         } catch (InstantiationException e) {
+            framedGraph.getBaseGraph().rollback();
             throw new RuntimeException(e);
         } catch (InvocationTargetException e) {
+            framedGraph.getBaseGraph().rollback();
             throw new RuntimeException(e);
         } catch (NoSuchMethodException e) {
+            framedGraph.getBaseGraph().rollback();
             throw new RuntimeException(e);
         } catch (IllegalAccessException e) {
+            framedGraph.getBaseGraph().rollback();
             throw new RuntimeException(e);
         }
     }
