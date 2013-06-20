@@ -17,7 +17,6 @@ module Ehri
     require "java"
 
     # Import Java classes like so...
-    java_import "javax.xml.parsers.SAXParserFactory"
     java_import "com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph"
     java_import "com.tinkerpop.frames.FramedGraph"
     java_import "eu.ehri.project.core.GraphManagerFactory"
@@ -47,6 +46,13 @@ module Ehri
        include_package "eu.ehri.project.acl"
     end
 
+    module Commands
+       include_package "eu.ehri.project.commands"
+    end
+
+    module Views
+       include_package "eu.ehri.project.views"
+    end
 
     # Use the default if NEO4J_DB isn't set...
     DB_PATH = ENV['NEO4J_DB'] ||= "#{ENV['NEO4J_HOME']}/data/graph.db"

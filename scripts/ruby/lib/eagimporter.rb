@@ -19,11 +19,12 @@ module Ehri
                 if Manager.exists(code)
                     Manager.get_frame(code, Models::Country.java_class)
                 else
-                    bundle = Bundle.new(EntityClass::COUNTRY)
+                    bundle = Persistance::Bundle.new(EntityClass::COUNTRY)
                                 .with_data_value("identifier", code)
                                 .with_data_value("name", name)
                     log = Optional::of("Creating country record for #{name}")
-                    LoggingCrudViews.new(graph, Country.java_class).create(bundle, user, log)
+                    Views::ViewFactory.get_crud_with_logging(Graph, 
+                                        Models::Country.java_class).create(bundle, user, log)
                 end
             end
 
