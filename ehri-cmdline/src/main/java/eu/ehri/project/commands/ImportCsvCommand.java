@@ -90,8 +90,6 @@ public abstract class ImportCsvCommand extends BaseCommand implements Command{
         } catch (Exception e) {
             e.printStackTrace();
             return 1;
-        } finally {
-            graph.shutdown();
         }
         return 0;
     }
