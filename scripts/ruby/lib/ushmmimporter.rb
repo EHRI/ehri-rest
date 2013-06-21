@@ -1,4 +1,12 @@
-#!/usr/bin/env ruby
+#
+# Importer for a USHMM Solr-to-EAD dump.
+#
+# The directory structure is a bit ad-hoc at the moment,
+# with EAD XML files residing in a directory named for
+# their immediate parent (or at the top level.)
+#
+# This is basically a hack.
+#
 
 require "#{File.dirname(__FILE__)}/ehri"
 

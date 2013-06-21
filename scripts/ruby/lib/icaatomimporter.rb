@@ -1,4 +1,9 @@
-#!/usr/bin/env ruby
+#
+# Importer for an ICA-Atom EAD export. Individual EAD XML
+# files reside in a directory named with their repository
+# id. The EAD files are potentially hierarchical, so there
+# is no need for a hierarchical directory structure.
+#
 
 require "#{File.dirname(__FILE__)}/ehri"
 

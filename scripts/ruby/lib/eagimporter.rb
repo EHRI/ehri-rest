@@ -1,4 +1,9 @@
-#!/usr/bin/env ruby
+#
+# Import ICA-Atom repository exports in EAG XML. The
+# individual EAG XML files reside in a directory named
+# for the country code (IS03166 - 2-letter) to which they
+# belong.
+#
 
 require "#{File.dirname(__FILE__)}/ehri"
 

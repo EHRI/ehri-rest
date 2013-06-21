@@ -1,4 +1,6 @@
-#!/usr/bin/env ruby
+#
+# Module to initialise the EHRI environment
+#
 
 require "#{File.dirname(__FILE__)}/ehriutils"
 
