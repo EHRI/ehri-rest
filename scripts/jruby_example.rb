@@ -7,12 +7,12 @@
 
 # Abort if we don't have NEO4J_HOME
 if ENV['NEO4J_HOME'].nil? or ENV['NEO4J_HOME'].empty? then
-    abort "Error: NEO4J_HOME environment variable must be defined."
+  abort "Error: NEO4J_HOME environment variable must be defined."
 end
 
 # Abort if we don't have a CLASSPATH env
 if ENV['CLASSPATH'].nil? or ENV['CLASSPATH'].empty? then
-    abort "Error: CLASSPATH environment variable must be defined."
+  abort "Error: CLASSPATH environment variable must be defined."
 end
 
 # The magic necessary to do Java stuff...
@@ -33,7 +33,7 @@ java_import "eu.ehri.project.persistance.Serializer"
 # imported will be used with the given module namespace, i.e.
 # EhriModels::DocumentaryUnit
 module EhriModels
-    include_package "eu.ehri.project.models"
+  include_package "eu.ehri.project.models"
 end
 
 # Use the default if NEO4J_DB isn't set...
@@ -52,13 +52,13 @@ puts serializer.vertex_frame_to_bundle ba
 
 # List a bunch of repositories...
 manager.get_frames(EntityClass::REPOSITORY, EhriModels::Repository.java_class).each { |i|    
-    puts i.get_id
+  puts i.get_id
 }
 
 # List the types of events and their log message...
 manager.get_frames(EntityClass::SYSTEM_EVENT, SystemEvent.java_class).each { |i|    
-    bundle = serializer.vertex_frame_to_bundle(i)
-    type = i.action_type
-    msg = i.log_message
-    puts type, msg
+  bundle = serializer.vertex_frame_to_bundle(i)
+  type = i.action_type
+  msg = i.log_message
+  puts type, msg
 }
