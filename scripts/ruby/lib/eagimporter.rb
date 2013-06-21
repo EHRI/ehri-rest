@@ -57,7 +57,7 @@ module Ehri
           end
 
           Graph.get_base_graph.commit
-          puts "Commited"
+          puts "Committed"
         rescue
           # Oops!
           Graph.get_base_graph.rollback
