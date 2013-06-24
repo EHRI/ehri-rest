@@ -230,4 +230,13 @@ Another, more complex example, is running the LoadFixtures command, with an argu
 Commands::LoadFixtures.new.exec(Graph, ["#{ENV["HOME"]}/Dropbox/EHRI/users.yaml"].to_java(:string))
 ```
 
+### Gotchas:
+
+For the (rare) Java method that requires passing a `char`, I cannot find a less ugly way to do this than:
+
+```ruby
+# Take a Ruby string, slice the first item, convert it to an Ord, and then a java char...
+csv = CSVReader.new(fio, ";"[0].ord.to_java(:char)) # Yuck!
+```
+
 More documentation to follow...
