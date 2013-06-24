@@ -102,17 +102,17 @@ public class EntityAdd extends BaseCommand implements Command {
 
         String id = entityClass.getIdgen().generateId(entityClass, scope, bundle);
 
-        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
             LoggingCrudViews<?> view = new LoggingCrudViews(graph, entityClass.getEntityClass(), scope);
             view.create(bundle.withId(id), user, getLogMessage(logMessage));
-            tx.success();
+            graph.getBaseGraph().commit();
         } catch (IntegrityError e) {
-            tx.failure();
+            graph.getBaseGraph().rollback();
             System.err.printf("A user a id: '%s' already exists\n", id);
             return 9;
-        } finally {
-            tx.finish();
+        } catch (Exception e) {
+            graph.getBaseGraph().rollback();
+            throw new RuntimeException(e);
         }
 
         return 0;

@@ -3,7 +3,6 @@ package eu.ehri.project.commands;
 import eu.ehri.project.models.base.NamedEntity;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
-import org.neo4j.graphdb.Transaction;
 
 import com.google.common.collect.Maps;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
@@ -97,7 +96,6 @@ public class UserAdd extends BaseCommand implements Command {
                 EntityClass.USER_PROFILE, SystemScope.getInstance(), bundle);
         bundle = bundle.withId(nodeId);
 
-        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
             LoggingCrudViews<UserProfile> view = new LoggingCrudViews<UserProfile>(
                     graph, UserProfile.class);
@@ -106,13 +104,14 @@ public class UserAdd extends BaseCommand implements Command {
                 Group group = manager.getFrame(groupId, EntityClass.GROUP, Group.class);
                 group.addMember(newUser);
             }
-            tx.success();
+            graph.getBaseGraph().commit();
         } catch (IntegrityError e) {
-            tx.failure();
+            graph.getBaseGraph().rollback();
             System.err.printf("A user a id: '%s' already exists\n", nodeId);
             return 9;
-        } finally {
-            tx.finish();
+        } catch (Exception e) {
+            graph.getBaseGraph().rollback();
+            throw new RuntimeException(e);
         }
 
         return 0;

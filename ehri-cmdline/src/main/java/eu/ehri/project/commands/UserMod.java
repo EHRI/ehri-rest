@@ -3,7 +3,6 @@ package eu.ehri.project.commands;
 import eu.ehri.project.definitions.EventTypes;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
-import org.neo4j.graphdb.Transaction;
 
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
@@ -88,7 +87,6 @@ public class UserMod extends BaseCommand implements Command {
             groups = cmdLine.getOptionValues("group");
         }
 
-        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
             UserProfile user = manager.getFrame(userId,
                     EntityClass.USER_PROFILE, UserProfile.class);
@@ -103,9 +101,10 @@ public class UserMod extends BaseCommand implements Command {
                 group.addMember(user);
                 actionCtx.addSubjects(group);
             }
-            tx.success();
-        } finally {
-            tx.finish();
+            graph.getBaseGraph().commit();
+        } catch (Exception e) {
+            graph.getBaseGraph().rollback();
+            throw new RuntimeException(e);
         }
 
         return 0;

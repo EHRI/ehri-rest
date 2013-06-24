@@ -47,7 +47,6 @@ import eu.ehri.project.models.base.PermissionGrantTarget;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.views.AclViews;
 import eu.ehri.project.views.Query;
-import org.neo4j.graphdb.Transaction;
 
 /**
  * Provides a RESTfull(ish) interface for setting PermissionTarget perms.
@@ -84,7 +83,7 @@ public class PermissionsResource extends AbstractRestResource {
             @QueryParam(SORT_PARAM) List<String> order,
             @QueryParam(FILTER_PARAM) List<String> filters)
             throws PermissionDenied, ItemNotFound, BadRequester {
-        graph.getBaseGraph().clearTxThreadVar();
+        graph.getBaseGraph().checkNotInTransaction();
         Accessor user = manager.getFrame(id, Accessor.class);
         Accessor accessor = getRequesterUserProfile();
         Query<AccessibleEntity> query = new Query<AccessibleEntity>(graph,
@@ -113,7 +112,7 @@ public class PermissionsResource extends AbstractRestResource {
             @QueryParam(SORT_PARAM) List<String> order,
             @QueryParam(FILTER_PARAM) List<String> filters)
             throws PermissionDenied, ItemNotFound, BadRequester {
-        graph.getBaseGraph().clearTxThreadVar();
+        graph.getBaseGraph().checkNotInTransaction();
         Accessor user = manager.getFrame(id, Accessor.class);
         Accessor accessor = getRequesterUserProfile();
         Query<AccessibleEntity> query = new Query<AccessibleEntity>(graph,
@@ -141,7 +140,7 @@ public class PermissionsResource extends AbstractRestResource {
             @QueryParam(SORT_PARAM) List<String> order,
             @QueryParam(FILTER_PARAM) List<String> filters)
             throws PermissionDenied, ItemNotFound, BadRequester {
-        graph.getBaseGraph().clearTxThreadVar();
+        graph.getBaseGraph().checkNotInTransaction();
         PermissionGrantTarget target = manager.getFrame(id,
                 PermissionGrantTarget.class);
         Accessor accessor = getRequesterUserProfile();
@@ -170,7 +169,7 @@ public class PermissionsResource extends AbstractRestResource {
             @QueryParam(SORT_PARAM) List<String> order,
             @QueryParam(FILTER_PARAM) List<String> filters)
             throws PermissionDenied, ItemNotFound, BadRequester {
-        graph.getBaseGraph().clearTxThreadVar();
+        graph.getBaseGraph().checkNotInTransaction();
         PermissionGrantTarget target = manager.getFrame(id,
                 PermissionGrantTarget.class);
         Accessor accessor = getRequesterUserProfile();
@@ -199,7 +198,7 @@ public class PermissionsResource extends AbstractRestResource {
             @QueryParam(SORT_PARAM) List<String> order,
             @QueryParam(FILTER_PARAM) List<String> filters)
             throws PermissionDenied, ItemNotFound, BadRequester {
-        graph.getBaseGraph().clearTxThreadVar();
+        graph.getBaseGraph().checkNotInTransaction();
         PermissionScope scope = manager.getFrame(id, PermissionScope.class);
         Accessor accessor = getRequesterUserProfile();
         Query<AccessibleEntity> query = new Query<AccessibleEntity>(graph,
@@ -227,7 +226,7 @@ public class PermissionsResource extends AbstractRestResource {
             @QueryParam(SORT_PARAM) List<String> order,
             @QueryParam(FILTER_PARAM) List<String> filters)
             throws PermissionDenied, ItemNotFound, BadRequester {
-        graph.getBaseGraph().clearTxThreadVar();
+        graph.getBaseGraph().checkNotInTransaction();
         PermissionScope scope = manager.getFrame(id, PermissionScope.class);
         Accessor accessor = getRequesterUserProfile();
         Query<AccessibleEntity> query = new Query<AccessibleEntity>(graph,
@@ -253,7 +252,7 @@ public class PermissionsResource extends AbstractRestResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getGlobalMatrix() throws PermissionDenied, IOException,
             ItemNotFound, BadRequester {
-        graph.getBaseGraph().clearTxThreadVar();
+        graph.getBaseGraph().checkNotInTransaction();
         Accessor accessor = getRequesterUserProfile();
         return getGlobalMatrix(accessor.getId());
     }
@@ -274,7 +273,7 @@ public class PermissionsResource extends AbstractRestResource {
     @Path("/{userId:.+}")
     public Response getGlobalMatrix(@PathParam("userId") String userId)
             throws PermissionDenied, IOException, ItemNotFound {
-        graph.getBaseGraph().clearTxThreadVar();
+        graph.getBaseGraph().checkNotInTransaction();
         Accessor accessor = manager.getFrame(userId, Accessor.class);
         AclManager acl = new AclManager(graph);
 
@@ -305,7 +304,7 @@ public class PermissionsResource extends AbstractRestResource {
     public Response setGlobalMatrix(@PathParam("userId") String userId,
             String json) throws PermissionDenied, IOException, ItemNotFound,
             DeserializationError, BadRequester {
-        graph.getBaseGraph().clearTxThreadVar();
+        graph.getBaseGraph().checkNotInTransaction();
         HashMap<String, List<String>> globals = parseMatrix(json);
         Accessor accessor = manager.getFrame(userId, Accessor.class);
         Accessor grantee = getRequesterUserProfile();
@@ -347,7 +346,7 @@ public class PermissionsResource extends AbstractRestResource {
     public Response getEntityMatrix(@PathParam("userId") String userId,
             @PathParam("id") String id) throws PermissionDenied, IOException,
             ItemNotFound {
-        graph.getBaseGraph().clearTxThreadVar();
+        graph.getBaseGraph().checkNotInTransaction();
         Accessor accessor = manager.getFrame(userId, Accessor.class);
         AccessibleEntity entity = manager.getFrame(id, AccessibleEntity.class);
         AclManager acl = new AclManager(graph, entity.getPermissionScope());
@@ -377,7 +376,7 @@ public class PermissionsResource extends AbstractRestResource {
     public Response getScopedMatrix(@PathParam("userId") String userId,
             @PathParam("id") String id) throws PermissionDenied, ItemNotFound,
             IOException, DeserializationError {
-        graph.getBaseGraph().clearTxThreadVar();
+        graph.getBaseGraph().checkNotInTransaction();
         Accessor accessor = manager.getFrame(userId, Accessor.class);
         PermissionScope scope = manager.getFrame(id, PermissionScope.class);
         AclManager acl = new AclManager(graph, scope);
@@ -413,7 +412,7 @@ public class PermissionsResource extends AbstractRestResource {
     public Response setScopedPermissions(@PathParam("userId") String userId,
             @PathParam("id") String id, String json) throws PermissionDenied,
             IOException, ItemNotFound, DeserializationError, BadRequester {
-        graph.getBaseGraph().clearTxThreadVar();
+        graph.getBaseGraph().checkNotInTransaction();
 
         try {
             HashMap<String, List<String>> globals = parseMatrix(json);
@@ -463,7 +462,7 @@ public class PermissionsResource extends AbstractRestResource {
     public Response setItemPermissions(@PathParam("userId") String userId,
             @PathParam("id") String id, String json) throws PermissionDenied,
             IOException, ItemNotFound, DeserializationError, BadRequester {
-        graph.getBaseGraph().clearTxThreadVar();
+        graph.getBaseGraph().checkNotInTransaction();
         List<String> scopedPerms;
         try {
             JsonFactory factory = new JsonFactory();

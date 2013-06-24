@@ -22,9 +22,7 @@ import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriBuilder;
 
 import eu.ehri.project.exceptions.*;
-import eu.ehri.project.models.EntityClass;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Transaction;
 
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.acl.AclManager;
@@ -171,21 +169,29 @@ public class DocumentaryUnitResource extends
             String json, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws AccessDenied, PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, ItemNotFound, BadRequester {
-        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
+        Accessor user = getRequesterUserProfile();
+        DocumentaryUnit parent = views.detail(manager.getFrame(id, cls), user);
         try {
-            Accessor user = getRequesterUserProfile();
-            DocumentaryUnit parent = new Query<DocumentaryUnit>(graph,
-                    DocumentaryUnit.class).get(id, getRequesterUserProfile());
             DocumentaryUnit doc = createDocumentaryUnit(json, parent);
             new AclManager(graph).setAccessors(doc,
                     getAccessors(accessors, user));
-            tx.success();
+            graph.getBaseGraph().commit();
             return buildResponseFromDocumentaryUnit(doc);
-        } catch (SerializationError e) {
-            tx.failure();
-            throw new WebApplicationException(e);
-        } finally {
-            tx.finish();
+        } catch (DeserializationError e) {
+            graph.getBaseGraph().rollback();
+            throw e;
+        } catch (ValidationError e) {
+            graph.getBaseGraph().rollback();
+            throw e;
+        } catch (IntegrityError e) {
+            graph.getBaseGraph().rollback();
+            throw e;
+        } catch (PermissionDenied e) {
+            graph.getBaseGraph().rollback();
+            throw e;
+        } catch (Exception e) {
+            graph.getBaseGraph().rollback();
+            throw new RuntimeException(e);
         }
     }
 

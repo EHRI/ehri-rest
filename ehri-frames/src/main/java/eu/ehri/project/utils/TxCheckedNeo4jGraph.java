@@ -1,4 +1,4 @@
-package eu.ehri.extension.utils;
+package eu.ehri.project.utils;
 
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -7,6 +7,9 @@ import java.util.Map;
 
 /**
  * Created by mike on 18/06/13.
+ *
+ * Wraps Neo4jGraph and adds an extra method to allow asseting
+ * that it should not be in a transaction.
  */
 public class TxCheckedNeo4jGraph extends Neo4jGraph {
     public TxCheckedNeo4jGraph(String directory) {
@@ -25,11 +28,14 @@ public class TxCheckedNeo4jGraph extends Neo4jGraph {
         super(directory, configuration);
     }
 
-    public void clearTxThreadVar() {
+    public void checkNotInTransaction() {
         if (tx.get() != null) {
-            System.err.println("Transaction threadvar is not empty!!!!! Bug somewhere in clearing the transaction!!!");
             rollback();
-            throw new IllegalStateException("Transaction thread var is not empty!!!");
+            throw new IllegalStateException("Error: graph is currently in a transaction.");
         }
+    }
+
+    public boolean isInTransaction() {
+        return tx.get() != null;
     }
 }

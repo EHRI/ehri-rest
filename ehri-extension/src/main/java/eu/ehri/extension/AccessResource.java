@@ -10,7 +10,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import com.google.common.collect.Sets;
-import com.tinkerpop.blueprints.TransactionalGraph;
 import eu.ehri.project.exceptions.SerializationError;
 import org.neo4j.graphdb.GraphDatabaseService;
 
@@ -49,7 +48,7 @@ public class AccessResource extends
     public Response setVisibility(@PathParam("id") String id,
             @QueryParam(ACCESSOR_PARAM) List<String> accessorIds)
             throws PermissionDenied, ItemNotFound, BadRequester, SerializationError {
-        graph.getBaseGraph().clearTxThreadVar();
+        graph.getBaseGraph().checkNotInTransaction();
         AccessibleEntity item = manager.getFrame(id, AccessibleEntity.class);
         Set<Accessor> accessors = extractAccessors(accessorIds);
         AclViews acl = new AclViews(graph);

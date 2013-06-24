@@ -16,7 +16,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import com.google.common.base.Optional;
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.models.base.*;
-import org.neo4j.graphdb.Transaction;
+import eu.ehri.project.utils.TxCheckedNeo4jGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -114,7 +114,6 @@ public class SkosCoreCvocImporter {
 	
 	public ImportLog importFile(InputStream ios, String logMessage)
             throws IOException, ValidationError, InputParseError {
-        Transaction tx = framedGraph.getBaseGraph().getRawGraph().beginTx();
         try {
             // Create a new action for this import
             final EventContext eventContext = new ActionManager(framedGraph, vocabulary).logEvent(
@@ -125,17 +124,14 @@ public class SkosCoreCvocImporter {
             // Do the import...
             importFile(ios, eventContext, log);
             // If nothing was imported, remove the action...
-            if (log.isValid()) {
-                tx.success();
-            }
-
+            commitOrRollback(log.isValid());
             return log;
         } catch (ValidationError e) {
+            commitOrRollback(false);
             throw e;
         } catch (Exception e) {
+            commitOrRollback(false);
             throw new RuntimeException(e);
-        } finally {
-            tx.finish();
         }
     }
 	
@@ -724,4 +720,13 @@ public class SkosCoreCvocImporter {
         }
     }
 
+    private void commitOrRollback(boolean okay) {
+        if (framedGraph.getBaseGraph() instanceof TxCheckedNeo4jGraph) {
+            TxCheckedNeo4jGraph graph = (TxCheckedNeo4jGraph)framedGraph.getBaseGraph();
+            if (!okay && graph.isInTransaction()) {
+                graph.rollback();
+            }
+        }
+        if (okay) framedGraph.getBaseGraph().commit();
+    }
 }

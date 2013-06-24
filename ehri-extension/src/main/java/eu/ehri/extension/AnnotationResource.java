@@ -11,7 +11,6 @@ import javax.ws.rs.core.Response.Status;
 import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.base.*;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Transaction;
 
 import com.google.common.collect.ListMultimap;
 
@@ -96,7 +95,7 @@ public class AnnotationResource extends
             String json, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws PermissionDenied, ValidationError, DeserializationError,
             ItemNotFound, BadRequester, SerializationError {
-        graph.getBaseGraph().clearTxThreadVar();
+        graph.getBaseGraph().checkNotInTransaction();
         try {
             Accessor user = getRequesterUserProfile();
             Annotation ann = new AnnotationViews(graph).createFor(id,

@@ -13,26 +13,20 @@ import javax.ws.rs.core.Response.Status;
 
 import eu.ehri.project.models.base.IdentifiableEntity;
 import eu.ehri.project.models.base.NamedEntity;
+import eu.ehri.project.views.Crud;
+import eu.ehri.project.views.ViewFactory;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Transaction;
-import org.neo4j.server.database.Database;
 
 import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.Vertex;
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
-import com.tinkerpop.frames.FramedGraph;
 
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.acl.PermissionType;
-import eu.ehri.project.core.GraphManager;
-import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Group;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistance.Bundle;
-import eu.ehri.project.persistance.Serializer;
-import eu.ehri.project.views.impl.LoggingCrudViews;
 
 /**
  * Provides additional Admin methods needed by client systems.
@@ -58,8 +52,7 @@ public class AdminResource extends AbstractRestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/createDefaultUserProfile")
     public Response createDefaultUserProfile() throws Exception {
-        graph.getBaseGraph().clearTxThreadVar();
-        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
+        graph.getBaseGraph().checkNotInTransaction();
         try {
             String ident = getNextDefaultUserId();
             Bundle bundle = new Bundle(EntityClass.USER_PROFILE)
@@ -69,22 +62,19 @@ public class AdminResource extends AbstractRestResource {
             // NB: This assumes that admin's ID is the same as its identifier.
             Accessor accessor = manager.getFrame(Group.ADMIN_GROUP_IDENTIFIER,
                     Accessor.class);
-            LoggingCrudViews<UserProfile> view = new LoggingCrudViews<UserProfile>(graph,
-                    UserProfile.class);
+            Crud<UserProfile> view = ViewFactory.getCrudWithLogging(graph, UserProfile.class);
             UserProfile user = view.create(bundle, accessor);
             // Grant them owner permissions on their own account.
             new AclManager(graph).grantPermissions(user, user,
                     PermissionType.OWNER);
 
             String jsonStr = serializer.vertexFrameToJson(user);
-            tx.success();
+            graph.getBaseGraph().commit();
             return Response.status(Status.CREATED).entity((jsonStr).getBytes())
                     .build();
         } catch (Exception e) {
-            tx.failure();
+            graph.getBaseGraph().rollback();
             throw e;
-        } finally {
-            tx.finish();
         }
     }
 

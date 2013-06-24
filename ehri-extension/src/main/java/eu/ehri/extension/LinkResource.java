@@ -14,10 +14,9 @@ import eu.ehri.project.persistance.ActionManager;
 import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.views.LinkViews;
 import eu.ehri.project.views.Query;
+import eu.ehri.project.views.ViewFactory;
 import eu.ehri.project.views.ViewHelper;
-import eu.ehri.project.views.impl.CrudViews;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Transaction;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -106,35 +105,29 @@ public class LinkResource extends
             @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws PermissionDenied, ValidationError, DeserializationError,
             ItemNotFound, BadRequester, SerializationError {
-        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
+        Accessor user = getRequesterUserProfile();
         try {
-            Accessor user = getRequesterUserProfile();
             Link link = new LinkViews(graph).createLink(id,
                     sourceId, bodies, Bundle.fromString(json), user);
             new AclManager(graph).setAccessors(link,
                     getAccessors(accessors, user));
-            tx.success();
+            graph.getBaseGraph().commit();
             return buildResponseFromAnnotation(link);
         } catch (ItemNotFound e) {
-            tx.failure();
-            throw e;
-        } catch (PermissionDenied e) {
-            tx.failure();
+            graph.getBaseGraph().rollback();
             throw e;
         } catch (DeserializationError e) {
-            tx.failure();
-            throw e;
-        } catch (BadRequester e) {
-            tx.failure();
+            graph.getBaseGraph().rollback();
             throw e;
         } catch (ValidationError e) {
-            tx.failure();
+            graph.getBaseGraph().rollback();
+            throw e;
+        } catch (PermissionDenied e) {
+            graph.getBaseGraph().rollback();
             throw e;
         } catch (Exception e) {
-            e.printStackTrace();
-            throw new WebApplicationException(e);
-        } finally {
-            tx.finish();
+            graph.getBaseGraph().rollback();
+            throw new RuntimeException(e);
         }
     }
 
@@ -163,7 +156,7 @@ public class LinkResource extends
         if (item == null) {
             throw new ItemNotFound(id);
         }
-        new CrudViews<AccessibleEntity>(graph, AccessibleEntity.class)
+        ViewFactory.getCrudNoLogging(graph, AccessibleEntity.class)
                 .deleteDependent(rel, item, userProfile, UndeterminedRelationship.class);
         return Response.status(Status.OK).build();
     }
@@ -213,7 +206,6 @@ public class LinkResource extends
         //return delete(id);
         // FIXME: Because it only takes ANNOTATE permissions to create a link
         // we need the same to delete them...
-        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
             new ViewHelper(graph).checkEntityPermission(manager.getFrame(id, AccessibleEntity.class),
                     getRequesterUserProfile(), PermissionType.ANNOTATE);
@@ -221,21 +213,17 @@ public class LinkResource extends
             Link link = manager.getFrame(linkId, EntityClass.LINK, Link.class);
             new ActionManager(graph).logEvent(link, actioner, EventTypes.deletion);
             manager.deleteVertex(link.asVertex());
-            tx.success();
+            graph.getBaseGraph().commit();
             return Response.ok().build();
         } catch (ItemNotFound e) {
-            tx.failure();
+            graph.getBaseGraph().rollback();
             throw e;
         } catch (PermissionDenied e) {
-            tx.failure();
+            graph.getBaseGraph().rollback();
             throw e;
-        } catch (BadRequester e) {
-            tx.failure();
-            throw e;        } catch (Exception e) {
-            e.printStackTrace();
-            throw new WebApplicationException(e);
-        } finally {
-            tx.finish();
+        } catch (Exception e) {
+            graph.getBaseGraph().rollback();
+            throw new RuntimeException(e);
         }
     }
 

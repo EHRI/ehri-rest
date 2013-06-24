@@ -11,7 +11,6 @@ import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.Frame;
 import eu.ehri.project.persistance.Bundle;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Transaction;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
@@ -33,7 +32,7 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
     public Response createDescription(@PathParam("id") String id, String json)
             throws AccessDenied, PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, ItemNotFound, BadRequester {
-        graph.getBaseGraph().clearTxThreadVar();
+        graph.getBaseGraph().checkNotInTransaction();
         Accessor user = getRequesterUserProfile();
         try {
             DescribedEntity doc = views.detail(
@@ -65,7 +64,7 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
     public Response updateDescription(@PathParam("id") String id, String json)
             throws AccessDenied, PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, ItemNotFound, BadRequester, SerializationError {
-        graph.getBaseGraph().clearTxThreadVar();
+        graph.getBaseGraph().checkNotInTransaction();
         Accessor user = getRequesterUserProfile();
         DescribedEntity doc = views.detail(
                 manager.getFrame(id, DescribedEntity.class), user);
@@ -108,7 +107,7 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
             @PathParam("id") String id, @PathParam("did") String did)
             throws AccessDenied, PermissionDenied, ItemNotFound, ValidationError,
             BadRequester, SerializationError {
-        graph.getBaseGraph().clearTxThreadVar();
+        graph.getBaseGraph().checkNotInTransaction();
         Accessor user = getRequesterUserProfile();
         DescribedEntity doc = views.detail(manager.getFrame(id, DescribedEntity.class), user);
         Description desc = manager.getFrame(did, EntityClass.DOCUMENT_DESCRIPTION,
@@ -149,7 +148,7 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
                 @PathParam("did") String did, String json)
             throws AccessDenied, PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, ItemNotFound, BadRequester {
-        graph.getBaseGraph().clearTxThreadVar();
+        graph.getBaseGraph().checkNotInTransaction();
         try {
             Accessor user = getRequesterUserProfile();
             DescribedEntity doc = views.detail(
@@ -184,7 +183,7 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
             @PathParam("did") String did, @PathParam("did") String apid, String json)
             throws AccessDenied, PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, ItemNotFound, BadRequester {
-        graph.getBaseGraph().clearTxThreadVar();
+        graph.getBaseGraph().checkNotInTransaction();
         try {
             Accessor user = getRequesterUserProfile();
             DescribedEntity doc = views.detail(

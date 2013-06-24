@@ -188,20 +188,29 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
             String json, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws AccessDenied, PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, ItemNotFound, BadRequester {
-        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
+        Accessor user = getRequesterUserProfile();
+        Repository repository = views.detail(manager.getFrame(id, cls), user);
         try {
-            Accessor user = getRequesterUserProfile();
-            Repository repository = views.detail(manager.getFrame(id, cls), user);
             DocumentaryUnit doc = createDocumentaryUnit(json, repository);
             new AclManager(graph).setAccessors(doc,
                     getAccessors(accessors, user));
-            tx.success();
+            graph.getBaseGraph().commit();
             return buildResponseFromDocumentaryUnit(doc);
-        } catch (SerializationError e) {
-            tx.failure();
-            throw new WebApplicationException(e);
-        } finally {
-            tx.finish();
+        } catch (DeserializationError e) {
+            graph.getBaseGraph().rollback();
+            throw e;
+        } catch (ValidationError e) {
+            graph.getBaseGraph().rollback();
+            throw e;
+        } catch (IntegrityError e) {
+            graph.getBaseGraph().rollback();
+            throw e;
+        } catch (PermissionDenied e) {
+            graph.getBaseGraph().rollback();
+            throw e;
+        } catch (Exception e) {
+            graph.getBaseGraph().rollback();
+            throw new RuntimeException(e);
         }
     }
 
