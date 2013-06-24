@@ -125,7 +125,7 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
     public Response addMember(@PathParam("id") String id,
             @PathParam("atype") String atype, @PathParam("aid") String aid)
             throws PermissionDenied, ItemNotFound, BadRequester {
-        graph.getBaseGraph().clearTxThreadVar();
+        graph.getBaseGraph().checkNotInTransaction();
         Group group = manager.getFrame(id, EntityClass.GROUP, Group.class);
         Accessor accessor = manager.getFrame(aid, Accessor.class);
         try {
@@ -154,7 +154,7 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
     public Response removeMember(@PathParam("id") String id,
             @PathParam("aid") String aid) throws PermissionDenied,
             ItemNotFound, BadRequester {
-        graph.getBaseGraph().clearTxThreadVar();
+        graph.getBaseGraph().checkNotInTransaction();
         Group group = manager.getFrame(id, EntityClass.GROUP, Group.class);
         Accessor accessor = manager.getFrame(aid, Accessor.class);
         try {

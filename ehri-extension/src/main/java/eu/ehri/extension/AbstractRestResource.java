@@ -10,7 +10,7 @@ import javax.ws.rs.core.*;
 
 import com.google.common.base.Optional;
 import com.tinkerpop.blueprints.Vertex;
-import eu.ehri.extension.utils.TxCheckedNeo4jGraph;
+import eu.ehri.project.utils.TxCheckedNeo4jGraph;
 import eu.ehri.project.models.base.Frame;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
@@ -18,7 +18,6 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import com.google.common.collect.ListMultimap;
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
 import eu.ehri.extension.errors.BadRequester;

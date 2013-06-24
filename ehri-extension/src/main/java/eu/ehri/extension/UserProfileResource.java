@@ -152,10 +152,9 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
             throws PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, BadRequester {
 
-        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
+        Accessor user = getRequesterUserProfile();
+        Bundle entityBundle = Bundle.fromString(json);
         try {
-            Accessor user = getRequesterUserProfile();
-            Bundle entityBundle = Bundle.fromString(json);
             UserProfile entity = views.create(entityBundle, user,getLogMessage());
             // TODO: Move elsewhere
             new AclManager(graph).setAccessors(entity,
@@ -178,21 +177,28 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
                         EventTypes.addGroup).addSubjects(group);
             }
             
-            tx.success();
+            graph.getBaseGraph().commit();
             return Response.status(Status.CREATED).location(docUri)
                     .entity((jsonStr).getBytes()).build();
-        } catch (SerializationError e) {
-            tx.failure();
-            return Response.status(Status.INTERNAL_SERVER_ERROR)
-                    .entity((produceErrorMessageJson(e)).getBytes()).build();
+        } catch (DeserializationError e) {
+            graph.getBaseGraph().rollback();
+            throw e;
         } catch (ItemNotFound e) {
-        	// group for addition was not found
-            tx.failure();
+            graph.getBaseGraph().rollback();
             return Response.status(Status.BAD_REQUEST)
                     .entity((produceErrorMessageJson(e)).getBytes()).build();
- 		} finally {
-            tx.finish();
+        } catch (ValidationError e) {
+            graph.getBaseGraph().rollback();
+            throw e;
+        } catch (IntegrityError e) {
+            graph.getBaseGraph().rollback();
+            throw e;
+        } catch (PermissionDenied e) {
+            graph.getBaseGraph().rollback();
+            throw e;
+        } catch (Exception e) {
+            graph.getBaseGraph().rollback();
+            throw new RuntimeException(e);
         }
     }
-
 }

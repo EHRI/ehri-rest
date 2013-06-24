@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import eu.ehri.project.utils.TxCheckedNeo4jGraph;
 import org.apache.commons.cli.*;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
@@ -91,7 +92,7 @@ public class CmdEntryPoint extends BaseCommand {
                 } else {
                     // Get the graph
                     graph = new FramedGraph<Neo4jGraph>(
-                            new Neo4jGraph(args[0]));
+                            new TxCheckedNeo4jGraph(args[0]));
                 }
 
                 try {

@@ -4,7 +4,6 @@ import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.*;
-import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.HistoricalAgent;
 import eu.ehri.project.models.cvoc.AuthoritativeItem;
@@ -13,7 +12,6 @@ import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.views.Query;
 import eu.ehri.project.views.impl.LoggingCrudViews;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Transaction;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
@@ -174,9 +172,6 @@ public class AuthoritativeSetResource extends
             throws ItemNotFound, BadRequester, AccessDenied, PermissionDenied {
         AuthoritativeSet set = new Query<AuthoritativeSet>(graph, AuthoritativeSet.class).get(id,
                 getRequesterUserProfile());
-
-        //return deleteAllHistoricalAgents(set);
-        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
         	LoggingCrudViews<AuthoritativeItem> agentViews = new LoggingCrudViews<AuthoritativeItem>(graph,
                     AuthoritativeItem.class, set);
@@ -185,18 +180,15 @@ public class AuthoritativeSetResource extends
         	for (AuthoritativeItem agent : agents) {
         		agentViews.delete(agent, requesterUserProfile);
         	}
-            tx.success();
+            graph.getBaseGraph().commit();
             return Response.status(Status.OK).build();
-        } catch (SerializationError e) {
-            tx.failure();
-            throw new WebApplicationException(e);
-        } catch (ValidationError e) {
-            tx.failure();
-            throw new WebApplicationException(e);
-		} finally {
-            tx.finish();
+        } catch (PermissionDenied e) {
+            graph.getBaseGraph().rollback();
+            throw e;
+        } catch (Exception e) {
+            graph.getBaseGraph().rollback();
+            throw new RuntimeException(e);
         }
-
     }
 
     /**
@@ -220,21 +212,26 @@ public class AuthoritativeSetResource extends
             String json, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws AccessDenied, PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, ItemNotFound, BadRequester {
-        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
+        Accessor user = getRequesterUserProfile();
+        AuthoritativeSet set = views.detail(manager.getFrame(id, cls), user);
         try {
-            Accessor user = getRequesterUserProfile();
-            AuthoritativeSet set = new Query<AuthoritativeSet>(graph,
-                    AuthoritativeSet.class).get(id, user);
             HistoricalAgent agent = createHistoricalAgent(json, set);
             new AclManager(graph).setAccessors(agent,
                     getAccessors(accessors, user));
-            tx.success();
+            graph.getBaseGraph().commit();
             return buildResponseFromHistoricalAgent(agent);
-        } catch (SerializationError e) {
-            tx.failure();
-            throw new WebApplicationException(e);
-        } finally {
-            tx.finish();
+        } catch (DeserializationError e) {
+            graph.getBaseGraph().rollback();
+            throw e;
+        } catch (ValidationError e) {
+            graph.getBaseGraph().rollback();
+            throw e;
+        } catch (IntegrityError e) {
+            graph.getBaseGraph().rollback();
+            throw e;
+        } catch (Exception e) {
+            graph.getBaseGraph().rollback();
+            throw new RuntimeException(e);
         }
     }
 

@@ -13,7 +13,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -21,10 +20,10 @@ import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
 
+import eu.ehri.project.acl.PermissionType;
 import eu.ehri.project.exceptions.*;
-import eu.ehri.project.models.EntityClass;
+import eu.ehri.project.views.ViewHelper;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Transaction;
 
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.acl.AclManager;
@@ -44,8 +43,11 @@ import eu.ehri.project.views.Query;
 public class CvocConceptResource extends
         AbstractAccessibleEntityResource<Concept> {
 
+    private final ViewHelper helper;
+
     public CvocConceptResource(@Context GraphDatabaseService database) {
         super(database, Concept.class);
+        helper = new ViewHelper(graph);
     }
 
     @GET
@@ -187,28 +189,18 @@ public class CvocConceptResource extends
      */
     @POST
     @Path("/{id:.+}/narrower/{id_narrower:.+}")
-    public Response addNarrowerCvocConcept(String json,
-            @PathParam("id") String id,
-            @PathParam("id_narrower") String id_narrower)
-            throws PermissionDenied, ValidationError, IntegrityError,
-            DeserializationError, ItemNotFound, BadRequester {
-
-        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
-        try {
-            Concept concept = views.detail(manager.getFrame(id, cls),
-                    getRequesterUserProfile());
-            Concept narrowerConcept = views.detail(
-                    manager.getFrame(id_narrower, cls),
-                    getRequesterUserProfile());
-            concept.addNarrowerConcept(narrowerConcept);
-            tx.success();
-            return Response.status(Status.OK).build();
-        } catch (Exception e) {
-            tx.failure();
-            throw new WebApplicationException(e);
-        } finally {
-            tx.finish();
-        }
+    public Response addNarrowerCvocConcept(
+                @PathParam("id") String id,
+                @PathParam("id_narrower") String id_narrower)
+            throws AccessDenied, PermissionDenied, ItemNotFound, BadRequester {
+        Accessor accessor = getRequesterUserProfile();
+        Concept concept = views.detail(manager.getFrame(id, cls), accessor);
+        Concept relatedConcept = views.detail(manager.getFrame(id_narrower, cls), accessor);
+        helper.checkEntityPermission(concept, accessor, PermissionType.UPDATE);
+        helper.checkEntityPermission(relatedConcept, accessor, PermissionType.UPDATE);
+        concept.addNarrowerConcept(relatedConcept);
+        graph.getBaseGraph().commit();
+        return Response.status(Status.OK).build();
     }
 
     /**
@@ -217,29 +209,19 @@ public class CvocConceptResource extends
      */
     @DELETE
     @Path("/{id:.+}/narrower/{id_narrower:.+}")
-    public Response removeNarrowerCvocConcept(String json,
-            @PathParam("id") String id,
-            @PathParam("id_narrower") String id_narrower)
-            throws PermissionDenied, ValidationError, IntegrityError,
-            DeserializationError, ItemNotFound, BadRequester {
+    public Response removeNarrowerCvocConcept(
+                @PathParam("id") String id,
+                @PathParam("id_narrower") String id_narrower)
+            throws PermissionDenied, AccessDenied, ItemNotFound, BadRequester {
 
-        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
-        try {
-            Concept concept = views.detail(manager.getFrame(id, cls),
-                    getRequesterUserProfile());
-            Concept narrowerConcept = views.detail(
-                    manager.getFrame(id_narrower, cls),
-                    getRequesterUserProfile());
-            concept.removeNarrowerConcept(narrowerConcept);
-
-            tx.success();
-            return Response.status(Status.OK).build();
-        } catch (Exception e) {
-            tx.failure();
-            throw new WebApplicationException(e);
-        } finally {
-            tx.finish();
-        }
+        Accessor accessor = getRequesterUserProfile();
+        Concept concept = views.detail(manager.getFrame(id, cls), accessor);
+        Concept relatedConcept = views.detail(manager.getFrame(id_narrower, cls), accessor);
+        helper.checkEntityPermission(concept, accessor, PermissionType.UPDATE);
+        helper.checkEntityPermission(relatedConcept, accessor, PermissionType.UPDATE);
+        concept.removeNarrowerConcept(relatedConcept);
+        graph.getBaseGraph().commit();
+        return Response.status(Status.OK).build();
     }
 
     @GET
@@ -285,28 +267,19 @@ public class CvocConceptResource extends
      */
     @POST
     @Path("/{id:.+}/related/{id_related:.+}")
-    public Response addRelatedCvocConcept(String json,
+    public Response addRelatedCvocConcept(
             @PathParam("id") String id,
             @PathParam("id_related") String id_related)
-            throws PermissionDenied, ValidationError, IntegrityError,
-            DeserializationError, ItemNotFound, BadRequester {
+            throws AccessDenied, PermissionDenied, ItemNotFound, BadRequester {
 
-        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
-        try {
-            Concept concept = views.detail(manager.getFrame(id, cls),
-                    getRequesterUserProfile());
-            Concept relatedConcept = views.detail(
-                    manager.getFrame(id_related, cls),
-                    getRequesterUserProfile());
-            concept.addRelatedConcept(relatedConcept);
-            tx.success();
-            return Response.status(Status.OK).build();
-        } catch (Exception e) {
-            tx.failure();
-            throw new WebApplicationException(e);
-        } finally {
-            tx.finish();
-        }
+        Accessor accessor = getRequesterUserProfile();
+        Concept concept = views.detail(manager.getFrame(id, cls), accessor);
+        Concept relatedConcept = views.detail(manager.getFrame(id_related, cls), accessor);
+        helper.checkEntityPermission(concept, accessor, PermissionType.UPDATE);
+        helper.checkEntityPermission(relatedConcept, accessor, PermissionType.UPDATE);
+        concept.addRelatedConcept(relatedConcept);
+        graph.getBaseGraph().commit();
+        return Response.status(Status.OK).build();
     }
 
     /**
@@ -315,29 +288,19 @@ public class CvocConceptResource extends
      */
     @DELETE
     @Path("/{id:.+}/related/{id_related:.+}")
-    public Response removeRelatedCvocConcept(String json,
-            @PathParam("id") String id,
-            @PathParam("id_related") String id_related)
-            throws PermissionDenied, ValidationError, IntegrityError,
-            DeserializationError, ItemNotFound, BadRequester {
+    public Response removeRelatedCvocConcept(
+                @PathParam("id") String id,
+                @PathParam("id_related") String id_related)
+            throws AccessDenied, PermissionDenied, ItemNotFound, BadRequester {
 
-        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
-        try {
-            Concept concept = views.detail(manager.getFrame(id, cls),
-                    getRequesterUserProfile());
-            Concept relatedConcept = views.detail(
-                    manager.getFrame(id_related, cls),
-                    getRequesterUserProfile());
-            concept.removeRelatedConcept(relatedConcept);
-
-            tx.success();
-            return Response.status(Status.OK).build();
-        } catch (Exception e) {
-            tx.failure();
-            throw new WebApplicationException(e);
-        } finally {
-            tx.finish();
-        }
+        Accessor accessor = getRequesterUserProfile();
+        Concept concept = views.detail(manager.getFrame(id, cls), accessor);
+        Concept relatedConcept = views.detail(manager.getFrame(id_related, cls), accessor);
+        helper.checkEntityPermission(concept, accessor, PermissionType.UPDATE);
+        helper.checkEntityPermission(relatedConcept, accessor, PermissionType.UPDATE);
+        concept.removeRelatedConcept(relatedConcept);
+        graph.getBaseGraph().commit();
+        return Response.status(Status.OK).build();
     }
 
     /**
@@ -362,21 +325,28 @@ public class CvocConceptResource extends
             String json, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws AccessDenied, PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, ItemNotFound, BadRequester {
-        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
+        Accessor user = getRequesterUserProfile();
+        Concept parent = views.detail(manager.getFrame(id, cls), user);
         try {
-            Accessor user = getRequesterUserProfile();
-            Concept parent = new Query<Concept>(graph, Concept.class).get(id,
-                    user);
             Concept concept = createConcept(json, parent);
-            new AclManager(graph).setAccessors(concept,
-                    getAccessors(accessors, user));
-            tx.success();
+            new AclManager(graph).setAccessors(concept, getAccessors(accessors, user));
+            graph.getBaseGraph().commit();
             return buildResponseFromConcept(concept);
-        } catch (SerializationError e) {
-            tx.failure();
-            throw new WebApplicationException(e);
-        } finally {
-            tx.finish();
+        } catch (DeserializationError e) {
+            graph.getBaseGraph().rollback();
+            throw e;
+        } catch (ValidationError e) {
+            graph.getBaseGraph().rollback();
+            throw e;
+        } catch (IntegrityError e) {
+            graph.getBaseGraph().rollback();
+            throw e;
+        } catch (PermissionDenied e) {
+            graph.getBaseGraph().rollback();
+            throw e;
+        } catch (Exception e) {
+            graph.getBaseGraph().rollback();
+            throw new RuntimeException(e);
         }
     }
 

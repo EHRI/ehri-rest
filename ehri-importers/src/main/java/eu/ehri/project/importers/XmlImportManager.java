@@ -19,7 +19,8 @@ import eu.ehri.project.persistance.ActionManager;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import org.neo4j.graphdb.Transaction;
+
+import eu.ehri.project.utils.TxCheckedNeo4jGraph;
 import org.neo4j.tooling.GlobalGraphOperations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -120,7 +121,6 @@ abstract public class XmlImportManager implements ImportManager {
      @Override
     public ImportLog importFile(InputStream ios, String logMessage)
             throws IOException, ValidationError, InputParseError {
-        Transaction tx = framedGraph.getBaseGraph().getRawGraph().beginTx();
         try {
             // Create a new action for this import
             final ActionManager.EventContext action = new ActionManager(
@@ -132,17 +132,15 @@ abstract public class XmlImportManager implements ImportManager {
             // Do the import...
             importFile(ios, action, log);
             // If nothing was imported, remove the action...
-            if (log.isValid()) {
-                tx.success();
-            }
+            commitOrRollback(log.isValid());
 
             return log;
         } catch (ValidationError e) {
+            commitOrRollback(false);
             throw e;
         } catch (Exception e) {
+            commitOrRollback(false);
             throw new RuntimeException(e);
-        } finally {
-            tx.finish();
         }
     }    
      
@@ -161,7 +159,6 @@ abstract public class XmlImportManager implements ImportManager {
     public ImportLog importFiles(List<String> paths, String logMessage)
             throws IOException, ValidationError {
 
-        Transaction tx = framedGraph.getBaseGraph().getRawGraph().beginTx();
         try {
 
             final ActionManager.EventContext action = new ActionManager(
@@ -188,20 +185,16 @@ abstract public class XmlImportManager implements ImportManager {
 
             // Only mark the transaction successful if we're
             // actually accomplished something.
-            if (log.isValid()) {
-                tx.success();
-            }
+            commitOrRollback(log.isValid());
 
             return log;
         } catch (ValidationError e) {
-            tx.failure();
+            commitOrRollback(false);
             throw e;
         } catch (Exception e) {
             e.printStackTrace();
-            tx.failure();
+            commitOrRollback(false);
             throw new RuntimeException(e);
-        } finally {
-            tx.finish();
         }
     }
     protected int getNodeCount(FramedGraph<Neo4jGraph> graph) {
@@ -226,5 +219,15 @@ abstract public class XmlImportManager implements ImportManager {
 
     private Optional<String> getLogMessage(String msg) {
         return msg.trim().isEmpty() ? Optional.<String>absent() : Optional.of(msg);
+    }
+
+    private void commitOrRollback(boolean okay) {
+        if (framedGraph.getBaseGraph() instanceof TxCheckedNeo4jGraph) {
+            TxCheckedNeo4jGraph graph = (TxCheckedNeo4jGraph)framedGraph.getBaseGraph();
+            if (!okay && graph.isInTransaction()) {
+                graph.rollback();
+            }
+        }
+        if (okay) framedGraph.getBaseGraph().commit();
     }
 }

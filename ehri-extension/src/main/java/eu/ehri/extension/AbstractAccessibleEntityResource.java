@@ -1,7 +1,5 @@
 package eu.ehri.extension;
 
-import static eu.ehri.extension.RestHelpers.produceErrorMessageJson;
-
 import java.net.URI;
 import java.util.List;
 import java.util.Set;
@@ -13,7 +11,6 @@ import javax.ws.rs.core.Response.Status;
 //import org.apache.log4j.Logger;
 import eu.ehri.project.exceptions.*;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Transaction;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -72,7 +69,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
     public StreamingOutput page(Integer offset, Integer limit,
             Iterable<String> order, Iterable<String> filters)
             throws ItemNotFound, BadRequester {
-        graph.getBaseGraph().clearTxThreadVar();
+        graph.getBaseGraph().checkNotInTransaction();
         final Query.Page<E> page = querier.setOffset(offset).setLimit(limit)
                 .orderBy(order).filter(filters).page(getRequesterUserProfile());
         return streamingPage(page);
@@ -103,7 +100,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
     public StreamingOutput list(Integer offset, Integer limit,
             Iterable<String> order, Iterable<String> filters)
             throws ItemNotFound, BadRequester {
-        graph.getBaseGraph().clearTxThreadVar();
+        graph.getBaseGraph().checkNotInTransaction();
         final Query<E> query = querier.setOffset(offset).setLimit(limit)
                 .orderBy(order).filter(filters);
         return streamingList(query.list(getRequesterUserProfile()));
@@ -118,7 +115,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      */
     public StreamingOutput list(Integer offset, Integer limit)
             throws ItemNotFound, BadRequester {
-        graph.getBaseGraph().clearTxThreadVar();
+        graph.getBaseGraph().checkNotInTransaction();
         return list(offset, limit, Lists.<String>newArrayList(),
                 Lists.<String>newArrayList());
     }
@@ -132,7 +129,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      */
     public Response count(Iterable<String> filters) throws BadRequester {
         Long count = querier.filter(filters).count(getRequesterUserProfile());
-        graph.getBaseGraph().clearTxThreadVar();
+        graph.getBaseGraph().checkNotInTransaction();
         return Response.ok().entity(count.toString().getBytes()).build();
     }
 
@@ -153,7 +150,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
     public Response create(String json, List<String> accessorIds)
             throws PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, BadRequester {
-        graph.getBaseGraph().clearTxThreadVar();
+        graph.getBaseGraph().checkNotInTransaction();
             Accessor user = getRequesterUserProfile();
             Bundle entityBundle = Bundle.fromString(json);
         try {
@@ -194,7 +191,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      */
     public Response retrieve(String id) throws AccessDenied, ItemNotFound,
             BadRequester {
-        graph.getBaseGraph().clearTxThreadVar();
+        graph.getBaseGraph().checkNotInTransaction();
         try {
             E entity = views.detail(manager.getFrame(id, getEntityType(), cls),
                     getRequesterUserProfile());
@@ -284,7 +281,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      */
     protected Response delete(String id) throws AccessDenied, PermissionDenied, ItemNotFound,
             ValidationError, BadRequester {
-        graph.getBaseGraph().clearTxThreadVar();
+        graph.getBaseGraph().checkNotInTransaction();
         try {
             E entity = views.detail(manager.getFrame(id, getEntityType(), cls),
                     getRequesterUserProfile());

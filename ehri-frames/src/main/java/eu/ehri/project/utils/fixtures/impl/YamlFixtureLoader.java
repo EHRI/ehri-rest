@@ -120,7 +120,7 @@ public class YamlFixtureLoader implements FixtureLoader {
     public void loadTestData(InputStream stream) {
 
         // Ensure we're not currently in a transaction!
-        graph.getBaseGraph().rollback();
+        //graph.getBaseGraph().rollback();
 
         // Initialize the DB
         try {
@@ -134,10 +134,10 @@ public class YamlFixtureLoader implements FixtureLoader {
                 throw new RuntimeException(e);
             }
             graph.getBaseGraph().commit();
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             graph.getBaseGraph().rollback();
             e.printStackTrace();
-            throw e;
+            throw new RuntimeException(e);
         }
     }
 

@@ -24,7 +24,6 @@ import javax.ws.rs.core.Response.Status;
 import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.EntityClass;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Transaction;
 
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.acl.AclManager;
@@ -191,7 +190,6 @@ public class VocabularyResource extends
                 getRequesterUserProfile());
         
         //return deleteAllConcepts(vocabulary);
-        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
         try {
         	LoggingCrudViews<Concept> conceptViews = new LoggingCrudViews<Concept>(graph,
             		Concept.class, vocabulary);
@@ -200,16 +198,14 @@ public class VocabularyResource extends
         	for (Concept concept : concepts) {
         		conceptViews.delete(concept, requesterUserProfile);
         	}
-            tx.success();
+            graph.getBaseGraph().commit();
             return Response.status(Status.OK).build();
-        } catch (SerializationError e) {
-            tx.failure();
-            throw new WebApplicationException(e);
-        } catch (ValidationError e) {
-            tx.failure();
-            throw new WebApplicationException(e);
-		} finally {
-            tx.finish();
+        } catch (PermissionDenied e) {
+            graph.getBaseGraph().rollback();
+            throw e;
+        } catch (Exception e) {
+            graph.getBaseGraph().rollback();
+            throw new RuntimeException(e);
         }
         
     }
@@ -234,22 +230,30 @@ public class VocabularyResource extends
     public Response createVocabularyConcept(@PathParam("id") String id,
             String json, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws AccessDenied, PermissionDenied, ValidationError, IntegrityError,
-            DeserializationError, ItemNotFound, BadRequester {
-        Transaction tx = graph.getBaseGraph().getRawGraph().beginTx();
+                DeserializationError, ItemNotFound, BadRequester {
+        Accessor user = getRequesterUserProfile();
+        Vocabulary vocabulary = views.detail(manager.getFrame(id, cls), user);
         try {
-            Accessor user = getRequesterUserProfile();
-            Vocabulary vocabulary = new Query<Vocabulary>(graph,
-                    Vocabulary.class).get(id, user);
             Concept concept = createConcept(json, vocabulary);
             new AclManager(graph).setAccessors(concept,
                     getAccessors(accessors, user));
-            tx.success();
+            graph.getBaseGraph().commit();
             return buildResponseFromConcept(concept);
-        } catch (SerializationError e) {
-            tx.failure();
-            throw new WebApplicationException(e);
-        } finally {
-            tx.finish();
+        } catch (DeserializationError e) {
+            graph.getBaseGraph().rollback();
+            throw e;
+        } catch (ValidationError e) {
+            graph.getBaseGraph().rollback();
+            throw e;
+        } catch (IntegrityError e) {
+            graph.getBaseGraph().rollback();
+            throw e;
+        } catch (PermissionDenied e) {
+            graph.getBaseGraph().rollback();
+            throw e;
+        } catch (Exception e) {
+            graph.getBaseGraph().rollback();
+            throw new RuntimeException(e);
         }
     }
 

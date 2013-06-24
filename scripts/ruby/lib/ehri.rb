@@ -49,11 +49,25 @@ module Ehri
     include_package "eu.ehri.project.views"
   end
 
+  module Exceptions
+    include_package "eu.ehri.project.exceptions"
+  end
+
   DB_PATH = ENV['NEO4J_DB'] ||= "#{ENV['NEO4J_HOME']}/data/graph.db"
 
   # Initialise a graph and the manager.
   # Note: the graph must not be being used elsewhere (i.e. by the server)
-  Graph = FramedGraph.new(Neo4jGraph.new DB_PATH)
+  #
+  
+  class CheckTransactionGraph < Neo4jGraph
+    def check_transaction
+      if not @tx.nil? and not @tx.get.nil?
+        raise "Graph is already in a transaction!"
+      end
+    end
+  end
+
+  Graph = FramedGraph.new(CheckTransactionGraph.new DB_PATH)
   Manager = GraphManagerFactory.get_instance Graph
 
 end
