@@ -4,8 +4,6 @@
 
 require "#{File.dirname(__FILE__)}/ehri"
 
-require "csv"
-
 
 module Ehri
   module UkraineImporter
@@ -85,8 +83,8 @@ module Ehri
 
           Graph.get_base_graph.commit
           puts "Committed"
-        rescue
-          # Oops!
+        rescue Java::JavaLang::Exception => e
+          e.print_stack_trace
           Graph.get_base_graph.rollback
           raise
         end

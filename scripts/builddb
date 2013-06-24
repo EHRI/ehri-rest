@@ -19,6 +19,7 @@ THES_RDF = "#{DROPBOX}/ehri-skos.rdf"
 CAMPS_RDF = "#{DROPBOX}/EHRI-Camps-structure.rdf"
 GHETTOS_RDF = "#{DROPBOX}/EHRI-Ghettos-structure.rdf"
 PERS_CSV = "#{DROPBOX}/Personalities-12-03-2013-utf8.csv"
+UKRAINE_CSV_FILE =  "#{DROPBOX}/ukraine.csv"
 
 # Check stuff works
 EhriUtils::check_env
@@ -59,6 +60,7 @@ end
 # is loaded.
 require "ehri"
 require "ushmmimporter"
+require "ukraineimporter"
 require "icaatomimporter"
 require "eagimporter"
 
@@ -122,6 +124,10 @@ class DbBuilder
     wl_xml = Dir.glob("#{WL_EAD_DIR}/*xml")
     wl_args = ["--scope", WL_ID, "--user", USER_ID, "--tolerant", "--log", "Importing AIM25 Wiener Library EAD"] + wl_xml
     Commands::EadImport.new.exec(Graph, wl_args.to_java(:string))
+  end
+
+  def import_ukraine
+    Ehri::UkraineImporter::import(UKRAINE_CSV_FILE, USER_ID)
   end
 
   def import_icaatom
@@ -193,6 +199,7 @@ start = Time.now
 builder = DbBuilder.new
 builder.init_db
 builder.create_users
+Graph.get_base_graph.check_transaction
 builder.import_thesaurus
 builder.import_camps
 builder.import_ghettos
@@ -200,6 +207,7 @@ builder.import_corporate_bodies
 builder.import_personalities
 builder.import_repositories
 builder.import_wl
+builder.import_ukraine
 builder.import_icaatom
 builder.import_ushmm
 
