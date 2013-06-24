@@ -49,6 +49,10 @@ module Ehri
     include_package "eu.ehri.project.views"
   end
 
+  module Exceptions
+    include_package "eu.ehri.project.exceptions"
+  end
+
   DB_PATH = ENV['NEO4J_DB'] ||= "#{ENV['NEO4J_HOME']}/data/graph.db"
 
   # Initialise a graph and the manager.
