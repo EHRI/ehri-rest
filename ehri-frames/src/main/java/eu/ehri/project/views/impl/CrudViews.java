@@ -37,10 +37,9 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
      */
     public CrudViews(FramedGraph<?> graph, Class<E> cls,
             PermissionScope scope) {
-        Preconditions.checkNotNull(scope);
         this.graph = graph;
         this.cls = cls;
-        this.scope = scope;
+        this.scope = Optional.fromNullable(scope).or(SystemScope.getInstance());
         helper = new ViewHelper(graph, scope);
         acl = helper.getAclManager();
         serializer = new Serializer(graph);

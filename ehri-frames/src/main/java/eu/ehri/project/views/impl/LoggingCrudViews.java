@@ -38,10 +38,9 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      */
     public LoggingCrudViews(FramedGraph<?> graph, Class<E> cls,
             PermissionScope scope) {
-        Preconditions.checkNotNull(scope);
         this.graph = graph;
         this.cls = cls;
-        this.scope = scope;
+        this.scope = Optional.fromNullable(scope).or(SystemScope.getInstance());
         actionManager = new ActionManager(graph, scope);
         views = new CrudViews<E>(graph, cls, scope);
     }
