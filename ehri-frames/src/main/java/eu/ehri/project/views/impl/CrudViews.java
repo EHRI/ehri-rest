@@ -40,7 +40,7 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
         this.graph = graph;
         this.cls = cls;
         this.scope = Optional.fromNullable(scope).or(SystemScope.getInstance());
-        helper = new ViewHelper(graph, scope);
+        helper = new ViewHelper(graph, this.scope);
         acl = helper.getAclManager();
         serializer = new Serializer(graph);
         manager = GraphManagerFactory.getInstance(graph);
