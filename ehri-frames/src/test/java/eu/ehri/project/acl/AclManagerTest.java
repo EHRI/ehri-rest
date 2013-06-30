@@ -61,6 +61,11 @@ public class AclManagerTest extends GraphTestBase {
         loader.loadTestData();
         UserProfile mike = manager.getFrame("mike", UserProfile.class);
         assertTrue(new AclManager(graph).belongsToAdmin(mike));
+
+        // Test a user not directly in admin, but belonging to a group that is,
+        // is also an admin user.
+        UserProfile tim = manager.getFrame("tim", UserProfile.class);
+        assertTrue(new AclManager(graph).belongsToAdmin(tim));
     }
 
     @Test
