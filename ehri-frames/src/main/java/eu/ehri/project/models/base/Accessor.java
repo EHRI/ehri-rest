@@ -5,11 +5,18 @@ import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.modules.javahandler.JavaHandler;
 import com.tinkerpop.frames.modules.javahandler.JavaHandlerImpl;
+import eu.ehri.project.models.Group;
 import eu.ehri.project.models.PermissionGrant;
 import eu.ehri.project.models.utils.JavaHandlerUtils;
 
 public interface Accessor extends IdentifiableEntity {
     public static final String BELONGS_TO = "belongsTo";
+
+    @JavaHandler
+    public boolean isAdmin();
+
+    @JavaHandler
+    public boolean isAnonymous();
 
     @Adjacency(label = BELONGS_TO)
     public Iterable<Accessor> getParents();
@@ -24,6 +31,15 @@ public interface Accessor extends IdentifiableEntity {
     public void addPermissionGrant(final PermissionGrant grant);
 
     abstract class Impl implements JavaHandlerImpl<Vertex>, Accessor {
+
+        public boolean isAdmin() {
+            return it().getProperty(IDENTIFIER_KEY).equals(Group.ADMIN_GROUP_IDENTIFIER);
+        }
+
+        public boolean isAnonymous() {
+            return false;
+        }
+
         public Iterable<Accessor> getAllParents() {
             return frameVertices(gremlin().as("n")
                     .out(BELONGS_TO)

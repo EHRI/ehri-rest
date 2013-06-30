@@ -3,12 +3,8 @@ package eu.ehri.extension.test.utils;
 import java.io.File;
 
 import com.tinkerpop.frames.FramedGraphFactory;
-import com.tinkerpop.frames.modules.gremlingroovy.GremlinGroovyModule;
 import com.tinkerpop.frames.modules.javahandler.JavaHandlerModule;
-import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
-import org.neo4j.kernel.AbstractGraphDatabase;
-import org.neo4j.kernel.EmbeddedGraphDatabase;
 import org.neo4j.kernel.GraphDatabaseAPI;
 import org.neo4j.server.NeoServer;
 import org.neo4j.server.WrappingNeoServerBootstrapper;
@@ -47,8 +43,7 @@ public class ServerRunner {
         // FIXME: Can we avoid the case here???
         graphDatabase = (GraphDatabaseAPI) new GraphDatabaseFactory().newEmbeddedDatabase(dbPath);
         framedGraph = new FramedGraphFactory(
-                new JavaHandlerModule(),
-                new GremlinGroovyModule()).create((new Neo4jGraph(graphDatabase)));
+                new JavaHandlerModule()).create((new Neo4jGraph(graphDatabase)));
 
         // Initialize the fixture loader and cleaner
         loader = FixtureLoaderFactory.getInstance(framedGraph);

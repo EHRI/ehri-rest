@@ -79,26 +79,16 @@ public final class AclManager {
     }
 
     /**
-     * Check if the current accessor IS the admin group.
-     * 
-     * @param accessor
-     */
-    public boolean isAdmin(Accessor accessor) {
-        Preconditions.checkNotNull(accessor, "NULL accessor given.");
-        return accessor.getId().equals(Group.ADMIN_GROUP_IDENTIFIER);
-    }
-
-    /**
      * Check if an accessor is admin or a member of Admin.
      * 
      * @param accessor
      * @return User belongs to the admin group
      */
     public boolean belongsToAdmin(Accessor accessor) {
-        if (isAdmin(accessor))
+        if (accessor.isAdmin())
             return true;
-        for (Accessor parent : accessor.getAllParents()) {
-            if (isAdmin(parent))
+        for (Accessor parent : accessor.getParents()) {
+            if (parent.isAdmin())
                 return true;
         }
         return false;
@@ -271,7 +261,7 @@ public final class AclManager {
      * @return Permission map for the given accessor
      */
     public GlobalPermissionSet getGlobalPermissions(Accessor accessor) {
-        return isAdmin(accessor)
+        return belongsToAdmin(accessor)
                 ? getAdminPermissions()
                 : getAccessorPermissions(accessor);
     }
@@ -465,7 +455,7 @@ public final class AclManager {
 
         ContentType contentTypeNode = enumContentTypeMap.get(contentType);
         // Check the user themselves...
-        return isAdmin(accessor) || belongsToAdmin(accessor) || hasScopedPermission(contentTypeNode, permissionType, accessor, scopes);
+        return belongsToAdmin(accessor) || hasScopedPermission(contentTypeNode, permissionType, accessor, scopes);
     }
 
     /**
@@ -542,7 +532,7 @@ public final class AclManager {
     private List<PermissionType> getEntityPermissions(Accessor accessor,
             AccessibleEntity entity) {
         // If we're admin, add it regardless.
-        if (isAdmin(accessor)) {
+        if (belongsToAdmin(accessor)) {
             return Lists.newArrayList(PermissionType.values());
         } else {
             List<PermissionType> list = Lists.newLinkedList();
@@ -612,7 +602,7 @@ public final class AclManager {
             throws PermissionDenied {
         // Quick sanity check to make sure we're not trying to add/remove
         // permissions from the admin or the anonymous accounts.
-        if (isAdmin(accessor) || isAnonymous(accessor))
+        if (accessor.isAdmin() || accessor.isAnonymous())
             throw new PermissionDenied(
                     "Unable to grant or revoke permissions to system accounts.");
     }
@@ -621,7 +611,7 @@ public final class AclManager {
         // Quick sanity check to make sure we're not trying to add/remove
         // permissions from the admin or the anonymous accounts.
         // This time throw  a runtime error.
-        if (isAdmin(accessor) || isAnonymous(accessor))
+        if (accessor.isAdmin() || accessor.isAnonymous())
             throw new RuntimeException(
                     "Unable to grant or revoke permissions to system accounts.");
     }

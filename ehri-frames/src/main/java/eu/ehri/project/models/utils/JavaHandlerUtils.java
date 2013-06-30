@@ -7,7 +7,7 @@ import com.tinkerpop.pipes.branch.LoopPipe;
 /**
  * User: mike
  *
- * Utilities for dealing with GremlinGroovy pipelines.
+ * Utilities for dealing with Gremlin pipelines.
  */
 public class JavaHandlerUtils {
 

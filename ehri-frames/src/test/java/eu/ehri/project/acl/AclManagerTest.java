@@ -53,7 +53,7 @@ public class AclManagerTest extends GraphTestBase {
     @Test
     public void testIsAdmin() throws Exception {
         Group admin = manager.getFrame(Group.ADMIN_GROUP_IDENTIFIER, Group.class);
-        assertTrue(new AclManager(graph).isAdmin(admin));
+        assertTrue(new AclManager(graph).belongsToAdmin(admin));
     }
 
     @Test
@@ -68,7 +68,7 @@ public class AclManagerTest extends GraphTestBase {
         Accessor admin = manager.getFrame(Group.ADMIN_GROUP_IDENTIFIER, Group.class);
         Accessor anon = AnonymousAccessor.getInstance();
         AclManager acl = new AclManager(graph);
-        assertFalse(acl.isAdmin(anon));
+        assertFalse(acl.belongsToAdmin(anon));
         assertTrue(acl.isAnonymous(anon));
         assertFalse(acl.isAnonymous(admin));
     }
