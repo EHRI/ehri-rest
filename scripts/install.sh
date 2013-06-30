@@ -37,6 +37,10 @@ fi
 
 echo "Extracting file: $archive"
 outpath=$NEO4JPATH/plugins/ehri
+if [ -e $outpath ]; then
+    rm $outpath/*jar
+    rmdir --ignore-fail-on-non-empty $outpath
+fi
 mkdir -p $outpath
 tar -C $outpath -zxvf $archive
 
