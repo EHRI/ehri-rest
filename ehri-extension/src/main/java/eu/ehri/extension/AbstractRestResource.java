@@ -10,6 +10,9 @@ import javax.ws.rs.core.*;
 
 import com.google.common.base.Optional;
 import com.tinkerpop.blueprints.Vertex;
+import com.tinkerpop.frames.FramedGraphFactory;
+import com.tinkerpop.frames.modules.gremlingroovy.GremlinGroovyModule;
+import com.tinkerpop.frames.modules.javahandler.JavaHandlerModule;
 import eu.ehri.project.utils.TxCheckedNeo4jGraph;
 import eu.ehri.project.models.base.Frame;
 import org.codehaus.jackson.JsonFactory;
@@ -92,7 +95,9 @@ public abstract class AbstractRestResource implements TxCheckedResource {
 
     public AbstractRestResource(@Context GraphDatabaseService database) {
         this.database = database;
-        graph = new FramedGraph<TxCheckedNeo4jGraph>(new TxCheckedNeo4jGraph(database));
+        graph = new FramedGraphFactory(
+                new JavaHandlerModule(),
+                new GremlinGroovyModule()).create(new TxCheckedNeo4jGraph(database));
         manager = GraphManagerFactory.getInstance(graph);
         serializer  = new Serializer(graph);
     }

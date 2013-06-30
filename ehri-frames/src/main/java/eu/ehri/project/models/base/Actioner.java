@@ -1,8 +1,11 @@
 package eu.ehri.project.models.base;
 
-import com.tinkerpop.frames.annotations.gremlin.GremlinGroovy;
+import com.tinkerpop.blueprints.Vertex;
 
+import com.tinkerpop.frames.modules.javahandler.JavaHandler;
+import com.tinkerpop.frames.modules.javahandler.JavaHandlerImpl;
 import eu.ehri.project.models.events.SystemEvent;
+import eu.ehri.project.models.utils.JavaHandlerUtils;
 import eu.ehri.project.persistance.ActionManager;
 
 public interface Actioner extends NamedEntity {
@@ -11,11 +14,26 @@ public interface Actioner extends NamedEntity {
      * 
      * @return
      */
-    @GremlinGroovy("it.as('n').out('" + ActionManager.LIFECYCLE_ACTION + "')" +
-            ".loop('n'){true}{true}.out('" + SystemEvent.HAS_EVENT + "')")
+    @JavaHandler
     public Iterable<SystemEvent> getActions();
 
-    @GremlinGroovy("it.as('n').out('" + ActionManager.LIFECYCLE_ACTION + "')"
-            + ".out('" + SystemEvent.HAS_EVENT + "')")
+    @JavaHandler
     public Iterable<SystemEvent> getLatestAction();
+
+    /**
+     * Implementation of complex methods.
+     */
+    abstract class Impl implements JavaHandlerImpl<Vertex>, Actioner {
+        public Iterable<SystemEvent> getLatestAction() {
+            return frameVertices(gremlin()
+                    .out(ActionManager.LIFECYCLE_ACTION)
+                    .out(SystemEvent.HAS_EVENT));
+        }
+
+        public Iterable<SystemEvent> getActions() {
+            return frameVertices(gremlin().as("n").out(ActionManager.LIFECYCLE_ACTION)
+                    .loop("n", JavaHandlerUtils.noopLoopFunc, JavaHandlerUtils.noopLoopFunc)
+                    .out(SystemEvent.HAS_EVENT));
+        }
+    }
 }

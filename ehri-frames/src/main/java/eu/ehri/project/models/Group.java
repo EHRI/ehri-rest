@@ -1,13 +1,19 @@
 package eu.ehri.project.models;
 
 import com.tinkerpop.blueprints.Direction;
+import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.Adjacency;
 
-import com.tinkerpop.frames.annotations.gremlin.GremlinGroovy;
+import com.tinkerpop.frames.modules.javahandler.JavaHandler;
+import com.tinkerpop.frames.modules.javahandler.JavaHandlerImpl;
+import com.tinkerpop.gremlin.java.GremlinPipeline;
+import com.tinkerpop.pipes.PipeFunction;
+import com.tinkerpop.pipes.branch.LoopPipe;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.base.*;
+import eu.ehri.project.models.utils.JavaHandlerUtils;
 
 @EntityType(EntityClass.GROUP)
 public interface Group extends Accessor, AccessibleEntity, IdentifiableEntity,
@@ -41,9 +47,24 @@ public interface Group extends Accessor, AccessibleEntity, IdentifiableEntity,
     public void removeMember(final Accessor accessor);
 
     // FIXME: Use of __ISA__ here breaks encapsulation of indexing details quite horribly
-    @GremlinGroovy("it.as('n').in('" + BELONGS_TO +"')" +
-            ".loop('n'){true}{it.object.getProperty('" + EntityType.TYPE_KEY +
-            "') == '" + Entities.USER_PROFILE + "'}")
+    @JavaHandler
     public Iterable<UserProfile> getAllUserProfileMembers();
 
+    /**
+     * Implementation of complex methods.
+     */
+    abstract class Impl implements JavaHandlerImpl<Vertex>, Group {
+        public Iterable<UserProfile> getAllUserProfileMembers() {
+            GremlinPipeline<Vertex,Vertex> pipe = gremlin().as("n").in(BELONGS_TO)
+                    .loop("n", JavaHandlerUtils.defaultMaxLoops, new PipeFunction<LoopPipe.LoopBundle<Vertex>, Boolean>() {
+                        @Override
+                        public Boolean compute(LoopPipe.LoopBundle<Vertex> vertexLoopBundle) {
+                            return vertexLoopBundle.getObject()
+                                    .getProperty(EntityType.TYPE_KEY)
+                                    .equals(Entities.USER_PROFILE);
+                        }
+                    });
+            return frameVertices(pipe.dedup());
+        }
+    }
 }

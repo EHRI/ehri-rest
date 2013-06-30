@@ -47,7 +47,7 @@ public class ActionManagerTest extends AbstractFixtureTest {
         assertEquals(1, Iterables.count(second.getActioners()));
 
         assertEquals(1, Iterables.count(repository.getHistory()));
-        assertEquals(1, Iterables.count(repository.getLatestEvent()));
+        assertNotNull(repository.getLatestEvent());
 
         // Check the latest event in the list is the one we want...
         SystemEvent top = am.getLatestGlobalEvents().iterator().next();

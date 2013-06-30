@@ -1,14 +1,20 @@
 package eu.ehri.project.models;
 
 import com.tinkerpop.blueprints.Direction;
+import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.Adjacency;
-import com.tinkerpop.frames.annotations.gremlin.GremlinGroovy;
-
+import com.tinkerpop.frames.modules.javahandler.JavaHandler;
+import com.tinkerpop.frames.modules.javahandler.JavaHandlerImpl;
+import com.tinkerpop.gremlin.java.GremlinPipeline;
+import com.tinkerpop.pipes.PipeFunction;
+import com.tinkerpop.pipes.branch.LoopPipe;
+import com.tinkerpop.pipes.util.Pipeline;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.DescribedEntity;
 import eu.ehri.project.models.base.PermissionScope;
+import eu.ehri.project.models.utils.JavaHandlerUtils;
 
 @EntityType(EntityClass.DOCUMENTARY_UNIT)
 public interface DocumentaryUnit extends AccessibleEntity,
@@ -21,9 +27,7 @@ public interface DocumentaryUnit extends AccessibleEntity,
      * @return
      */
     @Fetch(Repository.HELD_BY)
-    @GremlinGroovy("it.copySplit(_(), _().as('n').out('" + CHILD_OF +"')"
-            + ".loop('n'){it.loops < 40}{!it.object.out('" + CHILD_OF +"').hasNext()}"
-            + ").exhaustMerge().out('" + Repository.HELD_BY + "')")
+    @JavaHandler
     public Repository getRepository();
 
     /**
@@ -47,8 +51,7 @@ public interface DocumentaryUnit extends AccessibleEntity,
     /*
      * Fetches a list of all ancestors (parent -> parent -> parent)
      */
-    @GremlinGroovy("it.as('n').out('" + CHILD_OF
-            + "').loop('n'){it.loops < 20}{true}")
+    @JavaHandler
     public Iterable<DocumentaryUnit> getAncestors();
 
     /**
@@ -60,4 +63,31 @@ public interface DocumentaryUnit extends AccessibleEntity,
 
     @Adjacency(label = DescribedEntity.DESCRIBES, direction = Direction.IN)
     public Iterable<DocumentDescription> getDocumentDescriptions();
+
+    /**
+     * Implementation of complex methods.
+     */
+    abstract class Impl implements JavaHandlerImpl<Vertex>, DocumentaryUnit {
+        public Repository getRepository() {
+            Pipeline<Vertex,Vertex> otherPipe = gremlin().as("n").out(CHILD_OF)
+                    .loop("n", JavaHandlerUtils.defaultMaxLoops, new PipeFunction<LoopPipe.LoopBundle<Vertex>, Boolean>() {
+                        @Override
+                        public Boolean compute(LoopPipe.LoopBundle<Vertex> vertexLoopBundle) {
+                            return !vertexLoopBundle.getObject().getVertices(Direction.OUT,
+                                    CHILD_OF).iterator().hasNext();
+                        }
+                    });
+
+            GremlinPipeline<Vertex,Vertex> out = gremlin().cast(Vertex.class).copySplit(gremlin(), otherPipe)
+                    .exhaustMerge().out(Repository.HELD_BY);
+
+            return (Repository)(out.hasNext() ? frame(out.next()) : null);
+        }
+
+        public Iterable<DocumentaryUnit> getAncestors() {
+            return frameVertices(gremlin().as("n")
+                    .out(CHILD_OF)
+                    .loop("n", JavaHandlerUtils.defaultMaxLoops, JavaHandlerUtils.noopLoopFunc));
+        }
+    }
 }

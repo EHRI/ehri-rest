@@ -1,10 +1,14 @@
 package eu.ehri.project.models.base;
 
+import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.Adjacency;
-import com.tinkerpop.frames.annotations.gremlin.GremlinGroovy;
 
+import com.tinkerpop.frames.modules.javahandler.JavaHandler;
+import com.tinkerpop.frames.modules.javahandler.JavaHandlerImpl;
+import com.tinkerpop.gremlin.java.GremlinPipeline;
 import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.events.SystemEvent;
+import eu.ehri.project.models.utils.JavaHandlerUtils;
 import eu.ehri.project.persistance.ActionManager;
 
 public interface AccessibleEntity extends PermissionGrantTarget {
@@ -33,8 +37,7 @@ public interface AccessibleEntity extends PermissionGrantTarget {
     @Adjacency(label = HAS_PERMISSION_SCOPE)
     public void setPermissionScope(final PermissionScope scope);
 
-    @GremlinGroovy("it.as('n').out('" + HAS_PERMISSION_SCOPE
-            + "').loop('n'){it.loops < 20}{true}")
+    @JavaHandler
     public Iterable<PermissionScope> getPermissionScopes();
 
     /**
@@ -42,14 +45,34 @@ public interface AccessibleEntity extends PermissionGrantTarget {
      * 
      * @return
      */
-    @GremlinGroovy("it.as('n').out('" + ActionManager.LIFECYCLE_EVENT + "')"
-            + ".loop('n'){true}{true}.out('" + eu.ehri.project.models.events.SystemEvent.HAS_EVENT + "')")
+    @JavaHandler
     public Iterable<SystemEvent> getHistory();
 
-    // FIXME: This should be a single item return but frames doesn't currently
-    // support those...
     @Fetch(value = ActionManager.LIFECYCLE_EVENT, ifDepth = 0)
-    @GremlinGroovy("it.as('n').out('" + ActionManager.LIFECYCLE_EVENT + "')"
-            + ".out('" + eu.ehri.project.models.events.SystemEvent.HAS_EVENT + "')")
-    public Iterable<SystemEvent> getLatestEvent();
+    @JavaHandler
+    public SystemEvent getLatestEvent();
+
+    /**
+     * Implementation of complex methods.
+     */
+    abstract class Impl implements JavaHandlerImpl<Vertex>, AccessibleEntity {
+        public SystemEvent getLatestEvent() {
+            GremlinPipeline<Vertex, Vertex> out = gremlin()
+                    .out(ActionManager.LIFECYCLE_EVENT)
+                    .out(SystemEvent.HAS_EVENT);
+            return (SystemEvent)(out.hasNext() ? frame(out.next()) : null);
+        }
+
+        public Iterable<PermissionScope> getPermissionScopes() {
+            return frameVertices(gremlin().as("n")
+                    .out(HAS_PERMISSION_SCOPE)
+                    .loop("n", JavaHandlerUtils.defaultMaxLoops, JavaHandlerUtils.noopLoopFunc));
+        }
+
+        public Iterable<SystemEvent> getHistory() {
+            return frameVertices(gremlin().as("n").out(ActionManager.LIFECYCLE_EVENT)
+                    .loop("n", JavaHandlerUtils.noopLoopFunc, JavaHandlerUtils.noopLoopFunc)
+                    .out(SystemEvent.HAS_EVENT));
+        }
+    }
 }

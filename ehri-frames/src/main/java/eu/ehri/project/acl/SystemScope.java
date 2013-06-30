@@ -84,7 +84,7 @@ public enum SystemScope implements PermissionScope, AccessibleEntity {
         return new EmptyIterable<PermissionScope>();
     }
 
-    public Iterable<SystemEvent> getLatestEvent() {
+    public SystemEvent getLatestEvent() {
         // FIXME: Refactor frames hierarchy to make
         // AccessibleEntity less important.
         throw new UnsupportedOperationException();

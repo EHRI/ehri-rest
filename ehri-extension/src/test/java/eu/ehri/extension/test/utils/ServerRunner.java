@@ -2,6 +2,9 @@ package eu.ehri.extension.test.utils;
 
 import java.io.File;
 
+import com.tinkerpop.frames.FramedGraphFactory;
+import com.tinkerpop.frames.modules.gremlingroovy.GremlinGroovyModule;
+import com.tinkerpop.frames.modules.javahandler.JavaHandlerModule;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.neo4j.kernel.AbstractGraphDatabase;
@@ -43,7 +46,9 @@ public class ServerRunner {
         final String dbPath = "target/tmpdb_" + dbName;
         // FIXME: Can we avoid the case here???
         graphDatabase = (GraphDatabaseAPI) new GraphDatabaseFactory().newEmbeddedDatabase(dbPath);
-        framedGraph = new FramedGraph<Neo4jGraph>(new Neo4jGraph(graphDatabase));
+        framedGraph = new FramedGraphFactory(
+                new JavaHandlerModule(),
+                new GremlinGroovyModule()).create((new Neo4jGraph(graphDatabase)));
 
         // Initialize the fixture loader and cleaner
         loader = FixtureLoaderFactory.getInstance(framedGraph);

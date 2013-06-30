@@ -73,10 +73,7 @@ private final String UN_REL = "HR-HDA145corporateBodyAccessCroatianStateArchive"
 //            logger.debug(key + ": " + creator.asVertex().getProperty(key));
 //        }
 //        assertTrue(creator.asVertex().getPropertyKeys().contains("role"));
-        for(SystemEvent event : unit.getLatestEvent()){
-            System.out.println("event: " + event.getLogMessage());
-        }
-        
+
         List<SystemEvent> actions = toList(unit.getHistory());
         // Check we've only got one action
         assertEquals(1, actions.size());

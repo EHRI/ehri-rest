@@ -63,7 +63,8 @@ public class UshmmTest extends AbstractImporterTest{
         for(Description d : unit.getDocumentDescriptions())
             assertEquals("Spuścizna Bernarda Marka (Syg. S/333) [microform]", d.getName());
 
-        for(SystemEvent event : unit.getLatestEvent()){
+        SystemEvent event = unit.getLatestEvent();
+        if (event != null) {
             logger.debug("event: " + event.getLogMessage());
         }
         

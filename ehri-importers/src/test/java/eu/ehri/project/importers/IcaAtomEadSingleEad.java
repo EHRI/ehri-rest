@@ -65,10 +65,6 @@ public class IcaAtomEadSingleEad extends AbstractImporterTest{
         for(Description d : unit.getDocumentDescriptions())
             assertEquals("Test EAD Item", d.getName());
 
-        for(SystemEvent event : unit.getLatestEvent()){
-            System.out.println("event: " + event.getLogMessage());
-        }
-        
         List<SystemEvent> actions = toList(unit.getHistory());
         // Check we've only got one action
         assertEquals(1, actions.size());
