@@ -88,7 +88,7 @@ public final class AclManager {
         if (accessor.isAdmin())
             return true;
         for (Accessor parent : accessor.getParents()) {
-            if (parent.isAdmin())
+            if (belongsToAdmin(parent))
                 return true;
         }
         return false;
