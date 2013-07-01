@@ -2,9 +2,11 @@ package eu.ehri.project.core;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.HashMap;
 
+import com.tinkerpop.blueprints.IndexableGraph;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +27,9 @@ public class GraphReindexerTest extends ModelTestBase {
     @Test
     public void reindex() {
     	HashMap<EntityClass, Long> countBefore = countTypes();
+        if (graph.getBaseGraph().getClass().isAssignableFrom(IndexableGraph.class)) {
+            fail("Graph is not indexable: " + graph.getBaseGraph());
+        }
 
     	new GraphReindexer(graph).reindex(GraphReindexer.INDEX_NAME);
     	
@@ -41,7 +46,7 @@ public class GraphReindexerTest extends ModelTestBase {
      */
     private HashMap<EntityClass, Long> countTypes() {
     	HashMap<EntityClass, Long> counts = new HashMap<EntityClass, Long>();
-    	Index<Vertex> index = graph.getBaseGraph().getIndex(GraphReindexer.INDEX_NAME,
+    	Index<Vertex> index = ((IndexableGraph)graph.getBaseGraph()).getIndex(GraphReindexer.INDEX_NAME,
                 Vertex.class);
     	EntityClass[] entityClasses = EntityClass.values();
     	for (int i=0; i < entityClasses.length; i++) {
@@ -56,7 +61,7 @@ public class GraphReindexerTest extends ModelTestBase {
      * check that each node is at least indexed by it's id
      */
     private void checkIndex() {
-    	Index<Vertex> index = graph.getBaseGraph().getIndex(GraphReindexer.INDEX_NAME,
+    	Index<Vertex> index = ((IndexableGraph)graph.getBaseGraph()).getIndex(GraphReindexer.INDEX_NAME,
                 Vertex.class);
     	EntityClass[] entityClasses = EntityClass.values();
     	for (int i=0; i < entityClasses.length; i++) {

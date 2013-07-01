@@ -57,11 +57,11 @@ public class IcaAtomEadImporter extends EaImporter {
     @Override
     public DocumentaryUnit importItem(Map<String, Object> itemData, int depth)
             throws ValidationError {
-//        BundleDAO persister = new BundleDAO(framedGraph, permissionScope);
+
         Bundle unit = new Bundle(EntityClass.DOCUMENTARY_UNIT, extractDocumentaryUnit(itemData));
         if (unit.getDataValue(IdentifiableEntity.IDENTIFIER_KEY) == null) {
-            logger.debug("huh?");
-            throw new ValidationError(unit, DocumentaryUnit.IDENTIFIER_KEY, "Missing identifier " + DocumentaryUnit.IDENTIFIER_KEY);
+            throw new ValidationError(unit, DocumentaryUnit.IDENTIFIER_KEY,
+                    "Missing identifier " + DocumentaryUnit.IDENTIFIER_KEY);
         }
         logger.debug("Imported item: " + itemData.get("name"));
         Bundle descBundle = new Bundle(EntityClass.DOCUMENT_DESCRIPTION, extractUnitDescription(itemData, EntityClass.DOCUMENT_DESCRIPTION));
@@ -101,9 +101,11 @@ public class IcaAtomEadImporter extends EaImporter {
             if (scopeType.equals(EntityClass.REPOSITORY)) {
                 Repository repository = framedGraph.frame(permissionScope.asVertex(), Repository.class);
                 frame.setRepository(repository);
+                frame.setPermissionScope(repository);
             } else if (scopeType.equals(EntityClass.DOCUMENTARY_UNIT)) {
                 DocumentaryUnit parent = framedGraph.frame(permissionScope.asVertex(), DocumentaryUnit.class);
                 parent.addChild(frame);
+                frame.setPermissionScope(parent);
             } else {
                 logger.error("Unknown scope type for documentary unit: {}", scopeType);
             }

@@ -100,6 +100,13 @@ public class IcaAtomEadImporterTest extends AbstractImporterTest{
         
         assertEquals(5, subjects.size());
         assertEquals(log.getSuccessful(), subjects.size());
+
+        // Check permission scopes
+        assertEquals(agent, fonds_unit.getPermissionScope());
+        assertEquals(fonds_unit, c1.getPermissionScope());
+        assertEquals(c1, c2.getPermissionScope());
+        assertEquals(c2, c2_1.getPermissionScope());
+        assertEquals(c2, c2_2.getPermissionScope());
     }
 
    

@@ -1,5 +1,6 @@
 package eu.ehri.project.importers;
 
+import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.exceptions.ValidationError;
@@ -55,7 +56,7 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
      * @param permissionScope
      * @param actioner
      */
-    public SaxImportManager(FramedGraph<Neo4jGraph> framedGraph,
+    public SaxImportManager(FramedGraph<? extends TransactionalGraph> framedGraph,
             final PermissionScope permissionScope, final Actioner actioner,
             Class<? extends AbstractImporter> importerClass, Class<? extends SaxXmlHandler> handlerClass) {
         super(framedGraph, permissionScope, actioner);

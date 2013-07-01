@@ -7,6 +7,7 @@ package eu.ehri.project.importers.cvoc;
 import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.importers.AbstractImporterTest;
 import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.IdentifiableEntity;
 import eu.ehri.project.models.cvoc.Concept;
@@ -18,6 +19,8 @@ import java.io.PrintStream;
 import java.util.List;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,6 +78,11 @@ public class CampsImporterTest extends AbstractImporterTest{
         importer.setTolerant(true);
         log = importer.importFile(ios, logMessage);
 		*/
+
+        // Check permission scopes
+        for (AccessibleEntity e : log.getAction().getSubjects()) {
+            assertEquals(vocabulary, e.getPermissionScope());
+        }
     }
 
     

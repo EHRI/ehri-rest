@@ -57,10 +57,9 @@ public class NiodEuropeanaTest extends AbstractImporterTest{
                 getVertexByIdentifier(graph,UNIT_IDENTIFIER),
                 DocumentaryUnit.class);
 
-        for(Description d : fonds_unit.getDescriptions())
+        for(Description d : fonds_unit.getDescriptions()) {
             assertEquals("Jodenster", d.getName());
-
-
+        }
 
 
         // Ensure the import action has the right number of subjects.
@@ -77,6 +76,11 @@ public class NiodEuropeanaTest extends AbstractImporterTest{
         
         assertEquals(1, subjects.size());
         assertEquals(log.getSuccessful(), subjects.size());
+
+        // Check permission scopes
+        for (AccessibleEntity e : log.getAction().getSubjects()) {
+            assertEquals(agent, e.getPermissionScope());
+        }
     }
 
 }

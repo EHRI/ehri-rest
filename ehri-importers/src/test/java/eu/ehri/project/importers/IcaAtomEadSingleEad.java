@@ -7,6 +7,7 @@ package eu.ehri.project.importers;
 import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.events.SystemEvent;
 import java.io.InputStream;
@@ -82,5 +83,9 @@ public class IcaAtomEadSingleEad extends AbstractImporterTest{
         // And one logical item should've been updated
         assertEquals(1, log2.getUpdated());
 
+        // Check permission scopes
+        for (AccessibleEntity e : log.getAction().getSubjects()) {
+            assertEquals(agent, e.getPermissionScope());
+        }
     }
 }

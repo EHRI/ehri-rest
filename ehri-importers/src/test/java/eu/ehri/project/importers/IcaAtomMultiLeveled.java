@@ -8,12 +8,15 @@ import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.UndeterminedRelationship;
+import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.events.SystemEvent;
 import java.io.InputStream;
 import java.util.List;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -91,5 +94,6 @@ private final String UN_REL = "HR-HDA145corporateBodyAccessCroatianStateArchive"
         // And one logical item should've been updated
         assertEquals(3, log2.getUpdated());
 
+        // TODO: Check permission scopes
     }
 }
