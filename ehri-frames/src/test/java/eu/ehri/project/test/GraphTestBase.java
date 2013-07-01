@@ -1,5 +1,6 @@
 package eu.ehri.project.test;
 
+import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.core.GraphManager;
@@ -13,7 +14,7 @@ import org.neo4j.test.TestGraphDatabaseFactory;
  */
 public abstract class GraphTestBase {
 
-    protected FramedGraph<Neo4jGraph> graph;
+    protected FramedGraph<? extends TransactionalGraph> graph;
     protected GraphManager manager;
 
     @Before
