@@ -1,6 +1,7 @@
 package eu.ehri.project.importers;
 
 import com.google.common.base.Optional;
+import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import java.io.FileInputStream;
@@ -27,7 +28,7 @@ import org.slf4j.LoggerFactory;
 
 abstract public class XmlImportManager implements ImportManager {
     private static final Logger logger = LoggerFactory.getLogger(XmlImportManager.class);
-    protected final FramedGraph<Neo4jGraph> framedGraph;
+    protected final FramedGraph<? extends TransactionalGraph> framedGraph;
     protected final PermissionScope permissionScope;
     protected final Actioner actioner;
         private Boolean tolerant = false;
@@ -45,7 +46,8 @@ abstract public class XmlImportManager implements ImportManager {
      * @param permissionScope
      * @param actioner
      */
-    public XmlImportManager(FramedGraph<Neo4jGraph> framedGraph, final PermissionScope permissionScope, final Actioner actioner) {
+    public XmlImportManager(FramedGraph<? extends TransactionalGraph> framedGraph, final PermissionScope permissionScope,
+            final Actioner actioner) {
         this.framedGraph = framedGraph;
         this.permissionScope = permissionScope;
         this.actioner = actioner;

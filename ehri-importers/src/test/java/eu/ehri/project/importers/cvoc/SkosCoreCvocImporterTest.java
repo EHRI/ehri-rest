@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.List;
 
+import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.IdentifiableEntity;
 import org.junit.Test;
 
@@ -17,6 +18,8 @@ import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.ConceptDescription;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.views.Query;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * TODO cleanup this mess
@@ -81,6 +84,11 @@ public class SkosCoreCvocImporterTest extends AbstractImporterTest { //AbstractF
         importer.setTolerant(true);
         log = importer.importFile(ios, logMessage);
 		*/
+
+        // Check permission scopes
+        for (AccessibleEntity e : log.getAction().getSubjects()) {
+            assertEquals(vocabulary, e.getPermissionScope());
+        }
     }
 
     

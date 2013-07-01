@@ -6,6 +6,7 @@ package eu.ehri.project.importers;
 
 import au.com.bytecode.opencsv.CSVReader;
 import com.google.common.collect.Maps;
+import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.exceptions.ValidationError;
@@ -35,7 +36,7 @@ public class CsvImportManager extends XmlImportManager {
     private XmlImporter<Map<String, Object>> importer;
     private Class<? extends XmlImporter> importerClass;
 
-    public CsvImportManager(FramedGraph<Neo4jGraph> framedGraph,
+    public CsvImportManager(FramedGraph<? extends TransactionalGraph> framedGraph,
             final PermissionScope permissionScope, final Actioner actioner, Class<? extends XmlImporter> importerClass) {
         super(framedGraph, permissionScope, actioner);
         this.importerClass = importerClass;

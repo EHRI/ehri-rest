@@ -14,6 +14,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import com.google.common.base.Optional;
+import com.tinkerpop.blueprints.TransactionalGraph;
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.models.base.*;
 import eu.ehri.project.utils.TxCheckedNeo4jGraph;
@@ -64,7 +65,7 @@ import eu.ehri.project.persistance.BundleDAO;
 public class SkosCoreCvocImporter {
 	   private static final Logger logger = LoggerFactory
 	            .getLogger(SkosCoreCvocImporter.class);
-    protected final FramedGraph<Neo4jGraph> framedGraph;
+    protected final FramedGraph<? extends TransactionalGraph> framedGraph;
     protected final Actioner actioner;
     protected Boolean tolerant = false;
     protected final Vocabulary vocabulary;
@@ -82,7 +83,7 @@ public class SkosCoreCvocImporter {
      * @param actioner
      * @param vocabulary
      */
-    public SkosCoreCvocImporter(FramedGraph<Neo4jGraph> framedGraph,
+    public SkosCoreCvocImporter(FramedGraph<? extends TransactionalGraph> framedGraph,
              final Actioner actioner, Vocabulary vocabulary) {
         this.framedGraph = framedGraph;
         this.actioner = actioner;
@@ -223,6 +224,7 @@ public class SkosCoreCvocImporter {
 
                           // Set the vocabulary/concept relationship
                           frame.setVocabulary(vocabulary);
+                          frame.setPermissionScope(vocabulary);
 
                           // when concept was successfully persisted!
                           action.addSubjects(frame);

@@ -5,6 +5,7 @@
 package eu.ehri.project.importers;
 
 import eu.ehri.project.importers.properties.XmlImportProperties;
+import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.cvoc.AuthoritativeSet;
 import java.io.InputStream;
 
@@ -51,6 +52,10 @@ public class PersonalitiesImporterTest extends AbstractImporterTest{
          */
         assertEquals(count+34, getNodeCount(graph));
         assertEquals(voccount + 8, toList(authoritativeSet.getAuthoritativeItems()).size());
-       
+
+        // Check permission scopes are correct.
+        for (AccessibleEntity subject : log.getAction().getSubjects()) {
+            assertEquals(authoritativeSet, subject.getPermissionScope());
+        }
     }
 }

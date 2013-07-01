@@ -11,6 +11,7 @@ import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.models.base.IdentifiableEntity;
 import eu.ehri.project.test.AbstractFixtureTest;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.tooling.GlobalGraphOperations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +24,7 @@ public class AbstractImporterTest extends AbstractFixtureTest {
     private static final Logger logger = LoggerFactory.getLogger(AbstractImporterTest.class);
     
    
-    protected void printGraph(FramedGraph<Neo4jGraph> graph) {
+    protected void printGraph(FramedGraph<?> graph) {
         int vcount = 0;
         for (Vertex v : graph.getVertices()) {
             logger.debug(++vcount + " -------------------------");
@@ -46,13 +47,14 @@ public class AbstractImporterTest extends AbstractFixtureTest {
         }
     }
 
-    protected Vertex getVertexByIdentifier(FramedGraph<Neo4jGraph> graph, String id) {
+    protected Vertex getVertexByIdentifier(FramedGraph<?> graph, String id) {
         Iterable<Vertex> docs = graph.getVertices(IdentifiableEntity.IDENTIFIER_KEY, id);
         return docs.iterator().next();
     }
 
-    protected int getNodeCount(FramedGraph<Neo4jGraph> graph) {
-        return toList(GlobalGraphOperations
-                .at(graph.getBaseGraph().getRawGraph()).getAllNodes()).size();
+    protected int getNodeCount(FramedGraph<?> graph) {
+        // Unsafe cast here
+        GraphDatabaseService svc = ((Neo4jGraph)graph.getBaseGraph()).getRawGraph();
+        return toList(GlobalGraphOperations.at(svc).getAllNodes()).size();
     }
 }

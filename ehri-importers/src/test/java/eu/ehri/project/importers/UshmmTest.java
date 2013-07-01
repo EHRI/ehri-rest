@@ -6,11 +6,14 @@ package eu.ehri.project.importers;
 
 import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.events.SystemEvent;
 import java.io.InputStream;
 import java.util.List;
+
+import eu.ehri.project.views.Query;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import org.slf4j.Logger;
@@ -39,7 +42,8 @@ public class UshmmTest extends AbstractImporterTest{
         printGraph(graph);
         
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        ImportLog log = new SaxImportManager(graph, agent, validUser, IcaAtomEadImporter.class, IcaAtomEadHandler.class).setTolerant(Boolean.TRUE).importFile(ios, logMessage);
+        ImportLog log = new SaxImportManager(graph, agent, validUser, IcaAtomEadImporter.class, IcaAtomEadHandler.class)
+                .setTolerant(Boolean.TRUE).importFile(ios, logMessage);
 
         printGraph(graph);
         /* How many new nodes will have been created? We should have
@@ -66,11 +70,14 @@ public class UshmmTest extends AbstractImporterTest{
         for(SystemEvent event : unit.getLatestEvent()){
             logger.debug("event: " + event.getLogMessage());
         }
-        
+
         List<SystemEvent> actions = toList(unit.getHistory());
         // Check we've only got one action
         assertEquals(1, actions.size());
         assertEquals(logMessage, actions.get(0).getLogMessage());
+
+        // Check scope is correct...
+        assertEquals(agent, unit.getPermissionScope());
 
 //        // Now re-import the same file
 //        InputStream ios2 = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
