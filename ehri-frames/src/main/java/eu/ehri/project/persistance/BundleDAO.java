@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.google.common.base.Optional;
 import eu.ehri.project.models.base.Frame;
 import eu.ehri.project.models.idgen.IdGenerator;
 
@@ -45,6 +46,15 @@ public final class BundleDAO {
     private final PermissionScope scope;
     private final GraphManager manager;
 
+    private static class CreateOrUpdateInfo {
+        public final Vertex vertex;
+        public final boolean created;
+        public CreateOrUpdateInfo(Vertex vertex, boolean created) {
+            this.vertex = vertex;
+            this.created = created;
+        }
+    }
+
     /**
      * Constructor with a given scope.
      *
@@ -53,7 +63,8 @@ public final class BundleDAO {
      */
     public BundleDAO(FramedGraph<?> graph, PermissionScope scope) {
         this.graph = graph;
-        this.scope = scope;
+        this.scope = Optional.fromNullable(scope)
+                .or(SystemScope.getInstance());
         manager = GraphManagerFactory.getInstance(graph);
     }
 
@@ -100,7 +111,7 @@ public final class BundleDAO {
      */
     public <T extends Frame> T createOrUpdate(Bundle bundle, Class<T> cls)
             throws ValidationError {
-        return graph.frame(createOrUpdateInner(bundle), cls);
+        return graph.frame(createOrUpdateInner(bundle).vertex, cls);
     }
 
     /**
@@ -146,13 +157,16 @@ public final class BundleDAO {
      * @return
      * @throws ValidationError
      */
-    private Vertex createOrUpdateInner(Bundle bundle) throws ValidationError {
+    private CreateOrUpdateInfo createOrUpdateInner(Bundle bundle) throws ValidationError {
         if (bundle.getId() == null) {
-            return createInner(bundle);
+            return new CreateOrUpdateInfo(createInner(bundle), true);
         } else {
             try {
-                return manager.exists(bundle.getId()) ? updateInner(bundle)
-                        : createInner(bundle);
+                if (manager.exists(bundle.getId())) {
+                    return new CreateOrUpdateInfo(updateInner(bundle), false);
+                } else {
+                    return new CreateOrUpdateInfo(createInner(bundle), true);
+                }
             } catch (ItemNotFound e) {
                 throw new RuntimeException(
                         "Create or update failed because ItemNotFound was thrown even though exists() was true",
@@ -296,7 +310,7 @@ public final class BundleDAO {
 
                 for (Bundle bundle : relations.get(relation)) {
                     try {
-                        Vertex child = createOrUpdateInner(bundle);
+                        Vertex child = createOrUpdateInner(bundle).vertex;
                         // Create a relation if there isn't one already
                         if (!currentRels.contains(child)) {
                             createChildRelationship(master, child, relation,
