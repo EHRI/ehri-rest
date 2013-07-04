@@ -63,6 +63,7 @@ historicalAgentDescription,occupation,,,
 historicalAgentDescription,maintenanceEvent,,,1
 historicalAgentDescription,otherFormsOfFirstName,,,1
 historicalAgentDescription,otherFormsOfLastName,,,1
+repositoryDescription,rulesAndConventions,,,
 repositoryDescription,typeOfEntity,,,
 repositoryDescription,otherFormsOfName,,,1
 repositoryDescription,parallelFormsOfName,,,
