@@ -55,11 +55,10 @@ public class UkrainianUnitImporterTest extends AbstractImporterTest{
          * 17 DocumentaryUnits
          * 17 + 3 DocumentsDescription (there are 3 desc's with 2 languages)
          * 17 + 3 DatePeriods
-         * 17 + 3 UnknownProperties
          * 18 more import Event links (1 for every Unit, 1 for the User)
          * 1 more import Event
          */
-        assertEquals(count+96, getNodeCount(graph));
+        assertEquals(count+76, getNodeCount(graph));
         printGraph(graph);
 //        assertEquals(voccount + 8, toList(authoritativeSet.getAuthoritativeItems()).size());
        

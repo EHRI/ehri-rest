@@ -112,6 +112,9 @@ public class UkrainianUnitImporter extends XmlImporter<Object> {
     private Map<String, Object> extractUnit(Map<String, Object> itemData) {
         //unit needs at least IDENTIFIER_KEY
         Map<String, Object> item = new HashMap<String, Object>();
+        putIfNotNull(item, "scope", itemData.get(p.getFirstPropertyWithValue("scope")));
+        putIfNotNull(item, "priority", itemData.get(p.getFirstPropertyWithValue("priority")));
+        putIfNotNull(item, "copyrightStatus", itemData.get(p.getFirstPropertyWithValue("copyrightStatus")));
         if (itemData.containsKey("identifier")) {
             item.put(IdentifiableEntity.IDENTIFIER_KEY, itemData.get("identifier"));
         } else {
@@ -120,6 +123,11 @@ public class UkrainianUnitImporter extends XmlImporter<Object> {
         return item;
     }
 
+    private void putIfNotNull(Map<String, Object> item, String key, Object value){
+        if(value != null && !value.toString().isEmpty()){
+            item.put(key, value);
+        }
+    }
     public Map<String, Object> constructDateMap(Map<String, Object> itemData) {
         Map<String, Object> item = new HashMap<String, Object>();
         String origDate = itemData.get("dates").toString();
@@ -143,7 +151,10 @@ public class UkrainianUnitImporter extends XmlImporter<Object> {
                     !(p.getProperty(key).equals("IGNORE")) && 
                     !(p.getProperty(key).equals("UNKNOWN")) && 
                     (!key.equals("dates")) && 
-                    (!key.equals("language_of_description"))
+                    (!p.getProperty(key).equals("scope")) && //on the unit
+                    (!p.getProperty(key).equals("copyrightStatus")) && // on the unit
+                    (!p.getProperty(key).equals("priority")) && // on the unit
+                    (!key.equals("language_of_description"))  //dealt with in importItem
                     ) {
                 if (!p.containsProperty(key)) {
                     SaxXmlHandler.putPropertyInGraph(item, SaxXmlHandler.UNKNOWN + key, itemData.get(key).toString());

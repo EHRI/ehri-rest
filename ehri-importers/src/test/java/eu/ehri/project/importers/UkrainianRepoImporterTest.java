@@ -49,7 +49,6 @@ public class UkrainianRepoImporterTest extends AbstractImporterTest{
          * 17 DocumentaryUnits
          * 17 + 3 DocumentsDescription (there are 3 desc's with 2 languages)
          * 17 + 3 DatePeriods
-         * 17 + 3 UnknownProperties
          * 18 more import Event links (1 for every Unit, 1 for the User)
          * 1 more import Event
          * (==96)
@@ -62,7 +61,7 @@ public class UkrainianRepoImporterTest extends AbstractImporterTest{
         graph.getBaseGraph().commit();
 
         printGraph(graph);
-        assertEquals(count+21+96-2-17, getNodeCount(graph));
+        assertEquals(count+21+76-2-17, getNodeCount(graph));
 //        assertEquals(voccount + 8, toList(authoritativeSet.getAuthoritativeItems()).size());
        
     }
