@@ -4,7 +4,7 @@ import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.Adjacency;
 
 import com.tinkerpop.frames.modules.javahandler.JavaHandler;
-import com.tinkerpop.frames.modules.javahandler.JavaHandlerImpl;
+import com.tinkerpop.frames.modules.javahandler.JavaHandlerContext;
 import com.tinkerpop.gremlin.java.GremlinPipeline;
 import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.events.SystemEvent;
@@ -55,7 +55,7 @@ public interface AccessibleEntity extends PermissionGrantTarget {
     /**
      * Implementation of complex methods.
      */
-    abstract class Impl implements JavaHandlerImpl<Vertex>, AccessibleEntity {
+    abstract class Impl implements JavaHandlerContext<Vertex>, AccessibleEntity {
         public SystemEvent getLatestEvent() {
             GremlinPipeline<Vertex, Vertex> out = gremlin()
                     .out(ActionManager.LIFECYCLE_EVENT)

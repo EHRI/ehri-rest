@@ -3,7 +3,7 @@ package eu.ehri.project.models.base;
 import com.tinkerpop.blueprints.Vertex;
 
 import com.tinkerpop.frames.modules.javahandler.JavaHandler;
-import com.tinkerpop.frames.modules.javahandler.JavaHandlerImpl;
+import com.tinkerpop.frames.modules.javahandler.JavaHandlerContext;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.models.utils.JavaHandlerUtils;
 import eu.ehri.project.persistance.ActionManager;
@@ -23,7 +23,7 @@ public interface Actioner extends NamedEntity {
     /**
      * Implementation of complex methods.
      */
-    abstract class Impl implements JavaHandlerImpl<Vertex>, Actioner {
+    abstract class Impl implements JavaHandlerContext<Vertex>, Actioner {
         public Iterable<SystemEvent> getLatestAction() {
             return frameVertices(gremlin()
                     .out(ActionManager.LIFECYCLE_ACTION)

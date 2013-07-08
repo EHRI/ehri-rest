@@ -5,7 +5,7 @@ import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.Adjacency;
 
 import com.tinkerpop.frames.modules.javahandler.JavaHandler;
-import com.tinkerpop.frames.modules.javahandler.JavaHandlerImpl;
+import com.tinkerpop.frames.modules.javahandler.JavaHandlerContext;
 import com.tinkerpop.pipes.util.Pipeline;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
@@ -38,7 +38,7 @@ public interface Repository extends AccessibleEntity, DescribedEntity,
     /**
      * Implementation of complex methods.
      */
-    abstract class Impl implements JavaHandlerImpl<Vertex>, Repository {
+    abstract class Impl implements JavaHandlerContext<Vertex>, Repository {
         public Iterable<DocumentaryUnit> getAllCollections() {
             Pipeline<Vertex,Vertex> otherPipe = gremlin().as("n").in(DocumentaryUnit.CHILD_OF)
                     .loop("n", JavaHandlerUtils.noopLoopFunc, JavaHandlerUtils.noopLoopFunc);

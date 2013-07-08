@@ -5,7 +5,7 @@ import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Property;
 import com.tinkerpop.frames.modules.javahandler.JavaHandler;
-import com.tinkerpop.frames.modules.javahandler.JavaHandlerImpl;
+import com.tinkerpop.frames.modules.javahandler.JavaHandlerContext;
 import com.tinkerpop.pipes.PipeFunction;
 import com.tinkerpop.pipes.branch.LoopPipe;
 import eu.ehri.project.models.EntityClass;
@@ -63,7 +63,7 @@ public interface SystemEvent extends AccessibleEntity {
     /**
      * Implementation of complex methods.
      */
-    abstract class Impl implements JavaHandlerImpl<Vertex>, SystemEvent {
+    abstract class Impl implements JavaHandlerContext<Vertex>, SystemEvent {
         public Iterable<AccessibleEntity> getSubjects() {
             return frameVertices(gremlin().in(HAS_EVENT)
                     .as("n").in(ActionManager.LIFECYCLE_EVENT)

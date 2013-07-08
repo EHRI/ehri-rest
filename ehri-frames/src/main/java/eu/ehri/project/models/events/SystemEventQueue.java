@@ -2,7 +2,7 @@ package eu.ehri.project.models.events;
 
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.modules.javahandler.JavaHandler;
-import com.tinkerpop.frames.modules.javahandler.JavaHandlerImpl;
+import com.tinkerpop.frames.modules.javahandler.JavaHandlerContext;
 import com.tinkerpop.gremlin.java.GremlinPipeline;
 import com.tinkerpop.pipes.util.Pipeline;
 import eu.ehri.project.models.EntityClass;
@@ -25,7 +25,7 @@ public interface SystemEventQueue extends Frame {
     @JavaHandler
     public Iterable<SystemEvent> getSystemEvents();
 
-    abstract class Impl implements JavaHandlerImpl<Vertex>, SystemEventQueue {
+    abstract class Impl implements JavaHandlerContext<Vertex>, SystemEventQueue {
         public Iterable<SystemEvent> getSystemEvents() {
             Pipeline<Vertex,Vertex> otherPipe = gremlin().as("n")
                     .out(ActionManager.LIFECYCLE_ACTION)

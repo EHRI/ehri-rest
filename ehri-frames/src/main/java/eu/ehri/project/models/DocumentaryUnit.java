@@ -4,7 +4,7 @@ import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.modules.javahandler.JavaHandler;
-import com.tinkerpop.frames.modules.javahandler.JavaHandlerImpl;
+import com.tinkerpop.frames.modules.javahandler.JavaHandlerContext;
 import com.tinkerpop.gremlin.java.GremlinPipeline;
 import com.tinkerpop.pipes.PipeFunction;
 import com.tinkerpop.pipes.branch.LoopPipe;
@@ -67,7 +67,7 @@ public interface DocumentaryUnit extends AccessibleEntity,
     /**
      * Implementation of complex methods.
      */
-    abstract class Impl implements JavaHandlerImpl<Vertex>, DocumentaryUnit {
+    abstract class Impl implements JavaHandlerContext<Vertex>, DocumentaryUnit {
         public Repository getRepository() {
             Pipeline<Vertex,Vertex> otherPipe = gremlin().as("n").out(CHILD_OF)
                     .loop("n", JavaHandlerUtils.defaultMaxLoops, new PipeFunction<LoopPipe.LoopBundle<Vertex>, Boolean>() {
