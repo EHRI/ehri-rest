@@ -1,27 +1,21 @@
 package eu.ehri.project.commands;
 
-import eu.ehri.project.models.base.NamedEntity;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.Option;
-
 import com.google.common.collect.Maps;
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
+import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.frames.FramedGraph;
-
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
-import eu.ehri.project.exceptions.DeserializationError;
-import eu.ehri.project.exceptions.IntegrityError;
-import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Group;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.Accessor;
+import eu.ehri.project.models.base.NamedEntity;
 import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.views.impl.LoggingCrudViews;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.Option;
 
 /**
  * Add a user.
@@ -67,7 +61,7 @@ public class UserAdd extends BaseCommand implements Command {
      * @throws ValidationError 
      */
     @Override
-    public int execWithOptions(final FramedGraph<Neo4jGraph> graph,
+    public int execWithOptions(final FramedGraph<? extends TransactionalGraph> graph,
             CommandLine cmdLine) throws ItemNotFound, ValidationError, PermissionDenied, DeserializationError {
 
         GraphManager manager = GraphManagerFactory.getInstance(graph);

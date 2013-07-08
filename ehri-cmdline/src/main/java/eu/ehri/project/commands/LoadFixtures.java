@@ -1,16 +1,11 @@
 package eu.ehri.project.commands;
 
+import com.tinkerpop.blueprints.TransactionalGraph;
+import com.tinkerpop.frames.FramedGraph;
+import eu.ehri.project.utils.fixtures.FixtureLoader;
 import eu.ehri.project.utils.fixtures.FixtureLoaderFactory;
 import org.apache.commons.cli.CommandLine;
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
-import com.tinkerpop.frames.FramedGraph;
-
-
 import org.apache.commons.cli.Option;
-import org.apache.commons.cli.OptionBuilder;
-
-import eu.ehri.project.utils.fixtures.FixtureLoader;
-
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -53,7 +48,7 @@ public class LoadFixtures extends BaseCommand implements Command {
      * @throws Exception
      */
     @Override
-    public int execWithOptions(final FramedGraph<Neo4jGraph> graph,
+    public int execWithOptions(final FramedGraph<? extends TransactionalGraph> graph,
             CommandLine cmdLine) throws Exception {
         boolean initialize = cmdLine.hasOption("init");
         FixtureLoader loader = FixtureLoaderFactory.getInstance(graph, initialize);

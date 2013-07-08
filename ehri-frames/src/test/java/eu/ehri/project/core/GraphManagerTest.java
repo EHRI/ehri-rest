@@ -39,7 +39,7 @@ public class GraphManagerTest {
     private static final EntityClass TEST_TYPE = EntityClass.USER_PROFILE;
 
 
-    protected FramedGraph<Neo4jGraph> graph;
+    protected FramedGraph<? extends TransactionalGraph> graph;
     protected GraphManager manager;
 
     /**

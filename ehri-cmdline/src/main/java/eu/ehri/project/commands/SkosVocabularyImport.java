@@ -1,28 +1,18 @@
 package eu.ehri.project.commands;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-
+import com.tinkerpop.blueprints.TransactionalGraph;
+import com.tinkerpop.frames.FramedGraph;
+import eu.ehri.project.core.GraphManager;
+import eu.ehri.project.core.GraphManagerFactory;
+import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.importers.cvoc.SkosCoreCvocImporter;
+import eu.ehri.project.models.UserProfile;
+import eu.ehri.project.models.cvoc.Vocabulary;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.ParseException;
 
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
-import com.tinkerpop.frames.FramedGraph;
-
-import eu.ehri.project.core.GraphManager;
-import eu.ehri.project.core.GraphManagerFactory;
-import eu.ehri.project.exceptions.IntegrityError;
-import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.importers.ImportLog;
-import eu.ehri.project.importers.cvoc.SkosCoreCvocImporter;
-import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.UserProfile;
-import eu.ehri.project.models.cvoc.Vocabulary;
-import eu.ehri.project.persistance.Bundle;
-import eu.ehri.project.persistance.BundleDAO;
+import java.util.Map.Entry;
 
 /**
  * Import Skos from the command line...
@@ -69,7 +59,7 @@ public class SkosVocabularyImport extends BaseCommand implements Command {
      *
      * @throws Exception
      */
-    public int execWithOptions(final FramedGraph<Neo4jGraph> graph,
+    public int execWithOptions(final FramedGraph<? extends TransactionalGraph> graph,
                                CommandLine cmdLine) throws Exception {
 
         GraphManager manager = GraphManagerFactory.getInstance(graph);

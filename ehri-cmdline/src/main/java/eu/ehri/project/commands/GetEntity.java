@@ -1,14 +1,13 @@
 package eu.ehri.project.commands;
 
-import org.apache.commons.cli.CommandLine;
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
+import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.frames.FramedGraph;
-
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.persistance.Serializer;
+import org.apache.commons.cli.CommandLine;
 
 /**
  * Import EAD from the command line...
@@ -47,7 +46,7 @@ public class GetEntity extends BaseCommand implements Command {
      */
     @Override
     @SuppressWarnings("unchecked")
-    public int execWithOptions(final FramedGraph<Neo4jGraph> graph,
+    public int execWithOptions(final FramedGraph<? extends TransactionalGraph> graph,
             CommandLine cmdLine) throws Exception {
 
         GraphManager manager = GraphManagerFactory.getInstance(graph);

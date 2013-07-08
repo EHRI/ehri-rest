@@ -1,16 +1,15 @@
 package eu.ehri.project.commands;
 
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.Option;
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
+import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.frames.FramedGraph;
-
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.views.Query;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.Option;
 
 /**
  * Import EAD from the command line...
@@ -52,7 +51,7 @@ public class UserListEntities extends BaseCommand implements Command {
      * @throws Exception
      */
     @Override
-    public int execWithOptions(final FramedGraph<Neo4jGraph> graph,
+    public int execWithOptions(final FramedGraph<? extends TransactionalGraph> graph,
             CommandLine cmdLine) throws Exception {
 
         if (cmdLine.getArgList().size() < 1)

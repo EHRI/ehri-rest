@@ -5,7 +5,7 @@
 package eu.ehri.project.commands;
 
 import com.google.common.collect.Lists;
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
+import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.core.GraphManager;
@@ -16,16 +16,15 @@ import eu.ehri.project.importers.SaxImportManager;
 import eu.ehri.project.importers.SaxXmlHandler;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.PermissionScope;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.Option;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.InputStreamReader;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.Option;
 
 /**
  *
@@ -55,7 +54,7 @@ public abstract class ImportCommand extends BaseCommand implements Command{
     }
     
      @Override
-    public int execWithOptions(final FramedGraph<Neo4jGraph> graph,
+    public int execWithOptions(final FramedGraph<? extends TransactionalGraph> graph,
             CommandLine cmdLine) throws Exception {
 
         GraphManager manager = GraphManagerFactory.getInstance(graph);

@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.google.common.collect.Lists;
+import com.tinkerpop.frames.FramedGraphFactory;
+import com.tinkerpop.frames.modules.javahandler.JavaHandlerModule;
 import eu.ehri.project.models.base.Frame;
 import eu.ehri.project.utils.fixtures.FixtureLoader;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -329,7 +331,8 @@ public class YamlFixtureLoader implements FixtureLoader {
                 .newEmbeddedDatabase(args[0]);
         registerShutdownHook(db);
         try {
-            FramedGraph<Neo4jGraph> graph = new FramedGraph<Neo4jGraph>(
+            FramedGraph<? extends TransactionalGraph> graph = new FramedGraphFactory(
+                        new JavaHandlerModule()).create(
                     new Neo4jGraph(db));
             YamlFixtureLoader loader = new YamlFixtureLoader(graph);
             loader.loadTestData();

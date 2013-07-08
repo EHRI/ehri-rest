@@ -1,10 +1,9 @@
 package eu.ehri.project.commands;
 
-import org.apache.commons.cli.CommandLine;
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
+import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.frames.FramedGraph;
-
 import eu.ehri.project.utils.GraphInitializer;
+import org.apache.commons.cli.CommandLine;
 
 /**
  * Import EAD from the command line...
@@ -41,7 +40,7 @@ public class Initialize extends BaseCommand implements Command {
      * @throws Exception 
      */
     @Override
-    public int execWithOptions(final FramedGraph<Neo4jGraph> graph, CommandLine cmdLine) throws Exception {
+    public int execWithOptions(final FramedGraph<? extends TransactionalGraph> graph, CommandLine cmdLine) throws Exception {
         GraphInitializer initializer = new GraphInitializer(graph);
         initializer.initialize();
         return 0;

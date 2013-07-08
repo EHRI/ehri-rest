@@ -1,15 +1,14 @@
 package eu.ehri.project.commands;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
-import eu.ehri.project.utils.TxCheckedNeo4jGraph;
-import org.apache.commons.cli.*;
+import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
+import com.tinkerpop.frames.FramedGraphFactory;
+import com.tinkerpop.frames.modules.javahandler.JavaHandlerModule;
+import eu.ehri.project.utils.TxCheckedNeo4jGraph;
+import org.apache.commons.cli.*;
+
+import java.util.*;
 
 public class CmdEntryPoint extends BaseCommand {
 
@@ -64,7 +63,7 @@ public class CmdEntryPoint extends BaseCommand {
     }
 
     @Override
-    public int execWithOptions(FramedGraph<Neo4jGraph> graph, CommandLine cmdLine) throws Exception {
+    public int execWithOptions(FramedGraph<? extends TransactionalGraph> graph, CommandLine cmdLine) throws Exception {
         System.err.println(getHelp());
         return 1;
     }
@@ -81,17 +80,17 @@ public class CmdEntryPoint extends BaseCommand {
                     newArgs.add(args[i]);
                 }
                 Command cmd = CmdEntryPoint.COMMANDS.get(args[1]).getConstructor().newInstance();
-                FramedGraph<Neo4jGraph> graph;
+                FramedGraph<? extends TransactionalGraph> graph;
                 if (cmd.isReadOnly()) {
                     // Get the graph
 //                    graph = new FramedGraph<Neo4jGraph>(
 //                            new Neo4jGraph(new EmbeddedReadOnlyGraphDatabase(args[0])));
                     /* readonly gives problems on OSX, lets not use it */
-                    graph = new FramedGraph<Neo4jGraph>(
-                            new Neo4jGraph(args[0]));
+                    graph = new FramedGraphFactory(new JavaHandlerModule()).create(
+                                new Neo4jGraph(args[0]));
                 } else {
                     // Get the graph
-                    graph = new FramedGraph<Neo4jGraph>(
+                    graph = new FramedGraphFactory(new JavaHandlerModule()).create(
                             new TxCheckedNeo4jGraph(args[0]));
                 }
 
