@@ -329,6 +329,12 @@
               data:
                 startDate: !!str 1939-01-01
                 endDate: !!str 1945-01-01
+          hasUnknownProperty:
+            - id: c4-unp1
+              type: property
+              data:
+                test1: Arbitrary text
+                test2: More arbitrary text
     heldBy: r1
     hasPermissionScope: r1
 
