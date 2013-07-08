@@ -76,6 +76,10 @@ public class EagHandler extends SaxXmlHandler {
                     logger.debug("no " + Description.LANGUAGE_CODE + " found");
                     putPropertyInCurrentGraph(Description.LANGUAGE_CODE, "en");
                 }
+                if (!currentGraphPath.peek().containsKey("rulesAndConventions")) {
+                    logger.debug("no rulesAndConventions found");
+                    putPropertyInCurrentGraph("rulesAndConventions", "ISDIAH");
+                }
                 importer.importItem(currentGraphPath.pop(), depth);
 
             } catch (ValidationError ex) {

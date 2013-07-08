@@ -13,6 +13,7 @@ USHMM_DATA_DIR = "ead"
 EAD_DATA_DIR = "icaatom-export"
 USHMM_ID = "us-005578"
 USER_FIXTURES = "#{ENV["HOME"]}/Dropbox/EHRI/users.yaml"
+WL_USERS = "#{ENV["HOME"]}/Dropbox/EHRI/wl-user-groups.yaml"
 WL_EAD_DIR = "#{DROPBOX}/wiener-library"
 WL_ID = "gb-003348"
 THES_RDF = "#{DROPBOX}/ehri-skos.rdf"
@@ -121,6 +122,7 @@ class DbBuilder
 
   def import_wl    
     puts "Importing Wiener Library EAD..."
+    Commands::LoadFixtures.new.exec(Graph, [WL_USERS].to_java(:string))
     wl_xml = Dir.glob("#{WL_EAD_DIR}/*xml")
     wl_args = ["--scope", WL_ID, "--user", USER_ID, "--tolerant", "--log", "Importing AIM25 Wiener Library EAD"] + wl_xml
     Commands::EadImport.new.exec(Graph, wl_args.to_java(:string))
