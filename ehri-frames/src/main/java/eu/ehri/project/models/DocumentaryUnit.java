@@ -14,6 +14,7 @@ import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.DescribedEntity;
 import eu.ehri.project.models.base.PermissionScope;
+import eu.ehri.project.models.base.TemporalEntity;
 import eu.ehri.project.models.utils.JavaHandlerUtils;
 
 @EntityType(EntityClass.DOCUMENTARY_UNIT)
@@ -34,7 +35,7 @@ public interface DocumentaryUnit extends AccessibleEntity,
      * Set the repository that holds this documentary unit.
      * @param institution
      */
-    @Adjacency(label = Repository.HELD_BY)
+    @JavaHandler
     public void setRepository(final Repository institution);
 
     /**
@@ -68,6 +69,13 @@ public interface DocumentaryUnit extends AccessibleEntity,
      * Implementation of complex methods.
      */
     abstract class Impl implements JavaHandlerContext<Vertex>, DocumentaryUnit {
+
+        public void setRepository(final Repository institution) {
+            // NB: Convenience methods that proxies addCollection (which
+            // in turn maintains the child item cache.)
+            institution.addCollection(frame(it(), TemporalEntity.class));
+        }
+
         public Repository getRepository() {
             Pipeline<Vertex,Vertex> otherPipe = gremlin().as("n").out(CHILD_OF)
                     .loop("n", JavaHandlerUtils.defaultMaxLoops, new PipeFunction<LoopPipe.LoopBundle<Vertex>, Boolean>() {
