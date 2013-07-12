@@ -3,8 +3,6 @@ package eu.ehri.project.models;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.Adjacency;
-
-import com.tinkerpop.frames.Property;
 import com.tinkerpop.frames.modules.javahandler.JavaHandler;
 import com.tinkerpop.frames.modules.javahandler.JavaHandlerContext;
 import com.tinkerpop.pipes.util.Pipeline;
@@ -15,10 +13,9 @@ import eu.ehri.project.models.utils.JavaHandlerUtils;
 
 @EntityType(EntityClass.REPOSITORY)
 public interface Repository extends AccessibleEntity, DescribedEntity,
-        AnnotatableEntity, PermissionScope {
+        AnnotatableEntity, PermissionScope, ItemHolder {
 
     public static final String HELD_BY = "heldBy";
-    public static final String CHILD_COUNT = "childCount";
     public static final String HAS_COUNTRY = "hasCountry";
 
     @JavaHandler
@@ -32,7 +29,7 @@ public interface Repository extends AccessibleEntity, DescribedEntity,
 
     //@Adjacency(label = HELD_BY, direction = Direction.IN)
     @JavaHandler
-    public void addCollection(final TemporalEntity collection);
+    public void addCollection(final DocumentaryUnit collection);
 
     @Fetch(HAS_COUNTRY)
     @Adjacency(label = HAS_COUNTRY, direction = Direction.OUT)
@@ -60,7 +57,7 @@ public interface Repository extends AccessibleEntity, DescribedEntity,
             return frameVertices(gremlin().in(HELD_BY));
         }
 
-        public void addCollection(final TemporalEntity collection) {
+        public void addCollection(final DocumentaryUnit collection) {
             collection.asVertex().addEdge(HELD_BY, it());
             Long count = it().getProperty(CHILD_COUNT);
             if (count == null) {

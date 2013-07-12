@@ -2,7 +2,6 @@ package eu.ehri.project.models.base;
 
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.frames.Adjacency;
-
 import eu.ehri.project.models.PermissionGrant;
 
 public interface PermissionScope extends IdentifiableEntity, AccessibleEntity {

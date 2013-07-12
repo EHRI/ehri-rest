@@ -1,13 +1,13 @@
 package eu.ehri.project.models.idgen;
 
-import java.util.List;
-import java.util.UUID;
-
 import com.google.common.collect.Lists;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistance.Bundle;
+
+import java.util.List;
+import java.util.UUID;
 
 /**
  * Generates a generic ID for tertiary node types.

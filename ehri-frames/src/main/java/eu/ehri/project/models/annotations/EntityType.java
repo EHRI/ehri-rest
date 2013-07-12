@@ -1,11 +1,11 @@
 package eu.ehri.project.models.annotations;
 
+import eu.ehri.project.models.EntityClass;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-
-import eu.ehri.project.models.EntityClass;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)

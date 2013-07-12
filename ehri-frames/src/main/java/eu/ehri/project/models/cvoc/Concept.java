@@ -1,14 +1,18 @@
 package eu.ehri.project.models.cvoc;
 
 import com.tinkerpop.blueprints.Direction;
+import com.tinkerpop.blueprints.Edge;
+import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.Adjacency;
-
+import com.tinkerpop.frames.modules.javahandler.JavaHandler;
+import com.tinkerpop.frames.modules.javahandler.JavaHandlerContext;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.DescribedEntity;
 import eu.ehri.project.models.base.IdentifiableEntity;
+import eu.ehri.project.models.base.ItemHolder;
 
 /**
  * This models the thesaurus terms or keywords in a way that is better managing multi-linguality. 
@@ -27,7 +31,8 @@ import eu.ehri.project.models.base.IdentifiableEntity;
  *
  */
 @EntityType(EntityClass.CVOC_CONCEPT)
-public interface Concept extends AccessibleEntity, IdentifiableEntity, DescribedEntity, AuthoritativeItem {
+public interface Concept extends AccessibleEntity, IdentifiableEntity,
+        DescribedEntity, AuthoritativeItem, ItemHolder {
     public static final String BROADER = "broader";
     public static final String NARROWER = "narrower";
     public static final String RELATED = "related";
@@ -58,7 +63,8 @@ public interface Concept extends AccessibleEntity, IdentifiableEntity, Described
     @Adjacency(label = NARROWER)
     public void addNarrowerConcept(final Concept concept);
 
-    @Adjacency(label = NARROWER)
+    //@Adjacency(label = NARROWER)
+    @JavaHandler
     public void removeNarrowerConcept(final Concept concept);
 
     
@@ -75,5 +81,49 @@ public interface Concept extends AccessibleEntity, IdentifiableEntity, Described
     // Hmm, does not 'feel' symmetric
     @Adjacency(label = RELATED, direction=Direction.IN)
     public Iterable<Concept> getRelatedByConcepts();
-    
+
+    /**
+     * Implementation of complex methods.
+     */
+    abstract class Impl implements JavaHandlerContext<Vertex>, Concept {
+
+        public Long getChildCount() {
+            Long count = it().getProperty(CHILD_COUNT);
+            if (count == null) {
+                it().setProperty(CHILD_COUNT, gremlin().in(NARROWER).count());
+            }
+            return count;
+        }
+
+        public Iterable<Concept> getNarrowerConcepts() {
+            // Ensure value is cached when fetching.
+            getChildCount();
+            return frameVertices(gremlin().in(NARROWER));
+        }
+
+        public void addNarrowerConcept(final Concept concept) {
+            it().addEdge(NARROWER, concept.asVertex());
+            Long count = it().getProperty(CHILD_COUNT);
+            if (count == null) {
+                getChildCount();
+            } else {
+                it().setProperty(CHILD_COUNT, count + 1);
+            }
+        }
+
+        public void removeNarrowerConcept(final Concept concept) {
+            for (Edge e : it().getEdges(Direction.OUT, NARROWER)) {
+                if (e.getVertex(Direction.IN).equals(concept.asVertex())) {
+                    e.remove();
+                    break;
+                }
+            }
+            Long count = it().getProperty(CHILD_COUNT);
+            if (count == null) {
+                getChildCount();
+            } else {
+                it().setProperty(CHILD_COUNT, count - 1);
+            }
+        }
+    }
 }

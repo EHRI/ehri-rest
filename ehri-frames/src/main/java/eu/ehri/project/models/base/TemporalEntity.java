@@ -1,7 +1,6 @@
 package eu.ehri.project.models.base;
 
 import com.tinkerpop.frames.Adjacency;
-
 import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.annotations.Dependent;
 import eu.ehri.project.models.annotations.Fetch;

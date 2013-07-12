@@ -13,13 +13,13 @@ import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.DescribedEntity;
+import eu.ehri.project.models.base.ItemHolder;
 import eu.ehri.project.models.base.PermissionScope;
-import eu.ehri.project.models.base.TemporalEntity;
 import eu.ehri.project.models.utils.JavaHandlerUtils;
 
 @EntityType(EntityClass.DOCUMENTARY_UNIT)
 public interface DocumentaryUnit extends AccessibleEntity,
-        DescribedEntity, PermissionScope {
+        DescribedEntity, PermissionScope, ItemHolder {
 
     public static final String CHILD_OF = "childOf";
 
@@ -38,6 +38,9 @@ public interface DocumentaryUnit extends AccessibleEntity,
     @JavaHandler
     public void setRepository(final Repository institution);
 
+    @JavaHandler
+    public Long getChildCount();
+
     /**
      * Get parent documentary unit, if any
      * @return
@@ -46,7 +49,7 @@ public interface DocumentaryUnit extends AccessibleEntity,
     @Adjacency(label = CHILD_OF)
     public DocumentaryUnit getParent();
 
-    @Adjacency(label = DocumentaryUnit.CHILD_OF, direction = Direction.IN)
+    @JavaHandler
     public void addChild(final DocumentaryUnit child);
 
     /*
@@ -59,8 +62,11 @@ public interface DocumentaryUnit extends AccessibleEntity,
      * Get child documentary units
      * @return
      */
-    @Adjacency(label = DocumentaryUnit.CHILD_OF, direction = Direction.IN)
+    @JavaHandler
     public Iterable<DocumentaryUnit> getChildren();
+
+    @JavaHandler
+    public Iterable<DocumentaryUnit> getAllChildren();
 
     @Adjacency(label = DescribedEntity.DESCRIBES, direction = Direction.IN)
     public Iterable<DocumentDescription> getDocumentDescriptions();
@@ -70,10 +76,43 @@ public interface DocumentaryUnit extends AccessibleEntity,
      */
     abstract class Impl implements JavaHandlerContext<Vertex>, DocumentaryUnit {
 
+        public Long getChildCount() {
+            Long count = it().getProperty(CHILD_COUNT);
+            if (count == null) {
+                it().setProperty(CHILD_COUNT, gremlin().in(CHILD_OF).count());
+            }
+            return count;
+        }
+
+        public Iterable<DocumentaryUnit> getChildren() {
+            // Ensure value is cached when fetching.
+            getChildCount();
+            return frameVertices(gremlin().in(CHILD_OF));
+        }
+
+        public void addChild(final DocumentaryUnit child) {
+            child.asVertex().addEdge(CHILD_OF, it());
+            Long count = it().getProperty(CHILD_COUNT);
+            if (count == null) {
+                getChildCount();
+            } else {
+                it().setProperty(CHILD_COUNT, count + 1);
+            }
+        }
+
+        public Iterable<DocumentaryUnit> getAllChildren() {
+            Pipeline<Vertex,Vertex> otherPipe = gremlin().as("n").in(CHILD_OF)
+                    .loop("n", JavaHandlerUtils.noopLoopFunc, JavaHandlerUtils.noopLoopFunc);
+
+            return frameVertices(gremlin().in(CHILD_OF).cast(Vertex.class).copySplit(gremlin(), otherPipe)
+                    .fairMerge().cast(Vertex.class));
+        }
+
+
         public void setRepository(final Repository institution) {
             // NB: Convenience methods that proxies addCollection (which
             // in turn maintains the child item cache.)
-            institution.addCollection(frame(it(), TemporalEntity.class));
+            institution.addCollection(frame(it(), DocumentaryUnit.class));
         }
 
         public Repository getRepository() {

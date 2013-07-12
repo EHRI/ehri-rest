@@ -1,7 +1,6 @@
 package eu.ehri.project.models.cvoc;
 
 import com.tinkerpop.frames.Property;
-
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.Description;

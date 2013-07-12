@@ -8,9 +8,9 @@ import eu.ehri.project.models.cvoc.ConceptDescription;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.models.events.SystemEventQueue;
-import eu.ehri.project.models.idgen.IdentifiableEntityIdGenerator;
 import eu.ehri.project.models.idgen.GenericIdGenerator;
 import eu.ehri.project.models.idgen.IdGenerator;
+import eu.ehri.project.models.idgen.IdentifiableEntityIdGenerator;
 
 /**
  * Mapping of Entity type names to Frames interfaces classes and

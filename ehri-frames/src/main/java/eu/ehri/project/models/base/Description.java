@@ -3,7 +3,6 @@ package eu.ehri.project.models.base;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Property;
-
 import eu.ehri.project.models.MaintenanceEvent;
 import eu.ehri.project.models.UndeterminedRelationship;
 import eu.ehri.project.models.UnknownProperty;

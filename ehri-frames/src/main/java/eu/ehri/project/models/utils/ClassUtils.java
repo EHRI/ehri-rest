@@ -1,24 +1,22 @@
 package eu.ehri.project.models.utils;
 
-import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.tinkerpop.blueprints.Direction;
+import com.tinkerpop.frames.Adjacency;
+import com.tinkerpop.frames.Property;
+import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.*;
 import org.neo4j.helpers.collection.Iterables;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
-import com.tinkerpop.blueprints.Direction;
-import com.tinkerpop.frames.Adjacency;
-import com.tinkerpop.frames.Property;
-
-import eu.ehri.project.models.EntityClass;
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Helper functions for managing EntityType classes.
