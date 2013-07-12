@@ -50,8 +50,16 @@
 		</plugins>
 	</build>
 
-	<!-- PROFILES for javadoc stuff -->
 	<profiles>
+        <!-- Build Sparql extension -->
+        <profile>
+            <id>sparql</id>
+            <modules>
+                <module>ehri-extension-sparql</module>
+            </modules>
+        </profile>
+
+        <!-- PROFILES for javadoc stuff -->
 		<profile>
 			<id>plain-javadoc</id>
 			<activation>
