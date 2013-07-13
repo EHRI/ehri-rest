@@ -66,6 +66,9 @@ public class SkosCoreCvocImporter {
     protected final Actioner actioner;
     protected Boolean tolerant = false;
     protected final Vocabulary vocabulary;
+
+    private static final String CONCEPT_URL = "url";
+
     // map from the internal Skos identifier to the placeholder
     protected Map<String, ConceptPlaceholder> conceptLookup = new HashMap<String, ConceptPlaceholder>();
 
@@ -238,7 +241,7 @@ public class SkosCoreCvocImporter {
                                       + " related ids: " + relatedIds.toString());
 
                               String storeId = unit.getId();//id;
-                              String skosId = (String)unit.getData().get(IdentifiableEntity.IDENTIFIER_KEY);
+                              String skosId = (String)unit.getDataValue(CONCEPT_URL);
                               // referal
                               logger.debug("Concept store id = " + storeId + ", skos id = " + skosId);
                               conceptLookup.put(skosId, new ConceptPlaceholder(storeId, broaderIds, relatedIds, frame));
@@ -519,7 +522,7 @@ public class SkosCoreCvocImporter {
         // Hack! Use everything after the last '/'
         String idvalue = value.substring(value.lastIndexOf('/') + 1);
         dataMap.put(IdentifiableEntity.IDENTIFIER_KEY, idvalue);
-        dataMap.put("url", value);
+        dataMap.put(CONCEPT_URL, value);
 
         logger.debug("Extracting Concept id: " + dataMap.get(IdentifiableEntity.IDENTIFIER_KEY));        
         

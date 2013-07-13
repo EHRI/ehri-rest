@@ -50,7 +50,7 @@ public class GhettosImporterTest extends AbstractImporterTest{
         assertEquals(voccount+2, toList(vocabulary.getConcepts()).size());
 
         // get a top concept
-        String skosConceptId = "http://ehri01.dans.knaw.nl/ghettos/0";
+        String skosConceptId = "0";
         Query<Concept> query = new Query<Concept>(graph, Concept.class);
         
         // Query for document identifier.

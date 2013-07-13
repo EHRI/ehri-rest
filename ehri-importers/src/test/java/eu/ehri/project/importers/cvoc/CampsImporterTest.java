@@ -56,11 +56,17 @@ public class CampsImporterTest extends AbstractImporterTest{
         assertEquals(voccount + 8, toList(vocabulary.getConcepts()).size());
         // get a top concept
 
-        String skosConceptId = "http://ehri01.dans.knaw.nl/675";
+        for (Concept c : vocabulary.getConcepts()) {
+            System.out.println("Concept: " + c.getIdentifier());
+        }
+
+
+        String skosConceptId = "675";
         Query<Concept> query = new Query<Concept>(graph, Concept.class);
         // Query for document identifier.
         List<Concept> list = toList(query.setLimit(1).list(
                 IdentifiableEntity.IDENTIFIER_KEY, skosConceptId, validUser));
+        System.out.println(list);
         // and print the tree
         printConceptTree(System.out, list.get(0));
         for(Concept c : list.get(0).getBroaderConcepts()){
