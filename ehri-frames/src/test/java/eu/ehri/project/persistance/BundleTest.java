@@ -2,11 +2,13 @@ package eu.ehri.project.persistance;
 
 import com.google.common.collect.Maps;
 import com.google.common.hash.HashCode;
+import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.DescribedEntity;
 import eu.ehri.project.models.base.IdentifiableEntity;
 import eu.ehri.project.models.base.NamedEntity;
 import eu.ehri.project.persistance.utils.BundleUtils;
+import eu.ehri.project.test.TestData;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -95,6 +97,35 @@ public class BundleTest {
         Bundle b2 = bundle.withData(map);
         assertNull(b2.getDataValue(IdentifiableEntity.IDENTIFIER_KEY));
         assertEquals("bar", b2.getDataValue("foo"));
+    }
+
+    @Test
+    public void testEqualsAndHashCode() throws Exception {
+        // A bundle with the same relationship data but
+        // in different orders should be equals()
+        Bundle bundle1 = Bundle.fromData(TestData.getTestDocBundle());
+        Bundle bundle2 = Bundle.fromData(TestData.getTestDocBundle());
+        assertEquals(bundle1, bundle2);
+        assertEquals(bundle1.hashCode(), bundle2.hashCode());
+
+        // Add a new date period to both and ensure that have a
+        // different structural ordering
+        System.out.println(bundle1);
+        Bundle dp = new Bundle(EntityClass.DATE_PERIOD)
+                .withDataValue(DatePeriod.START_DATE, "1900-01-01")
+                .withDataValue(DatePeriod.END_DATE, "2000-01-01");
+        Bundle currentDp = BundleUtils.getBundle(bundle1, "describes[0]/hasDate[0]");
+        System.out.println("CURRENT: " + currentDp);
+        Bundle b1_2 = BundleUtils
+                            .setBundle(bundle1, "describes[0]/hasDate[-1]", currentDp);
+        Bundle b1_3 = BundleUtils.setBundle(b1_2, "describes[0]/hasDate[0]", dp);
+
+        Bundle b2_2 = BundleUtils.setBundle(bundle2, "describes[0]/hasDate[-1]", dp);
+        assertEquals(BundleUtils.getBundle(b1_3, "describes[0]/hasDate[1]"),
+                BundleUtils.getBundle(b2_2, "describes[0]/hasDate[0]"));
+        assertEquals(BundleUtils.getBundle(b1_3, "describes[0]/hasDate[0]"),
+                BundleUtils.getBundle(b2_2, "describes[0]/hasDate[1]"));
+        assertEquals(b1_3, b2_2);
     }
 
     @Test
