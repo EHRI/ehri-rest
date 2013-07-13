@@ -3,6 +3,13 @@
 
 $:.unshift File.join(File.dirname(__FILE__), "ruby", "lib")
 
+# CMD parsing...
+require "trollop"
+
+opts = Trollop::options do
+  opt :update, "Update instead of creating DB anew", :short => "-u", :default => false
+end
+
 require "ehriutils"
 require "fileutils"
 
@@ -25,33 +32,37 @@ UKRAINE_CSV_FILE =  "#{DROPBOX}/ukraine.csv"
 # Check stuff works
 EhriUtils::check_env
 
-if Dir.exist?(ENV["NEO4J_DB"])
-  # Check if the graph DB exists
-  OPTS = {
-    1 => "Yes",
-    2 => "No",
-    3 => "Backup",
-    4 => "Delete"
-  }
+p opts
 
-  puts "Neo4j database \"#{ENV["NEO4J_DB"]}\" already exists. Continue?"
-  OPTS.each { |opt, text|
-    puts "#{opt}) #{text}"
-  }
-  while true
-    print "> "
-    choice = gets.chomp.to_i
-    if OPTS.keys.include?(choice)
-      case choice
-      when 2
-        exit
-      when 3
-        FileUtils.mv(ENV["NEO4J_DB"], "#{ENV["NEO4J_DB"]}_#{Time.now.strftime("%Y%m%d%H%M%S")}")
-      when 4
-        puts "Deleting: #{ENV["NEO4J_DB"]}"
-        FileUtils.rm_r(ENV["NEO4J_DB"])
+if not opts[:update] then
+  if Dir.exist?(ENV["NEO4J_DB"])
+    # Check if the graph DB exists
+    OPTS = {
+      1 => "Yes",
+      2 => "No",
+      3 => "Backup",
+      4 => "Delete"
+    }
+
+    puts "Neo4j database \"#{ENV["NEO4J_DB"]}\" already exists. Continue?"
+    OPTS.each { |opt, text|
+      puts "#{opt}) #{text}"
+    }
+    while true
+      print "> "
+      choice = gets.chomp.to_i
+      if OPTS.keys.include?(choice)
+        case choice
+        when 2
+          exit
+        when 3
+          FileUtils.mv(ENV["NEO4J_DB"], "#{ENV["NEO4J_DB"]}_#{Time.now.strftime("%Y%m%d%H%M%S")}")
+        when 4
+          puts "Deleting: #{ENV["NEO4J_DB"]}"
+          FileUtils.rm_r(ENV["NEO4J_DB"])
+        end
+        break
       end
-      break
     end
   end
 end
@@ -88,6 +99,7 @@ class DbBuilder
     puts "Creating Corporate body set..."
     Commands::EntityAdd.new.exec(Graph, [
       "authoritativeSet",
+      "--update",
       "-Pidentifier=ehri-cb",
       '-Pname="Ehri Corporate Bodies"',
       "--user", USER_ID,
@@ -107,6 +119,7 @@ class DbBuilder
     puts "Creating Personalities set..."
     Commands::EntityAdd.new.exec(Graph, [
       "authoritativeSet",
+      "--update",
       "-Pidentifier=ehri-pers",
       '-Pname="Ehri Personalities"',
       "--user", USER_ID,
@@ -146,6 +159,7 @@ class DbBuilder
     puts "Creating thesaurus set..."
     Commands::EntityAdd.new.exec(Graph, [
       "cvocVocabulary",
+      "--update",
       "-Pidentifier=ehri-skos",
       '-Pname=EHRI Skos',
       "--user", USER_ID,
@@ -164,6 +178,7 @@ class DbBuilder
     puts "Creating camps set..."
     Commands::EntityAdd.new.exec(Graph, [
       "cvocVocabulary",
+      "--update",
       "-Pidentifier=ehri-camps",
       '-Pname=EHRI Camps',
       "--user", USER_ID,
@@ -182,6 +197,7 @@ class DbBuilder
     puts "Creating ghettos set..."
     Commands::EntityAdd.new.exec(Graph, [
       "cvocVocabulary",
+      "--update",
       "-Pidentifier=ehri-ghettos",
       '-Pname=EHRI Ghettos',
       "--user", USER_ID,
@@ -199,9 +215,11 @@ end
 
 start = Time.now
 builder = DbBuilder.new
-builder.init_db
-builder.create_users
 Graph.get_base_graph.check_transaction
+if not opts[:update] then
+  builder.init_db
+  builder.create_users
+end
 builder.import_thesaurus
 builder.import_camps
 builder.import_ghettos
