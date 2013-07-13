@@ -32,8 +32,6 @@ UKRAINE_CSV_FILE =  "#{DROPBOX}/ukraine.csv"
 # Check stuff works
 EhriUtils::check_env
 
-p opts
-
 if not opts[:update] then
   if Dir.exist?(ENV["NEO4J_DB"])
     # Check if the graph DB exists
