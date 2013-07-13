@@ -222,11 +222,11 @@ public final class BundleDAO {
      */
     private Vertex updateInner(Bundle bundle) throws ValidationError,
             ItemNotFound {
-        ListMultimap<String, String> errors = BundleValidatorFactory
-                .getInstance(manager, bundle).validateForUpdate();
         Vertex node = manager.getVertex(bundle.getId());
         Integer hash = node.getProperty(HASH_CACHE);
         if (hash != null && hash.equals(bundle.hashCode())) {
+            ListMultimap<String, String> errors = BundleValidatorFactory
+                    .getInstance(manager, bundle).validateForUpdate();
             node = manager.updateVertex(bundle.getId(), bundle.getType(),
                     bundle.getData(), bundle.getPropertyKeys());
             ListMultimap<String, BundleError> nestedErrors = updateDependents(node, bundle.getBundleClass(),
