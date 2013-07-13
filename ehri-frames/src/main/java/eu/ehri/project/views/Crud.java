@@ -6,17 +6,19 @@ import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Frame;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistance.Bundle;
+import eu.ehri.project.persistance.Mutation;
 
 public interface Crud<E extends AccessibleEntity> {
     public Crud<E> setScope(PermissionScope scope);
     
     public E detail(E item, Accessor user) throws AccessDenied;
 
-    public E update(Bundle bundle, Accessor user)
+    public Mutation<E> update(Bundle bundle, Accessor user)
             throws PermissionDenied, ValidationError, DeserializationError,
             IntegrityError, ItemNotFound;
 
-    public <T extends Frame> T updateDependent(Bundle bundle, E parent, Accessor user, Class<T> dependentClass)
+    public <T extends Frame> Mutation<T> updateDependent(Bundle bundle, E parent, Accessor user,
+            Class<T> dependentClass)
             throws PermissionDenied, ValidationError, DeserializationError,
             IntegrityError, ItemNotFound;
 
@@ -26,7 +28,7 @@ public interface Crud<E extends AccessibleEntity> {
     public <T extends Frame> T createDependent(Bundle bundle, E parent, Accessor user, Class<T> dependentClass)
             throws PermissionDenied, ValidationError, DeserializationError, IntegrityError;
 
-    public E createOrUpdate(Bundle bundle, Accessor user)
+    public Mutation<E> createOrUpdate(Bundle bundle, Accessor user)
             throws PermissionDenied, ValidationError, DeserializationError, IntegrityError;
 
     public Integer delete(E item, Accessor user) throws PermissionDenied,

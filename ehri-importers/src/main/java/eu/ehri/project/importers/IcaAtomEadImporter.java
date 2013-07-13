@@ -12,6 +12,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import eu.ehri.project.persistance.Mutation;
+import eu.ehri.project.persistance.MutationState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -91,12 +93,14 @@ public class IcaAtomEadImporter extends EaImporter {
         }
 
         logger.debug("Generated ID: " + id + " (" + permissionScope.getId() + ")");
-        boolean exists = manager.exists(id);
-        DocumentaryUnit frame = persister.createOrUpdate(unit.withId(id), DocumentaryUnit.class);
+
+        Mutation<DocumentaryUnit> mutation =
+                persister.createOrUpdate(unit.withId(id), DocumentaryUnit.class);
+        DocumentaryUnit frame = mutation.getNode();
 
         // Set the repository/item relationship
         //TODO: figure out another way to determine we're at the root, so we can get rid of the depth param
-        if (depth == TOP_LEVEL_DEPTH) {
+        if (depth == TOP_LEVEL_DEPTH && mutation.created()) {
             EntityClass scopeType = manager.getEntityClass(permissionScope);
             if (scopeType.equals(EntityClass.REPOSITORY)) {
                 Repository repository = framedGraph.frame(permissionScope.asVertex(), Repository.class);
@@ -110,16 +114,7 @@ public class IcaAtomEadImporter extends EaImporter {
                 logger.error("Unknown scope type for documentary unit: {}", scopeType);
             }
         }
-
-        if (exists) {
-            for (ImportCallback cb : updateCallbacks) {
-                cb.itemImported(frame);
-            }
-        } else {
-            for (ImportCallback cb : createCallbacks) {
-                cb.itemImported(frame);
-            }
-        }
+        handleCallbacks(mutation);
         return frame;
 
 

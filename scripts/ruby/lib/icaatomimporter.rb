@@ -32,7 +32,8 @@ module Ehri
           Importers::IcaAtomEadHandler.java_class)
         log = manager.import_files(ead_files, msg)
 
-        puts "Done EAD import for #{repo_id}: created: #{log.get_created}, updated: #{log.get_updated}"
+        puts "Done EAD import for #{repo_id}: created: #{log.get_created}, updated: #{log.get_updated},
+unchanged: #{log.get_unchanged}"
       end
 
       def import

@@ -76,6 +76,12 @@ public class CsvImportManager extends XmlImportManager {
                     log.addUpdated();
                 }
             });
+            importer.addUnchangedCallback(new ImportCallback() {
+                @Override
+                public void itemImported(AccessibleEntity item) {
+                    log.addUnchanged();
+                }
+            });
 
             CSVReader reader = new CSVReader(new InputStreamReader(ios, "UTF-8"), VALUE_DELIMITER);
             String[] headers = reader.readNext();

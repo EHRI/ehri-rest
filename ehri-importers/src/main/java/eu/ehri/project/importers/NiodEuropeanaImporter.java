@@ -17,6 +17,9 @@ import eu.ehri.project.models.idgen.IdGenerator;
 import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.persistance.BundleDAO;
 import java.util.Map;
+
+import eu.ehri.project.persistance.Mutation;
+import eu.ehri.project.persistance.MutationState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,25 +66,16 @@ public class NiodEuropeanaImporter extends EaImporter{
 
         IdGenerator generator = EntityClass.DOCUMENTARY_UNIT.getIdgen();
         String id = generator.generateId(EntityClass.DOCUMENTARY_UNIT, permissionScope, unit);
-        boolean exists = manager.exists(id);
-        DocumentaryUnit frame = persister.createOrUpdate(unit.withId(id), DocumentaryUnit.class);
-  
+        Mutation<DocumentaryUnit> mutation = persister.createOrUpdate(unit.withId(id), DocumentaryUnit.class);
+        DocumentaryUnit frame = mutation.getNode();
+
         // Set the repository/item relationship
         // Then we need to add a relationship to the repository
-        frame.setRepository(framedGraph.frame(permissionScope.asVertex(), Repository.class));
-        if (!exists) {
+        if (mutation.created()) {
+            frame.setRepository(framedGraph.frame(permissionScope.asVertex(), Repository.class));
             frame.setPermissionScope(permissionScope);
         }
-
-        if (exists) {
-            for (ImportCallback cb : updateCallbacks) {
-                cb.itemImported(frame);
-            }
-        } else {
-            for (ImportCallback cb : createCallbacks) {
-                cb.itemImported(frame);
-            }
-        }
+        handleCallbacks(mutation);
         return frame;
     }
 }

@@ -65,6 +65,18 @@ module Ehri
           end
         end
 
+        importer.add_unchanged_callback do |item|
+          log.add_unchanged
+
+          if log.get_successful > 0 and log.get_successful % COMMIT_MAX == 0
+            Graph.get_base_graph.commit
+          end
+
+          children.each do |cxml|
+            import_with_scope(cxml, item, event, log)
+          end
+        end
+
         handler = Importers::IcaAtomEadHandler.new importer
         spf = Java::JavaxXmlParsers::SAXParserFactory.new_instance
         spf.set_namespace_aware false
@@ -95,7 +107,8 @@ module Ehri
           end
 
           puts "Updated: #{log.get_updated}"
-          puts "Created: #{log.get_created}"    
+          puts "Created: #{log.get_created}"
+          puts "Unchanged: #{log.get_unchanged}"
 
           Graph.get_base_graph.commit
           puts "Committed"

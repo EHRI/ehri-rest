@@ -23,6 +23,8 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import eu.ehri.project.persistance.Mutation;
+import eu.ehri.project.persistance.MutationState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -119,18 +121,12 @@ public class EagImporter extends EaImporter {
         IdGenerator generator = EntityClass.REPOSITORY.getIdgen();
         String id = generator.generateId(EntityClass.REPOSITORY, permissionScope, unit);
         boolean exists = manager.exists(id);
-        Repository frame = persister.createOrUpdate(unit.withId(id), Repository.class);
+        Mutation<Repository> mutation = persister.createOrUpdate(unit.withId(id), Repository.class);
+        handleCallbacks(mutation);
 
-        if (exists) {
-            for (ImportCallback cb : updateCallbacks) {
-                cb.itemImported(frame);
-            }
-        } else {
-            frame.setCountry(framedGraph.frame(permissionScope.asVertex(), Country.class));
-            for (ImportCallback cb : createCallbacks) {
-                cb.itemImported(frame);
-            }
+        if (mutation.getState() == MutationState.CREATED) {
+            mutation.getNode().setCountry(framedGraph.frame(permissionScope.asVertex(), Country.class));
         }
-        return frame;
+        return mutation.getNode();
     }
 }

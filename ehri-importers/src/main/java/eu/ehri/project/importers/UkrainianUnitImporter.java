@@ -18,12 +18,11 @@ import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.IdentifiableEntity;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.base.TemporalEntity;
-import eu.ehri.project.persistance.Bundle;
+import eu.ehri.project.persistance.*;
+
 import java.util.HashMap;
 import java.util.Map;
 
-import eu.ehri.project.persistance.BundleValidator;
-import eu.ehri.project.persistance.BundleValidatorFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,22 +72,15 @@ public class UkrainianUnitImporter extends XmlImporter<Object> {
         validator.validateTree();
 
         String id = unit.getType().getIdgen().generateId(EntityClass.DOCUMENTARY_UNIT, permissionScope, unit);
-        boolean exists = manager.exists(id);
-        DocumentaryUnit frame = persister.createOrUpdate(unit.withId(id), DocumentaryUnit.class);
-        if (!permissionScope.equals(SystemScope.getInstance())) {
+        Mutation<DocumentaryUnit> mutation = persister.createOrUpdate(unit.withId(id), DocumentaryUnit.class);
+        DocumentaryUnit frame = mutation.getNode();
+        if (!permissionScope.equals(SystemScope.getInstance())
+                && mutation.created()) {
             frame.setRepository(framedGraph.frame(permissionScope.asVertex(), Repository.class));
             frame.setPermissionScope(permissionScope);
         }
 
-        if (exists) {
-            for (ImportCallback cb : updateCallbacks) {
-                cb.itemImported(frame);
-            }
-        } else {
-            for (ImportCallback cb : createCallbacks) {
-                cb.itemImported(frame);
-            }
-        }
+        handleCallbacks(mutation);
         return frame;
 
     }

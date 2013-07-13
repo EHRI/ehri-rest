@@ -198,7 +198,7 @@ public class CrudViewsTest extends AbstractFixtureTest {
         Bundle newBundle = bundle.withId(unit.getId()).withDataValue(
                 "name", newName);
 
-        DocumentaryUnit changedUnit = docViews.update(newBundle, validUser);
+        DocumentaryUnit changedUnit = docViews.update(newBundle, validUser).getNode();
         assertEquals(newName, changedUnit.asVertex().getProperty("name"));
         DocumentDescription desc = graph.frame(
                 changedUnit.getDescriptions().iterator().next().asVertex(),
@@ -234,7 +234,7 @@ public class CrudViewsTest extends AbstractFixtureTest {
         String newName = TestData.TEST_USER_NAME + " with new stuff";
         Bundle newBundle = bundle.withId(user.getId()).withDataValue(
                 "name", newName);
-        UserProfile changedUser = userViews.update(newBundle, validUser);
+        UserProfile changedUser = userViews.update(newBundle, validUser).getNode();
         assertEquals(newName, changedUser.getName());
     }
 
@@ -386,7 +386,7 @@ public class CrudViewsTest extends AbstractFixtureTest {
                 .get(0).withDataValue(DocumentDescription.NAME, "some-new-title");
 
         DocumentDescription changedDesc = docViews.updateDependent(descBundle, unit, validUser,
-                DocumentDescription.class);
+                DocumentDescription.class).getNode();
         assertEquals(descCount, Iterables.count(unit.getDocumentDescriptions()));
         assertEquals("some-new-title", changedDesc.getName());
     }

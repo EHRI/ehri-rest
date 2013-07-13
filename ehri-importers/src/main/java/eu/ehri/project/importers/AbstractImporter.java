@@ -21,6 +21,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import eu.ehri.project.persistance.Mutation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,10 +44,28 @@ public abstract class AbstractImporter<T> {
     protected final T documentContext;
     protected List<ImportCallback> createCallbacks = new LinkedList<ImportCallback>();
     protected List<ImportCallback> updateCallbacks = new LinkedList<ImportCallback>();
+    protected List<ImportCallback> unchangedCallbacks = new LinkedList<ImportCallback>();
     protected BundleDAO persister;
 
     private NodeProperties pc;
     private Joiner stringJoiner = Joiner.on("\n\n").skipNulls();
+
+    protected void handleCallbacks(Mutation<? extends AccessibleEntity> mutation) {
+        switch (mutation.getState()) {
+            case CREATED:
+                for (ImportCallback cb: createCallbacks)
+                    cb.itemImported(mutation.getNode());
+                break;
+            case UPDATED:
+                for (ImportCallback cb: updateCallbacks)
+                    cb.itemImported(mutation.getNode());
+                break;
+            case UNCHANGED:
+                for (ImportCallback cb: unchangedCallbacks)
+                    cb.itemImported(mutation.getNode());
+                break;
+        }
+    }
 
     /**
      * Constructor.
@@ -92,6 +111,15 @@ public abstract class AbstractImporter<T> {
      */
     public void addUpdateCallback(final ImportCallback cb) {
         updateCallbacks.add(cb);
+    }
+
+    /**
+     * Add a callback to run when an item is left unchanged.
+     *
+     * @param cb
+     */
+    public void addUnchangedCallback(final ImportCallback cb) {
+        unchangedCallbacks.add(cb);
     }
 
     abstract public AccessibleEntity importItem(Map<String, Object> itemData) throws ValidationError;

@@ -378,8 +378,8 @@ public final class Bundle {
 
         if (type != bundle.type) return false;
         if (!data.equals(bundle.data)) return false;
-        if (!LinkedHashMultimap.create(relations)
-                .equals(LinkedHashMultimap.create(bundle.relations))) return false;
+        if (!unorderedRelations(relations)
+                .equals(unorderedRelations(bundle.relations))) return false;
 
         return true;
     }
@@ -388,7 +388,21 @@ public final class Bundle {
     public int hashCode() {
         int result = type.hashCode();
         result = 31 * result + data.hashCode();
-        result = 31 * result + LinkedHashMultimap.create(relations).hashCode();
+        result = 31 * result + unorderedRelations(relations).hashCode();
         return result;
+    }
+
+    /**
+     * Convert the ordered relationship set into an unordered one for comparison.
+     * FIXME: Clean up the code and optimise this function.
+     * @param rels
+     * @return
+     */
+    private Map<String,LinkedHashMultiset<Bundle>> unorderedRelations(final ListMultimap<String,Bundle> rels) {
+        Map<String,LinkedHashMultiset<Bundle>> map = Maps.newHashMap();
+        for (Map.Entry<String,Collection<Bundle>> entry : rels.asMap().entrySet()) {
+            map.put(entry.getKey(), LinkedHashMultiset.create(entry.getValue()));
+        }
+        return map;
     }
 }

@@ -94,7 +94,7 @@ public abstract class ImportCommand extends BaseCommand implements Command{
             //ImportLog log = new SaxImportManager(graph, agent, validUser, EagImporter.class, EagHandler.class).importFile(ios, logMessage);
             
             System.out.println("Import completed. Created: " + log.getCreated()
-                    + ", Updated: " + log.getUpdated());
+                    + ", Updated: " + log.getUpdated() + ", Unchanged: " + log.getUnchanged());
             if (log.getErrored() > 0) {
                 System.out.println("Errors:");
                 for (Map.Entry<String, String> entry : log.getErrors().entrySet()) {

@@ -1,7 +1,6 @@
 package eu.ehri.project.views.impl;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.base.*;
@@ -11,7 +10,9 @@ import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.persistance.ActionManager;
 import eu.ehri.project.persistance.Bundle;
+import eu.ehri.project.persistance.MutationState;
 import eu.ehri.project.views.Crud;
+import eu.ehri.project.persistance.Mutation;
 
 /**
  * Views class that handles creating Action objects that provide an audit log
@@ -108,7 +109,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws IntegrityError
      * @throws DeserializationError
      */
-    public E createOrUpdate(Bundle bundle, Accessor user)
+    public Mutation<E> createOrUpdate(Bundle bundle, Accessor user)
             throws PermissionDenied, ValidationError, DeserializationError,
             IntegrityError {
         return createOrUpdate(bundle, user, Optional.<String>absent());
@@ -127,12 +128,14 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws IntegrityError
      * @throw DeserializationError
      */
-    public E createOrUpdate(Bundle bundle, Accessor user, Optional<String> logMessage)
+    public Mutation<E> createOrUpdate(Bundle bundle, Accessor user, Optional<String> logMessage)
             throws PermissionDenied, ValidationError, DeserializationError,
             IntegrityError {
-        E out = views.createOrUpdate(bundle, user);
-        actionManager.logEvent(out, graph.frame(user.asVertex(), Actioner.class),
-                EventTypes.modification, logMessage);
+        Mutation<E> out = views.createOrUpdate(bundle, user);
+        if (out.getState() == MutationState.UPDATED) {
+            actionManager.logEvent(out.getNode(), graph.frame(user.asVertex(), Actioner.class),
+                    EventTypes.modification, logMessage);
+        }
         return out;
     }
 
@@ -148,7 +151,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws IntegrityError
      * @throws DeserializationError
      */
-    public E update(Bundle bundle, Accessor user) throws PermissionDenied,
+    public Mutation<E> update(Bundle bundle, Accessor user) throws PermissionDenied,
             ValidationError, DeserializationError, IntegrityError {
         return update(bundle, user, Optional.<String>absent());
     }
@@ -166,13 +169,15 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws IntegrityError
      * @throw DeserializationError
      */
-    public E update(Bundle bundle, Accessor user, Optional<String> logMessage)
+    public Mutation<E> update(Bundle bundle, Accessor user, Optional<String> logMessage)
             throws PermissionDenied, ValidationError, DeserializationError,
             IntegrityError {
         try {
-            E out = views.update(bundle, user);
-            actionManager.logEvent(out, graph.frame(user.asVertex(), Actioner.class),
-                    EventTypes.modification, logMessage);
+            Mutation<E> out = views.update(bundle, user);
+            if (out.getState() != MutationState.UNCHANGED) {
+                actionManager.logEvent(out.getNode(), graph.frame(user.asVertex(), Actioner.class),
+                        EventTypes.modification, logMessage);
+            }
             return out;
         } catch (ItemNotFound ex) {
             throw new RuntimeException(ex); // FIXME: Remove this...
@@ -193,7 +198,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws IntegrityError
      * @throws DeserializationError
      */
-    public <T extends Frame> T updateDependent(Bundle bundle, E parent, Accessor user,
+    public <T extends Frame> Mutation<T> updateDependent(Bundle bundle, E parent, Accessor user,
             Class<T> dependentClass) throws PermissionDenied,
             ValidationError, DeserializationError, IntegrityError {
         return updateDependent(bundle, parent, user, dependentClass, Optional.<String>absent());
@@ -214,14 +219,16 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws IntegrityError
      * @throw DeserializationError
      */
-    public <T extends Frame> T updateDependent(Bundle bundle, E parent, Accessor user,
+    public <T extends Frame> Mutation<T> updateDependent(Bundle bundle, E parent, Accessor user,
             Class<T> dependentClass, Optional<String> logMessage)
             throws PermissionDenied, ValidationError, DeserializationError,
             IntegrityError {
         try {
-            T out = views.updateDependent(bundle, parent, user, dependentClass);
-            actionManager.setScope(parent).logEvent(graph.frame(user.asVertex(),
-                    Actioner.class), EventTypes.modification, logMessage);
+            Mutation<T> out = views.updateDependent(bundle, parent, user, dependentClass);
+            if (out.getState() != MutationState.UNCHANGED) {
+                actionManager.setScope(parent).logEvent(graph.frame(user.asVertex(),
+                        Actioner.class), EventTypes.modification, logMessage);
+            }
             return out;
         } catch (ItemNotFound ex) {
             throw new RuntimeException(ex);

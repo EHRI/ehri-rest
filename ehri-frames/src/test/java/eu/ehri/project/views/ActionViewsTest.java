@@ -47,7 +47,7 @@ public class ActionViewsTest extends AbstractFixtureTest {
         String newName = TestData.TEST_COLLECTION_NAME + " with new stuff";
         Bundle newBundle = bundle.withId(unit.getId()).withDataValue("name", newName);
 
-        DocumentaryUnit changedUnit = docViews.update(newBundle, validUser);
+        DocumentaryUnit changedUnit = docViews.update(newBundle, validUser).getNode();
         assertEquals(newName, changedUnit.asVertex().getProperty("name"));
         assertTrue(changedUnit.getDescriptions().iterator().hasNext());
         DocumentDescription desc = graph.frame(
@@ -83,7 +83,7 @@ public class ActionViewsTest extends AbstractFixtureTest {
         String newName = TestData.TEST_USER_NAME + " with new stuff";
         Bundle newBundle = bundle.withId(user.getId()).withDataValue("name", newName);
 
-        UserProfile changedUser = userViews.update(newBundle, validUser);
+        UserProfile changedUser = userViews.update(newBundle, validUser).getNode();
         assertEquals(newName, changedUser.getName());
 
         // Check we have an audit action.

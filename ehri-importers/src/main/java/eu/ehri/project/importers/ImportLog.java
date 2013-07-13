@@ -19,6 +19,7 @@ public class ImportLog {
 
 	private int created = 0;
 	private int updated = 0;
+    private int unchanged = 0;
 	private int errored = 0;
 	private EventContext eventContext;
 	private Map<String, String> errors = new HashMap<String, String>();
@@ -47,6 +48,13 @@ public class ImportLog {
 	public void addUpdated() {
 		updated++;
 	}
+
+    /**
+     * Increment the unchanged count.
+     */
+    public void addUnchanged() {
+        unchanged++;
+    }
 	
 	/**
          * 
@@ -63,6 +71,14 @@ public class ImportLog {
 	public int getUpdated() {
 		return updated;
 	}
+
+    /**
+     *
+     * @return returns the number of unchanged items
+     */
+    public int getUnchanged() {
+        return unchanged;
+    }
 
 	/**
          * 
@@ -124,4 +140,10 @@ public class ImportLog {
 	public int getSuccessful() {
 		return created + updated;
 	}
+
+    public void printReport() {
+        System.out.println("Created:    " + created);
+        System.out.println("Updated:    " + updated);
+        System.out.println("Unmodified: " + unchanged);
+    }
 }

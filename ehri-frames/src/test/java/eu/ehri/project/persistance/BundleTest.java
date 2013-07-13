@@ -166,30 +166,4 @@ public class BundleTest {
     public void testToXml() throws Exception {
         // TODO
     }
-
-    @Test
-    public void testGetHashCode() throws Exception {
-        Bundle b2 = bundle.withDataValue(IdentifiableEntity.IDENTIFIER_KEY, "foobaR");
-        HashCode h1 = bundle.getDataHash();
-        HashCode h2 = b2.getDataHash();
-        assertNotSame(h1, h2);
-        assertEquals(h1, b2.withDataValue(IdentifiableEntity.IDENTIFIER_KEY, "foobar").getDataHash());
-
-        // Using BundleUtils to alter nested values...
-        Bundle b3 = BundleUtils.set(bundle, DescribedEntity.DESCRIBES + "[0]/name", "Hello, world");
-        assertNotSame(bundle.getDataHash(), b3.getDataHash());
-        // Now set the value to what it used to be and ensure we have the same hash.
-        Bundle b4 = BundleUtils.set(b3, DescribedEntity.DESCRIBES + "[0]/name", "Foobar");
-        System.out.println(bundle.getData());
-        System.out.println(b4.getData());
-        assertEquals(bundle.getDataHash(), b4.getDataHash());
-    }
-
-    @Test
-    public void testGetHashCodeIgnoresIds() throws Exception {
-        Bundle b2 = bundle.withId("testid");
-        HashCode h1 = bundle.getDataHash();
-        HashCode h2 = b2.getDataHash();
-        assertEquals(h1, h2);
-    }
 }

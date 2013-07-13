@@ -18,6 +18,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import eu.ehri.project.persistance.Mutation;
+import eu.ehri.project.persistance.MutationState;
 import eu.ehri.project.views.impl.CrudViews;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -97,25 +99,20 @@ public class EacImporter extends EaImporter {
 
         IdGenerator generator = EntityClass.HISTORICAL_AGENT.getIdgen();
         String id = generator.generateId(EntityClass.HISTORICAL_AGENT, permissionScope, unit);
-        boolean exists = manager.exists(id);
-        HistoricalAgent frame = persister.createOrUpdate(unit.withId(id), HistoricalAgent.class);
+        Mutation<HistoricalAgent> mutation = persister.createOrUpdate(unit.withId(id), HistoricalAgent.class);
+        HistoricalAgent frame = mutation.getNode();
 
-        solveUndeterminedRelationships(frame, descBundle);
+        if (mutation.created()) {
+            solveUndeterminedRelationships(frame, descBundle);
+        }
 
         // There may or may not be a specific scope here...
-        if (!permissionScope.equals(SystemScope.getInstance())) {
+        if (!permissionScope.equals(SystemScope.getInstance())
+                && mutation.created()) {
             frame.setAuthoritativeSet(framedGraph.frame(permissionScope.asVertex(), AuthoritativeSet.class));
         }
 
-        if (exists) {
-            for (ImportCallback cb : updateCallbacks) {
-                cb.itemImported(frame);
-            }
-        } else {
-            for (ImportCallback cb : createCallbacks) {
-                cb.itemImported(frame);
-            }
-        }
+        handleCallbacks(mutation);
         return frame;
 
     }

@@ -14,6 +14,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import eu.ehri.project.persistance.Mutation;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -67,27 +69,10 @@ public class SkosImporter extends XmlImporter<Map<String, Object>> {
         IdGenerator generator = EntityClass.CVOC_CONCEPT.getIdgen();
         String id = generator.generateId(EntityClass.CVOC_CONCEPT, permissionScope, unit);
         boolean exists = manager.exists(id);
-        Concept frame = persister.createOrUpdate(unit.withId(id),
+        Mutation<Concept> mutation = persister.createOrUpdate(unit.withId(id),
                 Concept.class);
-
-        // Set the repository/item relationship
-        //frame.setRepository(repository); // SHOULD set the Vocabulary at some point!
-
-        // Set the parent child relationship
-        //if (parent != null)
-        //    parent.addChild(frame);
-
-        // Run creation callbacks for the new item...
-        if (exists) {
-            for (ImportCallback cb : updateCallbacks) {
-                cb.itemImported(frame);
-            }
-        } else {
-            for (ImportCallback cb : createCallbacks) {
-                cb.itemImported(frame);
-            }
-        }
-        return frame;
+        handleCallbacks(mutation);
+        return mutation.getNode();
     }
 
     /**

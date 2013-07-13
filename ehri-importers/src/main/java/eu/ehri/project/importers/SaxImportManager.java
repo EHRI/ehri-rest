@@ -98,6 +98,12 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
                     log.addUpdated();
                 }
             });
+            importer.addUnchangedCallback(new ImportCallback() {
+                @Override
+                public void itemImported(AccessibleEntity item) {
+                    log.addUnchanged();
+                }
+            });
             //TODO decide which handler to use, HandlerFactory? now part of constructor ...
             SaxXmlHandler handler = handlerClass.getConstructor(AbstractImporter.class).newInstance(importer);
             logger.debug("handler of class {}", handler.getClass());
