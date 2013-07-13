@@ -41,6 +41,8 @@ public class EntityAdd extends BaseCommand implements Command {
                 .create("P"));
         options.addOption(new Option("scope", true,
                 "Identifier of scope to create item in, i.e. a repository"));
+        options.addOption(new Option("u", "update", false,
+                "Update item if it already exists"));
         options.addOption(new Option("user", true,
                 "Identifier of user to import as"));
         options.addOption(new Option("log", true,
@@ -103,7 +105,10 @@ public class EntityAdd extends BaseCommand implements Command {
 
         try {
             LoggingCrudViews<?> view = new LoggingCrudViews(graph, entityClass.getEntityClass(), scope);
-            view.create(bundle.withId(id), user, getLogMessage(logMessage));
+            if (cmdLine.hasOption("update"))
+                view.createOrUpdate(bundle.withId(id), user, getLogMessage(logMessage));
+            else
+                view.create(bundle.withId(id), user, getLogMessage(logMessage));
             graph.getBaseGraph().commit();
         } catch (IntegrityError e) {
             graph.getBaseGraph().rollback();
