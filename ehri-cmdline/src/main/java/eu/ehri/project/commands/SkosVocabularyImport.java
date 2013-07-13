@@ -89,9 +89,7 @@ public class SkosVocabularyImport extends BaseCommand implements Command {
             SkosCoreCvocImporter importer = new SkosCoreCvocImporter(graph, user, vocabulary);
             importer.setTolerant(cmdLine.hasOption("tolerant"));
             ImportLog log = importer.importFile(filePath, logMessage);
-
-            System.out.println("Import completed. Created: " + log.getCreated()
-                    + ", Updated: " + log.getUpdated());
+            log.printReport();
             if (log.getErrored() > 0) {
                 System.out.println("Errors:");
                 for (Entry<String, String> entry : log.getErrors().entrySet()) {

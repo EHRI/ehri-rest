@@ -142,8 +142,9 @@ public class ImportLog {
 	}
 
     public void printReport() {
-        System.out.println("Created:    " + created);
-        System.out.println("Updated:    " + updated);
-        System.out.println("Unmodified: " + unchanged);
+        System.out.println(
+                String.format(
+                        "Created: %d, Updated: %d, Unchanged: %s",
+                        created, updated, unchanged));
     }
 }

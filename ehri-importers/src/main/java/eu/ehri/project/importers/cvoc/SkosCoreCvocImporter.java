@@ -201,18 +201,12 @@ public class SkosCoreCvocImporter {
              // NOTE the concept can be in a skos:Concept or an rdf:Description
              // for now assume we have RDF !
              NodeList nodeList = rdfElement.getElementsByTagName("rdf:Description");
-             for(int i=0; i<nodeList.getLength(); i++){
+             for(int i=0; i < nodeList.getLength(); i++){
             	  Node childNode = nodeList.item(i);
             	  Element element = (Element) childNode; // it should be!
             	  
             	  if (isConceptElement(element)) {
                       try {
-                          logger.debug("---------------");
-                          // extract ... data for concept
-                          // in Map<String, Object>
-                          // then use BundleDAO.createOrUpdate and use the framed Entity = CvocConcept
-                          // see: AbstractImporter.importItem
-
                           Bundle unit = constructBundleForConcept(element);
 
                           BundleDAO persister = new BundleDAO(framedGraph, vocabulary);
@@ -281,25 +275,19 @@ public class SkosCoreCvocImporter {
 
             Bundle descBundle = new Bundle(EntityClass.CVOC_CONCEPT_DESCRIPTION, d);
             Map<String, Object> rel = extractRelations(element, "owl:sameAs");
-            if(!rel.isEmpty())
-            descBundle = descBundle.withRelation(Description.RELATES_TO, new Bundle(EntityClass.UNDETERMINED_RELATIONSHIP, rel));
+            if(!rel.isEmpty()) {
+                descBundle = descBundle.withRelation(Description.RELATES_TO,
+                        new Bundle(EntityClass.UNDETERMINED_RELATIONSHIP, rel));
+            }
 
             // NOTE maybe test if prefLabel is there?
             unit = unit.withRelation(Description.DESCRIBES, descBundle);
         }
 
-
-
-        // NOTE the following gives a lot of output!
-        //logger.debug("Bundle as JSON: \n" + unit.toJson());
-
         // get an ID for the GraphDB
-        IdGenerator generator = EntityClass.CVOC_CONCEPT.getIdgen();
-        PermissionScope scope = vocabulary;
-
-        String id = generator.generateId(EntityClass.CVOC_CONCEPT, scope, unit);
-        unit = unit.withId(id);
-        return unit;
+        String id = unit.getType().getIdgen()
+                .generateId(EntityClass.CVOC_CONCEPT, vocabulary, unit);
+        return unit.withId(id);
     }
     
     /**
@@ -528,7 +516,10 @@ public class SkosCoreCvocImporter {
         // are we using the rdf:about attribute as 'identifier'
         Node namedItem = conceptNode.getAttributes().getNamedItem("rdf:about");
         String value = namedItem.getNodeValue();
-        dataMap.put(IdentifiableEntity.IDENTIFIER_KEY, value);
+        // Hack! Use everything after the last '/'
+        String idvalue = value.substring(value.lastIndexOf('/') + 1);
+        dataMap.put(IdentifiableEntity.IDENTIFIER_KEY, idvalue);
+        dataMap.put("url", value);
 
         logger.debug("Extracting Concept id: " + dataMap.get(IdentifiableEntity.IDENTIFIER_KEY));        
         
