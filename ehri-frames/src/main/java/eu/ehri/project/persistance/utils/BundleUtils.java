@@ -213,20 +213,22 @@ public class BundleUtils {
         if (path.hasTerminus())
             throw new IllegalArgumentException(
                     "Last component of path must be a valid subtree address.");
+
         if (path.isEmpty()) {
-            return fetchNode(bundle, path.next());
+            return bundle;
         } else {
             PathSection section = path.current();
             if (!bundle.hasRelations(section.getPath()))
                 throw new BundlePathError(String.format(
                         "Relation path '%s' not found", section.getPath()));
+            List<Bundle> relations = bundle.getRelations(section.getPath());
             try {
-                List<Bundle> relations = bundle.getRelations(section.getPath());
-                return relations.get(section.getIndex());
+                Bundle next = relations.get(section.getIndex());
+                return fetchNode(next, path.next());
             } catch (IndexOutOfBoundsException e) {
                 throw new BundleIndexError(String.format(
-                        "Relation index '%s[%s]' not found", section.getPath(),
-                        section.getIndex()));
+                        "Relation index '%s[%s]' not found: %s", section.getPath(),
+                        section.getIndex(), relations));
             }
         }
     }
@@ -296,7 +298,12 @@ public class BundleUtils {
             List<Bundle> relations = Lists.newLinkedList(allRelations
                     .removeAll(section.getPath()));
             if (next.isEmpty()) {
-                relations.set(section.getIndex(), newNode);
+                // If the index is negative, add to the end...
+                if (section.getIndex() == -1) {
+                    relations.add(newNode);
+                } else {
+                    relations.set(section.getIndex(), newNode);
+                }
             } else {
                 Bundle subject = relations.get(section.getIndex());
                 relations.set(section.getIndex(),
@@ -306,8 +313,8 @@ public class BundleUtils {
             return bundle.withRelations(allRelations);
         } catch (IndexOutOfBoundsException e) {
             throw new BundleIndexError(String.format(
-                    "Relation index '%s[%s]' not found", section.getPath(),
-                    section.getIndex()));
+                    "Relation index '%s[%s]' not found", next.current().getPath(),
+                    next.current().getIndex()));
         }
     }
     
@@ -316,7 +323,6 @@ public class BundleUtils {
      * 
      * @param bundle
      * @param path
-     * @param op
      * @return
      */
     private static Bundle deleteNode(Bundle bundle, BundlePath path) {

@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
  */
 final class PathSection {
     private static final Pattern pattern = Pattern
-            .compile("([^/\\[\\]]+)\\[(\\d+)\\]");
+            .compile("([^/\\[\\]]+)\\[(\\d+|-1)\\]");
     private final String path;
     private final int index;
 

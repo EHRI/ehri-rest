@@ -26,6 +26,16 @@ public class BundleUtilsTest extends AbstractFixtureTest {
         Assert.assertEquals(TestData.TEST_COLLECTION_NAME,
                 BundleUtils.get(bundle, NamedEntity.NAME));
         Assert.assertEquals(TestData.TEST_START_DATE,
+                BundleUtils.getBundle(bundle, "describes[0]/hasDate[0]")
+                    .getDataValue(DatePeriod.START_DATE));
+    }
+
+    @Test
+    public void testGetBundle() throws Exception {
+        Bundle bundle = Bundle.fromData(getTestBundle());
+        Assert.assertEquals(TestData.TEST_COLLECTION_NAME,
+                BundleUtils.get(bundle, NamedEntity.NAME));
+        Assert.assertEquals(TestData.TEST_START_DATE,
                 BundleUtils.get(bundle, "describes[0]/hasDate[0]/startDate"));
         Assert.assertEquals(TestData.TEST_START_DATE, BundleUtils.get(bundle,
                 "describes[0]/hasDate[0]/hasDate[0]/startDate"));
@@ -76,6 +86,19 @@ public class BundleUtilsTest extends AbstractFixtureTest {
                 "describes[0]/hasDate[0]/hasDate[0]", dateBundle);
         Assert.assertEquals("testval", BundleUtils.get(newBundle,
                 "describes[0]/hasDate[0]/hasDate[0]/testattr"));
+    }
+
+    @Test
+    public void testInsertNestedNode() throws Exception {
+        // Using -1 for insert means to append at the end of
+        // the current relationship set...
+        Bundle bundle = Bundle.fromData(getTestBundle());
+        Bundle dateBundle = BundleUtils.getBundle(bundle,
+                "describes[0]/hasDate[0]").withDataValue("testattr", "testval");
+        Bundle newBundle = BundleUtils.setBundle(bundle,
+                "describes[0]/hasDate[0]/hasDate[-1]", dateBundle);
+        Assert.assertEquals("testval", BundleUtils.get(newBundle,
+                "describes[0]/hasDate[0]/hasDate[1]/testattr"));
     }
 
     @Test
