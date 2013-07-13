@@ -6,14 +6,12 @@ package eu.ehri.project.importers;
 
 import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.models.DocumentaryUnit;
-import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.events.SystemEvent;
 import java.io.InputStream;
 import java.util.List;
 
-import eu.ehri.project.views.Query;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import org.slf4j.Logger;
@@ -59,7 +57,7 @@ public class UshmmTest extends AbstractImporterTest{
         assertEquals(createCount, getNodeCount(graph));
 
         // Yet we've only created 1 *logical* item...
-        assertEquals(1, log.getSuccessful());
+        assertEquals(1, log.getChanged());
 
         Iterable<Vertex> docs = graph.getVertices("identifier", IMPORTED_ITEM_ID);
         assertTrue(docs.iterator().hasNext());

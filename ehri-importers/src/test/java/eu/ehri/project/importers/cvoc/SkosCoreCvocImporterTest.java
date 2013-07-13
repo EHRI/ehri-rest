@@ -46,7 +46,7 @@ public class SkosCoreCvocImporterTest extends AbstractImporterTest { //AbstractF
         
         // How many new nodes will have been created? We should have
         // Yet we've only created 1 *logical* item...
-        //assertEquals(1, log.getSuccessful());   
+        //assertEquals(1, log.getChanged());
         
         /* check if broader is set
         String skosConceptId = "http://ehri01.dans.knaw.nl/tematres/vocab/?tema=512";

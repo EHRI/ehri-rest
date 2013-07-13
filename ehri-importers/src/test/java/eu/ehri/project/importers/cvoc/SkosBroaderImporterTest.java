@@ -101,7 +101,7 @@ public class SkosBroaderImporterTest extends AbstractImporterTest {
         // Ensure the import action has the right number of subjects.
         List<AccessibleEntity> subjects = toList(log.getAction().getSubjects());
         assertEquals(1, subjects.size());
-        assertEquals(log.getSuccessful(), subjects.size());
+        assertEquals(log.getChanged(), subjects.size());
 
 
 //        System.out.println("created: " + log.getCreated());

@@ -129,7 +129,7 @@ public class ImportLog {
 	 * 
 	 * @return returns whether the import succeeded
 	 */
-	public boolean isValid() {
+	public boolean hasDoneWork() {
 		return created > 0 || updated > 0;
 	}
 
@@ -137,7 +137,7 @@ public class ImportLog {
 	 * 
 	 * @return returns the number of items that were either created or updated.
 	 */
-	public int getSuccessful() {
+	public int getChanged() {
 		return created + updated;
 	}
 

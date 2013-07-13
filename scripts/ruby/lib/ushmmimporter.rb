@@ -42,7 +42,7 @@ module Ehri
           event.add_subjects item
           log.add_created
 
-          if log.get_successful > 0 and log.get_successful % COMMIT_MAX == 0
+          if log.get_changed > 0 and log.get_changed % COMMIT_MAX == 0
             Graph.get_base_graph.commit
           end
 
@@ -56,7 +56,7 @@ module Ehri
           event.add_subjects item
           log.add_updated
 
-          if log.get_successful > 0 and log.get_successful % COMMIT_MAX == 0
+          if log.get_changed > 0 and log.get_changed % COMMIT_MAX == 0
             Graph.get_base_graph.commit
           end
 
@@ -68,7 +68,7 @@ module Ehri
         importer.add_unchanged_callback do |item|
           log.add_unchanged
 
-          if log.get_successful > 0 and log.get_successful % COMMIT_MAX == 0
+          if log.get_changed > 0 and log.get_changed % COMMIT_MAX == 0
             Graph.get_base_graph.commit
           end
 
@@ -106,12 +106,15 @@ module Ehri
             import_with_scope xmlpath, ushmm, ctx, log
           end
 
-          puts "Updated: #{log.get_updated}"
-          puts "Created: #{log.get_created}"
-          puts "Unchanged: #{log.get_unchanged}"
+          log.print_report
 
-          Graph.get_base_graph.commit
-          puts "Committed"
+          if log.has_done_work
+            Graph.get_base_graph.commit
+            puts "Committed"
+          else
+            puts "No changes"
+            Graph.get_base_graph.rollback
+          end
         rescue
           # Oops!
           Graph.get_base_graph.rollback

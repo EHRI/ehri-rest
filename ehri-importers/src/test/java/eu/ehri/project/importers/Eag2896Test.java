@@ -104,7 +104,7 @@ public class Eag2896Test extends AbstractImporterTest {
             // Ensure the import action has the right number of subjects.
             List<AccessibleEntity> subjects = toList(log.getAction().getSubjects());
             assertEquals(1, subjects.size());
-            assertEquals(log.getSuccessful(), subjects.size());
+            assertEquals(log.getChanged(), subjects.size());
 
         } catch (IOException ex) {
             logger.error(ex.getMessage());

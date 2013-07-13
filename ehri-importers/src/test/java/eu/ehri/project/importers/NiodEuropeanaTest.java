@@ -75,7 +75,7 @@ public class NiodEuropeanaTest extends AbstractImporterTest{
             logger.info("identifier: " + subject.getId());
         
         assertEquals(1, subjects.size());
-        assertEquals(log.getSuccessful(), subjects.size());
+        assertEquals(log.getChanged(), subjects.size());
 
         // Check permission scopes
         for (AccessibleEntity e : log.getAction().getSubjects()) {

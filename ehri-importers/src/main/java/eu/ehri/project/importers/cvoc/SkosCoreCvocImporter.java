@@ -122,7 +122,7 @@ public class SkosCoreCvocImporter {
             // Do the import...
             importFile(ios, eventContext, log);
             // If nothing was imported, remove the action...
-            commitOrRollback(log.isValid());
+            commitOrRollback(log.hasDoneWork());
             return log;
         } catch (ValidationError e) {
             commitOrRollback(false);
@@ -743,12 +743,17 @@ public class SkosCoreCvocImporter {
     }
 
     private void commitOrRollback(boolean okay) {
-        if (framedGraph.getBaseGraph() instanceof TxCheckedNeo4jGraph) {
-            TxCheckedNeo4jGraph graph = (TxCheckedNeo4jGraph)framedGraph.getBaseGraph();
+        TransactionalGraph baseGraph = framedGraph.getBaseGraph();
+        if (baseGraph instanceof TxCheckedNeo4jGraph) {
+            TxCheckedNeo4jGraph graph = (TxCheckedNeo4jGraph) baseGraph;
             if (!okay && graph.isInTransaction()) {
                 graph.rollback();
             }
+        } else {
+            if (okay)
+                baseGraph.commit();
+            else
+                baseGraph.rollback();
         }
-        if (okay) framedGraph.getBaseGraph().commit();
     }
 }
