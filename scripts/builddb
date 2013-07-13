@@ -99,7 +99,7 @@ class DbBuilder
       "authoritativeSet",
       "--update",
       "-Pidentifier=ehri-cb",
-      '-Pname="Ehri Corporate Bodies"',
+      '-Pname=Ehri Corporate Bodies',
       "--user", USER_ID,
       "--log", "Adding authoritative set for EHRI corporate bodies"].to_java(:string))
 
@@ -119,7 +119,7 @@ class DbBuilder
       "authoritativeSet",
       "--update",
       "-Pidentifier=ehri-pers",
-      '-Pname="Ehri Personalities"',
+      '-Pname=Ehri Personalities',
       "--user", USER_ID,
       "--log", "Adding authoritative set for EHRI personalities"].to_java(:string))
 
@@ -203,7 +203,7 @@ class DbBuilder
 
     puts "Importing thesaurus..."
     Commands::SkosVocabularyImport.new.exec(Graph, [
-      "--scope", "ehri-skos",
+      "--scope", "ehri-ghettos",
       "--user", USER_ID,
       "--log", "Importing EHRI Ghettos SKOS",
       "--tolerant",
