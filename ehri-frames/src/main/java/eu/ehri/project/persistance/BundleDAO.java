@@ -45,6 +45,7 @@ public final class BundleDAO {
     private final FramedGraph<?> graph;
     private final PermissionScope scope;
     private final GraphManager manager;
+    private final Serializer serializer;
 
     private static class CreateOrUpdateInfo {
         public final Vertex vertex;
@@ -66,6 +67,7 @@ public final class BundleDAO {
         this.scope = Optional.fromNullable(scope)
                 .or(SystemScope.getInstance());
         manager = GraphManagerFactory.getInstance(graph);
+        serializer = new Serializer(graph, true);
     }
 
     /**
@@ -219,14 +221,26 @@ public final class BundleDAO {
             ItemNotFound {
         ListMultimap<String, String> errors = BundleValidatorFactory
                 .getInstance(manager, bundle).validateForUpdate();
-        Vertex node = manager.updateVertex(bundle.getId(), bundle.getType(),
-                bundle.getData(), bundle.getPropertyKeys());
-        ListMultimap<String, BundleError> nestedErrors = updateDependents(node, bundle.getBundleClass(),
-                bundle.getRelations());
-        if (!errors.isEmpty() || hasNestedErrors(nestedErrors)) {
-            throw new ValidationError(bundle, errors, nestedErrors);
+        try {
+            Vertex node = manager.getVertex(bundle.getId());
+            Bundle other = serializer.vertexFrameToBundle(node);
+            if (!other.equals(bundle)) {
+                logger.debug("Items differ, updating: \n{}\n-> \n{}", other, bundle);
+                node = manager.updateVertex(bundle.getId(), bundle.getType(),
+                        bundle.getData(), bundle.getPropertyKeys());
+                ListMultimap<String, BundleError> nestedErrors = updateDependents(node, bundle.getBundleClass(),
+                        bundle.getRelations());
+                if (!errors.isEmpty() || hasNestedErrors(nestedErrors)) {
+                    throw new ValidationError(bundle, errors, nestedErrors);
+                }
+            } else {
+                logger.info("Not updating equivalent bundle {}", bundle.getId());
+            }
+            return node;
+        } catch (SerializationError serializationError) {
+            throw new RuntimeException("Unexpected serialization error fetching node: " + bundle.getId(),
+                    serializationError);
         }
-        return node;
     }
 
     /**

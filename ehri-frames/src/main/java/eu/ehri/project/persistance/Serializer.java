@@ -8,6 +8,7 @@ import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Maps;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
+import eu.ehri.project.models.annotations.Dependent;
 import eu.ehri.project.models.base.Frame;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,12 +37,13 @@ public final class Serializer {
      * Lookup of entityType keys against their annotated class.
      */
     private final int maxTraversals;
+    private final boolean dependentOnly;
 
     /**
      * Constructor.
      */
     public Serializer(FramedGraph<?> graph) {
-        this(graph, Fetch.DEFAULT_TRAVERSALS);
+        this(graph, false, Fetch.DEFAULT_TRAVERSALS);
     }
 
     /**
@@ -50,7 +52,27 @@ public final class Serializer {
      * @param depth
      */
     public Serializer(FramedGraph<?> graph, int depth) {
+        this(graph, false, depth);
+    }
+
+    /**
+     * Constructor which allows specifying whether to serialize non-dependent relations.
+     *
+     * @param dependentOnly
+     */
+    public Serializer(FramedGraph<?> graph, boolean dependentOnly) {
+        this(graph, dependentOnly, Fetch.DEFAULT_TRAVERSALS);
+    }
+
+    /**
+     * Constructor which allows specifying whether to serialize non-dependent relations
+     * and the depth of traversal.
+     *
+     * @param dependentOnly
+     */
+    public Serializer(FramedGraph<?> graph, boolean dependentOnly, int depth) {
         this.graph = graph;
+        this.dependentOnly = dependentOnly;
         this.maxTraversals = depth;
     }
 
@@ -257,8 +279,17 @@ public final class Serializer {
         // However the @Fetch annotation can also specify a maximum
         // depth of traversal beyong which we don't serialize.
         Fetch fetchProps = method.getAnnotation(Fetch.class);
+        Dependent dep = method.getAnnotation(Dependent.class);
+
         if (fetchProps == null)
             return false;
+
+        if (dependentOnly && dep == null) {
+            logger.trace(
+                    "Terminating fetch dependent only is specified: {}, depth {}, limit {}, {}",
+                    relationName, depth, fetchProps.depth());
+            return false;
+        }
 
         if (depth >= fetchProps.depth()) {
             logger.trace(
@@ -285,7 +316,7 @@ public final class Serializer {
         Map<String, Object> data = Maps.newHashMap();
         for (String key : item.getPropertyKeys()) {
             if (!(key.equals(EntityType.ID_KEY) || key
-                    .equals(EntityType.TYPE_KEY)))
+                    .equals(EntityType.TYPE_KEY) || key.startsWith("_")))
                 data.put(key, item.getProperty(key));
         }
         return data;

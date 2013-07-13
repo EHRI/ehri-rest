@@ -6,11 +6,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import com.google.common.collect.ImmutableListMultimap;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.LinkedListMultimap;
-import com.google.common.collect.ListMultimap;
-import com.google.common.collect.Maps;
+import com.google.common.collect.*;
 
 import com.google.common.hash.*;
 import eu.ehri.project.exceptions.DeserializationError;
@@ -327,7 +323,7 @@ public final class Bundle {
 
     @Override
     public String toString() {
-        return "<" + getType() + "> (" + getData() + " + Rels: " + relations.size() + ")";
+        return "<" + getType() + "> (" + getData() + " + Rels: " + relations + ")";
     }
 
     /**
@@ -432,5 +428,28 @@ public final class Bundle {
             }
         }
         return ImmutableMap.copyOf(filtered);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Bundle bundle = (Bundle) o;
+
+        if (type != bundle.type) return false;
+        if (!data.equals(bundle.data)) return false;
+        if (!LinkedHashMultimap.create(relations)
+                .equals(LinkedHashMultimap.create(bundle.relations))) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = type.hashCode();
+        result = 31 * result + data.hashCode();
+        result = 31 * result + LinkedHashMultimap.create(relations).hashCode();
+        return result;
     }
 }
