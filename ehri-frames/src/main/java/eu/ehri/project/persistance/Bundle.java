@@ -354,67 +354,6 @@ public final class Bundle {
         return DataConverter.bundleToXmlString(this);
     }
 
-    @SuppressWarnings("serial")
-    private Funnel<Object> objectFunnel = new Funnel<Object>() {
-        @Override
-        public void funnel(Object data, PrimitiveSink into) {
-            if (data instanceof Object[]) {
-                for (Object sd : (Object[])data) {
-                    funnel(sd, into);
-                }
-            } else if (data instanceof String) {
-                into.putString((String)data);
-            } else if (data instanceof Long) {
-                into.putLong((Long)data);
-            } else if (data instanceof Integer) {
-                into.putInt((Integer)data);
-            } else if (data instanceof Long) {
-                into.putLong((Long)data);
-            } else {
-                into.putString(data.toString());
-            }
-        }
-    };
-
-    @SuppressWarnings("serial")
-    private Funnel<Map.Entry<String,Object>> entryFunnel = new Funnel<Map.Entry<String, Object>>() {
-        @Override
-        public void funnel(Map.Entry<String, Object> entry, PrimitiveSink into) {
-            into.putString(entry.getKey());
-            objectFunnel.funnel(entry.getValue(), into);
-        }
-    };
-
-    @SuppressWarnings("serial")
-    private Funnel<Bundle> bundleFunnel = new Funnel<Bundle>() {
-        @Override
-        public void funnel(Bundle bundle, PrimitiveSink into) {
-            for (Map.Entry<String,Object> entry : bundle.getData().entrySet()) {
-                if (!entry.getKey().equals(EntityType.ID_KEY)
-                        && !entry.getKey().equals(EntityType.HASH_KEY)) {
-                    entryFunnel.funnel(entry, into);
-                }
-            }
-            for (Map.Entry<String,Collection<Bundle>> rels : getRelations().asMap().entrySet()) {
-                into.putString(rels.getKey());
-                for (Bundle r : rels.getValue()) {
-                    into.putString(r.getDataHash().toString());
-                }
-            }
-        }
-    };
-
-    /**
-     * Get a hashCode for this bundle.
-     * @return
-     */
-    public HashCode getDataHash() {
-        HashFunction hf = Hashing.md5();
-        Hasher hasher = hf.newHasher();
-        hasher.putObject(this, bundleFunnel);
-        return hasher.hash();
-    }
-
     /**
      * Return an immutable copy of the given data map with nulls removed.
      * @param data

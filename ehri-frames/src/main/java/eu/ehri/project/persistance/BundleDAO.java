@@ -223,22 +223,26 @@ public final class BundleDAO {
     private Vertex updateInner(Bundle bundle) throws ValidationError,
             ItemNotFound {
         Vertex node = manager.getVertex(bundle.getId());
-        Integer hash = node.getProperty(HASH_CACHE);
-        if (hash != null && hash.equals(bundle.hashCode())) {
-            ListMultimap<String, String> errors = BundleValidatorFactory
-                    .getInstance(manager, bundle).validateForUpdate();
-            node = manager.updateVertex(bundle.getId(), bundle.getType(),
-                    bundle.getData(), bundle.getPropertyKeys());
-            ListMultimap<String, BundleError> nestedErrors = updateDependents(node, bundle.getBundleClass(),
-                    bundle.getRelations());
-            if (!errors.isEmpty() || hasNestedErrors(nestedErrors)) {
-                throw new ValidationError(bundle, errors, nestedErrors);
+        try {
+            Bundle nodeBundle = serializer.vertexFrameToBundle(node);
+            if (!nodeBundle.equals(bundle)) {
+                ListMultimap<String, String> errors = BundleValidatorFactory
+                        .getInstance(manager, bundle).validateForUpdate();
+                node = manager.updateVertex(bundle.getId(), bundle.getType(),
+                        bundle.getData(), bundle.getPropertyKeys());
+                ListMultimap<String, BundleError> nestedErrors = updateDependents(node, bundle.getBundleClass(),
+                        bundle.getRelations());
+                if (!errors.isEmpty() || hasNestedErrors(nestedErrors)) {
+                    throw new ValidationError(bundle, errors, nestedErrors);
+                }
+            } else {
+                logger.debug("Not updating equivalent bundle {}", bundle.getId());
             }
-            node.setProperty(HASH_CACHE, bundle.hashCode());
-        } else {
-            logger.info("Not updating equivalent bundle {}", bundle.getId());
+            return node;
+        } catch (SerializationError serializationError) {
+            throw new RuntimeException("Unexpected serialization error " +
+                    "checking bundle for equivalency", serializationError);
         }
-        return node;
     }
 
     /**
