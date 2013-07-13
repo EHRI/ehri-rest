@@ -34,7 +34,8 @@ public interface Description extends NamedEntity, AccessibleEntity {
     @Fetch(value = DESCRIBES, ifDepth=0)
     @Adjacency(label = DESCRIBES)
     public DescribedEntity getDescribedEntity();    
-        
+
+    @Fetch(MUTATES)
     @Dependent
     @Adjacency(label = MUTATES, direction=Direction.IN)
     public abstract Iterable<MaintenanceEvent> getMaintenanceEvents();
