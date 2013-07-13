@@ -42,6 +42,8 @@ public final class BundleDAO {
 
     private static final Logger logger = LoggerFactory.getLogger(BundleDAO.class);
 
+    public static final String HASH_CACHE = "_HASH_CACHE";
+
     private final FramedGraph<?> graph;
     private final PermissionScope scope;
     private final GraphManager manager;
@@ -198,6 +200,7 @@ public final class BundleDAO {
             if (!errors.isEmpty() || hasNestedErrors(nestedErrors)) {
                   throw new ValidationError(bundle, errors, nestedErrors);
             }
+            node.setProperty(HASH_CACHE, bundle.hashCode());
             return node;
         } catch (IntegrityError e) {
             // Convert integrity errors to validation errors
@@ -221,26 +224,21 @@ public final class BundleDAO {
             ItemNotFound {
         ListMultimap<String, String> errors = BundleValidatorFactory
                 .getInstance(manager, bundle).validateForUpdate();
-        try {
-            Vertex node = manager.getVertex(bundle.getId());
-            Bundle other = serializer.vertexFrameToBundle(node);
-            if (!other.equals(bundle)) {
-                logger.debug("Items differ, updating: \n{}\n-> \n{}", other, bundle);
-                node = manager.updateVertex(bundle.getId(), bundle.getType(),
-                        bundle.getData(), bundle.getPropertyKeys());
-                ListMultimap<String, BundleError> nestedErrors = updateDependents(node, bundle.getBundleClass(),
-                        bundle.getRelations());
-                if (!errors.isEmpty() || hasNestedErrors(nestedErrors)) {
-                    throw new ValidationError(bundle, errors, nestedErrors);
-                }
-            } else {
-                logger.info("Not updating equivalent bundle {}", bundle.getId());
+        Vertex node = manager.getVertex(bundle.getId());
+        Integer hash = node.getProperty(HASH_CACHE);
+        if (hash != null && hash.equals(bundle.hashCode())) {
+            node = manager.updateVertex(bundle.getId(), bundle.getType(),
+                    bundle.getData(), bundle.getPropertyKeys());
+            ListMultimap<String, BundleError> nestedErrors = updateDependents(node, bundle.getBundleClass(),
+                    bundle.getRelations());
+            if (!errors.isEmpty() || hasNestedErrors(nestedErrors)) {
+                throw new ValidationError(bundle, errors, nestedErrors);
             }
-            return node;
-        } catch (SerializationError serializationError) {
-            throw new RuntimeException("Unexpected serialization error fetching node: " + bundle.getId(),
-                    serializationError);
+            node.setProperty(HASH_CACHE, bundle.hashCode());
+        } else {
+            logger.info("Not updating equivalent bundle {}", bundle.getId());
         }
+        return node;
     }
 
     /**

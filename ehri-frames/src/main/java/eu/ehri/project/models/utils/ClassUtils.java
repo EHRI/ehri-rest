@@ -104,12 +104,19 @@ public class ClassUtils {
         return out;
     }
 
+    /**
+     * Get methods on a framed class that should be serialized by default. This
+     * means those with EITHER the @Fetch and/or the @Dependent annotation.
+     * @param cls
+     * @return
+     */
     private static Map<String, Method> getFetchMethodsInternal(Class<?> cls) {
         logger.trace(" - checking for @Fetch methods: {}", cls.getCanonicalName());
         Map<String, Method> out = new HashMap<String, Method>();
         for (Method method : cls.getMethods()) {
             Fetch fetch = method.getAnnotation(Fetch.class);
-            if (fetch != null
+            Dependent dep = method.getAnnotation(Dependent.class);
+            if ((fetch != null || dep != null)
                     && method.getName().startsWith(FETCH_METHOD_PREFIX)) {
                 out.put(fetch.value(), method);
                 logger.trace(" --- found @Fetch annotation: {}: {}", method.getName(), fetch.value());
