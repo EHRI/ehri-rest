@@ -351,7 +351,6 @@ public final class BundleDAO {
 
     private void deleteMissingFromUpdateSet(Vertex master,
             Map<String, Direction> dependents, Set<String> updating) {
-        Serializer serializer = new Serializer(graph);
         for (Entry<String, Direction> relEntry : dependents.entrySet()) {
             for (Vertex v : getCurrentRelationships(master,
                     relEntry.getValue(), relEntry.getKey())) {
