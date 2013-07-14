@@ -8,11 +8,9 @@ import java.util.Map;
 
 import com.google.common.collect.*;
 
-import com.google.common.hash.*;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.utils.ClassUtils;
 import org.w3c.dom.Document;
 
@@ -35,6 +33,13 @@ public final class Bundle {
     public static final String REL_KEY = "relationships";
     public static final String DATA_KEY = "data";
     public static final String TYPE_KEY = "type";
+
+    /**
+     * Properties that are "managed", i.e. automatically set
+     * date/time strings or cache values should begin with a
+     * prefix and are ignored Bundle equality calculations.
+     */
+    public static final String MANAGED_PREFIX = "_";
 
     /**
      * Constructor.
@@ -369,6 +374,17 @@ public final class Bundle {
         return ImmutableMap.copyOf(filtered);
     }
 
+    private Map<String,Object> unmanagedData(Map<String, Object> in) {
+        Map<String,Object> filtered = Maps.newHashMap();
+        for (Map.Entry<? extends String,Object> entry : in.entrySet()) {
+            if (!entry.getKey().startsWith(MANAGED_PREFIX)
+                    && entry.getValue() != null) {
+                filtered.put(entry.getKey(), entry.getValue());
+            }
+        }
+        return filtered;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -377,7 +393,7 @@ public final class Bundle {
         Bundle bundle = (Bundle) o;
 
         if (type != bundle.type) return false;
-        if (!data.equals(bundle.data)) return false;
+        if (!unmanagedData(data).equals(unmanagedData(bundle.data))) return false;
         if (!unorderedRelations(relations)
                 .equals(unorderedRelations(bundle.relations))) return false;
 
@@ -387,7 +403,7 @@ public final class Bundle {
     @Override
     public int hashCode() {
         int result = type.hashCode();
-        result = 31 * result + data.hashCode();
+        result = 31 * result + unmanagedData(data).hashCode();
         result = 31 * result + unorderedRelations(relations).hashCode();
         return result;
     }

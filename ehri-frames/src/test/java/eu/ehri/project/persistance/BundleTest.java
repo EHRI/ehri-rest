@@ -129,6 +129,20 @@ public class BundleTest {
     }
 
     @Test
+    public void testEqualsWithManagedData() throws Exception {
+        // A bundle with the same relationship data but
+        // in different orders should be equals()
+        Bundle bundle1 = Bundle.fromData(TestData.getTestDocBundle());
+        Bundle bundle2 = Bundle.fromData(TestData.getTestDocBundle())
+                .withDataValue(Bundle.MANAGED_PREFIX + "someKey", "foobar");
+        assertEquals(bundle1, bundle2);
+
+        // Data that isn't managed should count
+        Bundle bundle3 = bundle1.withDataValue("foo", "bar");
+        assertNotSame(bundle1, bundle3);
+    }
+
+    @Test
     public void testGetRelations() throws Exception {
         // TODO
     }
