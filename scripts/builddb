@@ -218,16 +218,16 @@ if not opts[:update] then
   builder.init_db
   builder.create_users
 end
-builder.import_thesaurus
-builder.import_camps
-builder.import_ghettos
-builder.import_corporate_bodies
-builder.import_personalities
+#builder.import_thesaurus
+#builder.import_camps
+#builder.import_ghettos
+#builder.import_corporate_bodies
+#builder.import_personalities
 builder.import_repositories
-builder.import_wl
-builder.import_ukraine
-builder.import_icaatom
-builder.import_ushmm
+#builder.import_wl
+#builder.import_ukraine
+#builder.import_icaatom
+#builder.import_ushmm
 
 Graph.get_base_graph.shutdown
 
