@@ -231,7 +231,7 @@ public final class BundleDAO {
                 }
                 return new Mutation(node, MutationState.UPDATED);
             } else {
-                logger.info("Not updating equivalent bundle {}", bundle.getId());
+                logger.debug("Not updating equivalent bundle {}", bundle.getId());
                 return new Mutation(node, MutationState.UNCHANGED);
             }
         } catch (SerializationError serializationError) {
