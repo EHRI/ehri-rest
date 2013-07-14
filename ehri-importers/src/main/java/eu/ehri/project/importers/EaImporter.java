@@ -127,9 +127,6 @@ public abstract class EaImporter extends XmlImporter<Map<String, Object>> {
 //        assert(description.containsKey(IdentifiableEntity.IDENTIFIER_KEY));
         return description;
     }
-    //TODO: or should this be done in the Handler?
-    private static int maintenanceIdentifier = 123;
-
     @SuppressWarnings("unchecked")
     protected Iterable<Map<String, Object>> extractMaintenanceEvent(Map<String, Object> data, String unitid)  {
         List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
@@ -144,13 +141,6 @@ public abstract class EaImporter extends XmlImporter<Map<String, Object>> {
                             e2.put(MaintenanceEvent.AGENTTYPE, event.get(eventkey));
                         } else {
                             e2.put(eventkey, event.get(eventkey));
-                        }
-                    }
-                    if (!e2.containsKey(IdentifiableEntity.IDENTIFIER_KEY)) {
-                        if (e2.containsKey("maintenanceEventDate")) {
-                            e2.put(IdentifiableEntity.IDENTIFIER_KEY, unitid + ":" + e2.get("maintenanceEventDate"));
-                        } else {
-                            e2.put(IdentifiableEntity.IDENTIFIER_KEY, maintenanceIdentifier++);
                         }
                     }
                     if (!e2.containsKey(MaintenanceEvent.EVENTTYPE)){

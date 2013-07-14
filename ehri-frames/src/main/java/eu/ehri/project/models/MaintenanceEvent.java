@@ -17,7 +17,7 @@ import eu.ehri.project.models.base.TemporalEntity;
  * @author linda
  */
 @EntityType(EntityClass.MAINTENANCE_EVENT)
-public interface MaintenanceEvent extends TemporalEntity, AccessibleEntity{
+public interface MaintenanceEvent extends TemporalEntity, AccessibleEntity {
      public static final String EVENTTYPE = "eventType";
      public static final String AGENTTYPE = "agentType";
      public enum EventType { CREATED, REVISED }

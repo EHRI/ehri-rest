@@ -219,6 +219,7 @@ public final class BundleDAO {
         try {
             Bundle nodeBundle = serializer.vertexFrameToBundle(node);
             if (!nodeBundle.equals(bundle)) {
+                logger.trace("Bundles differ\n\n{}\n\n{}", bundle, nodeBundle);
                 ListMultimap<String, String> errors = BundleValidatorFactory
                         .getInstance(manager, bundle).validateForUpdate();
                 node = manager.updateVertex(bundle.getId(), bundle.getType(),
@@ -230,7 +231,7 @@ public final class BundleDAO {
                 }
                 return new Mutation(node, MutationState.UPDATED);
             } else {
-                logger.debug("Not updating equivalent bundle {}", bundle.getId());
+                logger.info("Not updating equivalent bundle {}", bundle.getId());
                 return new Mutation(node, MutationState.UNCHANGED);
             }
         } catch (SerializationError serializationError) {
@@ -332,7 +333,9 @@ public final class BundleDAO {
                     }
                 }
             } else {
-                logger.error("Nested data being ignored on update because it is not a dependent relation: {}: {}", relation, relations.get(relation));
+                logger.warn("Nested data being ignored on update because " +
+                        "it is not a dependent relation: {}: {}",
+                        relation, relations.get(relation));
             }
         }
 

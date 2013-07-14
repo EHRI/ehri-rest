@@ -93,7 +93,6 @@ public class EagImporter extends EaImporter {
         descmap.put(IdentifiableEntity.IDENTIFIER_KEY, descmap.get(IdentifiableEntity.IDENTIFIER_KEY) + "#desc");
         Bundle descBundle = new Bundle(EntityClass.REPOSITORY_DESCRIPTION, descmap);
 
-
         // Add dates and descriptions to the bundle since they're @Dependent
         // relations.
         for (Map<String, Object> dpb : extractDates(itemData)) {
@@ -120,11 +119,10 @@ public class EagImporter extends EaImporter {
 
         IdGenerator generator = EntityClass.REPOSITORY.getIdgen();
         String id = generator.generateId(EntityClass.REPOSITORY, permissionScope, unit);
-        boolean exists = manager.exists(id);
         Mutation<Repository> mutation = persister.createOrUpdate(unit.withId(id), Repository.class);
         handleCallbacks(mutation);
 
-        if (mutation.getState() == MutationState.CREATED) {
+        if (mutation.created()) {
             mutation.getNode().setCountry(framedGraph.frame(permissionScope.asVertex(), Country.class));
         }
         return mutation.getNode();

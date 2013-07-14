@@ -41,83 +41,79 @@ public class Eag2896Test extends AbstractImporterTest {
     protected final String AGENT_DESC_ID = "NL-002896#desc";
 
     @Test
-    public void testImportItemsT() {
-        try {
-            Country country = manager.getFrame(TEST_COUNTRY, Country.class);
-            final String logMessage = "Importing a single EAG";
+    public void testImportItemsT() throws Exception {
+        Country country = manager.getFrame(TEST_COUNTRY, Country.class);
+        final String logMessage = "Importing a single EAG";
 
-            int count = getNodeCount(graph);
-            logger.info("count of nodes before importing: " + count);
+        int count = getNodeCount(graph);
+        logger.info("count of nodes before importing: " + count);
 
-            InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_UNIT);
-            ImportLog log = new SaxImportManager(graph, country, validUser, EagImporter.class, EagHandler.class).importFile(ios, logMessage);
-            //printGraph(graph);
-            // How many new nodes will have been created? We should have
-            // - 1 more Repository
-            // - 1 more RepositoryDescription
-            // - 1 more Address
-            // - 1 more UnknownProperty
-            // - 2 more MaintenanceEvent
-            // - 2 more linkEvents (1 for the Repository, 1 for the User)
-            // - 1 more SystemEvent        
-            assertEquals(count + 9, getNodeCount(graph));
+        InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_UNIT);
+        SaxImportManager importManager = new SaxImportManager(graph, country, validUser, EagImporter.class, EagHandler.class);
+        ImportLog log = importManager.importFile(ios, logMessage);
+        //printGraph(graph);
+        // How many new nodes will have been created? We should have
+        // - 1 more Repository
+        // - 1 more RepositoryDescription
+        // - 1 more Address
+        // - 1 more UnknownProperty
+        // - 2 more MaintenanceEvent
+        // - 2 more linkEvents (1 for the Repository, 1 for the User)
+        // - 1 more SystemEvent
 
-            Iterable<Vertex> docs = graph.getVertices(IdentifiableEntity.IDENTIFIER_KEY, IMPORTED_ITEM_ID);
-            assertTrue(docs.iterator().hasNext());
-            Repository unit = graph.frame(
-                    getVertexByIdentifier(graph, IMPORTED_ITEM_ID),
-                    Repository.class);
-            assertEquals(Entities.REPOSITORY, unit.getType());
+        int afterCount = count + 9;
+        assertEquals(afterCount, getNodeCount(graph));
 
-            // check the child items
-            RepositoryDescription c1 = graph.frame(
-                    getVertexByIdentifier(graph, AGENT_DESC_ID),
-                    RepositoryDescription.class);
-            assertEquals(Entities.REPOSITORY_DESCRIPTION, c1.getType());
-            Object notes = c1.asVertex().getProperty(EagImporter.MAINTENANCE_NOTES);
-            if (notes instanceof String[]) {
-                fail();
-            } else {
-                assertTrue(notes instanceof String);
-            }
+        Iterable<Vertex> docs = graph.getVertices(IdentifiableEntity.IDENTIFIER_KEY, IMPORTED_ITEM_ID);
+        assertTrue(docs.iterator().hasNext());
+        Repository unit = graph.frame(
+                getVertexByIdentifier(graph, IMPORTED_ITEM_ID),
+                Repository.class);
+        assertEquals(Entities.REPOSITORY, unit.getType());
 
-            // MB: Test priority hack - this should be pulled out of the
-            // maintenanceNotes field into its own int field
-            Object priority = unit.asVertex().getProperty(EagImporter.PRIORITY);
-            assertEquals(Integer.valueOf(5), priority);
-
-
-            //check whether the description has an Address attached to it
-            assertEquals(1, toList(c1.getAddresses()).size());
-
-            assertEquals(2, toList(c1.getMaintenanceEvents()).size());
-            // Ensure that c1 is a description of the unit
-            for (Description d : unit.getDescriptions()) {
-                assertEquals(IMPORTED_ITEM_ID, d.getDescribedEntity().getIdentifier());
-            }
-
-            // Check we've only got one action
-            assertEquals(1, log.getCreated());
-            assertTrue(log.getAction() instanceof SystemEvent);
-            assertEquals(logMessage, log.getAction().getLogMessage());
-
-            // Ensure the import action has the right number of subjects.
-            List<AccessibleEntity> subjects = toList(log.getAction().getSubjects());
-            assertEquals(1, subjects.size());
-            assertEquals(log.getChanged(), subjects.size());
-
-        } catch (IOException ex) {
-            logger.error(ex.getMessage());
-            fail();
-        } catch (ValidationError ex) {
-            logger.error(ex.getMessage());
-            fail();
-        } catch (InputParseError ex) {
-            logger.error(ex.getMessage());
-            fail();
-        } catch (ItemNotFound ex) {
-            logger.error(ex.getMessage());
-            fail();
+        // check the child items
+        RepositoryDescription c1 = graph.frame(
+                getVertexByIdentifier(graph, AGENT_DESC_ID),
+                RepositoryDescription.class);
+        assertEquals(Entities.REPOSITORY_DESCRIPTION, c1.getType());
+        Object notes = c1.asVertex().getProperty(EagImporter.MAINTENANCE_NOTES);
+        if (notes instanceof String[]) {
+            fail("Maintenance notes property should not be an array");
+        } else {
+            assertTrue(notes instanceof String);
         }
+
+        // MB: Test priority hack - this should be pulled out of the
+        // maintenanceNotes field into its own int field
+        Object priority = unit.asVertex().getProperty(EagImporter.PRIORITY);
+        assertEquals(Integer.valueOf(5), priority);
+
+
+        //check whether the description has an Address attached to it
+        assertEquals(1, toList(c1.getAddresses()).size());
+
+        assertEquals(2, toList(c1.getMaintenanceEvents()).size());
+        // Ensure that c1 is a description of the unit
+        for (Description d : unit.getDescriptions()) {
+            assertEquals(IMPORTED_ITEM_ID, d.getDescribedEntity().getIdentifier());
+        }
+
+        // Check we've only got one action
+        assertEquals(1, log.getCreated());
+        assertTrue(log.getAction() instanceof SystemEvent);
+        assertEquals(logMessage, log.getAction().getLogMessage());
+
+        // Ensure the import action has the right number of subjects.
+        List<AccessibleEntity> subjects = toList(log.getAction().getSubjects());
+        assertEquals(1, subjects.size());
+        assertEquals(log.getChanged(), subjects.size());
+
+        // Test idempotency
+        int edgeCount = getEdgeCount(graph);
+        ImportLog log2 = importManager
+                .importFile(ClassLoader.getSystemResourceAsStream(SINGLE_UNIT), logMessage);
+        assertFalse(log2.hasDoneWork());
+        assertEquals(afterCount, getNodeCount(graph));
+        assertEquals(edgeCount, getEdgeCount(graph));
     }
 }
