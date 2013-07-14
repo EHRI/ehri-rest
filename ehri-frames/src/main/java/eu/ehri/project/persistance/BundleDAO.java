@@ -219,7 +219,7 @@ public final class BundleDAO {
         try {
             Bundle nodeBundle = serializer.vertexFrameToBundle(node);
             if (!nodeBundle.equals(bundle)) {
-                logger.trace("Bundles differ\n\n{}\n\n{}", bundle, nodeBundle);
+                logger.trace("Bundles differ\n\n{}\n\n{}", bundle.toJson(), nodeBundle.toJson());
                 ListMultimap<String, String> errors = BundleValidatorFactory
                         .getInstance(manager, bundle).validateForUpdate();
                 node = manager.updateVertex(bundle.getId(), bundle.getType(),
