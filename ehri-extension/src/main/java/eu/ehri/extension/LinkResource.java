@@ -156,9 +156,22 @@ public class LinkResource extends
         if (item == null) {
             throw new ItemNotFound(id);
         }
-        ViewFactory.getCrudNoLogging(graph, AccessibleEntity.class)
-                .deleteDependent(rel, item, userProfile, UndeterminedRelationship.class);
-        return Response.status(Status.OK).build();
+
+        try {
+            ViewFactory.getCrudNoLogging(graph, AccessibleEntity.class)
+                    .deleteDependent(rel, item, userProfile, UndeterminedRelationship.class);
+            graph.getBaseGraph().commit();
+            return Response.status(Status.OK).build();
+        } catch (PermissionDenied permissionDenied) {
+            graph.getBaseGraph().rollback();
+            throw permissionDenied;
+        } catch (ValidationError validationError) {
+            graph.getBaseGraph().rollback();
+            throw validationError;
+        } catch (SerializationError serializationError) {
+            graph.getBaseGraph().rollback();
+            throw serializationError;
+        }
     }
 
     private Response buildResponseFromAnnotation(Link link)
