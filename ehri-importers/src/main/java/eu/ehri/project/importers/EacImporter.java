@@ -4,6 +4,7 @@ import com.google.common.collect.Sets;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.SystemScope;
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
@@ -19,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 
 import eu.ehri.project.persistance.Mutation;
-import eu.ehri.project.persistance.MutationState;
 import eu.ehri.project.views.impl.CrudViews;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,33 +69,33 @@ public class EacImporter extends EaImporter {
         // Add dates and descriptions to the bundle since they're @Dependent
         // relations.
         for (Map<String, Object> dpb : extractDates(itemData)) {
-            descBundle = descBundle.withRelation(TemporalEntity.HAS_DATE, new Bundle(EntityClass.DATE_PERIOD, dpb));
+            descBundle = descBundle.withRelation(Ontology.ENTITY_HAS_DATE, new Bundle(EntityClass.DATE_PERIOD, dpb));
         }
 
         //add the address to the description bundle
         Map<String, Object> address = extractAddress(itemData);
         if (!address.isEmpty()) {
-            descBundle = descBundle.withRelation(AddressableEntity.HAS_ADDRESS, new Bundle(EntityClass.ADDRESS, address));
+            descBundle = descBundle.withRelation(Ontology.ENTITY_HAS_ADDRESS, new Bundle(EntityClass.ADDRESS, address));
         }
 
         Map<String, Object> unknowns = extractUnknownProperties(itemData);
         if (!unknowns.isEmpty()) {
             logger.debug("Unknown Properties found");
-            descBundle = descBundle.withRelation(Description.HAS_UNKNOWN_PROPERTY, new Bundle(EntityClass.UNKNOWN_PROPERTY, unknowns));
+            descBundle = descBundle.withRelation(Ontology.HAS_UNKNOWN_PROPERTY, new Bundle(EntityClass.UNKNOWN_PROPERTY, unknowns));
         }
 
         for (Map<String, Object> dpb : extractMaintenanceEvent(itemData, itemData.get("objectIdentifier").toString())) {
             logger.debug("maintenance event found");
             //dates in maintenanceEvents are no DatePeriods, they are not something to search on
-            descBundle = descBundle.withRelation(Description.MUTATES, new Bundle(EntityClass.MAINTENANCE_EVENT, dpb));
+            descBundle = descBundle.withRelation(Ontology.HAS_MAINTENANCE_EVENT, new Bundle(EntityClass.MAINTENANCE_EVENT, dpb));
         }
 
         for (Map<String, Object> rel : extractRelations(itemData)) {
             logger.debug("relation found");
-            descBundle = descBundle.withRelation(Description.RELATES_TO, new Bundle(EntityClass.UNDETERMINED_RELATIONSHIP, rel));
+            descBundle = descBundle.withRelation(Ontology.HAS_ACCESS_POINT, new Bundle(EntityClass.UNDETERMINED_RELATIONSHIP, rel));
         }
 
-        unit = unit.withRelation(Description.DESCRIBES, descBundle);
+        unit = unit.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
 
         IdGenerator generator = EntityClass.HISTORICAL_AGENT.getIdgen();
         String id = generator.generateId(EntityClass.HISTORICAL_AGENT, permissionScope, unit);
@@ -122,7 +122,7 @@ public class EacImporter extends EaImporter {
         Map<String, Object> description = new HashMap<String, Object>();
         for (String key : itemData.keySet()) {
             if (key.equals("descriptionIdentifier")) {
-                description.put(IdentifiableEntity.IDENTIFIER_KEY, itemData.get(key));
+                description.put(Ontology.IDENTIFIER_KEY, itemData.get(key));
             } else if (key.startsWith("name")) {
                 Object name = itemData.get(key);
                 if (name instanceof List) {
@@ -132,7 +132,7 @@ public class EacImporter extends EaImporter {
                             String namePart = (String) ((Map<String, Object>) nameentry).get("name/namePart");
                             if (namePart != null && nameType != null) {
                                 if (nameType.equals("authorized"))
-                                    description.put(Description.NAME, namePart);
+                                    description.put(Ontology.NAME_KEY, namePart);
                                 else if (nameType.equals("parallel"))
                                     description.put("parallelFormsOfName", namePart);
                                 else
@@ -143,7 +143,7 @@ public class EacImporter extends EaImporter {
                 }
             } else if (!key.startsWith(SaxXmlHandler.UNKNOWN)
                     && !key.equals("objectIdentifier")
-                    && !key.equals(IdentifiableEntity.IDENTIFIER_KEY)
+                    && !key.equals(Ontology.IDENTIFIER_KEY)
                     && !key.startsWith("maintenanceEvent")
                     && !key.startsWith("relation")
                     && !key.startsWith("address/")) {
@@ -173,7 +173,7 @@ public class EacImporter extends EaImporter {
         //we need the id (not the identifier) of the description, this requires some checking
         for (Description thisAgentDescription : frame.getDescriptions()) {
             //is thisAgentDescription the one we just created?
-            if (thisAgentDescription.asVertex().getProperty(IdentifiableEntity.IDENTIFIER_KEY).equals(descBundle.getData().get(IdentifiableEntity.IDENTIFIER_KEY))) {
+            if (thisAgentDescription.asVertex().getProperty(Ontology.IDENTIFIER_KEY).equals(descBundle.getData().get(Ontology.IDENTIFIER_KEY))) {
                 histdesc = thisAgentDescription;
                 break;
             }
@@ -188,12 +188,12 @@ public class EacImporter extends EaImporter {
                 String targetUrl = (String)rel.asVertex().getProperty(LINK_TARGET);
                 Iterable<Vertex> docs = framedGraph.getVertices("descriptionUrl", targetUrl);
                 if (docs.iterator().hasNext()) {
-                    String annotationType = rel.asVertex().getProperty(Link.LINK_TYPE).toString();
+                    String annotationType = rel.asVertex().getProperty(Ontology.LINK_HAS_TYPE).toString();
                     DescribedEntity targetEntity = framedGraph.frame(docs.iterator().next(), Description.class).getEntity();
                     try {
                         Bundle linkBundle = new Bundle(EntityClass.LINK)
-                                .withDataValue(Link.LINK_TYPE, annotationType)
-                                .withDataValue(Link.LINK_DESCRIPTION, rel.asVertex().getProperty(Link.LINK_DESCRIPTION));
+                                .withDataValue(Ontology.LINK_HAS_TYPE, annotationType)
+                                .withDataValue(Ontology.LINK_HAS_DESCRIPTION, rel.asVertex().getProperty(Ontology.LINK_HAS_DESCRIPTION));
                         Link link = new CrudViews<Link>(framedGraph, Link.class).create(linkBundle, userProfile);
                         frame.addLink(link);
                         targetEntity.addLink(link);
@@ -205,7 +205,7 @@ public class EacImporter extends EaImporter {
                             for (UndeterminedRelationship remoteRel : Sets.newHashSet(targetEntityDescription.getUndeterminedRelationships())) {
                                 //check that both the body targeturl and the type are the same
                                 if (thisUrl.equals(remoteRel.asVertex().getProperty(LINK_TARGET))
-                                        && annotationType.equals(remoteRel.asVertex().getProperty(Link.LINK_TYPE))
+                                        && annotationType.equals(remoteRel.asVertex().getProperty(Ontology.LINK_HAS_TYPE))
                                         ) {
                                     link.addLinkBody(remoteRel);
                                 }

@@ -6,6 +6,7 @@ package eu.ehri.project.models;
 
 import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Property;
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.annotations.Mandatory;
@@ -24,38 +25,32 @@ import eu.ehri.project.models.base.LinkableEntity;
 @EntityType(EntityClass.LINK)
 public interface Link extends AccessibleEntity, AnnotatableEntity {
 
-    public static final String HAS_LINK_BODY = "hasLinkBody";
-    public static final String HAS_LINK_TARGET = "hasLinkTarget";
-    public static final String HAS_LINKER = "hasLinker";
-    public static final String LINK_TYPE = "type";
-    public static final String LINK_DESCRIPTION = "description";
-
-    @Fetch(HAS_LINKER)
-    @Adjacency(label = HAS_LINKER)
+    @Fetch(Ontology.LINK_HAS_LINKER)
+    @Adjacency(label = Ontology.LINK_HAS_LINKER)
     public Iterable<UserProfile> getLinker();
 
-    @Adjacency(label = HAS_LINKER)
+    @Adjacency(label = Ontology.LINK_HAS_LINKER)
     public void setLinker(final Accessor accessor);
 
-    @Fetch(ifDepth = 0, value = HAS_LINK_TARGET)
-    @Adjacency(label = HAS_LINK_TARGET)
+    @Fetch(ifDepth = 0, value = Ontology.LINK_HAS_TARGET)
+    @Adjacency(label = Ontology.LINK_HAS_TARGET)
     public Iterable<LinkableEntity> getLinkTargets();
 
-    @Adjacency(label = HAS_LINK_TARGET)
+    @Adjacency(label = Ontology.LINK_HAS_TARGET)
     public void addLinkTarget(final LinkableEntity entity);
 
-    @Fetch(HAS_LINK_BODY)
-    @Adjacency(label = HAS_LINK_BODY)
+    @Fetch(Ontology.LINK_HAS_BODY)
+    @Adjacency(label = Ontology.LINK_HAS_BODY)
     public Iterable<AccessibleEntity> getLinkBodies();
 
-    @Adjacency(label = HAS_LINK_BODY)
+    @Adjacency(label = Ontology.LINK_HAS_BODY)
     public void addLinkBody(final AccessibleEntity entity);
 
     @Mandatory
-    @Property(LINK_TYPE)
+    @Property(Ontology.LINK_HAS_TYPE)
     public String getLinkType();
 
-    @Property(LINK_DESCRIPTION)
+    @Property(Ontology.LINK_HAS_DESCRIPTION)
     public String getDescription();
 }
 

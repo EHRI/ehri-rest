@@ -13,6 +13,7 @@ import com.tinkerpop.pipes.PipeFunction;
 
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.IdGenerationError;
 import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.PermissionDenied;
@@ -369,7 +370,7 @@ public final class AclManager {
         return new PipeFunction<Vertex, Boolean>() {
             public Boolean compute(Vertex v) {
                 Iterable<Vertex> verts = v.getVertices(Direction.OUT,
-                        AccessibleEntity.ACCESS);
+                        Ontology.IS_ACCESSIBLE_TO);
                 // If there's no Access conditions, it's
                 // read-only...
                 if (!verts.iterator().hasNext())

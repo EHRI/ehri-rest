@@ -7,17 +7,14 @@ package eu.ehri.project.importers;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.SystemScope;
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.properties.XmlImportProperties;
-import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.base.Description;
-import eu.ehri.project.models.base.IdentifiableEntity;
 import eu.ehri.project.models.base.PermissionScope;
-import eu.ehri.project.models.base.TemporalEntity;
 import eu.ehri.project.persistance.*;
 
 import java.util.HashMap;
@@ -52,20 +49,20 @@ public class UkrainianUnitImporter extends XmlImporter<Object> {
             String[] langs = lang.split(", ");
             for (String l : langs) {
                 Bundle descBundle = new Bundle(EntityClass.DOCUMENT_DESCRIPTION, extractUnitDescription(itemData, l));
-                descBundle = descBundle.withRelation(TemporalEntity.HAS_DATE, new Bundle(EntityClass.DATE_PERIOD, constructDateMap(itemData)));
+                descBundle = descBundle.withRelation(Ontology.ENTITY_HAS_DATE, new Bundle(EntityClass.DATE_PERIOD, constructDateMap(itemData)));
                 if (!unknowns.isEmpty()) {
-                    descBundle = descBundle.withRelation(Description.HAS_UNKNOWN_PROPERTY, new Bundle(EntityClass.UNKNOWN_PROPERTY, unknowns));
+                    descBundle = descBundle.withRelation(Ontology.HAS_UNKNOWN_PROPERTY, new Bundle(EntityClass.UNKNOWN_PROPERTY, unknowns));
                 }
-                unit = unit.withRelation(Description.DESCRIBES, descBundle);
+                unit = unit.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
             }
         } else {
             Bundle descBundle = new Bundle(EntityClass.DOCUMENT_DESCRIPTION, extractUnitDescription(itemData, lang));
-            descBundle = descBundle.withRelation(TemporalEntity.HAS_DATE, new Bundle(EntityClass.DATE_PERIOD, constructDateMap(itemData)));
+            descBundle = descBundle.withRelation(Ontology.ENTITY_HAS_DATE, new Bundle(EntityClass.DATE_PERIOD, constructDateMap(itemData)));
             if (!unknowns.isEmpty()) {
-                descBundle = descBundle.withRelation(Description.HAS_UNKNOWN_PROPERTY, new Bundle(EntityClass.UNKNOWN_PROPERTY, unknowns));
+                descBundle = descBundle.withRelation(Ontology.HAS_UNKNOWN_PROPERTY, new Bundle(EntityClass.UNKNOWN_PROPERTY, unknowns));
             }
 
-            unit = unit.withRelation(Description.DESCRIBES, descBundle);
+            unit = unit.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
         }
 
         BundleValidator validator = BundleValidatorFactory.getInstance(manager, unit);
@@ -105,7 +102,7 @@ public class UkrainianUnitImporter extends XmlImporter<Object> {
         //unit needs at least IDENTIFIER_KEY
         Map<String, Object> item = new HashMap<String, Object>();
         if (itemData.containsKey("identifier")) {
-            item.put(IdentifiableEntity.IDENTIFIER_KEY, itemData.get("identifier"));
+            item.put(Ontology.IDENTIFIER_KEY, itemData.get("identifier"));
         } else {
             logger.error("missing identifier");
         }
@@ -117,11 +114,11 @@ public class UkrainianUnitImporter extends XmlImporter<Object> {
         String origDate = itemData.get("dates").toString();
         if (origDate.indexOf(MULTIVALUE_SEP) > 0) {
             String[] dates = itemData.get("dates").toString().split(MULTIVALUE_SEP);
-            item.put(DatePeriod.START_DATE, dates[0]);
-            item.put(DatePeriod.END_DATE, dates[1]);
+            item.put(Ontology.DATE_PERIOD_START_DATE, dates[0]);
+            item.put(Ontology.DATE_PERIOD_END_DATE, dates[1]);
         } else {
-            item.put(DatePeriod.START_DATE, origDate);
-            item.put(DatePeriod.END_DATE, origDate);
+            item.put(Ontology.DATE_PERIOD_START_DATE, origDate);
+            item.put(Ontology.DATE_PERIOD_END_DATE, origDate);
         }
         return item;
     }
@@ -154,7 +151,7 @@ public class UkrainianUnitImporter extends XmlImporter<Object> {
 
         }
         //replace the language from the itemData with the one specified in the param
-        SaxXmlHandler.putPropertyInGraph(item, Description.LANGUAGE_CODE, language);
+        SaxXmlHandler.putPropertyInGraph(item, Ontology.LANGUAGE_OF_DESCRIPTION, language);
         return item;
     }
 

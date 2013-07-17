@@ -3,6 +3,7 @@ package eu.ehri.project.importers;
 import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.definitions.Entities;
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.HistoricalAgent;
 import eu.ehri.project.models.HistoricalAgentDescription;
 import eu.ehri.project.models.Link;
@@ -130,7 +131,7 @@ public class EacImporterTest extends AbstractImporterTest {
         // - 1 more SystemEvent
         assertEquals(count + 7, getNodeCount(graph));
 
-            Iterable<Vertex> docs = graph.getVertices(IdentifiableEntity.IDENTIFIER_KEY,
+            Iterable<Vertex> docs = graph.getVertices(Ontology.IDENTIFIER_KEY,
                     IMPORTED_ITEM_ID);
             assertTrue(docs.iterator().hasNext());
             HistoricalAgent unit = graph.frame(
@@ -144,7 +145,7 @@ public class EacImporterTest extends AbstractImporterTest {
         assertEquals(Entities.HISTORICAL_AGENT_DESCRIPTION, c1.getType());
 
 
-        assertTrue(c1.asVertex().getProperty(Description.NAME) instanceof String);
+        assertTrue(c1.asVertex().getProperty(Ontology.NAME_KEY) instanceof String);
         assertTrue(c1.asVertex().getProperty("otherFormsOfName") instanceof String);
 
         // Ensure that c1 is a description of the unit

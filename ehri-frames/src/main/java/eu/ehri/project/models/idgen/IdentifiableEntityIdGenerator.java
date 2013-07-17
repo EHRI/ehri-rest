@@ -18,7 +18,7 @@ import java.text.MessageFormat;
 import java.util.LinkedList;
 import java.util.List;
 
-import static eu.ehri.project.models.base.IdentifiableEntity.IDENTIFIER_KEY;
+import static eu.ehri.project.definitions.Ontology.IDENTIFIER_KEY;
 
 /**
  * Generates an ID for nodes which represent AccessibleEntities.

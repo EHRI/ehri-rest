@@ -4,8 +4,8 @@ import java.io.InputStream;
 import java.io.PrintStream;
 
 import com.google.common.collect.Iterables;
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.base.IdentifiableEntity;
 import org.junit.Test;
 
 import com.tinkerpop.blueprints.Vertex;
@@ -14,7 +14,6 @@ import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.AbstractImporterTest;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.cvoc.Concept;
-import eu.ehri.project.models.cvoc.ConceptDescription;
 import eu.ehri.project.models.cvoc.Vocabulary;
 
 import static org.junit.Assert.assertEquals;
@@ -52,12 +51,12 @@ public class SkosCoreCvocImporterTest extends AbstractImporterTest { //AbstractF
 
         // check narrower and broader...
         for (Concept c : graph.frameVertices(
-                graph.getVertices(IdentifiableEntity.IDENTIFIER_KEY, "?tema=511"), Concept.class)) {
+                graph.getVertices(Ontology.IDENTIFIER_KEY, "?tema=511"), Concept.class)) {
             assertEquals(1, Iterables.size(c.getNarrowerConcepts()));
         }
 
         for (Concept c : graph.frameVertices(
-                graph.getVertices(IdentifiableEntity.IDENTIFIER_KEY, "?tema=512"), Concept.class)) {
+                graph.getVertices(Ontology.IDENTIFIER_KEY, "?tema=512"), Concept.class)) {
             assertEquals(2, Iterables.size(c.getBroaderConcepts()));
         }
 
@@ -111,25 +110,25 @@ public class SkosCoreCvocImporterTest extends AbstractImporterTest { //AbstractF
                     String language = description.getLanguageOfDescription();
                     Vertex cdVertex = description.asVertex();
                     // prefLabel (one and only one)
-                    String prefLabel = (String) cdVertex.getProperty(ConceptDescription.PREFLABEL);
+                    String prefLabel = (String) cdVertex.getProperty(Ontology.PREFLABEL);
                     out.println("  <skos:prefLabel xml:lang=\"" + language + "\">" + prefLabel + "</skos:prefLabel>");
 
                     // other stuff as well
-                    Object obj = cdVertex.getProperty(ConceptDescription.ALTLABEL);
+                    Object obj = cdVertex.getProperty(Ontology.CONCEPT_ALTLABEL);
                     if (obj != null) {
                         String[] altLabels = (String[]) obj;
                         for (String altLabel : altLabels) {
                             out.println("  <skos:altLabel xml:lang=\"" + language + "\">" + altLabel + "</skos:altLabel>");
                         }
                     }
-                    obj = cdVertex.getProperty(ConceptDescription.SCOPENOTE);
+                    obj = cdVertex.getProperty(Ontology.CONCEPT_SCOPENOTE);
                     if (obj != null) {
                         String[] scopeNotes = (String[]) obj;
                         for (String scopeNote : scopeNotes) {
                             out.println("  <skos:scopeNote xml:lang=\"" + language + "\">" + scopeNote + "</skos:altLabel>");
                         }
                     }
-                    obj = cdVertex.getProperty(ConceptDescription.DEFINITION);
+                    obj = cdVertex.getProperty(Ontology.CONCEPT_DEFINITION);
                     if (obj != null) {
                         String[] definitions = (String[]) obj;
                         for (String definition : definitions) {

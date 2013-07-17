@@ -16,6 +16,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import com.google.common.base.Optional;
 import com.tinkerpop.blueprints.TransactionalGraph;
 import eu.ehri.project.definitions.EventTypes;
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.base.*;
 import eu.ehri.project.persistance.*;
 import eu.ehri.project.utils.TxCheckedNeo4jGraph;
@@ -37,13 +38,10 @@ import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.exceptions.InvalidXmlDocument;
 import eu.ehri.project.importers.exceptions.InvalidInputFormatError;
-import eu.ehri.project.models.Annotation;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.cvoc.Concept;
-import eu.ehri.project.models.cvoc.ConceptDescription;
 import eu.ehri.project.models.cvoc.Vocabulary;
-import eu.ehri.project.models.idgen.IdGenerator;
 import eu.ehri.project.persistance.ActionManager.EventContext;
 
 /**
@@ -274,17 +272,17 @@ public class SkosCoreCvocImporter {
         for (String key : descriptions.keySet()) {
             logger.debug("description for: " + key);
             Map<String, Object> d = (Map<String, Object>) descriptions.get(key);
-            logger.debug("languageCode = " + d.get(Description.LANGUAGE_CODE));
+            logger.debug("languageCode = " + d.get(Ontology.LANGUAGE_OF_DESCRIPTION));
 
             Bundle descBundle = new Bundle(EntityClass.CVOC_CONCEPT_DESCRIPTION, d);
             Map<String, Object> rel = extractRelations(element, "owl:sameAs");
             if(!rel.isEmpty()) {
-                descBundle = descBundle.withRelation(Description.RELATES_TO,
+                descBundle = descBundle.withRelation(Ontology.HAS_ACCESS_POINT,
                         new Bundle(EntityClass.UNDETERMINED_RELATIONSHIP, rel));
             }
 
             // NOTE maybe test if prefLabel is there?
-            unit = unit.withRelation(Description.DESCRIBES, descBundle);
+            unit = unit.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
         }
 
         // get an ID for the GraphDB
@@ -521,10 +519,10 @@ public class SkosCoreCvocImporter {
         String value = namedItem.getNodeValue();
         // Hack! Use everything after the last '/'
         String idvalue = value.substring(value.lastIndexOf('/') + 1);
-        dataMap.put(IdentifiableEntity.IDENTIFIER_KEY, idvalue);
+        dataMap.put(Ontology.IDENTIFIER_KEY, idvalue);
         dataMap.put(CONCEPT_URL, value);
 
-        logger.debug("Extracting Concept id: " + dataMap.get(IdentifiableEntity.IDENTIFIER_KEY));        
+        logger.debug("Extracting Concept id: " + dataMap.get(Ontology.IDENTIFIER_KEY));
         
         return dataMap;
     }
@@ -540,8 +538,8 @@ public class SkosCoreCvocImporter {
             logger.debug("text: \"" + text + "\", skos name: " + skosName);
 
             // add to all descriptionData maps
-            relationNode.put(Annotation.ANNOTATION_TYPE, skosName);
-            relationNode.put(NamedEntity.NAME, text);
+            relationNode.put(Ontology.ANNOTATION_TYPE, skosName);
+            relationNode.put(Ontology.NAME_KEY, text);
         }
         return relationNode;
     }
@@ -556,16 +554,16 @@ public class SkosCoreCvocImporter {
         Map<String, Object> descriptionData = new HashMap<String, Object>(); 
         
         // one and only one
-        extractAndAddToLanguageMapSingleValuedTextToDescriptionData(descriptionData, Description.NAME, "skos:prefLabel", conceptElement);
+        extractAndAddToLanguageMapSingleValuedTextToDescriptionData(descriptionData, Ontology.NAME_KEY, "skos:prefLabel", conceptElement);
         // multiple alternatives is logical
         extractAndAddMultiValuedTextToDescriptionData(descriptionData, 
-        		ConceptDescription.ALTLABEL, "skos:altLabel", conceptElement);
+        		Ontology.CONCEPT_ALTLABEL, "skos:altLabel", conceptElement);
         // just allow multiple, its not forbidden by Skos
         extractAndAddMultiValuedTextToDescriptionData(descriptionData, 
-        		ConceptDescription.SCOPENOTE, "skos:scopeNote", conceptElement);
+        		Ontology.CONCEPT_SCOPENOTE, "skos:scopeNote", conceptElement);
         // just allow multiple, its not forbidden by Skos
         extractAndAddMultiValuedTextToDescriptionData(descriptionData, 
-        		ConceptDescription.DEFINITION, "skos:definition", conceptElement);
+        		Ontology.CONCEPT_DEFINITION, "skos:definition", conceptElement);
         //<geo:lat>52.43333333333333</geo:lat>
         extractAndAddToAllMapsSingleValuedTextToDescriptionData(descriptionData, "latitude", "geo:lat", conceptElement);
 	//<geo:long>20.716666666666665</geo:long>

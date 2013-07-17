@@ -1,12 +1,8 @@
 package eu.ehri.project.persistance;
 
 import com.google.common.collect.Maps;
-import com.google.common.hash.HashCode;
-import eu.ehri.project.models.DatePeriod;
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.base.DescribedEntity;
-import eu.ehri.project.models.base.IdentifiableEntity;
-import eu.ehri.project.models.base.NamedEntity;
 import eu.ehri.project.persistance.utils.BundleUtils;
 import eu.ehri.project.test.TestData;
 import org.junit.After;
@@ -31,10 +27,10 @@ public class BundleTest {
     @Before
     public void setUp() throws Exception {
         bundle = new Bundle(EntityClass.DOCUMENTARY_UNIT)
-                .withDataValue(IdentifiableEntity.IDENTIFIER_KEY, "foobar")
-                .withRelation(DescribedEntity.DESCRIBES,
+                .withDataValue(Ontology.IDENTIFIER_KEY, "foobar")
+                .withRelation(Ontology.DESCRIPTION_FOR_ENTITY,
                         new Bundle(EntityClass.DOCUMENT_DESCRIPTION)
-                            .withDataValue(NamedEntity.NAME, "Foobar"));
+                            .withDataValue(Ontology.NAME_KEY, "Foobar"));
     }
 
     @After
@@ -67,8 +63,8 @@ public class BundleTest {
 
     @Test
     public void testGetDataValue() throws Exception {
-        assertEquals("foobar", bundle.getDataValue(IdentifiableEntity.IDENTIFIER_KEY));
-        assertNull(bundle.getDataValue(NamedEntity.NAME));
+        assertEquals("foobar", bundle.getDataValue(Ontology.IDENTIFIER_KEY));
+        assertNull(bundle.getDataValue(Ontology.NAME_KEY));
     }
 
     @Test
@@ -87,7 +83,7 @@ public class BundleTest {
     @Test
     public void testGetData() throws Exception {
         Map<String,Object> data = bundle.getData();
-        assertEquals("foobar", data.get(IdentifiableEntity.IDENTIFIER_KEY));
+        assertEquals("foobar", data.get(Ontology.IDENTIFIER_KEY));
     }
 
     @Test
@@ -95,7 +91,7 @@ public class BundleTest {
         HashMap<String,Object> map = Maps.newHashMap();
         map.put("foo", "bar");
         Bundle b2 = bundle.withData(map);
-        assertNull(b2.getDataValue(IdentifiableEntity.IDENTIFIER_KEY));
+        assertNull(b2.getDataValue(Ontology.IDENTIFIER_KEY));
         assertEquals("bar", b2.getDataValue("foo"));
     }
 
@@ -112,8 +108,8 @@ public class BundleTest {
         // different structural ordering
         System.out.println(bundle1);
         Bundle dp = new Bundle(EntityClass.DATE_PERIOD)
-                .withDataValue(DatePeriod.START_DATE, "1900-01-01")
-                .withDataValue(DatePeriod.END_DATE, "2000-01-01");
+                .withDataValue(Ontology.DATE_PERIOD_START_DATE, "1900-01-01")
+                .withDataValue(Ontology.DATE_PERIOD_END_DATE, "2000-01-01");
         Bundle currentDp = BundleUtils.getBundle(bundle1, "describes[0]/hasDate[0]");
         System.out.println("CURRENT: " + currentDp);
         Bundle b1_2 = BundleUtils

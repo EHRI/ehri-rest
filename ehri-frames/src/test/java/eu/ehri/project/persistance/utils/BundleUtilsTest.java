@@ -7,15 +7,13 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
-import eu.ehri.project.models.base.IdentifiableEntity;
-import eu.ehri.project.models.base.NamedEntity;
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.test.AbstractFixtureTest;
 import eu.ehri.project.test.TestData;
 import org.junit.Assert;
 import org.junit.Test;
 
 import eu.ehri.project.definitions.Entities;
-import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.persistance.Bundle;
 
 public class BundleUtilsTest extends AbstractFixtureTest {
@@ -24,17 +22,17 @@ public class BundleUtilsTest extends AbstractFixtureTest {
     public void testGetPath() throws Exception {
         Bundle bundle = Bundle.fromData(getTestBundle());
         Assert.assertEquals(TestData.TEST_COLLECTION_NAME,
-                BundleUtils.get(bundle, NamedEntity.NAME));
+                BundleUtils.get(bundle, Ontology.NAME_KEY));
         Assert.assertEquals(TestData.TEST_START_DATE,
                 BundleUtils.getBundle(bundle, "describes[0]/hasDate[0]")
-                    .getDataValue(DatePeriod.START_DATE));
+                    .getDataValue(Ontology.DATE_PERIOD_START_DATE));
     }
 
     @Test
     public void testGetBundle() throws Exception {
         Bundle bundle = Bundle.fromData(getTestBundle());
         Assert.assertEquals(TestData.TEST_COLLECTION_NAME,
-                BundleUtils.get(bundle, NamedEntity.NAME));
+                BundleUtils.get(bundle, Ontology.NAME_KEY));
         Assert.assertEquals(TestData.TEST_START_DATE,
                 BundleUtils.get(bundle, "describes[0]/hasDate[0]/startDate"));
         Assert.assertEquals(TestData.TEST_START_DATE, BundleUtils.get(bundle,
@@ -143,15 +141,15 @@ public class BundleUtilsTest extends AbstractFixtureTest {
         return new HashMap<String, Object>() {{
             put("type", Entities.DOCUMENTARY_UNIT);
             put("data", new HashMap<String, Object>() {{
-                put(NamedEntity.NAME, TestData.TEST_COLLECTION_NAME);
-                put(IdentifiableEntity.IDENTIFIER_KEY, "someid-01");
+                put(Ontology.NAME_KEY, TestData.TEST_COLLECTION_NAME);
+                put(Ontology.IDENTIFIER_KEY, "someid-01");
             }});
             put("relationships", new HashMap<String, Object>() {{
                 put("describes", new LinkedList<HashMap<String, Object>>() {{
                     add(new HashMap<String, Object>() {{
                         put("type", Entities.DOCUMENT_DESCRIPTION);
                         put("data", new HashMap<String, Object>() {{
-                            put(IdentifiableEntity.IDENTIFIER_KEY, "someid-01");
+                            put(Ontology.IDENTIFIER_KEY, "someid-01");
                             put("title", "A brand new item description");
                             put("languageCode", "en");
                         }});
@@ -160,16 +158,16 @@ public class BundleUtilsTest extends AbstractFixtureTest {
                                 add(new HashMap<String, Object>() {{
                                     put("type", Entities.DATE_PERIOD);
                                     put("data", new HashMap<String, Object>() {{
-                                        put(DatePeriod.START_DATE, TestData.TEST_START_DATE);
-                                        put(DatePeriod.END_DATE, TestData.TEST_START_DATE);
+                                        put(Ontology.DATE_PERIOD_START_DATE, TestData.TEST_START_DATE);
+                                        put(Ontology.DATE_PERIOD_END_DATE, TestData.TEST_START_DATE);
                                     }});
                                     put("relationships", new HashMap<String, Object>() {{
                                         put("hasDate", new LinkedList<HashMap<String, Object>>() {{
                                             add(new HashMap<String, Object>() {{
                                                 put("type", Entities.DATE_PERIOD);
                                                 put("data", new HashMap<String, Object>() {{
-                                                    put(DatePeriod.START_DATE, TestData.TEST_START_DATE);
-                                                    put(DatePeriod.END_DATE, TestData.TEST_START_DATE);
+                                                    put(Ontology.DATE_PERIOD_START_DATE, TestData.TEST_START_DATE);
+                                                    put(Ontology.DATE_PERIOD_END_DATE, TestData.TEST_START_DATE);
                                                 }});
                                             }});
                                         }});
@@ -183,8 +181,8 @@ public class BundleUtilsTest extends AbstractFixtureTest {
                     add(new HashMap<String, Object>() {{
                         put("type", Entities.DATE_PERIOD);
                         put("data", new HashMap<String, Object>() {{
-                            put(DatePeriod.START_DATE, TestData.TEST_START_DATE);
-                            put(DatePeriod.END_DATE, TestData.TEST_START_DATE);
+                            put(Ontology.DATE_PERIOD_START_DATE, TestData.TEST_START_DATE);
+                            put(Ontology.DATE_PERIOD_END_DATE, TestData.TEST_START_DATE);
                         }});
                     }});
                 }});

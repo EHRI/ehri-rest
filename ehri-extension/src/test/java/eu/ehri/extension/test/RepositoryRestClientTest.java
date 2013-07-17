@@ -9,7 +9,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 
-import eu.ehri.project.models.Repository;
+import eu.ehri.project.definitions.Ontology;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Before;
@@ -74,7 +74,7 @@ public class RepositoryRestClientTest extends BaseRestClientTest {
     @Test
     public void testCreateRepositoryWithExistingIdentifier() throws Exception {
         String json = Bundle.fromString(agentTestData)
-                .withDataValue(Repository.IDENTIFIER_KEY, "r1").toJson();
+                .withDataValue(Ontology.IDENTIFIER_KEY, "r1").toJson();
         WebResource resource = client.resource(getExtensionEntryPointUri()
                 + "/" + Entities.COUNTRY + "/" + COUNTRY_CODE + "/" + Entities.REPOSITORY);
         ClientResponse response = resource

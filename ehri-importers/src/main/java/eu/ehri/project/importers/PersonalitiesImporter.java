@@ -9,16 +9,13 @@ import com.google.common.collect.Maps;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.SystemScope;
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.properties.XmlImportProperties;
-import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.HistoricalAgent;
 import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.base.Description;
-import eu.ehri.project.models.base.IdentifiableEntity;
 import eu.ehri.project.models.base.PermissionScope;
-import eu.ehri.project.models.base.TemporalEntity;
 import eu.ehri.project.models.cvoc.AuthoritativeSet;
 import eu.ehri.project.models.idgen.IdGenerator;
 import eu.ehri.project.persistance.Bundle;
@@ -28,7 +25,6 @@ import java.util.List;
 import java.util.Map;
 
 import eu.ehri.project.persistance.Mutation;
-import eu.ehri.project.persistance.MutationState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,9 +51,9 @@ public class PersonalitiesImporter extends XmlImporter<Object> {
         Bundle descBundle = new Bundle(EntityClass.HISTORICAL_AGENT_DESCRIPTION, extractUnitDescription(itemData, EntityClass.HISTORICAL_AGENT_DESCRIPTION));
 
         for (Map<String, Object> dpb : extractDates(itemData)) {
-            descBundle = descBundle.withRelation(TemporalEntity.HAS_DATE, new Bundle(EntityClass.DATE_PERIOD, dpb));
+            descBundle = descBundle.withRelation(Ontology.ENTITY_HAS_DATE, new Bundle(EntityClass.DATE_PERIOD, dpb));
         }
-        unit = unit.withRelation(Description.DESCRIBES, descBundle);
+        unit = unit.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
 
         IdGenerator generator = EntityClass.HISTORICAL_AGENT.getIdgen();
         String id = generator.generateId(EntityClass.HISTORICAL_AGENT, permissionScope, unit);
@@ -84,7 +80,7 @@ public class PersonalitiesImporter extends XmlImporter<Object> {
         //unit needs at least IDENTIFIER_KEY
         Map<String, Object> item = new HashMap<String, Object>();
         if (itemData.containsKey("id")) {
-            item.put(IdentifiableEntity.IDENTIFIER_KEY, itemData.get("id"));
+            item.put(Ontology.IDENTIFIER_KEY, itemData.get("id"));
         } else {
             logger.error("missing objectIdentifier");
         }
@@ -111,7 +107,7 @@ public class PersonalitiesImporter extends XmlImporter<Object> {
     private Map<String, Object> extractUnitDescription(Map<String, Object> itemData, EntityClass entityClass) {
         Map<String, Object> item = new HashMap<String, Object>();
 
-        SaxXmlHandler.putPropertyInGraph(item, Description.NAME, getName(itemData));
+        SaxXmlHandler.putPropertyInGraph(item, Ontology.NAME_KEY, getName(itemData));
         for (String key : itemData.keySet()) {
             if (!key.equals("id")) {
                 if (!p.containsProperty(key)) {
@@ -126,8 +122,8 @@ public class PersonalitiesImporter extends XmlImporter<Object> {
         if (!item.containsKey("typeOfEntity")) {
             SaxXmlHandler.putPropertyInGraph(item, "typeOfEntity", "person");
         }
-        if (!item.containsKey(Description.LANGUAGE_CODE)) {
-            SaxXmlHandler.putPropertyInGraph(item, Description.LANGUAGE_CODE, "en");
+        if (!item.containsKey(Ontology.LANGUAGE_OF_DESCRIPTION)) {
+            SaxXmlHandler.putPropertyInGraph(item, Ontology.LANGUAGE_OF_DESCRIPTION, "en");
         }
         return item;
     }
@@ -135,7 +131,7 @@ public class PersonalitiesImporter extends XmlImporter<Object> {
 
     /**
      * @param itemData
-     * @return returns a List with Maps with DatePeriod.START_DATE and DatePeriod.END_DATE values
+     * @return returns a List with Maps with DatePeriod.DATE_PERIOD_START_DATE and DatePeriod.DATE_PERIOD_END_DATE values
      */
     @Override
     public List<Map<String, Object>> extractDates(Map<String, Object> itemData) {
@@ -154,9 +150,9 @@ public class PersonalitiesImporter extends XmlImporter<Object> {
         }
         if (end != null || start != null) {
             if (start != null)
-                items.put(DatePeriod.START_DATE, start);
+                items.put(Ontology.DATE_PERIOD_START_DATE, start);
             if (end != null)
-                items.put(DatePeriod.END_DATE, end);
+                items.put(Ontology.DATE_PERIOD_END_DATE, end);
             l.add(items);
         }
         return l;

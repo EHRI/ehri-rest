@@ -6,6 +6,7 @@ import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.modules.javahandler.JavaHandler;
 import com.tinkerpop.frames.modules.javahandler.JavaHandlerContext;
 import com.tinkerpop.pipes.util.Pipeline;
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.base.*;
@@ -14,9 +15,6 @@ import eu.ehri.project.models.utils.JavaHandlerUtils;
 @EntityType(EntityClass.REPOSITORY)
 public interface Repository extends AccessibleEntity, DescribedEntity,
         AnnotatableEntity, PermissionScope, ItemHolder {
-
-    public static final String HELD_BY = "heldBy";
-    public static final String HAS_COUNTRY = "hasCountry";
 
     @JavaHandler
     public Long getChildCount();
@@ -27,15 +25,15 @@ public interface Repository extends AccessibleEntity, DescribedEntity,
     @JavaHandler
     public Iterable<DocumentaryUnit> getAllCollections();
 
-    //@Adjacency(label = HELD_BY, direction = Direction.IN)
+    //@Adjacency(label = DOC_HELD_BY_REPOSITORY, direction = Direction.IN)
     @JavaHandler
     public void addCollection(final DocumentaryUnit collection);
 
-    @Fetch(HAS_COUNTRY)
-    @Adjacency(label = HAS_COUNTRY, direction = Direction.OUT)
+    @Fetch(Ontology.REPOSITORY_HAS_COUNTRY)
+    @Adjacency(label = Ontology.REPOSITORY_HAS_COUNTRY, direction = Direction.OUT)
     public Iterable<Country> getCountry();
 
-    @Adjacency(label = HAS_COUNTRY, direction = Direction.OUT)
+    @Adjacency(label = Ontology.REPOSITORY_HAS_COUNTRY, direction = Direction.OUT)
     public void setCountry(final Country country);
 
     /**
@@ -46,7 +44,7 @@ public interface Repository extends AccessibleEntity, DescribedEntity,
         public Long getChildCount() {
             Long count = it().getProperty(CHILD_COUNT);
             if (count == null) {
-                it().setProperty(CHILD_COUNT, gremlin().in(HELD_BY).count());
+                it().setProperty(CHILD_COUNT, gremlin().in(Ontology.DOC_HELD_BY_REPOSITORY).count());
             }
             return count;
         }
@@ -54,11 +52,11 @@ public interface Repository extends AccessibleEntity, DescribedEntity,
         public Iterable<DocumentaryUnit> getCollections() {
             // Ensure value is cached when fetching.
             getChildCount();
-            return frameVertices(gremlin().in(HELD_BY));
+            return frameVertices(gremlin().in(Ontology.DOC_HELD_BY_REPOSITORY));
         }
 
         public void addCollection(final DocumentaryUnit collection) {
-            collection.asVertex().addEdge(HELD_BY, it());
+            collection.asVertex().addEdge(Ontology.DOC_HELD_BY_REPOSITORY, it());
             Long count = it().getProperty(CHILD_COUNT);
             if (count == null) {
                 getChildCount();
@@ -68,10 +66,10 @@ public interface Repository extends AccessibleEntity, DescribedEntity,
         }
 
         public Iterable<DocumentaryUnit> getAllCollections() {
-            Pipeline<Vertex,Vertex> otherPipe = gremlin().as("n").in(DocumentaryUnit.CHILD_OF)
+            Pipeline<Vertex,Vertex> otherPipe = gremlin().as("n").in(Ontology.DOC_IS_CHILD_OF)
                     .loop("n", JavaHandlerUtils.noopLoopFunc, JavaHandlerUtils.noopLoopFunc);
 
-            return frameVertices(gremlin().in(HELD_BY).cast(Vertex.class).copySplit(gremlin(), otherPipe)
+            return frameVertices(gremlin().in(Ontology.DOC_HELD_BY_REPOSITORY).cast(Vertex.class).copySplit(gremlin(), otherPipe)
                     .fairMerge().cast(Vertex.class));
         }
     }

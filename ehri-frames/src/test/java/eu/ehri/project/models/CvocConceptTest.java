@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.common.collect.Lists;
-import eu.ehri.project.models.base.IdentifiableEntity;
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.test.ModelTestBase;
 import org.junit.Test;
 import com.tinkerpop.blueprints.Vertex;
@@ -42,7 +42,7 @@ public class CvocConceptTest extends ModelTestBase {
 
         Map<String, Object> data = new HashMap<String, Object>() {
             {
-                put(IdentifiableEntity.IDENTIFIER_KEY, "fruit");
+                put(Ontology.IDENTIFIER_KEY, "fruit");
             }
         };
         Vertex v_fruit = manager.createVertex("fruit_id",
@@ -50,7 +50,7 @@ public class CvocConceptTest extends ModelTestBase {
 
         data = new HashMap<String, Object>() {
             {
-                put(IdentifiableEntity.IDENTIFIER_KEY, "apples");
+                put(Ontology.IDENTIFIER_KEY, "apples");
             }
         };
         Vertex v_apples = manager.createVertex("applies_id",
@@ -58,7 +58,7 @@ public class CvocConceptTest extends ModelTestBase {
 
         data = new HashMap<String, Object>() {
             {
-                put(IdentifiableEntity.IDENTIFIER_KEY, "bananas");
+                put(Ontology.IDENTIFIER_KEY, "bananas");
             }
         };
         Vertex v_bananas = manager.createVertex("bananas_id",
@@ -66,7 +66,7 @@ public class CvocConceptTest extends ModelTestBase {
 
         data = new HashMap<String, Object>() {
             {
-                put(IdentifiableEntity.IDENTIFIER_KEY, "trees");
+                put(Ontology.IDENTIFIER_KEY, "trees");
             }
         };
         Vertex v_trees = manager.createVertex("trees_id",
@@ -112,7 +112,7 @@ public class CvocConceptTest extends ModelTestBase {
             put(Bundle.ID_KEY, null);
             put(Bundle.TYPE_KEY, Entities.CVOC_CONCEPT);
             put(Bundle.DATA_KEY, new HashMap<String, Object>() {{
-                put(IdentifiableEntity.IDENTIFIER_KEY, "apple");
+                put(Ontology.IDENTIFIER_KEY, "apple");
             }});
             put(Bundle.REL_KEY, new HashMap<String, Object>() {{
                 put("describes", new LinkedList<HashMap<String, Object>>() {{
@@ -120,12 +120,12 @@ public class CvocConceptTest extends ModelTestBase {
                         //put(Bundle.ID_KEY, "cvd1");
                         put(Bundle.TYPE_KEY, Entities.CVOC_CONCEPT_DESCRIPTION);
                         put(Bundle.DATA_KEY, new HashMap<String, Object>() {{
-                            put(Description.LANGUAGE_CODE, TEST_LABEL_LANG);
-                            put(ConceptDescription.PREFLABEL, "pref1");
+                            put(Ontology.LANGUAGE_OF_DESCRIPTION, TEST_LABEL_LANG);
+                            put(Ontology.PREFLABEL, "pref1");
                             // other properties are optional, but we put them in
                             put("altLabel", Lists.<String>newArrayList("alt1", "alt2"));
-                            put(ConceptDescription.DEFINITION, Lists.<String>newArrayList("def1")); // allow multiple
-                            put(ConceptDescription.SCOPENOTE, Lists.<String>newArrayList("sn1")); // allow multiple
+                            put(Ontology.CONCEPT_DEFINITION, Lists.<String>newArrayList("def1")); // allow multiple
+                            put(Ontology.CONCEPT_SCOPENOTE, Lists.<String>newArrayList("sn1")); // allow multiple
                         }});
                     }});
                 }});
@@ -163,7 +163,7 @@ public class CvocConceptTest extends ModelTestBase {
 		//String[] altLabels = descr.getAltLabels();		
 		//assertEquals("alt2", altLabels[1]);
 		// NOTE we can't call getAltLabels() on the interface, because it is optional
-		List<String> altLabels = descr.asVertex().getProperty(ConceptDescription.ALTLABEL);
+		List<String> altLabels = descr.asVertex().getProperty(Ontology.CONCEPT_ALTLABEL);
 		assertFalse(altLabels == null);
 		assertEquals(2, altLabels.size());
 		assertEquals("alt2", altLabels.get(1));
@@ -174,9 +174,9 @@ public class CvocConceptTest extends ModelTestBase {
 	public void testAddConceptToVocabulary() throws Exception {
 		UserProfile validUser = manager.getFrame("mike", UserProfile.class);
 
-		Map<String, Object> data = new HashMap<String, Object>() {{put(IdentifiableEntity.IDENTIFIER_KEY, "testVocabulary");}};
+		Map<String, Object> data = new HashMap<String, Object>() {{put(Ontology.IDENTIFIER_KEY, "testVocabulary");}};
 		Vertex v_voc = manager.createVertex("voc_id", EntityClass.CVOC_VOCABULARY, data);
-		data = new HashMap<String, Object>() {{put(IdentifiableEntity.IDENTIFIER_KEY, "apples");}};
+		data = new HashMap<String, Object>() {{put(Ontology.IDENTIFIER_KEY, "apples");}};
 		Vertex v_apples = manager.createVertex("applies_id", EntityClass.CVOC_CONCEPT, data);
 
 		// frame it
@@ -195,7 +195,7 @@ public class CvocConceptTest extends ModelTestBase {
 		
 	  	System.out.println("Creating vocabulary: \"" + name + "\"");
         Map<String, Object> vocabularyData = new HashMap<String, Object>();
-        vocabularyData.put(IdentifiableEntity.IDENTIFIER_KEY, name);
+        vocabularyData.put(Ontology.IDENTIFIER_KEY, name);
         //vocabularyData.put(EntityType.ID_KEY, name);
         //vocabularyData.put("name", name);
         Bundle bundle = new Bundle(EntityClass.CVOC_VOCABULARY, vocabularyData);

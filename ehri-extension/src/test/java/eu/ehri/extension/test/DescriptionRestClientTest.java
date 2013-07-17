@@ -3,8 +3,7 @@ package eu.ehri.extension.test;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import eu.ehri.extension.AbstractRestResource;
-import eu.ehri.project.models.base.DescribedEntity;
-import eu.ehri.project.models.base.IdentifiableEntity;
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.persistance.Bundle;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -52,7 +51,7 @@ public class DescriptionRestClientTest extends BaseRestClientTest {
                 JsonNode.class);
         JsonNode idValue = rootNode
                 .path(Bundle.DATA_KEY)
-                .path(IdentifiableEntity.IDENTIFIER_KEY);
+                .path(Ontology.IDENTIFIER_KEY);
         assertFalse(idValue.isMissingNode());
         assertEquals(TEST_DESCRIPTION_IDENTIFIER, idValue.getTextValue());
     }
@@ -76,12 +75,12 @@ public class DescriptionRestClientTest extends BaseRestClientTest {
                 JsonNode.class);
         JsonNode idValue = rootNode
                 .path(Bundle.DATA_KEY)
-                .path(IdentifiableEntity.IDENTIFIER_KEY);
+                .path(Ontology.IDENTIFIER_KEY);
         assertFalse(idValue.isMissingNode());
         assertEquals(TEST_DESCRIPTION_IDENTIFIER, idValue.getTextValue());
         // Assert there are no extra descriptions
         assertTrue(rootNode.path(Bundle.REL_KEY).path(
-                DescribedEntity.DESCRIBES).path(1).isMissingNode());
+                Ontology.DESCRIPTION_FOR_ENTITY).path(1).isMissingNode());
     }
 
     @Test

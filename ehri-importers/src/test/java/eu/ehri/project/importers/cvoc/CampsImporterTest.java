@@ -1,9 +1,9 @@
 package eu.ehri.project.importers.cvoc;
 
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.importers.AbstractImporterTest;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.base.IdentifiableEntity;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.views.Query;
@@ -54,7 +54,7 @@ public class CampsImporterTest extends AbstractImporterTest {
         Query<Concept> query = new Query<Concept>(graph, Concept.class);
         // Query for document identifier.
         List<Concept> list = toList(query.setLimit(1).list(
-                IdentifiableEntity.IDENTIFIER_KEY, skosConceptId, validUser));
+                Ontology.IDENTIFIER_KEY, skosConceptId, validUser));
 
         assertEquals(1, toList(list.get(0).getBroaderConcepts()).size());
 

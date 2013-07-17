@@ -3,6 +3,7 @@ package eu.ehri.project.models.base;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Property;
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.MaintenanceEvent;
 import eu.ehri.project.models.UndeterminedRelationship;
 import eu.ehri.project.models.UnknownProperty;
@@ -11,17 +12,12 @@ import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.annotations.Mandatory;
 
 public interface Description extends NamedEntity, AccessibleEntity {
-    public static final String DESCRIBES = DescribedEntity.DESCRIBES;
-    public static final String LANGUAGE_CODE = "languageCode";
-    public static final String MUTATES = "maintenance"; //links to MaintenanceEvent
-    public static final String RELATES_TO = "relatesTo"; //links to UndeterminedRelationship
-    public static final String HAS_UNKNOWN_PROPERTY = "hasUnknownProperty";
 
-    @Adjacency(label = DESCRIBES)
+    @Adjacency(label = Ontology.DESCRIPTION_FOR_ENTITY)
     public DescribedEntity getEntity();
 
     @Mandatory
-    @Property(LANGUAGE_CODE)
+    @Property(Ontology.LANGUAGE_OF_DESCRIPTION)
     public String getLanguageOfDescription();
 
     /**
@@ -31,34 +27,34 @@ public interface Description extends NamedEntity, AccessibleEntity {
      * 
      * @return
      */
-    @Fetch(value = DESCRIBES, ifDepth=0)
-    @Adjacency(label = DESCRIBES)
+    @Fetch(value = Ontology.DESCRIPTION_FOR_ENTITY, ifDepth=0)
+    @Adjacency(label = Ontology.DESCRIPTION_FOR_ENTITY)
     public DescribedEntity getDescribedEntity();    
 
-    @Fetch(MUTATES)
+    @Fetch(Ontology.HAS_MAINTENANCE_EVENT)
     @Dependent
-    @Adjacency(label = MUTATES, direction=Direction.IN)
+    @Adjacency(label = Ontology.HAS_MAINTENANCE_EVENT, direction=Direction.IN)
     public abstract Iterable<MaintenanceEvent> getMaintenanceEvents();
 
-    @Adjacency(label = MUTATES)
+    @Adjacency(label = Ontology.HAS_MAINTENANCE_EVENT)
     public abstract void setMaintenanceEvents(final Iterable<MaintenanceEvent> maintenanceEvents);
 
-    @Adjacency(label = MUTATES)
+    @Adjacency(label = Ontology.HAS_MAINTENANCE_EVENT)
     public abstract void addMaintenanceEvent(final MaintenanceEvent maintenanceEvent);
     
-    @Fetch(RELATES_TO)
+    @Fetch(Ontology.HAS_ACCESS_POINT)
     @Dependent
-    @Adjacency(label = RELATES_TO)
+    @Adjacency(label = Ontology.HAS_ACCESS_POINT)
     public Iterable<UndeterminedRelationship> getUndeterminedRelationships();
 
-    @Adjacency(label = RELATES_TO)
+    @Adjacency(label = Ontology.HAS_ACCESS_POINT)
     public void setUndeterminedRelationships(final Iterable<UndeterminedRelationship> relationship);
 
-    @Adjacency(label = RELATES_TO)
+    @Adjacency(label = Ontology.HAS_ACCESS_POINT)
     public void addUndeterminedRelationship(final UndeterminedRelationship relationship);
 
-    @Fetch(value = HAS_UNKNOWN_PROPERTY, ifDepth = 1)
+    @Fetch(value = Ontology.HAS_UNKNOWN_PROPERTY, ifDepth = 1)
     @Dependent
-    @Adjacency(label = HAS_UNKNOWN_PROPERTY)
+    @Adjacency(label = Ontology.HAS_UNKNOWN_PROPERTY)
     public Iterable<UnknownProperty> getUnknownProperties();
 }

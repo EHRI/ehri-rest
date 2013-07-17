@@ -1,8 +1,7 @@
 package eu.ehri.project.test;
 
 import eu.ehri.project.definitions.Entities;
-import eu.ehri.project.models.DatePeriod;
-import eu.ehri.project.models.base.*;
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.persistance.Bundle;
 
 import java.util.HashMap;
@@ -29,25 +28,25 @@ public class TestData {
         return new HashMap<String, Object>() {{
             put(Bundle.TYPE_KEY, Entities.DOCUMENTARY_UNIT);
             put(Bundle.DATA_KEY, new HashMap<String, Object>() {{
-                put(NamedEntity.NAME, TEST_COLLECTION_NAME);
-                put(IdentifiableEntity.IDENTIFIER_KEY, "someid-01");
+                put(Ontology.NAME_KEY, TEST_COLLECTION_NAME);
+                put(Ontology.IDENTIFIER_KEY, "someid-01");
             }});
             put(Bundle.REL_KEY, new HashMap<String, Object>() {{
-                put(Description.DESCRIBES, new LinkedList<HashMap<String, Object>>() {{
+                put(Ontology.DESCRIPTION_FOR_ENTITY, new LinkedList<HashMap<String, Object>>() {{
                     add(new HashMap<String, Object>() {{
                         put(Bundle.TYPE_KEY, Entities.DOCUMENT_DESCRIPTION);
                         put(Bundle.DATA_KEY, new HashMap<String, Object>() {{
-                            put(IdentifiableEntity.IDENTIFIER_KEY, "someid-01");
-                            put(Description.NAME, "A brand new item description");
-                            put(Description.LANGUAGE_CODE, "en");
+                            put(Ontology.IDENTIFIER_KEY, "someid-01");
+                            put(Ontology.NAME_KEY, "A brand new item description");
+                            put(Ontology.LANGUAGE_OF_DESCRIPTION, "en");
                         }});
                         put(Bundle.REL_KEY, new HashMap<String,Object>() {{
-                            put(TemporalEntity.HAS_DATE, new LinkedList<HashMap<String, Object>>() {{
+                            put(Ontology.ENTITY_HAS_DATE, new LinkedList<HashMap<String, Object>>() {{
                                 add(new HashMap<String, Object>() {{
                                     put(Bundle.TYPE_KEY, Entities.DATE_PERIOD);
                                     put(Bundle.DATA_KEY, new HashMap<String, Object>() {{
-                                        put(DatePeriod.START_DATE, TEST_START_DATE);
-                                        put(DatePeriod.END_DATE, TEST_START_DATE);
+                                        put(Ontology.DATE_PERIOD_START_DATE, TEST_START_DATE);
+                                        put(Ontology.DATE_PERIOD_END_DATE, TEST_START_DATE);
                                     }});
                                 }});
                             }});
@@ -64,20 +63,20 @@ public class TestData {
         return new HashMap<String, Object>() {{
             put(Bundle.TYPE_KEY, Entities.REPOSITORY);
             put(Bundle.DATA_KEY, new HashMap<String, Object>() {{
-                put(NamedEntity.NAME, TEST_AGENT_NAME);
-                put(IdentifiableEntity.IDENTIFIER_KEY, "test-repo-1");
+                put(Ontology.NAME_KEY, TEST_AGENT_NAME);
+                put(Ontology.IDENTIFIER_KEY, "test-repo-1");
             }});
             put(Bundle.REL_KEY, new HashMap<String, Object>() {{
-                put(Description.DESCRIBES, new LinkedList<HashMap<String, Object>>() {{
+                put(Ontology.DESCRIPTION_FOR_ENTITY, new LinkedList<HashMap<String, Object>>() {{
                     add(new HashMap<String, Object>() {{
                         put(Bundle.TYPE_KEY, Entities.REPOSITORY_DESCRIPTION);
                         put(Bundle.DATA_KEY, new HashMap<String, Object>() {{
-                            put(IdentifiableEntity.IDENTIFIER_KEY, "test-repo-1-desc");
-                            put(Description.NAME, "A Test Repository");
-                            put(Description.LANGUAGE_CODE, "en");
+                            put(Ontology.IDENTIFIER_KEY, "test-repo-1-desc");
+                            put(Ontology.NAME_KEY, "A Test Repository");
+                            put(Ontology.LANGUAGE_OF_DESCRIPTION, "en");
                         }});
                         put(Bundle.REL_KEY, new HashMap<String, Object>() {{
-                            put(AddressableEntity.HAS_ADDRESS, new LinkedList<HashMap<String, Object>>() {{
+                            put(Ontology.ENTITY_HAS_ADDRESS, new LinkedList<HashMap<String, Object>>() {{
                                 add(new HashMap<String, Object>() {{
                                     put(Bundle.TYPE_KEY, Entities.ADDRESS);
                                     put(Bundle.DATA_KEY, new HashMap<String, Object>() {{
@@ -97,8 +96,8 @@ public class TestData {
         return new HashMap<String, Object>() {{
             put(Bundle.TYPE_KEY, Entities.USER_PROFILE);
             put(Bundle.DATA_KEY, new HashMap<String, Object>() {{
-                put(NamedEntity.NAME, TEST_USER_NAME);
-                put(IdentifiableEntity.IDENTIFIER_KEY, "joe-blogs");
+                put(Ontology.NAME_KEY, TEST_USER_NAME);
+                put(Ontology.IDENTIFIER_KEY, "joe-blogs");
             }});
         }};
     }
@@ -108,8 +107,8 @@ public class TestData {
         return new HashMap<String, Object>() {{
             put(Bundle.TYPE_KEY, Entities.GROUP);
             put(Bundle.DATA_KEY, new HashMap<String, Object>() {{
-                put(NamedEntity.NAME, TEST_GROUP_NAME);
-                put(IdentifiableEntity.IDENTIFIER_KEY, "people");
+                put(Ontology.NAME_KEY, TEST_GROUP_NAME);
+                put(Ontology.IDENTIFIER_KEY, "people");
             }});
         }};
     }

@@ -6,12 +6,12 @@ import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Group;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.models.base.NamedEntity;
 import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.views.impl.LoggingCrudViews;
 import org.apache.commons.cli.CommandLine;
@@ -84,8 +84,8 @@ public class UserAdd extends BaseCommand implements Command {
 
         Bundle bundle = new Bundle(EntityClass.USER_PROFILE,
                 Maps.<String, Object> newHashMap())
-                .withDataValue(UserProfile.IDENTIFIER_KEY, userId)
-                .withDataValue(NamedEntity.NAME, userName);
+                .withDataValue(Ontology.IDENTIFIER_KEY, userId)
+                .withDataValue(Ontology.NAME_KEY, userName);
         String nodeId = EntityClass.USER_PROFILE.getIdgen().generateId(
                 EntityClass.USER_PROFILE, SystemScope.getInstance(), bundle);
         bundle = bundle.withId(nodeId);

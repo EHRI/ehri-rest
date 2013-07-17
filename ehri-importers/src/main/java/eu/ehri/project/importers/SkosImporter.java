@@ -2,6 +2,7 @@ package eu.ehri.project.importers;
 
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.*;
@@ -58,11 +59,11 @@ public class SkosImporter extends XmlImporter<Map<String, Object>> {
         // Add dates and descriptions to the bundle since they're @Dependent
         // relations.
         for (Map<String, Object> dpb : extractDates(itemData)) {
-            unit = unit.withRelation(TemporalEntity.HAS_DATE, new Bundle(
+            unit = unit.withRelation(Ontology.ENTITY_HAS_DATE, new Bundle(
                     EntityClass.DATE_PERIOD, dpb));
         }
         for (Map<String, Object> dpb : extractConceptDescription(itemData)) {
-            unit = unit.withRelation(Description.DESCRIBES, new Bundle(
+            unit = unit.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, new Bundle(
                     EntityClass.CVOC_CONCEPT_DESCRIPTION, dpb));
         }
 
@@ -84,7 +85,7 @@ public class SkosImporter extends XmlImporter<Map<String, Object>> {
      */
     protected Map<String, Object> extractConcept(Map<String, Object> itemData) throws ValidationError {
         Map<String, Object> unit = new HashMap<String, Object>();
-        unit.put(IdentifiableEntity.IDENTIFIER_KEY, itemData.get("objectIdentifier"));
+        unit.put(Ontology.IDENTIFIER_KEY, itemData.get("objectIdentifier"));
         return unit;
     }
 
@@ -105,7 +106,7 @@ public class SkosImporter extends XmlImporter<Map<String, Object>> {
         for (String key : itemData.keySet()) {
             logger.debug("extract: " + key);
             if (key.equals("descriptionIdentifier")) {
-                unit.put(IdentifiableEntity.IDENTIFIER_KEY, itemData.get(key));
+                unit.put(Ontology.IDENTIFIER_KEY, itemData.get(key));
             } else if (key.equals("languageCode")) {
                 if (itemData.get(key) instanceof Map) {
                     for (String language : ((Map<String, Map<String, Object>>) itemData.get(key)).keySet()) {
@@ -118,10 +119,10 @@ public class SkosImporter extends XmlImporter<Map<String, Object>> {
         }
         for (Map<String, Object> lang : langs) {
             lang.putAll(unit);
-            if (unit.containsKey(IdentifiableEntity.IDENTIFIER_KEY)) {
-                lang.put(IdentifiableEntity.IDENTIFIER_KEY, unit.get(IdentifiableEntity.IDENTIFIER_KEY).toString() + lang.get("languageCode"));
+            if (unit.containsKey(Ontology.IDENTIFIER_KEY)) {
+                lang.put(Ontology.IDENTIFIER_KEY, unit.get(Ontology.IDENTIFIER_KEY).toString() + lang.get("languageCode"));
             } else {
-                lang.put(IdentifiableEntity.IDENTIFIER_KEY, itemData.get("objectIdentifier") + "#description_" + lang.get("languageCode"));
+                lang.put(Ontology.IDENTIFIER_KEY, itemData.get("objectIdentifier") + "#description_" + lang.get("languageCode"));
             }
 
         }

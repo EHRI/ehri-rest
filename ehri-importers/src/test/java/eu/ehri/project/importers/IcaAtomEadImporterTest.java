@@ -5,10 +5,10 @@
 package eu.ehri.project.importers;
 
 import com.tinkerpop.blueprints.Vertex;
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.base.IdentifiableEntity;
 import eu.ehri.project.models.events.SystemEvent;
 
 import java.io.InputStream;
@@ -57,7 +57,7 @@ public class IcaAtomEadImporterTest extends AbstractImporterTest{
         int newCount = count + 21;
         assertEquals(newCount, getNodeCount(graph));
 
-        Iterable<Vertex> docs = graph.getVertices(IdentifiableEntity.IDENTIFIER_KEY,
+        Iterable<Vertex> docs = graph.getVertices(Ontology.IDENTIFIER_KEY,
                 FONDS_LEVEL);
         assertTrue(docs.iterator().hasNext());
         DocumentaryUnit fonds_unit = graph.frame(

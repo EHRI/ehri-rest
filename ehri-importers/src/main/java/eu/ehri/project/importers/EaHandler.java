@@ -4,8 +4,8 @@
  */
 package eu.ehri.project.importers;
 
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.importers.properties.XmlImportProperties;
-import eu.ehri.project.models.base.Description;
 
 import java.util.List;
 import java.util.Map;
@@ -33,7 +33,7 @@ public abstract class EaHandler extends SaxXmlHandler {
                 putPropertyInCurrentGraph("otherFormsOfName", ((List) names).get(i).toString());
             }
         } else {
-            logger.warn("no " + Description.NAME + " found");
+            logger.warn("no " + Ontology.NAME_KEY + " found");
             nameValue = "no title";
         }
         return nameValue;

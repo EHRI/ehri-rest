@@ -5,16 +5,15 @@ import java.util.HashMap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.tinkerpop.blueprints.TransactionalGraph;
-import com.tinkerpop.blueprints.TransactionalGraph.Conclusion;
 import com.tinkerpop.frames.FramedGraph;
 
 import eu.ehri.project.acl.ContentTypes;
 import eu.ehri.project.acl.PermissionType;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Group;
-import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.persistance.ActionManager;
 
 /**
@@ -44,16 +43,16 @@ public class GraphInitializer {
                     ImmutableMap.<String, Object>of(
                             // It might be useful to know when this graph was
                             // initialise. We can also put other metadata here.
-                            SystemEvent.TIMESTAMP, ActionManager.getTimestamp(),
-                            SystemEvent.LOG_MESSAGE, INIT_MESSAGE
+                            Ontology.EVENT_TIMESTAMP, ActionManager.getTimestamp(),
+                            Ontology.EVENT_LOG_MESSAGE, INIT_MESSAGE
                     ));
 
             // Create admin account
             manager.createVertex(Group.ADMIN_GROUP_IDENTIFIER,
                     EntityClass.GROUP, new HashMap<String, Object>() {
                 {
-                    put(Group.IDENTIFIER_KEY, Group.ADMIN_GROUP_IDENTIFIER);
-                    put(Group.NAME, Group.ADMIN_GROUP_NAME);
+                    put(Ontology.IDENTIFIER_KEY, Group.ADMIN_GROUP_IDENTIFIER);
+                    put(Ontology.NAME_KEY, Group.ADMIN_GROUP_NAME);
                 }
             });
 

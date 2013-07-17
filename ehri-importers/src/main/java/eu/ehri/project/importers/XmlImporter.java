@@ -1,9 +1,9 @@
 package eu.ehri.project.importers;
 
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.models.DatePeriod;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -77,7 +77,7 @@ public abstract class XmlImporter<T> extends AbstractImporter<T> {
      * Attempt to extract some date periods. This does not currently put the dates into ISO form.
      *
      * @param date
-     * @return returns a Map with DatePeriod.START_DATE and DatePeriod.END_DATE values
+     * @return returns a Map with DatePeriod.DATE_PERIOD_START_DATE and DatePeriod.DATE_PERIOD_END_DATE values
      * @throws ValidationError
      */
     private Map<String, Object> extractDate(Object date) throws ValidationError {
@@ -100,8 +100,8 @@ public abstract class XmlImporter<T> extends AbstractImporter<T> {
         for (Pattern re : datePatterns) {
             Matcher matcher = re.matcher(date);
             if (matcher.matches()) {
-                data.put(DatePeriod.START_DATE, normaliseDate(matcher.group(1)));
-                data.put(DatePeriod.END_DATE, normaliseDate(matcher.group(matcher
+                data.put(Ontology.DATE_PERIOD_START_DATE, normaliseDate(matcher.group(1)));
+                data.put(Ontology.DATE_PERIOD_END_DATE, normaliseDate(matcher.group(matcher
                         .groupCount() > 1 ? 2 : 1)));
                 break;
             }

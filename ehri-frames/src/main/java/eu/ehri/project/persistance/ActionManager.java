@@ -6,6 +6,7 @@ import com.google.common.base.Optional;
 import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.definitions.EventTypes;
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.base.Frame;
 import eu.ehri.project.models.events.SystemEvent;
@@ -118,7 +119,7 @@ public final class ActionManager {
                 actionManager.replaceAtHead(entity.asVertex(), vertex,
                         LIFECYCLE_EVENT, LIFECYCLE_EVENT, Direction.OUT);
                 actionManager.graph.addEdge(null, vertex,
-                        systemEvent.asVertex(), eu.ehri.project.models.events.SystemEvent.HAS_EVENT);
+                        systemEvent.asVertex(), Ontology.ENTITY_HAS_EVENT);
             }
             return this;
         }
@@ -167,9 +168,9 @@ public final class ActionManager {
         try {
             Vertex system = manager.getVertex(GLOBAL_EVENT_ROOT, EntityClass.SYSTEM);
             Bundle ge = new Bundle(EntityClass.SYSTEM_EVENT)
-                    .withDataValue(SystemEvent.EVENT_TYPE, actionType.toString())
-                    .withDataValue(SystemEvent.TIMESTAMP, getTimestamp())
-                    .withDataValue(SystemEvent.LOG_MESSAGE, logMessage.or(""));
+                    .withDataValue(Ontology.EVENT_TYPE, actionType.toString())
+                    .withDataValue(Ontology.EVENT_TIMESTAMP, getTimestamp())
+                    .withDataValue(Ontology.EVENT_LOG_MESSAGE, logMessage.or(""));
             SystemEvent ev = new BundleDAO(graph).create(ge, SystemEvent.class);
             if (!scope.equals(SystemScope.getInstance())) {
                 ev.setEventScope(scope);
@@ -221,7 +222,7 @@ public final class ActionManager {
         replaceAtHead(user.asVertex(), vertex,
                 LIFECYCLE_ACTION, LIFECYCLE_ACTION, Direction.OUT);
         SystemEvent globalEvent = createGlobalEvent(user, type, logMessage);
-        graph.addEdge(null, vertex, globalEvent.asVertex(), SystemEvent.HAS_EVENT);
+        graph.addEdge(null, vertex, globalEvent.asVertex(), Ontology.ENTITY_HAS_EVENT);
         return new EventContext(this, globalEvent, user, type, logMessage);
     }
 

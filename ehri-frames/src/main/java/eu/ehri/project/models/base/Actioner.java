@@ -3,6 +3,7 @@ package eu.ehri.project.models.base;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.modules.javahandler.JavaHandler;
 import com.tinkerpop.frames.modules.javahandler.JavaHandlerContext;
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.models.utils.JavaHandlerUtils;
 import eu.ehri.project.persistance.ActionManager;
@@ -26,13 +27,13 @@ public interface Actioner extends NamedEntity {
         public Iterable<SystemEvent> getLatestAction() {
             return frameVertices(gremlin()
                     .out(ActionManager.LIFECYCLE_ACTION)
-                    .out(SystemEvent.HAS_EVENT));
+                    .out(Ontology.ENTITY_HAS_EVENT));
         }
 
         public Iterable<SystemEvent> getActions() {
             return frameVertices(gremlin().as("n").out(ActionManager.LIFECYCLE_ACTION)
                     .loop("n", JavaHandlerUtils.noopLoopFunc, JavaHandlerUtils.noopLoopFunc)
-                    .out(SystemEvent.HAS_EVENT));
+                    .out(Ontology.ENTITY_HAS_EVENT));
         }
     }
 }

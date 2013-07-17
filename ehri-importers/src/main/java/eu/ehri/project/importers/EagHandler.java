@@ -5,10 +5,11 @@
 package eu.ehri.project.importers;
 
 import com.google.common.collect.ImmutableMap;
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.MaintenanceEvent;
-import eu.ehri.project.models.base.Description;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -68,13 +69,13 @@ public class EagHandler extends SaxXmlHandler {
                 if (!currentGraphPath.peek().containsKey("typeOfEntity")) {
                     putPropertyInCurrentGraph("typeOfEntity", "organisation");
                 }
-                if (!currentGraphPath.peek().containsKey(Description.NAME)) {
-                    logger.debug("no " + Description.NAME + " found");
-                    putPropertyInCurrentGraph(Description.NAME, "title");
+                if (!currentGraphPath.peek().containsKey(Ontology.NAME_KEY)) {
+                    logger.debug("no " + Ontology.NAME_KEY + " found");
+                    putPropertyInCurrentGraph(Ontology.NAME_KEY, "title");
                 }
-                if (!currentGraphPath.peek().containsKey(Description.LANGUAGE_CODE)) {
-                    logger.debug("no " + Description.LANGUAGE_CODE + " found");
-                    putPropertyInCurrentGraph(Description.LANGUAGE_CODE, "en");
+                if (!currentGraphPath.peek().containsKey(Ontology.LANGUAGE_OF_DESCRIPTION)) {
+                    logger.debug("no " + Ontology.LANGUAGE_OF_DESCRIPTION + " found");
+                    putPropertyInCurrentGraph(Ontology.LANGUAGE_OF_DESCRIPTION, "en");
                 }
                 if (!currentGraphPath.peek().containsKey("rulesAndConventions")) {
                     logger.debug("no rulesAndConventions found");

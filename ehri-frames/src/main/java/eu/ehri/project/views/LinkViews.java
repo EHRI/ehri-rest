@@ -7,6 +7,7 @@ import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.definitions.EventTypes;
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
@@ -112,9 +113,9 @@ public final class LinkViews {
         helper.checkEntityPermission(description.getEntity(), user, PermissionType.UPDATE);
         Link link = new BundleDAO(graph).create(bundle, Link.class);
         Bundle relBundle = new Bundle(EntityClass.UNDETERMINED_RELATIONSHIP)
-                .withDataValue(UndeterminedRelationship.NAME, bodyName)
-                .withDataValue(UndeterminedRelationship.RELATIONSHIP_TYPE, bodyType)
-                .withDataValue(Link.LINK_DESCRIPTION, link.getDescription());
+                .withDataValue(Ontology.NAME_KEY, bodyName)
+                .withDataValue(Ontology.UNDETERMINED_RELATIONSHIP_TYPE, bodyType)
+                .withDataValue(Ontology.LINK_HAS_DESCRIPTION, link.getDescription());
         UndeterminedRelationship rel = new BundleDAO(graph).create(relBundle, UndeterminedRelationship.class);
         description.addUndeterminedRelationship(rel);
         link.addLinkTarget(t1);

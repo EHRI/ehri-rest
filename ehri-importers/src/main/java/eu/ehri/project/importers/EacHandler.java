@@ -5,12 +5,13 @@
 package eu.ehri.project.importers;
 
 import com.google.common.collect.ImmutableMap;
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.Annotation;
 import eu.ehri.project.models.MaintenanceEvent;
 import eu.ehri.project.models.UnknownProperty;
-import eu.ehri.project.models.base.Description;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -68,14 +69,14 @@ public class EacHandler extends EaHandler {
                 }
 
                 //TODO: name can have only 1 value, others are otherFormsOfName
-//                if (currentGraphPath.peek().containsKey(Description.NAME)) {
-//                    String name = chooseName(currentGraphPath.peek().get(Description.NAME));
-//                    overwritePropertyInCurrentGraph(Description.NAME, name);
+//                if (currentGraphPath.peek().containsKey(Description.NAME_KEY)) {
+//                    String name = chooseName(currentGraphPath.peek().get(Description.NAME_KEY));
+//                    overwritePropertyInCurrentGraph(Description.NAME_KEY, name);
 //
 //                }
-                if (!currentGraphPath.peek().containsKey(Description.LANGUAGE_CODE)) {
-                    logger.debug("no " + Description.LANGUAGE_CODE + " found");
-                    putPropertyInCurrentGraph(Description.LANGUAGE_CODE, "en");
+                if (!currentGraphPath.peek().containsKey(Ontology.LANGUAGE_OF_DESCRIPTION)) {
+                    logger.debug("no " + Ontology.LANGUAGE_OF_DESCRIPTION + " found");
+                    putPropertyInCurrentGraph(Ontology.LANGUAGE_OF_DESCRIPTION, "en");
                 }
                 importer.importItem(currentGraphPath.pop(), depth);
 

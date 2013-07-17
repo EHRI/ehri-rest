@@ -9,10 +9,9 @@ import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.base.Description;
-import eu.ehri.project.models.base.IdentifiableEntity;
 import eu.ehri.project.models.cvoc.Concept;
-import eu.ehri.project.models.cvoc.ConceptDescription;
 import eu.ehri.project.test.AbstractFixtureTest;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.tooling.GlobalGraphOperations;
@@ -67,7 +66,7 @@ public class AbstractImporterTest extends AbstractFixtureTest {
         Iterable<Description> descriptions = c.getDescriptions();
         for (Description d : descriptions) {
             String lang = d.getLanguageOfDescription();
-            String prefLabel = (String) d.asVertex().getProperty(ConceptDescription.PREFLABEL); // can't use the getPrefLabel() !
+            String prefLabel = (String) d.asVertex().getProperty(Ontology.PREFLABEL); // can't use the getPrefLabel() !
             out.print(", \"" + prefLabel + "\"(" + lang + ")");
         }
         // TODO Print related concept ids?
@@ -87,7 +86,7 @@ public class AbstractImporterTest extends AbstractFixtureTest {
     }
 
     protected Vertex getVertexByIdentifier(FramedGraph<?> graph, String id) {
-        Iterable<Vertex> docs = graph.getVertices(IdentifiableEntity.IDENTIFIER_KEY, id);
+        Iterable<Vertex> docs = graph.getVertices(Ontology.IDENTIFIER_KEY, id);
         return docs.iterator().next();
     }
 

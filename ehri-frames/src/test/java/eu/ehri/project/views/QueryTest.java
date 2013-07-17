@@ -5,9 +5,9 @@ import java.util.List;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.AccessDenied;
 import eu.ehri.project.models.Repository;
-import eu.ehri.project.models.base.IdentifiableEntity;
 import eu.ehri.project.test.AbstractFixtureTest;
 import org.junit.Test;
 
@@ -98,7 +98,7 @@ public class QueryTest extends AbstractFixtureTest {
 
         // Query for document identifier c1.
         List<DocumentaryUnit> list = toList(query.setLimit(1).list(
-                IdentifiableEntity.IDENTIFIER_KEY, "c1", validUser));
+                Ontology.IDENTIFIER_KEY, "c1", validUser));
         assertFalse(list.isEmpty());
         assertEquals(1, list.size());
     }
@@ -111,13 +111,13 @@ public class QueryTest extends AbstractFixtureTest {
         // Query for only top-level documentary units.
         // The result should be c1 and c4
         List<DocumentaryUnit> list = toList(query.depthFilter(
-                DocumentaryUnit.CHILD_OF, Direction.OUT, 0).list(
+                Ontology.DOC_IS_CHILD_OF, Direction.OUT, 0).list(
                 EntityClass.DOCUMENTARY_UNIT, validUser));
         assertFalse(list.isEmpty());
         assertEquals(2, list.size());
 
         // The same query with a depth filter of 1 should get 3 items
-        list = toList(query.depthFilter(DocumentaryUnit.CHILD_OF,
+        list = toList(query.depthFilter(Ontology.DOC_IS_CHILD_OF,
                 Direction.OUT, 1).list(EntityClass.DOCUMENTARY_UNIT, validUser));
         assertFalse(list.isEmpty());
         assertEquals(3, list.size());
@@ -131,61 +131,61 @@ public class QueryTest extends AbstractFixtureTest {
 
         // Query for document identifier c1.
         List<DocumentaryUnit> list = toList(query.filter(
-                IdentifiableEntity.IDENTIFIER_KEY, Query.FilterPredicate.EQUALS,
+                Ontology.IDENTIFIER_KEY, Query.FilterPredicate.EQUALS,
                 "c1").list(EntityClass.DOCUMENTARY_UNIT, validUser));
         assertEquals(1, list.size());
 
         // Case-insensitive query
-        list = toList(query.filter(IdentifiableEntity.IDENTIFIER_KEY,
+        list = toList(query.filter(Ontology.IDENTIFIER_KEY,
                 Query.FilterPredicate.IEQUALS, "C1").list(
                 EntityClass.DOCUMENTARY_UNIT, validUser));
         assertEquals(1, list.size());
 
         // Startswith...
-        list = toList(query.filter(IdentifiableEntity.IDENTIFIER_KEY,
+        list = toList(query.filter(Ontology.IDENTIFIER_KEY,
                 Query.FilterPredicate.STARTSWITH, "c").list(
                 EntityClass.DOCUMENTARY_UNIT, validUser));
         assertEquals(4, list.size());
 
         // Endswith... should get one item (c1)
-        list = toList(query.filter(IdentifiableEntity.IDENTIFIER_KEY,
+        list = toList(query.filter(Ontology.IDENTIFIER_KEY,
                 Query.FilterPredicate.ENDSWITH, "1").list(
                 EntityClass.DOCUMENTARY_UNIT, validUser));
         assertEquals(1, list.size());
 
         // Regexp... should get all doc units (c1-4)
-        list = toList(query.filter(IdentifiableEntity.IDENTIFIER_KEY,
+        list = toList(query.filter(Ontology.IDENTIFIER_KEY,
                 Query.FilterPredicate.MATCHES, "^c\\d+$").list(
                 EntityClass.DOCUMENTARY_UNIT, validUser));
         assertEquals(4, list.size());
 
         // Less than... should get one item (c1)
-        list = toList(query.filter(IdentifiableEntity.IDENTIFIER_KEY,
+        list = toList(query.filter(Ontology.IDENTIFIER_KEY,
                 Query.FilterPredicate.LT, "c2").list(
                 EntityClass.DOCUMENTARY_UNIT, validUser));
         assertEquals(1, list.size());
         assertEquals("c1", list.get(0).getIdentifier());
 
         // Greater than... should get one item (c4)
-        list = toList(query.filter(IdentifiableEntity.IDENTIFIER_KEY,
+        list = toList(query.filter(Ontology.IDENTIFIER_KEY,
                 Query.FilterPredicate.GT, "c3").list(
                 EntityClass.DOCUMENTARY_UNIT, validUser));
         assertEquals(1, list.size());
         assertEquals("c4", list.get(0).getIdentifier());
 
         // Less than or equal... should get twos items (c1,c2)
-        list = toList(query.filter(IdentifiableEntity.IDENTIFIER_KEY,
+        list = toList(query.filter(Ontology.IDENTIFIER_KEY,
                 Query.FilterPredicate.LTE, "c2")
-                .orderBy(IdentifiableEntity.IDENTIFIER_KEY, Query.Sort.ASC)
+                .orderBy(Ontology.IDENTIFIER_KEY, Query.Sort.ASC)
                 .list(EntityClass.DOCUMENTARY_UNIT, validUser));
         assertEquals(2, list.size());
         assertEquals("c1", list.get(0).getIdentifier());
         assertEquals("c2", list.get(1).getIdentifier());
 
         // Greater than or equal... should get two items (c3,c4)
-        list = toList(query.filter(IdentifiableEntity.IDENTIFIER_KEY,
+        list = toList(query.filter(Ontology.IDENTIFIER_KEY,
                 Query.FilterPredicate.GTE, "c3")
-                .orderBy(IdentifiableEntity.IDENTIFIER_KEY, Query.Sort.ASC)
+                .orderBy(Ontology.IDENTIFIER_KEY, Query.Sort.ASC)
                 .list(EntityClass.DOCUMENTARY_UNIT, validUser));
         assertEquals(2, list.size());
         assertEquals("c3", list.get(0).getIdentifier());
@@ -240,12 +240,12 @@ public class QueryTest extends AbstractFixtureTest {
 
         // Query for document identifier c1.
         Page<DocumentaryUnit> page = query.orderBy(
-                IdentifiableEntity.IDENTIFIER_KEY, Query.Sort.ASC).page(
+                Ontology.IDENTIFIER_KEY, Query.Sort.ASC).page(
                 EntityClass.DOCUMENTARY_UNIT, validUser);
         assertFalse(page.getCount() == 0);
         assertEquals("c1", toList(page.getIterable()).get(0).getIdentifier());
 
-        page = query.orderBy(IdentifiableEntity.IDENTIFIER_KEY, Query.Sort.DESC)
+        page = query.orderBy(Ontology.IDENTIFIER_KEY, Query.Sort.DESC)
                 .page(EntityClass.DOCUMENTARY_UNIT, validUser);
         assertFalse(page.getCount() == 0);
 
@@ -278,7 +278,7 @@ public class QueryTest extends AbstractFixtureTest {
 
         // Do a query that won't match anything.
         List<DocumentaryUnit> list = toList(query.list(
-                IdentifiableEntity.IDENTIFIER_KEY, "__GONNAFAIL__", validUser));
+                Ontology.IDENTIFIER_KEY, "__GONNAFAIL__", validUser));
         assertTrue(list.isEmpty());
         assertEquals(0, list.size());
     }
@@ -288,7 +288,7 @@ public class QueryTest extends AbstractFixtureTest {
             IndexNotFoundException, AccessDenied {
         Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
-        DocumentaryUnit doc = query.get(IdentifiableEntity.IDENTIFIER_KEY, "c1",
+        DocumentaryUnit doc = query.get(Ontology.IDENTIFIER_KEY, "c1",
                 validUser);
         assertEquals("c1", doc.getIdentifier());
     }
@@ -298,7 +298,7 @@ public class QueryTest extends AbstractFixtureTest {
             IndexNotFoundException, AccessDenied {
         Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
-        query.get(IdentifiableEntity.IDENTIFIER_KEY, "IDONTEXIST", validUser);
+        query.get(Ontology.IDENTIFIER_KEY, "IDONTEXIST", validUser);
     }
 
     @Test(expected = AccessDenied.class)
@@ -307,6 +307,6 @@ public class QueryTest extends AbstractFixtureTest {
         Accessor accessor = manager.getFrame("reto", Accessor.class);
         Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
-        query.get(IdentifiableEntity.IDENTIFIER_KEY, "c1", accessor);
+        query.get(Ontology.IDENTIFIER_KEY, "c1", accessor);
     }
 }

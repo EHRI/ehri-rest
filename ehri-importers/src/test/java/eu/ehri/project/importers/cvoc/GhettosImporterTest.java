@@ -1,9 +1,9 @@
 package eu.ehri.project.importers.cvoc;
 
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.importers.AbstractImporterTest;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.models.base.Description;
-import eu.ehri.project.models.base.IdentifiableEntity;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.views.Query;
@@ -51,7 +51,7 @@ public class GhettosImporterTest extends AbstractImporterTest {
 
         // Query for document identifier.
         List<Concept> list = toList(query.setLimit(1).list(
-                IdentifiableEntity.IDENTIFIER_KEY, skosConceptId, validUser));
+                Ontology.IDENTIFIER_KEY, skosConceptId, validUser));
 
         Concept ghetto0 = list.get(0);
         //  <geo:lat>52.43333333333333</geo:lat>

@@ -6,18 +6,14 @@ package eu.ehri.project.importers;
 
 import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.definitions.Entities;
-import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.importers.exceptions.InputParseError;
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.Country;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.RepositoryDescription;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Description;
-import eu.ehri.project.models.base.IdentifiableEntity;
 import eu.ehri.project.models.events.SystemEvent;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
@@ -64,7 +60,7 @@ public class Eag2896Test extends AbstractImporterTest {
         int afterCount = count + 9;
         assertEquals(afterCount, getNodeCount(graph));
 
-        Iterable<Vertex> docs = graph.getVertices(IdentifiableEntity.IDENTIFIER_KEY, IMPORTED_ITEM_ID);
+        Iterable<Vertex> docs = graph.getVertices(Ontology.IDENTIFIER_KEY, IMPORTED_ITEM_ID);
         assertTrue(docs.iterator().hasNext());
         Repository unit = graph.frame(
                 getVertexByIdentifier(graph, IMPORTED_ITEM_ID),
