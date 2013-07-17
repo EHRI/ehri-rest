@@ -12,7 +12,6 @@ import java.lang.annotation.Target;
 public @interface EntityType {
     public static final String TYPE_KEY = "__ISA__";
     public static final String ID_KEY = "__ID__";
-    public static final String HASH_KEY = "__HASH__";
 
     public EntityClass value();
 }
