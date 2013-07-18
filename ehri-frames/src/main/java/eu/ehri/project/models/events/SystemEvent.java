@@ -16,7 +16,6 @@ import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.Frame;
 import eu.ehri.project.models.utils.JavaHandlerUtils;
-import eu.ehri.project.persistance.ActionManager;
 
 @EntityType(EntityClass.SYSTEM_EVENT)
 public interface SystemEvent extends AccessibleEntity {
@@ -59,24 +58,24 @@ public interface SystemEvent extends AccessibleEntity {
     abstract class Impl implements JavaHandlerContext<Vertex>, SystemEvent {
         public Iterable<AccessibleEntity> getSubjects() {
             return frameVertices(gremlin().in(Ontology.ENTITY_HAS_EVENT)
-                    .as("n").in(ActionManager.LIFECYCLE_EVENT)
+                    .as("n").in(Ontology.ENTITY_HAS_LIFECYCLE_EVENT)
                     .loop("n", JavaHandlerUtils.noopLoopFunc, new PipeFunction<LoopPipe.LoopBundle<Vertex>, Boolean>() {
                         @Override
                         public Boolean compute(LoopPipe.LoopBundle<Vertex> vertexLoopBundle) {
                             return !vertexLoopBundle.getObject().getVertices(Direction.IN,
-                                    ActionManager.LIFECYCLE_EVENT).iterator().hasNext();
+                                    Ontology.ENTITY_HAS_LIFECYCLE_EVENT).iterator().hasNext();
                         }
                     }));
         }
 
         public Iterable<Actioner> getActioners() {
             return frameVertices(gremlin().in(Ontology.ENTITY_HAS_EVENT)
-                    .as("n").in(ActionManager.LIFECYCLE_ACTION)
+                    .as("n").in(Ontology.ACTIONER_HAS_LIFECYCLE_ACTION)
                     .loop("n", JavaHandlerUtils.noopLoopFunc, new PipeFunction<LoopPipe.LoopBundle<Vertex>, Boolean>() {
                         @Override
                         public Boolean compute(LoopPipe.LoopBundle<Vertex> vertexLoopBundle) {
                             return !vertexLoopBundle.getObject().getVertices(Direction.IN,
-                                    ActionManager.LIFECYCLE_ACTION).iterator().hasNext();
+                                    Ontology.ACTIONER_HAS_LIFECYCLE_ACTION).iterator().hasNext();
                         }
                     }));
         }

@@ -9,7 +9,6 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.models.utils.JavaHandlerUtils;
-import eu.ehri.project.persistance.ActionManager;
 
 public interface AccessibleEntity extends PermissionGrantTarget {
 
@@ -45,7 +44,7 @@ public interface AccessibleEntity extends PermissionGrantTarget {
     @JavaHandler
     public Iterable<SystemEvent> getHistory();
 
-    @Fetch(value = ActionManager.LIFECYCLE_EVENT, ifDepth = 0)
+    @Fetch(value = Ontology.ENTITY_HAS_LIFECYCLE_EVENT, ifDepth = 0)
     @JavaHandler
     public SystemEvent getLatestEvent();
 
@@ -55,7 +54,7 @@ public interface AccessibleEntity extends PermissionGrantTarget {
     abstract class Impl implements JavaHandlerContext<Vertex>, AccessibleEntity {
         public SystemEvent getLatestEvent() {
             GremlinPipeline<Vertex, Vertex> out = gremlin()
-                    .out(ActionManager.LIFECYCLE_EVENT)
+                    .out(Ontology.ENTITY_HAS_LIFECYCLE_EVENT)
                     .out(Ontology.ENTITY_HAS_EVENT);
             return (SystemEvent)(out.hasNext() ? frame(out.next()) : null);
         }
@@ -67,7 +66,7 @@ public interface AccessibleEntity extends PermissionGrantTarget {
         }
 
         public Iterable<SystemEvent> getHistory() {
-            return frameVertices(gremlin().as("n").out(ActionManager.LIFECYCLE_EVENT)
+            return frameVertices(gremlin().as("n").out(Ontology.ENTITY_HAS_LIFECYCLE_EVENT)
                     .loop("n", JavaHandlerUtils.noopLoopFunc, JavaHandlerUtils.noopLoopFunc)
                     .out(Ontology.ENTITY_HAS_EVENT));
         }

@@ -36,12 +36,6 @@ public final class ActionManager {
     // streams propagate.
     public static final String GLOBAL_EVENT_ROOT = "globalEventRoot";
 
-    /**
-     * Constant relationship names
-     */
-    public static final String LIFECYCLE_ACTION = "lifecycleAction";
-    public static final String LIFECYCLE_EVENT = "lifecycleEvent";
-
     private final FramedGraph<?> graph;
     private final GraphManager manager;
     private final Frame scope;
@@ -117,7 +111,7 @@ public final class ActionManager {
             for (AccessibleEntity entity : entities) {
                 Vertex vertex = actionManager.graph.addVertex(null);
                 actionManager.replaceAtHead(entity.asVertex(), vertex,
-                        LIFECYCLE_EVENT, LIFECYCLE_EVENT, Direction.OUT);
+                        Ontology.ENTITY_HAS_LIFECYCLE_EVENT, Ontology.ENTITY_HAS_LIFECYCLE_EVENT, Direction.OUT);
                 actionManager.graph.addEdge(null, vertex,
                         systemEvent.asVertex(), Ontology.ENTITY_HAS_EVENT);
             }
@@ -175,7 +169,7 @@ public final class ActionManager {
             if (!scope.equals(SystemScope.getInstance())) {
                 ev.setEventScope(scope);
             }
-            replaceAtHead(system, ev.asVertex(), LIFECYCLE_ACTION + "Stream", LIFECYCLE_ACTION, Direction.OUT);
+            replaceAtHead(system, ev.asVertex(), Ontology.ACTIONER_HAS_LIFECYCLE_ACTION + "Stream", Ontology.ACTIONER_HAS_LIFECYCLE_ACTION, Direction.OUT);
             return ev;
         } catch (ItemNotFound e) {
             e.printStackTrace();
@@ -220,7 +214,7 @@ public final class ActionManager {
     public EventContext logEvent(Actioner user, EventTypes type, Optional<String> logMessage) {
         Vertex vertex = graph.addVertex(null);
         replaceAtHead(user.asVertex(), vertex,
-                LIFECYCLE_ACTION, LIFECYCLE_ACTION, Direction.OUT);
+                Ontology.ACTIONER_HAS_LIFECYCLE_ACTION, Ontology.ACTIONER_HAS_LIFECYCLE_ACTION, Direction.OUT);
         SystemEvent globalEvent = createGlobalEvent(user, type, logMessage);
         graph.addEdge(null, vertex, globalEvent.asVertex(), Ontology.ENTITY_HAS_EVENT);
         return new EventContext(this, globalEvent, user, type, logMessage);
