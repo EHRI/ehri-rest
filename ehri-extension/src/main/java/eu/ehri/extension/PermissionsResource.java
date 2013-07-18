@@ -103,7 +103,7 @@ public class PermissionsResource extends AbstractRestResource {
      * @throws BadRequester
      */
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/page/{id:.+}")
     public StreamingOutput pagePermissionGrants(
             @PathParam("id") String id,
@@ -131,7 +131,7 @@ public class PermissionsResource extends AbstractRestResource {
      * @throws BadRequester
      */
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/listForItem/{id:.+}")
     public StreamingOutput listPermissionGrantsForItem(
             @PathParam("id") String id,
@@ -160,7 +160,7 @@ public class PermissionsResource extends AbstractRestResource {
      * @throws BadRequester
      */
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/pageForItem/{id:.+}")
     public StreamingOutput pagePermissionGrantsForItem(
             @PathParam("id") String id,
@@ -189,7 +189,7 @@ public class PermissionsResource extends AbstractRestResource {
      * @throws BadRequester
      */
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/listForScope/{id:.+}")
     public StreamingOutput listPermissionGrantsForScope(
             @PathParam("id") String id,
@@ -217,7 +217,7 @@ public class PermissionsResource extends AbstractRestResource {
      * @throws BadRequester
      */
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/pageForScope/{id:.+}")
     public StreamingOutput pagePermissionGrantsForScope(
             @PathParam("id") String id,
@@ -249,7 +249,7 @@ public class PermissionsResource extends AbstractRestResource {
      * @throws BadRequester
      */
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     public Response getGlobalMatrix() throws PermissionDenied, IOException,
             ItemNotFound, BadRequester {
         graph.getBaseGraph().checkNotInTransaction();
@@ -269,7 +269,7 @@ public class PermissionsResource extends AbstractRestResource {
      * @throws ItemNotFound
      */
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{userId:.+}")
     public Response getGlobalMatrix(@PathParam("userId") String userId)
             throws PermissionDenied, IOException, ItemNotFound {
@@ -299,7 +299,7 @@ public class PermissionsResource extends AbstractRestResource {
      */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{userId:.+}")
     public Response setGlobalMatrix(@PathParam("userId") String userId,
             String json) throws PermissionDenied, IOException, ItemNotFound,
@@ -341,7 +341,7 @@ public class PermissionsResource extends AbstractRestResource {
      * @throws ItemNotFound
      */
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{userId:.+}/{id:.+}")
     public Response getEntityMatrix(@PathParam("userId") String userId,
             @PathParam("id") String id) throws PermissionDenied, IOException,
@@ -370,7 +370,7 @@ public class PermissionsResource extends AbstractRestResource {
      * @throws DeserializationError
      */
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/{userId:.+}/scope/{id:.+}")
     public Response getScopedMatrix(@PathParam("userId") String userId,
@@ -407,7 +407,7 @@ public class PermissionsResource extends AbstractRestResource {
      */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{userId:.+}/scope/{id:.+}")
     public Response setScopedPermissions(@PathParam("userId") String userId,
             @PathParam("id") String id, String json) throws PermissionDenied,
@@ -457,7 +457,7 @@ public class PermissionsResource extends AbstractRestResource {
      */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{userId:.+}/{id:.+}")
     public Response setItemPermissions(@PathParam("userId") String userId,
             @PathParam("id") String id, String json) throws PermissionDenied,

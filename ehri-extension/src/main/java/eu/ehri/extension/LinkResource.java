@@ -49,7 +49,7 @@ public class LinkResource extends
      * @throws BadRequester
      */
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}")
     public Response getAction(@PathParam("id") String id) throws ItemNotFound,
             AccessDenied, BadRequester {
@@ -68,7 +68,7 @@ public class LinkResource extends
      * @throws BadRequester
      */
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/list")
     public StreamingOutput listLinks(
             @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
@@ -97,7 +97,7 @@ public class LinkResource extends
      */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("{id:.+}/{sourceId:.+}")
     public Response createLinkFor(@PathParam("id") String id,
             @PathParam("sourceId") String sourceId, String json,
@@ -190,7 +190,7 @@ public class LinkResource extends
      * @throws BadRequester
      */
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/for/{id:.+}")
     public StreamingOutput listRelatedItems(@PathParam("id") String id)
                 throws ItemNotFound, BadRequester {

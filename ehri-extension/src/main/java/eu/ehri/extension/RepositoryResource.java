@@ -47,7 +47,7 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
     }
 
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}")
     public Response getRepository(@PathParam("id") String id) throws ItemNotFound,
             AccessDenied, BadRequester {
@@ -55,7 +55,7 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
     }
 
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/list")
     public StreamingOutput listRepositories(
             @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
@@ -67,7 +67,7 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
     }
 
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/count")
     public Response countDocumentaryUnits(@QueryParam(FILTER_PARAM) List<String> filters)
             throws ItemNotFound, BadRequester {
@@ -75,7 +75,7 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
     }
 
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/list")
     public StreamingOutput listRepositoryDocumentaryUnits(
             @PathParam("id") String id,
@@ -94,7 +94,7 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
     }
 
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/count")
     public Response countRepositoryDocumentaryUnits(
             @PathParam("id") String id,
@@ -110,7 +110,7 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
     }
 
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/page")
     public StreamingOutput pageRepositoryDocumentaryUnits(
             @PathParam("id") String id,
@@ -129,7 +129,7 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
     }
 
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/page")
     public StreamingOutput pageRepositories(
             @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
@@ -142,7 +142,7 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
 
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     public Response updateRepository(String json) throws PermissionDenied,
             IntegrityError, ValidationError, DeserializationError,
             ItemNotFound, BadRequester {
@@ -151,7 +151,7 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
 
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}")
     public Response updateRepository(@PathParam("id") String id, String json)
             throws AccessDenied, PermissionDenied, IntegrityError, ValidationError,
@@ -182,7 +182,7 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
      */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/" + Entities.DOCUMENTARY_UNIT)
     public Response createRepositoryDocumentaryUnit(@PathParam("id") String id,
             String json, @QueryParam(ACCESSOR_PARAM) List<String> accessors)

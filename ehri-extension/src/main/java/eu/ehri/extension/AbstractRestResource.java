@@ -2,6 +2,7 @@ package eu.ehri.extension;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
 
@@ -157,7 +158,9 @@ public abstract class AbstractRestResource implements TxCheckedResource {
      */
     protected <T extends Frame> StreamingOutput streamingPage(
             final Query.Page<T> page) {
-        return streamingPage(page, serializer);
+        return MediaType.TEXT_XML_TYPE.equals(checkMediaType())
+                ? getStreamingXmlOutput(page, serializer)
+                : getStreamingJsonOutput(page, serializer);
     }
     
     /**
@@ -169,6 +172,36 @@ public abstract class AbstractRestResource implements TxCheckedResource {
      */
     protected <T extends Frame> StreamingOutput streamingPage(
             final Query.Page<T> page, final Serializer serializer) {
+        return MediaType.TEXT_XML_TYPE.equals(checkMediaType())
+                ? getStreamingXmlOutput(page, serializer)
+                : getStreamingJsonOutput(page, serializer);
+    }
+
+    private <T extends Frame> StreamingOutput getStreamingXmlOutput(final Query.Page<T> page, final Serializer serializer) {
+        final Charset utf8 = Charset.forName("UTF-8");
+        final String header = String.format("<page total=\"%d\" offset=\"%d\" limit=\"%d\">\n",
+                page.getCount(), page.getOffset(), page.getLimit());
+        final String tail = "</page>\n";
+
+        return new StreamingOutput() {
+            @Override
+            public void write(OutputStream os) throws IOException,
+                    WebApplicationException {
+                os.write(header.getBytes(utf8));
+                try {
+                    for (T item : page.getIterable()) {
+                        os.write(serializer.vertexFrameToXmlString(item)
+                                .getBytes(utf8));
+                    }
+                } catch (SerializationError serializationError) {
+                    throw new RuntimeException(serializationError);
+                }
+                os.write(tail.getBytes(utf8));
+            }
+        };
+    }
+
+    private <T extends Frame> StreamingOutput getStreamingJsonOutput(final Query.Page<T> page, final Serializer serializer) {
         final ObjectMapper mapper = new ObjectMapper();
         final JsonFactory f = new JsonFactory();
         return new StreamingOutput() {
@@ -204,7 +237,9 @@ public abstract class AbstractRestResource implements TxCheckedResource {
      */
     protected <T extends Frame> StreamingOutput streamingList(
             final Iterable<T> list) {
-        return streamingList(list, serializer);
+        return MediaType.TEXT_XML_TYPE.equals(checkMediaType())
+                ? getStreamingXmlOutput(list, serializer)
+                : getStreamingJsonOutput(list, serializer);
     }
         
     /**
@@ -216,6 +251,35 @@ public abstract class AbstractRestResource implements TxCheckedResource {
      */
     protected <T extends Frame> StreamingOutput streamingList(
             final Iterable<T> list, final Serializer serializer) {
+        return MediaType.TEXT_XML_TYPE.equals(checkMediaType())
+                ? getStreamingXmlOutput(list, serializer)
+                : getStreamingJsonOutput(list, serializer);
+    }
+
+    private <T extends Frame> StreamingOutput getStreamingXmlOutput(final Iterable<T> list, final Serializer serializer) {
+        final Charset utf8 = Charset.forName("UTF-8");
+        final String header = "<list>\n";
+        final String tail = "</list>\n";
+
+        return new StreamingOutput() {
+            @Override
+            public void write(OutputStream os) throws IOException,
+                    WebApplicationException {
+                os.write(header.getBytes(utf8));
+                try {
+                    for (T item : list) {
+                        os.write(serializer.vertexFrameToXmlString(item)
+                        .getBytes(utf8));
+                    }
+                } catch (SerializationError e) {
+                    throw new RuntimeException(e);
+                }
+                os.write(tail.getBytes(utf8));
+            }
+        };
+    }
+
+    private <T extends Frame> StreamingOutput getStreamingJsonOutput(final Iterable<T> list, final Serializer serializer) {
         final ObjectMapper mapper = new ObjectMapper();
         final JsonFactory f = new JsonFactory();
         return new StreamingOutput() {
@@ -300,6 +364,16 @@ public abstract class AbstractRestResource implements TxCheckedResource {
                 g.close();
             }
         };
+    }
+
+    /**
+     * Return a number.
+     */
+    protected Response numberResponse(Long number) {
+        return MediaType.TEXT_XML_TYPE.equals(checkMediaType())
+                ? Response.ok(String.format("<count>%d</count>", number.longValue())
+                    .getBytes()).build()
+                : Response.ok(number.toString().getBytes()).build();
     }
 
     /**

@@ -34,7 +34,7 @@ public class ContentTypeResource extends AbstractAccessibleEntityResource<Conten
     }
 
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}")
     public Response getContentType(@PathParam("id") String id)
             throws ItemNotFound, AccessDenied, BadRequester {
@@ -42,7 +42,7 @@ public class ContentTypeResource extends AbstractAccessibleEntityResource<Conten
     }
 
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/list")
     public StreamingOutput listContentTypes(
             @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
@@ -54,7 +54,7 @@ public class ContentTypeResource extends AbstractAccessibleEntityResource<Conten
     }
     
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/page")
     public StreamingOutput pageContentTypes(
             @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,

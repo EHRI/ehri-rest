@@ -132,7 +132,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
     public Response count(Iterable<String> filters) throws BadRequester {
         Long count = querier.filter(filters).count(getRequesterUserProfile());
         graph.getBaseGraph().checkNotInTransaction();
-        return Response.ok().entity(count.toString().getBytes()).build();
+        return numberResponse(count);
     }
 
     /**

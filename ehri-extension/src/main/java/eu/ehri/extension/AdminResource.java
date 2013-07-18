@@ -48,7 +48,7 @@ public class AdminResource extends AbstractRestResource {
      * @throws Exception
      */
     @POST
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/createDefaultUserProfile")
     public Response createDefaultUserProfile() throws Exception {
         graph.getBaseGraph().checkNotInTransaction();

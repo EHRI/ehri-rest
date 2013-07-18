@@ -43,7 +43,7 @@ public class PermissionGrantResource extends AbstractRestResource {
      * @throws BadRequester
      */
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}")
     public Response getPermissionGrant(@PathParam("id") String id)
             throws ItemNotFound, PermissionDenied, BadRequester, SerializationError {
