@@ -8,6 +8,7 @@ import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.neo4j.kernel.GraphDatabaseAPI;
 import org.neo4j.server.NeoServer;
 import org.neo4j.server.WrappingNeoServerBootstrapper;
+import org.neo4j.server.configuration.Configurator;
 import org.neo4j.server.configuration.ServerConfigurator;
 
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
@@ -19,44 +20,43 @@ import eu.ehri.project.utils.fixtures.FixtureLoaderFactory;
 
 /**
  * Class that handles running a test Neo4j server.
- * 
  */
-public class ServerRunner {
+public class ServerRunner extends WrappingNeoServerBootstrapper {
 
-    protected GraphDatabaseAPI graphDatabase;
-    protected WrappingNeoServerBootstrapper bootstrapper;
-    protected FixtureLoader loader;
-    protected GraphCleaner cleaner;
-    protected NeoServer neoServer;
-    protected ServerConfigurator config;
+    protected final FixtureLoader loader;
+    protected final GraphCleaner cleaner;
     private FramedGraph<Neo4jGraph> framedGraph;
+    private boolean isRunning = false;
+
+    public ServerRunner(GraphDatabaseAPI graphDatabase, ServerConfigurator config) {
+        super(graphDatabase, config);
+        framedGraph = new FramedGraphFactory(
+                new JavaHandlerModule()).create((new Neo4jGraph(graphDatabase)));
+        loader = FixtureLoaderFactory.getInstance(framedGraph);
+        cleaner = new GraphCleaner(framedGraph);
+    }
 
     /**
      * Initialise a new Neo4j Server with the given db name and port.
-     * 
+     *
      * @param dbName
      * @param dbPort
      */
-    public ServerRunner(String dbName, Integer dbPort) {
+    public static ServerRunner getInstance(String dbName, Integer dbPort) {
         // TODO: Work out a better way to configure the path
         final String dbPath = "target/tmpdb_" + dbName;
-        // FIXME: Can we avoid the case here???
-        graphDatabase = (GraphDatabaseAPI) new GraphDatabaseFactory().newEmbeddedDatabase(dbPath);
-        framedGraph = new FramedGraphFactory(
-                new JavaHandlerModule()).create((new Neo4jGraph(graphDatabase)));
+        GraphDatabaseAPI graphDatabase = (GraphDatabaseAPI) new GraphDatabaseFactory()
+                .newEmbeddedDatabase(dbPath);
 
         // Initialize the fixture loader and cleaner
-        loader = FixtureLoaderFactory.getInstance(framedGraph);
-        cleaner = new GraphCleaner(framedGraph);
-
         // Server configuration. TODO: Work out how to disable server startup
         // and load logging so the test output isn't so noisy...
-        config = new ServerConfigurator(graphDatabase);
+        ServerConfigurator config = new ServerConfigurator(graphDatabase);
         config.configuration().setProperty("org.neo4j.server.webserver.port",
                 dbPort.toString());
         config.configuration().setProperty("org.neo4j.server.webserver.port",
                 dbPort.toString());
-
+        config.configuration().setProperty("org.neo4j.dbpath", dbPath);
 
         // FIXME: Work out how to turn off server logging. The config below
         // doesn't
@@ -66,43 +66,36 @@ public class ServerRunner {
         config.configuration().setProperty("org.neo4j.server.logging.level",
                 "ERROR");
 
-
-
-        bootstrapper = new WrappingNeoServerBootstrapper(graphDatabase, config);
-
         // Attempt to ensure database is erased from the disk when
         // the runtime shuts down. This improves repeatability, because
         // if it is still there it'll be appended to on the next run.
-        Runtime.getRuntime().addShutdownHook(new Thread() {
+        /*Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
             public void run() {
                 deleteFolder(new File(dbPath));
             }
-        });
+        });*/
+
+        return new ServerRunner(graphDatabase, config);
     }
 
-    /**
-     * Get the configurator for the test db. This allows adjusting config before
-     * starting it up.
-     * 
-     * @return
-     */
-    public ServerConfigurator getConfigurator() {
-        return config;
+    public boolean isRunning() {
+        return isRunning;
     }
 
-    /**
-     * Initialise a new graph database in a given location. This should be
-     * unique for each superclass, because otherwise problems can be encountered
-     * when another test suite starts up whilst a database is in the process of
-     * shutting down.
-     * 
-     */
-    public void start() {
-        bootstrapper.start();
+    @Override
+    public Integer start() {
+        isRunning = true;
+        return super.start();
     }
 
-    public void setUp() throws Exception {
+    @Override
+    public int stop(int stopArg) {
+        isRunning = false;
+        return super.stop(stopArg);
+    }
+
+    public void setUp() {
         loader.loadTestData();
     }
 
@@ -111,18 +104,39 @@ public class ServerRunner {
     }
 
     /**
-     * Stop the server
+     * Get the configurator for the test db. This allows adjusting config before
+     * starting it up.
+     *
+     * @return
      */
-    public void stop() {
-        bootstrapper.stop();
+    public Configurator getConfigurator() {
+        return createConfigurator();
+    }
+
+    @Override
+    protected void addShutdownHook() {
+        Runtime.getRuntime()
+                .addShutdownHook(new Thread() {
+                    @Override
+                    public void run() {
+                        if (server != null && isRunning) {
+                            server.stop();
+                        }
+                        deleteFolder(
+                                new File(
+                                        createConfigurator()
+                                                .configuration()
+                                                .getString("org.neo4j.dbpath")));
+                    }
+                });
     }
 
     /**
      * Function for deleting an entire database folder. USE WITH CARE!!!
-     * 
+     *
      * @param folder
      */
-    protected void deleteFolder(File folder) {
+    private static void deleteFolder(File folder) {
         File[] files = folder.listFiles();
         if (files != null) { // some JVMs return null for empty dirs
             for (File f : files) {

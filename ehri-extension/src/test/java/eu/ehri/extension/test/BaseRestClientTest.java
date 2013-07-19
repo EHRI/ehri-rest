@@ -85,9 +85,9 @@ public class BaseRestClientTest extends AbstractRestClientTest {
      * @param dbName
      */
     public static void initializeTestDb(String dbName) {
-        runner = new ServerRunner(dbName, testServerPort);
+        runner = ServerRunner.getInstance(dbName, testServerPort);
         runner.getConfigurator()
-                .getThirdpartyJaxRsClasses()
+                .getThirdpartyJaxRsPackages()
                 .add(new ThirdPartyJaxRsPackage(
                         AbstractAccessibleEntityResource.class.getPackage()
                                 .getName(), mountPoint));
