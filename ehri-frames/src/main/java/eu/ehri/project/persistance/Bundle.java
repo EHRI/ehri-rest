@@ -185,6 +185,14 @@ public final class Bundle {
     }
 
     /**
+     * Get the bundle metadata
+     */
+    public Map<String,Object> getMeta() {
+        return meta;
+    }
+
+
+    /**
      * Set the entire data map for this bundle.
      *
      * @param data
