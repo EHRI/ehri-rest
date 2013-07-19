@@ -24,6 +24,7 @@ public final class Bundle {
     private final String id;
     private final EntityClass type;
     private final ImmutableMap<String, Object> data;
+    private final ImmutableMap<String, Object> meta;
     private final ImmutableListMultimap<String, Bundle> relations;
 
     /**
@@ -33,6 +34,7 @@ public final class Bundle {
     public static final String REL_KEY = "relationships";
     public static final String DATA_KEY = "data";
     public static final String TYPE_KEY = "type";
+    public static final String META_KEY = "meta";
 
     /**
      * Properties that are "managed", i.e. automatically set
@@ -50,11 +52,25 @@ public final class Bundle {
      * @param relations
      */
     public Bundle(String id, EntityClass type, final Map<String, Object> data,
-            final ListMultimap<String, Bundle> relations) {
+            final ListMultimap<String, Bundle> relations, final Map<String, Object> meta) {
         this.id = id;
         this.type = type;
         this.data = filterData(data);
+        this.meta = ImmutableMap.copyOf(meta);
         this.relations = ImmutableListMultimap.copyOf(relations);
+    }
+
+    /**
+     * Constructor for bundle without existing id.
+     *
+     * @param id
+     * @param type
+     * @param data
+     * @param relations
+     */
+    public Bundle(String id, EntityClass type, final Map<String, Object> data,
+            final ListMultimap<String, Bundle> relations) {
+        this(id, type, data, relations, Maps.<String,Object>newHashMap());
     }
 
     /**
@@ -66,7 +82,7 @@ public final class Bundle {
      */
     public Bundle(EntityClass type, final Map<String, Object> data,
             final ListMultimap<String, Bundle> relations) {
-        this(null, type, data, relations);
+        this(null, type, data, relations, Maps.<String,Object>newHashMap());
     }
 
     /**
@@ -76,7 +92,7 @@ public final class Bundle {
      */
     public Bundle(EntityClass type) {
         this(null, type, Maps.<String, Object> newHashMap(), LinkedListMultimap
-                .<String, Bundle> create());
+                .<String, Bundle> create(), Maps.<String,Object>newHashMap());
     }
 
     /**
@@ -86,7 +102,8 @@ public final class Bundle {
      * @param data
      */
     public Bundle(EntityClass type, final Map<String, Object> data) {
-        this(null, type, data, LinkedListMultimap.<String, Bundle> create());
+        this(null, type, data, LinkedListMultimap.<String, Bundle> create(),
+                Maps.<String,Object>newHashMap());
     }
 
     /**
@@ -106,7 +123,7 @@ public final class Bundle {
      */
     public Bundle withId(String id) {
         checkNotNull(id);
-        return new Bundle(id, type, data, relations);
+        return new Bundle(id, type, data, relations, meta);
     }
 
     /**
@@ -174,7 +191,7 @@ public final class Bundle {
      * @return
      */
     public Bundle withData(final Map<String, Object> data) {
-        return new Bundle(id, type, data, relations);
+        return new Bundle(id, type, data, relations, meta);
     }
 
     /**
@@ -193,7 +210,7 @@ public final class Bundle {
      * @return
      */
     public Bundle withRelations(ListMultimap<String, Bundle> relations) {
-        return new Bundle(id, type, data, relations);
+        return new Bundle(id, type, data, relations, meta);
     }
 
     /**
@@ -217,7 +234,7 @@ public final class Bundle {
         LinkedListMultimap<String, Bundle> tmp = LinkedListMultimap
                 .create(relations);
         tmp.putAll(relation, others);
-        return new Bundle(id, type, data, tmp);
+        return new Bundle(id, type, data, tmp, meta);
     }
 
     /**
@@ -230,7 +247,7 @@ public final class Bundle {
         LinkedListMultimap<String, Bundle> tmp = LinkedListMultimap
                 .create(relations);
         tmp.put(relation, other);
-        return new Bundle(id, type, data, tmp);
+        return new Bundle(id, type, data, tmp, meta);
     }
 
     /**
@@ -252,7 +269,7 @@ public final class Bundle {
     public Bundle removeRelation(String relation, Bundle item) {
         ListMultimap<String, Bundle> tmp = LinkedListMultimap.create(relations);
         tmp.remove(relation, item);
-        return new Bundle(id, type, data, tmp);
+        return new Bundle(id, type, data, tmp, meta);
     }
 
     /**
@@ -264,7 +281,7 @@ public final class Bundle {
     public Bundle removeRelations(String relation) {
         ListMultimap<String, Bundle> tmp = LinkedListMultimap.create(relations);
         tmp.removeAll(relation);
-        return new Bundle(id, type, data, tmp);
+        return new Bundle(id, type, data, tmp, meta);
     }
 
     /**
