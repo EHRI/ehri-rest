@@ -402,7 +402,13 @@ public class SkosCoreCvocImporter {
      */
     private void createBroaderNarrowerRelation(ConceptPlaceholder bcp, ConceptPlaceholder ncp)  {
     	logger.debug("Creating Broader: " + bcp.storeId + " to Narrower: " + ncp.storeId);
-    	bcp.concept.addNarrowerConcept(ncp.concept);
+
+        // An item CANNOT be a narrower version of itself!
+        if (bcp.concept.equals(ncp.concept)) {
+            logger.error("Ignoring cyclic narrower relationship on {}", bcp.concept.getId());
+        } else {
+            bcp.concept.addNarrowerConcept(ncp.concept);
+        }
     }
 
     /**
