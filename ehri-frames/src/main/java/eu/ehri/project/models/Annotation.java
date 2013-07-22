@@ -6,6 +6,7 @@ import com.tinkerpop.frames.Property;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
+import eu.ehri.project.models.annotations.Mandatory;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.AnnotatableEntity;
 import eu.ehri.project.models.base.Annotator;
@@ -30,6 +31,7 @@ public interface Annotation extends AnnotatableEntity, AccessibleEntity {
     @Adjacency(label = Ontology.ANNOTATION_HAS_SOURCE)
     public void addSource(final Annotator annotator);
 
+    @Mandatory
     @Property(Ontology.ANNOTATION_NOTES_BODY)
     public String getBody();
 }

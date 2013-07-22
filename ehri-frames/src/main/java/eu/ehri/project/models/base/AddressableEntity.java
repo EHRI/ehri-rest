@@ -16,8 +16,8 @@ import eu.ehri.project.models.annotations.Fetch;
  */
 public interface AddressableEntity {
 
-    @Fetch(Ontology.ENTITY_HAS_ADDRESS)
     @Dependent
+    @Fetch(value = Ontology.ENTITY_HAS_ADDRESS, whenNotLite = true)
     @Adjacency(label = Ontology.ENTITY_HAS_ADDRESS)
     public Iterable<Address> getAddresses();
 

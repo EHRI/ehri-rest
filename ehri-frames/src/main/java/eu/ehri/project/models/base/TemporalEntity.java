@@ -9,7 +9,7 @@ import eu.ehri.project.models.annotations.Fetch;
 public interface TemporalEntity extends Frame {
 
     @Dependent
-    @Fetch(Ontology.ENTITY_HAS_DATE)
+    @Fetch(value = Ontology.ENTITY_HAS_DATE, whenNotLite = true)
     @Adjacency(label = Ontology.ENTITY_HAS_DATE)
     public abstract Iterable<DatePeriod> getDatePeriods();
 

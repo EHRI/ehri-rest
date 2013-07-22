@@ -31,8 +31,8 @@ public interface Description extends NamedEntity, AccessibleEntity {
     @Adjacency(label = Ontology.DESCRIPTION_FOR_ENTITY)
     public DescribedEntity getDescribedEntity();    
 
-    @Fetch(Ontology.HAS_MAINTENANCE_EVENT)
     @Dependent
+    @Fetch(value = Ontology.HAS_MAINTENANCE_EVENT, whenNotLite = true)
     @Adjacency(label = Ontology.HAS_MAINTENANCE_EVENT, direction=Direction.IN)
     public abstract Iterable<MaintenanceEvent> getMaintenanceEvents();
 
@@ -41,9 +41,9 @@ public interface Description extends NamedEntity, AccessibleEntity {
 
     @Adjacency(label = Ontology.HAS_MAINTENANCE_EVENT)
     public abstract void addMaintenanceEvent(final MaintenanceEvent maintenanceEvent);
-    
-    @Fetch(Ontology.HAS_ACCESS_POINT)
+
     @Dependent
+    @Fetch(value = Ontology.HAS_ACCESS_POINT, whenNotLite = true)
     @Adjacency(label = Ontology.HAS_ACCESS_POINT)
     public Iterable<UndeterminedRelationship> getUndeterminedRelationships();
 
@@ -53,8 +53,8 @@ public interface Description extends NamedEntity, AccessibleEntity {
     @Adjacency(label = Ontology.HAS_ACCESS_POINT)
     public void addUndeterminedRelationship(final UndeterminedRelationship relationship);
 
-    @Fetch(value = Ontology.HAS_UNKNOWN_PROPERTY, ifDepth = 1)
     @Dependent
+    @Fetch(value = Ontology.HAS_UNKNOWN_PROPERTY, ifDepth = 1, whenNotLite = true)
     @Adjacency(label = Ontology.HAS_UNKNOWN_PROPERTY)
     public Iterable<UnknownProperty> getUnknownProperties();
 }

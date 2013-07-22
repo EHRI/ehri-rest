@@ -32,6 +32,8 @@ public @interface Fetch {
 
     int ifDepth() default -1;
 
+    boolean whenNotLite() default false;
+
     String value();
 
 }

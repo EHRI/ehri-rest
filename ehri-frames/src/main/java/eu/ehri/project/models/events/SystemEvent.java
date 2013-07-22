@@ -12,6 +12,7 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
+import eu.ehri.project.models.annotations.Mandatory;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.Frame;
@@ -24,9 +25,11 @@ public interface SystemEvent extends AccessibleEntity {
         lifecycleEvent, interactionEvent
     }
 
+    @Mandatory
     @Property(Ontology.EVENT_TIMESTAMP)
     public String getTimestamp();
 
+    @Mandatory
     @Property(Ontology.EVENT_TYPE)
     public String getEventType();
 
