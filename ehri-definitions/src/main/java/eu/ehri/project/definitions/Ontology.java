@@ -79,4 +79,7 @@ public class Ontology {
     public static final String EVENT_TYPE = "eventType";
     public static final String ACTIONER_HAS_LIFECYCLE_ACTION = "lifecycleAction";
     public static final String ENTITY_HAS_LIFECYCLE_EVENT = "lifecycleEvent";
+
+    // Virtual collections
+    public static final String VC_IS_PART_OF = "isPartOf";
 }
