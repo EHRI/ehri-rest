@@ -164,6 +164,23 @@ public final class Bundle {
     }
 
     /**
+     * Set a value in the bundle's meta data.
+     *
+     * @param key
+     * @param value
+     * @return
+     */
+    public Bundle withMetaDataValue(String key, Object value) {
+        if (value == null) {
+            return this;
+        } else {
+            Map<String, Object> newData = Maps.newHashMap(meta);
+            newData.put(key, value);
+            return withMetaData(newData);
+        }
+    }
+
+    /**
      * Remove a value in the bundle's data.
      *
      * @param key
@@ -187,7 +204,7 @@ public final class Bundle {
     /**
      * Get the bundle metadata
      */
-    public Map<String,Object> getMeta() {
+    public Map<String,Object> getMetaData() {
         return meta;
     }
 
@@ -199,6 +216,16 @@ public final class Bundle {
      * @return
      */
     public Bundle withData(final Map<String, Object> data) {
+        return new Bundle(id, type, data, relations, meta);
+    }
+
+    /**
+     * Set the entire meta data map for this bundle.
+     *
+     * @param meta
+     * @return
+     */
+    public Bundle withMetaData(final Map<String, Object> meta) {
         return new Bundle(id, type, data, relations, meta);
     }
 

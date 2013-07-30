@@ -244,8 +244,8 @@ public final class Serializer {
             ListMultimap<String, Bundle> relations = getRelationData(item,
                     depth, lite, type.getEntityClass());
             Map<String, Object> data = getVertexData(item, type, depth, lite);
-            return new Bundle(id, type, data,
-                    relations);
+            return new Bundle(id, type, data, relations)
+                        .withMetaDataValue("gid", item.getId());
         } catch (IllegalArgumentException e) {
             throw new SerializationError("Unable to serialize vertex: " + item,
                     e);
