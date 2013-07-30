@@ -210,6 +210,15 @@ public final class Bundle {
 
 
     /**
+     * Check if this bundle has associated metadata.
+     *
+     * @return
+     */
+    public boolean hasMetaData() {
+        return !meta.isEmpty();
+    }
+
+    /**
      * Set the entire data map for this bundle.
      *
      * @param data
@@ -283,6 +292,15 @@ public final class Bundle {
                 .create(relations);
         tmp.put(relation, other);
         return new Bundle(id, type, data, tmp, meta);
+    }
+
+    /**
+     * Check if this bundle contains any relations.
+     *
+     * @return
+     */
+    public boolean hasRelations() {
+        return !relations.isEmpty();
     }
 
     /**
