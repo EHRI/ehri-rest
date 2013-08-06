@@ -423,6 +423,16 @@ public abstract class AbstractRestResource implements TxCheckedResource {
         };
     }
 
+    /**
+     * Get a string representation (JSON or XML) of a given frame.
+     * @param vertex
+     * @return
+     */
+    protected String getRepresentation(Vertex vertex) throws SerializationError {
+        return MediaType.TEXT_XML_TYPE.equals(checkMediaType())
+                ? serializer.vertexToXmlString(vertex)
+                : serializer.vertexToJson(vertex);
+    }
 
     /**
      * Get a string representation (JSON or XML) of a given frame.
