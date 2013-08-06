@@ -6,11 +6,15 @@ import java.util.List;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
+
+import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.gremlin.java.GremlinPipeline;
 import com.tinkerpop.pipes.PipeFunction;
 import eu.ehri.project.exceptions.DeserializationError;
+import eu.ehri.project.exceptions.SerializationError;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -28,12 +32,15 @@ import eu.ehri.project.models.base.AccessibleEntity;
 @Path("entities")
 public class GenericResource extends AbstractAccessibleEntityResource<AccessibleEntity> {
 
+    final AclManager aclManager;
+
     public GenericResource(@Context GraphDatabaseService database) {
         super(database, AccessibleEntity.class);
+        aclManager = new AclManager(graph);
     }
 
     /**
-     * POST alternative to 'get', which allows passing a much larger
+     * POST alternative to 'list', which allows passing a much larger
      * list of ids to fetch via a JSON body.
      * @param json
      * @return
@@ -44,11 +51,47 @@ public class GenericResource extends AbstractAccessibleEntityResource<Accessible
      * @throws IOException
      */
     @POST
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML})
     @Consumes(MediaType.APPLICATION_JSON)
-    public StreamingOutput getFromJSON(String json)
+    public StreamingOutput listFromJson(String json)
             throws ItemNotFound, PermissionDenied, BadRequester, DeserializationError, IOException {
-        return get(parseIds(json));
+        return list(parseIds(json));
+    }
+
+    @GET
+    @Produces({MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML})
+    public StreamingOutput list(@QueryParam("id") List<String> ids) throws ItemNotFound,
+            PermissionDenied, BadRequester {
+        Iterable<Vertex> vertices = manager.getVertices(ids);
+        PipeFunction<Vertex,Boolean> filter = aclManager
+                .getAclFilterFunction(getRequesterUserProfile());
+        GremlinPipeline<Vertex, Vertex> filtered = new GremlinPipeline<Vertex, Vertex>(
+                vertices)
+                    .filter(aclManager.getContentTypeFilterFunction()).filter(filter);
+        return streamingVertexList(filtered, serializer);
+    }
+
+    @GET
+    @Produces({MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML})
+    @Path("/{id:.+}")
+    public Response get(@PathParam("id") String id) throws ItemNotFound,
+            PermissionDenied, BadRequester, SerializationError {
+        // TODO: Make this more efficient - it's wasteful to use the
+        // gremlin acl and type filtering for one item...
+        List<String> ids = Lists.newArrayList(id);
+        Iterable<Vertex> vertices = manager.getVertices(ids);
+        PipeFunction<Vertex,Boolean> filter = aclManager
+                .getAclFilterFunction(getRequesterUserProfile());
+        GremlinPipeline<Vertex, Vertex> filtered = new GremlinPipeline<Vertex, Vertex>(
+                vertices)
+                .filter(aclManager.getContentTypeFilterFunction()).filter(filter);
+        if (filtered.iterator().hasNext()) {
+            return Response.status(Response.Status.OK)
+                    .entity(getRepresentation(filtered.iterator().next()).getBytes())
+                    .build();
+        } else {
+            throw new ItemNotFound(id);
+        }
     }
 
     private List<String> parseIds(String json) throws IOException, DeserializationError {
@@ -61,23 +104,5 @@ public class GenericResource extends AbstractAccessibleEntityResource<Accessible
         } catch (JsonMappingException e) {
             throw new DeserializationError(e.getMessage());
         }
-    }
-
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    public StreamingOutput get(@QueryParam("id") List<String> ids) throws ItemNotFound,
-            PermissionDenied, BadRequester {
-        Iterable<Vertex> vertices = manager.getVertices(ids);
-        // FIXME: The Acl filter removes items that are not visible to the
-        // user only if they are AccessibleEntities. Things like Descriptions
-        // pass the filter even if their parent item should not be visible.
-        // It's difficult to know how to solve this in a generic and simple
-        // manner.
-        PipeFunction<Vertex,Boolean> filter = new AclManager(graph)
-                .getAclFilterFunction(getRequesterUserProfile());
-        GremlinPipeline<Vertex, Vertex> filtered = new GremlinPipeline<Vertex, Vertex>(
-                vertices)
-                .filter(filter);
-        return streamingVertexList(filtered, serializer);
     }
 }

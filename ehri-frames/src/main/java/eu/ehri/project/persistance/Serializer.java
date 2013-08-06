@@ -187,6 +187,17 @@ public final class Serializer {
         return DataConverter.bundleToJson(vertexFrameToBundle(item));
     }
 
+    /**
+     * Serialise a vertex frame to XML.
+     *
+     * @param item
+     * @return document
+     * @throws SerializationError
+     */
+    public Document vertexFrameToXml(Vertex item)
+            throws SerializationError {
+        return DataConverter.bundleToXml(vertexFrameToBundle(item));
+    }
 
     /**
      * Serialise a vertex frame to XML.
@@ -198,6 +209,18 @@ public final class Serializer {
     public <T extends Frame> Document vertexFrameToXml(T item)
             throws SerializationError {
         return DataConverter.bundleToXml(vertexFrameToBundle(item));
+    }
+
+    /**
+     * Serialise a vertex frame to XML string.
+     *
+     * @param item
+     * @return document string
+     * @throws SerializationError
+     */
+    public String vertexToXmlString(Vertex item)
+            throws SerializationError {
+        return DataConverter.bundleToXmlString(vertexFrameToBundle(item));
     }
 
     /**

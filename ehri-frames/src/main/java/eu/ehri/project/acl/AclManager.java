@@ -355,6 +355,25 @@ public final class AclManager {
     }
 
     /**
+     * Build a gremlin filter function that passes through items that are
+     * bona fide content types.
+     *
+     * @return A PipeFunction for filtering vertices that are content types.
+     */
+    public PipeFunction<Vertex, Boolean> getContentTypeFilterFunction() {
+        // TODO: This lookup could be cached
+        final Set<String> typeStrings = Sets.newHashSet();
+        for (ContentTypes t : ContentTypes.values()) {
+            typeStrings.add(t.getName());
+        }
+        return new PipeFunction<Vertex, Boolean>() {
+            public Boolean compute(Vertex v) {
+                return typeStrings.contains(manager.getType(v));
+            }
+        };
+    }
+
+    /**
      * Build a gremlin filter function that passes through items readable by a
      * given accessor.
      * 
