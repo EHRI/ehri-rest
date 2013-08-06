@@ -49,7 +49,7 @@ public final class BasicGraphManager<T extends IndexableGraph> implements GraphM
     }
 
     public String getType(Vertex vertex) {
-        return (String) vertex.getProperty(EntityType.ID_KEY);
+        return (String) vertex.getProperty(EntityType.TYPE_KEY);
     }
 
     public String getType(Frame frame) {
@@ -57,8 +57,7 @@ public final class BasicGraphManager<T extends IndexableGraph> implements GraphM
     }
 
     public EntityClass getEntityClass(Vertex vertex) {
-        return EntityClass.withName((String) vertex
-                .getProperty(EntityType.TYPE_KEY));
+        return EntityClass.withName(getType(vertex));
     }
 
     public EntityClass getEntityClass(Frame frame) {
