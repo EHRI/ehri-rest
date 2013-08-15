@@ -6,15 +6,12 @@ package eu.ehri.project.importers;
 
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.Country;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.base.AddressableEntity;
-import eu.ehri.project.models.base.Description;
-import eu.ehri.project.models.base.IdentifiableEntity;
 import eu.ehri.project.models.base.PermissionScope;
-import eu.ehri.project.models.base.TemporalEntity;
 import eu.ehri.project.models.idgen.IdGenerator;
 import eu.ehri.project.persistance.Bundle;
 
@@ -23,6 +20,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import eu.ehri.project.persistance.Mutation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -88,49 +86,41 @@ public class EagImporter extends EaImporter {
         Bundle unit = new Bundle(EntityClass.REPOSITORY, extractUnit(itemData));
 
         Map<String, Object> descmap = extractUnitDescription(itemData, EntityClass.REPOSITORY_DESCRIPTION);
-        descmap.put(IdentifiableEntity.IDENTIFIER_KEY, descmap.get(IdentifiableEntity.IDENTIFIER_KEY) + "#desc");
+        descmap.put(Ontology.IDENTIFIER_KEY, descmap.get(Ontology.IDENTIFIER_KEY) + "#desc");
         Bundle descBundle = new Bundle(EntityClass.REPOSITORY_DESCRIPTION, descmap);
-
 
         // Add dates and descriptions to the bundle since they're @Dependent
         // relations.
         for (Map<String, Object> dpb : extractDates(itemData)) {
-            descBundle = descBundle.withRelation(TemporalEntity.HAS_DATE, new Bundle(EntityClass.DATE_PERIOD, dpb));
+            descBundle = descBundle.withRelation(Ontology.ENTITY_HAS_DATE, new Bundle(EntityClass.DATE_PERIOD, dpb));
         }
 
         //add the address to the description bundle
         Map<String, Object> address = extractAddress(itemData);
         if (!address.isEmpty()) {
-            descBundle = descBundle.withRelation(AddressableEntity.HAS_ADDRESS, new Bundle(EntityClass.ADDRESS, address));
+            descBundle = descBundle.withRelation(Ontology.ENTITY_HAS_ADDRESS, new Bundle(EntityClass.ADDRESS, address));
         }
         Map<String, Object> unknowns = extractUnknownProperties(itemData);
         if (!unknowns.isEmpty()) {
             logger.debug("Unknown Properties found");
-            descBundle = descBundle.withRelation(Description.HAS_UNKNOWN_PROPERTY, new Bundle(EntityClass.UNKNOWN_PROPERTY, unknowns));
+            descBundle = descBundle.withRelation(Ontology.HAS_UNKNOWN_PROPERTY, new Bundle(EntityClass.UNKNOWN_PROPERTY, unknowns));
         }
         for (Map<String, Object> dpb : extractMaintenanceEvent(itemData, itemData.get("objectIdentifier").toString())) {
             logger.debug("maintenance event found");
             //dates in maintenanceEvents are no DatePeriods, they are not something to search on
-            descBundle = descBundle.withRelation(Description.MUTATES, new Bundle(EntityClass.MAINTENANCE_EVENT, dpb));
+            descBundle = descBundle.withRelation(Ontology.HAS_MAINTENANCE_EVENT, new Bundle(EntityClass.MAINTENANCE_EVENT, dpb));
         }
 
-        unit = unit.withRelation(Description.DESCRIBES, descBundle);
+        unit = unit.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
 
         IdGenerator generator = EntityClass.REPOSITORY.getIdgen();
         String id = generator.generateId(EntityClass.REPOSITORY, permissionScope, unit);
-        boolean exists = manager.exists(id);
-        Repository frame = persister.createOrUpdate(unit.withId(id), Repository.class);
+        Mutation<Repository> mutation = persister.createOrUpdate(unit.withId(id), Repository.class);
+        handleCallbacks(mutation);
 
-        if (exists) {
-            for (ImportCallback cb : updateCallbacks) {
-                cb.itemImported(frame);
-            }
-        } else {
-            frame.setCountry(framedGraph.frame(permissionScope.asVertex(), Country.class));
-            for (ImportCallback cb : createCallbacks) {
-                cb.itemImported(frame);
-            }
+        if (mutation.created()) {
+            mutation.getNode().setCountry(framedGraph.frame(permissionScope.asVertex(), Country.class));
         }
-        return frame;
+        return mutation.getNode();
     }
 }

@@ -41,7 +41,7 @@ public class EventResource extends AbstractAccessibleEntityResource<SystemEvent>
     }
 
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}")
     public Response getAction(@PathParam("id") String id) throws ItemNotFound,
             AccessDenied, BadRequester {
@@ -60,7 +60,7 @@ public class EventResource extends AbstractAccessibleEntityResource<SystemEvent>
      * @throws BadRequester
      */
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/list")
     public StreamingOutput listEvents(
             @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
@@ -77,7 +77,7 @@ public class EventResource extends AbstractAccessibleEntityResource<SystemEvent>
     }
 
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/page")
     public StreamingOutput pageEvents(
             @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
@@ -105,7 +105,7 @@ public class EventResource extends AbstractAccessibleEntityResource<SystemEvent>
      * @throws PermissionDenied
      */
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/subjects")
     public StreamingOutput pageSubjectsForEvent(
             @PathParam("id") String id,
@@ -137,7 +137,7 @@ public class EventResource extends AbstractAccessibleEntityResource<SystemEvent>
      * @throws PermissionDenied
      */
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/for/{id:.+}")
     public StreamingOutput pageEventsForItem(
             @PathParam("id") String id,

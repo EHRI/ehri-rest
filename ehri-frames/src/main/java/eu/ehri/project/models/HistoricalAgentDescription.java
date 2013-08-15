@@ -6,5 +6,4 @@ import eu.ehri.project.models.base.TemporalEntity;
 
 @EntityType(EntityClass.HISTORICAL_AGENT_DESCRIPTION)
 public interface HistoricalAgentDescription extends Description, TemporalEntity {
-    public final static String DATES_OF_EXISTENCE = "datesOfExistence";
 }

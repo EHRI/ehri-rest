@@ -42,18 +42,12 @@ public final class BundleDAO {
 
     private static final Logger logger = LoggerFactory.getLogger(BundleDAO.class);
 
+    ;
+
     private final FramedGraph<?> graph;
     private final PermissionScope scope;
     private final GraphManager manager;
-
-    private static class CreateOrUpdateInfo {
-        public final Vertex vertex;
-        public final boolean created;
-        public CreateOrUpdateInfo(Vertex vertex, boolean created) {
-            this.vertex = vertex;
-            this.created = created;
-        }
-    }
+    private final Serializer serializer;
 
     /**
      * Constructor with a given scope.
@@ -66,6 +60,7 @@ public final class BundleDAO {
         this.scope = Optional.fromNullable(scope)
                 .or(SystemScope.getInstance());
         manager = GraphManagerFactory.getInstance(graph);
+        serializer = new Serializer(graph, true);
     }
 
     /**
@@ -85,9 +80,10 @@ public final class BundleDAO {
      * @throws ValidationError
      * @throws ItemNotFound
      */
-    public <T extends Frame> T update(Bundle bundle, Class<T> cls)
+    public <T extends Frame> Mutation<T> update(Bundle bundle, Class<T> cls)
             throws ValidationError, ItemNotFound {
-        return graph.frame(updateInner(bundle), cls);
+        Mutation<Vertex> mutation = updateInner(bundle);
+        return new Mutation<T>(graph.frame(mutation.getNode(), cls), mutation.getState());
     }
 
     /**
@@ -109,9 +105,11 @@ public final class BundleDAO {
      * @return
      * @throws ValidationError
      */
-    public <T extends Frame> T createOrUpdate(Bundle bundle, Class<T> cls)
+    public <T extends Frame> Mutation<T> createOrUpdate(Bundle bundle, Class<T> cls)
             throws ValidationError {
-        return graph.frame(createOrUpdateInner(bundle).vertex, cls);
+
+        Mutation<Vertex> mutation = createOrUpdateInner(bundle);
+        return new Mutation<T>(graph.frame(mutation.getNode(), cls), mutation.getState());
     }
 
     /**
@@ -157,15 +155,15 @@ public final class BundleDAO {
      * @return
      * @throws ValidationError
      */
-    private CreateOrUpdateInfo createOrUpdateInner(Bundle bundle) throws ValidationError {
+    private Mutation<Vertex> createOrUpdateInner(Bundle bundle) throws ValidationError {
         if (bundle.getId() == null) {
-            return new CreateOrUpdateInfo(createInner(bundle), true);
+            return new Mutation(createInner(bundle), MutationState.CREATED);
         } else {
             try {
                 if (manager.exists(bundle.getId())) {
-                    return new CreateOrUpdateInfo(updateInner(bundle), false);
+                    return updateInner(bundle);
                 } else {
-                    return new CreateOrUpdateInfo(createInner(bundle), true);
+                    return new Mutation(createInner(bundle), MutationState.CREATED);
                 }
             } catch (ItemNotFound e) {
                 throw new RuntimeException(
@@ -215,18 +213,31 @@ public final class BundleDAO {
      * @throws ValidationError
      * @throws ItemNotFound
      */
-    private Vertex updateInner(Bundle bundle) throws ValidationError,
+    private Mutation<Vertex> updateInner(Bundle bundle) throws ValidationError,
             ItemNotFound {
-        ListMultimap<String, String> errors = BundleValidatorFactory
-                .getInstance(manager, bundle).validateForUpdate();
-        Vertex node = manager.updateVertex(bundle.getId(), bundle.getType(),
-                bundle.getData(), bundle.getPropertyKeys());
-        ListMultimap<String, BundleError> nestedErrors = updateDependents(node, bundle.getBundleClass(),
-                bundle.getRelations());
-        if (!errors.isEmpty() || hasNestedErrors(nestedErrors)) {
-            throw new ValidationError(bundle, errors, nestedErrors);
+        Vertex node = manager.getVertex(bundle.getId());
+        try {
+            Bundle nodeBundle = serializer.vertexFrameToBundle(node);
+            if (!nodeBundle.equals(bundle)) {
+                logger.trace("Bundles differ\n\n{}\n\n{}", bundle.toJson(), nodeBundle.toJson());
+                ListMultimap<String, String> errors = BundleValidatorFactory
+                        .getInstance(manager, bundle).validateForUpdate();
+                node = manager.updateVertex(bundle.getId(), bundle.getType(),
+                        bundle.getData(), bundle.getPropertyKeys());
+                ListMultimap<String, BundleError> nestedErrors = updateDependents(node, bundle.getBundleClass(),
+                        bundle.getRelations());
+                if (!errors.isEmpty() || hasNestedErrors(nestedErrors)) {
+                    throw new ValidationError(bundle, errors, nestedErrors);
+                }
+                return new Mutation(node, MutationState.UPDATED);
+            } else {
+                logger.debug("Not updating equivalent bundle {}", bundle.getId());
+                return new Mutation(node, MutationState.UNCHANGED);
+            }
+        } catch (SerializationError serializationError) {
+            throw new RuntimeException("Unexpected serialization error " +
+                    "checking bundle for equivalency", serializationError);
         }
-        return node;
     }
 
     /**
@@ -310,7 +321,7 @@ public final class BundleDAO {
 
                 for (Bundle bundle : relations.get(relation)) {
                     try {
-                        Vertex child = createOrUpdateInner(bundle).vertex;
+                        Vertex child = createOrUpdateInner(bundle).getNode();
                         // Create a relation if there isn't one already
                         if (!currentRels.contains(child)) {
                             createChildRelationship(master, child, relation,
@@ -322,7 +333,9 @@ public final class BundleDAO {
                     }
                 }
             } else {
-                logger.error("Nested data being ignored on update because it is not a dependent relation: {}: {}", relation, relations.get(relation));
+                logger.warn("Nested data being ignored on update because " +
+                        "it is not a dependent relation: {}: {}",
+                        relation, relations.get(relation));
             }
         }
 
@@ -341,7 +354,6 @@ public final class BundleDAO {
 
     private void deleteMissingFromUpdateSet(Vertex master,
             Map<String, Direction> dependents, Set<String> updating) {
-        Serializer serializer = new Serializer(graph);
         for (Entry<String, Direction> relEntry : dependents.entrySet()) {
             for (Vertex v : getCurrentRelationships(master,
                     relEntry.getValue(), relEntry.getKey())) {

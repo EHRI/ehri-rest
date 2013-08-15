@@ -1,24 +1,22 @@
 package eu.ehri.project.models.utils;
 
-import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.tinkerpop.blueprints.Direction;
+import com.tinkerpop.frames.Adjacency;
+import com.tinkerpop.frames.Property;
+import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.*;
 import org.neo4j.helpers.collection.Iterables;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
-import com.tinkerpop.blueprints.Direction;
-import com.tinkerpop.frames.Adjacency;
-import com.tinkerpop.frames.Property;
-
-import eu.ehri.project.models.EntityClass;
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Helper functions for managing EntityType classes.
@@ -106,12 +104,19 @@ public class ClassUtils {
         return out;
     }
 
+    /**
+     * Get methods on a framed class that should be serialized by default. This
+     * means those with EITHER the @Fetch and/or the @Dependent annotation.
+     * @param cls
+     * @return
+     */
     private static Map<String, Method> getFetchMethodsInternal(Class<?> cls) {
         logger.trace(" - checking for @Fetch methods: {}", cls.getCanonicalName());
         Map<String, Method> out = new HashMap<String, Method>();
         for (Method method : cls.getMethods()) {
             Fetch fetch = method.getAnnotation(Fetch.class);
-            if (fetch != null
+            Dependent dep = method.getAnnotation(Dependent.class);
+            if ((fetch != null || dep != null)
                     && method.getName().startsWith(FETCH_METHOD_PREFIX)) {
                 out.put(fetch.value(), method);
                 logger.trace(" --- found @Fetch annotation: {}: {}", method.getName(), fetch.value());

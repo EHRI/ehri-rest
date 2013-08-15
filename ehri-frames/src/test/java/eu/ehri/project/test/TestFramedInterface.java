@@ -2,11 +2,13 @@ package eu.ehri.project.test;
 
 import com.tinkerpop.frames.Property;
 
+import java.util.List;
+
 public interface TestFramedInterface {
 
-    @Property("array")
-    public String[] getArray();
+    @Property("list")
+    public List<String> getList();
     
-    @Property("array")
-    public void setArray(final String[] array);
+    @Property("list")
+    public void setList(final List<String> list);
 }

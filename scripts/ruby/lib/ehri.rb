@@ -13,7 +13,9 @@ module Ehri
 
   # Import Java classes like so...
   java_import "com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph"
-  java_import "com.tinkerpop.frames.FramedGraph"
+  java_import "com.tinkerpop.frames.FramedGraphFactory"
+  java_import "com.tinkerpop.frames.modules.gremlingroovy.GremlinGroovyModule"
+  java_import "com.tinkerpop.frames.modules.javahandler.JavaHandlerModule"
   java_import "eu.ehri.project.core.GraphManagerFactory"
   java_import "eu.ehri.project.models.EntityClass"
   java_import "eu.ehri.project.models.base.Frame"
@@ -67,7 +69,7 @@ module Ehri
     end
   end
 
-  Graph = FramedGraph.new(CheckTransactionGraph.new DB_PATH)
+  Graph = FramedGraphFactory.new(JavaHandlerModule.new, GremlinGroovyModule.new).create(CheckTransactionGraph.new DB_PATH)
   Manager = GraphManagerFactory.get_instance Graph
 
 end

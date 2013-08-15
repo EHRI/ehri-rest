@@ -10,6 +10,8 @@ import eu.ehri.project.models.base.DescribedEntity;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.Frame;
 import eu.ehri.project.persistance.Bundle;
+import eu.ehri.project.persistance.Mutation;
+import eu.ehri.project.persistance.MutationState;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.*;
@@ -27,7 +29,7 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}")
     public Response createDescription(@PathParam("id") String id, String json)
             throws AccessDenied, PermissionDenied, ValidationError, IntegrityError,
@@ -59,7 +61,7 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
 
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}")
     public Response updateDescription(@PathParam("id") String id, String json)
             throws AccessDenied, PermissionDenied, ValidationError, IntegrityError,
@@ -69,10 +71,11 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
         DescribedEntity doc = views.detail(
                 manager.getFrame(id, DescribedEntity.class), user);
         try {
-            Description desc = views.updateDependent(Bundle.fromString(json), doc, user, Description.class,
+            Mutation<Description> desc = views.updateDependent(Bundle.fromString(json), doc, user,
+                    Description.class,
                     getLogMessage());
             graph.getBaseGraph().commit();
-            return buildResponse(desc, Response.Status.OK);
+            return buildResponse(desc.getNode(), Response.Status.OK);
         } catch (PermissionDenied permissionDenied) {
             graph.getBaseGraph().rollback();
             throw permissionDenied;
@@ -90,7 +93,7 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
 
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/{did:.+}")
     public Response updateDescriptionWithId(@PathParam("id") String id,
             @PathParam("did") String did, String json)
@@ -142,7 +145,7 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/{did:.+}/" + Entities.UNDETERMINED_RELATIONSHIP)
     public Response createAccessPoint(@PathParam("id") String id,
                 @PathParam("did") String did, String json)

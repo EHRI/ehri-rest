@@ -10,8 +10,8 @@ import static org.junit.Assert.assertTrue;
 import java.io.InputStream;
 import java.util.List;
 
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.Repository;
-import eu.ehri.project.models.base.IdentifiableEntity;
 import eu.ehri.project.models.events.SystemEvent;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -62,7 +62,7 @@ public class SkosBroaderImporterTest extends AbstractImporterTest {
         // - 1 more import Action        
         assertEquals(count + 6, getNodeCount(graph));
 
-        Iterable<Vertex> docs = graph.getVertices(IdentifiableEntity.IDENTIFIER_KEY,
+        Iterable<Vertex> docs = graph.getVertices(Ontology.IDENTIFIER_KEY,
                 IMPORTED_ITEM_ID_512);
         assertTrue(docs.iterator().hasNext());
 
@@ -83,7 +83,7 @@ public class SkosBroaderImporterTest extends AbstractImporterTest {
 //                for(String key: d.getEntity().asVertex().getPropertyKeys()){
 //                    System.out.println(key + " " + d.getEntity().asVertex().getProperty(key));
 //                }
-//                for(Edge e: d.getEntity().asVertex().getEdges(Direction.IN, Description.DESCRIBES)){
+//                for(Edge e: d.getEntity().asVertex().getEdges(Direction.IN, Description.DESCRIPTION_FOR_ENTITY)){
 //                    System.out.println("edge: " + e.getLabel());
 //                }
 //                assertEquals(d.getEntity(), unit);
@@ -101,7 +101,7 @@ public class SkosBroaderImporterTest extends AbstractImporterTest {
         // Ensure the import action has the right number of subjects.
         List<AccessibleEntity> subjects = toList(log.getAction().getSubjects());
         assertEquals(1, subjects.size());
-        assertEquals(log.getSuccessful(), subjects.size());
+        assertEquals(log.getChanged(), subjects.size());
 
 
 //        System.out.println("created: " + log.getCreated());

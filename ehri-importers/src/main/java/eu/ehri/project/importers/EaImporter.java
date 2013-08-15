@@ -1,9 +1,9 @@
 package eu.ehri.project.importers;
 
 import com.tinkerpop.frames.FramedGraph;
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.Link;
 import eu.ehri.project.models.MaintenanceEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,9 +11,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import eu.ehri.project.models.UndeterminedRelationship;
-import eu.ehri.project.models.base.IdentifiableEntity;
-import eu.ehri.project.models.base.NamedEntity;
 import eu.ehri.project.models.base.PermissionScope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,7 +46,7 @@ public abstract class EaImporter extends XmlImporter<Map<String, Object>> {
 
      protected Map<String, Object> extractDocumentaryUnit(Map<String, Object> itemData) throws ValidationError {
         Map<String, Object> unit = new HashMap<String, Object>();
-        unit.put(IdentifiableEntity.IDENTIFIER_KEY, itemData.get("objectIdentifier"));
+        unit.put(Ontology.IDENTIFIER_KEY, itemData.get("objectIdentifier"));
         return unit;
     }
     protected <T> List<T> toList(Iterable<T> iter) {
@@ -86,21 +83,21 @@ public abstract class EaImporter extends XmlImporter<Map<String, Object>> {
                     Map<String, Object> relationNode = new HashMap<String, Object>();
                     for (String eventkey : origRelation.keySet()) {
                         if (eventkey.equals(REL + "/type")) {
-                            relationNode.put(UndeterminedRelationship.RELATIONSHIP_TYPE, origRelation.get(eventkey));
+                            relationNode.put(Ontology.UNDETERMINED_RELATIONSHIP_TYPE, origRelation.get(eventkey));
                         } else if (eventkey.equals(REL + "/url")) {
                             //try to find the original identifier
                             relationNode.put(LINK_TARGET, origRelation.get(eventkey));
-                        } else if (eventkey.equals(REL + "/" + NamedEntity.NAME)) {
+                        } else if (eventkey.equals(REL + "/" + Ontology.NAME_KEY)) {
                             //try to find the original identifier
-                            relationNode.put(NamedEntity.NAME, origRelation.get(eventkey));
+                            relationNode.put(Ontology.NAME_KEY, origRelation.get(eventkey));
                         } else if (eventkey.equals(REL + "/notes")) {
-                            relationNode.put(Link.LINK_DESCRIPTION, origRelation.get(eventkey));
+                            relationNode.put(Ontology.LINK_HAS_DESCRIPTION, origRelation.get(eventkey));
                         } else {
                             relationNode.put(eventkey, origRelation.get(eventkey));
                         }
                     }
-                    if (!relationNode.containsKey(UndeterminedRelationship.RELATIONSHIP_TYPE)) {
-                        relationNode.put(UndeterminedRelationship.RELATIONSHIP_TYPE, "corporateBodyAccess");
+                    if (!relationNode.containsKey(Ontology.UNDETERMINED_RELATIONSHIP_TYPE)) {
+                        relationNode.put(Ontology.UNDETERMINED_RELATIONSHIP_TYPE, "corporateBodyAccess");
                     }
                     list.add(relationNode);
                 }
@@ -113,10 +110,10 @@ public abstract class EaImporter extends XmlImporter<Map<String, Object>> {
         Map<String, Object> description = new HashMap<String, Object>();
         for (String key : itemData.keySet()) {
             if (key.equals("descriptionIdentifier")) {
-                description.put(IdentifiableEntity.IDENTIFIER_KEY, itemData.get(key));
+                description.put(Ontology.IDENTIFIER_KEY, itemData.get(key));
             }else if ( !key.startsWith(SaxXmlHandler.UNKNOWN) 
                     && ! key.equals("objectIdentifier") 
-                    && ! key.equals(IdentifiableEntity.IDENTIFIER_KEY)
+                    && ! key.equals(Ontology.IDENTIFIER_KEY)
                     && ! key.startsWith("maintenanceEvent") 
                     && ! key.startsWith("relation")
                     && ! key.startsWith("address/")
@@ -127,9 +124,6 @@ public abstract class EaImporter extends XmlImporter<Map<String, Object>> {
 //        assert(description.containsKey(IdentifiableEntity.IDENTIFIER_KEY));
         return description;
     }
-    //TODO: or should this be done in the Handler?
-    private static int maintenanceIdentifier = 123;
-
     @SuppressWarnings("unchecked")
     protected Iterable<Map<String, Object>> extractMaintenanceEvent(Map<String, Object> data, String unitid)  {
         List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
@@ -144,13 +138,6 @@ public abstract class EaImporter extends XmlImporter<Map<String, Object>> {
                             e2.put(MaintenanceEvent.AGENTTYPE, event.get(eventkey));
                         } else {
                             e2.put(eventkey, event.get(eventkey));
-                        }
-                    }
-                    if (!e2.containsKey(IdentifiableEntity.IDENTIFIER_KEY)) {
-                        if (e2.containsKey("maintenanceEventDate")) {
-                            e2.put(IdentifiableEntity.IDENTIFIER_KEY, unitid + ":" + e2.get("maintenanceEventDate"));
-                        } else {
-                            e2.put(IdentifiableEntity.IDENTIFIER_KEY, maintenanceIdentifier++);
                         }
                     }
                     if (!e2.containsKey(MaintenanceEvent.EVENTTYPE)){

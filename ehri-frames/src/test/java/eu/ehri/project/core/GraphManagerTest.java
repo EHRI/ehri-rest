@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.tinkerpop.blueprints.TransactionalGraph;
+import com.tinkerpop.frames.FramedGraphFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -38,7 +39,7 @@ public class GraphManagerTest {
     private static final EntityClass TEST_TYPE = EntityClass.USER_PROFILE;
 
 
-    protected FramedGraph<Neo4jGraph> graph;
+    protected FramedGraph<? extends TransactionalGraph> graph;
     protected GraphManager manager;
 
     /**
@@ -47,7 +48,8 @@ public class GraphManagerTest {
      */
     @Before
     public void setUp() {
-        graph = new FramedGraph<Neo4jGraph>(new Neo4jGraph(
+        // NB: Not loading modules to allow use of frames methods, like GremlinGroovy
+        graph = new FramedGraphFactory().create(new Neo4jGraph(
                 new TestGraphDatabaseFactory().newImpermanentDatabaseBuilder()
                         .newGraphDatabase()));
         manager = GraphManagerFactory.getInstance(graph);

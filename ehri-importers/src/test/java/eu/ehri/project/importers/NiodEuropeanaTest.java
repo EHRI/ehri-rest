@@ -5,11 +5,11 @@
 package eu.ehri.project.importers;
 
 import com.tinkerpop.blueprints.Vertex;
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Description;
-import eu.ehri.project.models.base.IdentifiableEntity;
 import eu.ehri.project.models.events.SystemEvent;
 import java.io.InputStream;
 import java.util.List;
@@ -50,7 +50,7 @@ public class NiodEuropeanaTest extends AbstractImporterTest{
         // - 1 more import Event
         assertEquals(count + 7, getNodeCount(graph));
 
-        Iterable<Vertex> docs = graph.getVertices(IdentifiableEntity.IDENTIFIER_KEY,
+        Iterable<Vertex> docs = graph.getVertices(Ontology.IDENTIFIER_KEY,
                 UNIT_IDENTIFIER);
         assertTrue(docs.iterator().hasNext());
         DocumentaryUnit fonds_unit = graph.frame(
@@ -75,7 +75,7 @@ public class NiodEuropeanaTest extends AbstractImporterTest{
             logger.info("identifier: " + subject.getId());
         
         assertEquals(1, subjects.size());
-        assertEquals(log.getSuccessful(), subjects.size());
+        assertEquals(log.getChanged(), subjects.size());
 
         // Check permission scopes
         for (AccessibleEntity e : log.getAction().getSubjects()) {

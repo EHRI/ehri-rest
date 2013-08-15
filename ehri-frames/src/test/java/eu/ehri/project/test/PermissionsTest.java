@@ -8,8 +8,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.Repository;
-import eu.ehri.project.models.base.IdentifiableEntity;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -122,7 +122,7 @@ public class PermissionsTest extends AbstractFixtureTest {
         // We should be able to create another item with c1 as the r1,
         // and inherit the perms from r1
         Bundle bundle = Bundle.fromData(TestData.getTestDocBundle())
-                .withDataValue(IdentifiableEntity.IDENTIFIER_KEY, "some-id");
+                .withDataValue(Ontology.IDENTIFIER_KEY, "some-id");
         DocumentaryUnit c2 = views.setScope(r1).create(bundle, user);
         assertNotNull(c2);
     }

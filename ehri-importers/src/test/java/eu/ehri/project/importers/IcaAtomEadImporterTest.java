@@ -5,10 +5,10 @@
 package eu.ehri.project.importers;
 
 import com.tinkerpop.blueprints.Vertex;
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.base.IdentifiableEntity;
 import eu.ehri.project.models.events.SystemEvent;
 
 import java.io.InputStream;
@@ -42,7 +42,9 @@ public class IcaAtomEadImporterTest extends AbstractImporterTest{
 
         int count = getNodeCount(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        ImportLog log = new SaxImportManager(graph, agent, validUser, IcaAtomEadImporter.class, IcaAtomEadHandler.class).setTolerant(Boolean.TRUE).importFile(ios, logMessage);
+        XmlImportManager importManager = new SaxImportManager(graph, agent, validUser, IcaAtomEadImporter.class, IcaAtomEadHandler.class)
+                .setTolerant(Boolean.TRUE);
+        ImportLog log = importManager.importFile(ios, logMessage);
 
         // How many new nodes will have been created? We should have
         // - 5 more DocumentaryUnits
@@ -52,9 +54,10 @@ public class IcaAtomEadImporterTest extends AbstractImporterTest{
         // - 1 UndeterminedRelationship, from origination/name
 	// - 6 more import Event links (4 for every Unit, 1 for the User)
         // - 1 more import Event
-        assertEquals(count + 21, getNodeCount(graph));
+        int newCount = count + 21;
+        assertEquals(newCount, getNodeCount(graph));
 
-        Iterable<Vertex> docs = graph.getVertices(IdentifiableEntity.IDENTIFIER_KEY,
+        Iterable<Vertex> docs = graph.getVertices(Ontology.IDENTIFIER_KEY,
                 FONDS_LEVEL);
         assertTrue(docs.iterator().hasNext());
         DocumentaryUnit fonds_unit = graph.frame(
@@ -99,7 +102,7 @@ public class IcaAtomEadImporterTest extends AbstractImporterTest{
             logger.info("identifier: " + subject.getId());
         
         assertEquals(5, subjects.size());
-        assertEquals(log.getSuccessful(), subjects.size());
+        assertEquals(log.getChanged(), subjects.size());
 
         // Check permission scopes
         assertEquals(agent, fonds_unit.getPermissionScope());
@@ -107,7 +110,12 @@ public class IcaAtomEadImporterTest extends AbstractImporterTest{
         assertEquals(c1, c2.getPermissionScope());
         assertEquals(c2, c2_1.getPermissionScope());
         assertEquals(c2, c2_2.getPermissionScope());
-    }
 
-   
+        // Check the importer is Idempotent
+        ImportLog log2 = importManager.importFile(
+                ClassLoader.getSystemResourceAsStream(SINGLE_EAD), logMessage);
+        assertEquals(5, log2.getUnchanged());
+        //assertEquals(0, log2.getChanged());
+        assertEquals(newCount, getNodeCount(graph));
+    }
 }

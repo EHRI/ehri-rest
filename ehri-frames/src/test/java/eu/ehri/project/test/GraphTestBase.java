@@ -3,6 +3,8 @@ package eu.ehri.project.test;
 import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
+import com.tinkerpop.frames.FramedGraphFactory;
+import com.tinkerpop.frames.modules.javahandler.JavaHandlerModule;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import org.junit.After;
@@ -19,7 +21,9 @@ public abstract class GraphTestBase {
 
     @Before
     public void setUp() throws Exception {
-        graph = new FramedGraph<Neo4jGraph>(new Neo4jGraph(
+
+        graph = new FramedGraphFactory(
+                new JavaHandlerModule()).create(new Neo4jGraph(
                 new TestGraphDatabaseFactory().newImpermanentDatabaseBuilder()
                         .newGraphDatabase()));
         manager = GraphManagerFactory.getInstance(graph);

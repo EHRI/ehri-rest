@@ -4,9 +4,10 @@
  */
 package eu.ehri.project.importers;
 
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.properties.XmlImportProperties;
-import eu.ehri.project.models.base.Description;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -55,14 +56,14 @@ public class NiodEuropeanaHandler extends EaHandler {
                 }
 
                 //name can have only 1 value, others are otherFormsOfName
-                if (currentGraphPath.peek().containsKey(Description.NAME)) {
-                    String name = chooseName(currentGraphPath.peek().get(Description.NAME));
-                    overwritePropertyInCurrentGraph(Description.NAME, name);
+                if (currentGraphPath.peek().containsKey(Ontology.NAME_KEY)) {
+                    String name = chooseName(currentGraphPath.peek().get(Ontology.NAME_KEY));
+                    overwritePropertyInCurrentGraph(Ontology.NAME_KEY, name);
 
                 }
-                if (!currentGraphPath.peek().containsKey(Description.LANGUAGE_CODE)) {
-                    putPropertyInCurrentGraph(Description.LANGUAGE_CODE, "en");
-                    logger.debug("no " + Description.LANGUAGE_CODE + " found, default language inserted: " + currentGraphPath.peek().get(Description.LANGUAGE_CODE));
+                if (!currentGraphPath.peek().containsKey(Ontology.LANGUAGE_OF_DESCRIPTION)) {
+                    putPropertyInCurrentGraph(Ontology.LANGUAGE_OF_DESCRIPTION, "en");
+                    logger.debug("no " + Ontology.LANGUAGE_OF_DESCRIPTION + " found, default language inserted: " + currentGraphPath.peek().get(Ontology.LANGUAGE_OF_DESCRIPTION));
                 }
                 importer.importItem(currentGraphPath.pop(), depth);
 

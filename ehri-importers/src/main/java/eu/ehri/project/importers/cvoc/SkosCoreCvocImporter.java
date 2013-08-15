@@ -16,7 +16,9 @@ import javax.xml.parsers.ParserConfigurationException;
 import com.google.common.base.Optional;
 import com.tinkerpop.blueprints.TransactionalGraph;
 import eu.ehri.project.definitions.EventTypes;
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.base.*;
+import eu.ehri.project.persistance.*;
 import eu.ehri.project.utils.TxCheckedNeo4jGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +30,6 @@ import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 
 import eu.ehri.project.exceptions.IntegrityError;
@@ -37,17 +38,11 @@ import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.exceptions.InvalidXmlDocument;
 import eu.ehri.project.importers.exceptions.InvalidInputFormatError;
-import eu.ehri.project.models.Annotation;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.cvoc.Concept;
-import eu.ehri.project.models.cvoc.ConceptDescription;
 import eu.ehri.project.models.cvoc.Vocabulary;
-import eu.ehri.project.models.idgen.IdGenerator;
-import eu.ehri.project.persistance.ActionManager;
 import eu.ehri.project.persistance.ActionManager.EventContext;
-import eu.ehri.project.persistance.Bundle;
-import eu.ehri.project.persistance.BundleDAO;
 
 /**
  * Importer for the controlled vocabulary (TemaTres thesaurus) 
@@ -69,6 +64,9 @@ public class SkosCoreCvocImporter {
     protected final Actioner actioner;
     protected Boolean tolerant = false;
     protected final Vocabulary vocabulary;
+
+    private static final String CONCEPT_URL = "url";
+
     // map from the internal Skos identifier to the placeholder
     protected Map<String, ConceptPlaceholder> conceptLookup = new HashMap<String, ConceptPlaceholder>();
 
@@ -125,7 +123,7 @@ public class SkosCoreCvocImporter {
             // Do the import...
             importFile(ios, eventContext, log);
             // If nothing was imported, remove the action...
-            commitOrRollback(log.isValid());
+            commitOrRollback(log.hasDoneWork());
             return log;
         } catch (ValidationError e) {
             commitOrRollback(false);
@@ -204,46 +202,48 @@ public class SkosCoreCvocImporter {
              // NOTE the concept can be in a skos:Concept or an rdf:Description
              // for now assume we have RDF !
              NodeList nodeList = rdfElement.getElementsByTagName("rdf:Description");
-             for(int i=0; i<nodeList.getLength(); i++){
+             for(int i=0; i < nodeList.getLength(); i++){
             	  Node childNode = nodeList.item(i);
             	  Element element = (Element) childNode; // it should be!
             	  
             	  if (isConceptElement(element)) {
                       try {
-                          logger.debug("---------------");
-                          // extract ... data for concept
-                          // in Map<String, Object>
-                          // then use BundleDAO.createOrUpdate and use the framed Entity = CvocConcept
-                          // see: AbstractImporter.importItem
-
                           Bundle unit = constructBundleForConcept(element);
 
                           BundleDAO persister = new BundleDAO(framedGraph, vocabulary);
-                          Concept frame = persister.createOrUpdate(unit,
+                          Mutation<Concept> mutation = persister.createOrUpdate(unit,
                                   Concept.class);
+                          Concept frame = mutation.getNode();
+
 
                           // Set the vocabulary/concept relationship
-                          frame.setVocabulary(vocabulary);
-                          frame.setPermissionScope(vocabulary);
+                          handleCallbacks(mutation, manifest);
 
-                          // when concept was successfully persisted!
-                          action.addSubjects(frame);
-                          manifest.addCreated();
+                          if (mutation.created() || mutation.unchanged()) {
+                              // when concept was successfully persisted!
+                              action.addSubjects(frame);
+                          }
 
-                          // Create and add a ConceptPlaceholder
-                          // for making the vocabulary (relation) structure in the next step
-                          List<String> broaderIds = getBroaderConceptIds(element);
-                          logger.debug("Concept has " + broaderIds.size()
-                                  + " broader ids: " + broaderIds.toString());
-                          List<String> relatedIds = getRelatedConceptIds(element);
-                          logger.debug("Concept has " + relatedIds.size()
-                                  + " related ids: " + relatedIds.toString());
+                          // FIXME: Handle case where relationships have changed on update???
+                          if (mutation.created()) {
+                              frame.setVocabulary(vocabulary);
+                              frame.setPermissionScope(vocabulary);
 
-                          String storeId = unit.getId();//id;
-                          String skosId = (String)unit.getData().get(IdentifiableEntity.IDENTIFIER_KEY);
-                          // referal
-                          logger.debug("Concept store id = " + storeId + ", skos id = " + skosId);
-                          conceptLookup.put(skosId, new ConceptPlaceholder(storeId, broaderIds, relatedIds, frame));
+                              // Create and add a ConceptPlaceholder
+                              // for making the vocabulary (relation) structure in the next step
+                              List<String> broaderIds = getBroaderConceptIds(element);
+                              logger.debug("Concept has " + broaderIds.size()
+                                      + " broader ids: " + broaderIds.toString());
+                              List<String> relatedIds = getRelatedConceptIds(element);
+                              logger.debug("Concept has " + relatedIds.size()
+                                      + " related ids: " + relatedIds.toString());
+
+                              String storeId = unit.getId();//id;
+                              String skosId = (String)unit.getDataValue(CONCEPT_URL);
+                              // referal
+                              logger.debug("Concept store id = " + storeId + ", skos id = " + skosId);
+                              conceptLookup.put(skosId, new ConceptPlaceholder(storeId, broaderIds, relatedIds, frame));
+                          }
                       } catch (ValidationError validationError) {
                           if (tolerant) {
                               logger.error(validationError.getMessage());
@@ -272,29 +272,23 @@ public class SkosCoreCvocImporter {
         for (String key : descriptions.keySet()) {
             logger.debug("description for: " + key);
             Map<String, Object> d = (Map<String, Object>) descriptions.get(key);
-            logger.debug("languageCode = " + d.get(Description.LANGUAGE_CODE));
+            logger.debug("languageCode = " + d.get(Ontology.LANGUAGE_OF_DESCRIPTION));
 
             Bundle descBundle = new Bundle(EntityClass.CVOC_CONCEPT_DESCRIPTION, d);
             Map<String, Object> rel = extractRelations(element, "owl:sameAs");
-            if(!rel.isEmpty())
-            descBundle = descBundle.withRelation(Description.RELATES_TO, new Bundle(EntityClass.UNDETERMINED_RELATIONSHIP, rel));
+            if(!rel.isEmpty()) {
+                descBundle = descBundle.withRelation(Ontology.HAS_ACCESS_POINT,
+                        new Bundle(EntityClass.UNDETERMINED_RELATIONSHIP, rel));
+            }
 
             // NOTE maybe test if prefLabel is there?
-            unit = unit.withRelation(Description.DESCRIBES, descBundle);
+            unit = unit.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
         }
 
-
-
-        // NOTE the following gives a lot of output!
-        //logger.debug("Bundle as JSON: \n" + unit.toJson());
-
         // get an ID for the GraphDB
-        IdGenerator generator = EntityClass.CVOC_CONCEPT.getIdgen();
-        PermissionScope scope = vocabulary;
-
-        String id = generator.generateId(EntityClass.CVOC_CONCEPT, scope, unit);
-        unit = unit.withId(id);
-        return unit;
+        String id = unit.getType().getIdgen()
+                .generateId(EntityClass.CVOC_CONCEPT, vocabulary, unit);
+        return unit.withId(id);
     }
     
     /**
@@ -408,7 +402,13 @@ public class SkosCoreCvocImporter {
      */
     private void createBroaderNarrowerRelation(ConceptPlaceholder bcp, ConceptPlaceholder ncp)  {
     	logger.debug("Creating Broader: " + bcp.storeId + " to Narrower: " + ncp.storeId);
-    	bcp.concept.addNarrowerConcept(ncp.concept);
+
+        // An item CANNOT be a narrower version of itself!
+        if (bcp.concept.equals(ncp.concept)) {
+            logger.error("Ignoring cyclic narrower relationship on {}", bcp.concept.getId());
+        } else {
+            bcp.concept.addNarrowerConcept(ncp.concept);
+        }
     }
 
     /**
@@ -523,9 +523,12 @@ public class SkosCoreCvocImporter {
         // are we using the rdf:about attribute as 'identifier'
         Node namedItem = conceptNode.getAttributes().getNamedItem("rdf:about");
         String value = namedItem.getNodeValue();
-        dataMap.put(IdentifiableEntity.IDENTIFIER_KEY, value);
+        // Hack! Use everything after the last '/'
+        String idvalue = value.substring(value.lastIndexOf('/') + 1);
+        dataMap.put(Ontology.IDENTIFIER_KEY, idvalue);
+        dataMap.put(CONCEPT_URL, value);
 
-        logger.debug("Extracting Concept id: " + dataMap.get(IdentifiableEntity.IDENTIFIER_KEY));        
+        logger.debug("Extracting Concept id: " + dataMap.get(Ontology.IDENTIFIER_KEY));
         
         return dataMap;
     }
@@ -541,8 +544,8 @@ public class SkosCoreCvocImporter {
             logger.debug("text: \"" + text + "\", skos name: " + skosName);
 
             // add to all descriptionData maps
-            relationNode.put(Annotation.ANNOTATION_TYPE, skosName);
-            relationNode.put(NamedEntity.NAME, text);
+            relationNode.put(Ontology.ANNOTATION_TYPE, skosName);
+            relationNode.put(Ontology.NAME_KEY, text);
         }
         return relationNode;
     }
@@ -557,16 +560,16 @@ public class SkosCoreCvocImporter {
         Map<String, Object> descriptionData = new HashMap<String, Object>(); 
         
         // one and only one
-        extractAndAddToLanguageMapSingleValuedTextToDescriptionData(descriptionData, Description.NAME, "skos:prefLabel", conceptElement);
+        extractAndAddToLanguageMapSingleValuedTextToDescriptionData(descriptionData, Ontology.NAME_KEY, "skos:prefLabel", conceptElement);
         // multiple alternatives is logical
         extractAndAddMultiValuedTextToDescriptionData(descriptionData, 
-        		ConceptDescription.ALTLABEL, "skos:altLabel", conceptElement);
+        		Ontology.CONCEPT_ALTLABEL, "skos:altLabel", conceptElement);
         // just allow multiple, its not forbidden by Skos
         extractAndAddMultiValuedTextToDescriptionData(descriptionData, 
-        		ConceptDescription.SCOPENOTE, "skos:scopeNote", conceptElement);
+        		Ontology.CONCEPT_SCOPENOTE, "skos:scopeNote", conceptElement);
         // just allow multiple, its not forbidden by Skos
         extractAndAddMultiValuedTextToDescriptionData(descriptionData, 
-        		ConceptDescription.DEFINITION, "skos:definition", conceptElement);
+        		Ontology.CONCEPT_DEFINITION, "skos:definition", conceptElement);
         //<geo:lat>52.43333333333333</geo:lat>
         extractAndAddToAllMapsSingleValuedTextToDescriptionData(descriptionData, "latitude", "geo:lat", conceptElement);
 	//<geo:long>20.716666666666665</geo:long>
@@ -722,13 +725,33 @@ public class SkosCoreCvocImporter {
         }
     }
 
+    protected void handleCallbacks(Mutation<? extends AccessibleEntity> mutation,
+            ImportLog manifest) {
+        switch (mutation.getState()) {
+            case CREATED:
+                manifest.addCreated();
+                break;
+            case UPDATED:
+                manifest.addUpdated();
+                break;
+            case UNCHANGED:
+                manifest.addUnchanged();
+                break;
+        }
+    }
+
     private void commitOrRollback(boolean okay) {
-        if (framedGraph.getBaseGraph() instanceof TxCheckedNeo4jGraph) {
-            TxCheckedNeo4jGraph graph = (TxCheckedNeo4jGraph)framedGraph.getBaseGraph();
+        TransactionalGraph baseGraph = framedGraph.getBaseGraph();
+        if (baseGraph instanceof TxCheckedNeo4jGraph) {
+            TxCheckedNeo4jGraph graph = (TxCheckedNeo4jGraph) baseGraph;
             if (!okay && graph.isInTransaction()) {
                 graph.rollback();
             }
+        } else {
+            if (okay)
+                baseGraph.commit();
+            else
+                baseGraph.rollback();
         }
-        if (okay) framedGraph.getBaseGraph().commit();
     }
 }

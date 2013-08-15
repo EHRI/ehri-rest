@@ -21,7 +21,7 @@ public class HistoricalAgentResource extends AbstractAccessibleEntityResource<Hi
     }
 
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}")
     public Response getAuthority(@PathParam("id") String id) throws ItemNotFound,
             AccessDenied, BadRequester {
@@ -29,7 +29,7 @@ public class HistoricalAgentResource extends AbstractAccessibleEntityResource<Hi
     }
 
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/list")
     public StreamingOutput listAuthorities(
             @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
@@ -41,7 +41,7 @@ public class HistoricalAgentResource extends AbstractAccessibleEntityResource<Hi
     }
 
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/count")
     public Response countHistoricalAgents(@QueryParam(FILTER_PARAM) List<String> filters)
             throws ItemNotFound, BadRequester {
@@ -49,7 +49,7 @@ public class HistoricalAgentResource extends AbstractAccessibleEntityResource<Hi
     }
 
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/page")
     public StreamingOutput pageAuthorities(
             @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
@@ -62,7 +62,7 @@ public class HistoricalAgentResource extends AbstractAccessibleEntityResource<Hi
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     public Response createAuthority(String json,
             @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws PermissionDenied, ValidationError, IntegrityError,
@@ -72,7 +72,7 @@ public class HistoricalAgentResource extends AbstractAccessibleEntityResource<Hi
 
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     public Response updateAuthority(String json) throws PermissionDenied,
             IntegrityError, ValidationError, DeserializationError,
             ItemNotFound, BadRequester {
@@ -81,7 +81,7 @@ public class HistoricalAgentResource extends AbstractAccessibleEntityResource<Hi
 
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}")
     public Response updateAuthority(@PathParam("id") String id, String json)
             throws AccessDenied, PermissionDenied, IntegrityError, ValidationError,

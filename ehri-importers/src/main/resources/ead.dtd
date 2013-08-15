@@ -7,7 +7,7 @@
 <!--                                                                       -->
 <!--                                                                       -->
 <!--                      ENCODED ARCHIVAL DESCRIPTION                     -->
-<!--                       DOCUMENT TYPE DEFINITION                        -->
+<!--                       DOCUMENT TYPE CONCEPT_DEFINITION                        -->
 <!--                             VERSION 2002                              -->
 <!--                                                                       -->
 <!--                                                                       -->
@@ -4604,7 +4604,7 @@
 <!--:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::-->
 <!--:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::-->
 <!--
-    END ENCODED ARCHIVAL DESCRIPTION DOCUMENT TYPE DEFINITION
+    END ENCODED ARCHIVAL DESCRIPTION DOCUMENT TYPE CONCEPT_DEFINITION
     (EAD DTD)
                                                                            -->
 <!--:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::-->

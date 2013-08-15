@@ -6,7 +6,7 @@ import static org.junit.Assert.assertTrue;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import eu.ehri.project.models.base.IdentifiableEntity;
+import eu.ehri.project.definitions.Ontology;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -14,7 +14,6 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 
 import eu.ehri.extension.AdminResource;
-import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.persistance.Bundle;
 
 /**
@@ -43,7 +42,7 @@ public class AdminRestClientTest extends BaseRestClientTest {
         String json = response.getEntity(String.class);
         Bundle bundle = Bundle.fromString(json);
         String ident = (String) bundle.getData().get(
-                IdentifiableEntity.IDENTIFIER_KEY);
+                Ontology.IDENTIFIER_KEY);
         assertTrue(ident != null);
         assertTrue(ident.startsWith(AdminResource.DEFAULT_USER_ID_PREFIX));
 
@@ -59,7 +58,7 @@ public class AdminRestClientTest extends BaseRestClientTest {
         String json2 = response2.getEntity(String.class);
         Bundle bundle2 = Bundle.fromString(json2);
         String ident2 = (String) bundle2.getData().get(
-                IdentifiableEntity.IDENTIFIER_KEY);
+                Ontology.IDENTIFIER_KEY);
         assertEquals(parseUserId(ident) + 1L, parseUserId(ident2));
         assertTrue(ident.startsWith(AdminResource.DEFAULT_USER_ID_PREFIX));
 

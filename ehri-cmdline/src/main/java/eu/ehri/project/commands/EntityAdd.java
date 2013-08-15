@@ -1,6 +1,6 @@
 package eu.ehri.project.commands;
 
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
+import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.core.GraphManager;
@@ -8,13 +8,12 @@ import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.UserProfile;
-import eu.ehri.project.models.base.*;
+import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.views.impl.LoggingCrudViews;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionBuilder;
-import org.neo4j.graphdb.Transaction;
 
 import java.util.Properties;
 
@@ -42,6 +41,8 @@ public class EntityAdd extends BaseCommand implements Command {
                 .create("P"));
         options.addOption(new Option("scope", true,
                 "Identifier of scope to create item in, i.e. a repository"));
+        options.addOption(new Option("u", "update", false,
+                "Update item if it already exists"));
         options.addOption(new Option("user", true,
                 "Identifier of user to import as"));
         options.addOption(new Option("log", true,
@@ -68,7 +69,7 @@ public class EntityAdd extends BaseCommand implements Command {
      * @throws eu.ehri.project.exceptions.ValidationError
      */
     @Override
-    public int execWithOptions(final FramedGraph<Neo4jGraph> graph,
+    public int execWithOptions(final FramedGraph<? extends TransactionalGraph> graph,
             CommandLine cmdLine) throws ItemNotFound, ValidationError, PermissionDenied, DeserializationError {
 
         GraphManager manager = GraphManagerFactory.getInstance(graph);
@@ -104,7 +105,10 @@ public class EntityAdd extends BaseCommand implements Command {
 
         try {
             LoggingCrudViews<?> view = new LoggingCrudViews(graph, entityClass.getEntityClass(), scope);
-            view.create(bundle.withId(id), user, getLogMessage(logMessage));
+            if (cmdLine.hasOption("update"))
+                view.createOrUpdate(bundle.withId(id), user, getLogMessage(logMessage));
+            else
+                view.create(bundle.withId(id), user, getLogMessage(logMessage));
             graph.getBaseGraph().commit();
         } catch (IntegrityError e) {
             graph.getBaseGraph().rollback();

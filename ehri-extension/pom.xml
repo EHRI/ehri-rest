@@ -8,7 +8,15 @@
 		<version>1.0</version>
 	</parent>
 
-	<artifactId>ehri-extension</artifactId>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!-- Jar Versions -->
+        <!-- was 1.8-SNAPSHOT -->
+        <!-- <neo4j.version>1.8.M07</neo4j.version> -->
+    </properties>
+
+
+    <artifactId>ehri-extension</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 
 	<!-- TODO add license info and more -->
@@ -156,6 +164,7 @@
 			</exclusions>
 		</dependency>
 
+
         <!-- logging -->
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
@@ -207,14 +216,10 @@
 			<name>Neo4j Maven 2 snapshot repository</name>
 			<url>http://m2.neo4j.org/content/repositories/snapshots/</url>
 		</repository>
+        <repository>
+            <id>sonatype-nexus-snapshots</id>
+            <name>Sonatype Nexus Snapshots</name>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </repository>
 	</repositories>
-
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<!-- Jar Versions -->
-		<!-- was 1.8-SNAPSHOT -->
-		<!-- <neo4j.version>1.8.M07</neo4j.version> -->
-	</properties>
-
-
 </project>

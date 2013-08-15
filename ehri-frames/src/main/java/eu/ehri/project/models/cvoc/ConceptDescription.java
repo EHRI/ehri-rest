@@ -1,7 +1,7 @@
 package eu.ehri.project.models.cvoc;
 
 import com.tinkerpop.frames.Property;
-
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.Description;
@@ -18,11 +18,6 @@ import eu.ehri.project.models.base.Description;
  */
 @EntityType(EntityClass.CVOC_CONCEPT_DESCRIPTION)
 public interface ConceptDescription extends Description {
-    public static final String LANGUAGE = Description.LANGUAGE_CODE; //"languageCode";
-    public static final String PREFLABEL = Description.NAME; //"prefLabel";
-    public static final String ALTLABEL = "altLabel";
-    public static final String DEFINITION = "definition";
-    public static final String SCOPENOTE = "scopeNote";
 
     /** 
      * The language property has the codes for language. 
@@ -47,23 +42,23 @@ public interface ConceptDescription extends Description {
 
     // Note: maybe we could make a OptionalProperty annotation?
 
-    @Property(PREFLABEL)
+    @Property(Ontology.PREFLABEL)
     public String getPrefLabel();
     
 // NOTE if it's optional then don't use this Entity interface!
     
 //    // More than one!
-//    @Property(ALTLABEL)
+//    @Property(CONCEPT_ALTLABEL)
 //    public String[] getAltLabels();
 //    
-//    @Property(DEFINITION)
+//    @Property(CONCEPT_DEFINITION)
 //    public String getDefinition();
 //
 //	// NOTE: why has SKOS definitions and scope notes, what is the difference?
 //	// scope notes seem to be used in a more flexible way 
 //	// and can contain some extra information besides describing the definition. 
 //
-//    @Property(SCOPENOTE)
+//    @Property(CONCEPT_SCOPENOTE)
 //    public String getScopeNote();
 
 }

@@ -53,7 +53,7 @@ public class DocumentaryUnitResource extends
     }
 
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/list")
     public StreamingOutput listDocumentaryUnits(
             @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
@@ -65,7 +65,7 @@ public class DocumentaryUnitResource extends
     }
 
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/page")
     public StreamingOutput pageDocumentaryUnits(
             @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
@@ -77,7 +77,7 @@ public class DocumentaryUnitResource extends
     }
 
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/count")
     public Response countDocumentaryUnits(@QueryParam(FILTER_PARAM) List<String> filters)
             throws ItemNotFound, BadRequester {
@@ -85,7 +85,7 @@ public class DocumentaryUnitResource extends
     }
 
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/list")
     public StreamingOutput listChildDocumentaryUnits(
             @PathParam("id") String id,
@@ -103,7 +103,7 @@ public class DocumentaryUnitResource extends
     }
 
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/page")
     public StreamingOutput pageChildDocumentaryUnits(
             @PathParam("id") String id,
@@ -121,7 +121,7 @@ public class DocumentaryUnitResource extends
     }
 
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/count")
     public Response countChildDocumentaryUnits(
             @PathParam("id") String id,
@@ -136,7 +136,7 @@ public class DocumentaryUnitResource extends
 
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     public Response updateDocumentaryUnit(String json) throws PermissionDenied,
             IntegrityError, ValidationError, DeserializationError,
             ItemNotFound, BadRequester {
@@ -145,7 +145,7 @@ public class DocumentaryUnitResource extends
 
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}")
     public Response updateDocumentaryUnit(@PathParam("id") String id,
             String json) throws AccessDenied, PermissionDenied, IntegrityError,
@@ -163,7 +163,7 @@ public class DocumentaryUnitResource extends
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/" + Entities.DOCUMENTARY_UNIT)
     public Response createChildDocumentaryUnit(@PathParam("id") String id,
             String json, @QueryParam(ACCESSOR_PARAM) List<String> accessors)

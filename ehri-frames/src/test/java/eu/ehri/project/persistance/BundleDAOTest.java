@@ -8,14 +8,12 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 import com.google.common.collect.Iterables;
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.*;
-import eu.ehri.project.models.base.NamedEntity;
 import eu.ehri.project.persistance.utils.BundleUtils;
 import eu.ehri.project.test.ModelTestBase;
 import org.junit.Before;
 import org.junit.Test;
-
-import com.google.common.collect.Maps;
 
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.IntegrityError;
@@ -23,11 +21,7 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.annotations.EntityType;
-import eu.ehri.project.models.base.DescribedEntity;
 import eu.ehri.project.models.base.Description;
-import eu.ehri.project.persistance.Bundle;
-import eu.ehri.project.persistance.BundleDAO;
-import eu.ehri.project.persistance.Serializer;
 
 public class BundleDAOTest extends ModelTestBase {
 
@@ -54,11 +48,11 @@ public class BundleDAOTest extends ModelTestBase {
         Repository r1 = manager.getFrame("r1", Repository.class);
         json = serializer.vertexFrameToJson(r1);
         bundle = Bundle.fromString(json);
-        List<Bundle> descs = bundle.getRelations(DescribedEntity.DESCRIBES);
+        List<Bundle> descs = bundle.getRelations(Ontology.DESCRIPTION_FOR_ENTITY);
         assertEquals(1, descs.size());
         Bundle descBundle = descs.get(0);
         List<Bundle> addresses = descBundle
-                .getRelations(RepositoryDescription.HAS_ADDRESS);
+                .getRelations(Ontology.ENTITY_HAS_ADDRESS);
         assertEquals(1, addresses.size());
     }
 
@@ -70,11 +64,11 @@ public class BundleDAOTest extends ModelTestBase {
 
         Bundle bundle = serializer.vertexFrameToBundle(c1);
         BundleDAO persister = new BundleDAO(graph);
-        DocumentaryUnit c1redux = persister.update(bundle,
+        Mutation<DocumentaryUnit> c1redux = persister.update(bundle,
                 DocumentaryUnit.class);
 
         assertEquals(toList(c1.getDescriptions()),
-                toList(c1redux.getDescriptions()));
+                toList(c1redux.getNode().getDescriptions()));
     }
 
     @Test
@@ -85,12 +79,12 @@ public class BundleDAOTest extends ModelTestBase {
 
         Bundle bundle = serializer.vertexFrameToBundle(r1);
         BundleDAO persister = new BundleDAO(graph);
-        Repository r1redux = persister.update(bundle, Repository.class);
+        Mutation<Repository> r1redux = persister.update(bundle, Repository.class);
 
         assertEquals(toList(r1.getDescriptions()),
-                toList(r1redux.getDescriptions()));
+                toList(r1redux.getNode().getDescriptions()));
 
-        RepositoryDescription ad1 = graph.frame(r1redux.getDescriptions().iterator()
+        RepositoryDescription ad1 = graph.frame(r1redux.getNode().getDescriptions().iterator()
                 .next().asVertex(), RepositoryDescription.class);
         assertEquals(1, toList(ad1.getAddresses()).size());
     }
@@ -119,10 +113,13 @@ public class BundleDAOTest extends ModelTestBase {
     public void testDeletingDependents() throws SerializationError,
             ValidationError, IntegrityError, ItemNotFound {
         DocumentaryUnit c1 = manager.getFrame(ID, DocumentaryUnit.class);
-        Bundle bundle = serializer.vertexFrameToBundle(c1);
+        Bundle bundle = new Serializer(graph, true).vertexFrameToBundle(c1);
         assertEquals(2, Iterables.size(c1.getDocumentDescriptions()));
         assertEquals(2, Iterables.size(c1.getDocumentDescriptions()
                 .iterator().next().getDatePeriods()));
+
+        System.out.println("Orig bundle: " + bundle);
+
         String dpid = "c1-dp2";
         try {
             manager.getFrame(dpid, DatePeriod.class);
@@ -134,9 +131,19 @@ public class BundleDAOTest extends ModelTestBase {
         // Delete the *second* date period from the first description...
         Bundle newBundle = BundleUtils.deleteBundle(
                 bundle, "describes[0]/hasDate[1]");
+        System.out.println("Delete bundle: " + newBundle);
         BundleDAO persister = new BundleDAO(graph);
-        persister.update(newBundle, DocumentaryUnit.class);
+        Mutation<DocumentaryUnit> mutation
+                = persister.update(newBundle, DocumentaryUnit.class);
+
+        assertEquals(MutationState.UPDATED, mutation.getState());
+
         assertEquals(2, Iterables.size(c1.getDocumentDescriptions()));
+
+        for (DatePeriod dp : manager.getFrame("cd1", DocumentDescription.class)
+                .getDatePeriods()) {
+            System.out.println("Got dp: " + dp.getId());
+        }
         assertEquals(1, Iterables.size(manager.getFrame("cd1", DocumentDescription.class)
                 .getDatePeriods()));
 
@@ -183,7 +190,7 @@ public class BundleDAOTest extends ModelTestBase {
         DocumentaryUnit c1 = manager.getFrame(ID, DocumentaryUnit.class);
         Bundle bundle = serializer.vertexFrameToBundle(c1);
         Bundle desc = BundleUtils.getBundle(bundle, "describes[0]");
-        Bundle newBundle = desc.removeDataValue(NamedEntity.NAME);
+        Bundle newBundle = desc.removeDataValue(Ontology.NAME_KEY);
 
         BundleDAO persister = new BundleDAO(graph);
         persister.update(newBundle, DocumentaryUnit.class);

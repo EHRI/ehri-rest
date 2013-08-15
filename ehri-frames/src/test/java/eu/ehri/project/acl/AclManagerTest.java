@@ -1,9 +1,8 @@
 package eu.ehri.project.acl;
 
-import com.google.common.collect.*;
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.*;
 import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.models.base.IdentifiableEntity;
 import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.test.GraphTestBase;
 import eu.ehri.project.test.TestData;
@@ -16,7 +15,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -53,7 +51,7 @@ public class AclManagerTest extends GraphTestBase {
     @Test
     public void testIsAdmin() throws Exception {
         Group admin = manager.getFrame(Group.ADMIN_GROUP_IDENTIFIER, Group.class);
-        assertTrue(new AclManager(graph).isAdmin(admin));
+        assertTrue(new AclManager(graph).belongsToAdmin(admin));
     }
 
     @Test
@@ -61,6 +59,11 @@ public class AclManagerTest extends GraphTestBase {
         loader.loadTestData();
         UserProfile mike = manager.getFrame("mike", UserProfile.class);
         assertTrue(new AclManager(graph).belongsToAdmin(mike));
+
+        // Test a user not directly in admin, but belonging to a group that is,
+        // is also an admin user.
+        UserProfile tim = manager.getFrame("tim", UserProfile.class);
+        assertTrue(new AclManager(graph).belongsToAdmin(tim));
     }
 
     @Test
@@ -68,7 +71,7 @@ public class AclManagerTest extends GraphTestBase {
         Accessor admin = manager.getFrame(Group.ADMIN_GROUP_IDENTIFIER, Group.class);
         Accessor anon = AnonymousAccessor.getInstance();
         AclManager acl = new AclManager(graph);
-        assertFalse(acl.isAdmin(anon));
+        assertFalse(acl.belongsToAdmin(anon));
         assertTrue(acl.isAnonymous(anon));
         assertFalse(acl.isAnonymous(admin));
     }
@@ -242,13 +245,13 @@ public class AclManagerTest extends GraphTestBase {
 
         DocumentaryUnit headdoc1 = views.create(
                 Bundle.fromData(TestData.getTestDocBundle())
-                        .withDataValue(IdentifiableEntity.IDENTIFIER_KEY, "head-doc"), headUser);
+                        .withDataValue(Ontology.IDENTIFIER_KEY, "head-doc"), headUser);
         DocumentaryUnit userdoc1 = views.create(
                 Bundle.fromData(TestData.getTestDocBundle())
-                        .withDataValue(IdentifiableEntity.IDENTIFIER_KEY, "user-doc-1"), user1);
+                        .withDataValue(Ontology.IDENTIFIER_KEY, "user-doc-1"), user1);
         DocumentaryUnit userdoc2 = views.create(
                 Bundle.fromData(TestData.getTestDocBundle())
-                        .withDataValue(IdentifiableEntity.IDENTIFIER_KEY, "user-doc-2"), user2);
+                        .withDataValue(Ontology.IDENTIFIER_KEY, "user-doc-2"), user2);
 
         // Ensure Head Archivist can update/delete user1's doc
         assertTrue(acl.hasPermission(userdoc1, UPDATE, headArchivists));

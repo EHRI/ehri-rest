@@ -1,7 +1,6 @@
 package eu.ehri.project.views.impl;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 import com.tinkerpop.frames.FramedGraph;
 
 import eu.ehri.project.acl.AclManager;
@@ -19,6 +18,7 @@ import eu.ehri.project.persistance.BundleDAO;
 import eu.ehri.project.persistance.Serializer;
 import eu.ehri.project.views.Crud;
 import eu.ehri.project.views.ViewHelper;
+import eu.ehri.project.persistance.Mutation;
 
 public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
     private final FramedGraph<?> graph;
@@ -80,7 +80,7 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws IntegrityError
      * @throws ItemNotFound
      */
-    public E update(Bundle bundle, Accessor user)
+    public Mutation<E> update(Bundle bundle, Accessor user)
             throws PermissionDenied, ValidationError, IntegrityError, ItemNotFound {
         E entity = graph.frame(manager.getVertex(bundle.getId()), cls);
         helper.checkEntityPermission(entity, user, PermissionType.UPDATE);
@@ -100,7 +100,7 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws IntegrityError
      * @throws ItemNotFound
      */
-    public <T extends Frame> T updateDependent(Bundle bundle, E parent,
+    public <T extends Frame> Mutation<T> updateDependent(Bundle bundle, E parent,
             Accessor user, Class<T> dependentClass)
             throws PermissionDenied, ValidationError, IntegrityError, ItemNotFound {
         helper.checkEntityPermission(parent, user, PermissionType.UPDATE);
@@ -125,7 +125,7 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
                 PermissionType.CREATE);
         E item = new BundleDAO(graph, scope).create(bundle, cls);
         // If a user creates an item, grant them OWNER perms on it.
-        if (!acl.isAdmin(user))
+        if (!acl.belongsToAdmin(user))
             acl.grantPermissions(user, item, PermissionType.OWNER);
         // If the scope is not the system, set the permission scope
         // of the item too...
@@ -168,7 +168,7 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws ValidationError
      * @throws IntegrityError
      */
-    public E createOrUpdate(Bundle bundle, Accessor user)
+    public Mutation<E> createOrUpdate(Bundle bundle, Accessor user)
             throws PermissionDenied, ValidationError, IntegrityError {
         helper.checkContentPermission(user, helper.getContentType(cls),
                 PermissionType.CREATE);

@@ -11,8 +11,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import eu.ehri.project.models.base.IdentifiableEntity;
-import eu.ehri.project.models.base.NamedEntity;
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.views.Crud;
 import eu.ehri.project.views.ViewFactory;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -49,15 +48,15 @@ public class AdminResource extends AbstractRestResource {
      * @throws Exception
      */
     @POST
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/createDefaultUserProfile")
     public Response createDefaultUserProfile() throws Exception {
         graph.getBaseGraph().checkNotInTransaction();
         try {
             String ident = getNextDefaultUserId();
             Bundle bundle = new Bundle(EntityClass.USER_PROFILE)
-                    .withDataValue(IdentifiableEntity.IDENTIFIER_KEY, ident)
-                    .withDataValue(NamedEntity.NAME, ident);
+                    .withDataValue(Ontology.IDENTIFIER_KEY, ident)
+                    .withDataValue(Ontology.NAME_KEY, ident);
 
             // NB: This assumes that admin's ID is the same as its identifier.
             Accessor accessor = manager.getFrame(Group.ADMIN_GROUP_IDENTIFIER,

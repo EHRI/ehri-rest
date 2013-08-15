@@ -1,10 +1,9 @@
 package eu.ehri.project.commands;
 
 import com.google.common.base.Optional;
-import org.apache.commons.cli.*;
-
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
+import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.frames.FramedGraph;
+import org.apache.commons.cli.*;
 
 public abstract class BaseCommand {
     
@@ -23,11 +22,12 @@ public abstract class BaseCommand {
         formatter.printHelp( "ant", options );
     }
 
-    public final int exec(final FramedGraph<Neo4jGraph> graph, String[] args) throws Exception {
+    public final int exec(final FramedGraph<? extends TransactionalGraph> graph, String[] args) throws Exception {
         setCustomOptions();
         return execWithOptions(graph, parser.parse(options, args));
     }
-    public abstract int execWithOptions(final FramedGraph<Neo4jGraph> graph, CommandLine cmdLine) throws Exception;
+    public abstract int execWithOptions(final FramedGraph<? extends TransactionalGraph> graph,
+            CommandLine cmdLine) throws Exception;
     public boolean isReadOnly() {
         return false;
     }

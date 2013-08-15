@@ -1,0 +1,262 @@
+#!/usr/bin/env python
+
+from __future__ import print_function
+
+import os
+import sys
+
+from lxml import etree
+import phpserialize
+import datetime
+from sqlaqubit import models, init_models, create_engine
+from incf.countryutils import transformations, data as countrydata
+
+# Hacky dictionary of official country/languages names
+# we want to substitute for friendlier versions... 
+# A more permenant solution is needed to this.
+SUBNAMES = {
+    "United Kingdom of Great Britain & Northern Ireland": "United Kingdom",
+    "Slovakia (Slovak Republic)" : "Slovak Republic",
+    "Holy See (Vatican City State)" : "Vatican City",
+    "Russian Federation" : "Russia",
+}
+
+HEADER_ATTRS = {
+    "countryencoding": "iso3166-1",
+    "dateencoding":"iso8601",
+    "langencoding":"iso639-2b",
+    "scriptencoding":"iso15924",
+    "repositoryencoding":"iso15511",
+    "status":"draft"
+}
+
+USER_SURNAME = "Bryant"
+USER_FIRSTNAME = "Mike"
+USER_CHARGE = "Researcher"
+
+EVENTS = [
+    {
+        "type": "update",
+        "surnames": USER_SURNAME,
+        "firstname": USER_FIRSTNAME,
+        "charge": USER_CHARGE,
+        "date": "2012-03-09",
+        "desc": "Imported from EHRI spreadsheet"
+    }, {
+        "type": "update",
+        "surnames": USER_SURNAME,
+        "firstname": USER_FIRSTNAME,
+        "charge": USER_CHARGE,
+        "date": datetime.date.today().isoformat(),
+        "desc": "Exported from ICA-AtoM"
+    }
+]
+
+class NoCountryCode(Exception):
+    """No country code found"""
+
+def get_country_from_code(code):
+    """Get the country code from a coutry name."""
+    try:
+        name = transformations.cc_to_cn(code)
+        return SUBNAMES.get(name, name)
+    except KeyError:
+        pass
+
+def get_repo_country_code(repo):
+    cc = None
+    try:
+        cc = repo.contacts[0].country_code
+    except IndexError, e:
+        raise NoCountryCode("Repository: %s has no country code!" % repo.id) 
+    if cc is None:
+        raise NoCountryCode("Repository: %s has no country code!" % repo.id) 
+    return cc       
+
+
+def get_doc_base(repo):
+    """Get the basic EAG outline."""
+    country_code = get_repo_country_code(repo)
+    repoid = "%06d" % repo.id
+    i18n = repo.get_i18n("en")
+
+    root = etree.Element("eag", {"audience":"internal",
+        "xmlns": "http://www.ministryculture.es/",
+        "xsi": "http://www.w3.org/2001/XMLSchema-instance",
+        "schemaLocation":"http://ehri01.dans.knaw.nl/schemas/eag-ehri.xsd"
+    })
+    eagheader = etree.SubElement(root, "eagheader", HEADER_ATTRS)
+    eagid = etree.SubElement(eagheader, "eagid")
+    eagid.text = repoid
+    mainhist = etree.SubElement(eagheader, "mainhist")
+
+    for event in EVENTS:
+        mainevent = etree.SubElement(mainhist, "mainevent", {"maintype": event["type"]})
+        date = etree.SubElement(mainevent, "date", {"calendar":"gregorian",
+            "era":"ce","normal": event["date"]})
+        respevent = etree.SubElement(mainevent, "respevent")
+        surnames = etree.SubElement(respevent, "surnames")
+        surnames.text = event["surnames"]
+        firstname = etree.SubElement(respevent, "firstname")
+        firstname.text = event["firstname"]
+        charge = etree.SubElement(respevent, "charge")
+        charge.text = event["charge"]
+        source = etree.SubElement(mainevent, "source")
+        source.text = event["desc"]
+    langdec = etree.SubElement(eagheader, "languagedecl")
+    lang = etree.SubElement(langdec, "language", {"langcode":"eng", "scriptcode":"Latn"})
+
+    archguide = etree.SubElement(root, "archguide")
+    identity = etree.SubElement(archguide, "identity")
+    repositoryid = etree.SubElement(identity, "repositorid", {"countrycode":get_repo_country_code(repo),
+        "repositorycode":repoid})
+    repositoryid.text = repo.identifier
+    autform = etree.SubElement(identity, "autform")
+    autform.text = i18n["authorized_form_of_name"]
+    for on in repo.other_names:
+        oni18n = on.get_i18n("en")
+        tag = "nonpreform" if on.type.id != 148 else "parform"
+        ele = etree.SubElement(identity, tag)
+        ele.text = oni18n["name"]
+
+    desc = etree.SubElement(archguide, "desc")
+
+    # Geocultural context goes in the desc/geogarea section???
+    geocult = i18n.get("geocultural_context")
+    if geocult and geocult.strip():
+        geog = etree.SubElement(desc, "geogarea")
+        geog.text = geocult
+
+    # Address parts for which there can be only one component
+    addrparts = dict(
+        street="street_address",
+        postalcode="postal_code",
+    )
+    if repo.contacts:
+        contact = repo.contacts[0]
+        cti18n = contact.get_i18n("en")
+        for tag, attr in addrparts.iteritems():
+            ele = etree.SubElement(desc, tag)
+            ele.text = getattr(contact, attr)
+        city = etree.SubElement(desc, "municipality")
+        city.text = cti18n["city"]
+        firstdem = etree.SubElement(desc, "firstdem")
+        firstdem.text = cti18n["region"]
+    
+    for contact in repo.contacts:
+        telephone = etree.SubElement(desc, "telephone")
+        telephone.text = contact.telephone
+
+        fax = etree.SubElement(desc, "fax")
+        fax.text = contact.fax
+
+        email = contact.email
+        if email:
+            ele = etree.SubElement(desc, "email", {"href":email})
+            ele.text = "Email"
+        website = contact.website
+        if website:
+            ele = etree.SubElement(desc, "webpage", {"href":website})
+            ele.text = "Website"
+
+    # TODO: Access
+
+    timetable = etree.SubElement(desc, "timetable")
+    opening = etree.SubElement(timetable, "opening")
+    opening.text = i18n["opening_times"]
+
+    access = etree.SubElement(desc, "access", {"question":"yes"})
+    restaccess = etree.SubElement(access, "restaccess")        
+    restaccess.text = i18n["access_conditions"]
+
+    # history, buildings etc
+    history = etree.SubElement(desc, "repositorhist")
+    historyinfo = etree.SubElement(history, "p")
+    historyinfo.text = i18n["history"]
+
+    ## TODO: Finding aids, research services
+    guides = etree.SubElement(desc, "repositorguides")
+    for guide in ["finding_aids", "holdings", "research_services"]:
+        value = i18n[guide]
+        if value is not None and value.strip() != "":
+            guide = etree.SubElement(guides, "guide")
+            guide.text = value
+
+    buildings = etree.SubElement(desc, "buildinginfo")
+    building = etree.SubElement(buildings, "building")
+    buildingsinfo = etree.SubElement(building, "p")
+    buildingsinfo.text = i18n["buildings"]
+    searchroom = etree.SubElement(buildings, "searchroom")
+    searchroomnum = etree.SubElement(searchroom, "num", {"unit":"volume"})  # meaningless
+    handicapped = etree.SubElement(buildings, "handicapped")
+    handicapped.text = i18n["disabled_access"]
+
+    extent = etree.SubElement(desc, "extent")
+    extentnum = etree.SubElement(extent, "num", {"unit":"volume"}) # meaningless
+    holdingsextent = i18n.get("holdings")
+    if holdingsextent and holdingsextent.strip():
+        extent.text = holdingsextent
+
+    services = etree.SubElement(desc, "techservices")
+    reprodser = etree.SubElement(services, "restorationser", {"question":"yes"}) # unneeded
+    reprodser = etree.SubElement(services, "reproductionser", {"question":"yes"})
+    reprodser.text = i18n["reproduction_services"]
+    reprodser = etree.SubElement(services, "library", {"question":"yes"}) # unneeded
+
+    notes = etree.SubElement(desc, "notes")
+    descsrcs = i18n.get("desc_sources")
+    if descsrcs and descsrcs.strip() != "":
+        notesbody1 = etree.SubElement(notes, "p")
+        notesbody1.text = "Description sources: " + unicode(descsrcs)
+    notesbody2 = etree.SubElement(notes, "p")
+    notesbody2.text = "ICA-AtoM identifier: " + unicode(repo.identifier)
+
+    # properties
+    for prop in repo.properties:
+        pi18n = prop.get_i18n("en")
+        pval = phpserialize.loads(pi18n.get("value",""))
+        if pval is not None:
+            priority = pval.get("ehriPriority")
+            if priority is not None:
+                notesbody3 = etree.SubElement(notes, "p")
+                notesbody3.text = "Priority: %s" % priority
+
+
+    return (country_code, root)
+
+
+
+def dump_repo(repo):
+    PATH = "eag"
+    #print(repo.identifier)
+    #for prop in repo.properties:
+    #    for k, v in prop.get_i18n("en").iteritems():
+    #        print("%-20s : %s" % (k, phpserialize.loads(v)))
+    #for address in repo.contacts:
+    #    for k, v in address.get_i18n("en").iteritems():
+    #        print "     %-20s : %s" % (k, v)
+    #for k, v in repo.get_i18n("en").iteritems():
+    #    print "%-20s : %s" % (k, v)
+    try:
+        country_code, doc = get_doc_base(repo)
+        dirpath = os.path.join(PATH, country_code.lower())
+        out = etree.tostring(doc, pretty_print=True)
+        if not os.path.exists(dirpath):
+            os.mkdir(dirpath)
+        
+        with open(os.path.join(dirpath, str(repo.id) + ".xml"), "w") as f:            
+            f.write(out)
+    except NoCountryCode, e:
+        print(e.message, file = sys.stderr)
+        
+
+
+engine = create_engine("mysql://ehri_icaatom:changeme@localhost/ehri_icaatom?charset=utf8")
+init_models(engine)
+session = models.Session()
+
+for repo in session.query(models.Repository).all():
+    dump_repo(repo)
+
+
+

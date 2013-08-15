@@ -2,7 +2,7 @@ package eu.ehri.project.test;
 
 import eu.ehri.project.acl.SystemScope;
 
-import eu.ehri.project.models.base.*;
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.persistance.Bundle;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -43,8 +43,8 @@ abstract public class AbstractFixtureTest extends ModelTestBase {
         } catch (ItemNotFound ex) {
             try {
                 Bundle unit = new Bundle(EntityClass.USER_PROFILE)
-                        .withDataValue(IdentifiableEntity.IDENTIFIER_KEY, "ehriimporter")
-                        .withDataValue(Description.NAME, "EHRI Importer");
+                        .withDataValue(Ontology.IDENTIFIER_KEY, "ehriimporter")
+                        .withDataValue(Ontology.NAME_KEY, "EHRI Importer");
                 importUser =  new BundleDAO(graph, SystemScope.getInstance()).create(unit, UserProfile.class);
                 Group admin = manager.getFrame("admin", Group.class);  // admin has id "admin"
                 admin.addMember(importUser);

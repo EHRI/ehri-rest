@@ -2,6 +2,7 @@ package eu.ehri.project.importers;
 
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.*;
 import eu.ehri.project.models.base.*;
@@ -12,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import eu.ehri.project.persistance.Mutation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,30 +61,30 @@ public class IcaAtomEadImporter extends EaImporter {
             throws ValidationError {
 
         Bundle unit = new Bundle(EntityClass.DOCUMENTARY_UNIT, extractDocumentaryUnit(itemData));
-        if (unit.getDataValue(IdentifiableEntity.IDENTIFIER_KEY) == null) {
-            throw new ValidationError(unit, DocumentaryUnit.IDENTIFIER_KEY,
-                    "Missing identifier " + DocumentaryUnit.IDENTIFIER_KEY);
+        if (unit.getDataValue(Ontology.IDENTIFIER_KEY) == null) {
+            throw new ValidationError(unit, Ontology.IDENTIFIER_KEY,
+                    "Missing identifier " + Ontology.IDENTIFIER_KEY);
         }
         logger.debug("Imported item: " + itemData.get("name"));
         Bundle descBundle = new Bundle(EntityClass.DOCUMENT_DESCRIPTION, extractUnitDescription(itemData, EntityClass.DOCUMENT_DESCRIPTION));
         // Add dates and descriptions to the bundle since they're @Dependent
         // relations.
         for (Map<String, Object> dpb : extractDates(itemData)) {
-            descBundle = descBundle.withRelation(TemporalEntity.HAS_DATE, new Bundle(EntityClass.DATE_PERIOD, dpb));
+            descBundle = descBundle.withRelation(Ontology.ENTITY_HAS_DATE, new Bundle(EntityClass.DATE_PERIOD, dpb));
         }
         for (Map<String, Object> rel : extractRelations(itemData)) {//, (String) unit.getData().get(IdentifiableEntity.IDENTIFIER_KEY)
-            logger.debug("relation found " + rel.get(IdentifiableEntity.IDENTIFIER_KEY));
-            descBundle = descBundle.withRelation(Description.RELATES_TO, new Bundle(EntityClass.UNDETERMINED_RELATIONSHIP, rel));
+            logger.debug("relation found " + rel.get(Ontology.IDENTIFIER_KEY));
+            descBundle = descBundle.withRelation(Ontology.HAS_ACCESS_POINT, new Bundle(EntityClass.UNDETERMINED_RELATIONSHIP, rel));
         }
         Map<String, Object> unknowns = extractUnknownProperties(itemData);
         if (!unknowns.isEmpty()) {
             logger.debug("Unknown Properties found");
-            descBundle = descBundle.withRelation(Description.HAS_UNKNOWN_PROPERTY, new Bundle(EntityClass.UNKNOWN_PROPERTY, unknowns));
+            descBundle = descBundle.withRelation(Ontology.HAS_UNKNOWN_PROPERTY, new Bundle(EntityClass.UNKNOWN_PROPERTY, unknowns));
         }
-        unit = unit.withRelation(Description.DESCRIBES, descBundle);
+        unit = unit.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
 
-        if (unit.getDataValue(DocumentaryUnit.IDENTIFIER_KEY) == null) {
-            throw new ValidationError(unit, DocumentaryUnit.IDENTIFIER_KEY, "Missing identifier");
+        if (unit.getDataValue(Ontology.IDENTIFIER_KEY) == null) {
+            throw new ValidationError(unit, Ontology.IDENTIFIER_KEY, "Missing identifier");
         }
         IdGenerator generator = EntityClass.DOCUMENTARY_UNIT.getIdgen();
         String id = generator.generateId(EntityClass.DOCUMENTARY_UNIT, permissionScope, unit);
@@ -91,12 +93,14 @@ public class IcaAtomEadImporter extends EaImporter {
         }
 
         logger.debug("Generated ID: " + id + " (" + permissionScope.getId() + ")");
-        boolean exists = manager.exists(id);
-        DocumentaryUnit frame = persister.createOrUpdate(unit.withId(id), DocumentaryUnit.class);
+
+        Mutation<DocumentaryUnit> mutation =
+                persister.createOrUpdate(unit.withId(id), DocumentaryUnit.class);
+        DocumentaryUnit frame = mutation.getNode();
 
         // Set the repository/item relationship
         //TODO: figure out another way to determine we're at the root, so we can get rid of the depth param
-        if (depth == TOP_LEVEL_DEPTH) {
+        if (depth == TOP_LEVEL_DEPTH && mutation.created()) {
             EntityClass scopeType = manager.getEntityClass(permissionScope);
             if (scopeType.equals(EntityClass.REPOSITORY)) {
                 Repository repository = framedGraph.frame(permissionScope.asVertex(), Repository.class);
@@ -110,16 +114,7 @@ public class IcaAtomEadImporter extends EaImporter {
                 logger.error("Unknown scope type for documentary unit: {}", scopeType);
             }
         }
-
-        if (exists) {
-            for (ImportCallback cb : updateCallbacks) {
-                cb.itemImported(frame);
-            }
-        } else {
-            for (ImportCallback cb : createCallbacks) {
-                cb.itemImported(frame);
-            }
-        }
+        handleCallbacks(mutation);
         return frame;
 
 
@@ -136,14 +131,14 @@ public class IcaAtomEadImporter extends EaImporter {
                     for (String eventkey : origRelation.keySet()) {
                         logger.debug(eventkey);
                         if (eventkey.endsWith(REL)) {
-                            relationNode.put(UndeterminedRelationship.RELATIONSHIP_TYPE, eventkey);
-                            relationNode.put(NamedEntity.NAME, origRelation.get(eventkey));
+                            relationNode.put(Ontology.UNDETERMINED_RELATIONSHIP_TYPE, eventkey);
+                            relationNode.put(Ontology.NAME_KEY, origRelation.get(eventkey));
                         } else {
                             relationNode.put(eventkey, origRelation.get(eventkey));
                         }
                     }
-                    if (!relationNode.containsKey(UndeterminedRelationship.RELATIONSHIP_TYPE)) {
-                        relationNode.put(UndeterminedRelationship.RELATIONSHIP_TYPE, "corporateBodyAccess");
+                    if (!relationNode.containsKey(Ontology.UNDETERMINED_RELATIONSHIP_TYPE)) {
+                        relationNode.put(Ontology.UNDETERMINED_RELATIONSHIP_TYPE, "corporateBodyAccess");
                     }
                     list.add(relationNode);
                 }
@@ -173,8 +168,8 @@ public class IcaAtomEadImporter extends EaImporter {
 //
 //    private Map<String, Object> createRelationNode(String type, String value) {
 //        Map<String, Object> relationNode = new HashMap<String, Object>();
-//        relationNode.put(UndeterminedRelationship.NAME, value);
-//        relationNode.put(UndeterminedRelationship.RELATIONSHIP_TYPE, type);
+//        relationNode.put(UndeterminedRelationship.NAME_KEY, value);
+//        relationNode.put(UndeterminedRelationship.UNDETERMINED_RELATIONSHIP_TYPE, type);
 //        relationNode.put(IdentifiableEntity.IDENTIFIER_KEY, (type + value).replaceAll("\\s", ""));
 //        return relationNode;
 //
@@ -183,7 +178,7 @@ public class IcaAtomEadImporter extends EaImporter {
     protected Map<String, Object> extractDocumentaryUnit(Map<String, Object> itemData, int depth) throws ValidationError {
         Map<String, Object> unit = new HashMap<String, Object>();
         if (itemData.get(OBJECT_ID) != null) {
-            unit.put(IdentifiableEntity.IDENTIFIER_KEY, itemData.get(OBJECT_ID));
+            unit.put(Ontology.IDENTIFIER_KEY, itemData.get(OBJECT_ID));
         }
         return unit;
     }

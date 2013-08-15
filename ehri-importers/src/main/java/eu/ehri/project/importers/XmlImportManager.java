@@ -134,7 +134,7 @@ abstract public class XmlImportManager implements ImportManager {
             // Do the import...
             importFile(ios, action, log);
             // If nothing was imported, remove the action...
-            commitOrRollback(log.isValid());
+            commitOrRollback(log.hasDoneWork());
 
             return log;
         } catch (ValidationError e) {
@@ -187,7 +187,7 @@ abstract public class XmlImportManager implements ImportManager {
 
             // Only mark the transaction successful if we're
             // actually accomplished something.
-            commitOrRollback(log.isValid());
+            commitOrRollback(log.hasDoneWork());
 
             return log;
         } catch (ValidationError e) {
@@ -224,12 +224,17 @@ abstract public class XmlImportManager implements ImportManager {
     }
 
     private void commitOrRollback(boolean okay) {
-        if (framedGraph.getBaseGraph() instanceof TxCheckedNeo4jGraph) {
-            TxCheckedNeo4jGraph graph = (TxCheckedNeo4jGraph)framedGraph.getBaseGraph();
+        TransactionalGraph baseGraph = framedGraph.getBaseGraph();
+        if (baseGraph instanceof TxCheckedNeo4jGraph) {
+            TxCheckedNeo4jGraph graph = (TxCheckedNeo4jGraph) baseGraph;
             if (!okay && graph.isInTransaction()) {
                 graph.rollback();
             }
+        } else {
+            if (okay)
+                baseGraph.commit();
+            else
+                baseGraph.rollback();
         }
-        if (okay) framedGraph.getBaseGraph().commit();
     }
 }

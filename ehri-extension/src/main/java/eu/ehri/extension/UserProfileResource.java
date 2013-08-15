@@ -50,7 +50,7 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
     }
 
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}")
     public Response getUserProfile(@PathParam("id") String id)
             throws AccessDenied, ItemNotFound, PermissionDenied, BadRequester {
@@ -58,7 +58,7 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
     }
 
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/list")
     public StreamingOutput listUserProfiles(
             @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
@@ -70,7 +70,7 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
     }
 
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/count")
     public Response countUserProfiles(@QueryParam(FILTER_PARAM) List<String> filters)
             throws ItemNotFound, BadRequester {
@@ -78,7 +78,7 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
     }
 
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/page")
     public StreamingOutput pageUserProfiles(
             @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
@@ -92,7 +92,7 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
     /*
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     public Response createUserProfile(String json,
             @QueryParam(ACCESSOR_PARAM) List<String> accessors) throws PermissionDenied,
             ValidationError, IntegrityError, DeserializationError,
@@ -102,7 +102,7 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
     */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     public Response createUserProfile(String json,
     		@QueryParam(GROUP_PARAM) List<String> groups, 
     		@QueryParam(ACCESSOR_PARAM) List<String> accessors) throws PermissionDenied,
@@ -113,7 +113,7 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
     
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     public Response updateUserProfile(String json) throws PermissionDenied,
             IntegrityError, ValidationError, DeserializationError,
             ItemNotFound, BadRequester {
@@ -122,7 +122,7 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
 
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}")
     public Response updateUserProfile(@PathParam("id") String id, String json)
             throws AccessDenied, PermissionDenied, IntegrityError, ValidationError,

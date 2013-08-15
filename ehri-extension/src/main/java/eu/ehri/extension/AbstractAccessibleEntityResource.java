@@ -10,6 +10,8 @@ import javax.ws.rs.core.Response.Status;
 
 //import org.apache.log4j.Logger;
 import eu.ehri.project.exceptions.*;
+import eu.ehri.project.persistance.Mutation;
+import eu.ehri.project.persistance.MutationState;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import com.google.common.collect.Lists;
@@ -130,7 +132,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
     public Response count(Iterable<String> filters) throws BadRequester {
         Long count = querier.filter(filters).count(getRequesterUserProfile());
         graph.getBaseGraph().checkNotInTransaction();
-        return Response.ok().entity(count.toString().getBytes()).build();
+        return numberResponse(count);
     }
 
     /**
@@ -219,10 +221,10 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
             BadRequester {
         try {
             Bundle entityBundle = Bundle.fromString(json);
-            E update = views.update(entityBundle, getRequesterUserProfile(), getLogMessage());
+            Mutation<E> update = views.update(entityBundle, getRequesterUserProfile(), getLogMessage());
             graph.getBaseGraph().commit();
             return Response.status(Status.OK)
-                    .entity(getRepresentation(update).getBytes())
+                    .entity(getRepresentation(update.getNode()).getBytes())
                     .build();
         } catch (PermissionDenied permissionDenied) {
             graph.getBaseGraph().rollback();

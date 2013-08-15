@@ -41,7 +41,7 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
     }
 
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}")
     public Response getGroup(@PathParam("id") String id) throws ItemNotFound,
             AccessDenied, BadRequester {
@@ -49,7 +49,7 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
     }
 
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/list")
     public StreamingOutput listGroups(
             @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
@@ -61,7 +61,7 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
     }
 
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/count")
     public Response countVocabularies(@QueryParam(FILTER_PARAM) List<String> filters)
             throws ItemNotFound, BadRequester {
@@ -69,7 +69,7 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
     }
 
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/page")
     public StreamingOutput pageGroups(
             @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
@@ -82,7 +82,7 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     public Response createGroup(String json,
             @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws PermissionDenied, ValidationError, IntegrityError,
@@ -92,7 +92,7 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
 
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     public Response updateGroup(String json) throws AccessDenied, PermissionDenied,
             IntegrityError, ValidationError, DeserializationError,
             ItemNotFound, BadRequester {
@@ -101,7 +101,7 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
 
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}")
     public Response updateGroup(@PathParam("id") String id, String json)
             throws AccessDenied, PermissionDenied, IntegrityError, ValidationError,
@@ -181,7 +181,7 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
      * @throws BadRequester
      */
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:[^/]+}/list")
     public StreamingOutput listGroupMembers(
     		@PathParam("id") String id,
@@ -203,7 +203,7 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
     }
 
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/count")
     public Response countGroupMembers(
             @PathParam("id") String id,

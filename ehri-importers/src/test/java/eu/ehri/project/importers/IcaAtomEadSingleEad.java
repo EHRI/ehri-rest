@@ -57,7 +57,7 @@ public class IcaAtomEadSingleEad extends AbstractImporterTest{
         assertEquals(createCount, getNodeCount(graph));
 
         // Yet we've only created 1 *logical* item...
-        assertEquals(1, log.getSuccessful());
+        assertEquals(1, log.getChanged());
 
         Iterable<Vertex> docs = graph.getVertices("identifier",
                 IMPORTED_ITEM_ID);
@@ -66,10 +66,6 @@ public class IcaAtomEadSingleEad extends AbstractImporterTest{
         for(Description d : unit.getDocumentDescriptions())
             assertEquals("Test EAD Item", d.getName());
 
-        for(SystemEvent event : unit.getLatestEvent()){
-            System.out.println("event: " + event.getLogMessage());
-        }
-        
         List<SystemEvent> actions = toList(unit.getHistory());
         // Check we've only got one action
         assertEquals(1, actions.size());

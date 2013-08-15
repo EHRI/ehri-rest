@@ -20,7 +20,15 @@ public enum AnonymousAccessor implements Accessor {
     INSTANCE;
 
     private AnonymousAccessor() {}
-    
+
+    public boolean isAdmin() {
+        return false;
+    }
+
+    public boolean isAnonymous() {
+        return true;
+    }
+
     /**
      * Obtain the shared instance of the Anonymous Accessor.
      * @return

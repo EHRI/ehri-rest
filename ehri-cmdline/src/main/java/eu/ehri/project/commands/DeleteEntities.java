@@ -1,6 +1,6 @@
 package eu.ehri.project.commands;
 
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
+import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
@@ -17,7 +17,6 @@ import eu.ehri.project.persistance.ActionManager;
 import eu.ehri.project.views.impl.CrudViews;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
-import org.neo4j.graphdb.Transaction;
 
 /**
  * Delete an entire class of stuff via the command line.
@@ -62,7 +61,8 @@ public class DeleteEntities extends BaseCommand implements Command {
      * @throws Exception
      */
     @Override
-    public int execWithOptions(final FramedGraph<Neo4jGraph> graph, CommandLine cmdLine) throws Exception {
+    public int execWithOptions(final FramedGraph<? extends TransactionalGraph> graph,
+            CommandLine cmdLine) throws Exception {
 
         // the first argument is the entity type, and that must be specified
         if (cmdLine.getArgList().size() < 1)
@@ -106,7 +106,7 @@ public class DeleteEntities extends BaseCommand implements Command {
      * @param type
      * @param user
      */
-    private void deleteIds(FramedGraph<Neo4jGraph> graph, GraphManager manager, EntityClass type, UserProfile user)
+    private void deleteIds(FramedGraph<? extends TransactionalGraph> graph, GraphManager manager, EntityClass type, UserProfile user)
             throws SerializationError, ValidationError, ItemNotFound, PermissionDenied {
         CrudViews<AccessibleEntity> views = new CrudViews<AccessibleEntity>(graph, AccessibleEntity.class);
         for (AccessibleEntity acc : manager.getFrames(type, AccessibleEntity.class)) {

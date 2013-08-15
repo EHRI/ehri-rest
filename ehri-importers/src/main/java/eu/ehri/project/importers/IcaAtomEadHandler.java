@@ -1,9 +1,10 @@
 package eu.ehri.project.importers;
 
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.DocumentaryUnit;
-import eu.ehri.project.models.base.Description;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -75,20 +76,20 @@ public class IcaAtomEadHandler extends SaxXmlHandler {
             if (childItemPattern.matcher(qName).matches() || qName.equals("archdesc")) {
                 try {
                     //add any mandatory fields not yet there:
-                    if (!currentGraph.containsKey(Description.NAME)) {
+                    if (!currentGraph.containsKey(Ontology.NAME_KEY)) {
                         //finding some name for this unit:
                         if (currentGraph.containsKey("title")) {
-                            currentGraph.put(Description.NAME, currentGraph.get("title"));
+                            currentGraph.put(Ontology.NAME_KEY, currentGraph.get("title"));
                         } else {
                             logger.error("IcaAtom node without name field: ");
-                            currentGraph.put(Description.NAME, "UNKNOWN title");
+                            currentGraph.put(Ontology.NAME_KEY, "UNKNOWN title");
                         }
                     }
-                    if (!currentGraph.containsKey(Description.LANGUAGE_CODE)) {
-                        currentGraph.put(Description.LANGUAGE_CODE, "en");
+                    if (!currentGraph.containsKey(Ontology.LANGUAGE_OF_DESCRIPTION)) {
+                        currentGraph.put(Ontology.LANGUAGE_OF_DESCRIPTION, "en");
                     }
-                if (!currentGraph.containsKey(Description.LANGUAGE_CODE)) {
-                    currentGraph.put(Description.LANGUAGE_CODE, "en");
+                if (!currentGraph.containsKey(Ontology.LANGUAGE_OF_DESCRIPTION)) {
+                    currentGraph.put(Ontology.LANGUAGE_OF_DESCRIPTION, "en");
                 }
                 DocumentaryUnit current = (DocumentaryUnit)importer.importItem(currentGraph, depth);
                 logger.debug("importer used: " + importer.getClass());

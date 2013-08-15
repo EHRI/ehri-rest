@@ -4,12 +4,11 @@
  */
 package eu.ehri.project.importers;
 
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.Country;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Repository;
-import eu.ehri.project.models.base.DescribedEntity;
-import eu.ehri.project.models.base.Description;
 import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.views.impl.CrudViews;
 import java.io.InputStream;
@@ -31,13 +30,13 @@ public class UkrainianUnitImporterTest extends AbstractImporterTest{
     public void testImportItemsT() throws Exception {
         Bundle ukrainianBundle = new Bundle(EntityClass.COUNTRY)
                                 .withDataValue(Country.COUNTRY_CODE, "ua");
-        Bundle repoBundle = new Bundle(EntityClass.REPOSITORY).withDataValue(Repository.IDENTIFIER_KEY, "ua-3311");
+        Bundle repoBundle = new Bundle(EntityClass.REPOSITORY).withDataValue(Ontology.IDENTIFIER_KEY, "ua-3311");
         Bundle repoDescBundle = new Bundle(EntityClass.REPOSITORY_DESCRIPTION)
-                .withDataValue(Description.NAME, "Центральний державний архів вищих органів влади і управління України")
+                .withDataValue(Ontology.NAME_KEY, "Центральний державний архів вищих органів влади і управління України")
                 .withDataValue("otherFormsOfName", "Central State Archive of Supreme Bodies of Power and Government of Ukraine")
-                .withDataValue(Description.LANGUAGE_CODE, "uk");
-        repoBundle = repoBundle.withRelation(DescribedEntity.DESCRIBES, repoDescBundle);
-        repoBundle = repoBundle.withRelation(Repository.HAS_COUNTRY, ukrainianBundle);
+                .withDataValue(Ontology.LANGUAGE_OF_DESCRIPTION, "uk");
+        repoBundle = repoBundle.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, repoDescBundle);
+        repoBundle = repoBundle.withRelation(Ontology.REPOSITORY_HAS_COUNTRY, ukrainianBundle);
         Repository repo = new CrudViews<Repository>(graph, Repository.class).create(repoBundle, validUser);
 
         int count = getNodeCount(graph);

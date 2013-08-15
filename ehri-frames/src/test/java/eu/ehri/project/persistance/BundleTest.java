@@ -1,12 +1,10 @@
 package eu.ehri.project.persistance;
 
 import com.google.common.collect.Maps;
-import com.google.common.hash.HashCode;
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.base.DescribedEntity;
-import eu.ehri.project.models.base.IdentifiableEntity;
-import eu.ehri.project.models.base.NamedEntity;
 import eu.ehri.project.persistance.utils.BundleUtils;
+import eu.ehri.project.test.TestData;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,10 +27,10 @@ public class BundleTest {
     @Before
     public void setUp() throws Exception {
         bundle = new Bundle(EntityClass.DOCUMENTARY_UNIT)
-                .withDataValue(IdentifiableEntity.IDENTIFIER_KEY, "foobar")
-                .withRelation(DescribedEntity.DESCRIBES,
+                .withDataValue(Ontology.IDENTIFIER_KEY, "foobar")
+                .withRelation(Ontology.DESCRIPTION_FOR_ENTITY,
                         new Bundle(EntityClass.DOCUMENT_DESCRIPTION)
-                            .withDataValue(NamedEntity.NAME, "Foobar"));
+                            .withDataValue(Ontology.NAME_KEY, "Foobar"));
     }
 
     @After
@@ -65,8 +63,8 @@ public class BundleTest {
 
     @Test
     public void testGetDataValue() throws Exception {
-        assertEquals("foobar", bundle.getDataValue(IdentifiableEntity.IDENTIFIER_KEY));
-        assertNull(bundle.getDataValue(NamedEntity.NAME));
+        assertEquals("foobar", bundle.getDataValue(Ontology.IDENTIFIER_KEY));
+        assertNull(bundle.getDataValue(Ontology.NAME_KEY));
     }
 
     @Test
@@ -85,7 +83,7 @@ public class BundleTest {
     @Test
     public void testGetData() throws Exception {
         Map<String,Object> data = bundle.getData();
-        assertEquals("foobar", data.get(IdentifiableEntity.IDENTIFIER_KEY));
+        assertEquals("foobar", data.get(Ontology.IDENTIFIER_KEY));
     }
 
     @Test
@@ -93,8 +91,51 @@ public class BundleTest {
         HashMap<String,Object> map = Maps.newHashMap();
         map.put("foo", "bar");
         Bundle b2 = bundle.withData(map);
-        assertNull(b2.getDataValue(IdentifiableEntity.IDENTIFIER_KEY));
+        assertNull(b2.getDataValue(Ontology.IDENTIFIER_KEY));
         assertEquals("bar", b2.getDataValue("foo"));
+    }
+
+    @Test
+    public void testEqualsAndHashCode() throws Exception {
+        // A bundle with the same relationship data but
+        // in different orders should be equals()
+        Bundle bundle1 = Bundle.fromData(TestData.getTestDocBundle());
+        Bundle bundle2 = Bundle.fromData(TestData.getTestDocBundle());
+        assertEquals(bundle1, bundle2);
+        assertEquals(bundle1.hashCode(), bundle2.hashCode());
+
+        // Add a new date period to both and ensure that have a
+        // different structural ordering
+        System.out.println(bundle1);
+        Bundle dp = new Bundle(EntityClass.DATE_PERIOD)
+                .withDataValue(Ontology.DATE_PERIOD_START_DATE, "1900-01-01")
+                .withDataValue(Ontology.DATE_PERIOD_END_DATE, "2000-01-01");
+        Bundle currentDp = BundleUtils.getBundle(bundle1, "describes[0]/hasDate[0]");
+        System.out.println("CURRENT: " + currentDp);
+        Bundle b1_2 = BundleUtils
+                            .setBundle(bundle1, "describes[0]/hasDate[-1]", currentDp);
+        Bundle b1_3 = BundleUtils.setBundle(b1_2, "describes[0]/hasDate[0]", dp);
+
+        Bundle b2_2 = BundleUtils.setBundle(bundle2, "describes[0]/hasDate[-1]", dp);
+        assertEquals(BundleUtils.getBundle(b1_3, "describes[0]/hasDate[1]"),
+                BundleUtils.getBundle(b2_2, "describes[0]/hasDate[0]"));
+        assertEquals(BundleUtils.getBundle(b1_3, "describes[0]/hasDate[0]"),
+                BundleUtils.getBundle(b2_2, "describes[0]/hasDate[1]"));
+        assertEquals(b1_3, b2_2);
+    }
+
+    @Test
+    public void testEqualsWithManagedData() throws Exception {
+        // A bundle with the same relationship data but
+        // in different orders should be equals()
+        Bundle bundle1 = Bundle.fromData(TestData.getTestDocBundle());
+        Bundle bundle2 = Bundle.fromData(TestData.getTestDocBundle())
+                .withDataValue(Bundle.MANAGED_PREFIX + "someKey", "foobar");
+        assertEquals(bundle1, bundle2);
+
+        // Data that isn't managed should count
+        Bundle bundle3 = bundle1.withDataValue("foo", "bar");
+        assertNotSame(bundle1, bundle3);
     }
 
     @Test
@@ -165,31 +206,5 @@ public class BundleTest {
     @Test
     public void testToXml() throws Exception {
         // TODO
-    }
-
-    @Test
-    public void testGetHashCode() throws Exception {
-        Bundle b2 = bundle.withDataValue(IdentifiableEntity.IDENTIFIER_KEY, "foobaR");
-        HashCode h1 = bundle.getDataHash();
-        HashCode h2 = b2.getDataHash();
-        assertNotSame(h1, h2);
-        assertEquals(h1, b2.withDataValue(IdentifiableEntity.IDENTIFIER_KEY, "foobar").getDataHash());
-
-        // Using BundleUtils to alter nested values...
-        Bundle b3 = BundleUtils.set(bundle, DescribedEntity.DESCRIBES + "[0]/name", "Hello, world");
-        assertNotSame(bundle.getDataHash(), b3.getDataHash());
-        // Now set the value to what it used to be and ensure we have the same hash.
-        Bundle b4 = BundleUtils.set(b3, DescribedEntity.DESCRIBES + "[0]/name", "Foobar");
-        System.out.println(bundle.getData());
-        System.out.println(b4.getData());
-        assertEquals(bundle.getDataHash(), b4.getDataHash());
-    }
-
-    @Test
-    public void testGetHashCodeIgnoresIds() throws Exception {
-        Bundle b2 = bundle.withId("testid");
-        HashCode h1 = bundle.getDataHash();
-        HashCode h2 = b2.getDataHash();
-        assertEquals(h1, h2);
     }
 }

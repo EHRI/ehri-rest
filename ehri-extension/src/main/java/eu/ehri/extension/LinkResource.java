@@ -49,7 +49,7 @@ public class LinkResource extends
      * @throws BadRequester
      */
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}")
     public Response getAction(@PathParam("id") String id) throws ItemNotFound,
             AccessDenied, BadRequester {
@@ -68,7 +68,7 @@ public class LinkResource extends
      * @throws BadRequester
      */
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/list")
     public StreamingOutput listLinks(
             @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
@@ -97,7 +97,7 @@ public class LinkResource extends
      */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("{id:.+}/{sourceId:.+}")
     public Response createLinkFor(@PathParam("id") String id,
             @PathParam("sourceId") String sourceId, String json,
@@ -156,9 +156,22 @@ public class LinkResource extends
         if (item == null) {
             throw new ItemNotFound(id);
         }
-        ViewFactory.getCrudNoLogging(graph, AccessibleEntity.class)
-                .deleteDependent(rel, item, userProfile, UndeterminedRelationship.class);
-        return Response.status(Status.OK).build();
+
+        try {
+            ViewFactory.getCrudNoLogging(graph, AccessibleEntity.class)
+                    .deleteDependent(rel, item, userProfile, UndeterminedRelationship.class);
+            graph.getBaseGraph().commit();
+            return Response.status(Status.OK).build();
+        } catch (PermissionDenied permissionDenied) {
+            graph.getBaseGraph().rollback();
+            throw permissionDenied;
+        } catch (ValidationError validationError) {
+            graph.getBaseGraph().rollback();
+            throw validationError;
+        } catch (SerializationError serializationError) {
+            graph.getBaseGraph().rollback();
+            throw serializationError;
+        }
     }
 
     private Response buildResponseFromAnnotation(Link link)
@@ -177,7 +190,7 @@ public class LinkResource extends
      * @throws BadRequester
      */
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/for/{id:.+}")
     public StreamingOutput listRelatedItems(@PathParam("id") String id)
                 throws ItemNotFound, BadRequester {

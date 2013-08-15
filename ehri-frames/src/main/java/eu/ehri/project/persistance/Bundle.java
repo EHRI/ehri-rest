@@ -6,17 +6,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import com.google.common.collect.ImmutableListMultimap;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.LinkedListMultimap;
-import com.google.common.collect.ListMultimap;
-import com.google.common.collect.Maps;
+import com.google.common.collect.*;
 
-import com.google.common.hash.*;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.utils.ClassUtils;
 import org.w3c.dom.Document;
 
@@ -30,6 +24,7 @@ public final class Bundle {
     private final String id;
     private final EntityClass type;
     private final ImmutableMap<String, Object> data;
+    private final ImmutableMap<String, Object> meta;
     private final ImmutableListMultimap<String, Bundle> relations;
 
     /**
@@ -39,6 +34,14 @@ public final class Bundle {
     public static final String REL_KEY = "relationships";
     public static final String DATA_KEY = "data";
     public static final String TYPE_KEY = "type";
+    public static final String META_KEY = "meta";
+
+    /**
+     * Properties that are "managed", i.e. automatically set
+     * date/time strings or cache values should begin with a
+     * prefix and are ignored Bundle equality calculations.
+     */
+    public static final String MANAGED_PREFIX = "_";
 
     /**
      * Constructor.
@@ -49,11 +52,25 @@ public final class Bundle {
      * @param relations
      */
     public Bundle(String id, EntityClass type, final Map<String, Object> data,
-            final ListMultimap<String, Bundle> relations) {
+            final ListMultimap<String, Bundle> relations, final Map<String, Object> meta) {
         this.id = id;
         this.type = type;
         this.data = filterData(data);
+        this.meta = ImmutableMap.copyOf(meta);
         this.relations = ImmutableListMultimap.copyOf(relations);
+    }
+
+    /**
+     * Constructor for bundle without existing id.
+     *
+     * @param id
+     * @param type
+     * @param data
+     * @param relations
+     */
+    public Bundle(String id, EntityClass type, final Map<String, Object> data,
+            final ListMultimap<String, Bundle> relations) {
+        this(id, type, data, relations, Maps.<String,Object>newHashMap());
     }
 
     /**
@@ -65,7 +82,7 @@ public final class Bundle {
      */
     public Bundle(EntityClass type, final Map<String, Object> data,
             final ListMultimap<String, Bundle> relations) {
-        this(null, type, data, relations);
+        this(null, type, data, relations, Maps.<String,Object>newHashMap());
     }
 
     /**
@@ -75,7 +92,7 @@ public final class Bundle {
      */
     public Bundle(EntityClass type) {
         this(null, type, Maps.<String, Object> newHashMap(), LinkedListMultimap
-                .<String, Bundle> create());
+                .<String, Bundle> create(), Maps.<String,Object>newHashMap());
     }
 
     /**
@@ -85,7 +102,8 @@ public final class Bundle {
      * @param data
      */
     public Bundle(EntityClass type, final Map<String, Object> data) {
-        this(null, type, data, LinkedListMultimap.<String, Bundle> create());
+        this(null, type, data, LinkedListMultimap.<String, Bundle> create(),
+                Maps.<String,Object>newHashMap());
     }
 
     /**
@@ -105,7 +123,7 @@ public final class Bundle {
      */
     public Bundle withId(String id) {
         checkNotNull(id);
-        return new Bundle(id, type, data, relations);
+        return new Bundle(id, type, data, relations, meta);
     }
 
     /**
@@ -167,13 +185,21 @@ public final class Bundle {
     }
 
     /**
+     * Get the bundle metadata
+     */
+    public Map<String,Object> getMeta() {
+        return meta;
+    }
+
+
+    /**
      * Set the entire data map for this bundle.
      *
      * @param data
      * @return
      */
     public Bundle withData(final Map<String, Object> data) {
-        return new Bundle(id, type, data, relations);
+        return new Bundle(id, type, data, relations, meta);
     }
 
     /**
@@ -192,7 +218,7 @@ public final class Bundle {
      * @return
      */
     public Bundle withRelations(ListMultimap<String, Bundle> relations) {
-        return new Bundle(id, type, data, relations);
+        return new Bundle(id, type, data, relations, meta);
     }
 
     /**
@@ -216,7 +242,7 @@ public final class Bundle {
         LinkedListMultimap<String, Bundle> tmp = LinkedListMultimap
                 .create(relations);
         tmp.putAll(relation, others);
-        return new Bundle(id, type, data, tmp);
+        return new Bundle(id, type, data, tmp, meta);
     }
 
     /**
@@ -229,7 +255,7 @@ public final class Bundle {
         LinkedListMultimap<String, Bundle> tmp = LinkedListMultimap
                 .create(relations);
         tmp.put(relation, other);
-        return new Bundle(id, type, data, tmp);
+        return new Bundle(id, type, data, tmp, meta);
     }
 
     /**
@@ -251,7 +277,7 @@ public final class Bundle {
     public Bundle removeRelation(String relation, Bundle item) {
         ListMultimap<String, Bundle> tmp = LinkedListMultimap.create(relations);
         tmp.remove(relation, item);
-        return new Bundle(id, type, data, tmp);
+        return new Bundle(id, type, data, tmp, meta);
     }
 
     /**
@@ -263,7 +289,7 @@ public final class Bundle {
     public Bundle removeRelations(String relation) {
         ListMultimap<String, Bundle> tmp = LinkedListMultimap.create(relations);
         tmp.removeAll(relation);
-        return new Bundle(id, type, data, tmp);
+        return new Bundle(id, type, data, tmp, meta);
     }
 
     /**
@@ -327,7 +353,7 @@ public final class Bundle {
 
     @Override
     public String toString() {
-        return "<" + getType() + "> (" + getData() + " + Rels: " + relations.size() + ")";
+        return "<" + getType() + "> (" + getData() + " + Rels: " + relations + ")";
     }
 
     /**
@@ -358,67 +384,6 @@ public final class Bundle {
         return DataConverter.bundleToXmlString(this);
     }
 
-    @SuppressWarnings("serial")
-    private Funnel<Object> objectFunnel = new Funnel<Object>() {
-        @Override
-        public void funnel(Object data, PrimitiveSink into) {
-            if (data instanceof Object[]) {
-                for (Object sd : (Object[])data) {
-                    funnel(sd, into);
-                }
-            } else if (data instanceof String) {
-                into.putString((String)data);
-            } else if (data instanceof Long) {
-                into.putLong((Long)data);
-            } else if (data instanceof Integer) {
-                into.putInt((Integer)data);
-            } else if (data instanceof Long) {
-                into.putLong((Long)data);
-            } else {
-                into.putString(data.toString());
-            }
-        }
-    };
-
-    @SuppressWarnings("serial")
-    private Funnel<Map.Entry<String,Object>> entryFunnel = new Funnel<Map.Entry<String, Object>>() {
-        @Override
-        public void funnel(Map.Entry<String, Object> entry, PrimitiveSink into) {
-            into.putString(entry.getKey());
-            objectFunnel.funnel(entry.getValue(), into);
-        }
-    };
-
-    @SuppressWarnings("serial")
-    private Funnel<Bundle> bundleFunnel = new Funnel<Bundle>() {
-        @Override
-        public void funnel(Bundle bundle, PrimitiveSink into) {
-            for (Map.Entry<String,Object> entry : bundle.getData().entrySet()) {
-                if (!entry.getKey().equals(EntityType.ID_KEY)
-                        && !entry.getKey().equals(EntityType.HASH_KEY)) {
-                    entryFunnel.funnel(entry, into);
-                }
-            }
-            for (Map.Entry<String,Collection<Bundle>> rels : getRelations().asMap().entrySet()) {
-                into.putString(rels.getKey());
-                for (Bundle r : rels.getValue()) {
-                    into.putString(r.getDataHash().toString());
-                }
-            }
-        }
-    };
-
-    /**
-     * Get a hashCode for this bundle.
-     * @return
-     */
-    public HashCode getDataHash() {
-        HashFunction hf = Hashing.md5();
-        Hasher hasher = hf.newHasher();
-        hasher.putObject(this, bundleFunnel);
-        return hasher.hash();
-    }
-
     /**
      * Return an immutable copy of the given data map with nulls removed.
      * @param data
@@ -432,5 +397,53 @@ public final class Bundle {
             }
         }
         return ImmutableMap.copyOf(filtered);
+    }
+
+    private Map<String,Object> unmanagedData(Map<String, Object> in) {
+        Map<String,Object> filtered = Maps.newHashMap();
+        for (Map.Entry<? extends String,Object> entry : in.entrySet()) {
+            if (!entry.getKey().startsWith(MANAGED_PREFIX)
+                    && entry.getValue() != null) {
+                filtered.put(entry.getKey(), entry.getValue());
+            }
+        }
+        return filtered;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Bundle bundle = (Bundle) o;
+
+        if (type != bundle.type) return false;
+        if (!unmanagedData(data).equals(unmanagedData(bundle.data))) return false;
+        if (!unorderedRelations(relations)
+                .equals(unorderedRelations(bundle.relations))) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = type.hashCode();
+        result = 31 * result + unmanagedData(data).hashCode();
+        result = 31 * result + unorderedRelations(relations).hashCode();
+        return result;
+    }
+
+    /**
+     * Convert the ordered relationship set into an unordered one for comparison.
+     * FIXME: Clean up the code and optimise this function.
+     * @param rels
+     * @return
+     */
+    private Map<String,LinkedHashMultiset<Bundle>> unorderedRelations(final ListMultimap<String,Bundle> rels) {
+        Map<String,LinkedHashMultiset<Bundle>> map = Maps.newHashMap();
+        for (Map.Entry<String,Collection<Bundle>> entry : rels.asMap().entrySet()) {
+            map.put(entry.getKey(), LinkedHashMultiset.create(entry.getValue()));
+        }
+        return map;
     }
 }

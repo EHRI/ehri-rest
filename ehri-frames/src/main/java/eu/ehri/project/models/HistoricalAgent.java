@@ -11,5 +11,4 @@ import eu.ehri.project.models.cvoc.AuthoritativeItem;
 public interface HistoricalAgent extends AuthoritativeItem, AccessibleEntity, IdentifiableEntity,
         DescribedEntity, AnnotatableEntity {
 
-    public static final String CREATED = "created";
 }

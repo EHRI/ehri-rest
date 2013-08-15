@@ -7,8 +7,6 @@ package eu.ehri.project.importers;
 import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Repository;
-import eu.ehri.project.models.UndeterminedRelationship;
-import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.events.SystemEvent;
 import java.io.InputStream;
@@ -63,7 +61,7 @@ private final String UN_REL = "HR-HDA145corporateBodyAccessCroatianStateArchive"
         assertEquals(createCount, getNodeCount(graph));
 
         // Yet we've only created 1 *logical* item...
-        assertEquals(3, log.getSuccessful());
+        assertEquals(3, log.getChanged());
 
         Iterable<Vertex> docs = graph.getVertices("identifier",
                 IMPORTED_ITEM_ID);
@@ -76,10 +74,7 @@ private final String UN_REL = "HR-HDA145corporateBodyAccessCroatianStateArchive"
 //            logger.debug(key + ": " + creator.asVertex().getProperty(key));
 //        }
 //        assertTrue(creator.asVertex().getPropertyKeys().contains("role"));
-        for(SystemEvent event : unit.getLatestEvent()){
-            System.out.println("event: " + event.getLogMessage());
-        }
-        
+
         List<SystemEvent> actions = toList(unit.getHistory());
         // Check we've only got one action
         assertEquals(1, actions.size());

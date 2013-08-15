@@ -7,7 +7,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.google.common.collect.Lists;
+import com.tinkerpop.frames.FramedGraphFactory;
+import com.tinkerpop.frames.modules.javahandler.JavaHandlerModule;
 import eu.ehri.project.models.base.Frame;
+import eu.ehri.project.persistance.Mutation;
 import eu.ehri.project.utils.fixtures.FixtureLoader;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
@@ -220,12 +223,12 @@ public class YamlFixtureLoader implements FixtureLoader {
                 getDependentRelations(nodeRels));
         BundleDAO persister = new BundleDAO(graph, SystemScope.getInstance());
         logger.debug("Creating node with id: {}", id);
-        Frame frame = persister.createOrUpdate(entityBundle,
+        Mutation<Frame> frame = persister.createOrUpdate(entityBundle,
                 Frame.class);
 
         ListMultimap<String, String> linkRels = getLinkedRelations(nodeRels);
         if (!linkRels.isEmpty()) {
-            links.put(frame.asVertex(), linkRels);
+            links.put(frame.getNode().asVertex(), linkRels);
         }
     }
 
@@ -329,7 +332,8 @@ public class YamlFixtureLoader implements FixtureLoader {
                 .newEmbeddedDatabase(args[0]);
         registerShutdownHook(db);
         try {
-            FramedGraph<Neo4jGraph> graph = new FramedGraph<Neo4jGraph>(
+            FramedGraph<? extends TransactionalGraph> graph = new FramedGraphFactory(
+                        new JavaHandlerModule()).create(
                     new Neo4jGraph(db));
             YamlFixtureLoader loader = new YamlFixtureLoader(graph);
             loader.loadTestData();

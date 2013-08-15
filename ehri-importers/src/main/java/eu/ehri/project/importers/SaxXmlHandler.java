@@ -20,9 +20,7 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import javax.sound.midi.SoundbankResource;
-
-import static eu.ehri.project.models.base.Description.LANGUAGE_CODE;
+import static eu.ehri.project.definitions.Ontology.LANGUAGE_OF_DESCRIPTION;
 
 /**
  *
@@ -77,10 +75,10 @@ public abstract class SaxXmlHandler extends DefaultHandler {
             languagePrefix = lang.get();
             if (!languageMap.containsKey(languagePrefix)) {
                 if (languageMap.isEmpty()) {
-                    currentGraphPath.peek().put(LANGUAGE_CODE, languageMap);
+                    currentGraphPath.peek().put(LANGUAGE_OF_DESCRIPTION, languageMap);
                 }
                 Map<String, Object> m = new HashMap<String, Object>();
-                m.put(LANGUAGE_CODE, languagePrefix);
+                m.put(LANGUAGE_OF_DESCRIPTION, languagePrefix);
                 languageMap.put(languagePrefix, m);
             }
         }
@@ -95,7 +93,7 @@ public abstract class SaxXmlHandler extends DefaultHandler {
         for (int attr = 0; attr < attributes.getLength(); attr++) { // only certain attributes get stored
             String attribute = withoutNamespace(attributes.getLocalName(attr));
             if (properties.hasAttributeProperty(attribute)
-                    && !properties.getAttributeProperty(attribute).equals(LANGUAGE_CODE)) {
+                    && !properties.getAttributeProperty(attribute).equals(LANGUAGE_OF_DESCRIPTION)) {
                 putPropertyInCurrentGraph(getImportantPath(currentPath, "@" + properties.getAttributeProperty(attribute)), attributes.getValue(attr));
             }
         }
@@ -133,7 +131,7 @@ public abstract class SaxXmlHandler extends DefaultHandler {
         for (int attr = 0; attr < attributes.getLength(); attr++) { // only certain attributes get stored
             String attribute = withoutNamespace(attributes.getLocalName(attr));
             String prop = properties.getAttributeProperty(attribute);
-            if (prop != null && prop.equals(LANGUAGE_CODE)) {
+            if (prop != null && prop.equals(LANGUAGE_OF_DESCRIPTION)) {
                 logger.debug("Language detected!");
                 return Optional.of(attributes.getValue(attr));
             }

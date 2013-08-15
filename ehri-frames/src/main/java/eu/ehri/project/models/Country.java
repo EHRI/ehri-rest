@@ -3,6 +3,7 @@ package eu.ehri.project.models;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Property;
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.IdentifiableEntity;
@@ -17,7 +18,7 @@ import eu.ehri.project.models.base.PermissionScope;
 @EntityType(EntityClass.COUNTRY)
 public interface Country extends IdentifiableEntity, AccessibleEntity, PermissionScope {
 
-    public static final String COUNTRY_CODE = IdentifiableEntity.IDENTIFIER_KEY;
+    public static final String COUNTRY_CODE = Ontology.IDENTIFIER_KEY;
 
     /**
      * Alias function for fetching the country code identifier.
@@ -26,6 +27,6 @@ public interface Country extends IdentifiableEntity, AccessibleEntity, Permissio
     @Property(COUNTRY_CODE)
     public String getCode();
 
-    @Adjacency(label = Repository.HAS_COUNTRY, direction = Direction.IN)
+    @Adjacency(label = Ontology.REPOSITORY_HAS_COUNTRY, direction = Direction.IN)
     public Iterable<Repository> getRepositories();
 }

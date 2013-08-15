@@ -2,6 +2,7 @@ package eu.ehri.project.views;
 
 import java.util.Iterator;
 
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.*;
 import eu.ehri.project.models.base.*;
@@ -198,7 +199,7 @@ public class CrudViewsTest extends AbstractFixtureTest {
         Bundle newBundle = bundle.withId(unit.getId()).withDataValue(
                 "name", newName);
 
-        DocumentaryUnit changedUnit = docViews.update(newBundle, validUser);
+        DocumentaryUnit changedUnit = docViews.update(newBundle, validUser).getNode();
         assertEquals(newName, changedUnit.asVertex().getProperty("name"));
         DocumentDescription desc = graph.frame(
                 changedUnit.getDescriptions().iterator().next().asVertex(),
@@ -234,7 +235,7 @@ public class CrudViewsTest extends AbstractFixtureTest {
         String newName = TestData.TEST_USER_NAME + " with new stuff";
         Bundle newBundle = bundle.withId(user.getId()).withDataValue(
                 "name", newName);
-        UserProfile changedUser = userViews.update(newBundle, validUser);
+        UserProfile changedUser = userViews.update(newBundle, validUser).getNode();
         assertEquals(newName, changedUser.getName());
     }
 
@@ -343,8 +344,8 @@ public class CrudViewsTest extends AbstractFixtureTest {
 
         long descCount = Iterables.count(unit.getDescriptions());
         Bundle descBundle = bundle
-                .getRelations(DescribedEntity.DESCRIBES)
-                .get(0).withDataValue(IdentifiableEntity.IDENTIFIER_KEY, "some-new-id");
+                .getRelations(Ontology.DESCRIPTION_FOR_ENTITY)
+                .get(0).withDataValue(Ontology.IDENTIFIER_KEY, "some-new-id");
 
         DocumentDescription changedDesc = docViews.createDependent(descBundle, unit, validUser,
                 DocumentDescription.class);
@@ -353,9 +354,9 @@ public class CrudViewsTest extends AbstractFixtureTest {
         // The order in which items are serialized is undefined, so we just have to throw
         // an error if we don't fine the right item...
         for (Bundle b : new Serializer(graph)
-                     .vertexFrameToBundle(unit).getRelations(DescribedEntity
-                        .DESCRIBES)) {
-            if (b.getDataValue(IdentifiableEntity.IDENTIFIER_KEY).equals("some-new-id")) {
+                     .vertexFrameToBundle(unit).getRelations(Ontology
+                        .DESCRIPTION_FOR_ENTITY)) {
+            if (b.getDataValue(Ontology.IDENTIFIER_KEY).equals("some-new-id")) {
                 return;
             }
         }
@@ -382,11 +383,11 @@ public class CrudViewsTest extends AbstractFixtureTest {
 
         long descCount = Iterables.count(unit.getDocumentDescriptions());
         Bundle descBundle = new Serializer(graph).vertexFrameToBundle(unit)
-                .getRelations(DescribedEntity.DESCRIBES)
-                .get(0).withDataValue(DocumentDescription.NAME, "some-new-title");
+                .getRelations(Ontology.DESCRIPTION_FOR_ENTITY)
+                .get(0).withDataValue(Ontology.NAME_KEY, "some-new-title");
 
         DocumentDescription changedDesc = docViews.updateDependent(descBundle, unit, validUser,
-                DocumentDescription.class);
+                DocumentDescription.class).getNode();
         assertEquals(descCount, Iterables.count(unit.getDocumentDescriptions()));
         assertEquals("some-new-title", changedDesc.getName());
     }

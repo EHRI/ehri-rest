@@ -1,15 +1,16 @@
 package eu.ehri.project.commands;
 
 import com.google.common.collect.Lists;
-import org.apache.commons.cli.CommandLine;
+import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
-
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
-
+import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
-import org.neo4j.graphdb.*;
+import org.neo4j.graphdb.DynamicRelationshipType;
+import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Node;
 import org.neo4j.visualization.graphviz.GraphvizWriter;
 import org.neo4j.walk.Walker;
 
@@ -60,11 +61,11 @@ public class GraphViz extends BaseCommand implements Command {
      */
     @Override
     @SuppressWarnings("unchecked")
-    public int execWithOptions(final FramedGraph<Neo4jGraph> graph,
+    public int execWithOptions(final FramedGraph<? extends TransactionalGraph> graph,
             CommandLine cmdLine) throws Exception {
 
         final GraphManager manager = GraphManagerFactory.getInstance(graph);
-        GraphDatabaseService neo4jGraph = graph.getBaseGraph().getRawGraph();
+        GraphDatabaseService neo4jGraph = ((Neo4jGraph)graph.getBaseGraph()).getRawGraph();
 
         // Cmdline arguments should be a node and a list of relationship types
         // to traverse.
