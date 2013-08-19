@@ -39,43 +39,43 @@ Please (also) see [these install instructions](docs/INSTALL.md).
 2. Run the installer script
    It will build all jars and copy them to the correct location. 
   
-      cd {neo4j-ehri-plugin}
+        cd {neo4j-ehri-plugin}
   
-      ./scripts/install.sh {neo4j}
+        ./scripts/install.sh {neo4j}
   
   {{ tell which jars are needed; joda-time-2.1.jar might be missing }}
   
 3. starting with a clean initial ehri database (might also be needed if the datamodels have changed a lot)
    When needed, remove any ehri stuff in there (or rename it for backup)
        
-     {neo4j}/bin/neo4j stop
+        {neo4j}/bin/neo4j stop
   
-     rm -rf {neo4j}/data/graph.db
+        rm -rf {neo4j}/data/graph.db
   
-     {neo4j}/bin/neo4j start
+        {neo4j}/bin/neo4j start
   
   Now there is a complete but empty db in graph.db 
   
   Initialize for use with ehri
   
-     .{neo4j}/bin/neo4j stop
+        .{neo4j}/bin/neo4j stop
   
-     ./scripts/cmd {neo4j}/data/graph.db initialize
+        ./scripts/cmd {neo4j}/data/graph.db initialize
   
-     .{neo4j}/bin/neo4j start
+        .{neo4j}/bin/neo4j start
 
 
 ### Doing it step by step
 
 1. build and copy jars
 
-      cd {neo4j-ehri-plugin}
+        cd {neo4j-ehri-plugin}
 
-      mvn clean install
+        mvn clean install
 
-      cp ehri-plugin/target/ehri-plugin-0.1-SNAPSHOT.jar {neo4j}/plugins   
+        cp ehri-plugin/target/ehri-plugin-0.1-SNAPSHOT.jar {neo4j}/plugins   
 
-      cp ehri-extension/target/ehri-extension-0.0.1-SNAPSHOT.jar {neo4j}/plugins   
+        cp ehri-extension/target/ehri-extension-0.0.1-SNAPSHOT.jar {neo4j}/plugins   
 
    The extension depends on ehri-frames; 
    therefore you need to copy the 'ehri-frames-0.1-SNAPSHOT.jar' into the 
