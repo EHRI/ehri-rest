@@ -25,9 +25,8 @@ import org.w3c.dom.Document;
 /**
  * Class containing static methods to convert between FramedVertex instances,
  * EntityBundles, and raw data.
- * 
+ *
  * @author michaelb
- * 
  */
 public final class Serializer {
 
@@ -49,7 +48,7 @@ public final class Serializer {
         }
     }
 
-    private final LruCache<String,Bundle> cache;
+    private final LruCache<String, Bundle> cache;
 
     public Serializer withCache() {
         return new Serializer(graph, dependentOnly, maxTraversals, liteMode, new LruCache<String, Bundle>(100));
@@ -71,7 +70,7 @@ public final class Serializer {
 
     /**
      * Constructor which allows specifying depth of @Fetched traversals.
-     * 
+     *
      * @param depth
      */
     public Serializer(FramedGraph<?> graph, int depth) {
@@ -92,10 +91,10 @@ public final class Serializer {
      * and the depth of traversal.
      *
      * @param dependentOnly Only serialize dependent nodes
-     * @param depth Depth at which to stop recursion
-     * @param lite  Only serialize mandatory properties
+     * @param depth         Depth at which to stop recursion
+     * @param lite          Only serialize mandatory properties
      */
-    public Serializer(FramedGraph<?> graph, boolean dependentOnly, int depth, boolean lite, LruCache<String,Bundle> cache) {
+    public Serializer(FramedGraph<?> graph, boolean dependentOnly, int depth, boolean lite, LruCache<String, Bundle> cache) {
         this.graph = graph;
         this.dependentOnly = dependentOnly;
         this.maxTraversals = depth;
@@ -128,7 +127,6 @@ public final class Serializer {
      * the specified depth.
      *
      * @param depth Maximum depth of traversal.
-     *
      * @param graph The framed graph
      */
     public static Serializer depthSerializer(FramedGraph<?> graph, int depth) {
@@ -137,7 +135,7 @@ public final class Serializer {
 
     /**
      * Convert a vertex frame to a raw bundle of data.
-     * 
+     *
      * @param item
      * @return
      * @throws SerializationError
@@ -162,7 +160,7 @@ public final class Serializer {
     /**
      * Convert a Frame into an EntityBundle that includes its @Fetch'd
      * relations.
-     * 
+     *
      * @param item
      * @return
      * @throws SerializationError
@@ -180,14 +178,14 @@ public final class Serializer {
      * @return
      * @throws SerializationError
      */
-    public  Bundle vertexFrameToBundle(Vertex item)
+    public Bundle vertexFrameToBundle(Vertex item)
             throws SerializationError {
         return vertexToBundle(item, 0, false);
     }
 
     /**
      * Serialise a vertex frame to JSON.
-     * 
+     *
      * @param item
      * @return
      * @throws SerializationError
@@ -260,7 +258,7 @@ public final class Serializer {
     /**
      * Run a callback every time a node in a subtree is encountered, starting
      * with the top-level node.
-     * 
+     *
      * @param item
      * @param cb
      */
@@ -272,7 +270,7 @@ public final class Serializer {
     /**
      * Convert a Frame into an EntityBundle that includes its @Fetch'd
      * relations.
-     * 
+     *
      * @param item
      * @param depth
      * @return
@@ -295,6 +293,18 @@ public final class Serializer {
             throw new SerializationError("Unable to serialize vertex: " + item,
                     e);
         }
+    }
+
+    private Bundle fetch(Frame frame, int depth, boolean isLite) throws SerializationError {
+        if (cache != null) {
+            String key = frame.getId() + depth + isLite;
+            if (cache.containsKey(key))
+                return cache.get(key);
+            Bundle bundle = vertexToBundle(frame.asVertex(), depth, isLite);
+            cache.put(key, bundle);
+            return bundle;
+        }
+        return vertexToBundle(frame.asVertex(), depth, isLite);
     }
 
     // TODO: Profiling shows that (unsurprisingly) this method is a
@@ -325,31 +335,13 @@ public final class Serializer {
                         // be a single Frame, or a Iterable<Frame>.
                         if (result instanceof Iterable<?>) {
                             for (Object d : (Iterable<?>) result) {
-                                Bundle bundle;
-                                if (cache != null && cache.containsKey(((Frame)d).getId())) {
-                                    bundle = cache.get(((Frame)d).getId());
-                                } else {
-                                    bundle = vertexToBundle(((Frame) d).asVertex(),
-                                            depth + 1, isLite);
-                                    if (cache != null)
-                                        cache.put(bundle.getId(), bundle);
-                                }
-                                relations.put(relationName, bundle);
+                                relations.put(relationName, fetch((Frame) d, depth + 1, isLite));
                             }
                         } else {
                             // This relationship could be NULL if, e.g. a
                             // collection has no holder.
                             if (result != null) {
-                                Bundle bundle;
-                                if (cache != null && cache.containsKey(((Frame)result).getId())) {
-                                    bundle = cache.get(((Frame)result).getId());
-                                } else {
-                                    bundle = vertexToBundle(((Frame) result).asVertex(),
-                                            depth + 1, isLite);
-                                    if (cache != null)
-                                        cache.put(bundle.getId(), bundle);
-                                }
-                                relations.put(relationName, bundle);
+                                relations.put(relationName, fetch((Frame) result, depth + 1, isLite));
                             }
                         }
                     } catch (Exception e) {
@@ -366,9 +358,9 @@ public final class Serializer {
     /**
      * Determine if a relation should be serialized without its non-mandatory
      * data. This will be the case if:
-     *
-     *  - depth is > 0
-     *  - item is a non-dependent relationship
+     * <p/>
+     * - depth is > 0
+     * - item is a non-dependent relationship
      *
      * @param relationName
      * @param method
@@ -381,7 +373,7 @@ public final class Serializer {
 
     /**
      * Determine if traversal should proceed on a Frames relation.
-     * 
+     *
      * @param relationName
      * @param method
      * @param depth
@@ -450,7 +442,7 @@ public final class Serializer {
     /**
      * Run a callback every time a node in a subtree is encountered, starting
      * with the top-level node.
-     * 
+     *
      * @param item
      * @param depth
      * @param cb
