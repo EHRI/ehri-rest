@@ -32,9 +32,7 @@ public final class Serializer {
 
     private static final Logger logger = LoggerFactory.getLogger(Serializer.class);
 
-    private final FramedGraph<?> graph;
-
-    private class LruCache<A, B> extends LinkedHashMap<A, B> {
+    private static class LruCache<A, B> extends LinkedHashMap<A, B> {
         private final int maxEntries;
 
         public LruCache(final int maxEntries) {
@@ -48,89 +46,87 @@ public final class Serializer {
         }
     }
 
-    private final LruCache<String, Bundle> cache;
-
-    public Serializer withCache() {
-        return new Serializer(graph, dependentOnly, maxTraversals, liteMode, new LruCache<String, Bundle>(100));
-    }
-
-    /**
-     * Lookup of entityType keys against their annotated class.
-     */
+    private final FramedGraph<?> graph;
     private final int maxTraversals;
     private final boolean dependentOnly;
     private final boolean liteMode;
+    private final LruCache<String, Bundle> cache;
+
+
+    public Serializer withCache() {
+        return new Serializer(new Builder(graph).withCache());
+    }
 
     /**
-     * Constructor.
+     * Basic constructor.
      */
     public Serializer(FramedGraph<?> graph) {
-        this(graph, false, Fetch.DEFAULT_TRAVERSALS, false, null);
+        this(new Builder(graph));
     }
 
     /**
-     * Constructor which allows specifying depth of @Fetched traversals.
-     *
-     * @param depth
+     * Builder for serializers with non-default options.
      */
-    public Serializer(FramedGraph<?> graph, int depth) {
-        this(graph, false, depth, false, null);
+    public static class Builder {
+        private final FramedGraph<?> graph;
+        private int maxTraversals = Fetch.DEFAULT_TRAVERSALS;
+        private boolean dependentOnly = false;
+        private boolean liteMode = false;
+        private LruCache<String, Bundle> cache = null;
+
+        public Builder(FramedGraph<?> graph) {
+            this.graph = graph;
+        }
+
+        public Builder withDepth(int depth) {
+            this.maxTraversals = depth;
+            return this;
+        }
+
+        public Builder dependentOnly() {
+            this.dependentOnly = true;
+            return this;
+        }
+
+        public Builder withLiteMode(boolean lite) {
+            this.liteMode = lite;
+            return this;
+        }
+
+        public Builder withCache() {
+            this.cache = new LruCache<String, Bundle>(100);
+            return this;
+        }
+
+        public Serializer build() {
+            return new Serializer(this);
+        }
+
     }
 
-    /**
-     * Constructor which allows specifying whether to serialize non-dependent relations.
-     *
-     * @param dependentOnly
-     */
-    public Serializer(FramedGraph<?> graph, boolean dependentOnly) {
-        this(graph, dependentOnly, Fetch.DEFAULT_TRAVERSALS, false, null);
+    public Serializer(Builder builder) {
+        this(builder.graph, builder.dependentOnly,
+                builder.maxTraversals, builder.liteMode, builder.cache);
     }
 
     /**
      * Constructor which allows specifying whether to serialize non-dependent relations
      * and the depth of traversal.
      *
+     * @param graph         The framed graph
      * @param dependentOnly Only serialize dependent nodes
      * @param depth         Depth at which to stop recursion
      * @param lite          Only serialize mandatory properties
+     * @param cache         Use a cache - use for single operations serializing many vertices
+     *                      with common attributes, and NOT for reusable serializers
      */
-    public Serializer(FramedGraph<?> graph, boolean dependentOnly, int depth, boolean lite, LruCache<String, Bundle> cache) {
+    private Serializer(FramedGraph<?> graph, boolean dependentOnly, int depth, boolean lite, LruCache<String,
+            Bundle> cache) {
         this.graph = graph;
         this.dependentOnly = dependentOnly;
         this.maxTraversals = depth;
         this.liteMode = lite;
         this.cache = cache;
-    }
-
-    /**
-     * Factory method for obtaining a default serializer for
-     * the given graph.
-     *
-     * @param graph The framed graph
-     */
-    public static Serializer defaultSerializer(FramedGraph<?> graph) {
-        return new Serializer(graph, false, Fetch.DEFAULT_TRAVERSALS, false, null);
-    }
-
-    /**
-     * Factory method for obtaining a serializer which only writes
-     * mandatory properties.
-     *
-     * @param graph The framed graph
-     */
-    public static Serializer liteSerializer(FramedGraph<?> graph) {
-        return new Serializer(graph, false, Fetch.DEFAULT_TRAVERSALS, true, null);
-    }
-
-    /**
-     * Factory method for obtaining a serializer which writes to
-     * the specified depth.
-     *
-     * @param depth Maximum depth of traversal.
-     * @param graph The framed graph
-     */
-    public static Serializer depthSerializer(FramedGraph<?> graph, int depth) {
-        return new Serializer(graph, false, depth, false, null);
     }
 
     /**

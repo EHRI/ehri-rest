@@ -99,7 +99,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
         graph = new FramedGraphFactory(
                 new JavaHandlerModule()).create(new TxCheckedNeo4jGraph(database));
         manager = GraphManagerFactory.getInstance(graph);
-        serializer  = new Serializer(graph);
+        serializer  = new Serializer.Builder(graph).withLiteMode(true).build();
     }
 
     public FramedGraph<TxCheckedNeo4jGraph> getGraph() {

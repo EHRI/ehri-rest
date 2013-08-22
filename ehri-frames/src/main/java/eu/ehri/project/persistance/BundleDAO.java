@@ -42,8 +42,6 @@ public final class BundleDAO {
 
     private static final Logger logger = LoggerFactory.getLogger(BundleDAO.class);
 
-    ;
-
     private final FramedGraph<?> graph;
     private final PermissionScope scope;
     private final GraphManager manager;
@@ -60,7 +58,7 @@ public final class BundleDAO {
         this.scope = Optional.fromNullable(scope)
                 .or(SystemScope.getInstance());
         manager = GraphManagerFactory.getInstance(graph);
-        serializer = new Serializer(graph, true);
+        serializer = new Serializer.Builder(graph).dependentOnly().build();
     }
 
     /**
