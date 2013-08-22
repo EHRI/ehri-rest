@@ -84,7 +84,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws PermissionDenied
      * @throws ValidationError
      * @throws IntegrityError
-     * @throw DeserializationError
+     * @throws DeserializationError
      */
     public E create(Bundle bundle, Accessor user, Optional<String> logMessage)
             throws PermissionDenied, ValidationError, DeserializationError,
@@ -126,7 +126,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws PermissionDenied
      * @throws ValidationError
      * @throws IntegrityError
-     * @throw DeserializationError
+     * @throws DeserializationError
      */
     public Mutation<E> createOrUpdate(Bundle bundle, Accessor user, Optional<String> logMessage)
             throws PermissionDenied, ValidationError, DeserializationError,
@@ -167,7 +167,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws PermissionDenied
      * @throws ValidationError
      * @throws IntegrityError
-     * @throw DeserializationError
+     * @throws DeserializationError
      */
     public Mutation<E> update(Bundle bundle, Accessor user, Optional<String> logMessage)
             throws PermissionDenied, ValidationError, DeserializationError,
@@ -217,7 +217,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws PermissionDenied
      * @throws ValidationError
      * @throws IntegrityError
-     * @throw DeserializationError
+     * @throws DeserializationError
      */
     public <T extends Frame> Mutation<T> updateDependent(Bundle bundle, E parent, Accessor user,
             Class<T> dependentClass, Optional<String> logMessage)
@@ -268,7 +268,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws PermissionDenied
      * @throws ValidationError
      * @throws IntegrityError
-     * @throw DeserializationError
+     * @throws DeserializationError
      */
     public <T extends Frame> T createDependent(Bundle bundle, E parent, Accessor user,
                 Class<T> dependentClass, Optional<String> logMessage)
