@@ -27,7 +27,7 @@ fi
 # Run maven to package our stuff...
 echo "Attempting package..."
 # NB: Include sparql stuff here with -P sparql
-mvn clean package  -DskipTests || { echo "Maven package exited with non-zero status, install aborted..."; exit 4; }
+mvn clean package -P sparql  -DskipTests || { echo "Maven package exited with non-zero status, install aborted..."; exit 4; }
 
 # find archive and untar it...
 archive=`ls assembly/target/assembly*tar.gz`
