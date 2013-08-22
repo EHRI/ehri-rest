@@ -1,6 +1,7 @@
 package eu.ehri.project.persistance;
 
 import java.lang.reflect.Method;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -34,6 +35,26 @@ public final class Serializer {
 
     private final FramedGraph<?> graph;
 
+    private class LruCache<A, B> extends LinkedHashMap<A, B> {
+        private final int maxEntries;
+
+        public LruCache(final int maxEntries) {
+            super(maxEntries + 1, 1.0f, true);
+            this.maxEntries = maxEntries;
+        }
+
+        @Override
+        protected boolean removeEldestEntry(final Map.Entry<A, B> eldest) {
+            return super.size() > maxEntries;
+        }
+    }
+
+    private final LruCache<String,Bundle> cache;
+
+    public Serializer withCache() {
+        return new Serializer(graph, dependentOnly, maxTraversals, liteMode, new LruCache<String, Bundle>(100));
+    }
+
     /**
      * Lookup of entityType keys against their annotated class.
      */
@@ -45,7 +66,7 @@ public final class Serializer {
      * Constructor.
      */
     public Serializer(FramedGraph<?> graph) {
-        this(graph, false, Fetch.DEFAULT_TRAVERSALS, false);
+        this(graph, false, Fetch.DEFAULT_TRAVERSALS, false, null);
     }
 
     /**
@@ -54,7 +75,7 @@ public final class Serializer {
      * @param depth
      */
     public Serializer(FramedGraph<?> graph, int depth) {
-        this(graph, false, depth, false);
+        this(graph, false, depth, false, null);
     }
 
     /**
@@ -63,7 +84,7 @@ public final class Serializer {
      * @param dependentOnly
      */
     public Serializer(FramedGraph<?> graph, boolean dependentOnly) {
-        this(graph, dependentOnly, Fetch.DEFAULT_TRAVERSALS, false);
+        this(graph, dependentOnly, Fetch.DEFAULT_TRAVERSALS, false, null);
     }
 
     /**
@@ -74,11 +95,12 @@ public final class Serializer {
      * @param depth Depth at which to stop recursion
      * @param lite  Only serialize mandatory properties
      */
-    public Serializer(FramedGraph<?> graph, boolean dependentOnly, int depth, boolean lite) {
+    public Serializer(FramedGraph<?> graph, boolean dependentOnly, int depth, boolean lite, LruCache<String,Bundle> cache) {
         this.graph = graph;
         this.dependentOnly = dependentOnly;
         this.maxTraversals = depth;
         this.liteMode = lite;
+        this.cache = cache;
     }
 
     /**
@@ -88,7 +110,7 @@ public final class Serializer {
      * @param graph The framed graph
      */
     public static Serializer defaultSerializer(FramedGraph<?> graph) {
-        return new Serializer(graph, false, Fetch.DEFAULT_TRAVERSALS, false);
+        return new Serializer(graph, false, Fetch.DEFAULT_TRAVERSALS, false, null);
     }
 
     /**
@@ -98,7 +120,7 @@ public final class Serializer {
      * @param graph The framed graph
      */
     public static Serializer liteSerializer(FramedGraph<?> graph) {
-        return new Serializer(graph, false, Fetch.DEFAULT_TRAVERSALS, true);
+        return new Serializer(graph, false, Fetch.DEFAULT_TRAVERSALS, true, null);
     }
 
     /**
@@ -110,7 +132,7 @@ public final class Serializer {
      * @param graph The framed graph
      */
     public static Serializer depthSerializer(FramedGraph<?> graph, int depth) {
-        return new Serializer(graph, false, depth, false);
+        return new Serializer(graph, false, depth, false, null);
     }
 
     /**
@@ -303,20 +325,32 @@ public final class Serializer {
                         // be a single Frame, or a Iterable<Frame>.
                         if (result instanceof Iterable<?>) {
                             for (Object d : (Iterable<?>) result) {
-                                relations.put(
-                                        relationName,
-                                        vertexToBundle(((Frame) d).asVertex(),
-                                                depth + 1, isLite));
+                                Bundle bundle;
+                                if (cache != null && cache.containsKey(((Frame)d).getId())) {
+                                    bundle = cache.get(((Frame)d).getId());
+                                } else {
+                                    bundle = vertexToBundle(((Frame) d).asVertex(),
+                                            depth + 1, isLite);
+                                    if (cache != null)
+                                        cache.put(bundle.getId(), bundle);
+                                }
+                                relations.put(relationName, bundle);
                             }
                         } else {
                             // This relationship could be NULL if, e.g. a
                             // collection has no holder.
-                            if (result != null)
-                                relations
-                                        .put(relationName,
-                                                vertexToBundle(
-                                                        ((Frame) result).asVertex(),
-                                                        depth + 1, isLite));
+                            if (result != null) {
+                                Bundle bundle;
+                                if (cache != null && cache.containsKey(((Frame)result).getId())) {
+                                    bundle = cache.get(((Frame)result).getId());
+                                } else {
+                                    bundle = vertexToBundle(((Frame) result).asVertex(),
+                                            depth + 1, isLite);
+                                    if (cache != null)
+                                        cache.put(bundle.getId(), bundle);
+                                }
+                                relations.put(relationName, bundle);
+                            }
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
