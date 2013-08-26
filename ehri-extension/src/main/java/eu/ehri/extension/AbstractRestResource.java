@@ -47,6 +47,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
     public static final String OFFSET_PARAM = "offset";
     public static final String ACCESSOR_PARAM = "accessibleTo";
     public static final String GROUP_PARAM = "group";
+    public static final String ALL_PARAM = "all";
 
     /**
      * Header names
