@@ -40,7 +40,7 @@ public class UshmmTest extends AbstractImporterTest{
         printGraph(graph);
         
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        ImportLog log = new SaxImportManager(graph, agent, validUser, IcaAtomEadImporter.class, IcaAtomEadHandler.class)
+        ImportLog log = new SaxImportManager(graph, agent, validUser, IcaAtomEadImporter.class, BundesarchiveEadHandler.class)
                 .setTolerant(Boolean.TRUE).importFile(ios, logMessage);
 
         printGraph(graph);
@@ -80,7 +80,7 @@ public class UshmmTest extends AbstractImporterTest{
 
 //        // Now re-import the same file
 //        InputStream ios2 = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-//        ImportLog log2 = new SaxImportManager(graph, agent, validUser, IcaAtomEadImporter.class, IcaAtomEadHandler.class).importFile(ios2, logMessage);
+//        ImportLog log2 = new SaxImportManager(graph, agent, validUser, IcaAtomEadImporter.class, BundesarchiveEadHandler.class).importFile(ios2, logMessage);
 //
 //        // We should only have three more nodes, for 
 //        // the action and 

@@ -85,7 +85,7 @@ public class IcaAtomEadImporter extends EaImporter {
 
         if (unit.getDataValue(Ontology.IDENTIFIER_KEY) == null) {
             throw new ValidationError(unit, Ontology.IDENTIFIER_KEY, "Missing identifier");
-        }
+        } 
         IdGenerator generator = EntityClass.DOCUMENTARY_UNIT.getIdgen();
         String id = generator.generateId(EntityClass.DOCUMENTARY_UNIT, permissionScope, unit);
         if (id.equals(permissionScope.getId())) {
