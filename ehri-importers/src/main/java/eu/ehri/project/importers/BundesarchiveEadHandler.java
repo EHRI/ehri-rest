@@ -73,21 +73,7 @@ public class BundesarchiveEadHandler extends SaxXmlHandler {
             if (childItemPattern.matcher(qName).matches() || qName.equals("archdesc")) {
                 try {
                     //add any mandatory fields not yet there:
-                    if (!currentGraph.containsKey(Ontology.NAME_KEY)) {
-                        //finding some name for this unit:
-                        if (currentGraph.containsKey("title")) {
-                            currentGraph.put(Ontology.NAME_KEY, currentGraph.get("title"));
-                        } else {
-                            logger.error("Bundesarchive node without name field: ");
-                            currentGraph.put(Ontology.NAME_KEY, "UNKNOWN title");
-                        }
-                    }
-                    if (!currentGraph.containsKey(Ontology.LANGUAGE_OF_DESCRIPTION)) {
-                        currentGraph.put(Ontology.LANGUAGE_OF_DESCRIPTION, "en");
-                    }
-                    if (!currentGraph.containsKey(Ontology.LANGUAGE_OF_DESCRIPTION)) {
-                        currentGraph.put(Ontology.LANGUAGE_OF_DESCRIPTION, "en");
-                    }
+                    //not all units have ids, and some have multiple, find the Bestandssignatur
                     if (currentGraph.containsKey("objectIdentifier")) {
                         if (currentGraph.get("objectIdentifier") instanceof List) {
                             logger.debug("class of identifier: " + currentGraph.get("objectIdentifier").getClass());
@@ -97,14 +83,42 @@ public class BundesarchiveEadHandler extends SaxXmlHandler {
                                 if (identifiertypes.get(i).equals("Bestandssignatur")) {
                                     logger.debug("found official id: " + identifiers.get(i));
                                     currentGraph.put("objectIdentifier", identifiers.get(i));
+                                }else {
+                                    logger.debug("found other form of identifier: " + identifiers.get(i));
+                                    currentGraph.put("arta", identifiers.get(i));
                                 }
                             }
+                            currentGraph.remove("objectIdentifierType");
                         }
                     } else {
                         logger.error("no unitid found, setting " + ++bundesarchivecount);
                         currentGraph.put("objectIdentifier", "bundesarchiveID"+bundesarchivecount);
                         
                     }
+                    //the BA have multiple unittitles, but with different types, find the Bestandsbezeichnung
+                    if (!currentGraph.containsKey(Ontology.NAME_KEY)) {
+                        //finding some name for this unit:
+                        logger.error("Bundesarchive node without name field: ");
+                        currentGraph.put(Ontology.NAME_KEY, "UNKNOWN title" );
+                    } else if(currentGraph.get(Ontology.NAME_KEY) instanceof List){
+                            logger.debug("class of identifier: " + currentGraph.get(Ontology.NAME_KEY).getClass());
+                            ArrayList<String> names = (ArrayList<String>) currentGraph.get(Ontology.NAME_KEY);
+                            ArrayList<String> nametypes = (ArrayList<String>) currentGraph.get(Ontology.NAME_KEY+"Type");
+                            for (int i = 0; i < names.size(); i++) {
+                                if (nametypes.get(i).equals("Bestandsbezeichnung")) {
+                                    logger.debug("found official name: " + names.get(i));
+                                    currentGraph.put(Ontology.NAME_KEY, names.get(i));
+                                } else {
+                                    logger.debug("found other form of name: " + names.get(i));
+                                    currentGraph.put("otherFormsOfName", names.get(i));
+                                }
+                            }
+                            currentGraph.remove(Ontology.NAME_KEY+"Type");
+                    }
+                    if (!currentGraph.containsKey(Ontology.LANGUAGE_OF_DESCRIPTION)) {
+                        currentGraph.put(Ontology.LANGUAGE_OF_DESCRIPTION, "de");
+                    }
+                    
                 DocumentaryUnit current = (DocumentaryUnit)importer.importItem(currentGraph, depth);
                 logger.debug("importer used: " + importer.getClass());
                 if (depth > 0) { // if not on root level
