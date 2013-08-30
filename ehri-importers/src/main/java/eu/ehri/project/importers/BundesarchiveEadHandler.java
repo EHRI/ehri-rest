@@ -28,6 +28,7 @@ public class BundesarchiveEadHandler extends SaxXmlHandler {
     private final List<DocumentaryUnit>[] children = new ArrayList[12];
     // Pattern for EAD nodes that represent a child item
     private Pattern childItemPattern = Pattern.compile("^/*c(?:\\d*)$");
+    
 
     /**
      * Set a custom resolver so EAD DTDs are never looked up online.
@@ -73,6 +74,7 @@ public class BundesarchiveEadHandler extends SaxXmlHandler {
             if (childItemPattern.matcher(qName).matches() || qName.equals("archdesc")) {
                 try {
                     //add any mandatory fields not yet there:
+                	
                     //not all units have ids, and some have multiple, find the Bestandssignatur
                     if (currentGraph.containsKey("objectIdentifier")) {
                         if (currentGraph.get("objectIdentifier") instanceof List) {
@@ -153,13 +155,7 @@ public class BundesarchiveEadHandler extends SaxXmlHandler {
     @Override
     protected boolean needToCreateSubNode(String qName) {
         //child or parent unit:
-        boolean need = childItemPattern.matcher(qName).matches() || qName.equals("archdesc");
-        //controlAccess 
-        String path = getImportantPath(currentPath);
-        if (path != null) {
-            need = need || path.endsWith("Access");
-        }
-        return need;
+        return childItemPattern.matcher(qName).matches() || qName.equals("archdesc");
     }
 
     @Override
