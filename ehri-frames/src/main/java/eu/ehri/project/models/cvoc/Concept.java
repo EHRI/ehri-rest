@@ -48,20 +48,15 @@ public interface Concept extends AccessibleEntity, IdentifiableEntity,
     // Note that multiple broader concepts are possible
     @Fetch(Ontology.CONCEPT_HAS_BROADER)
     @Adjacency(label = Ontology.CONCEPT_HAS_NARROWER, direction=Direction.IN)
-    //@Adjacency(label = CONCEPT_HAS_BROADER)
     public Iterable<Concept> getBroaderConcepts();
 
-    //@Adjacency(label = CONCEPT_HAS_BROADER)
-    //public void addBroaderConcept(final Concept concept);
-
     // NOTE: don't put a Fetch on it, because it can be a large tree of concepts
-    @Adjacency(label = Ontology.CONCEPT_HAS_NARROWER)
+    @JavaHandler
     public Iterable<Concept> getNarrowerConcepts();
 
-    @Adjacency(label = Ontology.CONCEPT_HAS_NARROWER)
+    @JavaHandler
     public void addNarrowerConcept(final Concept concept);
 
-    //@Adjacency(label = CONCEPT_HAS_NARROWER)
     @JavaHandler
     public void removeNarrowerConcept(final Concept concept);
 
@@ -88,7 +83,7 @@ public interface Concept extends AccessibleEntity, IdentifiableEntity,
         public Long getChildCount() {
             Long count = it().getProperty(CHILD_COUNT);
             if (count == null) {
-                it().setProperty(CHILD_COUNT, gremlin().in(Ontology.CONCEPT_HAS_NARROWER).count());
+                it().setProperty(CHILD_COUNT, gremlin().out(Ontology.CONCEPT_HAS_NARROWER).count());
             }
             return count;
         }
@@ -96,7 +91,7 @@ public interface Concept extends AccessibleEntity, IdentifiableEntity,
         public Iterable<Concept> getNarrowerConcepts() {
             // Ensure value is cached when fetching.
             getChildCount();
-            return frameVertices(gremlin().in(Ontology.CONCEPT_HAS_NARROWER));
+            return frameVertices(gremlin().out(Ontology.CONCEPT_HAS_NARROWER));
         }
 
         public void addNarrowerConcept(final Concept concept) {
