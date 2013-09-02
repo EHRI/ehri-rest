@@ -113,7 +113,7 @@ public class BundleDAOTest extends ModelTestBase {
     public void testDeletingDependents() throws SerializationError,
             ValidationError, IntegrityError, ItemNotFound {
         DocumentaryUnit c1 = manager.getFrame(ID, DocumentaryUnit.class);
-        Bundle bundle = new Serializer(graph, true).vertexFrameToBundle(c1);
+        Bundle bundle = new Serializer(graph).vertexFrameToBundle(c1);
         assertEquals(2, Iterables.size(c1.getDocumentDescriptions()));
         assertEquals(2, Iterables.size(c1.getDocumentDescriptions()
                 .iterator().next().getDatePeriods()));

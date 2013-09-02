@@ -28,21 +28,18 @@ buildclasspath() {
   LIBDIR="$NEO4J_HOME"/lib
   if [ ! -e "$LIBDIR" ] ; then
     echo "Error: missing Neo4j Library, expected at $LIBDIR"
-    exit 1
   fi
 
   # confirm system jars
   SYSLIBDIR="$NEO4J_HOME"/system/lib
   if [ ! -e "$SYSLIBDIR" ] ; then
     echo "Error: missing Neo4j System Library, expected at $SYSLIBDIR"
-    exit 1
   fi
 
   # confirm system jars
   EHRILIBDIR="$NEO4J_HOME"/plugins/ehri
   if [ ! -e "$EHRILIBDIR" ] ; then
     echo "Error: missing EHRI libs, expected at $EHRILIBDIR"
-    exit 1
   fi
 
   ALL_JARS=""

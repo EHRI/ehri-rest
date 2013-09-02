@@ -36,8 +36,14 @@ import eu.ehri.project.views.Query;
 @Path(Entities.SYSTEM_EVENT)
 public class EventResource extends AbstractAccessibleEntityResource<SystemEvent> {
 
+    private final Serializer subjectSerializer;
+
     public EventResource(@Context GraphDatabaseService database) {
         super(database, SystemEvent.class);
+
+        // Subjects are only serialized to depth 1 for efficiency...
+        subjectSerializer = new Serializer.Builder(graph).withDepth(1).build();
+
     }
 
     @GET
@@ -122,7 +128,7 @@ public class EventResource extends AbstractAccessibleEntityResource<SystemEvent>
         // NB: Taking a pragmatic decision here to only stream the first
         // level of the subject's tree.
         return streamingPage(query.page(event.getSubjects(), user),
-                new Serializer(graph, 1));
+                subjectSerializer.withCache());
     }
 
     /**

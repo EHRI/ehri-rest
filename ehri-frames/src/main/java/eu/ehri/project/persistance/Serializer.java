@@ -1,6 +1,7 @@
 package eu.ehri.project.persistance;
 
 import java.lang.reflect.Method;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -24,98 +25,113 @@ import org.w3c.dom.Document;
 /**
  * Class containing static methods to convert between FramedVertex instances,
  * EntityBundles, and raw data.
- * 
+ *
  * @author michaelb
- * 
  */
 public final class Serializer {
 
     private static final Logger logger = LoggerFactory.getLogger(Serializer.class);
 
-    private final FramedGraph<?> graph;
+    private static class LruCache<A, B> extends LinkedHashMap<A, B> {
+        private final int maxEntries;
 
-    /**
-     * Lookup of entityType keys against their annotated class.
-     */
+        public LruCache(final int maxEntries) {
+            super(maxEntries + 1, 1.0f, true);
+            this.maxEntries = maxEntries;
+        }
+
+        @Override
+        protected boolean removeEldestEntry(final Map.Entry<A, B> eldest) {
+            return super.size() > maxEntries;
+        }
+    }
+
+    private final FramedGraph<?> graph;
     private final int maxTraversals;
     private final boolean dependentOnly;
     private final boolean liteMode;
+    private final LruCache<String, Bundle> cache;
+
+
+    public Serializer withCache() {
+        return new Serializer(new Builder(graph).withCache());
+    }
 
     /**
-     * Constructor.
+     * Basic constructor.
      */
     public Serializer(FramedGraph<?> graph) {
-        this(graph, false, Fetch.DEFAULT_TRAVERSALS, false);
+        this(new Builder(graph));
     }
 
     /**
-     * Constructor which allows specifying depth of @Fetched traversals.
-     * 
-     * @param depth
+     * Builder for serializers with non-default options.
      */
-    public Serializer(FramedGraph<?> graph, int depth) {
-        this(graph, false, depth, false);
+    public static class Builder {
+        private final FramedGraph<?> graph;
+        private int maxTraversals = Fetch.DEFAULT_TRAVERSALS;
+        private boolean dependentOnly = false;
+        private boolean liteMode = false;
+        private LruCache<String, Bundle> cache = null;
+
+        public Builder(FramedGraph<?> graph) {
+            this.graph = graph;
+        }
+
+        public Builder withDepth(int depth) {
+            this.maxTraversals = depth;
+            return this;
+        }
+
+        public Builder dependentOnly() {
+            this.dependentOnly = true;
+            return this;
+        }
+
+        public Builder withLiteMode(boolean lite) {
+            this.liteMode = lite;
+            return this;
+        }
+
+        public Builder withCache() {
+            this.cache = new LruCache<String, Bundle>(100);
+            return this;
+        }
+
+        public Serializer build() {
+            return new Serializer(this);
+        }
+
     }
 
-    /**
-     * Constructor which allows specifying whether to serialize non-dependent relations.
-     *
-     * @param dependentOnly
-     */
-    public Serializer(FramedGraph<?> graph, boolean dependentOnly) {
-        this(graph, dependentOnly, Fetch.DEFAULT_TRAVERSALS, false);
+    public Serializer(Builder builder) {
+        this(builder.graph, builder.dependentOnly,
+                builder.maxTraversals, builder.liteMode, builder.cache);
     }
 
     /**
      * Constructor which allows specifying whether to serialize non-dependent relations
      * and the depth of traversal.
      *
+     * @param graph         The framed graph
      * @param dependentOnly Only serialize dependent nodes
-     * @param depth Depth at which to stop recursion
-     * @param lite  Only serialize mandatory properties
+     * @param depth         Depth at which to stop recursion
+     * @param lite          Only serialize mandatory properties
+     * @param cache         Use a cache - use for single operations serializing many vertices
+     *                      with common attributes, and NOT for reusable serializers
      */
-    public Serializer(FramedGraph<?> graph, boolean dependentOnly, int depth, boolean lite) {
+    private Serializer(FramedGraph<?> graph, boolean dependentOnly, int depth, boolean lite, LruCache<String,
+            Bundle> cache) {
         this.graph = graph;
         this.dependentOnly = dependentOnly;
         this.maxTraversals = depth;
         this.liteMode = lite;
-    }
-
-    /**
-     * Factory method for obtaining a default serializer for
-     * the given graph.
-     *
-     * @param graph The framed graph
-     */
-    public static Serializer defaultSerializer(FramedGraph<?> graph) {
-        return new Serializer(graph, false, Fetch.DEFAULT_TRAVERSALS, false);
-    }
-
-    /**
-     * Factory method for obtaining a serializer which only writes
-     * mandatory properties.
-     *
-     * @param graph The framed graph
-     */
-    public static Serializer liteSerializer(FramedGraph<?> graph) {
-        return new Serializer(graph, false, Fetch.DEFAULT_TRAVERSALS, true);
-    }
-
-    /**
-     * Factory method for obtaining a serializer which writes to
-     * the specified depth.
-     *
-     * @param depth Maximum depth of traversal.
-     *
-     * @param graph The framed graph
-     */
-    public static Serializer depthSerializer(FramedGraph<?> graph, int depth) {
-        return new Serializer(graph, false, depth, false);
+        this.cache = cache;
     }
 
     /**
      * Convert a vertex frame to a raw bundle of data.
-     * 
+     *
      * @param item
      * @return
      * @throws SerializationError
@@ -140,7 +156,7 @@ public final class Serializer {
     /**
      * Convert a Frame into an EntityBundle that includes its @Fetch'd
      * relations.
-     * 
+     *
      * @param item
      * @return
      * @throws SerializationError
@@ -158,14 +174,14 @@ public final class Serializer {
      * @return
      * @throws SerializationError
      */
-    public  Bundle vertexFrameToBundle(Vertex item)
+    public Bundle vertexFrameToBundle(Vertex item)
             throws SerializationError {
         return vertexToBundle(item, 0, false);
     }
 
     /**
      * Serialise a vertex frame to JSON.
-     * 
+     *
      * @param item
      * @return
      * @throws SerializationError
@@ -238,7 +254,7 @@ public final class Serializer {
     /**
      * Run a callback every time a node in a subtree is encountered, starting
      * with the top-level node.
-     * 
+     *
      * @param item
      * @param cb
      */
@@ -250,7 +266,7 @@ public final class Serializer {
     /**
      * Convert a Frame into an EntityBundle that includes its @Fetch'd
      * relations.
-     * 
+     *
      * @param item
      * @param depth
      * @return
@@ -275,6 +291,18 @@ public final class Serializer {
             throw new SerializationError("Unable to serialize vertex: " + item,
                     e);
         }
+    }
+
+    private Bundle fetch(Frame frame, int depth, boolean isLite) throws SerializationError {
+        if (cache != null) {
+            String key = frame.getId() + depth + isLite;
+            if (cache.containsKey(key))
+                return cache.get(key);
+            Bundle bundle = vertexToBundle(frame.asVertex(), depth, isLite);
+            cache.put(key, bundle);
+            return bundle;
+        }
+        return vertexToBundle(frame.asVertex(), depth, isLite);
     }
 
     // TODO: Profiling shows that (unsurprisingly) this method is a
@@ -305,20 +333,14 @@ public final class Serializer {
                         // be a single Frame, or a Iterable<Frame>.
                         if (result instanceof Iterable<?>) {
                             for (Object d : (Iterable<?>) result) {
-                                relations.put(
-                                        relationName,
-                                        vertexToBundle(((Frame) d).asVertex(),
-                                                depth + 1, isLite));
+                                relations.put(relationName, fetch((Frame) d, depth + 1, isLite));
                             }
                         } else {
                             // This relationship could be NULL if, e.g. a
                             // collection has no holder.
-                            if (result != null)
-                                relations
-                                        .put(relationName,
-                                                vertexToBundle(
-                                                        ((Frame) result).asVertex(),
-                                                        depth + 1, isLite));
+                            if (result != null) {
+                                relations.put(relationName, fetch((Frame) result, depth + 1, isLite));
+                            }
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -334,9 +356,9 @@ public final class Serializer {
     /**
      * Determine if a relation should be serialized without its non-mandatory
      * data. This will be the case if:
-     *
-     *  - depth is > 0
-     *  - item is a non-dependent relationship
+     * <p/>
+     * - depth is > 0
+     * - item is a non-dependent relationship
      *
      * @param relationName
      * @param method
@@ -349,7 +371,7 @@ public final class Serializer {
 
     /**
      * Determine if traversal should proceed on a Frames relation.
-     * 
+     *
      * @param relationName
      * @param method
      * @param depth
@@ -418,7 +440,7 @@ public final class Serializer {
     /**
      * Run a callback every time a node in a subtree is encountered, starting
      * with the top-level node.
-     * 
+     *
      * @param item
      * @param depth
      * @param cb

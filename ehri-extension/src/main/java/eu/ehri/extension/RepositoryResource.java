@@ -82,15 +82,19 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
             @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
             @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
             @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)
+            @QueryParam(FILTER_PARAM) List<String> filters,
+            @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all)
             throws ItemNotFound, BadRequester, AccessDenied {
         Accessor user = getRequesterUserProfile();
         Repository repository = views.detail(manager.getFrame(id, cls), user);
+        Iterable<DocumentaryUnit> units = all
+                ? repository.getAllCollections()
+                : repository.getCollections();
         Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
                 DocumentaryUnit.class).setLimit(limit).setOffset(offset)
                 .orderBy(order)
                 .filter(filters);
-        return streamingList(query.list(repository.getCollections(), user));
+        return streamingList(query.list(units, user));
     }
 
     @GET
@@ -98,15 +102,18 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
     @Path("/{id:.+}/count")
     public Response countRepositoryDocumentaryUnits(
             @PathParam("id") String id,
-            @QueryParam(FILTER_PARAM) List<String> filters)
+            @QueryParam(FILTER_PARAM) List<String> filters,
+            @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all)
             throws ItemNotFound, BadRequester, AccessDenied {
         Accessor user = getRequesterUserProfile();
         Repository repository = views.detail(manager.getFrame(id, cls), user);
+        Iterable<DocumentaryUnit> units = all
+                ? repository.getAllCollections()
+                : repository.getCollections();
         Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
                 DocumentaryUnit.class)
                 .filter(filters);
-        return Response.ok((query.count(repository.getCollections(), user))
-                .toString().getBytes()).build();
+        return Response.ok((query.count(units, user)).toString().getBytes()).build();
     }
 
     @GET
@@ -117,15 +124,19 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
             @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
             @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
             @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)
+            @QueryParam(FILTER_PARAM) List<String> filters,
+            @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all)
             throws ItemNotFound, BadRequester, AccessDenied, PermissionDenied {
         Accessor user = getRequesterUserProfile();
         Repository repository = views.detail(manager.getFrame(id, cls), user);
+        Iterable<DocumentaryUnit> units = all
+                ? repository.getAllCollections()
+                : repository.getCollections();
         Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
                 DocumentaryUnit.class).setLimit(limit).setOffset(offset)
                 .orderBy(order)
                 .filter(filters);
-        return streamingPage(query.page(repository.getCollections(), user));
+        return streamingPage(query.page(units, user));
     }
 
     @GET
