@@ -7,17 +7,6 @@ This server plugin is actually implemented by an unmanaged neo4j extension.
 This 'ehri-extension' project depends mainly on the 'ehri-frames' project, 
 which handles the business logic and data persistency. 
 
-##Building and deploying the plugin:
-----------------------------------
-  
-### Prerequisites 
-* Java6
-* Maven3
-* Git (if you want to contribute or get the latest versions from GitHub)
-* Most likely a Java IDE
-* Neo4j server
-    The directory where neo4j is installed will be called {neo4j} from now on. 
-      
 For documentation (a work-in-progress, but better than nothing) see the docs:
 
 * [Installing and running from the code repository](docs/INSTALL.md)
