@@ -15,16 +15,17 @@ import static junit.framework.Assert.*;
 public class SerializerTest extends AbstractFixtureTest {
 
     @Test
-    public void testDefaultSerialization() throws Exception {
+    public void testNonLiteSerialization() throws Exception {
         DocumentaryUnit doc = manager.getFrame("c1", DocumentaryUnit.class);
 
-        Bundle serialized = Serializer.defaultSerializer(graph)
+        Bundle serialized = new Serializer(graph)
                 .vertexFrameToBundle(doc);
 
         // Name of repository should be serialized
         assertEquals("Documentary Unit 1",
                 BundleUtils.get(serialized, "describes[0]/name"));
         assertNotNull(BundleUtils.get(serialized, "describes[0]/scopeAndContent"));
+        System.out.println(serialized);
         assertEquals("NIOD Description",
                 BundleUtils.get(serialized, "heldBy[0]/describes[0]/name"));
 
@@ -41,7 +42,7 @@ public class SerializerTest extends AbstractFixtureTest {
     public void testLiteSerialization() throws Exception {
         DocumentaryUnit doc = manager.getFrame("c1", DocumentaryUnit.class);
 
-        Bundle serialized = Serializer.liteSerializer(graph)
+        Bundle serialized = new Serializer.Builder(graph).withLiteMode(true).build()
                 .vertexFrameToBundle(doc);
 
         // Name of doc and repository should be serialized

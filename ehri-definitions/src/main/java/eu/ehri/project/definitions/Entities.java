@@ -28,4 +28,5 @@ public class Entities {
     public static final String MAINTENANCE_EVENT ="maintenanceEvent";
     public static final String UNDETERMINED_RELATIONSHIP = "relationship";
     public static final String AUTHORITATIVE_SET = "authoritativeSet";
+    public static final String VIRTUAL_COLLECTION = "virtualCollection";
 }

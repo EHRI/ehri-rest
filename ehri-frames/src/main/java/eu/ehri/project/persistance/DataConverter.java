@@ -48,7 +48,9 @@ class DataConverter {
         data.put(Bundle.ID_KEY, bundle.getId());
         data.put(Bundle.TYPE_KEY, bundle.getType().getName());
         data.put(Bundle.DATA_KEY, bundle.getData());
-        data.put(Bundle.META_KEY, bundle.getMeta());
+        if (bundle.hasMetaData()) {
+            data.put(Bundle.META_KEY, bundle.getMetaData());
+        }
         Map<String, List<Map<String, Object>>> relations = Maps.newHashMap();
         ListMultimap<String, Bundle> crelations = bundle.getRelations();
         for (String key : crelations.keySet()) {
