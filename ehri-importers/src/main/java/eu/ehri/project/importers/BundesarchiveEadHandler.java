@@ -117,8 +117,31 @@ public class BundesarchiveEadHandler extends SaxXmlHandler {
                             }
                             currentGraph.remove(Ontology.NAME_KEY+"Type");
                     }
+                    
+                    // Use "de" as default language
                     if (!currentGraph.containsKey(Ontology.LANGUAGE_OF_DESCRIPTION)) {
                         currentGraph.put(Ontology.LANGUAGE_OF_DESCRIPTION, "de");
+                    }
+                    
+                  //the BA have multiple unitdates, but with different types, find the Bestandslaufzeit
+                    if (!currentGraph.containsKey("unitDates")) {
+                        //finding some date for this unit:
+                        logger.error("Bundesarchive node without unitdate field: ");
+                        currentGraph.put(Ontology.ENTITY_HAS_DATE, "UNKNOWN date" );
+                    } else if(currentGraph.get(Ontology.ENTITY_HAS_DATE) instanceof List){
+                            logger.debug("class of dates: " + currentGraph.get(Ontology.ENTITY_HAS_DATE).getClass());
+                            ArrayList<String> dates = (ArrayList<String>) currentGraph.get(Ontology.ENTITY_HAS_DATE);
+                            ArrayList<String> datetypes = (ArrayList<String>) currentGraph.get(Ontology.ENTITY_HAS_DATE+"Types");
+                            for (int i = 0; i < dates.size(); i++) {
+                                if (datetypes.get(i).equals("Bestandslaufzeit")) {
+                                    logger.debug("found archival date: " + dates.get(i));
+                                    currentGraph.put(Ontology.ENTITY_HAS_DATE, dates.get(i));
+                                } else {
+                                    logger.debug("found other type of date: " + dates.get(i));
+                                    currentGraph.put("otherFormsOfName", dates.get(i));
+                                }
+                            }
+                            currentGraph.remove(Ontology.NAME_KEY+"Type");
                     }
                     
                 DocumentaryUnit current = (DocumentaryUnit)importer.importItem(currentGraph, depth);

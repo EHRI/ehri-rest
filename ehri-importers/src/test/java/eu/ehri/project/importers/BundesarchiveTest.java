@@ -113,8 +113,8 @@ public class BundesarchiveTest extends AbstractImporterTest{
         	assertEquals("1943-1945", dates.get(1));
         	System.out.println(d.asVertex().getProperty("unitDatesTypes"));
         	
-        	assertTrue(d.asVertex().getProperty("unitDatesTypes") instanceof String);
-        	List<String> dateTypes = toList((Iterable<String>)d.asVertex().getProperty("unitDatesTypes"));
+        	assertTrue(d.asVertex().getProperty("unitDatesTypes") instanceof List<?>);
+        	List<String> dateTypes = (List<String>)d.asVertex().getProperty("unitDatesTypes");
 //        	ArrayList<String> dateTypes = (ArrayList<String>) d.asVertex().getProperty("unitDatesTypes");
         	assertEquals(2, dateTypes.size());
         	assertEquals("Bestandslaufzeit", dateTypes.get(0));
