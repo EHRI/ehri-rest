@@ -124,24 +124,27 @@ public class BundesarchiveEadHandler extends SaxXmlHandler {
                     }
                     
                   //the BA have multiple unitdates, but with different types, find the Bestandslaufzeit
-                    if (!currentGraph.containsKey("unitDates")) {
+                    // there is a difference between Ontology.ENTITY_HAS_DATE and the .properties-defined term for unit dates
+                    final String UNITDATE = "unitDates";  
+                    
+                    if (!currentGraph.containsKey(UNITDATE)) {
                         //finding some date for this unit:
-                        logger.error("Bundesarchive node without unitdate field: ");
-                        currentGraph.put(Ontology.ENTITY_HAS_DATE, "UNKNOWN date" );
-                    } else if(currentGraph.get(Ontology.ENTITY_HAS_DATE) instanceof List){
-                            logger.debug("class of dates: " + currentGraph.get(Ontology.ENTITY_HAS_DATE).getClass());
-                            ArrayList<String> dates = (ArrayList<String>) currentGraph.get(Ontology.ENTITY_HAS_DATE);
-                            ArrayList<String> datetypes = (ArrayList<String>) currentGraph.get(Ontology.ENTITY_HAS_DATE+"Types");
+                        logger.error("Bundesarchiv node without unitdate field: ");
+                        currentGraph.put(UNITDATE, "UNKNOWN date" );
+                    } else if(currentGraph.get(UNITDATE) instanceof List){
+                            logger.debug("class of dates: " + currentGraph.get(UNITDATE).getClass());
+                            ArrayList<String> dates = (ArrayList<String>) currentGraph.get(UNITDATE);
+                            ArrayList<String> datetypes = (ArrayList<String>) currentGraph.get(UNITDATE+"Types");
                             for (int i = 0; i < dates.size(); i++) {
                                 if (datetypes.get(i).equals("Bestandslaufzeit")) {
                                     logger.debug("found archival date: " + dates.get(i));
-                                    currentGraph.put(Ontology.ENTITY_HAS_DATE, dates.get(i));
+                                    currentGraph.put(UNITDATE, dates.get(i));
                                 } else {
                                     logger.debug("found other type of date: " + dates.get(i));
-                                    currentGraph.put("otherFormsOfName", dates.get(i));
+                                    currentGraph.put("otherFormsOfDate", dates.get(i));
                                 }
                             }
-                            currentGraph.remove(Ontology.NAME_KEY+"Type");
+                            currentGraph.remove(UNITDATE+"Types"); // Why only when ..Type(s) is a list?
                     }
                     
                 DocumentaryUnit current = (DocumentaryUnit)importer.importItem(currentGraph, depth);
