@@ -130,7 +130,7 @@ public class BundesarchiveEadHandler extends SaxXmlHandler {
                     if (!currentGraph.containsKey(UNITDATE)) {
                         //finding some date for this unit:
                         logger.error("Bundesarchiv node without unitdate field: ");
-                        currentGraph.put(UNITDATE, "UNKNOWN date" );
+                        currentGraph.put(Ontology.ENTITY_HAS_DATE, "UNKNOWN date" );
                     } else if(currentGraph.get(UNITDATE) instanceof List){
                             logger.debug("class of dates: " + currentGraph.get(UNITDATE).getClass());
                             ArrayList<String> dates = (ArrayList<String>) currentGraph.get(UNITDATE);
