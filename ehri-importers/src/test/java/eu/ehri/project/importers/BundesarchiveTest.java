@@ -12,6 +12,9 @@ import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.base.PermissionScope;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.Test;
 import static org.junit.Assert.*;
 import org.junit.Before;
@@ -46,9 +49,9 @@ public class BundesarchiveTest extends AbstractImporterTest{
         // How many new nodes will have been created? We should have
         // - 9 more DocumentaryUnits (archdesc, 1-7+7)
        	// - 9 more DocumentDescription
-	// - 1 more DatePeriod -- this is not correct
+        // - 1 more DatePeriod
         // - 1 more UnknownProperties
-	// - 10 more import Event links (9 for every Unit, 1 for the User)
+        // - 10 more import Event links (9 for every Unit, 1 for the User)
         // - 1 more import Event
         int newCount = origCount + 31;
         assertEquals(newCount, getNodeCount(graph));
@@ -94,6 +97,28 @@ public class BundesarchiveTest extends AbstractImporterTest{
     //test level-of-desc
         for(DocumentDescription d : c7_2.getDocumentDescriptions()){
             assertEquals("fonds", d.asVertex().getProperty("levelOfDescription"));
+        }
+    //test dates
+        for(DocumentDescription d : c7_1.getDocumentDescriptions()){
+        	// Single date is just a string
+        	assertEquals("1942-1945", d.asVertex().getProperty("unitDates"));
+        	assertEquals("Bestandslaufzeit", d.asVertex().getProperty("unitDatesTypes"));
+        }
+        
+        // Second fonds has two dates with different types -> list
+        for(DocumentDescription d : c7_2.getDocumentDescriptions()){
+        	ArrayList<String> dates = (ArrayList<String>) d.asVertex().getProperty("unitDates");
+        	assertEquals(2, dates.size());
+        	assertEquals("1943-1944", dates.get(0));
+        	assertEquals("1943-1945", dates.get(1));
+        	System.out.println(d.asVertex().getProperty("unitDatesTypes"));
+        	
+        	assertTrue(d.asVertex().getProperty("unitDatesTypes") instanceof String);
+        	List<String> dateTypes = toList((Iterable<String>)d.asVertex().getProperty("unitDatesTypes"));
+//        	ArrayList<String> dateTypes = (ArrayList<String>) d.asVertex().getProperty("unitDatesTypes");
+        	assertEquals(2, dateTypes.size());
+        	assertEquals("Bestandslaufzeit", dateTypes.get(0));
+        	assertEquals("Provenienzlaufzeit", dateTypes.get(1));
         }
         
     }
