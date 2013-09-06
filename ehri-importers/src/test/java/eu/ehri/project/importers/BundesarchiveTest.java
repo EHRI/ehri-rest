@@ -46,7 +46,7 @@ public class BundesarchiveTest extends AbstractImporterTest{
         // How many new nodes will have been created? We should have
         // - 9 more DocumentaryUnits (archdesc, 1-7+7)
        	// - 9 more DocumentDescription
-	// - 1 more DatePeriod
+	// - 1 more DatePeriod -- this is not correct
         // - 1 more UnknownProperties
 	// - 10 more import Event links (9 for every Unit, 1 for the User)
         // - 1 more import Event
