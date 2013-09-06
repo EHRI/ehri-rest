@@ -40,7 +40,7 @@ public class UshmmTest extends AbstractImporterTest{
         printGraph(graph);
         
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        ImportLog log = new SaxImportManager(graph, agent, validUser, IcaAtomEadImporter.class, BundesarchiveEadHandler.class)
+        ImportLog log = new SaxImportManager(graph, agent, validUser, IcaAtomEadImporter.class, IcaAtomEadHandler.class)
                 .setTolerant(Boolean.TRUE).importFile(ios, logMessage);
 
         printGraph(graph);

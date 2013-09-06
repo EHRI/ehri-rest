@@ -14,6 +14,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import eu.ehri.project.models.base.PermissionScope;
+import java.text.ParsePosition;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
@@ -102,18 +106,37 @@ public abstract class XmlImporter<T> extends AbstractImporter<T> {
             if (matcher.matches()) {
                 data.put(Ontology.DATE_PERIOD_START_DATE, normaliseDate(matcher.group(1)));
                 data.put(Ontology.DATE_PERIOD_END_DATE, normaliseDate(matcher.group(matcher
-                        .groupCount() > 1 ? 2 : 1)));
+                        .groupCount() > 1 ? 2 : 1), Ontology.DATE_PERIOD_END_DATE));
                 break;
             }
         }
         return data;
     }
 
-    private String normaliseDate(String date) {
-        DateTimeFormatter fmt = ISODateTimeFormat.date();
-        return fmt.print(DateTime.parse(date));
+    private static String normaliseDate(String date) {
+        return normaliseDate(date, Ontology.DATE_PERIOD_START_DATE);
     }
-
+    
+    public static String normaliseDate(String date, String beginOrEnd) {
+        DateTimeFormatter fmt = ISODateTimeFormat.date();
+        String returndate = fmt.print(DateTime.parse(date));
+        if (Ontology.DATE_PERIOD_END_DATE.equals(beginOrEnd)) {
+            if (!date.equals(returndate)) {
+                ParsePosition p = new ParsePosition(0);
+                new SimpleDateFormat("yyyy-MM").parse(date, p);
+                if (p.getIndex() > 0) {
+                    returndate = fmt.print(DateTime.parse(date).plusMonths(1).minusDays(1));
+                } else {
+                    p = new ParsePosition(0);
+                    new SimpleDateFormat("yyyy").parse(date, p);
+                    if (p.getIndex() > 0) {
+                        returndate = fmt.print(DateTime.parse(date).plusYears(1).minusDays(1));
+                    }
+                }
+            }
+        }
+        return returndate;
+    }
     //TODO: for now, it only returns 1 unknown node object, but it could be more accurate to return several
     /**
      * extract data nodes from the data, that are not covered by their respectable properties file.

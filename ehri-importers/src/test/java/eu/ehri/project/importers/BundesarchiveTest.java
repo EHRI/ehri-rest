@@ -4,7 +4,6 @@
  */
 package eu.ehri.project.importers;
 
-import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.exceptions.InputParseError;
@@ -14,13 +13,9 @@ import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.base.PermissionScope;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.junit.Test;
 import static org.junit.Assert.*;
-import org.junit.Before;
-import org.junit.BeforeClass;
 
 /**
  *
@@ -47,7 +42,7 @@ public class BundesarchiveTest extends AbstractImporterTest{
         origCount = getNodeCount(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(XMLFILE);
         ImportLog log = new SaxImportManager(graph, agent, validUser, BundesarchiveEadImporter.class, BundesarchiveEadHandler.class).importFile(ios, logMessage);
-        printGraph(graph);
+//        printGraph(graph);
         // How many new nodes will have been created? We should have
         // - 9 more DocumentaryUnits (archdesc, 1-7+7)
        	// - 9 more DocumentDescription
@@ -106,7 +101,7 @@ public class BundesarchiveTest extends AbstractImporterTest{
         	assertEquals("1942-1945", d.asVertex().getProperty("unitDates"));
         	for (DatePeriod dp : d.getDatePeriods()){
         		assertEquals("1942-01-01", dp.getStartDate());
-        		assertEquals("1945-01-01", dp.getEndDate());
+        		assertEquals("1945-12-31", dp.getEndDate());
         	}
         	// There was only one date+date type, so it must still be around. 
         	assertEquals("Bestandslaufzeit", d.asVertex().getProperty("unitDatesTypes"));
@@ -119,7 +114,7 @@ public class BundesarchiveTest extends AbstractImporterTest{
         	// start and end dates correctly parsed and setup
         	for(DatePeriod dp : d.getDatePeriods()){
         		assertEquals("1943-01-01", dp.getStartDate());
-        		assertEquals("1944-01-01", dp.getEndDate());
+        		assertEquals("1944-12-31", dp.getEndDate());
         	}
         	
         	// Since there was a list of unitDateTypes, it should now be deleted
