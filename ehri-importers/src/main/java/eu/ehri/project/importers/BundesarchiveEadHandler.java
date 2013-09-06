@@ -117,8 +117,34 @@ public class BundesarchiveEadHandler extends SaxXmlHandler {
                             }
                             currentGraph.remove(Ontology.NAME_KEY+"Type");
                     }
+                    
+                    // Use "de" as default language
                     if (!currentGraph.containsKey(Ontology.LANGUAGE_OF_DESCRIPTION)) {
                         currentGraph.put(Ontology.LANGUAGE_OF_DESCRIPTION, "de");
+                    }
+                    
+                  //the BA have multiple unitdates, but with different types, find the Bestandslaufzeit
+                    // there is a difference between Ontology.ENTITY_HAS_DATE and the .properties-defined term for unit dates
+                    final String UNITDATE = "unitDates";  
+                    
+                    if (!currentGraph.containsKey(UNITDATE)) {
+                        //finding some date for this unit:
+                        logger.error("Bundesarchiv node without unitdate field: ");
+                        currentGraph.put(Ontology.ENTITY_HAS_DATE, "UNKNOWN date" );
+                    } else if(currentGraph.get(UNITDATE) instanceof List){
+                            logger.debug("class of dates: " + currentGraph.get(UNITDATE).getClass());
+                            ArrayList<String> dates = (ArrayList<String>) currentGraph.get(UNITDATE);
+                            ArrayList<String> datetypes = (ArrayList<String>) currentGraph.get(UNITDATE+"Types");
+                            for (int i = 0; i < dates.size(); i++) {
+                                if (datetypes.get(i).equals("Bestandslaufzeit")) {
+                                    logger.debug("found archival date: " + dates.get(i));
+                                    currentGraph.put(UNITDATE, dates.get(i));
+                                } else {
+                                    logger.debug("found other type of date: " + dates.get(i));
+                                    currentGraph.put("otherFormsOfDate", dates.get(i));
+                                }
+                            }
+                            currentGraph.remove(UNITDATE+"Types"); // Why only when ..Type(s) is a list?
                     }
                     
                 DocumentaryUnit current = (DocumentaryUnit)importer.importItem(currentGraph, depth);

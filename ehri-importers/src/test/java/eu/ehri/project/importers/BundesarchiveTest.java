@@ -4,9 +4,11 @@
  */
 package eu.ehri.project.importers;
 
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.exceptions.InputParseError;
+import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.DocumentDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.base.PermissionScope;
@@ -44,16 +46,16 @@ public class BundesarchiveTest extends AbstractImporterTest{
 
         origCount = getNodeCount(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(XMLFILE);
-        ImportLog log = new SaxImportManager(graph, agent, validUser, IcaAtomEadImporter.class, BundesarchiveEadHandler.class).importFile(ios, logMessage);
+        ImportLog log = new SaxImportManager(graph, agent, validUser, BundesarchiveEadImporter.class, BundesarchiveEadHandler.class).importFile(ios, logMessage);
         printGraph(graph);
         // How many new nodes will have been created? We should have
         // - 9 more DocumentaryUnits (archdesc, 1-7+7)
        	// - 9 more DocumentDescription
-        // - 1 more DatePeriod
+        // - 2 more DatePeriod
         // - 1 more UnknownProperties
         // - 10 more import Event links (9 for every Unit, 1 for the User)
         // - 1 more import Event
-        int newCount = origCount + 31;
+        int newCount = origCount + 32;
         assertEquals(newCount, getNodeCount(graph));
         
         archdesc = graph.frame(
@@ -102,23 +104,26 @@ public class BundesarchiveTest extends AbstractImporterTest{
         for(DocumentDescription d : c7_1.getDocumentDescriptions()){
         	// Single date is just a string
         	assertEquals("1942-1945", d.asVertex().getProperty("unitDates"));
+        	for (DatePeriod dp : d.getDatePeriods()){
+        		assertEquals("1942-01-01", dp.getStartDate());
+        		assertEquals("1945-01-01", dp.getEndDate());
+        	}
+        	// There was only one date+date type, so it must still be around. 
         	assertEquals("Bestandslaufzeit", d.asVertex().getProperty("unitDatesTypes"));
         }
         
         // Second fonds has two dates with different types -> list
         for(DocumentDescription d : c7_2.getDocumentDescriptions()){
-        	ArrayList<String> dates = (ArrayList<String>) d.asVertex().getProperty("unitDates");
-        	assertEquals(2, dates.size());
-        	assertEquals("1943-1944", dates.get(0));
-        	assertEquals("1943-1945", dates.get(1));
-        	System.out.println(d.asVertex().getProperty("unitDatesTypes"));
+        	// unitDates still around?
+        	assertEquals("1943-1944", d.asVertex().getProperty("unitDates"));
+        	// start and end dates correctly parsed and setup
+        	for(DatePeriod dp : d.getDatePeriods()){
+        		assertEquals("1943-01-01", dp.getStartDate());
+        		assertEquals("1944-01-01", dp.getEndDate());
+        	}
         	
-        	assertTrue(d.asVertex().getProperty("unitDatesTypes") instanceof String);
-        	List<String> dateTypes = toList((Iterable<String>)d.asVertex().getProperty("unitDatesTypes"));
-//        	ArrayList<String> dateTypes = (ArrayList<String>) d.asVertex().getProperty("unitDatesTypes");
-        	assertEquals(2, dateTypes.size());
-        	assertEquals("Bestandslaufzeit", dateTypes.get(0));
-        	assertEquals("Provenienzlaufzeit", dateTypes.get(1));
+        	// Since there was a list of unitDateTypes, it should now be deleted
+        	assertNull(d.asVertex().getProperty("unitDatesTypes"));
         }
         
     }
