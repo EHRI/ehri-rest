@@ -310,7 +310,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      */
     public Integer delete(E item, Accessor user, Optional<String> logMessage)
             throws PermissionDenied, ValidationError, SerializationError {
-        actionManager.logEvent(item, graph.frame(user.asVertex(), Actioner.class),
+        actionManager.logEvent(graph.frame(user.asVertex(), Actioner.class),
                 EventTypes.deletion, logMessage);
         return views.delete(item, user);
     }
