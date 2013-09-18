@@ -88,26 +88,23 @@ public class IcaAtomEadHandler extends SaxXmlHandler {
                     if (!currentGraph.containsKey(Ontology.LANGUAGE_OF_DESCRIPTION)) {
                         currentGraph.put(Ontology.LANGUAGE_OF_DESCRIPTION, "en");
                     }
-                if (!currentGraph.containsKey(Ontology.LANGUAGE_OF_DESCRIPTION)) {
-                    currentGraph.put(Ontology.LANGUAGE_OF_DESCRIPTION, "en");
-                }
-                DocumentaryUnit current = (DocumentaryUnit)importer.importItem(currentGraph, depth);
-                logger.debug("importer used: " + importer.getClass());
-                if (depth > 0) { // if not on root level
-                    children[depth - 1].add(current); // add child to parent offspring
-                    //set the parent child relationships by hand, as we don't have the parent Documentary unit yet.
-                    //only when closing a DocUnit, one can set the relationship to its children, but not its parent, as that has not yet been closed.
-                    for (DocumentaryUnit child : children[depth]) {
-                        if (child != null) {
-                            current.addChild(child);
-                            // FIXME: Is this correct??? It should be done automatically
-                            // using the scope of the BundleDAO, but because the actual
-                            // parent doesn't exist, we have to override it and set
-                            // this here...
-                            child.setPermissionScope(current);
-                        }
+                    DocumentaryUnit current = (DocumentaryUnit)importer.importItem(currentGraph, depth);
+                    logger.debug("importer used: " + importer.getClass());
+                    if (depth > 0) { // if not on root level
+                    	children[depth - 1].add(current); // add child to parent offspring
+                    	//set the parent child relationships by hand, as we don't have the parent Documentary unit yet.
+                    	//only when closing a DocUnit, one can set the relationship to its children, but not its parent, as that has not yet been closed.
+                    	for (DocumentaryUnit child : children[depth]) {
+                    		if (child != null) {
+                    			current.addChild(child);
+                    			// FIXME: Is this correct??? It should be done automatically
+                    			// using the scope of the BundleDAO, but because the actual
+                    			// parent doesn't exist, we have to override it and set
+                    			// this here...
+                    			child.setPermissionScope(current);
+                    		}
+                    	}
                     }
-                }
                 } catch (ValidationError ex) {
                     logger.error(ex.getMessage());
                 } finally {
@@ -125,13 +122,13 @@ public class IcaAtomEadHandler extends SaxXmlHandler {
     @Override
     protected boolean needToCreateSubNode(String qName) {
         //child or parent unit:
-        boolean need = childItemPattern.matcher(qName).matches() || qName.equals("archdesc");
-        //controlAccess 
-        String path = getImportantPath(currentPath);
-        if (path != null) {
-            need = need || path.endsWith("Access");
-        }
-        return need;
+    	boolean need = childItemPattern.matcher(qName).matches() || qName.equals("archdesc");
+    	//controlAccess 
+    	String path = getImportantPath(currentPath);
+    	if (path != null) {
+    		need = need || path.endsWith("Access");
+    	}
+    	return need;
     }
 
     @Override
