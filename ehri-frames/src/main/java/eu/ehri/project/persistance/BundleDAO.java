@@ -125,8 +125,7 @@ public final class BundleDAO {
     }
 
     // Helpers
-    private Integer deleteCount(Bundle bundle, Integer count)
-            throws ValidationError, ItemNotFound {
+    private Integer deleteCount(Bundle bundle, Integer count) throws Exception {
         Integer c = count;
         ListMultimap<String, Bundle> fetch = bundle.getRelations();
         Map<String, Direction> dependents = ClassUtils
@@ -227,7 +226,7 @@ public final class BundleDAO {
                 if (!errors.isEmpty() || hasNestedErrors(nestedErrors)) {
                     throw new ValidationError(bundle, errors, nestedErrors);
                 }
-                return new Mutation(node, MutationState.UPDATED);
+                return new Mutation(node, MutationState.UPDATED, nodeBundle);
             } else {
                 logger.debug("Not updating equivalent bundle {}", bundle.getId());
                 return new Mutation(node, MutationState.UNCHANGED);
