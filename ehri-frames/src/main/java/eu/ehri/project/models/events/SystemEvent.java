@@ -43,6 +43,12 @@ public interface SystemEvent extends AccessibleEntity {
     @JavaHandler
     public Iterable<AccessibleEntity> getSubjects();
 
+    @Property(Ontology.EVENT_PRIOR_VERSION)
+    public String getPrior();
+
+    @Property(Ontology.EVENT_PRIOR_VERSION)
+    public void setPrior(Object prior);
+
     /**
      * Fetch the "scope" of this event, or the context in which a
      * given creation/modification/deletion event is happening.

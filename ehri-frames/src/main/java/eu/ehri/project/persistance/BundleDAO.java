@@ -81,7 +81,8 @@ public final class BundleDAO {
     public <T extends Frame> Mutation<T> update(Bundle bundle, Class<T> cls)
             throws ValidationError, ItemNotFound {
         Mutation<Vertex> mutation = updateInner(bundle);
-        return new Mutation<T>(graph.frame(mutation.getNode(), cls), mutation.getState());
+        return new Mutation<T>(graph.frame(mutation.getNode(), cls),
+                mutation.getState(), mutation.getPrior());
     }
 
     /**
@@ -107,7 +108,8 @@ public final class BundleDAO {
             throws ValidationError {
 
         Mutation<Vertex> mutation = createOrUpdateInner(bundle);
-        return new Mutation<T>(graph.frame(mutation.getNode(), cls), mutation.getState());
+        return new Mutation<T>(graph.frame(mutation.getNode(), cls),
+                mutation.getState(), mutation.getPrior());
     }
 
     /**

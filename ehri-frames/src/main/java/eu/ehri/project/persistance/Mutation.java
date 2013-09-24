@@ -11,7 +11,7 @@ public final class Mutation<T> {
     private final MutationState state;
     private final Optional<Bundle> prior;
 
-    private Mutation(T node, MutationState state, Optional<Bundle> prior) {
+    public Mutation(T node, MutationState state, Optional<Bundle> prior) {
         this.node = node;
         this.state = state;
         this.prior = prior;

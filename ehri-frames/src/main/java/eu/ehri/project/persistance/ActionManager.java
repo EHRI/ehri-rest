@@ -72,14 +72,28 @@ public final class ActionManager {
         private final Actioner actioner;
         private final EventTypes actionType;
         private final Optional<String> logMessage;
+        private final Optional<Object> payload;
 
         public EventContext(ActionManager actionManager, SystemEvent systemEvent,
-                Actioner actioner, EventTypes type, Optional<String> logMessage) {
+                Actioner actioner, EventTypes type, Optional<String> logMessage,
+                Optional<Object> payload) {
             this.actionManager = actionManager;
             this.actionType = type;
             this.systemEvent = systemEvent;
             this.actioner = actioner;
             this.logMessage = logMessage;
+            this.payload = payload;
+        }
+
+        public EventContext(ActionManager actionManager, SystemEvent systemEvent,
+                Actioner actioner, EventTypes type, Optional<String> logMessage) {
+            this(actionManager, systemEvent, actioner, type, logMessage, Optional.absent());
+        }
+
+        public EventContext(ActionManager actionManager, SystemEvent systemEvent,
+                Actioner actioner, EventTypes type, Optional<String> logMessage, Object payload) {
+            this(actionManager, systemEvent, actioner, type, logMessage,
+                    Optional.fromNullable(payload));
         }
 
         public SystemEvent getSystemEvent() {
@@ -100,6 +114,14 @@ public final class ActionManager {
          */
         public Optional<String> getLogMessage() {
             return this.logMessage;
+        }
+
+        /**
+         * Add a payload to the event.
+         */
+        public EventContext setPayload(Object payload) {
+            systemEvent.setPrior(payload);
+            return this;
         }
 
         /**
@@ -200,6 +222,17 @@ public final class ActionManager {
      * @return
      */
     public EventContext logEvent(Actioner user, EventTypes type, String logMessage) {
+        return logEvent(user, type, Optional.of(logMessage));
+    }
+
+    /**
+     * Create an action with the given type and a log message.
+     * @param user
+     * @param type
+     * @param logMessage
+     * @return
+     */
+    public EventContext logEvent(Actioner user, EventTypes type, String logMessage, Object payload) {
         return logEvent(user, type, Optional.of(logMessage));
     }
 

@@ -77,6 +77,7 @@ public class Ontology {
     public static final String EVENT_TIMESTAMP = "timestamp";
     public static final String EVENT_LOG_MESSAGE = "logMessage";
     public static final String EVENT_TYPE = "eventType";
+    public static final String EVENT_PRIOR_VERSION = "priorVersion";
     public static final String ACTIONER_HAS_LIFECYCLE_ACTION = "lifecycleAction";
     public static final String ENTITY_HAS_LIFECYCLE_EVENT = "lifecycleEvent";
 
