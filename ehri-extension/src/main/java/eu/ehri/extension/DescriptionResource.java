@@ -138,7 +138,6 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
             return Response.status(status)
                     .entity((serializer.vertexFrameToJson(doc)).getBytes()).build();
         } catch (Exception e) {
-            // TODO Auto-generated catch block
             throw new RuntimeException(e);
         }
     }

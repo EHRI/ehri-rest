@@ -153,8 +153,8 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
             throws PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, BadRequester {
         graph.getBaseGraph().checkNotInTransaction();
-            Accessor user = getRequesterUserProfile();
-            Bundle entityBundle = Bundle.fromString(json);
+        Accessor user = getRequesterUserProfile();
+        Bundle entityBundle = Bundle.fromString(json);
         try {
             E entity = views.create(entityBundle, user, getLogMessage());
             // TODO: Move elsewhere
@@ -219,6 +219,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
     public Response update(String json) throws PermissionDenied,
             IntegrityError, ValidationError, DeserializationError,
             BadRequester {
+        graph.getBaseGraph().checkNotInTransaction();
         try {
             Bundle entityBundle = Bundle.fromString(json);
             Mutation<E> update = views.update(entityBundle, getRequesterUserProfile(), getLogMessage());
@@ -238,6 +239,12 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
         } catch (SerializationError serializationError) {
             graph.getBaseGraph().rollback();
             throw new RuntimeException(serializationError);
+        } catch (DeserializationError deserializationError) {
+            graph.getBaseGraph().checkNotInTransaction();
+            throw deserializationError;
+        } catch (BadRequester badRequester) {
+            graph.getBaseGraph().checkNotInTransaction();
+            throw badRequester;
         }
     }
 
@@ -284,13 +291,12 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
     protected Response delete(String id) throws AccessDenied, PermissionDenied, ItemNotFound,
             ValidationError, BadRequester {
         graph.getBaseGraph().checkNotInTransaction();
-        Response response;
         try {
             E entity = views.detail(manager.getFrame(id, getEntityType(), cls),
                     getRequesterUserProfile());
             views.delete(entity, getRequesterUserProfile(), getLogMessage());
             graph.getBaseGraph().commit();
-            response = Response.status(Status.OK).build();
+            return Response.status(Status.OK).build();
         } catch (ItemNotFound itemNotFound) {
             graph.getBaseGraph().rollback();
             throw itemNotFound;
@@ -303,9 +309,13 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
         } catch (SerializationError serializationError) {
             graph.getBaseGraph().rollback();
             throw new RuntimeException(serializationError);
+        } catch (AccessDenied accessDenied) {
+            graph.getBaseGraph().checkNotInTransaction("Access denied exiting delete for " + id);
+            throw accessDenied;
+        } catch (BadRequester badRequester) {
+            graph.getBaseGraph().checkNotInTransaction("Bad requester exiting delete for " + id);
+            throw badRequester;
         }
-        graph.getBaseGraph().checkNotInTransaction("Exiting delete for " + id);
-        return response;
     }
 
     // Helpers
