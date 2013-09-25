@@ -29,9 +29,13 @@ public class TxCheckedNeo4jGraph extends Neo4jGraph {
     }
 
     public void checkNotInTransaction() {
+        checkNotInTransaction("(no debug)");
+    }
+
+    public void checkNotInTransaction(String msg) {
         if (tx.get() != null) {
             rollback();
-            throw new IllegalStateException("Error: graph is currently in a transaction.");
+            throw new IllegalStateException("Error: graph is currently in a transaction: " + msg);
         }
     }
 

@@ -284,12 +284,16 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
     protected Response delete(String id) throws AccessDenied, PermissionDenied, ItemNotFound,
             ValidationError, BadRequester {
         graph.getBaseGraph().checkNotInTransaction();
+        Response response;
         try {
             E entity = views.detail(manager.getFrame(id, getEntityType(), cls),
                     getRequesterUserProfile());
             views.delete(entity, getRequesterUserProfile(), getLogMessage());
             graph.getBaseGraph().commit();
-            return Response.status(Status.OK).build();
+            response = Response.status(Status.OK).build();
+        } catch (ItemNotFound itemNotFound) {
+            graph.getBaseGraph().rollback();
+            throw itemNotFound;
         } catch (PermissionDenied permissionDenied) {
             graph.getBaseGraph().rollback();
             throw permissionDenied;
@@ -300,6 +304,8 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
             graph.getBaseGraph().rollback();
             throw new RuntimeException(serializationError);
         }
+        graph.getBaseGraph().checkNotInTransaction("Exiting delete for " + id);
+        return response;
     }
 
     // Helpers
