@@ -3,6 +3,7 @@ package eu.ehri.project.models;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.Adjacency;
+import com.tinkerpop.frames.Property;
 import com.tinkerpop.frames.modules.javahandler.JavaHandler;
 import com.tinkerpop.frames.modules.javahandler.JavaHandlerContext;
 import com.tinkerpop.pipes.util.Pipeline;
@@ -44,7 +45,7 @@ public interface Repository extends AccessibleEntity, DescribedEntity,
         public Long getChildCount() {
             Long count = it().getProperty(CHILD_COUNT);
             if (count == null) {
-                it().setProperty(CHILD_COUNT, gremlin().in(Ontology.DOC_HELD_BY_REPOSITORY).count());
+                count = gremlin().in(Ontology.DOC_HELD_BY_REPOSITORY).count();
             }
             return count;
         }
@@ -59,7 +60,7 @@ public interface Repository extends AccessibleEntity, DescribedEntity,
             collection.asVertex().addEdge(Ontology.DOC_HELD_BY_REPOSITORY, it());
             Long count = it().getProperty(CHILD_COUNT);
             if (count == null) {
-                getChildCount();
+                it().setProperty(CHILD_COUNT, gremlin().in(Ontology.DOC_HELD_BY_REPOSITORY).count());
             } else {
                 it().setProperty(CHILD_COUNT, count + 1);
             }

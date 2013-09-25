@@ -3,6 +3,7 @@ package eu.ehri.project.models;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.Adjacency;
+import com.tinkerpop.frames.Property;
 import com.tinkerpop.frames.modules.javahandler.JavaHandler;
 import com.tinkerpop.frames.modules.javahandler.JavaHandlerContext;
 import com.tinkerpop.pipes.util.Pipeline;
@@ -60,7 +61,7 @@ public interface VirtualCollection extends AccessibleEntity,
         public Long getChildCount() {
             Long count = it().getProperty(CHILD_COUNT);
             if (count == null) {
-                it().setProperty(CHILD_COUNT, gremlin().in(Ontology.VC_IS_PART_OF).count());
+                count = gremlin().in(Ontology.VC_IS_PART_OF).count();
             }
             return count;
         }
@@ -75,7 +76,7 @@ public interface VirtualCollection extends AccessibleEntity,
             child.asVertex().addEdge(Ontology.VC_IS_PART_OF, it());
             Long count = it().getProperty(CHILD_COUNT);
             if (count == null) {
-                getChildCount();
+                it().setProperty(CHILD_COUNT, gremlin().in(Ontology.VC_IS_PART_OF).count());
             } else {
                 it().setProperty(CHILD_COUNT, count + 1);
             }

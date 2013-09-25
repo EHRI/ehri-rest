@@ -4,6 +4,7 @@ import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.Adjacency;
+import com.tinkerpop.frames.Property;
 import com.tinkerpop.frames.modules.javahandler.JavaHandler;
 import com.tinkerpop.frames.modules.javahandler.JavaHandlerContext;
 import eu.ehri.project.definitions.Ontology;
@@ -42,6 +43,8 @@ public interface Concept extends AccessibleEntity, IdentifiableEntity,
     @Adjacency(label = Ontology.ITEM_IN_AUTHORITATIVE_SET)
     public void setVocabulary(final Vocabulary vocabulary);
 
+    @Property(CHILD_COUNT)
+    public Long getChildCount();
 
     // relations to other concepts
     
@@ -83,14 +86,12 @@ public interface Concept extends AccessibleEntity, IdentifiableEntity,
         public Long getChildCount() {
             Long count = it().getProperty(CHILD_COUNT);
             if (count == null) {
-                it().setProperty(CHILD_COUNT, gremlin().out(Ontology.CONCEPT_HAS_NARROWER).count());
+                count = gremlin().out(Ontology.CONCEPT_HAS_NARROWER).count();
             }
             return count;
         }
 
         public Iterable<Concept> getNarrowerConcepts() {
-            // Ensure value is cached when fetching.
-            getChildCount();
             return frameVertices(gremlin().out(Ontology.CONCEPT_HAS_NARROWER));
         }
 
@@ -98,7 +99,7 @@ public interface Concept extends AccessibleEntity, IdentifiableEntity,
             it().addEdge(Ontology.CONCEPT_HAS_NARROWER, concept.asVertex());
             Long count = it().getProperty(CHILD_COUNT);
             if (count == null) {
-                getChildCount();
+                it().setProperty(CHILD_COUNT, gremlin().out(Ontology.CONCEPT_HAS_NARROWER).count());
             } else {
                 it().setProperty(CHILD_COUNT, count + 1);
             }
