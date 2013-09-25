@@ -235,7 +235,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
             if (out.getState() != MutationState.UNCHANGED) {
                 ActionManager.EventContext ctx = actionManager.setScope(parent)
                         .logEvent(parent, graph.frame(user.asVertex(),
-                                Actioner.class), EventTypes.modification, logMessage);
+                                Actioner.class), EventTypes.modifyDependent, logMessage);
                 if (out.getPrior().isPresent()) {
                     ctx.setPayload(out.getPrior().get().toJson());
                 }
@@ -289,7 +289,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
         // NB: Note that parent is BOTH scope and a subject - I think
         // this makes sense...
         actionManager.setScope(parent).logEvent(parent,
-                graph.frame(user.asVertex(), Actioner.class), EventTypes.creation, logMessage);
+                graph.frame(user.asVertex(), Actioner.class), EventTypes.createDependent, logMessage);
         return out;
     }
 
@@ -368,7 +368,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
             throws PermissionDenied, ValidationError, SerializationError {
         ActionManager.EventContext ctx = actionManager.setScope(parent)
                 .logEvent(parent, graph.frame(user.asVertex(), Actioner.class),
-                        EventTypes.deletion, logMessage);
+                        EventTypes.deleteDependent, logMessage);
         ctx.setPayload(payloadSerializer.vertexFrameToJson(item));
         return views.deleteDependent(item, parent, user, dependentClass);
     }
