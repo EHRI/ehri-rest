@@ -1,16 +1,14 @@
 package eu.ehri.project.core;
 
-import java.util.Map;
-
 import com.tinkerpop.blueprints.CloseableIterable;
-import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
-
 import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.Frame;
+
+import java.util.Map;
 
 public interface GraphManager {
 

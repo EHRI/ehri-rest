@@ -1,16 +1,15 @@
 package eu.ehri.project.test;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
-import org.junit.After;
-import org.junit.Before;
-
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.utils.fixtures.FixtureLoader;
 import eu.ehri.project.utils.fixtures.FixtureLoaderFactory;
 import eu.ehri.project.views.Crud;
+import org.junit.After;
+import org.junit.Before;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 public abstract class ModelTestBase extends GraphTestBase {
 

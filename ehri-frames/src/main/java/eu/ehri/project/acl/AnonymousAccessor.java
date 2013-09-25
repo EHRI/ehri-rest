@@ -1,7 +1,6 @@
 package eu.ehri.project.acl;
 
 import com.tinkerpop.blueprints.Vertex;
-
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.models.Group;
 import eu.ehri.project.models.PermissionGrant;

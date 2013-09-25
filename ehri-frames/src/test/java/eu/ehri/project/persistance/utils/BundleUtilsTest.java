@@ -1,20 +1,16 @@
 package eu.ehri.project.persistance.utils;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-
+import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
+import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.test.AbstractFixtureTest;
 import eu.ehri.project.test.TestData;
 import org.junit.Assert;
 import org.junit.Test;
 
-import eu.ehri.project.definitions.Entities;
-import eu.ehri.project.persistance.Bundle;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
 
 public class BundleUtilsTest extends AbstractFixtureTest {
 

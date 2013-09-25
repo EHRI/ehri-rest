@@ -1,29 +1,29 @@
 package eu.ehri.project.core.impl;
 
-import java.util.*;
-
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.tinkerpop.blueprints.*;
-
+import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
+import com.tinkerpop.blueprints.impls.neo4j.Neo4jVertex;
+import com.tinkerpop.blueprints.impls.neo4j.Neo4jVertexIterable;
 import com.tinkerpop.blueprints.util.WrappingCloseableIterable;
+import com.tinkerpop.frames.FramedGraph;
+import eu.ehri.project.core.GraphManager;
+import eu.ehri.project.exceptions.IntegrityError;
+import eu.ehri.project.exceptions.ItemNotFound;
+import eu.ehri.project.models.EntityClass;
+import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.Frame;
 import org.apache.lucene.queryParser.QueryParser;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.index.IndexHits;
 import org.neo4j.graphdb.index.IndexManager;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jVertex;
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jVertexIterable;
-import com.tinkerpop.frames.FramedGraph;
-
-import eu.ehri.project.core.GraphManager;
-import eu.ehri.project.exceptions.IntegrityError;
-import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.annotations.EntityType;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
 
 /**
  * Implementation of GraphManager that uses a single index to manage all nodes.

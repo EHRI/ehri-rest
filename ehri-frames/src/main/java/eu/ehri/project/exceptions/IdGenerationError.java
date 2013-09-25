@@ -1,8 +1,8 @@
 package eu.ehri.project.exceptions;
 
-import java.util.Map;
-
 import eu.ehri.project.models.base.Frame;
+
+import java.util.Map;
 
 public class IdGenerationError extends Exception {
     

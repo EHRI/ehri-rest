@@ -1,35 +1,29 @@
 package eu.ehri.project.test;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import eu.ehri.project.acl.AclManager;
+import eu.ehri.project.acl.ContentTypes;
+import eu.ehri.project.acl.PermissionType;
+import eu.ehri.project.acl.SystemScope;
+import eu.ehri.project.definitions.Ontology;
+import eu.ehri.project.exceptions.*;
+import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.EntityClass;
+import eu.ehri.project.models.Repository;
+import eu.ehri.project.models.UserProfile;
+import eu.ehri.project.persistance.Bundle;
+import eu.ehri.project.persistance.BundleDAO;
+import eu.ehri.project.views.ViewHelper;
+import eu.ehri.project.views.impl.CrudViews;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.models.Repository;
-import org.junit.Before;
-import org.junit.Test;
-
-import eu.ehri.project.acl.AclManager;
-import eu.ehri.project.acl.ContentTypes;
-import eu.ehri.project.acl.PermissionType;
-import eu.ehri.project.acl.SystemScope;
-import eu.ehri.project.exceptions.DeserializationError;
-import eu.ehri.project.exceptions.IntegrityError;
-import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.exceptions.SerializationError;
-import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.models.DocumentaryUnit;
-import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.UserProfile;
-import eu.ehri.project.persistance.Bundle;
-import eu.ehri.project.persistance.BundleDAO;
-import eu.ehri.project.views.ViewHelper;
-import eu.ehri.project.views.impl.CrudViews;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 
 /**
  * Exercise various aspects of the permission system.

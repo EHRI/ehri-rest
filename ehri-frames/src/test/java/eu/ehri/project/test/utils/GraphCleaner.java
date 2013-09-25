@@ -1,20 +1,10 @@
 package eu.ehri.project.test.utils;
 
-import com.google.common.collect.Lists;
-import com.tinkerpop.blueprints.*;
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
+import com.tinkerpop.blueprints.Element;
+import com.tinkerpop.blueprints.Index;
+import com.tinkerpop.blueprints.IndexableGraph;
+import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.frames.FramedGraph;
-import org.neo4j.cypher.ExecutionEngine;
-import org.neo4j.cypher.ExecutionResult;
-import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.Relationship;
-import org.neo4j.graphdb.Transaction;
-import org.neo4j.kernel.AbstractGraphDatabase;
-import org.neo4j.kernel.impl.util.StringLogger;
-import org.neo4j.tooling.GlobalGraphOperations;
-
-import java.util.List;
 
 /**
  * Deletes all nodes and indices from a Neo4j graph. Use with care.

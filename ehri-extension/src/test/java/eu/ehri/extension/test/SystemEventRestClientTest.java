@@ -1,6 +1,7 @@
 package eu.ehri.extension.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 import java.util.List;
 import java.util.Map;
@@ -8,6 +9,10 @@ import java.util.Map;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import eu.ehri.project.definitions.Ontology;
+import eu.ehri.project.persistance.Bundle;
+import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -16,6 +21,7 @@ import com.sun.jersey.api.client.WebResource;
 
 import eu.ehri.extension.AbstractRestResource;
 import eu.ehri.project.definitions.Entities;
+
 
 public class SystemEventRestClientTest extends BaseRestClientTest {
 
@@ -82,7 +88,38 @@ public class SystemEventRestClientTest extends BaseRestClientTest {
                 .header(AbstractRestResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId())
                 .get(ClientResponse.class);
-        assertEquals(Response.Status.OK.getStatusCode(),
-                response.getStatus());
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+    }
+
+    @Test
+    public void testGetVersionsForItem() throws Exception {
+
+        // Create an item
+        WebResource resource = client.resource(getExtensionEntryPointUri()
+                + "/" + Entities.REPOSITORY + "/" + "r1");
+        ClientResponse response = resource
+                .accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                        getAdminUserProfileId()).entity(jsonAgentTestString)
+                .put(ClientResponse.class);
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+
+        resource = client.resource(getExtensionEntryPointUri()
+                + "/" + Entities.SYSTEM_EVENT + "/versions/r1");
+
+        response = resource
+                .accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                        getAdminUserProfileId())
+                .get(ClientResponse.class);
+        String json = response.getEntity(String.class);
+        // Check the response contains a new version
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode rootNode = mapper.readValue(json, JsonNode.class);
+        assertFalse(rootNode.path("values").path(0).path(Bundle.DATA_KEY)
+                .path(Ontology.VERSION_ENTITY_DATA).isMissingNode());
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
     }
 }

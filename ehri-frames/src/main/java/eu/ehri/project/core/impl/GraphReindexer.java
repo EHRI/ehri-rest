@@ -1,18 +1,16 @@
 package eu.ehri.project.core.impl;
 
-import com.tinkerpop.blueprints.IndexableGraph;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.tinkerpop.blueprints.Index;
+import com.tinkerpop.blueprints.IndexableGraph;
 import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
-
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.utils.ClassUtils;
 import eu.ehri.project.models.utils.EmptyIterable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Reindex a graph 

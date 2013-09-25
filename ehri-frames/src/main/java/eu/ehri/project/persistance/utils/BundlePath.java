@@ -1,15 +1,15 @@
 package eu.ehri.project.persistance.utils;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.NoSuchElementException;
-
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+
+import java.util.LinkedList;
+import java.util.List;
+import java.util.NoSuchElementException;
 
 /**
  * Class representing a path which points to some data in a bundle, i.e.

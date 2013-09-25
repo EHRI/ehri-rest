@@ -1,12 +1,14 @@
 package eu.ehri.project.persistance;
 
 import eu.ehri.project.definitions.EventTypes;
-import eu.ehri.project.exceptions.*;
+import eu.ehri.project.exceptions.DeserializationError;
+import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.events.SystemEvent;
+import eu.ehri.project.models.events.Version;
 import eu.ehri.project.test.AbstractFixtureTest;
 import eu.ehri.project.test.TestData;
 import org.junit.Test;
@@ -72,5 +74,43 @@ public class ActionManagerTest extends AbstractFixtureTest {
                 EventTypes.creation).getSystemEvent();
         assertNotNull(log.getEventScope());
         assertEquals(r1.asVertex(), log.getEventScope().asVertex());
+    }
+
+    @Test
+    public void testCreatingVersions() throws Exception {
+        Repository r1 = manager.getFrame("r1", Repository.class);
+        ActionManager am = new ActionManager(graph, r1);
+
+        Bundle docBundle = Bundle.fromData(TestData.getTestDocBundle());
+        BundleDAO dao = new BundleDAO(graph);
+        DocumentaryUnit doc = dao.create(docBundle, DocumentaryUnit.class);
+        SystemEvent log = am.logEvent(doc,
+                graph.frame(validUser.asVertex(), Actioner.class),
+                EventTypes.creation).getSystemEvent();
+        assertNull(doc.getPriorVersion());
+        Mutation<DocumentaryUnit> update = dao.update(docBundle
+                .withId(doc.getId())
+                .withDataValue("identifier", "changed"), DocumentaryUnit.class);
+        SystemEvent event = am.logEvent(doc,
+                graph.frame(validUser.asVertex(), Actioner.class),
+                EventTypes.modification).createVersion(doc, docBundle)
+                .getSystemEvent();
+        assertTrue(update.updated());
+        assertTrue(event.getPriorVersions().iterator().hasNext());
+        assertEquals(1, Iterables.count(event.getPriorVersions()));
+        Version version = event.getPriorVersions().iterator().next();
+        assertNotNull(doc.getPriorVersion());
+        assertEquals(version, doc.getPriorVersion());
+
+        // Create another event and ensure versions are ordered correctly
+        dao.update(docBundle
+                .withId(doc.getId())
+                .withDataValue("identifier", "changed-again"), DocumentaryUnit.class);
+        SystemEvent event2 = am.logEvent(doc,
+                graph.frame(validUser.asVertex(), Actioner.class),
+                EventTypes.modification).createVersion(doc, docBundle)
+                .getSystemEvent();
+        assertEquals(1, Iterables.count(event2.getPriorVersions()));
+        assertEquals(2, Iterables.count(doc.getAllPriorVersions()));
     }
 }

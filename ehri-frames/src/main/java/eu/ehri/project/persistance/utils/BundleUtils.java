@@ -1,14 +1,13 @@
 package eu.ehri.project.persistance.utils;
 
-import java.util.List;
-import java.util.Map;
-
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-
 import eu.ehri.project.persistance.Bundle;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * Helpers for working with the bundle format.

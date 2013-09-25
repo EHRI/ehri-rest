@@ -1,29 +1,22 @@
 package eu.ehri.project.views;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertNotNull;
+import com.google.common.base.Optional;
+import eu.ehri.project.exceptions.*;
+import eu.ehri.project.models.*;
+import eu.ehri.project.models.base.Description;
+import eu.ehri.project.models.events.SystemEvent;
+import eu.ehri.project.persistance.Bundle;
+import eu.ehri.project.persistance.Serializer;
+import eu.ehri.project.test.AbstractFixtureTest;
+import eu.ehri.project.test.TestData;
+import eu.ehri.project.views.impl.LoggingCrudViews;
+import org.junit.Test;
+import org.neo4j.helpers.collection.Iterables;
 
 import java.util.Iterator;
 import java.util.List;
 
-import com.google.common.base.Optional;
-import eu.ehri.project.models.*;
-import eu.ehri.project.models.events.SystemEvent;
-import eu.ehri.project.persistance.Serializer;
-import eu.ehri.project.test.AbstractFixtureTest;
-import eu.ehri.project.test.TestData;
-import org.junit.Test;
-
-import eu.ehri.project.exceptions.DeserializationError;
-import eu.ehri.project.exceptions.IntegrityError;
-import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.exceptions.SerializationError;
-import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.models.base.Description;
-import eu.ehri.project.persistance.Bundle;
-import eu.ehri.project.views.impl.LoggingCrudViews;
-import org.neo4j.helpers.collection.Iterables;
+import static org.junit.Assert.*;
 
 public class ActionViewsTest extends AbstractFixtureTest {
 

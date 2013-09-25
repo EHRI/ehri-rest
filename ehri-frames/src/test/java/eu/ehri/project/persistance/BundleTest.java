@@ -12,9 +12,7 @@ import org.junit.Test;
 import java.util.HashMap;
 import java.util.Map;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNotSame;
-import static junit.framework.Assert.assertNull;
+import static junit.framework.Assert.*;
 import static org.junit.Assert.assertSame;
 
 /**

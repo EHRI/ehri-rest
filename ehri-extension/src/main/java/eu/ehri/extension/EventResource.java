@@ -14,7 +14,9 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
 import eu.ehri.project.exceptions.AccessDenied;
+import eu.ehri.project.models.base.VersionedEntity;
 import eu.ehri.project.models.events.SystemEvent;
+import eu.ehri.project.models.events.Version;
 import eu.ehri.project.persistance.ActionManager;
 import org.neo4j.graphdb.GraphDatabaseService;
 
@@ -49,7 +51,7 @@ public class EventResource extends AbstractAccessibleEntityResource<SystemEvent>
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}")
-    public Response getAction(@PathParam("id") String id) throws ItemNotFound,
+    public Response getEvent(@PathParam("id") String id) throws ItemNotFound,
             AccessDenied, BadRequester {
         return retrieve(id);
     }
@@ -160,5 +162,36 @@ public class EventResource extends AbstractAccessibleEntityResource<SystemEvent>
                 .setOffset(offset).setLimit(limit)
                 .orderBy(order).filter(filters);
         return streamingPage(query.page(item.getHistory(), user));
+    }
+
+    /**
+     * Lookup and page the versions for a given item.
+     *
+     * @param id
+     * @param offset
+     * @param limit
+     * @return
+     * @throws ItemNotFound
+     * @throws BadRequester
+     * @throws PermissionDenied
+     */
+    @GET
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Path("/versions/{id:.+}")
+    public StreamingOutput pageVersionsForItem(
+            @PathParam("id") String id,
+            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
+            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(SORT_PARAM) List<String> order,
+            @QueryParam(FILTER_PARAM) List<String> filters)
+            throws ItemNotFound, BadRequester, AccessDenied {
+        Accessor user = getRequesterUserProfile();
+        AccessibleEntity item = new LoggingCrudViews<AccessibleEntity>(graph,
+                AccessibleEntity.class).detail(
+                manager.getFrame(id, AccessibleEntity.class), user);
+        Query<Version> query = new Query<Version>(graph, Version.class)
+                .setOffset(offset).setLimit(limit)
+                .orderBy(order).filter(filters);
+        return streamingPage(query.page(item.getAllPriorVersions(), user));
     }
 }

@@ -1,7 +1,6 @@
 package eu.ehri.project.persistance;
 
 import com.google.common.collect.ListMultimap;
-import eu.ehri.project.exceptions.BundleError;
 import eu.ehri.project.exceptions.ValidationError;
 
 /**

@@ -1,29 +1,29 @@
 package eu.ehri.project.persistance;
 
-import java.util.Iterator;
-
 import com.google.common.base.Optional;
+import com.tinkerpop.blueprints.Direction;
+import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Vertex;
+import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.SystemScope;
+import eu.ehri.project.core.GraphManager;
+import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.models.base.Frame;
-import eu.ehri.project.models.events.SystemEvent;
-import eu.ehri.project.models.events.SystemEventQueue;
-import org.joda.time.DateTime;
-import org.joda.time.format.ISODateTimeFormat;
-
-import com.tinkerpop.blueprints.Direction;
-import com.tinkerpop.blueprints.Edge;
-import com.tinkerpop.frames.FramedGraph;
-
-import eu.ehri.project.core.GraphManager;
-import eu.ehri.project.core.GraphManagerFactory;
+import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Actioner;
+import eu.ehri.project.models.base.Frame;
+import eu.ehri.project.models.events.SystemEvent;
+import eu.ehri.project.models.events.SystemEventQueue;
+import eu.ehri.project.models.events.Version;
+import org.joda.time.DateTime;
+import org.joda.time.format.ISODateTimeFormat;
+
+import java.util.Iterator;
 
 /**
  * Class for dealing with actions.
@@ -39,6 +39,7 @@ public final class ActionManager {
     private final FramedGraph<?> graph;
     private final GraphManager manager;
     private final Frame scope;
+    private final Serializer versionSerializer;
 
     /**
      * Constructor with scope.
@@ -49,6 +50,7 @@ public final class ActionManager {
         this.graph = graph;
         this.manager = GraphManagerFactory.getInstance(graph);
         this.scope = Optional.fromNullable(scope).or(SystemScope.getInstance());
+        this.versionSerializer = new Serializer.Builder(graph).dependentOnly().build();
     }
 
     /**
@@ -116,12 +118,33 @@ public final class ActionManager {
             return this.logMessage;
         }
 
-        /**
-         * Add a payload to the event.
-         */
-        public EventContext setPayload(Object payload) {
-            systemEvent.setPrior(payload);
-            return this;
+        public EventContext createVersion(Frame frame) {
+            try {
+                Bundle bundle = actionManager.versionSerializer.vertexFrameToBundle(frame);
+                return createVersion(frame, bundle);
+            } catch (SerializationError serializationError) {
+                throw new RuntimeException(serializationError);
+            }
+        }
+
+        public EventContext createVersion(Frame frame, Bundle bundle) {
+            try {
+                Bundle version = new Bundle(EntityClass.VERSION)
+                        .withDataValue(Ontology.VERSION_ENTITY_ID, frame.getId())
+                        .withDataValue(Ontology.VERSION_ENTITY_CLASS, frame.getType())
+                        .withDataValue(Ontology.VERSION_ENTITY_DATA, bundle.toJson());
+                Version ev = new BundleDAO(actionManager.graph)
+                        .create(version, Version.class);
+                actionManager.replaceAtHead(frame.asVertex(), ev.asVertex(),
+                        Ontology.ENTITY_HAS_PRIOR_VERSION,
+                        Ontology.ENTITY_HAS_PRIOR_VERSION, Direction.OUT);
+                actionManager.graph.addEdge(null, ev.asVertex(),
+                        systemEvent.asVertex(), Ontology.VERSION_HAS_EVENT);
+
+                return this;
+            } catch (ValidationError validationError) {
+                throw new RuntimeException(validationError);
+            }
         }
 
         /**

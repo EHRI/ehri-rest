@@ -1,12 +1,9 @@
 package eu.ehri.project.utils;
 
-import java.util.HashMap;
-
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.frames.FramedGraph;
-
 import eu.ehri.project.acl.ContentTypes;
 import eu.ehri.project.acl.PermissionType;
 import eu.ehri.project.core.GraphManager;
@@ -15,6 +12,8 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Group;
 import eu.ehri.project.persistance.ActionManager;
+
+import java.util.HashMap;
 
 /**
  * Initialize the graph with a minimal set of vertices. This includes:

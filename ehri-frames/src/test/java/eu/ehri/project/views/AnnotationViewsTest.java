@@ -1,15 +1,12 @@
 package eu.ehri.project.views;
 
-import static org.junit.Assert.*;
-
+import com.google.common.collect.ListMultimap;
+import eu.ehri.project.exceptions.ItemNotFound;
+import eu.ehri.project.models.Annotation;
 import eu.ehri.project.test.AbstractFixtureTest;
 import org.junit.Test;
 
-import com.google.common.collect.ListMultimap;
-
-import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.models.Annotation;
-import eu.ehri.project.views.AnnotationViews;
+import static org.junit.Assert.assertFalse;
 
 public class AnnotationViewsTest extends AbstractFixtureTest {
 

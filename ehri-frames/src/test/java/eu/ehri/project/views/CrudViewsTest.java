@@ -1,24 +1,24 @@
 package eu.ehri.project.views;
 
-import java.util.Iterator;
-
-import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.exceptions.*;
-import eu.ehri.project.models.*;
-import eu.ehri.project.models.base.*;
-import eu.ehri.project.persistance.Serializer;
-import eu.ehri.project.test.AbstractFixtureTest;
-import eu.ehri.project.test.TestData;
-import org.junit.Test;
-
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.acl.AnonymousAccessor;
 import eu.ehri.project.acl.ContentTypes;
 import eu.ehri.project.acl.PermissionType;
+import eu.ehri.project.definitions.Ontology;
+import eu.ehri.project.exceptions.*;
+import eu.ehri.project.models.*;
+import eu.ehri.project.models.base.Description;
+import eu.ehri.project.models.base.PermissionGrantTarget;
 import eu.ehri.project.persistance.Bundle;
+import eu.ehri.project.persistance.Serializer;
+import eu.ehri.project.test.AbstractFixtureTest;
+import eu.ehri.project.test.TestData;
 import eu.ehri.project.views.impl.CrudViews;
 import eu.ehri.project.views.impl.LoggingCrudViews;
+import org.junit.Test;
 import org.neo4j.helpers.collection.Iterables;
+
+import java.util.Iterator;
 
 import static org.junit.Assert.*;
 

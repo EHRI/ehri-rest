@@ -2,7 +2,6 @@ package eu.ehri.project.views.impl;
 
 import com.google.common.base.Optional;
 import com.tinkerpop.frames.FramedGraph;
-
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.acl.PermissionType;
 import eu.ehri.project.acl.SystemScope;
@@ -15,10 +14,10 @@ import eu.ehri.project.models.base.Frame;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.persistance.BundleDAO;
+import eu.ehri.project.persistance.Mutation;
 import eu.ehri.project.persistance.Serializer;
 import eu.ehri.project.views.Crud;
 import eu.ehri.project.views.ViewHelper;
-import eu.ehri.project.persistance.Mutation;
 
 public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
     private final FramedGraph<?> graph;

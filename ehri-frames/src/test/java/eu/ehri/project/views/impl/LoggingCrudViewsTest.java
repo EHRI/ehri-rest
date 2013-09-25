@@ -1,12 +1,14 @@
 package eu.ehri.project.views.impl;
 
-import com.google.common.collect.Iterables;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.RepositoryDescription;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.events.SystemEvent;
-import eu.ehri.project.persistance.*;
+import eu.ehri.project.persistance.ActionManager;
+import eu.ehri.project.persistance.Bundle;
+import eu.ehri.project.persistance.Mutation;
+import eu.ehri.project.persistance.Serializer;
 import eu.ehri.project.test.AbstractFixtureTest;
 import eu.ehri.project.test.TestData;
 import eu.ehri.project.views.Crud;
@@ -15,7 +17,6 @@ import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNotSame;
 import static junit.framework.Assert.assertTrue;
 import static org.junit.Assert.assertEquals;
@@ -55,8 +56,8 @@ public class LoggingCrudViewsTest extends AbstractFixtureTest {
         assertTrue(cou.updated());
         SystemEvent event = am.getLatestGlobalEvent();
         assertEquals(cou.getNode(), event.getSubjects().iterator().next());
-        assertNotNull(event.getPrior());
-        Bundle old = Bundle.fromString(event.getPrior());
+        assertTrue(event.getPriorVersions().iterator().hasNext());
+        Bundle old = Bundle.fromString(event.getPriorVersions().iterator().next().getEntityData());
         assertNotSame(old, repoBundle);
         Assert.assertEquals(before, old);
     }
@@ -69,8 +70,8 @@ public class LoggingCrudViewsTest extends AbstractFixtureTest {
         assertTrue(cou.updated());
         SystemEvent event = am.getLatestGlobalEvent();
         assertEquals(cou.getNode(), event.getSubjects().iterator().next());
-        assertNotNull(event.getPrior());
-        Bundle old = Bundle.fromString(event.getPrior());
+        assertTrue(event.getPriorVersions().iterator().hasNext());
+        Bundle old = Bundle.fromString(event.getPriorVersions().iterator().next().getEntityData());
         assertEquals(before, old);
     }
 
@@ -85,8 +86,8 @@ public class LoggingCrudViewsTest extends AbstractFixtureTest {
                 r1, validUser, RepositoryDescription.class);
         SystemEvent event = am.getLatestGlobalEvent();
         assertTrue(cou.updated());
-        assertNotNull(event.getPrior());
-        Bundle old = Bundle.fromString(event.getPrior());
+        assertTrue(event.getPriorVersions().iterator().hasNext());
+        Bundle old = Bundle.fromString(event.getPriorVersions().iterator().next().getEntityData());
         assertEquals(desc, old);
         assertNotSame(depSerializer.vertexFrameToBundle(description), old);
     }
@@ -112,8 +113,8 @@ public class LoggingCrudViewsTest extends AbstractFixtureTest {
         lcv.delete(r1, validUser);
         SystemEvent event = am.getLatestGlobalEvent();
         assertFalse(manager.exists("r1"));
-        assertNotNull(event.getPrior());
-        Bundle old = Bundle.fromString(event.getPrior());
+        assertTrue(event.getPriorVersions().iterator().hasNext());
+        Bundle old = Bundle.fromString(event.getPriorVersions().iterator().next().getEntityData());
         assertEquals(before, old);
     }
 
@@ -125,8 +126,8 @@ public class LoggingCrudViewsTest extends AbstractFixtureTest {
         Bundle desc = depSerializer.vertexFrameToBundle(description);
         lcv.deleteDependent(description, r1, validUser, Description.class);
         SystemEvent event = am.getLatestGlobalEvent();
-        assertNotNull(event.getPrior());
-        Bundle old = Bundle.fromString(event.getPrior());
+        assertTrue(event.getPriorVersions().iterator().hasNext());
+        Bundle old = Bundle.fromString(event.getPriorVersions().iterator().next().getEntityData());
         assertEquals(desc, old);
     }
 }

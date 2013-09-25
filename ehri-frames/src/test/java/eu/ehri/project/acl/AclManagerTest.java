@@ -7,9 +7,9 @@ import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.test.GraphTestBase;
 import eu.ehri.project.test.TestData;
 import eu.ehri.project.test.utils.GraphCleaner;
+import eu.ehri.project.utils.GraphInitializer;
 import eu.ehri.project.utils.fixtures.FixtureLoader;
 import eu.ehri.project.utils.fixtures.FixtureLoaderFactory;
-import eu.ehri.project.utils.GraphInitializer;
 import eu.ehri.project.views.impl.LoggingCrudViews;
 import org.junit.After;
 import org.junit.Before;
@@ -18,10 +18,10 @@ import org.junit.Test;
 import java.util.List;
 import java.util.Map;
 
+import static eu.ehri.project.acl.ContentTypes.DOCUMENTARY_UNIT;
+import static eu.ehri.project.acl.ContentTypes.REPOSITORY;
 import static eu.ehri.project.acl.PermissionType.*;
-import static eu.ehri.project.acl.ContentTypes.*;
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
 
 /**
  * User: michaelb

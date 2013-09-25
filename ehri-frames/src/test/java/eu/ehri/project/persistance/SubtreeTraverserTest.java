@@ -1,13 +1,10 @@
 package eu.ehri.project.persistance;
 
-import static org.junit.Assert.*;
-
 import eu.ehri.project.models.base.Frame;
 import eu.ehri.project.test.AbstractFixtureTest;
 import org.junit.Test;
 
-import eu.ehri.project.persistance.Serializer;
-import eu.ehri.project.persistance.TraversalCallback;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test the subtree traverser actually works.

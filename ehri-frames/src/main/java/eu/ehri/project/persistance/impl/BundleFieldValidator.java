@@ -1,11 +1,7 @@
 package eu.ehri.project.persistance.impl;
 
-import java.text.MessageFormat;
-import java.util.Map;
-
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
-
 import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Vertex;
@@ -17,6 +13,9 @@ import eu.ehri.project.models.utils.ClassUtils;
 import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.persistance.BundleValidator;
 import eu.ehri.project.persistance.BundleValidatorFactory;
+
+import java.text.MessageFormat;
+import java.util.Map;
 
 /**
  * Class responsible for validating bundles.

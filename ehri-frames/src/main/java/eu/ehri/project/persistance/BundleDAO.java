@@ -1,32 +1,26 @@
 package eu.ehri.project.persistance;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
 import com.google.common.base.Optional;
-import eu.ehri.project.models.base.Frame;
-import eu.ehri.project.models.idgen.IdGenerator;
-
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
-
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
-import eu.ehri.project.exceptions.BundleError;
-import eu.ehri.project.exceptions.IntegrityError;
-import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.exceptions.SerializationError;
-import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.exceptions.*;
+import eu.ehri.project.models.base.Frame;
 import eu.ehri.project.models.base.PermissionScope;
+import eu.ehri.project.models.idgen.IdGenerator;
 import eu.ehri.project.models.utils.ClassUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 /**
  * Class responsible for persisting and deleting a Bundle - a data structure representing a graph node and its relations

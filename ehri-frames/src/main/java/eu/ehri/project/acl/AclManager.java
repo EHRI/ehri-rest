@@ -1,8 +1,5 @@
 package eu.ehri.project.acl;
 
-import java.util.*;
-import java.util.Map.Entry;
-
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.*;
@@ -10,19 +7,17 @@ import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.pipes.PipeFunction;
-
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.IdGenerationError;
 import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.models.ContentType;
-import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.Group;
-import eu.ehri.project.models.Permission;
-import eu.ehri.project.models.PermissionGrant;
+import eu.ehri.project.models.*;
 import eu.ehri.project.models.base.*;
+
+import java.util.*;
+import java.util.Map.Entry;
 
 /**
  * Helper class for checking and asserting access and write permissions.

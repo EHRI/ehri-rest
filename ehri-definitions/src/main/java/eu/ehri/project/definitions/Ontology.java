@@ -81,6 +81,13 @@ public class Ontology {
     public static final String ACTIONER_HAS_LIFECYCLE_ACTION = "lifecycleAction";
     public static final String ENTITY_HAS_LIFECYCLE_EVENT = "lifecycleEvent";
 
+    // Versioning
+    public static final String ENTITY_HAS_PRIOR_VERSION = "hasPriorVersion";
+    public static final String VERSION_HAS_EVENT = "triggeredByEvent";
+    public static final String VERSION_ENTITY_CLASS = "entityType";
+    public static final String VERSION_ENTITY_ID = "entityId";
+    public static final String VERSION_ENTITY_DATA = "entityData";
+
     // Virtual collections
     public static final String VC_IS_PART_OF = "isPartOf";
 }

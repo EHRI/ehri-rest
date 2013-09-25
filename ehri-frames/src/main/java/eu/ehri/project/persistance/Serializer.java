@@ -1,26 +1,24 @@
 package eu.ehri.project.persistance;
 
-import java.lang.reflect.Method;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
-
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Maps;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
-import eu.ehri.project.models.annotations.Dependent;
-import eu.ehri.project.models.base.Frame;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.models.EntityClass;
+import eu.ehri.project.models.annotations.Dependent;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
+import eu.ehri.project.models.base.Frame;
 import eu.ehri.project.models.utils.ClassUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
+
+import java.lang.reflect.Method;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Class containing static methods to convert between FramedVertex instances,

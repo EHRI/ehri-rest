@@ -1,13 +1,11 @@
 package eu.ehri.project.views.impl;
 
 import com.google.common.base.Optional;
+import com.tinkerpop.frames.FramedGraph;
+import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.base.*;
-
-import com.tinkerpop.frames.FramedGraph;
-
-import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.persistance.*;
 import eu.ehri.project.views.Crud;
 
@@ -132,12 +130,10 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
             IntegrityError {
         Mutation<E> out = views.createOrUpdate(bundle, user);
         if (out.updated()) {
-            ActionManager.EventContext ctx = actionManager
+            actionManager
                     .logEvent(out.getNode(), graph.frame(user.asVertex(), Actioner.class),
-                            EventTypes.modification, logMessage);
-            if (out.getPrior().isPresent()) {
-                ctx.setPayload(out.getPrior().get().toJson());
-            }
+                            EventTypes.modification, logMessage)
+                    .createVersion(out.getNode(), out.getPrior().get());
         }
         return out;
     }
@@ -178,16 +174,14 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
         try {
             Mutation<E> out = views.update(bundle, user);
             if (!out.unchanged()) {
-                ActionManager.EventContext ctx = actionManager.logEvent(
+                actionManager.logEvent(
                         out.getNode(), graph.frame(user.asVertex(), Actioner.class),
-                        EventTypes.modification, logMessage);
-                if (out.getPrior().isPresent()) {
-                    ctx.setPayload(out.getPrior().get().toJson());
-                }
+                        EventTypes.modification, logMessage)
+                        .createVersion(out.getNode(), out.getPrior().get());
             }
             return out;
         } catch (ItemNotFound ex) {
-            throw new RuntimeException(ex); // FIXME: Remove this...
+            throw new RuntimeException(ex);
         }
     }
 
@@ -233,12 +227,10 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
         try {
             Mutation<T> out = views.updateDependent(bundle, parent, user, dependentClass);
             if (out.getState() != MutationState.UNCHANGED) {
-                ActionManager.EventContext ctx = actionManager.setScope(parent)
+                actionManager.setScope(parent)
                         .logEvent(parent, graph.frame(user.asVertex(),
-                                Actioner.class), EventTypes.modifyDependent, logMessage);
-                if (out.getPrior().isPresent()) {
-                    ctx.setPayload(out.getPrior().get().toJson());
-                }
+                                Actioner.class), EventTypes.modifyDependent, logMessage)
+                        .createVersion(out.getNode(), out.getPrior().get());
             }
             return out;
         } catch (ItemNotFound ex) {
@@ -323,10 +315,10 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      */
     public Integer delete(E item, Accessor user, Optional<String> logMessage)
             throws PermissionDenied, ValidationError, SerializationError {
-        ActionManager.EventContext ctx = actionManager
+        actionManager
                 .logEvent(graph.frame(user.asVertex(), Actioner.class),
-                        EventTypes.deletion, logMessage);
-        ctx.setPayload(payloadSerializer.vertexFrameToJson(item));
+                        EventTypes.deletion, logMessage)
+                .createVersion(item);
         return views.delete(item, user);
     }
 
@@ -366,10 +358,10 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
     public <T extends Frame> Integer deleteDependent(T item, E parent, Accessor user,
             Class<T> dependentClass, Optional<String> logMessage)
             throws PermissionDenied, ValidationError, SerializationError {
-        ActionManager.EventContext ctx = actionManager.setScope(parent)
+        actionManager.setScope(parent)
                 .logEvent(parent, graph.frame(user.asVertex(), Actioner.class),
-                        EventTypes.deleteDependent, logMessage);
-        ctx.setPayload(payloadSerializer.vertexFrameToJson(item));
+                        EventTypes.deleteDependent, logMessage)
+                .createVersion(item);
         return views.deleteDependent(item, parent, user, dependentClass);
     }
 

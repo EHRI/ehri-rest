@@ -1,18 +1,17 @@
 package eu.ehri.project.persistance;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-
 import com.google.common.collect.*;
-
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.utils.ClassUtils;
 import org.w3c.dom.Document;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Class that represents a graph entity and subtree relations.
