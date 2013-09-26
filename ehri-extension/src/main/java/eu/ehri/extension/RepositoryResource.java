@@ -204,7 +204,7 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
                     getAccessors(accessors, user));
             graph.getBaseGraph().commit();
             return buildResponseFromDocumentaryUnit(doc);
-        } catch (Exception e) {
+        } catch (SerializationError e) {
             graph.getBaseGraph().rollback();
             throw new RuntimeException(e);
         } finally {
