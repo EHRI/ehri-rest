@@ -132,9 +132,10 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
             new AclViews(graph).addAccessorToGroup(group, accessor, getRequesterUserProfile());
             graph.getBaseGraph().commit();
             return Response.status(Status.OK).build();
-        } catch (PermissionDenied permissionDenied) {
-            graph.getBaseGraph().rollback();
-            throw permissionDenied;
+        } finally {
+            if (graph.getBaseGraph().isInTransaction()) {
+                graph.getBaseGraph().rollback();
+            }
         }
     }
 
@@ -161,9 +162,10 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
             new AclViews(graph).removeAccessorFromGroup(group, accessor, getRequesterUserProfile());
             graph.getBaseGraph().commit();
             return Response.status(Status.OK).build();
-        } catch (PermissionDenied permissionDenied) {
-            graph.getBaseGraph().rollback();
-            throw permissionDenied;
+        } finally {
+            if (graph.getBaseGraph().isInTransaction()) {
+                graph.getBaseGraph().rollback();
+            }
         }
     }
 

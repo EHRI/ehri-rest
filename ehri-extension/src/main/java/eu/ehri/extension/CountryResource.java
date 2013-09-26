@@ -4,7 +4,6 @@ import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.*;
-import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.Country;
@@ -12,7 +11,6 @@ import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.views.Query;
 import eu.ehri.project.views.impl.LoggingCrudViews;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Transaction;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
@@ -193,21 +191,13 @@ public class CountryResource extends
                     getAccessors(accessors, user));
             graph.getBaseGraph().commit();
             return buildResponseFromRepository(repository);
-        } catch (DeserializationError e) {
-            graph.getBaseGraph().rollback();
-            throw e;
-        } catch (ValidationError e) {
-            graph.getBaseGraph().rollback();
-            throw e;
-        } catch (IntegrityError e) {
-            graph.getBaseGraph().rollback();
-            throw e;
-        } catch (PermissionDenied e) {
-            graph.getBaseGraph().rollback();
-            throw e;
-        } catch (Exception e) {
+        } catch (SerializationError e) {
             graph.getBaseGraph().rollback();
             throw new RuntimeException(e);
+        } finally {
+            if (graph.getBaseGraph().isInTransaction()) {
+                graph.getBaseGraph().rollback();
+            }
         }
     }
 

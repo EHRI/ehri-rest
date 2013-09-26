@@ -49,14 +49,21 @@ public class AccessResource extends
             @QueryParam(ACCESSOR_PARAM) List<String> accessorIds)
             throws PermissionDenied, ItemNotFound, BadRequester, SerializationError {
         graph.getBaseGraph().checkNotInTransaction();
-        AccessibleEntity item = manager.getFrame(id, AccessibleEntity.class);
-        Set<Accessor> accessors = extractAccessors(accessorIds);
-        AclViews acl = new AclViews(graph);
-        acl.setAccessors(item, accessors, getRequesterUserProfile());
-        graph.getBaseGraph().commit();
-        return Response.status(Status.OK)
-                .entity((serializer.vertexFrameToJson(item)).getBytes())
-                .build();
+        try {
+            AccessibleEntity item = manager.getFrame(id, AccessibleEntity.class);
+            Set<Accessor> accessors = extractAccessors(accessorIds);
+            AclViews acl = new AclViews(graph);
+            acl.setAccessors(item, accessors, getRequesterUserProfile());
+            graph.getBaseGraph().commit();
+            return Response.status(Status.OK)
+                    .entity((serializer.vertexFrameToJson(item)).getBytes())
+                    .build();
+        } finally {
+            if (graph.getBaseGraph().isInTransaction()) {
+                graph.getBaseGraph().rollback();
+            }
+        }
+
     }
 
     /**

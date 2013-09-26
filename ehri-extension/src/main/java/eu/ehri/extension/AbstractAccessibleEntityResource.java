@@ -11,7 +11,6 @@ import javax.ws.rs.core.Response.Status;
 //import org.apache.log4j.Logger;
 import eu.ehri.project.exceptions.*;
 import eu.ehri.project.persistance.Mutation;
-import eu.ehri.project.persistance.MutationState;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import com.google.common.collect.Lists;
@@ -166,18 +165,13 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
             graph.getBaseGraph().commit();
             return Response.status(Status.CREATED).location(docUri)
                     .entity(getRepresentation(entity).getBytes()).build();
-        } catch (PermissionDenied permissionDenied) {
-            graph.getBaseGraph().rollback();
-            throw permissionDenied;
-        } catch (ValidationError validationError) {
-            graph.getBaseGraph().rollback();
-            throw validationError;
-        } catch (IntegrityError integrityError) {
-            graph.getBaseGraph().rollback();
-            throw integrityError;
         } catch (SerializationError serializationError) {
             graph.getBaseGraph().rollback();
             throw new RuntimeException(serializationError);
+        } finally {
+            if (graph.getBaseGraph().isInTransaction()) {
+                graph.getBaseGraph().rollback();
+            }
         }
     }
 
@@ -227,24 +221,13 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
             return Response.status(Status.OK)
                     .entity(getRepresentation(update.getNode()).getBytes())
                     .build();
-        } catch (PermissionDenied permissionDenied) {
-            graph.getBaseGraph().rollback();
-            throw permissionDenied;
-        } catch (ValidationError validationError) {
-            graph.getBaseGraph().rollback();
-            throw validationError;
-        } catch (IntegrityError integrityError) {
-            graph.getBaseGraph().rollback();
-            throw integrityError;
         } catch (SerializationError serializationError) {
             graph.getBaseGraph().rollback();
             throw new RuntimeException(serializationError);
-        } catch (DeserializationError deserializationError) {
-            graph.getBaseGraph().checkNotInTransaction();
-            throw deserializationError;
-        } catch (BadRequester badRequester) {
-            graph.getBaseGraph().checkNotInTransaction();
-            throw badRequester;
+        } finally {
+            if (graph.getBaseGraph().isInTransaction()) {
+                graph.getBaseGraph().rollback();
+            }
         }
     }
 
@@ -297,24 +280,13 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
             views.delete(entity, getRequesterUserProfile(), getLogMessage());
             graph.getBaseGraph().commit();
             return Response.status(Status.OK).build();
-        } catch (ItemNotFound itemNotFound) {
-            graph.getBaseGraph().rollback();
-            throw itemNotFound;
-        } catch (PermissionDenied permissionDenied) {
-            graph.getBaseGraph().rollback();
-            throw permissionDenied;
-        } catch (ValidationError validationError) {
-            graph.getBaseGraph().rollback();
-            throw validationError;
         } catch (SerializationError serializationError) {
             graph.getBaseGraph().rollback();
             throw new RuntimeException(serializationError);
-        } catch (AccessDenied accessDenied) {
-            graph.getBaseGraph().checkNotInTransaction("Access denied exiting delete for " + id);
-            throw accessDenied;
-        } catch (BadRequester badRequester) {
-            graph.getBaseGraph().checkNotInTransaction("Bad requester exiting delete for " + id);
-            throw badRequester;
+        } finally {
+            if (graph.getBaseGraph().isInTransaction()) {
+                graph.getBaseGraph().rollback();
+            }
         }
     }
 

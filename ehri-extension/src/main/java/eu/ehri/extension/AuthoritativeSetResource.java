@@ -182,12 +182,16 @@ public class AuthoritativeSetResource extends
         	}
             graph.getBaseGraph().commit();
             return Response.status(Status.OK).build();
-        } catch (PermissionDenied e) {
-            graph.getBaseGraph().rollback();
-            throw e;
-        } catch (Exception e) {
+        } catch (ValidationError e) {
             graph.getBaseGraph().rollback();
             throw new RuntimeException(e);
+        } catch (SerializationError e) {
+            graph.getBaseGraph().rollback();
+            throw new RuntimeException(e);
+        } finally {
+            if (graph.getBaseGraph().isInTransaction()) {
+                graph.getBaseGraph().rollback();
+            }
         }
     }
 
@@ -220,18 +224,13 @@ public class AuthoritativeSetResource extends
                     getAccessors(accessors, user));
             graph.getBaseGraph().commit();
             return buildResponseFromHistoricalAgent(agent);
-        } catch (DeserializationError e) {
-            graph.getBaseGraph().rollback();
-            throw e;
-        } catch (ValidationError e) {
-            graph.getBaseGraph().rollback();
-            throw e;
-        } catch (IntegrityError e) {
-            graph.getBaseGraph().rollback();
-            throw e;
-        } catch (Exception e) {
+        } catch (SerializationError e) {
             graph.getBaseGraph().rollback();
             throw new RuntimeException(e);
+        } finally {
+            if (graph.getBaseGraph().isInTransaction()) {
+                graph.getBaseGraph().rollback();
+            }
         }
     }
 

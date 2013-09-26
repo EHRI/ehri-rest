@@ -180,25 +180,17 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
             graph.getBaseGraph().commit();
             return Response.status(Status.CREATED).location(docUri)
                     .entity((jsonStr).getBytes()).build();
-        } catch (DeserializationError e) {
-            graph.getBaseGraph().rollback();
-            throw e;
         } catch (ItemNotFound e) {
             graph.getBaseGraph().rollback();
             return Response.status(Status.BAD_REQUEST)
                     .entity((produceErrorMessageJson(e)).getBytes()).build();
-        } catch (ValidationError e) {
-            graph.getBaseGraph().rollback();
-            throw e;
-        } catch (IntegrityError e) {
-            graph.getBaseGraph().rollback();
-            throw e;
-        } catch (PermissionDenied e) {
-            graph.getBaseGraph().rollback();
-            throw e;
-        } catch (Exception e) {
+        } catch (SerializationError e) {
             graph.getBaseGraph().rollback();
             throw new RuntimeException(e);
+        } finally {
+            if (graph.getBaseGraph().isInTransaction()) {
+                graph.getBaseGraph().rollback();
+            }
         }
     }
 }
