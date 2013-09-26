@@ -105,9 +105,7 @@ public class AnnotationResource extends
             graph.getBaseGraph().commit();
             return buildResponseFromAnnotation(ann);
         } finally {
-            if (graph.getBaseGraph().isInTransaction()) {
-                graph.getBaseGraph().rollback();
-            }
+            cleanupTransaction();
         }
     }
 

@@ -59,9 +59,7 @@ public class AccessResource extends
                     .entity((serializer.vertexFrameToJson(item)).getBytes())
                     .build();
         } finally {
-            if (graph.getBaseGraph().isInTransaction()) {
-                graph.getBaseGraph().rollback();
-            }
+            cleanupTransaction();
         }
 
     }

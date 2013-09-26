@@ -73,10 +73,7 @@ public class PermissionGrantResource extends AbstractRestResource {
             graph.getBaseGraph().commit();
             return Response.status(Status.OK).build();
         } finally {
-            if (graph.getBaseGraph().isInTransaction()) {
-                graph.getBaseGraph().rollback();
-            }
+            cleanupTransaction();
         }
-
     }
 }

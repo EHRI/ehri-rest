@@ -314,9 +314,7 @@ public class PermissionsResource extends AbstractRestResource {
             graph.getBaseGraph().commit();
             return getGlobalMatrix(userId);
         } finally {
-            if (graph.getBaseGraph().isInTransaction()) {
-                graph.getBaseGraph().rollback();
-            }
+            cleanupTransaction();
         }
     }
 
@@ -416,9 +414,7 @@ public class PermissionsResource extends AbstractRestResource {
             graph.getBaseGraph().commit();
             return getScopedMatrix(userId, id);
         } finally {
-            if (graph.getBaseGraph().isInTransaction()) {
-                graph.getBaseGraph().rollback();
-            }
+            cleanupTransaction();
         }
     }
 
@@ -476,9 +472,7 @@ public class PermissionsResource extends AbstractRestResource {
                                     manager.getFrame(id, AccessibleEntity.class)))))
                     .build();
         } finally {
-            if (graph.getBaseGraph().isInTransaction()) {
-                graph.getBaseGraph().rollback();
-            }
+            cleanupTransaction();
         }
     }
 

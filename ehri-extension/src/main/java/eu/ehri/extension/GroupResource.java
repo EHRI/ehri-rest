@@ -133,9 +133,7 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
             graph.getBaseGraph().commit();
             return Response.status(Status.OK).build();
         } finally {
-            if (graph.getBaseGraph().isInTransaction()) {
-                graph.getBaseGraph().rollback();
-            }
+            cleanupTransaction();
         }
     }
 
@@ -163,9 +161,7 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
             graph.getBaseGraph().commit();
             return Response.status(Status.OK).build();
         } finally {
-            if (graph.getBaseGraph().isInTransaction()) {
-                graph.getBaseGraph().rollback();
-            }
+            cleanupTransaction();
         }
     }
 

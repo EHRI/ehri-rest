@@ -47,9 +47,7 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
             graph.getBaseGraph().rollback();
             throw new RuntimeException(serializationError);
         } finally {
-            if (graph.getBaseGraph().isInTransaction()) {
-                graph.getBaseGraph().rollback();
-            }
+            cleanupTransaction();
         }
     }
 
@@ -74,9 +72,7 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
             graph.getBaseGraph().rollback();
             throw new RuntimeException(serializationError);
         } finally {
-            if (graph.getBaseGraph().isInTransaction()) {
-                graph.getBaseGraph().rollback();
-            }
+            cleanupTransaction();
         }
     }
 
@@ -112,9 +108,7 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
             graph.getBaseGraph().rollback();
             throw new RuntimeException(serializationError);
         } finally {
-            if (graph.getBaseGraph().isInTransaction()) {
-                graph.getBaseGraph().rollback();
-            }
+            cleanupTransaction();
         }
     }
 
@@ -152,9 +146,7 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
             graph.getBaseGraph().rollback();
             throw new RuntimeException(serializationError);
         } finally {
-            if (graph.getBaseGraph().isInTransaction()) {
-                graph.getBaseGraph().rollback();
-            }
+            cleanupTransaction();
         }
     }
 
@@ -182,9 +174,7 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
             graph.getBaseGraph().rollback();
             throw new RuntimeException(serializationError);
         } finally {
-            if (graph.getBaseGraph().isInTransaction()) {
-                graph.getBaseGraph().rollback();
-            }
+            cleanupTransaction();
         }
     }
 }

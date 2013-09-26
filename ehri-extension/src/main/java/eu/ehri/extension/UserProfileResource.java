@@ -188,9 +188,7 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
             graph.getBaseGraph().rollback();
             throw new RuntimeException(e);
         } finally {
-            if (graph.getBaseGraph().isInTransaction()) {
-                graph.getBaseGraph().rollback();
-            }
+            cleanupTransaction();
         }
     }
 }

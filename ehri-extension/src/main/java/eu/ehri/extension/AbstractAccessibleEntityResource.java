@@ -169,9 +169,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
             graph.getBaseGraph().rollback();
             throw new RuntimeException(serializationError);
         } finally {
-            if (graph.getBaseGraph().isInTransaction()) {
-                graph.getBaseGraph().rollback();
-            }
+            cleanupTransaction();
         }
     }
 
@@ -225,9 +223,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
             graph.getBaseGraph().rollback();
             throw new RuntimeException(serializationError);
         } finally {
-            if (graph.getBaseGraph().isInTransaction()) {
-                graph.getBaseGraph().rollback();
-            }
+            cleanupTransaction();
         }
     }
 
@@ -284,9 +280,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
             graph.getBaseGraph().rollback();
             throw new RuntimeException(serializationError);
         } finally {
-            if (graph.getBaseGraph().isInTransaction()) {
-                graph.getBaseGraph().rollback();
-            }
+            cleanupTransaction();
         }
     }
 

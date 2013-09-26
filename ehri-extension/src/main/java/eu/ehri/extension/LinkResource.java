@@ -217,9 +217,7 @@ public class LinkResource extends
             graph.getBaseGraph().commit();
             return Response.ok().build();
         } finally {
-            if (graph.getBaseGraph().isInTransaction()) {
-                graph.getBaseGraph().rollback();
-            }
+            cleanupTransaction();
         }
     }
 
