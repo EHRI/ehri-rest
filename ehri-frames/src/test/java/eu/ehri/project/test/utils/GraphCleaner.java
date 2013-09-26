@@ -1,9 +1,6 @@
 package eu.ehri.project.test.utils;
 
-import com.tinkerpop.blueprints.Element;
-import com.tinkerpop.blueprints.Index;
-import com.tinkerpop.blueprints.IndexableGraph;
-import com.tinkerpop.blueprints.TransactionalGraph;
+import com.tinkerpop.blueprints.*;
 import com.tinkerpop.frames.FramedGraph;
 
 /**
@@ -35,16 +32,9 @@ public class GraphCleaner<T extends TransactionalGraph & IndexableGraph> {
             for (Index<? extends Element> idx : graph.getBaseGraph().getIndices()) {
                 graph.getBaseGraph().dropIndex(idx.getIndexName());
             }
-            /*for (Vertex v : graph.getVertices()) {
-                // FIXME: Neo4j deadlocks when attempting to delete all nodes,
-                // whether it's done directly, or with Cypher, or whatever.
-                // So just hope that deindexing then will suffice here.
-                //graph.removeVertex(v);
-                for (String key : v.getPropertyKeys()) {
-                    System.out.println(" - removing prop : " + key + " (" + v.getId() + ")");
-                    v.removeProperty(key);
-                }
-            }*/
+            for (Vertex v : graph.getVertices()) {
+                v.remove();
+            }
             graph.getBaseGraph().commit();
         } catch (Exception e) {
             graph.getBaseGraph().rollback();
