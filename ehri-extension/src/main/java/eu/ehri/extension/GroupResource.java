@@ -166,6 +166,41 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
     }
 
     /**
+     * list members of the specified group;
+     * UserProfiles and sub-Groups (direct descendants)
+     *
+     * @param id
+     * @param offset
+     * @param limit
+     * @param order
+     * @param filters
+     * @return
+     * @throws ItemNotFound
+     * @throws BadRequester
+     */
+    @GET
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Path("/{id:[^/]+}/list")
+    public StreamingOutput listGroupMembers(
+            @PathParam("id") String id,
+            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
+            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(SORT_PARAM) List<String> order,
+            @QueryParam(FILTER_PARAM) List<String> filters,
+            @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all)
+            throws ItemNotFound, BadRequester {
+        Group group = manager.getFrame(id, EntityClass.GROUP, Group.class);
+        // TODO: Fix generic types
+        Iterable<AccessibleEntity> members = all
+                ? group.getAllUserProfileMembers()
+                : group.getMembersAsEntities();
+        Query<AccessibleEntity> query = new Query<AccessibleEntity>(graph, AccessibleEntity.class)
+                .setOffset(offset).setLimit(limit)
+                .orderBy(order).filter(filters);
+        return streamingList(query.list(members, getRequesterUserProfile()));
+    }
+
+    /**
      * list members of the specified group; 
      * UserProfiles and sub-Groups (direct descendants)
      * 
@@ -180,24 +215,23 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
      */
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/{id:[^/]+}/list")
-    public StreamingOutput listGroupMembers(
+    @Path("/{id:[^/]+}/page")
+    public StreamingOutput pageGroupMembers(
     		@PathParam("id") String id,
             @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
             @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
             @QueryParam(SORT_PARAM) List<String> order,            
-            @QueryParam(FILTER_PARAM) List<String> filters)
+            @QueryParam(FILTER_PARAM) List<String> filters,
+            @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all)
             throws ItemNotFound, BadRequester {
         Group group = manager.getFrame(id, EntityClass.GROUP, Group.class);
-        // TODO list all users of the group
-        // get them from the RelationShip
-        // Iterable<Accessor> members = group.getMembers();
-        // use offset to skip is not efficient... but what else to do
-        // better query and add a filter to reduce for the specified group
-        Query<AccessibleEntity> userQuerier = new Query<AccessibleEntity>(graph, AccessibleEntity.class);
-        Query<AccessibleEntity> query = userQuerier.setOffset(offset).setLimit(limit)
+        Iterable<AccessibleEntity> members = all
+                ? group.getAllUserProfileMembers()
+                : group.getMembersAsEntities();
+        Query<AccessibleEntity> query = new Query<AccessibleEntity>(graph, AccessibleEntity.class)
+                .setOffset(offset).setLimit(limit)
                 .orderBy(order).filter(filters);
-        return streamingList(query.list(group.getMembersAsEntities(), getRequesterUserProfile()));
+        return streamingPage(query.page(members, getRequesterUserProfile()));
     }
 
     @GET
