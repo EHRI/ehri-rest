@@ -27,7 +27,7 @@ public class Slugify {
 
         ret = normalize(ret);
         ret = removeDuplicateWhiteSpaces(ret);
-        return ret.replace(" ", "-").toLowerCase();
+        return ret.replaceAll(" ", "-").replaceAll("-+", "-").toLowerCase();
     }
 
     private static String normalize(String input) {
