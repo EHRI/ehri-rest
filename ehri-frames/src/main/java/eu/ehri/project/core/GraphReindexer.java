@@ -1,4 +1,4 @@
-package eu.ehri.project.core.impl;
+package eu.ehri.project.core;
 
 import com.tinkerpop.blueprints.Index;
 import com.tinkerpop.blueprints.IndexableGraph;
@@ -48,7 +48,7 @@ public class GraphReindexer<T extends TransactionalGraph & IndexableGraph> {
                         index.put(key, val, vertex);
                     }
                 }
-            };
+            }
 
             graph.getBaseGraph().commit();
         } catch (Exception e) {

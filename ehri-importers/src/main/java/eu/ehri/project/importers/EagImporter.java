@@ -120,6 +120,7 @@ public class EagImporter extends EaImporter {
 
         if (mutation.created()) {
             mutation.getNode().setCountry(framedGraph.frame(permissionScope.asVertex(), Country.class));
+            mutation.getNode().setPermissionScope(permissionScope);
         }
         return mutation.getNode();
     }

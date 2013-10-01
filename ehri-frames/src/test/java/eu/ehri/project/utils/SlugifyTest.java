@@ -1,16 +1,11 @@
-package eu.ehri.project.test.utils;
+package eu.ehri.project.utils;
 
-import eu.ehri.project.utils.Slugify;
 import org.junit.Test;
 
 import static junit.framework.Assert.assertEquals;
 
 /**
- * Created with IntelliJ IDEA.
- * User: michaelb
- * Date: 22/02/13
- * Time: 11:04
- * To change this template use File | Settings | File Templates.
+ * Test slugification.
  */
 public class SlugifyTest {
 
@@ -24,5 +19,11 @@ public class SlugifyTest {
     public void removeSlashes() {
         String bad = "foo/bar";
         assertEquals("foo-bar", Slugify.slugify(bad));
+    }
+
+    @Test
+    public void removeMultiDashes() {
+        String bad = "foo---bad";
+        assertEquals("foo-bad", Slugify.slugify(bad));
     }
 }
