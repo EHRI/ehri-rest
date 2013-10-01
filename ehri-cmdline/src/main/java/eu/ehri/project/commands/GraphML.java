@@ -6,7 +6,7 @@ import com.tinkerpop.blueprints.util.io.graphml.GraphMLWriter;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
-import eu.ehri.project.core.impl.GraphReindexer;
+import eu.ehri.project.core.GraphReindexer;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.MissingArgumentException;
 import org.apache.commons.cli.Option;
