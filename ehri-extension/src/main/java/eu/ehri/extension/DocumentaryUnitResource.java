@@ -13,7 +13,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -187,21 +186,11 @@ public class DocumentaryUnitResource extends
                     getAccessors(accessors, user));
             graph.getBaseGraph().commit();
             return buildResponseFromDocumentaryUnit(doc);
-        } catch (DeserializationError e) {
-            graph.getBaseGraph().rollback();
-            throw e;
-        } catch (ValidationError e) {
-            graph.getBaseGraph().rollback();
-            throw e;
-        } catch (IntegrityError e) {
-            graph.getBaseGraph().rollback();
-            throw e;
-        } catch (PermissionDenied e) {
-            graph.getBaseGraph().rollback();
-            throw e;
-        } catch (Exception e) {
+        } catch (SerializationError e) {
             graph.getBaseGraph().rollback();
             throw new RuntimeException(e);
+        } finally {
+            cleanupTransaction();
         }
     }
 

@@ -11,7 +11,6 @@ import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.Frame;
 import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.persistance.Mutation;
-import eu.ehri.project.persistance.MutationState;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.*;
@@ -44,18 +43,11 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
             doc.addDescription(desc);
             graph.getBaseGraph().commit();
             return buildResponse(desc, Response.Status.CREATED);
-        } catch (PermissionDenied permissionDenied) {
-            graph.getBaseGraph().rollback();
-            throw permissionDenied;
-        } catch (DeserializationError deserializationError) {
-            graph.getBaseGraph().rollback();
-            throw deserializationError;
-        } catch (ValidationError validationError) {
-            graph.getBaseGraph().rollback();
-            throw validationError;
         } catch (SerializationError serializationError) {
             graph.getBaseGraph().rollback();
             throw new RuntimeException(serializationError);
+        } finally {
+            cleanupTransaction();
         }
     }
 
@@ -76,18 +68,11 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
                     getLogMessage());
             graph.getBaseGraph().commit();
             return buildResponse(desc.getNode(), Response.Status.OK);
-        } catch (PermissionDenied permissionDenied) {
-            graph.getBaseGraph().rollback();
-            throw permissionDenied;
-        } catch (DeserializationError deserializationError) {
-            graph.getBaseGraph().rollback();
-            throw deserializationError;
-        } catch (ValidationError validationError) {
-            graph.getBaseGraph().rollback();
-            throw validationError;
         } catch (SerializationError serializationError) {
             graph.getBaseGraph().rollback();
             throw new RuntimeException(serializationError);
+        } finally {
+            cleanupTransaction();
         }
     }
 
@@ -119,15 +104,11 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
             views.deleteDependent(desc, doc, user, Description.class, getLogMessage());
             graph.getBaseGraph().commit();
             return Response.ok().build();
-        } catch (PermissionDenied permissionDenied) {
-            graph.getBaseGraph().rollback();
-            throw permissionDenied;
-        } catch (ValidationError validationError) {
-            graph.getBaseGraph().rollback();
-            throw validationError;
         } catch (SerializationError serializationError) {
             graph.getBaseGraph().rollback();
             throw new RuntimeException(serializationError);
+        } finally {
+            cleanupTransaction();
         }
     }
 
@@ -161,28 +142,18 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
             desc.addUndeterminedRelationship(rel);
             graph.getBaseGraph().commit();
             return buildResponse(rel, Response.Status.CREATED);
-        } catch (ItemNotFound itemNotFound) {
-            graph.getBaseGraph().rollback();
-            throw itemNotFound;
-        } catch (IntegrityError integrityError) {
-            graph.getBaseGraph().rollback();
-            throw integrityError;
-        } catch (PermissionDenied permissionDenied) {
-            graph.getBaseGraph().rollback();
-            throw permissionDenied;
-        } catch (ValidationError validationError) {
-            graph.getBaseGraph().rollback();
-            throw validationError;
         } catch (SerializationError serializationError) {
             graph.getBaseGraph().rollback();
             throw new RuntimeException(serializationError);
+        } finally {
+            cleanupTransaction();
         }
     }
 
     @DELETE
     @Path("/{id:.+}/{did:.+}/" + Entities.UNDETERMINED_RELATIONSHIP + "/{apid:.+}")
     public Response deleteAccessPoint(@PathParam("id") String id,
-            @PathParam("did") String did, @PathParam("did") String apid, String json)
+            @PathParam("did") String did, @PathParam("did") String apid)
             throws AccessDenied, PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, ItemNotFound, BadRequester {
         graph.getBaseGraph().checkNotInTransaction();
@@ -199,18 +170,11 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
             views.deleteDependent(rel, doc, user, UndeterminedRelationship.class, getLogMessage());
             graph.getBaseGraph().commit();
             return Response.ok().build();
-        } catch (ItemNotFound itemNotFound) {
-            graph.getBaseGraph().rollback();
-            throw itemNotFound;
-        } catch (PermissionDenied permissionDenied) {
-            graph.getBaseGraph().rollback();
-            throw permissionDenied;
-        } catch (ValidationError validationError) {
-            graph.getBaseGraph().rollback();
-            throw validationError;
         } catch (SerializationError serializationError) {
             graph.getBaseGraph().rollback();
             throw new RuntimeException(serializationError);
+        } finally {
+            cleanupTransaction();
         }
     }
 }

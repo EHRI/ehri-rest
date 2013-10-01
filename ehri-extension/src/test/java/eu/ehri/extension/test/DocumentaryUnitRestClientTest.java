@@ -109,6 +109,7 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
                 .entity(jsonDocumentaryUnitTestStr).post(ClientResponse.class);
         // Check the JSON gives use the correct error
         String errString = response.getEntity(String.class);
+        System.out.println(errString);
 
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(),
                 response.getStatus());

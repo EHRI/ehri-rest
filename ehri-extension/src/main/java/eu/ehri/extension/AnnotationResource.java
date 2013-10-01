@@ -104,24 +104,8 @@ public class AnnotationResource extends
                     getAccessors(accessors, user));
             graph.getBaseGraph().commit();
             return buildResponseFromAnnotation(ann);
-        } catch (ItemNotFound e) {
-            graph.getBaseGraph().rollback();
-            throw e;
-        } catch (PermissionDenied e) {
-            graph.getBaseGraph().rollback();
-            throw e;
-        } catch (DeserializationError e) {
-            graph.getBaseGraph().rollback();
-            throw e;
-        } catch (BadRequester e) {
-            graph.getBaseGraph().rollback();
-            throw e;
-        } catch (ValidationError e) {
-            graph.getBaseGraph().rollback();
-            throw e;
-        } catch (Exception e) {
-            graph.getBaseGraph().rollback();
-            throw new WebApplicationException(e);
+        } finally {
+            cleanupTransaction();
         }
     }
 

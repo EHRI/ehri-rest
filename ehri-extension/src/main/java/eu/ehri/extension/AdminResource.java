@@ -71,9 +71,8 @@ public class AdminResource extends AbstractRestResource {
             graph.getBaseGraph().commit();
             return Response.status(Status.CREATED).entity((jsonStr).getBytes())
                     .build();
-        } catch (Exception e) {
-            graph.getBaseGraph().rollback();
-            throw e;
+        } finally {
+            cleanupTransaction();
         }
     }
 

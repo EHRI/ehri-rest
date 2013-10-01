@@ -13,7 +13,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -22,9 +21,7 @@ import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriBuilder;
 
 import eu.ehri.project.exceptions.*;
-import eu.ehri.project.models.EntityClass;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Transaction;
 
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.acl.AclManager;
@@ -207,21 +204,11 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
                     getAccessors(accessors, user));
             graph.getBaseGraph().commit();
             return buildResponseFromDocumentaryUnit(doc);
-        } catch (DeserializationError e) {
-            graph.getBaseGraph().rollback();
-            throw e;
-        } catch (ValidationError e) {
-            graph.getBaseGraph().rollback();
-            throw e;
-        } catch (IntegrityError e) {
-            graph.getBaseGraph().rollback();
-            throw e;
-        } catch (PermissionDenied e) {
-            graph.getBaseGraph().rollback();
-            throw e;
-        } catch (Exception e) {
+        } catch (SerializationError e) {
             graph.getBaseGraph().rollback();
             throw new RuntimeException(e);
+        } finally {
+            cleanupTransaction();
         }
     }
 

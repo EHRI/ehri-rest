@@ -47,14 +47,15 @@ public interface Group extends Accessor, AccessibleEntity, IdentifiableEntity,
     public void removeMember(final Accessor accessor);
 
     // FIXME: Use of __ISA__ here breaks encapsulation of indexing details quite horribly
+    // FIXME: Should return an Accessor here, hierarchies are confusing.
     @JavaHandler
-    public Iterable<UserProfile> getAllUserProfileMembers();
+    public Iterable<AccessibleEntity> getAllUserProfileMembers();
 
     /**
      * Implementation of complex methods.
      */
     abstract class Impl implements JavaHandlerContext<Vertex>, Group {
-        public Iterable<UserProfile> getAllUserProfileMembers() {
+        public Iterable<AccessibleEntity> getAllUserProfileMembers() {
             GremlinPipeline<Vertex,Vertex> pipe = gremlin().as("n").in(Ontology.ACCESSOR_BELONGS_TO_GROUP)
                     .loop("n", JavaHandlerUtils.defaultMaxLoops, new PipeFunction<LoopPipe.LoopBundle<Vertex>, Boolean>() {
                         @Override
