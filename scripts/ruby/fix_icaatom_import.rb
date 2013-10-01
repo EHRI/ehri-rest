@@ -27,6 +27,7 @@ module Ehri
 
     ctx = Persistance::ActionManager.new(Graph).log_event(user, EventTypes::modification,
                       "Correcting archivist's note field missed from ICA-Atom migration")
+    dao = Persistance::BundleDAO.new(Graph)
 
     while (row = csv.read_next) != nil
       arr = row.to_a
