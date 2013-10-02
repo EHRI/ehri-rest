@@ -55,9 +55,7 @@ public class PersonalitiesImporter extends XmlImporter<Object> {
         }
         unit = unit.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
 
-        IdGenerator generator = EntityClass.HISTORICAL_AGENT.getIdgen();
-        String id = generator.generateId(EntityClass.HISTORICAL_AGENT, permissionScope, unit);
-        Mutation<HistoricalAgent> mutation = persister.createOrUpdate(unit.withId(id), HistoricalAgent.class);
+        Mutation<HistoricalAgent> mutation = persister.createOrUpdate(unit, HistoricalAgent.class);
         HistoricalAgent frame = mutation.getNode();
 
         if (!permissionScope.equals(SystemScope.getInstance())

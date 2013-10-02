@@ -113,9 +113,7 @@ public class EagImporter extends EaImporter {
 
         unit = unit.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
 
-        IdGenerator generator = EntityClass.REPOSITORY.getIdgen();
-        String id = generator.generateId(EntityClass.REPOSITORY, permissionScope, unit);
-        Mutation<Repository> mutation = persister.createOrUpdate(unit.withId(id), Repository.class);
+        Mutation<Repository> mutation = persister.createOrUpdate(unit, Repository.class);
         handleCallbacks(mutation);
 
         if (mutation.created()) {

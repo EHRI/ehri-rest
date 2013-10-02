@@ -285,10 +285,7 @@ public class SkosCoreCvocImporter {
             unit = unit.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
         }
 
-        // get an ID for the GraphDB
-        String id = unit.getType().getIdgen()
-                .generateId(EntityClass.CVOC_CONCEPT, vocabulary, unit);
-        return unit.withId(id);
+        return unit;
     }
     
     /**

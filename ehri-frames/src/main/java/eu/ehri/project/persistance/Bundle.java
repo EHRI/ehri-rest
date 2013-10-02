@@ -1,13 +1,16 @@
 package eu.ehri.project.persistance;
 
 import com.google.common.collect.*;
+import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.models.EntityClass;
+import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.utils.ClassUtils;
 import org.w3c.dom.Document;
 
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -20,6 +23,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  */
 public final class Bundle {
+    private final boolean temp;
     private final String id;
     private final EntityClass type;
     private final ImmutableMap<String, Object> data;
@@ -49,14 +53,16 @@ public final class Bundle {
      * @param type
      * @param data
      * @param relations
+     * @param temp
      */
     public Bundle(String id, EntityClass type, final Map<String, Object> data,
-            final ListMultimap<String, Bundle> relations, final Map<String, Object> meta) {
+            final ListMultimap<String, Bundle> relations, final Map<String, Object> meta, boolean temp) {
         this.id = id;
         this.type = type;
         this.data = filterData(data);
         this.meta = ImmutableMap.copyOf(meta);
         this.relations = ImmutableListMultimap.copyOf(relations);
+        this.temp = temp;
     }
 
     /**
@@ -72,6 +78,18 @@ public final class Bundle {
         this(id, type, data, relations, Maps.<String,Object>newHashMap());
     }
 
+    /**
+     * Constructor.
+     *
+     * @param id
+     * @param type
+     * @param data
+     * @param relations
+     */
+    public Bundle(String id, EntityClass type, final Map<String, Object> data,
+            final ListMultimap<String, Bundle> relations, final Map<String, Object> meta) {
+        this(id, type, data, relations, Maps.<String,Object>newHashMap(), false);
+    }
     /**
      * Constructor for bundle without existing id.
      *
@@ -122,7 +140,7 @@ public final class Bundle {
      */
     public Bundle withId(String id) {
         checkNotNull(id);
-        return new Bundle(id, type, data, relations, meta);
+        return new Bundle(id, type, data, relations, meta, temp);
     }
 
     /**
@@ -224,7 +242,7 @@ public final class Bundle {
      * @return
      */
     public Bundle withData(final Map<String, Object> data) {
-        return new Bundle(id, type, data, relations, meta);
+        return new Bundle(id, type, data, relations, meta, temp);
     }
 
     /**
@@ -234,7 +252,7 @@ public final class Bundle {
      * @return
      */
     public Bundle withMetaData(final Map<String, Object> meta) {
-        return new Bundle(id, type, data, relations, meta);
+        return new Bundle(id, type, data, relations, meta, temp);
     }
 
     /**
@@ -253,7 +271,7 @@ public final class Bundle {
      * @return
      */
     public Bundle withRelations(ListMultimap<String, Bundle> relations) {
-        return new Bundle(id, type, data, relations, meta);
+        return new Bundle(id, type, data, relations, meta, temp);
     }
 
     /**
@@ -277,7 +295,7 @@ public final class Bundle {
         LinkedListMultimap<String, Bundle> tmp = LinkedListMultimap
                 .create(relations);
         tmp.putAll(relation, others);
-        return new Bundle(id, type, data, tmp, meta);
+        return new Bundle(id, type, data, tmp, meta, temp);
     }
 
     /**
@@ -290,7 +308,7 @@ public final class Bundle {
         LinkedListMultimap<String, Bundle> tmp = LinkedListMultimap
                 .create(relations);
         tmp.put(relation, other);
-        return new Bundle(id, type, data, tmp, meta);
+        return new Bundle(id, type, data, tmp, meta, temp);
     }
 
     /**
@@ -321,7 +339,7 @@ public final class Bundle {
     public Bundle removeRelation(String relation, Bundle item) {
         ListMultimap<String, Bundle> tmp = LinkedListMultimap.create(relations);
         tmp.remove(relation, item);
-        return new Bundle(id, type, data, tmp, meta);
+        return new Bundle(id, type, data, tmp, meta, temp);
     }
 
     /**
@@ -333,7 +351,7 @@ public final class Bundle {
     public Bundle removeRelations(String relation) {
         ListMultimap<String, Bundle> tmp = LinkedListMultimap.create(relations);
         tmp.removeAll(relation);
-        return new Bundle(id, type, data, tmp, meta);
+        return new Bundle(id, type, data, tmp, meta, temp);
     }
 
     /**
@@ -397,7 +415,7 @@ public final class Bundle {
 
     @Override
     public String toString() {
-        return "<" + getType() + "> (" + getData() + " + Rels: " + relations + ")";
+        return "<" + getType() + ": '" + (id == null ? "?" : id) + "'> (" + getData() + " + Rels: " + relations + ")";
     }
 
     /**
@@ -489,5 +507,51 @@ public final class Bundle {
             map.put(entry.getKey(), LinkedHashMultiset.create(entry.getValue()));
         }
         return map;
+    }
+
+    public boolean hasGeneratedId() {
+        return temp;
+    }
+
+    /**
+     * Generate missing IDs for the subtree.
+     * @param scopes A set of parent scopes.
+     * @return
+     */
+    public Bundle generateIds(final List<String> scopes) {
+        boolean isTemp = id == null;
+        String newId = isTemp
+                ?  getType().getIdgen().generateId(getType(), scopes, this)
+                : id;
+        ListMultimap<String,Bundle> idRels = LinkedListMultimap.create();
+        for (Map.Entry<String, Bundle> entry :  relations.entries()) {
+            idRels.put(entry.getKey(), entry.getValue().generateIds(scopes));
+        }
+        return new Bundle(newId, type, data, idRels, meta, isTemp);
+    }
+
+    /**
+     * Generate missing IDs for the subtree.
+     * @param scope A permission scope.
+     * @return
+     */
+    public Bundle generateIds(final PermissionScope scope) {
+        return generateIds(getScopeIds(scope));
+    }
+
+    // Helpers...
+
+    private List<String> getScopeIds(PermissionScope scope) {
+        if (SystemScope.INSTANCE.equals(scope)) {
+            return Lists.newArrayList();
+        } else {
+            LinkedList<String> scopeIds = Lists.newLinkedList();
+            if (scope != null) {
+                for (PermissionScope s : scope.getPermissionScopes())
+                    scopeIds.addFirst(s.getIdentifier());
+                scopeIds.add(scope.getIdentifier());
+            }
+            return scopeIds;
+        }
     }
 }

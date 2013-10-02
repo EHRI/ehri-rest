@@ -62,9 +62,7 @@ public class NiodEuropeanaImporter extends EaImporter{
         }
         unit=unit.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
 
-        IdGenerator generator = EntityClass.DOCUMENTARY_UNIT.getIdgen();
-        String id = generator.generateId(EntityClass.DOCUMENTARY_UNIT, permissionScope, unit);
-        Mutation<DocumentaryUnit> mutation = persister.createOrUpdate(unit.withId(id), DocumentaryUnit.class);
+        Mutation<DocumentaryUnit> mutation = persister.createOrUpdate(unit, DocumentaryUnit.class);
         DocumentaryUnit frame = mutation.getNode();
 
         // Set the repository/item relationship

@@ -5,7 +5,6 @@ import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
 import eu.ehri.project.acl.SystemScope;
-import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistance.Bundle;
@@ -32,8 +31,8 @@ public enum IdentifiableEntityIdGenerator implements IdGenerator {
 
     private static Logger logger = LoggerFactory.getLogger(IdentifiableEntityIdGenerator.class);
 
-    public void handleIdCollision(EntityClass type, PermissionScope scope,
-            Bundle bundle) throws ValidationError {
+    public ListMultimap<String,String> handleIdCollision(EntityClass type, PermissionScope scope,
+            Bundle bundle) {
         String scopeId = scope == null ? "none" : scope.getIdentifier();
         logger.error("ID Generation error: {}={} (scope: {})", IDENTIFIER_KEY,
                 bundle.getDataValue(IDENTIFIER_KEY), scopeId);
@@ -41,7 +40,7 @@ public enum IdentifiableEntityIdGenerator implements IdGenerator {
         errors.put(IDENTIFIER_KEY,  MessageFormat.format(
                 Messages.getString("BundleDAO.uniquenessError"), //$NON-NLS-1$
                 bundle.getDataValue(IDENTIFIER_KEY)));
-        throw new ValidationError(bundle, errors);
+        return errors;
     }
 
 

@@ -3,6 +3,7 @@ package eu.ehri.project.persistance;
 import com.google.common.base.Optional;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
@@ -17,10 +18,8 @@ import eu.ehri.project.models.utils.ClassUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashSet;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 
 /**
  * Class responsible for persisting and deleting a Bundle - a data structure representing a graph node and its relations
@@ -74,7 +73,10 @@ public final class BundleDAO {
      */
     public <T extends Frame> Mutation<T> update(Bundle bundle, Class<T> cls)
             throws ValidationError, ItemNotFound {
-        Mutation<Vertex> mutation = updateInner(bundle);
+        Bundle bundleWithIds = bundle.generateIds(scope);
+        BundleValidatorFactory
+                .getInstance(manager, bundleWithIds, scope).validateTreeForUpdate();
+        Mutation<Vertex> mutation = updateInner(bundleWithIds);
         return new Mutation<T>(graph.frame(mutation.getNode(), cls),
                 mutation.getState(), mutation.getPrior());
     }
@@ -88,7 +90,10 @@ public final class BundleDAO {
      */
     public <T extends Frame> T create(Bundle bundle, Class<T> cls)
             throws ValidationError {
-        return graph.frame(createInner(bundle), cls);
+        Bundle bundleWithIds = bundle.generateIds(scope);
+        BundleValidatorFactory
+                .getInstance(manager, bundleWithIds, scope).validateTree();
+        return graph.frame(createInner(bundleWithIds), cls);
     }
 
     /**
@@ -100,10 +105,12 @@ public final class BundleDAO {
      */
     public <T extends Frame> Mutation<T> createOrUpdate(Bundle bundle, Class<T> cls)
             throws ValidationError {
-
-        Mutation<Vertex> mutation = createOrUpdateInner(bundle);
-        return new Mutation<T>(graph.frame(mutation.getNode(), cls),
-                mutation.getState(), mutation.getPrior());
+        Bundle bundleWithIds = bundle.generateIds(scope);
+        BundleValidatorFactory
+                .getInstance(manager, bundleWithIds, scope).validateTreeForUpdate();
+        Mutation<Vertex> vertexMutation = createOrUpdateInner(bundleWithIds);
+        return new Mutation<T>(graph.frame(vertexMutation.getNode(), cls), vertexMutation.getState(),
+                vertexMutation.getPrior());
     }
 
     /**
@@ -146,23 +153,18 @@ public final class BundleDAO {
      *
      * @param bundle
      * @return
-     * @throws ValidationError
      */
-    private Mutation<Vertex> createOrUpdateInner(Bundle bundle) throws ValidationError {
-        if (bundle.getId() == null) {
-            return new Mutation(createInner(bundle), MutationState.CREATED);
-        } else {
-            try {
-                if (manager.exists(bundle.getId())) {
-                    return updateInner(bundle);
-                } else {
-                    return new Mutation(createInner(bundle), MutationState.CREATED);
-                }
-            } catch (ItemNotFound e) {
-                throw new RuntimeException(
-                        "Create or update failed because ItemNotFound was thrown even though exists() was true",
-                        e);
+    private Mutation<Vertex> createOrUpdateInner(Bundle bundle) {
+        try {
+            if (manager.exists(bundle.getId())) {
+                return updateInner(bundle);
+            } else {
+                return new Mutation(createInner(bundle), MutationState.CREATED);
             }
+        } catch (ItemNotFound e) {
+            throw new RuntimeException(
+                    "Create or update failed because ItemNotFound was thrown even though exists() was true",
+                    e);
         }
     }
 
@@ -171,30 +173,18 @@ public final class BundleDAO {
      *
      * @param bundle
      * @return
-     * @throws ValidationError
      */
-    private Vertex createInner(Bundle bundle) throws ValidationError {
-        IdGenerator idGen = bundle.getType().getIdgen();
+    private Vertex createInner(Bundle bundle) {
         try {
-            ListMultimap<String, String> errors = BundleValidatorFactory
-                    .getInstance(manager, bundle).validate();
-            String id = bundle.getId() != null ? bundle.getId() : idGen
-                    .generateId(bundle.getType(), scope, bundle);
-            Vertex node = manager.createVertex(id, bundle.getType(),
+            Vertex node = manager.createVertex(bundle.getId(), bundle.getType(),
                     bundle.getData(), bundle.getPropertyKeys());
-            ListMultimap<String, BundleError> nestedErrors = createDependents(node, bundle.getBundleClass(),
-                    bundle.getRelations());
-            if (!errors.isEmpty() || hasNestedErrors(nestedErrors)) {
-                  throw new ValidationError(bundle, errors, nestedErrors);
-            }
+            createDependents(node, bundle.getBundleClass(), bundle.getRelations());
             return node;
         } catch (IntegrityError e) {
-            // Convert integrity errors to validation errors
-            idGen.handleIdCollision(bundle.getType(), scope, bundle);
             // Mmmn, if we get here, it means that there's been an ID generation error
             // which was not handled by an exception.. so throw a runtime error...
             throw new RuntimeException(
-                    "Unexpected state: ID generation error not handled by IdGenerator class: " + idGen);
+                    "Unexpected state: ID generation error not handled by IdGenerator class");
         }
     }
 
@@ -206,22 +196,15 @@ public final class BundleDAO {
      * @throws ValidationError
      * @throws ItemNotFound
      */
-    private Mutation<Vertex> updateInner(Bundle bundle) throws ValidationError,
-            ItemNotFound {
+    private Mutation<Vertex> updateInner(Bundle bundle) throws ItemNotFound {
         Vertex node = manager.getVertex(bundle.getId());
         try {
             Bundle nodeBundle = serializer.vertexFrameToBundle(node);
             if (!nodeBundle.equals(bundle)) {
                 logger.trace("Bundles differ\n\n{}\n\n{}", bundle.toJson(), nodeBundle.toJson());
-                ListMultimap<String, String> errors = BundleValidatorFactory
-                        .getInstance(manager, bundle).validateForUpdate();
                 node = manager.updateVertex(bundle.getId(), bundle.getType(),
                         bundle.getData(), bundle.getPropertyKeys());
-                ListMultimap<String, BundleError> nestedErrors = updateDependents(node, bundle.getBundleClass(),
-                        bundle.getRelations());
-                if (!errors.isEmpty() || hasNestedErrors(nestedErrors)) {
-                    throw new ValidationError(bundle, errors, nestedErrors);
-                }
+                updateDependents(node, bundle.getBundleClass(), bundle.getRelations());
                 return new Mutation(node, MutationState.UPDATED, nodeBundle);
             } else {
                 logger.debug("Not updating equivalent bundle {}", bundle.getId());
@@ -244,32 +227,23 @@ public final class BundleDAO {
      *
      * @return errors
      */
-    private ListMultimap<String, BundleError> createDependents(Vertex master,
+    private void createDependents(Vertex master,
             Class<?> cls, ListMultimap<String, Bundle> relations)
             throws IntegrityError {
         Map<String, Direction> dependents = ClassUtils
                 .getDependentRelations(cls);
 
-        // Accumulate child errors before re-throwing...
-        ListMultimap<String, BundleError> errors = LinkedListMultimap.create();
         for (String relation : relations.keySet()) {
             if (dependents.containsKey(relation)) {
                 for (Bundle bundle : relations.get(relation)) {
-                    try {
-                        Vertex child = createInner(bundle);
-                        createChildRelationship(master, child, relation,
-                                dependents.get(relation));
-                        // no errors, so put a placeholder there instead.
-                        errors.put(relation, null);
-                    } catch (ValidationError e) {
-                        errors.put(relation, e);
-                    }
+                    Vertex child = createInner(bundle);
+                    createChildRelationship(master, child, relation,
+                            dependents.get(relation));
                 }
             } else {
                 logger.error("Nested data being ignored on creation because it is not a dependent relation: {}: {}", relation, relations.get(relation));
             }
         }
-        return errors;
     }
 
     /**
@@ -283,9 +257,8 @@ public final class BundleDAO {
      *
      * @return errors
      */
-    private ListMultimap<String, BundleError> updateDependents(Vertex master,
-            Class<?> cls, ListMultimap<String, Bundle> relations)
-            throws ItemNotFound {
+    private void updateDependents(Vertex master, Class<?> cls, ListMultimap<String,
+            Bundle> relations) throws ItemNotFound {
 
         // Get a list of dependent relationships for this class, and their
         // directions.
@@ -296,9 +269,6 @@ public final class BundleDAO {
         Set<String> updating = getUpdateSet(relations);
         // Any that we're not going to update can have their subtrees deleted.
         deleteMissingFromUpdateSet(master, dependents, updating);
-
-        // Accumulate child errors before re-throwing...
-        ListMultimap<String, BundleError> errors = LinkedListMultimap.create();
 
         // Now go throw and create or update the new subtrees.
         for (String relation : relations.keySet()) {
@@ -313,16 +283,11 @@ public final class BundleDAO {
                         direction, relation);
 
                 for (Bundle bundle : relations.get(relation)) {
-                    try {
-                        Vertex child = createOrUpdateInner(bundle).getNode();
-                        // Create a relation if there isn't one already
-                        if (!currentRels.contains(child)) {
-                            createChildRelationship(master, child, relation,
-                                    direction);
-                        }
-                        errors.put(relation, null);
-                    } catch (ValidationError e) {
-                        errors.put(relation, e);
+                    Vertex child = createOrUpdateInner(bundle).getNode();
+                    // Create a relation if there isn't one already
+                    if (!currentRels.contains(child)) {
+                        createChildRelationship(master, child, relation,
+                                direction);
                     }
                 }
             } else {
@@ -331,8 +296,6 @@ public final class BundleDAO {
                         relation, relations.get(relation));
             }
         }
-
-        return errors;
     }
 
     private Set<String> getUpdateSet(ListMultimap<String, Bundle> relations) {
@@ -394,21 +357,5 @@ public final class BundleDAO {
         } else {
             graph.addEdge(null, child, master, label);
         }
-    }
-
-    /**
-     * Search a tree of errors and determine if there's anything in it except for null values, which have to be there to
-     * maintain item ordering.
-     *
-     * @param errors
-     * @return
-     */
-    private boolean hasNestedErrors(ListMultimap<String, BundleError> errors) {
-        for (BundleError e : errors.values()) {
-            if (e != null) {
-                return true;
-            }
-        }
-        return false;
     }
 }

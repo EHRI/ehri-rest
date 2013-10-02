@@ -9,12 +9,14 @@ import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.exceptions.BundleError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.annotations.EntityType;
+import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.utils.ClassUtils;
 import eu.ehri.project.persistance.Bundle;
 import eu.ehri.project.persistance.BundleValidator;
 import eu.ehri.project.persistance.BundleValidatorFactory;
 
 import java.text.MessageFormat;
+import java.util.Collection;
 import java.util.Map;
 
 /**
@@ -32,15 +34,17 @@ public final class BundleFieldValidator implements BundleValidator {
 
     private final Bundle bundle;
     private final GraphManager manager;
+    private final PermissionScope scope;
 
     private final ListMultimap<String, String> errors = ArrayListMultimap
             .create();
     private final ListMultimap<String, BundleError> childErrors = ArrayListMultimap
             .create();
 
-    public BundleFieldValidator(GraphManager manager, Bundle bundle) {
+    public BundleFieldValidator(GraphManager manager, Bundle bundle, PermissionScope scope) {
         this.bundle = bundle;
         this.manager = manager;
+        this.scope = scope;
     }
 
     /**
@@ -87,6 +91,10 @@ public final class BundleFieldValidator implements BundleValidator {
         checkEntityType();
         checkUniquenessOnUpdate();
         checkChildren(true);
+
+        if (!errors.isEmpty() || hasNestedErrors(childErrors)) {
+            throw new ValidationError(bundle, errors, childErrors);
+        }
     }
 
     /**
@@ -97,6 +105,7 @@ public final class BundleFieldValidator implements BundleValidator {
     public void validateTree() throws ValidationError {
         checkFields();
         checkEntityType();
+        checkIntegrity();
         checkUniqueness();
         checkChildren(false);
 
@@ -113,7 +122,8 @@ public final class BundleFieldValidator implements BundleValidator {
             if (dependents.containsKey(relation)) {
                 for (Bundle child : relations.get(relation)) {
                     try {
-                        BundleValidator validator = BundleValidatorFactory.getInstance(manager, child);
+                        BundleValidator validator = BundleValidatorFactory
+                                .getInstance(manager, child, scope);
                         if (forUpdate)
                             validator.validateTreeForUpdate();
                         else
@@ -169,6 +179,24 @@ public final class BundleFieldValidator implements BundleValidator {
             errors.put(Bundle.TYPE_KEY, MessageFormat.format(Messages
                     .getString("BundleFieldValidator.missingTypeAnnotation"), //$NON-NLS-1$
                     bundle.getBundleClass().getName()));
+        }
+    }
+
+    /**
+     * Check uniqueness constrains for a bundle's fields.
+     */
+    private void checkIntegrity() {
+        if (bundle.getId() == null) {
+            errors.put("id", MessageFormat.format(Messages.getString("BundleFieldValidator.missingIdForCreate"),
+                    bundle.getId()));
+        }
+        if (manager.exists(bundle.getId())) {
+            ListMultimap<String, String> errors = bundle
+                    .getType().getIdgen()
+                    .handleIdCollision(bundle.getType(), scope, bundle);
+            for (Map.Entry<String,String> entry :errors.entries()) {
+                this.errors.put(entry.getKey(), entry.getValue());
+            }
         }
     }
 

@@ -1,8 +1,10 @@
 package eu.ehri.project.persistance;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.EntityClass;
+import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistance.utils.BundleUtils;
 import eu.ehri.project.test.TestData;
 import org.junit.After;
@@ -13,6 +15,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static junit.framework.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 
 /**
@@ -204,5 +208,17 @@ public class BundleTest {
     @Test
     public void testToXml() throws Exception {
         // TODO
+    }
+
+    @Test
+    public void testGenerateIds() throws Exception {
+        assertNull(bundle.getId());
+        assertNull(bundle.getRelations(
+                Ontology.DESCRIPTION_FOR_ENTITY).get(0).getId());
+        Bundle test = bundle.generateIds(Lists.<String>newArrayList("test"));
+        assertTrue(test.hasGeneratedId());
+        assertEquals("test-foobar", test.getId());
+        assertNotNull(test.getRelations(
+                Ontology.DESCRIPTION_FOR_ENTITY).get(0).getId());
     }
 }

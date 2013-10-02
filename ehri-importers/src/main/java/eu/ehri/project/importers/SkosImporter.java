@@ -67,11 +67,7 @@ public class SkosImporter extends XmlImporter<Map<String, Object>> {
                     EntityClass.CVOC_CONCEPT_DESCRIPTION, dpb));
         }
 
-        IdGenerator generator = EntityClass.CVOC_CONCEPT.getIdgen();
-        String id = generator.generateId(EntityClass.CVOC_CONCEPT, permissionScope, unit);
-        boolean exists = manager.exists(id);
-        Mutation<Concept> mutation = persister.createOrUpdate(unit.withId(id),
-                Concept.class);
+        Mutation<Concept> mutation = persister.createOrUpdate(unit, Concept.class);
         handleCallbacks(mutation);
         return mutation.getNode();
     }
