@@ -40,6 +40,7 @@ public class CmdEntryPoint extends BaseCommand {
         mmap.put(DeleteEntities.NAME, DeleteEntities.class);
         // new command, could we use reflection code to try find all Command interface implementing classes
         mmap.put(GraphML.NAME, GraphML.class);
+        mmap.put(Check.NAME, Check.class);
         
         COMMANDS = Collections.unmodifiableMap(mmap);
     }
