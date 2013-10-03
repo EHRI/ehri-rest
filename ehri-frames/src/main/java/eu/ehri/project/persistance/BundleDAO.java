@@ -12,7 +12,6 @@ import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.base.Frame;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.utils.ClassUtils;
-import eu.ehri.project.persistance.impl.BundleFieldValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +30,7 @@ public final class BundleDAO {
     private final PermissionScope scope;
     private final GraphManager manager;
     private final Serializer serializer;
-    private final BundleFieldValidator validator;
+    private final BundleValidator validator;
 
     /**
      * Constructor with a given scope.
@@ -45,7 +44,7 @@ public final class BundleDAO {
                 .or(SystemScope.getInstance());
         manager = GraphManagerFactory.getInstance(graph);
         serializer = new Serializer.Builder(graph).dependentOnly().build();
-        validator = new BundleFieldValidator(manager, scope);
+        validator = new BundleValidator(manager, scope);
     }
 
     /**
@@ -67,8 +66,7 @@ public final class BundleDAO {
      */
     public <T extends Frame> Mutation<T> update(Bundle bundle, Class<T> cls)
             throws ValidationError, ItemNotFound {
-        Bundle bundleWithIds = bundle.generateIds(scope);
-        validator.validateForUpdate(bundleWithIds);
+        Bundle bundleWithIds = validator.validateForUpdate(bundle);
         Mutation<Vertex> mutation = updateInner(bundleWithIds);
         return new Mutation<T>(graph.frame(mutation.getNode(), cls),
                 mutation.getState(), mutation.getPrior());
@@ -83,8 +81,7 @@ public final class BundleDAO {
      */
     public <T extends Frame> T create(Bundle bundle, Class<T> cls)
             throws ValidationError {
-        Bundle bundleWithIds = bundle.generateIds(scope);
-        validator.validate(bundleWithIds);
+        Bundle bundleWithIds = validator.validateForCreate(bundle);
         return graph.frame(createInner(bundleWithIds), cls);
     }
 
@@ -97,8 +94,7 @@ public final class BundleDAO {
      */
     public <T extends Frame> Mutation<T> createOrUpdate(Bundle bundle, Class<T> cls)
             throws ValidationError {
-        Bundle bundleWithIds = bundle.generateIds(scope);
-        validator.validateForUpdate(bundleWithIds);
+        Bundle bundleWithIds = validator.validateForUpdate(bundle);
         Mutation<Vertex> vertexMutation = createOrUpdateInner(bundleWithIds);
         return new Mutation<T>(graph.frame(vertexMutation.getNode(), cls), vertexMutation.getState(),
                 vertexMutation.getPrior());
@@ -150,7 +146,7 @@ public final class BundleDAO {
             if (manager.exists(bundle.getId())) {
                 return updateInner(bundle);
             } else {
-                return new Mutation(createInner(bundle), MutationState.CREATED);
+                return new Mutation<Vertex>(createInner(bundle), MutationState.CREATED);
             }
         } catch (ItemNotFound e) {
             throw new RuntimeException(
@@ -184,7 +180,6 @@ public final class BundleDAO {
      *
      * @param bundle
      * @return
-     * @throws ValidationError
      * @throws ItemNotFound
      */
     private Mutation<Vertex> updateInner(Bundle bundle) throws ItemNotFound {
@@ -196,10 +191,10 @@ public final class BundleDAO {
                 node = manager.updateVertex(bundle.getId(), bundle.getType(),
                         bundle.getData(), bundle.getPropertyKeys());
                 updateDependents(node, bundle.getBundleClass(), bundle.getRelations());
-                return new Mutation(node, MutationState.UPDATED, nodeBundle);
+                return new Mutation<Vertex>(node, MutationState.UPDATED, nodeBundle);
             } else {
                 logger.debug("Not updating equivalent bundle {}", bundle.getId());
-                return new Mutation(node, MutationState.UNCHANGED);
+                return new Mutation<Vertex>(node, MutationState.UNCHANGED);
             }
         } catch (SerializationError serializationError) {
             throw new RuntimeException("Unexpected serialization error " +

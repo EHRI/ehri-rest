@@ -6,8 +6,10 @@ import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.*;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.Description;
+import eu.ehri.project.models.base.IdentifiableEntity;
 import eu.ehri.project.persistance.utils.BundleUtils;
 import eu.ehri.project.test.ModelTestBase;
+import eu.ehri.project.test.TestData;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -188,5 +190,16 @@ public class BundleDAOTest extends ModelTestBase {
         BundleDAO persister = new BundleDAO(graph);
         persister.update(newBundle, DocumentaryUnit.class);
         fail("Bundle with no description name did not throw a ValidationError");
+    }
+
+    @Test(expected = ValidationError.class)
+    public void testUpdateWithNoIdentifier() throws SerializationError,
+            ValidationError, ItemNotFound, IntegrityError, DeserializationError {
+        Bundle b1 = Bundle.fromData(TestData.getTestAgentBundle())
+                .removeDataValue(Ontology.IDENTIFIER_KEY);
+
+        BundleDAO persister = new BundleDAO(graph);
+        persister.update(b1, Repository.class);
+        fail("Attempting to update a non-existent bundle did not throw an error");
     }
 }
