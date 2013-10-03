@@ -2,21 +2,20 @@ package eu.ehri.project.persistance.impl;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.core.GraphManager;
-import eu.ehri.project.exceptions.BundleError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.utils.ClassUtils;
 import eu.ehri.project.persistance.Bundle;
-import eu.ehri.project.persistance.BundleValidator;
-import eu.ehri.project.persistance.BundleValidatorFactory;
+import eu.ehri.project.persistance.ErrorSet;
 
 import java.text.MessageFormat;
-import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -30,19 +29,12 @@ import java.util.Map;
  * @author mike
  * 
  */
-public final class BundleFieldValidator implements BundleValidator {
+public final class BundleFieldValidator {
 
-    private final Bundle bundle;
     private final GraphManager manager;
     private final PermissionScope scope;
 
-    private final ListMultimap<String, String> errors = ArrayListMultimap
-            .create();
-    private final ListMultimap<String, BundleError> childErrors = ArrayListMultimap
-            .create();
-
-    public BundleFieldValidator(GraphManager manager, Bundle bundle, PermissionScope scope) {
-        this.bundle = bundle;
+    public BundleFieldValidator(GraphManager manager, PermissionScope scope) {
         this.manager = manager;
         this.scope = scope;
     }
@@ -54,14 +46,11 @@ public final class BundleFieldValidator implements BundleValidator {
      * @return errors
      *
      */
-    public ListMultimap<String,String> validateForUpdate() {
-        if (bundle.getId() == null)
-            errors.put(Bundle.ID_KEY, Messages
-                    .getString("BundleFieldValidator.missingIdForUpdate")); //$NON-NLS-1$
-        checkFields();
-        checkEntityType();
-        checkUniquenessOnUpdate();
-        return errors;
+    public void validateForUpdate(final Bundle bundle) throws ValidationError {
+        ErrorSet es = validateTreeForUpdate(bundle);
+        if (!es.isEmpty()) {
+            throw new ValidationError(bundle, es);
+        }
     }
 
     /**
@@ -69,11 +58,11 @@ public final class BundleFieldValidator implements BundleValidator {
      *
      * @return errors
      */
-    public ListMultimap<String,String> validate() {
-        checkFields();
-        checkEntityType();
-        checkUniqueness();
-        return errors;
+    public void validate(final Bundle bundle) throws ValidationError {
+        ErrorSet es = validateTree(bundle);
+        if (!es.isEmpty()) {
+            throw new ValidationError(bundle, es);
+        }
     }
 
     /**
@@ -83,18 +72,16 @@ public final class BundleFieldValidator implements BundleValidator {
      * @return errors
      * 
      */
-    public void validateTreeForUpdate() throws ValidationError {
+    private ErrorSet validateTreeForUpdate(final Bundle bundle) {
+        ErrorSet.Builder builder = new ErrorSet.Builder();
         if (bundle.getId() == null)
-            errors.put(Bundle.ID_KEY, Messages
+            builder.addError(Bundle.ID_KEY, Messages
                     .getString("BundleFieldValidator.missingIdForUpdate")); //$NON-NLS-1$
-        checkFields();
-        checkEntityType();
-        checkUniquenessOnUpdate();
-        checkChildren(true);
-
-        if (!errors.isEmpty() || hasNestedErrors(childErrors)) {
-            throw new ValidationError(bundle, errors, childErrors);
-        }
+        builder.addErrors(checkFields(bundle));
+        builder.addErrors(checkEntityType(bundle));
+        builder.addErrors(checkUniquenessOnUpdate(bundle));
+        builder.addRelations(checkChildren(bundle, true));
+        return builder.build();
     }
 
     /**
@@ -102,108 +89,108 @@ public final class BundleFieldValidator implements BundleValidator {
      * 
      * @return errors
      */
-    public void validateTree() throws ValidationError {
-        checkFields();
-        checkEntityType();
-        checkIntegrity();
-        checkUniqueness();
-        checkChildren(false);
-
-        if (!errors.isEmpty() || hasNestedErrors(childErrors)) {
-            throw new ValidationError(bundle, errors, childErrors);
-        }
+    private ErrorSet validateTree(final Bundle bundle) {
+        ErrorSet.Builder builder = new ErrorSet.Builder();
+        builder.addErrors(checkFields(bundle));
+        builder.addErrors(checkEntityType(bundle));
+        builder.addErrors(checkIntegrity(bundle));
+        builder.addErrors(checkUniqueness(bundle));
+        builder.addRelations(checkChildren(bundle, false));
+        return builder.build();
     }
 
-    private void checkChildren(boolean forUpdate) {
+    private ListMultimap<String,ErrorSet> checkChildren(final Bundle bundle, boolean forUpdate) {
+        ListMultimap<String,ErrorSet> errors = ArrayListMultimap.create();
         Map<String, Direction> dependents = ClassUtils
                 .getDependentRelations(bundle.getBundleClass());
         ListMultimap<String, Bundle> relations = bundle.getRelations();
         for (String relation : relations.keySet()) {
             if (dependents.containsKey(relation)) {
                 for (Bundle child : relations.get(relation)) {
-                    try {
-                        BundleValidator validator = BundleValidatorFactory
-                                .getInstance(manager, child, scope);
-                        if (forUpdate)
-                            validator.validateTreeForUpdate();
-                        else
-                            validator.validateTree();
-                    } catch (BundleError e) {
-                        childErrors.put(relation, e);
+                    if (forUpdate) {
+                        errors.put(relation, validateTreeForUpdate(child));
+                    } else {
+                        errors.put(relation, validateTree(child));
                     }
                 }
             }
         }
+        return errors;
     }
 
     /**
      * Check a bundle's fields validate.
      */
-    private void checkFields() {
+    private static ListMultimap<String,String> checkFields(final Bundle bundle) {
+        ListMultimap<String,String> errors = ArrayListMultimap.create();
         for (String key : ClassUtils.getMandatoryPropertyKeys(bundle.getBundleClass())) {
-            checkField(key);
+            errors.putAll(key, checkField(bundle, key));
         }
+        return errors;
     }
 
     /**
      * Check the data holds a given field, accounting for the
      * 
      * @param name
+     * @return  A list of errors for the given field.
      */
-    private void checkField(String name) {
-        Map<String, Object> data = bundle.getData();
-        if (!data.containsKey(name)) {
-            errors.put(name,
-                    Messages.getString("BundleFieldValidator.missingField"));
+    private static List<String> checkField(final Bundle bundle, String name) {
+        List<String> errors = Lists.newArrayList();
+        if (!bundle.getData().containsKey(name)) {
+            errors.add(Messages.getString("BundleFieldValidator.missingField"));
         } else {
-            Object value = data.get(name);
+            Object value = bundle.getData().get(name);
             if (value == null) {
-                errors.put(name,
-                        Messages.getString("BundleFieldValidator.emptyField"));
+                errors.add(Messages.getString("BundleFieldValidator.emptyField"));
             } else if (value instanceof String) {
                 if (((String) value).trim().isEmpty()) {
-                    errors.put(name, Messages
-                            .getString("BundleFieldValidator.emptyField"));
+                    errors.add(Messages.getString("BundleFieldValidator.emptyField"));
                 }
             }
         }
+        return errors;
     }
 
     /**
      * Check entity type annotation.
      */
-    private void checkEntityType() {
-        EntityType annotation = bundle.getBundleClass().getAnnotation(
-                EntityType.class);
+    private static ListMultimap<String,String> checkEntityType(final Bundle bundle) {
+        ListMultimap<String,String> errors = ArrayListMultimap.create();
+        EntityType annotation = bundle.getBundleClass().getAnnotation(EntityType.class);
         if (annotation == null) {
             errors.put(Bundle.TYPE_KEY, MessageFormat.format(Messages
                     .getString("BundleFieldValidator.missingTypeAnnotation"), //$NON-NLS-1$
                     bundle.getBundleClass().getName()));
         }
+        return errors;
     }
 
     /**
      * Check uniqueness constrains for a bundle's fields.
      */
-    private void checkIntegrity() {
+    private ListMultimap<String,String> checkIntegrity(final Bundle bundle) {
+        ListMultimap<String,String> errors = ArrayListMultimap.create();
         if (bundle.getId() == null) {
             errors.put("id", MessageFormat.format(Messages.getString("BundleFieldValidator.missingIdForCreate"),
                     bundle.getId()));
         }
         if (manager.exists(bundle.getId())) {
-            ListMultimap<String, String> errors = bundle
+            ListMultimap<String, String> idErrors = bundle
                     .getType().getIdgen()
                     .handleIdCollision(bundle.getType(), scope, bundle);
-            for (Map.Entry<String,String> entry :errors.entries()) {
-                this.errors.put(entry.getKey(), entry.getValue());
+            for (Map.Entry<String,String> entry :idErrors.entries()) {
+                errors.put(entry.getKey(), entry.getValue());
             }
         }
+        return errors;
     }
 
     /**
      * Check uniqueness constrains for a bundle's fields.
      */
-    private void checkUniqueness() {
+    private ListMultimap<String,String> checkUniqueness(final Bundle bundle) {
+        ListMultimap<String,String> errors = ArrayListMultimap.create();
         for (String ukey : bundle.getUniquePropertyKeys()) {
             Object uval = bundle.getDataValue(ukey);
             if (uval != null) {
@@ -218,12 +205,14 @@ public final class BundleFieldValidator implements BundleValidator {
                 }
             }
         }
+        return errors;
     }
 
     /**
      * Check uniqueness constrains for a bundle's fields.
      */
-    private void checkUniquenessOnUpdate() {
+    private ListMultimap<String,String> checkUniquenessOnUpdate(final Bundle bundle) {
+        ListMultimap<String,String> errors = ArrayListMultimap.create();
         for (String ukey : bundle.getUniquePropertyKeys()) {
             Object uval = bundle.getDataValue(ukey);
             if (uval != null) {
@@ -243,21 +232,6 @@ public final class BundleFieldValidator implements BundleValidator {
                 }
             }
         }
-    }
-
-    /**
-     * Search a tree of errors and determine if there's anything in it except for null values, which have to be there to
-     * maintain item ordering.
-     *
-     * @param errors
-     * @return
-     */
-    private boolean hasNestedErrors(ListMultimap<String, BundleError> errors) {
-        for (BundleError e : errors.values()) {
-            if (e != null) {
-                return true;
-            }
-        }
-        return false;
+        return errors;
     }
 }

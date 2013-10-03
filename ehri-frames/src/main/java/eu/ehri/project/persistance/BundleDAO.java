@@ -1,9 +1,7 @@
 package eu.ehri.project.persistance;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
-import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
@@ -13,8 +11,8 @@ import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.base.Frame;
 import eu.ehri.project.models.base.PermissionScope;
-import eu.ehri.project.models.idgen.IdGenerator;
 import eu.ehri.project.models.utils.ClassUtils;
+import eu.ehri.project.persistance.impl.BundleFieldValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,12 +22,6 @@ import java.util.Map.Entry;
 /**
  * Class responsible for persisting and deleting a Bundle - a data structure representing a graph node and its relations
  * to be updated in a single batch.
- *
- * NB: This is complicated considerably because we need to catch, accumulate, and rethrow exceptions in the context of
- * the subtree to which they belong.
- *
- * TODO: Extensive clean-up of error-handing.
- *
  */
 public final class BundleDAO {
 
@@ -39,6 +31,7 @@ public final class BundleDAO {
     private final PermissionScope scope;
     private final GraphManager manager;
     private final Serializer serializer;
+    private final BundleFieldValidator validator;
 
     /**
      * Constructor with a given scope.
@@ -52,6 +45,7 @@ public final class BundleDAO {
                 .or(SystemScope.getInstance());
         manager = GraphManagerFactory.getInstance(graph);
         serializer = new Serializer.Builder(graph).dependentOnly().build();
+        validator = new BundleFieldValidator(manager, scope);
     }
 
     /**
@@ -74,8 +68,7 @@ public final class BundleDAO {
     public <T extends Frame> Mutation<T> update(Bundle bundle, Class<T> cls)
             throws ValidationError, ItemNotFound {
         Bundle bundleWithIds = bundle.generateIds(scope);
-        BundleValidatorFactory
-                .getInstance(manager, bundleWithIds, scope).validateTreeForUpdate();
+        validator.validateForUpdate(bundleWithIds);
         Mutation<Vertex> mutation = updateInner(bundleWithIds);
         return new Mutation<T>(graph.frame(mutation.getNode(), cls),
                 mutation.getState(), mutation.getPrior());
@@ -91,8 +84,7 @@ public final class BundleDAO {
     public <T extends Frame> T create(Bundle bundle, Class<T> cls)
             throws ValidationError {
         Bundle bundleWithIds = bundle.generateIds(scope);
-        BundleValidatorFactory
-                .getInstance(manager, bundleWithIds, scope).validateTree();
+        validator.validate(bundleWithIds);
         return graph.frame(createInner(bundleWithIds), cls);
     }
 
@@ -106,8 +98,7 @@ public final class BundleDAO {
     public <T extends Frame> Mutation<T> createOrUpdate(Bundle bundle, Class<T> cls)
             throws ValidationError {
         Bundle bundleWithIds = bundle.generateIds(scope);
-        BundleValidatorFactory
-                .getInstance(manager, bundleWithIds, scope).validateTreeForUpdate();
+        validator.validateForUpdate(bundleWithIds);
         Mutation<Vertex> vertexMutation = createOrUpdateInner(bundleWithIds);
         return new Mutation<T>(graph.frame(vertexMutation.getNode(), cls), vertexMutation.getState(),
                 vertexMutation.getPrior());
@@ -222,10 +213,8 @@ public final class BundleDAO {
      * @param master
      * @param cls
      * @param relations
-     * @return
-     * @throws IntegrityError
-     *
      * @return errors
+     * @throws IntegrityError
      */
     private void createDependents(Vertex master,
             Class<?> cls, ListMultimap<String, Bundle> relations)
@@ -252,10 +241,8 @@ public final class BundleDAO {
      * @param master
      * @param cls
      * @param relations
-     * @return
-     * @throws ItemNotFound
-     *
      * @return errors
+     * @throws ItemNotFound
      */
     private void updateDependents(Vertex master, Class<?> cls, ListMultimap<String,
             Bundle> relations) throws ItemNotFound {

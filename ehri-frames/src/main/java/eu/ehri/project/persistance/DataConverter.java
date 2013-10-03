@@ -35,6 +35,49 @@ class DataConverter {
     private static ObjectMapper mapper = new ObjectMapper();
 
     /**
+     * Convert an error set to a generic data structure.
+     * @param errorSet
+     * @return
+     */
+    public static Map<String,Object> errorSetToData(ErrorSet errorSet) {
+        Map<String,Object> data = Maps.newHashMap();
+        data.put(ErrorSet.ERROR_KEY, errorSet.getErrors().asMap());
+        Map<String, List<Map<String, Object>>> relations = Maps.newHashMap();
+        ListMultimap<String, ErrorSet> crelations = errorSet.getRelations();
+        for (String key : crelations.keySet()) {
+            List<Map<String, Object>> rels = Lists.newArrayList();
+            for (ErrorSet subbundle : crelations.get(key)) {
+                rels.add(errorSetToData(subbundle));
+            }
+            relations.put(key, rels);
+        }
+        data.put(ErrorSet.REL_KEY, relations);
+        return data;
+    }
+
+    /**
+     * Convert an error set to JSON.
+     *
+     * @param errorSet
+     * @return
+     * @throws SerializationError
+     *
+     */
+    public static String errorSetToJson(ErrorSet errorSet) throws SerializationError {
+        Map<String, Object> data = errorSetToData(errorSet);
+        try {
+            // Note: defaultPrettyPrintWriter has been replaced by
+            // writerWithDefaultPrettyPrinter in newer versions of
+            // Jackson, though not the one available in Neo4j.
+            @SuppressWarnings("deprecation")
+            ObjectWriter writer = mapper.defaultPrettyPrintingWriter();
+            return writer.writeValueAsString(data);
+        } catch (Exception e) {
+            throw new SerializationError("Error writing errorSet to JSON", e);
+        }
+    }
+
+    /**
      * Convert a bundle to a generic data structure.
      * 
      * @param bundle
