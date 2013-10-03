@@ -250,11 +250,11 @@ public final class Serializer {
     }
 
     /**
-     * Run a callback every time a node in a subtree is encountered, starting
-     * with the top-level node.
+     * Run a callback every time a node in a subtree is encountered,
+     * excepting the top-level node.
      *
-     * @param item
-     * @param cb
+     * @param item The item
+     * @param cb   A callback object
      */
     public <T extends Frame> void traverseSubtree(T item,
             final TraversalCallback cb) {
@@ -436,8 +436,8 @@ public final class Serializer {
     }
 
     /**
-     * Run a callback every time a node in a subtree is encountered, starting
-     * with the top-level node.
+     * Run a callback every time a node in a subtree is encountered, excepting
+     * the top-level node.
      *
      * @param item
      * @param depth

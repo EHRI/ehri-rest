@@ -4,6 +4,7 @@ import eu.ehri.project.models.base.Frame;
 import eu.ehri.project.test.AbstractFixtureTest;
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -14,14 +15,21 @@ import static org.junit.Assert.assertTrue;
  */
 public class SubtreeTraverserTest extends AbstractFixtureTest {
 
+    private static class Counter {
+        public int count = 0;
+    }
+
     @Test
-    public void testSubtreeSerialization() {
-        new Serializer(graph).traverseSubtree(item, new TraversalCallback() {            
+    public void testSubtreeSerializationTouchesAllNodes() throws Exception {
+        // Doc c1 has five nodes in its subtree
+        final Counter counter = new Counter();
+        System.out.println(new Serializer(graph).vertexFrameToJson(item));
+        new Serializer.Builder(graph).dependentOnly().build()
+                .traverseSubtree(item, new TraversalCallback() {
             public void process(Frame vertexFrame, int depth, String rname, int rnum) {
-                System.out.println(manager.getId(vertexFrame) + " -> " + rname);                
+                counter.count++;
             }
         });
-        // TODO: Actual useful tests
-        assertTrue(true);
+        assertEquals(5, counter.count);
     }
 }
