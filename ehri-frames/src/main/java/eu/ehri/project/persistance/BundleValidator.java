@@ -1,30 +1,23 @@
 package eu.ehri.project.persistance;
 
-import com.google.common.collect.ArrayListMultimap;
+import com.google.common.base.Optional;
 import com.google.common.collect.ListMultimap;
-import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Vertex;
+import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.utils.ClassUtils;
-
 import java.text.MessageFormat;
-import java.util.List;
 import java.util.Map;
 
 /**
  * Class responsible for validating bundles.
- * <p/>
- * FIXME: This currently duplicates much of the functionality in the
- * (not very nice) BundleDAO code. What it doesn't (yet) do is handle
- * id collisions and integrity errors, but since this is more or less
- * exactly what we do here, it should be extended to do so.
  *
- * @author mike
+ * @author Mike Bryant (http://github.com/mikesname)
  */
 public final class BundleValidator {
 
@@ -33,7 +26,7 @@ public final class BundleValidator {
 
     public BundleValidator(GraphManager manager, PermissionScope scope) {
         this.manager = manager;
-        this.scope = scope;
+        this.scope = Optional.fromNullable(scope).or(SystemScope.getInstance());
     }
 
     /**
@@ -97,8 +90,8 @@ public final class BundleValidator {
         if (bundle.getId() == null)
             builder.addError(Bundle.ID_KEY, eu.ehri.project.persistance.Messages
                     .getString("BundleValidator.missingIdForUpdate")); //$NON-NLS-1$
-        builder.addErrors(checkUniquenessOnUpdate(bundle));
-        builder.addRelations(checkChildren(bundle, ValidationType.update));
+        checkUniquenessOnUpdate(bundle, builder);
+        checkChildren(bundle, builder, ValidationType.update);
         return builder.build();
     }
 
@@ -110,9 +103,9 @@ public final class BundleValidator {
      */
     private ErrorSet validateTreeForCreate(final Bundle bundle) {
         ErrorSet.Builder builder = new ErrorSet.Builder();
-        builder.addErrors(checkIntegrity(bundle));
-        builder.addErrors(checkUniqueness(bundle));
-        builder.addRelations(checkChildren(bundle, ValidationType.create));
+        checkIntegrity(bundle, builder);
+        checkUniqueness(bundle, builder);
+        checkChildren(bundle, builder, ValidationType.create);
         return builder.build();
     }
 
@@ -123,15 +116,14 @@ public final class BundleValidator {
      */
     private ErrorSet validateTreeData(final Bundle bundle) {
         ErrorSet.Builder builder = new ErrorSet.Builder();
-        builder.addErrors(checkFields(bundle));
-        builder.addErrors(checkEntityType(bundle));
-        builder.addErrors(checkUniqueness(bundle));
-        builder.addRelations(checkChildren(bundle, ValidationType.data));
+        checkFields(bundle, builder);
+        checkEntityType(bundle, builder);
+        checkChildren(bundle, builder, ValidationType.data);
         return builder.build();
     }
 
-    private ListMultimap<String, ErrorSet> checkChildren(final Bundle bundle, ValidationType type) {
-        ListMultimap<String, ErrorSet> errors = ArrayListMultimap.create();
+    private void checkChildren(final Bundle bundle,
+            final ErrorSet.Builder builder, ValidationType type) {
         Map<String, Direction> dependents = ClassUtils
                 .getDependentRelations(bundle.getBundleClass());
         ListMultimap<String, Bundle> relations = bundle.getRelations();
@@ -140,76 +132,67 @@ public final class BundleValidator {
                 for (Bundle child : relations.get(relation)) {
                     switch (type) {
                         case data:
-                            errors.put(relation, validateTreeData(child));
+                            builder.addRelation(relation, validateTreeData(child));
                             break;
                         case create:
-                            errors.put(relation, validateTreeForCreate(child));
+                            builder.addRelation(relation, validateTreeForCreate(child));
                             break;
                         case update:
-                            errors.put(relation, validateTreeForUpdate(child));
+                            builder.addRelation(relation, validateTreeForUpdate(child));
                             break;
                     }
                 }
             }
         }
-        return errors;
     }
 
     /**
      * Check a bundle's fields validate.
      */
-    private static ListMultimap<String, String> checkFields(final Bundle bundle) {
-        ListMultimap<String, String> errors = ArrayListMultimap.create();
+    private static void checkFields(final Bundle bundle, final ErrorSet.Builder builder) {
         for (String key : ClassUtils.getMandatoryPropertyKeys(bundle.getBundleClass())) {
-            errors.putAll(key, checkField(bundle, key));
+            checkField(bundle, builder, key);
         }
-        return errors;
     }
 
     /**
      * Check the data holds a given field, accounting for the
      *
      * @param name The field name
-     * @return A list of errors for the given field.
      */
-    private static List<String> checkField(final Bundle bundle, String name) {
-        List<String> errors = Lists.newArrayList();
+    private static void checkField(final Bundle bundle, final ErrorSet.Builder builder, String name) {
         if (!bundle.getData().containsKey(name)) {
-            errors.add(eu.ehri.project.persistance.Messages.getString("BundleValidator.missingField"));
+            builder.addError(name, Messages.getString("BundleValidator.missingField"));
         } else {
             Object value = bundle.getData().get(name);
             if (value == null) {
-                errors.add(eu.ehri.project.persistance.Messages.getString("BundleValidator.emptyField"));
+                builder.addError(name, Messages.getString("BundleValidator.emptyField"));
             } else if (value instanceof String) {
                 if (((String) value).trim().isEmpty()) {
-                    errors.add(eu.ehri.project.persistance.Messages.getString("BundleValidator.emptyField"));
+                    builder.addError(name, Messages.getString("BundleValidator.emptyField"));
                 }
             }
         }
-        return errors;
     }
 
     /**
      * Check entity type annotation.
      */
-    private static ListMultimap<String, String> checkEntityType(final Bundle bundle) {
-        ListMultimap<String, String> errors = ArrayListMultimap.create();
+    private static void checkEntityType(final Bundle bundle, final ErrorSet.Builder builder) {
         EntityType annotation = bundle.getBundleClass().getAnnotation(EntityType.class);
         if (annotation == null) {
-            errors.put(Bundle.TYPE_KEY, MessageFormat.format(eu.ehri.project.persistance.Messages
+            builder.addError(Bundle.TYPE_KEY, MessageFormat.format(Messages
                     .getString("BundleValidator.missingTypeAnnotation"), //$NON-NLS-1$
                     bundle.getBundleClass().getName()));
         }
-        return errors;
     }
 
     /**
      * Check uniqueness constrains for a bundle's fields.
      */
-    private ListMultimap<String, String> checkIntegrity(final Bundle bundle) {
-        ListMultimap<String, String> errors = ArrayListMultimap.create();
+    private void checkIntegrity(final Bundle bundle, final ErrorSet.Builder builder) {
         if (bundle.getId() == null) {
-            errors.put("id", MessageFormat.format(eu.ehri.project.persistance.Messages.getString("BundleValidator.missingIdForCreate"),
+            builder.addError("id", MessageFormat.format(Messages.getString("BundleValidator.missingIdForCreate"),
                     bundle.getId()));
         }
         if (manager.exists(bundle.getId())) {
@@ -217,24 +200,22 @@ public final class BundleValidator {
                     .getType().getIdgen()
                     .handleIdCollision(bundle.getType(), scope, bundle);
             for (Map.Entry<String, String> entry : idErrors.entries()) {
-                errors.put(entry.getKey(), entry.getValue());
+                builder.addError(entry.getKey(), entry.getValue());
             }
         }
-        return errors;
     }
 
     /**
      * Check uniqueness constrains for a bundle's fields.
      */
-    private ListMultimap<String, String> checkUniqueness(final Bundle bundle) {
-        ListMultimap<String, String> errors = ArrayListMultimap.create();
+    private void checkUniqueness(final Bundle bundle, final ErrorSet.Builder builder) {
         for (String ukey : bundle.getUniquePropertyKeys()) {
             Object uval = bundle.getDataValue(ukey);
             if (uval != null) {
                 CloseableIterable<Vertex> vertices = manager.getVertices(ukey, uval, bundle.getType());
                 try {
                     if (vertices.iterator().hasNext()) {
-                        errors.put(ukey, MessageFormat.format(eu.ehri.project.persistance.Messages
+                        builder.addError(ukey, MessageFormat.format(Messages
                                 .getString("BundleValidator.uniquenessError"), uval));
                     }
                 } finally {
@@ -242,14 +223,12 @@ public final class BundleValidator {
                 }
             }
         }
-        return errors;
     }
 
     /**
      * Check uniqueness constrains for a bundle's fields.
      */
-    private ListMultimap<String, String> checkUniquenessOnUpdate(final Bundle bundle) {
-        ListMultimap<String, String> errors = ArrayListMultimap.create();
+    private void checkUniquenessOnUpdate(final Bundle bundle, final ErrorSet.Builder builder) {
         for (String ukey : bundle.getUniquePropertyKeys()) {
             Object uval = bundle.getDataValue(ukey);
             if (uval != null) {
@@ -259,7 +238,7 @@ public final class BundleValidator {
                         Vertex v = vertices.iterator().next();
                         // If it's the same vertex, we don't have a problem...
                         if (!manager.getId(v).equals(bundle.getId())) {
-                            errors.put(ukey, MessageFormat.format(eu.ehri.project.persistance.Messages
+                            builder.addError(ukey, MessageFormat.format(Messages
                                     .getString("BundleValidator.uniquenessError"), uval));
 
                         }
@@ -269,6 +248,5 @@ public final class BundleValidator {
                 }
             }
         }
-        return errors;
     }
 }

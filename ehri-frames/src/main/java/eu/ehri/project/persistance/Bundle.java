@@ -19,8 +19,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * Class that represents a graph entity and subtree relations.
  *
- * @author michaelb
- *
+ * @author Mike Bryant (http://github.com/mikesname)
  */
 public final class Bundle {
     private final boolean temp;
@@ -46,16 +45,47 @@ public final class Bundle {
      */
     public static final String MANAGED_PREFIX = "_";
 
+    public static class Builder {
+        private String id = null;
+        private final EntityClass type;
+        final ListMultimap<String, Bundle> relations = ArrayListMultimap.create();
+        final Map<String, Object> data = Maps.newHashMap();
+
+        public Builder setId(String id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder(EntityClass cls) {
+            type = cls;
+        }
+
+        public Builder addRelation(String relation, Bundle bundle) {
+            relations.put(relation, bundle);
+            return this;
+        }
+
+        public Builder addDataValue(String key, Object value) {
+            data.put(key, value);
+            return this;
+        }
+
+        public Bundle build() {
+            return new Bundle(id, type, data, relations);
+        }
+    }
+
     /**
      * Constructor.
      *
-     * @param id
-     * @param type
-     * @param data
-     * @param relations
-     * @param temp
+     * @param id        The bundle's id
+     * @param type      The bundle's type class
+     * @param data      An initial map of data
+     * @param relations An initial set of relations
+     * @param meta      An initial map of metadata
+     * @param temp      A marker to indicate the ID has been generated
      */
-    public Bundle(String id, EntityClass type, final Map<String, Object> data,
+    private Bundle(String id, EntityClass type, final Map<String, Object> data,
             final ListMultimap<String, Bundle> relations, final Map<String, Object> meta, boolean temp) {
         this.id = id;
         this.type = type;
@@ -68,66 +98,68 @@ public final class Bundle {
     /**
      * Constructor for bundle without existing id.
      *
-     * @param id
-     * @param type
-     * @param data
-     * @param relations
+     * @param id        The bundle's id
+     * @param type      The bundle's type class
+     * @param data      An initial map of data
+     * @param relations An initial set of relations
      */
     public Bundle(String id, EntityClass type, final Map<String, Object> data,
             final ListMultimap<String, Bundle> relations) {
-        this(id, type, data, relations, Maps.<String,Object>newHashMap());
+        this(id, type, data, relations, Maps.<String, Object>newHashMap());
     }
 
     /**
      * Constructor.
      *
-     * @param id
-     * @param type
-     * @param data
-     * @param relations
+     * @param id        The bundle's id
+     * @param type      The bundle's type class
+     * @param data      An initial map of data
+     * @param relations An initial set of relations
+     * @param meta      An initial map of metadata
      */
     public Bundle(String id, EntityClass type, final Map<String, Object> data,
             final ListMultimap<String, Bundle> relations, final Map<String, Object> meta) {
-        this(id, type, data, relations, Maps.<String,Object>newHashMap(), false);
+        this(id, type, data, relations, meta, false);
     }
+
     /**
      * Constructor for bundle without existing id.
      *
-     * @param type
-     * @param data
-     * @param relations
+     * @param type      The bundle's type class
+     * @param data      An initial map of data
+     * @param relations An initial set of relations
      */
     public Bundle(EntityClass type, final Map<String, Object> data,
             final ListMultimap<String, Bundle> relations) {
-        this(null, type, data, relations, Maps.<String,Object>newHashMap());
+        this(null, type, data, relations, Maps.<String, Object>newHashMap());
     }
 
     /**
      * Constructor for just a type.
      *
-     * @param type
+     * @param type The bundle's type class
      */
     public Bundle(EntityClass type) {
-        this(null, type, Maps.<String, Object> newHashMap(), LinkedListMultimap
-                .<String, Bundle> create(), Maps.<String,Object>newHashMap());
+        this(null, type, Maps.<String, Object>newHashMap(), LinkedListMultimap
+                .<String, Bundle>create(), Maps.<String, Object>newHashMap());
     }
 
     /**
      * Constructor for bundle without existing id or relations.
      *
-     * @param type
-     * @param data
+     * @param type The bundle's type class
+     * @param data An initial map of data
      */
     public Bundle(EntityClass type, final Map<String, Object> data) {
-        this(null, type, data, LinkedListMultimap.<String, Bundle> create(),
-                Maps.<String,Object>newHashMap());
+        this(null, type, data, LinkedListMultimap.<String, Bundle>create(),
+                Maps.<String, Object>newHashMap());
     }
 
     /**
      * Get the id of the bundle's graph vertex (or null if it does not yet
      * exist.
      *
-     * @return
+     * @return The bundle's id
      */
     public String getId() {
         return id;
@@ -136,7 +168,7 @@ public final class Bundle {
     /**
      * Get a bundle with the given id.
      *
-     * @param id
+     * @param id The bundle's id
      */
     public Bundle withId(String id) {
         checkNotNull(id);
@@ -147,7 +179,7 @@ public final class Bundle {
      * Get the type of entity this bundle represents as per the target class's
      * entity type key.
      *
-     * @return
+     * @return The bundle's type
      */
     public EntityClass getType() {
         return type;
@@ -156,7 +188,7 @@ public final class Bundle {
     /**
      * Get a data value.
      *
-     * @return
+     * @return The data value
      */
     public Object getDataValue(String key) {
         checkNotNull(key);
@@ -166,9 +198,9 @@ public final class Bundle {
     /**
      * Set a value in the bundle's data.
      *
-     * @param key
-     * @param value
-     * @return
+     * @param key   The data key
+     * @param value The data value
+     * @return A new bundle
      */
     public Bundle withDataValue(String key, Object value) {
         if (value == null) {
@@ -183,9 +215,9 @@ public final class Bundle {
     /**
      * Set a value in the bundle's meta data.
      *
-     * @param key
-     * @param value
-     * @return
+     * @param key   The metadata key
+     * @param value The metadata value
+     * @return A new bundle
      */
     public Bundle withMetaDataValue(String key, Object value) {
         if (value == null) {
@@ -200,8 +232,8 @@ public final class Bundle {
     /**
      * Remove a value in the bundle's data.
      *
-     * @param key
-     * @return
+     * @param key The data key to remove
+     * @return A new bundle
      */
     public Bundle removeDataValue(String key) {
         Map<String, Object> newData = Maps.newHashMap(data);
@@ -212,7 +244,7 @@ public final class Bundle {
     /**
      * Get the bundle data.
      *
-     * @return
+     * @return The full data map
      */
     public Map<String, Object> getData() {
         return data;
@@ -220,8 +252,10 @@ public final class Bundle {
 
     /**
      * Get the bundle metadata
+     *
+     * @return The full metadata map
      */
-    public Map<String,Object> getMetaData() {
+    public Map<String, Object> getMetaData() {
         return meta;
     }
 
@@ -229,7 +263,7 @@ public final class Bundle {
     /**
      * Check if this bundle has associated metadata.
      *
-     * @return
+     * @return Whether metadata is present
      */
     public boolean hasMetaData() {
         return !meta.isEmpty();
@@ -238,8 +272,8 @@ public final class Bundle {
     /**
      * Set the entire data map for this bundle.
      *
-     * @param data
-     * @return
+     * @param data The full data map to set
+     * @return The new bundle
      */
     public Bundle withData(final Map<String, Object> data) {
         return new Bundle(id, type, data, relations, meta, temp);
@@ -248,8 +282,8 @@ public final class Bundle {
     /**
      * Set the entire meta data map for this bundle.
      *
-     * @param meta
-     * @return
+     * @param meta The full metadata map to set
+     * @return The new bundle
      */
     public Bundle withMetaData(final Map<String, Object> meta) {
         return new Bundle(id, type, data, relations, meta, temp);
@@ -258,7 +292,7 @@ public final class Bundle {
     /**
      * Get the bundle's relation bundles.
      *
-     * @return
+     * @return The full set of relations
      */
     public ListMultimap<String, Bundle> getRelations() {
         return relations;
@@ -267,8 +301,8 @@ public final class Bundle {
     /**
      * Set entire set of relations.
      *
-     * @param relations
-     * @return
+     * @param relations A full set of relations
+     * @return The new bundle
      */
     public Bundle withRelations(ListMultimap<String, Bundle> relations) {
         return new Bundle(id, type, data, relations, meta, temp);
@@ -277,8 +311,8 @@ public final class Bundle {
     /**
      * Get a set of relations.
      *
-     * @param relation
-     * @return
+     * @param relation A relationship key
+     * @return A given set of relations
      */
     public List<Bundle> getRelations(String relation) {
         return relations.get(relation);
@@ -287,9 +321,9 @@ public final class Bundle {
     /**
      * Set bundles for a particular relation.
      *
-     * @param relation
-     * @param others
-     * @return
+     * @param relation A relationship key
+     * @param others   A set of relations for the given key
+     * @return A new bundle
      */
     public Bundle withRelations(String relation, List<Bundle> others) {
         LinkedListMultimap<String, Bundle> tmp = LinkedListMultimap
@@ -301,8 +335,9 @@ public final class Bundle {
     /**
      * Add a bundle for a particular relation.
      *
-     * @param relation
-     * @param other
+     * @param relation A relationship key
+     * @param other    A related bundle
+     * @return A new bundle
      */
     public Bundle withRelation(String relation, Bundle other) {
         LinkedListMultimap<String, Bundle> tmp = LinkedListMultimap
@@ -312,19 +347,10 @@ public final class Bundle {
     }
 
     /**
-     * Check if this bundle contains any relations.
-     *
-     * @return
-     */
-    public boolean hasRelations() {
-        return !relations.isEmpty();
-    }
-
-    /**
      * Check if this bundle contains the given relation set.
      *
-     * @param relation
-     * @return
+     * @param relation A relationship key
+     * @return Whether this bundle has relations for the given key
      */
     public boolean hasRelations(String relation) {
         return relations.containsKey(relation);
@@ -333,8 +359,9 @@ public final class Bundle {
     /**
      * Remove a single relation.
      *
-     * @param relation
-     * @return
+     * @param relation A relationship key
+     * @param item     The item to remove
+     * @return A new bundle
      */
     public Bundle removeRelation(String relation, Bundle item) {
         ListMultimap<String, Bundle> tmp = LinkedListMultimap.create(relations);
@@ -343,21 +370,9 @@ public final class Bundle {
     }
 
     /**
-     * Remove a set of relationships.
-     *
-     * @param relation
-     * @return
-     */
-    public Bundle removeRelations(String relation) {
-        ListMultimap<String, Bundle> tmp = LinkedListMultimap.create(relations);
-        tmp.removeAll(relation);
-        return new Bundle(id, type, data, tmp, meta, temp);
-    }
-
-    /**
      * Get the target class.
      *
-     * @return
+     * @return The bundle's type class
      */
     public Class<?> getBundleClass() {
         return type.getEntityClass();
@@ -367,7 +382,7 @@ public final class Bundle {
      * Return a list of names for mandatory properties, as represented in the
      * graph.
      *
-     * @return
+     * @return A list of property keys for the bundle's type
      */
     public Iterable<String> getPropertyKeys() {
         return ClassUtils.getPropertyKeys(type.getEntityClass());
@@ -376,7 +391,7 @@ public final class Bundle {
     /**
      * Return a list of property keys which must be unique.
      *
-     * @return
+     * @return A list of unique property keys for the bundle's type
      */
     public Iterable<String> getUniquePropertyKeys() {
         return ClassUtils.getUniquePropertyKeys(type.getEntityClass());
@@ -385,8 +400,8 @@ public final class Bundle {
     /**
      * Create a bundle from raw data.
      *
-     * @param data
-     * @return
+     * @param data A raw data object
+     * @return A bundle
      * @throws DeserializationError
      */
     public static Bundle fromData(Object data) throws DeserializationError {
@@ -396,7 +411,7 @@ public final class Bundle {
     /**
      * Serialize a bundle to raw data.
      *
-     * @return
+     * @return A raw data object
      */
     public Map<String, Object> toData() {
         return DataConverter.bundleToData(this);
@@ -405,8 +420,8 @@ public final class Bundle {
     /**
      * Create a bundle from a (JSON) string.
      *
-     * @param json
-     * @return
+     * @param json A JSON representation
+     * @return A bundle
      * @throws DeserializationError
      */
     public static Bundle fromString(String json) throws DeserializationError {
@@ -420,6 +435,7 @@ public final class Bundle {
 
     /**
      * Serialize a bundle to a JSON string.
+     *
      * @return json string
      */
     public String toJson() {
@@ -432,7 +448,8 @@ public final class Bundle {
 
     /**
      * Serialize a bundle to a JSON string.
-     * @return document
+     *
+     * @return document An XML document
      */
     public Document toXml() {
         return DataConverter.bundleToXml(this);
@@ -440,36 +457,48 @@ public final class Bundle {
 
     /**
      * Serialize to an XML String.
-     * @return
+     *
+     * @return An XML string
      */
     public String toXmlString() {
         return DataConverter.bundleToXmlString(this);
     }
 
     /**
-     * Return an immutable copy of the given data map with nulls removed.
-     * @param data
-     * @return
+     * Check if this bundle as a generated ID.
+     *
+     * @return True if the ID has been synthesised.
      */
-    private ImmutableMap<String, Object> filterData(Map<String, Object> data) {
-        Map<String,Object> filtered = Maps.newHashMap();
-        for (Map.Entry<? extends String,Object> entry : data.entrySet()) {
-            if (entry.getValue() != null) {
-                filtered.put(entry.getKey(), entry.getValue());
-            }
-        }
-        return ImmutableMap.copyOf(filtered);
+    public boolean hasGeneratedId() {
+        return temp;
     }
 
-    private Map<String,Object> unmanagedData(Map<String, Object> in) {
-        Map<String,Object> filtered = Maps.newHashMap();
-        for (Map.Entry<? extends String,Object> entry : in.entrySet()) {
-            if (!entry.getKey().startsWith(MANAGED_PREFIX)
-                    && entry.getValue() != null) {
-                filtered.put(entry.getKey(), entry.getValue());
-            }
+    /**
+     * Generate missing IDs for the subtree.
+     *
+     * @param scopes A set of parent scopes.
+     * @return A new bundle
+     */
+    public Bundle generateIds(final List<String> scopes) {
+        boolean isTemp = id == null;
+        String newId = isTemp
+                ? getType().getIdgen().generateId(getType(), scopes, this)
+                : id;
+        ListMultimap<String, Bundle> idRels = LinkedListMultimap.create();
+        for (Map.Entry<String, Bundle> entry : relations.entries()) {
+            idRels.put(entry.getKey(), entry.getValue().generateIds(scopes));
         }
-        return filtered;
+        return new Bundle(newId, type, data, idRels, meta, isTemp);
+    }
+
+    /**
+     * Generate missing IDs for the subtree.
+     *
+     * @param scope A permission scope.
+     * @return A new bundle
+     */
+    public Bundle generateIds(final PermissionScope scope) {
+        return generateIds(getScopeIds(scope));
     }
 
     @Override
@@ -479,12 +508,9 @@ public final class Bundle {
 
         Bundle bundle = (Bundle) o;
 
-        if (type != bundle.type) return false;
-        if (!unmanagedData(data).equals(unmanagedData(bundle.data))) return false;
-        if (!unorderedRelations(relations)
-                .equals(unorderedRelations(bundle.relations))) return false;
-
-        return true;
+        return type == bundle.type
+                && unmanagedData(data).equals(unmanagedData(bundle.data))
+                && unorderedRelations(relations).equals(unorderedRelations(bundle.relations));
     }
 
     @Override
@@ -495,51 +521,46 @@ public final class Bundle {
         return result;
     }
 
+    // Helpers...
+
+    /**
+     * Return an immutable copy of the given data map with nulls removed.
+     */
+    private ImmutableMap<String, Object> filterData(Map<String, Object> data) {
+        Map<String, Object> filtered = Maps.newHashMap();
+        for (Map.Entry<? extends String, Object> entry : data.entrySet()) {
+            if (entry.getValue() != null) {
+                filtered.put(entry.getKey(), entry.getValue());
+            }
+        }
+        return ImmutableMap.copyOf(filtered);
+    }
+
+    /**
+     * Return a set of data with 'managed' items (prefixed by a particular
+     * key) removed.
+     */
+    private Map<String, Object> unmanagedData(Map<String, Object> in) {
+        Map<String, Object> filtered = Maps.newHashMap();
+        for (Map.Entry<? extends String, Object> entry : in.entrySet()) {
+            if (!entry.getKey().startsWith(MANAGED_PREFIX)
+                    && entry.getValue() != null) {
+                filtered.put(entry.getKey(), entry.getValue());
+            }
+        }
+        return filtered;
+    }
+
     /**
      * Convert the ordered relationship set into an unordered one for comparison.
-     * FIXME: Clean up the code and optimise this function.
-     * @param rels
-     * @return
      */
-    private Map<String,LinkedHashMultiset<Bundle>> unorderedRelations(final ListMultimap<String,Bundle> rels) {
-        Map<String,LinkedHashMultiset<Bundle>> map = Maps.newHashMap();
-        for (Map.Entry<String,Collection<Bundle>> entry : rels.asMap().entrySet()) {
+    private Map<String, LinkedHashMultiset<Bundle>> unorderedRelations(final ListMultimap<String, Bundle> rels) {
+        Map<String, LinkedHashMultiset<Bundle>> map = Maps.newHashMap();
+        for (Map.Entry<String, Collection<Bundle>> entry : rels.asMap().entrySet()) {
             map.put(entry.getKey(), LinkedHashMultiset.create(entry.getValue()));
         }
         return map;
     }
-
-    public boolean hasGeneratedId() {
-        return temp;
-    }
-
-    /**
-     * Generate missing IDs for the subtree.
-     * @param scopes A set of parent scopes.
-     * @return
-     */
-    public Bundle generateIds(final List<String> scopes) {
-        boolean isTemp = id == null;
-        String newId = isTemp
-                ?  getType().getIdgen().generateId(getType(), scopes, this)
-                : id;
-        ListMultimap<String,Bundle> idRels = LinkedListMultimap.create();
-        for (Map.Entry<String, Bundle> entry :  relations.entries()) {
-            idRels.put(entry.getKey(), entry.getValue().generateIds(scopes));
-        }
-        return new Bundle(newId, type, data, idRels, meta, isTemp);
-    }
-
-    /**
-     * Generate missing IDs for the subtree.
-     * @param scope A permission scope.
-     * @return
-     */
-    public Bundle generateIds(final PermissionScope scope) {
-        return generateIds(getScopeIds(scope));
-    }
-
-    // Helpers...
 
     private List<String> getScopeIds(PermissionScope scope) {
         if (SystemScope.INSTANCE.equals(scope)) {

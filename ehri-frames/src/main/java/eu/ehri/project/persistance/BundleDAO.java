@@ -8,19 +8,25 @@ import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
-import eu.ehri.project.exceptions.*;
+import eu.ehri.project.exceptions.IntegrityError;
+import eu.ehri.project.exceptions.ItemNotFound;
+import eu.ehri.project.exceptions.SerializationError;
+import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.base.Frame;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.utils.ClassUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 /**
- * Class responsible for persisting and deleting a Bundle - a data structure representing a graph node and its relations
- * to be updated in a single batch.
+ * Class responsible for creating, updating and deleting Bundles.
+ *
+ * @author Mike Bryant (http://github.com/mikesname)
  */
 public final class BundleDAO {
 

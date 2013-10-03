@@ -12,11 +12,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * Class that represents a set of validation errors associated with a bundle.
  *
- * @author michaelb
- *
+ * @author Mike Bryant (http://github.com/mikesname)
  */
 public final class ErrorSet {
-    private final ImmutableListMultimap<String,String> errors;
+    private final ImmutableListMultimap<String, String> errors;
     private final ImmutableListMultimap<String, ErrorSet> relations;
 
     /**
@@ -29,7 +28,7 @@ public final class ErrorSet {
      * Builder class for creating an Error set.
      */
     public static class Builder {
-        private final ListMultimap<String,String> errors = ArrayListMultimap.create();
+        private final ListMultimap<String, String> errors = ArrayListMultimap.create();
         private final ListMultimap<String, ErrorSet> relations = ArrayListMultimap.create();
 
         public Builder addError(String key, String error) {
@@ -37,18 +36,8 @@ public final class ErrorSet {
             return this;
         }
 
-        public Builder addErrors(ListMultimap<String,String> errs) {
-            errors.putAll(errs);
-            return this;
-        }
-
         public Builder addRelation(String relation, ErrorSet errorSet) {
             relations.put(relation, errorSet);
-            return this;
-        }
-
-        public Builder addRelations(ListMultimap<String,ErrorSet> rels) {
-            relations.putAll(rels);
             return this;
         }
 
@@ -61,8 +50,8 @@ public final class ErrorSet {
      * Constructor.
      */
     public ErrorSet() {
-        this(ArrayListMultimap.<String,String>create(),
-                ArrayListMultimap.<String,ErrorSet>create());
+        this(ArrayListMultimap.<String, String>create(),
+                ArrayListMultimap.<String, ErrorSet>create());
     }
 
     /**
@@ -82,8 +71,8 @@ public final class ErrorSet {
      *
      * @param errors
      */
-    public ErrorSet(ListMultimap<String,String> errors) {
-        this(errors, ArrayListMultimap.<String,ErrorSet>create());
+    public ErrorSet(ListMultimap<String, String> errors) {
+        this(errors, ArrayListMultimap.<String, ErrorSet>create());
     }
 
     /**
@@ -92,7 +81,7 @@ public final class ErrorSet {
      * @param errors
      * @param relations
      */
-    public ErrorSet(ListMultimap<String,String> errors, final ListMultimap<String, ErrorSet> relations) {
+    public ErrorSet(ListMultimap<String, String> errors, final ListMultimap<String, ErrorSet> relations) {
         this.errors = ImmutableListMultimap.copyOf(errors);
         this.relations = ImmutableListMultimap.copyOf(relations);
     }
@@ -118,7 +107,7 @@ public final class ErrorSet {
         if (err == null) {
             return this;
         } else {
-            ListMultimap<String,String> errs = LinkedListMultimap.create(errors);
+            ListMultimap<String, String> errs = LinkedListMultimap.create(errors);
             errs.put(key, err);
             return withErrors(errs);
         }
@@ -129,7 +118,7 @@ public final class ErrorSet {
      *
      * @return
      */
-    public ListMultimap<String,String> getErrors() {
+    public ListMultimap<String, String> getErrors() {
         return errors;
     }
 
@@ -139,7 +128,7 @@ public final class ErrorSet {
      * @param errors
      * @return
      */
-    public ErrorSet withErrors(final ListMultimap<String,String> errors) {
+    public ErrorSet withErrors(final ListMultimap<String, String> errors) {
         return new ErrorSet(errors, relations);
     }
 
@@ -234,6 +223,7 @@ public final class ErrorSet {
 
     /**
      * Serialize a error set to a JSON string.
+     *
      * @return json string
      */
     public String toJson() {
@@ -268,12 +258,13 @@ public final class ErrorSet {
     /**
      * Convert the ordered relationship set into an unordered one for comparison.
      * FIXME: Clean up the code and optimise this function.
+     *
      * @param rels
      * @return
      */
-    private Map<String,LinkedHashMultiset<ErrorSet>> unorderedRelations(final ListMultimap<String,ErrorSet> rels) {
-        Map<String,LinkedHashMultiset<ErrorSet>> map = Maps.newHashMap();
-        for (Map.Entry<String,Collection<ErrorSet>> entry : rels.asMap().entrySet()) {
+    private Map<String, LinkedHashMultiset<ErrorSet>> unorderedRelations(final ListMultimap<String, ErrorSet> rels) {
+        Map<String, LinkedHashMultiset<ErrorSet>> map = Maps.newHashMap();
+        for (Map.Entry<String, Collection<ErrorSet>> entry : rels.asMap().entrySet()) {
             map.put(entry.getKey(), LinkedHashMultiset.create(entry.getValue()));
         }
         return map;
@@ -282,12 +273,13 @@ public final class ErrorSet {
     /**
      * Is this ErrorSet empty? It will be if there are
      * no errors and none of the relations have errors.
+     *
      * @return
      */
     public boolean isEmpty() {
         if (!errors.isEmpty())
             return false;
-        for (Map.Entry<String,ErrorSet> rel : relations.entries()) {
+        for (Map.Entry<String, ErrorSet> rel : relations.entries()) {
             if (!rel.getValue().isEmpty())
                 return false;
         }
