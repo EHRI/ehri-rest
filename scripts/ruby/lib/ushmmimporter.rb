@@ -97,7 +97,7 @@ module Ehri
           user = Manager.get_frame(@user_id, Models::UserProfile.java_class)
 
           # Start an action!
-          ctx = Persistance::ActionManager.new(
+          ctx = Persistence::ActionManager.new(
             Graph, ushmm).log_event(user, EventTypes::ingest, "Importing USHMM data")
           log = Importers::ImportLog.new(ctx)
 

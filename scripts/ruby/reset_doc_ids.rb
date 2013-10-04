@@ -20,7 +20,7 @@ module Ehri
 
     java_import "au.com.bytecode.opencsv.CSVReader"
 
-    serializer = Persistance::Serializer.new(Graph)
+    serializer = Persistence::Serializer.new(Graph)
     reindexer = Core::GraphReindexer.new(Graph)
 
     Manager.get_frames(EntityClass::REPOSITORY, Models::Repository.java_class).each do |repo|

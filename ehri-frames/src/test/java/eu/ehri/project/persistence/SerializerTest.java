@@ -1,7 +1,7 @@
-package eu.ehri.project.persistance;
+package eu.ehri.project.persistence;
 
 import eu.ehri.project.models.DocumentaryUnit;
-import eu.ehri.project.persistance.utils.BundleUtils;
+import eu.ehri.project.persistence.utils.BundleUtils;
 import eu.ehri.project.test.AbstractFixtureTest;
 import org.junit.Test;
 

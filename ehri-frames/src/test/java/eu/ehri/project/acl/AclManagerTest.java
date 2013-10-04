@@ -3,7 +3,7 @@ package eu.ehri.project.acl;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.*;
 import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.persistance.Bundle;
+import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.test.GraphTestBase;
 import eu.ehri.project.test.TestData;
 import eu.ehri.project.test.utils.GraphCleaner;

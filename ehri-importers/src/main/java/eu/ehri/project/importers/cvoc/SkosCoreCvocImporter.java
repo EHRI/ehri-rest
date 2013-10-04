@@ -18,7 +18,11 @@ import com.tinkerpop.blueprints.TransactionalGraph;
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.base.*;
-import eu.ehri.project.persistance.*;
+import eu.ehri.project.persistence.*;
+import eu.ehri.project.persistence.ActionManager;
+import eu.ehri.project.persistence.Bundle;
+import eu.ehri.project.persistence.BundleDAO;
+import eu.ehri.project.persistence.Mutation;
 import eu.ehri.project.utils.TxCheckedNeo4jGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +46,7 @@ import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
-import eu.ehri.project.persistance.ActionManager.EventContext;
+import eu.ehri.project.persistence.ActionManager.EventContext;
 
 /**
  * Importer for the controlled vocabulary (TemaTres thesaurus) 
@@ -711,7 +715,7 @@ public class SkosCoreCvocImporter {
     
     /**
      * Dummy resolver that does nothing. This is used to ensure that, in
-     * tolerant mode, the EAD parser does not lookup the DTD and validate the
+     * tolerant mode, the EAD parser does not lookup the DTD and validateData the
      * document, which is both slow and error prone.
      */
     public class DummyEntityResolver implements EntityResolver {

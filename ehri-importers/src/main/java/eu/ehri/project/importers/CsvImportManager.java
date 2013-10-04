@@ -7,14 +7,13 @@ package eu.ehri.project.importers;
 import au.com.bytecode.opencsv.CSVReader;
 import com.google.common.collect.Maps;
 import com.tinkerpop.blueprints.TransactionalGraph;
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.exceptions.InvalidInputFormatError;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
-import eu.ehri.project.persistance.ActionManager;
+import eu.ehri.project.persistence.ActionManager;
 
 import java.io.IOException;
 import java.io.InputStream;

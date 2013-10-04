@@ -1,4 +1,4 @@
-package eu.ehri.project.persistance.utils;
+package eu.ehri.project.persistence.utils;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;

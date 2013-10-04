@@ -9,8 +9,8 @@ import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.DescribedEntity;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.Frame;
-import eu.ehri.project.persistance.Bundle;
-import eu.ehri.project.persistance.Mutation;
+import eu.ehri.project.persistence.Bundle;
+import eu.ehri.project.persistence.Mutation;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.*;

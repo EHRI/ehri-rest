@@ -1,4 +1,4 @@
-package eu.ehri.project.persistance;
+package eu.ehri.project.persistence;
 
 import eu.ehri.project.models.base.Frame;
 import eu.ehri.project.test.AbstractFixtureTest;

@@ -16,7 +16,7 @@ import eu.ehri.project.importers.exceptions.InvalidInputFormatError;
 import eu.ehri.project.importers.exceptions.InvalidXmlDocument;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
-import eu.ehri.project.persistance.ActionManager;
+import eu.ehri.project.persistence.ActionManager;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -56,7 +56,7 @@ abstract public class XmlImportManager implements ImportManager {
      * Tell the importer to simply skip invalid items rather than throwing an
      * exception.
      *
-     * @param tolerant true means it won't validate the xml file
+     * @param tolerant true means it won't validateData the xml file
      */
     public XmlImportManager setTolerant(Boolean tolerant) {
         logger.info("Setting importer to tolerant: " + tolerant);

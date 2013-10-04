@@ -15,7 +15,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 
 import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.persistance.ErrorSet;
+import eu.ehri.project.persistence.ErrorSet;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Before;
@@ -27,7 +27,7 @@ import com.sun.jersey.api.client.WebResource;
 
 import eu.ehri.extension.AbstractRestResource;
 import eu.ehri.project.definitions.Entities;
-import eu.ehri.project.persistance.Bundle;
+import eu.ehri.project.persistence.Bundle;
 
 public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
 

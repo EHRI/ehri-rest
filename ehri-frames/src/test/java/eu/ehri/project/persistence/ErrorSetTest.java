@@ -1,4 +1,4 @@
-package eu.ehri.project.persistance;
+package eu.ehri.project.persistence;
 
 import org.junit.Test;
 

@@ -14,10 +14,9 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
 import eu.ehri.project.exceptions.AccessDenied;
-import eu.ehri.project.models.base.VersionedEntity;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.models.events.Version;
-import eu.ehri.project.persistance.ActionManager;
+import eu.ehri.project.persistence.ActionManager;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import eu.ehri.extension.errors.BadRequester;
@@ -26,7 +25,7 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.persistance.Serializer;
+import eu.ehri.project.persistence.Serializer;
 import eu.ehri.project.views.impl.LoggingCrudViews;
 import eu.ehri.project.views.Query;
 

@@ -1,4 +1,4 @@
-package eu.ehri.project.persistance;
+package eu.ehri.project.persistence;
 
 import com.google.common.collect.Iterables;
 import eu.ehri.project.definitions.Ontology;
@@ -6,8 +6,7 @@ import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.*;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.Description;
-import eu.ehri.project.models.base.IdentifiableEntity;
-import eu.ehri.project.persistance.utils.BundleUtils;
+import eu.ehri.project.persistence.utils.BundleUtils;
 import eu.ehri.project.test.ModelTestBase;
 import eu.ehri.project.test.TestData;
 import org.junit.Before;

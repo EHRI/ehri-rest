@@ -31,8 +31,8 @@ module Ehri
     include_package "eu.ehri.project.importers"
   end
 
-  module Persistance
-    include_package "eu.ehri.project.persistance"
+  module Persistence
+    include_package "eu.ehri.project.persistence"
   end
 
   module Models

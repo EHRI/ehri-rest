@@ -25,9 +25,9 @@ module Ehri
     # Note gotcah on char!
     csv = CSVReader.new(Java::JavaIo::FileReader.new(CSV), ","[0].ord.to_java(:char))
 
-    ctx = Persistance::ActionManager.new(Graph).log_event(user, EventTypes::modification,
+    ctx = Persistence::ActionManager.new(Graph).log_event(user, EventTypes::modification,
                       "Correcting archivist's note field missed from ICA-Atom migration")
-    dao = Persistance::BundleDAO.new(Graph)
+    dao = Persistence::BundleDAO.new(Graph)
 
     while (row = csv.read_next) != nil
       arr = row.to_a
