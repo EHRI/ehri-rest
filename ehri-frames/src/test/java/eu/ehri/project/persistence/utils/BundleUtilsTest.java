@@ -1,8 +1,8 @@
-package eu.ehri.project.persistance.utils;
+package eu.ehri.project.persistence.utils;
 
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.persistance.Bundle;
+import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.test.AbstractFixtureTest;
 import eu.ehri.project.test.TestData;
 import org.junit.Assert;

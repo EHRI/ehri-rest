@@ -7,7 +7,7 @@ import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.Country;
-import eu.ehri.project.persistance.Bundle;
+import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.views.Query;
 import eu.ehri.project.views.impl.LoggingCrudViews;
 import org.neo4j.graphdb.GraphDatabaseService;

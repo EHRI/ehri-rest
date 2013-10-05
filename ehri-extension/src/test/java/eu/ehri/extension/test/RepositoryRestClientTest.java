@@ -22,7 +22,7 @@ import com.sun.jersey.api.client.WebResource;
 import eu.ehri.extension.AbstractRestResource;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.DeserializationError;
-import eu.ehri.project.persistance.Bundle;
+import eu.ehri.project.persistence.Bundle;
 
 public class RepositoryRestClientTest extends BaseRestClientTest {
 

@@ -1,4 +1,4 @@
-package eu.ehri.project.persistance;
+package eu.ehri.project.persistence;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ListMultimap;
@@ -88,7 +88,7 @@ public final class BundleValidator {
     private ErrorSet validateTreeForUpdate(final Bundle bundle) {
         ErrorSet.Builder builder = new ErrorSet.Builder();
         if (bundle.getId() == null)
-            builder.addError(Bundle.ID_KEY, eu.ehri.project.persistance.Messages
+            builder.addError(Bundle.ID_KEY, Messages
                     .getString("BundleValidator.missingIdForUpdate")); //$NON-NLS-1$
         checkUniquenessOnUpdate(bundle, builder);
         checkChildren(bundle, builder, ValidationType.update);

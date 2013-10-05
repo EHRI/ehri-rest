@@ -13,7 +13,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -22,7 +21,6 @@ import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.Response.Status;
 
 import eu.ehri.project.exceptions.*;
-import eu.ehri.project.models.EntityClass;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import eu.ehri.extension.errors.BadRequester;
@@ -31,7 +29,7 @@ import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
-import eu.ehri.project.persistance.Bundle;
+import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.views.impl.LoggingCrudViews;
 import eu.ehri.project.views.Query;
 

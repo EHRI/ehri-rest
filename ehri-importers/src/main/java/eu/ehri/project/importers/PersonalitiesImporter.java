@@ -17,14 +17,13 @@ import eu.ehri.project.models.HistoricalAgent;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.cvoc.AuthoritativeSet;
-import eu.ehri.project.models.idgen.IdGenerator;
-import eu.ehri.project.persistance.Bundle;
+import eu.ehri.project.persistence.Bundle;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import eu.ehri.project.persistance.Mutation;
+import eu.ehri.project.persistence.Mutation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

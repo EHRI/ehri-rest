@@ -1,10 +1,10 @@
-package eu.ehri.project.persistance.utils;
+package eu.ehri.project.persistence.utils;
 
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import eu.ehri.project.persistance.Bundle;
+import eu.ehri.project.persistence.Bundle;
 
 import java.util.List;
 import java.util.Map;

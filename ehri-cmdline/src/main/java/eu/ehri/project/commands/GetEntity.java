@@ -6,7 +6,7 @@ import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.persistance.Serializer;
+import eu.ehri.project.persistence.Serializer;
 import org.apache.commons.cli.CommandLine;
 
 /**

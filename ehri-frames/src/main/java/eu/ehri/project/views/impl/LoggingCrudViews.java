@@ -6,7 +6,7 @@ import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.base.*;
-import eu.ehri.project.persistance.*;
+import eu.ehri.project.persistence.*;
 import eu.ehri.project.views.Crud;
 
 /**

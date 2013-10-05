@@ -17,7 +17,7 @@ import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.Annotation;
 import eu.ehri.project.models.base.*;
-import eu.ehri.project.persistance.*;
+import eu.ehri.project.persistence.*;
 
 /**
  * View class for handling annotation-related operations.

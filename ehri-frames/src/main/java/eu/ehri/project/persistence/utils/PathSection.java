@@ -1,4 +1,4 @@
-package eu.ehri.project.persistance.utils;
+package eu.ehri.project.persistence.utils;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

@@ -1,11 +1,10 @@
-package eu.ehri.project.persistance;
+package eu.ehri.project.persistence;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.base.PermissionScope;
-import eu.ehri.project.persistance.utils.BundleUtils;
+import eu.ehri.project.persistence.utils.BundleUtils;
 import eu.ehri.project.test.TestData;
 import org.junit.After;
 import org.junit.Before;

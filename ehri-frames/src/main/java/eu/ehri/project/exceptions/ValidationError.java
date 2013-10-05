@@ -1,8 +1,8 @@
 package eu.ehri.project.exceptions;
 
 import com.google.common.collect.ListMultimap;
-import eu.ehri.project.persistance.Bundle;
-import eu.ehri.project.persistance.ErrorSet;
+import eu.ehri.project.persistence.Bundle;
+import eu.ehri.project.persistence.ErrorSet;
 
 /**
  * Validation error. This exception holds a map of field=error(s) values.

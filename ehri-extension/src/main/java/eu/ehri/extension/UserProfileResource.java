@@ -25,7 +25,6 @@ import javax.ws.rs.core.Response.Status;
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.exceptions.*;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Transaction;
 
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.acl.AclManager;
@@ -36,8 +35,8 @@ import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Actioner;
-import eu.ehri.project.persistance.ActionManager;
-import eu.ehri.project.persistance.Bundle;
+import eu.ehri.project.persistence.ActionManager;
+import eu.ehri.project.persistence.Bundle;
 
 /**
  * Provides a RESTfull interface for the UserProfile.

@@ -15,7 +15,7 @@ import eu.ehri.project.models.Group;
 import eu.ehri.project.models.Permission;
 import eu.ehri.project.models.PermissionGrant;
 import eu.ehri.project.models.base.*;
-import eu.ehri.project.persistance.ActionManager;
+import eu.ehri.project.persistence.ActionManager;
 
 import java.util.List;
 import java.util.Map;

@@ -29,7 +29,7 @@ module Ehri
 
         headers = csv.read_next().to_a
 
-        ctx = Persistance::ActionManager.new(Graph).log_event(user, EventTypes::ingest,
+        ctx = Persistence::ActionManager.new(Graph).log_event(user, EventTypes::ingest,
                           "Importing spreadsheet data for Ukrainian repositories")
         log = Importers::ImportLog.new(ctx)
 

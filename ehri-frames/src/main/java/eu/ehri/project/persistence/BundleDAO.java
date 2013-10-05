@@ -1,4 +1,4 @@
-package eu.ehri.project.persistance;
+package eu.ehri.project.persistence;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ListMultimap;

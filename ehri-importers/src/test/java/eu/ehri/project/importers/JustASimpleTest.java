@@ -6,7 +6,7 @@ package eu.ehri.project.importers;
 
 import com.google.common.base.Optional;
 import eu.ehri.project.definitions.EventTypes;
-import eu.ehri.project.persistance.ActionManager;
+import eu.ehri.project.persistence.ActionManager;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import org.slf4j.Logger;

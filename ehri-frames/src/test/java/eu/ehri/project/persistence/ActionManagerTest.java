@@ -1,4 +1,4 @@
-package eu.ehri.project.persistance;
+package eu.ehri.project.persistence;
 
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.exceptions.DeserializationError;

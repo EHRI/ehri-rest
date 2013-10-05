@@ -12,10 +12,10 @@ import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Frame;
 import eu.ehri.project.models.base.PermissionScope;
-import eu.ehri.project.persistance.Bundle;
-import eu.ehri.project.persistance.BundleDAO;
-import eu.ehri.project.persistance.Mutation;
-import eu.ehri.project.persistance.Serializer;
+import eu.ehri.project.persistence.Bundle;
+import eu.ehri.project.persistence.BundleDAO;
+import eu.ehri.project.persistence.Mutation;
+import eu.ehri.project.persistence.Serializer;
 import eu.ehri.project.views.Crud;
 import eu.ehri.project.views.ViewHelper;
 

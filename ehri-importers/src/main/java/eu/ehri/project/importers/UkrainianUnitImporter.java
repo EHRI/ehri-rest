@@ -15,11 +15,13 @@ import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.PermissionScope;
-import eu.ehri.project.persistance.*;
+import eu.ehri.project.persistence.*;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import eu.ehri.project.persistence.Bundle;
+import eu.ehri.project.persistence.Mutation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

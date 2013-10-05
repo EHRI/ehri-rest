@@ -11,7 +11,7 @@ import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Group;
-import eu.ehri.project.persistance.ActionManager;
+import eu.ehri.project.persistence.ActionManager;
 
 import java.util.HashMap;
 

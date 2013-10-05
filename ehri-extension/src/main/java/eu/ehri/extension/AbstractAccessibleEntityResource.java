@@ -10,7 +10,7 @@ import javax.ws.rs.core.Response.Status;
 
 //import org.apache.log4j.Logger;
 import eu.ehri.project.exceptions.*;
-import eu.ehri.project.persistance.Mutation;
+import eu.ehri.project.persistence.Mutation;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import com.google.common.collect.Lists;
@@ -23,7 +23,7 @@ import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.utils.ClassUtils;
-import eu.ehri.project.persistance.Bundle;
+import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.views.impl.LoggingCrudViews;
 import eu.ehri.project.views.Query;
 
