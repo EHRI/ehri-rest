@@ -3,7 +3,6 @@ package eu.ehri.project.persistance;
 import com.google.common.base.Optional;
 import com.google.common.collect.ListMultimap;
 import com.tinkerpop.blueprints.CloseableIterable;
-import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.core.GraphManager;
@@ -11,6 +10,7 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.utils.ClassUtils;
+
 import java.text.MessageFormat;
 import java.util.Map;
 
@@ -124,24 +124,17 @@ public final class BundleValidator {
 
     private void checkChildren(final Bundle bundle,
             final ErrorSet.Builder builder, ValidationType type) {
-        Map<String, Direction> dependents = ClassUtils
-                .getDependentRelations(bundle.getBundleClass());
-        ListMultimap<String, Bundle> relations = bundle.getRelations();
-        for (String relation : relations.keySet()) {
-            if (dependents.containsKey(relation)) {
-                for (Bundle child : relations.get(relation)) {
-                    switch (type) {
-                        case data:
-                            builder.addRelation(relation, validateTreeData(child));
-                            break;
-                        case create:
-                            builder.addRelation(relation, validateTreeForCreate(child));
-                            break;
-                        case update:
-                            builder.addRelation(relation, validateTreeForUpdate(child));
-                            break;
-                    }
-                }
+        for (Map.Entry<String, Bundle> entry : bundle.getDependentRelations().entries()) {
+            switch (type) {
+                case data:
+                    builder.addRelation(entry.getKey(), validateTreeData(entry.getValue()));
+                    break;
+                case create:
+                    builder.addRelation(entry.getKey(), validateTreeForCreate(entry.getValue()));
+                    break;
+                case update:
+                    builder.addRelation(entry.getKey(), validateTreeForUpdate(entry.getValue()));
+                    break;
             }
         }
     }

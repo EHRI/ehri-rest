@@ -1,6 +1,7 @@
 package eu.ehri.project.persistance;
 
 import com.google.common.collect.*;
+import com.tinkerpop.blueprints.Direction;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.SerializationError;
@@ -296,6 +297,26 @@ public final class Bundle {
      */
     public ListMultimap<String, Bundle> getRelations() {
         return relations;
+    }
+
+    /**
+     * Get only the bundle's relations which have a dependent
+     * relationship.
+     * 
+     * @return
+     */
+    public ListMultimap<String,Bundle> getDependentRelations() {
+        ListMultimap<String, Bundle> dependentRelations = ArrayListMultimap.create();
+        Map<String, Direction> dependents = ClassUtils
+                .getDependentRelations(type.getEntityClass());
+        for (String relation : relations.keySet()) {
+            if (dependents.containsKey(relation)) {
+                for (Bundle child : relations.get(relation)) {
+                    dependentRelations.put(relation, child);
+                }
+            }
+        }
+        return dependentRelations;
     }
 
     /**

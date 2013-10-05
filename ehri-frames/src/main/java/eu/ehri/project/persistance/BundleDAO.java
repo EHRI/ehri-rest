@@ -121,23 +121,14 @@ public final class BundleDAO {
     }
 
     // Helpers
-    private Integer deleteCount(Bundle bundle, Integer count) throws Exception {
+    private Integer deleteCount(Bundle bundle, int count) throws Exception {
         Integer c = count;
-        ListMultimap<String, Bundle> fetch = bundle.getRelations();
-        Map<String, Direction> dependents = ClassUtils
-                .getDependentRelations(bundle.getBundleClass());
-        for (String key : fetch.keySet()) {
-            for (Bundle sub : fetch.get(key)) {
-                // FIXME: Make it so we don't typically do this check for
-                // Dependent relations
-                if (dependents.containsKey(key)) {
-                    c = deleteCount(sub, c);
-                }
-            }
+
+        for (Bundle child : bundle.getDependentRelations().values()) {
+            c = deleteCount(child, c);
         }
         manager.deleteVertex(bundle.getId());
-        c += 1;
-        return c;
+        return c + 1;
     }
 
     /**
