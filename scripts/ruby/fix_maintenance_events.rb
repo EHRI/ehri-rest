@@ -34,7 +34,7 @@ module Ehri
             })
         
             ev3 = Persistence::Bundle.new(EntityClass::MAINTENANCE_EVENT, {
-                "maintenanceEvent/source" => "Exported from ICA-Atom",
+                "maintenanceEvent/source" => "Exported from ICA-AtoM",
                 "eventType" => "creation",
                 "maintenanceEvent/date" => "2013-09-09"
             })
@@ -46,7 +46,7 @@ module Ehri
             repodesc.add_maintenance_event(m2)
             repodesc.add_maintenance_event(m3)
 
-            puts "Restored events for: #{repodesc.get_entity.get_id}"
+            puts "Restored events for: #{repodesc.get_entity.get_id} - #{sources}"
         end
       rescue Exception => msg
         puts "ERROR - #{msg}"

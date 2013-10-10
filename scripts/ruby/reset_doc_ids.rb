@@ -60,6 +60,7 @@ module Ehri
         puts "Reindexing..."
         reindexer.reindex("entities")
         Graph.get_base_graph.commit
+        puts "Committed..."
     else
         Graph.get_base_graph.rollback
         puts "Size: #{data.size}, matched: #{matched}, errors: #{errors} - rolled back"
