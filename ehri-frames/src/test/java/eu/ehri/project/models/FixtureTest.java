@@ -1,15 +1,14 @@
 package eu.ehri.project.models;
 
-import java.util.List;
-
-import com.google.common.collect.Iterables;
+import eu.ehri.project.exceptions.ItemNotFound;
+import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.test.ModelTestBase;
 import org.junit.Test;
 
-import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.models.base.Accessor;
+import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class FixtureTest extends ModelTestBase {
     @Test

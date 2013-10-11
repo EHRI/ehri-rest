@@ -1,22 +1,12 @@
 package eu.ehri.extension.errors.mappers;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
-import org.codehaus.jackson.map.ObjectMapper;
+import eu.ehri.project.exceptions.ValidationError;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ListMultimap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-
-import eu.ehri.project.exceptions.BundleError;
 
 /**
  * Serialize a tree of validation errors to JSON. Like bundles,
@@ -46,16 +36,12 @@ import eu.ehri.project.exceptions.BundleError;
  *
  */
 @Provider
-public class ValidationErrorMapper implements ExceptionMapper<BundleError> {
-
-    private final ObjectMapper mapper = new ObjectMapper();
-
+public class ValidationErrorMapper implements ExceptionMapper<ValidationError> {
     @Override
-    public Response toResponse(final BundleError e) {
-        Map<String, Object> out = BundleError.getErrorTree(e.getErrors(), e.getRelations());
+    public Response toResponse(final ValidationError e) {
         try {
             return Response.status(Status.BAD_REQUEST)
-                    .entity(mapper.writeValueAsBytes(out)).build();
+                    .entity(e.getErrorSet().toJson().getBytes()).build();
         } catch (Exception e1) {
             e1.printStackTrace();
             throw new RuntimeException(e1);

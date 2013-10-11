@@ -15,6 +15,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 
 import eu.ehri.project.definitions.Ontology;
+import eu.ehri.project.persistence.ErrorSet;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Before;
@@ -26,8 +27,7 @@ import com.sun.jersey.api.client.WebResource;
 
 import eu.ehri.extension.AbstractRestResource;
 import eu.ehri.project.definitions.Entities;
-import eu.ehri.project.exceptions.BundleError;
-import eu.ehri.project.persistance.Bundle;
+import eu.ehri.project.persistence.Bundle;
 
 public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
 
@@ -109,13 +109,14 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
                 .entity(jsonDocumentaryUnitTestStr).post(ClientResponse.class);
         // Check the JSON gives use the correct error
         String errString = response.getEntity(String.class);
+        System.out.println(errString);
 
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(),
                 response.getStatus());
 
         ObjectMapper mapper = new ObjectMapper();
         JsonNode rootNode = mapper.readValue(errString, JsonNode.class);
-        JsonNode errValue = rootNode.path(BundleError.ERROR_KEY).path(
+        JsonNode errValue = rootNode.path(ErrorSet.ERROR_KEY).path(
                 Ontology.IDENTIFIER_KEY);
         assertFalse(errValue.isMissingNode());
     }
@@ -141,9 +142,9 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
         // first date relation should be missing
         ObjectMapper mapper = new ObjectMapper();
         JsonNode rootNode = mapper.readValue(errorJson, JsonNode.class);
-        JsonNode errValue1 = rootNode.path(BundleError.REL_KEY)
+        JsonNode errValue1 = rootNode.path(ErrorSet.REL_KEY)
                 .path(Ontology.DESCRIPTION_FOR_ENTITY).path(0)
-                .path(BundleError.ERROR_KEY).path(Ontology.NAME_KEY);
+                .path(ErrorSet.ERROR_KEY).path(Ontology.NAME_KEY);
         assertFalse(errValue1.isMissingNode());
     }
 

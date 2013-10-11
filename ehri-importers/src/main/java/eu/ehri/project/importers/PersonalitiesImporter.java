@@ -17,14 +17,13 @@ import eu.ehri.project.models.HistoricalAgent;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.cvoc.AuthoritativeSet;
-import eu.ehri.project.models.idgen.IdGenerator;
-import eu.ehri.project.persistance.Bundle;
+import eu.ehri.project.persistence.Bundle;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import eu.ehri.project.persistance.Mutation;
+import eu.ehri.project.persistence.Mutation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,9 +54,7 @@ public class PersonalitiesImporter extends XmlImporter<Object> {
         }
         unit = unit.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
 
-        IdGenerator generator = EntityClass.HISTORICAL_AGENT.getIdgen();
-        String id = generator.generateId(EntityClass.HISTORICAL_AGENT, permissionScope, unit);
-        Mutation<HistoricalAgent> mutation = persister.createOrUpdate(unit.withId(id), HistoricalAgent.class);
+        Mutation<HistoricalAgent> mutation = persister.createOrUpdate(unit, HistoricalAgent.class);
         HistoricalAgent frame = mutation.getNode();
 
         if (!permissionScope.equals(SystemScope.getInstance())

@@ -43,6 +43,9 @@ public interface SystemEvent extends AccessibleEntity {
     @JavaHandler
     public Iterable<AccessibleEntity> getSubjects();
 
+    @Adjacency(label = Ontology.VERSION_HAS_EVENT, direction = Direction.IN)
+    public Iterable<Version> getPriorVersions();
+
     /**
      * Fetch the "scope" of this event, or the context in which a
      * given creation/modification/deletion event is happening.

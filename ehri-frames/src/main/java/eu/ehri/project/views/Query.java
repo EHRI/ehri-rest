@@ -1,35 +1,32 @@
-package eu.ehri.project.views;
+    package eu.ehri.project.views;
 
-import java.util.*;
-import java.util.Map.Entry;
+    import com.google.common.base.Optional;
+    import com.google.common.collect.*;
+    import com.tinkerpop.blueprints.CloseableIterable;
+    import com.tinkerpop.blueprints.Direction;
+    import com.tinkerpop.blueprints.Vertex;
+    import com.tinkerpop.frames.FramedGraph;
+    import com.tinkerpop.gremlin.java.GremlinPipeline;
+    import com.tinkerpop.pipes.PipeFunction;
+    import com.tinkerpop.pipes.util.structures.Pair;
+    import eu.ehri.project.acl.AclManager;
+    import eu.ehri.project.acl.SystemScope;
+    import eu.ehri.project.core.GraphManager;
+    import eu.ehri.project.core.GraphManagerFactory;
+    import eu.ehri.project.exceptions.AccessDenied;
+    import eu.ehri.project.exceptions.ItemNotFound;
+    import eu.ehri.project.exceptions.PermissionDenied;
+    import eu.ehri.project.models.EntityClass;
+    import eu.ehri.project.models.base.AccessibleEntity;
+    import eu.ehri.project.models.base.Accessor;
+    import eu.ehri.project.models.base.Frame;
+    import eu.ehri.project.models.base.PermissionScope;
+    import eu.ehri.project.models.utils.ClassUtils;
+    import org.slf4j.Logger;
+    import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.*;
-
-import com.google.common.base.Optional;
-import com.tinkerpop.blueprints.CloseableIterable;
-import com.tinkerpop.blueprints.Direction;
-import com.tinkerpop.blueprints.Vertex;
-import com.tinkerpop.frames.FramedGraph;
-import com.tinkerpop.gremlin.java.GremlinPipeline;
-import com.tinkerpop.pipes.PipeFunction;
-import com.tinkerpop.pipes.util.structures.Pair;
-
-import eu.ehri.project.exceptions.AccessDenied;
-import eu.ehri.project.models.base.Frame;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import eu.ehri.project.acl.AclManager;
-import eu.ehri.project.acl.SystemScope;
-import eu.ehri.project.core.GraphManager;
-import eu.ehri.project.core.GraphManagerFactory;
-import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.models.base.PermissionScope;
-import eu.ehri.project.models.utils.ClassUtils;
+    import java.util.*;
+    import java.util.Map.Entry;
 
 /**
  * Handles querying Accessible Entities, with ACL semantics.

@@ -24,7 +24,7 @@ import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 
 import eu.ehri.extension.AbstractRestResource;
-import eu.ehri.project.persistance.Bundle;
+import eu.ehri.project.persistence.Bundle;
 
 public class UserProfileRestClientTest extends BaseRestClientTest {
 

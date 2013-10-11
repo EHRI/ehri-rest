@@ -6,7 +6,6 @@ import com.google.common.collect.ListMultimap;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.pipes.PipeFunction;
-
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.acl.PermissionType;
 import eu.ehri.project.acl.SystemScope;
@@ -18,11 +17,7 @@ import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.Annotation;
 import eu.ehri.project.models.base.*;
-import eu.ehri.project.persistance.ActionManager;
-import eu.ehri.project.persistance.Bundle;
-import eu.ehri.project.persistance.BundleDAO;
-import eu.ehri.project.persistance.Serializer;
-import eu.ehri.project.persistance.TraversalCallback;
+import eu.ehri.project.persistence.*;
 
 /**
  * View class for handling annotation-related operations.

@@ -8,6 +8,7 @@ import eu.ehri.project.models.cvoc.ConceptDescription;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.models.events.SystemEventQueue;
+import eu.ehri.project.models.events.Version;
 import eu.ehri.project.models.idgen.GenericIdGenerator;
 import eu.ehri.project.models.idgen.IdGenerator;
 import eu.ehri.project.models.idgen.IdentifiableEntityIdGenerator;
@@ -40,6 +41,7 @@ public enum EntityClass {
     ANNOTATION(Entities.ANNOTATION, "ann", Annotation.class),
     ADDRESS(Entities.ADDRESS, "adr", Address.class),
     SYSTEM_EVENT(Entities.SYSTEM_EVENT, "ev", SystemEvent.class, GenericIdGenerator.INSTANCE),
+    VERSION(Entities.VERSION, "ver", Version.class),
     SYSTEM(Entities.SYSTEM, "sys", SystemEventQueue.class),
     UNKNOWN_PROPERTY(Entities.UNKNOWN_PROPERTY, "p", UnknownProperty.class),
     PERMISSION(Entities.PERMISSION, "pm", Permission.class),

@@ -25,7 +25,7 @@ import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Group;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.persistance.Bundle;
+import eu.ehri.project.persistence.Bundle;
 
 /**
  * Provides additional Admin methods needed by client systems.
@@ -71,9 +71,8 @@ public class AdminResource extends AbstractRestResource {
             graph.getBaseGraph().commit();
             return Response.status(Status.CREATED).entity((jsonStr).getBytes())
                     .build();
-        } catch (Exception e) {
-            graph.getBaseGraph().rollback();
-            throw e;
+        } finally {
+            cleanupTransaction();
         }
     }
 

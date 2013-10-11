@@ -1,9 +1,9 @@
 package eu.ehri.project.models.idgen;
 
-import eu.ehri.project.exceptions.ValidationError;
+import com.google.common.collect.ListMultimap;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.PermissionScope;
-import eu.ehri.project.persistance.Bundle;
+import eu.ehri.project.persistence.Bundle;
 
 import java.util.List;
 
@@ -28,8 +28,8 @@ public interface IdGenerator {
      * @param scope
      * @param bundle
      */
-    public void handleIdCollision(EntityClass type, PermissionScope scope,
-            Bundle bundle) throws ValidationError;
+    public ListMultimap<String,String> handleIdCollision(EntityClass type, PermissionScope scope,
+            Bundle bundle);
 
     /**
      * Generate an ID given an entity type prefix and a vertex.

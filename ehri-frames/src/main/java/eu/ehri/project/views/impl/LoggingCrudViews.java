@@ -1,18 +1,13 @@
 package eu.ehri.project.views.impl;
 
 import com.google.common.base.Optional;
+import com.tinkerpop.frames.FramedGraph;
+import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.base.*;
-
-import com.tinkerpop.frames.FramedGraph;
-
-import eu.ehri.project.acl.SystemScope;
-import eu.ehri.project.persistance.ActionManager;
-import eu.ehri.project.persistance.Bundle;
-import eu.ehri.project.persistance.MutationState;
+import eu.ehri.project.persistence.*;
 import eu.ehri.project.views.Crud;
-import eu.ehri.project.persistance.Mutation;
 
 /**
  * Views class that handles creating Action objects that provide an audit log
@@ -30,6 +25,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
     private final Class<E> cls;
     @SuppressWarnings("unused")
     private final PermissionScope scope;
+    private final Serializer payloadSerializer;
 
     /**
      * Scoped Constructor.
@@ -44,6 +40,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
         this.scope = Optional.fromNullable(scope).or(SystemScope.getInstance());
         actionManager = new ActionManager(graph, this.scope);
         views = new CrudViews<E>(graph, cls, this.scope);
+        payloadSerializer = new Serializer.Builder(graph).dependentOnly().build();
     }
 
     /**
@@ -132,9 +129,11 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
             throws PermissionDenied, ValidationError, DeserializationError,
             IntegrityError {
         Mutation<E> out = views.createOrUpdate(bundle, user);
-        if (out.getState() == MutationState.UPDATED) {
-            actionManager.logEvent(out.getNode(), graph.frame(user.asVertex(), Actioner.class),
-                    EventTypes.modification, logMessage);
+        if (out.updated()) {
+            actionManager
+                    .logEvent(out.getNode(), graph.frame(user.asVertex(), Actioner.class),
+                            EventTypes.modification, logMessage)
+                    .createVersion(out.getNode(), out.getPrior().get());
         }
         return out;
     }
@@ -174,13 +173,15 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
             IntegrityError {
         try {
             Mutation<E> out = views.update(bundle, user);
-            if (out.getState() != MutationState.UNCHANGED) {
-                actionManager.logEvent(out.getNode(), graph.frame(user.asVertex(), Actioner.class),
-                        EventTypes.modification, logMessage);
+            if (!out.unchanged()) {
+                actionManager.logEvent(
+                        out.getNode(), graph.frame(user.asVertex(), Actioner.class),
+                        EventTypes.modification, logMessage)
+                        .createVersion(out.getNode(), out.getPrior().get());
             }
             return out;
         } catch (ItemNotFound ex) {
-            throw new RuntimeException(ex); // FIXME: Remove this...
+            throw new RuntimeException(ex);
         }
     }
 
@@ -226,8 +227,10 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
         try {
             Mutation<T> out = views.updateDependent(bundle, parent, user, dependentClass);
             if (out.getState() != MutationState.UNCHANGED) {
-                actionManager.setScope(parent).logEvent(graph.frame(user.asVertex(),
-                        Actioner.class), EventTypes.modification, logMessage);
+                actionManager.setScope(parent)
+                        .logEvent(parent, graph.frame(user.asVertex(),
+                                Actioner.class), EventTypes.modifyDependent, logMessage)
+                        .createVersion(out.getNode(), out.getPrior().get());
             }
             return out;
         } catch (ItemNotFound ex) {
@@ -275,8 +278,10 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
             throws PermissionDenied, ValidationError, DeserializationError,
             IntegrityError {
         T out = views.createDependent(bundle, parent, user, dependentClass);
-        actionManager.setScope(parent).logEvent(
-                graph.frame(user.asVertex(), Actioner.class), EventTypes.creation, logMessage);
+        // NB: Note that parent is BOTH scope and a subject - I think
+        // this makes sense...
+        actionManager.setScope(parent).logEvent(parent,
+                graph.frame(user.asVertex(), Actioner.class), EventTypes.createDependent, logMessage);
         return out;
     }
 
@@ -310,8 +315,10 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      */
     public Integer delete(E item, Accessor user, Optional<String> logMessage)
             throws PermissionDenied, ValidationError, SerializationError {
-        actionManager.logEvent(item, graph.frame(user.asVertex(), Actioner.class),
-                EventTypes.deletion, logMessage);
+        actionManager
+                .logEvent(graph.frame(user.asVertex(), Actioner.class),
+                        EventTypes.deletion, logMessage)
+                .createVersion(item);
         return views.delete(item, user);
     }
 
@@ -351,8 +358,10 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
     public <T extends Frame> Integer deleteDependent(T item, E parent, Accessor user,
             Class<T> dependentClass, Optional<String> logMessage)
             throws PermissionDenied, ValidationError, SerializationError {
-        actionManager.setScope(parent).logEvent(graph.frame(user.asVertex(), Actioner.class),
-                EventTypes.deletion, logMessage);
+        actionManager.setScope(parent)
+                .logEvent(parent, graph.frame(user.asVertex(), Actioner.class),
+                        EventTypes.deleteDependent, logMessage)
+                .createVersion(item);
         return views.deleteDependent(item, parent, user, dependentClass);
     }
 

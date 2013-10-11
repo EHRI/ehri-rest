@@ -1,9 +1,8 @@
 package eu.ehri.project.acl;
 
+import eu.ehri.project.definitions.Entities;
 import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.annotate.JsonValue;
-
-import eu.ehri.project.definitions.Entities;
 
 public enum ContentTypes {
     DOCUMENTARY_UNIT(Entities.DOCUMENTARY_UNIT),

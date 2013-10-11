@@ -1,30 +1,26 @@
 package eu.ehri.project.core;
 
-import static org.junit.Assert.*;
+import com.tinkerpop.blueprints.CloseableIterable;
+import com.tinkerpop.blueprints.TransactionalGraph;
+import com.tinkerpop.blueprints.Vertex;
+import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
+import com.tinkerpop.frames.FramedGraph;
+import com.tinkerpop.frames.FramedGraphFactory;
+import eu.ehri.project.exceptions.IndexNotFoundException;
+import eu.ehri.project.exceptions.IntegrityError;
+import eu.ehri.project.exceptions.ItemNotFound;
+import eu.ehri.project.models.EntityClass;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.neo4j.test.TestGraphDatabaseFactory;
 
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import com.tinkerpop.blueprints.TransactionalGraph;
-import com.tinkerpop.frames.FramedGraphFactory;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.neo4j.test.TestGraphDatabaseFactory;
-
-import com.tinkerpop.blueprints.CloseableIterable;
-import com.tinkerpop.blueprints.Vertex;
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
-import com.tinkerpop.frames.FramedGraph;
-
-import eu.ehri.project.core.GraphManager;
-import eu.ehri.project.core.GraphManagerFactory;
-import eu.ehri.project.exceptions.IndexNotFoundException;
-import eu.ehri.project.exceptions.IntegrityError;
-import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.models.EntityClass;
+import static org.junit.Assert.*;
 
 /**
  * 

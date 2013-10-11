@@ -2,7 +2,7 @@ package eu.ehri.project.test;
 
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.persistance.Bundle;
+import eu.ehri.project.persistence.Bundle;
 
 import java.util.HashMap;
 import java.util.LinkedList;

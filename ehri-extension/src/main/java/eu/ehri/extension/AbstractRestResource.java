@@ -6,7 +6,6 @@ import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
 
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.*;
 
 import com.google.common.base.Optional;
@@ -30,13 +29,18 @@ import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.persistance.Serializer;
+import eu.ehri.project.persistence.Serializer;
 import eu.ehri.project.views.Query;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 public abstract class AbstractRestResource implements TxCheckedResource {
 
     public static final int DEFAULT_LIST_LIMIT = 20;
     private static final ObjectMapper mapper = new ObjectMapper();
+
+    private static final Logger logger = LoggerFactory.getLogger(TxCheckedResource.class);
 
     /**
      * Query arguments.
@@ -105,6 +109,13 @@ public abstract class AbstractRestResource implements TxCheckedResource {
 
     public FramedGraph<TxCheckedNeo4jGraph> getGraph() {
         return graph;
+    }
+
+    protected void cleanupTransaction() {
+        if (graph.getBaseGraph().isInTransaction()) {
+            logger.warn("Rolling back active transaction");
+            graph.getBaseGraph().rollback();
+        }
     }
 
     /**

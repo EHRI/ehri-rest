@@ -313,18 +313,8 @@ public class PermissionsResource extends AbstractRestResource {
                     enumifyMatrix(globals), grantee);
             graph.getBaseGraph().commit();
             return getGlobalMatrix(userId);
-        } catch (PermissionDenied permissionDenied) {
-            graph.getBaseGraph().rollback();
-            throw permissionDenied;
-        } catch (DeserializationError deserializationError) {
-            graph.getBaseGraph().rollback();
-            throw deserializationError;
-        } catch (IOException e) {
-            graph.getBaseGraph().rollback();
-            throw e;
-        } catch (ItemNotFound itemNotFound) {
-            graph.getBaseGraph().rollback();
-            throw itemNotFound;
+        } finally {
+            cleanupTransaction();
         }
     }
 
@@ -423,18 +413,8 @@ public class PermissionsResource extends AbstractRestResource {
             acl.setGlobalPermissionMatrix(accessor, enumifyMatrix(globals), grantee);
             graph.getBaseGraph().commit();
             return getScopedMatrix(userId, id);
-        } catch (IOException e) {
-            graph.getBaseGraph().rollback();
-            throw e;
-        } catch (DeserializationError deserializationError) {
-            graph.getBaseGraph().rollback();
-            throw deserializationError;
-        } catch (ItemNotFound itemNotFound) {
-            graph.getBaseGraph().rollback();
-            throw itemNotFound;
-        } catch (PermissionDenied permissionDenied) {
-            graph.getBaseGraph().rollback();
-            throw permissionDenied;
+        } finally {
+            cleanupTransaction();
         }
     }
 
@@ -491,18 +471,8 @@ public class PermissionsResource extends AbstractRestResource {
                                     graph).getInheritedEntityPermissions(accessor,
                                     manager.getFrame(id, AccessibleEntity.class)))))
                     .build();
-        } catch (ItemNotFound itemNotFound) {
-            graph.getBaseGraph().rollback();
-            throw itemNotFound;
-        } catch (PermissionDenied permissionDenied) {
-            graph.getBaseGraph().rollback();
-            throw permissionDenied;
-        } catch (DeserializationError deserializationError) {
-            graph.getBaseGraph().rollback();
-            throw deserializationError;
-        } catch (IOException e) {
-            graph.getBaseGraph().rollback();
-            throw e;
+        } finally {
+            cleanupTransaction();
         }
     }
 

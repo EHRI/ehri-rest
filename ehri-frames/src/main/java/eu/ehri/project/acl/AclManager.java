@@ -1,8 +1,5 @@
 package eu.ehri.project.acl;
 
-import java.util.*;
-import java.util.Map.Entry;
-
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.*;
@@ -10,33 +7,21 @@ import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.pipes.PipeFunction;
-
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.exceptions.IdGenerationError;
 import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.models.ContentType;
-import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.Group;
-import eu.ehri.project.models.Permission;
-import eu.ehri.project.models.PermissionGrant;
+import eu.ehri.project.models.*;
 import eu.ehri.project.models.base.*;
+
+import java.util.*;
+import java.util.Map.Entry;
 
 /**
  * Helper class for checking and asserting access and write permissions.
  * 
- * TODO: Re-express all this hideousness as Cypher or Gremlin queries, though
- * they will inevitably be quite complex.
- *
- * TODO: Greatly simply determining if a permission to do something with
- * something else exists. At the moment most of this is handled partly
- * by this class, and partly by the ViewHelper. Separate this logic more
- * cleanly.
- * 
- * @author mike
- * 
+ * @author Mike Bryant (http://github.com/mikesname)
  */
 public final class AclManager {
 
@@ -607,8 +592,7 @@ public final class AclManager {
         return Optional.absent();
     }
 
-    private PermissionGrant createPermissionGrant() throws IntegrityError,
-            IdGenerationError {
+    private PermissionGrant createPermissionGrant() throws IntegrityError {
         Vertex vertex = manager.createVertex(
                 EntityClass.PERMISSION_GRANT.getIdgen().generateId(
                         EntityClass.PERMISSION_GRANT,

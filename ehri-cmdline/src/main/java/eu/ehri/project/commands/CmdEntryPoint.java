@@ -42,6 +42,7 @@ public class CmdEntryPoint extends BaseCommand {
         mmap.put(GraphML.NAME, GraphML.class);
         // adaptation of UserAdd for adding countries
         mmap.put(CountryAdd.NAME, CountryAdd.class);
+        mmap.put(Check.NAME, Check.class);
         
         COMMANDS = Collections.unmodifiableMap(mmap);
     }

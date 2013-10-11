@@ -1,10 +1,10 @@
 package eu.ehri.project.models.idgen;
 
+import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
-import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.PermissionScope;
-import eu.ehri.project.persistance.Bundle;
+import eu.ehri.project.persistence.Bundle;
 
 import java.util.List;
 import java.util.UUID;
@@ -19,8 +19,8 @@ public enum GenericIdGenerator implements IdGenerator {
     
     INSTANCE;
 
-    public void handleIdCollision(EntityClass type, PermissionScope scope,
-            Bundle bundle) throws ValidationError {
+    public ListMultimap<String,String> handleIdCollision(EntityClass type, PermissionScope scope,
+            Bundle bundle) {
         throw new RuntimeException(String.format("Index collision generating identifier for item type '%s' with data: '%s'",
                 type, bundle));
     }

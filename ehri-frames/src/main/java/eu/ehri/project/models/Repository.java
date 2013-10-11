@@ -44,7 +44,7 @@ public interface Repository extends AccessibleEntity, DescribedEntity,
         public Long getChildCount() {
             Long count = it().getProperty(CHILD_COUNT);
             if (count == null) {
-                it().setProperty(CHILD_COUNT, gremlin().in(Ontology.DOC_HELD_BY_REPOSITORY).count());
+                count = gremlin().in(Ontology.DOC_HELD_BY_REPOSITORY).count();
             }
             return count;
         }
@@ -59,7 +59,7 @@ public interface Repository extends AccessibleEntity, DescribedEntity,
             collection.asVertex().addEdge(Ontology.DOC_HELD_BY_REPOSITORY, it());
             Long count = it().getProperty(CHILD_COUNT);
             if (count == null) {
-                getChildCount();
+                it().setProperty(CHILD_COUNT, gremlin().in(Ontology.DOC_HELD_BY_REPOSITORY).count());
             } else {
                 it().setProperty(CHILD_COUNT, count + 1);
             }

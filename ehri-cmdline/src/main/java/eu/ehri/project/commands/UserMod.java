@@ -13,8 +13,8 @@ import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Group;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.Actioner;
-import eu.ehri.project.persistance.ActionManager;
-import eu.ehri.project.persistance.ActionManager.EventContext;
+import eu.ehri.project.persistence.ActionManager;
+import eu.ehri.project.persistence.ActionManager.EventContext;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 

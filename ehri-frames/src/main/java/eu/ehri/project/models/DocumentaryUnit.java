@@ -37,9 +37,6 @@ public interface DocumentaryUnit extends AccessibleEntity,
     @JavaHandler
     public void setRepository(final Repository institution);
 
-    @JavaHandler
-    public Long getChildCount();
-
     /**
      * Get parent documentary unit, if any
      * @return
@@ -56,6 +53,9 @@ public interface DocumentaryUnit extends AccessibleEntity,
      */
     @JavaHandler
     public Iterable<DocumentaryUnit> getAncestors();
+
+    @JavaHandler
+    public Long getChildCount();
 
     /**
      * Get child documentary units
@@ -78,14 +78,12 @@ public interface DocumentaryUnit extends AccessibleEntity,
         public Long getChildCount() {
             Long count = it().getProperty(CHILD_COUNT);
             if (count == null) {
-                it().setProperty(CHILD_COUNT, gremlin().in(Ontology.DOC_IS_CHILD_OF).count());
+                count = gremlin().in(Ontology.DOC_IS_CHILD_OF).count();
             }
             return count;
         }
 
         public Iterable<DocumentaryUnit> getChildren() {
-            // Ensure value is cached when fetching.
-            getChildCount();
             return frameVertices(gremlin().in(Ontology.DOC_IS_CHILD_OF));
         }
 
@@ -93,7 +91,7 @@ public interface DocumentaryUnit extends AccessibleEntity,
             child.asVertex().addEdge(Ontology.DOC_IS_CHILD_OF, it());
             Long count = it().getProperty(CHILD_COUNT);
             if (count == null) {
-                getChildCount();
+                it().setProperty(CHILD_COUNT, gremlin().in(Ontology.DOC_IS_CHILD_OF).count());
             } else {
                 it().setProperty(CHILD_COUNT, count + 1);
             }
