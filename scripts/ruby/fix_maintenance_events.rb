@@ -8,7 +8,9 @@ module Ehri
   module Fixer
     include Ehri
 
-
+    # This script restores maintenance event nodes capturing provenance information
+    # that we erroneously being lost when repositories were updated.
+    total = 0
     Manager.get_frames(EntityClass::REPOSITORY_DESCRIPTION, Models::RepositoryDescription.java_class).each do |repodesc|
       begin
         notes = repodesc.as_vertex.get_property("maintenanceNotes")
@@ -29,15 +31,16 @@ module Ehri
         
             ev2 = Persistence::Bundle.new(EntityClass::MAINTENANCE_EVENT, {
                 "maintenanceEvent/source" => "Imported from EHRI spreadsheet",
-                "eventType" => "creation",
+                "eventType" => "update",
                 "maintenanceEvent/date" => "2012-03-09"
             })
         
             ev3 = Persistence::Bundle.new(EntityClass::MAINTENANCE_EVENT, {
                 "maintenanceEvent/source" => "Exported from ICA-AtoM",
-                "eventType" => "creation",
+                "eventType" => "update",
                 "maintenanceEvent/date" => "2013-09-09"
             })
+
             m1 = persister.create(ev1, Models::MaintenanceEvent.java_class)
             m2 = persister.create(ev2, Models::MaintenanceEvent.java_class)
             m3 = persister.create(ev3, Models::MaintenanceEvent.java_class)
@@ -46,6 +49,7 @@ module Ehri
             repodesc.add_maintenance_event(m2)
             repodesc.add_maintenance_event(m3)
 
+            total += 1
             puts "Restored events for: #{repodesc.get_entity.get_id} - #{sources}"
         end
       rescue Exception => msg
@@ -53,6 +57,7 @@ module Ehri
       end
     end
     Graph.get_base_graph.commit
-    puts "Committed."
+    puts "Committed: #{total}"
+    Graph.get_base_graph.shutdown
   end
 end
