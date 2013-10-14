@@ -54,7 +54,8 @@ public class CegesomaTest extends AbstractImporterTest{
         // - 1 more creatorAccess
         // - 6 more import Event links (1 for each Unit, 1 for the User)
         // - 1 more import Event
-        int newCount = origCount + 24 + 34;
+        // --- = + 57, needs to be + 59
+        int newCount = origCount + 24 + 34 + 1;
         assertEquals(newCount, getNodeCount(graph));
         
         archdesc = graph.frame(
@@ -113,17 +114,14 @@ public class CegesomaTest extends AbstractImporterTest{
         // Fonds has two dates with different types -> list
         for(DocumentDescription d : archdesc.getDocumentDescriptions()){
         	// unitDates still around?
-        	List<String> s = (List<String>) d.asVertex().getProperty("unitDates");
-        	assertEquals("1944-1979", s.get(0));
-        	assertEquals("1944-1948", s.get(1));
+        	String s = d.asVertex().getProperty("unitDates");
+        	assertEquals("1944-1979", s);
         	
         	// start and end dates correctly parsed and setup
         	List<DatePeriod> dp = toList(d.getDatePeriods());
-        	assertEquals(2, dp.size());
+        	assertEquals(1, dp.size());
         	assertEquals("1944-01-01", dp.get(0).getStartDate());
         	assertEquals("1979-12-31", dp.get(0).getEndDate());
-        	assertEquals("1944-01-01", dp.get(1).getStartDate());
-        	assertEquals("1948-12-31", dp.get(1).getEndDate());
         	
         	
         	// Since there was a list of unitDateTypes, it should now be deleted
