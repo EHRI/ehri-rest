@@ -17,6 +17,7 @@ import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.Frame;
+import eu.ehri.project.models.base.ItemHolder;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.models.events.SystemEventQueue;
 import eu.ehri.project.models.events.Version;
@@ -156,9 +157,9 @@ public final class ActionManager {
             for (AccessibleEntity entity : entities) {
                 Vertex vertex = actionManager.graph.addVertex(null);
                 actionManager.replaceAtHead(entity.asVertex(), vertex,
-                        Ontology.ENTITY_HAS_LIFECYCLE_EVENT, Ontology.ENTITY_HAS_LIFECYCLE_EVENT, Direction.OUT);
-                actionManager.graph.addEdge(null, vertex,
-                        systemEvent.asVertex(), Ontology.ENTITY_HAS_EVENT);
+                        Ontology.ENTITY_HAS_LIFECYCLE_EVENT,
+                        Ontology.ENTITY_HAS_LIFECYCLE_EVENT, Direction.OUT);
+                actionManager.addSubject(systemEvent.asVertex(), vertex);
             }
             return this;
         }
@@ -270,9 +271,10 @@ public final class ActionManager {
     public EventContext logEvent(Actioner user, EventTypes type, Optional<String> logMessage) {
         Vertex vertex = graph.addVertex(null);
         replaceAtHead(user.asVertex(), vertex,
-                Ontology.ACTIONER_HAS_LIFECYCLE_ACTION, Ontology.ACTIONER_HAS_LIFECYCLE_ACTION, Direction.OUT);
+                Ontology.ACTIONER_HAS_LIFECYCLE_ACTION,
+                Ontology.ACTIONER_HAS_LIFECYCLE_ACTION, Direction.OUT);
         SystemEvent globalEvent = createGlobalEvent(user, type, logMessage);
-        graph.addEdge(null, vertex, globalEvent.asVertex(), Ontology.ENTITY_HAS_EVENT);
+        addSubject(globalEvent.asVertex(), vertex);
         return new EventContext(this, globalEvent, user, type, logMessage);
     }
 
@@ -324,6 +326,16 @@ public final class ActionManager {
 
 
     // Helpers.
+
+    private void addSubject(Vertex event, Vertex subject) {
+        Long count = event.getProperty(ItemHolder.CHILD_COUNT);
+        graph.addEdge(null, subject, event, Ontology.ENTITY_HAS_EVENT);
+        if (count == null) {
+            event.setProperty(ItemHolder.CHILD_COUNT, 1L);
+        } else {
+            event.setProperty(ItemHolder.CHILD_COUNT, count + 1L);
+        }
+    }
 
     /**
      * Given a vertex <em>head</em> that forms that start of a chain <em>relation</em> with

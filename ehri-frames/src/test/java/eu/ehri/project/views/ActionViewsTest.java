@@ -86,9 +86,8 @@ public class ActionViewsTest extends AbstractFixtureTest {
         // it can't
         assertEquals(1, Iterables.count(validUser.getLatestAction()));
         SystemEvent event = Iterables.single(validUser.getLatestAction());
-        assertTrue(event.getSubjects().iterator()
-                .hasNext());
-        assertEquals(changedUser.asVertex(), event.getSubjects().iterator().next().asVertex());
+        assertNotNull(event.getFirstSubject());
+        assertEquals(changedUser.asVertex(), event.getFirstSubject().asVertex());
         assertTrue(changedUser.getHistory().iterator().hasNext());
 
         // We should have exactly two actions now; one for create, one for
