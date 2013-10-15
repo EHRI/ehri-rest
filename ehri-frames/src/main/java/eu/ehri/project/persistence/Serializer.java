@@ -272,22 +272,25 @@ public final class Serializer {
      */
     private Bundle vertexToBundle(Vertex item, int depth, boolean lite)
             throws SerializationError {
-        // FIXME: Try and move the logic for accessing id and type elsewhere.
         try {
-            String id = (String) item.getProperty(EntityType.ID_KEY);
             EntityClass type = EntityClass.withName((String) item
                     .getProperty(EntityType.TYPE_KEY));
+            String id = item.getProperty(EntityType.ID_KEY);
             logger.trace("Serializing {} ({}) at depth {}", id, type, depth);
-            ListMultimap<String, Bundle> relations = getRelationData(item,
-                    depth, lite, type.getEntityClass());
-            Map<String, Object> data = getVertexData(item, type, depth, lite);
-            Bundle bundle = new Bundle(id, type, data, relations);
-            if (!lite)
-                bundle = bundle.withMetaDataValue("gid", item.getId());
-            return bundle;
+
+            Bundle.Builder builder = new Bundle.Builder(type);
+            builder.setId(id)
+                .addRelations(getRelationData(item,
+                    depth, lite, type.getEntityClass()))
+                .addData(getVertexData(item, type, depth, lite))
+                .addMetaData(getVertexMeta(item, type, depth, lite));
+            if (!lite) {
+                builder.addMetaData(getVertexMeta(item, type, depth, lite))
+                       .addMetaDataValue("gid", item.getId());
+            }
+            return builder.build();
         } catch (IllegalArgumentException e) {
-            throw new SerializationError("Unable to serialize vertex: " + item,
-                    e);
+            throw new SerializationError("Unable to serialize vertex: " + item, e);
         }
     }
 
@@ -431,6 +434,21 @@ public final class Serializer {
             if (!(key.equals(EntityType.ID_KEY) || key
                     .equals(EntityType.TYPE_KEY) || key.startsWith("_")))
                 data.put(key, item.getProperty(key));
+        }
+        return data;
+    }
+
+    /**
+     * Fetch a map of metadata sourced from vertex properties.
+     * This is anything that begins with an underscore (but now
+     * two underscores)
+     */
+    private Map<String, Object> getVertexMeta(Vertex item, EntityClass type, int depth, boolean lite) {
+        Map<String, Object> data = Maps.newHashMap();
+        for (String key : item.getPropertyKeys()) {
+            if (!key.startsWith("__") && key.startsWith("_")) {
+                data.put(key.substring(1), item.getProperty(key));
+            }
         }
         return data;
     }

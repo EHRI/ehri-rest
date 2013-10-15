@@ -51,6 +51,7 @@ public final class Bundle {
         private final EntityClass type;
         final ListMultimap<String, Bundle> relations = ArrayListMultimap.create();
         final Map<String, Object> data = Maps.newHashMap();
+        final Map<String, Object> meta = Maps.newHashMap();
 
         public Builder setId(String id) {
             this.id = id;
@@ -61,8 +62,18 @@ public final class Bundle {
             type = cls;
         }
 
+        public Builder addRelations(ListMultimap<String, Bundle> r) {
+            relations.putAll(r);
+            return this;
+        }
+
         public Builder addRelation(String relation, Bundle bundle) {
             relations.put(relation, bundle);
+            return this;
+        }
+
+        public Builder addData(Map<String,Object> d) {
+            data.putAll(d);
             return this;
         }
 
@@ -71,8 +82,18 @@ public final class Bundle {
             return this;
         }
 
+        public Builder addMetaData(Map<String,Object> d) {
+            meta.putAll(d);
+            return this;
+        }
+
+        public Builder addMetaDataValue(String key, Object value) {
+            meta.put(key, value);
+            return this;
+        }
+
         public Bundle build() {
-            return new Bundle(id, type, data, relations);
+            return new Bundle(id, type, data, relations, meta);
         }
     }
 
