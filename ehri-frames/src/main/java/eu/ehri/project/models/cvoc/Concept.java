@@ -54,7 +54,7 @@ public interface Concept extends AccessibleEntity, IdentifiableEntity,
     public Iterable<Concept> getBroaderConcepts();
 
     // NOTE: don't put a Fetch on it, because it can be a large tree of concepts
-    @JavaHandler
+    @Adjacency(label = Ontology.CONCEPT_HAS_NARROWER, direction = Direction.OUT)
     public Iterable<Concept> getNarrowerConcepts();
 
     @JavaHandler
@@ -81,7 +81,7 @@ public interface Concept extends AccessibleEntity, IdentifiableEntity,
     /**
      * Implementation of complex methods.
      */
-    abstract class Impl implements JavaHandlerContext<Vertex>, Concept {
+    abstract class Impl  implements JavaHandlerContext<Vertex>, Concept {
 
         public Long getChildCount() {
             Long count = it().getProperty(CHILD_COUNT);
@@ -89,10 +89,6 @@ public interface Concept extends AccessibleEntity, IdentifiableEntity,
                 count = gremlin().out(Ontology.CONCEPT_HAS_NARROWER).count();
             }
             return count;
-        }
-
-        public Iterable<Concept> getNarrowerConcepts() {
-            return frameVertices(gremlin().out(Ontology.CONCEPT_HAS_NARROWER));
         }
 
         public void addNarrowerConcept(final Concept concept) {

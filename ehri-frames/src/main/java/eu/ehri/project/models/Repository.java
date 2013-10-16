@@ -19,13 +19,12 @@ public interface Repository extends AccessibleEntity, DescribedEntity,
     @JavaHandler
     public Long getChildCount();
 
-    @JavaHandler
+    @Adjacency(label = Ontology.DOC_HELD_BY_REPOSITORY, direction = Direction.IN)
     public Iterable<DocumentaryUnit> getCollections();
 
     @JavaHandler
     public Iterable<DocumentaryUnit> getAllCollections();
 
-    //@Adjacency(label = DOC_HELD_BY_REPOSITORY, direction = Direction.IN)
     @JavaHandler
     public void addCollection(final DocumentaryUnit collection);
 
@@ -33,7 +32,7 @@ public interface Repository extends AccessibleEntity, DescribedEntity,
     @Adjacency(label = Ontology.REPOSITORY_HAS_COUNTRY, direction = Direction.OUT)
     public Iterable<Country> getCountry();
 
-    @Adjacency(label = Ontology.REPOSITORY_HAS_COUNTRY, direction = Direction.OUT)
+    @JavaHandler
     public void setCountry(final Country country);
 
     /**
@@ -49,12 +48,6 @@ public interface Repository extends AccessibleEntity, DescribedEntity,
             return count;
         }
 
-        public Iterable<DocumentaryUnit> getCollections() {
-            // Ensure value is cached when fetching.
-            getChildCount();
-            return frameVertices(gremlin().in(Ontology.DOC_HELD_BY_REPOSITORY));
-        }
-
         public void addCollection(final DocumentaryUnit collection) {
             collection.asVertex().addEdge(Ontology.DOC_HELD_BY_REPOSITORY, it());
             Long count = it().getProperty(CHILD_COUNT);
@@ -63,6 +56,10 @@ public interface Repository extends AccessibleEntity, DescribedEntity,
             } else {
                 it().setProperty(CHILD_COUNT, count + 1);
             }
+        }
+
+        public void setCountry(final Country country) {
+            country.addRepository(frame(it(), Repository.class));
         }
 
         public Iterable<DocumentaryUnit> getAllCollections() {
