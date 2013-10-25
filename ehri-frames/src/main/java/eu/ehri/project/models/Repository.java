@@ -35,10 +35,17 @@ public interface Repository extends AccessibleEntity, DescribedEntity,
     @JavaHandler
     public void setCountry(final Country country);
 
+    @JavaHandler
+    public void updateChildCountCache();
+
     /**
      * Implementation of complex methods.
      */
     abstract class Impl implements JavaHandlerContext<Vertex>, Repository {
+
+        public void updateChildCountCache() {
+            it().setProperty(CHILD_COUNT, gremlin().in(Ontology.DOC_HELD_BY_REPOSITORY).count());
+        }
 
         public Long getChildCount() {
             Long count = it().getProperty(CHILD_COUNT);
@@ -50,12 +57,7 @@ public interface Repository extends AccessibleEntity, DescribedEntity,
 
         public void addCollection(final DocumentaryUnit collection) {
             collection.asVertex().addEdge(Ontology.DOC_HELD_BY_REPOSITORY, it());
-            Long count = it().getProperty(CHILD_COUNT);
-            if (count == null) {
-                it().setProperty(CHILD_COUNT, gremlin().in(Ontology.DOC_HELD_BY_REPOSITORY).count());
-            } else {
-                it().setProperty(CHILD_COUNT, count + 1);
-            }
+            updateChildCountCache();
         }
 
         public void setCountry(final Country country) {

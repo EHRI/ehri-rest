@@ -78,10 +78,17 @@ public interface Concept extends AccessibleEntity, IdentifiableEntity,
     @Adjacency(label = Ontology.CONCEPT_HAS_RELATED, direction=Direction.IN)
     public Iterable<Concept> getRelatedByConcepts();
 
+    @JavaHandler
+    public void updateChildCountCache();
+
     /**
      * Implementation of complex methods.
      */
     abstract class Impl  implements JavaHandlerContext<Vertex>, Concept {
+
+        public void updateChildCountCache() {
+            it().setProperty(CHILD_COUNT, gremlin().out(Ontology.CONCEPT_HAS_NARROWER).count());
+        }
 
         public Long getChildCount() {
             Long count = it().getProperty(CHILD_COUNT);
@@ -93,12 +100,7 @@ public interface Concept extends AccessibleEntity, IdentifiableEntity,
 
         public void addNarrowerConcept(final Concept concept) {
             it().addEdge(Ontology.CONCEPT_HAS_NARROWER, concept.asVertex());
-            Long count = it().getProperty(CHILD_COUNT);
-            if (count == null) {
-                it().setProperty(CHILD_COUNT, gremlin().out(Ontology.CONCEPT_HAS_NARROWER).count());
-            } else {
-                it().setProperty(CHILD_COUNT, count + 1);
-            }
+            updateChildCountCache();
         }
 
         public void removeNarrowerConcept(final Concept concept) {
@@ -108,12 +110,7 @@ public interface Concept extends AccessibleEntity, IdentifiableEntity,
                     break;
                 }
             }
-            Long count = it().getProperty(CHILD_COUNT);
-            if (count == null) {
-                getChildCount();
-            } else {
-                it().setProperty(CHILD_COUNT, count - 1);
-            }
+            updateChildCountCache();
         }
     }
 }

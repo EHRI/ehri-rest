@@ -67,6 +67,9 @@ public interface DocumentaryUnit extends AccessibleEntity,
     @JavaHandler
     public Iterable<DocumentaryUnit> getAllChildren();
 
+    @JavaHandler
+    public void updateChildCountCache();
+
     @Adjacency(label = Ontology.DESCRIPTION_FOR_ENTITY, direction = Direction.IN)
     public Iterable<DocumentDescription> getDocumentDescriptions();
 
@@ -74,6 +77,10 @@ public interface DocumentaryUnit extends AccessibleEntity,
      * Implementation of complex methods.
      */
     abstract class Impl implements JavaHandlerContext<Vertex>, DocumentaryUnit {
+
+        public void updateChildCountCache() {
+            it().setProperty(CHILD_COUNT, gremlin().in(Ontology.DOC_IS_CHILD_OF).count());
+        }
 
         public Long getChildCount() {
             Long count = it().getProperty(CHILD_COUNT);
@@ -89,12 +96,7 @@ public interface DocumentaryUnit extends AccessibleEntity,
 
         public void addChild(final DocumentaryUnit child) {
             child.asVertex().addEdge(Ontology.DOC_IS_CHILD_OF, it());
-            Long count = it().getProperty(CHILD_COUNT);
-            if (count == null) {
-                it().setProperty(CHILD_COUNT, gremlin().in(Ontology.DOC_IS_CHILD_OF).count());
-            } else {
-                it().setProperty(CHILD_COUNT, count + 1);
-            }
+            updateChildCountCache();
         }
 
         public Iterable<DocumentaryUnit> getAllChildren() {

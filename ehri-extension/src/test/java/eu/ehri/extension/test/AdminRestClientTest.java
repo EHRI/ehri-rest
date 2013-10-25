@@ -30,6 +30,16 @@ public class AdminRestClientTest extends BaseRestClientTest {
     }
 
     @Test
+    public void testHouseKeeping() throws Exception {
+        WebResource resource = client.resource(getExtensionEntryPointUri()
+                + "/admin/_rebuildChildCache");
+        ClientResponse response = resource.accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON).post(ClientResponse.class);
+        assertEquals(Response.Status.OK.getStatusCode(),
+                response.getStatus());
+    }
+
+    @Test
     public void testCreateDefaultUser() throws Exception {
         // Create
         WebResource resource = client.resource(getExtensionEntryPointUri()
