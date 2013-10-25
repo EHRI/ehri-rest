@@ -154,6 +154,34 @@ public class GraphManagerTest {
         assertEquals(null, vertex.getProperty(TEST_KEY));
     }
 
+    @Test
+    public void testUpdateVertexWithMetadata() throws Exception {
+        @SuppressWarnings("serial")
+        Map<String, Object> data = new HashMap<String, Object>() {
+            {
+                put(TEST_KEY, TEST_VALUE);
+            }
+        };
+
+        Vertex vertex = manager.createVertex(TEST_ID1, TEST_TYPE, data);
+
+        String testMetaKey = "_metakey";
+        String testMetaValue = "test-value";
+        vertex.setProperty(testMetaKey, testMetaValue);
+
+        String NEW_TEST_KEY = "newTestKey";
+        String NEW_TEST_VALUE = "newTestValue";
+
+        // change a value of existing key
+        data.put(TEST_KEY, NEW_TEST_VALUE);
+        manager.updateVertex(TEST_ID1, TEST_TYPE, data);
+        vertex = manager.getVertex(TEST_ID1);
+        assertEquals(NEW_TEST_VALUE, vertex.getProperty(TEST_KEY));
+
+        // Check the metadata remains unharmed
+        assertEquals(testMetaValue, vertex.getProperty(testMetaKey));
+    }
+
     // TODO copy and change the other tests
 
     @SuppressWarnings("serial")
