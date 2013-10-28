@@ -7,7 +7,9 @@ import java.util.List;
 import java.util.Map;
 
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
 
+import com.sun.jersey.core.util.MultivaluedMapImpl;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 import org.junit.After;
@@ -111,8 +113,17 @@ public class BaseRestClientTest extends AbstractRestClientTest {
      */
     protected List<Map<String, Object>> getEntityList(String entityType,
             String userId) throws Exception {
+        return getEntityList(entityType, userId, new MultivaluedMapImpl());
+    }
+
+    /**
+     * Function for fetching a list of entities with the given EntityType,
+     * and some additional parameters.
+     */
+    protected List<Map<String, Object>> getEntityList(String entityType,
+            String userId, MultivaluedMap<String,String> params) throws Exception {
         WebResource resource = client.resource(getExtensionEntryPointUri()
-                + "/" + entityType + "/list");
+                + "/" + entityType + "/list").queryParams(params);
         ClientResponse response = resource.accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
                 .header(AbstractRestResource.AUTH_HEADER_NAME, userId)

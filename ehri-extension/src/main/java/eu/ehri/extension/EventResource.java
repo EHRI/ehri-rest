@@ -13,10 +13,14 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
+import com.tinkerpop.gremlin.java.GremlinPipeline;
+import com.tinkerpop.pipes.PipeFunction;
 import eu.ehri.project.exceptions.AccessDenied;
+import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.models.events.Version;
 import eu.ehri.project.persistence.ActionManager;
+import org.joda.time.DateTime;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import eu.ehri.extension.errors.BadRequester;
@@ -36,6 +40,13 @@ import eu.ehri.project.views.Query;
  */
 @Path(Entities.SYSTEM_EVENT)
 public class EventResource extends AbstractAccessibleEntityResource<SystemEvent> {
+
+    public final static String ITEM_TYPE_PARAM = "type";
+    public final static String EVENT_TYPE_PARAM = "et";
+    public final static String USER_PARAM = "user";
+    public final static String FROM_PARAM = "from";
+    public final static String TO_PARAM = "to";
+
 
     private final Serializer subjectSerializer;
 
@@ -60,8 +71,9 @@ public class EventResource extends AbstractAccessibleEntityResource<SystemEvent>
      * 
      * @param offset
      * @param limit
-     * @param order
-     * @param filters
+     * @param eventTypes
+     * @param itemTypes
+     * @param users
      * @return
      * @throws ItemNotFound
      * @throws BadRequester
@@ -72,32 +84,81 @@ public class EventResource extends AbstractAccessibleEntityResource<SystemEvent>
     public StreamingOutput listEvents(
             @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
             @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
-            @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)
+            final @QueryParam(EVENT_TYPE_PARAM) List<String> eventTypes,
+            final @QueryParam(ITEM_TYPE_PARAM) List<String> itemTypes,
+            final @QueryParam(USER_PARAM) List<String> users,
+            final @QueryParam(FROM_PARAM) String from,
+            final @QueryParam(TO_PARAM) String to)
             throws ItemNotFound, BadRequester {
-        Query<SystemEvent> query = new Query<SystemEvent>(graph,
-                SystemEvent.class).setOffset(offset).setLimit(limit)
-                .orderBy(order).filter(filters);
+        Query<SystemEvent> query = new Query<SystemEvent>(graph, SystemEvent.class);
         ActionManager am = new ActionManager(graph);
-        return streamingList(query.list(am.getLatestGlobalEvents(),
-                getRequesterUserProfile()));
-    }
 
-    @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/page")
-    public StreamingOutput pageEvents(
-            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
-            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
-            @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)
-            throws ItemNotFound, BadRequester {
-        Query<SystemEvent> query = new Query<SystemEvent>(graph,
-                SystemEvent.class).setOffset(offset).setLimit(limit)
-                .orderBy(order).filter(filters);
-        ActionManager am = new ActionManager(graph);
-        return streamingPage(query.page(am.getLatestGlobalEvents(),
-                getRequesterUserProfile()));
+        Iterable<SystemEvent> list = query
+                .list(am.getLatestGlobalEvents(), getRequesterUserProfile());
+
+        // Add optional filters for event type, item type, and user...
+        GremlinPipeline<SystemEvent,SystemEvent> pipe = new GremlinPipeline<SystemEvent, SystemEvent>(
+                list);
+
+        if (!eventTypes.isEmpty()) {
+            pipe = pipe.filter(new PipeFunction<SystemEvent, Boolean>() {
+                @Override
+                public Boolean compute(SystemEvent event) {
+                    return eventTypes.contains(event.getEventType());
+                }
+            });
+        }
+
+        if (!itemTypes.isEmpty()) {
+            pipe = pipe.filter(new PipeFunction<SystemEvent, Boolean>() {
+                @Override
+                public Boolean compute(SystemEvent event) {
+                    for (AccessibleEntity e : event.getSubjects()) {
+                        if (itemTypes.contains(e.getType())) {
+                            return true;
+                        }
+                    }
+                    return false;
+                }
+            });
+        }
+
+        if (!users.isEmpty()) {
+            pipe = pipe.filter(new PipeFunction<SystemEvent, Boolean>() {
+                @Override
+                public Boolean compute(SystemEvent event) {
+                    for (Actioner e : event.getActioners()) {
+                        if (users.contains(e.getId())) {
+                            return true;
+                        }
+                    }
+                    return false;
+                }
+            });
+        }
+
+        // Add from/to filters (depends on timestamp strings comparing the right way!
+        if (from != null) {
+            pipe = pipe.filter(new PipeFunction<SystemEvent, Boolean>() {
+                @Override
+                public Boolean compute(SystemEvent event) {
+                    String timestamp = event.getTimestamp();
+                    return from.compareTo(timestamp) <= 0;
+                }
+            });
+        }
+
+        if (to != null) {
+            pipe = pipe.filter(new PipeFunction<SystemEvent, Boolean>() {
+                @Override
+                public Boolean compute(SystemEvent event) {
+                    String timestamp = event.getTimestamp();
+                    return to.compareTo(timestamp) >= 0;
+                }
+            });
+        }
+
+        return streamingList(pipe.range(offset, offset + (limit - 1)));
     }
 
     /**

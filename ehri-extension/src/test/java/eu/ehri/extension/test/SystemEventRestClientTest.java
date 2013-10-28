@@ -2,13 +2,17 @@ package eu.ehri.extension.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 import java.util.Map;
 
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
+import com.sun.jersey.core.util.MultivaluedMapImpl;
+import eu.ehri.extension.EventResource;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.persistence.Bundle;
 import org.codehaus.jackson.JsonNode;
@@ -61,7 +65,39 @@ public class SystemEventRestClientTest extends BaseRestClientTest {
         // Having created a new Repository, we should have at least one Event.
         assertEquals(actionsBefore.size() + 1, actionsAfter.size());
     }
-    
+
+    @Test
+    public void testListActionsWithFilter() throws Exception {
+        // Create a new agent. We're going to test that this creates
+        // a corresponding action.
+
+        WebResource resource = client.resource(getExtensionEntryPointUri()
+                + "/" + Entities.COUNTRY + "/" + COUNTRY_CODE + "/" +  Entities.REPOSITORY);
+        resource
+                .accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                        getAdminUserProfileId()).entity(jsonAgentTestString)
+                .post(ClientResponse.class);
+
+        // Add a good user filter...
+        MultivaluedMap<String,String> goodFilters = new MultivaluedMapImpl();
+        goodFilters.add(EventResource.USER_PARAM, getAdminUserProfileId());
+
+        // Add a useless filter that should remove all results
+        MultivaluedMap<String,String> badFilters = new MultivaluedMapImpl();
+        badFilters.add(EventResource.USER_PARAM, "nobody");
+
+        List<Map<String, Object>> goodFiltered = getEntityList(
+                Entities.SYSTEM_EVENT, getAdminUserProfileId(), goodFilters);
+
+        List<Map<String, Object>> badFiltered = getEntityList(
+                Entities.SYSTEM_EVENT, getAdminUserProfileId(), badFilters);
+
+        assertTrue(goodFiltered.size() > 0);
+        assertEquals(0, badFiltered.size());
+    }
+
     @Test
     public void testGetActionsForItem() throws Exception {
 
