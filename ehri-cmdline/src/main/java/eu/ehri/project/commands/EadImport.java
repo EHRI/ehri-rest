@@ -1,6 +1,7 @@
 package eu.ehri.project.commands;
 
 import eu.ehri.project.importers.BundesarchiveEadHandler;
+import eu.ehri.project.importers.IcaAtomEadHandler;
 import eu.ehri.project.importers.IcaAtomEadImporter;
 
 /**
@@ -15,7 +16,7 @@ public class EadImport extends ImportCommand implements Command {
      * Constructor.
      */
     public EadImport() {
-        super(BundesarchiveEadHandler.class, IcaAtomEadImporter.class);
+        super(IcaAtomEadHandler.class, IcaAtomEadImporter.class);
     }
 
     

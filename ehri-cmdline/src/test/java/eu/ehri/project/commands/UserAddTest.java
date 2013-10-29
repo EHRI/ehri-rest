@@ -20,10 +20,13 @@ public class UserAddTest extends AbstractFixtureTest {
 	public void testExecWithOptions() throws ParseException {
 		String[] args = new String[]{"useradd","ben","--group","admin"};
 		
-		CommandLine cmdLine = new PosixParser().parse(new Options(), args);
+		UserAdd ua = new UserAdd();
+		ua.setCustomOptions();
+		
+		CommandLine cmdLine = new PosixParser().parse(ua.options, args);
 		
 		try {
-			assertEquals(0, new UserAdd().execWithOptions(graph, cmdLine));
+			assertEquals(0, ua.execWithOptions(graph, cmdLine));
 		} catch (ItemNotFound e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

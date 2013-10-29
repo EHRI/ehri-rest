@@ -6,6 +6,7 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.*;
 import eu.ehri.project.models.base.*;
+import eu.ehri.project.models.idgen.IdGenerator;
 import eu.ehri.project.persistence.Bundle;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -82,12 +83,13 @@ public class IcaAtomEadImporter extends EaImporter {
         }
         unit = unit.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
 
+        // New solution to missing IDs: throw an exception.
         if (unit.getDataValue(Ontology.IDENTIFIER_KEY) == null) {
             throw new ValidationError(unit, Ontology.IDENTIFIER_KEY, "Missing identifier");
-//<<<<<<< HEAD
+
         }
-//=======
-//        } 
+
+//        // Old solution to missing IDs: generate a replacement. 
 //        IdGenerator generator = EntityClass.DOCUMENTARY_UNIT.getIdgen();
 //        String id = generator.generateId(EntityClass.DOCUMENTARY_UNIT, permissionScope, unit);
 //        if (id.equals(permissionScope.getId())) {
@@ -95,7 +97,7 @@ public class IcaAtomEadImporter extends EaImporter {
 //        }
 //
 //        logger.debug("Generated ID: " + id + " (" + permissionScope.getId() + ")");
-//>>>>>>> BA-oneUnitDate
+
 
         Mutation<DocumentaryUnit> mutation =
                 persister.createOrUpdate(unit, DocumentaryUnit.class);

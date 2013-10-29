@@ -100,7 +100,7 @@ public class BundesarchiveEadHandler extends SaxXmlHandler {
                     //the BA have multiple unittitles, but with different types, find the Bestandsbezeichnung
                     if (!currentGraph.containsKey(Ontology.NAME_KEY)) {
                         //finding some name for this unit:
-                        logger.error("Bundesarchive node without name field: ");
+                        logger.error("Bundesarchiv node without name field: ");
                         currentGraph.put(Ontology.NAME_KEY, "UNKNOWN title" );
                     } else if(currentGraph.get(Ontology.NAME_KEY) instanceof List){
                             logger.debug("class of identifier: " + currentGraph.get(Ontology.NAME_KEY).getClass());
