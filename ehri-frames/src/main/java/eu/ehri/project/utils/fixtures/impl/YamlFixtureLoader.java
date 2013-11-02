@@ -64,6 +64,7 @@ public class YamlFixtureLoader implements FixtureLoader {
 
     public static final String GENERATE_ID_PLACEHOLDER = "?";
 
+    private static final FramedGraphFactory graphFactory = new FramedGraphFactory(new JavaHandlerModule());
     private final FramedGraph<? extends TransactionalGraph> graph;
     private final GraphManager manager;
     private static final Logger logger = LoggerFactory
@@ -331,8 +332,7 @@ public class YamlFixtureLoader implements FixtureLoader {
                 .newEmbeddedDatabase(args[0]);
         registerShutdownHook(db);
         try {
-            FramedGraph<? extends TransactionalGraph> graph = new FramedGraphFactory(
-                        new JavaHandlerModule()).create(
+            FramedGraph<? extends TransactionalGraph> graph = graphFactory.create(
                     new Neo4jGraph(db));
             YamlFixtureLoader loader = new YamlFixtureLoader(graph);
             loader.loadTestData();

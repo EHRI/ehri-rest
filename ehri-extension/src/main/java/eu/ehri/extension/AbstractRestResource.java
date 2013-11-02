@@ -41,6 +41,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
     private static final ObjectMapper mapper = new ObjectMapper();
 
     private static final Logger logger = LoggerFactory.getLogger(TxCheckedResource.class);
+    private static final FramedGraphFactory graphFactory = new FramedGraphFactory(new JavaHandlerModule());
 
     /**
      * Query arguments.
@@ -101,8 +102,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
 
     public AbstractRestResource(@Context GraphDatabaseService database) {
         this.database = database;
-        graph = new FramedGraphFactory(
-                new JavaHandlerModule()).create(new TxCheckedNeo4jGraph(database));
+        graph = graphFactory.create(new TxCheckedNeo4jGraph(database));
         manager = GraphManagerFactory.getInstance(graph);
         serializer  = new Serializer.Builder(graph).build();
     }

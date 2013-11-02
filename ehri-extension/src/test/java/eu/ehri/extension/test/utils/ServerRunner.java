@@ -23,6 +23,8 @@ import eu.ehri.project.utils.fixtures.FixtureLoaderFactory;
  */
 public class ServerRunner extends WrappingNeoServerBootstrapper {
 
+    private static final FramedGraphFactory graphFactory = new FramedGraphFactory(new JavaHandlerModule());
+
     protected final FixtureLoader loader;
     protected final GraphCleaner cleaner;
     private FramedGraph<Neo4jGraph> framedGraph;
@@ -30,8 +32,7 @@ public class ServerRunner extends WrappingNeoServerBootstrapper {
 
     public ServerRunner(GraphDatabaseAPI graphDatabase, ServerConfigurator config) {
         super(graphDatabase, config);
-        framedGraph = new FramedGraphFactory(
-                new JavaHandlerModule()).create((new Neo4jGraph(graphDatabase)));
+        framedGraph = graphFactory.create((new Neo4jGraph(graphDatabase)));
         loader = FixtureLoaderFactory.getInstance(framedGraph);
         cleaner = new GraphCleaner(framedGraph);
     }
