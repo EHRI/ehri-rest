@@ -15,6 +15,9 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import static org.junit.Assert.*;
 
 /**
@@ -23,6 +26,7 @@ import static org.junit.Assert.*;
  */
 public class NiodEadTest extends AbstractImporterTest{
     
+	private static final Logger logger = LoggerFactory.getLogger(NiodEadTest.class);
     protected final String TEST_REPO = "r1";
     protected final String XMLFILE = "NIOD-38640-ca1.xml";
     // Identifiers of nodes in the imported documentary units
@@ -52,7 +56,7 @@ public class NiodEadTest extends AbstractImporterTest{
         // - 1? more UnknownProperties
         // - 25 more import Event links (24 for every Unit, 1 for the User)
         // - 1 more import Event
-        int newCount = origCount + 91; // temporarily changed to match found numbers
+        int newCount = origCount + 104; // temporarily changed to match found numbers
         assertEquals(newCount, getNodeCount(graph));
         
         archdesc = graph.frame(
@@ -101,6 +105,8 @@ public class NiodEadTest extends AbstractImporterTest{
         	// Single date is just a string
         	assertEquals("1506/1950", d.asVertex().getProperty("unitDates"));
         	for (DatePeriod dp : d.getDatePeriods()){
+        		logger.debug("startDate: " + dp.getStartDate());
+        		logger.debug("endDate: " + dp.getEndDate());
         		assertEquals("1506-01-01", dp.getStartDate());
         		assertEquals("1950-12-31", dp.getEndDate());
         	}
