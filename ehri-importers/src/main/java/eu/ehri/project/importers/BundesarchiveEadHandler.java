@@ -25,7 +25,7 @@ public class BundesarchiveEadHandler extends EadHandler {
     private static int bundesarchivecount = 0;
     private static final Logger logger = LoggerFactory
             .getLogger(BundesarchiveEadHandler.class);
-    private final List<DocumentaryUnit>[] children = new ArrayList[12];
+//    private final List<DocumentaryUnit>[] children = new ArrayList[12];
     // Pattern for EAD nodes that represent a child item
 //    private Pattern childItemPattern = Pattern.compile("^/*c(?:\\d*)$");
     
@@ -47,7 +47,6 @@ public class BundesarchiveEadHandler extends EadHandler {
     @SuppressWarnings("unchecked")
     public BundesarchiveEadHandler(AbstractImporter<Map<String, Object>> importer) {
         super(importer, new XmlImportProperties("bundesarchive.properties"));
-        children[depth] = new ArrayList<DocumentaryUnit>();
     }
 
 //    @Override

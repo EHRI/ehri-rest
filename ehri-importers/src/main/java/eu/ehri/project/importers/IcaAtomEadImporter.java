@@ -124,7 +124,8 @@ public class IcaAtomEadImporter extends EaImporter {
 
 
     }
-    @Override
+    @SuppressWarnings("unchecked")
+	@Override
     protected Iterable<Map<String, Object>> extractRelations(Map<String, Object> data) {
         final String REL = "Access";
         List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();

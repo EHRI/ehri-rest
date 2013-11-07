@@ -24,7 +24,7 @@ public class EadHandler extends SaxXmlHandler {
 
     private static final Logger logger = LoggerFactory
             .getLogger(EadHandler.class);
-    private final List<DocumentaryUnit>[] children = new ArrayList[12];
+    protected final List<DocumentaryUnit>[] children = new ArrayList[12];
     // Pattern for EAD nodes that represent a child item
     private Pattern childItemPattern = Pattern.compile("^/*c(?:\\d*)$");
     
