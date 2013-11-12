@@ -12,6 +12,9 @@ import com.google.common.base.Optional;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraphFactory;
 import com.tinkerpop.frames.modules.javahandler.JavaHandlerModule;
+import eu.ehri.project.models.EntityClass;
+import eu.ehri.project.models.UserProfile;
+import eu.ehri.project.models.utils.ClassUtils;
 import eu.ehri.project.utils.TxCheckedNeo4jGraph;
 import eu.ehri.project.models.base.Frame;
 import org.codehaus.jackson.JsonFactory;
@@ -119,7 +122,8 @@ public abstract class AbstractRestResource implements TxCheckedResource {
     }
 
     /**
-     * Retrieve the id of the UserProfile of the requester
+     * Retrieve the account of the current user, who may be
+     * anonymous.
      * 
      * @return The UserProfile
      * @throws BadRequester
@@ -135,6 +139,21 @@ public abstract class AbstractRestResource implements TxCheckedResource {
                 throw new BadRequester(id.get());
             }
         }
+    }
+
+    /**
+     * Retrieve the profile of the current user, throwing a
+     * BadRequest if it's invalid.
+     * @return
+     */
+    protected UserProfile getCurrentUser() throws BadRequester {
+        Accessor profile = getRequesterUserProfile();
+        if (profile.isAdmin() || profile.isAnonymous()
+                || !ClassUtils.getEntityType(profile.getClass())
+                .equals(EntityClass.USER_PROFILE)) {
+            throw new BadRequester("Invalid user: " + profile.getId());
+        }
+        return graph.frame(profile.asVertex(), UserProfile.class);
     }
 
     /**

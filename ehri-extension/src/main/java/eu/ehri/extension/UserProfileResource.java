@@ -24,6 +24,8 @@ import javax.ws.rs.core.Response.Status;
 
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.exceptions.*;
+import eu.ehri.project.models.utils.ClassUtils;
+import eu.ehri.project.views.Query;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import eu.ehri.extension.errors.BadRequester;
@@ -88,17 +90,6 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
         return page(offset, limit, order, filters);
     }
     
-    /*
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    public Response createUserProfile(String json,
-            @QueryParam(ACCESSOR_PARAM) List<String> accessors) throws PermissionDenied,
-            ValidationError, IntegrityError, DeserializationError,
-            ItemNotFound, BadRequester {
-        return create(json, accessors);
-    }
-    */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
@@ -136,11 +127,55 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
             BadRequester {
         return delete(id);
     }
-    
-    
+
+    @GET
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Path("/followers")
+    public StreamingOutput pageFollowers(
+            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
+            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(SORT_PARAM) List<String> order,
+            @QueryParam(FILTER_PARAM) List<String> filters)
+            throws ItemNotFound, BadRequester {
+        UserProfile user = getCurrentUser();
+        final Query.Page<UserProfile> page = querier.setOffset(offset).setLimit(limit)
+                .orderBy(order).filter(filters).page(user.getFollowing(), user);
+        return streamingPage(page);
+    }
+
+
+    @POST
+    @Path("/follow/{userId:.+}")
+    public Response followUserProfile(@PathParam("userId") String userId)
+            throws BadRequester, PermissionDenied, ItemNotFound {
+        UserProfile user = getCurrentUser();
+        try {
+            user.addFollowing(manager.getFrame(userId, UserProfile.class));
+            graph.getBaseGraph().commit();
+            return Response.status(Status.OK).build();
+        }  finally {
+            cleanupTransaction();
+        }
+    }
+
+    @POST
+    @Path("/unfollow/{userId:.+}")
+    public Response unfollowUserProfile(@PathParam("userId") String userId)
+            throws BadRequester, PermissionDenied, ItemNotFound {
+        UserProfile user = getCurrentUser();
+        try {
+            user.removeFollowing(manager.getFrame(userId, UserProfile.class));
+            graph.getBaseGraph().commit();
+            return Response.status(Status.OK).build();
+        }  finally {
+            cleanupTransaction();
+        }
+    }
+
+
     /*** helpers ***/
-    
-    /* 
+
+    /*
      * This code is similar to the create method of AbstractAccessibleEntityResource 
      * but also allows specifying groups to which the new userProfile will be added. 
      * 
