@@ -1,10 +1,13 @@
 package eu.ehri.extension.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.net.URI;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.ws.rs.core.MediaType;
@@ -12,7 +15,10 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 
+import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
+import eu.ehri.project.models.EntityClass;
+import eu.ehri.project.models.annotations.EntityType;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
@@ -45,7 +51,7 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
     public void testCreateDeleteUserProfile() throws Exception {
         // Create
         WebResource resource = client.resource(getExtensionEntryPointUri()
-                + "/userProfile");
+                + "/" + Entities.USER_PROFILE);
         ClientResponse response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
@@ -76,8 +82,8 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
         queryParams.add("value", FETCH_NAME);
 
         WebResource resource = client.resource(
-                getExtensionEntryPointUri() + "/userProfile").queryParams(
-                queryParams);
+                getExtensionEntryPointUri() + "/" + Entities.USER_PROFILE)
+                .queryParams(queryParams);
 
         ClientResponse response = resource
                 .accept(MediaType.APPLICATION_JSON)
@@ -95,7 +101,7 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
 
         // -create data for testing
         WebResource resource = client.resource(getExtensionEntryPointUri()
-                + "/userProfile");
+                + "/" + Entities.USER_PROFILE);
         ClientResponse response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
@@ -125,7 +131,7 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
 
         // -update
         resource = client
-                .resource(getExtensionEntryPointUri() + "/userProfile");
+                .resource(getExtensionEntryPointUri() + "/" + Entities.USER_PROFILE);
         response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
@@ -152,7 +158,7 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
     public void testCreateUserProfileWithIntegrityErrir() throws Exception {
         // Create
         WebResource resource = client.resource(getExtensionEntryPointUri()
-                + "/userProfile");
+                + "/" + Entities.USER_PROFILE);
         ClientResponse response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
@@ -182,8 +188,8 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
     	final String GROUP_ID2 = "kcl";
         
     	// Create
-    	URI uri = UriBuilder.fromPath(getExtensionEntryPointUri()
-                + "/userProfile")
+    	URI uri = UriBuilder.fromPath(getExtensionEntryPointUri())
+                .segment(Entities.USER_PROFILE)
                 .queryParam("group", GROUP_ID1)
                 .queryParam("group", GROUP_ID2)
                 .build();
@@ -236,10 +242,10 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
     	final String GROUP_ID_NONEXISTING = "non-existing-e6d86e97-5eb1-4030-9d21-3eabea6f57ca";
         
     	// Create
-    	URI uri = UriBuilder.fromPath(getExtensionEntryPointUri()
-                + "/userProfile")
-                .queryParam("group", GROUP_ID_EXISTING)
-                .queryParam("group", GROUP_ID_NONEXISTING)
+    	URI uri = UriBuilder.fromPath(getExtensionEntryPointUri())
+                .segment(Entities.USER_PROFILE)
+                .queryParam(AbstractRestResource.GROUP_PARAM, GROUP_ID_EXISTING)
+                .queryParam(AbstractRestResource.GROUP_PARAM, GROUP_ID_NONEXISTING)
                 .build();
     	
         WebResource resource = client.resource(uri);
@@ -253,5 +259,43 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
 
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(),
                 response.getStatus());
+    }
+
+    @Test
+    public void testFollowAndUnfollow() throws Exception {
+        String followersUrl = "/" + Entities.USER_PROFILE + "/followers";
+        List<Map<String,Object>> followers
+                = getItemList(followersUrl, getRegularUserProfileId());
+        assertTrue(followers.isEmpty());
+
+        URI followUrl = UriBuilder.fromPath(getExtensionEntryPointUri())
+                .segment(Entities.USER_PROFILE)
+                .segment("follow")
+                .segment(getAdminUserProfileId())
+                .build();
+        ClientResponse response = client.resource(followUrl)
+                .accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                        getRegularUserProfileId())
+                .post(ClientResponse.class);
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        followers = getItemList(followersUrl, getRegularUserProfileId());
+        assertFalse(followers.isEmpty());
+
+        URI unfollowUrl = UriBuilder.fromPath(getExtensionEntryPointUri())
+                .segment(Entities.USER_PROFILE)
+                .segment("unfollow")
+                .segment(getAdminUserProfileId())
+                .build();
+        response = client.resource(unfollowUrl)
+                .accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                        getRegularUserProfileId())
+                .post(ClientResponse.class);
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        followers = getItemList(followersUrl, getRegularUserProfileId());
+        assertTrue(followers.isEmpty());
     }
 }

@@ -12,6 +12,7 @@ import com.google.common.base.Optional;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraphFactory;
 import com.tinkerpop.frames.modules.javahandler.JavaHandlerModule;
+import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.utils.ClassUtils;
@@ -149,8 +150,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
     protected UserProfile getCurrentUser() throws BadRequester {
         Accessor profile = getRequesterUserProfile();
         if (profile.isAdmin() || profile.isAnonymous()
-                || !ClassUtils.getEntityType(profile.getClass())
-                .equals(EntityClass.USER_PROFILE)) {
+                || !profile.getType().equals(Entities.USER_PROFILE)) {
             throw new BadRequester("Invalid user: " + profile.getId());
         }
         return graph.frame(profile.asVertex(), UserProfile.class);

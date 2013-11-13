@@ -131,16 +131,16 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/followers")
-    public StreamingOutput pageFollowers(
+    public StreamingOutput listFollowers(
             @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
             @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
             @QueryParam(SORT_PARAM) List<String> order,
             @QueryParam(FILTER_PARAM) List<String> filters)
             throws ItemNotFound, BadRequester {
         UserProfile user = getCurrentUser();
-        final Query.Page<UserProfile> page = querier.setOffset(offset).setLimit(limit)
-                .orderBy(order).filter(filters).page(user.getFollowing(), user);
-        return streamingPage(page);
+        final Iterable<UserProfile> list = querier.setOffset(offset).setLimit(limit)
+                .orderBy(order).filter(filters).list(user.getFollowing(), user);
+        return streamingList(list);
     }
 
 

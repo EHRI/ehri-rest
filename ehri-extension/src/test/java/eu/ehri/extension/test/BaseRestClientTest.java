@@ -108,6 +108,27 @@ public class BaseRestClientTest extends AbstractRestClientTest {
 
     /*** Helpers ***/
 
+    protected List<Map<String, Object>> getItemList(String entityType, String userId) throws Exception {
+        return getItemList(entityType, userId, new MultivaluedMapImpl());
+    }
+
+    /**
+     * Get a list of items at some url, as the given user.
+     */
+    protected List<Map<String,Object>> getItemList(String url, String userId,
+                         MultivaluedMap<String,String> params) throws Exception {
+        WebResource resource = client.resource(getExtensionEntryPointUri() + url).queryParams(params);
+        ClientResponse response = resource.accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .header(AbstractRestResource.AUTH_HEADER_NAME, userId)
+                .get(ClientResponse.class);
+        String json = response.getEntity(String.class);
+        ObjectMapper mapper = new ObjectMapper();
+        TypeReference<LinkedList<HashMap<String, Object>>> typeRef = new TypeReference<LinkedList<HashMap<String, Object>>>() {
+        };
+        return mapper.readValue(json, typeRef);
+    }
+
     /**
      * Function for fetching a list of entities with the given EntityType
      */
@@ -122,17 +143,7 @@ public class BaseRestClientTest extends AbstractRestClientTest {
      */
     protected List<Map<String, Object>> getEntityList(String entityType,
             String userId, MultivaluedMap<String,String> params) throws Exception {
-        WebResource resource = client.resource(getExtensionEntryPointUri()
-                + "/" + entityType + "/list").queryParams(params);
-        ClientResponse response = resource.accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME, userId)
-                .get(ClientResponse.class);
-        String json = response.getEntity(String.class);
-        ObjectMapper mapper = new ObjectMapper();
-        TypeReference<LinkedList<HashMap<String, Object>>> typeRef = new TypeReference<LinkedList<HashMap<String, Object>>>() {
-        };
-        return mapper.readValue(json, typeRef);
+        return getItemList("/" + entityType + "/list", userId, params);
     }
 
     protected Long getEntityCount(String entityType,
