@@ -28,4 +28,13 @@ public class UserProfileTest extends AbstractFixtureTest {
         validUser.removeFollowing(follower);
         assertTrue(Iterables.isEmpty(validUser.getFollowing()));
     }
+
+    @Test
+    public void testIsFollowing() throws Exception {
+        UserProfile follower = manager.getFrame("reto", UserProfile.class);
+        assertFalse(follower.isFollowing(validUser));
+        follower.addFollowing(validUser);
+        assertTrue(follower.isFollowing(validUser));
+        assertFalse(validUser.isFollowing(follower));
+    }
 }

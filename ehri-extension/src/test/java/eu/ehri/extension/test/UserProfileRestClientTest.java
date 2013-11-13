@@ -283,6 +283,16 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
         followers = getItemList(followersUrl, getRegularUserProfileId());
         assertFalse(followers.isEmpty());
 
+        // Hitting the same URL as a GET should give us a boolean...
+        response = client.resource(followUrl)
+                .accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                        getRegularUserProfileId())
+                .get(ClientResponse.class);
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        assertEquals("true", response.getEntity(String.class));
+
         URI unfollowUrl = UriBuilder.fromPath(getExtensionEntryPointUri())
                 .segment(Entities.USER_PROFILE)
                 .segment("unfollow")

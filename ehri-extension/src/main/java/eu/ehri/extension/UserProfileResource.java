@@ -144,6 +144,16 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
     }
 
 
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/follow/{userId:.+}")
+    public Response followsUserProfile(@PathParam("userId") String userId)
+            throws BadRequester, PermissionDenied, ItemNotFound {
+        UserProfile user = getCurrentUser();
+        return booleanResponse(user.isFollowing(
+                manager.getFrame(userId, UserProfile.class)));
+    }
+
     @POST
     @Path("/follow/{userId:.+}")
     public Response followUserProfile(@PathParam("userId") String userId)

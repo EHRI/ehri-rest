@@ -1,7 +1,11 @@
 package eu.ehri.project.models;
 
 import com.tinkerpop.blueprints.Direction;
+import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.Adjacency;
+import com.tinkerpop.frames.modules.javahandler.JavaHandler;
+import com.tinkerpop.frames.modules.javahandler.JavaHandlerContext;
+import com.tinkerpop.pipes.PipeFunction;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
@@ -23,4 +27,18 @@ public interface UserProfile extends Accessor, AccessibleEntity, IdentifiableEnt
 
     @Adjacency(label = Ontology.USER_FOLLOWS_USER, direction = Direction.OUT)
     public void removeFollowing(final UserProfile user);
+
+    @JavaHandler
+    public boolean isFollowing(final UserProfile otherUser);
+
+    abstract class Impl implements JavaHandlerContext<Vertex>, UserProfile {
+        public boolean isFollowing(final UserProfile otherUser) {
+            return gremlin().out(Ontology.USER_FOLLOWS_USER).filter(new PipeFunction<Vertex, Boolean>() {
+                @Override
+                public Boolean compute(Vertex vertex) {
+                    return vertex.equals(otherUser.asVertex());
+                }
+            }).hasNext();
+        }
+    }
 }

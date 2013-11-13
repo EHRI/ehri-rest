@@ -405,6 +405,16 @@ public abstract class AbstractRestResource implements TxCheckedResource {
     }
 
     /**
+     * Return a boolean.
+     */
+    protected Response booleanResponse(boolean bool) {
+        return MediaType.TEXT_XML_TYPE.equals(checkMediaType())
+                ? Response.ok(String.format("<boolean>%s</boolean>", bool)
+                    .getBytes()).build()
+                : Response.ok(Boolean.toString(bool).getBytes()).build();
+    }
+
+    /**
      * Return a streaming response from an iterable.
      * 
      * @param map
