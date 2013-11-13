@@ -35,6 +35,7 @@ public class UserProfileTest extends AbstractFixtureTest {
         assertFalse(follower.isFollowing(validUser));
         follower.addFollowing(validUser);
         assertTrue(follower.isFollowing(validUser));
+        assertTrue(validUser.isFollower(follower));
         assertFalse(validUser.isFollowing(follower));
     }
 }

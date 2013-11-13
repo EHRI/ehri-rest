@@ -46,6 +46,13 @@ import eu.ehri.project.persistence.Bundle;
 @Path(Entities.USER_PROFILE)
 public class UserProfileResource extends AbstractAccessibleEntityResource<UserProfile> {
 
+    public static final String FOLLOW = "follow";
+    public static final String UNFOLLOW = "unfollow";
+    public static final String FOLLOWING = "following";
+    public static final String FOLLOWERS = "followers";
+    public static final String IS_FOLLOWING = "isFollowing";
+    public static final String IS_FOLLOWER = "isFollower";
+
     public UserProfileResource(@Context GraphDatabaseService database) {
         super(database, UserProfile.class);
     }
@@ -130,8 +137,23 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/followers")
+    @Path("/" + FOLLOWERS)
     public StreamingOutput listFollowers(
+            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
+            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(SORT_PARAM) List<String> order,
+            @QueryParam(FILTER_PARAM) List<String> filters)
+            throws ItemNotFound, BadRequester {
+        UserProfile user = getCurrentUser();
+        final Iterable<UserProfile> list = querier.setOffset(offset).setLimit(limit)
+                .orderBy(order).filter(filters).list(user.getFollowers(), user);
+        return streamingList(list);
+    }
+
+    @GET
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Path("/" + FOLLOWING)
+    public StreamingOutput listFollowing(
             @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
             @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
             @QueryParam(SORT_PARAM) List<String> order,
@@ -146,16 +168,26 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/follow/{userId:.+}")
-    public Response followsUserProfile(@PathParam("userId") String userId)
+    @Path("/" + IS_FOLLOWING + "/{userId:.+}")
+    public Response isFollowing(@PathParam("userId") String userId)
             throws BadRequester, PermissionDenied, ItemNotFound {
         UserProfile user = getCurrentUser();
         return booleanResponse(user.isFollowing(
                 manager.getFrame(userId, UserProfile.class)));
     }
 
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/" + IS_FOLLOWER + "/{userId:.+}")
+    public Response isFollower(@PathParam("userId") String userId)
+            throws BadRequester, PermissionDenied, ItemNotFound {
+        UserProfile user = getCurrentUser();
+        return booleanResponse(user
+                .isFollower(manager.getFrame(userId, UserProfile.class)));
+    }
+
     @POST
-    @Path("/follow/{userId:.+}")
+    @Path("/" + FOLLOW + "/{userId:.+}")
     public Response followUserProfile(@PathParam("userId") String userId)
             throws BadRequester, PermissionDenied, ItemNotFound {
         UserProfile user = getCurrentUser();
@@ -169,7 +201,7 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
     }
 
     @POST
-    @Path("/unfollow/{userId:.+}")
+    @Path("/" + UNFOLLOW + "/{userId:.+}")
     public Response unfollowUserProfile(@PathParam("userId") String userId)
             throws BadRequester, PermissionDenied, ItemNotFound {
         UserProfile user = getCurrentUser();

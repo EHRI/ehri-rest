@@ -19,6 +19,9 @@ public interface UserProfile extends Accessor, AccessibleEntity, IdentifiableEnt
     @Adjacency(label = Ontology.ACCESSOR_BELONGS_TO_GROUP)
     public Iterable<Group> getGroups();
 
+    @Adjacency(label = Ontology.USER_FOLLOWS_USER, direction = Direction.IN)
+    public Iterable<UserProfile> getFollowers();
+
     @Adjacency(label = Ontology.USER_FOLLOWS_USER, direction = Direction.OUT)
     public Iterable<UserProfile> getFollowing();
 
@@ -31,9 +34,21 @@ public interface UserProfile extends Accessor, AccessibleEntity, IdentifiableEnt
     @JavaHandler
     public boolean isFollowing(final UserProfile otherUser);
 
+    @JavaHandler
+    public boolean isFollower(final UserProfile otherUser);
+
     abstract class Impl implements JavaHandlerContext<Vertex>, UserProfile {
         public boolean isFollowing(final UserProfile otherUser) {
             return gremlin().out(Ontology.USER_FOLLOWS_USER).filter(new PipeFunction<Vertex, Boolean>() {
+                @Override
+                public Boolean compute(Vertex vertex) {
+                    return vertex.equals(otherUser.asVertex());
+                }
+            }).hasNext();
+        }
+
+        public boolean isFollower(final UserProfile otherUser) {
+            return gremlin().in(Ontology.USER_FOLLOWS_USER).filter(new PipeFunction<Vertex, Boolean>() {
                 @Override
                 public Boolean compute(Vertex vertex) {
                     return vertex.equals(otherUser.asVertex());

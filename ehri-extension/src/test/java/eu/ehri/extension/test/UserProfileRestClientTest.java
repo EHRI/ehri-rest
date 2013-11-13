@@ -17,13 +17,12 @@ import javax.ws.rs.core.UriBuilder;
 
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.annotations.EntityType;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import static eu.ehri.extension.UserProfileResource.*;
 
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
@@ -263,14 +262,14 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
 
     @Test
     public void testFollowAndUnfollow() throws Exception {
-        String followersUrl = "/" + Entities.USER_PROFILE + "/followers";
+        String followingUrl = "/" + Entities.USER_PROFILE + "/" + FOLLOWING;
         List<Map<String,Object>> followers
-                = getItemList(followersUrl, getRegularUserProfileId());
+                = getItemList(followingUrl, getRegularUserProfileId());
         assertTrue(followers.isEmpty());
 
         URI followUrl = UriBuilder.fromPath(getExtensionEntryPointUri())
                 .segment(Entities.USER_PROFILE)
-                .segment("follow")
+                .segment(FOLLOW)
                 .segment(getAdminUserProfileId())
                 .build();
         ClientResponse response = client.resource(followUrl)
@@ -280,11 +279,16 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
                         getRegularUserProfileId())
                 .post(ClientResponse.class);
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
-        followers = getItemList(followersUrl, getRegularUserProfileId());
+        followers = getItemList(followingUrl, getRegularUserProfileId());
         assertFalse(followers.isEmpty());
 
         // Hitting the same URL as a GET should give us a boolean...
-        response = client.resource(followUrl)
+        URI isFollowingUrl = UriBuilder.fromPath(getExtensionEntryPointUri())
+                .segment(Entities.USER_PROFILE)
+                .segment(IS_FOLLOWING)
+                .segment(getAdminUserProfileId())
+                .build();
+        response = client.resource(isFollowingUrl)
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
                 .header(AbstractRestResource.AUTH_HEADER_NAME,
@@ -293,9 +297,23 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
         assertEquals("true", response.getEntity(String.class));
 
+        URI hasFollowerUrl = UriBuilder.fromPath(getExtensionEntryPointUri())
+                .segment(Entities.USER_PROFILE)
+                .segment(IS_FOLLOWER)
+                .segment(getRegularUserProfileId())
+                .build();
+        response = client.resource(hasFollowerUrl)
+                .accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                        getAdminUserProfileId())
+                .get(ClientResponse.class);
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        assertEquals("true", response.getEntity(String.class));
+
         URI unfollowUrl = UriBuilder.fromPath(getExtensionEntryPointUri())
                 .segment(Entities.USER_PROFILE)
-                .segment("unfollow")
+                .segment(UNFOLLOW)
                 .segment(getAdminUserProfileId())
                 .build();
         response = client.resource(unfollowUrl)
@@ -305,7 +323,7 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
                         getRegularUserProfileId())
                 .post(ClientResponse.class);
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
-        followers = getItemList(followersUrl, getRegularUserProfileId());
+        followers = getItemList(followingUrl, getRegularUserProfileId());
         assertTrue(followers.isEmpty());
     }
 }
