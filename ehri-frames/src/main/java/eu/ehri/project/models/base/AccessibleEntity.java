@@ -1,14 +1,18 @@
 package eu.ehri.project.models.base;
 
+import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.modules.javahandler.JavaHandler;
 import com.tinkerpop.frames.modules.javahandler.JavaHandlerContext;
 import com.tinkerpop.gremlin.java.GremlinPipeline;
 import eu.ehri.project.definitions.Ontology;
+import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.models.utils.JavaHandlerUtils;
+
+import static eu.ehri.project.definitions.Ontology.USER_WATCHING_ITEM;
 
 public interface AccessibleEntity extends PermissionGrantTarget, VersionedEntity {
 

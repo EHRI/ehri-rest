@@ -19,14 +19,19 @@ public class UserProfileTest extends AbstractFixtureTest {
     }
 
     @Test
-    public void testGetFollowing() throws Exception {
+    public void testFollowing() throws Exception {
         UserProfile follower = manager.getFrame("reto", UserProfile.class);
         assertTrue(Iterables.isEmpty(validUser.getFollowing()));
         validUser.addFollowing(follower);
+        // Get count caching
+        assertEquals(1L, validUser.asVertex().getProperty(UserProfile.FOLLOWING_COUNT));
+        assertEquals(1L, follower.asVertex().getProperty(UserProfile.FOLLOWER_COUNT));
         assertFalse(Iterables.isEmpty(validUser.getFollowing()));
         assertTrue(Iterables.contains(validUser.getFollowing(), follower));
         validUser.removeFollowing(follower);
         assertTrue(Iterables.isEmpty(validUser.getFollowing()));
+        assertEquals(0L, validUser.asVertex().getProperty(UserProfile.FOLLOWING_COUNT));
+        assertEquals(0L, follower.asVertex().getProperty(UserProfile.FOLLOWER_COUNT));
     }
 
     @Test
@@ -37,5 +42,19 @@ public class UserProfileTest extends AbstractFixtureTest {
         assertTrue(follower.isFollowing(validUser));
         assertTrue(validUser.isFollower(follower));
         assertFalse(validUser.isFollowing(follower));
+    }
+
+    @Test
+    public void testWatching() throws Exception {
+        DocumentaryUnit watched = manager.getFrame("c1", DocumentaryUnit.class);
+        assertFalse(validUser.isWatching(watched));
+        validUser.addWatching(watched);
+        assertTrue(validUser.isWatching(watched));
+        assertEquals(1L, validUser.asVertex().getProperty(UserProfile.WATCHING_COUNT));
+        assertEquals(1L, watched.asVertex().getProperty(UserProfile.WATCHED_COUNT));
+        validUser.removeWatching(watched);
+        assertFalse(validUser.isWatching(watched));
+        assertEquals(0L, validUser.asVertex().getProperty(UserProfile.WATCHING_COUNT));
+        assertEquals(0L, watched.asVertex().getProperty(UserProfile.WATCHED_COUNT));
     }
 }

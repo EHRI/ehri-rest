@@ -137,29 +137,33 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/" + FOLLOWERS)
+    @Path("{userId:.+}/" + FOLLOWERS)
     public StreamingOutput listFollowers(
+            @PathParam("userId") String userId,
             @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
             @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
             @QueryParam(SORT_PARAM) List<String> order,
             @QueryParam(FILTER_PARAM) List<String> filters)
-            throws ItemNotFound, BadRequester {
-        UserProfile user = getCurrentUser();
+            throws ItemNotFound, AccessDenied, BadRequester, AccessDenied {
+        Accessor accessor = getRequesterUserProfile();
+        UserProfile user = views.detail(manager.getFrame(userId, UserProfile.class), accessor);
         final Iterable<UserProfile> list = querier.setOffset(offset).setLimit(limit)
-                .orderBy(order).filter(filters).list(user.getFollowers(), user);
+                .orderBy(order).filter(filters).list(user.getFollowers(), accessor);
         return streamingList(list);
     }
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/" + FOLLOWING)
+    @Path("{userId:.+}/" + FOLLOWING)
     public StreamingOutput listFollowing(
+            @PathParam("userId") String userId,
             @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
             @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
             @QueryParam(SORT_PARAM) List<String> order,
             @QueryParam(FILTER_PARAM) List<String> filters)
-            throws ItemNotFound, BadRequester {
-        UserProfile user = getCurrentUser();
+            throws ItemNotFound, AccessDenied, BadRequester {
+        Accessor accessor = getRequesterUserProfile();
+        UserProfile user = views.detail(manager.getFrame(userId, UserProfile.class), accessor);
         final Iterable<UserProfile> list = querier.setOffset(offset).setLimit(limit)
                 .orderBy(order).filter(filters).list(user.getFollowing(), user);
         return streamingList(list);
@@ -168,31 +172,40 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/" + IS_FOLLOWING + "/{userId:.+}")
-    public Response isFollowing(@PathParam("userId") String userId)
-            throws BadRequester, PermissionDenied, ItemNotFound {
-        UserProfile user = getCurrentUser();
+    @Path("{userId:.+}/" + IS_FOLLOWING + "/{otherId:.+}")
+    public Response isFollowing(
+            @PathParam("userId") String userId,
+            @PathParam("otherId") String otherId)
+            throws BadRequester, AccessDenied, PermissionDenied, ItemNotFound {
+        Accessor accessor = getRequesterUserProfile();
+        UserProfile user = views.detail(manager.getFrame(userId, UserProfile.class), accessor);
         return booleanResponse(user.isFollowing(
-                manager.getFrame(userId, UserProfile.class)));
+                manager.getFrame(otherId, UserProfile.class)));
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/" + IS_FOLLOWER + "/{userId:.+}")
-    public Response isFollower(@PathParam("userId") String userId)
-            throws BadRequester, PermissionDenied, ItemNotFound {
-        UserProfile user = getCurrentUser();
+    @Path("{userId:.+}/" + IS_FOLLOWER + "/{otherId:.+}")
+    public Response isFollower(
+            @PathParam("userId") String userId,
+            @PathParam("otherId") String otherId)
+            throws BadRequester, AccessDenied, PermissionDenied, ItemNotFound {
+        Accessor accessor = getRequesterUserProfile();
+        UserProfile user = views.detail(manager.getFrame(userId, UserProfile.class), accessor);
         return booleanResponse(user
-                .isFollower(manager.getFrame(userId, UserProfile.class)));
+                .isFollower(manager.getFrame(otherId, UserProfile.class)));
     }
 
     @POST
-    @Path("/" + FOLLOW + "/{userId:.+}")
-    public Response followUserProfile(@PathParam("userId") String userId)
-            throws BadRequester, PermissionDenied, ItemNotFound {
-        UserProfile user = getCurrentUser();
+    @Path("{userId:.+}/" + FOLLOW + "/{otherId:.+}")
+    public Response followUserProfile(
+            @PathParam("userId") String userId,
+            @PathParam("otherId") String otherId)
+            throws BadRequester, AccessDenied, PermissionDenied, ItemNotFound {
+        Accessor accessor = getRequesterUserProfile();
+        UserProfile user = views.detail(manager.getFrame(userId, UserProfile.class), accessor);
         try {
-            user.addFollowing(manager.getFrame(userId, UserProfile.class));
+            user.addFollowing(manager.getFrame(otherId, UserProfile.class));
             graph.getBaseGraph().commit();
             return Response.status(Status.OK).build();
         }  finally {
@@ -201,12 +214,14 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
     }
 
     @POST
-    @Path("/" + UNFOLLOW + "/{userId:.+}")
-    public Response unfollowUserProfile(@PathParam("userId") String userId)
+    @Path("{userId:.+}/" + UNFOLLOW + "/{otherId:.+}")
+    public Response unfollowUserProfile(
+            @PathParam("userId") String userId,
+            @PathParam("otherId") String otherId)
             throws BadRequester, PermissionDenied, ItemNotFound {
         UserProfile user = getCurrentUser();
         try {
-            user.removeFollowing(manager.getFrame(userId, UserProfile.class));
+            user.removeFollowing(manager.getFrame(otherId, UserProfile.class));
             graph.getBaseGraph().commit();
             return Response.status(Status.OK).build();
         }  finally {

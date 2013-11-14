@@ -91,6 +91,7 @@ public class Ontology {
 
     // Virtual collections
     public static final String VC_IS_PART_OF = "isPartOf";
-    public static final String USER_FOLLOWS_USER = "follows";
-    public static final String USER_BLOCKS_USER = "follows";
+    public static final String USER_FOLLOWS_USER = "isFollowing";
+    public static final String USER_BLOCKS_USER = "isBlocking";
+    public static final String USER_WATCHING_ITEM = "isWatching";
 }

@@ -14,7 +14,7 @@ import eu.ehri.project.models.utils.JavaHandlerUtils;
 
 @EntityType(EntityClass.REPOSITORY)
 public interface Repository extends AccessibleEntity, DescribedEntity,
-        AnnotatableEntity, PermissionScope, ItemHolder {
+        AnnotatableEntity, PermissionScope, ItemHolder, Watchable {
 
     @JavaHandler
     public Long getChildCount();
