@@ -1,35 +1,30 @@
 package eu.ehri.extension.test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.core.util.MultivaluedMapImpl;
+import eu.ehri.extension.AbstractRestResource;
+import eu.ehri.project.definitions.Entities;
+import eu.ehri.project.definitions.Ontology;
+import eu.ehri.project.persistence.Bundle;
+import org.codehaus.jettison.json.JSONArray;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriBuilder;
-
-import eu.ehri.project.definitions.Entities;
-import eu.ehri.project.definitions.Ontology;
-import org.codehaus.jettison.json.JSONArray;
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import static com.sun.jersey.api.client.ClientResponse.Status.*;
 import static eu.ehri.extension.UserProfileResource.*;
-
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.WebResource;
-import com.sun.jersey.core.util.MultivaluedMapImpl;
-
-import eu.ehri.extension.AbstractRestResource;
-import eu.ehri.project.persistence.Bundle;
+import static org.junit.Assert.*;
 
 public class UserProfileRestClientTest extends BaseRestClientTest {
 
@@ -49,27 +44,16 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
     @Test
     public void testCreateDeleteUserProfile() throws Exception {
         // Create
-        WebResource resource = client.resource(getExtensionEntryPointUri()
-                + "/" + Entities.USER_PROFILE);
-        ClientResponse response = resource
-                .accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME,
-                        getAdminUserProfileId())
+        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
+                ehriUri(Entities.USER_PROFILE))
                 .entity(jsonUserProfileTestString).post(ClientResponse.class);
 
-        assertEquals(Response.Status.CREATED.getStatusCode(),
-                response.getStatus());
+        assertStatus(CREATED, response);
 
         // Get created entity via the response location?
-        URI location = response.getLocation();
-
-        resource = client.resource(location);
-        response = resource
-                .accept(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME,
-                        getAdminUserProfileId()).get(ClientResponse.class);
-        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        response = jsonCallAs(getAdminUserProfileId(), response.getLocation())
+                .get(ClientResponse.class);
+        assertStatus(OK, response);
         // TODO again test json
     }
 
@@ -80,8 +64,7 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
         queryParams.add("key", Ontology.IDENTIFIER_KEY);
         queryParams.add("value", FETCH_NAME);
 
-        WebResource resource = client.resource(
-                getExtensionEntryPointUri() + "/" + Entities.USER_PROFILE)
+        WebResource resource = client.resource(ehriUri(Entities.USER_PROFILE))
                 .queryParams(queryParams);
 
         ClientResponse response = resource
@@ -91,37 +74,27 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
                         getAdminUserProfileId())
                 .entity(jsonUserProfileTestString).post(ClientResponse.class);
 
-        assertEquals(Response.Status.CREATED.getStatusCode(),
-                response.getStatus());
+        assertStatus(CREATED, response);
     }
 
     @Test
     public void testUpdateUserProfile() throws Exception {
 
         // -create data for testing
-        WebResource resource = client.resource(getExtensionEntryPointUri()
-                + "/" + Entities.USER_PROFILE);
-        ClientResponse response = resource
-                .accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME,
-                        getAdminUserProfileId())
+        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
+                ehriUri(Entities.USER_PROFILE))
                 .entity(jsonUserProfileTestString).post(ClientResponse.class);
 
-        assertEquals(Response.Status.CREATED.getStatusCode(),
-                response.getStatus());
+        assertStatus(CREATED, response);
         // TODO test if json is valid?
         // response.getEntity(String.class)
 
         // Get created doc via the response location?
         URI location = response.getLocation();
 
-        resource = client.resource(location);
-        response = resource
-                .accept(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME,
-                        getAdminUserProfileId()).get(ClientResponse.class);
-        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        response = jsonCallAs(getAdminUserProfileId(), response.getLocation())
+                .get(ClientResponse.class);
+        assertStatus(OK, response);
 
         // -get the data and change it
         String json = response.getEntity(String.class);
@@ -129,23 +102,14 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
                 UPDATED_NAME);
 
         // -update
-        resource = client
-                .resource(getExtensionEntryPointUri() + "/" + Entities.USER_PROFILE);
-        response = resource
-                .accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME,
-                        getAdminUserProfileId())
+        response = jsonCallAs(getAdminUserProfileId(), ehriUri(Entities.USER_PROFILE))
                 .entity(entityBundle.toJson()).put(ClientResponse.class);
-        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        assertStatus(OK, response);
 
         // -get the data and convert to a bundle, is it changed?
-        resource = client.resource(location);
-        response = resource
-                .accept(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME,
-                        getAdminUserProfileId()).get(ClientResponse.class);
-        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        response = jsonCallAs(getAdminUserProfileId(), location)
+                .get(ClientResponse.class);
+        assertStatus(OK, response);
 
         // -get the data and convert to a bundle, is it OK?
         String updatedJson = response.getEntity(String.class);
@@ -156,106 +120,75 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
     @Test
     public void testCreateUserProfileWithIntegrityErrir() throws Exception {
         // Create
-        WebResource resource = client.resource(getExtensionEntryPointUri()
-                + "/" + Entities.USER_PROFILE);
-        ClientResponse response = resource
-                .accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME,
-                        getAdminUserProfileId())
+        URI uri = ehriUri(Entities.USER_PROFILE);
+        ClientResponse response = jsonCallAs(getAdminUserProfileId(), uri)
                 .entity(jsonUserProfileTestString).post(ClientResponse.class);
-
-        assertEquals(Response.Status.CREATED.getStatusCode(),
-                response.getStatus());
+        assertStatus(CREATED, response);
 
         // Doing exactly the same thing twice should result in a
         // ValidationError because the same IDs will be generated...
-        response = resource
-                .accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME,
-                        getAdminUserProfileId())
+        response = jsonCallAs(getAdminUserProfileId(), uri)
                 .entity(jsonUserProfileTestString).post(ClientResponse.class);
-        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(),
-                response.getStatus());
+        assertStatus(BAD_REQUEST, response);
     }
-    
+
     @Test
     public void testCreateDeleteUserProfileWithGroups() throws Exception {
-    	final String GROUP_ID1 = "dans";
-    	final String GROUP_ID2 = "kcl";
-        
-    	// Create
-    	URI uri = UriBuilder.fromPath(getExtensionEntryPointUri())
+        final String GROUP_ID1 = "dans";
+        final String GROUP_ID2 = "kcl";
+
+        // Create
+        URI uri = UriBuilder.fromPath(getExtensionEntryPointUri())
                 .segment(Entities.USER_PROFILE)
                 .queryParam("group", GROUP_ID1)
                 .queryParam("group", GROUP_ID2)
                 .build();
-    	
-        WebResource resource = client.resource(uri);
-        ClientResponse response = resource
-                .accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME,
-                        getAdminUserProfileId())
+
+        ClientResponse response = jsonCallAs(getAdminUserProfileId(), uri)
                 .entity(jsonUserProfileTestString)
                 .post(ClientResponse.class);
 
-        assertEquals(Response.Status.CREATED.getStatusCode(),
-                response.getStatus());
+        assertStatus(CREATED, response);
 
         // Get created entity via the response location?
-        URI location = response.getLocation();
+        response = jsonCallAs(getAdminUserProfileId(), response.getLocation())
+                .get(ClientResponse.class);
+        assertStatus(OK, response);
 
-        resource = client.resource(location);
-        response = resource
-                .accept(MediaType.APPLICATION_JSON)
-                //.type(MediaType.APPLICATION_JSON_TYPE)
-                .header(AbstractRestResource.AUTH_HEADER_NAME,
-                        getAdminUserProfileId()).get(ClientResponse.class);
-        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
-        
         // check that the groups are there
         Set<String> groupIds = getGroupIdsFromEntityJson(response.getEntity(String.class));
         assertTrue(groupIds.contains(GROUP_ID1));
         assertTrue(groupIds.contains(GROUP_ID2));
     }
-    
+
     private Set<String> getGroupIdsFromEntityJson(String jsonString) throws JSONException {
         JSONObject obj = new JSONObject(jsonString);
         Set<String> groupIds = new HashSet<String>();
         JSONArray jsonArray = ((JSONObject) obj.get("relationships")).getJSONArray("belongsTo");
-        for (int i=0; i<jsonArray.length(); i++) {
+        for (int i = 0; i < jsonArray.length(); i++) {
             JSONObject item = jsonArray.getJSONObject(i);
-            //System.out.println("id: " + item.get("id"));
-            groupIds.add(item.getString("id").toString());
+            groupIds.add(item.getString("id"));
         }
         return groupIds;
     }
-    
+
     @Test
     public void testCreateUserProfileWithNonexistingGroup() throws Exception {
-    	final String GROUP_ID_EXISTING = "dans";
-    	final String GROUP_ID_NONEXISTING = "non-existing-e6d86e97-5eb1-4030-9d21-3eabea6f57ca";
-        
-    	// Create
-    	URI uri = UriBuilder.fromPath(getExtensionEntryPointUri())
+        final String GROUP_ID_EXISTING = "dans";
+        final String GROUP_ID_NONEXISTING = "non-existing-e6d86e97-5eb1-4030-9d21-3eabea6f57ca";
+
+        // Create
+        URI uri = UriBuilder.fromPath(getExtensionEntryPointUri())
                 .segment(Entities.USER_PROFILE)
                 .queryParam(AbstractRestResource.GROUP_PARAM, GROUP_ID_EXISTING)
                 .queryParam(AbstractRestResource.GROUP_PARAM, GROUP_ID_NONEXISTING)
                 .build();
-    	
-        WebResource resource = client.resource(uri);
-        ClientResponse response = resource
-                .accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME,
-                        getAdminUserProfileId())
+
+        ClientResponse response = jsonCallAs(getAdminUserProfileId(), uri)
                 .entity(jsonUserProfileTestString)
                 .post(ClientResponse.class);
 
-        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(),
-                response.getStatus());
+        assertStatus(BAD_REQUEST, response);
     }
 
     @Test
@@ -263,59 +196,28 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
         String user1 = getRegularUserProfileId();
         String user2 = getAdminUserProfileId();
         String followingUrl = "/" + Entities.USER_PROFILE + "/" + user1 + "/" + FOLLOWING;
-        List<Map<String,Object>> followers = getItemList(followingUrl, user1);
+        List<Map<String, Object>> followers = getItemList(followingUrl, user1);
         assertTrue(followers.isEmpty());
 
-        URI followUrl = UriBuilder.fromPath(getExtensionEntryPointUri())
-                .segment(Entities.USER_PROFILE)
-                .segment(user1)
-                .segment(FOLLOW)
-                .segment(user2)
-                .build();
-        ClientResponse response = client.resource(followUrl)
-                .accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME, user1)
-                .post(ClientResponse.class);
-        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        URI followUrl = ehriUri(Entities.USER_PROFILE, user1, FOLLOW, user2);
+        ClientResponse response = jsonCallAs(user1, followUrl).post(ClientResponse.class);
+        assertStatus(OK, response);
         followers = getItemList(followingUrl, user1);
         assertFalse(followers.isEmpty());
 
         // Hitting the same URL as a GET should give us a boolean...
-        URI isFollowingUrl = UriBuilder.fromPath(getExtensionEntryPointUri())
-                .segment(Entities.USER_PROFILE)
-                .segment(user1)
-                .segment(IS_FOLLOWING)
-                .segment(user2)
-                .build();
-        response = client.resource(isFollowingUrl)
-                .accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME, user1)
-                .get(ClientResponse.class);
-        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        URI isFollowingUrl = ehriUri(Entities.USER_PROFILE, user1, IS_FOLLOWING, user2);
+        response = jsonCallAs(user1, isFollowingUrl).get(ClientResponse.class);
+        assertStatus(OK, response);
         assertEquals("true", response.getEntity(String.class));
 
-        URI hasFollowerUrl = UriBuilder.fromPath(getExtensionEntryPointUri())
-                .segment(Entities.USER_PROFILE)
-                .segment(user2)
-                .segment(IS_FOLLOWER)
-                .segment(user1)
-                .build();
-        response = client.resource(hasFollowerUrl)
-                .accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME, user2)
-                .get(ClientResponse.class);
-        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        URI hasFollowerUrl = ehriUri(Entities.USER_PROFILE, user2, IS_FOLLOWER, user1);
+        response = jsonCallAs(user2, hasFollowerUrl).get(ClientResponse.class);
+        assertStatus(OK, response);
         assertEquals("true", response.getEntity(String.class));
 
-        response = client.resource(followUrl)
-                .accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME, user1)
-                .delete(ClientResponse.class);
-        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        response = jsonCallAs(user1, followUrl).delete(ClientResponse.class);
+        assertStatus(OK, response);
         followers = getItemList(followingUrl, user1);
         assertTrue(followers.isEmpty());
     }
@@ -325,47 +227,24 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
         String user1 = getAdminUserProfileId();
         String item = "c1";
         String watchersUrl = "/" + Entities.USER_PROFILE + "/" + user1 + "/" + WATCHING;
-        List<Map<String,Object>> watching = getItemList(watchersUrl, user1);
+        List<Map<String, Object>> watching = getItemList(watchersUrl, user1);
         assertTrue(watching.isEmpty());
 
-        URI watchUrl = UriBuilder.fromPath(getExtensionEntryPointUri())
-                .segment(Entities.USER_PROFILE)
-                .segment(user1)
-                .segment(WATCH)
-                .segment(item)
-                .build();
-        ClientResponse response = client.resource(watchUrl)
-                .accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME, user1)
-                .post(ClientResponse.class);
-        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        URI watchUrl = ehriUri(Entities.USER_PROFILE, user1, WATCH, item);
+        ClientResponse response = jsonCallAs(user1, watchUrl).post(ClientResponse.class);
+        assertStatus(OK, response);
         watching = getItemList(watchersUrl, user1);
         assertFalse(watching.isEmpty());
 
         // Hitting the same URL as a GET should give us a boolean...
-        URI isWatchingUrl = UriBuilder.fromPath(getExtensionEntryPointUri())
-                .segment(Entities.USER_PROFILE)
-                .segment(user1)
-                .segment(IS_WATCHING)
-                .segment(item)
-                .build();
-        response = client.resource(isWatchingUrl)
-                .accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME, user1)
-                .get(ClientResponse.class);
-        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        URI isWatchingUrl = ehriUri(Entities.USER_PROFILE, user1, IS_WATCHING, item);
+        response = jsonCallAs(user1, isWatchingUrl).get(ClientResponse.class);
+        assertStatus(OK, response);
         assertEquals("true", response.getEntity(String.class));
 
-        response = client.resource(watchUrl)
-                .accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME, user1)
-                .delete(ClientResponse.class);
-        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        response = jsonCallAs(user1, watchUrl).delete(ClientResponse.class);
+        assertStatus(OK, response);
         watching = getItemList(watchersUrl, user1);
         assertTrue(watching.isEmpty());
     }
-
 }
