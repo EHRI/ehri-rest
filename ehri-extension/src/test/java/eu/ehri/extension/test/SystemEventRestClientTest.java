@@ -1,15 +1,18 @@
 package eu.ehri.extension.test;
 
+import static eu.ehri.extension.UserProfileResource.WATCH;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriBuilder;
 
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 import eu.ehri.extension.EventResource;
@@ -157,5 +160,46 @@ public class SystemEventRestClientTest extends BaseRestClientTest {
         assertFalse(rootNode.path("values").path(0).path(Bundle.DATA_KEY)
                 .path(Ontology.VERSION_ENTITY_DATA).isMissingNode());
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+    }
+
+    @Test
+    public void testPersonalisedEventList() throws Exception {
+
+        // Create an event by updating an item...
+        WebResource resource = client.resource(getExtensionEntryPointUri()
+                + "/" + Entities.REPOSITORY + "/" + "r1");
+        ClientResponse response = resource
+                .accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                        getAdminUserProfileId()).entity(jsonAgentTestString)
+                .put(ClientResponse.class);
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+
+        // At present, the personalised event stream for the validUser user should
+        // be empty because she's not watching any items
+
+        String user = getRegularUserProfileId();
+        String personalisedEventUrl = "/" + Entities.SYSTEM_EVENT + "/forUser/" + user;
+        List<Map<String, Object>> events = getItemList(personalisedEventUrl, user);
+        assertTrue(events.isEmpty());
+
+        // Now start watching item r1
+        URI watchUrl = UriBuilder.fromPath(getExtensionEntryPointUri())
+                .segment(Entities.USER_PROFILE)
+                .segment(user)
+                .segment(WATCH)
+                .segment("r1")
+                .build();
+
+        client.resource(watchUrl)
+                .accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .header(AbstractRestResource.AUTH_HEADER_NAME, user)
+                .post(ClientResponse.class);
+
+        // Now our event list should contain one item...
+        events = getItemList(personalisedEventUrl, user);
+        assertEquals(1, events.size());
     }
 }

@@ -176,7 +176,6 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
                 .header(AbstractRestResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId())
                 .entity(jsonUserProfileTestString).post(ClientResponse.class);
-        System.out.println(response.getEntity(String.class));
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(),
                 response.getStatus());
     }
@@ -224,7 +223,6 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
     
     private Set<String> getGroupIdsFromEntityJson(String jsonString) throws JSONException {
         JSONObject obj = new JSONObject(jsonString);
-        //System.out.println("id: " + obj.get("id"));
         Set<String> groupIds = new HashSet<String>();
         JSONArray jsonArray = ((JSONObject) obj.get("relationships")).getJSONArray("belongsTo");
         for (int i=0; i<jsonArray.length(); i++) {
