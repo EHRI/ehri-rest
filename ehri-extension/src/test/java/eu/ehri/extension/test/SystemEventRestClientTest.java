@@ -1,5 +1,6 @@
 package eu.ehri.extension.test;
 
+import static eu.ehri.extension.UserProfileResource.FOLLOW;
 import static eu.ehri.extension.UserProfileResource.WATCH;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -200,6 +201,28 @@ public class SystemEventRestClientTest extends BaseRestClientTest {
 
         // Now our event list should contain one item...
         events = getItemList(personalisedEventUrl, user);
+        assertEquals(1, events.size());
+
+        // Only get events for people we follow, excluding those
+        // for items we watch...
+        events = getItemList(personalisedEventUrl + "?" + EventResource.WATCHING_PARAM + "=false", user);
+        assertEquals(0, events.size());
+
+        // Now follow the other user...
+        URI followUrl = UriBuilder.fromPath(getExtensionEntryPointUri())
+                .segment(Entities.USER_PROFILE)
+                .segment(user)
+                .segment(FOLLOW)
+                .segment(getAdminUserProfileId())
+                .build();
+        client.resource(followUrl)
+                .accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .header(AbstractRestResource.AUTH_HEADER_NAME, user)
+                .post(ClientResponse.class);
+
+        // We should get the event again...
+        events = getItemList(personalisedEventUrl + "?" + EventResource.WATCHING_PARAM + "=false", user);
         assertEquals(1, events.size());
     }
 }

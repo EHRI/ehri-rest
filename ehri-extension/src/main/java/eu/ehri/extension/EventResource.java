@@ -51,6 +51,8 @@ public class EventResource extends AbstractAccessibleEntityResource<SystemEvent>
     public final static String USER_PARAM = "user";
     public final static String FROM_PARAM = "from";
     public final static String TO_PARAM = "to";
+    public final static String WATCHING_PARAM = "watching";
+    public final static String FOLLOWING_PARAM = "following";
 
 
     private final Serializer subjectSerializer;
@@ -136,7 +138,9 @@ public class EventResource extends AbstractAccessibleEntityResource<SystemEvent>
             final @QueryParam(ITEM_ID_PARAM) List<String> itemIds,
             final @QueryParam(USER_PARAM) List<String> users,
             final @QueryParam(FROM_PARAM) String from,
-            final @QueryParam(TO_PARAM) String to)
+            final @QueryParam(TO_PARAM) String to,
+            final @QueryParam(WATCHING_PARAM) @DefaultValue("true") Boolean watched,
+            final @QueryParam(FOLLOWING_PARAM) @DefaultValue("true") Boolean followed)
             throws ItemNotFound, BadRequester {
 
         UserProfile user = getCurrentUser();
@@ -172,14 +176,18 @@ public class EventResource extends AbstractAccessibleEntityResource<SystemEvent>
         pipe = pipe.filter(new PipeFunction<SystemEvent, Boolean>() {
             @Override
             public Boolean compute(SystemEvent event) {
-                for (AccessibleEntity e : event.getSubjects()) {
-                    if (watching.contains(e.getId())) {
-                        return true;
+                if (watched) {
+                    for (AccessibleEntity e : event.getSubjects()) {
+                        if (watching.contains(e.getId())) {
+                            return true;
+                        }
                     }
                 }
-                for (Actioner e : event.getActioners()) {
-                    if (following.contains(e.getId())) {
-                        return true;
+                if (followed) {
+                    for (Actioner e : event.getActioners()) {
+                        if (following.contains(e.getId())) {
+                            return true;
+                        }
                     }
                 }
                 return false;
