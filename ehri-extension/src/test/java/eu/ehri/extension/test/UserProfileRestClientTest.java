@@ -312,19 +312,62 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
         assertEquals("true", response.getEntity(String.class));
 
-        URI unfollowUrl = UriBuilder.fromPath(getExtensionEntryPointUri())
+        response = client.resource(followUrl)
+                .accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .header(AbstractRestResource.AUTH_HEADER_NAME, user1)
+                .delete(ClientResponse.class);
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        followers = getItemList(followingUrl, user1);
+        assertTrue(followers.isEmpty());
+    }
+
+    @Test
+    public void testWatchingAndUnwatching() throws Exception {
+        String user1 = getAdminUserProfileId();
+        String item = "c1";
+        String watchersUrl = "/" + Entities.USER_PROFILE + "/" + user1 + "/" + WATCHING;
+        List<Map<String,Object>> watching = getItemList(watchersUrl, user1);
+        assertTrue(watching.isEmpty());
+
+        URI watchUrl = UriBuilder.fromPath(getExtensionEntryPointUri())
                 .segment(Entities.USER_PROFILE)
                 .segment(user1)
-                .segment(UNFOLLOW)
-                .segment(user2)
+                .segment(WATCH)
+                .segment(item)
                 .build();
-        response = client.resource(unfollowUrl)
+        ClientResponse response = client.resource(watchUrl)
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
                 .header(AbstractRestResource.AUTH_HEADER_NAME, user1)
                 .post(ClientResponse.class);
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
-        followers = getItemList(followingUrl, user1);
-        assertTrue(followers.isEmpty());
+        watching = getItemList(watchersUrl, user1);
+        assertFalse(watching.isEmpty());
+
+        // Hitting the same URL as a GET should give us a boolean...
+        URI isWatchingUrl = UriBuilder.fromPath(getExtensionEntryPointUri())
+                .segment(Entities.USER_PROFILE)
+                .segment(user1)
+                .segment(IS_WATCHING)
+                .segment(item)
+                .build();
+        response = client.resource(isWatchingUrl)
+                .accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .header(AbstractRestResource.AUTH_HEADER_NAME, user1)
+                .get(ClientResponse.class);
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        assertEquals("true", response.getEntity(String.class));
+
+        response = client.resource(watchUrl)
+                .accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .header(AbstractRestResource.AUTH_HEADER_NAME, user1)
+                .delete(ClientResponse.class);
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        watching = getItemList(watchersUrl, user1);
+        assertTrue(watching.isEmpty());
     }
+
 }

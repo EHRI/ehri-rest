@@ -52,6 +52,7 @@ public class UserProfileTest extends AbstractFixtureTest {
         assertTrue(validUser.isWatching(watched));
         assertEquals(1L, validUser.asVertex().getProperty(UserProfile.WATCHING_COUNT));
         assertEquals(1L, watched.asVertex().getProperty(UserProfile.WATCHED_COUNT));
+        assertTrue(Iterables.contains(validUser.getWatching(), watched));
         validUser.removeWatching(watched);
         assertFalse(validUser.isWatching(watched));
         assertEquals(0L, validUser.asVertex().getProperty(UserProfile.WATCHING_COUNT));

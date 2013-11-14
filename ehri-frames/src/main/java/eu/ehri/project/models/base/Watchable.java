@@ -9,7 +9,7 @@ import static eu.ehri.project.definitions.Ontology.USER_WATCHING_ITEM;
 /**
  * @author Mike Bryant (http://github.com/mikesname)
  */
-public interface Watchable extends Frame {
+public interface Watchable extends AccessibleEntity {
     @Adjacency(label = USER_WATCHING_ITEM, direction = Direction.IN)
     public Iterable<UserProfile> getWatchers();
 }

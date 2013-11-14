@@ -48,16 +48,16 @@ public interface UserProfile extends Accessor, AccessibleEntity, IdentifiableEnt
     public boolean isFollower(final UserProfile otherUser);
 
     @Adjacency(label = USER_WATCHING_ITEM, direction = Direction.OUT)
-    public Iterable<Frame> getWatching();
+    public Iterable<Watchable> getWatching();
 
     @JavaHandler
-    public void addWatching(final Frame item);
+    public void addWatching(final Watchable item);
 
     @JavaHandler
-    public void removeWatching(final Frame item);
+    public void removeWatching(final Watchable item);
 
     @JavaHandler
-    public boolean isWatching(final Frame item);
+    public boolean isWatching(final Watchable item);
 
     abstract class Impl implements JavaHandlerContext<Vertex>, UserProfile {
 
@@ -109,12 +109,12 @@ public interface UserProfile extends Accessor, AccessibleEntity, IdentifiableEnt
             }).hasNext();
         }
 
-        public void addWatching(final Frame item) {
+        public void addWatching(final Watchable item) {
             it().addEdge(USER_WATCHING_ITEM, item.asVertex());
             updateWatchCount(it(), item.asVertex());
         }
 
-        public void removeWatching(final Frame item) {
+        public void removeWatching(final Watchable item) {
             for (Edge e : it().getEdges(Direction.OUT, USER_WATCHING_ITEM)) {
                 if (e.getVertex(Direction.IN).equals(item.asVertex())) {
                     e.remove();
@@ -123,7 +123,7 @@ public interface UserProfile extends Accessor, AccessibleEntity, IdentifiableEnt
             updateWatchCount(it(), item.asVertex());
         }
 
-        public boolean isWatching(final Frame item) {
+        public boolean isWatching(final Watchable item) {
             return gremlin().out(USER_WATCHING_ITEM).filter(new PipeFunction<Vertex, Boolean>() {
                 @Override
                 public Boolean compute(Vertex vertex) {

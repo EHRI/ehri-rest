@@ -24,6 +24,7 @@ import javax.ws.rs.core.Response.Status;
 
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.exceptions.*;
+import eu.ehri.project.models.base.*;
 import eu.ehri.project.models.utils.ClassUtils;
 import eu.ehri.project.views.Query;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -34,9 +35,6 @@ import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Group;
 import eu.ehri.project.models.UserProfile;
-import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.persistence.Bundle;
 
@@ -47,11 +45,13 @@ import eu.ehri.project.persistence.Bundle;
 public class UserProfileResource extends AbstractAccessibleEntityResource<UserProfile> {
 
     public static final String FOLLOW = "follow";
-    public static final String UNFOLLOW = "unfollow";
     public static final String FOLLOWING = "following";
     public static final String FOLLOWERS = "followers";
     public static final String IS_FOLLOWING = "isFollowing";
     public static final String IS_FOLLOWER = "isFollower";
+    public static final String WATCH = "watch";
+    public static final String WATCHING = "watching";
+    public static final String IS_WATCHING = "isWatching";
 
     public UserProfileResource(@Context GraphDatabaseService database) {
         super(database, UserProfile.class);
@@ -165,10 +165,9 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
         Accessor accessor = getRequesterUserProfile();
         UserProfile user = views.detail(manager.getFrame(userId, UserProfile.class), accessor);
         final Iterable<UserProfile> list = querier.setOffset(offset).setLimit(limit)
-                .orderBy(order).filter(filters).list(user.getFollowing(), user);
+                .orderBy(order).filter(filters).list(user.getFollowing(), accessor);
         return streamingList(list);
     }
-
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -213,13 +212,14 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
         }
     }
 
-    @POST
-    @Path("{userId:.+}/" + UNFOLLOW + "/{otherId:.+}")
+    @DELETE
+    @Path("{userId:.+}/" + FOLLOW + "/{otherId:.+}")
     public Response unfollowUserProfile(
             @PathParam("userId") String userId,
             @PathParam("otherId") String otherId)
-            throws BadRequester, PermissionDenied, ItemNotFound {
-        UserProfile user = getCurrentUser();
+            throws BadRequester, PermissionDenied, ItemNotFound, AccessDenied {
+        Accessor accessor = getRequesterUserProfile();
+        UserProfile user = views.detail(manager.getFrame(userId, UserProfile.class), accessor);
         try {
             user.removeFollowing(manager.getFrame(otherId, UserProfile.class));
             graph.getBaseGraph().commit();
@@ -229,6 +229,70 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
         }
     }
 
+    @GET
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Path("{userId:.+}/" + WATCHING)
+    public StreamingOutput listWatching(
+            @PathParam("userId") String userId,
+            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
+            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(SORT_PARAM) List<String> order,
+            @QueryParam(FILTER_PARAM) List<String> filters)
+            throws ItemNotFound, AccessDenied, BadRequester {
+        Accessor accessor = getRequesterUserProfile();
+        UserProfile user = views.detail(manager.getFrame(userId, UserProfile.class), accessor);
+        final Iterable<Watchable> list = new Query<Watchable>(graph,
+                Watchable.class).setOffset(offset).setLimit(limit)
+                .orderBy(order).filter(filters).list(user.getWatching(), accessor);
+        return streamingList(list);
+    }
+
+    @POST
+    @Path("{userId:.+}/" + WATCH + "/{otherId:.+}")
+    public Response watchItem(
+            @PathParam("userId") String userId,
+            @PathParam("otherId") String otherId)
+            throws BadRequester, AccessDenied, PermissionDenied, ItemNotFound {
+        Accessor accessor = getRequesterUserProfile();
+        UserProfile user = views.detail(manager.getFrame(userId, UserProfile.class), accessor);
+        try {
+            user.addWatching(manager.getFrame(otherId, Watchable.class));
+            graph.getBaseGraph().commit();
+            return Response.status(Status.OK).build();
+        }  finally {
+            cleanupTransaction();
+        }
+    }
+
+    @DELETE
+    @Path("{userId:.+}/" + WATCH + "/{otherId:.+}")
+    public Response unwatchItem(
+            @PathParam("userId") String userId,
+            @PathParam("otherId") String otherId)
+            throws BadRequester, PermissionDenied, ItemNotFound, AccessDenied {
+        Accessor accessor = getRequesterUserProfile();
+        UserProfile user = views.detail(manager.getFrame(userId, UserProfile.class), accessor);
+        try {
+            user.removeWatching(manager.getFrame(otherId, Watchable.class));
+            graph.getBaseGraph().commit();
+            return Response.status(Status.OK).build();
+        }  finally {
+            cleanupTransaction();
+        }
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("{userId:.+}/" + IS_WATCHING + "/{otherId:.+}")
+    public Response isWatching(
+            @PathParam("userId") String userId,
+            @PathParam("otherId") String otherId)
+            throws BadRequester, AccessDenied, PermissionDenied, ItemNotFound {
+        Accessor accessor = getRequesterUserProfile();
+        UserProfile user = views.detail(manager.getFrame(userId, UserProfile.class), accessor);
+        return booleanResponse(user
+                .isWatching(manager.getFrame(otherId, Watchable.class)));
+    }
 
     /*** helpers ***/
 
