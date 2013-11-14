@@ -205,7 +205,8 @@ public class SystemEventRestClientTest extends BaseRestClientTest {
 
         // Only get events for people we follow, excluding those
         // for items we watch...
-        events = getItemList(personalisedEventUrl + "?" + EventResource.WATCHING_PARAM + "=false", user);
+        events = getItemList(personalisedEventUrl + "?" + EventResource.SHOW
+                + "=" + EventResource.SHOW_FOLLOWS, user);
         assertEquals(0, events.size());
 
         // Now follow the other user...
@@ -222,7 +223,8 @@ public class SystemEventRestClientTest extends BaseRestClientTest {
                 .post(ClientResponse.class);
 
         // We should get the event again...
-        events = getItemList(personalisedEventUrl + "?" + EventResource.WATCHING_PARAM + "=false", user);
+        events = getItemList(personalisedEventUrl + "?" + EventResource.SHOW
+                + "=" + EventResource.SHOW_FOLLOWS, user);
         assertEquals(1, events.size());
     }
 }

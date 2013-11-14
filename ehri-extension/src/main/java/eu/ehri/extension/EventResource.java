@@ -51,8 +51,10 @@ public class EventResource extends AbstractAccessibleEntityResource<SystemEvent>
     public final static String USER_PARAM = "user";
     public final static String FROM_PARAM = "from";
     public final static String TO_PARAM = "to";
-    public final static String WATCHING_PARAM = "watching";
-    public final static String FOLLOWING_PARAM = "following";
+    public final static String SHOW = "show"; // all, watched, follows
+    public final static String SHOW_ALL = "all";
+    public final static String SHOW_WATCHED = "watched";
+    public final static String SHOW_FOLLOWS = "follows";
 
 
     private final Serializer subjectSerializer;
@@ -139,8 +141,7 @@ public class EventResource extends AbstractAccessibleEntityResource<SystemEvent>
             final @QueryParam(USER_PARAM) List<String> users,
             final @QueryParam(FROM_PARAM) String from,
             final @QueryParam(TO_PARAM) String to,
-            final @QueryParam(WATCHING_PARAM) @DefaultValue("true") Boolean watched,
-            final @QueryParam(FOLLOWING_PARAM) @DefaultValue("true") Boolean followed)
+            final @QueryParam(SHOW) @DefaultValue(SHOW_ALL) String show)
             throws ItemNotFound, BadRequester {
 
         UserProfile user = getCurrentUser();
@@ -176,14 +177,14 @@ public class EventResource extends AbstractAccessibleEntityResource<SystemEvent>
         pipe = pipe.filter(new PipeFunction<SystemEvent, Boolean>() {
             @Override
             public Boolean compute(SystemEvent event) {
-                if (watched) {
+                if (show.equals(SHOW_ALL) || show.equals(SHOW_WATCHED)) {
                     for (AccessibleEntity e : event.getSubjects()) {
                         if (watching.contains(e.getId())) {
                             return true;
                         }
                     }
                 }
-                if (followed) {
+                if (show.equals(SHOW_ALL) || show.equals(SHOW_FOLLOWS)) {
                     for (Actioner e : event.getActioners()) {
                         if (following.contains(e.getId())) {
                             return true;
