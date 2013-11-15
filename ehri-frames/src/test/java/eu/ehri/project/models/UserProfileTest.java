@@ -45,6 +45,16 @@ public class UserProfileTest extends AbstractFixtureTest {
     }
 
     @Test
+    public void testDuplicateWatches() throws Exception {
+        UserProfile follower = manager.getFrame("reto", UserProfile.class);
+        assertFalse(follower.isFollowing(validUser));
+        // Do this twice and ensure the follower count isn't altered...
+        follower.addFollowing(validUser);
+        follower.addFollowing(validUser);
+        assertEquals(1L, Iterables.size(follower.getFollowing()));
+    }
+
+    @Test
     public void testWatching() throws Exception {
         DocumentaryUnit watched = manager.getFrame("c1", DocumentaryUnit.class);
         assertFalse(validUser.isWatching(watched));

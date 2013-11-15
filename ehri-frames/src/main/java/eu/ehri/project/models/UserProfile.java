@@ -78,8 +78,10 @@ public interface UserProfile extends Accessor, AccessibleEntity, IdentifiableEnt
         }
 
         public void addFollowing(final UserProfile user) {
-            it().addEdge(USER_FOLLOWS_USER, user.asVertex());
-            updateFollowCounts(it(), user.asVertex());
+            if (!isFollowing(user)) {
+                it().addEdge(USER_FOLLOWS_USER, user.asVertex());
+                updateFollowCounts(it(), user.asVertex());
+            }
         }
 
         public void removeFollowing(final UserProfile user) {
@@ -110,8 +112,10 @@ public interface UserProfile extends Accessor, AccessibleEntity, IdentifiableEnt
         }
 
         public void addWatching(final Watchable item) {
-            it().addEdge(USER_WATCHING_ITEM, item.asVertex());
-            updateWatchCount(it(), item.asVertex());
+            if (!isWatching(item)) {
+                it().addEdge(USER_WATCHING_ITEM, item.asVertex());
+                updateWatchCount(it(), item.asVertex());
+            }
         }
 
         public void removeWatching(final Watchable item) {
