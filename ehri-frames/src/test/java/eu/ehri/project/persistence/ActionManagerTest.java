@@ -48,6 +48,9 @@ public class ActionManagerTest extends AbstractFixtureTest {
         assertEquals(1, Iterables.count(second.getSubjects()));
         assertEquals(1, Iterables.count(second.getActioners()));
 
+        // Check the user is correctly linked
+        assertEquals(validUser, Iterables.first(second.getActioners()));
+
         assertEquals(1, Iterables.count(repository.getHistory()));
         assertNotNull(repository.getLatestEvent());
 
