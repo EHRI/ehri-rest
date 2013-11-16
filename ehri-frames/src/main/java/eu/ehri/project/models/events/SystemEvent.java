@@ -88,8 +88,9 @@ public interface SystemEvent extends AccessibleEntity {
                     .loop("n", JavaHandlerUtils.noopLoopFunc, new PipeFunction<LoopPipe.LoopBundle<Vertex>, Boolean>() {
                         @Override
                         public Boolean compute(LoopPipe.LoopBundle<Vertex> vertexLoopBundle) {
-                            return !vertexLoopBundle.getObject().getVertices(Direction.IN,
-                                    Ontology.ENTITY_HAS_LIFECYCLE_EVENT).iterator().hasNext();
+                            return (!vertexLoopBundle.getObject().getVertices(Direction.IN,
+                                    Ontology.ENTITY_HAS_LIFECYCLE_EVENT).iterator().hasNext())
+                                    && vertexLoopBundle.getObject().getProperty(EntityType.TYPE_KEY) != null;
                         }
                     });
             return (AccessibleEntity)(subjects.iterator().hasNext()
