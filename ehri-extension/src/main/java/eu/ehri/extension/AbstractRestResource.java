@@ -322,6 +322,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
                     try {
                         mapper.writeValue(g, cacheSerializer.vertexFrameToData(item));
                     } catch (SerializationError e) {
+                        e.printStackTrace();
                         throw new RuntimeException(e);
                     }
                 }
