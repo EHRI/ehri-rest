@@ -29,6 +29,31 @@ import java.util.Iterator;
 /**
  * Class for dealing with actions.
  *
+ * Events are captured as a linked list with new events placed
+ * at the head. The head event is connected to a node called the
+ * {@link eu.ehri.project.models.events.SystemEventQueue}. Events
+ * can have subjects (the thing the event is happening to) and
+ * actioners (the person initiating the event.) A subject's events
+ * and an actioner's actions likewise for a linked list so it is
+ * possible to fetch new events easily and prevent having to sort
+ * by timestamp, etc. Schematically, the graph thus formed looks
+ * something like:
+ *
+ *      Actioner            SystemEventQueue             Subject
+ *          \/                      \/                      \/
+ *  [lifecycleAction]   [lifecycleActionStream]     [lifecycleEvent]
+ *          |                       |                       |
+ *          e3--[hasActioner]-<-- Event 3 ---[hasEvent]--<--e3
+ *          \/                      \/                      \/
+ *  [lifecycleAction]       [lifecycleAction]       [lifecycleEvent]
+ *          |                       |                       |
+ *          e2--[hasActioner]-<-- Event 2 ---[hasEvent]--<--e2
+ *          \/                      \/                      \/
+ *  [lifecycleAction]       [lifecycleAction]       [lifecycleEvent]
+ *          |                       |                       |
+ *          e1--[hasActioner]-<-- Event 1 ---[hasEvent]--<--e1
+ *
+ *
  * @author michaelb
  */
 public final class ActionManager {
@@ -36,6 +61,9 @@ public final class ActionManager {
     // Name of the global event root node, from whence event
     // streams propagate.
     public static final String GLOBAL_EVENT_ROOT = "globalEventRoot";
+    public static final String DEBUG_TYPE = "_debugType";
+    public static final String EVENT_LINK = "eventLink";
+    public static final String LINK_TYPE = "_linkType";
 
     private final FramedGraph<?> graph;
     private final GraphManager manager;
@@ -155,7 +183,8 @@ public final class ActionManager {
          */
         public EventContext addSubjects(AccessibleEntity... entities) {
             for (AccessibleEntity entity : entities) {
-                Vertex vertex = actionManager.graph.addVertex(null);
+                Vertex vertex = actionManager.getLinkNode(
+                        Ontology.ENTITY_HAS_LIFECYCLE_EVENT);
                 actionManager.replaceAtHead(entity.asVertex(), vertex,
                         Ontology.ENTITY_HAS_LIFECYCLE_EVENT,
                         Ontology.ENTITY_HAS_LIFECYCLE_EVENT, Direction.OUT);
@@ -199,18 +228,18 @@ public final class ActionManager {
      * relationship from the <em>system</em> node to the new latest action is
      * <em>actionType</em><strong>Stream</strong>.
      *
-     * @param user
      * @param actionType
      * @param logMessage
      * @return
      */
-    private SystemEvent createGlobalEvent(Actioner user, EventTypes actionType, Optional<String> logMessage) {
+    private SystemEvent createGlobalEvent(EventTypes actionType, Optional<String> logMessage) {
         try {
             Vertex system = manager.getVertex(GLOBAL_EVENT_ROOT, EntityClass.SYSTEM);
-            Bundle ge = new Bundle(EntityClass.SYSTEM_EVENT)
-                    .withDataValue(Ontology.EVENT_TYPE, actionType.toString())
-                    .withDataValue(Ontology.EVENT_TIMESTAMP, getTimestamp())
-                    .withDataValue(Ontology.EVENT_LOG_MESSAGE, logMessage.or(""));
+            Bundle ge = new Bundle.Builder(EntityClass.SYSTEM_EVENT)
+                    .addDataValue(Ontology.EVENT_TYPE, actionType.toString())
+                    .addDataValue(Ontology.EVENT_TIMESTAMP, getTimestamp())
+                    .addDataValue(Ontology.EVENT_LOG_MESSAGE, logMessage.or(""))
+                    .build();
             SystemEvent ev = new BundleDAO(graph).create(ge, SystemEvent.class);
             if (!scope.equals(SystemScope.getInstance())) {
                 ev.setEventScope(scope);
@@ -269,11 +298,11 @@ public final class ActionManager {
      * @return
      */
     public EventContext logEvent(Actioner user, EventTypes type, Optional<String> logMessage) {
-        Vertex vertex = graph.addVertex(null);
+        Vertex vertex = getLinkNode(Ontology.ACTIONER_HAS_LIFECYCLE_ACTION);
         replaceAtHead(user.asVertex(), vertex,
                 Ontology.ACTIONER_HAS_LIFECYCLE_ACTION,
                 Ontology.ACTIONER_HAS_LIFECYCLE_ACTION, Direction.OUT);
-        SystemEvent globalEvent = createGlobalEvent(user, type, logMessage);
+        SystemEvent globalEvent = createGlobalEvent(type, logMessage);
         addSubject(globalEvent.asVertex(), vertex);
         return new EventContext(this, globalEvent, user, type, logMessage);
     }
@@ -326,6 +355,17 @@ public final class ActionManager {
 
 
     // Helpers.
+
+    /**
+     * Create a link vertex. This we stamp with a descriptive
+     * type purely for debugging purposes.
+     */
+    private Vertex getLinkNode(String linkType) {
+        Vertex vertex = graph.addVertex(null);
+        vertex.setProperty(DEBUG_TYPE, EVENT_LINK);
+        vertex.setProperty(LINK_TYPE, linkType);
+        return vertex;
+    }
 
     private void addSubject(Vertex event, Vertex subject) {
         Long count = event.getProperty(ItemHolder.CHILD_COUNT);
