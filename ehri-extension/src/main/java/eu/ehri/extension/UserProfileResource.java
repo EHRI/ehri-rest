@@ -154,6 +154,23 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Path("{userId:.+}/" + FOLLOWERS + "/page")
+    public StreamingOutput pageFollowers(
+            @PathParam("userId") String userId,
+            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
+            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(SORT_PARAM) List<String> order,
+            @QueryParam(FILTER_PARAM) List<String> filters)
+            throws ItemNotFound, AccessDenied, BadRequester, AccessDenied {
+        Accessor accessor = getRequesterUserProfile();
+        UserProfile user = views.detail(manager.getFrame(userId, UserProfile.class), accessor);
+        final Query.Page<UserProfile> page = querier.setOffset(offset).setLimit(limit)
+                .orderBy(order).filter(filters).page(user.getFollowers(), accessor);
+        return streamingPage(page);
+    }
+
+    @GET
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("{userId:.+}/" + FOLLOWING)
     public StreamingOutput listFollowing(
             @PathParam("userId") String userId,
@@ -167,6 +184,23 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
         final Iterable<UserProfile> list = querier.setOffset(offset).setLimit(limit)
                 .orderBy(order).filter(filters).list(user.getFollowing(), accessor);
         return streamingList(list);
+    }
+
+    @GET
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Path("{userId:.+}/" + FOLLOWING + "/page")
+    public StreamingOutput pageFollowing(
+            @PathParam("userId") String userId,
+            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
+            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(SORT_PARAM) List<String> order,
+            @QueryParam(FILTER_PARAM) List<String> filters)
+            throws ItemNotFound, AccessDenied, BadRequester {
+        Accessor accessor = getRequesterUserProfile();
+        UserProfile user = views.detail(manager.getFrame(userId, UserProfile.class), accessor);
+        final Query.Page<UserProfile> page = querier.setOffset(offset).setLimit(limit)
+                .orderBy(order).filter(filters).page(user.getFollowing(), accessor);
+        return streamingPage(page);
     }
 
     @GET
@@ -245,6 +279,24 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
                 Watchable.class).setOffset(offset).setLimit(limit)
                 .orderBy(order).filter(filters).list(user.getWatching(), accessor);
         return streamingList(list);
+    }
+
+    @GET
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Path("{userId:.+}/" + WATCHING + "/page")
+    public StreamingOutput pageWatching(
+            @PathParam("userId") String userId,
+            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
+            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(SORT_PARAM) List<String> order,
+            @QueryParam(FILTER_PARAM) List<String> filters)
+            throws ItemNotFound, AccessDenied, BadRequester {
+        Accessor accessor = getRequesterUserProfile();
+        UserProfile user = views.detail(manager.getFrame(userId, UserProfile.class), accessor);
+        final Query.Page<Watchable> page = new Query<Watchable>(graph,
+                Watchable.class).setOffset(offset).setLimit(limit)
+                .orderBy(order).filter(filters).page(user.getWatching(), accessor);
+        return streamingPage(page);
     }
 
     @POST
