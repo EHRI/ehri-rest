@@ -290,6 +290,7 @@ public final class Serializer {
             }
             return builder.build();
         } catch (IllegalArgumentException e) {
+            logger.error("Error serializing vertex with data: {}", getVertexData(item));
             throw new SerializationError("Unable to serialize vertex: " + item, e);
         }
     }
@@ -345,8 +346,11 @@ public final class Serializer {
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
+                        logger.error("Error serializing relationship for {} ({}): {}, depth {}, {}",
+                                item, item.getProperty(EntityType.TYPE_KEY),
+                                relationName, depth, method.getName());
                         throw new RuntimeException(
-                                "Unexpected error serializing Frame", e);
+                                "Unexpected error serializing Frame " + item, e);
                     }
                 }
             }
@@ -449,6 +453,14 @@ public final class Serializer {
             if (!key.startsWith("__") && key.startsWith("_")) {
                 data.put(key.substring(1), item.getProperty(key));
             }
+        }
+        return data;
+    }
+
+    private Map<String,Object> getVertexData(Vertex item) {
+        Map<String,Object> data = Maps.newHashMap();
+        for (String key : item.getPropertyKeys()) {
+            data.put(key, item.getProperty(key));
         }
         return data;
     }
