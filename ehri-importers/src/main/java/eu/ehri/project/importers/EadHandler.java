@@ -169,7 +169,13 @@ public class EadHandler extends SaxXmlHandler {
     @Override
     protected boolean needToCreateSubNode(String qName) {
         //child or parent unit:
-        return childItemPattern.matcher(qName).matches() || qName.equals("archdesc");
+    	boolean need = childItemPattern.matcher(qName).matches() || qName.equals("archdesc");
+        //controlAccess 
+        String path = getImportantPath(currentPath);
+        if (path != null) {
+            need = need || path.endsWith("Access");
+        }
+        return need;
     }
 
     @Override

@@ -56,7 +56,7 @@ public class NiodEadTest extends AbstractImporterTest{
         // - 1? more UnknownProperties
         // - 25 more import Event links (24 for every Unit, 1 for the User)
         // - 1 more import Event
-        int newCount = origCount + 104; // temporarily changed to match found numbers
+        int newCount = origCount + 105; // temporarily changed to match found numbers
         assertEquals(newCount, getNodeCount(graph));
         
         archdesc = graph.frame(
