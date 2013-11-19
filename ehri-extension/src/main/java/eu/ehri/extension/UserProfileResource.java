@@ -24,6 +24,7 @@ import javax.ws.rs.core.Response.Status;
 
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.exceptions.*;
+import eu.ehri.project.models.*;
 import eu.ehri.project.models.base.*;
 import eu.ehri.project.models.utils.ClassUtils;
 import eu.ehri.project.views.Query;
@@ -32,9 +33,6 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.definitions.Entities;
-import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.Group;
-import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.persistence.Bundle;
 
@@ -345,6 +343,43 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
         return booleanResponse(user
                 .isWatching(manager.getFrame(otherId, Watchable.class)));
     }
+
+    @GET
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Path("{userId:.+}/" + Entities.ANNOTATION + "/page")
+    public StreamingOutput pageAnnotations(
+            @PathParam("userId") String userId,
+            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
+            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(SORT_PARAM) List<String> order,
+            @QueryParam(FILTER_PARAM) List<String> filters)
+            throws ItemNotFound, AccessDenied, BadRequester {
+        Accessor accessor = getRequesterUserProfile();
+        UserProfile user = views.detail(manager.getFrame(userId, UserProfile.class), accessor);
+        final Query.Page<Annotation> page = new Query<Annotation>(graph,
+                Annotation.class).setOffset(offset).setLimit(limit)
+                .orderBy(order).filter(filters).page(user.getAnnotations(), accessor);
+        return streamingPage(page);
+    }
+
+    @GET
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Path("{userId:.+}/" + Entities.LINK + "/page")
+    public StreamingOutput pageLinks(
+            @PathParam("userId") String userId,
+            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
+            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(SORT_PARAM) List<String> order,
+            @QueryParam(FILTER_PARAM) List<String> filters)
+            throws ItemNotFound, AccessDenied, BadRequester {
+        Accessor accessor = getRequesterUserProfile();
+        UserProfile user = views.detail(manager.getFrame(userId, UserProfile.class), accessor);
+        final Query.Page<Link> page = new Query<Link>(graph,
+                Link.class).setOffset(offset).setLimit(limit)
+                .orderBy(order).filter(filters).page(user.getLinks(), accessor);
+        return streamingPage(page);
+    }
+
 
     /*** helpers ***/
 

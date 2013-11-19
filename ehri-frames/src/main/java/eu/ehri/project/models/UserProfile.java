@@ -50,6 +50,12 @@ public interface UserProfile extends Accessor, AccessibleEntity, IdentifiableEnt
     @Adjacency(label = USER_WATCHING_ITEM, direction = Direction.OUT)
     public Iterable<Watchable> getWatching();
 
+    @Adjacency(label = Ontology.LINK_HAS_LINKER, direction = Direction.IN)
+    public Iterable<Link> getLinks();
+
+    @Adjacency(label = Ontology.ANNOTATOR_HAS_ANNOTATION)
+    public Iterable<Annotation> getAnnotations();
+
     @JavaHandler
     public void addWatching(final Watchable item);
 
