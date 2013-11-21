@@ -3,6 +3,7 @@ package eu.ehri.project.views;
 import com.google.common.base.Optional;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Sets;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.pipes.PipeFunction;
@@ -18,6 +19,8 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.Annotation;
 import eu.ehri.project.models.base.*;
 import eu.ehri.project.persistence.*;
+
+import java.util.Set;
 
 /**
  * View class for handling annotation-related operations.
@@ -74,6 +77,51 @@ public final class AnnotationViews {
                 annotation);
         annotation.setAnnotator(graph.frame(user.asVertex(),
                 Annotator.class));
+
+        new ActionManager(graph, entity).logEvent(annotation,
+                graph.frame(user.asVertex(), Actioner.class),
+                EventTypes.annotation, Optional.<String>absent());
+        return annotation;
+    }
+
+    /**
+     * Create an annotation for a dependent node of an item.
+     *
+     * @param id the identifier of the AccessibleEntity this annotation is attached to, as a target
+     * @param did the identifier of the dependent item
+     * @param bundle the annotation itself
+     * @param user the user creating the annotation
+     * @return
+     * @throws PermissionDenied
+     * @throws ValidationError
+     * @throws ItemNotFound
+     */
+    public Annotation createFor(String id, String did, Bundle bundle, Accessor user)
+            throws PermissionDenied, ValidationError, ItemNotFound {
+        AccessibleEntity entity = manager.getFrame(id, AccessibleEntity.class);
+        AnnotatableEntity dep = manager.getFrame(did, AnnotatableEntity.class);
+        helper.checkEntityPermission(entity, user, PermissionType.ANNOTATE);
+
+        // Check dependent is within item's subtree!
+        final Set<String> deps = Sets.newHashSet();
+        new Serializer(graph).traverseSubtree(entity, new TraversalCallback() {
+            @Override
+            public void process(Frame vertexFrame, int depth,
+                    String relation, int relationIndex) {
+                deps.add(vertexFrame.getId());
+            }
+        });
+
+        if (!deps.contains(did)) {
+            // FIXME: Better error message here...
+            throw new PermissionDenied("Item is not covered by parent item's permissions");
+        }
+
+
+        Annotation annotation = new BundleDAO(graph).create(bundle,
+                Annotation.class);
+        dep.addAnnotation(annotation);
+        annotation.setAnnotator(graph.frame(user.asVertex(), Annotator.class));
 
         new ActionManager(graph, entity).logEvent(annotation,
                 graph.frame(user.asVertex(), Actioner.class),

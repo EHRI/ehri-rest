@@ -110,6 +110,44 @@ public class AnnotationResource extends
     }
 
     /**
+     * Create an annotation for a dependent node on a given item.
+     *
+     * @param id
+     * @param did
+     * @param json
+     * @param accessors
+     * @return
+     * @throws PermissionDenied
+     * @throws ValidationError
+     * @throws DeserializationError
+     * @throws ItemNotFound
+     * @throws BadRequester
+     * @throws SerializationError
+     */
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Path("{id:.+}/{did:.+}")
+    public Response createAnnotationFor(
+            @PathParam("id") String id,
+            @PathParam("did") String did,
+            String json, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
+            throws PermissionDenied, ValidationError, DeserializationError,
+            ItemNotFound, BadRequester, SerializationError {
+        graph.getBaseGraph().checkNotInTransaction();
+        try {
+            Accessor user = getRequesterUserProfile();
+            Annotation ann = new AnnotationViews(graph).createFor(id, did, Bundle.fromString(json), user);
+            new AclManager(graph).setAccessors(ann,
+                    getAccessors(accessors, user));
+            graph.getBaseGraph().commit();
+            return buildResponseFromAnnotation(ann);
+        } finally {
+            cleanupTransaction();
+        }
+    }
+
+    /**
      * Return a map of annotations for the subtree of the given item and its
      * child items.
      * 
