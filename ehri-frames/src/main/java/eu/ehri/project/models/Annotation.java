@@ -25,6 +25,7 @@ public interface Annotation extends AnnotatableEntity, AccessibleEntity {
     @Adjacency(label = Ontology.ANNOTATOR_HAS_ANNOTATION, direction = Direction.IN)
     public Annotator setAnnotator(final Annotator annotator);
 
+    @Fetch(Ontology.ANNOTATES)
     @Adjacency(label = Ontology.ANNOTATION_ANNOTATES)
     public Iterable<AnnotatableEntity> getTargets();
 

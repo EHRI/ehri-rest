@@ -45,8 +45,8 @@ public class Ontology {
     public static final String PERMISSION_GRANT_HAS_TARGET = "hasTarget";
 
     // Annotations
+    public static final String ANNOTATES = "annotates";
     public static final String ANNOTATOR_HAS_ANNOTATION = "hasAnnotation";
-
     public static final String ANNOTATION_ANNOTATES = "hasAnnotationTarget";
     public static final String ANNOTATION_HAS_SOURCE = "hasAnnotationBody";
     public static final String ANNOTATION_NOTES_BODY = "body";

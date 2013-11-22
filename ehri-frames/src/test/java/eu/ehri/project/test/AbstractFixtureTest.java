@@ -1,15 +1,8 @@
 package eu.ehri.project.test;
 
-import eu.ehri.project.acl.SystemScope;
-import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.DocumentaryUnit;
-import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.Group;
 import eu.ehri.project.models.UserProfile;
-import eu.ehri.project.persistence.Bundle;
-import eu.ehri.project.persistence.BundleDAO;
 import org.junit.Before;
 import org.junit.BeforeClass;
 
@@ -17,7 +10,6 @@ abstract public class AbstractFixtureTest extends ModelTestBase {
 
     // Members closely coupled to the test data!
     protected UserProfile validUser;
-    protected UserProfile importUser;
     protected UserProfile invalidUser;
     protected DocumentaryUnit item;
 
