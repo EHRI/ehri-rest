@@ -30,7 +30,7 @@ public class UshmmHandler extends EadHandler {
 	 * @param importer
 	 */
 	public UshmmHandler(AbstractImporter<Map<String, Object>> importer) {
-		super(importer, new XmlImportProperties("icaatom.properties"));
+		super(importer, new XmlImportProperties("ushmm.properties"));
 		
 	}
 

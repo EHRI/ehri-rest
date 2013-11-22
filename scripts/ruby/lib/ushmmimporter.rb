@@ -77,7 +77,7 @@ module Ehri
           end
         end
 
-        handler = Importers::IcaAtomEadHandler.new importer
+        handler = Importers::UshmmHandler.new importer
         spf = Java::JavaxXmlParsers::SAXParserFactory.new_instance
         spf.set_namespace_aware false
         spf.set_validating false
