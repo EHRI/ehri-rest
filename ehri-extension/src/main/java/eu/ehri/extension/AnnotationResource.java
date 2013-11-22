@@ -176,6 +176,23 @@ public class AnnotationResource extends
     }
 
     /**
+     * Update an annotation.
+     * @param id
+     * @return
+     * @throws PermissionDenied
+     * @throws ItemNotFound
+     * @throws ValidationError
+     * @throws BadRequester
+     */
+    @POST
+    @Path("/{id:.+}")
+    public Response updateAnnotation(@PathParam("id") String id, String json)
+            throws AccessDenied, PermissionDenied, ItemNotFound, ValidationError,
+            BadRequester, DeserializationError, IntegrityError {
+        return update(id, json);
+    }
+
+    /**
      * Delete an annotation.
      * @param id
      * @return
