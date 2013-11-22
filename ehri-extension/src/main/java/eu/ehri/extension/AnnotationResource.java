@@ -98,7 +98,7 @@ public class AnnotationResource extends
         graph.getBaseGraph().checkNotInTransaction();
         try {
             Accessor user = getRequesterUserProfile();
-            Annotation ann = new AnnotationViews(graph).createFor(id,
+            Annotation ann = new AnnotationViews(graph).createFor(id, id,
                     Bundle.fromString(json), user);
             new AclManager(graph).setAccessors(ann,
                     getAccessors(accessors, user));
@@ -184,7 +184,7 @@ public class AnnotationResource extends
      * @throws ValidationError
      * @throws BadRequester
      */
-    @POST
+    @PUT
     @Path("/{id:.+}")
     public Response updateAnnotation(@PathParam("id") String id, String json)
             throws AccessDenied, PermissionDenied, ItemNotFound, ValidationError,

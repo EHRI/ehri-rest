@@ -7,6 +7,7 @@ import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.modules.javahandler.JavaHandler;
 import com.tinkerpop.frames.modules.javahandler.JavaHandlerContext;
 import com.tinkerpop.pipes.PipeFunction;
+import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
@@ -61,6 +62,12 @@ public interface UserProfile extends Accessor, AccessibleEntity, IdentifiableEnt
 
     @JavaHandler
     public void removeWatching(final Watchable item);
+
+    /**
+     * Users who share groups with this user.
+     */
+    @JavaHandler
+    public Iterable<UserProfile> coGroupMembers();
 
     @JavaHandler
     public boolean isWatching(final Watchable item);
@@ -140,6 +147,27 @@ public interface UserProfile extends Accessor, AccessibleEntity, IdentifiableEnt
                     return vertex.equals(item.asVertex());
                 }
             }).hasNext();
+        }
+
+        public Iterable<UserProfile> coGroupMembers() {
+            return frameVertices(gremlin().as("n")
+                    .out(Ontology.ACCESSOR_BELONGS_TO_GROUP)
+                    .loop("n", JavaHandlerUtils.defaultMaxLoops, JavaHandlerUtils.noopLoopFunc)
+                    .in(Ontology.ACCESSOR_BELONGS_TO_GROUP).filter(new PipeFunction<Vertex, Boolean>() {
+                @Override
+                public Boolean compute(Vertex vertex) {
+                    // Exclude the current user...
+                    if (it().equals(vertex)) {
+                        return false;
+                    }
+                    // Exclude other groups...
+                    String type = vertex.getProperty(EntityType.TYPE_KEY);
+                    if (type == null || !type.equals(Entities.USER_PROFILE)) {
+                        return false;
+                    }
+                    return true;
+                }
+            }));
         }
     }
 }

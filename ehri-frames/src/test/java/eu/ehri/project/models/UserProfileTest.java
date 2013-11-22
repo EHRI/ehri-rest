@@ -1,8 +1,12 @@
 package eu.ehri.project.models;
 
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import eu.ehri.project.test.AbstractFixtureTest;
 import org.junit.Test;
+
+import java.util.ArrayList;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -67,5 +71,19 @@ public class UserProfileTest extends AbstractFixtureTest {
         assertFalse(validUser.isWatching(watched));
         assertEquals(0L, validUser.asVertex().getProperty(UserProfile.WATCHING_COUNT));
         assertEquals(0L, watched.asVertex().getProperty(UserProfile.WATCHED_COUNT));
+    }
+
+    @Test
+    public void testCoGroupMembers() throws Exception {
+        // mike is in groups kcl and admin. reto is in
+        // group kcl and veerle in admin. Therefore mike's
+        // co-group members are reto and veerle...
+        UserProfile mike = manager.getFrame("mike", UserProfile.class);
+        UserProfile reto = manager.getFrame("reto", UserProfile.class);
+        UserProfile veerle = manager.getFrame("veerle", UserProfile.class);
+        ArrayList<UserProfile> profiles = Lists.newArrayList(mike.coGroupMembers());
+        assertEquals(2, profiles.size());
+        assertTrue(profiles.contains(reto));
+        assertTrue(profiles.contains(veerle));
     }
 }

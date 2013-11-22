@@ -36,21 +36,5 @@ abstract public class AbstractFixtureTest extends ModelTestBase {
         } catch (ItemNotFound e) {
             throw new RuntimeException(e);
         }
-        try {
-            importUser = manager.getFrame("ehriimporter", UserProfile.class);
-        } catch (ItemNotFound ex) {
-            try {
-                Bundle unit = new Bundle(EntityClass.USER_PROFILE)
-                        .withDataValue(Ontology.IDENTIFIER_KEY, "ehriimporter")
-                        .withDataValue(Ontology.NAME_KEY, "EHRI Importer");
-                importUser =  new BundleDAO(graph, SystemScope.getInstance()).create(unit, UserProfile.class);
-                Group admin = manager.getFrame("admin", Group.class);  // admin has id "admin"
-                admin.addMember(importUser);
-            } catch (ItemNotFound ex1) {
-                throw new RuntimeException(ex1);
-            } catch (ValidationError ex1) {
-                throw new RuntimeException(ex1);
-            }
-        }
     }
 }
