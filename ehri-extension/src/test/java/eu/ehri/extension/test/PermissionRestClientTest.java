@@ -6,7 +6,6 @@ import com.sun.jersey.api.client.UniformInterfaceException;
 import eu.ehri.project.acl.ContentTypes;
 import eu.ehri.project.acl.PermissionType;
 import eu.ehri.project.definitions.Entities;
-import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.persistence.Bundle;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -28,10 +27,6 @@ import static org.junit.Assert.assertTrue;
 
 /**
  * Test Permissions resource.
- * <p/>
- * FIXME: Remove lots of
- *
- * @author michaelb
  */
 public class PermissionRestClientTest extends BaseRestClientTest {
 
@@ -39,6 +34,8 @@ public class PermissionRestClientTest extends BaseRestClientTest {
     static final String TEST_HOLDER_IDENTIFIER = "r2";
 
     private String jsonDocumentaryUnitTestStr;
+    private final JsonFactory factory = new JsonFactory();
+    private final ObjectMapper mapper = new ObjectMapper(factory);
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
@@ -72,7 +69,7 @@ public class PermissionRestClientTest extends BaseRestClientTest {
         // Set the permission via REST
         response = jsonCallAs(getAdminUserProfileId(),
                 ehriUri(Entities.PERMISSION, LIMITED_USER_NAME))
-                .entity(new ObjectMapper().writeValueAsBytes(getTestMatrix()))
+                .entity(mapper.writeValueAsBytes(getTestMatrix()))
                 .post(ClientResponse.class);
 
         assertStatus(OK, response);
@@ -96,23 +93,20 @@ public class PermissionRestClientTest extends BaseRestClientTest {
     }
 
     @Test
-    public void testPermissionSetPermissionDenied()
-            throws UniformInterfaceException, IOException {
+    public void testPermissionSetPermissionDenied() throws Exception {
 
         // Test a user setting his own permissions over REST - this should
         // obviously fail...
+        byte[] bytes = mapper.writeValueAsBytes(getTestMatrix());
         ClientResponse response = jsonCallAs(LIMITED_USER_NAME,
                 ehriUri(Entities.PERMISSION, LIMITED_USER_NAME))
-                .entity(new ObjectMapper().writeValueAsBytes(getTestMatrix()))
-                .post(ClientResponse.class);
+                .post(ClientResponse.class, bytes);
         assertStatus(UNAUTHORIZED, response);
         // TODO: Figure out why no content ever seems to be returned here?
     }
 
     @Test
-    public void testGivingBadPermsErrorsCorrectly()
-            throws
-            UniformInterfaceException, IOException {
+    public void testGivingBadPermsErrorsCorrectly() throws Exception {
 
         // If we give a permission matrix for a content type that doesn't
         // exist we should get a DeserializationError in return.
@@ -123,16 +117,15 @@ public class PermissionRestClientTest extends BaseRestClientTest {
                         PermissionType.CREATE.getName()).build());
 
         // Set the permission via REST
+        byte[] bytes = mapper.writeValueAsBytes(testMatrix);
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
                 ehriUri(Entities.PERMISSION, LIMITED_USER_NAME))
-                .entity(new ObjectMapper().writeValueAsBytes(testMatrix))
-                .post(ClientResponse.class);
+                .post(ClientResponse.class, bytes);
         assertStatus(BAD_REQUEST, response);
     }
 
     @Test
-    public void testSettingGlobalPermissions() throws
-            UniformInterfaceException, IOException {
+    public void testSettingGlobalPermissions() throws Exception {
 
         ClientResponse response = jsonCallAs(LIMITED_USER_NAME,
                 getCreationUri()).entity(jsonDocumentaryUnitTestStr)
@@ -140,10 +133,10 @@ public class PermissionRestClientTest extends BaseRestClientTest {
         assertStatus(UNAUTHORIZED, response);
 
         // Set the permission via REST
+        byte[] bytes = mapper.writeValueAsBytes(getTestMatrix());
         response = jsonCallAs(getAdminUserProfileId(),
                 ehriUri(Entities.PERMISSION, LIMITED_USER_NAME))
-                .entity(new ObjectMapper().writeValueAsBytes(getTestMatrix()))
-                .post(ClientResponse.class);
+                .post(ClientResponse.class, bytes);
 
         assertStatus(OK, response);
 
@@ -221,9 +214,7 @@ public class PermissionRestClientTest extends BaseRestClientTest {
     }
 
     @Test
-    public void testSettingItemPermissions() throws
-            UniformInterfaceException, IOException,
-            DeserializationError {
+    public void testSettingItemPermissions() throws Exception {
 
         // Fetch an existing item's data
         String targetResourceId = "c4";
@@ -269,11 +260,7 @@ public class PermissionRestClientTest extends BaseRestClientTest {
         assertStatus(OK, response);
     }
 
-    private List<Map<String, Map<String, List<String>>>> getInheritedMatrix(
-            String json) throws
-            IOException {
-        JsonFactory factory = new JsonFactory();
-        ObjectMapper mapper = new ObjectMapper(factory);
+    private List<Map<String, Map<String, List<String>>>> getInheritedMatrix(String json) throws IOException {
         TypeReference<LinkedList<HashMap<String, Map<String, List<String>>>>> typeRef = new TypeReference<LinkedList<HashMap<String, Map<String, List<String>>>>>() {
         };
         return mapper.readValue(json, typeRef);
@@ -282,7 +269,7 @@ public class PermissionRestClientTest extends BaseRestClientTest {
     @SuppressWarnings("serial")
     private Map<String, List<String>> getTestMatrix() {
         // @formatter:off
-        Map<String, List<String>> matrix = new HashMap<String, List<String>>() {{
+        return new HashMap<String, List<String>>() {{
             put(ContentTypes.DOCUMENTARY_UNIT.getName(), new LinkedList<String>() {{
                 add(PermissionType.CREATE.getName());
                 add(PermissionType.DELETE.getName());
@@ -294,8 +281,6 @@ public class PermissionRestClientTest extends BaseRestClientTest {
                 add(PermissionType.UPDATE.getName());
             }});
         }};
-        // @formatter:on
-        return matrix;
     }
 
     private URI getCreationUri() {

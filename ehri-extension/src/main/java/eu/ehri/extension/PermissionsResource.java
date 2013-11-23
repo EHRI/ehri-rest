@@ -1,7 +1,6 @@
 package eu.ehri.extension;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,8 +19,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import eu.ehri.project.acl.GlobalPermissionSet;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerationException;
@@ -29,8 +26,6 @@ import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 import org.neo4j.graphdb.GraphDatabaseService;
-
-import com.google.common.collect.Sets;
 
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.acl.AclManager;
@@ -280,9 +275,8 @@ public class PermissionsResource extends AbstractRestResource {
         return Response
                 .status(Response.Status.OK)
                 .entity(mapper
-                        .writeValueAsBytes(stringifyInheritedGlobalMatrix(acl
-                                .getInheritedGlobalPermissions(accessor))))
-                        .build();
+                        .writeValueAsBytes(acl.getInheritedGlobalPermissions(accessor)))
+                .build();
     }
 
     /**
@@ -305,14 +299,17 @@ public class PermissionsResource extends AbstractRestResource {
             String json) throws PermissionDenied, IOException, ItemNotFound,
             DeserializationError, BadRequester {
         graph.getBaseGraph().checkNotInTransaction();
-        HashMap<String, List<String>> globals = parseMatrix(json);
+        HashMap<ContentTypes, List<PermissionType>> globals = parseMatrix(json);
         Accessor accessor = manager.getFrame(userId, Accessor.class);
         Accessor grantee = getRequesterUserProfile();
         try {
-            new AclViews(graph).setGlobalPermissionMatrix(accessor,
-                    enumifyMatrix(globals), grantee);
+            List<Map<String, GlobalPermissionSet>> newPerms
+                    = new AclViews(graph)
+                    .setGlobalPermissionMatrix(accessor, globals, grantee);
             graph.getBaseGraph().commit();
-            return getGlobalMatrix(userId);
+            return Response
+                    .status(Response.Status.OK)
+                    .entity(mapper.writeValueAsBytes(newPerms)).build();
         } finally {
             cleanupTransaction();
         }
@@ -343,9 +340,8 @@ public class PermissionsResource extends AbstractRestResource {
 
         return Response
                 .status(Response.Status.OK)
-                .entity(mapper.writeValueAsBytes(stringifyInheritedMatrix(acl
-                        .getInheritedEntityPermissions(accessor, entity))))
-                        .build();
+                .entity(mapper.writeValueAsBytes(acl.getInheritedEntityPermissions(accessor, entity)))
+                .build();
     }
 
     /**
@@ -353,7 +349,6 @@ public class PermissionsResource extends AbstractRestResource {
      *
      * @param userId
      * @param id
-     * @return
      * @throws IOException
      * @throws JsonMappingException
      * @throws JsonGenerationException
@@ -374,20 +369,17 @@ public class PermissionsResource extends AbstractRestResource {
         return Response
                 .status(Response.Status.OK)
                 .entity(mapper
-                        .writeValueAsBytes(stringifyInheritedGlobalMatrix(acl
-                                .getInheritedGlobalPermissions(accessor))))
+                        .writeValueAsBytes(acl
+                                .getInheritedGlobalPermissions(accessor)))
                 .build();
     }
 
     /**
      * Set a user's permissions on a content type with a given scope.
      *
-     * @param userId
-     *            the user
-     * @param id
-     *            the scope id
-     * @param json
-     *            the serialized permission list
+     * @param userId the user
+     * @param id     the scope id
+     * @param json   the serialized permission list
      * @return
      * @throws PermissionDenied
      * @throws IOException
@@ -405,12 +397,12 @@ public class PermissionsResource extends AbstractRestResource {
         graph.getBaseGraph().checkNotInTransaction();
 
         try {
-            HashMap<String, List<String>> globals = parseMatrix(json);
+            HashMap<ContentTypes, List<PermissionType>> globals = parseMatrix(json);
             Accessor accessor = manager.getFrame(userId, Accessor.class);
             PermissionScope scope = manager.getFrame(id, PermissionScope.class);
             Accessor grantee = getRequesterUserProfile();
             AclViews acl = new AclViews(graph, scope);
-            acl.setGlobalPermissionMatrix(accessor, enumifyMatrix(globals), grantee);
+            acl.setGlobalPermissionMatrix(accessor, globals, grantee);
             graph.getBaseGraph().commit();
             return getScopedMatrix(userId, id);
         } finally {
@@ -421,14 +413,9 @@ public class PermissionsResource extends AbstractRestResource {
     /**
      * Set a user's permissions on a given item.
      *
-     * @param id
-     *            the item id
-     * @param userId
-     *            the user id
-     * @param json
-     *            the serialized permission list
-     * @return
-     *
+     * @param id     the item id
+     * @param userId the user id
+     * @param json   the serialized permission list
      * @throws PermissionDenied
      * @throws IOException
      * @throws ItemNotFound
@@ -443,11 +430,11 @@ public class PermissionsResource extends AbstractRestResource {
             @PathParam("id") String id, String json) throws PermissionDenied,
             IOException, ItemNotFound, DeserializationError, BadRequester {
         graph.getBaseGraph().checkNotInTransaction();
-        List<String> scopedPerms;
+        Set<PermissionType> scopedPerms;
         try {
             JsonFactory factory = new JsonFactory();
             ObjectMapper mapper = new ObjectMapper(factory);
-            TypeReference<List<String>> typeRef = new TypeReference<List<String>>() {
+            TypeReference<Set<PermissionType>> typeRef = new TypeReference<Set<PermissionType>>() {
             };
             scopedPerms = mapper.readValue(json, typeRef);
         } catch (JsonMappingException e) {
@@ -460,130 +447,35 @@ public class PermissionsResource extends AbstractRestResource {
             AccessibleEntity item = manager.getFrame(id, PermissionScope.class);
             Accessor grantee = getRequesterUserProfile();
             AclViews acl = new AclViews(graph);
-
-            acl.setItemPermissions(item, accessor,
-                    enumifyPermissionList(scopedPerms), grantee);
+            acl.setItemPermissions(item, accessor, scopedPerms, grantee);
             graph.getBaseGraph().commit();
             return Response
                     .status(Response.Status.OK)
                     .entity(mapper
-                            .writeValueAsBytes(stringifyInheritedMatrix(new AclManager(
+                            .writeValueAsBytes(new AclManager(
                                     graph).getInheritedEntityPermissions(accessor,
-                                    manager.getFrame(id, AccessibleEntity.class)))))
+                                    manager.getFrame(id, AccessibleEntity.class))))
                     .build();
         } finally {
             cleanupTransaction();
         }
     }
 
-    // Helpers. These just convert from string to internal enum representations
-    // of the various permissions-related data structures.
-    // TODO: There's probably a way to get Jackson to do that automatically.
-    // This was why scala was invented...
-
-    private HashMap<String, List<String>> parseMatrix(String json)
-            throws IOException, DeserializationError {
-        HashMap<String, List<String>> globals;
+    private HashMap<ContentTypes, List<PermissionType>> parseMatrix(String json)
+            throws DeserializationError {
+        HashMap<ContentTypes, List<PermissionType>> globals;
         try {
             JsonFactory factory = new JsonFactory();
             ObjectMapper mapper = new ObjectMapper(factory);
-            TypeReference<HashMap<String, List<String>>> typeRef = new TypeReference<HashMap<String, List<String>>>() {
+            TypeReference<HashMap<ContentTypes, List<PermissionType>>> typeRef = new TypeReference<HashMap<ContentTypes,
+                    List<PermissionType>>>() {
             };
             globals = mapper.readValue(json, typeRef);
         } catch (JsonMappingException e) {
             throw new DeserializationError(e.getMessage());
+        } catch (IOException e) {
+            throw new DeserializationError(e.getMessage());
         }
         return globals;
-    }
-
-    private List<Map<String, Map<String, List<String>>>> stringifyInheritedGlobalMatrix(
-            List<Map<String, GlobalPermissionSet>> list2) {
-        List<Map<String, Map<String, List<String>>>> list = Lists
-                .newLinkedList();
-        for (Map<String, GlobalPermissionSet> item : list2) {
-            Map<String, Map<String, List<String>>> tmp = Maps.newHashMap();
-            for (Map.Entry<String, GlobalPermissionSet> entry : item.entrySet()) {
-                tmp.put(entry.getKey(), stringifyGlobalMatrix(entry.getValue().asMap()));
-            }
-            list.add(tmp);
-        }
-        return list;
-    }
-
-    private Map<String, List<String>> stringifyGlobalMatrix(
-            Map<ContentTypes, Collection<PermissionType>> map) {
-        Map<String, List<String>> tmp = Maps.newHashMap();
-        for (Map.Entry<ContentTypes, Collection<PermissionType>> entry : map
-                .entrySet()) {
-            List<String> ptmp = Lists.newLinkedList();
-            for (PermissionType pt : entry.getValue()) {
-                ptmp.add(pt.getName());
-            }
-            tmp.put(entry.getKey().getName(), ptmp);
-        }
-        return tmp;
-    }
-
-    private List<Map<String, List<String>>> stringifyInheritedMatrix(
-            List<Map<String, List<PermissionType>>> matrix) {
-        List<Map<String, List<String>>> tmp = Lists.newLinkedList();
-        for (Map<String, List<PermissionType>> item : matrix) {
-            tmp.add(stringifyMatrix(item));
-        }
-        return tmp;
-    }
-
-    private Map<String, List<String>> stringifyMatrix(
-            Map<String, List<PermissionType>> matrix) {
-        Map<String, List<String>> out = Maps.newHashMap();
-        for (Map.Entry<String, List<PermissionType>> entry : matrix.entrySet()) {
-            List<String> tmp = Lists.newLinkedList();
-            for (PermissionType t : entry.getValue()) {
-                tmp.add(t.getName());
-            }
-            out.put(entry.getKey(), tmp);
-        }
-        return out;
-    }
-
-    /**
-     * Convert a permission matrix containing strings in lieu of content type
-     * and permission type enum values to the enum version. If Jackson 1.9 were
-     * available in Neo4j we wouldn't need this, since its @JsonCreator
-     * annotation allows specifying how to deserialize those enums properly.
-     *
-     * @param matrix
-     * @return
-     * @throws DeserializationError
-     */
-    private Map<ContentTypes, List<PermissionType>> enumifyMatrix(
-            Map<String, List<String>> matrix) throws DeserializationError {
-        try {
-            Map<ContentTypes, List<PermissionType>> out = Maps.newHashMap();
-            for (Map.Entry<String, List<String>> entry : matrix.entrySet()) {
-                List<PermissionType> tmp = Lists.newLinkedList();
-                for (String t : entry.getValue()) {
-                    tmp.add(PermissionType.withName(t));
-                }
-                out.put(ContentTypes.withName(entry.getKey()), tmp);
-            }
-            return out;
-        } catch (IllegalArgumentException e) {
-            throw new DeserializationError(e.getMessage());
-        }
-    }
-
-    private Set<PermissionType> enumifyPermissionList(List<String> scopedPerms)
-            throws DeserializationError {
-        try {
-            Set<PermissionType> perms = Sets.newHashSet();
-            for (String p : scopedPerms) {
-                perms.add(PermissionType.withName(p));
-            }
-
-            return perms;
-        } catch (IllegalArgumentException e) {
-            throw new DeserializationError(e.getMessage());
-        }
     }
 }
