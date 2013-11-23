@@ -6,7 +6,7 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.annotations.Dependent;
 import eu.ehri.project.models.annotations.Fetch;
 
-public interface DescribedEntity extends AccessibleEntity, IdentifiableEntity, AnnotatableEntity, LinkableEntity {
+public interface DescribedEntity extends PermissionScope, AnnotatableEntity, LinkableEntity {
 
     @Adjacency(label = Ontology.DESCRIPTION_FOR_ENTITY, direction = Direction.IN)
     public void addDescription(final Description description);

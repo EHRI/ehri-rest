@@ -99,11 +99,11 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws IntegrityError
      * @throws ItemNotFound
      */
-    public <T extends Frame> Mutation<T> updateDependent(Bundle bundle, E parent,
+    public <T extends Frame, P extends PermissionScope> Mutation<T> updateDependent(Bundle bundle, P parent,
             Accessor user, Class<T> dependentClass)
             throws PermissionDenied, ValidationError, IntegrityError, ItemNotFound {
         helper.checkEntityPermission(parent, user, PermissionType.UPDATE);
-        return new BundleDAO(graph, scope).update(bundle, dependentClass);
+        return new BundleDAO(graph, parent).update(bundle, dependentClass);
     }
 
     /**
@@ -148,12 +148,12 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws ValidationError
      * @throws IntegrityError
      */
-    public <T extends Frame> T createDependent(Bundle bundle, E parent,
+    public <T extends Frame, P extends PermissionScope> T createDependent(Bundle bundle, P parent,
             Accessor user, Class<T> dependentCls)
             throws PermissionDenied, ValidationError,
             IntegrityError {
         helper.checkEntityPermission(parent, user, PermissionType.UPDATE);
-        return new BundleDAO(graph, scope).create(bundle, dependentCls);
+        return new BundleDAO(graph, parent).create(bundle, dependentCls);
     }
 
     /**
@@ -205,11 +205,11 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws ValidationError
      * @throws SerializationError
      */
-    public <T extends Frame> Integer deleteDependent(T item, E parent,
+    public <T extends Frame, P extends PermissionScope> Integer deleteDependent(T item, P parent,
                 Accessor user, Class<T> dependentClass)
             throws PermissionDenied, ValidationError, SerializationError {
         helper.checkEntityPermission(parent, user, PermissionType.DELETE);
-        return new BundleDAO(graph, scope).delete(serializer
+        return new BundleDAO(graph, parent).delete(serializer
                 .vertexFrameToBundle(item));
     }
 

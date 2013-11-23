@@ -9,6 +9,7 @@ import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.models.events.SystemEventQueue;
 import eu.ehri.project.models.events.Version;
+import eu.ehri.project.models.idgen.DescriptionIdGenerator;
 import eu.ehri.project.models.idgen.GenericIdGenerator;
 import eu.ehri.project.models.idgen.IdGenerator;
 import eu.ehri.project.models.idgen.IdentifiableEntityIdGenerator;
@@ -34,9 +35,9 @@ public enum EntityClass {
     CVOC_CONCEPT(Entities.CVOC_CONCEPT, "cv", Concept.class, IdentifiableEntityIdGenerator.INSTANCE),
 
     // Generic entities.
-    DOCUMENT_DESCRIPTION(Entities.DOCUMENT_DESCRIPTION, "dd", DocumentDescription.class),
-    REPOSITORY_DESCRIPTION(Entities.REPOSITORY_DESCRIPTION, "rd", RepositoryDescription.class),
-    HISTORICAL_AGENT_DESCRIPTION(Entities.HISTORICAL_AGENT_DESCRIPTION, "ad", HistoricalAgentDescription.class),
+    DOCUMENT_DESCRIPTION(Entities.DOCUMENT_DESCRIPTION, "dd", DocumentDescription.class, DescriptionIdGenerator.INSTANCE),
+    REPOSITORY_DESCRIPTION(Entities.REPOSITORY_DESCRIPTION, "rd", RepositoryDescription.class, DescriptionIdGenerator.INSTANCE),
+    HISTORICAL_AGENT_DESCRIPTION(Entities.HISTORICAL_AGENT_DESCRIPTION, "ad", HistoricalAgentDescription.class, DescriptionIdGenerator.INSTANCE),
     DATE_PERIOD(Entities.DATE_PERIOD, "dp", DatePeriod.class),
     ANNOTATION(Entities.ANNOTATION, "ann", Annotation.class),
     ADDRESS(Entities.ADDRESS, "adr", Address.class),
@@ -47,7 +48,7 @@ public enum EntityClass {
     PERMISSION(Entities.PERMISSION, "pm", Permission.class),
     PERMISSION_GRANT(Entities.PERMISSION_GRANT, "pmg", PermissionGrant.class),
     CONTENT_TYPE(Entities.CONTENT_TYPE, "ct", ContentType.class),
-    CVOC_CONCEPT_DESCRIPTION(Entities.CVOC_CONCEPT_DESCRIPTION, "cvd", ConceptDescription.class),
+    CVOC_CONCEPT_DESCRIPTION(Entities.CVOC_CONCEPT_DESCRIPTION, "cvd", ConceptDescription.class, DescriptionIdGenerator.INSTANCE),
     MAINTENANCE_EVENT ( Entities.MAINTENANCE_EVENT, "me", MaintenanceEvent.class),
     UNDETERMINED_RELATIONSHIP (Entities.UNDETERMINED_RELATIONSHIP, "rs", UndeterminedRelationship.class),
     LINK (Entities.LINK, "lnk", Link.class),

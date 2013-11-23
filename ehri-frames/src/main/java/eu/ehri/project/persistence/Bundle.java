@@ -7,6 +7,7 @@ import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.PermissionScope;
+import eu.ehri.project.models.idgen.IdGenerator;
 import eu.ehri.project.models.utils.ClassUtils;
 import org.w3c.dom.Document;
 
@@ -523,12 +524,15 @@ public final class Bundle {
      */
     public Bundle generateIds(final List<String> scopes) {
         boolean isTemp = id == null;
+        IdGenerator idgen = getType().getIdgen();
         String newId = isTemp
-                ? getType().getIdgen().generateId(getType(), scopes, this)
+                ? idgen.generateId(getType(), scopes, this)
                 : id;
         ListMultimap<String, Bundle> idRels = LinkedListMultimap.create();
+        List<String> nextScopes = Lists.newArrayList(scopes);
+        nextScopes.add(idgen.getIdBase(this));
         for (Map.Entry<String, Bundle> entry : relations.entries()) {
-            idRels.put(entry.getKey(), entry.getValue().generateIds(scopes));
+            idRels.put(entry.getKey(), entry.getValue().generateIds(nextScopes));
         }
         return new Bundle(newId, type, data, idRels, meta, isTemp);
     }

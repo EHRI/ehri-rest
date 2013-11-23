@@ -42,11 +42,19 @@ public class DescriptionRestClientTest extends BaseRestClientTest {
         ObjectMapper mapper = new ObjectMapper();
         JsonNode rootNode = mapper.readValue(response.getEntity(String.class),
                 JsonNode.class);
+
+        // Check ID is the correct concatenation of all the scope IDs...
         JsonNode idValue = rootNode
+                .path(Bundle.ID_KEY);
+        assertFalse(idValue.isMissingNode());
+        assertEquals("nl-r1-c1-c2-en-another-description", idValue.getTextValue());
+
+        // Check the identifier is present and correct...
+        JsonNode identValue = rootNode
                 .path(Bundle.DATA_KEY)
                 .path(Ontology.IDENTIFIER_KEY);
-        assertFalse(idValue.isMissingNode());
-        assertEquals(TEST_DESCRIPTION_IDENTIFIER, idValue.getTextValue());
+        assertFalse(identValue.isMissingNode());
+        assertEquals(TEST_DESCRIPTION_IDENTIFIER, identValue.getTextValue());
     }
 
     @Test

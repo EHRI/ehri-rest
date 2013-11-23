@@ -1,28 +1,32 @@
 package eu.ehri.project.models.idgen;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.ListMultimap;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.Bundle;
+
 import java.util.List;
 
 import static eu.ehri.project.definitions.Ontology.IDENTIFIER_KEY;
 import static eu.ehri.project.definitions.Ontology.LANGUAGE_OF_DESCRIPTION;
 
 /**
- * Generates an ID for nodes which represent IdentifiableEntities, where
- * The graph id is .
+ * Generates an ID for nodes which represent Descriptions, where
+ * The graph id is a combination of the parent scopes, plus the description
+ * language code, plus an optional description identifier (say, 'alt').
  * 
  * @author michaelb
  * 
  */
-public enum IdentifiableEntityIdGenerator implements IdGenerator {
+public enum DescriptionIdGenerator implements IdGenerator {
 
     INSTANCE;
 
     public ListMultimap<String,String> handleIdCollision(EntityClass type, PermissionScope scope,
             Bundle bundle) {
-        return IdGeneratorUtils.handleIdCollision(scope, IDENTIFIER_KEY, getIdBase(bundle));
+        return IdGeneratorUtils.handleIdCollision(scope, LANGUAGE_OF_DESCRIPTION,
+                getIdBase(bundle));
     }
 
 
@@ -45,7 +49,8 @@ public enum IdentifiableEntityIdGenerator implements IdGenerator {
      * @return The calculated identifier
      */
     public String generateId(EntityClass type, List<String> scopeIds, Bundle bundle) {
-        return IdGeneratorUtils.generateId(type, scopeIds, bundle, getIdBase(bundle));
+        return IdGeneratorUtils.generateId(type, scopeIds, bundle,
+                getIdBase(bundle));
     }
 
     /**
@@ -54,6 +59,12 @@ public enum IdentifiableEntityIdGenerator implements IdGenerator {
      * @return The base id string.
      */
     public String getIdBase(Bundle bundle) {
-        return (String)bundle.getDataValue(IDENTIFIER_KEY);
+        String lang = (String) bundle.getDataValue(LANGUAGE_OF_DESCRIPTION);
+        String ident = (String) bundle.getDataValue(IDENTIFIER_KEY);
+        if (ident != null && ident.trim().equals("")) {
+            ident = null;
+        }
+        return Joiner.on(IdGeneratorUtils.SEPARATOR)
+                .skipNulls().join(lang, ident);
     }
 }

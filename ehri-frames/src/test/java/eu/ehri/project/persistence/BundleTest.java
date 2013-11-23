@@ -31,7 +31,8 @@ public class BundleTest {
                 .withDataValue(Ontology.IDENTIFIER_KEY, "foobar")
                 .withRelation(Ontology.DESCRIPTION_FOR_ENTITY,
                         new Bundle(EntityClass.DOCUMENT_DESCRIPTION)
-                            .withDataValue(Ontology.NAME_KEY, "Foobar"));
+                            .withDataValue(Ontology.NAME_KEY, "Foobar")
+                            .withDataValue(Ontology.LANGUAGE, "en"));
     }
 
     @After
@@ -217,7 +218,8 @@ public class BundleTest {
         Bundle test = bundle.generateIds(Lists.<String>newArrayList("test"));
         assertTrue(test.hasGeneratedId());
         assertEquals("test-foobar", test.getId());
-        assertNotNull(test.getRelations(
-                Ontology.DESCRIPTION_FOR_ENTITY).get(0).getId());
+        Bundle desc = test.getRelations(Ontology.DESCRIPTION_FOR_ENTITY).get(0);
+        assertNotNull(desc.getId());
+        assertEquals("test-foobar-en", desc.getId());
     }
 }

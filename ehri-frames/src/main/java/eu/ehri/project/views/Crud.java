@@ -17,7 +17,8 @@ public interface Crud<E extends AccessibleEntity> {
             throws PermissionDenied, ValidationError, DeserializationError,
             IntegrityError, ItemNotFound;
 
-    public <T extends Frame> Mutation<T> updateDependent(Bundle bundle, E parent, Accessor user,
+    public <T extends Frame, P extends PermissionScope> Mutation<T> updateDependent(Bundle bundle, P parent,
+            Accessor user,
             Class<T> dependentClass)
             throws PermissionDenied, ValidationError, DeserializationError,
             IntegrityError, ItemNotFound;
@@ -25,7 +26,8 @@ public interface Crud<E extends AccessibleEntity> {
     public E create(Bundle bundle, Accessor user)
             throws PermissionDenied, ValidationError, DeserializationError, IntegrityError;
 
-    public <T extends Frame> T createDependent(Bundle bundle, E parent, Accessor user, Class<T> dependentClass)
+    public <T extends Frame, P extends PermissionScope> T createDependent(Bundle bundle, P parent, Accessor user,
+            Class<T> dependentClass)
             throws PermissionDenied, ValidationError, DeserializationError, IntegrityError;
 
     public Mutation<E> createOrUpdate(Bundle bundle, Accessor user)
@@ -34,6 +36,7 @@ public interface Crud<E extends AccessibleEntity> {
     public Integer delete(E item, Accessor user) throws PermissionDenied,
             ValidationError, SerializationError;
 
-    public <T extends Frame> Integer deleteDependent(T item, E parent, Accessor user, Class<T> dependentClass)
+    public <T extends Frame, P extends PermissionScope> Integer deleteDependent(T item, P parent, Accessor user,
+            Class<T> dependentClass)
             throws PermissionDenied, ValidationError, SerializationError;
 }

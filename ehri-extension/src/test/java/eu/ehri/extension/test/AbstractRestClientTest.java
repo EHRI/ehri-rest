@@ -3,6 +3,8 @@ package eu.ehri.extension.test;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.api.client.config.ClientConfig;
+import com.sun.jersey.api.client.config.DefaultClientConfig;
 import eu.ehri.extension.AbstractRestResource;
 import eu.ehri.project.definitions.Entities;
 import org.junit.Test;
@@ -34,6 +36,8 @@ abstract public class AbstractRestClientTest {
      */
     abstract String getAdminUserProfileId();
 
+    //  ClientConfig clientConfig = new DefaultClientConfig();
+    //clientConfig.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING, Boolean.TRUE);
     protected Client client = Client.create();
 
     protected URI ehriUri(String... segments) {
