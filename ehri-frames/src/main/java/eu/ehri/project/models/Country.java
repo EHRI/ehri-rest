@@ -6,7 +6,6 @@ import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Property;
 import com.tinkerpop.frames.modules.javahandler.JavaHandler;
 import com.tinkerpop.frames.modules.javahandler.JavaHandlerContext;
-import com.tinkerpop.pipes.util.Pipeline;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Mandatory;
@@ -14,7 +13,6 @@ import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.IdentifiableEntity;
 import eu.ehri.project.models.base.ItemHolder;
 import eu.ehri.project.models.base.PermissionScope;
-import eu.ehri.project.models.utils.JavaHandlerUtils;
 
 /**
  * User: michaelb

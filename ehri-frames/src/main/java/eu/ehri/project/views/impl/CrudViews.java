@@ -8,10 +8,7 @@ import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.exceptions.*;
-import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.models.base.Frame;
-import eu.ehri.project.models.base.PermissionScope;
+import eu.ehri.project.models.base.*;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.BundleDAO;
 import eu.ehri.project.persistence.Mutation;
@@ -99,7 +96,7 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws IntegrityError
      * @throws ItemNotFound
      */
-    public <T extends Frame, P extends PermissionScope> Mutation<T> updateDependent(Bundle bundle, P parent,
+    public <T extends Frame, P extends DescribedEntity> Mutation<T> updateDependent(Bundle bundle, P parent,
             Accessor user, Class<T> dependentClass)
             throws PermissionDenied, ValidationError, IntegrityError, ItemNotFound {
         helper.checkEntityPermission(parent, user, PermissionType.UPDATE);
@@ -148,7 +145,7 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws ValidationError
      * @throws IntegrityError
      */
-    public <T extends Frame, P extends PermissionScope> T createDependent(Bundle bundle, P parent,
+    public <T extends Frame, P extends DescribedEntity> T createDependent(Bundle bundle, P parent,
             Accessor user, Class<T> dependentCls)
             throws PermissionDenied, ValidationError,
             IntegrityError {
@@ -205,7 +202,7 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws ValidationError
      * @throws SerializationError
      */
-    public <T extends Frame, P extends PermissionScope> Integer deleteDependent(T item, P parent,
+    public <T extends Frame, P extends DescribedEntity> Integer deleteDependent(T item, P parent,
                 Accessor user, Class<T> dependentClass)
             throws PermissionDenied, ValidationError, SerializationError {
         helper.checkEntityPermission(parent, user, PermissionType.DELETE);

@@ -4,10 +4,10 @@ import com.google.common.collect.ListMultimap;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.Bundle;
+
 import java.util.List;
 
 import static eu.ehri.project.definitions.Ontology.IDENTIFIER_KEY;
-import static eu.ehri.project.definitions.Ontology.LANGUAGE_OF_DESCRIPTION;
 
 /**
  * Generates an ID for nodes which represent IdentifiableEntities, where

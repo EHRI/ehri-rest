@@ -199,7 +199,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws IntegrityError
      * @throws DeserializationError
      */
-    public <T extends Frame, P extends PermissionScope> Mutation<T> updateDependent(Bundle bundle, P parent,
+    public <T extends Frame, P extends DescribedEntity> Mutation<T> updateDependent(Bundle bundle, P parent,
             Accessor user,
             Class<T> dependentClass) throws PermissionDenied,
             ValidationError, DeserializationError, IntegrityError {
@@ -221,7 +221,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws IntegrityError
      * @throw DeserializationError
      */
-    public <T extends Frame, P extends PermissionScope> Mutation<T> updateDependent(Bundle bundle, P parent,
+    public <T extends Frame, P extends DescribedEntity> Mutation<T> updateDependent(Bundle bundle, P parent,
             Accessor user,
             Class<T> dependentClass, Optional<String> logMessage)
             throws PermissionDenied, ValidationError, DeserializationError,
@@ -255,7 +255,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws IntegrityError
      * @throws DeserializationError
      */
-    public <T extends Frame, P extends PermissionScope> T createDependent(Bundle bundle,
+    public <T extends Frame, P extends DescribedEntity> T createDependent(Bundle bundle,
             P parent, Accessor user, Class<T> dependentClass) throws PermissionDenied,
             ValidationError, DeserializationError, IntegrityError {
         return createDependent(bundle, parent, user, dependentClass, Optional.<String>absent());
@@ -276,7 +276,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws IntegrityError
      * @throw DeserializationError
      */
-    public <T extends Frame, P extends PermissionScope> T createDependent(Bundle bundle, P parent, Accessor user,
+    public <T extends Frame, P extends DescribedEntity> T createDependent(Bundle bundle, P parent, Accessor user,
                 Class<T> dependentClass, Optional<String> logMessage)
             throws PermissionDenied, ValidationError, DeserializationError,
             IntegrityError {
@@ -338,7 +338,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws ValidationError
      * @throws SerializationError
      */
-    public <T extends Frame, P extends PermissionScope> Integer deleteDependent(T item, P parent, Accessor user,
+    public <T extends Frame, P extends DescribedEntity> Integer deleteDependent(T item, P parent, Accessor user,
             Class<T> dependentClass) throws PermissionDenied,
             ValidationError, SerializationError {
         return deleteDependent(item, parent, user, dependentClass, Optional.<String>absent());
@@ -358,7 +358,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws ValidationError
      * @throws SerializationError
      */
-    public <T extends Frame, P extends PermissionScope> Integer deleteDependent(T item, P parent, Accessor user,
+    public <T extends Frame, P extends DescribedEntity> Integer deleteDependent(T item, P parent, Accessor user,
             Class<T> dependentClass, Optional<String> logMessage)
             throws PermissionDenied, ValidationError, SerializationError {
         actionManager.setScope(parent)
