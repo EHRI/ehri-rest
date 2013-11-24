@@ -524,13 +524,11 @@ public final class Bundle {
      */
     public Bundle generateIds(final List<String> scopes) {
         boolean isTemp = id == null;
-        IdGenerator idgen = getType().getIdgen();
-        String newId = isTemp
-                ? idgen.generateId(getType(), scopes, this)
-                : id;
+        IdGenerator idGen = getType().getIdgen();
+        String newId = isTemp ? idGen.generateId(scopes, this) : id;
         ListMultimap<String, Bundle> idRels = LinkedListMultimap.create();
         List<String> nextScopes = Lists.newArrayList(scopes);
-        nextScopes.add(idgen.getIdBase(this));
+        nextScopes.add(idGen.getIdBase(this));
         for (Map.Entry<String, Bundle> entry : relations.entries()) {
             idRels.put(entry.getKey(), entry.getValue().generateIds(nextScopes));
         }

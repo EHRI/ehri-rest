@@ -3,6 +3,7 @@ package eu.ehri.project.test;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.UserProfile;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 
@@ -28,5 +29,11 @@ abstract public class AbstractFixtureTest extends ModelTestBase {
         } catch (ItemNotFound e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        super.tearDown();
+
     }
 }

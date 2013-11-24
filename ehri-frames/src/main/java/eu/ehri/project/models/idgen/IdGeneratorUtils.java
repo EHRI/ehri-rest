@@ -47,31 +47,30 @@ public class IdGeneratorUtils  {
      * Uses the items identifier and its entity type to generate a (supposedly)
      * unique ID.
      */
-    public static String generateId(EntityClass type, PermissionScope scope, Bundle bundle, String ident) {
+    public static String generateId(PermissionScope scope, Bundle bundle, String ident) {
         LinkedList<String> scopeIds = Lists.newLinkedList();
         if (scope != null && !scope.equals(SystemScope.getInstance())) {
             for (PermissionScope s : scope.getPermissionScopes())
                 scopeIds.addFirst(s.getIdentifier());
             scopeIds.add(scope.getIdentifier());            
         }
-        return generateId(type, scopeIds, bundle, ident);
+        return generateId(scopeIds, bundle, ident);
     }
 
     /**
      * Use an array of scope IDs and the bundle data to generate a unique
      * id within a given scope.
      *
-     * @param type The entity type.
      * @param scopeIds An array of scope ids
      * @param bundle The input bundle
      * @return The complete id string
      */
-    public static String generateId(EntityClass type, final List<String> scopeIds, final Bundle bundle, String ident) {
+    public static String generateId(final List<String> scopeIds, final Bundle bundle, String ident) {
 
         // Validation should have ensured that ident exists...
         if (ident == null || ident.trim().isEmpty()) {
             throw new RuntimeException("Invalid null identifier for "
-                    + type.getEntityClass().getCanonicalName() + ": " + bundle.getData());
+                    + bundle.getType().getName() + ": " + bundle.getData());
         }
         List<String> newIds = Lists.newArrayList(scopeIds);
         newIds.add(ident);

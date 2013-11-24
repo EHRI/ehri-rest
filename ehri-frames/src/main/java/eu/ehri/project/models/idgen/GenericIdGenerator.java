@@ -18,35 +18,31 @@ public enum GenericIdGenerator implements IdGenerator {
 
     INSTANCE;
 
-    public ListMultimap<String, String> handleIdCollision(EntityClass type, PermissionScope scope,
-            Bundle bundle) {
+    public ListMultimap<String, String> handleIdCollision(PermissionScope scope, Bundle bundle) {
         throw new RuntimeException(String.format("Index collision generating identifier for item type '%s' with data: '%s'",
-                type, bundle));
+                bundle.getType().getName(), bundle));
     }
 
 
     /**
      * Generates a random string UUID.
      *
-     * @param type   The type of the entity
      * @param scope  The entity's parent scope
      * @param bundle The entity's bundle data
      * @return A generated ID string
      */
-    public String generateId(EntityClass type, PermissionScope scope,
-            Bundle bundle) {
-        return generateId(type, Lists.<String>newArrayList(), bundle);
+    public String generateId(PermissionScope scope, Bundle bundle) {
+        return generateId(Lists.<String>newArrayList(), bundle);
     }
 
     /**
      * Generates a random String.
      *
-     * @param type     The entity's type
      * @param scopeIds array of scope ids
      * @param bundle   The entity's bundle data
      * @return A generated ID string
      */
-    public String generateId(EntityClass type, List<String> scopeIds, Bundle bundle) {
+    public String generateId(List<String> scopeIds, Bundle bundle) {
         return getIdBase(bundle);
     }
 

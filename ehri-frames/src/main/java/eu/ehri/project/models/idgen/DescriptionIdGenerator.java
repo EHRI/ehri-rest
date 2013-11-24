@@ -23,8 +23,7 @@ public enum DescriptionIdGenerator implements IdGenerator {
 
     INSTANCE;
 
-    public ListMultimap<String,String> handleIdCollision(EntityClass type, PermissionScope scope,
-            Bundle bundle) {
+    public ListMultimap<String,String> handleIdCollision(PermissionScope scope, Bundle bundle) {
         return IdGeneratorUtils.handleIdCollision(scope, LANGUAGE_OF_DESCRIPTION,
                 getIdBase(bundle));
     }
@@ -34,23 +33,20 @@ public enum DescriptionIdGenerator implements IdGenerator {
      * Uses the items identifier and its entity type to generate a (supposedly)
      * unique ID.
      */
-    public String generateId(EntityClass type, PermissionScope scope,
-            Bundle bundle) {
-        return IdGeneratorUtils.generateId(type, scope, bundle, getIdBase(bundle));
+    public String generateId(PermissionScope scope, Bundle bundle) {
+        return IdGeneratorUtils.generateId(scope, bundle, getIdBase(bundle));
     }
 
     /**
      * Use an array of scope IDs and the bundle data to generate a unique
      * id within a given scope.
      *
-     * @param type The bundle type
      * @param scopeIds An array of scope ids
      * @param bundle The bundle
      * @return The calculated identifier
      */
-    public String generateId(EntityClass type, List<String> scopeIds, Bundle bundle) {
-        return IdGeneratorUtils.generateId(type, scopeIds, bundle,
-                getIdBase(bundle));
+    public String generateId(List<String> scopeIds, Bundle bundle) {
+        return IdGeneratorUtils.generateId(scopeIds, bundle, getIdBase(bundle));
     }
 
     /**

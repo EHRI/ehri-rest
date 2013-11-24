@@ -18,36 +18,30 @@ public interface IdGenerator {
      * Handle an id collision by either a validation error depending
      * on how the id was generated, or a RuntimeError.
      *
-     * @param type   The type of the entity
      * @param scope  The entity's parent scope
      * @param bundle The entity's bundle data
      * @return A set of errors
      */
-    public ListMultimap<String, String> handleIdCollision(EntityClass type, PermissionScope scope,
-            Bundle bundle);
+    public ListMultimap<String, String> handleIdCollision(PermissionScope scope, Bundle bundle);
 
     /**
      * Generate an ID given an entity type prefix and a vertex.
      *
-     * @param type   The type of the entity
      * @param scope  The entity's parent scope
      * @param bundle The entity's bundle data
      * @return A generated ID string
      */
-    public String generateId(EntityClass type, PermissionScope scope,
-            Bundle bundle);
+    public String generateId(PermissionScope scope, Bundle bundle);
 
     /**
      * Generate an ID given an array of scope IDs. This can be used
      * where the scope might not yet exist.
      *
-     * @param type     The type of the entity
      * @param scopeIds An array of scope ids, ordered parent-to-child.
      * @param bundle   The entity's bundle data
      * @return A generated ID string
      */
-    public String generateId(EntityClass type, List<String> scopeIds,
-            Bundle bundle);
+    public String generateId(List<String> scopeIds, Bundle bundle);
 
     /**
      * Return the base data for the id, sans scoping.
