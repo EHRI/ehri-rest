@@ -82,7 +82,10 @@ public final class AnnotationViews {
 
 
         Annotation annotation = new BundleDAO(graph).create(bundle, Annotation.class);
-        dep.addAnnotation(annotation);
+        entity.addAnnotation(annotation);
+        if (!entity.equals(dep)) {
+            dep.addAnnotationPart(annotation);
+        }
         annotation.setAnnotator(graph.frame(user.asVertex(), Annotator.class));
 
         new ActionManager(graph, entity).logEvent(annotation,
