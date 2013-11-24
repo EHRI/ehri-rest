@@ -12,6 +12,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -92,6 +93,7 @@ public class PermissionRestClientTest extends BaseRestClientTest {
                 .contains(PermissionType.DELETE.getName()));
     }
 
+    @Ignore
     @Test
     public void testPermissionSetPermissionDenied() throws Exception {
 
@@ -105,6 +107,7 @@ public class PermissionRestClientTest extends BaseRestClientTest {
         // TODO: Figure out why no content ever seems to be returned here?
     }
 
+    @Ignore
     @Test
     public void testGivingBadPermsErrorsCorrectly() throws Exception {
 
@@ -124,6 +127,7 @@ public class PermissionRestClientTest extends BaseRestClientTest {
         assertStatus(BAD_REQUEST, response);
     }
 
+    @Ignore
     @Test
     public void testSettingGlobalPermissions() throws Exception {
 
@@ -156,6 +160,7 @@ public class PermissionRestClientTest extends BaseRestClientTest {
         assertStatus(OK, response);
     }
 
+    @Ignore
     @Test
     public void testSettingScopedPermissions() throws Exception {
         // Grant permissions for a user to create items within this scope.

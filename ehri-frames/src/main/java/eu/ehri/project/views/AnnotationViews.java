@@ -101,22 +101,14 @@ public final class AnnotationViews {
      * @param accessor
      * @return map of ids to annotation lists.
      */
-    public ListMultimap<String, Annotation> getFor(String id, Accessor accessor)
+    public Iterable<Annotation> getFor(String id, Accessor accessor)
             throws ItemNotFound {
         final PipeFunction<Vertex, Boolean> filter = acl
                 .getAclFilterFunction(accessor);
         final ListMultimap<String, Annotation> annotations = LinkedListMultimap
                 .create();
         AnnotatableEntity item = manager.getFrame(id, AnnotatableEntity.class);
-        getAnnotations(item, annotations, filter);
-        new Serializer(graph).traverseSubtree(item, new TraversalCallback() {
-            @Override
-            public void process(Frame vertexFrame, int depth,
-                    String relation, int relationIndex) {
-                getAnnotations(vertexFrame, annotations, filter);
-            }
-        });
-        return annotations;
+        return item.getAnnotations();
     }
 
     /**
