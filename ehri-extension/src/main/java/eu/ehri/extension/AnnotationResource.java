@@ -163,9 +163,8 @@ public class AnnotationResource extends
     public StreamingOutput listAnnotationsForSubtree(@PathParam("id") String id)
             throws ItemNotFound, BadRequester, PermissionDenied {
         AnnotationViews annotationViews = new AnnotationViews(graph);
-        ListMultimap<String, Annotation> anns = annotationViews.getFor(id,
-                getRequesterUserProfile());
-        return streamingMultimap(anns);
+        Iterable<Annotation> anns = annotationViews.getFor(id, getRequesterUserProfile());
+        return streamingList(anns);
     }
 
     private Response buildResponseFromAnnotation(Annotation ann)

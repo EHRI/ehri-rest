@@ -46,8 +46,10 @@ public class Ontology {
 
     // Annotations
     public static final String ANNOTATES = "annotates";
+    public static final String ANNOTATES_PART = "annotatesPart";
     public static final String ANNOTATOR_HAS_ANNOTATION = "hasAnnotation";
     public static final String ANNOTATION_ANNOTATES = "hasAnnotationTarget";
+    public static final String ANNOTATION_ANNOTATES_PART = "hasAnnotationTargetPart";
     public static final String ANNOTATION_HAS_SOURCE = "hasAnnotationBody";
     public static final String ANNOTATION_NOTES_BODY = "body";
     public static final String ANNOTATION_TYPE = "type";
