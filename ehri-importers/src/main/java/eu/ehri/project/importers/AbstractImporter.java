@@ -42,9 +42,12 @@ public abstract class AbstractImporter<T> {
     protected final GraphManager manager;
     protected final ImportLog log;
     protected final T documentContext;
-    protected List<ImportCallback> createCallbacks = new LinkedList<ImportCallback>();
-    protected List<ImportCallback> updateCallbacks = new LinkedList<ImportCallback>();
-    protected List<ImportCallback> unchangedCallbacks = new LinkedList<ImportCallback>();
+    protected List<ImportCallback<Mutation<? extends AccessibleEntity>>> createCallbacks
+            = new LinkedList<ImportCallback<Mutation<? extends AccessibleEntity>>>();
+    protected List<ImportCallback<Mutation<? extends AccessibleEntity>>> updateCallbacks
+            = new LinkedList<ImportCallback<Mutation<? extends AccessibleEntity>>>();
+    protected List<ImportCallback<Mutation<? extends AccessibleEntity>>> unchangedCallbacks
+            = new LinkedList<ImportCallback<Mutation<? extends AccessibleEntity>>>();
     protected BundleDAO persister;
 
     private NodeProperties pc;
@@ -53,16 +56,16 @@ public abstract class AbstractImporter<T> {
     protected void handleCallbacks(Mutation<? extends AccessibleEntity> mutation) {
         switch (mutation.getState()) {
             case CREATED:
-                for (ImportCallback cb: createCallbacks)
-                    cb.itemImported(mutation.getNode());
+                for (ImportCallback<Mutation<? extends AccessibleEntity>> cb : createCallbacks)
+                    cb.itemImported(mutation);
                 break;
             case UPDATED:
-                for (ImportCallback cb: updateCallbacks)
-                    cb.itemImported(mutation.getNode());
+                for (ImportCallback<Mutation<? extends AccessibleEntity>> cb : updateCallbacks)
+                    cb.itemImported(mutation);
                 break;
             case UNCHANGED:
-                for (ImportCallback cb: unchangedCallbacks)
-                    cb.itemImported(mutation.getNode());
+                for (ImportCallback<Mutation<? extends AccessibleEntity>> cb : unchangedCallbacks)
+                    cb.itemImported(mutation);
                 break;
         }
     }
@@ -87,6 +90,7 @@ public abstract class AbstractImporter<T> {
 
     /**
      * Constructor without a document context.
+     *
      * @param framedGraph
      * @param permissionScope
      * @param log
@@ -100,7 +104,7 @@ public abstract class AbstractImporter<T> {
      *
      * @param cb
      */
-    public void addCreationCallback(final ImportCallback cb) {
+    public void addCreationCallback(final ImportCallback<Mutation<? extends AccessibleEntity>> cb) {
         createCallbacks.add(cb);
     }
 
@@ -109,7 +113,7 @@ public abstract class AbstractImporter<T> {
      *
      * @param cb
      */
-    public void addUpdateCallback(final ImportCallback cb) {
+    public void addUpdateCallback(final ImportCallback<Mutation<? extends AccessibleEntity>> cb) {
         updateCallbacks.add(cb);
     }
 
@@ -118,7 +122,7 @@ public abstract class AbstractImporter<T> {
      *
      * @param cb
      */
-    public void addUnchangedCallback(final ImportCallback cb) {
+    public void addUnchangedCallback(final ImportCallback<Mutation<? extends AccessibleEntity>> cb) {
         unchangedCallbacks.add(cb);
     }
 

@@ -21,6 +21,7 @@ import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 
+import eu.ehri.project.persistence.Mutation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,25 +60,28 @@ public class CsvImportManager extends XmlImportManager {
             importer = importerClass.getConstructor(FramedGraph.class, PermissionScope.class,
                     ImportLog.class).newInstance(framedGraph, permissionScope, log);
             logger.debug("importer of class " + importer.getClass());
-            importer.addCreationCallback(new ImportCallback() {
+            importer.addCreationCallback(new ImportCallback<Mutation<? extends AccessibleEntity>>() {
                 @Override
-                public void itemImported(AccessibleEntity item) {
-                    logger.info("Item created: {}", item.getId());
-                    eventContext.addSubjects(item);
+                public void itemImported(Mutation<? extends AccessibleEntity> item) {
+                    logger.info("Item created: {}", item.getNode().getId());
+                    eventContext.addSubjects(item.getNode());
                     log.addCreated();
                 }
             });
-            importer.addUpdateCallback(new ImportCallback() {
+            importer.addUpdateCallback(new ImportCallback<Mutation<? extends AccessibleEntity>>() {
                 @Override
-                public void itemImported(AccessibleEntity item) {
-                    logger.info("Item updated: {}", item.getId());
-                    eventContext.addSubjects(item);
+                public void itemImported(Mutation<? extends AccessibleEntity> item) {
+                    logger.info("Item updated: {}", item.getNode().getId());
+                    eventContext.addSubjects(item.getNode());
+                    if (item.getPrior().isPresent()) {
+                        eventContext.createVersion(item.getNode(), item.getPrior().get());
+                    }
                     log.addUpdated();
                 }
             });
-            importer.addUnchangedCallback(new ImportCallback() {
+            importer.addUnchangedCallback(new ImportCallback<Mutation<? extends AccessibleEntity>>() {
                 @Override
-                public void itemImported(AccessibleEntity item) {
+                public void itemImported(Mutation<? extends AccessibleEntity> item) {
                     log.addUnchanged();
                 }
             });
