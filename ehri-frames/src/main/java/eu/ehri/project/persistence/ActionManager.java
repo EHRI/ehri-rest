@@ -28,7 +28,7 @@ import java.util.Iterator;
 
 /**
  * Class for dealing with actions.
- *
+ * <p/>
  * Events are captured as a linked list with new events placed
  * at the head. The head event is connected to a node called the
  * {@link eu.ehri.project.models.events.SystemEventQueue}. Events
@@ -38,21 +38,20 @@ import java.util.Iterator;
  * possible to fetch new events easily and prevent having to sort
  * by timestamp, etc. Schematically, the graph thus formed looks
  * something like:
- *
- *      Actioner            SystemEventQueue             Subject
- *          \/                      \/                      \/
- *  [lifecycleAction]   [lifecycleActionStream]     [lifecycleEvent]
- *          |                       |                       |
- *          e3--[hasActioner]-<-- Event 3 ---[hasEvent]--<--e3
- *          \/                      \/                      \/
- *  [lifecycleAction]       [lifecycleAction]       [lifecycleEvent]
- *          |                       |                       |
- *          e2--[hasActioner]-<-- Event 2 ---[hasEvent]--<--e2
- *          \/                      \/                      \/
- *  [lifecycleAction]       [lifecycleAction]       [lifecycleEvent]
- *          |                       |                       |
- *          e1--[hasActioner]-<-- Event 1 ---[hasEvent]--<--e1
- *
+ * <p/>
+ * Actioner            SystemEventQueue             Subject
+ * \/                      \/                      \/
+ * [lifecycleAction]   [lifecycleActionStream]     [lifecycleEvent]
+ * |                       |                       |
+ * e3--[hasActioner]-<-- Event 3 ---[hasEvent]--<--e3
+ * \/                      \/                      \/
+ * [lifecycleAction]       [lifecycleAction]       [lifecycleEvent]
+ * |                       |                       |
+ * e2--[hasActioner]-<-- Event 2 ---[hasEvent]--<--e2
+ * \/                      \/                      \/
+ * [lifecycleAction]       [lifecycleAction]       [lifecycleEvent]
+ * |                       |                       |
+ * e1--[hasActioner]-<-- Event 1 ---[hasEvent]--<--e1
  *
  * @author michaelb
  */
@@ -73,7 +72,7 @@ public final class ActionManager {
     /**
      * Constructor with scope.
      *
-     * @param graph
+     * @param graph The framed graph
      */
     public ActionManager(final FramedGraph<?> graph, final Frame scope) {
         this.graph = graph;
@@ -85,7 +84,7 @@ public final class ActionManager {
     /**
      * Constructor.
      *
-     * @param graph
+     * @param graph The framed graph
      */
     public ActionManager(FramedGraph<?> graph) {
         this(graph, SystemScope.getInstance());
@@ -103,28 +102,23 @@ public final class ActionManager {
         private final Actioner actioner;
         private final EventTypes actionType;
         private final Optional<String> logMessage;
-        private final Optional<Object> payload;
 
+        /**
+         * Create a new event context.
+         *
+         * @param actionManager The action manager instance
+         * @param systemEvent   The current event
+         * @param actioner      The actioner
+         * @param type          The event type
+         * @param logMessage    An optional log message
+         */
         public EventContext(ActionManager actionManager, SystemEvent systemEvent,
-                Actioner actioner, EventTypes type, Optional<String> logMessage,
-                Optional<Object> payload) {
+                Actioner actioner, EventTypes type, Optional<String> logMessage) {
             this.actionManager = actionManager;
             this.actionType = type;
             this.systemEvent = systemEvent;
             this.actioner = actioner;
             this.logMessage = logMessage;
-            this.payload = payload;
-        }
-
-        public EventContext(ActionManager actionManager, SystemEvent systemEvent,
-                Actioner actioner, EventTypes type, Optional<String> logMessage) {
-            this(actionManager, systemEvent, actioner, type, logMessage, Optional.absent());
-        }
-
-        public EventContext(ActionManager actionManager, SystemEvent systemEvent,
-                Actioner actioner, EventTypes type, Optional<String> logMessage, Object payload) {
-            this(actionManager, systemEvent, actioner, type, logMessage,
-                    Optional.fromNullable(payload));
         }
 
         public SystemEvent getSystemEvent() {
@@ -133,20 +127,28 @@ public final class ActionManager {
 
         /**
          * Get the event actioner.
-         * @return
+         *
+         * @return The actioner
          */
         public Actioner getActioner() {
             return this.actioner;
         }
-        
+
         /**
          * Get the event context log message.
-         * @return
+         *
+         * @return The optional log message
          */
         public Optional<String> getLogMessage() {
             return this.logMessage;
         }
 
+        /**
+         * Create a snapshot of the given node's data.
+         *
+         * @param frame The subject node
+         * @return This event context
+         */
         public EventContext createVersion(Frame frame) {
             try {
                 Bundle bundle = actionManager.versionSerializer.vertexFrameToBundle(frame);
@@ -156,6 +158,15 @@ public final class ActionManager {
             }
         }
 
+        /**
+         * Create a snapshot of the given node using the provided data. This is
+         * useful when the node has already been changed at this point the snapshot
+         * is taken.
+         *
+         * @param frame  The subject node
+         * @param bundle A bundle of the node's data
+         * @return This event context
+         */
         public EventContext createVersion(Frame frame, Bundle bundle) {
             try {
                 Bundle version = new Bundle(EntityClass.VERSION)
@@ -178,8 +189,9 @@ public final class ActionManager {
 
         /**
          * Add subjects to an event.
-         * @param entities
-         * @return
+         *
+         * @param entities A set of event subjects
+         * @return This event context
          */
         public EventContext addSubjects(AccessibleEntity... entities) {
             for (AccessibleEntity entity : entities) {
@@ -192,11 +204,21 @@ public final class ActionManager {
             }
             return this;
         }
+
+        /**
+         * Get the type of this event context.
+         *
+         * @return The event context type
+         */
+        public EventTypes getEventType() {
+            return actionType;
+        }
     }
 
     /**
      * Get the latest global event.
-     * @return
+     *
+     * @return The latest event node
      */
     public SystemEvent getLatestGlobalEvent() {
         try {
@@ -211,7 +233,8 @@ public final class ActionManager {
 
     /**
      * Get an iterable of global events in most-recent-first order.
-     * @return
+     *
+     * @return A iterable of event nodes
      */
     public Iterable<SystemEvent> getLatestGlobalEvents() {
         try {
@@ -226,17 +249,17 @@ public final class ActionManager {
     /**
      * Create a global event and insert it at the head of the system queue. The
      * relationship from the <em>system</em> node to the new latest action is
-     * <em>actionType</em><strong>Stream</strong>.
+     * <em>type</em><strong>Stream</strong>.
      *
-     * @param actionType
-     * @param logMessage
-     * @return
+     * @param type       The event type
+     * @param logMessage An optional log message
+     * @return A new SystemEvent node
      */
-    private SystemEvent createGlobalEvent(EventTypes actionType, Optional<String> logMessage) {
+    private SystemEvent createGlobalEvent(EventTypes type, Optional<String> logMessage) {
         try {
             Vertex system = manager.getVertex(GLOBAL_EVENT_ROOT, EntityClass.SYSTEM);
             Bundle ge = new Bundle.Builder(EntityClass.SYSTEM_EVENT)
-                    .addDataValue(Ontology.EVENT_TYPE, actionType.toString())
+                    .addDataValue(Ontology.EVENT_TYPE, type.toString())
                     .addDataValue(Ontology.EVENT_TIMESTAMP, getTimestamp())
                     .addDataValue(Ontology.EVENT_LOG_MESSAGE, logMessage.or(""))
                     .build();
@@ -259,9 +282,10 @@ public final class ActionManager {
 
     /**
      * Create an action with the given type.
-     * @param user
-     * @param type
-     * @return
+     *
+     * @param user The actioner
+     * @param type The event type
+     * @return A new event context
      */
     public EventContext logEvent(Actioner user, EventTypes type) {
         return logEvent(user, type, Optional.<String>absent());
@@ -269,33 +293,23 @@ public final class ActionManager {
 
     /**
      * Create an action with the given type and a log message.
-     * @param user
-     * @param type
-     * @param logMessage
-     * @return
+     *
+     * @param user       The actioner
+     * @param type       The event type
+     * @param logMessage A log message
+     * @return An EventContext object
      */
     public EventContext logEvent(Actioner user, EventTypes type, String logMessage) {
         return logEvent(user, type, Optional.of(logMessage));
     }
 
     /**
-     * Create an action with the given type and a log message.
-     * @param user
-     * @param type
-     * @param logMessage
-     * @return
-     */
-    public EventContext logEvent(Actioner user, EventTypes type, String logMessage, Object payload) {
-        return logEvent(user, type, Optional.of(logMessage));
-    }
-
-    /**
      * Create an action node describing something that user U has done.
      *
-     * @param user
-     * @param type
-     * @param logMessage
-     * @return
+     * @param user       The actioner
+     * @param type       The event type
+     * @param logMessage An optional log message
+     * @return An EventContext object
      */
     public EventContext logEvent(Actioner user, EventTypes type, Optional<String> logMessage) {
         Vertex vertex = getLinkNode(Ontology.ACTIONER_HAS_LIFECYCLE_ACTION);
@@ -309,10 +323,11 @@ public final class ActionManager {
 
     /**
      * Create an action for the given subject, user, and type.
-     * @param subject
-     * @param user
-     * @param type
-     * @return
+     *
+     * @param subject The subject node
+     * @param user    The actioner
+     * @param type    The event type
+     * @return An EventContext object
      */
     public EventContext logEvent(AccessibleEntity subject, Actioner user,
             EventTypes type) {
@@ -321,11 +336,12 @@ public final class ActionManager {
 
     /**
      * Create an action for the given subject, user, and type and a log message.
-     * @param subject
-     * @param user
-     * @param type
-     * @param logMessage
-     * @return
+     *
+     * @param subject    The subjject node
+     * @param user       The actioner
+     * @param type       The event type
+     * @param logMessage A log message
+     * @return An EventContext object
      */
     public EventContext logEvent(AccessibleEntity subject, Actioner user,
             EventTypes type, String logMessage) {
@@ -336,10 +352,10 @@ public final class ActionManager {
      * Create an action node that describes what user U has done with subject S
      * via logMessage log.
      *
-     * @param subject
-     * @param user
-     * @param logMessage
-     * @return
+     * @param subject    The subjject node
+     * @param user       The actioner
+     * @param logMessage A log message
+     * @return An EventContext object
      */
     public EventContext logEvent(AccessibleEntity subject, Actioner user,
             EventTypes type, Optional<String> logMessage) {
@@ -348,6 +364,12 @@ public final class ActionManager {
         return context;
     }
 
+    /**
+     * Set the scope of this action.
+     *
+     * @param frame The current permission scope
+     * @return A new ActionManager instance.
+     */
     public ActionManager setScope(Frame frame) {
         return new ActionManager(graph,
                 Optional.fromNullable(frame).or(SystemScope.getInstance()));
@@ -367,6 +389,12 @@ public final class ActionManager {
         return vertex;
     }
 
+    /**
+     * Add a subject node to an event and increment the subject count cache.
+     *
+     * @param event   The event node
+     * @param subject The subject node
+     */
     private void addSubject(Vertex event, Vertex subject) {
         Long count = event.getProperty(ItemHolder.CHILD_COUNT);
         graph.addEdge(null, subject, event, Ontology.ENTITY_HAS_EVENT);
@@ -382,10 +410,10 @@ public final class ActionManager {
      * direction <em>direction</em>, insert vertex <em>insert</em> <strong>after</strong>
      * the head of the chain.
      *
-     * @param head
-     * @param newHead
-     * @param relation
-     * @param direction
+     * @param head      The current vertex queue head node
+     * @param newHead   The replacement head node
+     * @param relation  The relationship between them
+     * @param direction The direction of the relationship
      */
     private void replaceAtHead(Vertex head, Vertex newHead, String headRelation,
             String relation, Direction direction) {
@@ -403,7 +431,8 @@ public final class ActionManager {
 
     /**
      * Get the current time as a timestamp.
-     * @return
+     *
+     * @return The current time in ISO DateTime format.
      */
     public static String getTimestamp() {
         DateTime dt = DateTime.now();
