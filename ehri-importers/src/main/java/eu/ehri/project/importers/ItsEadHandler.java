@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,8 +20,7 @@ public class ItsEadHandler extends EadHandler {
 	private int itscount = 0;
 	
 	public ItsEadHandler(AbstractImporter<Map<String, Object>> importer) {
-		super(importer); // add specific .properties?
-		
+		super(importer, new XmlImportProperties("its.properties"));
 	}
 
 	
