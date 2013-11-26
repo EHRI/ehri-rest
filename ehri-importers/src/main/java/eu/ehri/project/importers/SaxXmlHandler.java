@@ -181,7 +181,7 @@ public abstract class SaxXmlHandler extends DefaultHandler {
         // MB: Egregious hack - translate 3-letter language codes to 2-letter ones!!!
 
         if (property.startsWith("language")) {
-            valuetrimmed = Helpers.iso639Three2Two(valuetrimmed);
+            valuetrimmed = Helpers.iso639DashTwoCode(valuetrimmed);
         }
 
         logger.debug("putProp: " + property + " " + valuetrimmed);

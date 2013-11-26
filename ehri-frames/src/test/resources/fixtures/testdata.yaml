@@ -120,7 +120,7 @@
         data:
           identifier: niod-en
           name: NIOD Description
-          languageCode: en
+          languageCode: eng
         relationships:
           hasAddress:
             - id: ar1
@@ -144,7 +144,7 @@
         data:
           identifier: kcl-en
           name: KCL Description
-          languageCode: en
+          languageCode: eng
         relationships:
           hasAddress:
             - id: ar2
@@ -168,7 +168,7 @@
         data:
           identifier: dans-en
           name: DANS Description
-          languageCode: en
+          languageCode: eng
         relationships:
           hasAddress:
             - id: ar3
@@ -191,7 +191,7 @@
         data:
           identifier: soma-en
           name: SOMA Description
-          languageCode: en
+          languageCode: eng
         relationships:
           hasAddress:
             - id: ar4
@@ -217,7 +217,7 @@
         data:
           identifier: c1-desc
           name: Documentary Unit 1
-          languageCode: en
+          languageCode: eng
           scopeAndContent: Some description text for c1
         relationships:
           hasDate:
@@ -244,7 +244,7 @@
         data:
           identifier: c1-desc2
           name: Documentary Unit 1
-          languageCode: en
+          languageCode: eng
           scopeAndContent: Some alternate description text for c1
     heldBy: r1
     hasPermissionScope: r1
@@ -265,7 +265,7 @@
         data:
           identifier: c2-desc
           name: Documentary Unit 2
-          languageCode: en
+          languageCode: eng
           scopeAndContent: Some description text for c2
         relationships:
           hasDate:
@@ -293,7 +293,7 @@
         data:
           identifier: c3-desc
           name: Documentary Unit 3
-          languageCode: en
+          languageCode: eng
           scopeAndContent: Some description text for c3
         relationships:
           hasDate:
@@ -320,7 +320,7 @@
         data:
           identifier: c4-desc
           name: Documentary Unit 4
-          languageCode: en
+          languageCode: eng
           scopeAndContent: Some description text for c4
         relationships:
           hasDate:
@@ -356,7 +356,7 @@
         data:
           typeOfEntity: person
           name: An Authority 1
-          languageCode: en
+          languageCode: eng
     inAuthoritativeSet: auths
     hasPermissionScope: auths
 
@@ -371,7 +371,7 @@
         data:
           typeOfEntity: person
           name: An Authority 2
-          languageCode: en
+          languageCode: eng
     inAuthoritativeSet: auths
     hasPermissionScope: auths
 
