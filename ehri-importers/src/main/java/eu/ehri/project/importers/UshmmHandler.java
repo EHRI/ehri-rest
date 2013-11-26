@@ -40,7 +40,7 @@ public class UshmmHandler extends EadHandler {
 	 */
 	@Override
 	protected void extractIdentifier(Map<String, Object> currentGraph) {
-		//not all units have ids, and some have multiple, find the Bestandssignatur
+		//not all units have ids, and some have multiple, find the "irn"
 		if (currentGraph.containsKey("objectIdentifier")) {
 			if (currentGraph.get("objectIdentifier") instanceof List) {
 				logger.debug("class of identifier: " + currentGraph.get("objectIdentifier").getClass());
