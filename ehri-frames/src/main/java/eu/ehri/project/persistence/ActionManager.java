@@ -200,7 +200,7 @@ public final class ActionManager {
                 actionManager.replaceAtHead(entity.asVertex(), vertex,
                         Ontology.ENTITY_HAS_LIFECYCLE_EVENT,
                         Ontology.ENTITY_HAS_LIFECYCLE_EVENT, Direction.OUT);
-                actionManager.addSubject(systemEvent.asVertex(), vertex);
+                actionManager.addSubjectAndIncrementCount(systemEvent.asVertex(), vertex);
             }
             return this;
         }
@@ -317,7 +317,7 @@ public final class ActionManager {
                 Ontology.ACTIONER_HAS_LIFECYCLE_ACTION,
                 Ontology.ACTIONER_HAS_LIFECYCLE_ACTION, Direction.OUT);
         SystemEvent globalEvent = createGlobalEvent(type, logMessage);
-        addSubject(globalEvent.asVertex(), vertex);
+        addActionerLink(globalEvent.asVertex(), vertex);
         return new EventContext(this, globalEvent, user, type, logMessage);
     }
 
@@ -390,19 +390,23 @@ public final class ActionManager {
     }
 
     /**
-     * Add a subject node to an event and increment the subject count cache.
+     * Add a subjectLinkNode node to an event and increment the subjectLinkNode count cache.
      *
      * @param event   The event node
-     * @param subject The subject node
+     * @param subjectLinkNode The subjectLinkNode node
      */
-    private void addSubject(Vertex event, Vertex subject) {
+    private void addSubjectAndIncrementCount(Vertex event, Vertex subjectLinkNode) {
         Long count = event.getProperty(ItemHolder.CHILD_COUNT);
-        graph.addEdge(null, subject, event, Ontology.ENTITY_HAS_EVENT);
+        graph.addEdge(null, subjectLinkNode, event, Ontology.ENTITY_HAS_EVENT);
         if (count == null) {
             event.setProperty(ItemHolder.CHILD_COUNT, 1L);
         } else {
             event.setProperty(ItemHolder.CHILD_COUNT, count + 1L);
         }
+    }
+
+    private void addActionerLink(Vertex event, Vertex actionerLinkNode) {
+        graph.addEdge(null, actionerLinkNode, event, Ontology.ENTITY_HAS_EVENT);
     }
 
     /**

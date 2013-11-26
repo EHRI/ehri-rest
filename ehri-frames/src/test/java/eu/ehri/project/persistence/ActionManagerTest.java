@@ -7,6 +7,7 @@ import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.Actioner;
+import eu.ehri.project.models.base.ItemHolder;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.models.events.Version;
 import eu.ehri.project.test.AbstractFixtureTest;
@@ -46,6 +47,8 @@ public class ActionManagerTest extends AbstractFixtureTest {
 
         // Check exactly one Event was created
         assertEquals(1, Iterables.count(second.getSubjects()));
+        // Check item cache is correct...
+        assertEquals(1L, second.asVertex().getProperty(ItemHolder.CHILD_COUNT));
         assertEquals(1, Iterables.count(second.getActioners()));
 
         // Check the user is correctly linked
