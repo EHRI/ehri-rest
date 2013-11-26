@@ -27,6 +27,7 @@ public class CmdEntryPoint extends BaseCommand {
         mmap.put(EadImport.NAME, EadImport.class);
         mmap.put(BaEadImport.NAME, BaEadImport.class);
         mmap.put(NiodEadImport.NAME, NiodEadImport.class);
+        mmap.put(ItsEadImport.NAME, ItsEadImport.class);
         mmap.put(EacImport.NAME, EacImport.class);
         mmap.put(EagImport.NAME, EagImport.class);
         mmap.put(UserListEntities.NAME, UserListEntities.class);

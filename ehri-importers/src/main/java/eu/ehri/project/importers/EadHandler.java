@@ -48,7 +48,7 @@ public class EadHandler extends SaxXmlHandler {
 
     @SuppressWarnings("unchecked")
     public EadHandler(AbstractImporter<Map<String, Object>> importer) {
-        this(importer, new XmlImportProperties("bundesarchive.properties"));
+        this(importer, new XmlImportProperties("icaatom.properties"));
     }
 
     public EadHandler(AbstractImporter<Map<String, Object>> importer,
@@ -122,7 +122,7 @@ public class EadHandler extends SaxXmlHandler {
 
     /**
      * Checks given currentGraph for a language and sets a default language tag
-     * if no language is found.
+     * for the description if no language is found.
      * @param currentGraph
      */
 	protected void useDefaultLanguage(Map<String, Object> currentGraph) {
@@ -131,7 +131,7 @@ public class EadHandler extends SaxXmlHandler {
 	
 	/**
      * Checks given currentGraph for a language and sets a default language tag
-     * if no language is found.
+     * for the description if no language is found.
      * @param currentGraph
      * @param defaultLanguage Language tag to use as default
      */
