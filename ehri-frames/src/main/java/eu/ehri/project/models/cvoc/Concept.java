@@ -54,7 +54,7 @@ public interface Concept extends AccessibleEntity, IdentifiableEntity,
     public Iterable<Concept> getBroaderConcepts();
 
     // NOTE: don't put a Fetch on it, because it can be a large tree of concepts
-    @JavaHandler
+    @Adjacency(label = Ontology.CONCEPT_HAS_NARROWER, direction = Direction.OUT)
     public Iterable<Concept> getNarrowerConcepts();
 
     @JavaHandler
@@ -78,10 +78,17 @@ public interface Concept extends AccessibleEntity, IdentifiableEntity,
     @Adjacency(label = Ontology.CONCEPT_HAS_RELATED, direction=Direction.IN)
     public Iterable<Concept> getRelatedByConcepts();
 
+    @JavaHandler
+    public void updateChildCountCache();
+
     /**
      * Implementation of complex methods.
      */
-    abstract class Impl implements JavaHandlerContext<Vertex>, Concept {
+    abstract class Impl  implements JavaHandlerContext<Vertex>, Concept {
+
+        public void updateChildCountCache() {
+            it().setProperty(CHILD_COUNT, gremlin().out(Ontology.CONCEPT_HAS_NARROWER).count());
+        }
 
         public Long getChildCount() {
             Long count = it().getProperty(CHILD_COUNT);
@@ -91,18 +98,9 @@ public interface Concept extends AccessibleEntity, IdentifiableEntity,
             return count;
         }
 
-        public Iterable<Concept> getNarrowerConcepts() {
-            return frameVertices(gremlin().out(Ontology.CONCEPT_HAS_NARROWER));
-        }
-
         public void addNarrowerConcept(final Concept concept) {
             it().addEdge(Ontology.CONCEPT_HAS_NARROWER, concept.asVertex());
-            Long count = it().getProperty(CHILD_COUNT);
-            if (count == null) {
-                it().setProperty(CHILD_COUNT, gremlin().out(Ontology.CONCEPT_HAS_NARROWER).count());
-            } else {
-                it().setProperty(CHILD_COUNT, count + 1);
-            }
+            updateChildCountCache();
         }
 
         public void removeNarrowerConcept(final Concept concept) {
@@ -112,12 +110,7 @@ public interface Concept extends AccessibleEntity, IdentifiableEntity,
                     break;
                 }
             }
-            Long count = it().getProperty(CHILD_COUNT);
-            if (count == null) {
-                getChildCount();
-            } else {
-                it().setProperty(CHILD_COUNT, count - 1);
-            }
+            updateChildCountCache();
         }
     }
 }

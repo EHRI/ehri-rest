@@ -1,6 +1,8 @@
 package eu.ehri.project.models.utils;
 
+import com.tinkerpop.blueprints.Element;
 import com.tinkerpop.blueprints.Vertex;
+import com.tinkerpop.gremlin.java.GremlinPipeline;
 import com.tinkerpop.pipes.PipeFunction;
 import com.tinkerpop.pipes.branch.LoopPipe;
 
@@ -16,11 +18,11 @@ public class JavaHandlerUtils {
     /**
      * Pipe function that quits after a certain number of loops
      */
-    public static PipeFunction<LoopPipe.LoopBundle<Vertex>, Boolean> maxLoopFuncFactory(final int maxLoops) {
-        return new PipeFunction<LoopPipe.LoopBundle<Vertex>,
+    public static <S> PipeFunction<LoopPipe.LoopBundle<S>, Boolean> maxLoopFuncFactory(final int maxLoops) {
+        return new PipeFunction<LoopPipe.LoopBundle<S>,
                 Boolean>() {
             @Override
-            public Boolean compute(LoopPipe.LoopBundle<Vertex> vertexLoopBundle) {
+            public Boolean compute(LoopPipe.LoopBundle<S> vertexLoopBundle) {
                 return vertexLoopBundle.getLoops() < maxLoops;
             }
         };
@@ -42,4 +44,22 @@ public class JavaHandlerUtils {
             return true;
         }
     };
+
+    /**
+     * Given a pipeline
+     * @param element   The element
+     * @param propName  The cache property name
+     * @param pipe      A pipeline to count
+     */
+    public static <S,E> void cacheCount(Element element, GremlinPipeline<S,E> pipe, String propName) {
+        element.setProperty(propName, pipe.count());
+    }
+
+    public static <S,E> Long getCachedCount(Element element, GremlinPipeline<S,E> pipe, String propName) {
+        Long count = element.getProperty(propName);
+        if (count == null) {
+            count = pipe.count();
+        }
+        return count;
+    }
 }

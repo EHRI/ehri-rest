@@ -40,7 +40,11 @@ public class ItsTest extends AbstractImporterTest {
         InputStream ios = ClassLoader.getSystemResourceAsStream(EAD_EN);
         InputStream ios2 = ClassLoader.getSystemResourceAsStream(EAD_DE);
         
+<<<<<<< HEAD
         XmlImportManager sim = new SaxImportManager(graph, agent, validUser, IcaAtomEadImporter.class, ItsEadHandler.class)
+=======
+        XmlImportManager sim = new SaxImportManager(graph, agent, validUser, IcaAtomEadImporter.class, EadHandler.class)
+>>>>>>> newmike/importer_merge
                 .setTolerant(Boolean.TRUE);
 //        sim.importFiles(, logMessage)
         ImportLog log_en = sim.importFile(ios, logMessage);

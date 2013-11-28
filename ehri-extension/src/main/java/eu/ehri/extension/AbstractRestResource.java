@@ -12,6 +12,10 @@ import com.google.common.base.Optional;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraphFactory;
 import com.tinkerpop.frames.modules.javahandler.JavaHandlerModule;
+import eu.ehri.project.definitions.Entities;
+import eu.ehri.project.models.EntityClass;
+import eu.ehri.project.models.UserProfile;
+import eu.ehri.project.models.utils.ClassUtils;
 import eu.ehri.project.utils.TxCheckedNeo4jGraph;
 import eu.ehri.project.models.base.Frame;
 import org.codehaus.jackson.JsonFactory;
@@ -41,6 +45,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
     private static final ObjectMapper mapper = new ObjectMapper();
 
     private static final Logger logger = LoggerFactory.getLogger(TxCheckedResource.class);
+    private static final FramedGraphFactory graphFactory = new FramedGraphFactory(new JavaHandlerModule());
 
     /**
      * Query arguments.
@@ -101,8 +106,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
 
     public AbstractRestResource(@Context GraphDatabaseService database) {
         this.database = database;
-        graph = new FramedGraphFactory(
-                new JavaHandlerModule()).create(new TxCheckedNeo4jGraph(database));
+        graph = graphFactory.create(new TxCheckedNeo4jGraph(database));
         manager = GraphManagerFactory.getInstance(graph);
         serializer  = new Serializer.Builder(graph).build();
     }
@@ -119,7 +123,8 @@ public abstract class AbstractRestResource implements TxCheckedResource {
     }
 
     /**
-     * Retrieve the id of the UserProfile of the requester
+     * Retrieve the account of the current user, who may be
+     * anonymous.
      * 
      * @return The UserProfile
      * @throws BadRequester
@@ -135,6 +140,20 @@ public abstract class AbstractRestResource implements TxCheckedResource {
                 throw new BadRequester(id.get());
             }
         }
+    }
+
+    /**
+     * Retrieve the profile of the current user, throwing a
+     * BadRequest if it's invalid.
+     * @return
+     */
+    protected UserProfile getCurrentUser() throws BadRequester {
+        Accessor profile = getRequesterUserProfile();
+        if (profile.isAdmin() || profile.isAnonymous()
+                || !profile.getType().equals(Entities.USER_PROFILE)) {
+            throw new BadRequester("Invalid user: " + profile.getId());
+        }
+        return graph.frame(profile.asVertex(), UserProfile.class);
     }
 
     /**
@@ -303,6 +322,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
                     try {
                         mapper.writeValue(g, cacheSerializer.vertexFrameToData(item));
                     } catch (SerializationError e) {
+                        e.printStackTrace();
                         throw new RuntimeException(e);
                     }
                 }
@@ -383,6 +403,16 @@ public abstract class AbstractRestResource implements TxCheckedResource {
                 ? Response.ok(String.format("<count>%d</count>", number.longValue())
                     .getBytes()).build()
                 : Response.ok(number.toString().getBytes()).build();
+    }
+
+    /**
+     * Return a boolean.
+     */
+    protected Response booleanResponse(boolean bool) {
+        return MediaType.TEXT_XML_TYPE.equals(checkMediaType())
+                ? Response.ok(String.format("<boolean>%s</boolean>", bool)
+                    .getBytes()).build()
+                : Response.ok(Boolean.toString(bool).getBytes()).build();
     }
 
     /**

@@ -1,19 +1,12 @@
 package eu.ehri.extension.test;
 
 import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.WebResource;
-import com.sun.jersey.core.util.MultivaluedMapImpl;
-import eu.ehri.extension.AbstractRestResource;
-import eu.ehri.extension.LinkResource;
 import eu.ehri.project.definitions.Entities;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
-
-import static org.junit.Assert.assertEquals;
+import static com.sun.jersey.api.client.ClientResponse.Status.CREATED;
+import static com.sun.jersey.api.client.ClientResponse.Status.OK;
 
 public class LinkRestClientTest extends BaseRestClientTest {
 
@@ -30,45 +23,27 @@ public class LinkRestClientTest extends BaseRestClientTest {
     @Test
     public void testGetLinks() throws Exception {
         // Fetch annotations for an item.
-        WebResource resource = client.resource(getExtensionEntryPointUri()
-                + "/" + Entities.LINK + "/for/c1");
-        ClientResponse response = resource
-                .accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME,
-                        getAdminUserProfileId())
+        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
+                ehriUri(Entities.LINK, "for", "c1"))
                 .get(ClientResponse.class);
-        assertEquals(Response.Status.OK.getStatusCode(),
-                response.getStatus());        
+        assertStatus(OK, response);
     }
 
     @Test
     public void testDeleteAccessPoint() throws Exception {
         // Create a link annotation between two objects
-        WebResource resource = client.resource(getExtensionEntryPointUri()
-                + "/" + Entities.LINK + "/accessPoint/ur1");
-        ClientResponse response = resource
-                .accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME,
-                        getAdminUserProfileId())
+        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
+                ehriUri(Entities.LINK, "accessPoint", "ur1"))
                 .delete(ClientResponse.class);
-        assertEquals(Response.Status.OK.getStatusCode(),
-                response.getStatus());
+        assertStatus(OK, response);
     }
 
     @Test
     public void testCreateLink() throws Exception {
         // Create a link annotation between two objects
-        WebResource resource = client.resource(getExtensionEntryPointUri()
-                + "/" + Entities.LINK + "/c1/c4");
-        ClientResponse response = resource
-                .accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME,
-                        getAdminUserProfileId()).entity(jsonLinkTestString)
+        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
+                ehriUri(Entities.LINK, "c1", "c4")).entity(jsonLinkTestString)
                 .post(ClientResponse.class);
-        assertEquals(Response.Status.CREATED.getStatusCode(),
-                response.getStatus());        
+        assertStatus(CREATED, response);
     }
 }

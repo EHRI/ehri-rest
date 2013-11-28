@@ -7,6 +7,7 @@ import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.PermissionScope;
+import eu.ehri.project.models.idgen.IdGenerator;
 import eu.ehri.project.models.utils.ClassUtils;
 import org.w3c.dom.Document;
 
@@ -51,6 +52,7 @@ public final class Bundle {
         private final EntityClass type;
         final ListMultimap<String, Bundle> relations = ArrayListMultimap.create();
         final Map<String, Object> data = Maps.newHashMap();
+        final Map<String, Object> meta = Maps.newHashMap();
 
         public Builder setId(String id) {
             this.id = id;
@@ -61,8 +63,18 @@ public final class Bundle {
             type = cls;
         }
 
+        public Builder addRelations(ListMultimap<String, Bundle> r) {
+            relations.putAll(r);
+            return this;
+        }
+
         public Builder addRelation(String relation, Bundle bundle) {
             relations.put(relation, bundle);
+            return this;
+        }
+
+        public Builder addData(Map<String,Object> d) {
+            data.putAll(d);
             return this;
         }
 
@@ -71,8 +83,18 @@ public final class Bundle {
             return this;
         }
 
+        public Builder addMetaData(Map<String,Object> d) {
+            meta.putAll(d);
+            return this;
+        }
+
+        public Builder addMetaDataValue(String key, Object value) {
+            meta.put(key, value);
+            return this;
+        }
+
         public Bundle build() {
-            return new Bundle(id, type, data, relations);
+            return new Bundle(id, type, data, relations, meta);
         }
     }
 
@@ -502,12 +524,13 @@ public final class Bundle {
      */
     public Bundle generateIds(final List<String> scopes) {
         boolean isTemp = id == null;
-        String newId = isTemp
-                ? getType().getIdgen().generateId(getType(), scopes, this)
-                : id;
+        IdGenerator idGen = getType().getIdgen();
+        String newId = isTemp ? idGen.generateId(scopes, this) : id;
         ListMultimap<String, Bundle> idRels = LinkedListMultimap.create();
+        List<String> nextScopes = Lists.newArrayList(scopes);
+        nextScopes.add(idGen.getIdBase(this));
         for (Map.Entry<String, Bundle> entry : relations.entries()) {
-            idRels.put(entry.getKey(), entry.getValue().generateIds(scopes));
+            idRels.put(entry.getKey(), entry.getValue().generateIds(nextScopes));
         }
         return new Bundle(newId, type, data, idRels, meta, isTemp);
     }

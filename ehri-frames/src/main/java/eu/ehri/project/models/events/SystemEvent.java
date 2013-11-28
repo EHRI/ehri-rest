@@ -6,6 +6,7 @@ import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Property;
 import com.tinkerpop.frames.modules.javahandler.JavaHandler;
 import com.tinkerpop.frames.modules.javahandler.JavaHandlerContext;
+import com.tinkerpop.gremlin.java.GremlinPipeline;
 import com.tinkerpop.pipes.PipeFunction;
 import com.tinkerpop.pipes.branch.LoopPipe;
 import eu.ehri.project.definitions.Ontology;
@@ -46,6 +47,10 @@ public interface SystemEvent extends AccessibleEntity {
     @Adjacency(label = Ontology.VERSION_HAS_EVENT, direction = Direction.IN)
     public Iterable<Version> getPriorVersions();
 
+    @Fetch(value = Ontology.EVENT_HAS_FIRST_SUBJECT, ifDepth = 0)
+    @JavaHandler
+    public AccessibleEntity getFirstSubject();
+
     /**
      * Fetch the "scope" of this event, or the context in which a
      * given creation/modification/deletion event is happening.
@@ -72,6 +77,25 @@ public interface SystemEvent extends AccessibleEntity {
                                     Ontology.ENTITY_HAS_LIFECYCLE_EVENT).iterator().hasNext();
                         }
                     }));
+        }
+
+        public AccessibleEntity getFirstSubject() {
+            // Ugh: horrible code duplication is horrible - unfortunately
+            // just calling getSubjects() fails for an obscure reason to do
+            // with Frames not being thinking it has an iterable???
+            GremlinPipeline<Vertex,Vertex> subjects = gremlin().in(Ontology.ENTITY_HAS_EVENT)
+                    .as("n").in(Ontology.ENTITY_HAS_LIFECYCLE_EVENT)
+                    .loop("n", JavaHandlerUtils.noopLoopFunc, new PipeFunction<LoopPipe.LoopBundle<Vertex>, Boolean>() {
+                        @Override
+                        public Boolean compute(LoopPipe.LoopBundle<Vertex> vertexLoopBundle) {
+                            return (!vertexLoopBundle.getObject().getVertices(Direction.IN,
+                                    Ontology.ENTITY_HAS_LIFECYCLE_EVENT).iterator().hasNext())
+                                    && vertexLoopBundle.getObject().getProperty(EntityType.TYPE_KEY) != null;
+                        }
+                    });
+            return (AccessibleEntity)(subjects.iterator().hasNext()
+                ? frame(subjects.iterator().next())
+                : null);
         }
 
         public Iterable<Actioner> getActioners() {

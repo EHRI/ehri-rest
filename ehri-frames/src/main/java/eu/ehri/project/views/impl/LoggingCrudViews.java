@@ -199,7 +199,8 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws IntegrityError
      * @throws DeserializationError
      */
-    public <T extends Frame> Mutation<T> updateDependent(Bundle bundle, E parent, Accessor user,
+    public <T extends Frame, P extends DescribedEntity> Mutation<T> updateDependent(Bundle bundle, P parent,
+            Accessor user,
             Class<T> dependentClass) throws PermissionDenied,
             ValidationError, DeserializationError, IntegrityError {
         return updateDependent(bundle, parent, user, dependentClass, Optional.<String>absent());
@@ -220,12 +221,14 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws IntegrityError
      * @throws DeserializationError
      */
-    public <T extends Frame> Mutation<T> updateDependent(Bundle bundle, E parent, Accessor user,
+    public <T extends Frame, P extends DescribedEntity> Mutation<T> updateDependent(Bundle bundle, P parent,
+            Accessor user,
             Class<T> dependentClass, Optional<String> logMessage)
             throws PermissionDenied, ValidationError, DeserializationError,
             IntegrityError {
         try {
-            Mutation<T> out = views.updateDependent(bundle, parent, user, dependentClass);
+            Mutation<T> out = views.setScope(parent)
+                    .updateDependent(bundle, parent, user, dependentClass);
             if (out.getState() != MutationState.UNCHANGED) {
                 actionManager.setScope(parent)
                         .logEvent(parent, graph.frame(user.asVertex(),
@@ -252,8 +255,8 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws IntegrityError
      * @throws DeserializationError
      */
-    public <T extends Frame> T createDependent(Bundle bundle,
-            E parent, Accessor user, Class<T> dependentClass) throws PermissionDenied,
+    public <T extends Frame, P extends DescribedEntity> T createDependent(Bundle bundle,
+            P parent, Accessor user, Class<T> dependentClass) throws PermissionDenied,
             ValidationError, DeserializationError, IntegrityError {
         return createDependent(bundle, parent, user, dependentClass, Optional.<String>absent());
     }
@@ -273,11 +276,11 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws IntegrityError
      * @throws DeserializationError
      */
-    public <T extends Frame> T createDependent(Bundle bundle, E parent, Accessor user,
+    public <T extends Frame, P extends DescribedEntity> T createDependent(Bundle bundle, P parent, Accessor user,
                 Class<T> dependentClass, Optional<String> logMessage)
             throws PermissionDenied, ValidationError, DeserializationError,
             IntegrityError {
-        T out = views.createDependent(bundle, parent, user, dependentClass);
+        T out = views.setScope(parent).createDependent(bundle, parent, user, dependentClass);
         // NB: Note that parent is BOTH scope and a subject - I think
         // this makes sense...
         actionManager.setScope(parent).logEvent(parent,
@@ -335,7 +338,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws ValidationError
      * @throws SerializationError
      */
-    public <T extends Frame> Integer deleteDependent(T item, E parent, Accessor user,
+    public <T extends Frame, P extends DescribedEntity> Integer deleteDependent(T item, P parent, Accessor user,
             Class<T> dependentClass) throws PermissionDenied,
             ValidationError, SerializationError {
         return deleteDependent(item, parent, user, dependentClass, Optional.<String>absent());
@@ -355,14 +358,14 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws ValidationError
      * @throws SerializationError
      */
-    public <T extends Frame> Integer deleteDependent(T item, E parent, Accessor user,
+    public <T extends Frame, P extends DescribedEntity> Integer deleteDependent(T item, P parent, Accessor user,
             Class<T> dependentClass, Optional<String> logMessage)
             throws PermissionDenied, ValidationError, SerializationError {
         actionManager.setScope(parent)
                 .logEvent(parent, graph.frame(user.asVertex(), Actioner.class),
                         EventTypes.deleteDependent, logMessage)
                 .createVersion(item);
-        return views.deleteDependent(item, parent, user, dependentClass);
+        return views.setScope(parent).deleteDependent(item, parent, user, dependentClass);
     }
 
 

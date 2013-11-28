@@ -34,6 +34,7 @@ import java.util.NoSuchElementException;
 public final class SingleIndexGraphManager implements GraphManager {
 
     private static final String INDEX_NAME = "entities";
+    private static final String METADATA_PREFIX = "_";
 
     private final FramedGraph<Neo4jGraph> graph;
 
@@ -256,9 +257,11 @@ public final class SingleIndexGraphManager implements GraphManager {
         // remove 'old' properties
         for (String key : item.getPropertyKeys()) {
             Object value = item.getProperty(key);
-            item.removeProperty(key);
-            if (keys == null || keys.contains(key)) {
-                index.remove(key, value, item);
+            if (!key.startsWith(METADATA_PREFIX)) {
+                item.removeProperty(key);
+                if (keys == null || keys.contains(key)) {
+                    index.remove(key, value, item);
+                }
             }
         }
 

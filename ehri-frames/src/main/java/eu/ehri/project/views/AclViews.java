@@ -2,10 +2,7 @@ package eu.ehri.project.views;
 
 import com.google.common.base.Preconditions;
 import com.tinkerpop.frames.FramedGraph;
-import eu.ehri.project.acl.AclManager;
-import eu.ehri.project.acl.ContentTypes;
-import eu.ehri.project.acl.PermissionType;
-import eu.ehri.project.acl.SystemScope;
+import eu.ehri.project.acl.*;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.definitions.EventTypes;
@@ -59,12 +56,13 @@ public final class AclViews {
     /**
      * Set the global permission matrix for a user.
      * 
+     *
      * @param accessor
      * @param permissionMap
      * @param grantee
      * @throws PermissionDenied
      */
-    public void setGlobalPermissionMatrix(Accessor accessor,
+    public List<Map<String,GlobalPermissionSet>> setGlobalPermissionMatrix(Accessor accessor,
             Map<ContentTypes, List<PermissionType>> permissionMap,
             Accessor grantee) throws PermissionDenied {
         checkGrantPermission(grantee, permissionMap);
@@ -78,6 +76,7 @@ public final class AclViews {
         if (scoped) {
             context.addSubjects(scope);
         }
+        return acl.getInheritedGlobalPermissions(accessor);
     }
 
     /**

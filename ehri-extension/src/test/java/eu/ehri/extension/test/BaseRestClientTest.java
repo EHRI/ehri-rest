@@ -1,13 +1,11 @@
 package eu.ehri.extension.test;
 
-import java.io.File;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
-import javax.ws.rs.core.MediaType;
-
+import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.core.util.MultivaluedMapImpl;
+import eu.ehri.extension.AbstractAccessibleEntityResource;
+import eu.ehri.extension.AbstractRestResource;
+import eu.ehri.extension.test.utils.ServerRunner;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 import org.junit.After;
@@ -16,12 +14,13 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.neo4j.server.configuration.ThirdPartyJaxRsPackage;
 
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.WebResource;
-
-import eu.ehri.extension.AbstractAccessibleEntityResource;
-import eu.ehri.extension.AbstractRestResource;
-import eu.ehri.extension.test.utils.ServerRunner;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
+import java.io.File;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Base class for testing the REST interface on a 'embedded' neo4j server.
@@ -81,7 +80,7 @@ public class BaseRestClientTest extends AbstractRestClientTest {
      * unique for each class, because otherwise problems can be encountered when
      * another test suite starts up whilst a database is in the process of
      * shutting down.
-     * 
+     *
      * @param dbName
      */
     public static void initializeTestDb(String dbName) {
@@ -96,7 +95,7 @@ public class BaseRestClientTest extends AbstractRestClientTest {
 
     /**
      * Shut down database when test suite has run.
-     * 
+     *
      * @throws Exception
      */
     @AfterClass
@@ -104,15 +103,20 @@ public class BaseRestClientTest extends AbstractRestClientTest {
         runner.stop();
     }
 
-    /*** Helpers ***/
+    /**
+     * Helpers **
+     */
+
+    protected List<Map<String, Object>> getItemList(String entityType, String userId) throws Exception {
+        return getItemList(entityType, userId, new MultivaluedMapImpl());
+    }
 
     /**
-     * Function for fetching a list of entities with the given EntityType
+     * Get a list of items at some url, as the given user.
      */
-    protected List<Map<String, Object>> getEntityList(String entityType,
-            String userId) throws Exception {
-        WebResource resource = client.resource(getExtensionEntryPointUri()
-                + "/" + entityType + "/list");
+    protected List<Map<String, Object>> getItemList(String url, String userId,
+            MultivaluedMap<String, String> params) throws Exception {
+        WebResource resource = client.resource(getExtensionEntryPointUri() + url).queryParams(params);
         ClientResponse response = resource.accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
                 .header(AbstractRestResource.AUTH_HEADER_NAME, userId)
@@ -124,8 +128,25 @@ public class BaseRestClientTest extends AbstractRestClientTest {
         return mapper.readValue(json, typeRef);
     }
 
+    /**
+     * Function for fetching a list of entities with the given EntityType
+     */
+    protected List<Map<String, Object>> getEntityList(String entityType,
+            String userId) throws Exception {
+        return getEntityList(entityType, userId, new MultivaluedMapImpl());
+    }
+
+    /**
+     * Function for fetching a list of entities with the given EntityType,
+     * and some additional parameters.
+     */
+    protected List<Map<String, Object>> getEntityList(String entityType,
+            String userId, MultivaluedMap<String, String> params) throws Exception {
+        return getItemList("/" + entityType + "/list", userId, params);
+    }
+
     protected Long getEntityCount(String entityType,
-                                                      String userId) throws Exception {
+            String userId) throws Exception {
         WebResource resource = client.resource(getExtensionEntryPointUri()
                 + "/" + entityType + "/count");
         ClientResponse response = resource.accept(MediaType.APPLICATION_JSON)
@@ -134,13 +155,14 @@ public class BaseRestClientTest extends AbstractRestClientTest {
                 .get(ClientResponse.class);
         String json = response.getEntity(String.class);
         ObjectMapper mapper = new ObjectMapper();
-        TypeReference<Long> typeRef = new TypeReference<Long>() {};
+        TypeReference<Long> typeRef = new TypeReference<Long>() {
+        };
         return mapper.readValue(json, typeRef);
     }
 
     /**
      * Function for deleting an entire database folder. USE WITH CARE!!!
-     * 
+     *
      * @param folder
      */
     protected static void deleteFolder(File folder) {

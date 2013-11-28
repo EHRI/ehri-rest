@@ -7,7 +7,10 @@ import java.util.Map;
 import org.apache.commons.configuration.XMLPropertiesConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+<<<<<<< HEAD
 import org.xml.sax.SAXException;
+=======
+>>>>>>> newmike/importer_merge
 
 import eu.ehri.project.importers.properties.XmlImportProperties;
 
@@ -19,12 +22,16 @@ public class ItsEadHandler extends EadHandler {
     protected String defaultLanguage = "de";
 
 	private int itscount = 0;
+<<<<<<< HEAD
 	private String archID;
+=======
+>>>>>>> newmike/importer_merge
 	
 	public ItsEadHandler(AbstractImporter<Map<String, Object>> importer) {
 		super(importer, new XmlImportProperties("its.properties"));
 	}
 
+<<<<<<< HEAD
 	 @Override
 	 public void endElement(String uri, String localName, String qName) throws SAXException {
 		 //the child closes, add the new DocUnit to the list, establish some relations
@@ -39,6 +46,9 @@ public class ItsEadHandler extends EadHandler {
 //		 }
 	 }
 	 
+=======
+	
+>>>>>>> newmike/importer_merge
 	/**
 	 * Handler specific code for extraction of unit IDs
 	 * @param currentGraph
@@ -64,7 +74,11 @@ public class ItsEadHandler extends EadHandler {
 			}
 		} else {
 			logger.error("no unitid found, setting " + ++itscount);
+<<<<<<< HEAD
 			currentGraph.put("objectIdentifier", this.archID+"-itsID"+itscount);
+=======
+			currentGraph.put("objectIdentifier", "itsID"+itscount);
+>>>>>>> newmike/importer_merge
 
 		}
 	}
