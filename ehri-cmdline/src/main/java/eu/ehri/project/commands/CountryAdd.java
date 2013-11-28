@@ -84,12 +84,8 @@ public class CountryAdd extends BaseCommand implements Command {
                 Maps.<String, Object> newHashMap())
                 .withDataValue(Ontology.IDENTIFIER_KEY, countryId)
                 .withDataValue(Ontology.NAME_KEY, countryName);
-<<<<<<< HEAD
-        String nodeId = EntityClass.COUNTRY.getIdgen().generateId(
-                EntityClass.COUNTRY, SystemScope.getInstance(), bundle);
-=======
+
         String nodeId = EntityClass.COUNTRY.getIdgen().generateId(SystemScope.getInstance(), bundle);
->>>>>>> newmike/importer_merge
         bundle = bundle.withId(nodeId);
 
         try {
