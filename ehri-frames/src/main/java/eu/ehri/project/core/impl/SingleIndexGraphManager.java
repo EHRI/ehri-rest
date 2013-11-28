@@ -49,26 +49,32 @@ public final class SingleIndexGraphManager implements GraphManager {
 
     // Access functions
     public String getId(Vertex vertex) {
+        Preconditions.checkNotNull(vertex);
         return (String) vertex.getProperty(EntityType.ID_KEY);
     }
 
     public String getId(Frame frame) {
+        Preconditions.checkNotNull(frame);
         return getId(frame.asVertex());
     }
 
     public String getType(Vertex vertex) {
+        Preconditions.checkNotNull(vertex);
         return (String) vertex.getProperty(EntityType.TYPE_KEY);
     }
 
     public String getType(Frame frame) {
+        Preconditions.checkNotNull(frame);
         return frame.getType();
     }
 
     public EntityClass getEntityClass(Vertex vertex) {
+        Preconditions.checkNotNull(vertex);
         return EntityClass.withName(getType(vertex));
     }
 
     public EntityClass getEntityClass(Frame frame) {
+        Preconditions.checkNotNull(frame);
         return getEntityClass(frame.asVertex());
     }
 

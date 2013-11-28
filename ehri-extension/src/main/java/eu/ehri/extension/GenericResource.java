@@ -81,6 +81,15 @@ public class GenericResource extends AbstractAccessibleEntityResource<Accessible
     @Path("/listByGraphId")
     public StreamingOutput listByGid(@QueryParam("gid") List<Long> ids) throws ItemNotFound,
             PermissionDenied, BadRequester {
+        // FIXME: This is ugly, but to return 404 on a bad item we have to
+        // iterate the list first otherwise the streaming response will be
+        // broken.
+        for (Long id : ids) {
+            if (graph.getVertex(id) == null) {
+                throw new ItemNotFound(String.valueOf(id));
+            }
+        }
+
         FluentIterable<Vertex> vertices = FluentIterable.from(ids)
                 .transform(new Function<Long, Vertex>() {
             public Vertex apply(Long id) {
