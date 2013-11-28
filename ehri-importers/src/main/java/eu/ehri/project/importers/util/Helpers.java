@@ -29,12 +29,14 @@ public class Helpers {
     private static final String[] languages = Locale.getISOLanguages();
     private static final Map<String, Locale> locale3Map = Maps.newHashMapWithExpectedSize(languages.length);
     private static final Map<String, Locale> localeNameMap = Maps.newHashMapWithExpectedSize(languages.length);
+    private static final Map<String, Locale> englishNameMap = Maps.newHashMapWithExpectedSize(languages.length);
 
     static {
         for (String language : languages) {
             Locale locale = new Locale(language);
             locale3Map.put(locale.getISO3Language(), locale);
             localeNameMap.put(locale.getDisplayLanguage(), locale);
+            englishNameMap.put(locale.getDisplayLanguage(Locale.ENGLISH), locale);
         }
 
     }
@@ -53,5 +55,20 @@ public class Helpers {
         if (localeNameMap.containsKey(threeLetterCode))
             return localeNameMap.get(threeLetterCode).getLanguage();
         return threeLetterCode;
+    }
+    
+    /**
+     * Get the ISO639-1 language code for an English language name.
+     * @param englishName the language name in English
+     * @return the corresponding ISO639-1 two-letter language code, or null if the language name is unrecognised.
+     */
+    public static String englishName2Two(String englishName) {
+    	if (englishNameMap.containsKey(englishName)) {
+    		return englishNameMap.get(englishName).getLanguage();
+    	}
+//    	else if() {
+//    		
+//    	}
+    	return null;
     }
 }
