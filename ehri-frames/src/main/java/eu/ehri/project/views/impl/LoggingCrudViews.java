@@ -81,7 +81,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws PermissionDenied
      * @throws ValidationError
      * @throws IntegrityError
-     * @throw DeserializationError
+     * @throws DeserializationError
      */
     public E create(Bundle bundle, Accessor user, Optional<String> logMessage)
             throws PermissionDenied, ValidationError, DeserializationError,
@@ -123,7 +123,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws PermissionDenied
      * @throws ValidationError
      * @throws IntegrityError
-     * @throw DeserializationError
+     * @throws DeserializationError
      */
     public Mutation<E> createOrUpdate(Bundle bundle, Accessor user, Optional<String> logMessage)
             throws PermissionDenied, ValidationError, DeserializationError,
@@ -166,7 +166,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws PermissionDenied
      * @throws ValidationError
      * @throws IntegrityError
-     * @throw DeserializationError
+     * @throws DeserializationError
      */
     public Mutation<E> update(Bundle bundle, Accessor user, Optional<String> logMessage)
             throws PermissionDenied, ValidationError, DeserializationError,
@@ -219,7 +219,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws PermissionDenied
      * @throws ValidationError
      * @throws IntegrityError
-     * @throw DeserializationError
+     * @throws DeserializationError
      */
     public <T extends Frame, P extends DescribedEntity> Mutation<T> updateDependent(Bundle bundle, P parent,
             Accessor user,
@@ -274,7 +274,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws PermissionDenied
      * @throws ValidationError
      * @throws IntegrityError
-     * @throw DeserializationError
+     * @throws DeserializationError
      */
     public <T extends Frame, P extends DescribedEntity> T createDependent(Bundle bundle, P parent, Accessor user,
                 Class<T> dependentClass, Optional<String> logMessage)

@@ -160,8 +160,8 @@ public abstract class SaxXmlHandler extends DefaultHandler {
     }
 
     /**
-     * stores this property value pair in the current DocumentNode if the property already exists, it is added to the
-     * value list
+     * Stores this property value pair in the current DocumentNode.
+     * If the property already exists, it is added to the value list.
      *
      * @param property
      * @param value
@@ -193,8 +193,8 @@ public abstract class SaxXmlHandler extends DefaultHandler {
                 ((List<Object>) propertyList).add(valuetrimmed);
             } else {
                 List<Object> o = new ArrayList<Object>();
-                o.add(valuetrimmed);
                 o.add(c.get(property));
+                o.add(valuetrimmed);
                 c.put(property, o);
             }
         } else {
