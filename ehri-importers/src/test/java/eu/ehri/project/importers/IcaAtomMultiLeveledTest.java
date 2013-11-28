@@ -48,20 +48,20 @@ private final String UN_REL = "HR-HDA145corporateBodyAccessCroatianStateArchive"
         // - 3 more DocumentDescription
         // - 3 more DatePeriod
         //TODO: test these UR's
-        // - 4 more UndeterminedRelationships
+        // - 8 more UndeterminedRelationships
         //TODO: test this UP
         // - 3 more UnknownProperty
         // - 4 more import Event links
         // - 1 more import Event
 
-        int createCount = origCount + 21;
+        int createCount = origCount + 25;
 
-        // - 4 more UnderterminedRelationship nodes
 
         assertEquals(createCount, getNodeCount(graph));
 
-        // Yet we've only created 1 *logical* item...
-        assertEquals(3, log.getChanged());
+        // Yet we've only created 3 *logical* items...
+        assertEquals(0, log.getUpdated());
+        assertEquals(3, log.getCreated());
 
         Iterable<Vertex> docs = graph.getVertices("identifier",
                 IMPORTED_ITEM_ID);
@@ -84,13 +84,10 @@ private final String UN_REL = "HR-HDA145corporateBodyAccessCroatianStateArchive"
         InputStream ios2 = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
         ImportLog log2 = new SaxImportManager(graph, agent, validUser, IcaAtomEadImporter.class, IcaAtomEadHandler.class).importFile(ios2, logMessage);
 
-        // We should only have three more nodes, for 
-        // 1 the action and 
-        // 3 the user event links, 
-        // 1 plus the global event
-        assertEquals(createCount + 5, getNodeCount(graph));
-        // And one logical item should've been updated
-        assertEquals(3, log2.getUpdated());
+        // We should have no new nodes, not even SystemEvent
+        assertEquals(createCount, getNodeCount(graph));
+        // And no logical item should've been updated
+        assertEquals(0, log2.getUpdated());
 
         // TODO: Check permission scopes
     }
