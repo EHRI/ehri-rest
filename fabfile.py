@@ -16,6 +16,7 @@ env.project_name = 'ehri-rest'
 env.service_name = 'neo4j-service'
 env.prod = False
 env.path = '/opt/webapps/' + env.project_name
+env.neo4j_install = '/opt/webapps/' + 'neo4j-version'
 env.user = os.getenv("USER")
 env.use_ssh_config = True
 
@@ -51,8 +52,11 @@ def clean_deploy():
 def get_version_stamp():
     "Get a dated and revision stamped version string"
     rev = subprocess.check_output(["git","rev-parse", "--short", "HEAD"]).strip()
-    timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")    
-    return "%s_%s" % (timestamp, rev)
+    return "%s_%s" % (get_timestamp(), rev)
+
+def get_timestamp():
+    return datetime.datetime.now().strftime("%Y%m%d%H%M%S")    
+
 
 def copy_to_server():
     "Upload the app to a versioned path."
@@ -120,11 +124,24 @@ def latest():
             print("Current version is now: %s" % output)
             restart()
 
-def copy_db():
-    "Copy a Neo4j DB from a server"
-    raise NotImplementedError
+def clone_db(dirname):
+    """Copy a Neo4j DB from a server using the backup tool.
+    This creates a copy of the running DB in /tmp, zips it,
+    downloads the zip, extracts it to the specified DB, and
+    cleans up."""
+    timestamp = get_timestamp()
+    with settings(tmpdst = "/tmp/" + timestamp):
+        run("%(neo4j_install)s/bin/neo4j-backup -from single://localhost:6362 -to %(tmpdst)s" % env)
+        run("tar --create --gzip --file %(tmpdst)s.tgz -C %(tmpdst)s ." % env)
+        get(env.tmpdst + ".tgz", env.tmpdst + ".tgz")
+        run("rm -rf %(tmpdst)s %(tmpdst)s.tgz" % env)
+        local("mkdir -p " + dirname)
+        local("tar xf /tmp/%s.tgz -C %s" % (timestamp, dirname))
+        local("rm " + env.tmpdst + ".tgz")
 
-def update_db():
+
+
+def update_db(dirname):
     "Update a Neo4j DB on a server"
     raise NotImplementedError
 
