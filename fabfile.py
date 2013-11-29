@@ -126,7 +126,8 @@ def latest():
 
 def online_backup(dstdir):
     "Do an online backup to a particular directory on the server."
-    run("%(neo4j_install)s/bin/neo4j-backup -from single://localhost:6362 -to %s" % dstdir)
+    with settings(dst=dstdir):
+        run("%(neo4j_install)s/bin/neo4j-backup -from single://localhost:6362 -to %(dst)s" % env)
 
 
 def clone_db(dirname):
