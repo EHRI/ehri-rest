@@ -64,6 +64,7 @@ public class YamlFixtureLoader implements FixtureLoader {
 
     public static final String GENERATE_ID_PLACEHOLDER = "?";
 
+    private static final FramedGraphFactory graphFactory = new FramedGraphFactory(new JavaHandlerModule());
     private final FramedGraph<? extends TransactionalGraph> graph;
     private final GraphManager manager;
     private static final Logger logger = LoggerFactory
@@ -247,8 +248,7 @@ public class YamlFixtureLoader implements FixtureLoader {
 
         // If the given id is a placeholder, generate it according to type rules
         if (id.trim().contentEquals(GENERATE_ID_PLACEHOLDER)) {
-            String newId = type.getIdgen().generateId(
-                    type, Lists.<String>newArrayList(), b);
+            String newId = type.getIdgen().generateId(Lists.<String>newArrayList(), b);
             b = b.withId(newId);
         }
         return b;
@@ -331,8 +331,7 @@ public class YamlFixtureLoader implements FixtureLoader {
                 .newEmbeddedDatabase(args[0]);
         registerShutdownHook(db);
         try {
-            FramedGraph<? extends TransactionalGraph> graph = new FramedGraphFactory(
-                        new JavaHandlerModule()).create(
+            FramedGraph<? extends TransactionalGraph> graph = graphFactory.create(
                     new Neo4jGraph(db));
             YamlFixtureLoader loader = new YamlFixtureLoader(graph);
             loader.loadTestData();

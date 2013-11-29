@@ -45,9 +45,11 @@ public class Ontology {
     public static final String PERMISSION_GRANT_HAS_TARGET = "hasTarget";
 
     // Annotations
+    public static final String ANNOTATES = "annotates";
+    public static final String ANNOTATES_PART = "annotatesPart";
     public static final String ANNOTATOR_HAS_ANNOTATION = "hasAnnotation";
-
     public static final String ANNOTATION_ANNOTATES = "hasAnnotationTarget";
+    public static final String ANNOTATION_ANNOTATES_PART = "hasAnnotationTargetPart";
     public static final String ANNOTATION_HAS_SOURCE = "hasAnnotationBody";
     public static final String ANNOTATION_NOTES_BODY = "body";
     public static final String ANNOTATION_TYPE = "type";
@@ -77,6 +79,7 @@ public class Ontology {
     public static final String EVENT_TIMESTAMP = "timestamp";
     public static final String EVENT_LOG_MESSAGE = "logMessage";
     public static final String EVENT_TYPE = "eventType";
+    public static final String EVENT_HAS_FIRST_SUBJECT = "hasFirstSubject";
     public static final String EVENT_PRIOR_VERSION = "priorVersion";
     public static final String ACTIONER_HAS_LIFECYCLE_ACTION = "lifecycleAction";
     public static final String ENTITY_HAS_LIFECYCLE_EVENT = "lifecycleEvent";
@@ -90,4 +93,7 @@ public class Ontology {
 
     // Virtual collections
     public static final String VC_IS_PART_OF = "isPartOf";
+    public static final String USER_FOLLOWS_USER = "isFollowing";
+    public static final String USER_BLOCKS_USER = "isBlocking";
+    public static final String USER_WATCHING_ITEM = "isWatching";
 }

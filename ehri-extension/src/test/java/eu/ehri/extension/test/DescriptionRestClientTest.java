@@ -1,8 +1,6 @@
 package eu.ehri.extension.test;
 
 import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.WebResource;
-import eu.ehri.extension.AbstractRestResource;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.persistence.Bundle;
 import org.codehaus.jackson.JsonNode;
@@ -11,9 +9,9 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import static com.sun.jersey.api.client.ClientResponse.Status.OK;
 import static org.junit.Assert.*;
 
 public class DescriptionRestClientTest extends BaseRestClientTest {
@@ -36,39 +34,37 @@ public class DescriptionRestClientTest extends BaseRestClientTest {
     public void testCreateDescription() throws Exception {
         // Create additional description for c2
         // C2 initially has one description, so it should have two afterwards
-        WebResource resource = client.resource(getExtensionEntryPointUri()
-                + "/description/c2");
-        ClientResponse response = resource
-                .accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME,
-                        getAdminUserProfileId())
+        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
+                ehriUri("description", "c2"))
                 .entity(descriptionTestStr).post(ClientResponse.class);
         assertEquals(Response.Status.CREATED.getStatusCode(), response.getStatus());
 
         ObjectMapper mapper = new ObjectMapper();
         JsonNode rootNode = mapper.readValue(response.getEntity(String.class),
                 JsonNode.class);
+
+        // Check ID is the correct concatenation of all the scope IDs...
         JsonNode idValue = rootNode
+                .path(Bundle.ID_KEY);
+        assertFalse(idValue.isMissingNode());
+        assertEquals("nl-r1-c1-c2-en-another-description", idValue.getTextValue());
+
+        // Check the identifier is present and correct...
+        JsonNode identValue = rootNode
                 .path(Bundle.DATA_KEY)
                 .path(Ontology.IDENTIFIER_KEY);
-        assertFalse(idValue.isMissingNode());
-        assertEquals(TEST_DESCRIPTION_IDENTIFIER, idValue.getTextValue());
+        assertFalse(identValue.isMissingNode());
+        assertEquals(TEST_DESCRIPTION_IDENTIFIER, identValue.getTextValue());
     }
 
     @Test
     public void testUpdateDescription() throws Exception {
         // Update description for c2
         // C2 initially has one description, and should still have one afterwards
-        WebResource resource = client.resource(getExtensionEntryPointUri()
-                + "/description/c2/cd2");
-        ClientResponse response = resource
-                .accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME,
-                        getAdminUserProfileId())
+        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
+                ehriUri("description", "c2", "cd2"))
                 .entity(descriptionTestStr).put(ClientResponse.class);
-        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        assertStatus(OK, response);
 
         ObjectMapper mapper = new ObjectMapper();
         JsonNode rootNode = mapper.readValue(response.getEntity(String.class),
@@ -87,14 +83,9 @@ public class DescriptionRestClientTest extends BaseRestClientTest {
     public void testDeleteDescription() throws Exception {
         // Delete description for c2
         // C2 initially has one description, so there should be none afterwards
-        WebResource resource = client.resource(getExtensionEntryPointUri()
-                + "/description/c2/cd2");
-        ClientResponse response = resource
-                .accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME,
-                        getAdminUserProfileId())
+        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
+                ehriUri("description", "c2", "cd2"))
                 .delete(ClientResponse.class);
-        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        assertStatus(OK, response);
     }
 }

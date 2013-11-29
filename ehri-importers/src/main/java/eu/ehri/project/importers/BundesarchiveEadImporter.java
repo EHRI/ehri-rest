@@ -89,7 +89,7 @@ public class BundesarchiveEadImporter extends EaImporter {
             logger.error("identifier Key: "+unit.getDataValue(Ontology.IDENTIFIER_KEY).toString());
         }
         IdGenerator generator = EntityClass.DOCUMENTARY_UNIT.getIdgen();
-        String id = generator.generateId(EntityClass.DOCUMENTARY_UNIT, permissionScope, unit);
+        String id = generator.generateId(permissionScope, unit);
         if (id.equals(permissionScope.getId())) {
             throw new RuntimeException("Generated an id same as scope: " + unit.getData());
         }

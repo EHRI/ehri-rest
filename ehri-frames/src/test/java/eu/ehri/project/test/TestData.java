@@ -38,7 +38,7 @@ public class TestData {
                         put(Bundle.DATA_KEY, new HashMap<String, Object>() {{
                             put(Ontology.IDENTIFIER_KEY, "someid-01");
                             put(Ontology.NAME_KEY, "A brand new item description");
-                            put(Ontology.LANGUAGE_OF_DESCRIPTION, "en");
+                            put(Ontology.LANGUAGE_OF_DESCRIPTION, "eng");
                         }});
                         put(Bundle.REL_KEY, new HashMap<String,Object>() {{
                             put(Ontology.ENTITY_HAS_DATE, new LinkedList<HashMap<String, Object>>() {{
@@ -73,7 +73,7 @@ public class TestData {
                         put(Bundle.DATA_KEY, new HashMap<String, Object>() {{
                             put(Ontology.IDENTIFIER_KEY, "test-repo-1-desc");
                             put(Ontology.NAME_KEY, "A Test Repository");
-                            put(Ontology.LANGUAGE_OF_DESCRIPTION, "en");
+                            put(Ontology.LANGUAGE_OF_DESCRIPTION, "eng");
                         }});
                         put(Bundle.REL_KEY, new HashMap<String, Object>() {{
                             put(Ontology.ENTITY_HAS_ADDRESS, new LinkedList<HashMap<String, Object>>() {{

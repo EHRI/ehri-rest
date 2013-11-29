@@ -11,4 +11,8 @@ public interface AnnotatableEntity extends Frame {
 
     @Adjacency(label = Ontology.ANNOTATION_ANNOTATES, direction = Direction.IN)
     public void addAnnotation(final Annotation annotation);
+
+    @Adjacency(label = Ontology.ANNOTATION_ANNOTATES_PART, direction = Direction.IN)
+    public void addAnnotationPart(final Annotation annotation);
+
 }

@@ -12,6 +12,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import eu.ehri.project.definitions.Ontology;
+import eu.ehri.project.models.*;
+import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.views.Crud;
 import eu.ehri.project.views.ViewFactory;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -21,9 +23,6 @@ import com.tinkerpop.blueprints.Vertex;
 
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.acl.PermissionType;
-import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.Group;
-import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistence.Bundle;
 
@@ -38,6 +37,35 @@ public class AdminResource extends AbstractRestResource {
 
     public AdminResource(@Context GraphDatabaseService database) {
         super(database);
+    }
+
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/_rebuildChildCache")
+    public Response rebuildChildCache() throws Exception {
+        graph.getBaseGraph().checkNotInTransaction();
+        try {
+            for (DocumentaryUnit unit: manager.getFrames(EntityClass.DOCUMENTARY_UNIT, DocumentaryUnit.class)) {
+                unit.updateChildCountCache();
+            }
+            for (Repository repository : manager.getFrames(EntityClass.REPOSITORY, Repository.class)) {
+                repository.updateChildCountCache();
+            }
+            for (Country country : manager.getFrames(EntityClass.COUNTRY, Country.class)) {
+                country.updateChildCountCache();
+            }
+            for (Group group : manager.getFrames(EntityClass.GROUP, Group.class)) {
+                group.updateChildCountCache();
+            }
+            for (Concept concept : manager.getFrames(EntityClass.CVOC_CONCEPT, Concept.class)) {
+                concept.updateChildCountCache();
+            }
+
+            graph.getBaseGraph().commit();
+            return Response.status(Status.OK).build();
+        } finally {
+            cleanupTransaction();
+        }
     }
 
 

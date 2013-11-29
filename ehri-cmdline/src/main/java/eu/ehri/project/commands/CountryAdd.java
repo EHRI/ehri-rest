@@ -84,8 +84,8 @@ public class CountryAdd extends BaseCommand implements Command {
                 Maps.<String, Object> newHashMap())
                 .withDataValue(Ontology.IDENTIFIER_KEY, countryId)
                 .withDataValue(Ontology.NAME_KEY, countryName);
-        String nodeId = EntityClass.COUNTRY.getIdgen().generateId(
-                EntityClass.COUNTRY, SystemScope.getInstance(), bundle);
+
+        String nodeId = EntityClass.COUNTRY.getIdgen().generateId(SystemScope.getInstance(), bundle);
         bundle = bundle.withId(nodeId);
 
         try {

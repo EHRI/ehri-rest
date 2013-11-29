@@ -98,8 +98,46 @@ public class AnnotationResource extends
         graph.getBaseGraph().checkNotInTransaction();
         try {
             Accessor user = getRequesterUserProfile();
-            Annotation ann = new AnnotationViews(graph).createFor(id,
+            Annotation ann = new AnnotationViews(graph).createFor(id, id,
                     Bundle.fromString(json), user);
+            new AclManager(graph).setAccessors(ann,
+                    getAccessors(accessors, user));
+            graph.getBaseGraph().commit();
+            return buildResponseFromAnnotation(ann);
+        } finally {
+            cleanupTransaction();
+        }
+    }
+
+    /**
+     * Create an annotation for a dependent node on a given item.
+     *
+     * @param id
+     * @param did
+     * @param json
+     * @param accessors
+     * @return
+     * @throws PermissionDenied
+     * @throws ValidationError
+     * @throws DeserializationError
+     * @throws ItemNotFound
+     * @throws BadRequester
+     * @throws SerializationError
+     */
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Path("{id:.+}/{did:.+}")
+    public Response createAnnotationFor(
+            @PathParam("id") String id,
+            @PathParam("did") String did,
+            String json, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
+            throws PermissionDenied, ValidationError, DeserializationError,
+            ItemNotFound, BadRequester, SerializationError {
+        graph.getBaseGraph().checkNotInTransaction();
+        try {
+            Accessor user = getRequesterUserProfile();
+            Annotation ann = new AnnotationViews(graph).createFor(id, did, Bundle.fromString(json), user);
             new AclManager(graph).setAccessors(ann,
                     getAccessors(accessors, user));
             graph.getBaseGraph().commit();
@@ -125,9 +163,8 @@ public class AnnotationResource extends
     public StreamingOutput listAnnotationsForSubtree(@PathParam("id") String id)
             throws ItemNotFound, BadRequester, PermissionDenied {
         AnnotationViews annotationViews = new AnnotationViews(graph);
-        ListMultimap<String, Annotation> anns = annotationViews.getFor(id,
-                getRequesterUserProfile());
-        return streamingMultimap(anns);
+        Iterable<Annotation> anns = annotationViews.getFor(id, getRequesterUserProfile());
+        return streamingList(anns);
     }
 
     private Response buildResponseFromAnnotation(Annotation ann)
@@ -135,6 +172,23 @@ public class AnnotationResource extends
         String jsonStr = serializer.vertexFrameToJson(ann);
         return Response.status(Status.CREATED).entity((jsonStr).getBytes())
                 .build();
+    }
+
+    /**
+     * Update an annotation.
+     * @param id
+     * @return
+     * @throws PermissionDenied
+     * @throws ItemNotFound
+     * @throws ValidationError
+     * @throws BadRequester
+     */
+    @PUT
+    @Path("/{id:.+}")
+    public Response updateAnnotation(@PathParam("id") String id, String json)
+            throws AccessDenied, PermissionDenied, ItemNotFound, ValidationError,
+            BadRequester, DeserializationError, IntegrityError {
+        return update(id, json);
     }
 
     /**

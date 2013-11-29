@@ -24,17 +24,15 @@ import javax.ws.rs.core.Response.Status;
 
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.exceptions.*;
+import eu.ehri.project.models.*;
+import eu.ehri.project.models.base.*;
+import eu.ehri.project.models.utils.ClassUtils;
+import eu.ehri.project.views.Query;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.definitions.Entities;
-import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.Group;
-import eu.ehri.project.models.UserProfile;
-import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.persistence.Bundle;
 
@@ -43,6 +41,15 @@ import eu.ehri.project.persistence.Bundle;
  */
 @Path(Entities.USER_PROFILE)
 public class UserProfileResource extends AbstractAccessibleEntityResource<UserProfile> {
+
+    public static final String FOLLOW = "follow";
+    public static final String FOLLOWING = "following";
+    public static final String FOLLOWERS = "followers";
+    public static final String IS_FOLLOWING = "isFollowing";
+    public static final String IS_FOLLOWER = "isFollower";
+    public static final String WATCH = "watch";
+    public static final String WATCHING = "watching";
+    public static final String IS_WATCHING = "isWatching";
 
     public UserProfileResource(@Context GraphDatabaseService database) {
         super(database, UserProfile.class);
@@ -88,17 +95,6 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
         return page(offset, limit, order, filters);
     }
     
-    /*
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    public Response createUserProfile(String json,
-            @QueryParam(ACCESSOR_PARAM) List<String> accessors) throws PermissionDenied,
-            ValidationError, IntegrityError, DeserializationError,
-            ItemNotFound, BadRequester {
-        return create(json, accessors);
-    }
-    */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
@@ -136,11 +132,258 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
             BadRequester {
         return delete(id);
     }
-    
-    
+
+    @GET
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Path("{userId:.+}/" + FOLLOWERS)
+    public StreamingOutput listFollowers(
+            @PathParam("userId") String userId,
+            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
+            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(SORT_PARAM) List<String> order,
+            @QueryParam(FILTER_PARAM) List<String> filters)
+            throws ItemNotFound, AccessDenied, BadRequester, AccessDenied {
+        Accessor accessor = getRequesterUserProfile();
+        UserProfile user = views.detail(manager.getFrame(userId, UserProfile.class), accessor);
+        final Iterable<UserProfile> list = querier.setOffset(offset).setLimit(limit)
+                .orderBy(order).filter(filters).list(user.getFollowers(), accessor);
+        return streamingList(list);
+    }
+
+    @GET
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Path("{userId:.+}/" + FOLLOWERS + "/page")
+    public StreamingOutput pageFollowers(
+            @PathParam("userId") String userId,
+            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
+            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(SORT_PARAM) List<String> order,
+            @QueryParam(FILTER_PARAM) List<String> filters)
+            throws ItemNotFound, AccessDenied, BadRequester, AccessDenied {
+        Accessor accessor = getRequesterUserProfile();
+        UserProfile user = views.detail(manager.getFrame(userId, UserProfile.class), accessor);
+        final Query.Page<UserProfile> page = querier.setOffset(offset).setLimit(limit)
+                .orderBy(order).filter(filters).page(user.getFollowers(), accessor);
+        return streamingPage(page);
+    }
+
+    @GET
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Path("{userId:.+}/" + FOLLOWING)
+    public StreamingOutput listFollowing(
+            @PathParam("userId") String userId,
+            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
+            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(SORT_PARAM) List<String> order,
+            @QueryParam(FILTER_PARAM) List<String> filters)
+            throws ItemNotFound, AccessDenied, BadRequester {
+        Accessor accessor = getRequesterUserProfile();
+        UserProfile user = views.detail(manager.getFrame(userId, UserProfile.class), accessor);
+        final Iterable<UserProfile> list = querier.setOffset(offset).setLimit(limit)
+                .orderBy(order).filter(filters).list(user.getFollowing(), accessor);
+        return streamingList(list);
+    }
+
+    @GET
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Path("{userId:.+}/" + FOLLOWING + "/page")
+    public StreamingOutput pageFollowing(
+            @PathParam("userId") String userId,
+            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
+            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(SORT_PARAM) List<String> order,
+            @QueryParam(FILTER_PARAM) List<String> filters)
+            throws ItemNotFound, AccessDenied, BadRequester {
+        Accessor accessor = getRequesterUserProfile();
+        UserProfile user = views.detail(manager.getFrame(userId, UserProfile.class), accessor);
+        final Query.Page<UserProfile> page = querier.setOffset(offset).setLimit(limit)
+                .orderBy(order).filter(filters).page(user.getFollowing(), accessor);
+        return streamingPage(page);
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("{userId:.+}/" + IS_FOLLOWING + "/{otherId:.+}")
+    public Response isFollowing(
+            @PathParam("userId") String userId,
+            @PathParam("otherId") String otherId)
+            throws BadRequester, AccessDenied, PermissionDenied, ItemNotFound {
+        Accessor accessor = getRequesterUserProfile();
+        UserProfile user = views.detail(manager.getFrame(userId, UserProfile.class), accessor);
+        return booleanResponse(user.isFollowing(
+                manager.getFrame(otherId, UserProfile.class)));
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("{userId:.+}/" + IS_FOLLOWER + "/{otherId:.+}")
+    public Response isFollower(
+            @PathParam("userId") String userId,
+            @PathParam("otherId") String otherId)
+            throws BadRequester, AccessDenied, PermissionDenied, ItemNotFound {
+        Accessor accessor = getRequesterUserProfile();
+        UserProfile user = views.detail(manager.getFrame(userId, UserProfile.class), accessor);
+        return booleanResponse(user
+                .isFollower(manager.getFrame(otherId, UserProfile.class)));
+    }
+
+    @POST
+    @Path("{userId:.+}/" + FOLLOW + "/{otherId:.+}")
+    public Response followUserProfile(
+            @PathParam("userId") String userId,
+            @PathParam("otherId") String otherId)
+            throws BadRequester, AccessDenied, PermissionDenied, ItemNotFound {
+        Accessor accessor = getRequesterUserProfile();
+        UserProfile user = views.detail(manager.getFrame(userId, UserProfile.class), accessor);
+        try {
+            user.addFollowing(manager.getFrame(otherId, UserProfile.class));
+            graph.getBaseGraph().commit();
+            return Response.status(Status.OK).build();
+        }  finally {
+            cleanupTransaction();
+        }
+    }
+
+    @DELETE
+    @Path("{userId:.+}/" + FOLLOW + "/{otherId:.+}")
+    public Response unfollowUserProfile(
+            @PathParam("userId") String userId,
+            @PathParam("otherId") String otherId)
+            throws BadRequester, PermissionDenied, ItemNotFound, AccessDenied {
+        Accessor accessor = getRequesterUserProfile();
+        UserProfile user = views.detail(manager.getFrame(userId, UserProfile.class), accessor);
+        try {
+            user.removeFollowing(manager.getFrame(otherId, UserProfile.class));
+            graph.getBaseGraph().commit();
+            return Response.status(Status.OK).build();
+        }  finally {
+            cleanupTransaction();
+        }
+    }
+
+    @GET
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Path("{userId:.+}/" + WATCHING)
+    public StreamingOutput listWatching(
+            @PathParam("userId") String userId,
+            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
+            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(SORT_PARAM) List<String> order,
+            @QueryParam(FILTER_PARAM) List<String> filters)
+            throws ItemNotFound, AccessDenied, BadRequester {
+        Accessor accessor = getRequesterUserProfile();
+        UserProfile user = views.detail(manager.getFrame(userId, UserProfile.class), accessor);
+        final Iterable<Watchable> list = new Query<Watchable>(graph,
+                Watchable.class).setOffset(offset).setLimit(limit)
+                .orderBy(order).filter(filters).list(user.getWatching(), accessor);
+        return streamingList(list);
+    }
+
+    @GET
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Path("{userId:.+}/" + WATCHING + "/page")
+    public StreamingOutput pageWatching(
+            @PathParam("userId") String userId,
+            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
+            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(SORT_PARAM) List<String> order,
+            @QueryParam(FILTER_PARAM) List<String> filters)
+            throws ItemNotFound, AccessDenied, BadRequester {
+        Accessor accessor = getRequesterUserProfile();
+        UserProfile user = views.detail(manager.getFrame(userId, UserProfile.class), accessor);
+        final Query.Page<Watchable> page = new Query<Watchable>(graph,
+                Watchable.class).setOffset(offset).setLimit(limit)
+                .orderBy(order).filter(filters).page(user.getWatching(), accessor);
+        return streamingPage(page);
+    }
+
+    @POST
+    @Path("{userId:.+}/" + WATCH + "/{otherId:.+}")
+    public Response watchItem(
+            @PathParam("userId") String userId,
+            @PathParam("otherId") String otherId)
+            throws BadRequester, AccessDenied, PermissionDenied, ItemNotFound {
+        Accessor accessor = getRequesterUserProfile();
+        UserProfile user = views.detail(manager.getFrame(userId, UserProfile.class), accessor);
+        try {
+            user.addWatching(manager.getFrame(otherId, Watchable.class));
+            graph.getBaseGraph().commit();
+            return Response.status(Status.OK).build();
+        }  finally {
+            cleanupTransaction();
+        }
+    }
+
+    @DELETE
+    @Path("{userId:.+}/" + WATCH + "/{otherId:.+}")
+    public Response unwatchItem(
+            @PathParam("userId") String userId,
+            @PathParam("otherId") String otherId)
+            throws BadRequester, PermissionDenied, ItemNotFound, AccessDenied {
+        Accessor accessor = getRequesterUserProfile();
+        UserProfile user = views.detail(manager.getFrame(userId, UserProfile.class), accessor);
+        try {
+            user.removeWatching(manager.getFrame(otherId, Watchable.class));
+            graph.getBaseGraph().commit();
+            return Response.status(Status.OK).build();
+        }  finally {
+            cleanupTransaction();
+        }
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("{userId:.+}/" + IS_WATCHING + "/{otherId:.+}")
+    public Response isWatching(
+            @PathParam("userId") String userId,
+            @PathParam("otherId") String otherId)
+            throws BadRequester, AccessDenied, PermissionDenied, ItemNotFound {
+        Accessor accessor = getRequesterUserProfile();
+        UserProfile user = views.detail(manager.getFrame(userId, UserProfile.class), accessor);
+        return booleanResponse(user
+                .isWatching(manager.getFrame(otherId, Watchable.class)));
+    }
+
+    @GET
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Path("{userId:.+}/" + Entities.ANNOTATION + "/page")
+    public StreamingOutput pageAnnotations(
+            @PathParam("userId") String userId,
+            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
+            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(SORT_PARAM) List<String> order,
+            @QueryParam(FILTER_PARAM) List<String> filters)
+            throws ItemNotFound, AccessDenied, BadRequester {
+        Accessor accessor = getRequesterUserProfile();
+        UserProfile user = views.detail(manager.getFrame(userId, UserProfile.class), accessor);
+        final Query.Page<Annotation> page = new Query<Annotation>(graph,
+                Annotation.class).setOffset(offset).setLimit(limit)
+                .orderBy(order).filter(filters).page(user.getAnnotations(), accessor);
+        return streamingPage(page);
+    }
+
+    @GET
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Path("{userId:.+}/" + Entities.LINK + "/page")
+    public StreamingOutput pageLinks(
+            @PathParam("userId") String userId,
+            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
+            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(SORT_PARAM) List<String> order,
+            @QueryParam(FILTER_PARAM) List<String> filters)
+            throws ItemNotFound, AccessDenied, BadRequester {
+        Accessor accessor = getRequesterUserProfile();
+        UserProfile user = views.detail(manager.getFrame(userId, UserProfile.class), accessor);
+        final Query.Page<Link> page = new Query<Link>(graph,
+                Link.class).setOffset(offset).setLimit(limit)
+                .orderBy(order).filter(filters).page(user.getLinks(), accessor);
+        return streamingPage(page);
+    }
+
+
     /*** helpers ***/
-    
-    /* 
+
+    /*
      * This code is similar to the create method of AbstractAccessibleEntityResource 
      * but also allows specifying groups to which the new userProfile will be added. 
      * 

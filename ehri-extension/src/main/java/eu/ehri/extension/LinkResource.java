@@ -145,7 +145,7 @@ public class LinkResource extends
         if (description == null) {
             throw new ItemNotFound(id);
         }
-        AccessibleEntity item = description.getEntity();
+        DescribedEntity item = description.getEntity();
         if (item == null) {
             throw new ItemNotFound(id);
         }

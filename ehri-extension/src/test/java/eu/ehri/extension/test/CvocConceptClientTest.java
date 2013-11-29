@@ -1,28 +1,24 @@
 package eu.ehri.extension.test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
-import java.io.IOException;
-import java.net.URI;
-import java.util.Iterator;
-
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriBuilder;
-
+import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.WebResource;
+import eu.ehri.extension.AbstractRestResource;
+import eu.ehri.project.definitions.Entities;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.WebResource;
+import javax.ws.rs.core.MediaType;
+import java.io.IOException;
+import java.net.URI;
+import java.util.Iterator;
 
-import eu.ehri.extension.AbstractRestResource;
-import eu.ehri.project.definitions.Entities;
+import static com.sun.jersey.api.client.ClientResponse.Status.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 
 public class CvocConceptClientTest extends BaseRestClientTest {
     static final String TEST_CVOC_ID = "cvoc1"; // vocabulary in fixture
@@ -46,46 +42,29 @@ public class CvocConceptClientTest extends BaseRestClientTest {
     @Test
     public void testCreateDeleteCvocConcept() throws Exception {
         // Create
-        WebResource resource = client.resource(getCreationUri());
-
-        ClientResponse response = resource
-                .accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME,
-                        getAdminUserProfileId()).entity(jsonApplesTestStr)
+        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
+                getCreationUri()).entity(jsonApplesTestStr)
                 .post(ClientResponse.class);
 
-        assertEquals(Response.Status.CREATED.getStatusCode(),
-                response.getStatus());
-        // System.out.println("POST Respons json: " +
-        // response.getEntity(String.class));
+        assertStatus(CREATED, response);
 
         // Get created entity via the response location?
         URI location = response.getLocation();
 
-        resource = client.resource(location);
-        response = resource
-                .accept(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME,
-                        getAdminUserProfileId()).get(ClientResponse.class);
-        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
-        // TODO again test json
-        // System.out.println("GET Respons json: " +
-        // response.getEntity(String.class));
+        response = jsonCallAs(getAdminUserProfileId(), location)
+                .get(ClientResponse.class);
+        assertStatus(OK, response);
 
         // Where is my deletion test, I want to know if it works
-        resource = client.resource(location);
-        response = resource
-                .accept(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME,
-                        getAdminUserProfileId()).delete(ClientResponse.class);
-        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        response = jsonCallAs(getAdminUserProfileId(), location)
+                .delete(ClientResponse.class);
+        assertStatus(OK, response);
 
     }
 
     /**
      * Add and remove narrower concept
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -93,17 +72,13 @@ public class CvocConceptClientTest extends BaseRestClientTest {
         String jsonFruitTestStr = "{\"type\":\"cvocConcept\", \"data\":{\"identifier\": \"fruit\"}}";
         String jsonAppleTestStr = "{\"type\":\"cvocConcept\", \"data\":{\"identifier\": \"apple\"}}";
 
-        ClientResponse response;
-
         // Create fruit
-        response = testCreateConcept(jsonFruitTestStr);
+        ClientResponse response = testCreateConcept(jsonFruitTestStr);
         // Get created entity via the response location
         URI fruitLocation = response.getLocation();
 
         // Create apple
         response = testCreateConcept(jsonAppleTestStr);
-        // System.out.println("POST Respons json: " +
-        // response.getEntity(String.class));
 
         // Get created entity via the response location
         URI appleLocation = response.getLocation();
@@ -122,9 +97,7 @@ public class CvocConceptClientTest extends BaseRestClientTest {
                         getAdminUserProfileId()).post(ClientResponse.class);
         // Hmm, it's a post request, but we don't create a vertex (but we do an
         // edge...)
-        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
-        // System.out.println("add narrower Respons json: " +
-        // response.getEntity(String.class));
+        assertStatus(OK, response);
 
         // get fruit's narrower concepts
         response = testGet(fruitLocation + "/narrower/list");
@@ -133,8 +106,7 @@ public class CvocConceptClientTest extends BaseRestClientTest {
 
         // check if apple's broader is fruit
         // get apple's broader concepts
-        response = testGet(getExtensionEntryPointUri() + "/cvocConcept/"
-                + appleIdStr + "/broader/list");
+        response = testGet(ehriUri("cvocConcept", appleIdStr, "broader", "list"));
         // check if fruit is in there
         assertTrue(containsIdentifier(response, "fruit"));
 
@@ -145,11 +117,11 @@ public class CvocConceptClientTest extends BaseRestClientTest {
                 .type(MediaType.APPLICATION_JSON)
                 .header(AbstractRestResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId()).delete(ClientResponse.class);
-        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        assertStatus(OK, response);
 
         // apple should still exist
-        response = testGet(getExtensionEntryPointUri() + "/cvocConcept/"
-                + appleIdStr);
+        response = testGet(ehriUri("cvocConcept", appleIdStr));
+        assertStatus(OK, response);
 
         // but not as a narrower of fruit!
         response = testGet(fruitLocation + "/narrower/list");
@@ -160,7 +132,7 @@ public class CvocConceptClientTest extends BaseRestClientTest {
     /**
      * Add and remove related concept Similar to the narrower/broader
      * 'relationships'
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -195,9 +167,7 @@ public class CvocConceptClientTest extends BaseRestClientTest {
                         getAdminUserProfileId()).post(ClientResponse.class);
         // Hmm, it's a post request, but we don't create a vertex (but we do an
         // edge...)
-        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
-        // System.out.println("add related Respons json: " +
-        // response.getEntity(String.class));
+        assertStatus(OK, response);
 
         // get fruit's related concepts
         response = testGet(treeLocation + "/related/list");
@@ -218,11 +188,11 @@ public class CvocConceptClientTest extends BaseRestClientTest {
                 .type(MediaType.APPLICATION_JSON)
                 .header(AbstractRestResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId()).delete(ClientResponse.class);
-        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        assertStatus(OK, response);
 
         // apple should still exist
-        response = testGet(getExtensionEntryPointUri() + "/cvocConcept/"
-                + appleIdStr);
+        response = testGet(ehriUri(Entities.CVOC_CONCEPT, appleIdStr));
+        assertStatus(OK, response);
 
         // but not as a related of tree!
         response = testGet(treeLocation + "/related/list");
@@ -232,35 +202,31 @@ public class CvocConceptClientTest extends BaseRestClientTest {
 
     @Test
     public void testGetConcept() throws Exception {
-        testGet(getExtensionEntryPointUri() + "/" + Entities.CVOC_CONCEPT + "/"
-                + TEST_CVOC_CONCEPT_ID);
+        testGet(ehriUri(Entities.CVOC_CONCEPT, TEST_CVOC_CONCEPT_ID));
     }
 
     @Test
     public void testDeleteConcept() throws Exception {
-        String url = getExtensionEntryPointUri() + "/" + Entities.CVOC_CONCEPT
-                + "/" + TEST_CVOC_CONCEPT_ID;
+        URI url = ehriUri(Entities.CVOC_CONCEPT, TEST_CVOC_CONCEPT_ID);
         testDelete(url);
 
         // Check it's really gone...
         WebResource resource = client.resource(url);
-        ClientResponse responseDel = resource
+        ClientResponse response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
                 .header(AbstractRestResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId()).get(ClientResponse.class);
-
-        assertEquals(Response.Status.NOT_FOUND.getStatusCode(),
-                responseDel.getStatus());
+        assertStatus(NOT_FOUND, response);
     }
 
-    /*** helpers ***/
+    /**
+     * helpers **
+     */
 
     public boolean containsIdentifier(final ClientResponse response,
             final String idStr) throws IOException {
         String json = response.getEntity(String.class);
-        // System.out.println("list Response json: " + json);
-
         ObjectMapper mapper = new ObjectMapper();
         JsonNode rootNode = mapper.readValue(json, JsonNode.class);
         return containsIdentifier(rootNode.getElements(), idStr);
@@ -287,79 +253,43 @@ public class CvocConceptClientTest extends BaseRestClientTest {
         return result;
     }
 
+    private ClientResponse testGet(URI url) {
+        return testGet(url.toString());
+    }
+
     public ClientResponse testGet(String url) {
         WebResource resource = client.resource(url);
         ClientResponse response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .header(AbstractRestResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId()).get(ClientResponse.class);
-        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        assertStatus(OK, response);
 
         return response;
     }
 
-    public ClientResponse testDelete(String url) {
+    public ClientResponse testDelete(URI url) {
         WebResource resource = client.resource(url);
         ClientResponse response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .header(AbstractRestResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId()).delete(ClientResponse.class);
-        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        assertStatus(OK, response);
 
         return response;
     }
 
     public ClientResponse testCreateConcept(String json) {
         // Create
-        WebResource resource = client.resource(getCreationUri());
-
-        ClientResponse response = resource
-                .accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME,
-                        getAdminUserProfileId()).entity(json)
+        ClientResponse response = jsonCallAs(getAdminUserProfileId(), getCreationUri())
+                .entity(json)
                 .post(ClientResponse.class);
-
-        assertEquals(Response.Status.CREATED.getStatusCode(),
-                response.getStatus());
-
-        return response;
-    }
-
-    public ClientResponse testCreateConceptWithAccessor(String json) {
-        // Create
-        WebResource resource = client.resource(getCreationUri()).queryParam(
-                AbstractRestResource.ACCESSOR_PARAM, getAdminUserProfileId());
-        ClientResponse response = resource
-                .accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME,
-                        getAdminUserProfileId()).entity(json)
-                .post(ClientResponse.class);
-
-        assertEquals(Response.Status.CREATED.getStatusCode(),
-                response.getStatus());
-        URI location = response.getLocation();
-        response = client
-                .resource(location)
-                .header(AbstractRestResource.AUTH_HEADER_NAME,
-                        getAdminUserProfileId()).get(ClientResponse.class);
-        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
-
-        // Now check that the unprivileged user cannot access the resource
-        response = client
-                .resource(location)
-                .header(AbstractRestResource.AUTH_HEADER_NAME,
-                        getRegularUserProfileId()).get(ClientResponse.class);
-        assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(),
-                response.getStatus());
+        assertStatus(CREATED, response);
         return response;
     }
 
     private URI getCreationUri() {
         // always create Concepts under a Vocabulary
-        return UriBuilder.fromPath(getExtensionEntryPointUri())
-                .segment(Entities.CVOC_VOCABULARY).segment(TEST_CVOC_ID)
-                .segment(Entities.CVOC_CONCEPT).build();
+        return ehriUri(Entities.CVOC_VOCABULARY, TEST_CVOC_ID, Entities.CVOC_CONCEPT);
     }
 }
