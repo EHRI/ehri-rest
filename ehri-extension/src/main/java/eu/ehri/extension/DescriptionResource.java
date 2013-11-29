@@ -153,7 +153,7 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
     @DELETE
     @Path("/{id:.+}/{did:.+}/" + Entities.UNDETERMINED_RELATIONSHIP + "/{apid:.+}")
     public Response deleteAccessPoint(@PathParam("id") String id,
-            @PathParam("did") String did, @PathParam("did") String apid)
+            @PathParam("did") String did, @PathParam("apid") String apid)
             throws AccessDenied, PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, ItemNotFound, BadRequester {
         graph.getBaseGraph().checkNotInTransaction();
@@ -164,7 +164,7 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
             Description desc = manager.getFrame(did, Description.class);
             UndeterminedRelationship rel = manager.getFrame(apid, UndeterminedRelationship.class);
             if (!rel.getDescription().equals(desc)) {
-                throw new WebApplicationException(
+                throw new RuntimeException(
                         new Exception("Access point does not belong to given description."));
             }
             views.deleteDependent(rel, doc, user, UndeterminedRelationship.class, getLogMessage());

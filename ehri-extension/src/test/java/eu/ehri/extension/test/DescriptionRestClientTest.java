@@ -1,6 +1,7 @@
 package eu.ehri.extension.test;
 
 import com.sun.jersey.api.client.ClientResponse;
+import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.persistence.Bundle;
 import org.codehaus.jackson.JsonNode;
@@ -11,12 +12,15 @@ import org.junit.Test;
 
 import javax.ws.rs.core.Response;
 
+import static com.sun.jersey.api.client.ClientResponse.Status.CREATED;
 import static com.sun.jersey.api.client.ClientResponse.Status.OK;
 import static org.junit.Assert.*;
 
 public class DescriptionRestClientTest extends BaseRestClientTest {
 
+    private final ObjectMapper mapper = new ObjectMapper();
     private String descriptionTestStr;
+    private String accessPointTestStr;
     static final String TEST_DESCRIPTION_IDENTIFIER = "another-description";
     // FIXME: This ID is temporaty and will break when we decide on a proper
 
@@ -28,6 +32,7 @@ public class DescriptionRestClientTest extends BaseRestClientTest {
     @Before
     public void setUp() throws Exception {
         descriptionTestStr = readFileAsString("documentDescription.json");
+        accessPointTestStr = readFileAsString("undeterminedRelationship.json");
     }
 
     @Test
@@ -39,7 +44,6 @@ public class DescriptionRestClientTest extends BaseRestClientTest {
                 .entity(descriptionTestStr).post(ClientResponse.class);
         assertEquals(Response.Status.CREATED.getStatusCode(), response.getStatus());
 
-        ObjectMapper mapper = new ObjectMapper();
         JsonNode rootNode = mapper.readValue(response.getEntity(String.class),
                 JsonNode.class);
 
@@ -66,7 +70,6 @@ public class DescriptionRestClientTest extends BaseRestClientTest {
                 .entity(descriptionTestStr).put(ClientResponse.class);
         assertStatus(OK, response);
 
-        ObjectMapper mapper = new ObjectMapper();
         JsonNode rootNode = mapper.readValue(response.getEntity(String.class),
                 JsonNode.class);
         JsonNode idValue = rootNode
@@ -85,6 +88,26 @@ public class DescriptionRestClientTest extends BaseRestClientTest {
         // C2 initially has one description, so there should be none afterwards
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
                 ehriUri("description", "c2", "cd2"))
+                .delete(ClientResponse.class);
+        assertStatus(OK, response);
+    }
+
+    @Test
+    public void testCreateDeleteAccessPoints() throws Exception {
+        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
+                ehriUri("description", "c2", "cd2", Entities.UNDETERMINED_RELATIONSHIP))
+                .entity(accessPointTestStr).post(ClientResponse.class);
+        assertStatus(CREATED, response);
+        JsonNode rootNode = mapper.readValue(response.getEntity(String.class),
+                JsonNode.class);
+        JsonNode idNode = rootNode
+                .path(Bundle.ID_KEY);
+        assertFalse(idNode.isMissingNode());
+        String value = idNode.asText();
+
+        response = jsonCallAs(getAdminUserProfileId(),
+                ehriUri("description", "c2", "cd2",
+                        Entities.UNDETERMINED_RELATIONSHIP, value))
                 .delete(ClientResponse.class);
         assertStatus(OK, response);
     }
