@@ -1,5 +1,5 @@
 """
-Fabric deployment script for EHRI front-end webapp.
+Fabric deployment script for EHRI rest backend.
 """
 
 from __future__ import with_statement
@@ -124,6 +124,11 @@ def latest():
             print("Current version is now: %s" % output)
             restart()
 
+def online_backup(dstdir):
+    "Do an online backup to a particular directory on the server."
+    run("%(neo4j_install)s/bin/neo4j-backup -from single://localhost:6362 -to %s" % dstdir)
+
+
 def clone_db(dirname):
     """Copy a Neo4j DB from a server using the backup tool.
     This creates a copy of the running DB in /tmp, zips it,
@@ -131,7 +136,7 @@ def clone_db(dirname):
     cleans up."""
     timestamp = get_timestamp()
     with settings(tmpdst = "/tmp/" + timestamp):
-        run("%(neo4j_install)s/bin/neo4j-backup -from single://localhost:6362 -to %(tmpdst)s" % env)
+        online_backup(env.tmpdst)
         run("tar --create --gzip --file %(tmpdst)s.tgz -C %(tmpdst)s ." % env)
         get(env.tmpdst + ".tgz", env.tmpdst + ".tgz")
         run("rm -rf %(tmpdst)s %(tmpdst)s.tgz" % env)
@@ -142,7 +147,35 @@ def clone_db(dirname):
 
 
 def update_db(dirname):
-    "Update a Neo4j DB on a server"
-    raise NotImplementedError
+    """Update a Neo4j DB on a server. Tar the input dir for upload,
+    upload it, stop the server, move the current DB out of the way,
+    and unzip it."""
+    # Check we have a reasonable path...
+    if not os.path.exists(os.path.join(dirname, "index.db")):
+        raise Exception("This doesn't look like a Neo4j DB folder!: " + dirname)
+
+    remote_db_dir = "%(neo4j_install)s/data/graph.db" % env
+    timestamp = get_timestamp()
+    import tempfile
+    tf = tempfile.NamedTemporaryFile(suffix=".tgz")
+    name = tf.name
+    tf.close()
+
+    local("tar --create --gzip --file %s -C %s ." % (name, dirname))
+    remote_name = os.path.join("/tmp", os.path.basename(name))
+    put(name, remote_name)
+
+    if confirm("Stop Neo4j server?"):
+        stop()
+        run("mv %s %s.%s" % (remote_db_dir, remote_db_dir, timestamp))
+        run("mkdir " + remote_db_dir)
+        run("tar zxf %s -C %s" % (remote_name, remote_db_dir))
+        run("chown %s.webadm -R %s" % (env.user, remote_db_dir))
+        start()
+
+def full_reindex():
+    "Run a full reindex of Neo4j -> Solr data"
+    raise NotImplementedError()
+
 
 
