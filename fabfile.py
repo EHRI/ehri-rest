@@ -8,6 +8,8 @@ import os
 import datetime
 import subprocess
 from fabric.api import *
+from fabric.utils import abort, error, warn
+from fabric.contrib import files
 from fabric.contrib.console import confirm
 from contextlib import contextmanager as _contextmanager
 
@@ -22,18 +24,19 @@ env.use_ssh_config = True
 
 # environments
 def test():
-    "Use the remote testing server"
+    "Use the remote testing server."
     env.hosts = ['ehritest']
 
 def stage():
-    "Use the remote staging server"
+    "Use the remote staging server."
     env.hosts = ['ehristage']
 
 def prod():
-    "Use the remote virtual server"
+    "Use the remote virtual server."
     env.hosts = ['ehriprod']
     env.prod = True
 
+@task
 def deploy():
     """
     Deploy the latest version of the site to the servers, install any
@@ -44,10 +47,125 @@ def deploy():
         symlink_current()
         restart()
 
+@task
 def clean_deploy():
     """Build a clean version and deploy."""
     local('mvn clean package -P sparql  -DskipTests')
     deploy()
+
+@task
+def start():
+    "Start neo4j-service."
+    # NB: This doesn't use sudo() directly because it insists on asking
+    # for a password, even though we should have NOPASSWD in visudo.
+    run('sudo service %(service_name)s start' % env, pty=False, shell=False)
+
+@task
+def stop():
+    "Stop neo4j-service."
+    # NB: This doesn't use sudo() directly because it insists on asking
+    # for a password, even though we should have NOPASSWD in visudo.
+    run('sudo service %(service_name)s stop' % env, pty=False, shell=False)
+
+@task
+def restart():
+    "Restart neo4j-service."
+    # NB: This doesn't use sudo() directly because it insists on asking
+    # for a password, even though we should have NOPASSWD in visudo.
+    if confirm("Restart Neo4j server?"):
+        run('sudo service %(service_name)s restart' % env, pty=False, shell=False)
+
+@task
+def rollback():
+    "Rollback to the last versioned dir and restart."
+    with cd(env.path):
+        output = run("ls -1rt deploys | tail -n 2 | head -n 1").strip()
+        if output == "":
+            raise Exception("Unable to get previous version for rollback!")
+        with settings(version=output):
+            symlink_current()
+            print("Current version is now: %s" % output)
+            restart()
+
+@task
+def latest():
+    "Point symlink at latest version."
+    with cd(env.path):
+        output = run("ls -1rt deploys | tail -n 1").strip()
+        if output == "":
+            raise Exception("Unable to get latest version for rollback!")
+        with settings(version=output):
+            symlink_current()
+            print("Current version is now: %s" % output)
+            restart()
+
+@task
+def online_backup(remote_dir):
+    """
+    Do an online backup to a particular directory on the server.
+
+    online_backup:/path/on/server/backup.graph.db
+    """
+    if files.exists(remote_dir):
+        abort("Remote directory '%s' already exists!" % remote_dir)
+    with settings(dst=remote_dir):
+        run("%(neo4j_install)s/bin/neo4j-backup -from single://localhost:6362 -to %(dst)s" % env)
+
+
+@task
+def clone_db(local_dir):
+    """Copy a Neo4j DB from a server using the backup tool.
+    This creates a copy of the running DB in /tmp, zips it,
+    downloads the zip, extracts it to the specified DB, and
+    cleans up.
+    
+    clone_db:/local/path/to/graph.db
+    """
+    timestamp = get_timestamp()
+    with settings(tmpdst = "/tmp/" + timestamp):
+        online_backup(env.tmpdst)
+        run("tar --create --gzip --file %(tmpdst)s.tgz -C %(tmpdst)s ." % env)
+        get(env.tmpdst + ".tgz", env.tmpdst + ".tgz")
+        run("rm -rf %(tmpdst)s %(tmpdst)s.tgz" % env)
+        local("mkdir -p " + local_dir)
+        local("tar xf /tmp/%s.tgz -C %s" % (timestamp, local_dir))
+        local("rm " + env.tmpdst + ".tgz")
+
+@task
+def update_db(local_dir):
+    """Update a Neo4j DB on a server.    
+    Tar the input dir for upload, upload it, stop the server,
+    move the current DB out of the way, and unzip it.
+    
+    update_db:/local/path/to/graph.db
+    """
+    # Check we have a reasonable path...
+    if not os.path.exists(os.path.join(local_dir, "index.db")):
+        raise Exception("This doesn't look like a Neo4j DB folder!: " + local_dir)
+
+    remote_db_dir = "%(neo4j_install)s/data/graph.db" % env
+    timestamp = get_timestamp()
+    import tempfile
+    tf = tempfile.NamedTemporaryFile(suffix=".tgz")
+    name = tf.name
+    tf.close()
+
+    local("tar --create --gzip --file %s -C %s ." % (name, local_dir))
+    remote_name = os.path.join("/tmp", os.path.basename(name))
+    put(name, remote_name)
+
+    if confirm("Stop Neo4j server?"):
+        stop()
+        run("mv %s %s.%s" % (remote_db_dir, remote_db_dir, timestamp))
+        run("mkdir " + remote_db_dir)
+        run("tar zxf %s -C %s" % (remote_name, remote_db_dir))
+        run("chown %s.webadm -R %s" % (env.user, remote_db_dir))
+        start()
+
+def full_reindex():
+    "Run a full reindex of Neo4j -> Solr data"
+    raise NotImplementedError()
+
 
 def get_version_stamp():
     "Get a dated and revision stamped version string"
@@ -56,7 +174,6 @@ def get_version_stamp():
 
 def get_timestamp():
     return datetime.datetime.now().strftime("%Y%m%d%H%M%S")    
-
 
 def copy_to_server():
     "Upload the app to a versioned path."
@@ -82,101 +199,5 @@ def copy_to_server():
 def symlink_current():
     with cd(env.path):
         run("ln --force --no-dereference --symbolic deploys/%(version)s current" % env)
-
-def start():
-    "Start Neo4j"
-    # NB: This doesn't use sudo() directly because it insists on asking
-    # for a password, even though we should have NOPASSWD in visudo.
-    run('sudo service %(service_name)s start' % env, pty=False, shell=False)
-
-def stop():
-    "Stop docview"
-    # NB: This doesn't use sudo() directly because it insists on asking
-    # for a password, even though we should have NOPASSWD in visudo.
-    run('sudo service %(service_name)s stop' % env, pty=False, shell=False)
-
-def restart():
-    "Restart docview"
-    # NB: This doesn't use sudo() directly because it insists on asking
-    # for a password, even though we should have NOPASSWD in visudo.
-    if confirm("Restart Neo4j server?"):
-        run('sudo service %(service_name)s restart' % env, pty=False, shell=False)
-
-def rollback():
-    "Rollback to the last versioned dir and restart"
-    with cd(env.path):
-        output = run("ls -1rt deploys | tail -n 2 | head -n 1").strip()
-        if output == "":
-            raise Exception("Unable to get previous version for rollback!")
-        with settings(version=output):
-            symlink_current()
-            print("Current version is now: %s" % output)
-            restart()
-
-def latest():
-    "Point symlink at latest version"
-    with cd(env.path):
-        output = run("ls -1rt deploys | tail -n 1").strip()
-        if output == "":
-            raise Exception("Unable to get latest version for rollback!")
-        with settings(version=output):
-            symlink_current()
-            print("Current version is now: %s" % output)
-            restart()
-
-def online_backup(dstdir):
-    "Do an online backup to a particular directory on the server."
-    with settings(dst=dstdir):
-        run("%(neo4j_install)s/bin/neo4j-backup -from single://localhost:6362 -to %(dst)s" % env)
-
-
-def clone_db(dirname):
-    """Copy a Neo4j DB from a server using the backup tool.
-    This creates a copy of the running DB in /tmp, zips it,
-    downloads the zip, extracts it to the specified DB, and
-    cleans up."""
-    timestamp = get_timestamp()
-    with settings(tmpdst = "/tmp/" + timestamp):
-        online_backup(env.tmpdst)
-        run("tar --create --gzip --file %(tmpdst)s.tgz -C %(tmpdst)s ." % env)
-        get(env.tmpdst + ".tgz", env.tmpdst + ".tgz")
-        run("rm -rf %(tmpdst)s %(tmpdst)s.tgz" % env)
-        local("mkdir -p " + dirname)
-        local("tar xf /tmp/%s.tgz -C %s" % (timestamp, dirname))
-        local("rm " + env.tmpdst + ".tgz")
-
-
-
-def update_db(dirname):
-    """Update a Neo4j DB on a server. Tar the input dir for upload,
-    upload it, stop the server, move the current DB out of the way,
-    and unzip it."""
-    # Check we have a reasonable path...
-    if not os.path.exists(os.path.join(dirname, "index.db")):
-        raise Exception("This doesn't look like a Neo4j DB folder!: " + dirname)
-
-    remote_db_dir = "%(neo4j_install)s/data/graph.db" % env
-    timestamp = get_timestamp()
-    import tempfile
-    tf = tempfile.NamedTemporaryFile(suffix=".tgz")
-    name = tf.name
-    tf.close()
-
-    local("tar --create --gzip --file %s -C %s ." % (name, dirname))
-    remote_name = os.path.join("/tmp", os.path.basename(name))
-    put(name, remote_name)
-
-    if confirm("Stop Neo4j server?"):
-        stop()
-        run("mv %s %s.%s" % (remote_db_dir, remote_db_dir, timestamp))
-        run("mkdir " + remote_db_dir)
-        run("tar zxf %s -C %s" % (remote_name, remote_db_dir))
-        run("chown %s.webadm -R %s" % (env.user, remote_db_dir))
-        start()
-
-def full_reindex():
-    "Run a full reindex of Neo4j -> Solr data"
-    raise NotImplementedError()
-
 
 
