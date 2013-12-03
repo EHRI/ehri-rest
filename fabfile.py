@@ -5,8 +5,9 @@ Fabric deployment script for EHRI rest backend.
 from __future__ import with_statement
 
 import os
-import datetime
 import subprocess
+from datetime import datetime
+
 from fabric.api import *
 from fabric.utils import abort, error, warn
 from fabric.contrib import files
@@ -22,15 +23,20 @@ env.neo4j_install = '/opt/webapps/' + 'neo4j-version'
 env.user = os.getenv("USER")
 env.use_ssh_config = True
 
+TIMESTAMP_FORMAT = "%Y%m%d%H%M%S"
+
 # environments
+@task
 def test():
     "Use the remote testing server."
     env.hosts = ['ehritest']
 
+@task
 def stage():
     "Use the remote staging server."
     env.hosts = ['ehristage']
 
+@task
 def prod():
     "Use the remote virtual server."
     env.hosts = ['ehriprod']
@@ -162,10 +168,27 @@ def update_db(local_dir):
         run("chown %s.webadm -R %s" % (env.user, remote_db_dir))
         start()
 
+@task
 def full_reindex():
-    "Run a full reindex of Neo4j -> Solr data"
+    "Run a full reindex of Neo4j -> Solr data (Not yet implemented)"
     raise NotImplementedError()
 
+@task
+def current_version():
+    "Show the current date/revision"
+    with cd(env.path):
+        path = run("readlink -f current")
+        deploy = os.path.split(path)
+        timestamp, revision = os.path.basename(deploy[-1]).split("_")
+        date = datetime.strptime(timestamp, TIMESTAMP_FORMAT)
+        print("Timestamp: %s, revision: %s" % (date, revision))
+        return date, revision
+
+@task
+def current_version_log():
+    "Output git log between HEAD and the current deployed version."
+    _, revision = current_version()
+    local("git log %s..HEAD" % revision)
 
 def get_version_stamp():
     "Get a dated and revision stamped version string"
@@ -173,7 +196,7 @@ def get_version_stamp():
     return "%s_%s" % (get_timestamp(), rev)
 
 def get_timestamp():
-    return datetime.datetime.now().strftime("%Y%m%d%H%M%S")    
+    return datetime.now().strftime(TIMESTAMP_FORMAT)    
 
 def copy_to_server():
     "Upload the app to a versioned path."
