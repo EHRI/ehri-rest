@@ -31,6 +31,8 @@ Available commands:
 
     clean_deploy   Build a clean version and deploy.
     clone_db       Copy a Neo4j DB from a server using the backup tool.
+    current_version      Show the current date/revision
+    current_version_log  Output git log between HEAD and the current deployed version.
     deploy         Deploy the latest version of the site to the servers, install any
     latest         Point symlink at latest version.
     online_backup  Do an online backup to a particular directory on the server.
