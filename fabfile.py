@@ -20,6 +20,7 @@ env.service_name = 'neo4j-service'
 env.prod = False
 env.path = '/opt/webapps/' + env.project_name
 env.neo4j_install = '/opt/webapps/' + 'neo4j-version'
+env.index_helper = "/opt/webapps/docview/bin/indexer.jar"
 env.user = os.getenv("USER")
 env.use_ssh_config = True
 
@@ -167,6 +168,22 @@ def update_db(local_dir):
         run("tar zxf %s -C %s" % (remote_name, remote_db_dir))
         run("chown %s.webadm -R %s" % (env.user, remote_db_dir))
         start()
+
+@task
+def reindex_repository(repo_id):
+    """Reindex items held by a repository.
+    NB: Bit specific but very useful."""
+    indexer_cmd = [
+        "java", "-jar", env.index_helper,
+        "--clear-key-value", "holderId=" + repo_id,
+        "--index",
+        "-H", "Authorization=admin",
+        "--stats",
+        "--solr", "http://localhost:8080/ehri/portal",
+        "--rest", "http://localhost:7474/ehri",
+        "'repository|%s'" % repo_id,
+    ]
+    run(" ".join(indexer_cmd))
 
 @task
 def full_reindex():
