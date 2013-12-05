@@ -1,12 +1,8 @@
 package eu.ehri.project.views;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.LinkedListMultimap;
-import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Sets;
-import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
-import com.tinkerpop.pipes.PipeFunction;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.acl.PermissionType;
 import eu.ehri.project.acl.SystemScope;
@@ -92,43 +88,6 @@ public final class AnnotationViews {
                 graph.frame(user.asVertex(), Actioner.class),
                 EventTypes.annotation, Optional.<String>absent());
         return annotation;
-    }
-
-    /**
-     * Fetch annotations for an item subtree.
-     * 
-     * @param id
-     * @param accessor
-     * @return map of ids to annotation lists.
-     */
-    public Iterable<Annotation> getFor(String id, Accessor accessor)
-            throws ItemNotFound {
-        final PipeFunction<Vertex, Boolean> filter = acl
-                .getAclFilterFunction(accessor);
-        final ListMultimap<String, Annotation> annotations = LinkedListMultimap
-                .create();
-        AnnotatableEntity item = manager.getFrame(id, AnnotatableEntity.class);
-        return item.getAnnotations();
-    }
-
-    /**
-     * Fetch annotations for an item and its subtree.
-     * 
-     * @param item
-     * @param annotations
-     * @param filter
-     */
-    private <T extends Frame> void getAnnotations(T item,
-            ListMultimap<String, Annotation> annotations,
-            PipeFunction<Vertex, Boolean> filter) {
-        String id = item.getId();
-        AnnotatableEntity entity = graph.frame(item.asVertex(),
-                AnnotatableEntity.class);
-        for (Annotation ann : entity.getAnnotations()) {
-            if (filter.compute(ann.asVertex())) {
-                annotations.put(id, ann);
-            }
-        }
     }
 
     private boolean isInSubtree(Frame parent, Frame child) {
