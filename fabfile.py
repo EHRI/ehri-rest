@@ -120,7 +120,7 @@ def online_backup(remote_dir):
 
 
 @task
-def clone_db(local_dir):
+def online_clone_db(local_dir):
     """Copy a Neo4j DB from a server using the backup tool.
     This creates a copy of the running DB in /tmp, zips it,
     downloads the zip, extracts it to the specified DB, and
@@ -137,6 +137,29 @@ def clone_db(local_dir):
         local("mkdir -p " + local_dir)
         local("tar xf /tmp/%s.tgz -C %s" % (timestamp, local_dir))
         local("rm " + env.tmpdst + ".tgz")
+
+@task
+def copy_db(local_dir):
+    """Copy a (not running) DB from the remote server.
+    
+    copy_db:/local/path/to/graph.db
+    """
+    if confirm("Stop Neo4j server?"):
+        stop()
+
+        remote_db_dir = "%(neo4j_install)s/data/graph.db" % env
+        temp_file = our_temp_file = run("mktemp --suffix=.tgz")
+        if not os.path.exists(local_dir):
+            os.mkdir(local_dir)
+
+        run("tar --create --gzip --file %s -C %s ." % (temp_file, remote_db_dir))
+        get(temp_file, os.path.dirname(our_temp_file))
+        local("tar --extract --gzip --file %s -C %s" % (our_temp_file, local_dir))
+        run("rm %s" % temp_file)
+        os.unlink(our_temp_file)
+
+        if confirm("Restart Neo4j server?"):
+            start()
 
 @task
 def update_db(local_dir):
@@ -186,9 +209,21 @@ def reindex_repository(repo_id):
     run(" ".join(indexer_cmd))
 
 @task
-def full_reindex():
-    "Run a full reindex of Neo4j -> Solr data (Not yet implemented)"
-    raise NotImplementedError()
+def reindex_all():
+    "Run a full reindex of Neo4j -> Solr data"
+    all_types = ["documentaryUnit", "repository", "country",
+            "historicalAgent", "cvocVocabulary", "cvocConcept",
+            "authoritativeSet", "userProfile", "group"]
+    indexer_cmd = [
+        "java", "-jar", env.index_helper,
+        "--clear-all",
+        "--index",
+        "-H", "Authorization=admin",
+        "--stats",
+        "--solr", "http://localhost:8080/ehri/portal",
+        "--rest", "http://localhost:7474/ehri",
+    ] + all_types
+    run(" ".join(indexer_cmd))
 
 @task
 def current_version():
