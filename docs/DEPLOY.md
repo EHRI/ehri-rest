@@ -29,26 +29,32 @@ Fabric deployment script for EHRI rest backend.
 
 Available commands:
 
-    clean_deploy   Build a clean version and deploy.
-    clone_db       Copy a Neo4j DB from a server using the backup tool.
+    clean_deploy         Build a clean version and deploy.
+    copy_db              Copy a (not running) DB from the remote server.
     current_version      Show the current date/revision
     current_version_log  Output git log between HEAD and the current deployed version.
-    deploy         Deploy the latest version of the site to the servers, install any
-    latest         Point symlink at latest version.
-    online_backup  Do an online backup to a particular directory on the server.
-    restart        Restart neo4j-service.
-    rollback       Rollback to the last versioned dir and restart.
-    start          Start neo4j-service.
-    stop           Stop neo4j-service.
-    update_db      Update a Neo4j DB on a server.
+    deploy               Deploy the latest version of the site to the servers, install any
+    latest               Point symlink at latest version.
+    online_backup        Do an online backup to a particular directory on the server.
+    online_clone_db      Copy a Neo4j DB from a server using the backup tool.
+    prod                 Use the remote virtual server.
+    reindex_all          Run a full reindex of Neo4j -> Solr data
+    reindex_repository   Reindex items held by a repository.
+    restart              Restart neo4j-service.
+    rollback             Rollback to the last versioned dir and restart.
+    stage                Use the remote staging server.
+    start                Start neo4j-service.
+    stop                 Stop neo4j-service.
+    test                 Use the remote testing server.
+    update_db            Update a Neo4j DB on a server.
 ```
 
 More detailed info for tasks are available with the `-d` switch:
 
 ```bash
-$> fab -d clone_db
+$> fab -d online_clone_db
 
-Displaying detailed information for task 'clone_db':
+Displaying detailed information for task 'online_clone_db':
 
     Copy a Neo4j DB from a server using the backup tool.
         This creates a copy of the running DB in /tmp, zips it,
