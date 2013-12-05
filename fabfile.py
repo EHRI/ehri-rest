@@ -126,7 +126,7 @@ def online_clone_db(local_dir):
     downloads the zip, extracts it to the specified DB, and
     cleans up.
     
-    clone_db:/local/path/to/graph.db
+    online_clone_db:/local/path/to/graph.db
     """
     timestamp = get_timestamp()
     with settings(tmpdst = "/tmp/" + timestamp):
