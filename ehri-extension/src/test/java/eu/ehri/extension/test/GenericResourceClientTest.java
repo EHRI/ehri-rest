@@ -69,4 +69,16 @@ public class GenericResourceClientTest extends BaseRestClientTest {
                 ehriUri("entities", BAD_ITEM)).get(ClientResponse.class);
         assertStatus(NOT_FOUND, response);
     }
+
+    @Test
+    public void listEntitiesByGidThrows404() throws IOException {
+        // Create
+        URI uri = UriBuilder.fromUri(getExtensionEntryPointUri())
+                .segment("entities")
+                .segment("listByGraphId")
+                .queryParam("gid", -1L).build();
+
+        ClientResponse response = jsonCallAs(getAdminUserProfileId(), uri).get(ClientResponse.class);
+        assertStatus(NOT_FOUND, response);
+    }
 }

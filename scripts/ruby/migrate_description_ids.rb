@@ -23,8 +23,6 @@ module Ehri
       end
     end
 
-    # This script restores maintenance event nodes capturing provenance information
-    # that we erroneously being lost when repositories were updated.
     begin
       fix_type(EntityClass::REPOSITORY_DESCRIPTION, Models::RepositoryDescription.java_class)
       fix_type(EntityClass::DOCUMENT_DESCRIPTION, Models::DocumentDescription.java_class)

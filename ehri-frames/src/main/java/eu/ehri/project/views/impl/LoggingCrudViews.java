@@ -23,9 +23,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
     private final CrudViews<E> views;
     private final FramedGraph<?> graph;
     private final Class<E> cls;
-    @SuppressWarnings("unused")
     private final PermissionScope scope;
-    private final Serializer payloadSerializer;
 
     /**
      * Scoped Constructor.
@@ -40,7 +38,6 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
         this.scope = Optional.fromNullable(scope).or(SystemScope.getInstance());
         actionManager = new ActionManager(graph, this.scope);
         views = new CrudViews<E>(graph, cls, this.scope);
-        payloadSerializer = new Serializer.Builder(graph).dependentOnly().build();
     }
 
     /**

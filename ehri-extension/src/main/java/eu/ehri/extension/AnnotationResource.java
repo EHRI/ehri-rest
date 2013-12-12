@@ -10,9 +10,9 @@ import javax.ws.rs.core.Response.Status;
 
 import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.base.*;
+import eu.ehri.project.views.Query;
+import eu.ehri.project.views.impl.CrudViews;
 import org.neo4j.graphdb.GraphDatabaseService;
-
-import com.google.common.collect.ListMultimap;
 
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.acl.AclManager;
@@ -160,11 +160,21 @@ public class AnnotationResource extends
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/for/{id:.+}")
-    public StreamingOutput listAnnotationsForSubtree(@PathParam("id") String id)
-            throws ItemNotFound, BadRequester, PermissionDenied {
-        AnnotationViews annotationViews = new AnnotationViews(graph);
-        Iterable<Annotation> anns = annotationViews.getFor(id, getRequesterUserProfile());
-        return streamingList(anns);
+    public StreamingOutput listAnnotationsForSubtree(
+            @PathParam("id") String id,
+            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
+            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(SORT_PARAM) List<String> order,
+            @QueryParam(FILTER_PARAM) List<String> filters)
+                throws AccessDenied, ItemNotFound, BadRequester, PermissionDenied {
+        AccessibleEntity item = new CrudViews<AccessibleEntity>(graph, AccessibleEntity.class)
+                .detail(manager.getFrame(id, AccessibleEntity.class),
+                getRequesterUserProfile());
+        Query<Annotation> query = new Query<Annotation>(graph, cls)
+                .setOffset(offset).setLimit(limit).filter(filters)
+                .orderBy(order).filter(filters);
+        return streamingList(query.list(item.getAnnotations(), getRequesterUserProfile()));
+
     }
 
     private Response buildResponseFromAnnotation(Annotation ann)
