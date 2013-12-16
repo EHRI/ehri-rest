@@ -37,36 +37,20 @@ module Ehri
 
         importer = Importers::IcaAtomEadImporter.new(Graph, scope, log)
 
-        importer.add_creation_callback do |item|
-          puts "Created item: #{item.get_id}"
-          event.add_subjects item
-          log.add_created
-
-          if log.get_changed > 0 and log.get_changed % COMMIT_MAX == 0
-            Graph.get_base_graph.commit
+        importer.add_callback do |mutation|
+          item = mutation.get_node
+          case mutation.get_state
+            when Persistence::MutationState::CREATED
+              puts "Created item: #{item.get_id}"
+              event.add_subjects item
+              log.add_created
+            when Persistence::MutationState::UPDATED
+              puts "Updated item: #{item.get_id}"
+              event.add_subjects item
+              log.add_updated
+            when Persistence::MutationState::UNCHANGED
+              log.add_unchanged
           end
-
-          children.each do |cxml|
-            import_with_scope(cxml, item, event, log)
-          end
-        end
-
-        importer.add_update_callback do |item|
-          puts "Updated item: #{item.get_id}"
-          event.add_subjects item
-          log.add_updated
-
-          if log.get_changed > 0 and log.get_changed % COMMIT_MAX == 0
-            Graph.get_base_graph.commit
-          end
-
-          children.each do |cxml|
-            import_with_scope(cxml, item, event, log)
-          end
-        end
-
-        importer.add_unchanged_callback do |item|
-          log.add_unchanged
 
           if log.get_changed > 0 and log.get_changed % COMMIT_MAX == 0
             Graph.get_base_graph.commit

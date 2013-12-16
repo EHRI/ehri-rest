@@ -25,4 +25,6 @@ public interface ImportManager {
     
     public ImportLog importFiles(List<String> paths, String logMessage)
             throws IOException, ValidationError;
+
+    public ImportManager addCallback(ImportCallback cb);
 }

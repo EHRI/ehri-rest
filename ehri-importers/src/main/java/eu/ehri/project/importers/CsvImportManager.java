@@ -21,6 +21,7 @@ import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 
+import eu.ehri.project.persistence.Mutation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,6 +42,11 @@ public class CsvImportManager extends XmlImportManager {
         this.importerClass = importerClass;
     }
 
+    public CsvImportManager addCallback(ImportCallback cb) {
+        importer.addCallback(cb);
+        return this;
+    }
+
     /**
      * Import XML from the given InputStream, as part of the given action.
      *
@@ -59,26 +65,23 @@ public class CsvImportManager extends XmlImportManager {
             importer = importerClass.getConstructor(FramedGraph.class, PermissionScope.class,
                     ImportLog.class).newInstance(framedGraph, permissionScope, log);
             logger.debug("importer of class " + importer.getClass());
-            importer.addCreationCallback(new ImportCallback() {
-                @Override
-                public void itemImported(AccessibleEntity item) {
-                    logger.info("Item created: {}", item.getId());
-                    eventContext.addSubjects(item);
-                    log.addCreated();
-                }
-            });
-            importer.addUpdateCallback(new ImportCallback() {
-                @Override
-                public void itemImported(AccessibleEntity item) {
-                    logger.info("Item updated: {}", item.getId());
-                    eventContext.addSubjects(item);
-                    log.addUpdated();
-                }
-            });
-            importer.addUnchangedCallback(new ImportCallback() {
-                @Override
-                public void itemImported(AccessibleEntity item) {
-                    log.addUnchanged();
+            importer.addCallback(new ImportCallback() {
+                public void itemImported(Mutation<? extends AccessibleEntity> mutation) {
+                    switch (mutation.getState()) {
+                        case CREATED:
+                            logger.info("Item created: {}", mutation.getNode().getId());
+                            eventContext.addSubjects(mutation.getNode());
+                            log.addCreated();
+                            break;
+                        case UPDATED:
+                            logger.info("Item created: {}", mutation.getNode().getId());
+                            eventContext.addSubjects(mutation.getNode());
+                            log.addCreated();
+                            break;
+                        case UNCHANGED:
+                            log.addUnchanged();
+                            break;
+                    }
                 }
             });
 

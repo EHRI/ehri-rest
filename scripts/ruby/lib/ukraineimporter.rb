@@ -51,20 +51,20 @@ module Ehri
             importer = Importers::UkrainianUnitImporter.new(Graph, repo, log)
             @importerlookup[repo_code] = importer
 
-            importer.add_creation_callback do |item|
-              puts "Created item: #{item.get_id}"
-              ctx.add_subjects item
-              log.add_created
-            end
-
-            importer.add_update_callback do |item|
-              puts "Updated item: #{item.get_id}"
-              ctx.add_subjects item
-              log.add_updated
-            end
-
-            importer.add_unchanged_callback do |item|
-              log.add_unchanged
+            importer.add_callback do |mutation|
+              item = mutation.get_node
+              case mutation.get_state
+                when Persistence::MutationState::CREATED
+                  puts "Created item: #{item.get_id}"
+                  ctx.add_subjects item
+                  log.add_created
+                when Persistence::MutationState::UPDATED
+                  puts "Updated item: #{item.get_id}"
+                  ctx.add_subjects item
+                  log.add_updated
+                when Persistence::MutationState::UNCHANGED
+                  log.add_unchanged
+              end
             end
           end
 

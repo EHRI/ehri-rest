@@ -19,6 +19,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+import eu.ehri.project.persistence.Mutation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
@@ -51,6 +52,11 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
         this.handlerClass = handlerClass;
     }
 
+    public SaxImportManager addCallback(ImportCallback cb) {
+        importer.addCallback(cb);
+        return this;
+    }
+
     /**
      * Import XML from the given InputStream, as part of the given action.
      *
@@ -71,26 +77,26 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
             importer = importerClass.getConstructor(FramedGraph.class, PermissionScope.class,
                     ImportLog.class).newInstance(framedGraph, permissionScope, log);
             logger.debug("importer of class {}", importer.getClass());
-            importer.addCreationCallback(new ImportCallback() {
-                public void itemImported(AccessibleEntity item) {
-                    logger.info("Item created: {}", item.getId());
-                    eventContext.addSubjects(item);
-                    log.addCreated();
+            importer.addCallback(new ImportCallback() {
+                public void itemImported(Mutation<? extends AccessibleEntity> mutation) {
+                    switch (mutation.getState()) {
+                        case CREATED:
+                            logger.info("Item created: {}", mutation.getNode().getId());
+                            eventContext.addSubjects(mutation.getNode());
+                            log.addCreated();
+                            break;
+                        case UPDATED:
+                            logger.info("Item created: {}", mutation.getNode().getId());
+                            eventContext.addSubjects(mutation.getNode());
+                            log.addCreated();
+                            break;
+                        case UNCHANGED:
+                            log.addUnchanged();
+                            break;
+                    }
                 }
             });
-            importer.addUpdateCallback(new ImportCallback() {
-                public void itemImported(AccessibleEntity item) {
-                    logger.info("Item updated: {}", item.getId());
-                    eventContext.addSubjects(item);
-                    log.addUpdated();
-                }
-            });
-            importer.addUnchangedCallback(new ImportCallback() {
-                @Override
-                public void itemImported(AccessibleEntity item) {
-                    log.addUnchanged();
-                }
-            });
+
             //TODO decide which handler to use, HandlerFactory? now part of constructor ...
             SaxXmlHandler handler = handlerClass.getConstructor(AbstractImporter.class).newInstance(importer);
             logger.debug("handler of class {}", handler.getClass());

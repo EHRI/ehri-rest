@@ -46,7 +46,8 @@ abstract public class XmlImportManager implements ImportManager {
      * @param permissionScope
      * @param actioner
      */
-    public XmlImportManager(FramedGraph<? extends TransactionalGraph> framedGraph, final PermissionScope permissionScope,
+    public XmlImportManager(FramedGraph<? extends TransactionalGraph> framedGraph,
+            final PermissionScope permissionScope,
             final Actioner actioner) {
         this.framedGraph = framedGraph;
         this.permissionScope = permissionScope;
@@ -199,6 +200,7 @@ abstract public class XmlImportManager implements ImportManager {
             throw new RuntimeException(e);
         }
     }
+
     protected int getNodeCount(FramedGraph<Neo4jGraph> graph) {
         return toList(GlobalGraphOperations
                 .at(graph.getBaseGraph().getRawGraph()).getAllNodes()).size();
