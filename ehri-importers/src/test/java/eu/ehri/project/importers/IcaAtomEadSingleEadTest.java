@@ -13,6 +13,8 @@ import eu.ehri.project.models.events.SystemEvent;
 import java.io.InputStream;
 import java.util.List;
 import org.junit.Test;
+
+
 import static org.junit.Assert.*;
 
 /**
@@ -50,6 +52,27 @@ public class IcaAtomEadSingleEadTest extends AbstractImporterTest {
         // - 2 more import Event links
         // - 1 more import Event
 
+        Iterable<Vertex> docs = graph.getVertices("identifier",
+                IMPORTED_ITEM_ID);
+        assertTrue(docs.iterator().hasNext());
+        DocumentaryUnit unit = graph.frame(docs.iterator().next(), DocumentaryUnit.class);
+        for(Description d : unit.getDocumentDescriptions())
+            assertEquals("Test EAD Item", d.getName());
+
+        // Test scope and content has correctly decoded data.
+        // This tests two bugs:
+        //  Space stripping: https://github.com/mikesname/ehri-rest/issues/12
+        //  Paragraph ordering: https://github.com/mikesname/ehri-rest/issues/13
+        Description firstDesc = unit.getDocumentDescriptions().iterator().next();
+        String scopeContent = firstDesc.asVertex().getProperty("scopeAndContent");
+        String expected =
+                "This is some test scope and content.\n\n" +
+                "This contains Something & Something else.\n\n" +
+                "This is another paragraph.";
+
+        assertEquals(expected, scopeContent);
+
+        // Check the right nodes get created.
         int createCount = origCount + 11;
 
         // - 4 more UnderterminedRelationship nodes
@@ -58,13 +81,6 @@ public class IcaAtomEadSingleEadTest extends AbstractImporterTest {
 
         // Yet we've only created 1 *logical* item...
         assertEquals(1, log.getChanged());
-
-        Iterable<Vertex> docs = graph.getVertices("identifier",
-                IMPORTED_ITEM_ID);
-        assertTrue(docs.iterator().hasNext());
-        DocumentaryUnit unit = graph.frame(docs.iterator().next(), DocumentaryUnit.class);
-        for(Description d : unit.getDocumentDescriptions())
-            assertEquals("Test EAD Item", d.getName());
 
         List<SystemEvent> actions = toList(unit.getHistory());
         // Check we've only got one action
