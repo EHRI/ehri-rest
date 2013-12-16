@@ -86,10 +86,10 @@ public class IcaAtomEadHandler extends SaxXmlHandler {
                         }
                     }
                     if (!currentGraph.containsKey(Ontology.LANGUAGE_OF_DESCRIPTION)) {
-                        currentGraph.put(Ontology.LANGUAGE_OF_DESCRIPTION, "en");
+                        currentGraph.put(Ontology.LANGUAGE_OF_DESCRIPTION, "eng");
                     }
                 if (!currentGraph.containsKey(Ontology.LANGUAGE_OF_DESCRIPTION)) {
-                    currentGraph.put(Ontology.LANGUAGE_OF_DESCRIPTION, "en");
+                    currentGraph.put(Ontology.LANGUAGE_OF_DESCRIPTION, "eng");
                 }
                 DocumentaryUnit current = (DocumentaryUnit)importer.importItem(currentGraph, depth);
                 logger.debug("importer used: " + importer.getClass());
