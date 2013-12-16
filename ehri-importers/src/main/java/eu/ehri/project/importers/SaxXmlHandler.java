@@ -195,8 +195,8 @@ public abstract class SaxXmlHandler extends DefaultHandler {
                 ((List<Object>) propertyList).add(valuetrimmed);
             } else {
                 List<Object> o = new ArrayList<Object>();
-                o.add(valuetrimmed);
                 o.add(c.get(property));
+                o.add(valuetrimmed);
                 c.put(property, o);
             }
         } else {
