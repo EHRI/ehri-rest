@@ -25,6 +25,9 @@ public class CmdEntryPoint extends BaseCommand {
         Map<String, Class<? extends Command>> mmap = new HashMap<String, Class<? extends Command>>();
         mmap.put(SkosVocabularyImport.NAME, SkosVocabularyImport.class);
         mmap.put(EadImport.NAME, EadImport.class);
+        mmap.put(BaEadImport.NAME, BaEadImport.class);
+        mmap.put(NiodEadImport.NAME, NiodEadImport.class);
+        mmap.put(ItsEadImport.NAME, ItsEadImport.class);
         mmap.put(EacImport.NAME, EacImport.class);
         mmap.put(EagImport.NAME, EagImport.class);
         mmap.put(UserListEntities.NAME, UserListEntities.class);
@@ -40,6 +43,8 @@ public class CmdEntryPoint extends BaseCommand {
         mmap.put(DeleteEntities.NAME, DeleteEntities.class);
         // new command, could we use reflection code to try find all Command interface implementing classes
         mmap.put(GraphML.NAME, GraphML.class);
+        // adaptation of UserAdd for adding countries
+        mmap.put(CountryAdd.NAME, CountryAdd.class);
         mmap.put(Check.NAME, Check.class);
         
         COMMANDS = Collections.unmodifiableMap(mmap);

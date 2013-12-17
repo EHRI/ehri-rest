@@ -44,9 +44,9 @@ documentDescription,systemOfArrangement,,,
 documentDescription,creators,,,1
 documentDescription,subjects,,,1
 documentDescription,unitDates,,,1
-documentDescription,languageOfMaterial,,,1
-documentDescription,scriptOfMaterial,,,1
+documentDescription,unitDatesTypes,,,1
 documentDescription,levelOfDescription,,,
+documentDescription,sources,,,
 historicalAgentDescription,lastName,,,
 historicalAgentDescription,firstName,,,
 historicalAgentDescription,source,,,1
@@ -93,3 +93,6 @@ repositoryDescription,maintenanceEvent,,,
 cvocConceptDescription,otherFormsOfName,,,
 cvocConceptDescription,definition,,,
 cvocConceptDescription,scopeNote,,,
+documentaryUnit,scope,,,
+documentaryUnit,copyrightStatus,,,
+documentaryUnit,priority,,,

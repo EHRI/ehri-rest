@@ -43,7 +43,7 @@ public class UserAdd extends BaseCommand implements Command {
 
     @Override
     public String getHelp() {
-        return "Usage: useradd [OPTIONS] <user-identifier>";
+        return "Usage: useradd <user-identifier> [OPTIONS]";
     }
 
     @Override
