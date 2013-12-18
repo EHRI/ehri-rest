@@ -38,8 +38,10 @@ public class CmdEntryPoint extends BaseCommand {
         mmap.put(EntityAdd.NAME, EntityAdd.class);
         mmap.put(PersonalitiesImport.NAME, PersonalitiesImport.class);
         mmap.put(DeleteEntities.NAME, DeleteEntities.class);
-        // new command, could we use reflection code to try find all Command interface implementing classes
-        mmap.put(GraphML.NAME, GraphML.class);
+
+        // DISABLED due to brokenness... use GraphSON instead.
+        //mmap.put(GraphML.NAME, GraphML.class);
+        mmap.put(GraphSON.NAME, GraphSON.class);
         mmap.put(Check.NAME, Check.class);
         
         COMMANDS = Collections.unmodifiableMap(mmap);
