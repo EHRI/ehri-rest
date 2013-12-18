@@ -11,7 +11,7 @@ public enum PermissionType {
     , OWNER("owner", 15) // Implies C,U,D,A
     , GRANT("grant", 16)
 
-    , PROMOTE("promote", 17)
+    , PROMOTE("promote", 32)
     // Reserved permission types
 //    RESERVED2("reserved2", 32),
 //    RESERVED3("reserved3", 64),
