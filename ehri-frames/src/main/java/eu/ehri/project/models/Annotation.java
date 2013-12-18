@@ -10,9 +10,10 @@ import eu.ehri.project.models.annotations.Mandatory;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.AnnotatableEntity;
 import eu.ehri.project.models.base.Annotator;
+import eu.ehri.project.models.base.Promotable;
 
 @EntityType(EntityClass.ANNOTATION)
-public interface Annotation extends AnnotatableEntity, AccessibleEntity {
+public interface Annotation extends AnnotatableEntity, AccessibleEntity, Promotable {
 
     @Fetch(Ontology.ANNOTATION_ANNOTATES)
     @Adjacency(label = Ontology.ANNOTATION_ANNOTATES, direction = Direction.IN)

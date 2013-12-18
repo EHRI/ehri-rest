@@ -380,6 +380,11 @@ public final class AclManager {
                 // read-only...
                 if (!verts.iterator().hasNext())
                     return true;
+                // If it's promoted it's publically accessible
+                if (v.getEdges(Direction.OUT, Ontology.PROMOTED_BY).iterator().hasNext())
+                    return true;
+
+                // Otherwise, check relevant accessors...
                 for (Vertex other : verts) {
                     if (all.contains(other))
                         return true;
