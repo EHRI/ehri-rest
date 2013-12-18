@@ -3,6 +3,7 @@ package eu.ehri.project.models.base;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.Adjacency;
+import com.tinkerpop.frames.Property;
 import com.tinkerpop.frames.modules.javahandler.JavaHandler;
 import com.tinkerpop.frames.modules.javahandler.JavaHandlerContext;
 import eu.ehri.project.definitions.Ontology;
@@ -27,6 +28,9 @@ public interface Promotable extends AccessibleEntity {
     @JavaHandler
     public boolean isPromoted();
 
+    @JavaHandler
+    public boolean isPromotable();
+
     /**
      * Implementation of complex methods.
      */
@@ -34,6 +38,11 @@ public interface Promotable extends AccessibleEntity {
 
         public boolean isPromoted() {
             return gremlin().out(Ontology.PROMOTED_BY).hasNext();
+        }
+
+        public boolean isPromotable() {
+            Boolean promotable = it().getProperty(Ontology.IS_PROMOTABLE);
+            return promotable != null && promotable;
         }
     }
 }

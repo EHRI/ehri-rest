@@ -20,6 +20,12 @@ public class PromotionViews {
     private final ViewHelper helper;
     private final ActionManager actionManager;
 
+    public static class NotPromotableError extends Exception {
+        public NotPromotableError(String itemId) {
+            super(String.format("Item '%s' is not marked as promotable.", itemId));
+        }
+    }
+
     /**
      * Scoped constructor.
      *
@@ -46,8 +52,12 @@ public class PromotionViews {
      * @param user The item's promoter
      * @throws PermissionDenied
      */
-    public void promoteItem(Promotable item, UserProfile user) throws PermissionDenied {
+    public void promoteItem(Promotable item, UserProfile user) throws PermissionDenied,
+            NotPromotableError {
         helper.checkEntityPermission(item, user, PermissionType.PROMOTE);
+        if (!item.isPromotable()) {
+            throw new NotPromotableError(item.getId());
+        }
         item.addPromotion(user);
         actionManager.logEvent(item, user, EventTypes.promotion);
     }
@@ -60,6 +70,8 @@ public class PromotionViews {
      */
     public void demoteItem(Promotable item, UserProfile user) throws PermissionDenied {
         helper.checkEntityPermission(item, user, PermissionType.PROMOTE);
+        // Should we complain here if the item is not promotable?
+        // I think probably not, since this is then correcting an error...
         item.removePromotion(user);
         actionManager.logEvent(item, user, EventTypes.demotion);
     }

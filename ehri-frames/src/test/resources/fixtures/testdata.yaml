@@ -382,6 +382,7 @@
   data:
     identifier: ann1
     body: Test Annotation
+    isPromotable: !!bool true
   relationships:
     hasAnnotationTarget: c1
     

@@ -46,6 +46,9 @@ public class PromotionResource extends AbstractRestResource {
             pv.promoteItem(item, currentUser);
             graph.getBaseGraph().commit();
             return Response.ok().build();
+        } catch (PromotionViews.NotPromotableError e) {
+            return Response.status(Response.Status.BAD_REQUEST.getStatusCode())
+                    .entity(e.getMessage()).build();
         } finally {
             if (graph.getBaseGraph().isInTransaction()) {
                 graph.getBaseGraph().rollback();
