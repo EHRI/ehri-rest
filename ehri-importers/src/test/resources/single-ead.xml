@@ -64,6 +64,15 @@
 			<p>
 				This is some test scope and content.
 			</p>
+            <!-- Test content for problem with entities having their
+                surrounding space stripped. -->
+            <p>
+                This contains Something &amp; Something else.
+            </p>
+
+            <p>
+                This is another paragraph.
+            </p>
 		</scopecontent>
 		<arrangement encodinganalog="3.3.4">
 			<p>

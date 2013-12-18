@@ -80,7 +80,7 @@ public class BundesarchiveTest extends AbstractImporterTest{
             assertEquals("Generalkommandos der Waffen-SS", d.getName());
         }
         for(DocumentDescription d : c7_2.getDocumentDescriptions()){
-            assertEquals("I. SS-Panzerkorps\"Leibstandarte\"", d.getName());
+            assertEquals("I. SS-Panzerkorps \"Leibstandarte\"", d.getName());
         }
     //test hierarchy
         assertEquals(new Long(1), archdesc.getChildCount());

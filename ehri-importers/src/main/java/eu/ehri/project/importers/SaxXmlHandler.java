@@ -151,12 +151,14 @@ public abstract class SaxXmlHandler extends DefaultHandler {
 
     @Override
     public void characters(char ch[], int start, int length) throws SAXException {
-        if (isEmpty(new String(ch, start, length))) {
+        String data = new String(ch, start, length);
+        if (data.trim().isEmpty()) {
             return;
         }
-        String trimmed = new String(ch, start, length).trim().replaceAll("\\s+", " ");
-        currentText.push(currentText.pop()+trimmed);
-//        logger.debug(currentPath.peek() + ": "+currentText.peek() + " (" + getImportantPath(currentPath)+")");
+        // NB: Not trimming the string because this method is called
+        // for chars either side of encoded entities, which means
+        // that Foo &amp; Bar would end up as "Foo&Bar".
+        currentText.push((currentText.pop() + data).replaceAll("\\s+", " "));
     }
 
     /**
@@ -207,10 +209,6 @@ public abstract class SaxXmlHandler extends DefaultHandler {
     private void overwritePropertyInCurrentGraph(Map<String, Object> c,String property, Object value){
         logger.debug("overwriteProp: " + property + " " + value);
         c.put(property, value);
-    }
-
-    private boolean isEmpty(String s) {
-        return (s.trim()).isEmpty();
     }
 
     /**
