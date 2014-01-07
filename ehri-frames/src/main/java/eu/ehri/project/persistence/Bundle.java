@@ -413,6 +413,19 @@ public final class Bundle {
     }
 
     /**
+     * Merge this bundle's data with that of another. Note: currently
+     * relation data is not merged.
+     *
+     * @param otherBundle Another bundle
+     * @return A bundle with data merged
+     */
+    public Bundle mergeDataWith(Bundle otherBundle) {
+        Map<String, Object> mergeData = Maps.newHashMap(getData());
+        mergeData.putAll(otherBundle.getData());
+        return withData(mergeData);
+    }
+
+    /**
      * Get the target class.
      *
      * @return The bundle's type class

@@ -27,7 +27,9 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
 
     private String jsonDocumentaryUnitTestStr;
     private String invalidJsonDocumentaryUnitTestStr;
+    private String partialJsonDocumentaryUnitTestStr;
     static final String UPDATED_NAME = "UpdatedNameTEST";
+    static final String PARTIAL_NAME = "PatchNameTest";
     static final String TEST_JSON_IDENTIFIER = "c1";
     static final String FIRST_DOC_ID = "c1";
     static final String TEST_HOLDER_IDENTIFIER = "r1";
@@ -44,6 +46,7 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
     public void setUp() throws Exception {
         jsonDocumentaryUnitTestStr = readFileAsString("documentaryUnit.json");
         invalidJsonDocumentaryUnitTestStr = readFileAsString("invalidDocumentaryUnit.json");
+        partialJsonDocumentaryUnitTestStr = readFileAsString("partialDocumentaryUnit.json");
     }
 
     /**
@@ -226,6 +229,53 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
         String updatedJson = response.getEntity(String.class);
         Bundle updatedEntityBundle = Bundle.fromString(updatedJson);
         assertEquals(UPDATED_NAME, updatedEntityBundle.getDataValue("name"));
+    }
+
+    @Test
+    public void testPatchDocumentaryUnit() throws Exception {
+
+        // -create data for testing, making this a child element of c1.
+        WebResource resource = client.resource(getCreationUri());
+        ClientResponse response = resource
+                .accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                        getAdminUserProfileId())
+                .entity(jsonDocumentaryUnitTestStr).post(ClientResponse.class);
+
+        assertStatus(CREATED, response);
+
+        // Get created doc via the response location?
+        URI location = response.getLocation();
+
+        String toUpdateJson = partialJsonDocumentaryUnitTestStr;
+
+        // - patch the data (using the Patch header)
+        resource = client.resource(location);
+        response = resource
+                .accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                        getAdminUserProfileId())
+                .header(AbstractRestResource.PATCH_HEADER_NAME, "true")
+                .entity(toUpdateJson)
+                .put(ClientResponse.class);
+        assertStatus(OK, response);
+
+        // -get the data and convert to a bundle, is it patched?
+        resource = client.resource(location);
+        response = resource
+                .accept(MediaType.APPLICATION_JSON)
+                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                        getAdminUserProfileId())
+                    .get(ClientResponse.class);
+        assertStatus(OK, response);
+
+        // -get the data and convert to a bundle, is it OK?
+        String updatedJson = response.getEntity(String.class);
+        Bundle updatedEntityBundle = Bundle.fromString(updatedJson);
+        assertEquals(CREATED_ID, updatedEntityBundle.getDataValue("identifier"));
+        assertEquals(PARTIAL_NAME, updatedEntityBundle.getDataValue("name"));
     }
 
     private URI getCreationUri() {
