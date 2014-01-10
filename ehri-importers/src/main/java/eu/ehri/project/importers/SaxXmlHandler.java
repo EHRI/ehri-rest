@@ -56,6 +56,10 @@ public abstract class SaxXmlHandler extends DefaultHandler {
     protected int depth = 0;
     private String languagePrefix;
 
+    /**
+     * Get a List of Strings containing files names of XML Schemas.
+     * @return List containing files names as Strings
+     */
     protected abstract List<String> getSchemas();
 
     public SaxXmlHandler(AbstractImporter<Map<String, Object>> importer, XmlImportProperties properties) {
@@ -65,6 +69,12 @@ public abstract class SaxXmlHandler extends DefaultHandler {
         currentGraphPath.push(new HashMap<String, Object>());
     }
 
+    /**
+     * Determines whether a new node that is a 'child' of the current node (i.e. a 'sub-node')
+     * needs to be created, based on the qualified element name.
+     * @param qName the QName
+     * @return true if the QName warrants a sub-node, false otherwise
+     */
     protected abstract boolean needToCreateSubNode(String qName);
 
     @Override
@@ -149,6 +159,11 @@ public abstract class SaxXmlHandler extends DefaultHandler {
         return name;
     }
 
+    /**
+     * Receives character data in SAX events, converts multiple space to a single space
+     * and puts the characters in the current node, unless the input contains only 
+     * whitespace.
+     */
     @Override
     public void characters(char ch[], int start, int length) throws SAXException {
         String data = new String(ch, start, length);
@@ -223,9 +238,11 @@ public abstract class SaxXmlHandler extends DefaultHandler {
     protected String getImportantPath(Stack<String> path) {
         return getImportantPath(path, "");
     }
- /**
+    
+    /**
      *
      * @param path
+     * @param attribute
      * @return returns the corresponding value to this path from the properties file. the search is inside out, so if
      * both eadheader/ and ead/eadheader/ are specified, it will return the value for the first
      *
@@ -242,6 +259,10 @@ public abstract class SaxXmlHandler extends DefaultHandler {
         }
         return UNKNOWN + all.replace("/", "_");
     }
+    
+    /**
+     * Print a text representation of the graph on `System.out`.
+     */
     protected void printGraph() {
         for (String key : currentGraphPath.peek().keySet()) {
             System.out.println(key + ":" + currentGraphPath.peek().get(key));

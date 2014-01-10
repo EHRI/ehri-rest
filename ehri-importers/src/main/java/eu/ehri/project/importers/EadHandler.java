@@ -15,10 +15,14 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
 /**
- *
+ * Handler of EAD files. Use to create a representation of the structure of Documentary Units.
+ * This generic handler does not do tricks to get data from any CHI-custom use of EAD - you 
+ * should extend this class for that.
+ * If there is no language, it does set the language of the description to English.
  * makes use of icaatom.properties with format: part/of/path/=attribute
  *
  * @author linda
+ * @author ben
  */
 public class EadHandler extends SaxXmlHandler {
 
@@ -28,8 +32,10 @@ public class EadHandler extends SaxXmlHandler {
     // Pattern for EAD nodes that represent a child item
     private Pattern childItemPattern = Pattern.compile("^/*c(?:\\d*)$");
     
-    // Default language to use in units without language
-    protected String defaultLanguage = "en";
+    /**
+     * Default language to use in units without language
+     */
+    protected String defaultLanguage = "eng";
     
 
     /**
@@ -71,6 +77,15 @@ public class EadHandler extends SaxXmlHandler {
 //        }
     }
 
+	/**
+	 * Called when the XML parser encounters an end tag. This is tuned for EAD files, which come in many flavours.
+	 * 
+	 * Certain elements represent subcollections, for which we create new nodes (here, we create representative Maps for nodes).
+	 * Many EAD producers use the standard in their own special way, so this method calls generalised methods to filter, get data 
+	 * in the right place and reformat. 
+	 * If a collection of EAD files need special treatment to get specific data in the right place, you only need to override the 
+	 * other methods (extractTitle, extractIdentifier, extractDate). 
+	 */
     @Override
     public void endElement(String uri, String localName, String qName) throws SAXException {
         //the child closes, add the new DocUnit to the list, establish some relations
@@ -143,7 +158,8 @@ public class EadHandler extends SaxXmlHandler {
 	}
 
 	/**
-	 * Handler specific code for extraction of unit titles
+	 * Handler-specific code for extraction or generation of unit titles.
+	 * Default method is empty; override when necessary.
 	 * @param currentGraph
 	 */
 	protected void extractTitle(Map<String, Object> currentGraph) {
@@ -151,7 +167,8 @@ public class EadHandler extends SaxXmlHandler {
 	}
 
 	/**
-	 * Handler specific code for extraction of unit dates
+	 * Handler-specific code for extraction or generation of unit dates.
+	 * Default method is empty; override when necessary.
 	 * @param currentGraph
 	 */
 	protected void extractDate(Map<String, Object> currentGraph) {
@@ -159,7 +176,8 @@ public class EadHandler extends SaxXmlHandler {
 	}
 
 	/**
-	 * Handler specific code for extraction of unit IDs
+	 * Handler-specific code for extraction or generation of unit IDs.
+	 * Default method is empty; override when necessary.
 	 * @param currentGraph
 	 */
 	protected void extractIdentifier(Map<String, Object> currentGraph) {

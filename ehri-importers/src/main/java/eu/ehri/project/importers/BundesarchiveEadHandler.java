@@ -183,7 +183,7 @@ public class BundesarchiveEadHandler extends EadHandler {
 		                currentGraph.put("objectIdentifier", identifiers.get(i));
 		            }else {
 		                logger.debug("found other form of identifier: " + identifiers.get(i));
-		                currentGraph.put("arta", identifiers.get(i));
+		                currentGraph.put("otherIdentifiers", identifiers.get(i));
 		            }
 		        }
 		        currentGraph.remove("objectIdentifierType");
@@ -200,12 +200,5 @@ public class BundesarchiveEadHandler extends EadHandler {
 //        //child or parent unit:
 //        return childItemPattern.matcher(qName).matches() || qName.equals("archdesc");
 //    }
-//
-//    @Override
-//    protected List<String> getSchemas() {
-//        List<String> schemas = new ArrayList<String>();
-//        schemas.add("xlink.xsd");
-//        schemas.add("ead.xsd");
-//        return schemas;
-//    }
+
 }
