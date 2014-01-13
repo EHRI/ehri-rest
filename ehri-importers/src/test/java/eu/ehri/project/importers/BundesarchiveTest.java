@@ -41,7 +41,7 @@ public class BundesarchiveTest extends AbstractImporterTest{
 
         origCount = getNodeCount(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(XMLFILE);
-        ImportLog log = new SaxImportManager(graph, agent, validUser, IcaAtomEadImporter.class, BundesarchiveEadHandler.class).importFile(ios, logMessage);
+        ImportLog log = new SaxImportManager(graph, agent, validUser, EadImporter.class, BundesarchiveEadHandler.class).importFile(ios, logMessage);
 //        printGraph(graph);
         // How many new nodes will have been created? We should have
         // - 9 more DocumentaryUnits (archdesc, 1-7+7)
@@ -90,6 +90,8 @@ public class BundesarchiveTest extends AbstractImporterTest{
     //test otherIdentifiers (property of DocumentaryUnit! Should be array?)
         // The c7_2 DocumentaryUnit has one other identifier.
 //        for(DocumentDescription d : c7_2.getDocumentDescriptions()){
+        for (String k : c7_2.asVertex().getPropertyKeys())
+        	System.out.println("key: " + k);
             assertEquals("R 3021", c7_2.asVertex().getProperty("otherIdentifiers"));
 //        }
     //test level-of-desc

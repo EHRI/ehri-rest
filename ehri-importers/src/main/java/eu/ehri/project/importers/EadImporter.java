@@ -86,14 +86,9 @@ public class EadImporter extends EaImporter {
         }
         unit = unit.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
 
-//        // Old solution to missing IDs: generate a replacement. (New solution used above: throw error)
-//        IdGenerator generator = EntityClass.DOCUMENTARY_UNIT.getIdgen();
-//        String id = generator.generateId(EntityClass.DOCUMENTARY_UNIT, permissionScope, unit);
-//        if (id.equals(permissionScope.getId())) {
-//            throw new RuntimeException("Generated an id same as scope: " + unit.getData());
-//        }
-//
-//        logger.debug("Generated ID: " + id + " (" + permissionScope.getId() + ")");
+        // Old solution to missing IDs: generate a replacement. 
+        // New solution used above: throw error - Handlers should produce IDs if necessary.
+
 
 
         Mutation<DocumentaryUnit> mutation =
@@ -180,20 +175,40 @@ public class EadImporter extends EaImporter {
 //
 //    }
 
-    
+    /**
+     * Creates a Map containing properties of a Documentary Unit.
+     * These properties are the unit's identifiers.
+     * @param itemData Map of all extracted information
+     * @param depth depth of node in the tree
+     * @return a Map representing a Documentary Unit node
+     * @throws ValidationError
+     */
     protected Map<String, Object> extractDocumentaryUnit(Map<String, Object> itemData, int depth) throws ValidationError {
         Map<String, Object> unit = new HashMap<String, Object>();
         if (itemData.get(OBJECT_ID) != null) {
             unit.put(Ontology.IDENTIFIER_KEY, itemData.get(OBJECT_ID));
         }
+        if (itemData.get(Ontology.OTHER_IDENTIFIERS) != null) {
+            unit.put(Ontology.OTHER_IDENTIFIERS, itemData.get(Ontology.OTHER_IDENTIFIERS));
+        }
         return unit;
     }
 
+    /**
+     * Creates a Map containing properties of a Documentary Unit description.
+     * These properties are the unit description's properties: all except the doc unit identifiers and unknown properties.
+     * @param itemData Map of all extracted information
+     * @param depth depth of node in the tree
+     * @return a Map representing a Documentary Unit Description node
+     * @throws ValidationError
+     */
     protected Map<String, Object> extractDocumentDescription(Map<String, Object> itemData, int depth) throws ValidationError {
 
         Map<String, Object> unit = new HashMap<String, Object>();
         for (String key : itemData.keySet()) {
-            if (!(key.equals(OBJECT_ID) || key.startsWith(SaxXmlHandler.UNKNOWN))) {
+            if (!(key.equals(OBJECT_ID) 
+            	|| key.equals(Ontology.OTHER_IDENTIFIERS) 
+            	|| key.startsWith(SaxXmlHandler.UNKNOWN))) {
                 unit.put(key, itemData.get(key));
             }
         }
