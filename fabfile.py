@@ -138,6 +138,19 @@ def online_clone_db(local_dir):
         local("tar xf /tmp/%s.tgz -C %s" % (timestamp, local_dir))
         local("rm " + env.tmpdst + ".tgz")
 
+
+@hosts("ehristage")
+def copy_db_to_staging(local_tar, staging_dir):
+    """
+    Do an online backup of the production graph database and copy it to the staging server.
+    
+    online_clone_to_staging:/path/on/server/backup.graph.db
+    """
+    stage()
+    put(local_tar, staging_dir + "")
+    prod()
+
+
 @task
 def copy_db(local_dir):
     """Copy a (not running) DB from the remote server.
@@ -190,6 +203,7 @@ def update_db(local_dir):
         run("mkdir " + remote_db_dir)
         run("tar zxf %s -C %s" % (remote_name, remote_db_dir))
         run("chown %s.webadm -R %s" % (env.user, remote_db_dir))
+        run("chmod -R g+w " + remote_db_dir)
         start()
 
 @task
@@ -275,4 +289,10 @@ def symlink_current():
     with cd(env.path):
         run("ln --force --no-dereference --symbolic deploys/%(version)s current" % env)
 
-
+@task
+def copy_lib_sh():
+    "Put the lib.sh and cmd scripts on the server."
+    with cd(env.path):
+        put("scripts/lib.sh", "scripts/lib.sh")
+        put("scripts/cmd", "scripts/cmd")
+        run("chmod g+x scripts/cmd") 
