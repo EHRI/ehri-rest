@@ -184,6 +184,25 @@ public class EadHandler extends SaxXmlHandler {
 		
 	}
 
+	/**
+	 * Helper method to add identifiers to the list of other identifiers.
+	 * The property named Ontology.OTHER_IDENTIFIERS (i.e. "otherIdentifiers")
+	 * is always an ArrayList of Strings.
+	 * @param currentGraph the node representation to add the otherIdentifier to
+	 * @param otherIdentifier the alternative identifier to add
+	 */
+	protected void addOtherIdentifier(Map<String, Object> currentGraph, String otherIdentifier) {
+		if (currentGraph.containsKey(Ontology.OTHER_IDENTIFIERS)) {
+			ArrayList<String> oids = (ArrayList<String>) currentGraph.get(Ontology.OTHER_IDENTIFIERS);
+			oids.add(otherIdentifier);
+		}
+		else {
+			ArrayList<String> oids = new ArrayList<>();
+			oids.add(otherIdentifier);
+			currentGraph.put(Ontology.OTHER_IDENTIFIERS, oids);
+		}
+	}
+	
     @Override
     protected boolean needToCreateSubNode(String qName) {
         //child or parent unit:

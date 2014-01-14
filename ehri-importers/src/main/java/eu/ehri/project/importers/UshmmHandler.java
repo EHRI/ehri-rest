@@ -53,7 +53,8 @@ public class UshmmHandler extends EadHandler {
 						currentGraph.put("objectIdentifier", identifiers.get(i));
 					}else {
 						logger.debug("found other form of identifier: " + identifiers.get(i));
-						currentGraph.put("otherIdentifiers", identifiers.get(i));
+						addOtherIdentifier(currentGraph, identifiers.get(i));
+						//currentGraph.put("otherIdentifiers", identifiers.get(i));
 					}
 				}
 				currentGraph.remove("objectIdentifierType");
