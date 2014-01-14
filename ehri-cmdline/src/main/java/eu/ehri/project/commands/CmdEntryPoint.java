@@ -28,6 +28,7 @@ public class CmdEntryPoint extends BaseCommand {
         mmap.put(BaEadImport.NAME, BaEadImport.class);
         mmap.put(NiodEadImport.NAME, NiodEadImport.class);
         mmap.put(ItsEadImport.NAME, ItsEadImport.class);
+        mmap.put(UshmmEadImport.NAME, UshmmEadImport.class);
         mmap.put(EacImport.NAME, EacImport.class);
         mmap.put(EagImport.NAME, EagImport.class);
         mmap.put(UserListEntities.NAME, UserListEntities.class);
@@ -64,7 +65,8 @@ public class CmdEntryPoint extends BaseCommand {
 
     @Override
     public String getUsage() {
-        return "Usage: cmd <graph-db> <command> <command-args ... >";
+    	// "Usage: cmd <graph-db> <command> <command-args ... >": we don't use the <graph-db> option?
+        return "Usage: cmd <command> <command-args ... >"; 
     }
 
     @Override
