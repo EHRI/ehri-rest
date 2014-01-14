@@ -41,7 +41,7 @@ public class SkosImporterTest extends AbstractImporterTest {
     protected final String IMPORTED_ITEM_DESC_EN = "http://ehri01.dans.knaw.nl/tematres/vocab/?tema=932#description_en";
     protected final String IMPORTED_ITEM_DESC_DE = "http://ehri01.dans.knaw.nl/tematres/vocab/?tema=932#description_de";
 
-    @Ignore("not ready yet") @Test
+    @Test
     public void testImportItemsT() throws Exception {
         UserProfile user = validUser; //graph.frame(graph.getVertex(validUserId), UserProfile.class);
         Repository agent = manager.getFrame(TEST_REPO, Repository.class); //graph.frame(helper.getTestVertex(TEST_REPO), Repository.class);
