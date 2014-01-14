@@ -16,6 +16,7 @@ import org.junit.Test;
 
 
 import static org.junit.Assert.*;
+import org.junit.Ignore;
 
 /**
  *
@@ -46,14 +47,13 @@ public class IcaAtomEadSingleEadTest extends AbstractImporterTest {
         // - 1 more DocumentDescription
         // - 1 more DatePeriod
         //TODO: test these UR's
-        // - 4 more UndeterminedRelationships
+        // - 5 more UndeterminedRelationships
         //TODO: test this UP
         // - 1 more UnknownProperty
         // - 2 more import Event links
         // - 1 more import Event
 
-        Iterable<Vertex> docs = graph.getVertices("identifier",
-                IMPORTED_ITEM_ID);
+        Iterable<Vertex> docs = graph.getVertices("identifier", IMPORTED_ITEM_ID);
         assertTrue(docs.iterator().hasNext());
         DocumentaryUnit unit = graph.frame(docs.iterator().next(), DocumentaryUnit.class);
         for(Description d : unit.getDocumentDescriptions())
@@ -73,7 +73,7 @@ public class IcaAtomEadSingleEadTest extends AbstractImporterTest {
         assertEquals(expected, scopeContent);
 
         // Check the right nodes get created.
-        int createCount = origCount + 11;
+        int createCount = origCount + 12;
 
         // - 4 more UnderterminedRelationship nodes
 
@@ -91,13 +91,10 @@ public class IcaAtomEadSingleEadTest extends AbstractImporterTest {
         InputStream ios2 = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
         ImportLog log2 = new SaxImportManager(graph, agent, validUser, IcaAtomEadImporter.class, IcaAtomEadHandler.class).importFile(ios2, logMessage);
 
-        // We should only have three more nodes, for 
-        // the action and 
-        // the user event links, 
-        // plus the global event
-        assertEquals(createCount + 3, getNodeCount(graph));
-        // And one logical item should've been updated
-        assertEquals(1, log2.getUpdated());
+        // We should only have no extra nodes, if nothing happened, nothing is created, not even an EventNode
+        assertEquals(createCount, getNodeCount(graph));
+        // And no logical item should've been updated
+        assertEquals(0, log2.getUpdated());
 
         // Check permission scopes
         for (AccessibleEntity e : log.getAction().getSubjects()) {

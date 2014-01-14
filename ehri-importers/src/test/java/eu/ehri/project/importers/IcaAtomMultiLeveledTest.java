@@ -15,6 +15,7 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 
+import org.junit.Ignore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,17 +45,17 @@ private final String UN_REL = "HR-HDA145corporateBodyAccessCroatianStateArchive"
 
         printGraph(graph);
         // How many new nodes will have been created? We should have
-        // - 3 more DocumentaryUnit
-        // - 3 more DocumentDescription
-        // - 3 more DatePeriod
+        // - 3 more DocumentaryUnit (1 1 1)
+        // - 3 more DocumentDescription (1 1 1)
+        // - 3 more DatePeriod (1 1 1)
         //TODO: test these UR's
-        // - 4 more UndeterminedRelationships
+        // - 8 more UndeterminedRelationships (2 4 2)
         //TODO: test this UP
-        // - 3 more UnknownProperty
-        // - 4 more import Event links
+        // - 3 more UnknownProperty (1 1 1)
+        // - 4 more import Event links (+1)
         // - 1 more import Event
 
-        int createCount = origCount + 21;
+        int createCount = origCount + 25;
 
         // - 4 more UnderterminedRelationship nodes
 
@@ -84,13 +85,10 @@ private final String UN_REL = "HR-HDA145corporateBodyAccessCroatianStateArchive"
         InputStream ios2 = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
         ImportLog log2 = new SaxImportManager(graph, agent, validUser, IcaAtomEadImporter.class, IcaAtomEadHandler.class).importFile(ios2, logMessage);
 
-        // We should only have three more nodes, for 
-        // 1 the action and 
-        // 3 the user event links, 
-        // 1 plus the global event
-        assertEquals(createCount + 5, getNodeCount(graph));
-        // And one logical item should've been updated
-        assertEquals(3, log2.getUpdated());
+        // We should only have no more nodes, since nothing happened
+        assertEquals(createCount, getNodeCount(graph));
+        // And no logical item should've been updated
+        assertEquals(0, log2.getUpdated());
 
         // TODO: Check permission scopes
     }
