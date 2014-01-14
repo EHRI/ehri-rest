@@ -189,6 +189,27 @@ public class EadImporter extends EaImporter {
             unit.put(Ontology.IDENTIFIER_KEY, itemData.get(OBJECT_ID));
         }
         if (itemData.get(Ontology.OTHER_IDENTIFIERS) != null) {
+        	logger.debug("otherIdentifiers is not null");
+            unit.put(Ontology.OTHER_IDENTIFIERS, itemData.get(Ontology.OTHER_IDENTIFIERS));
+        }
+        return unit;
+    }
+    
+    /**
+     * Creates a Map containing properties of a Documentary Unit.
+     * These properties are the unit's identifiers.
+     * @param itemData Map of all extracted information
+     * @return a Map representing a Documentary Unit node
+     * @throws ValidationError
+     */
+    @Override
+    protected Map<String, Object> extractDocumentaryUnit(Map<String, Object> itemData) throws ValidationError {
+        Map<String, Object> unit = new HashMap<String, Object>();
+        if (itemData.get(OBJECT_ID) != null) {
+            unit.put(Ontology.IDENTIFIER_KEY, itemData.get(OBJECT_ID));
+        }
+        if (itemData.get(Ontology.OTHER_IDENTIFIERS) != null) {
+        	logger.debug("otherIdentifiers is not null");
             unit.put(Ontology.OTHER_IDENTIFIERS, itemData.get(Ontology.OTHER_IDENTIFIERS));
         }
         return unit;
@@ -214,6 +235,26 @@ public class EadImporter extends EaImporter {
         }
         return unit;
     }
+    
+//    /**
+//     * Creates a Map containing properties of a Documentary Unit description.
+//     * These properties are the unit description's properties: all except the doc unit identifiers and unknown properties.
+//     * @param itemData Map of all extracted information
+//     * @return a Map representing a Documentary Unit Description node
+//     * @throws ValidationError
+//     */
+//    protected Map<String, Object> extractDocumentDescription(Map<String, Object> itemData) throws ValidationError {
+//
+//        Map<String, Object> unit = new HashMap<String, Object>();
+//        for (String key : itemData.keySet()) {
+//            if (!(key.equals(OBJECT_ID) 
+//            	|| key.equals(Ontology.OTHER_IDENTIFIERS) 
+//            	|| key.startsWith(SaxXmlHandler.UNKNOWN))) {
+//                unit.put(key, itemData.get(key));
+//            }
+//        }
+//        return unit;
+//    }
 
     @Override
     public AccessibleEntity importItem(Map<String, Object> itemData) throws ValidationError {

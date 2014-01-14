@@ -109,7 +109,7 @@ abstract public class XmlImportManager implements ImportManager {
         }
     }
 
-     /**
+    /**
      * Import a file, creating a new action with the given log message.
      *
      * @param ios
@@ -148,7 +148,7 @@ abstract public class XmlImportManager implements ImportManager {
      
 
 
-         /**
+    /**
      * Import multiple files in the same batch/transaction.
      *
      * @param paths

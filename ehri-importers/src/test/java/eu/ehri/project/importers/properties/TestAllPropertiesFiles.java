@@ -81,6 +81,20 @@ public class TestAllPropertiesFiles {
         logger.debug(propfile);
         assertTrue(p.check(new XmlImportProperties(propfile), EntityClass.DOCUMENT_DESCRIPTION));
     }
+    
+    @Test
+    public void testNiodEadXmlProperties() {
+        String propfile = "niodead.properties";
+        logger.debug(propfile);
+        assertTrue(p.check(new XmlImportProperties(propfile), EntityClass.DOCUMENT_DESCRIPTION));
+    }
+    
+    @Test
+    public void testUshmmXmlProperties() {
+        String propfile = "ushmm.properties";
+        logger.debug(propfile);
+        assertTrue(p.check(new XmlImportProperties(propfile), EntityClass.DOCUMENT_DESCRIPTION));
+    }
 
     @Test
     public void testUkrainianDescXmlProperties() {

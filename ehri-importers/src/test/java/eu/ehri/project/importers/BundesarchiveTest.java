@@ -13,6 +13,7 @@ import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.base.PermissionScope;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -90,9 +91,11 @@ public class BundesarchiveTest extends AbstractImporterTest{
     //test otherIdentifiers (property of DocumentaryUnit! Should be array?)
         // The c7_2 DocumentaryUnit has one other identifier.
 //        for(DocumentDescription d : c7_2.getDocumentDescriptions()){
-        for (String k : c7_2.asVertex().getPropertyKeys())
-        	System.out.println("key: " + k);
-            assertEquals("R 3021", c7_2.asVertex().getProperty("otherIdentifiers"));
+//        for (String k : c7_2.asVertex().getPropertyKeys())
+//        	System.out.println("key: " + k);
+        //printGraph(graph);
+        List<String> oids = (List<String>) c7_2.asVertex().getProperty("otherIdentifiers");
+        assertEquals("R 3021", oids.get(0));
 //        }
     //test level-of-desc
         for(DocumentDescription d : c7_2.getDocumentDescriptions()){

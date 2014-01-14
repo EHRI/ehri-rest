@@ -193,10 +193,12 @@ public class EadHandler extends SaxXmlHandler {
 	 */
 	protected void addOtherIdentifier(Map<String, Object> currentGraph, String otherIdentifier) {
 		if (currentGraph.containsKey(Ontology.OTHER_IDENTIFIERS)) {
+			logger.debug("adding alternative id: " + otherIdentifier);
 			ArrayList<String> oids = (ArrayList<String>) currentGraph.get(Ontology.OTHER_IDENTIFIERS);
 			oids.add(otherIdentifier);
 		}
 		else {
+			logger.debug("adding first alt id: " + otherIdentifier);
 			ArrayList<String> oids = new ArrayList<>();
 			oids.add(otherIdentifier);
 			currentGraph.put(Ontology.OTHER_IDENTIFIERS, oids);
