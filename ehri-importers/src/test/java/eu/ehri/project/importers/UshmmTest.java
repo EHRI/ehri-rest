@@ -62,9 +62,10 @@ public class UshmmTest extends AbstractImporterTest{
         Iterable<Vertex> docs = graph.getVertices("identifier", IMPORTED_ITEM_ID);
         assertTrue(docs.iterator().hasNext());
         DocumentaryUnit unit = graph.frame(docs.iterator().next(), DocumentaryUnit.class);
-        for(Description d : unit.getDocumentDescriptions())
+        for(Description d : unit.getDocumentDescriptions()) {
             assertEquals("Oral history interview with Marijan Perić", d.getName());
-
+        	assertEquals("eng", d.getLanguageOfDescription());
+        }
         SystemEvent event = unit.getLatestEvent();
         if (event != null) {
             logger.debug("event: " + event.getLogMessage());

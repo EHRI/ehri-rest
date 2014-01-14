@@ -14,8 +14,9 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 
 /**
+ * Handler for importing EAD files converted from the USHMM Solr index file.
+ * These files were converted using the solr2ead XSLT stylesheet.
  * @author ben
- *
  */
 public class UshmmHandler extends EadHandler {
 
@@ -52,7 +53,7 @@ public class UshmmHandler extends EadHandler {
 						currentGraph.put("objectIdentifier", identifiers.get(i));
 					}else {
 						logger.debug("found other form of identifier: " + identifiers.get(i));
-						currentGraph.put("arta", identifiers.get(i));
+						currentGraph.put("otherIdentifiers", identifiers.get(i));
 					}
 				}
 				currentGraph.remove("objectIdentifierType");
