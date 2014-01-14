@@ -7,8 +7,8 @@ import eu.ehri.project.importers.IcaAtomEadImporter;
 import eu.ehri.project.importers.ItsEadHandler;
 
 /**
- * Import command for BundesArchiv EAD files. 
- * This imports files using the BundesarchiveEadHandler and BundesarchiveEadImporter.
+ * Import command for ITS EAD files. 
+ * This imports files using the ItsEadHandler and IcaAtomEadImporter.
  * @author ben
  *
  */

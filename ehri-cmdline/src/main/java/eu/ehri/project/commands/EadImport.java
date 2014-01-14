@@ -33,7 +33,7 @@ public class EadImport extends ImportCommand implements Command {
 
         @Override
     public String getHelp() {
-        return "Usage: " + NAME + " [OPTIONS] -user <user-id> -scope <repository-id> [<neo4j-graph-dir>] <ead1.xml> <ead2.xml> ... <eadN.xml>";
+        return "Usage: " + NAME + " [OPTIONS] -user <user-id> -scope <repository-id> <ead1.xml> <ead2.xml> ... <eadN.xml>";
     }
 
     @Override
