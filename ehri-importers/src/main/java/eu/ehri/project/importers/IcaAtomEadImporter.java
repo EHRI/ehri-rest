@@ -90,6 +90,9 @@ public class IcaAtomEadImporter extends EaImporter {
                 persister.createOrUpdate(unit, DocumentaryUnit.class);
         DocumentaryUnit frame = mutation.getNode();
 
+        if (mutation.created()) {
+            solveUndeterminedRelationships(frame, descBundle);
+        }
         // Set the repository/item relationship
         //TODO: figure out another way to determine we're at the root, so we can get rid of the depth param
         if (depth == TOP_LEVEL_DEPTH && mutation.created()) {
@@ -189,5 +192,9 @@ public class IcaAtomEadImporter extends EaImporter {
     @Override
     public AccessibleEntity importItem(Map<String, Object> itemData) throws ValidationError {
         throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    protected void solveUndeterminedRelationships(DocumentaryUnit frame, Bundle descBundle) throws ValidationError {
+        // can be used by subclasses to solve any undeterminedRelationships
     }
 }

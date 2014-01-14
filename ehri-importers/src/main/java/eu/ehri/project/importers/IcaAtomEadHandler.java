@@ -41,11 +41,13 @@ public class IcaAtomEadHandler extends SaxXmlHandler {
         // This is the equivalent of returning a null dtd.
         return new org.xml.sax.InputSource(new java.io.StringReader(""));
     }
-
+    public IcaAtomEadHandler(AbstractImporter<Map<String, Object>> importer, XmlImportProperties properties) {
+        super(importer, properties);
+        children[depth] = new ArrayList<DocumentaryUnit>();
+    }
     @SuppressWarnings("unchecked")
     public IcaAtomEadHandler(AbstractImporter<Map<String, Object>> importer) {
-        super(importer, new XmlImportProperties("icaatom.properties"));
-        children[depth] = new ArrayList<DocumentaryUnit>();
+        this(importer, new XmlImportProperties("icaatom.properties"));
     }
 
     @Override

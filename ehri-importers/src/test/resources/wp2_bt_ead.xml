@@ -1,0 +1,479 @@
+<ead xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="urn:isbn:1-931666-22-9"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:isbn:1-931666-22-9 http://www.loc.gov/ead/ead.xsd">
+    <eadheader langencoding="iso639-2b" scriptencoding="iso15924" dateencoding="iso8601"
+        countryencoding="iso3166-1" repositoryencoding="iso15511">
+        <eadid countrycode="IL">Beit Terezin</eadid>
+        <filedesc>
+            <titlestmt>
+                <titleproper>WP2 files of Beit Terezin</titleproper>
+            </titlestmt>
+        </filedesc>
+        <profiledesc>
+            <creation>
+                <date>2013-12-19</date>
+            </creation>
+            <langusage>
+                <language langcode="cze" scriptcode="Latn">Czech</language>
+            </langusage>
+        </profiledesc>
+    </eadheader>
+    <frontmatter/>
+    <archdesc level="recordgrp">
+        <did>
+            <abstract> Files and Documents compiled by Beit Terezin and edited by EHRI to be part of
+                the Terezin Research Guide. </abstract>
+        </did>
+        <dsc>
+            <c01 level="subgrp">
+                <did>
+                    <unitid>000.001.0</unitid>
+                    <unittitle>Ellinger Elsa</unittitle>
+                </did>
+                <controlaccess>
+                    <subject>aliat hanoar</subject>
+                    <persname>Ellinger Elsa</persname>
+                </controlaccess>
+                <c02 level="item">
+                    <did>
+                        <unittitle/>
+                        <unitid>000.001.1</unitid>
+                        <langmaterial/>
+                    </did>
+                    <controlaccess>
+                        <subject>aliat hanoar</subject>
+                        <persname>Ellinger Elsa</persname>
+                    </controlaccess>
+                </c02>
+            </c01>
+            <c01 level="subgrp">
+                <did>
+                    <unitid>000.002.0</unitid>
+                    <unittitle>Auerbach Sara</unittitle>
+                </did>
+                <controlaccess>
+                    <subject>personal document</subject>
+                    <subject>correspondence</subject>
+                    <subject source="WP2_keywords" authfilenumber="KEYWORD.JMP.716"
+                        >Correspondence</subject>
+                    <persname>Auerbach Sara</persname>
+                    <persname> Auerbach Yossi</persname>
+                </controlaccess>
+                <c02 level="item">
+                    <did>
+                        <unittitle/>
+                        <unitid>000.002.1</unitid>
+                        <langmaterial/>
+                    </did>
+                    <controlaccess>
+                        <subject>personal document</subject>
+                        <subject> correspondence</subject>
+                        <persname>Auerbach Sara</persname>
+                        <persname> Auerbach Yossi</persname>
+                    </controlaccess>
+                </c02>
+                <c02 level="item">
+                    <did>
+                        <unittitle/>
+                        <unitid>000.002.2</unitid>
+                        <langmaterial/>
+                    </did>
+                    <controlaccess>
+                        <subject>personal document</subject>
+                        <subject> correspondence</subject>
+                        <persname>Auerbach Sara</persname>
+                        <persname> Auerbach Yossi</persname>
+                    </controlaccess>
+                </c02>
+            </c01>
+            <c01 level="subgrp">
+                <did>
+                    <unitdate type="inclusive" era="ce" calendar="gregorian" normal="1943"
+                        >1943</unitdate>
+                    <unitid>000.003.0</unitid>
+                    <unittitle>Albright Madeleine</unittitle>
+                </did>
+                <controlaccess>
+                    <subject>personal record</subject>
+                    <subject>letter</subject>
+                    <subject>article</subject>
+                    <geogname>Beit Terezin</geogname>
+                    <persname>Alibright Madeleine</persname>
+                    <persname> Paul Eppstein</persname>
+                </controlaccess>
+                <c02 level="item">
+                    <did>
+                        <unitdate type="inclusive" era="ce" calendar="gregorian" normal="1943"
+                            >1943</unitdate>
+                        <unittitle/>
+                        <unitid>000.003.1</unitid>
+                        <langmaterial/>
+                    </did>
+                    <controlaccess>
+                        <subject>personal record</subject>
+                        <subject> letter</subject>
+                        <subject> article</subject>
+                        <geogname>Beit Terezin</geogname>
+                        <persname>Alibright Madeleine</persname>
+                        <persname> Paul Eppstein</persname>
+                    </controlaccess>
+                </c02>
+                <c02 level="item">
+                    <did>
+                        <unitdate type="inclusive" era="ce" calendar="gregorian" normal="1943"
+                            >1943</unitdate>
+                        <unittitle/>
+                        <unitid>000.003.2</unitid>
+                        <langmaterial/>
+                    </did>
+                    <controlaccess>
+                        <subject>personal record</subject>
+                        <subject> letter</subject>
+                        <subject> article</subject>
+                        <geogname>Beit Terezin</geogname>
+                        <persname>Alibright Madeleine</persname>
+                        <persname> Paul Eppstein</persname>
+                    </controlaccess>
+                </c02>
+                <c02 level="item">
+                    <did>
+                        <unitdate type="inclusive" era="ce" calendar="gregorian" normal="1943"
+                            >1943</unitdate>
+                        <unittitle/>
+                        <unitid>000.003.3</unitid>
+                        <langmaterial/>
+                    </did>
+                    <controlaccess>
+                        <subject>personal record</subject>
+                        <subject> letter</subject>
+                        <subject> article</subject>
+                        <geogname>Beit Terezin</geogname>
+                        <persname>Alibright Madeleine</persname>
+                        <persname> Paul Eppstein</persname>
+                    </controlaccess>
+                </c02>
+                <c02 level="item">
+                    <did>
+                        <unitdate type="inclusive" era="ce" calendar="gregorian" normal="1943"
+                            >1943</unitdate>
+                        <unittitle/>
+                        <unitid>000.003.4</unitid>
+                        <langmaterial/>
+                    </did>
+                    <controlaccess>
+                        <subject>personal record</subject>
+                        <subject> letter</subject>
+                        <subject> article</subject>
+                        <geogname>Beit Terezin</geogname>
+                        <persname>Alibright Madeleine</persname>
+                        <persname> Paul Eppstein</persname>
+                    </controlaccess>
+                </c02>
+                <c02 level="item">
+                    <did>
+                        <unitdate type="inclusive" era="ce" calendar="gregorian" normal="1943"
+                            >1943</unitdate>
+                        <unittitle/>
+                        <unitid>000.003.5</unitid>
+                        <langmaterial/>
+                    </did>
+                    <controlaccess>
+                        <subject>personal record</subject>
+                        <subject> letter</subject>
+                        <subject> article</subject>
+                        <geogname>Beit Terezin</geogname>
+                        <persname>Alibright Madeleine</persname>
+                        <persname> Paul Eppstein</persname>
+                    </controlaccess>
+                </c02>
+            </c01>
+            <c01 level="subgrp">
+                <did>
+                    <unitid>000.004.0</unitid>
+                    <unittitle>A family Auerbuch</unittitle>
+                </did>
+                <controlaccess>
+                    <subject>family tree</subject>
+                    <subject>letter</subject>
+                    <persname>Auerbuch</persname>
+                </controlaccess>
+                <c02 level="item">
+                    <did>
+                        <unittitle/>
+                        <unitid>000.004.1</unitid>
+                        <langmaterial/>
+                    </did>
+                    <controlaccess>
+                        <subject>family tree</subject>
+                        <subject> letter</subject>
+                        <persname>Auerbuch</persname>
+                    </controlaccess>
+                </c02>
+                <c02 level="item">
+                    <did>
+                        <unittitle/>
+                        <unitid>000.004.2</unitid>
+                        <langmaterial/>
+                    </did>
+                    <controlaccess>
+                        <subject>family tree</subject>
+                        <subject> letter</subject>
+                        <persname>Auerbuch</persname>
+                    </controlaccess>
+                </c02>
+            </c01>
+            <c01 level="subgrp">
+                <did>
+                    <unitid>000.005.0</unitid>
+                    <unittitle>Adler Yvonne</unittitle>
+                </did>
+                <controlaccess>
+                    <subject>letter</subject>
+                    <persname>Adler Yvonne</persname>
+                </controlaccess>
+                <c02 level="item">
+                    <did>
+                        <unittitle/>
+                        <unitid>000.005.1</unitid>
+                        <langmaterial/>
+                    </did>
+                    <controlaccess>
+                        <subject>letter</subject>
+                        <persname>Adler Yvonne</persname>
+                    </controlaccess>
+                </c02>
+            </c01>
+            <c01 level="subgrp">
+                <did>
+                    <unitdate type="inclusive" era="ce" calendar="gregorian" normal="1941"
+                        >1941</unitdate>
+                    <unitid>000.006.0</unitid>
+                    <unittitle>Oppenheimer Lore (Peis Lore)</unittitle>
+                </did>
+                <controlaccess>
+                    <subject>diary</subject>
+                    <geogname>Latvia</geogname>
+                    <persname>Oppenheimer Lore</persname>
+                    <persname> Peis Lore</persname>
+                </controlaccess>
+                <c02 level="item">
+                    <did>
+                        <unitdate type="inclusive" era="ce" calendar="gregorian" normal="1941"
+                            >1941</unitdate>
+                        <unittitle/>
+                        <unitid>000.006.1</unitid>
+                        <langmaterial/>
+                    </did>
+                    <controlaccess>
+                        <subject>diary</subject>
+                        <geogname>Latvia</geogname>
+                        <persname>Oppenheimer Lore</persname>
+                        <persname> Peis Lore</persname>
+                    </controlaccess>
+                </c02>
+            </c01>
+            <c01 level="subgrp">
+                <did>
+                    <unitdate type="inclusive" era="ce" calendar="gregorian" normal="1943"
+                        >1943</unitdate>
+                    <unitid>000.007.0</unitid>
+                    <unittitle>Ordner Berthold</unittitle>
+                </did>
+                <controlaccess>
+                    <subject>personal record</subject>
+                    <subject>exhibition</subject>
+                    <subject>sculpture</subject>
+                    <subject>sketches</subject>
+                    <subject>interview</subject>
+                    <subject>diary</subject>
+                    <subject source="WP2_keywords" authfilenumber="KEYWORD.JMP.160">Visual
+                        arts</subject>
+                    <subject source="WP2_keywords" authfilenumber="KEYWORD.JMP.254"
+                        >Drawings</subject>
+                    <persname>Ordner Berthold</persname>
+                    <persname> Ordner Olga</persname>
+                    <persname> Ginz Petr</persname>
+                </controlaccess>
+                <c02 level="item">
+                    <did>
+                        <unitdate type="inclusive" era="ce" calendar="gregorian" normal="1943"
+                            >1943</unitdate>
+                        <unittitle/>
+                        <unitid>000.007.1</unitid>
+                        <langmaterial/>
+                    </did>
+                    <controlaccess>
+                        <subject>personal record</subject>
+                        <subject> exhibition</subject>
+                        <subject> sculpture</subject>
+                        <subject> sketches</subject>
+                        <subject> interview</subject>
+                        <subject> diary</subject>
+                        <persname>Ordner Berthold</persname>
+                        <persname> Ordner Olga</persname>
+                        <persname> Ginz Petr</persname>
+                    </controlaccess>
+                </c02>
+                <c02 level="item">
+                    <did>
+                        <unitdate type="inclusive" era="ce" calendar="gregorian" normal="1943"
+                            >1943</unitdate>
+                        <unittitle/>
+                        <unitid>000.007.2</unitid>
+                        <langmaterial/>
+                    </did>
+                    <controlaccess>
+                        <subject>personal record</subject>
+                        <subject> exhibition</subject>
+                        <subject> sculpture</subject>
+                        <subject> sketches</subject>
+                        <subject> interview</subject>
+                        <subject> diary</subject>
+                        <persname>Ordner Berthold</persname>
+                        <persname> Ordner Olga</persname>
+                        <persname> Ginz Petr</persname>
+                    </controlaccess>
+                </c02>
+                <c02 level="item">
+                    <did>
+                        <unitdate type="inclusive" era="ce" calendar="gregorian" normal="1943"
+                            >1943</unitdate>
+                        <unittitle/>
+                        <unitid>000.007.3</unitid>
+                        <langmaterial/>
+                    </did>
+                    <controlaccess>
+                        <subject>personal record</subject>
+                        <subject> exhibition</subject>
+                        <subject> sculpture</subject>
+                        <subject> sketches</subject>
+                        <subject> interview</subject>
+                        <subject> diary</subject>
+                        <persname>Ordner Berthold</persname>
+                        <persname> Ordner Olga</persname>
+                        <persname> Ginz Petr</persname>
+                    </controlaccess>
+                </c02>
+                <c02 level="item">
+                    <did>
+                        <unitdate type="inclusive" era="ce" calendar="gregorian" normal="1943"
+                            >1943</unitdate>
+                        <unittitle/>
+                        <unitid>000.007.4</unitid>
+                        <langmaterial/>
+                    </did>
+                    <controlaccess>
+                        <subject>personal record</subject>
+                        <subject> exhibition</subject>
+                        <subject> sculpture</subject>
+                        <subject> sketches</subject>
+                        <subject> interview</subject>
+                        <subject> diary</subject>
+                        <persname>Ordner Berthold</persname>
+                        <persname> Ordner Olga</persname>
+                        <persname> Ginz Petr</persname>
+                    </controlaccess>
+                </c02>
+                <c02 level="item">
+                    <did>
+                        <unitdate type="inclusive" era="ce" calendar="gregorian" normal="1943"
+                            >1943</unitdate>
+                        <unittitle/>
+                        <unitid>000.007.5</unitid>
+                        <langmaterial/>
+                    </did>
+                    <controlaccess>
+                        <subject>personal record</subject>
+                        <subject> exhibition</subject>
+                        <subject> sculpture</subject>
+                        <subject> sketches</subject>
+                        <subject> interview</subject>
+                        <subject> diary</subject>
+                        <persname>Ordner Berthold</persname>
+                        <persname> Ordner Olga</persname>
+                        <persname> Ginz Petr</persname>
+                    </controlaccess>
+                </c02>
+            </c01>
+            <c01 level="subgrp">
+                <did>
+                    <unitid>000.008.0</unitid>
+                    <unittitle>Opfermann G. Charlotte</unittitle>
+                </did>
+                <controlaccess>
+                    <subject>Freizeitgestaltung</subject>
+                    <subject source="WP2_keywords" authfilenumber="KEYWORD.JMP.296"
+                        >Propaganda</subject>
+                    <subject source="WP2_keywords" authfilenumber="KEYWORD.JMP.273">Children and
+                        youth</subject>
+                    <subject source="WP2_keywords" authfilenumber="KEYWORD.JMP.717">International
+                        Committee of the Red Cross</subject>
+                    <geogname>Terezin</geogname>
+                    <persname>Opfermann G. Charlotte</persname>
+                </controlaccess>
+                <c02 level="item">
+                    <did>
+                        <unittitle/>
+                        <unitid>000.008.1</unitid>
+                        <langmaterial/>
+                    </did>
+                    <controlaccess>
+                        <subject>Freizeitgestaltung</subject>
+                        <geogname>Terezin</geogname>
+                        <persname>Opfermann G. Charlotte</persname>
+                    </controlaccess>
+                </c02>
+            </c01>
+            <c01 level="subgrp">
+                <did>
+                    <unitdate type="inclusive" era="ce" calendar="gregorian" normal="2011"
+                        >2011</unitdate>
+                    <unitid>000.009.0</unitid>
+                    <unittitle>Sas Andreas</unittitle>
+                </did>
+                <controlaccess>
+                    <subject>memory</subject>
+                    <subject>holocaust</subject>
+                    <persname>Andreas Sas</persname>
+                </controlaccess>
+                <c02 level="item">
+                    <did>
+                        <unitdate type="inclusive" era="ce" calendar="gregorian" normal="2011"
+                            >2011</unitdate>
+                        <unittitle/>
+                        <unitid>000.009.1</unitid>
+                        <langmaterial/>
+                    </did>
+                    <controlaccess>
+                        <subject>memory</subject>
+                        <subject> holocaust</subject>
+                        <persname>Andreas Sas</persname>
+                    </controlaccess>
+                </c02>
+            </c01>
+            <c01 level="subgrp">
+                <did>
+                    <unitid>001.000.0</unitid>
+                    <unittitle>Aurednicek Anna</unittitle>
+                </did>
+                <controlaccess>
+                    <subject>memory book</subject>
+                    <geogname>Terezin</geogname>
+                    <persname>Aurednicek Anna</persname>
+                </controlaccess>
+                <c02 level="item">
+                    <did>
+                        <unittitle/>
+                        <unitid>001.000.1</unitid>
+                        <langmaterial/>
+                    </did>
+                    <controlaccess>
+                        <subject>memory book</subject>
+                        <geogname>Terezin</geogname>
+                        <persname>Aurednicek Anna</persname>
+                    </controlaccess>
+                </c02>
+            </c01>
+        </dsc>
+    </archdesc>
+</ead>
