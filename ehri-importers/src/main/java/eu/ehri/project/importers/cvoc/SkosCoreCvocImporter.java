@@ -158,6 +158,7 @@ public class SkosCoreCvocImporter {
             logger.error(e.getMessage());
             throw new RuntimeException(e);
         } catch (SAXException e) {
+            logger.error(e.getMessage());
             throw new InputParseError(e);
         }
 
@@ -267,8 +268,7 @@ public class SkosCoreCvocImporter {
      * @throws ValidationError
      */
     private Bundle constructBundleForConcept(Element element) throws ValidationError {
-        Bundle unit = new Bundle(EntityClass.CVOC_CONCEPT,
-                extractCvocConcept(element));
+        Bundle unit = new Bundle(EntityClass.CVOC_CONCEPT, extractCvocConcept(element));
 
         // add the description data to the concept as relationship
         Map<String, Object> descriptions = extractCvocConceptDescriptions(element);
