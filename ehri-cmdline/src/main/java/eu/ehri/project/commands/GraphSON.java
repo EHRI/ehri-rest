@@ -1,11 +1,10 @@
 package eu.ehri.project.commands;
 
 import com.tinkerpop.blueprints.TransactionalGraph;
-import com.tinkerpop.blueprints.util.io.graphml.GraphMLReader;
-import com.tinkerpop.blueprints.util.io.graphml.GraphMLWriter;
+import com.tinkerpop.blueprints.util.io.graphson.GraphSONMode;
+import com.tinkerpop.blueprints.util.io.graphson.GraphSONReader;
+import com.tinkerpop.blueprints.util.io.graphson.GraphSONWriter;
 import com.tinkerpop.frames.FramedGraph;
-import eu.ehri.project.core.GraphManager;
-import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.core.GraphReindexer;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.MissingArgumentException;
@@ -18,62 +17,50 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
- * IMPORTANT! This command is currently not available since GraphML
- * dumps are broken with the EHRI DB since we use array properties
- * which do not save/load correctly.
- *
- * Instead the `graphson` command should be used to dump JSON.
- *
- * --------------------------------
- *
- * Dump the complete graph as graphml file or import such a dump
- *
+ * Dump the complete graph as graphSON file, or import such a dump
+ * <p/>
  * Example usage:
  * - stop the server
- *   $NEO4J_HOME/bin/neo4j stop
+ * $NEO4J_HOME/bin/neo4j stop
  * - save a dump
- *   ./scripts/cmd graphml -d out graph.xml 
- *   or 
- *   ./scripts/cmd graphml -d out - > graph.xml 
+ * ./scripts/cmd graphson -d out graph.json
+ * or
+ * ./scripts/cmd graphson -d out - > graph.json
  * - edit it
  * - remove the graph
- *   rm -rf $NEO4J_HOME/data/graph.db
+ * rm -rf $NEO4J_HOME/data/graph.db
  * - load edited graph
- *   ./scripts/cmd graphml -d in graph.xml 
+ * ./scripts/cmd graphson -d in graph.json
  * - start server
- *   $NEO4J_HOME/bin/neo4j start
- * 
+ * $NEO4J_HOME/bin/neo4j start
  */
-public class GraphML extends BaseCommand implements Command {
+public class GraphSON extends BaseCommand implements Command {
 
-    final static String NAME = "graphml";
+    final static String NAME = "graphson";
 
     private static final String INDEX_NAME = "entities"; // FIXME!!
 
     /**
      * Constructor.
      */
-    public GraphML() {
+    public GraphSON() {
     }
-    
-	@Override
-	public String getHelp() {
-        String help = "export or import a GraphML file." + 
-        		"\n" + getUsage();
-        return help;
-	}
-	
+
+    @Override
+    public String getHelp() {
+        return "export or import a GraphSON file.\n" + getUsage();
+    }
+
     @Override
     public String getUsage() {
-		return "Usage: graphml -d [out|in] <filename>";
+        return "Usage: graphson -d [out|in] <filename>";
     }
 
     @Override
     protected void setCustomOptions() {
-        options.addOption(new Option("d", true,
-                "Output or input a dump"));
+        options.addOption(new Option("d", true, "Output or input a dump"));
     }
-    
+
     /**
      * Command-line entry-point (for testing.)
      *
@@ -87,52 +74,48 @@ public class GraphML extends BaseCommand implements Command {
         if (cmdLine.getArgList().size() < 1) {
             throw new MissingArgumentException("Graph file path missing");
         }
-        
+
         String dumpMode = "out"; //defaults might also be handled by the parser?
-        
+
         if (cmdLine.hasOption("d")) {
-        	dumpMode = cmdLine.getOptionValue("d");
+            dumpMode = cmdLine.getOptionValue("d");
         }
-        
+
         // check if option is useful, otherwise print the help and bail out
         if (dumpMode.contentEquals("out")) {
-        	saveDump(graph, cmdLine);
+            saveDump(graph, cmdLine);
         } else if (dumpMode.contentEquals("in")) {
-        	loadDump(graph, cmdLine);
+            loadDump(graph, cmdLine);
         } else {
             throw new UnrecognizedOptionException("Unrecognised dump mode: '" + dumpMode + "'");
         }
-        
+
         return 0;
     }
 
     public void saveDump(final FramedGraph<? extends TransactionalGraph> graph,
             CommandLine cmdLine) throws Exception {
-        final GraphManager manager = GraphManagerFactory.getInstance(graph);
 
-        GraphMLWriter writer = new GraphMLWriter(graph);
-        writer.setNormalize(true);
+        String filepath = (String) cmdLine.getArgList().get(0);
 
-        String filepath = (String)cmdLine.getArgList().get(0);
-        
         // if the file is '-' that means we do standard out
         if (filepath.contentEquals("-")) {
             // to stdout
-            writer.outputGraph(System.out);
+            GraphSONWriter.outputGraph(graph, System.out, GraphSONMode.EXTENDED);
         } else {
             // try to open or create the file for writing
             OutputStream out = new FileOutputStream(filepath);
-            writer.outputGraph(out); 
+            GraphSONWriter.outputGraph(graph, out, GraphSONMode.EXTENDED);
             out.close();
-        }        
-    } 
-    
-   public void loadDump(final FramedGraph<? extends TransactionalGraph> graph,
-           CommandLine cmdLine) throws Exception {
-       GraphMLReader reader = new GraphMLReader(graph);
-       String filepath = (String)cmdLine.getArgList().get(0);
-	   InputStream in = new FileInputStream(filepath);
-	   reader.inputGraph(in);
-	   new GraphReindexer(graph).reindex(INDEX_NAME);
-   }
+        }
+    }
+
+    public void loadDump(final FramedGraph<? extends TransactionalGraph> graph,
+            CommandLine cmdLine) throws Exception {
+        GraphSONReader reader = new GraphSONReader(graph);
+        String filepath = (String) cmdLine.getArgList().get(0);
+        InputStream in = new FileInputStream(filepath);
+        reader.inputGraph(in);
+        new GraphReindexer(graph).reindex(INDEX_NAME);
+    }
 }
