@@ -28,14 +28,14 @@ import org.slf4j.LoggerFactory;
  * @author lindar
  *
  */
-public class IcaAtomEadImporter extends EaImporter {
+public class EadImporter extends EaImporter {
 
-    private static final Logger logger = LoggerFactory.getLogger(IcaAtomEadImporter.class);
+    private static final Logger logger = LoggerFactory.getLogger(EadImporter.class);
     /**
      * Depth of top-level items. For reasons as-yet-undetermined in the bowels of the SamXmlHandler, top level items are
      * at depth 1 (rather than 0)
      */
-    private final int TOP_LEVEL_DEPTH = 1;
+    protected final int TOP_LEVEL_DEPTH = 1;
 
     /**
      * Construct an EadImporter object.
@@ -44,7 +44,7 @@ public class IcaAtomEadImporter extends EaImporter {
      * @param permissionScope
      * @param log
      */
-    public IcaAtomEadImporter(FramedGraph<Neo4jGraph> framedGraph, PermissionScope permissionScope, ImportLog log) {
+    public EadImporter(FramedGraph<Neo4jGraph> framedGraph, PermissionScope permissionScope, ImportLog log) {
         super(framedGraph, permissionScope, log);
 
     }
@@ -54,12 +54,13 @@ public class IcaAtomEadImporter extends EaImporter {
      *
      * @param itemData
      * @param depth
-     * @throws ValidationError when the itemData does not contain an identifier for the unit.
+     * @throws ValidationError when the itemData does not contain an identifier for the unit or...
      */
     @Override
     public DocumentaryUnit importItem(Map<String, Object> itemData, int depth)
             throws ValidationError {
 
+    	// extractDocumentaryUnit does not throw ValidationError on missing ID
         Bundle unit = new Bundle(EntityClass.DOCUMENTARY_UNIT, extractDocumentaryUnit(itemData));
         
         // Check for missing identifier, throw an exception when there is no ID.
@@ -85,20 +86,9 @@ public class IcaAtomEadImporter extends EaImporter {
         }
         unit = unit.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
 
-//        // New solution to missing IDs: throw an exception.
-//        if (unit.getDataValue(Ontology.IDENTIFIER_KEY) == null) {
-//            throw new ValidationError(unit, Ontology.IDENTIFIER_KEY, "Missing identifier");
-//
-//        }
+        // Old solution to missing IDs: generate a replacement. 
+        // New solution used above: throw error - Handlers should produce IDs if necessary.
 
-//        // Old solution to missing IDs: generate a replacement. 
-//        IdGenerator generator = EntityClass.DOCUMENTARY_UNIT.getIdgen();
-//        String id = generator.generateId(EntityClass.DOCUMENTARY_UNIT, permissionScope, unit);
-//        if (id.equals(permissionScope.getId())) {
-//            throw new RuntimeException("Generated an id same as scope: " + unit.getData());
-//        }
-//
-//        logger.debug("Generated ID: " + id + " (" + permissionScope.getId() + ")");
 
 
         Mutation<DocumentaryUnit> mutation =
@@ -126,6 +116,7 @@ public class IcaAtomEadImporter extends EaImporter {
 
 
     }
+    
     @SuppressWarnings("unchecked")
 	@Override
     protected Iterable<Map<String, Object>> extractRelations(Map<String, Object> data) {
@@ -154,6 +145,7 @@ public class IcaAtomEadImporter extends EaImporter {
         }
         return list;
     }
+    
 //    @Override
 //    protected Iterable<Map<String, Object>> extractRelations(Map<String, Object> data) {
 //        final String REL = "Access";
@@ -183,20 +175,40 @@ public class IcaAtomEadImporter extends EaImporter {
 //
 //    }
 
-    
+    /**
+     * Creates a Map containing properties of a Documentary Unit.
+     * These properties are the unit's identifiers.
+     * @param itemData Map of all extracted information
+     * @param depth depth of node in the tree
+     * @return a Map representing a Documentary Unit node
+     * @throws ValidationError
+     */
     protected Map<String, Object> extractDocumentaryUnit(Map<String, Object> itemData, int depth) throws ValidationError {
         Map<String, Object> unit = new HashMap<String, Object>();
         if (itemData.get(OBJECT_ID) != null) {
             unit.put(Ontology.IDENTIFIER_KEY, itemData.get(OBJECT_ID));
         }
+        if (itemData.get(Ontology.OTHER_IDENTIFIERS) != null) {
+            unit.put(Ontology.OTHER_IDENTIFIERS, itemData.get(Ontology.OTHER_IDENTIFIERS));
+        }
         return unit;
     }
 
+    /**
+     * Creates a Map containing properties of a Documentary Unit description.
+     * These properties are the unit description's properties: all except the doc unit identifiers and unknown properties.
+     * @param itemData Map of all extracted information
+     * @param depth depth of node in the tree
+     * @return a Map representing a Documentary Unit Description node
+     * @throws ValidationError
+     */
     protected Map<String, Object> extractDocumentDescription(Map<String, Object> itemData, int depth) throws ValidationError {
 
         Map<String, Object> unit = new HashMap<String, Object>();
         for (String key : itemData.keySet()) {
-            if (!(key.equals(OBJECT_ID) || key.startsWith(SaxXmlHandler.UNKNOWN))) {
+            if (!(key.equals(OBJECT_ID) 
+            	|| key.equals(Ontology.OTHER_IDENTIFIERS) 
+            	|| key.startsWith(SaxXmlHandler.UNKNOWN))) {
                 unit.put(key, itemData.get(key));
             }
         }

@@ -41,7 +41,7 @@ public class BundesarchiveTest extends AbstractImporterTest{
 
         origCount = getNodeCount(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(XMLFILE);
-        ImportLog log = new SaxImportManager(graph, agent, validUser, BundesarchiveEadImporter.class, BundesarchiveEadHandler.class).importFile(ios, logMessage);
+        ImportLog log = new SaxImportManager(graph, agent, validUser, EadImporter.class, BundesarchiveEadHandler.class).importFile(ios, logMessage);
 //        printGraph(graph);
         // How many new nodes will have been created? We should have
         // - 9 more DocumentaryUnits (archdesc, 1-7+7)
@@ -80,17 +80,20 @@ public class BundesarchiveTest extends AbstractImporterTest{
             assertEquals("Generalkommandos der Waffen-SS", d.getName());
         }
         for(DocumentDescription d : c7_2.getDocumentDescriptions()){
-            assertEquals("I. SS-Panzerkorps\"Leibstandarte\"", d.getName());
+            assertEquals("I. SS-Panzerkorps \"Leibstandarte\"", d.getName());
         }
     //test hierarchy
         assertEquals(new Long(1), archdesc.getChildCount());
         for(DocumentaryUnit d : archdesc.getChildren()){
             assertEquals(C01, d.getIdentifier());
         }
-    //test arta-identifiers
-        for(DocumentDescription d : c7_2.getDocumentDescriptions()){
-            assertEquals("R 3021", d.asVertex().getProperty("arta"));
-        }
+    //test otherIdentifiers (property of DocumentaryUnit! Should be array?)
+        // The c7_2 DocumentaryUnit has one other identifier.
+//        for(DocumentDescription d : c7_2.getDocumentDescriptions()){
+        for (String k : c7_2.asVertex().getPropertyKeys())
+        	System.out.println("key: " + k);
+            assertEquals("R 3021", c7_2.asVertex().getProperty("otherIdentifiers"));
+//        }
     //test level-of-desc
         for(DocumentDescription d : c7_2.getDocumentDescriptions()){
             assertEquals("fonds", d.asVertex().getProperty("levelOfDescription"));

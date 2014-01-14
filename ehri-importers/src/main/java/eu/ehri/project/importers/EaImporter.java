@@ -38,17 +38,30 @@ public abstract class EaImporter extends XmlImporter<Map<String, Object>> {
         super(framedGraph, permissionScope, log);
     }
 
+    /**
+     * 
+     * @param itemData
+     * @return
+     * @throws ValidationError
+     */
     protected Map<String, Object> extractUnit(Map<String, Object> itemData) throws ValidationError {
         Map<String, Object> unit = extractDocumentaryUnit(itemData);
         unit.put("typeOfEntity", itemData.get("typeOfEntity"));
         return unit;
     }
 
-     protected Map<String, Object> extractDocumentaryUnit(Map<String, Object> itemData) throws ValidationError {
+    protected Map<String, Object> extractDocumentaryUnit(Map<String, Object> itemData) throws ValidationError {
         Map<String, Object> unit = new HashMap<String, Object>();
         unit.put(Ontology.IDENTIFIER_KEY, itemData.get("objectIdentifier"));
         return unit;
     }
+     
+    /**
+     * Utility method to return an Iterable<T> as a List<T>.
+     * 
+     * @param iter an Iterable of type T
+     * @return the input as a List of the same type T
+     */
     protected <T> List<T> toList(Iterable<T> iter) {
         Iterator<T> it = iter.iterator();
         List<T> lst = new ArrayList<T>();
@@ -59,6 +72,7 @@ public abstract class EaImporter extends XmlImporter<Map<String, Object>> {
     }
     
     /**
+     * Extract properties from the itemData Map that are marked as unknown, put them in a new Map.
      * 
      * @param itemData
      * @return returns a Map with all keys from itemData that start with SaxXmlHandler.UNKNOWN

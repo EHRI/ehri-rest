@@ -20,6 +20,7 @@ description,identifier,descriptionIdentifier,,
 description,languageCode,,1,
 description,name,,1,
 unit,identifier,objectIdentifier,1,
+unit,otherIdentifiers,,,1
 dateperiod,type,,,
 dateperiod,startDate,,,
 dateperiod,endDate,,,
