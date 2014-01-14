@@ -139,16 +139,16 @@ def online_clone_db(local_dir):
         local("rm " + env.tmpdst + ".tgz")
 
 
-@hosts("ehristage")
-def copy_db_to_staging(local_tar, staging_dir):
-    """
-    Do an online backup of the production graph database and copy it to the staging server.
-    
-    online_clone_to_staging:/path/on/server/backup.graph.db
-    """
-    stage()
-    put(local_tar, staging_dir + "")
-    prod()
+# @hosts("ehristage")
+# def copy_db_to_staging(local_tar, staging_dir):
+#     """
+#     Do an online backup of the production graph database and copy it to the staging server.
+#     
+#     online_clone_to_staging:/path/on/server/backup.graph.db
+#     """
+#     stage()
+#     put(local_tar, staging_dir + "")
+#     prod()
 
 
 @task
