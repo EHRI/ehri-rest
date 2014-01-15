@@ -34,6 +34,10 @@ public class ValidationError extends Exception {
                 "A validation error occurred building %s: %s\n", clsName, errorSet.toJson()));
         return buf.toString();
     }
+    
+    public String getMessage() {
+    	return formatErrors(bundle.getType().getName(), errorSet);
+    }
 
     public ErrorSet getErrorSet() {
         return errorSet;

@@ -9,20 +9,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 
 public class ItsEadHandler extends EadHandler {
 
 	private static final Logger logger = LoggerFactory.getLogger(ItsEadHandler.class);
 
-    // Default language to use in units without language
-    protected String defaultLanguage = "de";
 
+    private final String UNKNOWN_TITLE = "UNKNOWN title";
 	private int itscount = 0;
 	private String archID;
 	
 	public ItsEadHandler(AbstractImporter<Map<String, Object>> importer) {
 		super(importer, new XmlImportProperties("its.properties"));
+		this.defaultLanguage = "deu";
 	}
 
 	 @Override
@@ -71,5 +72,26 @@ public class ItsEadHandler extends EadHandler {
 
 		}
 	}
+
+	/**
+	 * Not all ITS units have a title; generate one for those.
+	 * 
+	 * @param currentGraph the unit representation to extract a title from 
+	 * 		or generate a title for
+	 */
+	@Override
+	protected void extractTitle(Map<String, Object> currentGraph) {
+		if (!currentGraph.containsKey(Ontology.NAME_KEY)) {
+			String title = UNKNOWN_TITLE;
+			if (currentGraph.containsKey(Ontology.IDENTIFIER_KEY)) {
+				title += " (" + (String)currentGraph.get(Ontology.IDENTIFIER_KEY) + ")";
+			}
+			logger.info("Setting default title: " + title);
+			currentGraph.put(Ontology.NAME_KEY, title);
+		}
+		
+	}
+	
+	
 
 }

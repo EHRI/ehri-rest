@@ -96,8 +96,9 @@ public class EadHandler extends SaxXmlHandler {
             if (childItemPattern.matcher(qName).matches() || qName.equals("archdesc")) {
                 try {
                     //add any mandatory fields not yet there:
-                	
+                	// First: identifier(s), 
                     extractIdentifier(currentGraph);
+                    // 
                     extractTitle(currentGraph);
                     
                     useDefaultLanguage(currentGraph);
@@ -122,7 +123,7 @@ public class EadHandler extends SaxXmlHandler {
                     	}
                     }
                 } catch (ValidationError ex) {
-                    logger.error(ex.getMessage());
+                    logger.error("caught validation error: " + ex.getMessage());
                 } finally {
                     depth--;
                 }
@@ -136,25 +137,30 @@ public class EadHandler extends SaxXmlHandler {
     }
 
     /**
-     * Checks given currentGraph for a language and sets a default language tag
+     * Checks given currentGraph for a language and sets a default language code
      * for the description if no language is found.
      * @param currentGraph
      */
 	protected void useDefaultLanguage(Map<String, Object> currentGraph) {
-		useDefaultLanguage(currentGraph, this.defaultLanguage);
+		useDefaultLanguage(currentGraph, getDefaultLanguage());
 	}
 	
 	/**
-     * Checks given currentGraph for a language and sets a default language tag
+     * Checks given currentGraph for a language and sets a default language code
      * for the description if no language is found.
      * @param currentGraph
-     * @param defaultLanguage Language tag to use as default
+     * @param defaultLanguage Language code to use as default
      */
 	protected void useDefaultLanguage(Map<String, Object> currentGraph, String defaultLanguage) {
 		
 		if (!currentGraph.containsKey(Ontology.LANGUAGE_OF_DESCRIPTION)) {
+			logger.debug("Using default language code: " +defaultLanguage);
 		    currentGraph.put(Ontology.LANGUAGE_OF_DESCRIPTION, defaultLanguage);
 		}
+	}
+	
+	protected String getDefaultLanguage() {
+		return defaultLanguage;
 	}
 
 	/**
@@ -199,7 +205,7 @@ public class EadHandler extends SaxXmlHandler {
 		}
 		else {
 			logger.debug("adding first alt id: " + otherIdentifier);
-			ArrayList<String> oids = new ArrayList<>();
+			ArrayList<String> oids = new ArrayList<String>();
 			oids.add(otherIdentifier);
 			currentGraph.put(Ontology.OTHER_IDENTIFIERS, oids);
 		}

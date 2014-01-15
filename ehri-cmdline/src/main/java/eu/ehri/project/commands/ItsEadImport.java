@@ -3,7 +3,7 @@
  */
 package eu.ehri.project.commands;
 
-import eu.ehri.project.importers.IcaAtomEadImporter;
+import eu.ehri.project.importers.EadImporter;
 import eu.ehri.project.importers.ItsEadHandler;
 
 /**
@@ -16,6 +16,6 @@ public class ItsEadImport extends EadImport {
 	final static String NAME = "its-ead-import";
 	
 	public ItsEadImport() {
-		super(ItsEadHandler.class, IcaAtomEadImporter.class);
+		super(ItsEadHandler.class, EadImporter.class);
 	}
 }

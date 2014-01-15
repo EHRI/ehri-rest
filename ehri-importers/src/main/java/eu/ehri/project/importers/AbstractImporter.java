@@ -122,8 +122,23 @@ public abstract class AbstractImporter<T> {
         unchangedCallbacks.add(cb);
     }
 
+    /**
+     * Import an item representation into the graph, and return the Node.
+     * 
+     * @param itemData the item representation to import
+     * @return the imported node
+     * @throws ValidationError when the item representation does not validate
+     */
     abstract public AccessibleEntity importItem(Map<String, Object> itemData) throws ValidationError;
 
+    /**
+     * Import an item representation into the graph at a certain depth, and return the Node.
+     * 
+     * @param itemData the item representation to import
+     * @param depth the depth of the tree to import the node at
+     * @return the imported node
+     * @throws ValidationError when the item representation does not validate
+     */
     abstract public AccessibleEntity importItem(Map<String, Object> itemData, int depth) throws ValidationError;
 
     /**
