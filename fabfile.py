@@ -173,6 +173,30 @@ def copy_db(local_dir):
 
         if confirm("Restart Neo4j server?"):
             start()
+            
+@task
+def copy_db_test(local_dir):
+    """Copy a (not running) DB from the remote TEST server. The TEST server runs a
+    different version of mktemp and has different permissions (e.g. no sudo without tty).
+    
+    copy_db_test:/local/path/to/graph.db
+    """
+    
+
+    remote_db_dir = "%(neo4j_install)s/data/graph.db" % env
+    temp_file = our_temp_file = run("mktemp")
+    run("mv %s %s" % (temp_file, temp_file + ".tgz"))
+    if not os.path.exists(local_dir):
+        os.mkdir(local_dir)
+
+    run("tar --create --gzip --file %s -C %s ." % (temp_file, remote_db_dir))
+    get(temp_file, os.path.dirname(our_temp_file))
+    local("tar --extract --gzip --file %s -C %s" % (our_temp_file, local_dir))
+    run("rm %s" % temp_file)
+    os.unlink(our_temp_file)
+
+    if confirm("Restart Neo4j server?"):
+        start()
 
 @task
 def update_db(local_dir):
@@ -205,6 +229,37 @@ def update_db(local_dir):
         run("chown %s.webadm -R %s" % (env.user, remote_db_dir))
         run("chmod -R g+w " + remote_db_dir)
         start()
+        
+@task
+def update_db_test(local_dir):
+    """Update a Neo4j DB on the TEST server.    
+    Tar the input dir for upload, upload it, stop the server,
+    move the current DB out of the way, and unzip it.
+    
+    update_db_test:/local/path/to/graph.db
+    """
+    # Check we have a reasonable path...
+    if not os.path.exists(os.path.join(local_dir, "index.db")):
+        raise Exception("This doesn't look like a Neo4j DB folder!: " + local_dir)
+
+    remote_db_dir = "%(neo4j_install)s/data/graph.db" % env
+    timestamp = get_timestamp()
+    import tempfile
+    tf = tempfile.NamedTemporaryFile(suffix=".tgz")
+    name = tf.name
+    tf.close()
+
+    local("tar --create --gzip --file %s -C %s ." % (name, local_dir))
+    remote_name = os.path.join("/tmp", os.path.basename(name))
+    put(name, remote_name)
+
+    
+    run("mv %s %s.%s" % (remote_db_dir, remote_db_dir, timestamp))
+    run("mkdir " + remote_db_dir)
+    run("tar zxf %s -C %s" % (remote_name, remote_db_dir))
+    run("chown %s.webadm -R %s" % (env.user, remote_db_dir))
+    run("chmod -R g+w " + remote_db_dir)
+    
 
 @task
 def reindex_repository(repo_id):
@@ -291,8 +346,10 @@ def symlink_current():
 
 @task
 def copy_lib_sh():
-    "Put the lib.sh and cmd scripts on the server."
+    "Put the lib.sh, import-ushmm.sh and cmd scripts on the server."
     with cd(env.path):
         put("scripts/lib.sh", "scripts/lib.sh")
+        put("scripts/import-ushmm.sh", "scripts/import-ushmm.sh")
+        run("chmod g+x scripts/import-ushmm.sh") 
         put("scripts/cmd", "scripts/cmd")
         run("chmod g+x scripts/cmd") 
