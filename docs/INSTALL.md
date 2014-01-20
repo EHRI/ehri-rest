@@ -41,7 +41,7 @@ Make somewhere to put your code:
 
 Clone the EHRI server code from Github:
 
-	git clone https://github.com/mikesname/neo4j-ehri-plugin.git
+	git clone https://github.com/mikesname/ehri-rest.git
 	cd neo4j-ehri-plugin
 	mvn clean install
 
@@ -49,11 +49,11 @@ Clone the EHRI server code from Github:
 
 While Maven is doing its thing, we can install a standalone version of the Neo4j server. Once the code has been built, we can enable the EHRI REST service within the standalone Neo4j server.
 
-	curl -L -0 "http://download.neo4j.org/artifact?edition=community&version=1.9&distribution=tarball&dlid=1957811" | tar zx -C ~/apps
+	curl -L -0 "http://download.neo4j.org/artifact?edition=community&version=1.9.3&distribution=tarball&dlid=1957811" | tar zx -C ~/apps
 	
 We'll need to refer to the installation location a lot so save it as an environment variable:
 
-	export NEO4J_VERSION=1.9
+	export NEO4J_VERSION=1.9.3
 	export NEO4J_HOME=$HOME/apps/neo4j-community-${NEO4J_VERSION}
 	export NEO4J_DB=$NEO4J_HOME/data/graph.db
 
