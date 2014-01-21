@@ -6,6 +6,7 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.*;
 import eu.ehri.project.models.base.*;
+import eu.ehri.project.models.idgen.IdGenerator;
 import eu.ehri.project.persistence.Bundle;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -53,13 +54,15 @@ public class IcaAtomEadImporter extends EaImporter {
      *
      * @param itemData
      * @param depth
-     * @throws ValidationError
+     * @throws ValidationError when the itemData does not contain an identifier for the unit.
      */
     @Override
     public DocumentaryUnit importItem(Map<String, Object> itemData, int depth)
             throws ValidationError {
 
         Bundle unit = new Bundle(EntityClass.DOCUMENTARY_UNIT, extractDocumentaryUnit(itemData));
+        
+        // Check for missing identifier, throw an exception when there is no ID.
         if (unit.getDataValue(Ontology.IDENTIFIER_KEY) == null) {
             throw new ValidationError(unit, Ontology.IDENTIFIER_KEY,
                     "Missing identifier " + Ontology.IDENTIFIER_KEY);
@@ -82,9 +85,21 @@ public class IcaAtomEadImporter extends EaImporter {
         }
         unit = unit.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
 
-        if (unit.getDataValue(Ontology.IDENTIFIER_KEY) == null) {
-            throw new ValidationError(unit, Ontology.IDENTIFIER_KEY, "Missing identifier");
-        }
+//        // New solution to missing IDs: throw an exception.
+//        if (unit.getDataValue(Ontology.IDENTIFIER_KEY) == null) {
+//            throw new ValidationError(unit, Ontology.IDENTIFIER_KEY, "Missing identifier");
+//
+//        }
+
+//        // Old solution to missing IDs: generate a replacement. 
+//        IdGenerator generator = EntityClass.DOCUMENTARY_UNIT.getIdgen();
+//        String id = generator.generateId(EntityClass.DOCUMENTARY_UNIT, permissionScope, unit);
+//        if (id.equals(permissionScope.getId())) {
+//            throw new RuntimeException("Generated an id same as scope: " + unit.getData());
+//        }
+//
+//        logger.debug("Generated ID: " + id + " (" + permissionScope.getId() + ")");
+
 
         Mutation<DocumentaryUnit> mutation =
                 persister.createOrUpdate(unit, DocumentaryUnit.class);
@@ -114,7 +129,8 @@ public class IcaAtomEadImporter extends EaImporter {
 
 
     }
-    @Override
+    @SuppressWarnings("unchecked")
+	@Override
     protected Iterable<Map<String, Object>> extractRelations(Map<String, Object> data) {
         final String REL = "Access";
         List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
@@ -170,6 +186,7 @@ public class IcaAtomEadImporter extends EaImporter {
 //
 //    }
 
+    
     protected Map<String, Object> extractDocumentaryUnit(Map<String, Object> itemData, int depth) throws ValidationError {
         Map<String, Object> unit = new HashMap<String, Object>();
         if (itemData.get(OBJECT_ID) != null) {

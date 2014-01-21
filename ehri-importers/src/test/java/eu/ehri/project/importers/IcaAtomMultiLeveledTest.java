@@ -57,12 +57,12 @@ private final String UN_REL = "HR-HDA145corporateBodyAccessCroatianStateArchive"
 
         int createCount = origCount + 25;
 
-        // - 4 more UnderterminedRelationship nodes
 
         assertEquals(createCount, getNodeCount(graph));
 
-        // Yet we've only created 1 *logical* item...
-        assertEquals(3, log.getChanged());
+        // Yet we've only created 3 *logical* items...
+        assertEquals(0, log.getUpdated());
+        assertEquals(3, log.getCreated());
 
         Iterable<Vertex> docs = graph.getVertices("identifier",
                 IMPORTED_ITEM_ID);
@@ -85,7 +85,7 @@ private final String UN_REL = "HR-HDA145corporateBodyAccessCroatianStateArchive"
         InputStream ios2 = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
         ImportLog log2 = new SaxImportManager(graph, agent, validUser, IcaAtomEadImporter.class, IcaAtomEadHandler.class).importFile(ios2, logMessage);
 
-        // We should only have no more nodes, since nothing happened
+        // We should have no new nodes, not even SystemEvent
         assertEquals(createCount, getNodeCount(graph));
         // And no logical item should've been updated
         assertEquals(0, log2.getUpdated());

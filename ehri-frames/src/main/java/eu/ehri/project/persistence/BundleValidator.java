@@ -49,6 +49,7 @@ public final class BundleValidator {
     /**
      * Validate the data in the bundle, according to the target class, and
      * ensure it is fit for updating in the graph.
+     * 
      *
      * @return A new bundle with generated IDs.
      * @throws ValidationError
@@ -64,9 +65,11 @@ public final class BundleValidator {
     }
 
     /**
-     * Validate bundle fields.
+     * Validate bundle fields. Mandatory fields must be present and non-empty
+     * and entity type annotations must be present in the bundle's entity type class.
      *
-     * @throws ValidationError
+     * @param bundle a Bundle to validate
+     * @throws ValidationError if any errors were found during validation of the bundle
      */
     private void validateData(final Bundle bundle) throws ValidationError {
         ErrorSet es = validateTreeData(bundle);
@@ -83,7 +86,9 @@ public final class BundleValidator {
      * Validate the data in the bundle, according to the target class, and
      * ensure it is fit for updating in the graph.
      *
-     * @return errors
+     * @param bundle the Bundle to validate
+     * @return errors an ErrorSet that is empty when no errors were found, 
+     * 		or containing found errors
      */
     private ErrorSet validateTreeForUpdate(final Bundle bundle) {
         ErrorSet.Builder builder = new ErrorSet.Builder();
@@ -97,9 +102,11 @@ public final class BundleValidator {
 
     /**
      * Validate the data in the bundle, according to the target class, and
-     * ensure it is fit for updating in the graph.
+     * ensure it is fit for creating in the graph.
      *
-     * @return errors
+     * @param bundle the Bundle to validate
+     * @return errors an ErrorSet that is empty when no errors were found, 
+     * 		or containing found errors
      */
     private ErrorSet validateTreeForCreate(final Bundle bundle) {
         ErrorSet.Builder builder = new ErrorSet.Builder();
@@ -110,9 +117,11 @@ public final class BundleValidator {
     }
 
     /**
-     * Validate bundle fields.
+     * Validate bundle fields. Mandatory fields must be present and non-empty
+     * and entity type annotations must be present in the bundle's entity type class.
      *
-     * @return errors
+     * @return errors an ErrorSet that may contain errors for missing/empty mandatory fields
+     * 		and missing entity types
      */
     private ErrorSet validateTreeData(final Bundle bundle) {
         ErrorSet.Builder builder = new ErrorSet.Builder();
@@ -140,7 +149,7 @@ public final class BundleValidator {
     }
 
     /**
-     * Check a bundle's fields validate.
+     * Check a bundle's mandatory fields are present and not empty. Add errors to the builder's ErrorSet.
      */
     private static void checkFields(final Bundle bundle, final ErrorSet.Builder builder) {
         for (String key : ClassUtils.getMandatoryPropertyKeys(bundle.getBundleClass())) {
@@ -149,7 +158,7 @@ public final class BundleValidator {
     }
 
     /**
-     * Check the data holds a given field, accounting for the
+     * Check the data holds a given field and that the field is not empty.
      *
      * @param name The field name
      */
@@ -169,7 +178,7 @@ public final class BundleValidator {
     }
 
     /**
-     * Check entity type annotation.
+     * Check that the entity type annotation is present in the bundle's class.
      */
     private static void checkEntityType(final Bundle bundle, final ErrorSet.Builder builder) {
         EntityType annotation = bundle.getBundleClass().getAnnotation(EntityType.class);
@@ -181,7 +190,8 @@ public final class BundleValidator {
     }
 
     /**
-     * Check uniqueness constrains for a bundle's fields.
+     * Check uniqueness constraints for a bundle's fields. ID must be present and not existing in
+     * the graph.
      */
     private void checkIntegrity(final Bundle bundle, final ErrorSet.Builder builder) {
         if (bundle.getId() == null) {
@@ -198,7 +208,7 @@ public final class BundleValidator {
     }
 
     /**
-     * Check uniqueness constrains for a bundle's fields.
+     * Check uniqueness constraints for a bundle's fields.
      */
     private void checkUniqueness(final Bundle bundle, final ErrorSet.Builder builder) {
         for (String ukey : bundle.getUniquePropertyKeys()) {
@@ -218,7 +228,8 @@ public final class BundleValidator {
     }
 
     /**
-     * Check uniqueness constrains for a bundle's fields.
+     * Check uniqueness constraints for a bundle's fields: add errors for node references whose referent is 
+     * not already in the graph.
      */
     private void checkUniquenessOnUpdate(final Bundle bundle, final ErrorSet.Builder builder) {
         for (String ukey : bundle.getUniquePropertyKeys()) {

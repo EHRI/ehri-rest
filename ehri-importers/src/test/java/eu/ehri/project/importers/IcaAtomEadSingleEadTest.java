@@ -91,7 +91,7 @@ public class IcaAtomEadSingleEadTest extends AbstractImporterTest {
         InputStream ios2 = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
         ImportLog log2 = new SaxImportManager(graph, agent, validUser, IcaAtomEadImporter.class, IcaAtomEadHandler.class).importFile(ios2, logMessage);
 
-        // We should only have no extra nodes, if nothing happened, nothing is created, not even an EventNode
+        // We should no new nodes (not even a SystemEvent)
         assertEquals(createCount, getNodeCount(graph));
         // And no logical item should've been updated
         assertEquals(0, log2.getUpdated());

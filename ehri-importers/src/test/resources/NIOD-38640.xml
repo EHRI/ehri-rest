@@ -1,0 +1,225 @@
+
+<ead xmlns="urn:isbn:1-931666-22-9" audience="external"> 
+  <eadheader countryencoding="iso3166-1" dateencoding="iso8601" findaidstatus="unverified-full-draft" langencoding="iso639-2b" repositoryencoding="iso15511" scriptencoding="iso15924"> 
+    <eadid countrycode="NL" mainagencycode="NL-AsdNIOD">197a</eadid>  
+    <filedesc> 
+      <titlestmt> 
+        <titleproper>Stichting Centraal Bureau van Onderzoek inzake de Vererving van de Nalatenschappen van Vermiste Personen</titleproper> 
+      </titlestmt>  
+      <publicationstmt> 
+        <publisher>NIOD Instituut voor Oorlogs-, Holocaust- en Genocidestudies</publisher>  
+        <date calendar="gregorian" era="ce" normal="2012">2012</date> 
+      </publicationstmt> 
+    </filedesc> 
+  </eadheader>  
+  <archdesc level="fonds" type="inventory"> 
+    <did> 
+      <unitdate calendar="gregorian" era="ce" normal="0/9999"/>  
+      <origination>Stichting Centraal Bureau van Onderzoek inzake de Vererving van de Nalatenschappen van Vermiste Personen</origination> 
+    </did>  
+    <odd> 
+      <odd> 
+        <head><![CDATA[Openbaarheid]]></head>  
+        <p><![CDATA[Het archief is beperkt openbaar. De inventarisnummers 483 en 484 zijn slechts raadpleegbaar na verkregen schriftelijke toestemming van de directeur van het NIOD. Onderzoekers kunnen zich daartoe schriftelijk wenden tot de directeur van het NIOD. Alle overige inventarisnummers zijn slechts raadpleegbaar na verkregen toestemming van de directeur van het NIOD. Voor bezoekers die deze toestemming willen hebben, ligt een formulier bij de balie van de studiezaal van het NIOD.]]></p> 
+      </odd> 
+    </odd>  
+    <odd> 
+      <odd> 
+        <head><![CDATA[Inleiding]]></head>  
+        <p><![CDATA[De "Stichting Centraal Bureau van Onderzoek inzake de Vererving van de Nalatenschappen van Vermiste Personen" gevestigd te 's-Gravenhage, werd opgericht d.d. 17 juni 1949. De oprichting geschiedde op instigatie van de Broederschap der Notarissen in Nederland, met het doel om de grote opeenhoping van aanvragen van verervingsonderzoeken op te vangen en te coördineren. Deze aanvragen waren een gevolg van het feit, dat een groot deel van de door de Duitse bezetter gedeporteerde personen - in het bijzonder Joodse landgenoten - niet zijn teruggekeerd. De Stichting stond onder toezicht van een Raad van Toezicht, bestaande uit 11 leden, en werd bestuurd door een directie, bestaande uit 2 personen, t.w. G.W.M. Beck, oud-hoofdambtenaar van Justitie in het toenmalige Nederlands-Indië, en mr. J.H. Leopold, oud-inspecteur der registratie. Zij had de opdracht, ten dienste van nader aan te wijzen personen en instellingen, de familiebetrekkingen en de vererving van de nalatenschappen van vermiste personen na te gaan, en daaromtrent inlichtingen te verstrekken.]]></p>  
+        <p><![CDATA[De "Stichting Centraal Bureau van Onderzoek inzake de Vererving van de Nalatenschappen van Vermiste Personen" werd belast met het vaststellen der vererving, zo nodig na voorafgaand onderzoek, van de nalatenschappen van personen, die tijdens de Duitse bezetting door de bezettende macht waren weggevoerd en overleden waren, of als overleden werden beschouwd.]]></p>  
+        <p><![CDATA[Ter uitvoering van deze taak, werd aan de beide directeuren een aantal medewerkers, w.o. een candidaat-notaris en een Indisch jurist toegevoegd, die verder de beschikking kregen over een tweetal z.g. "cartografen", belast met meer technische werkzaamheden, een boekhouder voor het financiële gedeelte en enige administratieve krachten.]]></p>  
+        <p><![CDATA[De werkzaamheden der Stichting waren zodanig georganiseerd, dat de verschillende aanvragen, die bij notarissen werden ingediend, tegen betaling van een voorschot door de Stichting werden behandeld, in samenwerking met het departement van Justitie, dat via publikaties in de Staatscourant de sterfdata der vermisten vaststelde en waarvan bij de Stichting uittreksels werden vervaardigd, het Informatiebureau van het Nederlandsche Roode Kruis, en de bevolkingsregisters van de verschillende gemeenten. De verkregen gegevens werden dan per geval nader uitgewerkt. Op deze wijze ontstond een serie zaakdossiers, die alle correspondentie over een bepaalde zaak bevatten. Teneinde een goed overzicht te behouden werden alle binnenkomende en uitgaande stukken geregistreerd in een agenda, die tevens vermeldde waar de stukken werden opgeborgen.]]></p>  
+        <p><![CDATA[Niet tot dossiers behorende stukken werden opgeborgen in een serie correspondentiemappen gemerkt van A-Z, terwijl parallel hiermee een "register" werd bijgehouden van z.g. kleine gevallen.]]></p>  
+        <p><![CDATA[Vervolgens werden de aanvragen op volgorde van binnenkomst in een "aanvraagregister" geregistreerd, met vermelding van de naam der persoon of instantie van wie de aanvraag uit ging, terwijl tevens voor elk geval een schematisch overzicht (stamboom) werd opgesteld van de verervingslijn van de erflater. Als het onderzoek was afgerond werd door de Stichting een verklaring opgesteld waaruit blijkt wie gerechtigd waren tot de erfenis. De verklaring werd gestuurd aan een notaris of aan de Liquidatie van Verwaltung Sarphatistraat (= liquidatie Lippmann, Rosenthal en Co.).]]></p>  
+        <p><![CDATA[Deze genealogische schema's, stamboomkaarten genaamd, werden voorzien van een nummer, dat ook op de desbetreffende dossiers werd vermeld, alsmede op de trefwoordkaartjes, die van iedere voorkomende persoon werden gemaakt. Op deze trefwoordkaartjes werd tevens aangeduid of het een dossier dan wel een z.g. klein geval betrof (de kleine gevallen werden voorzien van een rode linkerbovenhoek).]]></p>  
+        <p><![CDATA[De stukken die betrekking hadden op deze "kleine gevallen" (dat zijn rekeningen met kleine saldi) werden in mappen gelegd op agendanummer. Daar behoudens enkele uitzonderingen deze kleine gevallen alle betrekking hadden op aanvragen van Liquidatie van Verwaltung Sarphatistraat (LvVS)]]>  
+          <note> 
+            <p><![CDATA[Als een der Duitse instellingen welker taak het was, langs de weg van door de Rijkscommissaris voor het bezette Nederlandse gebied uitgevaardigde verordeningen het vermogen van joden in beslag te nemen, was in augustus 1941 opgericht het kantoor Sarphatistraat van de onder Duits beheer gestelde bankiersfirma Lippmann, Rosenthal & Co te Amsterdam (VO 148/1941). Feitelijk verband met deze bank ontbrak, de naam diende uitsluitend ter camouflage; het pand waarin het kantoor gevestigd werd, behoorde toe aan de Amsterdamsche Bank. Na de bevrijding werd de naam van de inmiddels onder beheer gekomen instelling Lippmann, Rosenthal & Co., Sarphatistraat(Liro) ter voorkoming van verwarring gewijzigd in Liquidatie van Verwaltung Sarphatistraat (LVVS).]]></p> 
+          </note><![CDATA[ werden deze in een aparte "agenda" bijgehouden.]]> 
+        </p>  
+        <p><![CDATA[In de vergadering van de Raad van Toezicht d.d. 21 maart 1956 werd mr. J.H. Leopold belast met de liquidatie van de "Stichting Centraal Bureau van Onderzoek inzake de Vererving van de Nalatenschappen van Vermiste Personen", welke liquidatie op 14 april 1956 moest zijn voltooid. Het archief werd toen overgebracht naar LvVS en per januari 1958 overgedragen aan het Rijksinstituut voor Oorlogsdocumentatie. Het archief, waarvan de oorspronkelijke ordening zoveel mogelijk is gehandhaafd, kon dus tengevolge van de organisatie van het bureau der Stichting niet functioneel worden opgezet, doch werd ingedeeld in een afdeling algemene zaken en een afdeling bijzondere zaken.]]></p>  
+        <p><![CDATA[De in het archief aangetroffen "series" konden in het algemeen worden gehandhaafd, echter met uitzondering van een algemene serie ingekomen en uitgaande stukken.]]></p>  
+        <p><![CDATA[De heterogene samenstelling van deze laatste serie noopte namelijk tot een herindeling, daar de correspondentie deels op onderwerp, deels per correspondentierelatie was opgeborgen. Dit laatste gedeelte is, zij het in gewijzigde volgorde, gehandhaafd, het onderwerpsgewijze gerangschikte gedeelte werd ondergebracht bij de afdelingen waarop het betrekking heeft. Daar in de agenda's No's 5-15 en 16-21 naar de oorspronkelijke letters en nummers van deze omslagen wordt verwezen, is met het oog op het terugvinden der stukken een concordantie van deze letters en nummers met de nummers van deze inventaris samengesteld, (zie bijlage II).]]></p>  
+        <p><![CDATA[De hoofdtaak van de Stichting vond zijn neerslag in de omvangrijke serie stukken betreffende onderzoekingen inzake de vererving van de nalatenschappen van vermiste personen (no. 233-373). Daarnaast vormde zich nog een serie zg. "kleine gevallen" in feitelijke zin zaken als in de zoëven genoemde serie, doch door hun gering belang in het algemeen niet tot dossiers uitgegroeid. Het terugvinden der enkele stukken werd mogelijk gemaakt door raadpleging der agenda's, van ingekomen en uitgaande stukken, terwijl de ingangen der series werden gevormd door de in de inventaris vermelde indices en kaartsystemen.]]></p>  
+        <p><![CDATA[Voorts ontstonden kleinere series van voor het onderzoek benodigde hulpmiddelen als stamboomkaart en en uittreksels uit de bevolkingsregisters (zg. exposé's) en uittreksels uit de Staatscouranten (overlijdensakten).]]></p>  
+        <p><![CDATA[Los hiervan, doch er nauw mede verbonden,ontstond een financiële rubriek, die zowel de financiële aspecten, verbonden aan het verervingsonderzoek, alsmede de aan de exploitatie van het bureau verbonden kosten als loonadministratie en materiele voorzieningen omvatte.]]></p>  
+        <p><![CDATA[De hiertoe behorende bescheiden (No's 67 tot 164) komen na het aflopen van de bewaringstermijn grotendeels voor vernietiging in aanmerking.]]></p>  
+        <p><![CDATA[Aan de inventaris zijn een tweetal bijlagen toegevoegd nl. een alfabetische lexicografische lijst van namen der erflaters, met achter elke naam vermeld het dossier nummer, dat op deze zaak betrekking heeft, en een concordantie van de oorspronkelijke letters en nummers der uiteengenomen algemene correspondentieserie met de nummers van de inventaris.]]></p>  
+        <p><![CDATA[De toegang is in april 1959 vervaardigd door de heer J. Zwaan.]]></p> 
+      </odd> 
+    </odd>  
+    <dsc type="combined"> 
+      <note> 
+        <p><![CDATA[aanvraaginstructie<br/><br/>Archiefstukken uit dit archief kunnen in de studiezaal van het NIOD worden aangevraagd<br/> onder vermelding van: archief 197a, inv.no. ...<br/> Het inventarisnummer is vermeld in numeriek oplopende volgorde,<br/> links naast de beschrijving van de stukken<br/>]]></p> 
+      </note>  
+      <c01 level="series"> 
+        <did> 
+          <unitid type="series_code">1.</unitid>  
+          <unittitle>Algemene zaken</unittitle>  
+          <unitdate calendar="gregorian" era="ce" normal="1949/1956"/> 
+        </did>  
+      
+        <c02 level="otherlevel" otherlevel="filegrp"> 
+          <did> 
+            <unitid>5-15</unitid>  
+            <unittitle>Agenda's der ingekomen stukken</unittitle>  
+            <unitdate calendar="gregorian" era="ce" normal="1950/1955">1950-1955.</unitdate>  
+            <physdesc>13 delen</physdesc> 
+          </did>  
+          <c03 level="file"> 
+            <did> 
+              <unitid>5</unitid>  
+              <unittitle>1950 No's .1-1558</unittitle>  
+              <unitdate calendar="gregorian" era="ce" normal="1558/1950"/> 
+            </did> 
+          </c03>  
+          <c03 level="file"> 
+            <did> 
+              <unitid>6</unitid>  
+              <unittitle>1950 No's .1559- 2438</unittitle>  
+              <unitdate calendar="gregorian" era="ce" normal="1559/1950"/> 
+            </did> 
+          </c03>  
+          <c03 level="file"> 
+            <did> 
+              <unitid>7</unitid>  
+              <unittitle>1950 No's .2439- 3633</unittitle>  
+              <unitdate calendar="gregorian" era="ce" normal="1950"/> 
+            </did> 
+          </c03>  
+          <c03 level="file"> 
+            <did> 
+              <unitid>8</unitid>  
+              <unittitle>1950-51 No's .3634/50-1506/51</unittitle>  
+              <unitdate calendar="gregorian" era="ce" normal="1506/1950"/> 
+            </did> 
+          </c03>  
+          <c03 level="file"> 
+            <did> 
+              <unitid>9</unitid>  
+              <unittitle>1951 No's .1507- 4829</unittitle>  
+              <unitdate calendar="gregorian" era="ce" normal="1507/1951"/> 
+            </did> 
+          </c03>  
+          <c03 level="file"> 
+            <did> 
+              <unitid>10</unitid>  
+              <unittitle>1951 No's .4830- 9325</unittitle>  
+              <unitdate calendar="gregorian" era="ce" normal="1951"/> 
+            </did> 
+          </c03>  
+          <c03 level="file"> 
+            <did> 
+              <unitid>11</unitid>  
+              <unittitle>1951-52 No's .9327/51-4483/52</unittitle>  
+              <unitdate calendar="gregorian" era="ce" normal="1951"/> 
+            </did> 
+          </c03>  
+          <c03 level="file"> 
+            <did> 
+              <unitid>12</unitid>  
+              <unittitle>1952-53 No's .4484/52-1528/53</unittitle>  
+              <unitdate calendar="gregorian" era="ce" normal="1528/1952"/> 
+            </did> 
+          </c03>  
+          <c03 level="file"> 
+            <did> 
+              <unitid>13</unitid>  
+              <unittitle>1953 No's .1529- 7701</unittitle>  
+              <unitdate calendar="gregorian" era="ce" normal="1529/1953"/> 
+            </did> 
+          </c03>  
+          <c03 level="file"> 
+            <did> 
+              <unitid>14</unitid>  
+              <unittitle>1953-55 No's .7702/53-200/55</unittitle>  
+              <unitdate calendar="gregorian" era="ce" normal="1953"/> 
+            </did> 
+          </c03>  
+          <c03 level="file"> 
+            <did> 
+              <unitid>15</unitid>  
+              <unittitle>1955 No's .201- 2967</unittitle>  
+              <unitdate calendar="gregorian" era="ce" normal="1955"/> 
+            </did> 
+          </c03>  
+          <c03 level="file"> 
+            <did> 
+              <unitid>15a</unitid>  
+              <unittitle>1950 No's .1-3856</unittitle>  
+              <unitdate calendar="gregorian" era="ce" normal="1950"/> 
+            </did> 
+          </c03>  
+          <c03 level="file"> 
+            <did> 
+              <unitid>15b</unitid>  
+              <unittitle>1950 No's .3856- 4619</unittitle>  
+              <unitdate calendar="gregorian" era="ce" normal="1950"/> 
+            </did> 
+          </c03> 
+        </c02>  
+        
+        <c02 level="otherlevel" otherlevel="filegrp"> 
+          <did> 
+            <unitid>58-61</unitid>  
+            <unittitle>Stukken betreffende een enquête onder de leden van de Broederschap der Notarissen, over nog aan de Stichting te verstrekken opdrachten</unittitle>  
+            <unitdate calendar="gregorian" era="ce" normal="1951/1952">1951-1952.</unitdate>  
+            <physdesc>4 omslagen</physdesc> 
+          </did>  
+          <c03 level="file"> 
+            <did> 
+              <unitid>58</unitid>  
+              <unittitle>Algemeen (S 9)</unittitle>  
+              <unitdate calendar="gregorian" era="ce" normal="1951/1952">1951-1952</unitdate> 
+            </did> 
+          </c03>  
+          <c03 level="file"> 
+            <did> 
+              <unitid>59</unitid>  
+              <unittitle>Ingekomen formulieren met negatieve antwoorden (S 9a)</unittitle>  
+              <unitdate calendar="gregorian" era="ce" normal="1952">1952</unitdate> 
+            </did> 
+          </c03>  
+          <c03 level="file"> 
+            <did> 
+              <unitid>60</unitid>  
+              <unittitle>Ingekomen formulieren met neutrale antwoorden (S 9b)</unittitle>  
+              <unitdate calendar="gregorian" era="ce" normal="1952">1952</unitdate> 
+            </did> 
+          </c03>  
+          <c03 level="file"> 
+            <did> 
+              <unitid>61</unitid>  
+              <unittitle>Ingekomen formulieren met positieve antwoorden (S 9c)</unittitle>  
+              <unitdate calendar="gregorian" era="ce" normal="1952">1952</unitdate> 
+            </did> 
+          </c03> 
+        </c02>  
+        <c02 level="file"> 
+          <did> 
+            <unitid>61a</unitid>  
+            <unittitle>Notities van algemene aard, z.d..</unittitle>  
+            <unitdate calendar="gregorian" era="ce" normal="1949/1956"/>  
+            <physdesc>1deeltje</physdesc> 
+          </did> 
+        </c02>  
+        <c02 level="file"> 
+          <did> 
+            <unitid>61b</unitid>  
+            <unittitle>Memorandum van bij notarissen in behandeling zijnde boedels, die (nog) niet aan de Stichting in behandeling zijn gegeven. 1 deeltje, z.d..</unittitle>  
+            <unitdate calendar="gregorian" era="ce" normal="1949/1956"/> 
+          </did> 
+        </c02>  
+        <c02 level="file"> 
+          <did> 
+            <unitid>61c</unitid>  
+            <unittitle>Lijst van bewindvoeringen van de Stichting "Commissie van Advies en Beheer voor Afwezigen (C.A.B.A.)" te Rotterdam, z.d..</unittitle>  
+            <unitdate calendar="gregorian" era="ce" normal="1949/1956"/>  
+            <physdesc>1omslag</physdesc> 
+          </did> 
+        </c02> 
+      </c01> 
+    </dsc> 
+  </archdesc> 
+</ead>

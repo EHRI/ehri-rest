@@ -24,7 +24,7 @@ public class AbstractImporterTest extends AbstractFixtureTest {
     protected void printGraph(FramedGraph<?> graph) {
         int vcount = 0;
         for (Vertex v : graph.getVertices()) {
-            logger.info(++vcount + " -------------------------");
+            logger.debug(++vcount + " -------------------------");
             for (String key : v.getPropertyKeys()) {
                 String value = "";
                 if (v.getProperty(key) instanceof String[]) {
@@ -35,11 +35,11 @@ public class AbstractImporterTest extends AbstractFixtureTest {
                 } else {
                     value = v.getProperty(key).toString();
                 }
-                logger.info(key + ": " + value);
+                logger.debug(key + ": " + value);
             }
 
             for (Edge e : v.getEdges(Direction.OUT)) {
-                logger.info(e.getLabel());
+                logger.debug(e.getLabel());
             }
         }
     }

@@ -18,6 +18,7 @@ import eu.ehri.project.models.cvoc.Vocabulary;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.fail;
 
 /**
  * @author paulboon
@@ -29,7 +30,7 @@ public class SkosCoreCvocImporterTest extends AbstractImporterTest { //AbstractF
 
     @Test
     public void testImportItemsT() throws Exception {
-        final String logMessage = "Importing a SKOS file";
+    	final String logMessage = "Importing a SKOS file";
         Vocabulary vocabulary = manager.getFrame("cvoc1", Vocabulary.class);
         int beforeNodeCount = getNodeCount(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(SKOS_FILE);

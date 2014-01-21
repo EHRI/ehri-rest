@@ -9,7 +9,7 @@
 NEO4JPATH=${1%}
 
 # Default to NEO4J_HOME
-if [ "$NEO4PATH" == "" ]; then
+if [ "$NEO4JPATH" == "" ]; then
     NEO4JPATH=$NEO4J_HOME
 fi
 
