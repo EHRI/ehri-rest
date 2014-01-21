@@ -12,13 +12,10 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Maps;
 import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.exceptions.DeserializationError;
-import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.*;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.views.Crud;
@@ -110,7 +107,7 @@ public class AdminResource extends AbstractRestResource {
             new AclManager(graph).grantPermissions(user, user,
                     PermissionType.OWNER);
 
-            String jsonStr = serializer.vertexFrameToJson(user);
+            String jsonStr = getSerializer().vertexFrameToJson(user);
             graph.getBaseGraph().commit();
             return Response.status(Status.CREATED).entity((jsonStr).getBytes())
                     .build();

@@ -203,7 +203,7 @@ public class CountryResource extends
 
     private Response buildResponseFromRepository(Repository repository)
             throws SerializationError {
-        String jsonStr = serializer.vertexFrameToJson(repository);
+        String jsonStr = getSerializer().vertexFrameToJson(repository);
         // FIXME: Hide the details of building this path
         URI docUri = UriBuilder.fromUri(uriInfo.getBaseUri())
                 .segment(Entities.REPOSITORY)

@@ -216,7 +216,7 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
 
     private Response buildResponseFromDocumentaryUnit(DocumentaryUnit doc)
             throws SerializationError {
-        String jsonStr = serializer.vertexFrameToJson(doc);
+        String jsonStr = getSerializer().vertexFrameToJson(doc);
         // FIXME: Hide the details of building this path
         URI docUri = UriBuilder.fromUri(uriInfo.getBaseUri())
                 .segment(Entities.DOCUMENTARY_UNIT)

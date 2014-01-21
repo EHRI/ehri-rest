@@ -117,7 +117,7 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
             throws SerializationError {
         try {
             return Response.status(status)
-                    .entity((serializer.vertexFrameToJson(doc)).getBytes()).build();
+                    .entity((getSerializer().vertexFrameToJson(doc)).getBytes()).build();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

@@ -198,7 +198,7 @@ public class DocumentaryUnitResource extends
 
     private Response buildResponseFromDocumentaryUnit(DocumentaryUnit doc)
             throws SerializationError {
-        String jsonStr = serializer.vertexFrameToJson(doc);
+        String jsonStr = getSerializer().vertexFrameToJson(doc);
 
         try {
             // FIXME: Hide the details of building this path

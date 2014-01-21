@@ -257,7 +257,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
                     getRequesterUserProfile());
             Bundle rawBundle = Bundle.fromString(json);
             if (isPatch()) {
-                Bundle existing = serializer.vertexFrameToBundle(entity);
+                Bundle existing = getSerializer().vertexFrameToBundle(entity);
                 rawBundle = existing.mergeDataWith(rawBundle);
             }
             Bundle entityBundle = new Bundle(entity.getId(), getEntityType(),

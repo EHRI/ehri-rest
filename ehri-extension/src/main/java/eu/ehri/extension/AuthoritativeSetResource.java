@@ -234,7 +234,7 @@ public class AuthoritativeSetResource extends
 
     private Response buildResponseFromHistoricalAgent(HistoricalAgent agent)
             throws SerializationError {
-        String jsonStr = serializer.vertexFrameToJson(agent);
+        String jsonStr = getSerializer().vertexFrameToJson(agent);
         // FIXME: Hide the details of building this path
         URI docUri = UriBuilder.fromUri(uriInfo.getBaseUri())
                 .segment(Entities.HISTORICAL_AGENT)

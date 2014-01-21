@@ -344,7 +344,7 @@ public class CvocConceptResource extends
 
     private Response buildResponseFromConcept(Concept concept)
             throws SerializationError {
-        String jsonStr = serializer.vertexFrameToJson(concept);
+        String jsonStr = getSerializer().vertexFrameToJson(concept);
         // FIXME: Hide the details of building this path
         URI docUri = UriBuilder.fromUri(uriInfo.getBaseUri())
                 .segment(Entities.CVOC_CONCEPT)

@@ -164,7 +164,7 @@ public class LinkResource extends
 
     private Response buildResponseFromAnnotation(Link link)
             throws SerializationError {
-        String jsonStr = serializer.vertexFrameToJson(link);
+        String jsonStr = getSerializer().vertexFrameToJson(link);
         return Response.status(Status.CREATED).entity((jsonStr).getBytes())
                 .build();
     }

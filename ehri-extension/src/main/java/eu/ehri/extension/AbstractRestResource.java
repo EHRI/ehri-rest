@@ -56,6 +56,8 @@ public abstract class AbstractRestResource implements TxCheckedResource {
     public static final String GROUP_PARAM = "group";
     public static final String ALL_PARAM = "all";
 
+    public static final String INCLUDE_PROPS_PARAM = "_ip";
+
     /**
      * Header names
      */
@@ -101,13 +103,21 @@ public abstract class AbstractRestResource implements TxCheckedResource {
     protected final GraphDatabaseService database;
     protected final FramedGraph<TxCheckedNeo4jGraph> graph;
     protected final GraphManager manager;
-    protected final Serializer serializer;
+    private final Serializer serializer;
 
     public AbstractRestResource(@Context GraphDatabaseService database) {
         this.database = database;
         graph = graphFactory.create(new TxCheckedNeo4jGraph(database));
         manager = GraphManagerFactory.getInstance(graph);
         serializer = new Serializer.Builder(graph).build();
+    }
+
+    public Serializer getSerializer() {
+        Optional<List<String>> includeProps = Optional.fromNullable(uriInfo.getQueryParameters(true)
+                .get(INCLUDE_PROPS_PARAM));
+        return includeProps.isPresent()
+                ? serializer.withIncludedProperties(includeProps.get())
+                : serializer;
     }
 
     public FramedGraph<TxCheckedNeo4jGraph> getGraph() {
@@ -207,8 +217,8 @@ public abstract class AbstractRestResource implements TxCheckedResource {
     protected <T extends Frame> StreamingOutput streamingPage(
             final Query.Page<T> page) {
         return MediaType.TEXT_XML_TYPE.equals(checkMediaType())
-                ? getStreamingXmlOutput(page, serializer)
-                : getStreamingJsonOutput(page, serializer);
+                ? getStreamingXmlOutput(page, getSerializer())
+                : getStreamingJsonOutput(page, getSerializer());
     }
 
     /**
@@ -286,8 +296,8 @@ public abstract class AbstractRestResource implements TxCheckedResource {
     protected <T extends Frame> StreamingOutput streamingList(
             final Iterable<T> list) {
         return MediaType.TEXT_XML_TYPE.equals(checkMediaType())
-                ? getStreamingXmlOutput(list, serializer)
-                : getStreamingJsonOutput(list, serializer);
+                ? getStreamingXmlOutput(list, getSerializer())
+                : getStreamingJsonOutput(list, getSerializer());
     }
 
     /**
@@ -420,7 +430,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
      */
     protected <T extends Frame> StreamingOutput streamingMultimap(
             final ListMultimap<String, T> map) {
-        return streamingMultimap(map, serializer);
+        return streamingMultimap(map, getSerializer());
     }
 
     /**
@@ -485,8 +495,8 @@ public abstract class AbstractRestResource implements TxCheckedResource {
      */
     protected String getRepresentation(Vertex vertex) throws SerializationError {
         return MediaType.TEXT_XML_TYPE.equals(checkMediaType())
-                ? serializer.vertexToXmlString(vertex)
-                : serializer.vertexToJson(vertex);
+                ? getSerializer().vertexToXmlString(vertex)
+                : getSerializer().vertexToJson(vertex);
     }
 
     /**
@@ -497,7 +507,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
      */
     protected String getRepresentation(Frame frame) throws SerializationError {
         return MediaType.TEXT_XML_TYPE.equals(checkMediaType())
-                ? serializer.vertexFrameToXmlString(frame)
-                : serializer.vertexFrameToJson(frame);
+                ? getSerializer().vertexFrameToXmlString(frame)
+                : getSerializer().vertexFrameToJson(frame);
     }
 }

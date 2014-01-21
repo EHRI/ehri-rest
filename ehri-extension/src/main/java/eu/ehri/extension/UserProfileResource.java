@@ -26,7 +26,6 @@ import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.*;
 import eu.ehri.project.models.base.*;
-import eu.ehri.project.models.utils.ClassUtils;
 import eu.ehri.project.views.Query;
 import org.neo4j.graphdb.GraphDatabaseService;
 
@@ -402,7 +401,7 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
             new AclManager(graph).setAccessors(entity,
                     getAccessors(accessorIds, user));
 
-            String jsonStr = serializer.vertexFrameToJson(entity);
+            String jsonStr = getSerializer().vertexFrameToJson(entity);
             UriBuilder ub = uriInfo.getAbsolutePathBuilder();
             URI docUri = ub.path(entity.getId()).build();
             
