@@ -5,7 +5,6 @@
 package eu.ehri.project.importers;
 
 import com.google.common.collect.Sets;
-import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.definitions.Ontology;
@@ -15,11 +14,9 @@ import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.HistoricalAgent;
 import eu.ehri.project.models.Link;
 import eu.ehri.project.models.UndeterminedRelationship;
 import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.models.base.DescribedEntity;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.cvoc.Concept;
@@ -27,6 +24,7 @@ import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.views.impl.CrudViews;
 
+import java.util.Map;
 import java.util.logging.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +37,7 @@ public class Wp2EadImporter extends IcaAtomEadImporter {
 
     private static final Logger logger = LoggerFactory.getLogger(Wp2EadImporter.class);
     private final Accessor userProfile;
+    public static final String WP2AUTHOR = "EHRI - Terezin Research Guide";
 
     public Wp2EadImporter(FramedGraph<Neo4jGraph> framedGraph, PermissionScope permissionScope, ImportLog log) {
         super(framedGraph, permissionScope, log);
@@ -47,6 +46,13 @@ public class Wp2EadImporter extends IcaAtomEadImporter {
         } catch (ItemNotFound ex) {
             throw new RuntimeException("Unable to find accessor with given id: " + log.getActioner().getId());
         }
+    }
+    
+    @Override
+    protected Map<String, Object> extractUnitDescription(Map<String, Object> itemData, EntityClass entity) {
+        Map<String, Object> map = super.extractUnitDescription(itemData, entity);
+        map.put("author", WP2AUTHOR);    
+        return map;
     }
 
     /**

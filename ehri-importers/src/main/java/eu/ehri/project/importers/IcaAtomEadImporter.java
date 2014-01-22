@@ -85,22 +85,6 @@ public class IcaAtomEadImporter extends EaImporter {
         }
         unit = unit.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
 
-//        // New solution to missing IDs: throw an exception.
-//        if (unit.getDataValue(Ontology.IDENTIFIER_KEY) == null) {
-//            throw new ValidationError(unit, Ontology.IDENTIFIER_KEY, "Missing identifier");
-//
-//        }
-
-//        // Old solution to missing IDs: generate a replacement. 
-//        IdGenerator generator = EntityClass.DOCUMENTARY_UNIT.getIdgen();
-//        String id = generator.generateId(EntityClass.DOCUMENTARY_UNIT, permissionScope, unit);
-//        if (id.equals(permissionScope.getId())) {
-//            throw new RuntimeException("Generated an id same as scope: " + unit.getData());
-//        }
-//
-//        logger.debug("Generated ID: " + id + " (" + permissionScope.getId() + ")");
-
-
         Mutation<DocumentaryUnit> mutation =
                 persister.createOrUpdate(unit, DocumentaryUnit.class);
         DocumentaryUnit frame = mutation.getNode();
