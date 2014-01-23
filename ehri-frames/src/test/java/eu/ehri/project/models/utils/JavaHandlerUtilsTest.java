@@ -41,5 +41,9 @@ public class JavaHandlerUtilsTest {
         assertTrue(JavaHandlerUtils.addSingleRelationship(v1, v3, "test"));
         assertTrue(Iterables.contains(v1.getVertices(Direction.OUT), v3));
         assertFalse(Iterables.contains(v1.getVertices(Direction.OUT), v2));
+
+        assertTrue(JavaHandlerUtils.addSingleRelationship(v2, v3, "test"));
+        assertTrue(Iterables.contains(v3.getVertices(Direction.IN), v1));
+        assertTrue(Iterables.contains(v3.getVertices(Direction.IN), v2));
     }
 }
