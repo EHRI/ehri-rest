@@ -12,6 +12,8 @@ import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Link;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.cvoc.AuthoritativeItem;
+import eu.ehri.project.models.cvoc.AuthoritativeSet;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.models.events.SystemEvent;
@@ -28,19 +30,17 @@ import static org.junit.Assert.*;
  *
  * @author linda
  */
-public class Wp2BtEadTest extends AbstractImporterTest {
+public class Wp2YvEadTest extends AbstractImporterTest {
 
-    private static final Logger logger = LoggerFactory.getLogger(Wp2BtEadTest.class);
-    protected final String SINGLE_EAD = "wp2_bt_ead_small.xml";
+    private static final Logger logger = LoggerFactory.getLogger(Wp2YvEadTest.class);
+    protected final String SINGLE_EAD = "wp2_yv_ead.xml";
     // Depends on fixtures
     protected final String TEST_REPO = "r1";
     // Depends on hierarchical-ead.xml
-    protected final String C1_A = "000.001.0";
-    protected final String C1_B = "000.002.0";
-    protected final String C1_A_C2 = "000.001.1";
-    protected final String C1_B_C2_A = "000.002.1";
-    protected final String C1_B_C2_B = "000.002.2";
-    protected final String FONDS = "wp2bt";
+    protected final String C1 = "O.64.2-A.";
+    protected final String C2 = "O.64.2-A.A.";
+    protected final String C3 = "3685529";
+    protected final String FONDS = "O.64.2";
 
     @Test
     public void testImportItemsT() throws Exception {
@@ -49,17 +49,17 @@ public class Wp2BtEadTest extends AbstractImporterTest {
         Bundle vocabularyBundle = new Bundle(EntityClass.CVOC_VOCABULARY)
                                 .withDataValue(Ontology.IDENTIFIER_KEY, "WP2_keywords");
         Bundle conceptBundle = new Bundle(EntityClass.CVOC_CONCEPT)
-                                .withDataValue(Ontology.IDENTIFIER_KEY, "KEYWORD.JMP.716");
-        Vocabulary vocabulary = new CrudViews<Vocabulary>(graph, Vocabulary.class).create(vocabularyBundle, validUser);
+                                .withDataValue(Ontology.IDENTIFIER_KEY, "KEYWORD.JMP.288");
+        AuthoritativeSet vocabulary = new CrudViews<AuthoritativeSet>(graph, AuthoritativeSet.class).create(vocabularyBundle, validUser);
         logger.debug(vocabulary.getId());
-        Concept concept_716 = new CrudViews<Concept>(graph, Concept.class).create(conceptBundle, validUser); 
-        vocabulary.addConcept(concept_716);
+        AuthoritativeItem concept_288 = new CrudViews<Concept>(graph, Concept.class).create(conceptBundle, validUser); 
+        vocabulary.addAuthoritativeItem(concept_288);
         
         
         Vocabulary vocabularyTest = manager.getFrame("wp2-keywords", Vocabulary.class);
         assertNotNull(vocabularyTest);
         
-        final String logMessage = "Importing Beit Terezin EAD";
+        final String logMessage = "Importing Yad Vashem EAD";
 
         int count = getNodeCount(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
@@ -69,14 +69,17 @@ public class Wp2BtEadTest extends AbstractImporterTest {
 
         printGraph(graph);
         // How many new nodes will have been created? We should have
-        // - 6 more DocumentaryUnits fonds 2C1 3C2
-        // - 6 more DocumentDescription
-        // - 1 more DatePeriod 0 0 1 
-        // - 17 UndeterminedRelationship, 0 2 2 4 4 5
-        // - 7 more import Event links (6 for every Unit, 1 for the User)
+        // - 4 more DocumentaryUnits fonds C1 C2 C3 
+        // - 4 more DocumentDescription
+        // - 11 UndeterminedRelationship, 0 0 0 11
+        // - 5 more import Event links (4 for every Unit, 1 for the User)
         // - 1 more import Event
         // - 1 Annotation as resolved relationship 
-        int newCount = count + 39;
+
+        //TODO: the dates are in a weird format, so they are not recognized
+        // (- 2 more DatePeriod 1 0 1 )
+
+        int newCount = count + 26;
         assertEquals(newCount, getNodeCount(graph));
 
         Iterable<Vertex> docs = graph.getVertices(Ontology.IDENTIFIER_KEY, FONDS);
@@ -84,30 +87,24 @@ public class Wp2BtEadTest extends AbstractImporterTest {
         DocumentaryUnit fonds = graph.frame(getVertexByIdentifier(graph, FONDS), DocumentaryUnit.class);
 
         // check the child items
-        DocumentaryUnit c1_a = graph.frame(getVertexByIdentifier(graph, C1_A), DocumentaryUnit.class);
-        DocumentaryUnit c1_b = graph.frame(getVertexByIdentifier(graph, C1_B), DocumentaryUnit.class);
-        DocumentaryUnit c1_a_c2 = graph.frame(getVertexByIdentifier(graph, C1_A_C2), DocumentaryUnit.class);
-        DocumentaryUnit c1_b_c2_a = graph.frame(getVertexByIdentifier(graph, C1_B_C2_A), DocumentaryUnit.class);
-        DocumentaryUnit c1_b_c2_b = graph.frame(getVertexByIdentifier(graph, C1_B_C2_B), DocumentaryUnit.class);
+        DocumentaryUnit c1 = graph.frame(getVertexByIdentifier(graph, C1), DocumentaryUnit.class);
+        DocumentaryUnit c2 = graph.frame(getVertexByIdentifier(graph, C2), DocumentaryUnit.class);
+        DocumentaryUnit c3 = graph.frame(getVertexByIdentifier(graph, C3), DocumentaryUnit.class);
 
-        assertEquals(fonds, c1_a.getParent());
-        assertEquals(fonds, c1_b.getParent());
+        assertEquals(fonds, c1.getParent());
+        assertEquals(c1, c2.getParent());
+        assertEquals(c2, c3.getParent());
         
-        assertEquals(c1_a, c1_a_c2.getParent());
-
-        assertEquals(c1_b, c1_b_c2_a.getParent());
-        assertEquals(c1_b, c1_b_c2_b.getParent());
-
         // Ensure the import action has the right number of subjects.
         //        Iterable<Action> actions = unit.getHistory();
         // Check we've created 6 items
-        assertEquals(6, log.getCreated());
+        assertEquals(4, log.getCreated());
         assertTrue(log.getAction() instanceof SystemEvent);
         assertEquals(logMessage, log.getAction().getLogMessage());
 
         //assert keywords are matched to cvocs
-        assertTrue(toList(c1_b.getLinks()).size() > 0);
-        for(Link a : c1_b.getLinks()){
+        assertTrue(toList(c3.getLinks()).size() > 0);
+        for(Link a : c3.getLinks()){
             logger.debug(a.getLinkType());
         }
 
@@ -116,25 +113,23 @@ public class Wp2BtEadTest extends AbstractImporterTest {
             logger.info("identifier: " + subject.getId());
         }
 
-        assertEquals(6, subjects.size());
+        assertEquals(4, subjects.size());
         assertEquals(log.getChanged(), subjects.size());
 
         // Check permission scopes
         assertEquals(agent, fonds.getPermissionScope());
-        assertEquals(fonds, c1_a.getPermissionScope());
-        assertEquals(fonds, c1_b.getPermissionScope());
-        assertEquals(c1_a, c1_a_c2.getPermissionScope());
-        assertEquals(c1_b, c1_b_c2_a.getPermissionScope());
-        assertEquals(c1_b, c1_b_c2_b.getPermissionScope());
+        assertEquals(fonds, c1.getPermissionScope());
+        assertEquals(c1, c2.getPermissionScope());
+        assertEquals(c2, c3.getPermissionScope());
         
         // Check the author of the description
-        for (DocumentDescription d : c1_a.getDocumentDescriptions()){
+        for (DocumentDescription d : c1.getDocumentDescriptions()){
             assertEquals(Wp2EadImporter.WP2AUTHOR, d.asVertex().getProperty(Wp2EadImporter.PROPERTY_AUTHOR));
         }
 
         // Check the importer is Idempotent
         ImportLog log2 = importManager.importFile(ClassLoader.getSystemResourceAsStream(SINGLE_EAD), logMessage);
-        assertEquals(6, log2.getUnchanged());
+        assertEquals(4, log2.getUnchanged());
         //assertEquals(0, log2.getChanged());
         assertEquals(newCount, getNodeCount(graph));
     }
