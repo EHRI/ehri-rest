@@ -161,7 +161,7 @@ def copy_db(local_dir):
         stop()
 
         remote_db_dir = "%(neo4j_install)s/data/graph.db" % env
-        temp_file = our_temp_file = run("mktemp --suffix=.tgz")
+        temp_file = our_temp_file = run("mktemp")
         if not os.path.exists(local_dir):
             os.mkdir(local_dir)
 
