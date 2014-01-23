@@ -1,6 +1,7 @@
 package eu.ehri.project.models;
 
 import com.tinkerpop.blueprints.Direction;
+import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.modules.javahandler.JavaHandler;
@@ -14,10 +15,14 @@ import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.base.*;
 import eu.ehri.project.models.utils.JavaHandlerUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @EntityType(EntityClass.DOCUMENTARY_UNIT)
 public interface DocumentaryUnit extends AccessibleEntity,
         DescribedEntity, PermissionScope, ItemHolder, Watchable {
+
+    static final Logger logger = LoggerFactory.getLogger(DocumentaryUnit.class);
 
     /**
      * Get the repository that holds this documentary unit.
@@ -92,8 +97,10 @@ public interface DocumentaryUnit extends AccessibleEntity,
         }
 
         public void addChild(final DocumentaryUnit child) {
-            child.asVertex().addEdge(Ontology.DOC_IS_CHILD_OF, it());
-            updateChildCountCache();
+            if (JavaHandlerUtils
+                    .addSingleRelationship(child.asVertex(), it(), Ontology.DOC_IS_CHILD_OF)) {
+                updateChildCountCache();
+            }
         }
 
         public Iterable<DocumentaryUnit> getAllChildren() {
