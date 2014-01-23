@@ -18,5 +18,7 @@ module Ehri
         {}
     )
     Graph.get_base_graph.commit
+    puts "Committed!"
+    Graph.get_base_graph.shutdown
   end
 end
