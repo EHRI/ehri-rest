@@ -2,7 +2,6 @@ package eu.ehri.project.models.idgen;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ListMultimap;
-import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.Bundle;
 
