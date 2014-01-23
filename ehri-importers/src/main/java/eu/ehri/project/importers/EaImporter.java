@@ -38,17 +38,30 @@ public abstract class EaImporter extends XmlImporter<Map<String, Object>> {
         super(framedGraph, permissionScope, log);
     }
 
+    /**
+     * 
+     * @param itemData
+     * @return
+     * @throws ValidationError
+     */
     protected Map<String, Object> extractUnit(Map<String, Object> itemData) throws ValidationError {
         Map<String, Object> unit = extractDocumentaryUnit(itemData);
         unit.put("typeOfEntity", itemData.get("typeOfEntity"));
         return unit;
     }
 
-     protected Map<String, Object> extractDocumentaryUnit(Map<String, Object> itemData) throws ValidationError {
+    protected Map<String, Object> extractDocumentaryUnit(Map<String, Object> itemData) throws ValidationError {
         Map<String, Object> unit = new HashMap<String, Object>();
         unit.put(Ontology.IDENTIFIER_KEY, itemData.get("objectIdentifier"));
         return unit;
     }
+     
+    /**
+     * Utility method to return an Iterable<T> as a List<T>.
+     * 
+     * @param iter an Iterable of type T
+     * @return the input as a List of the same type T
+     */
     protected <T> List<T> toList(Iterable<T> iter) {
         Iterator<T> it = iter.iterator();
         List<T> lst = new ArrayList<T>();
@@ -59,6 +72,7 @@ public abstract class EaImporter extends XmlImporter<Map<String, Object>> {
     }
     
     /**
+     * Extract properties from the itemData Map that are marked as unknown, put them in a new Map.
      * 
      * @param itemData
      * @return returns a Map with all keys from itemData that start with SaxXmlHandler.UNKNOWN
@@ -106,6 +120,14 @@ public abstract class EaImporter extends XmlImporter<Map<String, Object>> {
         return list;
     }
 
+    /**
+     * Extract a Map containing the properties of a documentary unit's description.
+     * Excludes unknown properties, object identifier(s), maintenance events, relations,
+     * addresses and *Access relations.
+     * @param itemData
+     * @param entity
+     * @return
+     */
     protected Map<String, Object> extractUnitDescription(Map<String, Object> itemData, EntityClass entity) {
         Map<String, Object> description = new HashMap<String, Object>();
         for (String key : itemData.keySet()) {
@@ -114,6 +136,7 @@ public abstract class EaImporter extends XmlImporter<Map<String, Object>> {
             }else if ( !key.startsWith(SaxXmlHandler.UNKNOWN) 
                     && ! key.equals("objectIdentifier") 
                     && ! key.equals(Ontology.IDENTIFIER_KEY)
+                    && ! key.equals(Ontology.OTHER_IDENTIFIERS)
                     && ! key.startsWith("maintenanceEvent") 
                     && ! key.startsWith("relation")
                     && ! key.startsWith("address/")
@@ -124,6 +147,7 @@ public abstract class EaImporter extends XmlImporter<Map<String, Object>> {
 //        assert(description.containsKey(IdentifiableEntity.IDENTIFIER_KEY));
         return description;
     }
+    
     @SuppressWarnings("unchecked")
     protected Iterable<Map<String, Object>> extractMaintenanceEvent(Map<String, Object> data, String unitid)  {
         List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();

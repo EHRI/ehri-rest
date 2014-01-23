@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ead xmlns="urn:isbn:1-931666-22-9"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="urn:isbn:1-931666-22-9 ead.xsd">
+  <eadheader>
+    <eadid countrycode="DE">Beständeübersicht</eadid>
+    <filedesc>
+      <titlestmt>
+        <titleproper>Beständeübersicht des Bundesarchivs</titleproper>
+      </titlestmt>
+      <publicationstmt>
+        <publisher>Bundesarchiv / Basys2</publisher>
+        <date>17.06.2013 13:06</date>
+      </publicationstmt>
+    </filedesc>
+  </eadheader>
+  <archdesc level="otherlevel" otherlevel="holding_guide">
+    <did>
+      <unittitle>Bestände</unittitle>
+    </did>
+    <dsc type="othertype">
+      <c01 level="otherlevel" otherlevel="holding_guide">
+        <did>
+          <unittitle>Bundesarchiv</unittitle>
+        </did>
+        <c02 level="otherlevel" otherlevel="plan_of_record_groups">
+          <did>
+            <unittitle>Norddeutscher Bund und Deutsches Reich (1867/1871-1945)</unittitle>
+          </did>
+          <c03 level="otherlevel" otherlevel="plan_of_record_groups">
+            <did>
+              <unittitle>Militär</unittitle>
+            </did>
+            <c04 level="otherlevel" otherlevel="plan_of_record_groups">
+              <did>
+                <unittitle>Preußische und Kaiserliche Marine 1849 bis 1918/1919</unittitle>
+              </did>
+              <c05 level="otherlevel" otherlevel="plan_of_record_groups">
+                <did>
+                  <unittitle>Kommandobehörden, Verbände und Einheiten</unittitle>
+                </did>
+                <c06 level="otherlevel" otherlevel="plan_of_record_groups">
+                  <did>
+                    <unittitle>Generalkommandos (Korps)</unittitle>
+                  </did>
+                  <c07 level="fonds">
+                    <did>
+                      <unitid encodinganalog="Bestandssignatur">RS 2</unitid>
+                      <unittitle encodinganalog="Bestandsbezeichnung">Generalkommandos der
+                        Waffen-SS</unittitle>
+                      <unitdate encodinganalog="Bestandslaufzeit">1942-1945</unitdate>
+                      <physdesc>
+                        <genreform>Schriftgut</genreform>
+                      </physdesc>
+                    </did>
+                  </c07>
+                  <c07 level="fonds">
+                    <did>
+                      <unitid encodinganalog="Bestandssignatur">RS 2-1</unitid>
+                      <unitid encodinganalog="Alte_Bestandssignatur">R 3021</unitid>
+                      <unittitle encodinganalog="Bestandsbezeichnung">I. SS-Panzerkorps
+                        &quot;Leibstandarte&quot;</unittitle>
+                      <unitdate encodinganalog="Bestandslaufzeit">1943-1944</unitdate>
+                      <unittitle encodinganalog="Langbezeichnung">I. SS-Panzerkorps
+                        &quot;Leibstandarte&quot;</unittitle>
+                      <unittitle encodinganalog="Kurzbezeichnung">I. SS-PzK</unittitle>
+                      <unitdate encodinganalog="Provenienzlaufzeit">1943-1945</unitdate>
+                      <physdesc>
+                        <extent>11 AE0,1 lfm</extent>
+                        <genreform>Schriftgut</genreform>
+                      </physdesc>
+                      <physloc encodinganalog="Benutzungsort">Freiburg</physloc>
+                    </did>
+                    <scopecontent encodinganalog="Inhaltliche_Charakterisierung">
+                      <p>Von der Führungsabteilung (Ia) sind lediglich das Kriegstagebuch mit
+                        Anlagen für die Zeit von Juli bis Dezember 1943 sowie Tagesmeldungen von
+                        Juni und August 1944 erhalten. </p>
+                    </scopecontent>
+                    <arrangement encodinganalog="Vorarchivische_Ordnung">
+                      <p>Die überlieferten Schriftgutsplitter stammen aus Rückführungen aus den
+                        USA.</p>
+                    </arrangement>
+                    <descgrp encodinganalog="Bestandsbeschreibung">
+                      <p>Aufstellung am 27. Juli 1943 in Berlin-Lichterfelde, die Korpstruppen auf
+                        dem Truppenübungsplatz Beverloo, die schwere Panzer-Abteilung auf dem
+                        Truppenübungsplatz Mailly le Camp. Nov. 1943 in Aufstellung zur Heeresgruppe
+                        &quot;B&quot; in Oberitalien; Dez. 1943 nach Frankreich verlegt zur
+                        Verfügung OKW, bzw. OB West; zur Führung der SS-Panzerdivisionen 1
+                        &quot;Leibstandarte&quot;, 2 &quot;Das Reich&quot; und 12
+                        &quot;Hitlerjugend&quot; bestimmt, ohne dass diese Unterstellung
+                        jedoch bestehen blieb. </p>
+                      <p>Korpseinheiten:</p>
+                      <p>Artillerie-Kommandeur</p>
+                      <p>Nachr. Abt. 101</p>
+                      <p>schw. SS-Panzer Abt. 101</p>
+                      <p>schw. SS-Art. Abt. 101 und schw. Beob. Bttr. 101 (vorher SS Werfer Abt.
+                        101)</p>
+                      <p>SS-San. Abt. 101</p>
+                      <p>SS-Nachschubtruppen 101</p>
+                      <p>Unterstellung:</p>
+                      <p>1943 Nov. in Aufstellung, HGr. &quot;B&quot; Oberitalien</p>
+                      <p>1944 Dez. 14. Armee, HGr. &quot;C&quot; Oberitalien</p>
+                      <p>1945 Jan./Mai z. Vfg, HGr. &quot;D&quot; Frankreich</p>
+                      <p>1946 Juni 7. Armee, HGr. &quot;B&quot; Normandie</p>
+                      <p>1947 Juli Pz. Gru. West, HGr. &quot;B&quot; Normandie</p>
+                      <p>1948 Aug. 5. Pz. Armee, HGr. &quot;B&quot; Normandie</p>
+                      <p>1949 Sept./Okt. 7. Armee, HGr. &quot;B&quot; Eifel</p>
+                      <p>1950 Nov. z. Auffrischung Westfalen</p>
+                      <p>1951 Dez. z. Vfg. OB West Ardennen</p>
+                      <p>1945 Jan. 5. Pz. Armee, HGr. &quot;B&quot; Ardennen</p>
+                      <p>Febr./März z. Auffrischung Deutschland</p>
+                      <p>Apr. 6. Pz. Armee, HGr. Süd Ungarn (Stuhlweißenburg)</p>
+                      <p>Mai 6. Pz. Armee, HGr. Ostmark Niederösterreich</p>
+                      <p>(Quelle: Tessin, Georg: Verbände und Truppen der deutschen Wehrmacht und
+                        Waffen-SS 1939-1945. Osnabrück 1973, Bd. 2, S. 16-17)</p>
+                      <p>Die korrekte Bezeichnung des Korps ließ sich leider nicht mehr feststellen,
+                        da in der hiesigen Überlieferung das Korps sowohl als
+                        &quot;Leibstandarte&quot; als auch &quot;Leibstandarte SS Adolf
+                        Hitler&quot; bezeichnet wird. </p>
+                      <p>Kommandierende Generale des Korps waren:</p>
+                      <p>27. Juli 1943 - 9. Aug. 1943: SS-Oberst-Gruppenführer Josef Dietrich</p>
+                      <p>9. Aug. 1944 - 16. Aug. 1944: SS-Brigadeführer und Chef des Stabes Fritz
+                        Kraemer</p>
+                      <p>16. Aug. 1944 - Okt. 1944: SS-Obergruppenführer Georg Keppler</p>
+                      <p>24. Okt. 1944 - 8. Mai 1945: SS-Gruppenführer Herm Prieß</p>
+                    </descgrp>
+                    <processinfo encodinganalog="Erschließungszustand">
+                      <p>Online-Findbuch 2009</p>
+                    </processinfo>
+                    <relatedmaterial encodinganalog="Verwandtes_Archivgut_im_BArch">
+                      <p>RS 1 Führungsstellen/Oberkommandos der Waffen-SS </p>
+                      <p>RS 3 Divisionen der Waffen-SS</p>
+                      <p>RS 4 Brigaden, Regimenter, Bataillone sowie Feld-Dienststellen der
+                        Waffen-SS</p>
+                      <p>RS 8 Personalverwaltende Stellen der Waffen-SS, RS 8/51:
+                        Führer-Stellenbesetzung des I. SS-Panzerkorps
+                        &quot;Leibstandarte&quot; (ohne Dat.)</p>
+                      <p>RH 19 Heeresgruppen</p>
+                      <p>RH 20 Armeen</p>
+                      <p>RH 21 Panzerarmeen</p>
+                      <p>RH 10 OKH/Generalinspekteur der Panzertruppen, RH 10/308 und 309:
+                        Zustandsberichte von 1944/45</p>
+                      <p>RH 7 Heerespersonalamt, RH 7A/628 und 1335:Verleihungslisten KVK und EK</p>
+                      <p>ZA 1 Studiengruppe der US-Historical Division, ZA 1/124, 181, 488 - 493,
+                        929, 977, 1131, 1165, 1181, 1225 und 1249: Einsatz 1943 - 1945</p>
+                      <p>N 756 Nachlass Wolfgang Vopersal, N 756/79a - 79b, 80a</p>
+                      <p>B 438 Bundesverband der Soldaten der ehemaligen Waffen-SS e.V. -
+                        Hilfsgemeinschaft auf Gegenseitigkeit (HIAG)</p>
+                      <p>NS 33 SS-Führungshauptamt (Bundesarchiv, Abteilung R, Berlin) </p>
+                    </relatedmaterial>
+                    <bibliography encodinganalog="Amtliche_Druckschriften">
+                      <p>RSD</p>
+                    </bibliography>
+                    <bibliography encodinganalog="Literatur">
+                      <p>Guides to German Records Microfilmed at Alexandria/Va. Washington 1958 ff.,
+                        Bd. 27, 75 und 95</p>
+                      <p>Baldig, Willi: Gefährten unserer Jugend: die Flak-Abteilung der
+                        Leibstandarte. Emmelshausen 1999</p>
+                      <p>Greelen, Lothar van: Verkauft und verraten. Westfront 1944. München
+                        1963</p>
+                      <p>Guderian, Heinz: Erinnerungen eines Soldaten. Neckargemünd 1960</p>
+                      <p>Hastings, Max: Unternehmen Overlord. D-day und die Invasion in der
+                        Normandie 1944. Wien [u. a.] 1985</p>
+                      <p>Haupt, Werner: Rückzug im Westen: von der Invasion zur Ardennen-Offensive.
+                        Stuttgart 1978</p>
+                      <p>Held, Walter: Verbände und Truppen der deutschen Wehrmacht und Waffen-SS im
+                        Zweiten Weltkrieg. Eine Bibliographie der deutschsprachigen
+                        Nachkriegsliteratur. 5 Bde. Osnabrück 1978 ff.</p>
+                      <p>Klietmann, Kurt-Gerhard: Die Waffen-SS. Eine Dokumentation. Osnabrück
+                        1965</p>
+                      <p>Mehner, Kurt (Hrsg.): Die Waffen-SS und Polizei 1939-1945. Norderstedt
+                        1995</p>
+                      <p>Stoves, Rolf: Die gepanzerten und motorisierten deutschen Großverbände
+                        1935-1945. Nebel-Verlag 2003</p>
+                      <p>Tessin, Georg: Verbände und Truppen der deutschen Wehrmacht und Waffen-SS
+                        1939-1945. 20 Bde. Osnabrück 1967 ff.</p>
+                    </bibliography>
+                    <bioghist>
+                      <p>siehe Tessin &quot;Truppen und Verbände..., 1939-1945&quot;, Bd.
+                        II, S. 16 Mai 1945 Ungarn, Niederösterreich).- KTB Juli - Dez. 1943.</p>
+                    </bioghist>
+                  </c07>
+                </c06>
+              </c05>
+            </c04>
+          </c03>
+        </c02>
+      </c01>
+    </dsc>
+  </archdesc>
+</ead>
