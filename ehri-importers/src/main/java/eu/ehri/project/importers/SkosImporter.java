@@ -7,16 +7,15 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.*;
 import eu.ehri.project.models.cvoc.Concept;
-import eu.ehri.project.models.idgen.IdGenerator;
-import eu.ehri.project.persistance.Bundle;
-import eu.ehri.project.persistance.BundleDAO;
+import eu.ehri.project.persistence.Bundle;
+import eu.ehri.project.persistence.BundleDAO;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import eu.ehri.project.persistance.Mutation;
+import eu.ehri.project.persistence.Mutation;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -67,11 +66,7 @@ public class SkosImporter extends XmlImporter<Map<String, Object>> {
                     EntityClass.CVOC_CONCEPT_DESCRIPTION, dpb));
         }
 
-        IdGenerator generator = EntityClass.CVOC_CONCEPT.getIdgen();
-        String id = generator.generateId(EntityClass.CVOC_CONCEPT, permissionScope, unit);
-        boolean exists = manager.exists(id);
-        Mutation<Concept> mutation = persister.createOrUpdate(unit.withId(id),
-                Concept.class);
+        Mutation<Concept> mutation = persister.createOrUpdate(unit, Concept.class);
         handleCallbacks(mutation);
         return mutation.getNode();
     }

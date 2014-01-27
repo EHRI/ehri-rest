@@ -1,18 +1,13 @@
 package eu.ehri.project.views.impl;
 
 import com.google.common.base.Optional;
+import com.tinkerpop.frames.FramedGraph;
+import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.base.*;
-
-import com.tinkerpop.frames.FramedGraph;
-
-import eu.ehri.project.acl.SystemScope;
-import eu.ehri.project.persistance.ActionManager;
-import eu.ehri.project.persistance.Bundle;
-import eu.ehri.project.persistance.MutationState;
+import eu.ehri.project.persistence.*;
 import eu.ehri.project.views.Crud;
-import eu.ehri.project.persistance.Mutation;
 
 /**
  * Views class that handles creating Action objects that provide an audit log
@@ -28,7 +23,6 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
     private final CrudViews<E> views;
     private final FramedGraph<?> graph;
     private final Class<E> cls;
-    @SuppressWarnings("unused")
     private final PermissionScope scope;
 
     /**
@@ -132,9 +126,11 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
             throws PermissionDenied, ValidationError, DeserializationError,
             IntegrityError {
         Mutation<E> out = views.createOrUpdate(bundle, user);
-        if (out.getState() == MutationState.UPDATED) {
-            actionManager.logEvent(out.getNode(), graph.frame(user.asVertex(), Actioner.class),
-                    EventTypes.modification, logMessage);
+        if (out.updated()) {
+            actionManager
+                    .logEvent(out.getNode(), graph.frame(user.asVertex(), Actioner.class),
+                            EventTypes.modification, logMessage)
+                    .createVersion(out.getNode(), out.getPrior().get());
         }
         return out;
     }
@@ -174,60 +170,11 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
             IntegrityError {
         try {
             Mutation<E> out = views.update(bundle, user);
-            if (out.getState() != MutationState.UNCHANGED) {
-                actionManager.logEvent(out.getNode(), graph.frame(user.asVertex(), Actioner.class),
-                        EventTypes.modification, logMessage);
-            }
-            return out;
-        } catch (ItemNotFound ex) {
-            throw new RuntimeException(ex); // FIXME: Remove this...
-        }
-    }
-
-    /**
-     * Update an object of type `E` from the given data, saving an Action log
-     * with the default update message.
-     *
-     * @param bundle
-     * @param parent
-     * @param user
-     * @param dependentClass
-     * @return The updated framed vertex
-     * @throws PermissionDenied
-     * @throws ValidationError
-     * @throws IntegrityError
-     * @throws DeserializationError
-     */
-    public <T extends Frame> Mutation<T> updateDependent(Bundle bundle, E parent, Accessor user,
-            Class<T> dependentClass) throws PermissionDenied,
-            ValidationError, DeserializationError, IntegrityError {
-        return updateDependent(bundle, parent, user, dependentClass, Optional.<String>absent());
-    }
-
-    /**
-     * Update an object of type `E` from the given data, saving an Action log
-     * with the given log message.
-     *
-     * @param bundle
-     * @param parent
-     * @param user
-     * @param dependentClass
-     * @param logMessage
-     * @return The updated framed vertex
-     * @throws PermissionDenied
-     * @throws ValidationError
-     * @throws IntegrityError
-     * @throws DeserializationError
-     */
-    public <T extends Frame> Mutation<T> updateDependent(Bundle bundle, E parent, Accessor user,
-            Class<T> dependentClass, Optional<String> logMessage)
-            throws PermissionDenied, ValidationError, DeserializationError,
-            IntegrityError {
-        try {
-            Mutation<T> out = views.updateDependent(bundle, parent, user, dependentClass);
-            if (out.getState() != MutationState.UNCHANGED) {
-                actionManager.setScope(parent).logEvent(graph.frame(user.asVertex(),
-                        Actioner.class), EventTypes.modification, logMessage);
+            if (!out.unchanged()) {
+                actionManager.logEvent(
+                        out.getNode(), graph.frame(user.asVertex(), Actioner.class),
+                        EventTypes.modification, logMessage)
+                        .createVersion(out.getNode(), out.getPrior().get());
             }
             return out;
         } catch (ItemNotFound ex) {
@@ -249,8 +196,64 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws IntegrityError
      * @throws DeserializationError
      */
-    public <T extends Frame> T createDependent(Bundle bundle,
-            E parent, Accessor user, Class<T> dependentClass) throws PermissionDenied,
+    public <T extends Frame, P extends DescribedEntity> Mutation<T> updateDependent(Bundle bundle, P parent,
+            Accessor user,
+            Class<T> dependentClass) throws PermissionDenied,
+            ValidationError, DeserializationError, IntegrityError {
+        return updateDependent(bundle, parent, user, dependentClass, Optional.<String>absent());
+    }
+
+    /**
+     * Update an object of type `E` from the given data, saving an Action log
+     * with the given log message.
+     *
+     * @param bundle
+     * @param parent
+     * @param user
+     * @param dependentClass
+     * @param logMessage
+     * @return The updated framed vertex
+     * @throws PermissionDenied
+     * @throws ValidationError
+     * @throws IntegrityError
+     * @throws DeserializationError
+     */
+    public <T extends Frame, P extends DescribedEntity> Mutation<T> updateDependent(Bundle bundle, P parent,
+            Accessor user,
+            Class<T> dependentClass, Optional<String> logMessage)
+            throws PermissionDenied, ValidationError, DeserializationError,
+            IntegrityError {
+        try {
+            Mutation<T> out = views.setScope(parent)
+                    .updateDependent(bundle, parent, user, dependentClass);
+            if (out.getState() != MutationState.UNCHANGED) {
+                actionManager.setScope(parent)
+                        .logEvent(parent, graph.frame(user.asVertex(),
+                                Actioner.class), EventTypes.modifyDependent, logMessage)
+                        .createVersion(out.getNode(), out.getPrior().get());
+            }
+            return out;
+        } catch (ItemNotFound ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
+    /**
+     * Update an object of type `E` from the given data, saving an Action log
+     * with the default update message.
+     *
+     * @param bundle
+     * @param parent
+     * @param user
+     * @param dependentClass
+     * @return The updated framed vertex
+     * @throws PermissionDenied
+     * @throws ValidationError
+     * @throws IntegrityError
+     * @throws DeserializationError
+     */
+    public <T extends Frame, P extends DescribedEntity> T createDependent(Bundle bundle,
+            P parent, Accessor user, Class<T> dependentClass) throws PermissionDenied,
             ValidationError, DeserializationError, IntegrityError {
         return createDependent(bundle, parent, user, dependentClass, Optional.<String>absent());
     }
@@ -270,13 +273,15 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws IntegrityError
      * @throws DeserializationError
      */
-    public <T extends Frame> T createDependent(Bundle bundle, E parent, Accessor user,
+    public <T extends Frame, P extends DescribedEntity> T createDependent(Bundle bundle, P parent, Accessor user,
                 Class<T> dependentClass, Optional<String> logMessage)
             throws PermissionDenied, ValidationError, DeserializationError,
             IntegrityError {
-        T out = views.createDependent(bundle, parent, user, dependentClass);
-        actionManager.setScope(parent).logEvent(
-                graph.frame(user.asVertex(), Actioner.class), EventTypes.creation, logMessage);
+        T out = views.setScope(parent).createDependent(bundle, parent, user, dependentClass);
+        // NB: Note that parent is BOTH scope and a subject - I think
+        // this makes sense...
+        actionManager.setScope(parent).logEvent(parent,
+                graph.frame(user.asVertex(), Actioner.class), EventTypes.createDependent, logMessage);
         return out;
     }
 
@@ -310,8 +315,10 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      */
     public Integer delete(E item, Accessor user, Optional<String> logMessage)
             throws PermissionDenied, ValidationError, SerializationError {
-        actionManager.logEvent(item, graph.frame(user.asVertex(), Actioner.class),
-                EventTypes.deletion, logMessage);
+        actionManager
+                .logEvent(graph.frame(user.asVertex(), Actioner.class),
+                        EventTypes.deletion, logMessage)
+                .createVersion(item);
         return views.delete(item, user);
     }
 
@@ -328,7 +335,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws ValidationError
      * @throws SerializationError
      */
-    public <T extends Frame> Integer deleteDependent(T item, E parent, Accessor user,
+    public <T extends Frame, P extends DescribedEntity> Integer deleteDependent(T item, P parent, Accessor user,
             Class<T> dependentClass) throws PermissionDenied,
             ValidationError, SerializationError {
         return deleteDependent(item, parent, user, dependentClass, Optional.<String>absent());
@@ -348,12 +355,14 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws ValidationError
      * @throws SerializationError
      */
-    public <T extends Frame> Integer deleteDependent(T item, E parent, Accessor user,
+    public <T extends Frame, P extends DescribedEntity> Integer deleteDependent(T item, P parent, Accessor user,
             Class<T> dependentClass, Optional<String> logMessage)
             throws PermissionDenied, ValidationError, SerializationError {
-        actionManager.setScope(parent).logEvent(graph.frame(user.asVertex(), Actioner.class),
-                EventTypes.deletion, logMessage);
-        return views.deleteDependent(item, parent, user, dependentClass);
+        actionManager.setScope(parent)
+                .logEvent(parent, graph.frame(user.asVertex(), Actioner.class),
+                        EventTypes.deleteDependent, logMessage)
+                .createVersion(item);
+        return views.setScope(parent).deleteDependent(item, parent, user, dependentClass);
     }
 
 

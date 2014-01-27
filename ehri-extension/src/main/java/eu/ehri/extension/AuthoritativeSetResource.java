@@ -8,7 +8,7 @@ import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.HistoricalAgent;
 import eu.ehri.project.models.cvoc.AuthoritativeItem;
 import eu.ehri.project.models.cvoc.AuthoritativeSet;
-import eu.ehri.project.persistance.Bundle;
+import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.views.Query;
 import eu.ehri.project.views.impl.LoggingCrudViews;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -182,12 +182,14 @@ public class AuthoritativeSetResource extends
         	}
             graph.getBaseGraph().commit();
             return Response.status(Status.OK).build();
-        } catch (PermissionDenied e) {
-            graph.getBaseGraph().rollback();
-            throw e;
-        } catch (Exception e) {
+        } catch (ValidationError e) {
             graph.getBaseGraph().rollback();
             throw new RuntimeException(e);
+        } catch (SerializationError e) {
+            graph.getBaseGraph().rollback();
+            throw new RuntimeException(e);
+        } finally {
+            cleanupTransaction();
         }
     }
 
@@ -220,18 +222,11 @@ public class AuthoritativeSetResource extends
                     getAccessors(accessors, user));
             graph.getBaseGraph().commit();
             return buildResponseFromHistoricalAgent(agent);
-        } catch (DeserializationError e) {
-            graph.getBaseGraph().rollback();
-            throw e;
-        } catch (ValidationError e) {
-            graph.getBaseGraph().rollback();
-            throw e;
-        } catch (IntegrityError e) {
-            graph.getBaseGraph().rollback();
-            throw e;
-        } catch (Exception e) {
+        } catch (SerializationError e) {
             graph.getBaseGraph().rollback();
             throw new RuntimeException(e);
+        } finally {
+            cleanupTransaction();
         }
     }
 

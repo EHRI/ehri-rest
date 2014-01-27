@@ -13,7 +13,7 @@ import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.persistance.ActionManager;
+import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.views.impl.CrudViews;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;

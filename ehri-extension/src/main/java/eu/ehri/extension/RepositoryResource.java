@@ -13,7 +13,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -22,9 +21,7 @@ import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriBuilder;
 
 import eu.ehri.project.exceptions.*;
-import eu.ehri.project.models.EntityClass;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Transaction;
 
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.acl.AclManager;
@@ -32,7 +29,7 @@ import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.persistance.Bundle;
+import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.views.impl.LoggingCrudViews;
 import eu.ehri.project.views.Query;
 
@@ -82,15 +79,19 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
             @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
             @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
             @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)
+            @QueryParam(FILTER_PARAM) List<String> filters,
+            @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all)
             throws ItemNotFound, BadRequester, AccessDenied {
         Accessor user = getRequesterUserProfile();
         Repository repository = views.detail(manager.getFrame(id, cls), user);
+        Iterable<DocumentaryUnit> units = all
+                ? repository.getAllCollections()
+                : repository.getCollections();
         Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
                 DocumentaryUnit.class).setLimit(limit).setOffset(offset)
                 .orderBy(order)
                 .filter(filters);
-        return streamingList(query.list(repository.getCollections(), user));
+        return streamingList(query.list(units, user));
     }
 
     @GET
@@ -98,15 +99,18 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
     @Path("/{id:.+}/count")
     public Response countRepositoryDocumentaryUnits(
             @PathParam("id") String id,
-            @QueryParam(FILTER_PARAM) List<String> filters)
+            @QueryParam(FILTER_PARAM) List<String> filters,
+            @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all)
             throws ItemNotFound, BadRequester, AccessDenied {
         Accessor user = getRequesterUserProfile();
         Repository repository = views.detail(manager.getFrame(id, cls), user);
+        Iterable<DocumentaryUnit> units = all
+                ? repository.getAllCollections()
+                : repository.getCollections();
         Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
                 DocumentaryUnit.class)
                 .filter(filters);
-        return Response.ok((query.count(repository.getCollections(), user))
-                .toString().getBytes()).build();
+        return Response.ok((query.count(units, user)).toString().getBytes()).build();
     }
 
     @GET
@@ -117,15 +121,19 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
             @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
             @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
             @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)
+            @QueryParam(FILTER_PARAM) List<String> filters,
+            @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all)
             throws ItemNotFound, BadRequester, AccessDenied, PermissionDenied {
         Accessor user = getRequesterUserProfile();
         Repository repository = views.detail(manager.getFrame(id, cls), user);
+        Iterable<DocumentaryUnit> units = all
+                ? repository.getAllCollections()
+                : repository.getCollections();
         Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
                 DocumentaryUnit.class).setLimit(limit).setOffset(offset)
                 .orderBy(order)
                 .filter(filters);
-        return streamingPage(query.page(repository.getCollections(), user));
+        return streamingPage(query.page(units, user));
     }
 
     @GET
@@ -196,21 +204,11 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
                     getAccessors(accessors, user));
             graph.getBaseGraph().commit();
             return buildResponseFromDocumentaryUnit(doc);
-        } catch (DeserializationError e) {
-            graph.getBaseGraph().rollback();
-            throw e;
-        } catch (ValidationError e) {
-            graph.getBaseGraph().rollback();
-            throw e;
-        } catch (IntegrityError e) {
-            graph.getBaseGraph().rollback();
-            throw e;
-        } catch (PermissionDenied e) {
-            graph.getBaseGraph().rollback();
-            throw e;
-        } catch (Exception e) {
+        } catch (SerializationError e) {
             graph.getBaseGraph().rollback();
             throw new RuntimeException(e);
+        } finally {
+            cleanupTransaction();
         }
     }
 

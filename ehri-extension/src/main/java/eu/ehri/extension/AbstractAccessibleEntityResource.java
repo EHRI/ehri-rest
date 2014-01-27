@@ -10,8 +10,7 @@ import javax.ws.rs.core.Response.Status;
 
 //import org.apache.log4j.Logger;
 import eu.ehri.project.exceptions.*;
-import eu.ehri.project.persistance.Mutation;
-import eu.ehri.project.persistance.MutationState;
+import eu.ehri.project.persistence.Mutation;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import com.google.common.collect.Lists;
@@ -24,7 +23,7 @@ import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.utils.ClassUtils;
-import eu.ehri.project.persistance.Bundle;
+import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.views.impl.LoggingCrudViews;
 import eu.ehri.project.views.Query;
 
@@ -153,8 +152,8 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
             throws PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, BadRequester {
         graph.getBaseGraph().checkNotInTransaction();
-            Accessor user = getRequesterUserProfile();
-            Bundle entityBundle = Bundle.fromString(json);
+        Accessor user = getRequesterUserProfile();
+        Bundle entityBundle = Bundle.fromString(json);
         try {
             E entity = views.create(entityBundle, user, getLogMessage());
             // TODO: Move elsewhere
@@ -166,18 +165,11 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
             graph.getBaseGraph().commit();
             return Response.status(Status.CREATED).location(docUri)
                     .entity(getRepresentation(entity).getBytes()).build();
-        } catch (PermissionDenied permissionDenied) {
-            graph.getBaseGraph().rollback();
-            throw permissionDenied;
-        } catch (ValidationError validationError) {
-            graph.getBaseGraph().rollback();
-            throw validationError;
-        } catch (IntegrityError integrityError) {
-            graph.getBaseGraph().rollback();
-            throw integrityError;
         } catch (SerializationError serializationError) {
             graph.getBaseGraph().rollback();
             throw new RuntimeException(serializationError);
+        } finally {
+            cleanupTransaction();
         }
     }
 
@@ -219,6 +211,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
     public Response update(String json) throws PermissionDenied,
             IntegrityError, ValidationError, DeserializationError,
             BadRequester {
+        graph.getBaseGraph().checkNotInTransaction();
         try {
             Bundle entityBundle = Bundle.fromString(json);
             Mutation<E> update = views.update(entityBundle, getRequesterUserProfile(), getLogMessage());
@@ -226,18 +219,11 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
             return Response.status(Status.OK)
                     .entity(getRepresentation(update.getNode()).getBytes())
                     .build();
-        } catch (PermissionDenied permissionDenied) {
-            graph.getBaseGraph().rollback();
-            throw permissionDenied;
-        } catch (ValidationError validationError) {
-            graph.getBaseGraph().rollback();
-            throw validationError;
-        } catch (IntegrityError integrityError) {
-            graph.getBaseGraph().rollback();
-            throw integrityError;
         } catch (SerializationError serializationError) {
             graph.getBaseGraph().rollback();
             throw new RuntimeException(serializationError);
+        } finally {
+            cleanupTransaction();
         }
     }
 
@@ -290,15 +276,11 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
             views.delete(entity, getRequesterUserProfile(), getLogMessage());
             graph.getBaseGraph().commit();
             return Response.status(Status.OK).build();
-        } catch (PermissionDenied permissionDenied) {
-            graph.getBaseGraph().rollback();
-            throw permissionDenied;
-        } catch (ValidationError validationError) {
-            graph.getBaseGraph().rollback();
-            throw validationError;
         } catch (SerializationError serializationError) {
             graph.getBaseGraph().rollback();
             throw new RuntimeException(serializationError);
+        } finally {
+            cleanupTransaction();
         }
     }
 

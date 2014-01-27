@@ -36,10 +36,10 @@ public interface Description extends NamedEntity, AccessibleEntity {
     @Adjacency(label = Ontology.HAS_MAINTENANCE_EVENT, direction=Direction.IN)
     public abstract Iterable<MaintenanceEvent> getMaintenanceEvents();
 
-    @Adjacency(label = Ontology.HAS_MAINTENANCE_EVENT)
+    @Adjacency(label = Ontology.HAS_MAINTENANCE_EVENT, direction=Direction.IN)
     public abstract void setMaintenanceEvents(final Iterable<MaintenanceEvent> maintenanceEvents);
 
-    @Adjacency(label = Ontology.HAS_MAINTENANCE_EVENT)
+    @Adjacency(label = Ontology.HAS_MAINTENANCE_EVENT, direction=Direction.IN)
     public abstract void addMaintenanceEvent(final MaintenanceEvent maintenanceEvent);
 
     @Dependent

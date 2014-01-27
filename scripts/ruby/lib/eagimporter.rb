@@ -24,7 +24,7 @@ module Ehri
         if Manager.exists(code)
           Manager.get_frame(code, Models::Country.java_class)
         else
-          bundle = Persistance::Bundle.new(EntityClass::COUNTRY)
+          bundle = Persistence::Bundle.new(EntityClass::COUNTRY)
           .with_data_value("identifier", code)
           .with_data_value("name", name)
           log = Optional::of("Creating country record for #{name}")

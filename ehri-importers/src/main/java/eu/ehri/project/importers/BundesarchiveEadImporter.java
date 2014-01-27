@@ -7,13 +7,13 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.*;
 import eu.ehri.project.models.base.*;
 import eu.ehri.project.models.idgen.IdGenerator;
-import eu.ehri.project.persistance.Bundle;
+import eu.ehri.project.persistence.Bundle;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import eu.ehri.project.persistance.Mutation;
+import eu.ehri.project.persistence.Mutation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
  * @author lindar
  *
  */
-public class BundesarchiveEadImporter extends EaImporter {
+public class BundesarchiveEadImporter extends EadImporter {
 
     private static final Logger logger = LoggerFactory.getLogger(BundesarchiveEadImporter.class);
     /**
@@ -89,7 +89,7 @@ public class BundesarchiveEadImporter extends EaImporter {
             logger.error("identifier Key: "+unit.getDataValue(Ontology.IDENTIFIER_KEY).toString());
         }
         IdGenerator generator = EntityClass.DOCUMENTARY_UNIT.getIdgen();
-        String id = generator.generateId(EntityClass.DOCUMENTARY_UNIT, permissionScope, unit);
+        String id = generator.generateId(permissionScope, unit);
         if (id.equals(permissionScope.getId())) {
             throw new RuntimeException("Generated an id same as scope: " + unit.getData());
         }
@@ -121,6 +121,7 @@ public class BundesarchiveEadImporter extends EaImporter {
 
 
     }
+    
     @Override
     protected Iterable<Map<String, Object>> extractRelations(Map<String, Object> data) {
         final String REL = "Access";
@@ -148,35 +149,8 @@ public class BundesarchiveEadImporter extends EaImporter {
         }
         return list;
     }
-//    @Override
-//    protected Iterable<Map<String, Object>> extractRelations(Map<String, Object> data) {
-//        final String REL = "Access";
-//        List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
-//        for (String key : data.keySet()) {
-//            logger.debug("trying for Relations: "+key);
-//            if (key.endsWith(REL)) {
-//                if (data.get(key) instanceof List) {
-//                    //every item becomes a UndeterminedRelationship, with the key as body
-//                    for (String body : (List<String>) data.get(key)) {
-//                        list.add(createRelationNode(key, body));
-//                    }
-//                } else {
-//                    list.add(createRelationNode(key, (String) data.get(key)));
-//                }
-//            }
-//        }
-//        return list;
-//    }
-//
-//    private Map<String, Object> createRelationNode(String type, String value) {
-//        Map<String, Object> relationNode = new HashMap<String, Object>();
-//        relationNode.put(UndeterminedRelationship.NAME_KEY, value);
-//        relationNode.put(UndeterminedRelationship.UNDETERMINED_RELATIONSHIP_TYPE, type);
-//        relationNode.put(IdentifiableEntity.IDENTIFIER_KEY, (type + value).replaceAll("\\s", ""));
-//        return relationNode;
-//
-//    }
 
+    @Override
     protected Map<String, Object> extractDocumentaryUnit(Map<String, Object> itemData, int depth) throws ValidationError {
         Map<String, Object> unit = new HashMap<String, Object>();
         if (itemData.get(OBJECT_ID) != null) {
@@ -185,6 +159,7 @@ public class BundesarchiveEadImporter extends EaImporter {
         return unit;
     }
 
+    @Override
     protected Map<String, Object> extractDocumentDescription(Map<String, Object> itemData, int depth) throws ValidationError {
 
         Map<String, Object> unit = new HashMap<String, Object>();

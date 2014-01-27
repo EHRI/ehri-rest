@@ -2,23 +2,19 @@ package eu.ehri.project.views.impl;
 
 import com.google.common.base.Optional;
 import com.tinkerpop.frames.FramedGraph;
-
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.acl.PermissionType;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.exceptions.*;
-import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.models.base.Frame;
-import eu.ehri.project.models.base.PermissionScope;
-import eu.ehri.project.persistance.Bundle;
-import eu.ehri.project.persistance.BundleDAO;
-import eu.ehri.project.persistance.Serializer;
+import eu.ehri.project.models.base.*;
+import eu.ehri.project.persistence.Bundle;
+import eu.ehri.project.persistence.BundleDAO;
+import eu.ehri.project.persistence.Mutation;
+import eu.ehri.project.persistence.Serializer;
 import eu.ehri.project.views.Crud;
 import eu.ehri.project.views.ViewHelper;
-import eu.ehri.project.persistance.Mutation;
 
 public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
     private final FramedGraph<?> graph;
@@ -100,11 +96,11 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws IntegrityError
      * @throws ItemNotFound
      */
-    public <T extends Frame> Mutation<T> updateDependent(Bundle bundle, E parent,
+    public <T extends Frame, P extends DescribedEntity> Mutation<T> updateDependent(Bundle bundle, P parent,
             Accessor user, Class<T> dependentClass)
             throws PermissionDenied, ValidationError, IntegrityError, ItemNotFound {
         helper.checkEntityPermission(parent, user, PermissionType.UPDATE);
-        return new BundleDAO(graph, scope).update(bundle, dependentClass);
+        return new BundleDAO(graph, parent).update(bundle, dependentClass);
     }
 
     /**
@@ -149,12 +145,12 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws ValidationError
      * @throws IntegrityError
      */
-    public <T extends Frame> T createDependent(Bundle bundle, E parent,
+    public <T extends Frame, P extends DescribedEntity> T createDependent(Bundle bundle, P parent,
             Accessor user, Class<T> dependentCls)
             throws PermissionDenied, ValidationError,
             IntegrityError {
         helper.checkEntityPermission(parent, user, PermissionType.UPDATE);
-        return new BundleDAO(graph, scope).create(bundle, dependentCls);
+        return new BundleDAO(graph, parent).create(bundle, dependentCls);
     }
 
     /**
@@ -206,11 +202,11 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws ValidationError
      * @throws SerializationError
      */
-    public <T extends Frame> Integer deleteDependent(T item, E parent,
+    public <T extends Frame, P extends DescribedEntity> Integer deleteDependent(T item, P parent,
                 Accessor user, Class<T> dependentClass)
             throws PermissionDenied, ValidationError, SerializationError {
         helper.checkEntityPermission(parent, user, PermissionType.DELETE);
-        return new BundleDAO(graph, scope).delete(serializer
+        return new BundleDAO(graph, parent).delete(serializer
                 .vertexFrameToBundle(item));
     }
 

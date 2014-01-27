@@ -7,9 +7,9 @@ package eu.ehri.project.utils;
  * https://github.com/slugify/slugify/blob/master/src/main/java/com/github/slugify/Slugify.java
  */
 
-import java.text.Normalizer;
-
 import org.apache.commons.lang.StringUtils;
+
+import java.text.Normalizer;
 
 public class Slugify {
 
@@ -27,7 +27,7 @@ public class Slugify {
 
         ret = normalize(ret);
         ret = removeDuplicateWhiteSpaces(ret);
-        return ret.replace(" ", "-").toLowerCase();
+        return ret.replaceAll(" ", "-").replaceAll("-+", "-").toLowerCase();
     }
 
     private static String normalize(String input) {

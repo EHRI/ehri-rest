@@ -10,7 +10,7 @@ import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.PermissionScope;
 
-import eu.ehri.project.persistance.BundleDAO;
+import eu.ehri.project.persistence.BundleDAO;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -21,7 +21,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import eu.ehri.project.persistance.Mutation;
+import eu.ehri.project.persistence.Mutation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -122,8 +122,23 @@ public abstract class AbstractImporter<T> {
         unchangedCallbacks.add(cb);
     }
 
+    /**
+     * Import an item representation into the graph, and return the Node.
+     * 
+     * @param itemData the item representation to import
+     * @return the imported node
+     * @throws ValidationError when the item representation does not validate
+     */
     abstract public AccessibleEntity importItem(Map<String, Object> itemData) throws ValidationError;
 
+    /**
+     * Import an item representation into the graph at a certain depth, and return the Node.
+     * 
+     * @param itemData the item representation to import
+     * @param depth the depth of the tree to import the node at
+     * @return the imported node
+     * @throws ValidationError when the item representation does not validate
+     */
     abstract public AccessibleEntity importItem(Map<String, Object> itemData, int depth) throws ValidationError;
 
     /**

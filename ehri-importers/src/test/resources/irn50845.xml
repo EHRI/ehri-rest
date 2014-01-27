@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ead>
+   <eadheader>
+      <eadid>irn50845</eadid>
+      <filedesc>
+         <titlestmt>
+            <titleproper>Oral history interviews of the Former Yugoslavia Witnesses Documentation Project, Bosnia</titleproper>
+            <subtitle>Oral history interview with Marijan Perić</subtitle>
+            <author/>
+         </titlestmt>
+         <publicationstmt>
+            <publisher>USHMM / EHRI partners</publisher>
+            <date>2013-05-22 10:47:02</date>
+         </publicationstmt>
+      </filedesc>
+      <profiledesc>
+         <creation>Automatically converted from USHMM's Solr index file using solr2ead.xsl (https://github.com/bencomp/solr2ead)
+                        <date calendar="gregorian" era="ce" normal="2013-11-20T17:58:44.73+01:00">2013-11-20T17:58:44.73+01:00</date>
+         </creation>
+         <langusage>
+            <language langcode="eng">English</language>
+         </langusage>
+      </profiledesc>
+   </eadheader>
+   <frontmatter>
+      <titlepage>
+         <titleproper>Oral history interviews of the Former Yugoslavia Witnesses Documentation Project, Bosnia</titleproper>
+         <publisher/>
+         <date calendar="gregorian" era="ce">2012 March 31</date>
+      </titlepage>
+   </frontmatter>
+   <archdesc>
+      <did>
+         <unittitle>Oral history interview with Marijan Perić</unittitle>
+         <unitdate calendar="gregorian" era="ce">2012 March 31</unitdate>
+         <unitid type="irn">50845</unitid>
+         <unitid type="rg_number" label="Record group number">RG-50.586*0138</unitid>
+         <origination/>
+         <physdesc>
+            <extent>Master copy, 2 videocassettes (DVCAM) (PAL) : sound, color ; 1/4 in. User copy, 1 digital file</extent>
+            <physfacet/>
+         </physdesc>
+         <langmaterial>
+            <language>Serbo-Croatian</language>
+         </langmaterial>
+         <arrangement/>
+         <repository/>
+         <abstract/>
+      </did>
+      <acqinfo>
+         <p>Accession number: 2007.504.2.138</p>
+         <p>Credit: Interviews made possible by the United States Holocaust Memorial Museum, The Jeff and Toby Herr Testimony Initiative.</p>
+      </acqinfo>
+      <bioghist/>
+      <scopecontent/>
+      <relatedmaterial/>
+      <accessrestrict>
+         <p>No restrictions on access</p>
+      </accessrestrict>
+      <userestrict>
+         <p>No restrictions on use</p>
+      </userestrict>
+      <separatedmaterial/>
+      <controlaccess>
+         <persname>Perić, Marijan.</persname>
+         <subject>Holocaust, Jewish (1939-1945) -- Europe -- Personal narratives.</subject>
+         <geogname>Bosnia and Hercegovina.</geogname>
+      </controlaccess>
+      <dsc/>
+   </archdesc>
+</ead>

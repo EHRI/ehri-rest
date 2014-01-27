@@ -1,19 +1,18 @@
 package eu.ehri.extension.test;
 
-import static org.junit.Assert.assertEquals;
-
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
-
+import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
+import eu.ehri.extension.AbstractRestResource;
+import eu.ehri.project.definitions.Entities;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.WebResource;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
 
-import eu.ehri.extension.AbstractRestResource;
+import static com.sun.jersey.api.client.ClientResponse.Status.OK;
+import static com.sun.jersey.api.client.ClientResponse.Status.UNAUTHORIZED;
 
 public class AccessRestClientTest extends BaseRestClientTest {
 
@@ -28,55 +27,36 @@ public class AccessRestClientTest extends BaseRestClientTest {
     @Test
     public void testUserCannotRead() throws Exception {
         // Create
-        WebResource resource = client.resource(getExtensionEntryPointUri()
-                + "/documentaryUnit/c1");
-        ClientResponse response = resource
-                .accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME,
-                        LIMITED_USER_NAME).get(ClientResponse.class);
-
-        assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(),
-                response.getStatus());
+        ClientResponse response = jsonCallAs(LIMITED_USER_NAME,
+                ehriUri(Entities.DOCUMENTARY_UNIT, "c1")).get(ClientResponse.class);
+        assertStatus(UNAUTHORIZED, response);
     }
 
     @Test
     public void testGrantAccess() throws Exception {
         // Attempt to fetch an element.
-        WebResource resource = client.resource(getExtensionEntryPointUri()
-                + "/documentaryUnit/c1");
-        ClientResponse response = resource
-                .accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME,
-                        LIMITED_USER_NAME).get(ClientResponse.class);
+        ClientResponse response = jsonCallAs(LIMITED_USER_NAME,
+                ehriUri(Entities.DOCUMENTARY_UNIT, "c1")).get(ClientResponse.class);
 
-        assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(),
-                response.getStatus());
+        assertStatus(UNAUTHORIZED, response);
 
         // Set the form data
-        MultivaluedMap<String,String> queryParams = new MultivaluedMapImpl();
+        MultivaluedMap<String, String> queryParams = new MultivaluedMapImpl();
         queryParams.add(AbstractRestResource.ACCESSOR_PARAM, LIMITED_USER_NAME);
 
-        resource = client.resource(getExtensionEntryPointUri() + "/access/c1");
-        response = resource
+        response = client.resource(ehriUri("access", "c1"))
                 .queryParams(queryParams)
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
                 .header(AbstractRestResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId())
                 .post(ClientResponse.class);
-        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        assertStatus(OK, response);
 
         // Try the original request again and ensure it worked...
-        resource = client.resource(getExtensionEntryPointUri()
-                + "/documentaryUnit/c1");
-        response = resource
-                .accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME,
-                        LIMITED_USER_NAME).get(ClientResponse.class);
-        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        response = jsonCallAs(LIMITED_USER_NAME,
+                ehriUri(Entities.DOCUMENTARY_UNIT, "c1")).get(ClientResponse.class);
+        assertStatus(OK, response);
     }
 
     @Test
@@ -86,21 +66,16 @@ public class AccessRestClientTest extends BaseRestClientTest {
         testGrantAccess();
 
         // Create
-        WebResource resource = client.resource(getExtensionEntryPointUri()
-                + "/documentaryUnit/c1");
-        ClientResponse response = resource
-                .accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME,
-                        LIMITED_USER_NAME).get(ClientResponse.class);
+        ClientResponse response = jsonCallAs(LIMITED_USER_NAME,
+                ehriUri(Entities.DOCUMENTARY_UNIT, "c1")).get(ClientResponse.class);
 
-        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        assertStatus(OK, response);
 
         // Set the form data
-        MultivaluedMap<String,String> queryParams = new MultivaluedMapImpl();
+        MultivaluedMap<String, String> queryParams = new MultivaluedMapImpl();
         queryParams.add(AbstractRestResource.ACCESSOR_PARAM, PRIVILEGED_USER_NAME);
 
-        resource = client.resource(getExtensionEntryPointUri() + "/access/c1");
+        WebResource resource = client.resource(ehriUri("access", "c1"));
         response = resource
                 .queryParams(queryParams)
                 .accept(MediaType.APPLICATION_JSON)
@@ -108,18 +83,12 @@ public class AccessRestClientTest extends BaseRestClientTest {
                 .header(AbstractRestResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId())
                 .post(ClientResponse.class);
-        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        assertStatus(OK, response);
 
         // Try the original request again and ensure it worked...
-        resource = client.resource(getExtensionEntryPointUri()
-                + "/documentaryUnit/c1");
-        response = resource
-                .accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME,
-                        LIMITED_USER_NAME).get(ClientResponse.class);
-        assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(),
-                response.getStatus());
+        response = jsonCallAs(LIMITED_USER_NAME,
+                ehriUri(Entities.DOCUMENTARY_UNIT, "c1")).get(ClientResponse.class);
+        assertStatus(UNAUTHORIZED, response);
     }
 
 }

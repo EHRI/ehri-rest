@@ -1,31 +1,21 @@
 package eu.ehri.extension.test;
 
 import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.WebResource;
-import eu.ehri.extension.AbstractRestResource;
-import eu.ehri.project.persistance.Bundle;
+import eu.ehri.project.persistence.Bundle;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
+import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
+import java.net.URI;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertTrue;
+import static com.sun.jersey.api.client.ClientResponse.Status.NOT_FOUND;
+import static com.sun.jersey.api.client.ClientResponse.Status.OK;
+import static junit.framework.Assert.*;
 
-/**
- * Created with IntelliJ IDEA.
- * User: mikebryant
- * Date: 09/03/2013
- * Time: 14:36
- * To change this template use File | Settings | File Templates.
- */
-public class GenericResourceClientTest  extends BaseRestClientTest {
+public class GenericResourceClientTest extends BaseRestClientTest {
 
     private static final String ITEM1 = "c1";
     private static final String ITEM2 = "c4";
@@ -39,16 +29,14 @@ public class GenericResourceClientTest  extends BaseRestClientTest {
     @Test
     public void getMultipleGenericEntities() throws IOException {
         // Create
-        WebResource resource = client.resource(getExtensionEntryPointUri()
-                + "/entities?id=" + ITEM1 + "&id=" + ITEM2);
-        ClientResponse response = resource
-                .accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME,
-                        getAdminUserProfileId())
+        URI uri = UriBuilder.fromUri(getExtensionEntryPointUri())
+                .segment("entities")
+                .queryParam("id", ITEM1)
+                .queryParam("id", ITEM2).build();
+        System.out.println("URI: " + uri);
+        ClientResponse response = jsonCallAs(getAdminUserProfileId(), uri)
                 .get(ClientResponse.class);
-        assertEquals(Response.Status.OK.getStatusCode(),
-                response.getStatus());
+        assertStatus(OK, response);
         ObjectMapper mapper = new ObjectMapper();
         JsonNode rootNode = mapper.readValue(response.getEntity(String.class),
                 JsonNode.class);
@@ -63,16 +51,9 @@ public class GenericResourceClientTest  extends BaseRestClientTest {
     @Test
     public void getSingleGenericEntity() throws IOException {
         // Create
-        WebResource resource = client.resource(getExtensionEntryPointUri()
-                + "/entities/" + ITEM1);
-        ClientResponse response = resource
-                .accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME,
-                        getAdminUserProfileId())
-                .get(ClientResponse.class);
-        assertEquals(Response.Status.OK.getStatusCode(),
-                response.getStatus());
+        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
+                ehriUri("entities", ITEM1)).get(ClientResponse.class);
+        assertStatus(OK, response);
         ObjectMapper mapper = new ObjectMapper();
         JsonNode rootNode = mapper.readValue(response.getEntity(String.class),
                 JsonNode.class);
@@ -84,15 +65,20 @@ public class GenericResourceClientTest  extends BaseRestClientTest {
     @Test
     public void getCannotFetchNonContentTypes() throws IOException {
         // Create
-        WebResource resource = client.resource(getExtensionEntryPointUri()
-                + "/entities/" + BAD_ITEM);
-        ClientResponse response = resource
-                .accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
-                .header(AbstractRestResource.AUTH_HEADER_NAME,
-                        getAdminUserProfileId())
-                .get(ClientResponse.class);
-        assertEquals(Response.Status.NOT_FOUND.getStatusCode(),
-                response.getStatus());
+        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
+                ehriUri("entities", BAD_ITEM)).get(ClientResponse.class);
+        assertStatus(NOT_FOUND, response);
+    }
+
+    @Test
+    public void listEntitiesByGidThrows404() throws IOException {
+        // Create
+        URI uri = UriBuilder.fromUri(getExtensionEntryPointUri())
+                .segment("entities")
+                .segment("listByGraphId")
+                .queryParam("gid", -1L).build();
+
+        ClientResponse response = jsonCallAs(getAdminUserProfileId(), uri).get(ClientResponse.class);
+        assertStatus(NOT_FOUND, response);
     }
 }

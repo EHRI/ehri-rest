@@ -7,13 +7,13 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.*;
 import eu.ehri.project.models.base.*;
 import eu.ehri.project.models.idgen.IdGenerator;
-import eu.ehri.project.persistance.Bundle;
+import eu.ehri.project.persistence.Bundle;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import eu.ehri.project.persistance.Mutation;
+import eu.ehri.project.persistence.Mutation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,13 +54,15 @@ public class IcaAtomEadImporter extends EaImporter {
      *
      * @param itemData
      * @param depth
-     * @throws ValidationError
+     * @throws ValidationError when the itemData does not contain an identifier for the unit.
      */
     @Override
     public DocumentaryUnit importItem(Map<String, Object> itemData, int depth)
             throws ValidationError {
 
         Bundle unit = new Bundle(EntityClass.DOCUMENTARY_UNIT, extractDocumentaryUnit(itemData));
+        
+        // Check for missing identifier, throw an exception when there is no ID.
         if (unit.getDataValue(Ontology.IDENTIFIER_KEY) == null) {
             throw new ValidationError(unit, Ontology.IDENTIFIER_KEY,
                     "Missing identifier " + Ontology.IDENTIFIER_KEY);
@@ -72,7 +74,7 @@ public class IcaAtomEadImporter extends EaImporter {
         for (Map<String, Object> dpb : extractDates(itemData)) {
             descBundle = descBundle.withRelation(Ontology.ENTITY_HAS_DATE, new Bundle(EntityClass.DATE_PERIOD, dpb));
         }
-        for (Map<String, Object> rel : extractRelations(itemData)) {//, (String) unit.getData().get(IdentifiableEntity.IDENTIFIER_KEY)
+        for (Map<String, Object> rel : extractRelations(itemData)) {//, (String) unit.getErrors().get(IdentifiableEntity.IDENTIFIER_KEY)
             logger.debug("relation found " + rel.get(Ontology.IDENTIFIER_KEY));
             descBundle = descBundle.withRelation(Ontology.HAS_ACCESS_POINT, new Bundle(EntityClass.UNDETERMINED_RELATIONSHIP, rel));
         }
@@ -83,19 +85,24 @@ public class IcaAtomEadImporter extends EaImporter {
         }
         unit = unit.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
 
-        if (unit.getDataValue(Ontology.IDENTIFIER_KEY) == null) {
-            throw new ValidationError(unit, Ontology.IDENTIFIER_KEY, "Missing identifier");
-        } 
-        IdGenerator generator = EntityClass.DOCUMENTARY_UNIT.getIdgen();
-        String id = generator.generateId(EntityClass.DOCUMENTARY_UNIT, permissionScope, unit);
-        if (id.equals(permissionScope.getId())) {
-            throw new RuntimeException("Generated an id same as scope: " + unit.getData());
-        }
+//        // New solution to missing IDs: throw an exception.
+//        if (unit.getDataValue(Ontology.IDENTIFIER_KEY) == null) {
+//            throw new ValidationError(unit, Ontology.IDENTIFIER_KEY, "Missing identifier");
+//
+//        }
 
-        logger.debug("Generated ID: " + id + " (" + permissionScope.getId() + ")");
+//        // Old solution to missing IDs: generate a replacement. 
+//        IdGenerator generator = EntityClass.DOCUMENTARY_UNIT.getIdgen();
+//        String id = generator.generateId(EntityClass.DOCUMENTARY_UNIT, permissionScope, unit);
+//        if (id.equals(permissionScope.getId())) {
+//            throw new RuntimeException("Generated an id same as scope: " + unit.getData());
+//        }
+//
+//        logger.debug("Generated ID: " + id + " (" + permissionScope.getId() + ")");
+
 
         Mutation<DocumentaryUnit> mutation =
-                persister.createOrUpdate(unit.withId(id), DocumentaryUnit.class);
+                persister.createOrUpdate(unit, DocumentaryUnit.class);
         DocumentaryUnit frame = mutation.getNode();
 
         // Set the repository/item relationship
@@ -119,7 +126,8 @@ public class IcaAtomEadImporter extends EaImporter {
 
 
     }
-    @Override
+    @SuppressWarnings("unchecked")
+	@Override
     protected Iterable<Map<String, Object>> extractRelations(Map<String, Object> data) {
         final String REL = "Access";
         List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
@@ -175,6 +183,7 @@ public class IcaAtomEadImporter extends EaImporter {
 //
 //    }
 
+    
     protected Map<String, Object> extractDocumentaryUnit(Map<String, Object> itemData, int depth) throws ValidationError {
         Map<String, Object> unit = new HashMap<String, Object>();
         if (itemData.get(OBJECT_ID) != null) {

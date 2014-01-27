@@ -15,11 +15,13 @@ import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.PermissionScope;
-import eu.ehri.project.persistance.*;
+import eu.ehri.project.persistence.*;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import eu.ehri.project.persistence.Bundle;
+import eu.ehri.project.persistence.Mutation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,11 +67,8 @@ public class UkrainianUnitImporter extends XmlImporter<Object> {
             unit = unit.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
         }
 
-        BundleValidator validator = BundleValidatorFactory.getInstance(manager, unit);
-        validator.validateTree();
-
-        String id = unit.getType().getIdgen().generateId(EntityClass.DOCUMENTARY_UNIT, permissionScope, unit);
-        Mutation<DocumentaryUnit> mutation = persister.createOrUpdate(unit.withId(id), DocumentaryUnit.class);
+        Mutation<DocumentaryUnit> mutation = persister
+                .createOrUpdate(unit, DocumentaryUnit.class);
         DocumentaryUnit frame = mutation.getNode();
         if (!permissionScope.equals(SystemScope.getInstance())
                 && mutation.created()) {

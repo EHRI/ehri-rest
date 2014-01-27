@@ -7,7 +7,6 @@ import eu.ehri.project.models.Group;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.PermissionGrantTarget;
 import eu.ehri.project.test.AbstractFixtureTest;
-import eu.ehri.project.views.AclViews;
 import org.junit.Test;
 
 import static org.junit.Assert.assertFalse;

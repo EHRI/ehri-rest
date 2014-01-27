@@ -10,11 +10,8 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
@@ -33,7 +30,7 @@ import com.sun.jersey.api.client.WebResource;
 
 //from the frames
 import eu.ehri.project.exceptions.DeserializationError;
-import eu.ehri.project.persistance.Bundle;
+import eu.ehri.project.persistence.Bundle;
 
 // Indexing functionality
 //

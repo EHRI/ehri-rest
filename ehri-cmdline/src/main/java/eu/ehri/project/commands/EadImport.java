@@ -1,7 +1,11 @@
 package eu.ehri.project.commands;
 
-import eu.ehri.project.importers.BundesarchiveEadHandler;
+import org.apache.commons.cli.Option;
+
+import eu.ehri.project.importers.AbstractImporter;
+import eu.ehri.project.importers.EadHandler;
 import eu.ehri.project.importers.IcaAtomEadImporter;
+import eu.ehri.project.importers.SaxXmlHandler;
 
 /**
  * Import EAD from the command line...
@@ -15,14 +19,21 @@ public class EadImport extends ImportCommand implements Command {
      * Constructor.
      */
     public EadImport() {
-        super(BundesarchiveEadHandler.class, IcaAtomEadImporter.class);
+        this(EadHandler.class, IcaAtomEadImporter.class);
+    }
+    
+    /**
+     * Generic EAD import command, designed for extending classes that use specific Handlers.
+     * @param handler The Handler class to be used for import
+     * @param importer The Importer class to be used. If null, IcaAtomEadImporter is used.
+     */
+    public EadImport(Class<? extends SaxXmlHandler> handler, Class<? extends AbstractImporter> importer) {
+    	super(handler, importer);
     }
 
-    
-
-    @Override
+        @Override
     public String getHelp() {
-        return "Usage: " + NAME + " [OPTIONS] -user <user-id> -repo <agent-id> <neo4j-graph-dir> <ead1.xml> <ead2.xml> ... <eadN.xml>";
+        return "Usage: " + NAME + " [OPTIONS] -user <user-id> -scope <repository-id> <ead1.xml> <ead2.xml> ... <eadN.xml>";
     }
 
     @Override

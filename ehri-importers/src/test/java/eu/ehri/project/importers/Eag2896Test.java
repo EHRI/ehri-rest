@@ -84,6 +84,8 @@ public class Eag2896Test extends AbstractImporterTest {
         Object priority = unit.asVertex().getProperty(EagImporter.PRIORITY);
         assertEquals(Integer.valueOf(5), priority);
 
+        // Check scope
+        assertEquals(country, unit.getPermissionScope());
 
         //check whether the description has an Address attached to it
         assertEquals(1, toList(c1.getAddresses()).size());

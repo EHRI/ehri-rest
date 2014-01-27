@@ -9,7 +9,7 @@ import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.Country;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Repository;
-import eu.ehri.project.persistance.Bundle;
+import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.views.impl.CrudViews;
 import java.io.InputStream;
 import org.junit.Test;

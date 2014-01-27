@@ -1,9 +1,10 @@
 package eu.ehri.project.views;
 
 import com.google.common.base.Optional;
-
-import static org.junit.Assert.*;
 import org.junit.Test;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Created with IntelliJ IDEA.

@@ -6,13 +6,16 @@ import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
 
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.*;
 
 import com.google.common.base.Optional;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraphFactory;
 import com.tinkerpop.frames.modules.javahandler.JavaHandlerModule;
+import eu.ehri.project.definitions.Entities;
+import eu.ehri.project.models.EntityClass;
+import eu.ehri.project.models.UserProfile;
+import eu.ehri.project.models.utils.ClassUtils;
 import eu.ehri.project.utils.TxCheckedNeo4jGraph;
 import eu.ehri.project.models.base.Frame;
 import org.codehaus.jackson.JsonFactory;
@@ -30,13 +33,20 @@ import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.persistance.Serializer;
+import eu.ehri.project.persistence.Serializer;
 import eu.ehri.project.views.Query;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 public abstract class AbstractRestResource implements TxCheckedResource {
 
     public static final int DEFAULT_LIST_LIMIT = 20;
-    
+    private static final ObjectMapper mapper = new ObjectMapper();
+
+    private static final Logger logger = LoggerFactory.getLogger(TxCheckedResource.class);
+    private static final FramedGraphFactory graphFactory = new FramedGraphFactory(new JavaHandlerModule());
+
     /**
      * Query arguments.
      */
@@ -46,6 +56,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
     public static final String OFFSET_PARAM = "offset";
     public static final String ACCESSOR_PARAM = "accessibleTo";
     public static final String GROUP_PARAM = "group";
+    public static final String ALL_PARAM = "all";
 
     /**
      * Header names
@@ -95,18 +106,25 @@ public abstract class AbstractRestResource implements TxCheckedResource {
 
     public AbstractRestResource(@Context GraphDatabaseService database) {
         this.database = database;
-        graph = new FramedGraphFactory(
-                new JavaHandlerModule()).create(new TxCheckedNeo4jGraph(database));
+        graph = graphFactory.create(new TxCheckedNeo4jGraph(database));
         manager = GraphManagerFactory.getInstance(graph);
-        serializer  = new Serializer(graph);
+        serializer  = new Serializer.Builder(graph).build();
     }
 
     public FramedGraph<TxCheckedNeo4jGraph> getGraph() {
         return graph;
     }
 
+    protected void cleanupTransaction() {
+        if (graph.getBaseGraph().isInTransaction()) {
+            logger.warn("Rolling back active transaction");
+            graph.getBaseGraph().rollback();
+        }
+    }
+
     /**
-     * Retrieve the id of the UserProfile of the requester
+     * Retrieve the account of the current user, who may be
+     * anonymous.
      * 
      * @return The UserProfile
      * @throws BadRequester
@@ -122,6 +140,20 @@ public abstract class AbstractRestResource implements TxCheckedResource {
                 throw new BadRequester(id.get());
             }
         }
+    }
+
+    /**
+     * Retrieve the profile of the current user, throwing a
+     * BadRequest if it's invalid.
+     * @return
+     */
+    protected UserProfile getCurrentUser() throws BadRequester {
+        Accessor profile = getRequesterUserProfile();
+        if (profile.isAdmin() || profile.isAnonymous()
+                || !profile.getType().equals(Entities.USER_PROFILE)) {
+            throw new BadRequester("Invalid user: " + profile.getId());
+        }
+        return graph.frame(profile.asVertex(), UserProfile.class);
     }
 
     /**
@@ -185,8 +217,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
 
         return new StreamingOutput() {
             @Override
-            public void write(OutputStream os) throws IOException,
-                    WebApplicationException {
+            public void write(OutputStream os) throws IOException {
                 os.write(header.getBytes(utf8));
                 try {
                     for (T item : page.getIterable()) {
@@ -202,12 +233,11 @@ public abstract class AbstractRestResource implements TxCheckedResource {
     }
 
     private <T extends Frame> StreamingOutput getStreamingJsonOutput(final Query.Page<T> page, final Serializer serializer) {
-        final ObjectMapper mapper = new ObjectMapper();
         final JsonFactory f = new JsonFactory();
+        final Serializer cacheSerializer = serializer.withCache();
         return new StreamingOutput() {
             @Override
-            public void write(OutputStream os) throws IOException,
-                    WebApplicationException {
+            public void write(OutputStream os) throws IOException {
                 JsonGenerator g = f.createJsonGenerator(os);
                 g.writeStartObject();
                 g.writeNumberField("total", page.getCount());
@@ -217,7 +247,8 @@ public abstract class AbstractRestResource implements TxCheckedResource {
                 g.writeStartArray();
                 for (T item : page.getIterable()) {
                     try {
-                        mapper.writeValue(g, serializer.vertexFrameToData(item));
+                        g.writeRaw('\n');
+                        mapper.writeValue(g, cacheSerializer.vertexFrameToData(item));
                     } catch (SerializationError e) {
                         throw new RuntimeException(e);
                     }
@@ -263,8 +294,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
 
         return new StreamingOutput() {
             @Override
-            public void write(OutputStream os) throws IOException,
-                    WebApplicationException {
+            public void write(OutputStream os) throws IOException {
                 os.write(header.getBytes(utf8));
                 try {
                     for (T item : list) {
@@ -280,18 +310,19 @@ public abstract class AbstractRestResource implements TxCheckedResource {
     }
 
     private <T extends Frame> StreamingOutput getStreamingJsonOutput(final Iterable<T> list, final Serializer serializer) {
-        final ObjectMapper mapper = new ObjectMapper();
         final JsonFactory f = new JsonFactory();
+        final Serializer cacheSerializer = serializer.withCache();
         return new StreamingOutput() {
             @Override
-            public void write(OutputStream arg0) throws IOException,
-                    WebApplicationException {
+            public void write(OutputStream arg0) throws IOException {
                 JsonGenerator g = f.createJsonGenerator(arg0);
                 g.writeStartArray();
                 for (T item : list) {
+                    g.writeRaw('\n');
                     try {
-                        mapper.writeValue(g, serializer.vertexFrameToData(item));
+                        mapper.writeValue(g, cacheSerializer.vertexFrameToData(item));
                     } catch (SerializationError e) {
+                        e.printStackTrace();
                         throw new RuntimeException(e);
                     }
                 }
@@ -312,17 +343,17 @@ public abstract class AbstractRestResource implements TxCheckedResource {
      */
     protected StreamingOutput streamingVertexList(
             final Iterable<Vertex> list, final Serializer serializer) {
-        final ObjectMapper mapper = new ObjectMapper();
         final JsonFactory f = new JsonFactory();
+        final Serializer cacheSerializer = serializer.withCache();
         return new StreamingOutput() {
             @Override
-            public void write(OutputStream arg0) throws IOException,
-                    WebApplicationException {
+            public void write(OutputStream arg0) throws IOException {
                 JsonGenerator g = f.createJsonGenerator(arg0);
                 g.writeStartArray();
                 for (Vertex item : list) {
                     try {
-                        mapper.writeValue(g, serializer.vertexToData(item));
+                        g.writeRaw('\n');
+                        mapper.writeValue(g, cacheSerializer.vertexToData(item));
                     } catch (SerializationError e) {
                         throw new RuntimeException(e);
                     }
@@ -344,12 +375,10 @@ public abstract class AbstractRestResource implements TxCheckedResource {
      */
     protected StreamingOutput streamingVertexMap(
             final Map<String, Vertex> map, final Serializer serializer) {
-        final ObjectMapper mapper = new ObjectMapper();
         final JsonFactory f = new JsonFactory();
         return new StreamingOutput() {
             @Override
-            public void write(OutputStream arg0) throws IOException,
-                    WebApplicationException {
+            public void write(OutputStream arg0) throws IOException {
                 JsonGenerator g = f.createJsonGenerator(arg0);
                 g.writeStartObject();
                 for (Map.Entry<String,Vertex> keypair: map.entrySet()) {
@@ -377,6 +406,16 @@ public abstract class AbstractRestResource implements TxCheckedResource {
     }
 
     /**
+     * Return a boolean.
+     */
+    protected Response booleanResponse(boolean bool) {
+        return MediaType.TEXT_XML_TYPE.equals(checkMediaType())
+                ? Response.ok(String.format("<boolean>%s</boolean>", bool)
+                    .getBytes()).build()
+                : Response.ok(Boolean.toString(bool).getBytes()).build();
+    }
+
+    /**
      * Return a streaming response from an iterable.
      * 
      * @param map
@@ -397,12 +436,10 @@ public abstract class AbstractRestResource implements TxCheckedResource {
      */
     protected <T extends Frame> StreamingOutput streamingMultimap(
             final ListMultimap<String, T> map, final Serializer serializer) {
-        final ObjectMapper mapper = new ObjectMapper();
         final JsonFactory f = new JsonFactory();
         return new StreamingOutput() {
             @Override
-            public void write(OutputStream arg0) throws IOException,
-                    WebApplicationException {
+            public void write(OutputStream arg0) throws IOException {
                 JsonGenerator g = f.createJsonGenerator(arg0);
                 g.writeStartObject();
                 for (String itemId : map.keySet()) {

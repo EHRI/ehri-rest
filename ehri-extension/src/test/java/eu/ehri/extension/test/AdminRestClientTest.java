@@ -1,26 +1,24 @@
 package eu.ehri.extension.test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
+import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.WebResource;
+import eu.ehri.extension.AdminResource;
 import eu.ehri.project.definitions.Ontology;
+import eu.ehri.project.persistence.Bundle;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.WebResource;
+import javax.ws.rs.core.MediaType;
 
-import eu.ehri.extension.AdminResource;
-import eu.ehri.project.persistance.Bundle;
+import static com.sun.jersey.api.client.ClientResponse.Status.CREATED;
+import static com.sun.jersey.api.client.ClientResponse.Status.OK;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test admin REST functions.
- * 
+ *
  * @author michaelb
- * 
  */
 public class AdminRestClientTest extends BaseRestClientTest {
 
@@ -30,32 +28,35 @@ public class AdminRestClientTest extends BaseRestClientTest {
     }
 
     @Test
+    public void testHouseKeeping() throws Exception {
+        WebResource resource = client.resource(ehriUri("admin", "_rebuildChildCache"));
+        ClientResponse response = resource.accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON).post(ClientResponse.class);
+        assertStatus(OK, response);
+    }
+
+    @Test
     public void testCreateDefaultUser() throws Exception {
         // Create
-        WebResource resource = client.resource(getExtensionEntryPointUri()
-                + "/admin/createDefaultUserProfile");
+        WebResource resource = client.resource(ehriUri("admin", "createDefaultUserProfile"));
         ClientResponse response = resource.accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON).post(ClientResponse.class);
 
-        assertEquals(Response.Status.CREATED.getStatusCode(),
-                response.getStatus());
+        assertStatus(CREATED, response);
         String json = response.getEntity(String.class);
         Bundle bundle = Bundle.fromString(json);
-        String ident = (String) bundle.getData().get(
-                Ontology.IDENTIFIER_KEY);
+        String ident = (String) bundle.getData().get(Ontology.IDENTIFIER_KEY);
         assertTrue(ident != null);
         assertTrue(ident.startsWith(AdminResource.DEFAULT_USER_ID_PREFIX));
 
         // Create another user and ensure their idents are different and
         // incremental
-        WebResource resource2 = client.resource(getExtensionEntryPointUri()
-                + "/admin/createDefaultUserProfile");
-        ClientResponse response2 = resource2.accept(MediaType.APPLICATION_JSON)
+        WebResource resource2 = client.resource(ehriUri("admin", "createDefaultUserProfile"));
+        response = resource2.accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON).post(ClientResponse.class);
 
-        assertEquals(Response.Status.CREATED.getStatusCode(),
-                response2.getStatus());
-        String json2 = response2.getEntity(String.class);
+        assertStatus(CREATED, response);
+        String json2 = response.getEntity(String.class);
         Bundle bundle2 = Bundle.fromString(json2);
         String ident2 = (String) bundle2.getData().get(
                 Ontology.IDENTIFIER_KEY);

@@ -9,7 +9,7 @@ import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.PermissionScope;
-import eu.ehri.project.persistance.Bundle;
+import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.views.impl.LoggingCrudViews;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
@@ -101,7 +101,7 @@ public class EntityAdd extends BaseCommand implements Command {
             bundle = bundle.withDataValue((String)prop, properties.getProperty((String)prop));
         }
 
-        String id = entityClass.getIdgen().generateId(entityClass, scope, bundle);
+        String id = entityClass.getIdgen().generateId(scope, bundle);
 
         try {
             LoggingCrudViews<?> view = new LoggingCrudViews(graph, entityClass.getEntityClass(), scope);

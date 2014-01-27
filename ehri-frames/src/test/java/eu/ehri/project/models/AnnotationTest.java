@@ -1,17 +1,13 @@
 package eu.ehri.project.models;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 import com.google.common.collect.Iterables;
+import eu.ehri.project.exceptions.ItemNotFound;
+import eu.ehri.project.models.base.AnnotatableEntity;
 import eu.ehri.project.test.ModelTestBase;
 import org.junit.Test;
 
-import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.models.Annotation;
-import eu.ehri.project.models.DocumentaryUnit;
-import eu.ehri.project.models.UserProfile;
-import eu.ehri.project.models.base.AnnotatableEntity;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class AnnotationTest extends ModelTestBase {
 

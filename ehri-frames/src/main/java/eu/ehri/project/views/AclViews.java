@@ -1,28 +1,22 @@
 package eu.ehri.project.views;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import com.google.common.base.Preconditions;
 import com.tinkerpop.frames.FramedGraph;
-
-import eu.ehri.project.acl.AclManager;
-import eu.ehri.project.acl.ContentTypes;
-import eu.ehri.project.acl.PermissionType;
-import eu.ehri.project.acl.SystemScope;
+import eu.ehri.project.acl.*;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.models.*;
-import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.models.base.Actioner;
-import eu.ehri.project.models.base.PermissionGrantTarget;
-import eu.ehri.project.models.base.PermissionScope;
-import eu.ehri.project.persistance.ActionManager;
+import eu.ehri.project.models.Group;
+import eu.ehri.project.models.Permission;
+import eu.ehri.project.models.PermissionGrant;
+import eu.ehri.project.models.base.*;
+import eu.ehri.project.persistence.ActionManager;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Views class for permission operations.
@@ -62,12 +56,13 @@ public final class AclViews {
     /**
      * Set the global permission matrix for a user.
      * 
+     *
      * @param accessor
      * @param permissionMap
      * @param grantee
      * @throws PermissionDenied
      */
-    public void setGlobalPermissionMatrix(Accessor accessor,
+    public List<Map<String,GlobalPermissionSet>> setGlobalPermissionMatrix(Accessor accessor,
             Map<ContentTypes, List<PermissionType>> permissionMap,
             Accessor grantee) throws PermissionDenied {
         checkGrantPermission(grantee, permissionMap);
@@ -81,6 +76,7 @@ public final class AclViews {
         if (scoped) {
             context.addSubjects(scope);
         }
+        return acl.getInheritedGlobalPermissions(accessor);
     }
 
     /**

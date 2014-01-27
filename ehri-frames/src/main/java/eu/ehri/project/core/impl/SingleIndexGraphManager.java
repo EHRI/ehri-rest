@@ -1,29 +1,29 @@
 package eu.ehri.project.core.impl;
 
-import java.util.*;
-
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.tinkerpop.blueprints.*;
-
+import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
+import com.tinkerpop.blueprints.impls.neo4j.Neo4jVertex;
+import com.tinkerpop.blueprints.impls.neo4j.Neo4jVertexIterable;
 import com.tinkerpop.blueprints.util.WrappingCloseableIterable;
+import com.tinkerpop.frames.FramedGraph;
+import eu.ehri.project.core.GraphManager;
+import eu.ehri.project.exceptions.IntegrityError;
+import eu.ehri.project.exceptions.ItemNotFound;
+import eu.ehri.project.models.EntityClass;
+import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.Frame;
 import org.apache.lucene.queryParser.QueryParser;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.index.IndexHits;
 import org.neo4j.graphdb.index.IndexManager;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jVertex;
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jVertexIterable;
-import com.tinkerpop.frames.FramedGraph;
-
-import eu.ehri.project.core.GraphManager;
-import eu.ehri.project.exceptions.IntegrityError;
-import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.annotations.EntityType;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
 
 /**
  * Implementation of GraphManager that uses a single index to manage all nodes.
@@ -34,6 +34,7 @@ import eu.ehri.project.models.annotations.EntityType;
 public final class SingleIndexGraphManager implements GraphManager {
 
     private static final String INDEX_NAME = "entities";
+    private static final String METADATA_PREFIX = "_";
 
     private final FramedGraph<Neo4jGraph> graph;
 
@@ -48,26 +49,32 @@ public final class SingleIndexGraphManager implements GraphManager {
 
     // Access functions
     public String getId(Vertex vertex) {
+        Preconditions.checkNotNull(vertex);
         return (String) vertex.getProperty(EntityType.ID_KEY);
     }
 
     public String getId(Frame frame) {
+        Preconditions.checkNotNull(frame);
         return getId(frame.asVertex());
     }
 
     public String getType(Vertex vertex) {
+        Preconditions.checkNotNull(vertex);
         return (String) vertex.getProperty(EntityType.TYPE_KEY);
     }
 
     public String getType(Frame frame) {
+        Preconditions.checkNotNull(frame);
         return frame.getType();
     }
 
     public EntityClass getEntityClass(Vertex vertex) {
+        Preconditions.checkNotNull(vertex);
         return EntityClass.withName(getType(vertex));
     }
 
     public EntityClass getEntityClass(Frame frame) {
+        Preconditions.checkNotNull(frame);
         return getEntityClass(frame.asVertex());
     }
 
@@ -256,9 +263,11 @@ public final class SingleIndexGraphManager implements GraphManager {
         // remove 'old' properties
         for (String key : item.getPropertyKeys()) {
             Object value = item.getProperty(key);
-            item.removeProperty(key);
-            if (keys == null || keys.contains(key)) {
-                index.remove(key, value, item);
+            if (!key.startsWith(METADATA_PREFIX)) {
+                item.removeProperty(key);
+                if (keys == null || keys.contains(key)) {
+                    index.remove(key, value, item);
+                }
             }
         }
 
