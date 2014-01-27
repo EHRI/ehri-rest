@@ -8,11 +8,8 @@ import eu.ehri.project.models.DocumentaryUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xml.sax.Attributes;
-import org.xml.sax.SAXException;
 
 /**
  *
@@ -27,51 +24,44 @@ public class CegesomaEadHandler extends EadHandler {
             .getLogger(CegesomaEadHandler.class);
     
 
-    /**
-     * Set a custom resolver so EAD DTDs are never looked up online.
-     * @param publicId
-     * @param systemId
-     * @return returns essentially an empty dtd file
-     * @throws org.xml.sax.SAXException
-     * @throws java.io.IOException
-     */
-    public org.xml.sax.InputSource resolveEntity(String publicId, String systemId)
-            throws org.xml.sax.SAXException, java.io.IOException {
-        // This is the equivalent of returning a null dtd.
-        return new org.xml.sax.InputSource(new java.io.StringReader(""));
-    }
-
     public CegesomaEadHandler(AbstractImporter<Map<String, Object>> importer) {
         super(importer, new XmlImportProperties("cegesoma.properties"));
         this.defaultLanguage = "nl";
     }
 
-    
+    /**
+     * Picks the first identifier as the 'official' ID if there were multiple unitids in the EAD
+     * and puts the others in the otherIdentifiers field.
+     */
     @Override
     protected void extractIdentifier(Map<String, Object> currentGraph) {
+    	// Is there an identifier?
     	if (currentGraph.containsKey("objectIdentifier")) {
+    		// Multiple identifiers?
             if (currentGraph.get("objectIdentifier") instanceof List) {
                 logger.debug("class of identifier: " + currentGraph.get("objectIdentifier").getClass());
                 ArrayList<String> identifiers = (ArrayList<String>) currentGraph.get("objectIdentifier");
-                ArrayList<String> identifiertypes = (ArrayList<String>) currentGraph.get("objectIdentifierType");
-                for (int i = 0; i < identifiers.size(); i++) {
-                    if (identifiertypes.get(i).equals("Bestandssignatur")) {
-                        logger.debug("found official id: " + identifiers.get(i));
-                        currentGraph.put("objectIdentifier", identifiers.get(i));
-                    }else {
-                        logger.debug("found other form of identifier: " + identifiers.get(i));
-                        addOtherIdentifier(currentGraph, identifiers.get(i));
-                    }
+                logger.debug("Using first ID as official id: " + identifiers.get(0));
+                currentGraph.put("objectIdentifier", identifiers.get(0));
+                for (int i = 1; i < identifiers.size(); i++) {
+                	logger.debug("Adding remaining IDs as other identifier: " + identifiers.get(i));
+                	addOtherIdentifier(currentGraph, identifiers.get(i));
                 }
                 currentGraph.remove("objectIdentifierType");
             }
         } else {
+        	// Generate an identifier if there is none
             logger.error("no unitid found, setting " + ++cegesomacount);
             currentGraph.put("objectIdentifier", "cegesomaID"+cegesomacount);
             
         }
     }
 
+    /**
+     * If there is no title, generate a generic one.
+     * If there are multiple titles, use the first as 'the' title
+     * and put the others in otherFormsOfName
+     */
     @Override
     protected void extractTitle(Map<String, Object> currentGraph) {
     	if (!currentGraph.containsKey(Ontology.NAME_KEY)) {
@@ -81,15 +71,12 @@ public class CegesomaEadHandler extends EadHandler {
         } else if(currentGraph.get(Ontology.NAME_KEY) instanceof List){
             logger.debug("class of identifier: " + currentGraph.get(Ontology.NAME_KEY).getClass());
             ArrayList<String> names = (ArrayList<String>) currentGraph.get(Ontology.NAME_KEY);
-            ArrayList<String> nametypes = (ArrayList<String>) currentGraph.get(Ontology.NAME_KEY+"Type");
-            for (int i = 0; i < names.size(); i++) {
-                if (nametypes.get(i).equals("Bestandsbezeichnung")) {
-                    logger.debug("found official name: " + names.get(i));
-                    currentGraph.put(Ontology.NAME_KEY, names.get(i));
-                } else {
-                    logger.debug("found other form of name: " + names.get(i));
-                    currentGraph.put("otherFormsOfName", names.get(i));
-                }
+            logger.debug("Using first name as official name: " + names.get(0));
+            currentGraph.put(Ontology.NAME_KEY, names.get(0));
+            
+            for (int i = 1; i < names.size(); i++) {
+                logger.debug("Adding other names as 'other form of name': " + names.get(i));
+                currentGraph.put("otherFormsOfName", names.get(i));
             }
             currentGraph.remove(Ontology.NAME_KEY+"Type");
         }
@@ -103,7 +90,7 @@ public class CegesomaEadHandler extends EadHandler {
         final String UNITDATE = "unitDates";  
         
         if (!currentGraph.containsKey(UNITDATE)) {
-            //finding some date for this unit:
+            // Add a generic date for this unit without date:
             logger.error("Cegesoma node without unitdate field: ");
             currentGraph.put(Ontology.ENTITY_HAS_DATE, "UNKNOWN date" );
         } else if(currentGraph.get(UNITDATE) instanceof List){
