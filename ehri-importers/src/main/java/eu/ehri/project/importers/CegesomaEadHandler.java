@@ -20,14 +20,11 @@ import org.xml.sax.SAXException;
  *
  * @author linda
  */
-public class CegesomaEadHandler extends SaxXmlHandler {
+public class CegesomaEadHandler extends EadHandler {
 
     private static int cegesomacount = 0;
     private static final Logger logger = LoggerFactory
             .getLogger(CegesomaEadHandler.class);
-    private final List<DocumentaryUnit>[] children = new ArrayList[12];
-    // Pattern for EAD nodes that represent a child item
-    private Pattern childItemPattern = Pattern.compile("^/*c(?:\\d*)$");
     
 
     /**
@@ -44,157 +41,87 @@ public class CegesomaEadHandler extends SaxXmlHandler {
         return new org.xml.sax.InputSource(new java.io.StringReader(""));
     }
 
-    @SuppressWarnings("unchecked")
     public CegesomaEadHandler(AbstractImporter<Map<String, Object>> importer) {
         super(importer, new XmlImportProperties("cegesoma.properties"));
-        children[depth] = new ArrayList<DocumentaryUnit>();
+        this.defaultLanguage = "nl";
     }
 
+    
     @Override
-    public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
-        super.startElement(uri, localName, qName, attributes);
-
-        if (childItemPattern.matcher(qName).matches() || qName.equals("archdesc")) { //a new DocumentaryUnit should be created
-            children[depth] = new ArrayList<DocumentaryUnit>();
-        }
-//        for (int attr = 0; attr < attributes.getLength(); attr++) { // only certain attributes get stored
-//            if (p.hasAttributeProperty(attributes.getLocalName(attr))) {
-//                putPropertyInCurrentGraph(p.getAttributeProperty(attributes.getLocalName(attr)), attributes.getValue(attr));
-//            }
-//        }
-    }
-
-    @Override
-    public void endElement(String uri, String localName, String qName) throws SAXException {
-        //the child closes, add the new DocUnit to the list, establish some relations
-        super.endElement(uri, localName, qName);
-
-        if (needToCreateSubNode(qName)) {
-            Map<String, Object> currentGraph = currentGraphPath.pop();
-            if (childItemPattern.matcher(qName).matches() || qName.equals("archdesc")) {
-                try {
-                    //add any mandatory fields not yet there:
-                	
-                    //not all units have ids, and some have multiple, find the Bestandssignatur
-                    if (currentGraph.containsKey("objectIdentifier")) {
-                        if (currentGraph.get("objectIdentifier") instanceof List) {
-                            logger.debug("class of identifier: " + currentGraph.get("objectIdentifier").getClass());
-                            ArrayList<String> identifiers = (ArrayList<String>) currentGraph.get("objectIdentifier");
-                            ArrayList<String> identifiertypes = (ArrayList<String>) currentGraph.get("objectIdentifierType");
-                            for (int i = 0; i < identifiers.size(); i++) {
-                                if (identifiertypes.get(i).equals("Bestandssignatur")) {
-                                    logger.debug("found official id: " + identifiers.get(i));
-                                    currentGraph.put("objectIdentifier", identifiers.get(i));
-                                }else {
-                                    logger.debug("found other form of identifier: " + identifiers.get(i));
-                                    currentGraph.put("arta", identifiers.get(i));
-                                }
-                            }
-                            currentGraph.remove("objectIdentifierType");
-                        }
-                    } else {
-                        logger.error("no unitid found, setting " + ++cegesomacount);
-                        currentGraph.put("objectIdentifier", "cegesomaID"+cegesomacount);
-                        
-                    }
-                    //the BA have multiple unittitles, but with different types, find the Bestandsbezeichnung
-                    if (!currentGraph.containsKey(Ontology.NAME_KEY)) {
-                        //finding some name for this unit:
-                        logger.error("Bundesarchive node without name field: ");
-                        currentGraph.put(Ontology.NAME_KEY, "UNKNOWN title" );
-                    } else if(currentGraph.get(Ontology.NAME_KEY) instanceof List){
-                            logger.debug("class of identifier: " + currentGraph.get(Ontology.NAME_KEY).getClass());
-                            ArrayList<String> names = (ArrayList<String>) currentGraph.get(Ontology.NAME_KEY);
-                            ArrayList<String> nametypes = (ArrayList<String>) currentGraph.get(Ontology.NAME_KEY+"Type");
-                            for (int i = 0; i < names.size(); i++) {
-                                if (nametypes.get(i).equals("Bestandsbezeichnung")) {
-                                    logger.debug("found official name: " + names.get(i));
-                                    currentGraph.put(Ontology.NAME_KEY, names.get(i));
-                                } else {
-                                    logger.debug("found other form of name: " + names.get(i));
-                                    currentGraph.put("otherFormsOfName", names.get(i));
-                                }
-                            }
-                            currentGraph.remove(Ontology.NAME_KEY+"Type");
-                    }
-                    
-                    // Use "de" as default language
-                    if (!currentGraph.containsKey(Ontology.LANGUAGE_OF_DESCRIPTION)) {
-                        currentGraph.put(Ontology.LANGUAGE_OF_DESCRIPTION, "nl");
-                    }
-                    
-                  // Cegesoma have multiple unitdates, but with different types, find the inclusive
-                    // there is a difference between Ontology.ENTITY_HAS_DATE and the .properties-defined term for unit dates
-                    final String UNITDATE = "unitDates";  
-                    
-                    if (!currentGraph.containsKey(UNITDATE)) {
-                        //finding some date for this unit:
-                        logger.error("Cegesoma node without unitdate field: ");
-                        currentGraph.put(Ontology.ENTITY_HAS_DATE, "UNKNOWN date" );
-                    } else if(currentGraph.get(UNITDATE) instanceof List){
-                            logger.debug("class of dates: " + currentGraph.get(UNITDATE).getClass());
-                            ArrayList<String> dates = (ArrayList<String>) currentGraph.get(UNITDATE);
-                            ArrayList<String> datetypes = (ArrayList<String>) currentGraph.get(UNITDATE+"Types");
-                            for (int i = 0; i < dates.size(); i++) {
-                                if (datetypes.get(i).equals("inclusive")) {
-                                    logger.debug("found archival date: " + dates.get(i));
-                                    currentGraph.put(UNITDATE, dates.get(i));
-                                } else {
-                                    logger.debug("found other type of date: " + dates.get(i));
-                                    currentGraph.put("otherFormsOfDate", dates.get(i));
-                                }
-                            }
-                            currentGraph.remove(UNITDATE+"Types"); // Why only when ..Type(s) is a list?
-                    }
-                    
-                DocumentaryUnit current = (DocumentaryUnit)importer.importItem(currentGraph, depth);
-                logger.debug("importer used: " + importer.getClass());
-                if (depth > 0) { // if not on root level
-                    children[depth - 1].add(current); // add child to parent offspring
-                    //set the parent child relationships by hand, as we don't have the parent Documentary unit yet.
-                    //only when closing a DocUnit, one can set the relationship to its children, but not its parent, as that has not yet been closed.
-                    for (DocumentaryUnit child : children[depth]) {
-                        if (child != null) {
-                            current.addChild(child);
-                            // FIXME: Is this correct??? It should be done automatically
-                            // using the scope of the BundleDAO, but because the actual
-                            // parent doesn't exist, we have to override it and set
-                            // this here...
-                            child.setPermissionScope(current);
-                        }
+    protected void extractIdentifier(Map<String, Object> currentGraph) {
+    	if (currentGraph.containsKey("objectIdentifier")) {
+            if (currentGraph.get("objectIdentifier") instanceof List) {
+                logger.debug("class of identifier: " + currentGraph.get("objectIdentifier").getClass());
+                ArrayList<String> identifiers = (ArrayList<String>) currentGraph.get("objectIdentifier");
+                ArrayList<String> identifiertypes = (ArrayList<String>) currentGraph.get("objectIdentifierType");
+                for (int i = 0; i < identifiers.size(); i++) {
+                    if (identifiertypes.get(i).equals("Bestandssignatur")) {
+                        logger.debug("found official id: " + identifiers.get(i));
+                        currentGraph.put("objectIdentifier", identifiers.get(i));
+                    }else {
+                        logger.debug("found other form of identifier: " + identifiers.get(i));
+                        addOtherIdentifier(currentGraph, identifiers.get(i));
                     }
                 }
-                } catch (ValidationError ex) {
-                    logger.error(ex.getMessage());
-                } finally {
-                    depth--;
-                }
-            } else {
-                putSubGraphInCurrentGraph(getImportantPath(currentPath), currentGraph);
-                depth--;
+                currentGraph.remove("objectIdentifierType");
             }
+        } else {
+            logger.error("no unitid found, setting " + ++cegesomacount);
+            currentGraph.put("objectIdentifier", "cegesomaID"+cegesomacount);
+            
         }
-
-        currentPath.pop();
     }
 
     @Override
-    protected boolean needToCreateSubNode(String qName) {
-        //child or parent unit:
-    	boolean need = childItemPattern.matcher(qName).matches() || qName.equals("archdesc");
-        //controlAccess 
-        String path = getImportantPath(currentPath);
-        if (path != null) {
-            need = need || path.endsWith("Access");
+    protected void extractTitle(Map<String, Object> currentGraph) {
+    	if (!currentGraph.containsKey(Ontology.NAME_KEY)) {
+            //finding some name for this unit:
+            logger.error("Cegesoma node without name field: ");
+            currentGraph.put(Ontology.NAME_KEY, "UNKNOWN title" );
+        } else if(currentGraph.get(Ontology.NAME_KEY) instanceof List){
+            logger.debug("class of identifier: " + currentGraph.get(Ontology.NAME_KEY).getClass());
+            ArrayList<String> names = (ArrayList<String>) currentGraph.get(Ontology.NAME_KEY);
+            ArrayList<String> nametypes = (ArrayList<String>) currentGraph.get(Ontology.NAME_KEY+"Type");
+            for (int i = 0; i < names.size(); i++) {
+                if (nametypes.get(i).equals("Bestandsbezeichnung")) {
+                    logger.debug("found official name: " + names.get(i));
+                    currentGraph.put(Ontology.NAME_KEY, names.get(i));
+                } else {
+                    logger.debug("found other form of name: " + names.get(i));
+                    currentGraph.put("otherFormsOfName", names.get(i));
+                }
+            }
+            currentGraph.remove(Ontology.NAME_KEY+"Type");
         }
-        return need;
-    }
-
+	}
+    
+    
     @Override
-    protected List<String> getSchemas() {
-        List<String> schemas = new ArrayList<String>();
-        schemas.add("xlink.xsd");
-        schemas.add("ead.xsd");
-        return schemas;
+    protected void extractDate(Map<String, Object> currentGraph) {
+    	// Cegesoma have multiple unitdates, but with different types, find the inclusive
+        // there is a difference between Ontology.ENTITY_HAS_DATE and the .properties-defined term for unit dates
+        final String UNITDATE = "unitDates";  
+        
+        if (!currentGraph.containsKey(UNITDATE)) {
+            //finding some date for this unit:
+            logger.error("Cegesoma node without unitdate field: ");
+            currentGraph.put(Ontology.ENTITY_HAS_DATE, "UNKNOWN date" );
+        } else if(currentGraph.get(UNITDATE) instanceof List){
+            logger.debug("class of dates: " + currentGraph.get(UNITDATE).getClass());
+            ArrayList<String> dates = (ArrayList<String>) currentGraph.get(UNITDATE);
+            ArrayList<String> datetypes = (ArrayList<String>) currentGraph.get(UNITDATE+"Types");
+            for (int i = 0; i < dates.size(); i++) {
+                if (datetypes.get(i).equals("inclusive")) {
+                    logger.debug("found archival date: " + dates.get(i));
+                    currentGraph.put(UNITDATE, dates.get(i));
+                } else {
+                    logger.debug("found other type of date: " + dates.get(i));
+                    currentGraph.put("otherFormsOfDate", dates.get(i));
+                }
+            }
+            currentGraph.remove(UNITDATE+"Types"); // Why only when ..Type(s) is a list?
+        }
     }
+    
+    
 }
