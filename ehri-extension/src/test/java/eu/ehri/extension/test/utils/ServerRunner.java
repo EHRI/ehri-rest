@@ -1,27 +1,26 @@
 package eu.ehri.extension.test.utils;
 
-import java.io.File;
-
+import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
+import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.frames.FramedGraphFactory;
 import com.tinkerpop.frames.modules.javahandler.JavaHandlerModule;
+import eu.ehri.project.test.utils.GraphCleaner;
+import eu.ehri.project.utils.fixtures.FixtureLoader;
+import eu.ehri.project.utils.fixtures.FixtureLoaderFactory;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.neo4j.kernel.GraphDatabaseAPI;
-import org.neo4j.server.NeoServer;
 import org.neo4j.server.WrappingNeoServerBootstrapper;
 import org.neo4j.server.configuration.Configurator;
 import org.neo4j.server.configuration.ServerConfigurator;
 
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
-import com.tinkerpop.frames.FramedGraph;
-
-import eu.ehri.project.test.utils.GraphCleaner;
-import eu.ehri.project.utils.fixtures.FixtureLoader;
-import eu.ehri.project.utils.fixtures.FixtureLoaderFactory;
+import java.io.File;
 
 /**
  * Class that handles running a test Neo4j server.
  */
 public class ServerRunner extends WrappingNeoServerBootstrapper {
+
+    private static final FramedGraphFactory graphFactory = new FramedGraphFactory(new JavaHandlerModule());
 
     protected final FixtureLoader loader;
     protected final GraphCleaner cleaner;
@@ -30,8 +29,7 @@ public class ServerRunner extends WrappingNeoServerBootstrapper {
 
     public ServerRunner(GraphDatabaseAPI graphDatabase, ServerConfigurator config) {
         super(graphDatabase, config);
-        framedGraph = new FramedGraphFactory(
-                new JavaHandlerModule()).create((new Neo4jGraph(graphDatabase)));
+        framedGraph = graphFactory.create((new Neo4jGraph(graphDatabase)));
         loader = FixtureLoaderFactory.getInstance(framedGraph);
         cleaner = new GraphCleaner(framedGraph);
     }

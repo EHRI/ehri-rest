@@ -3,7 +3,6 @@ package eu.ehri.project.views;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.tinkerpop.frames.FramedGraph;
-
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.acl.ContentTypes;
 import eu.ehri.project.acl.PermissionType;

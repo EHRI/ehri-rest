@@ -1,13 +1,13 @@
 package eu.ehri.project.test;
 
-import static org.junit.Assert.*;
-
 import com.google.common.collect.Lists;
+import com.tinkerpop.blueprints.Vertex;
 import org.junit.Test;
 
-import com.tinkerpop.blueprints.Vertex;
-
 import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class FramesTest extends ModelTestBase {
 

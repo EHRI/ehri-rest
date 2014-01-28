@@ -66,9 +66,14 @@ public class PermissionGrantResource extends AbstractRestResource {
     @Path("/{id:.+}")
     public Response revokePermissionGrant(@PathParam("id") String id)
             throws ItemNotFound, PermissionDenied, BadRequester {
-        new AclViews(graph).revokePermissionGrant(manager.getFrame(id,
-                EntityClass.PERMISSION_GRANT, PermissionGrant.class),
-                getRequesterUserProfile());
-        return Response.status(Status.OK).build();
+        try {
+            new AclViews(graph).revokePermissionGrant(manager.getFrame(id,
+                    EntityClass.PERMISSION_GRANT, PermissionGrant.class),
+                    getRequesterUserProfile());
+            graph.getBaseGraph().commit();
+            return Response.status(Status.OK).build();
+        } finally {
+            cleanupTransaction();
+        }
     }
 }

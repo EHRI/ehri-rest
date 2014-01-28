@@ -24,8 +24,8 @@ import org.slf4j.LoggerFactory;
 public class UshmmTest extends AbstractImporterTest{
     private static final Logger logger = LoggerFactory.getLogger(UshmmTest.class);
     
-    protected final String SINGLE_EAD = "ushmm-irn524448.xml";
-    protected final String IMPORTED_ITEM_ID = "2007.253";
+    protected final String SINGLE_EAD = "irn50845.xml";
+    protected final String IMPORTED_ITEM_ID = "50845";
 
     // Depends on fixtures
     protected final String TEST_REPO = "r1";
@@ -40,7 +40,7 @@ public class UshmmTest extends AbstractImporterTest{
         printGraph(graph);
         
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        ImportLog log = new SaxImportManager(graph, agent, validUser, IcaAtomEadImporter.class, BundesarchiveEadHandler.class)
+        ImportLog log = new SaxImportManager(graph, agent, validUser, IcaAtomEadImporter.class, UshmmHandler.class)
                 .setTolerant(Boolean.TRUE).importFile(ios, logMessage);
 
         printGraph(graph);
@@ -53,7 +53,7 @@ public class UshmmTest extends AbstractImporterTest{
         * 5 more UndeterminedRelationships
         * 1 more UnknownProperty
         */
-        int createCount = origCount + 12;
+        int createCount = origCount + 9;
         assertEquals(createCount, getNodeCount(graph));
 
         // Yet we've only created 1 *logical* item...
@@ -62,9 +62,10 @@ public class UshmmTest extends AbstractImporterTest{
         Iterable<Vertex> docs = graph.getVertices("identifier", IMPORTED_ITEM_ID);
         assertTrue(docs.iterator().hasNext());
         DocumentaryUnit unit = graph.frame(docs.iterator().next(), DocumentaryUnit.class);
-        for(Description d : unit.getDocumentDescriptions())
-            assertEquals("Spuścizna Bernarda Marka (Syg. S/333) [microform]", d.getName());
-
+        for(Description d : unit.getDocumentDescriptions()) {
+            assertEquals("Oral history interview with Marijan Perić", d.getName());
+        	assertEquals("eng", d.getLanguageOfDescription());
+        }
         SystemEvent event = unit.getLatestEvent();
         if (event != null) {
             logger.debug("event: " + event.getLogMessage());

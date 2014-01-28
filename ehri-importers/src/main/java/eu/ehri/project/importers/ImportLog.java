@@ -5,7 +5,7 @@ import java.util.Map;
 
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.events.SystemEvent;
-import eu.ehri.project.persistance.ActionManager.EventContext;
+import eu.ehri.project.persistence.ActionManager.EventContext;
 
 /**
  * Class that serves as a manifest for an import batch,

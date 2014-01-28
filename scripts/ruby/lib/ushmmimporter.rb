@@ -77,7 +77,7 @@ module Ehri
           end
         end
 
-        handler = Importers::IcaAtomEadHandler.new importer
+        handler = Importers::UshmmHandler.new importer
         spf = Java::JavaxXmlParsers::SAXParserFactory.new_instance
         spf.set_namespace_aware false
         spf.set_validating false
@@ -97,7 +97,7 @@ module Ehri
           user = Manager.get_frame(@user_id, Models::UserProfile.java_class)
 
           # Start an action!
-          ctx = Persistance::ActionManager.new(
+          ctx = Persistence::ActionManager.new(
             Graph, ushmm).log_event(user, EventTypes::ingest, "Importing USHMM data")
           log = Importers::ImportLog.new(ctx)
 

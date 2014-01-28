@@ -12,7 +12,7 @@ import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Group;
 import eu.ehri.project.models.Country;
 import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.persistance.Bundle;
+import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.views.impl.LoggingCrudViews;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
@@ -84,8 +84,8 @@ public class CountryAdd extends BaseCommand implements Command {
                 Maps.<String, Object> newHashMap())
                 .withDataValue(Ontology.IDENTIFIER_KEY, countryId)
                 .withDataValue(Ontology.NAME_KEY, countryName);
-        String nodeId = EntityClass.COUNTRY.getIdgen().generateId(
-                EntityClass.COUNTRY, SystemScope.getInstance(), bundle);
+
+        String nodeId = EntityClass.COUNTRY.getIdgen().generateId(SystemScope.getInstance(), bundle);
         bundle = bundle.withId(nodeId);
 
         try {

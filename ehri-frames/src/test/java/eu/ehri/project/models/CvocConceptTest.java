@@ -1,29 +1,26 @@
 package eu.ehri.project.models;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
+import com.google.common.collect.Lists;
+import com.tinkerpop.blueprints.Vertex;
+import eu.ehri.project.definitions.Entities;
+import eu.ehri.project.definitions.Ontology;
+import eu.ehri.project.models.base.Description;
+import eu.ehri.project.models.cvoc.Concept;
+import eu.ehri.project.models.cvoc.ConceptDescription;
+import eu.ehri.project.models.cvoc.Vocabulary;
+import eu.ehri.project.persistence.Bundle;
+import eu.ehri.project.persistence.BundleDAO;
+import eu.ehri.project.test.ModelTestBase;
+import eu.ehri.project.views.Crud;
+import eu.ehri.project.views.impl.CrudViews;
+import org.junit.Test;
 
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import com.google.common.collect.Lists;
-import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.test.ModelTestBase;
-import org.junit.Test;
-import com.tinkerpop.blueprints.Vertex;
-
-import eu.ehri.project.definitions.Entities;
-import eu.ehri.project.models.base.Description;
-import eu.ehri.project.models.cvoc.Concept;
-import eu.ehri.project.models.cvoc.ConceptDescription;
-import eu.ehri.project.models.cvoc.Vocabulary;
-import eu.ehri.project.persistance.Bundle;
-import eu.ehri.project.persistance.BundleDAO;
-import eu.ehri.project.views.Crud;
-import eu.ehri.project.views.impl.CrudViews;
+import static org.junit.Assert.*;
 
 public class CvocConceptTest extends ModelTestBase {
 

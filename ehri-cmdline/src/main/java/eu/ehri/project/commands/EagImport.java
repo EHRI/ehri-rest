@@ -25,7 +25,7 @@ public class EagImport  extends ImportCommand implements Command {
     
     @Override
     public String getHelp() {
-        return "Usage: " + NAME + " [OPTIONS] -user <user-id> -repo <agent-id> <neo4j-graph-dir> <eag1.xml> <eag2.xml> ... <eagN.xml>";
+        return "Usage: " + NAME + " [OPTIONS] -user <user-id> -scope <agent-id> <neo4j-graph-dir> <eag1.xml> <eag2.xml> ... <eagN.xml>";
     }
 
     @Override

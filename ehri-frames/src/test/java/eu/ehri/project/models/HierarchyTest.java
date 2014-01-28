@@ -1,16 +1,14 @@
 package eu.ehri.project.models;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import java.util.List;
-
+import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.test.ModelTestBase;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.models.DocumentaryUnit;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class HierarchyTest extends ModelTestBase {
 

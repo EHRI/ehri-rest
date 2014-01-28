@@ -1,31 +1,16 @@
 package eu.ehri.project.utils.fixtures.impl;
 
-import java.io.*;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
-import com.google.common.collect.Lists;
-import com.tinkerpop.frames.FramedGraphFactory;
-import com.tinkerpop.frames.modules.javahandler.JavaHandlerModule;
-import eu.ehri.project.models.base.Frame;
-import eu.ehri.project.persistance.Mutation;
-import eu.ehri.project.utils.fixtures.FixtureLoader;
-import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.factory.GraphDatabaseFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.yaml.snakeyaml.Yaml;
-
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
+import com.tinkerpop.frames.FramedGraphFactory;
+import com.tinkerpop.frames.modules.javahandler.JavaHandlerModule;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
@@ -34,9 +19,23 @@ import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.persistance.Bundle;
-import eu.ehri.project.persistance.BundleDAO;
+import eu.ehri.project.models.base.Frame;
+import eu.ehri.project.persistence.Bundle;
+import eu.ehri.project.persistence.BundleDAO;
+import eu.ehri.project.persistence.Mutation;
 import eu.ehri.project.utils.GraphInitializer;
+import eu.ehri.project.utils.fixtures.FixtureLoader;
+import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.factory.GraphDatabaseFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.yaml.snakeyaml.Yaml;
+
+import java.io.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * Load data from YAML fixtures.
@@ -65,6 +64,7 @@ public class YamlFixtureLoader implements FixtureLoader {
 
     public static final String GENERATE_ID_PLACEHOLDER = "?";
 
+    private static final FramedGraphFactory graphFactory = new FramedGraphFactory(new JavaHandlerModule());
     private final FramedGraph<? extends TransactionalGraph> graph;
     private final GraphManager manager;
     private static final Logger logger = LoggerFactory
@@ -248,8 +248,7 @@ public class YamlFixtureLoader implements FixtureLoader {
 
         // If the given id is a placeholder, generate it according to type rules
         if (id.trim().contentEquals(GENERATE_ID_PLACEHOLDER)) {
-            String newId = type.getIdgen().generateId(
-                    type, Lists.<String>newArrayList(), b);
+            String newId = type.getIdgen().generateId(Lists.<String>newArrayList(), b);
             b = b.withId(newId);
         }
         return b;
@@ -332,8 +331,7 @@ public class YamlFixtureLoader implements FixtureLoader {
                 .newEmbeddedDatabase(args[0]);
         registerShutdownHook(db);
         try {
-            FramedGraph<? extends TransactionalGraph> graph = new FramedGraphFactory(
-                        new JavaHandlerModule()).create(
+            FramedGraph<? extends TransactionalGraph> graph = graphFactory.create(
                     new Neo4jGraph(db));
             YamlFixtureLoader loader = new YamlFixtureLoader(graph);
             loader.loadTestData();

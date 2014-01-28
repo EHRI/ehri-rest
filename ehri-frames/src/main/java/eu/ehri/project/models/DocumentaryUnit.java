@@ -12,15 +12,12 @@ import com.tinkerpop.pipes.util.Pipeline;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
-import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.base.DescribedEntity;
-import eu.ehri.project.models.base.ItemHolder;
-import eu.ehri.project.models.base.PermissionScope;
+import eu.ehri.project.models.base.*;
 import eu.ehri.project.models.utils.JavaHandlerUtils;
 
 @EntityType(EntityClass.DOCUMENTARY_UNIT)
 public interface DocumentaryUnit extends AccessibleEntity,
-        DescribedEntity, PermissionScope, ItemHolder {
+        DescribedEntity, PermissionScope, ItemHolder, Watchable {
 
     /**
      * Get the repository that holds this documentary unit.
@@ -36,9 +33,6 @@ public interface DocumentaryUnit extends AccessibleEntity,
      */
     @JavaHandler
     public void setRepository(final Repository institution);
-
-    @JavaHandler
-    public Long getChildCount();
 
     /**
      * Get parent documentary unit, if any
@@ -57,6 +51,9 @@ public interface DocumentaryUnit extends AccessibleEntity,
     @JavaHandler
     public Iterable<DocumentaryUnit> getAncestors();
 
+    @JavaHandler
+    public Long getChildCount();
+
     /**
      * Get child documentary units
      * @return
@@ -67,6 +64,9 @@ public interface DocumentaryUnit extends AccessibleEntity,
     @JavaHandler
     public Iterable<DocumentaryUnit> getAllChildren();
 
+    @JavaHandler
+    public void updateChildCountCache();
+
     @Adjacency(label = Ontology.DESCRIPTION_FOR_ENTITY, direction = Direction.IN)
     public Iterable<DocumentDescription> getDocumentDescriptions();
 
@@ -75,28 +75,25 @@ public interface DocumentaryUnit extends AccessibleEntity,
      */
     abstract class Impl implements JavaHandlerContext<Vertex>, DocumentaryUnit {
 
+        public void updateChildCountCache() {
+            it().setProperty(CHILD_COUNT, gremlin().in(Ontology.DOC_IS_CHILD_OF).count());
+        }
+
         public Long getChildCount() {
             Long count = it().getProperty(CHILD_COUNT);
             if (count == null) {
-                it().setProperty(CHILD_COUNT, gremlin().in(Ontology.DOC_IS_CHILD_OF).count());
+                count = gremlin().in(Ontology.DOC_IS_CHILD_OF).count();
             }
             return count;
         }
 
         public Iterable<DocumentaryUnit> getChildren() {
-            // Ensure value is cached when fetching.
-            getChildCount();
             return frameVertices(gremlin().in(Ontology.DOC_IS_CHILD_OF));
         }
 
         public void addChild(final DocumentaryUnit child) {
             child.asVertex().addEdge(Ontology.DOC_IS_CHILD_OF, it());
-            Long count = it().getProperty(CHILD_COUNT);
-            if (count == null) {
-                getChildCount();
-            } else {
-                it().setProperty(CHILD_COUNT, count + 1);
-            }
+            updateChildCountCache();
         }
 
         public Iterable<DocumentaryUnit> getAllChildren() {

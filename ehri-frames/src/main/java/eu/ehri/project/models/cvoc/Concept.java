@@ -4,6 +4,7 @@ import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.Adjacency;
+import com.tinkerpop.frames.Property;
 import com.tinkerpop.frames.modules.javahandler.JavaHandler;
 import com.tinkerpop.frames.modules.javahandler.JavaHandlerContext;
 import eu.ehri.project.definitions.Ontology;
@@ -42,26 +43,23 @@ public interface Concept extends AccessibleEntity, IdentifiableEntity,
     @Adjacency(label = Ontology.ITEM_IN_AUTHORITATIVE_SET)
     public void setVocabulary(final Vocabulary vocabulary);
 
+    @Property(CHILD_COUNT)
+    public Long getChildCount();
 
     // relations to other concepts
     
     // Note that multiple broader concepts are possible
     @Fetch(Ontology.CONCEPT_HAS_BROADER)
     @Adjacency(label = Ontology.CONCEPT_HAS_NARROWER, direction=Direction.IN)
-    //@Adjacency(label = CONCEPT_HAS_BROADER)
     public Iterable<Concept> getBroaderConcepts();
 
-    //@Adjacency(label = CONCEPT_HAS_BROADER)
-    //public void addBroaderConcept(final Concept concept);
-
     // NOTE: don't put a Fetch on it, because it can be a large tree of concepts
-    @Adjacency(label = Ontology.CONCEPT_HAS_NARROWER)
+    @Adjacency(label = Ontology.CONCEPT_HAS_NARROWER, direction = Direction.OUT)
     public Iterable<Concept> getNarrowerConcepts();
 
-    @Adjacency(label = Ontology.CONCEPT_HAS_NARROWER)
+    @JavaHandler
     public void addNarrowerConcept(final Concept concept);
 
-    //@Adjacency(label = CONCEPT_HAS_NARROWER)
     @JavaHandler
     public void removeNarrowerConcept(final Concept concept);
 
@@ -80,33 +78,29 @@ public interface Concept extends AccessibleEntity, IdentifiableEntity,
     @Adjacency(label = Ontology.CONCEPT_HAS_RELATED, direction=Direction.IN)
     public Iterable<Concept> getRelatedByConcepts();
 
+    @JavaHandler
+    public void updateChildCountCache();
+
     /**
      * Implementation of complex methods.
      */
-    abstract class Impl implements JavaHandlerContext<Vertex>, Concept {
+    abstract class Impl  implements JavaHandlerContext<Vertex>, Concept {
+
+        public void updateChildCountCache() {
+            it().setProperty(CHILD_COUNT, gremlin().out(Ontology.CONCEPT_HAS_NARROWER).count());
+        }
 
         public Long getChildCount() {
             Long count = it().getProperty(CHILD_COUNT);
             if (count == null) {
-                it().setProperty(CHILD_COUNT, gremlin().in(Ontology.CONCEPT_HAS_NARROWER).count());
+                count = gremlin().out(Ontology.CONCEPT_HAS_NARROWER).count();
             }
             return count;
         }
 
-        public Iterable<Concept> getNarrowerConcepts() {
-            // Ensure value is cached when fetching.
-            getChildCount();
-            return frameVertices(gremlin().in(Ontology.CONCEPT_HAS_NARROWER));
-        }
-
         public void addNarrowerConcept(final Concept concept) {
             it().addEdge(Ontology.CONCEPT_HAS_NARROWER, concept.asVertex());
-            Long count = it().getProperty(CHILD_COUNT);
-            if (count == null) {
-                getChildCount();
-            } else {
-                it().setProperty(CHILD_COUNT, count + 1);
-            }
+            updateChildCountCache();
         }
 
         public void removeNarrowerConcept(final Concept concept) {
@@ -116,12 +110,7 @@ public interface Concept extends AccessibleEntity, IdentifiableEntity,
                     break;
                 }
             }
-            Long count = it().getProperty(CHILD_COUNT);
-            if (count == null) {
-                getChildCount();
-            } else {
-                it().setProperty(CHILD_COUNT, count - 1);
-            }
+            updateChildCountCache();
         }
     }
 }

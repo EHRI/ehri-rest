@@ -7,7 +7,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Ordering;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.pipes.util.structures.Pair;
-
 import org.neo4j.helpers.collection.Iterables;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

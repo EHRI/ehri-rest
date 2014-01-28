@@ -12,7 +12,7 @@ import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Group;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.persistance.Bundle;
+import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.views.impl.LoggingCrudViews;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
@@ -43,7 +43,7 @@ public class UserAdd extends BaseCommand implements Command {
 
     @Override
     public String getHelp() {
-        return "Usage: useradd [OPTIONS] <user-identifier>";
+        return "Usage: useradd <user-identifier> [OPTIONS]";
     }
 
     @Override
@@ -86,8 +86,8 @@ public class UserAdd extends BaseCommand implements Command {
                 Maps.<String, Object> newHashMap())
                 .withDataValue(Ontology.IDENTIFIER_KEY, userId)
                 .withDataValue(Ontology.NAME_KEY, userName);
-        String nodeId = EntityClass.USER_PROFILE.getIdgen().generateId(
-                EntityClass.USER_PROFILE, SystemScope.getInstance(), bundle);
+        String nodeId = EntityClass.USER_PROFILE.getIdgen()
+                .generateId(SystemScope.getInstance(), bundle);
         bundle = bundle.withId(nodeId);
 
         try {

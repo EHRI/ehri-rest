@@ -20,9 +20,9 @@ java_import "eu.ehri.project.core.GraphManagerFactory"
 java_import "eu.ehri.project.models.EntityClass"
 java_import "eu.ehri.project.models.base.Frame"
 java_import "eu.ehri.project.models.events.SystemEvent"
-java_import "eu.ehri.project.persistance.Bundle"
-java_import "eu.ehri.project.persistance.BundleDAO"
-java_import "eu.ehri.project.persistance.Serializer"
+java_import "eu.ehri.project.persistence.Bundle"
+java_import "eu.ehri.project.persistence.BundleDAO"
+java_import "eu.ehri.project.persistence.Serializer"
 java_import "eu.ehri.project.definitions.EventTypes"
 
 # Use the default if NEO4J_DB isn't set...

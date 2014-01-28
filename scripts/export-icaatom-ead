@@ -28,7 +28,7 @@ br.set_handle_referer(True)
 br.set_handle_robots(False)
 
 # Follows refresh 0 but not hangs on refresh > 0
-br.set_handle_refresh(mechanize._http.HTTPRefreshProcessor(), max_time=1)
+br.set_handle_refresh(mechanize._http.HTTPRefreshProcessor(), max_time=20)
 
 # Login
 loginpage = br.open(url + "/index.php/;user/login")
@@ -37,28 +37,45 @@ br.form['email'] = email
 br.form['password'] = password
 br.submit()
 
-page = br.open(url + "/index.php/;informationobject/browse?limit=2000")
-html = page.read()
-soup = BeautifulSoup(html)
-for td in soup("table", {"class":"sticky-enabled"})[0].tbody("tr"):
-    link = td("a")[0]
-    rawpath = link["href"]
-    repository = link["data-repository"]
-    if repository is None or repository.strip() == "":
-        print("Item '%s' has no repository code data" % rawpath, file=sys.stderr)
-        continue
-    xmlpath = rawpath.replace(";isad", ";ead?sf_format=xml")
-    name = os.path.basename(rawpath.replace(";isad", ""))
-    try:
-        ead = br.open(xmlpath)
-        outpath = os.path.join(outdir, repository)
-        if not os.path.exists(outpath):
-            os.mkdir(outpath)
-        with open(os.path.join(outpath, name + ".xml"), "w") as f:
-            f.write(ead.read())
-            print("%s -> %s" % (repository, xmlpath))
-    except Exception, e:
-        print(e, file=sys.stderr)
+limit = 100
+page_num = 1
+done_all = {}
+
+while True:
+    page = br.open(url + "/index.php/;informationobject/browse?page=%d&limit=%s" % (page_num, limit))
+    html = page.read()
+    soup = BeautifulSoup(html)
+    for td in soup("table", {"class":"sticky-enabled"})[0].tbody("tr"):
+        link = td("a")[0]
+        rawpath = link["href"]
+        repository = link["data-repository"]
+        if repository is None or repository.strip() == "":
+            print("Item '%s' has no repository code data" % rawpath, file=sys.stderr)
+            continue
+        xmlpath = rawpath.replace(";isad", ";ead?sf_format=xml")
+
+        # if we've already got it, exit!
+        if xmlpath in done_all.values():
+            break
+
+        name = os.path.basename(rawpath.replace(";isad", ""))
+        try:
+            ead = br.open(xmlpath)
+            outpath = os.path.join(outdir, repository)
+            if not os.path.exists(outpath):
+                os.mkdir(outpath)
+            with open(os.path.join(outpath, name + ".xml"), "w") as f:
+                f.write(ead.read())
+                print("%s -> %s" % (repository, xmlpath))
+        except Exception, e:
+            print(e, file=sys.stderr)
+        done_all[xmlpath] = True
+
+    page_num += 1
+
+print("Done: %s" % len(done_all))
+
+sys.exit(0)
 
 
 

@@ -1,9 +1,7 @@
 package eu.ehri.project.utils.fixtures;
 
 import com.tinkerpop.blueprints.TransactionalGraph;
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
-
 import eu.ehri.project.utils.fixtures.impl.YamlFixtureLoader;
 
 /**

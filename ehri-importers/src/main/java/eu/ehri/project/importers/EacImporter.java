@@ -12,14 +12,13 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.*;
 import eu.ehri.project.models.base.*;
 import eu.ehri.project.models.cvoc.AuthoritativeSet;
-import eu.ehri.project.models.idgen.IdGenerator;
-import eu.ehri.project.persistance.Bundle;
+import eu.ehri.project.persistence.Bundle;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import eu.ehri.project.persistance.Mutation;
+import eu.ehri.project.persistence.Mutation;
 import eu.ehri.project.views.impl.CrudViews;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -97,9 +96,7 @@ public class EacImporter extends EaImporter {
 
         unit = unit.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
 
-        IdGenerator generator = EntityClass.HISTORICAL_AGENT.getIdgen();
-        String id = generator.generateId(EntityClass.HISTORICAL_AGENT, permissionScope, unit);
-        Mutation<HistoricalAgent> mutation = persister.createOrUpdate(unit.withId(id), HistoricalAgent.class);
+        Mutation<HistoricalAgent> mutation = persister.createOrUpdate(unit, HistoricalAgent.class);
         HistoricalAgent frame = mutation.getNode();
 
         if (mutation.created()) {
@@ -110,6 +107,7 @@ public class EacImporter extends EaImporter {
         if (!permissionScope.equals(SystemScope.getInstance())
                 && mutation.created()) {
             frame.setAuthoritativeSet(framedGraph.frame(permissionScope.asVertex(), AuthoritativeSet.class));
+            frame.setPermissionScope(permissionScope);
         }
 
         handleCallbacks(mutation);

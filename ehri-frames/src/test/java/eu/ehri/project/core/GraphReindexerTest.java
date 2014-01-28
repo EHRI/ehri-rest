@@ -1,24 +1,19 @@
 package eu.ehri.project.core;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
-import java.util.HashMap;
-
+import com.tinkerpop.blueprints.CloseableIterable;
+import com.tinkerpop.blueprints.Index;
 import com.tinkerpop.blueprints.IndexableGraph;
+import com.tinkerpop.blueprints.Vertex;
+import eu.ehri.project.models.EntityClass;
+import eu.ehri.project.models.annotations.EntityType;
+import eu.ehri.project.test.ModelTestBase;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.tinkerpop.blueprints.CloseableIterable;
-import com.tinkerpop.blueprints.Index;
-import com.tinkerpop.blueprints.Vertex;
+import java.util.HashMap;
 
-import eu.ehri.project.core.impl.GraphReindexer;
-import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.annotations.EntityType;
-import eu.ehri.project.test.ModelTestBase;
+import static org.junit.Assert.*;
 
 
 public class GraphReindexerTest extends ModelTestBase {

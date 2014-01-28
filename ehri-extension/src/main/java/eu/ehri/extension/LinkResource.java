@@ -10,8 +10,8 @@ import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Link;
 import eu.ehri.project.models.UndeterminedRelationship;
 import eu.ehri.project.models.base.*;
-import eu.ehri.project.persistance.ActionManager;
-import eu.ehri.project.persistance.Bundle;
+import eu.ehri.project.persistence.ActionManager;
+import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.views.LinkViews;
 import eu.ehri.project.views.Query;
 import eu.ehri.project.views.ViewFactory;
@@ -113,22 +113,15 @@ public class LinkResource extends
                     getAccessors(accessors, user));
             graph.getBaseGraph().commit();
             return buildResponseFromAnnotation(link);
-        } catch (ItemNotFound e) {
-            graph.getBaseGraph().rollback();
-            throw e;
-        } catch (DeserializationError e) {
-            graph.getBaseGraph().rollback();
-            throw e;
-        } catch (ValidationError e) {
-            graph.getBaseGraph().rollback();
-            throw e;
-        } catch (PermissionDenied e) {
-            graph.getBaseGraph().rollback();
-            throw e;
-        } catch (Exception e) {
+        } catch (SerializationError e) {
             graph.getBaseGraph().rollback();
             throw new RuntimeException(e);
+        } finally {
+            if (graph.getBaseGraph().isInTransaction()) {
+                graph.getBaseGraph().rollback();
+            }
         }
+
     }
 
     /**
@@ -152,7 +145,7 @@ public class LinkResource extends
         if (description == null) {
             throw new ItemNotFound(id);
         }
-        AccessibleEntity item = description.getEntity();
+        DescribedEntity item = description.getEntity();
         if (item == null) {
             throw new ItemNotFound(id);
         }
@@ -162,15 +155,10 @@ public class LinkResource extends
                     .deleteDependent(rel, item, userProfile, UndeterminedRelationship.class);
             graph.getBaseGraph().commit();
             return Response.status(Status.OK).build();
-        } catch (PermissionDenied permissionDenied) {
-            graph.getBaseGraph().rollback();
-            throw permissionDenied;
-        } catch (ValidationError validationError) {
-            graph.getBaseGraph().rollback();
-            throw validationError;
-        } catch (SerializationError serializationError) {
-            graph.getBaseGraph().rollback();
-            throw serializationError;
+        } finally {
+            if (graph.getBaseGraph().isInTransaction()) {
+                graph.getBaseGraph().rollback();
+            }
         }
     }
 
@@ -228,15 +216,8 @@ public class LinkResource extends
             manager.deleteVertex(link.asVertex());
             graph.getBaseGraph().commit();
             return Response.ok().build();
-        } catch (ItemNotFound e) {
-            graph.getBaseGraph().rollback();
-            throw e;
-        } catch (PermissionDenied e) {
-            graph.getBaseGraph().rollback();
-            throw e;
-        } catch (Exception e) {
-            graph.getBaseGraph().rollback();
-            throw new RuntimeException(e);
+        } finally {
+            cleanupTransaction();
         }
     }
 

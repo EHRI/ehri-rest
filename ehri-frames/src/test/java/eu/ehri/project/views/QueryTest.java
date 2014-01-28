@@ -1,26 +1,24 @@
 package eu.ehri.project.views;
 
-import java.util.List;
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.exceptions.AccessDenied;
-import eu.ehri.project.models.Repository;
-import eu.ehri.project.test.AbstractFixtureTest;
-import org.junit.Test;
-
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Vertex;
-
 import eu.ehri.project.acl.AclManager;
+import eu.ehri.project.definitions.Ontology;
+import eu.ehri.project.exceptions.AccessDenied;
 import eu.ehri.project.exceptions.IndexNotFoundException;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
+import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.base.Accessor;
+import eu.ehri.project.test.AbstractFixtureTest;
 import eu.ehri.project.views.Query.Page;
+import org.junit.Test;
+
+import java.util.List;
 
 import static org.junit.Assert.*;
 

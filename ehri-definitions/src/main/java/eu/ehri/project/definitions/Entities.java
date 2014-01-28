@@ -19,7 +19,7 @@ public class Entities {
     public static final String PERMISSION = "permission";
     public static final String PERMISSION_GRANT = "permissionGrant";
     public static final String CONTENT_TYPE = "contentType";
-    public static final String REVISION = "revision";
+    public static final String VERSION = "version";
     public static final String LINK = "link";
     public static final String CVOC_VOCABULARY = "cvocVocabulary";
     public static final String CVOC_CONCEPT = "cvocConcept";
@@ -28,4 +28,5 @@ public class Entities {
     public static final String MAINTENANCE_EVENT ="maintenanceEvent";
     public static final String UNDETERMINED_RELATIONSHIP = "relationship";
     public static final String AUTHORITATIVE_SET = "authoritativeSet";
+    public static final String VIRTUAL_COLLECTION = "virtualCollection";
 }

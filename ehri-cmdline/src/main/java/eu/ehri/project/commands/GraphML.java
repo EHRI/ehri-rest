@@ -6,7 +6,7 @@ import com.tinkerpop.blueprints.util.io.graphml.GraphMLWriter;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
-import eu.ehri.project.core.impl.GraphReindexer;
+import eu.ehri.project.core.GraphReindexer;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.MissingArgumentException;
 import org.apache.commons.cli.Option;
@@ -18,6 +18,14 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
+ * IMPORTANT! This command is currently not available since GraphML
+ * dumps are broken with the EHRI DB since we use array properties
+ * which do not save/load correctly.
+ *
+ * Instead the `graphson` command should be used to dump JSON.
+ *
+ * --------------------------------
+ *
  * Dump the complete graph as graphml file or import such a dump
  *
  * Example usage:

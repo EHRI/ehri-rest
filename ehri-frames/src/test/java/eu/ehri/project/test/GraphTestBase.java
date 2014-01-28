@@ -16,14 +16,15 @@ import org.neo4j.test.TestGraphDatabaseFactory;
  */
 public abstract class GraphTestBase {
 
+    private static final FramedGraphFactory graphFactory = new FramedGraphFactory(new JavaHandlerModule());
+
     protected FramedGraph<? extends TransactionalGraph> graph;
     protected GraphManager manager;
 
     @Before
     public void setUp() throws Exception {
 
-        graph = new FramedGraphFactory(
-                new JavaHandlerModule()).create(new Neo4jGraph(
+        graph = graphFactory.create(new Neo4jGraph(
                 new TestGraphDatabaseFactory().newImpermanentDatabaseBuilder()
                         .newGraphDatabase()));
         manager = GraphManagerFactory.getInstance(graph);

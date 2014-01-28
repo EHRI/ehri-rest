@@ -10,7 +10,7 @@ import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.models.utils.JavaHandlerUtils;
 
-public interface AccessibleEntity extends PermissionGrantTarget {
+public interface AccessibleEntity extends PermissionGrantTarget, VersionedEntity, AnnotatableEntity {
 
     @Fetch(value = Ontology.IS_ACCESSIBLE_TO, depth = 1)
     @Adjacency(label = Ontology.IS_ACCESSIBLE_TO)
