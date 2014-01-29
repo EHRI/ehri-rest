@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet TYPE="text/xsl" href="http://pallas.cegesoma.be/ead/res/cs1Nie.xsl"?>
+<!DOCTYPE Ead PUBLIC "-//Society of American Archivists//DTD ead.dtd (Encoded
+Archival Description (EAD) Version 1.0)//EN" "http://pallas.cegesoma.be/ead/res/ead.dtd" [ 
+<!ENTITY % eadnotat PUBLIC "-//Society of American Archivists//DTD eadnotat.ent
+(EAD Notation Declarations)//EN" "http://pallas.cegesoma.be/ead/res/eadnotat.ent"> 
+%eadnotat;
+]>
+<ead relatedencoding="MARC21">
+  <eadheader audience="internal" langencoding="ISO 639-2" findaidstatus="EDITED-FULL-DRAFT" id="a0">
+    <eadid systemid="SOMA_CEGES_72695" source="Studie- en Documentatiecentrum Oorlog en Hedendaagse Maatschappij" encodinganalog="852">SOMA_CEGES_72695</eadid>
+    <filedesc>
+      <titlestmt>
+        <titleproper>Nola</titleproper>
+        <subtitle>Inventaris "Deelarchief betreffende het actienetwerk Nola (1942-1944)"</subtitle>
+        <author>Automatisch gegenereerd door PALLAS systeem</author>
+      </titlestmt>
+      <publicationstmt>
+        <publisher>Studie- en Documentatiecentrum Oorlog en Hedendaagse Maatschappij</publisher>
+        <date>28/03/2013</date>
+        <address>Luchtvaartsquare 29 - 1070 Brussel (Belgi&#235;)</address>
+      </publicationstmt>
+    </filedesc>
+    <profiledesc>
+       <creation><date>28/03/2013</date>Automatisch gegenereerd door PALLAS systeem</creation>
+       <langusage>F</langusage>
+    </profiledesc>
+  </eadheader>
+  <archdesc level="fonds" type="inventory">
+    <did id="a1">
+      <head>Deelarchief betreffende het actienetwerk Nola (1942-1944)</head>
+      <repository encodinganalog="852$a" label="Depot:"><addressline>Luchtvaartsquare 29 - 1070 Brussel (Belgi&#235;)</addressline>Studie- en Documentatiecentrum Oorlog en Hedendaagse Maatschappij</repository>
+      <origination label="Vormer:">
+        <corpname encodinganalog="110">Nola</corpname>
+      </origination>
+      <unittitle encodinganalog="245$a" label="Titel:">Deelarchief betreffende het actienetwerk Nola (1942-1944)</unittitle>
+      <unitdate type="inclusive" encodinganalog="245$f" label="Data:">1944-1979</unitdate>
+      <unitdate type="bulk" encodinganalog="245$g" label="Overwegend:">1944-1948</unitdate>
+      <physdesc encodinganalog="300$a" label="Omvang:">41 fardes</physdesc>
+      <unitid encodinganalog="099" countrycode="BE" label="Identificatie:">AA 1134</unitid>
+    </did>
+    <organization encodinganalog="351$a" id="a4">
+      <head>Organisatie</head>
+      <p></p>
+    </organization>
+    <arrangement encodinganalog="351$b" id="a5">
+      <head>Ordening</head>
+      <p></p>
+    </arrangement>
+    <add>
+      <otherfindaid encodinganalog="555" id="a8">
+      <head>Andere toegangen</head>
+      <p>Groupe Nola / door D. Martin (Soma, januari 1984, 12 p.)</p>
+      </otherfindaid>
+    </add>
+    <controlaccess id="a12">
+    <head>Onderwerpen</head>
+      <controlaccess>
+      <head>Instellingen, bedrijven, organisaties</head>
+      <corpname encodinganalog="710">Nola</corpname>
+      </controlaccess>
+      <controlaccess>
+      <head>Trefwoorden</head>
+      <subject encodinganalog="650">belgie--binnenlandse troepen (1944)</subject>
+      <subject encodinganalog="650">belgie. staatsveiligheid</subject>
+      <subject encodinganalog="650">belgique. ministere de la defense nationale. office de la resistance</subject>
+      <subject encodinganalog="650">belgisch leger der partizanen</subject>
+      <subject encodinganalog="650">belgische nationale beweging</subject>
+      <subject encodinganalog="650">borinage (belgique)--histoire--1944 (liberation)</subject>
+      <subject encodinganalog="650">brabant wallon (belgique &#59; province)--histoire--1944 (liberation)</subject>
+      <subject encodinganalog="650">civil affairs</subject>
+      <subject encodinganalog="650">federation nationale des resistants armes juifs</subject>
+      <subject encodinganalog="650">geheim leger</subject>
+      <subject encodinganalog="650">gerard, georges</subject>
+      <subject encodinganalog="650">grande-bretagne. belgian military mission</subject>
+      <subject encodinganalog="650">groep "g"</subject>
+      <subject encodinganalog="650">groot-brittannie. political warfare executive</subject>
+      <subject encodinganalog="650">guerre mondiale (1939-1945)--resistants--statut juridique--belgique</subject>
+      <subject encodinganalog="650">heffinck, henri</subject>
+      <subject encodinganalog="650">herdenkingsriten en herdenkingsplechtigheden--belgie</subject>
+      <subject encodinganalog="650">ittre (belgique)</subject>
+      <subject encodinganalog="650">jemappes (belgique)</subject>
+      <subject encodinganalog="650">leopold iii (roi des belges &#59; 1934-1951)</subject>
+      <subject encodinganalog="650">memoire et representations collectives--belgique</subject>
+      <subject encodinganalog="650">nationaal comite voor actie en waakzaamheid--belgie</subject>
+      <subject encodinganalog="650">nola</subject>
+      <subject encodinganalog="650">onafhankelijkheidsfront</subject>
+      <subject encodinganalog="650">patriottische milities</subject>
+      <subject encodinganalog="650">potvin, gerard</subject>
+      <subject encodinganalog="650">union des services de renseignement et d&#39;action</subject>
+      <subject encodinganalog="650">union nationale de la resistance</subject>
+      <subject encodinganalog="650">verzetsbewegingen--belgie--1944-...</subject>
+      <subject encodinganalog="650">wereldoorlog (1939-1945)--collaboratie--borinage (belgie)</subject>
+      <subject encodinganalog="650">wereldoorlog (1939-1945)--gewapend verzet--borinage (belgie)</subject>
+      <subject encodinganalog="650">witte brigade (fidelio)</subject>
+      </controlaccess>
+      <controlaccess>
+      <head>Titel</head>
+      <title encodinganalog="630">Deelarchief betreffende het actienetwerk Nola (1942-1944)</title>
+    </controlaccess>
+    </controlaccess>
+    <dsc id="a23" type="combined">
+<head>Gedetailleerde beschrijving</head>
+    <c01 level="file">
+    <did>
+      <unittitle encodinganalog="245$a" label="Titel:">Documenten betreffende l&#39;Union nationale de la R&#233;sistance</unittitle>
+      <unitdate type="inclusive" encodinganalog="245$f" label="Data:"></unitdate>
+    </did>
+    <organization encodinganalog="351$a" id="a4">
+      <head>Organisatie</head>
+      <p></p>
+    </organization>
+    <arrangement encodinganalog="351$b" id="a5">
+      <head>Ordening</head>
+      <p></p>
+    </arrangement>
+    <c02 level="file">
+    <did>
+      <unittitle encodinganalog="245$a" label="Titel:">Documenten betreffende l&#39;Union nationale de la R&#233;sistance : PV van vergaderingen, correspondentie, projet de loi sur les statuts de la R&#233;sistance en documenten betr. praktische</unittitle>
+      <unitdate type="inclusive" encodinganalog="245$f" label="Data:">1944-1948</unitdate>
+      <physdesc encodinganalog="300$a" label="Omvang:">47 st.</physdesc>
+      <unitid encodinganalog="099" countrycode="BE" label="Identificatie:">AA 1134 / 32</unitid>
+    </did>
+    <organization encodinganalog="351$a" id="a4">
+      <head>Organisatie</head>
+      <p></p>
+    </organization>
+    <arrangement encodinganalog="351$b" id="a5">
+      <head>Ordening</head>
+      <p></p>
+    </arrangement>
+    </c02>
+    <c02 level="file">
+    <did>
+      <unittitle encodinganalog="245$a" label="Titel:">Documenten van en in verband met verzetsgroepen en vaderlandslievende verenigingen en briefwisseling Pirenne-Joset/G&#233;rard betr. geme</unittitle>
+      <unitdate type="inclusive" encodinganalog="245$f" label="Data:">1944-1948</unitdate>
+      <physdesc encodinganalog="300$a" label="Omvang:">22 st.</physdesc>
+      <unitid encodinganalog="099" countrycode="BE" label="Identificatie:">AA 1134 / 33</unitid>
+    </did>
+    <organization encodinganalog="351$a" id="a4">
+      <head>Organisatie</head>
+      <p></p>
+    </organization>
+    <arrangement encodinganalog="351$b" id="a5">
+      <head>Ordening</head>
+      <p></p>
+    </arrangement>
+    </c02>
+    <c02 level="item">
+    <did>
+      <unittitle encodinganalog="245$a" label="Titel:">Wetteksten (U.) S.R.A.</unittitle>
+      <unitdate type="inclusive" encodinganalog="245$f" label="Data:"></unitdate>
+      <physdesc encodinganalog="300$a" label="Omvang:">2 st.</physdesc>
+      <unitid encodinganalog="099" countrycode="BE" label="Identificatie:">AA 1134 / 34</unitid>
+    </did>
+    <organization encodinganalog="351$a" id="a4">
+      <head>Organisatie</head>
+      <p></p>
+    </organization>
+    <arrangement encodinganalog="351$b" id="a5">
+      <head>Ordening</head>
+      <p></p>
+    </arrangement>
+    </c02>
+    </c01>
+    </dsc>
+  </archdesc>
+</ead>

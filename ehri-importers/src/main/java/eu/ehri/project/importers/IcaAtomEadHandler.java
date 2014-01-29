@@ -42,6 +42,7 @@ public class IcaAtomEadHandler extends EadHandler {
                 currentGraph.put(Ontology.NAME_KEY, "UNKNOWN title");
             }
         }
+
     }
 
 }
