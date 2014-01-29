@@ -1,5 +1,6 @@
 package eu.ehri.project.commands;
 
+import com.google.common.collect.Ordering;
 import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
@@ -38,6 +39,7 @@ public class CmdEntryPoint extends BaseCommand {
         mmap.put(GraphViz.NAME, GraphViz.class);
         mmap.put(LoadFixtures.NAME, LoadFixtures.class);
         mmap.put(Initialize.NAME, Initialize.class);
+        mmap.put(Reindex.NAME, Reindex.class);
         mmap.put(UserAdd.NAME, UserAdd.class);
         mmap.put(UserMod.NAME, UserMod.class);
         mmap.put(EntityAdd.NAME, EntityAdd.class);
@@ -61,7 +63,7 @@ public class CmdEntryPoint extends BaseCommand {
         String help = "Command line interface for the EHRI graph database."
                 + sep + sep + "The following commands are available:" + sep
                 + sep;
-        for (String key : CmdEntryPoint.COMMANDS.keySet()) {
+        for (String key : Ordering.natural().sortedCopy(CmdEntryPoint.COMMANDS.keySet())) {
             help += "  " + key + sep;
         }
         return help;

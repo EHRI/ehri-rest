@@ -28,6 +28,7 @@ public abstract class BaseCommand {
     }
     public abstract int execWithOptions(final FramedGraph<? extends TransactionalGraph> graph,
             CommandLine cmdLine) throws Exception;
+
     public boolean isReadOnly() {
         return false;
     }
