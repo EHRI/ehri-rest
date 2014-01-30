@@ -30,7 +30,7 @@ public interface AccessibleEntity extends PermissionGrantTarget, VersionedEntity
     @Adjacency(label = Ontology.HAS_PERMISSION_SCOPE)
     public PermissionScope getPermissionScope();
 
-    @Adjacency(label = Ontology.HAS_PERMISSION_SCOPE)
+    @JavaHandler
     public void setPermissionScope(final PermissionScope scope);
 
     @JavaHandler
@@ -52,6 +52,12 @@ public interface AccessibleEntity extends PermissionGrantTarget, VersionedEntity
      * Implementation of complex methods.
      */
     abstract class Impl implements JavaHandlerContext<Vertex>, AccessibleEntity {
+
+        public void setPermissionScope(final PermissionScope scope) {
+            JavaHandlerUtils.addSingleRelationship(it(), scope.asVertex(),
+                    Ontology.HAS_PERMISSION_SCOPE);
+        }
+
         public SystemEvent getLatestEvent() {
             GremlinPipeline<Vertex, Vertex> out = gremlin()
                     .out(Ontology.ENTITY_HAS_LIFECYCLE_EVENT)
