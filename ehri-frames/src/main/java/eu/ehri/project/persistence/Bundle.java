@@ -41,6 +41,15 @@ public final class Bundle {
     public static final String META_KEY = "meta";
 
     /**
+     * Merge discriminator functor, used to instruct the merge operation
+     * whether or not a relation that exists in the source bundle should be kept
+     * or discarded.
+     */
+    public static interface MergeDiscriminator {
+        public boolean replace(final Bundle a);
+    }
+
+    /**
      * Properties that are "managed", i.e. automatically set
      * date/time strings or cache values should begin with a
      * prefix and are ignored Bundle equality calculations.
@@ -423,6 +432,28 @@ public final class Bundle {
         Map<String, Object> mergeData = Maps.newHashMap(getData());
         mergeData.putAll(otherBundle.getData());
         return withData(mergeData);
+    }
+
+    /**
+     * Merge this bundle with another bundle, using a discriminator
+     * function to determine if top level relations should be preserved
+     * or discarded.
+     *
+     * @param otherBundle The bundle to merge into this one
+     * @param discriminator The discriminator function
+     * @return A merged bundle
+     */
+    public Bundle mergeWith(Bundle otherBundle, MergeDiscriminator discriminator) {
+        Builder builder = new Builder(type)
+                .setId(id).addData(data).addMetaData(meta)
+                .addData(otherBundle.data).addMetaData(otherBundle.meta)
+                .addRelations(otherBundle.getRelations());
+        for (Map.Entry<String,Bundle> rel : relations.entries()) {
+            if (!discriminator.replace(rel.getValue())) {
+                builder.addRelation(rel.getKey(), rel.getValue());
+            }
+        }
+        return builder.build();
     }
 
     /**

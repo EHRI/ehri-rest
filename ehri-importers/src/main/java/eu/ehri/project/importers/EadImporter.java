@@ -3,6 +3,8 @@ package eu.ehri.project.importers;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.definitions.Ontology;
+import eu.ehri.project.exceptions.ItemNotFound;
+import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.*;
 import eu.ehri.project.models.base.*;
@@ -14,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 import eu.ehri.project.persistence.Mutation;
+import eu.ehri.project.persistence.Serializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,6 +39,8 @@ public class EadImporter extends EaImporter {
      * at depth 1 (rather than 0)
      */
     protected final int TOP_LEVEL_DEPTH = 1;
+    private Serializer mergeSerializer = new Serializer.Builder(framedGraph)
+            .dependentOnly().build();
 
     /**
      * Construct an EadImporter object.
@@ -86,10 +91,34 @@ public class EadImporter extends EaImporter {
         }
         unit = unit.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
 
-        // Old solution to missing IDs: generate a replacement. 
-        // New solution used above: throw error - Handlers should produce IDs if necessary.
+        Bundle unitWithIds = unit.generateIds(permissionScope);
+        if (manager.exists(unitWithIds.getId())) {
+            try {
+                DocumentaryUnit item = manager.getFrame(unitWithIds.getId(), DocumentaryUnit.class);
 
+                Bundle existingBundle = mergeSerializer.vertexFrameToBundle(item);
+                final String lang = (String)descBundle.getDataValue(Ontology.LANGUAGE);
+                logger.info("Importing file with language code: '" + lang + "'");
+                Bundle.MergeDiscriminator discriminator = new Bundle.MergeDiscriminator() {
+                    @Override
+                    public boolean replace(Bundle a) {
+                        if (!a.getType().equals(EntityClass.DOCUMENT_DESCRIPTION))
+                            return false;
+                        if (!a.getDataValue(Ontology.LANGUAGE).equals(lang)) {
+                            return false;
+                        }
 
+                        // TODO: Add check about manual creation...
+                        return true;
+                    }
+                };
+                unit = existingBundle.mergeWith(unitWithIds, discriminator);
+            } catch (ItemNotFound itemNotFound) {
+                itemNotFound.printStackTrace();
+            } catch (SerializationError serializationError) {
+                serializationError.printStackTrace();
+            }
+        }
 
         Mutation<DocumentaryUnit> mutation =
                 persister.createOrUpdate(unit, DocumentaryUnit.class);
@@ -97,7 +126,7 @@ public class EadImporter extends EaImporter {
 
         // Set the repository/item relationship
         //TODO: figure out another way to determine we're at the root, so we can get rid of the depth param
-        if (depth == TOP_LEVEL_DEPTH && mutation.created()) {
+        if (depth == TOP_LEVEL_DEPTH && !mutation.unchanged()) {
             EntityClass scopeType = manager.getEntityClass(permissionScope);
             if (scopeType.equals(EntityClass.REPOSITORY)) {
                 Repository repository = framedGraph.frame(permissionScope.asVertex(), Repository.class);
