@@ -51,7 +51,6 @@ public class XmlImportProperties implements ImportProperties {
         return ps;
     }
     public String getFirstPropertyWithValue(String value){
-        Set<String> ps = new HashSet<String>();
         Properties p = getProperties();
         for(Object key : p.keySet()){
             if(value.equals(p.get(key).toString()))

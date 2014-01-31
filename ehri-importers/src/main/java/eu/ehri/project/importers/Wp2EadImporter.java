@@ -38,6 +38,7 @@ public class Wp2EadImporter extends IcaAtomEadImporter {
     private static final Logger logger = LoggerFactory.getLogger(Wp2EadImporter.class);
     private final Accessor userProfile;
     public static final String WP2AUTHOR = "EHRI - Terezin Research Guide";
+    public static final String PROPERTY_AUTHOR = "authors";
 
     public Wp2EadImporter(FramedGraph<Neo4jGraph> framedGraph, PermissionScope permissionScope, ImportLog log) {
         super(framedGraph, permissionScope, log);
@@ -51,7 +52,7 @@ public class Wp2EadImporter extends IcaAtomEadImporter {
     @Override
     protected Map<String, Object> extractUnitDescription(Map<String, Object> itemData, EntityClass entity) {
         Map<String, Object> map = super.extractUnitDescription(itemData, entity);
-        map.put("author", WP2AUTHOR);    
+        map.put(PROPERTY_AUTHOR, WP2AUTHOR);    
         return map;
     }
 

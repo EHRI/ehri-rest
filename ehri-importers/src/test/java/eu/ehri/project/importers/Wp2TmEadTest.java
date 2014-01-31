@@ -121,7 +121,7 @@ public class Wp2TmEadTest extends AbstractImporterTest {
         
         // Check the author of the description
         for (DocumentDescription d : c1_a.getDocumentDescriptions()){
-            assertEquals(Wp2EadImporter.WP2AUTHOR, d.asVertex().getProperty("author"));
+            assertEquals(Wp2EadImporter.WP2AUTHOR, d.asVertex().getProperty(Wp2EadImporter.PROPERTY_AUTHOR));
         }
 
         // Check the importer is Idempotent
