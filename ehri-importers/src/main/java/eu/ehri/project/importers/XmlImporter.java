@@ -38,6 +38,7 @@ public abstract class XmlImporter<T> extends AbstractImporter<T> {
     // Various date patterns
     private final Pattern[] datePatterns = {
         // Yad Vashem, ICA-Atom style: 1924-1-1 - 1947-12-31
+        // Yad Vashem in Wp2: 12-15-1941, 9-30-1944
         Pattern.compile("^(\\d{4}-\\d{1,2}-\\d{1,2})\\s?-\\s?(\\d{4}-\\d{1,2}-\\d{1,2})$"),
         Pattern.compile("^(\\d{4})\\s?-\\s?(\\d{4})$"),
         Pattern.compile("^(\\d{4})-\\[(\\d{4})\\]$"),
@@ -45,6 +46,7 @@ public abstract class XmlImporter<T> extends AbstractImporter<T> {
         Pattern.compile("^(\\d{4}s)-\\[(\\d{4}s)\\]$"),
         Pattern.compile("^\\[(\\d{4})\\]$"), Pattern.compile("^(\\d{4})$"),
         Pattern.compile("^(\\d{2})th century$"),
+//        Pattern.compile("^(\\d{1,2}-\\d{1,2}-\\d{4}) - (\\d{1,2}-\\d{1,2}-\\d{4})$"),
         Pattern.compile("^\\s*(\\d{4})\\s*-\\s*(\\d{4})"),
         Pattern.compile("^\\s*(\\d{4})\\s*/\\s*(\\d{4})")
     };
@@ -63,6 +65,7 @@ public abstract class XmlImporter<T> extends AbstractImporter<T> {
         Object value;
         for (String key : data.keySet()) {
             if (dates.containsProperty(key) && (value = data.get(key)) != null) {
+                logger.debug("-----------"+key + ": " + data.get(key));
                 try {
                     Map<String, Object> dpb = extractDate(value);
                     if (dpb != null) {

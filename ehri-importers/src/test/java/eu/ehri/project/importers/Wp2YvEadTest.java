@@ -71,15 +71,14 @@ public class Wp2YvEadTest extends AbstractImporterTest {
         // How many new nodes will have been created? We should have
         // - 4 more DocumentaryUnits fonds C1 C2 C3 
         // - 4 more DocumentDescription
+        // - 1 more DatePeriod 0 0 1 
         // - 11 UndeterminedRelationship, 0 0 0 11
         // - 5 more import Event links (4 for every Unit, 1 for the User)
         // - 1 more import Event
         // - 1 Annotation as resolved relationship 
 
-        //TODO: the dates are in a weird format, so they are not recognized
-        // (- 2 more DatePeriod 1 0 1 )
 
-        int newCount = count + 26;
+        int newCount = count + 27;
         assertEquals(newCount, getNodeCount(graph));
 
         Iterable<Vertex> docs = graph.getVertices(Ontology.IDENTIFIER_KEY, FONDS);

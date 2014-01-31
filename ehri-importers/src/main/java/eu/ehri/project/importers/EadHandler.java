@@ -46,6 +46,7 @@ public class EadHandler extends SaxXmlHandler {
      * @throws org.xml.sax.SAXException
      * @throws java.io.IOException
      */
+    @Override
     public org.xml.sax.InputSource resolveEntity(String publicId, String systemId)
             throws org.xml.sax.SAXException, java.io.IOException {
         // This is the equivalent of returning a null dtd.
