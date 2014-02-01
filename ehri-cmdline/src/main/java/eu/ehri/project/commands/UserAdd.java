@@ -87,7 +87,7 @@ public class UserAdd extends BaseCommand implements Command {
                 .withDataValue(Ontology.IDENTIFIER_KEY, userId)
                 .withDataValue(Ontology.NAME_KEY, userName);
         String nodeId = EntityClass.USER_PROFILE.getIdgen()
-                .generateId(SystemScope.getInstance(), bundle);
+                .generateId(SystemScope.getInstance().idPath(), bundle);
         bundle = bundle.withId(nodeId);
 
         try {

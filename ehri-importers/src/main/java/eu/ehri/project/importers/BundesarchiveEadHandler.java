@@ -105,7 +105,7 @@ public class BundesarchiveEadHandler extends EadHandler {
     		}
     	} else {
     		logger.error("no unitid found, setting " + ++bundesarchivecount);
-    		currentGraph.put("objectIdentifier", "bundesarchiveID"+bundesarchivecount);
+    		currentGraph.put("objectIdentifier", "" + bundesarchivecount);
 
     	}
     }

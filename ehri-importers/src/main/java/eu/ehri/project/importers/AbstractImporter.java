@@ -1,6 +1,7 @@
 package eu.ehri.project.importers;
 
 import com.google.common.base.Joiner;
+import com.google.common.collect.Iterables;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
@@ -45,7 +46,6 @@ public abstract class AbstractImporter<T> {
     protected List<ImportCallback> createCallbacks = new LinkedList<ImportCallback>();
     protected List<ImportCallback> updateCallbacks = new LinkedList<ImportCallback>();
     protected List<ImportCallback> unchangedCallbacks = new LinkedList<ImportCallback>();
-    protected BundleDAO persister;
 
     private NodeProperties pc;
     private Joiner stringJoiner = Joiner.on("\n\n").skipNulls();
@@ -67,6 +67,19 @@ public abstract class AbstractImporter<T> {
         }
     }
 
+    public PermissionScope getPermissionScope() {
+        return permissionScope;
+    }
+
+    public BundleDAO getPersister(List<String> scopeIds) {
+        return new BundleDAO(framedGraph,
+                Iterables.concat(permissionScope.idPath(), scopeIds));
+    }
+
+    public BundleDAO getPersister() {
+        return new BundleDAO(framedGraph, permissionScope.idPath());
+    }
+
     /**
      * Constructor.
      *
@@ -82,7 +95,6 @@ public abstract class AbstractImporter<T> {
         this.log = log;
         this.documentContext = documentContext;
         manager = GraphManagerFactory.getInstance(framedGraph);
-        persister = new BundleDAO(framedGraph, permissionScope);
     }
 
     /**
@@ -135,11 +147,13 @@ public abstract class AbstractImporter<T> {
      * Import an item representation into the graph at a certain depth, and return the Node.
      * 
      * @param itemData the item representation to import
-     * @param depth the depth of the tree to import the node at
+     * @param scopeIds parent identifiers for ID generation,
+     *                 not including permission scope
      * @return the imported node
      * @throws ValidationError when the item representation does not validate
      */
-    abstract public AccessibleEntity importItem(Map<String, Object> itemData, int depth) throws ValidationError;
+    abstract public AccessibleEntity importItem(Map<String, Object> itemData,
+            List<String> scopeIds) throws ValidationError;
 
     /**
      * Extract a list of DatePeriod bundles from an item's data.

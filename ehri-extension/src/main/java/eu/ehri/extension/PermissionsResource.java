@@ -444,7 +444,7 @@ public class PermissionsResource extends AbstractRestResource {
         Accessor accessor = manager.getFrame(userId, Accessor.class);
 
         try {
-            AccessibleEntity item = manager.getFrame(id, PermissionScope.class);
+            AccessibleEntity item = manager.getFrame(id, AccessibleEntity.class);
             Accessor grantee = getRequesterUserProfile();
             AclViews acl = new AclViews(graph);
             acl.setItemPermissions(item, accessor, scopedPerms, grantee);

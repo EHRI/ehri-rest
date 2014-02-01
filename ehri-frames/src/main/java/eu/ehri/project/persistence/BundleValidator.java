@@ -2,16 +2,16 @@ package eu.ehri.project.persistence;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.Vertex;
-import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.annotations.EntityType;
-import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.utils.ClassUtils;
 
 import java.text.MessageFormat;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -22,11 +22,11 @@ import java.util.Map;
 public final class BundleValidator {
 
     private final GraphManager manager;
-    private final PermissionScope scope;
+    private final Iterable<String> scopes;
 
-    public BundleValidator(GraphManager manager, PermissionScope scope) {
+    public BundleValidator(GraphManager manager, Iterable<String> scopes) {
         this.manager = manager;
-        this.scope = Optional.fromNullable(scope).or(SystemScope.getInstance());
+        this.scopes = Optional.fromNullable(scopes).or(Lists.<String>newArrayList());
     }
 
     /**
@@ -38,7 +38,7 @@ public final class BundleValidator {
      */
     public Bundle validateForCreate(final Bundle bundle) throws ValidationError {
         validateData(bundle);
-        Bundle withIds = bundle.generateIds(scope);
+        Bundle withIds = bundle.generateIds(scopes);
         ErrorSet createErrors = validateTreeForCreate(withIds);
         if (!createErrors.isEmpty()) {
             throw new ValidationError(bundle, createErrors);
@@ -56,7 +56,7 @@ public final class BundleValidator {
      */
     public Bundle validateForUpdate(final Bundle bundle) throws ValidationError {
         validateData(bundle);
-        Bundle withIds = bundle.generateIds(scope);
+        Bundle withIds = bundle.generateIds(scopes);
         ErrorSet updateErrors = validateTreeForUpdate(withIds);
         if (!updateErrors.isEmpty()) {
             throw new ValidationError(bundle, updateErrors);
@@ -200,7 +200,7 @@ public final class BundleValidator {
         }
         if (manager.exists(bundle.getId())) {
             ListMultimap<String, String> idErrors = bundle
-                    .getType().getIdgen().handleIdCollision(scope, bundle);
+                    .getType().getIdgen().handleIdCollision(scopes, bundle);
             for (Map.Entry<String, String> entry : idErrors.entries()) {
                 builder.addError(entry.getKey(), entry.getValue());
             }

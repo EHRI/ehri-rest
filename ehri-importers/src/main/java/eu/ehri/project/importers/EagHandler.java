@@ -5,6 +5,7 @@
 package eu.ehri.project.importers;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.exceptions.ValidationError;
@@ -81,7 +82,7 @@ public class EagHandler extends SaxXmlHandler {
                     logger.debug("no rulesAndConventions found");
                     putPropertyInCurrentGraph("rulesAndConventions", "ISDIAH");
                 }
-                importer.importItem(currentGraphPath.pop(), depth);
+                importer.importItem(currentGraphPath.pop(), Lists.<String>newArrayList());
 
             } catch (ValidationError ex) {
                 logger.error(ex.getMessage());

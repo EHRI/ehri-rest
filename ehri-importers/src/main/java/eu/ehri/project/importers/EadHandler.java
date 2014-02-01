@@ -1,5 +1,7 @@
 package eu.ehri.project.importers;
 
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.exceptions.ValidationError;
@@ -8,6 +10,7 @@ import eu.ehri.project.models.DocumentaryUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Stack;
 import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +32,7 @@ public class EadHandler extends SaxXmlHandler {
     private static final Logger logger = LoggerFactory
             .getLogger(EadHandler.class);
     protected final List<DocumentaryUnit>[] children = new ArrayList[12];
+    protected final Stack<String> scopeIds = new Stack<String>();
     // Pattern for EAD nodes that represent a child item
     private Pattern childItemPattern = Pattern.compile("^/*c(?:\\d*)$");
     
@@ -77,6 +81,27 @@ public class EadHandler extends SaxXmlHandler {
 //        }
     }
 
+    protected List<String> pathIds () {
+        if (scopeIds.isEmpty()) {
+            return scopeIds;
+        } else {
+            List<String> path = Lists.newArrayList();
+            for (int i = 0; i < scopeIds.size() - 1; i++) {
+                path.add(scopeIds.get(i));
+            }
+            return path;
+        }
+    }
+
+    public String getCurrentTopIdentifier() {
+        Object current = currentGraphPath.peek().get("objectIdentifier");
+        if (current instanceof List<?>) {
+            return ((List<String>)current).get(0);
+        } else {
+            return (String)current;
+        }
+    }
+
 	/**
 	 * Called when the XML parser encounters an end tag. This is tuned for EAD files, which come in many flavours.
 	 * 
@@ -91,8 +116,20 @@ public class EadHandler extends SaxXmlHandler {
         //the child closes, add the new DocUnit to the list, establish some relations
         super.endElement(uri, localName, qName);
 
+        // FIXME: We need to add the 'parent' identifier to the ID stack
+        // so that graph path IDs are created correctly. This currently
+        // assumes there's a 'did' element from which we extract this
+        // identifier.
+        if (qName.equals("did")) {
+            extractIdentifier(currentGraphPath.peek());
+            String topId = getCurrentTopIdentifier();
+            scopeIds.push(topId);
+            logger.debug("Current id path: " + scopeIds);
+        }
+
         if (needToCreateSubNode(qName)) {
             Map<String, Object> currentGraph = currentGraphPath.pop();
+
             if (childItemPattern.matcher(qName).matches() || qName.equals("archdesc")) {
                 try {
                     //add any mandatory fields not yet there:
@@ -105,7 +142,7 @@ public class EadHandler extends SaxXmlHandler {
                     
                     extractDate(currentGraph);
 
-                    DocumentaryUnit current = (DocumentaryUnit)importer.importItem(currentGraph, depth);
+                    DocumentaryUnit current = (DocumentaryUnit)importer.importItem(currentGraph, pathIds());
                     logger.debug("importer used: " + importer.getClass());
                     if (depth > 0) { // if not on root level
                     	children[depth - 1].add(current); // add child to parent offspring
@@ -126,6 +163,7 @@ public class EadHandler extends SaxXmlHandler {
                     logger.error("caught validation error: " + ex.getMessage());
                 } finally {
                     depth--;
+                    scopeIds.pop();
                 }
             } else {
                 putSubGraphInCurrentGraph(getImportantPath(currentPath), currentGraph);

@@ -535,7 +535,7 @@ public final class Bundle {
      * @param scopes A set of parent scopes.
      * @return A new bundle
      */
-    public Bundle generateIds(final List<String> scopes) {
+    public Bundle generateIds(final Iterable<String> scopes) {
         boolean isTemp = id == null;
         IdGenerator idGen = getType().getIdgen();
         String newId = isTemp ? idGen.generateId(scopes, this) : id;
@@ -546,16 +546,6 @@ public final class Bundle {
             idRels.put(entry.getKey(), entry.getValue().generateIds(nextScopes));
         }
         return new Bundle(newId, type, data, idRels, meta, isTemp);
-    }
-
-    /**
-     * Generate missing IDs for the subtree.
-     *
-     * @param scope A permission scope.
-     * @return A new bundle
-     */
-    public Bundle generateIds(final PermissionScope scope) {
-        return generateIds(getScopeIds(scope));
     }
 
     @Override
