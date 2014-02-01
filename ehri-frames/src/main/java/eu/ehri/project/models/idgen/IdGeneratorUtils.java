@@ -72,7 +72,16 @@ public class IdGeneratorUtils  {
         }
         List<String> newIds = Lists.newArrayList(scopeIds);
         newIds.add(ident);
-        String scopedId =  Joiner.on(SEPARATOR).join(newIds);
+        return joinPath(newIds);
+    }
+
+    /**
+     * Join an identifier path to form a full ID.
+     * @param path A list of identifier strings.
+     * @return The resultant path ID.
+     */
+    public static String joinPath(Iterable<String> path) {
+        String scopedId =  Joiner.on(SEPARATOR).join(path);
         return Slugify.slugify(scopedId);
     }
 }
