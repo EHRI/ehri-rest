@@ -4,8 +4,7 @@ There are two kinds of identifier concepts in the EHRI DB: local, and global. Un
 thorough about disambiguating the two things, so it's quite confusing in places. If we use the word 'identifier' it
 typically means the local identifier, whereas the word ID means the global one. Here's what they mean in practice:
 
-Local identifiers exist within a namespace defined by their parent scope. Item types at the top level of a hierarchy
-- for example, countries - have an identifier that consists of their ISO 3166 two-letter country code. Since they have
+Local identifiers exist within a namespace defined by their parent scope. Item types at the top level of a hierarchy - for example, countries - have an identifier that consists of their ISO 3166 two-letter country code. Since they have
 no higher scope, their local identifier is the same as their global one: for example, the Netherlands has local
 identifier `nl` and also global identifier `nl`.
 
