@@ -12,10 +12,9 @@ import eu.ehri.project.views.Crud;
 /**
  * Views class that handles creating Action objects that provide an audit log
  * for CRUD actions.
- * 
- * @author michaelb
- * 
+ *
  * @param <E>
+ * @author michaelb
  */
 public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
 
@@ -23,28 +22,27 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
     private final CrudViews<E> views;
     private final FramedGraph<?> graph;
     private final Class<E> cls;
-    private final PermissionScope scope;
 
     /**
      * Scoped Constructor.
-     * 
-     * @param graph
-     * @param cls
+     *
+     * @param graph The graph
+     * @param cls   The entity class to return
+     * @param scope The permission scope
      */
     public LoggingCrudViews(FramedGraph<?> graph, Class<E> cls,
             PermissionScope scope) {
         this.graph = graph;
         this.cls = cls;
-        this.scope = Optional.fromNullable(scope).or(SystemScope.getInstance());
-        actionManager = new ActionManager(graph, this.scope);
-        views = new CrudViews<E>(graph, cls, this.scope);
+        actionManager = new ActionManager(graph, scope);
+        views = new CrudViews<E>(graph, cls, scope);
     }
 
     /**
      * Constructor.
-     * 
-     * @param graph
-     * @param cls
+     *
+     * @param graph The graph
+     * @param cls   The entity class to return
      */
     public LoggingCrudViews(FramedGraph<?> graph, Class<E> cls) {
         this(graph, cls, SystemScope.getInstance());
@@ -53,9 +51,9 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
     /**
      * Create a new object of type `E` from the given data, saving an Action log
      * with the default creation message.
-     * 
-     * @param bundle
-     * @param user
+     *
+     * @param bundle The item's data bundle
+     * @param user   The current user
      * @return The created framed vertex
      * @throws PermissionDenied
      * @throws ValidationError
@@ -70,10 +68,10 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
     /**
      * Create a new object of type `E` from the given data, saving an Action log
      * with the given log message.
-     * 
-     * @param bundle
-     * @param user
-     * @param logMessage
+     *
+     * @param bundle     The item's data bundle
+     * @param user       The current user
+     * @param logMessage A log message
      * @return The created framed vertex
      * @throws PermissionDenied
      * @throws ValidationError
@@ -83,8 +81,6 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
     public E create(Bundle bundle, Accessor user, Optional<String> logMessage)
             throws PermissionDenied, ValidationError, DeserializationError,
             IntegrityError {
-        // Behold: A compelling reason to upgrade to Java 7
-        // http://docs.oracle.com/javase/7/docs/technotes/guides/language/catch-multiple.html
         E out = views.create(bundle, user);
         actionManager.logEvent(out, graph.frame(user.asVertex(), Actioner.class),
                 EventTypes.creation, logMessage);
@@ -94,9 +90,9 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
     /**
      * Create or update a new object of type `E` from the given data, saving an
      * Action log with the default creation message.
-     * 
-     * @param bundle
-     * @param user
+     *
+     * @param bundle The item's data bundle
+     * @param user   The current user
      * @return The created framed vertex
      * @throws PermissionDenied
      * @throws ValidationError
@@ -112,10 +108,10 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
     /**
      * Create or update a new object of type `E` from the given data, saving an
      * Action log with the given log message.
-     * 
-     * @param bundle
-     * @param user
-     * @param logMessage
+     *
+     * @param bundle     The item's data bundle
+     * @param user       The current user
+     * @param logMessage A log message
      * @return The created framed vertex
      * @throws PermissionDenied
      * @throws ValidationError
@@ -138,9 +134,9 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
     /**
      * Update an object of type `E` from the given data, saving an Action log
      * with the default update message.
-     * 
-     * @param bundle
-     * @param user
+     *
+     * @param bundle The item's data bundle
+     * @param user   The current user
      * @return The updated framed vertex
      * @throws PermissionDenied
      * @throws ValidationError
@@ -155,10 +151,10 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
     /**
      * Update an object of type `E` from the given data, saving an Action log
      * with the given log message.
-     * 
-     * @param bundle
-     * @param user
-     * @param logMessage
+     *
+     * @param bundle     The item's data bundle
+     * @param user       The current user
+     * @param logMessage A log message
      * @return The updated framed vertex
      * @throws PermissionDenied
      * @throws ValidationError
@@ -186,10 +182,10 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * Update an object of type `E` from the given data, saving an Action log
      * with the default update message.
      *
-     * @param bundle
-     * @param parent
-     * @param user
-     * @param dependentClass
+     * @param bundle The item's data
+     * @param parent The item's parent node
+     * @param user The current user
+     * @param dependentClass The item's class
      * @return The updated framed vertex
      * @throws PermissionDenied
      * @throws ValidationError
@@ -207,11 +203,11 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * Update an object of type `E` from the given data, saving an Action log
      * with the given log message.
      *
-     * @param bundle
-     * @param parent
-     * @param user
-     * @param dependentClass
-     * @param logMessage
+     * @param bundle The item's data
+     * @param parent The item's parent node
+     * @param user The current user
+     * @param dependentClass The item's class
+     * @param logMessage     A log message
      * @return The updated framed vertex
      * @throws PermissionDenied
      * @throws ValidationError
@@ -226,7 +222,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
         try {
             Mutation<T> out = views.setScope(parent)
                     .updateDependent(bundle, parent, user, dependentClass);
-            if (out.getState() != MutationState.UNCHANGED) {
+            if (!out.unchanged()) {
                 actionManager.setScope(parent)
                         .logEvent(parent, graph.frame(user.asVertex(),
                                 Actioner.class), EventTypes.modifyDependent, logMessage)
@@ -242,10 +238,10 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * Update an object of type `E` from the given data, saving an Action log
      * with the default update message.
      *
-     * @param bundle
-     * @param parent
-     * @param user
-     * @param dependentClass
+     * @param bundle The item's data
+     * @param parent The item's parent node
+     * @param user The current user
+     * @param dependentClass The item's class
      * @return The updated framed vertex
      * @throws PermissionDenied
      * @throws ValidationError
@@ -262,11 +258,11 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * Update an object of type `E` from the given data, saving an Action log
      * with the given log message.
      *
-     * @param bundle
-     * @param parent
-     * @param user
-     * @param dependentClass
-     * @param logMessage
+     * @param bundle The item's data
+     * @param parent The item's parent node
+     * @param user The current user
+     * @param dependentClass The item's class
+     * @param logMessage     A log message
      * @return The updated framed vertex
      * @throws PermissionDenied
      * @throws ValidationError
@@ -274,7 +270,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * @throws DeserializationError
      */
     public <T extends Frame, P extends DescribedEntity> T createDependent(Bundle bundle, P parent, Accessor user,
-                Class<T> dependentClass, Optional<String> logMessage)
+            Class<T> dependentClass, Optional<String> logMessage)
             throws PermissionDenied, ValidationError, DeserializationError,
             IntegrityError {
         T out = views.setScope(parent).createDependent(bundle, parent, user, dependentClass);
@@ -288,9 +284,9 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
     /**
      * Delete an object bundle, following dependency cascades, saving an Action
      * log with the default deletion message.
-     * 
-     * @param item
-     * @param user
+     *
+     * @param item The item
+     * @param user The current user
      * @return The number of vertices deleted
      * @throws PermissionDenied
      * @throws ValidationError
@@ -304,10 +300,10 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
     /**
      * Delete an object bundle, following dependency cascades, saving an Action
      * log with the given deletion message.
-     * 
-     * @param item
-     * @param user
-     * @param logMessage
+     *
+     * @param item The item
+     * @param user The current user
+     * @param logMessage A log message
      * @return The number of vertices deleted
      * @throws PermissionDenied
      * @throws ValidationError
@@ -326,10 +322,10 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * Delete an object bundle, following dependency cascades, saving an Action
      * log with the default deletion message.
      *
-     * @param item
-     * @param parent
-     * @param user
-     * @param dependentClass
+     * @param item The item
+     * @param parent The item's parent node
+     * @param user The current user
+     * @param dependentClass The item's class
      * @return The number of vertices deleted
      * @throws PermissionDenied
      * @throws ValidationError
@@ -345,11 +341,11 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * Delete an object bundle, following dependency cascades, saving an Action
      * log with the given deletion message.
      *
-     * @param item
-     * @param parent
-     * @param user
-     * @param dependentClass
-     * @param logMessage
+     * @param item The item
+     * @param parent The item's parent node
+     * @param user The current user
+     * @param dependentClass The item's class
+     * @param logMessage     A log message
      * @return The number of vertices deleted
      * @throws PermissionDenied
      * @throws ValidationError
@@ -366,11 +362,25 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
     }
 
 
+    /**
+     * Set the permission scope of the view.
+     *
+     * @param scope A permission scope
+     * @return A new view
+     */
     public LoggingCrudViews<E> setScope(PermissionScope scope) {
         return new LoggingCrudViews<E>(graph, cls,
                 Optional.fromNullable(scope).or(SystemScope.INSTANCE));
     }
 
+    /**
+     * Fetch an item, as a user. This only provides access control.
+     *
+     * @param item The item
+     * @param user The current user
+     * @return The item
+     * @throws AccessDenied
+     */
     public E detail(E item, Accessor user) throws AccessDenied {
         return views.detail(item, user);
     }

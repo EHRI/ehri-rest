@@ -28,8 +28,9 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
     /**
      * Scoped Constructor.
      *
-     * @param graph
-     * @param cls
+     * @param graph The graph
+     * @param cls   The entity class to return
+     * @param scope The permission scope
      */
     public CrudViews(FramedGraph<?> graph, Class<E> cls,
             PermissionScope scope) {
@@ -45,31 +46,31 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
     /**
      * Constructor.
      *
-     * @param graph
-     * @param cls
+     * @param graph The graph
+     * @param cls   The entity class to return
      */
     public CrudViews(FramedGraph<?> graph, Class<E> cls) {
         this(graph, cls, SystemScope.getInstance());
     }
 
     /**
-     * Return a string representation of the given item.
+     * Fetch an item, as a user. This only provides access control.
      *
-     * @param entity
-     * @param user
+     * @param item The item
+     * @param user The current user
      * @return The given framed vertex
      * @throws AccessDenied
      */
-    public E detail(E entity, Accessor user) throws AccessDenied {
-        helper.checkReadAccess(entity, user);
-        return entity;
+    public E detail(E item, Accessor user) throws AccessDenied {
+        helper.checkReadAccess(item, user);
+        return item;
     }
 
     /**
      * Update an object bundle, also updating dependent items.
      *
-     * @param bundle
-     * @param user
+     * @param bundle     The item's data bundle
+     * @param user       The current user
      * @return The updated framed vertex
      * @throws PermissionDenied
      * @throws ValidationError
@@ -87,9 +88,9 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
      * Update an object bundle representing a dependent item, also updating *it's*
      * dependent items.
      *
-     * @param bundle
-     * @param parent
-     * @param user
+     * @param bundle The item's data
+     * @param parent The item's parent node
+     * @param user The current user
      * @return The updated framed vertex
      * @throws PermissionDenied
      * @throws ValidationError
@@ -107,8 +108,8 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
      * Create a new object of type `E` from the given data, within the scope of
      * `scope`.
      *
-     * @param bundle
-     * @param user
+     * @param bundle     The item's data bundle
+     * @param user       The current user
      * @return The created framed vertex
      * @throws PermissionDenied
      * @throws ValidationError
@@ -136,10 +137,10 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
      * between the items is not automatically set and must subsequently
      * be established.
      *
-     * @param bundle
-     * @param parent
-     * @param user
-     * @param dependentCls
+     * @param bundle The item's data
+     * @param parent The item's parent node
+     * @param user The current user
+     * @param dependentCls The dependent class
      * @return The created framed vertex
      * @throws PermissionDenied
      * @throws ValidationError
@@ -157,8 +158,8 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
      * Create or update a new object of type `E` from the given data, within the
      * scope of `scope`.
      *
-     * @param bundle
-     * @param user
+     * @param bundle     The item's data bundle
+     * @param user       The current user
      * @return The created framed vertex
      * @throws PermissionDenied
      * @throws ValidationError
@@ -177,8 +178,8 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
      * Delete an object bundle, following dependency cascades, within the scope
      * of item `scope`.
      *
-     * @param item
-     * @param user
+     * @param item The item
+     * @param user The current user
      * @return The number of vertices deleted.
      * @throws PermissionDenied
      * @throws ValidationError
@@ -195,8 +196,8 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
      * Delete a dependent item bundle, following dependency cascades, within the scope
      * of item `scope`.
      *
-     * @param item
-     * @param user
+     * @param item The item
+     * @param user The current user
      * @return The number of vertices deleted.
      * @throws PermissionDenied
      * @throws ValidationError
@@ -210,6 +211,12 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
                 .vertexFrameToBundle(item));
     }
 
+    /**
+     * Set the permission scope of the view.
+     *
+     * @param scope A permission scope
+     * @return A new view
+     */
     public Crud<E> setScope(PermissionScope scope) {
         return new CrudViews<E>(graph, cls,
                 Optional.fromNullable(scope).or(SystemScope.INSTANCE));
