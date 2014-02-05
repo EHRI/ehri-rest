@@ -11,6 +11,7 @@ import javax.ws.rs.core.Response.Status;
 //import org.apache.log4j.Logger;
 import eu.ehri.project.exceptions.*;
 import eu.ehri.project.persistence.Mutation;
+import eu.ehri.project.persistence.Serializer;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import com.google.common.collect.Lists;
@@ -257,7 +258,8 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
                     getRequesterUserProfile());
             Bundle rawBundle = Bundle.fromString(json);
             if (isPatch()) {
-                Bundle existing = getSerializer().vertexFrameToBundle(entity);
+                Serializer depSerializer = new Serializer.Builder(graph).dependentOnly().build();
+                Bundle existing = depSerializer.vertexFrameToBundle(entity);
                 rawBundle = existing.mergeDataWith(rawBundle);
             }
             Bundle entityBundle = new Bundle(entity.getId(), getEntityType(),
