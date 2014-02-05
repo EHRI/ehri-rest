@@ -67,6 +67,16 @@ index lookup, which is very cheap. The downside is that an item's graph ID is de
 structure to which it belongs. If it is moved to another parent scope, it's graph ID will no longer be valid. For this
 reason we recommend that moving an item within a hierarchy be though of as a copy followed by a delete.
 
+## Validation
+
+Maintaining hierarchical structures is difficult is any database system: whilst integrity guarantees might best be maintained using a traditional self-referential foreign-key structure in a relational database (which can better handle integrity issues using compound keys), any system that aspires to good performance will run into problems when moving trees within trees (especially when optimisations like the adjacency list or nested set model are employed.) Validating hierarchical structures is therefore important. A tool that ensures the validity of hierarchical data is therefore quite important to the EHRI database. Confusing matter is the fact that there are two types of hierarchy:
+
+ - permission scope
+ - parental
+
+Most items, for instance, archival units, can only have one parent. However, some, such as concepts (in SKOS vocabularies) can belong to multiple different trees and therefore have several different parents. **All** items, however, can only have a single permission scope. For archival units this will be the parent item or the repository. For repositories it will be the country they are in. For concepts it will be the vocabulary they belong (rather than the higher level broader concepts which they may have as immediate parents.)
+
+TODO: Write about the 'check' tool that ensures IDs match permission scopes.
 
 
 
