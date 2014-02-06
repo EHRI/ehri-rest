@@ -213,9 +213,9 @@ public final class Bundle {
      *
      * @return The data value
      */
-    public Object getDataValue(String key) {
+    public <T> T getDataValue(String key) {
         checkNotNull(key);
-        return data.get(key);
+        return (T)data.get(key);
     }
 
     /**
