@@ -41,6 +41,20 @@ public final class Bundle {
     public static final String META_KEY = "meta";
 
     /**
+     * Filter predicate function interface.
+     */
+    public static interface Filter {
+        /**
+         * Filter (remove) items in a Bundle tree that
+         * match this predicate.
+         *
+         * @param bundle The bundle
+         * @return  Whether to remove the item
+         */
+        public boolean remove(final String relationLabel, final Bundle bundle);
+    }
+
+    /**
      * Properties that are "managed", i.e. automatically set
      * date/time strings or cache values should begin with a
      * prefix and are ignored Bundle equality calculations.
@@ -213,9 +227,9 @@ public final class Bundle {
      *
      * @return The data value
      */
-    public Object getDataValue(String key) {
+    public <T> T getDataValue(String key) {
         checkNotNull(key);
-        return data.get(key);
+        return (T)data.get(key);
     }
 
     /**
@@ -325,7 +339,7 @@ public final class Bundle {
      * Get only the bundle's relations which have a dependent
      * relationship.
      * 
-     * @return
+     * @return A multimap of dependent relations.
      */
     public ListMultimap<String,Bundle> getDependentRelations() {
         ListMultimap<String, Bundle> dependentRelations = ArrayListMultimap.create();
@@ -423,6 +437,28 @@ public final class Bundle {
         Map<String, Object> mergeData = Maps.newHashMap(getData());
         mergeData.putAll(otherBundle.getData());
         return withData(mergeData);
+    }
+
+    /**
+     * Filter relations, removing items that *match* the given
+     * filter function.
+     *
+     * @param filter A Filter function instance
+     * @return A bundle with relations matching the
+     * given predicate function removed.
+     */
+    public Bundle filterRelations(Filter filter) {
+        Builder builder = new Builder(type)
+                .addData(data)
+                .addMetaData(meta)
+                .setId(id);
+        for (Map.Entry<String,Bundle> rel : relations.entries()) {
+            if (!filter.remove(rel.getKey(), rel.getValue())) {
+                builder.addRelation(rel.getKey(), rel.getValue()
+                        .filterRelations(filter));
+            }
+        }
+        return builder.build();
     }
 
     /**
