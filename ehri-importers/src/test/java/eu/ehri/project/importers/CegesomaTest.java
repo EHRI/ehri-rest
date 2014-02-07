@@ -70,7 +70,11 @@ public class CegesomaTest extends AbstractImporterTest{
         c2_2 = graph.frame(
                 getVertexByIdentifier(graph,C02_02),
                 DocumentaryUnit.class);
-        
+
+        // Test ID generation is correct
+        assertEquals("nl-r1-aa-1134-cegesomaid1", c1.getId());
+        assertEquals(c1.getId() + "-aa-1134-32", c2_1.getId());
+        assertEquals(c1.getId() + "-aa-1134-34", c2_2.getId());
 
     //test titles
         for(DocumentDescription d : archdesc.getDocumentDescriptions()){

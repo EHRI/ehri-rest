@@ -15,10 +15,12 @@ import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.Bundle;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import eu.ehri.project.persistence.BundleDAO;
 import eu.ehri.project.persistence.Mutation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +48,8 @@ public class EagImporter extends EaImporter {
     }
 
     @Override
-    public Repository importItem(Map<String, Object> itemData, int depth) throws ValidationError {
+    public Repository importItem(Map<String, Object> itemData, List<String> idPath) throws
+            ValidationError {
         return importItem(itemData);
     }
 
@@ -81,6 +84,8 @@ public class EagImporter extends EaImporter {
      */
     @Override
     public Repository importItem(Map<String, Object> itemData) throws ValidationError {
+
+        BundleDAO persister = new BundleDAO(framedGraph, permissionScope.idPath());
 
         Bundle unit = new Bundle(EntityClass.REPOSITORY, extractUnit(itemData));
 

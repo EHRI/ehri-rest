@@ -101,7 +101,7 @@ public class EntityAdd extends BaseCommand implements Command {
             bundle = bundle.withDataValue((String)prop, properties.getProperty((String)prop));
         }
 
-        String id = entityClass.getIdgen().generateId(scope, bundle);
+        String id = entityClass.getIdgen().generateId(scope.idPath(), bundle);
 
         try {
             LoggingCrudViews<?> view = new LoggingCrudViews(graph, entityClass.getEntityClass(), scope);

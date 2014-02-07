@@ -60,7 +60,7 @@ public final class SingleIndexGraphManager implements GraphManager {
 
     public String getType(Vertex vertex) {
         Preconditions.checkNotNull(vertex);
-        return (String) vertex.getProperty(EntityType.TYPE_KEY);
+        return vertex.getProperty(EntityType.TYPE_KEY);
     }
 
     public String getType(Frame frame) {
@@ -75,7 +75,7 @@ public final class SingleIndexGraphManager implements GraphManager {
 
     public EntityClass getEntityClass(Frame frame) {
         Preconditions.checkNotNull(frame);
-        return getEntityClass(frame.asVertex());
+        return EntityClass.withName(frame.getType());
     }
 
     public boolean exists(String id) {

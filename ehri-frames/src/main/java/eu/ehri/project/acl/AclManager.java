@@ -601,7 +601,7 @@ public final class AclManager {
     private PermissionGrant createPermissionGrant() throws IntegrityError {
         Vertex vertex = manager.createVertex(
                 EntityClass.PERMISSION_GRANT.getIdgen()
-                        .generateId(SystemScope.getInstance(), null),
+                        .generateId(Lists.<String>newArrayList(), null),
                 EntityClass.PERMISSION_GRANT,
                 Maps.<String, Object> newHashMap());
         return graph.frame(vertex, PermissionGrant.class);

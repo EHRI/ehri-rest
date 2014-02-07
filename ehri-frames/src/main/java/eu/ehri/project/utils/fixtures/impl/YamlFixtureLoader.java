@@ -221,7 +221,7 @@ public class YamlFixtureLoader implements FixtureLoader {
         // bundle converter to load it.
         Bundle entityBundle = createBundle(id, isa, nodeData,
                 getDependentRelations(nodeRels));
-        BundleDAO persister = new BundleDAO(graph, SystemScope.getInstance());
+        BundleDAO persister = new BundleDAO(graph);
         logger.debug("Creating node with id: {}", id);
         Mutation<Frame> frame = persister.createOrUpdate(entityBundle,
                 Frame.class);

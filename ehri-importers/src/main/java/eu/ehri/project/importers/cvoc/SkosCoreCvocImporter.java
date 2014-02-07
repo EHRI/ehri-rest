@@ -18,7 +18,6 @@ import com.tinkerpop.blueprints.TransactionalGraph;
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.base.*;
-import eu.ehri.project.persistence.*;
 import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.BundleDAO;
@@ -214,7 +213,7 @@ public class SkosCoreCvocImporter {
                       try {
                           Bundle unit = constructBundleForConcept(element);
 
-                          BundleDAO persister = new BundleDAO(framedGraph, vocabulary);
+                          BundleDAO persister = new BundleDAO(framedGraph, vocabulary.idPath());
                           Mutation<Concept> mutation = persister.createOrUpdate(unit,
                                   Concept.class);
                           Concept frame = mutation.getNode();

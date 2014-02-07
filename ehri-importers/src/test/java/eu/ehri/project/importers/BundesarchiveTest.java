@@ -26,12 +26,11 @@ public class BundesarchiveTest extends AbstractImporterTest{
     
     protected final String TEST_REPO = "r1";
     protected final String XMLFILE = "best20130618-testpart.xml";
-    protected final String ARCHDESC = "bundesarchiveID7",
-            C01 = "bundesarchiveID6",
-            C02 = "bundesarchiveID5",
+    protected final String ARCHDESC = "1",
+            C01 = "2",
+            C02 = "3",
             C07_1 = "RS 2",
             C07_2 = "RS 2-1";
-    DocumentaryUnit archdesc, c1, c2, c7_1, c7_2;
     int origCount=0;
             
     @Test
@@ -54,21 +53,37 @@ public class BundesarchiveTest extends AbstractImporterTest{
         int newCount = origCount + 32;
         assertEquals(newCount, getNodeCount(graph));
         
-        archdesc = graph.frame(
+        DocumentaryUnit archdesc = graph.frame(
                 getVertexByIdentifier(graph,ARCHDESC),
                 DocumentaryUnit.class);
-        c1 = graph.frame(
+        DocumentaryUnit c1 = graph.frame(
                 getVertexByIdentifier(graph,C01),
                 DocumentaryUnit.class);
-        c2 = graph.frame(
+        DocumentaryUnit c2 = graph.frame(
                 getVertexByIdentifier(graph,C02),
                 DocumentaryUnit.class);
-        c7_1 = graph.frame(
+        DocumentaryUnit c7_1 = graph.frame(
                 getVertexByIdentifier(graph,C07_1),
                 DocumentaryUnit.class);
-        c7_2 = graph.frame(
+        DocumentaryUnit c7_2 = graph.frame(
                 getVertexByIdentifier(graph,C07_2),
                 DocumentaryUnit.class);
+
+        // Test ID generation and hierarchy
+        assertEquals("nl-r1-1", archdesc.getId());
+        assertEquals("nl-r1-1-2", c1.getId());
+        assertEquals("nl-r1-1-2-3", c2.getId());
+        assertEquals("nl-r1-1-2-3-4-5-6-7-rs-2", c7_1.getId());
+        assertEquals("nl-r1-1-2-3-4-5-6-7-rs-2-1", c7_2.getId());
+
+        assertNull(archdesc.getParent());
+        assertEquals(agent, archdesc.getRepository());
+        assertEquals(agent, archdesc.getPermissionScope());
+        assertEquals(archdesc, c1.getParent());
+        assertEquals(archdesc, c1.getPermissionScope());
+        assertEquals(c1, c2.getParent());
+        assertEquals(c1, c2.getPermissionScope());
+
 
     //test titles
         for(DocumentDescription d : archdesc.getDocumentDescriptions()){

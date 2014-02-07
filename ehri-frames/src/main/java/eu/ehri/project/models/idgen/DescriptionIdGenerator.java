@@ -2,10 +2,8 @@ package eu.ehri.project.models.idgen;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ListMultimap;
-import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.Bundle;
 
-import java.util.List;
 
 import static eu.ehri.project.definitions.Ontology.IDENTIFIER_KEY;
 import static eu.ehri.project.definitions.Ontology.LANGUAGE_OF_DESCRIPTION;
@@ -22,18 +20,9 @@ public enum DescriptionIdGenerator implements IdGenerator {
 
     INSTANCE;
 
-    public ListMultimap<String,String> handleIdCollision(PermissionScope scope, Bundle bundle) {
-        return IdGeneratorUtils.handleIdCollision(scope, LANGUAGE_OF_DESCRIPTION,
+    public ListMultimap<String,String> handleIdCollision(Iterable<String> scopeIds, Bundle bundle) {
+        return IdGeneratorUtils.handleIdCollision(scopeIds, LANGUAGE_OF_DESCRIPTION,
                 getIdBase(bundle));
-    }
-
-
-    /**
-     * Uses the items identifier and its entity type to generate a (supposedly)
-     * unique ID.
-     */
-    public String generateId(PermissionScope scope, Bundle bundle) {
-        return IdGeneratorUtils.generateId(scope, bundle, getIdBase(bundle));
     }
 
     /**
@@ -44,7 +33,7 @@ public enum DescriptionIdGenerator implements IdGenerator {
      * @param bundle The bundle
      * @return The calculated identifier
      */
-    public String generateId(List<String> scopeIds, Bundle bundle) {
+    public String generateId(Iterable<String> scopeIds, Bundle bundle) {
         return IdGeneratorUtils.generateId(scopeIds, bundle, getIdBase(bundle));
     }
 
