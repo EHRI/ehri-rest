@@ -16,9 +16,7 @@ import java.util.Map;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotSame;
 import static junit.framework.Assert.assertTrue;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
+import static org.junit.Assert.*;
 
 /**
  * User: michaelb
@@ -150,6 +148,23 @@ public class BundleTest {
         assertNotSame(merged, bundle);
         assertEquals(merged.getDataValue(Ontology.IDENTIFIER_KEY), "foobar");
         assertEquals(merged.getDataValue("akey"), "avalue");
+    }
+
+    @Test
+    public void testFilterRelations() throws Exception {
+        // Remove descriptions with languageCode = "en"
+        Bundle.Filter filter = new Bundle.Filter() {
+            @Override
+            public boolean remove(String relationLabel, Bundle bundle) {
+                String lang = bundle.getDataValue(Ontology.LANGUAGE);
+                return bundle.getType().equals(EntityClass.DOCUMENT_DESCRIPTION)
+                        && (lang != null
+                            && lang.equals("en"));
+            }
+        };
+        Bundle filtered = bundle.filterRelations(filter);
+        assertFalse(bundle.getRelations(Ontology.DESCRIPTION_FOR_ENTITY).isEmpty());
+        assertTrue(filtered.getRelations(Ontology.DESCRIPTION_FOR_ENTITY).isEmpty());
     }
 
     @Test
