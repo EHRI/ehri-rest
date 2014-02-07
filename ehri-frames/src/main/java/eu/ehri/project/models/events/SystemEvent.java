@@ -73,8 +73,7 @@ public interface SystemEvent extends AccessibleEntity {
                     .loop("n", JavaHandlerUtils.noopLoopFunc, new PipeFunction<LoopPipe.LoopBundle<Vertex>, Boolean>() {
                         @Override
                         public Boolean compute(LoopPipe.LoopBundle<Vertex> vertexLoopBundle) {
-                            return !vertexLoopBundle.getObject().getVertices(Direction.IN,
-                                    Ontology.ENTITY_HAS_LIFECYCLE_EVENT).iterator().hasNext();
+                            return isValidTarget(vertexLoopBundle.getObject());
                         }
                     }));
         }
@@ -88,9 +87,7 @@ public interface SystemEvent extends AccessibleEntity {
                     .loop("n", JavaHandlerUtils.noopLoopFunc, new PipeFunction<LoopPipe.LoopBundle<Vertex>, Boolean>() {
                         @Override
                         public Boolean compute(LoopPipe.LoopBundle<Vertex> vertexLoopBundle) {
-                            return (!vertexLoopBundle.getObject().getVertices(Direction.IN,
-                                    Ontology.ENTITY_HAS_LIFECYCLE_EVENT).iterator().hasNext())
-                                    && vertexLoopBundle.getObject().getProperty(EntityType.TYPE_KEY) != null;
+                            return isValidTarget(vertexLoopBundle.getObject());
                         }
                     });
             return (AccessibleEntity)(subjects.iterator().hasNext()
@@ -108,6 +105,12 @@ public interface SystemEvent extends AccessibleEntity {
                                     Ontology.ACTIONER_HAS_LIFECYCLE_ACTION).iterator().hasNext();
                         }
                     }));
+        }
+
+        private boolean isValidTarget(Vertex vertex) {
+            return (!vertex.getVertices(Direction.IN,
+                    Ontology.ENTITY_HAS_LIFECYCLE_EVENT).iterator().hasNext())
+                    && vertex.getProperty(EntityType.TYPE_KEY) != null;
         }
     }
 }
