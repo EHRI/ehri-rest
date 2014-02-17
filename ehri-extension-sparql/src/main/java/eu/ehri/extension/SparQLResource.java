@@ -23,6 +23,7 @@ import org.openrdf.sail.Sail;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.List;
@@ -64,8 +65,8 @@ public class SparQLResource extends AbstractRestResource {
     /**
      * @param database Injected neo4j database
      */
-    public SparQLResource(@Context GraphDatabaseService database) {
-        super(database);
+    public SparQLResource(@Context GraphDatabaseService database, @Context HttpHeaders requestHeaders) {
+        super(database, requestHeaders);
 
     }
 
