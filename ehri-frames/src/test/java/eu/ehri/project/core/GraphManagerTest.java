@@ -207,20 +207,20 @@ public class GraphManagerTest {
         graph.getBaseGraph().commit();
 
         // try and find joe via name and age...
-        CloseableIterable<? extends Vertex> query1 = manager.getVertices("name",
+        CloseableIterable<Vertex> query1 = manager.getVertices("name",
                 data.get("name"), TEST_TYPE);
         assertTrue(query1.iterator().hasNext());
         Vertex joe1 = query1.iterator().next();
         assertEquals(joe, joe1);
 
-        CloseableIterable<? extends Vertex> query2 = manager.getVertices("age",
+        CloseableIterable<Vertex> query2 = manager.getVertices("age",
                 data.get("age"), TEST_TYPE);
         assertTrue(query2.iterator().hasNext());
         Vertex joe2 = query2.iterator().next();
         assertEquals(joe, joe2);
 
         // Query by height should fail...
-        CloseableIterable<? extends Vertex> query3 = manager.getVertices("height",
+        CloseableIterable<Vertex> query3 = manager.getVertices("height",
                 data.get("height"), TEST_TYPE);
         assertFalse(query3.iterator().hasNext());
     }

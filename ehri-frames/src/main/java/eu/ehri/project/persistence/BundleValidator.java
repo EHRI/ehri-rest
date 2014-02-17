@@ -214,8 +214,7 @@ public final class BundleValidator {
         for (String ukey : bundle.getUniquePropertyKeys()) {
             Object uval = bundle.getDataValue(ukey);
             if (uval != null) {
-                CloseableIterable<? extends Vertex> vertices
-                        = manager.getVertices(ukey, uval, bundle.getType());
+                CloseableIterable<Vertex> vertices = manager.getVertices(ukey, uval, bundle.getType());
                 try {
                     if (vertices.iterator().hasNext()) {
                         builder.addError(ukey, MessageFormat.format(Messages
@@ -236,8 +235,7 @@ public final class BundleValidator {
         for (String ukey : bundle.getUniquePropertyKeys()) {
             Object uval = bundle.getDataValue(ukey);
             if (uval != null) {
-                CloseableIterable<? extends Vertex> vertices
-                        = manager.getVertices(ukey, uval, bundle.getType());
+                CloseableIterable<Vertex> vertices = manager.getVertices(ukey, uval, bundle.getType());
                 try {
                     if (vertices.iterator().hasNext()) {
                         Vertex v = vertices.iterator().next();
