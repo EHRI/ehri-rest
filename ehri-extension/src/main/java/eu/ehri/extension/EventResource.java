@@ -8,10 +8,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
+import javax.ws.rs.core.*;
 
 import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.Vertex;
@@ -59,8 +56,8 @@ public class EventResource extends AbstractAccessibleEntityResource<SystemEvent>
 
     private final Serializer subjectSerializer;
 
-    public EventResource(@Context GraphDatabaseService database) {
-        super(database, SystemEvent.class);
+    public EventResource(@Context GraphDatabaseService database, @Context HttpHeaders requestHeaders) {
+        super(database, requestHeaders, SystemEvent.class);
 
         // Subjects are only serialized to depth 1 for efficiency...
         subjectSerializer = new Serializer.Builder(graph).withDepth(1).build();

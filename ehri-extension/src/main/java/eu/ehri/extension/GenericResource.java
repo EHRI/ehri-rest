@@ -4,10 +4,7 @@ import java.io.IOException;
 import java.util.List;
 
 import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
+import javax.ws.rs.core.*;
 
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
@@ -36,8 +33,8 @@ public class GenericResource extends AbstractAccessibleEntityResource<Accessible
 
     final AclManager aclManager;
 
-    public GenericResource(@Context GraphDatabaseService database) {
-        super(database, AccessibleEntity.class);
+    public GenericResource(@Context GraphDatabaseService database, @Context HttpHeaders requestHeaders) {
+        super(database, requestHeaders, AccessibleEntity.class);
         aclManager = new AclManager(graph);
     }
 

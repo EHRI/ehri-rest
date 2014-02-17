@@ -12,11 +12,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import javax.ws.rs.core.*;
 import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.StreamingOutput;
 
 import eu.ehri.project.exceptions.*;
 import eu.ehri.project.views.AclViews;
@@ -36,8 +33,8 @@ import eu.ehri.project.views.Query;
 @Path(Entities.GROUP)
 public class GroupResource extends AbstractAccessibleEntityResource<Group> {
 
-    public GroupResource(@Context GraphDatabaseService database) {
-        super(database, Group.class);
+    public GroupResource(@Context GraphDatabaseService database, @Context HttpHeaders requestHeaders) {
+        super(database, requestHeaders, Group.class);
     }
 
     @GET

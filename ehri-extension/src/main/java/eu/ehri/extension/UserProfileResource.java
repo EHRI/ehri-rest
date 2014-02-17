@@ -15,11 +15,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
-import javax.ws.rs.core.UriBuilder;
+import javax.ws.rs.core.*;
 import javax.ws.rs.core.Response.Status;
 
 import eu.ehri.project.definitions.EventTypes;
@@ -50,8 +46,8 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
     public static final String WATCHING = "watching";
     public static final String IS_WATCHING = "isWatching";
 
-    public UserProfileResource(@Context GraphDatabaseService database) {
-        super(database, UserProfile.class);
+    public UserProfileResource(@Context GraphDatabaseService database, @Context HttpHeaders requestHeaders) {
+        super(database, requestHeaders, UserProfile.class);
     }
 
     @GET

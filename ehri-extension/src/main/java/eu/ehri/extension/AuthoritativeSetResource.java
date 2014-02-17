@@ -30,8 +30,8 @@ import java.util.List;
 public class AuthoritativeSetResource extends
         AbstractAccessibleEntityResource<AuthoritativeSet> {
 
-    public AuthoritativeSetResource(@Context GraphDatabaseService database) {
-        super(database, AuthoritativeSet.class);
+    public AuthoritativeSetResource(@Context GraphDatabaseService database, @Context HttpHeaders requestHeaders) {
+        super(database, requestHeaders, AuthoritativeSet.class);
     }
 
     @GET

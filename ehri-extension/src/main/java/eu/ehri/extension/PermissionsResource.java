@@ -14,10 +14,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
+import javax.ws.rs.core.*;
 
 import eu.ehri.project.acl.GlobalPermissionSet;
 import org.codehaus.jackson.JsonFactory;
@@ -55,8 +52,8 @@ public class PermissionsResource extends AbstractRestResource {
 
     private final ObjectMapper mapper = new ObjectMapper();
 
-    public PermissionsResource(@Context GraphDatabaseService database) {
-        super(database);
+    public PermissionsResource(@Context GraphDatabaseService database, @Context HttpHeaders requestHeaders) {
+        super(database, requestHeaders);
     }
 
     /**

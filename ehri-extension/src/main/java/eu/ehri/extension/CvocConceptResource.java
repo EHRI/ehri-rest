@@ -13,12 +13,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriBuilder;
+import javax.ws.rs.core.*;
 import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.StreamingOutput;
 
 import eu.ehri.project.acl.PermissionType;
 import eu.ehri.project.exceptions.*;
@@ -45,8 +41,8 @@ public class CvocConceptResource extends
 
     private final ViewHelper helper;
 
-    public CvocConceptResource(@Context GraphDatabaseService database) {
-        super(database, Concept.class);
+    public CvocConceptResource(@Context GraphDatabaseService database, @Context HttpHeaders requestHeaders) {
+        super(database, requestHeaders, Concept.class);
         helper = new ViewHelper(graph);
     }
 

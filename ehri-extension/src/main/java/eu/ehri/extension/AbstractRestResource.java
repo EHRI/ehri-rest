@@ -107,22 +107,16 @@ public abstract class AbstractRestResource  {
     protected final GraphManager manager;
     private final Serializer serializer;
 
-    public AbstractRestResource(@Context GraphDatabaseService database) {
+    public AbstractRestResource(@Context GraphDatabaseService database, @Context final HttpHeaders requestHeaders) {
         this.database = database;
+        TxCheckedNeo4jGraph txGraph = new TxCheckedNeo4jGraph(database);
         AclGraph<TxCheckedNeo4jGraph> aclGraph
-                = new AclGraph<TxCheckedNeo4jGraph>(new TxCheckedNeo4jGraph(database), AnonymousAccessor.INSTANCE);
-        graph = graphFactory.create(aclGraph);
-        manager = GraphManagerFactory.getInstance(graph);
-        serializer = new Serializer.Builder(graph).build();
-    }
-
-    public AbstractRestResource(@Context GraphDatabaseService database, @Context HttpHeaders requestHeaders) {
-        this.database = database;
-        TxCheckedNeo4jGraph graph1 = new TxCheckedNeo4jGraph(database);
-        FramedTransactionalGraph<TxCheckedNeo4jGraph> tmp = graphFactory.create(graph1);
-        GraphManager tmpManager = GraphManagerFactory.getInstance(tmp);
-        AclGraph<TxCheckedNeo4jGraph> aclGraph
-                = new AclGraph<TxCheckedNeo4jGraph>(graph1, getAccessorOrAnonymous(tmpManager, requestHeaders));
+                = new AclGraph<TxCheckedNeo4jGraph>(txGraph, new AclGraph.AccessorFetcher() {
+            @Override
+            public Accessor fetch() {
+                return getAccessorOrAnonymous(manager, requestHeaders);
+            }
+        });
         graph = graphFactory.create(aclGraph);
         manager = GraphManagerFactory.getInstance(graph);
         serializer = new Serializer.Builder(graph).build();

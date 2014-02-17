@@ -54,20 +54,6 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * @param cls      The 'entity' class
      */
     public AbstractAccessibleEntityResource(
-            @Context GraphDatabaseService database, Class<E> cls) {
-        super(database);
-        this.cls = cls;
-        views = new LoggingCrudViews<E>(graph, cls);
-        querier = new Query<E>(graph, cls);
-    }
-
-    /**
-     * Constructor
-     *
-     * @param database Injected neo4j database
-     * @param cls      The 'entity' class
-     */
-    public AbstractAccessibleEntityResource(
             @Context GraphDatabaseService database, @Context HttpHeaders requestHeaders, Class<E> cls) {
         super(database, requestHeaders);
         this.cls = cls;

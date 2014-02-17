@@ -8,10 +8,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
+import javax.ws.rs.core.*;
 
 import eu.ehri.project.exceptions.AccessDenied;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -29,8 +26,8 @@ import eu.ehri.project.models.ContentType;
 @Path(Entities.CONTENT_TYPE)
 public class ContentTypeResource extends AbstractAccessibleEntityResource<ContentType> {
 
-    public ContentTypeResource(@Context GraphDatabaseService database) {
-        super(database, ContentType.class);
+    public ContentTypeResource(@Context GraphDatabaseService database, @Context HttpHeaders requestHeaders) {
+        super(database, requestHeaders, ContentType.class);
     }
 
     @GET

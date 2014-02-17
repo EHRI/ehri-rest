@@ -22,8 +22,8 @@ import javax.ws.rs.core.*;
 @Path("description")
 public class DescriptionResource extends AbstractAccessibleEntityResource<DescribedEntity> {
 
-    public DescriptionResource(@Context GraphDatabaseService database) {
-        super(database, DescribedEntity.class);
+    public DescriptionResource(@Context GraphDatabaseService database, @Context HttpHeaders requestHeaders) {
+        super(database, requestHeaders, DescribedEntity.class);
     }
 
     @POST

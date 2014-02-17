@@ -14,6 +14,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 
 /**
@@ -22,8 +23,8 @@ import javax.ws.rs.core.Response;
 @Path("promote")
 public class PromotionResource extends AbstractRestResource {
 
-    public PromotionResource(@Context GraphDatabaseService database) {
-        super(database);
+    public PromotionResource(@Context GraphDatabaseService database, @Context HttpHeaders requestHeaders) {
+        super(database, requestHeaders);
     }
 
     /**

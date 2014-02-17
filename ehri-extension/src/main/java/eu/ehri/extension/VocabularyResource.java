@@ -13,11 +13,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
-import javax.ws.rs.core.UriBuilder;
+import javax.ws.rs.core.*;
 import javax.ws.rs.core.Response.Status;
 
 import eu.ehri.project.exceptions.*;
@@ -44,8 +40,8 @@ import eu.ehri.project.views.Query;
 public class VocabularyResource extends
         AbstractAccessibleEntityResource<Vocabulary> {
 
-    public VocabularyResource(@Context GraphDatabaseService database) {
-        super(database, Vocabulary.class);
+    public VocabularyResource(@Context GraphDatabaseService database, @Context HttpHeaders requestHeaders) {
+        super(database, requestHeaders, Vocabulary.class);
     }
 
     @GET

@@ -8,6 +8,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -44,8 +45,8 @@ public class AdminResource extends AbstractRestResource {
     public static String DEFAULT_USER_ID_PREFIX = "user";
     public static String DEFAULT_USER_ID_FORMAT = "%s%06d";
 
-    public AdminResource(@Context GraphDatabaseService database) {
-        super(database);
+    public AdminResource(@Context GraphDatabaseService database, @Context HttpHeaders requestHeaders) {
+        super(database, requestHeaders);
     }
 
     @POST

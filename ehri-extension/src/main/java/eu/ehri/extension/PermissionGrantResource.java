@@ -2,6 +2,7 @@ package eu.ehri.extension;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -27,8 +28,8 @@ import eu.ehri.project.views.AclViews;
 @Path(Entities.PERMISSION_GRANT)
 public class PermissionGrantResource extends AbstractRestResource {
 
-    public PermissionGrantResource(@Context GraphDatabaseService database) {
-        super(database);
+    public PermissionGrantResource(@Context GraphDatabaseService database, @Context HttpHeaders requestHeaders) {
+        super(database, requestHeaders);
     }
 
     /**
