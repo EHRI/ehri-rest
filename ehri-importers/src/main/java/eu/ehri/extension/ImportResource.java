@@ -12,6 +12,7 @@ import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.File;
@@ -31,8 +32,8 @@ public class ImportResource extends AbstractRestResource {
     private static final Class<? extends AbstractImporter> DEFAULT_EAD_IMPORTER
             = IcaAtomEadImporter.class;
 
-    public ImportResource(@Context GraphDatabaseService database) {
-        super(database);
+    public ImportResource(@Context GraphDatabaseService database, @Context HttpHeaders requestHeaders) {
+        super(database, requestHeaders);
     }
 
     /**
