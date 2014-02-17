@@ -246,7 +246,7 @@ public final class Query<E extends AccessibleEntity> {
      */
     public E get(String key, String value, Accessor user)
             throws AccessDenied, ItemNotFound {
-        CloseableIterable<Vertex> indexQuery = manager.getVertices(key, value,
+        CloseableIterable<? extends Vertex> indexQuery = manager.getVertices(key, value,
                 ClassUtils.getEntityType(cls));
         try {
             E item = graph.frame(indexQuery.iterator().next(), cls);
@@ -330,10 +330,10 @@ public final class Query<E extends AccessibleEntity> {
      * @return Page instance
      */
     public Page<E> page(String key, String query, Accessor user) {
-        CloseableIterable<Vertex> countQ = manager.getVertices(key, query,
+        CloseableIterable<? extends Vertex> countQ = manager.getVertices(key, query,
                 ClassUtils.getEntityType(cls));
         try {
-            CloseableIterable<Vertex> indexQ = manager.getVertices(key,
+            CloseableIterable<? extends Vertex> indexQ = manager.getVertices(key,
                     query, ClassUtils.getEntityType(cls));
             try {
                 PipeFunction<Vertex, Boolean> aclFilterFunction = new AclManager(
@@ -391,7 +391,7 @@ public final class Query<E extends AccessibleEntity> {
      */
     public Iterable<E> list(String key, String query, Accessor user) {
         // This function is optimised for ACL actions.
-        CloseableIterable<Vertex> vertices = manager.getVertices(key,
+        CloseableIterable<? extends Vertex> vertices = manager.getVertices(key,
                 query, ClassUtils.getEntityType(cls));
         try {
             GremlinPipeline<E, Vertex> filter = new GremlinPipeline<E, Vertex>(

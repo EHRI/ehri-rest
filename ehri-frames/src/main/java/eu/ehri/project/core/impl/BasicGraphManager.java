@@ -35,14 +35,14 @@ public final class BasicGraphManager<T extends IndexableGraph> implements GraphM
         return graph;
     }
 
-    public BasicGraphManager(FramedGraph<?> graph) {
+    public BasicGraphManager(FramedGraph<T> graph) {
         // Accept a warning here about the unsafe cast.
-        this.graph = (FramedGraph<T>)graph;
+        this.graph = graph;
     }
 
     // Access functions
     public String getId(Vertex vertex) {
-        return (String) vertex.getProperty(EntityType.ID_KEY);
+        return vertex.getProperty(EntityType.ID_KEY);
     }
 
     public String getId(Frame frame) {
@@ -50,7 +50,7 @@ public final class BasicGraphManager<T extends IndexableGraph> implements GraphM
     }
 
     public String getType(Vertex vertex) {
-        return (String) vertex.getProperty(EntityType.TYPE_KEY);
+        return vertex.getProperty(EntityType.TYPE_KEY);
     }
 
     public String getType(Frame frame) {
@@ -89,10 +89,10 @@ public final class BasicGraphManager<T extends IndexableGraph> implements GraphM
     }
 
     public <T> CloseableIterable<T> getFrames(EntityClass type, Class<T> cls) {
-        CloseableIterable<Vertex> vertices = getVertices(type);
+        CloseableIterable<? extends Vertex> vertices = getVertices(type);
         try {
             return new WrappingCloseableIterable<T>(
-                    graph.frameVertices(getVertices(type), cls));
+                    graph.frameVertices((CloseableIterable<Vertex>) getVertices(type), cls));
         } finally {
             vertices.close();
         }
@@ -121,11 +121,11 @@ public final class BasicGraphManager<T extends IndexableGraph> implements GraphM
         throw new ItemNotFound(id);
     }
 
-    public CloseableIterable<Vertex> getVertices(EntityClass type) {
+    public CloseableIterable<? extends Vertex > getVertices(EntityClass type) {
         return getIndex().get(EntityType.TYPE_KEY, type.getName());
     }
 
-    public CloseableIterable<Vertex> getVertices(Iterable<String> ids) throws ItemNotFound {
+    public CloseableIterable<? extends Vertex> getVertices(Iterable<String> ids) throws ItemNotFound {
         // Ugh, we don't want to remove duplicate results here
         // because that's not expected behaviour - if you give
         // an array with dups you expect the dups to come out...
@@ -133,9 +133,10 @@ public final class BasicGraphManager<T extends IndexableGraph> implements GraphM
         for (String id : ids) {
             verts.add(getVertex(id));
         }
-        return new WrappingCloseableIterable(verts);
+        return new WrappingCloseableIterable<Vertex>(verts);
     }
 
+    @Override
     public CloseableIterable<Vertex> getVertices(String key, Object value,
             final EntityClass type) {
         // NB: This is rather annoying.

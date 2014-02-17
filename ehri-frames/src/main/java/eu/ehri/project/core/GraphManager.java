@@ -101,7 +101,7 @@ public interface GraphManager {
      * @param type
      * @return
      */
-    public CloseableIterable<Vertex> getVertices(EntityClass type);
+    public CloseableIterable<? extends Vertex> getVertices(EntityClass type);
 
     /**
      * Get a CloseableIterable of vertices with the given ids.
@@ -109,16 +109,16 @@ public interface GraphManager {
      * @param ids
      * @return
      */
-    public CloseableIterable<Vertex> getVertices(Iterable<String> ids) throws ItemNotFound;
+    public CloseableIterable<? extends Vertex> getVertices(Iterable<String> ids) throws ItemNotFound;
 
     /**
      * Get a CloseableIterable of vertices with the given type, and the given
      * key/value indexed property.
-     * 
+     *
      * @param type
      * @return
      */
-    public <T extends Vertex> CloseableIterable<T> getVertices(String key,
+    public CloseableIterable<? extends Vertex> getVertices(String key,
             Object value, EntityClass type);
 
     /**
