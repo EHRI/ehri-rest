@@ -62,6 +62,20 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
     }
 
     /**
+     * Constructor
+     *
+     * @param database Injected neo4j database
+     * @param cls      The 'entity' class
+     */
+    public AbstractAccessibleEntityResource(
+            @Context GraphDatabaseService database, @Context HttpHeaders requestHeaders, Class<E> cls) {
+        super(database, requestHeaders);
+        this.cls = cls;
+        views = new LoggingCrudViews<E>(graph, cls);
+        querier = new Query<E>(graph, cls);
+    }
+
+    /**
      * List all instances of the 'entity' accessible to the given user.
      *
      * @return List of entities
@@ -71,7 +85,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
     public StreamingOutput page(Integer offset, Integer limit,
             Iterable<String> order, Iterable<String> filters)
             throws ItemNotFound, BadRequester {
-        graph.getBaseGraph().checkNotInTransaction();
+        checkNotInTransaction();
         final Query.Page<E> page = querier.setOffset(offset).setLimit(limit)
                 .orderBy(order).filter(filters).page(getRequesterUserProfile());
         return streamingPage(page);
@@ -102,7 +116,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
     public StreamingOutput list(Integer offset, Integer limit,
             Iterable<String> order, Iterable<String> filters)
             throws ItemNotFound, BadRequester {
-        graph.getBaseGraph().checkNotInTransaction();
+        checkNotInTransaction();
         final Query<E> query = querier.setOffset(offset).setLimit(limit)
                 .orderBy(order).filter(filters);
         return streamingList(query.list(getRequesterUserProfile()));
@@ -117,7 +131,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      */
     public StreamingOutput list(Integer offset, Integer limit)
             throws ItemNotFound, BadRequester {
-        graph.getBaseGraph().checkNotInTransaction();
+        checkNotInTransaction();
         return list(offset, limit, Lists.<String>newArrayList(),
                 Lists.<String>newArrayList());
     }
@@ -131,7 +145,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      */
     public Response count(Iterable<String> filters) throws BadRequester {
         Long count = querier.filter(filters).count(getRequesterUserProfile());
-        graph.getBaseGraph().checkNotInTransaction();
+        checkNotInTransaction();
         return numberResponse(count);
     }
 
@@ -152,7 +166,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
     public Response create(String json, List<String> accessorIds)
             throws PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, BadRequester {
-        graph.getBaseGraph().checkNotInTransaction();
+        checkNotInTransaction();
         Accessor user = getRequesterUserProfile();
         Bundle entityBundle = Bundle.fromString(json);
         try {
@@ -186,7 +200,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      */
     public Response retrieve(String id) throws AccessDenied, ItemNotFound,
             BadRequester {
-        graph.getBaseGraph().checkNotInTransaction();
+        checkNotInTransaction();
         try {
             E entity = views.detail(manager.getFrame(id, getEntityType(), cls),
                     getRequesterUserProfile());
@@ -212,7 +226,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
     public Response update(String json) throws PermissionDenied,
             IntegrityError, ValidationError, DeserializationError,
             BadRequester, ItemNotFound {
-        graph.getBaseGraph().checkNotInTransaction();
+        checkNotInTransaction();
         try {
             Bundle entityBundle = Bundle.fromString(json);
             Mutation<E> update = views
@@ -286,7 +300,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      */
     protected Response delete(String id) throws AccessDenied, PermissionDenied, ItemNotFound,
             ValidationError, BadRequester {
-        graph.getBaseGraph().checkNotInTransaction();
+        checkNotInTransaction();
         try {
             E entity = views.detail(manager.getFrame(id, getEntityType(), cls),
                     getRequesterUserProfile());

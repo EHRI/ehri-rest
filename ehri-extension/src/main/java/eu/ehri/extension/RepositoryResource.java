@@ -13,12 +13,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import javax.ws.rs.core.*;
 import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.StreamingOutput;
-import javax.ws.rs.core.UriBuilder;
 
 import eu.ehri.project.exceptions.*;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -39,8 +35,8 @@ import eu.ehri.project.views.Query;
 @Path(Entities.REPOSITORY)
 public class RepositoryResource extends AbstractAccessibleEntityResource<Repository> {
 
-    public RepositoryResource(@Context GraphDatabaseService database) {
-        super(database, Repository.class);
+    public RepositoryResource(@Context GraphDatabaseService database, @Context HttpHeaders requestHeaders) {
+        super(database, requestHeaders, Repository.class);
     }
 
     @GET

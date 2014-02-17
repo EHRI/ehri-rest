@@ -29,8 +29,8 @@ import java.util.List;
 public class CountryResource extends
         AbstractAccessibleEntityResource<Country> {
 
-    public CountryResource(@Context GraphDatabaseService database) {
-        super(database, Country.class);
+    public CountryResource(@Context GraphDatabaseService database, @Context HttpHeaders requestHeaders) {
+        super(database, requestHeaders, Country.class);
     }
 
     @GET

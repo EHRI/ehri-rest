@@ -33,7 +33,7 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
     public Response createDescription(@PathParam("id") String id, String json)
             throws AccessDenied, PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, ItemNotFound, BadRequester {
-        graph.getBaseGraph().checkNotInTransaction();
+        checkNotInTransaction();
         Accessor user = getRequesterUserProfile();
         try {
             DescribedEntity doc = views.detail(
@@ -58,7 +58,7 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
     public Response updateDescription(@PathParam("id") String id, String json)
             throws AccessDenied, PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, ItemNotFound, BadRequester, SerializationError {
-        graph.getBaseGraph().checkNotInTransaction();
+        checkNotInTransaction();
         Accessor user = getRequesterUserProfile();
         DescribedEntity doc = views.detail(
                 manager.getFrame(id, DescribedEntity.class), user);
@@ -95,7 +95,7 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
             @PathParam("id") String id, @PathParam("did") String did)
             throws AccessDenied, PermissionDenied, ItemNotFound, ValidationError,
             BadRequester, SerializationError {
-        graph.getBaseGraph().checkNotInTransaction();
+        checkNotInTransaction();
         Accessor user = getRequesterUserProfile();
         DescribedEntity doc = views.detail(manager.getFrame(id, DescribedEntity.class), user);
         Description desc = manager.getFrame(did, EntityClass.DOCUMENT_DESCRIPTION,
@@ -131,7 +131,7 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
                 @PathParam("did") String did, String json)
             throws AccessDenied, PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, ItemNotFound, BadRequester {
-        graph.getBaseGraph().checkNotInTransaction();
+        checkNotInTransaction();
         try {
             Accessor user = getRequesterUserProfile();
             DescribedEntity doc = views.detail(
@@ -156,7 +156,7 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
             @PathParam("did") String did, @PathParam("apid") String apid)
             throws AccessDenied, PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, ItemNotFound, BadRequester {
-        graph.getBaseGraph().checkNotInTransaction();
+        checkNotInTransaction();
         try {
             Accessor user = getRequesterUserProfile();
             DescribedEntity doc = views.detail(

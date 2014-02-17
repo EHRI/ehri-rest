@@ -11,7 +11,9 @@ import javax.ws.rs.core.*;
 import com.google.common.base.Optional;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraphFactory;
+import com.tinkerpop.frames.FramedTransactionalGraph;
 import com.tinkerpop.frames.modules.javahandler.JavaHandlerModule;
+import eu.ehri.project.acl.wrapper.AclGraph;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.utils.TxCheckedNeo4jGraph;
@@ -37,7 +39,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-public abstract class AbstractRestResource implements TxCheckedResource {
+public abstract class AbstractRestResource  {
 
     public static final int DEFAULT_LIST_LIMIT = 20;
     private static final ObjectMapper mapper = new ObjectMapper();
@@ -101,13 +103,27 @@ public abstract class AbstractRestResource implements TxCheckedResource {
     @Context
     protected UriInfo uriInfo;
     protected final GraphDatabaseService database;
-    protected final FramedGraph<TxCheckedNeo4jGraph> graph;
+    protected final FramedGraph<AclGraph<TxCheckedNeo4jGraph>> graph;
     protected final GraphManager manager;
     private final Serializer serializer;
 
     public AbstractRestResource(@Context GraphDatabaseService database) {
         this.database = database;
-        graph = graphFactory.create(new TxCheckedNeo4jGraph(database));
+        AclGraph<TxCheckedNeo4jGraph> aclGraph
+                = new AclGraph<TxCheckedNeo4jGraph>(new TxCheckedNeo4jGraph(database), AnonymousAccessor.INSTANCE);
+        graph = graphFactory.create(aclGraph);
+        manager = GraphManagerFactory.getInstance(graph);
+        serializer = new Serializer.Builder(graph).build();
+    }
+
+    public AbstractRestResource(@Context GraphDatabaseService database, @Context HttpHeaders requestHeaders) {
+        this.database = database;
+        TxCheckedNeo4jGraph graph1 = new TxCheckedNeo4jGraph(database);
+        FramedTransactionalGraph<TxCheckedNeo4jGraph> tmp = graphFactory.create(graph1);
+        GraphManager tmpManager = GraphManagerFactory.getInstance(tmp);
+        AclGraph<TxCheckedNeo4jGraph> aclGraph
+                = new AclGraph<TxCheckedNeo4jGraph>(graph1, getAccessorOrAnonymous(tmpManager, requestHeaders));
+        graph = graphFactory.create(aclGraph);
         manager = GraphManagerFactory.getInstance(graph);
         serializer = new Serializer.Builder(graph).build();
     }
@@ -120,14 +136,37 @@ public abstract class AbstractRestResource implements TxCheckedResource {
                 : serializer;
     }
 
-    public FramedGraph<TxCheckedNeo4jGraph> getGraph() {
-        return graph;
+    protected Accessor getAccessorOrAnonymous(GraphManager tmp, HttpHeaders requestHeaders) {
+        List<String> list = requestHeaders.getRequestHeader(AUTH_HEADER_NAME);
+        if (list != null && !list.isEmpty()) {
+            String id = list.get(0);
+            try {
+                return tmp.getFrame(id, Accessor.class);
+            } catch (ItemNotFound e) {
+                return AnonymousAccessor.getInstance();
+            }
+        }
+        return AnonymousAccessor.getInstance();
     }
 
+    protected boolean isInTransaction() {
+        return graph.getBaseGraph().getBaseGraph().isInTransaction();
+    }
+
+    public void checkNotInTransaction() {
+        graph.getBaseGraph().getBaseGraph().checkNotInTransaction();
+    }
+
+    public void checkNotInTransaction(String msg) {
+        graph.getBaseGraph().getBaseGraph().checkNotInTransaction(msg);
+    }
+
+
+
     protected void cleanupTransaction() {
-        if (graph.getBaseGraph().isInTransaction()) {
+        if (graph.getBaseGraph().getBaseGraph().isInTransaction()) {
             logger.error("Rolling back active transaction");
-            graph.getBaseGraph().rollback();
+            graph.getBaseGraph().getBaseGraph().rollback();
         }
     }
 

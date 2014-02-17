@@ -16,8 +16,8 @@ import java.util.List;
 @Path(Entities.HISTORICAL_AGENT)
 public class HistoricalAgentResource extends AbstractAccessibleEntityResource<HistoricalAgent> {
 
-    public HistoricalAgentResource(@Context GraphDatabaseService database) {
-        super(database, HistoricalAgent.class);
+    public HistoricalAgentResource(@Context GraphDatabaseService database, @Context HttpHeaders requestHeaders) {
+        super(database, requestHeaders, HistoricalAgent.class);
     }
 
     @GET

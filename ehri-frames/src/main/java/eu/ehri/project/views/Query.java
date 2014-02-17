@@ -304,7 +304,7 @@ public final class Query<E extends AccessibleEntity> {
      */
     public <T extends Frame> Page<T> page(Iterable<T> vertices,
             Accessor user, Class<T> cls) {
-        PipeFunction<Vertex, Boolean> aclFilterFunction = new AclManager(graph)
+        PipeFunction<Vertex, Boolean> aclFilterFunction = AclManager
                 .getAclFilterFunction(user);
 
         // FIXME: We have to read the vertices into memory here since we
@@ -336,8 +336,8 @@ public final class Query<E extends AccessibleEntity> {
             CloseableIterable<Vertex> indexQ = manager.getVertices(key,
                     query, ClassUtils.getEntityType(cls));
             try {
-                PipeFunction<Vertex, Boolean> aclFilterFunction = new AclManager(
-                        graph).getAclFilterFunction(user);
+                PipeFunction<Vertex, Boolean> aclFilterFunction = AclManager
+                        .getAclFilterFunction(user);
                 long count = applyFilters(new GremlinPipeline<Vertex, Vertex>(
                         countQ).filter(aclFilterFunction)).count();
                 return new Page<E>(
@@ -395,8 +395,7 @@ public final class Query<E extends AccessibleEntity> {
                 query, ClassUtils.getEntityType(cls));
         try {
             GremlinPipeline<E, Vertex> filter = new GremlinPipeline<E, Vertex>(
-                    vertices).filter(new AclManager(graph)
-                    .getAclFilterFunction(user));
+                    vertices).filter(AclManager.getAclFilterFunction(user));
             return graph
                     .frameVertices(
                             setPipelineRange(setOrder(applyFilters(filter))),
@@ -428,7 +427,7 @@ public final class Query<E extends AccessibleEntity> {
             Accessor user, Class<T> cls) {
         GremlinPipeline<T, Vertex> filter = new GremlinPipeline<T, Vertex>(
                 new FramedVertexIterableAdaptor<T>(vertices))
-                .filter(new AclManager(graph).getAclFilterFunction(user));
+                .filter(AclManager.getAclFilterFunction(user));
         return graph
                 .frameVertices(
                         setPipelineRange(setOrder(applyFilters(filter))),
@@ -446,7 +445,7 @@ public final class Query<E extends AccessibleEntity> {
         GremlinPipeline<T, Vertex> filter = new GremlinPipeline<T, Vertex>(vertices);
 
         // FIXME! Count doesn't 'account' for ACL privileges!
-                //.filter(new AclManager(graph).getAclFilterFunction(user));
+                //.filter(AclManager.getAclFilterFunction(user));
         return applyFilters(filter).count();
     }
 

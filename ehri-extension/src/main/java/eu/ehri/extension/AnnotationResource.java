@@ -2,10 +2,7 @@ package eu.ehri.extension;
 
 import java.util.List;
 import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
+import javax.ws.rs.core.*;
 import javax.ws.rs.core.Response.Status;
 
 import eu.ehri.project.exceptions.*;
@@ -28,8 +25,8 @@ import eu.ehri.project.views.AnnotationViews;
 public class AnnotationResource extends
         AbstractAccessibleEntityResource<Annotation> {
 
-    public AnnotationResource(@Context GraphDatabaseService database) {
-        super(database, Annotation.class);
+    public AnnotationResource(@Context GraphDatabaseService database, @Context HttpHeaders requestHeaders) {
+        super(database, requestHeaders, Annotation.class);
     }
 
     /**
@@ -95,7 +92,7 @@ public class AnnotationResource extends
             String json, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws PermissionDenied, ValidationError, DeserializationError,
             ItemNotFound, BadRequester, SerializationError {
-        graph.getBaseGraph().checkNotInTransaction();
+        checkNotInTransaction();
         try {
             Accessor user = getRequesterUserProfile();
             Annotation ann = new AnnotationViews(graph).createFor(id, id,
@@ -134,7 +131,7 @@ public class AnnotationResource extends
             String json, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws PermissionDenied, ValidationError, DeserializationError,
             ItemNotFound, BadRequester, SerializationError {
-        graph.getBaseGraph().checkNotInTransaction();
+        checkNotInTransaction();
         try {
             Accessor user = getRequesterUserProfile();
             Annotation ann = new AnnotationViews(graph).createFor(id, did, Bundle.fromString(json), user);

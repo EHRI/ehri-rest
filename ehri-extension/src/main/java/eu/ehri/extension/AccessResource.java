@@ -5,6 +5,7 @@ import java.util.Set;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -27,8 +28,8 @@ import eu.ehri.project.views.AclViews;
 public class AccessResource extends
         AbstractAccessibleEntityResource<AccessibleEntity> {
 
-    public AccessResource(@Context GraphDatabaseService database) {
-        super(database, AccessibleEntity.class);
+    public AccessResource(@Context GraphDatabaseService database, @Context HttpHeaders requestHeaders) {
+        super(database, requestHeaders, AccessibleEntity.class);
     }
 
     /**
@@ -48,7 +49,7 @@ public class AccessResource extends
     public Response setVisibility(@PathParam("id") String id,
             @QueryParam(ACCESSOR_PARAM) List<String> accessorIds)
             throws PermissionDenied, ItemNotFound, BadRequester, SerializationError {
-        graph.getBaseGraph().checkNotInTransaction();
+        checkNotInTransaction();
         try {
             AccessibleEntity item = manager.getFrame(id, AccessibleEntity.class);
             Set<Accessor> accessors = extractAccessors(accessorIds);

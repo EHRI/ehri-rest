@@ -70,7 +70,7 @@ public final class AclManager {
      * @param accessor
      * @return User belongs to the admin group
      */
-    public boolean belongsToAdmin(Accessor accessor) {
+    public static boolean belongsToAdmin(Accessor accessor) {
         if (accessor.isAdmin())
             return true;
         for (Accessor parent : accessor.getParents()) {
@@ -86,7 +86,7 @@ public final class AclManager {
      * @param accessor
      * @return User is an anonymous accessor
      */
-    public boolean isAnonymous(Accessor accessor) {
+    public static boolean isAnonymous(Accessor accessor) {
         Preconditions.checkNotNull(accessor, "NULL accessor given.");
         return accessor instanceof AnonymousAccessor
                 || accessor.getId().equals(
@@ -101,7 +101,7 @@ public final class AclManager {
      * 
      * @return Whether or not the given accessor can access the entity
      */
-    public boolean getAccessControl(AccessibleEntity entity, Accessor accessor) {
+    public static boolean getAccessControl(AccessibleEntity entity, Accessor accessor) {
         Preconditions.checkNotNull(entity, "Entity is null");
         Preconditions.checkNotNull(accessor, "Accessor is null");
         // Admin can read/write everything and object can always read/write
@@ -366,7 +366,7 @@ public final class AclManager {
      * @param accessor
      * @return A PipeFunction for filtering a set of vertices as the given user
      */
-    public PipeFunction<Vertex, Boolean> getAclFilterFunction(Accessor accessor) {
+    public static PipeFunction<Vertex, Boolean> getAclFilterFunction(Accessor accessor) {
         Preconditions.checkNotNull(accessor, "Accessor is null");
         if (belongsToAdmin(accessor))
             return noopFilterFunction();
@@ -633,7 +633,7 @@ public final class AclManager {
      *            The user(s) accessing the resource
      * @return The accessors in the given list able to access the resource
      */
-    private List<Accessor> searchAccess(List<Accessor> accessing,
+    private static List<Accessor> searchAccess(List<Accessor> accessing,
             List<Accessor> allowedAccessors) {
         if (accessing.isEmpty()) {
             return new ArrayList<Accessor>();
@@ -665,7 +665,7 @@ public final class AclManager {
      * @param accessor
      * @return
      */
-    private HashSet<Vertex> getAllAccessors(Accessor accessor) {
+    private static HashSet<Vertex> getAllAccessors(Accessor accessor) {
 
         final HashSet<Vertex> all = Sets.newHashSet();
         if (!isAnonymous(accessor)) {
@@ -726,7 +726,7 @@ public final class AclManager {
      * @return A no-op PipeFunction for filtering a list of vertices as an admin
      *         user
      */
-    private PipeFunction<Vertex, Boolean> noopFilterFunction() {
+    private static PipeFunction<Vertex, Boolean> noopFilterFunction() {
         return new PipeFunction<Vertex, Boolean>() {
             public Boolean compute(Vertex v) {
                 return true;

@@ -19,11 +19,8 @@ import eu.ehri.project.views.ViewHelper;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import javax.ws.rs.core.*;
 import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.StreamingOutput;
 import java.util.List;
 
 /**
@@ -35,8 +32,8 @@ public class LinkResource extends
 
     public static final String BODY_PARAM = "body";
 
-    public LinkResource(@Context GraphDatabaseService database) {
-        super(database, Link.class);
+    public LinkResource(@Context GraphDatabaseService database, @Context HttpHeaders requestHeaders) {
+        super(database, requestHeaders, Link.class);
     }
 
     /**
@@ -117,7 +114,7 @@ public class LinkResource extends
             graph.getBaseGraph().rollback();
             throw new RuntimeException(e);
         } finally {
-            if (graph.getBaseGraph().isInTransaction()) {
+            if (isInTransaction()) {
                 graph.getBaseGraph().rollback();
             }
         }
@@ -156,7 +153,7 @@ public class LinkResource extends
             graph.getBaseGraph().commit();
             return Response.status(Status.OK).build();
         } finally {
-            if (graph.getBaseGraph().isInTransaction()) {
+            if (isInTransaction()) {
                 graph.getBaseGraph().rollback();
             }
         }

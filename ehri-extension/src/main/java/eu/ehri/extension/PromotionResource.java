@@ -50,7 +50,7 @@ public class PromotionResource extends AbstractRestResource {
             return Response.status(Response.Status.BAD_REQUEST.getStatusCode())
                     .entity(e.getMessage()).build();
         } finally {
-            if (graph.getBaseGraph().isInTransaction()) {
+            if (isInTransaction()) {
                 graph.getBaseGraph().rollback();
             }
         }
@@ -77,7 +77,7 @@ public class PromotionResource extends AbstractRestResource {
             graph.getBaseGraph().commit();
             return Response.ok().build();
         } finally {
-            if (graph.getBaseGraph().isInTransaction()) {
+            if (isInTransaction()) {
                 graph.getBaseGraph().rollback();
             }
         }

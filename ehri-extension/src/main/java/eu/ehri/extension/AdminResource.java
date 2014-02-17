@@ -52,7 +52,7 @@ public class AdminResource extends AbstractRestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/_rebuildChildCache")
     public Response rebuildChildCache() throws Exception {
-        graph.getBaseGraph().checkNotInTransaction();
+        checkNotInTransaction();
         try {
             for (DocumentaryUnit unit: manager.getFrames(EntityClass.DOCUMENTARY_UNIT, DocumentaryUnit.class)) {
                 unit.updateChildCountCache();
@@ -89,7 +89,7 @@ public class AdminResource extends AbstractRestResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/createDefaultUserProfile")
     public Response createDefaultUserProfile(String jsonData) throws Exception {
-        graph.getBaseGraph().checkNotInTransaction();
+        checkNotInTransaction();
         try {
             String ident = getNextDefaultUserId();
             Bundle bundle = new Bundle.Builder(EntityClass.USER_PROFILE)

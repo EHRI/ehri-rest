@@ -98,7 +98,7 @@ public class ImportResource extends AbstractRestResource {
             return Response.status(Response.Status.BAD_REQUEST.getStatusCode())
                     .entity(("Class not found: " + e.getMessage() + "\n").getBytes()).build();
         } finally {
-            if (graph.getBaseGraph().isInTransaction()) {
+            if (isInTransaction()) {
                 graph.getBaseGraph().rollback();
             }
         }
