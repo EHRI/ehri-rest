@@ -29,7 +29,7 @@ public class BundesarchiveEadHandler extends EadHandler {
     @SuppressWarnings("unchecked")
     public BundesarchiveEadHandler(AbstractImporter<Map<String, Object>> importer) {
         super(importer, new XmlImportProperties("bundesarchive.properties"));
-        defaultLanguage = "de";
+        defaultLanguage = "deu";
     }
 
 
@@ -105,7 +105,7 @@ public class BundesarchiveEadHandler extends EadHandler {
     		}
     	} else {
     		logger.error("no unitid found, setting " + ++bundesarchivecount);
-    		currentGraph.put("objectIdentifier", "bundesarchiveID"+bundesarchivecount);
+    		currentGraph.put("objectIdentifier", "" + bundesarchivecount);
 
     	}
     }

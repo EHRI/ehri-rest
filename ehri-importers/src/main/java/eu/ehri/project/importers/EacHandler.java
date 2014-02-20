@@ -5,6 +5,7 @@
 package eu.ehri.project.importers;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.properties.XmlImportProperties;
@@ -78,7 +79,7 @@ public class EacHandler extends EaHandler {
                     logger.debug("no " + Ontology.LANGUAGE_OF_DESCRIPTION + " found");
                     putPropertyInCurrentGraph(Ontology.LANGUAGE_OF_DESCRIPTION, "en");
                 }
-                importer.importItem(currentGraphPath.pop(), depth);
+                importer.importItem(currentGraphPath.pop(), Lists.<String>newArrayList());
 
             } catch (ValidationError ex) {
                 logger.error(ex.getMessage());

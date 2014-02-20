@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import eu.ehri.project.persistence.BundleDAO;
 import eu.ehri.project.persistence.Mutation;
 import eu.ehri.project.views.impl.CrudViews;
 import org.slf4j.Logger;
@@ -50,7 +51,8 @@ public class EacImporter extends EaImporter {
     }
 
     @Override
-    public HistoricalAgent importItem(Map<String, Object> itemData, int depth) throws ValidationError {
+    public HistoricalAgent importItem(Map<String, Object> itemData, List<String> idPath) throws
+            ValidationError {
         return importItem(itemData);
     }
 
@@ -60,6 +62,8 @@ public class EacImporter extends EaImporter {
      */
     @Override
     public HistoricalAgent importItem(Map<String, Object> itemData) throws ValidationError {
+
+        BundleDAO persister = new BundleDAO(framedGraph, permissionScope.idPath());
 
         Bundle unit = new Bundle(EntityClass.HISTORICAL_AGENT, extractUnit(itemData));
 

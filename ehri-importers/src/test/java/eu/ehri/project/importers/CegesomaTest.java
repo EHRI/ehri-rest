@@ -29,7 +29,7 @@ public class CegesomaTest extends AbstractImporterTest{
     protected final String TEST_REPO = "r1";
     protected final String XMLFILE = "Bestand_Nola_ead-test.pxml";
     protected final String ARCHDESC = "AA 1134",
-            C01 = "cegesomaID1",
+            C01 = "cegesomaID-SOMA_CEGES_72695-1",
             C02_01 = "AA 1134 / 32",
             C02_02 = "AA 1134 / 34";
     DocumentaryUnit archdesc, c1, c2_1, c2_2;
@@ -43,8 +43,8 @@ public class CegesomaTest extends AbstractImporterTest{
 
         origCount = getNodeCount(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(XMLFILE);
-        ImportLog log = new SaxImportManager(graph, agent, validUser, IcaAtomEadImporter.class, CegesomaEadHandler.class).importFile(ios, logMessage);
-        printGraph(graph);
+        ImportLog log = new SaxImportManager(graph, agent, validUser, EadImporter.class, CegesomaEadHandler.class).importFile(ios, logMessage);
+//        printGraph(graph);
         // How many new nodes will have been created? We should have
         // - 5 more DocumentaryUnits (archdesc, 1 c01, 3 c02)
        	// - 5 more DocumentDescription
@@ -70,26 +70,40 @@ public class CegesomaTest extends AbstractImporterTest{
         c2_2 = graph.frame(
                 getVertexByIdentifier(graph,C02_02),
                 DocumentaryUnit.class);
-        
 
-    //test titles
-        for(DocumentDescription d : archdesc.getDocumentDescriptions()){
-            assertEquals("Deelarchief betreffende het actienetwerk Nola (1942-1944)", d.getName());
+        // Test ID generation is correct
+        assertEquals("nl-r1-aa-1134-cegesomaid-soma-ceges-72695-1", c1.getId());
+        assertEquals(c1.getId() + "-aa-1134-32", c2_1.getId());
+        assertEquals(c1.getId() + "-aa-1134-34", c2_2.getId());
+
+        /**
+         * Test titles
+         */
+        // There should be one DocumentDescription for the <archdesc>
+        for(DocumentDescription dd : archdesc.getDocumentDescriptions()){
+            assertEquals("Deelarchief betreffende het actienetwerk Nola (1942-1944)", dd.getName());
+            assertEquals("nld", dd.getLanguageOfDescription());
         }
-        for(DocumentDescription desc : c1.getDocumentDescriptions()){
-                assertEquals("Documenten betreffende l'Union nationale de la Résistance", desc.getName());
+        
+        // There should be one DocumentDescription for the (only) <c01>
+        for(DocumentDescription dd : c1.getDocumentDescriptions()){
+            assertEquals("Documenten betreffende l'Union nationale de la Résistance", dd.getName());
+            assertEquals("nld", dd.getLanguageOfDescription());
         }
-//        for(DocumentDescription d : c7_1.getDocumentDescriptions()){
-//            assertEquals("Generalkommandos der Waffen-SS", d.getName());
-//        }
-        for(DocumentDescription d : c2_2.getDocumentDescriptions()){
-            assertEquals("Wetteksten (U.) S.R.A.", d.getName());
-            assertEquals("item", d.asVertex().getProperty("levelOfDescription"));
+
+        // There should be one DocumentDescription for the (second) <c02>
+        for(DocumentDescription dd : c2_2.getDocumentDescriptions()){
+            assertEquals("Wetteksten (U.) S.R.A.", dd.getName());
+            assertEquals("nld", dd.getLanguageOfDescription());
+            assertEquals("item", dd.asVertex().getProperty("levelOfDescription"));
         }
-    //test hierarchy
+    
+        /**
+         * Test hierarchy
+         */
         assertEquals(new Long(1), archdesc.getChildCount());
-        for(DocumentaryUnit d : archdesc.getChildren()){
-            assertEquals(C01, d.getIdentifier());
+        for(DocumentaryUnit du : archdesc.getChildren()){
+            assertEquals(C01, du.getIdentifier());
         }
     //test arta-identifiers
 //        for(DocumentDescription d : c7_2.getDocumentDescriptions()){

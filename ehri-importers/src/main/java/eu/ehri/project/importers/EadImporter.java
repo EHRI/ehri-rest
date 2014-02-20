@@ -1,5 +1,6 @@
 package eu.ehri.project.importers;
 
+import com.google.common.collect.Iterables;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.definitions.Ontology;
@@ -13,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import eu.ehri.project.persistence.BundleDAO;
 import eu.ehri.project.persistence.Mutation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,11 +33,6 @@ import org.slf4j.LoggerFactory;
 public class EadImporter extends EaImporter {
 
     private static final Logger logger = LoggerFactory.getLogger(EadImporter.class);
-    /**
-     * Depth of top-level items. For reasons as-yet-undetermined in the bowels of the SamXmlHandler, top level items are
-     * at depth 1 (rather than 0)
-     */
-    protected final int TOP_LEVEL_DEPTH = 1;
 
     /**
      * Construct an EadImporter object.
@@ -52,15 +49,18 @@ public class EadImporter extends EaImporter {
     /**
      * Import a single archdesc or c01-12 item, keeping a reference to the hierarchical depth.
      *
-     * @param itemData
-     * @param depth
+     * @param itemData The data map
+     * @param idPath The identifiers of parent documents,
+     *               not including those of the overall permission scope
      * @throws ValidationError when the itemData does not contain an identifier for the unit or...
      */
     @Override
-    public DocumentaryUnit importItem(Map<String, Object> itemData, int depth)
+    public DocumentaryUnit importItem(Map<String, Object> itemData, List<String> idPath)
             throws ValidationError {
 
-    	// extractDocumentaryUnit does not throw ValidationError on missing ID
+        BundleDAO persister = getPersister(idPath);
+
+        // extractDocumentaryUnit does not throw ValidationError on missing ID
         Bundle unit = new Bundle(EntityClass.DOCUMENTARY_UNIT, extractDocumentaryUnit(itemData));
         
         // Check for missing identifier, throw an exception when there is no ID.
@@ -97,7 +97,7 @@ public class EadImporter extends EaImporter {
 
         // Set the repository/item relationship
         //TODO: figure out another way to determine we're at the root, so we can get rid of the depth param
-        if (depth == TOP_LEVEL_DEPTH && mutation.created()) {
+        if (idPath.isEmpty() && mutation.created()) {
             EntityClass scopeType = manager.getEntityClass(permissionScope);
             if (scopeType.equals(EntityClass.REPOSITORY)) {
                 Repository repository = framedGraph.frame(permissionScope.asVertex(), Repository.class);
@@ -116,7 +116,7 @@ public class EadImporter extends EaImporter {
 
 
     }
-    
+
     @SuppressWarnings("unchecked")
 	@Override
     protected Iterable<Map<String, Object>> extractRelations(Map<String, Object> data) {
