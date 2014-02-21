@@ -74,7 +74,8 @@ public final class AclViews {
                 graph.frame(grantee.asVertex(), Actioner.class),
                 EventTypes.setGlobalPermissions);
         if (scoped) {
-            context.addSubjects(scope);
+            context.addSubjects(
+                    graph.frame(scope.asVertex(), AccessibleEntity.class));
         }
         return acl.getInheritedGlobalPermissions(accessor);
     }

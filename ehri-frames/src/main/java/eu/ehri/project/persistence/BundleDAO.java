@@ -1,11 +1,10 @@
 package eu.ehri.project.persistence;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
-import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.exceptions.IntegrityError;
@@ -13,7 +12,6 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.base.Frame;
-import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.utils.ClassUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +31,6 @@ public final class BundleDAO {
     private static final Logger logger = LoggerFactory.getLogger(BundleDAO.class);
 
     private final FramedGraph<?> graph;
-    private final PermissionScope scope;
     private final GraphManager manager;
     private final Serializer serializer;
     private final BundleValidator validator;
@@ -42,15 +39,13 @@ public final class BundleDAO {
      * Constructor with a given scope.
      *
      * @param graph
-     * @param scope
+     * @param scopeIds
      */
-    public BundleDAO(FramedGraph<?> graph, PermissionScope scope) {
+    public BundleDAO(FramedGraph<?> graph, Iterable<String> scopeIds) {
         this.graph = graph;
-        this.scope = Optional.fromNullable(scope)
-                .or(SystemScope.getInstance());
         manager = GraphManagerFactory.getInstance(graph);
         serializer = new Serializer.Builder(graph).dependentOnly().build();
-        validator = new BundleValidator(manager, scope);
+        validator = new BundleValidator(manager, scopeIds);
     }
 
     /**
@@ -59,7 +54,7 @@ public final class BundleDAO {
      * @param graph
      */
     public BundleDAO(FramedGraph<?> graph) {
-        this(graph, SystemScope.getInstance());
+        this(graph, Lists.<String>newArrayList());
     }
 
     /**
@@ -137,6 +132,7 @@ public final class BundleDAO {
      *
      * @param bundle
      * @return
+     * @throws RuntimeException when an item is said to exist, but could not be found
      */
     private Mutation<Vertex> createOrUpdateInner(Bundle bundle) {
         try {
@@ -153,10 +149,11 @@ public final class BundleDAO {
     }
 
     /**
-     * Insert a bundle and save it's dependent items.
+     * Insert a bundle and save its dependent items.
      *
-     * @param bundle
-     * @return
+     * @param bundle a Bundle to insert in the graph
+     * @return the Vertex that was created from this Bundle
+     * @throws RuntimeException when an ID generation error was not handled by the IdGenerator class
      */
     private Vertex createInner(Bundle bundle) {
         try {

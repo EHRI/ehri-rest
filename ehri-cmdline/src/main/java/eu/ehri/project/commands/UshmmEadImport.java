@@ -1,6 +1,6 @@
 package eu.ehri.project.commands;
 
-import eu.ehri.project.importers.IcaAtomEadImporter;
+import eu.ehri.project.importers.EadImporter;
 import eu.ehri.project.importers.UshmmHandler;
 
 /**
@@ -13,6 +13,6 @@ public class UshmmEadImport extends EadImport {
 	final static String NAME = "ushmm-ead-import";
 	
 	public UshmmEadImport() {
-		super(UshmmHandler.class, IcaAtomEadImporter.class);
+		super(UshmmHandler.class, EadImporter.class);
 	}
 }

@@ -13,13 +13,22 @@ import java.util.Set;
  */
 public interface ImportProperties {
 
+	/**
+     * Get the value for the specified key.
+     */
     public String getProperty(String key);
 
+    /**
+     * See whether a value exists in the properties file.
+     * 
+     * @param value a value to look for
+     * @return true when found, false when it doesn't exist in the file
+     */
     public boolean containsPropertyValue(String value);
 
     /**
      * 
-     * @return returns the right-hand side of the properties file 
+     * @return the right-hand side of the properties file 
      */
     public Set<String> getAllNonAttributeValues();
 
@@ -27,5 +36,8 @@ public interface ImportProperties {
 
     public boolean hasAttributeProperty(String key);
 
+    /**
+     * Get the value for the given attribute name.
+     */
     public String getAttributeProperty(String key);
 }

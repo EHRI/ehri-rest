@@ -3,7 +3,6 @@ package eu.ehri.project.models.idgen;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
 import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.Bundle;
@@ -23,7 +22,7 @@ import static org.junit.Assert.assertTrue;
 public class IdentifiableEntityIdGeneratorTest extends AbstractFixtureTest {
 
     private IdGenerator instance;
-    private PermissionScope scope;
+    private List<String> scopes;
     private Bundle bundle;
 
     @Override
@@ -31,26 +30,19 @@ public class IdentifiableEntityIdGeneratorTest extends AbstractFixtureTest {
     public void setUp() throws Exception{
         super.setUp();
         instance = IdentifiableEntityIdGenerator.INSTANCE;
-        scope = manager.getFrame("r1", Repository.class);
+        scopes = Lists.newArrayList("r1");
         bundle = Bundle.fromData(TestData.getTestDocBundle());
     }
 
     @Test()
     public void testHandleIdCollision() throws Exception {
         ListMultimap<String,String> errors = instance
-                .handleIdCollision(scope, bundle);
+                .handleIdCollision(scopes, bundle);
         assertTrue(errors.containsKey(Ontology.IDENTIFIER_KEY));
     }
 
     @Test
-    public void testGenerateId() throws Exception {
-        String id = instance.generateId(scope, bundle);
-        assertEquals("nl-r1-someid-01", id);
-    }
-
-    @Test
     public void testGenerateIdWithStringScopes() throws Exception {
-        List<String> scopes = Lists.newArrayList("r1");
         String id = instance.generateId(scopes, bundle);
         assertEquals("r1-someid-01", id);
 

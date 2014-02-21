@@ -18,6 +18,7 @@ import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import eu.ehri.project.persistence.Bundle;
@@ -42,6 +43,9 @@ public class UkrainianUnitImporter extends XmlImporter<Object> {
 
     @Override
     public AccessibleEntity importItem(Map<String, Object> itemData) throws ValidationError {
+
+        BundleDAO persister = new BundleDAO(framedGraph, permissionScope.idPath());
+
         logger.debug("-----------------------------------");
         Bundle unit = new Bundle(EntityClass.DOCUMENTARY_UNIT, extractUnit(itemData));
         Map<String, Object> unknowns = extractUnknownProperties(itemData);
@@ -93,7 +97,8 @@ public class UkrainianUnitImporter extends XmlImporter<Object> {
 
 
     @Override
-    public AccessibleEntity importItem(Map<String, Object> itemData, int depth) throws ValidationError {
+    public AccessibleEntity importItem(Map<String, Object> itemData, List<String> scopeIds) throws
+            ValidationError {
         throw new UnsupportedOperationException("Not supported ever.");
     }
 

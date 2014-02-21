@@ -4,6 +4,7 @@
  */
 package eu.ehri.project.importers;
 
+import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Repository;
@@ -67,13 +68,27 @@ private final String UN_REL = "HR-HDA145corporateBodyAccessCroatianStateArchive"
                 IMPORTED_ITEM_ID);
         assertTrue(docs.iterator().hasNext());
         DocumentaryUnit unit = graph.frame(docs.iterator().next(), DocumentaryUnit.class);
+
+        // Check unit ID
+        String targetUnitId = "nl-r1-hr-r000382hr-hr-hda-1551";
+        assertEquals(targetUnitId, unit.getId());
+
         for(Description d : unit.getDocumentDescriptions())
             assertEquals("Zbirka gradiva za povijest Židova (Collection of material concerning the history of Jews)", d.getName());
-//  UndeterminedRelationship creator = graph.frame(graph.getVertices("identifier", UN_REL).iterator().next(), UndeterminedRelationship.class);
-//        for(String key : creator.asVertex().getPropertyKeys()){
-//            logger.debug(key + ": " + creator.asVertex().getProperty(key));
-//        }
-//        assertTrue(creator.asVertex().getPropertyKeys().contains("role"));
+
+        assertEquals(Long.valueOf(2), unit.getChildCount());
+        List<DocumentaryUnit> children = Lists.newArrayList(unit.getChildren());
+        DocumentaryUnit child1 = children.get(0);
+        DocumentaryUnit child2 = children.get(1);
+
+        // Check permission scopes
+        assertEquals(agent, unit.getPermissionScope());
+        assertEquals(unit, child1.getPermissionScope());
+        assertEquals(unit, child2.getPermissionScope());
+
+        // Check child IDs
+        assertEquals(targetUnitId + "-hr-hda-145", child1.getId());
+        assertEquals(targetUnitId + "-hr-hda-223", child2.getId());
 
         List<SystemEvent> actions = toList(unit.getHistory());
         // Check we've only got one action
@@ -88,7 +103,5 @@ private final String UN_REL = "HR-HDA145corporateBodyAccessCroatianStateArchive"
         assertEquals(createCount, getNodeCount(graph));
         // And no logical item should've been updated
         assertEquals(0, log2.getUpdated());
-
-        // TODO: Check permission scopes
     }
 }

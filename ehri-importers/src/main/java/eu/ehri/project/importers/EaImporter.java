@@ -39,10 +39,12 @@ public abstract class EaImporter extends XmlImporter<Map<String, Object>> {
     }
 
     /**
+     * Extract properties from the itemData Map that belong to a generic unit and
+     * returns them as a new Map. Calls extractDocumentaryUnit.
      * 
-     * @param itemData
-     * @return
-     * @throws ValidationError
+     * @param itemData a Map representation of a unit
+     * @return a new Map containing those properties that are specific to a unit
+     * @throws ValidationError when extractDocumentaryUnit throws it
      */
     protected Map<String, Object> extractUnit(Map<String, Object> itemData) throws ValidationError {
         Map<String, Object> unit = extractDocumentaryUnit(itemData);
@@ -50,6 +52,16 @@ public abstract class EaImporter extends XmlImporter<Map<String, Object>> {
         return unit;
     }
 
+    /**
+     * Extract DocumentaryUnit properties from the itemData and return them as a new Map.
+     * This implementation only extracts the objectIdentifier.
+     * 
+     * This implementation does not throw ValidationErrors.
+     * 
+     * @param itemData a Map containing raw properties of a DocumentaryUnit
+     * @return a new Map containing the objectIdentifier property
+     * @throws ValidationError never
+     */
     protected Map<String, Object> extractDocumentaryUnit(Map<String, Object> itemData) throws ValidationError {
         Map<String, Object> unit = new HashMap<String, Object>();
         unit.put(Ontology.IDENTIFIER_KEY, itemData.get("objectIdentifier"));
@@ -72,9 +84,9 @@ public abstract class EaImporter extends XmlImporter<Map<String, Object>> {
     }
     
     /**
-     * Extract properties from the itemData Map that are marked as unknown, put them in a new Map.
+     * Extract properties from the itemData Map that are marked as unknown, and return them in a new Map.
      * 
-     * @param itemData
+     * @param itemData a Map containing raw properties of a unit
      * @return returns a Map with all keys from itemData that start with SaxXmlHandler.UNKNOWN
      * @throws ValidationError 
      */
@@ -87,13 +99,20 @@ public abstract class EaImporter extends XmlImporter<Map<String, Object>> {
         }
         return unknowns;
     }
-    protected Iterable<Map<String, Object>> extractRelations(Map<String, Object> data) {
+    
+    /**
+     * Extract node representations for related nodes based on the 'relation' property in the supplied data Map.
+     * 
+     * @param itemData a Map containing raw properties of a unit
+     * @return an Iterable of new Maps representing related nodes and their types
+     */
+    protected Iterable<Map<String, Object>> extractRelations(Map<String, Object> itemData) {
         final String REL = "relation";
         List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
-        for (String key : data.keySet()) {
+        for (String key : itemData.keySet()) {
             if (key.equals(REL)) {
                 //type, targetUrl, targetName, notes
-                for (Map<String, Object> origRelation : (List<Map<String, Object>>) data.get(key)) {
+                for (Map<String, Object> origRelation : (List<Map<String, Object>>) itemData.get(key)) {
                     Map<String, Object> relationNode = new HashMap<String, Object>();
                     for (String eventkey : origRelation.keySet()) {
                         if (eventkey.equals(REL + "/type")) {
@@ -124,7 +143,8 @@ public abstract class EaImporter extends XmlImporter<Map<String, Object>> {
      * Extract a Map containing the properties of a documentary unit's description.
      * Excludes unknown properties, object identifier(s), maintenance events, relations,
      * addresses and *Access relations.
-     * @param itemData
+     * 
+     * @param itemData a Map containing raw properties of a unit 
      * @param entity
      * @return
      */
@@ -148,12 +168,21 @@ public abstract class EaImporter extends XmlImporter<Map<String, Object>> {
         return description;
     }
     
+    /**
+     * Extract an Iterable of representations of maintenance events from the itemData.
+     * 
+     * TODO the unitid parameter is not used in the code.
+     * 
+     * @param itemData a Map containing raw properties of a unit
+     * @param unitid
+     * @return
+     */
     @SuppressWarnings("unchecked")
-    protected Iterable<Map<String, Object>> extractMaintenanceEvent(Map<String, Object> data, String unitid)  {
+    protected Iterable<Map<String, Object>> extractMaintenanceEvent(Map<String, Object> itemData, String unitid)  {
         List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
-        for (String key : data.keySet()) {
+        for (String key : itemData.keySet()) {
             if (key.equals("maintenanceEvent")) {
-                for (Map<String, Object> event : (List<Map<String, Object>>) data.get(key)) {
+                for (Map<String, Object> event : (List<Map<String, Object>>) itemData.get(key)) {
                     Map<String, Object> e2 = new HashMap<String, Object>();
                     for (String eventkey : event.keySet()) {
                         if (eventkey.equals("maintenanceEvent/type")) {
@@ -175,10 +204,10 @@ public abstract class EaImporter extends XmlImporter<Map<String, Object>> {
     }
 
     /**
+     * Extract an address node representation from the itemData.
      * 
-     * @param itemData
-     * @return returns a Map with all address/ keys
-     * @throws ValidationError 
+     * @param itemData a Map containing raw properties of a unit
+     * @return returns a Map with all address/ keys (may be empty)
      */
     protected Map<String, Object> extractAddress(Map<String, Object> itemData)  {
         Map<String, Object> address = new HashMap<String, Object>();

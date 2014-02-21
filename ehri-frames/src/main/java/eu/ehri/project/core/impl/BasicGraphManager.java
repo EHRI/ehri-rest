@@ -42,7 +42,7 @@ public final class BasicGraphManager<T extends IndexableGraph> implements GraphM
 
     // Access functions
     public String getId(Vertex vertex) {
-        return (String) vertex.getProperty(EntityType.ID_KEY);
+        return vertex.getProperty(EntityType.ID_KEY);
     }
 
     public String getId(Frame frame) {
@@ -50,7 +50,7 @@ public final class BasicGraphManager<T extends IndexableGraph> implements GraphM
     }
 
     public String getType(Vertex vertex) {
-        return (String) vertex.getProperty(EntityType.TYPE_KEY);
+        return vertex.getProperty(EntityType.TYPE_KEY);
     }
 
     public String getType(Frame frame) {
@@ -58,11 +58,13 @@ public final class BasicGraphManager<T extends IndexableGraph> implements GraphM
     }
 
     public EntityClass getEntityClass(Vertex vertex) {
+        Preconditions.checkNotNull(vertex);
         return EntityClass.withName(getType(vertex));
     }
 
     public EntityClass getEntityClass(Frame frame) {
-        return getEntityClass(frame.asVertex());
+        Preconditions.checkNotNull(frame);
+        return EntityClass.withName(frame.getType());
     }
 
     public boolean exists(String id) {

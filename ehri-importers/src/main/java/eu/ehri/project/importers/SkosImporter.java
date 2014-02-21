@@ -53,7 +53,7 @@ public class SkosImporter extends XmlImporter<Map<String, Object>> {
 
         Bundle unit = new Bundle(EntityClass.CVOC_CONCEPT,
                 extractConcept(itemData));
-        BundleDAO persister = new BundleDAO(framedGraph, permissionScope);
+        BundleDAO persister = new BundleDAO(framedGraph, permissionScope.idPath());
 
         // Add dates and descriptions to the bundle since they're @Dependent
         // relations.
@@ -134,7 +134,8 @@ public class SkosImporter extends XmlImporter<Map<String, Object>> {
     }
 
     @Override
-    public AccessibleEntity importItem(Map<String, Object> itemData, int depth) throws ValidationError {
+    public AccessibleEntity importItem(Map<String, Object> itemData, List<String> idPath) throws
+            ValidationError {
         throw new UnsupportedOperationException("Not supported ever.");
     }
 }

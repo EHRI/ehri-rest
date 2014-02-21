@@ -2,21 +2,25 @@ package eu.ehri.project.commands;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.TransactionalGraph;
-import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
-import eu.ehri.project.definitions.Entities;
-import eu.ehri.project.models.annotations.EntityType;
+import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.EntityClass;
+import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Frame;
+import eu.ehri.project.models.base.IdentifiableEntity;
 import eu.ehri.project.models.base.PermissionScope;
+import eu.ehri.project.models.idgen.IdGeneratorUtils;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 
 import java.util.List;
 
-import static eu.ehri.project.definitions.Entities.*;
+import static eu.ehri.project.models.EntityClass.*;
 
 /**
  * Sanity check various parts of the graph.
@@ -34,9 +38,8 @@ public class Check extends BaseCommand implements Command {
     
 	@Override
 	public String getHelp() {
-        String help = "perform various checks on the graph structure" +
+        return "perform various checks on the graph structure" +
         		"\n" + getUsage();
-        return help;
 	}
 	
     @Override
@@ -73,27 +76,51 @@ public class Check extends BaseCommand implements Command {
      *  Repository - a country
      *  Hist agent - an auth set
      *
-     * @param graph
-     * @param manager
+     * @param graph The graph
+     * @param manager The graph manager
      * @throws Exception
      */
     public void checkPermissionScopes(final FramedGraph<? extends TransactionalGraph> graph,
             final GraphManager manager) throws Exception {
 
-        List<String> types = Lists.newArrayList(DOCUMENTARY_UNIT, REPOSITORY, CVOC_CONCEPT, HISTORICAL_AGENT);
+        List<EntityClass> types = Lists.newArrayList(DOCUMENTARY_UNIT, REPOSITORY, CVOC_CONCEPT, HISTORICAL_AGENT);
 
-        Iterable<Vertex> vertices = graph.getVertices();
-        for (Vertex vertex : vertices) {
-            String type = vertex.getProperty(EntityType.TYPE_KEY);
-            if (!types.contains(type)) {
-                continue;
-            }
-
-            AccessibleEntity entity = graph.frame(vertex, AccessibleEntity.class);
-            PermissionScope scope = entity.getPermissionScope();
-            if (scope == null) {
-                System.err.println("Missing scope: " + entity.getId() + " (" + vertex.getId() + ")");
+        for (EntityClass entityClass : types) {
+            CloseableIterable<? extends Frame> items
+                    = manager.getFrames(entityClass, entityClass.getEntityClass());
+            try {
+                for (Frame item : items) {
+                    AccessibleEntity entity = graph.frame(item.asVertex(), AccessibleEntity.class);
+                    PermissionScope scope = entity.getPermissionScope();
+                    if (scope == null) {
+                        System.err.println("Missing scope: " + entity.getId() + " (" + entity.asVertex().getId() + ")");
+                    } else {
+                        switch (manager.getEntityClass(item)) {
+                            case DOCUMENTARY_UNIT:
+                                checkIdGeneration(graph.frame(item.asVertex(), DocumentaryUnit.class), scope);
+                                break;
+                            case REPOSITORY:
+                                checkIdGeneration(graph.frame(item.asVertex(), Repository.class), scope);
+                                break;
+                            default:
+                        }
+                    }
+                }
+            } finally {
+                items.close();
             }
         }
-    } 
+    }
+
+    private void checkIdGeneration(IdentifiableEntity doc, PermissionScope scope) {
+        if (scope != null) {
+            String ident = doc.getIdentifier();
+            List<String> path = Lists.newArrayList(Iterables.concat(scope.idPath(), Lists.newArrayList(ident)));
+            String finalId = IdGeneratorUtils.joinPath(path);
+            if (!finalId.equals(doc.getId())) {
+                System.err.println(String.format("Generated ID does not match scopes: '%s' -> %s + %s",
+                        doc.getId(), path, ident));
+            }
+        }
+    }
 }

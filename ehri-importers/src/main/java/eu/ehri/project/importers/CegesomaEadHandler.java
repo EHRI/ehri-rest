@@ -26,7 +26,7 @@ public class CegesomaEadHandler extends EadHandler {
 
     public CegesomaEadHandler(AbstractImporter<Map<String, Object>> importer) {
         super(importer, new XmlImportProperties("cegesoma.properties"));
-        this.defaultLanguage = "nl";
+        this.defaultLanguage = "nld";
     }
 
     /**
@@ -51,8 +51,8 @@ public class CegesomaEadHandler extends EadHandler {
             }
         } else {
         	// Generate an identifier if there is none
-            logger.error("no unitid found, setting " + ++cegesomacount);
-            currentGraph.put("objectIdentifier", "cegesomaID"+cegesomacount);
+            logger.error("no unitid found, setting " + getEadId() + "-" + ++cegesomacount);
+            currentGraph.put("objectIdentifier", "cegesomaID-"+getEadId() + "-" +cegesomacount);
             
         }
     }
@@ -68,7 +68,7 @@ public class CegesomaEadHandler extends EadHandler {
             //finding some name for this unit:
             logger.error("Cegesoma node without name field: ");
             currentGraph.put(Ontology.NAME_KEY, "UNKNOWN title" );
-        } else if(currentGraph.get(Ontology.NAME_KEY) instanceof List){
+        } else if (currentGraph.get(Ontology.NAME_KEY) instanceof List) {
             logger.debug("class of identifier: " + currentGraph.get(Ontology.NAME_KEY).getClass());
             ArrayList<String> names = (ArrayList<String>) currentGraph.get(Ontology.NAME_KEY);
             logger.debug("Using first name as official name: " + names.get(0));
@@ -82,6 +82,15 @@ public class CegesomaEadHandler extends EadHandler {
         }
 	}
     
+    /**
+     * Cegesoma uses 'N' for Dutch and 'F' for French; we need to expand these 'codes'
+     * to 'nld' and 'fre'.
+     */
+//    @Override
+//    protected void useDefaultLanguage(Map<String, Object> currentGraph) {
+//    	// TODO
+//    }
+    
     
     @Override
     protected void extractDate(Map<String, Object> currentGraph) {
@@ -90,8 +99,9 @@ public class CegesomaEadHandler extends EadHandler {
         final String UNITDATE = "unitDates";  
         
         if (!currentGraph.containsKey(UNITDATE)) {
+        	// Log an error with the identifier (should have been set by now)
             // Add a generic date for this unit without date:
-            logger.error("Cegesoma node without unitdate field: ");
+            logger.error("Cegesoma node without unitdate field: " + currentGraph.get(Ontology.IDENTIFIER_KEY));
             currentGraph.put(Ontology.ENTITY_HAS_DATE, "UNKNOWN date" );
         } else if(currentGraph.get(UNITDATE) instanceof List){
             logger.debug("class of dates: " + currentGraph.get(UNITDATE).getClass());
