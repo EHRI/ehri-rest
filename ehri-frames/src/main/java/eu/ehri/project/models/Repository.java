@@ -38,6 +38,9 @@ public interface Repository extends AccessibleEntity, DescribedEntity,
     @JavaHandler
     public void updateChildCountCache();
 
+    @Adjacency(label = Ontology.DESCRIPTION_FOR_ENTITY, direction = Direction.IN)
+    public Iterable<RepositoryDescription> getRepositoryDescriptions();
+
     /**
      * Implementation of complex methods.
      */

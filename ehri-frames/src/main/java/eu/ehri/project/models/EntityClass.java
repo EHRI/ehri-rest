@@ -52,6 +52,7 @@ public enum EntityClass {
     MAINTENANCE_EVENT ( Entities.MAINTENANCE_EVENT, "me", MaintenanceEvent.class),
     UNDETERMINED_RELATIONSHIP (Entities.UNDETERMINED_RELATIONSHIP, "rs", UndeterminedRelationship.class),
     LINK (Entities.LINK, "lnk", Link.class),
+    GEO_LOCATION (Entities.GEO_LOCATION, "loc", GeoLocation.class),
     VIRTUAL_COLLECTION(Entities.VIRTUAL_COLLECTION, "vc", VirtualCollection.class, GenericIdGenerator.INSTANCE);
     // @formatter:on
 

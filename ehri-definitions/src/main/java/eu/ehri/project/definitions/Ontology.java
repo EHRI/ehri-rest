@@ -14,6 +14,11 @@ public class Ontology {
     // Address
     public static final String ENTITY_HAS_ADDRESS = "hasAddress";
 
+    // Geo Location
+    public static final String LATITUDE = "lat";
+    public static final String LONGITUDE = "lon";
+    public static final String HAS_GEO_LOCATION = "hasLocation";
+
     // Properties
     public static final String LANGUAGE_OF_DESCRIPTION = "languageCode";
     public static final String LANGUAGE = LANGUAGE_OF_DESCRIPTION; //"languageCode";

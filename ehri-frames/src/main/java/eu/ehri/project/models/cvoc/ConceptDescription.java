@@ -5,6 +5,7 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.Description;
+import eu.ehri.project.models.base.LocatedEntity;
 
 /**
  * labels, notes and texts that describe the concept, for a specific language 
@@ -17,7 +18,7 @@ import eu.ehri.project.models.base.Description;
  *
  */
 @EntityType(EntityClass.CVOC_CONCEPT_DESCRIPTION)
-public interface ConceptDescription extends Description {
+public interface ConceptDescription extends Description, LocatedEntity {
 
     /** 
      * The language property has the codes for language. 
