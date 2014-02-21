@@ -288,9 +288,6 @@ public class BundleUtils {
         PathSection section = path.current();
         BundlePath next = path.next();
         
-        if (!bundle.hasRelations(section.getPath()))
-            throw new BundlePathError(String.format(
-                    "Relation path '%s' not found", section.getPath()));
         ListMultimap<String, Bundle> allRelations = LinkedListMultimap
                 .create(bundle.getRelations());
         try {
