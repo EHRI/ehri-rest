@@ -256,21 +256,49 @@ public class AclManagerTest extends GraphTestBase {
         // Ensure Head Archivist can update/delete user1's doc
         assertTrue(acl.hasPermission(userdoc1, UPDATE, headArchivists));
         assertTrue(acl.hasPermission(userdoc1, DELETE, headArchivists));
+        // But doesn't own it
+        assertFalse(acl.hasPermission(userdoc1, OWNER, headArchivists));
+
+        // Check the calculated permission sets.
+        assertTrue(hasPermissionIn(
+                acl.getInheritedEntityPermissions(user1, userdoc1), user1, OWNER));
+        assertFalse(hasPermissionIn(
+                acl.getInheritedEntityPermissions(user1, userdoc2), user1, OWNER));
+        assertTrue(hasPermissionIn(
+                acl.getInheritedEntityPermissions(user2, userdoc2), user2, OWNER));
+        assertFalse(hasPermissionIn(
+                acl.getInheritedEntityPermissions(user2, userdoc1), user2, OWNER));
 
         // Ensure user1 can update/delete his own doc
+        assertTrue(acl.hasPermission(userdoc1, OWNER, user1));
         assertTrue(acl.hasPermission(userdoc1, UPDATE, user1));
         assertTrue(acl.hasPermission(userdoc1, DELETE, user1));
 
         // Ensure neither user1 or user2 can update/delete head's docs
+        assertFalse(acl.hasPermission(headdoc1, OWNER, user1));
         assertFalse(acl.hasPermission(headdoc1, UPDATE, user1));
         assertFalse(acl.hasPermission(headdoc1, DELETE, user1));
+        assertFalse(acl.hasPermission(headdoc1, OWNER, user2));
         assertFalse(acl.hasPermission(headdoc1, UPDATE, user2));
         assertFalse(acl.hasPermission(headdoc1, DELETE, user2));
 
         // Ensure neither user1 or user2 can update/delete each other's docs
+        assertFalse(acl.hasPermission(userdoc1, OWNER, user2));
         assertFalse(acl.hasPermission(userdoc1, UPDATE, user2));
         assertFalse(acl.hasPermission(userdoc1, DELETE, user2));
+        assertFalse(acl.hasPermission(userdoc2, OWNER, user1));
         assertFalse(acl.hasPermission(userdoc2, UPDATE, user1));
         assertFalse(acl.hasPermission(userdoc2, DELETE, user1));
+    }
+
+    private boolean hasPermissionIn(List<Map<String, List<PermissionType>>> set, Accessor user, PermissionType perm) {
+        for (Map<String, List<PermissionType>> grant : set) {
+            if (grant.containsKey(user.getId())) {
+                if (grant.get(user.getId()).contains(perm)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }
