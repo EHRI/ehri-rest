@@ -5,15 +5,14 @@ import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.frames.FramedGraph;
+import eu.ehri.project.acl.PermissionType;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
+import eu.ehri.project.models.PermissionGrant;
 import eu.ehri.project.models.Repository;
-import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.base.Frame;
-import eu.ehri.project.models.base.IdentifiableEntity;
-import eu.ehri.project.models.base.PermissionScope;
+import eu.ehri.project.models.base.*;
 import eu.ehri.project.models.idgen.IdGeneratorUtils;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
@@ -64,6 +63,7 @@ public class Check extends BaseCommand implements Command {
 
         final GraphManager manager = GraphManagerFactory.getInstance(graph);
         checkPermissionScopes(graph, manager);
+        checkOwnerPermGrantsHaveNoScope(graph, manager);
 
         return 0;
     }
@@ -122,5 +122,24 @@ public class Check extends BaseCommand implements Command {
                         doc.getId(), path, ident));
             }
         }
+    }
+
+    private void checkOwnerPermGrantsHaveNoScope(final FramedGraph<? extends TransactionalGraph> graph,
+            final GraphManager manager) throws Exception {
+        CloseableIterable<PermissionGrant> items
+                = manager.getFrames(EntityClass.PERMISSION_GRANT, PermissionGrant.class);
+        try {
+            for (PermissionGrant grant : items) {
+                Frame scope = grant.getScope();
+                Frame perm = grant.getPermission();
+                if (scope != null && perm != null && perm.getId().equals(PermissionType.OWNER.getName())) {
+                    System.err.println(
+                            String.format("Owner permission grant with scope: " + grant.asVertex().getId()));
+                }
+            }
+        } finally {
+            items.close();
+        }
+
     }
 }
