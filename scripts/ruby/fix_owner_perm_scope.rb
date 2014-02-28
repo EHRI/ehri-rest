@@ -8,7 +8,7 @@ require "#{File.join(File.dirname(__FILE__), "lib", "ehri")}"
 # which meant Things Went Wrong (when fetching permissions
 # for display, not when calculating perms for update.)
 #
-# Check ALL permission grants with a scope have a permission-type
+# Check ALL permission grants with a scope have a content-type
 # target - not an item target.
 #
 
@@ -16,14 +16,6 @@ module Ehri
   module Fixer
     include Ehri
 
-    module Events
-      include_package "eu.ehri.project.models.events"
-    end
-    module ModelsBase
-      include_package "eu.ehri.project.models.base"
-    end
-
-    # Set a _childCount property on system events for how many subjects they have
     total = 0
     Manager.get_frames(EntityClass::PERMISSION_GRANT, Models::PermissionGrant.java_class).each do |pg|
       begin
@@ -33,7 +25,7 @@ module Ehri
           puts "#{scope.get_id} -> #{targets.collect{|t| t.get_id}}"
           bad = false
           targets.each do |t|
-            if not t.get_type == EntityClass::PERMISSION.to_s
+            if not t.get_type == EntityClass::CONTENT_TYPE.to_s
               puts " - BAD: #{t.get_id} #{t.get_type}"
               bad = true
               break
