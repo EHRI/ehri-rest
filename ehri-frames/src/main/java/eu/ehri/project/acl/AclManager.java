@@ -552,8 +552,9 @@ public final class AclManager {
             // entries and thus be pretty fast, but for deeply nested
             // documentary units there might be quite a few.
             HashSet<Vertex> scopes = Sets.newHashSet();
-            for (PermissionScope scope : entity.getPermissionScopes())
+            for (PermissionScope scope : entity.getPermissionScopes()) {
                 scopes.add(scope.asVertex());
+            }
 
             PermissionGrantTarget target = graph.frame(entity.asVertex(),
                     PermissionGrantTarget.class);

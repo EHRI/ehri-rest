@@ -23,7 +23,6 @@ public abstract class GraphTestBase {
 
     @Before
     public void setUp() throws Exception {
-
         graph = graphFactory.create(new Neo4jGraph(
                 new TestGraphDatabaseFactory().newImpermanentDatabaseBuilder()
                         .newGraphDatabase()));

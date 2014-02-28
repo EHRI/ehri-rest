@@ -26,31 +26,32 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 
 /**
- * Implementation of GraphManager that uses a single index to manage all nodes.
+ * Implementation of GraphManager that uses a single index to manage all nodes,
+ * with Neo4j Lucene query optimisations.
  * 
  * @author mike
  * 
  */
-public final class SingleIndexGraphManager implements GraphManager {
+public final class SingleIndexGraphManager<T extends Neo4jGraph> implements GraphManager {
 
     private static final String INDEX_NAME = "entities";
     private static final String METADATA_PREFIX = "_";
 
-    private final FramedGraph<Neo4jGraph> graph;
+    private final FramedGraph<T> graph;
 
-    public FramedGraph<? extends TransactionalGraph> getGraph() {
+    public FramedGraph<T> getGraph() {
         return graph;
     }
 
-    public SingleIndexGraphManager(FramedGraph<?> graph) {
+    public SingleIndexGraphManager(FramedGraph<T> graph) {
         // Accept a warning here about the unsafe cast.
-        this.graph = (FramedGraph<Neo4jGraph>)graph;
+        this.graph = graph;
     }
 
     // Access functions
     public String getId(Vertex vertex) {
         Preconditions.checkNotNull(vertex);
-        return (String) vertex.getProperty(EntityType.ID_KEY);
+        return vertex.getProperty(EntityType.ID_KEY);
     }
 
     public String getId(Frame frame) {

@@ -137,7 +137,7 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
             @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
             @QueryParam(SORT_PARAM) List<String> order,
             @QueryParam(FILTER_PARAM) List<String> filters)
-            throws ItemNotFound, AccessDenied, BadRequester, AccessDenied {
+            throws ItemNotFound, BadRequester, AccessDenied {
         Accessor accessor = getRequesterUserProfile();
         UserProfile user = views.detail(manager.getFrame(userId, UserProfile.class), accessor);
         final Iterable<UserProfile> list = querier.setOffset(offset).setLimit(limit)
@@ -154,7 +154,7 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
             @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
             @QueryParam(SORT_PARAM) List<String> order,
             @QueryParam(FILTER_PARAM) List<String> filters)
-            throws ItemNotFound, AccessDenied, BadRequester, AccessDenied {
+            throws ItemNotFound, BadRequester, AccessDenied {
         Accessor accessor = getRequesterUserProfile();
         UserProfile user = views.detail(manager.getFrame(userId, UserProfile.class), accessor);
         final Query.Page<UserProfile> page = querier.setOffset(offset).setLimit(limit)

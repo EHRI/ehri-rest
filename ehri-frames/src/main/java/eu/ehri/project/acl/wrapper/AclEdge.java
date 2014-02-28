@@ -21,7 +21,9 @@ public class AclEdge extends AclElement implements Edge {
     @Override
     public Vertex getVertex(Direction direction) throws IllegalArgumentException {
         final Vertex vertex = ((Edge) baseElement).getVertex(direction);
-        return aclFilter.compute(vertex) ? new AclVertex(((Edge) baseElement).getVertex(direction), graph) : null;
+        return aclFilter.compute(vertex)
+                ? new AclVertex(((Edge) baseElement).getVertex(direction), graph)
+                : null;
     }
 
     @Override

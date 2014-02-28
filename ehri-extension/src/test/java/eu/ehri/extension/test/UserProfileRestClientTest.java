@@ -156,7 +156,9 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
         assertStatus(OK, response);
 
         // check that the groups are there
-        Set<String> groupIds = getGroupIdsFromEntityJson(response.getEntity(String.class));
+        String string = response.getEntity(String.class);
+        System.out.println(string);
+        Set<String> groupIds = getGroupIdsFromEntityJson(string);
         assertTrue(groupIds.contains(GROUP_ID1));
         assertTrue(groupIds.contains(GROUP_ID2));
     }

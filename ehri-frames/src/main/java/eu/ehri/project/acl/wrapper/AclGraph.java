@@ -2,6 +2,8 @@ package eu.ehri.project.acl.wrapper;
 
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.*;
 import com.tinkerpop.blueprints.util.wrappers.WrappedGraphQuery;
 import com.tinkerpop.blueprints.util.wrappers.WrapperGraph;
@@ -9,6 +11,8 @@ import com.tinkerpop.gremlin.java.GremlinPipeline;
 import com.tinkerpop.pipes.PipeFunction;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.models.base.Accessor;
+
+import java.util.List;
 
 /**
  * @author Mike Bryant (http://github.com/mikesname)
@@ -50,14 +54,17 @@ public class AclGraph<T extends TransactionalGraph & IndexableGraph> implements 
 
     @Override
     public Vertex addVertex(Object o) {
-        return baseGraph.addVertex(o);
+        return new AclVertex(baseGraph.addVertex(o), this);
     }
 
     @Override
     public Vertex getVertex(Object o) {
         Vertex vertex = baseGraph.getVertex(o);
         return vertex != null
-                ? (getAclFilter().compute(vertex) ? vertex : null)
+                ? (
+                    getAclFilter().compute(vertex)
+                            ? new AclVertex(vertex, this)
+                            : null)
                 : null;
     }
 
@@ -68,40 +75,41 @@ public class AclGraph<T extends TransactionalGraph & IndexableGraph> implements 
 
     @Override
     public Iterable<Vertex> getVertices() {
-        return new GremlinPipeline<Vertex, Vertex>(
-                baseGraph.getVertices()).filter(getAclFilter());
+        return new AclVertexIterable(baseGraph.getVertices(), this);
 
     }
 
     @Override
     public Iterable<Vertex> getVertices(String s, Object o) {
-        return new GremlinPipeline<Vertex, Vertex>(
-                baseGraph.getVertices(s, o)).filter(getAclFilter());
+        return new AclVertexIterable(baseGraph.getVertices(s, o), this);
     }
 
     @Override
     public Edge addEdge(Object o, Vertex vertex, Vertex vertex2, String s) {
-        return baseGraph.addEdge(o, vertex, vertex2, s);
+        Vertex v1 = (vertex instanceof AclVertex) ? ((AclVertex) vertex).getBaseVertex() : vertex;
+        Vertex v2 = (vertex2 instanceof AclVertex) ? ((AclVertex) vertex2).getBaseVertex() : vertex2;
+        return new AclEdge(baseGraph.addEdge(o, v1, v2, s), this);
     }
 
     @Override
     public Edge getEdge(Object o) {
-        return baseGraph.getEdge(o);
+        return new AclEdge(baseGraph.getEdge(o), this);
     }
 
     @Override
     public void removeEdge(Edge edge) {
-        baseGraph.removeEdge(edge);
+        Edge e = (edge instanceof AclEdge) ? ((AclEdge) edge).getBaseEdge() : edge;
+        baseGraph.removeEdge(e);
     }
 
     @Override
     public Iterable<Edge> getEdges() {
-        return baseGraph.getEdges();
+        return new AclEdgeIterable(baseGraph.getEdges(), this);
     }
 
     @Override
     public Iterable<Edge> getEdges(String s, Object o) {
-        return baseGraph.getEdges(s, o);
+        return new AclEdgeIterable(baseGraph.getEdges(s, o), this);
     }
 
     @Override
@@ -156,17 +164,21 @@ public class AclGraph<T extends TransactionalGraph & IndexableGraph> implements 
 
     @Override
     public <T extends Element> Index<T> createIndex(String s, Class<T> tClass, Parameter... parameters) {
-        return baseGraph.createIndex(s, tClass, parameters);
+        return new AclIndex<T>(baseGraph.createIndex(s, tClass, parameters), this);
     }
 
     @Override
     public <T extends Element> Index<T> getIndex(String s, Class<T> tClass) {
-        return baseGraph.getIndex(s, tClass);
+        return new AclIndex<T>(baseGraph.getIndex(s, tClass), this);
     }
 
     @Override
     public Iterable<Index<? extends Element>> getIndices() {
-        return baseGraph.getIndices();
+        List<Index<? extends Element>> indices = Lists.newArrayList();
+        for (Index<?> index : baseGraph.getIndices()) {
+            indices.add(new AclIndex(index, this));
+        }
+        return indices;
     }
 
     @Override

@@ -4,6 +4,7 @@ import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.VertexQuery;
+import com.tinkerpop.blueprints.util.ElementHelper;
 import com.tinkerpop.blueprints.util.wrappers.WrapperVertexQuery;
 
 /**
@@ -35,14 +36,19 @@ public class AclVertex extends AclElement implements Vertex {
 
             @Override
             public Iterable<Edge> edges() {
-                return this.query.edges();
+                return  new AclEdgeIterable(this.query.edges(), graph);
             }
         };
     }
 
     @Override
+    public boolean equals(final Object other) {
+        return ElementHelper.areEqual(this, other);
+    }
+
+    @Override
     public Edge addEdge(String label, Vertex vertex) {
-        return this.graph.addEdge(null, this, vertex, label);
+        return new AclEdge(this.graph.addEdge(null, this, vertex, label), graph);
     }
 
     public Vertex getBaseVertex() {

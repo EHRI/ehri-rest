@@ -109,12 +109,14 @@ public abstract class AbstractRestResource  {
 
     public AbstractRestResource(@Context GraphDatabaseService database, @Context final HttpHeaders requestHeaders) {
         this.database = database;
-        TxCheckedNeo4jGraph txGraph = new TxCheckedNeo4jGraph(database);
+        final TxCheckedNeo4jGraph txGraph = new TxCheckedNeo4jGraph(database);
         AclGraph<TxCheckedNeo4jGraph> aclGraph
                 = new AclGraph<TxCheckedNeo4jGraph>(txGraph, new AclGraph.AccessorFetcher() {
             @Override
             public Accessor fetch() {
-                return getAccessorOrAnonymous(manager, requestHeaders);
+                return getAccessorOrAnonymous(
+                        GraphManagerFactory.getInstance(
+                                graphFactory.create(txGraph)), requestHeaders);
             }
         });
         graph = graphFactory.create(aclGraph);
