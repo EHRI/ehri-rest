@@ -40,4 +40,7 @@ public interface PermissionGrant extends Frame {
     
     @Adjacency(label = Ontology.PERMISSION_GRANT_HAS_SCOPE)
     public void setScope(final PermissionScope scope);
+
+    @Adjacency(label = Ontology.PERMISSION_GRANT_HAS_SCOPE)
+    public void removeScope(final PermissionScope scope);
 }
