@@ -76,10 +76,8 @@ public interface Group extends Accessor, AccessibleEntity, IdentifiableEntity,
         }
 
         public void addMember(final Accessor accessor) {
-            if (JavaHandlerUtils.addSingleRelationship(accessor.asVertex(),
-                    it(),Ontology.ACCESSOR_BELONGS_TO_GROUP)) {
-                updateChildCountCache();
-            }
+            accessor.asVertex().addEdge(Ontology.ACCESSOR_BELONGS_TO_GROUP, it());
+            updateChildCountCache();
         }
 
         public void removeMember(final Accessor accessor) {
