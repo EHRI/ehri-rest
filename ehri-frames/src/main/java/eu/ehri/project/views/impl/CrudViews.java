@@ -123,8 +123,12 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
         E item = getPersister(scope).create(bundle, cls);
         // If a user creates an item, grant them OWNER perms on it.
         // Owner permissions do not have a scope.
-        if (!acl.belongsToAdmin(user))
-            acl.withScope(SystemScope.INSTANCE).grantPermissions(user, item, PermissionType.OWNER);
+        // FIXME: Currently a hack here so this doesn't apply to admin
+        // users - but it probably should...
+        if (!acl.belongsToAdmin(user)) {
+            acl.withScope(SystemScope.INSTANCE)
+                    .grantPermissions(user, item, PermissionType.OWNER);
+        }
         // If the scope is not the system, set the permission scope
         // of the item too...
         if (!scope.equals(SystemScope.getInstance())) {

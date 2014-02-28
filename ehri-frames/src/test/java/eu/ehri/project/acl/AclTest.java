@@ -7,6 +7,7 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Group;
+import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
@@ -105,6 +106,38 @@ public class AclTest extends ModelTestBase {
         assertFalse(acl.belongsToAdmin(reto));
         assertTrue(acl.getAccessControl(prof, reto));
     }
+
+    /**
+     * Test scoped permissions. In the fixtures, 'reto' has permissions
+     * to create docs within repository r1, but not update or delete them.
+     *
+     */
+    @Test
+    public void testSetUserPermissionsWithScope() throws Exception {
+        UserProfile user = manager.getFrame("reto", UserProfile.class);
+        Repository scope = manager.getFrame("r1", Repository.class);
+        assertFalse(acl.withScope(scope)
+                .hasPermission(ContentTypes.DOCUMENTARY_UNIT, PermissionType.UPDATE, user));
+        assertFalse(acl.withScope(scope)
+                .hasPermission(ContentTypes.DOCUMENTARY_UNIT, PermissionType.DELETE, user));
+        assertFalse(acl.withScope(scope)
+                .hasPermission(ContentTypes.DOCUMENTARY_UNIT, PermissionType.ANNOTATE, user));
+        Map<ContentTypes, List<PermissionType>> matrix = Maps.newHashMap();
+        matrix.put(ContentTypes.DOCUMENTARY_UNIT, Lists.newArrayList(
+           PermissionType.UPDATE,
+           PermissionType.DELETE
+        ));
+        acl.withScope(scope).setPermissionMatrix(user, matrix);
+        assertTrue(acl.withScope(scope)
+                .hasPermission(ContentTypes.DOCUMENTARY_UNIT, PermissionType.UPDATE, user));
+        assertTrue(acl.withScope(scope)
+                .hasPermission(ContentTypes.DOCUMENTARY_UNIT, PermissionType.DELETE, user));
+        // This should still be false, since we didn't change it.
+        assertFalse(acl.withScope(scope)
+                .hasPermission(ContentTypes.DOCUMENTARY_UNIT, PermissionType.ANNOTATE, user));
+    }
+
+
 
     /**
      * Test user accessing other profile.
