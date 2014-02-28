@@ -562,7 +562,7 @@ public final class AclManager {
             for (PermissionGrant grant : accessor.getPermissionGrants()) {
                 if (Iterables.contains(grant.getTargets(), target)) {
                     list.add(enumForPermission(grant.getPermission()));
-                } else if (grant.getScope() != null) {
+                } else if (grant.getScope() != null && hasContentTypeTargets(grant)) {
                     // If there isn't a direct grant to the entity, search its
                     // parent scopes for an appropriate scoped permission
                     if (scopes.contains(grant.getScope().asVertex())) {
@@ -791,5 +791,14 @@ public final class AclManager {
             throw new RuntimeException(
                     String.format("No content type found for type: '%s'", type.getName()), e);
         }
+    }
+
+    private boolean hasContentTypeTargets(PermissionGrant grant) {
+        for (PermissionGrantTarget tg : grant.getTargets()) {
+            if (!manager.getEntityClass(tg).equals(EntityClass.CONTENT_TYPE)) {
+                return false;
+            }
+        }
+        return true;
     }
 }
