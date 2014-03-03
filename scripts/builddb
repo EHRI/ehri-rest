@@ -20,6 +20,7 @@ USHMM_DATA_DIR = "data/ushmm_ead"
 EAD_DATA_DIR = "data/icaatom-ead"
 USHMM_ID = "us-005578"
 USER_FIXTURES = "data/users.yaml"
+GROUP_FIXTURES = "data/groups.yaml"
 WL_USERS = "data/wl-user-groups.yaml"
 WL_EAD_DIR = "#{DROPBOX}/wiener-library-ah"
 WL_ID = "gb-003348"
@@ -86,6 +87,11 @@ class DbBuilder
   def create_users
     puts "Importing users from YAML..."
     Commands::LoadFixtures.new.exec(Graph, [USER_FIXTURES].to_java(:string))
+  end
+
+  def create_groups
+    puts "Importing groups from YAML..."
+    Commands::LoadFixtures.new.exec(Graph, [GROUP_FIXTURES].to_java(:string))
   end
 
   def import_repositories
@@ -217,6 +223,7 @@ Graph.get_base_graph.check_transaction
 if not opts[:update] then
   builder.init_db
   builder.create_users
+  builder.create_groups
 end
 builder.import_thesaurus
 builder.import_camps
