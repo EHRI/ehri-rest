@@ -49,6 +49,13 @@
     identifier: soma-group
     name: CEGES-SOMA
 
+- id: portal
+  type: group
+  data:
+    identifier: portal
+    name: Portal
+    description: Group for users of the EHRI Portal
+
 --- # Users Mike, Tim, Linda, and Reto
 
 # Mike is a member of the KCL group, but he is ALSO a member of Admin
@@ -445,6 +452,18 @@
     hasTarget: documentaryUnit
     hasAccessor: linda
     hasGrantee: mike
+
+# Allow portal users to create annotations
+- id: portalAnnotationGrant
+  type: permissionGrant
+  relationships:
+    hasPermission: annotate
+    hasTarget:
+      - documentaryUnit
+      - repository
+      - historicalAgent
+      - cvocConcept
+    hasAccessor: portal
 
 --- # Vocabularies
 - id: cvoc1
