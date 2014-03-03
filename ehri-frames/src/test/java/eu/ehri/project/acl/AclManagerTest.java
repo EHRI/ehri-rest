@@ -1,12 +1,13 @@
 package eu.ehri.project.acl;
 
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.*;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.test.GraphTestBase;
 import eu.ehri.project.test.TestData;
-import eu.ehri.project.test.utils.GraphCleaner;
 import eu.ehri.project.utils.GraphInitializer;
 import eu.ehri.project.utils.fixtures.FixtureLoader;
 import eu.ehri.project.utils.fixtures.FixtureLoaderFactory;
@@ -28,7 +29,6 @@ import static org.junit.Assert.*;
  */
 public class AclManagerTest extends GraphTestBase {
 
-    private GraphCleaner cleaner;
     private FixtureLoader loader;
     private GraphInitializer initializer;
 
@@ -38,7 +38,6 @@ public class AclManagerTest extends GraphTestBase {
         super.setUp();
         initializer = new GraphInitializer(graph);
         loader = FixtureLoaderFactory.getInstance(graph, false); // Initialize separately
-        cleaner = new GraphCleaner(graph);
         initializer.initialize();
     }
 
@@ -78,22 +77,38 @@ public class AclManagerTest extends GraphTestBase {
 
     @Test
     public void testGetAccessControl() throws Exception {
-
+        loader.loadTestData();
+        DocumentaryUnit c1 = manager.getFrame("c1", DocumentaryUnit.class);
+        UserProfile user1 = manager.getFrame("mike", UserProfile.class);
+        UserProfile user2 = manager.getFrame("reto", UserProfile.class);
+        AclManager acl = new AclManager(graph);
+        assertTrue(acl.getAccessControl(c1, user1));
+        assertFalse(acl.getAccessControl(c1, user2));
     }
 
     @Test
     public void testRemoveAccessControl() throws Exception {
-
+        loader.loadTestData();
+        DocumentaryUnit c1 = manager.getFrame("c1", DocumentaryUnit.class);
+        UserProfile user1 = manager.getFrame("mike", UserProfile.class);
+        AclManager acl = new AclManager(graph);
+        assertTrue(Iterables.contains(c1.getAccessors(), user1));
+        acl.removeAccessControl(c1, user1);
+        assertFalse(Iterables.contains(c1.getAccessors(), user1));
     }
 
     @Test
     public void testSetAccessors() throws Exception {
-
-    }
-
-    @Test
-    public void testGetPermissionGrants() throws Exception {
-
+        loader.loadTestData();
+        DocumentaryUnit c1 = manager.getFrame("c1", DocumentaryUnit.class);
+        UserProfile user1 = manager.getFrame("mike", UserProfile.class);
+        UserProfile user2 = manager.getFrame("reto", UserProfile.class);
+        AclManager acl = new AclManager(graph);
+        assertTrue(acl.getAccessControl(c1, user1));
+        assertFalse(acl.getAccessControl(c1, user2));
+        acl.setAccessors(c1, Lists.<Accessor>newArrayList(user1, user2));
+        assertTrue(acl.getAccessControl(c1, user1));
+        assertTrue(acl.getAccessControl(c1, user2));
     }
 
     @Test
@@ -110,9 +125,7 @@ public class AclManagerTest extends GraphTestBase {
     public void testGetInheritedGlobalPermissions() throws Exception {
         loader.loadTestData("permissions.yaml");
         Group group1 = manager.getFrame("group1", Group.class);
-        Group group2 = manager.getFrame("group2", Group.class);
         UserProfile user1 = manager.getFrame("user1", UserProfile.class);
-        UserProfile user2 = manager.getFrame("user2", UserProfile.class);
 
         AclManager acl = new AclManager(graph);
         List<Map<String, GlobalPermissionSet>> getPerms
