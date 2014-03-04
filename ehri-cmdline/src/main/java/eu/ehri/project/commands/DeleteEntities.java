@@ -111,7 +111,7 @@ public class DeleteEntities extends BaseCommand implements Command {
         CrudViews<AccessibleEntity> views = new CrudViews<AccessibleEntity>(graph, AccessibleEntity.class);
         for (AccessibleEntity acc : manager.getFrames(type, AccessibleEntity.class)) {
             System.out.println(acc.getId());
-            views.delete(acc, graph.frame(user.asVertex(), Accessor.class));
+            views.delete(acc.getId(), graph.frame(user.asVertex(), Accessor.class));
         }
     }
 }

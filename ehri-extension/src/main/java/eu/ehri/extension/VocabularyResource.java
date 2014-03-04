@@ -99,7 +99,7 @@ public class VocabularyResource extends
             @QueryParam(FILTER_PARAM) List<String> filters)
             throws ItemNotFound, BadRequester, AccessDenied {
         Accessor user = getRequesterUserProfile();
-        Vocabulary vocabulary = views.detail(manager.getFrame(id, cls), user);
+        Vocabulary vocabulary = views.detail(id, user);
         Query<Concept> query = new Query<Concept>(graph, Concept.class)
                 .setLimit(limit).setOffset(offset).orderBy(order)
                 .filter(filters);
@@ -114,7 +114,7 @@ public class VocabularyResource extends
             @QueryParam(FILTER_PARAM) List<String> filters)
             throws ItemNotFound, BadRequester, AccessDenied {
         Accessor user = getRequesterUserProfile();
-        Vocabulary vocabulary = views.detail(manager.getFrame(id, cls), user);
+        Vocabulary vocabulary = views.detail(id, user);
         Query<Concept> query = new Query<Concept>(graph, Concept.class)
                 .filter(filters);
         return Response.ok((query.count(vocabulary.getConcepts(), user))
@@ -132,7 +132,7 @@ public class VocabularyResource extends
             @QueryParam(FILTER_PARAM) List<String> filters)
             throws ItemNotFound, BadRequester, AccessDenied {
         Accessor user = getRequesterUserProfile();
-        Vocabulary vocabulary = views.detail(manager.getFrame(id, cls), user);
+        Vocabulary vocabulary = views.detail(id, user);
         Query<Concept> query = new Query<Concept>(graph, Concept.class)
                 .setLimit(limit).setOffset(offset).orderBy(order)
                 .filter(filters);
@@ -194,7 +194,7 @@ public class VocabularyResource extends
         	Accessor requesterUserProfile = getRequesterUserProfile();
         	Iterable<Concept> concepts = vocabulary.getConcepts();
         	for (Concept concept : concepts) {
-        		conceptViews.delete(concept, requesterUserProfile);
+        		conceptViews.delete(concept.getId(), requesterUserProfile);
         	}
             graph.getBaseGraph().commit();
             return Response.status(Status.OK).build();
@@ -212,9 +212,9 @@ public class VocabularyResource extends
     /**
      * Create a top-level concept unit for this vocabulary.
      * 
-     * @param id
-     * @param json
-     * @return
+     * @param id The vocabulary ID
+     * @param json The new concept data
+     * @return The new concept
      * @throws PermissionDenied
      * @throws ValidationError
      * @throws IntegrityError
@@ -228,10 +228,10 @@ public class VocabularyResource extends
     @Path("/{id:.+}/" + Entities.CVOC_CONCEPT)
     public Response createVocabularyConcept(@PathParam("id") String id,
             String json, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
-            throws AccessDenied, PermissionDenied, ValidationError, IntegrityError,
+            throws PermissionDenied, ValidationError, IntegrityError,
                 DeserializationError, ItemNotFound, BadRequester {
         Accessor user = getRequesterUserProfile();
-        Vocabulary vocabulary = views.detail(manager.getFrame(id, cls), user);
+        Vocabulary vocabulary = views.detail(id, user);
         try {
             Concept concept = createConcept(json, vocabulary);
             new AclManager(graph).setAccessors(concept,

@@ -12,13 +12,9 @@ import javax.ws.rs.core.Response.Status;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Maps;
-import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.*;
-import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.cvoc.Concept;
-import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.views.Crud;
 import eu.ehri.project.views.ViewFactory;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -83,7 +79,7 @@ public class AdminResource extends AbstractRestResource {
     /**
      * Create a new user with a default name and identifier.
      * 
-     * @return
+     * @return A new user
      * @throws Exception
      */
     @POST

@@ -35,6 +35,13 @@ public final class BasicGraphManager<T extends IndexableGraph> implements GraphM
         return graph;
     }
 
+    /**
+     * Cast one frame to another.
+     */
+    public <T extends Frame> T cast(Frame frame, Class<T> cls) {
+        return graph.frame(frame.asVertex(), cls);
+    }
+
     public BasicGraphManager(FramedGraph<?> graph) {
         // Accept a warning here about the unsafe cast.
         this.graph = (FramedGraph<T>)graph;

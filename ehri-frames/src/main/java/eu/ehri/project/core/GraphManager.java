@@ -18,6 +18,11 @@ public interface GraphManager {
     public FramedGraph<?> getGraph();
 
     /**
+     * Cast one frame to another.
+     */
+    public <T extends Frame> T cast(Frame frame, Class<T> cls);
+
+    /**
      * Get the id of a given vertex.
      */
     public String getId(Vertex vertex);

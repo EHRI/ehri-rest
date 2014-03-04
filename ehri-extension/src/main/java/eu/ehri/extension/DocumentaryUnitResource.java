@@ -179,7 +179,7 @@ public class DocumentaryUnitResource extends
             throws AccessDenied, PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, ItemNotFound, BadRequester {
         Accessor user = getRequesterUserProfile();
-        DocumentaryUnit parent = views.detail(manager.getFrame(id, cls), user);
+        DocumentaryUnit parent = views.detail(id, user);
         try {
             DocumentaryUnit doc = createDocumentaryUnit(json, parent);
             new AclManager(graph).setAccessors(doc,

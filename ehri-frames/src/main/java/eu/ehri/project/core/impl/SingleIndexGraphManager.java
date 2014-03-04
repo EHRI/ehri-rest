@@ -47,6 +47,13 @@ public final class SingleIndexGraphManager implements GraphManager {
         this.graph = (FramedGraph<Neo4jGraph>)graph;
     }
 
+    /**
+     * Cast one frame to another.
+     */
+    public <T extends Frame> T cast(Frame frame, Class<T> cls) {
+        return graph.frame(frame.asVertex(), cls);
+    }
+
     // Access functions
     public String getId(Vertex vertex) {
         Preconditions.checkNotNull(vertex);
