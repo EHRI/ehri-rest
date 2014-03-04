@@ -6,6 +6,7 @@ import eu.ehri.project.acl.ContentTypes;
 import eu.ehri.project.acl.PermissionType;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.AccessDenied;
+import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.*;
@@ -27,33 +28,33 @@ import static org.junit.Assert.*;
 public class CrudViewsTest extends AbstractFixtureTest {
 
     @Test
-    public void testDetail() throws AccessDenied {
+    public void testDetail() throws ItemNotFound {
         Crud<DocumentaryUnit> docViews = new CrudViews<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
-        DocumentaryUnit unit = docViews.detail(item, validUser);
+        DocumentaryUnit unit = docViews.detail(item.getId(), validUser);
         assertEquals(item.asVertex(), unit.asVertex());
     }
 
     @Test
-    public void testUserProfile() throws AccessDenied {
+    public void testUserProfile() throws ItemNotFound {
         CrudViews<UserProfile> userViews = new CrudViews<UserProfile>(graph,
                 UserProfile.class);
-        UserProfile user = userViews.detail(validUser, validUser);
+        UserProfile user = userViews.detail(validUser.getId(), validUser);
         assertEquals(validUser.asVertex(), user.asVertex());
     }
 
-    @Test(expected = AccessDenied.class)
-    public void testDetailAnonymous() throws AccessDenied {
+    @Test(expected = ItemNotFound.class)
+    public void testDetailAnonymous() throws ItemNotFound {
         CrudViews<DocumentaryUnit> docViews = new CrudViews<DocumentaryUnit>(
                 graph, DocumentaryUnit.class);
-        docViews.detail(item, AnonymousAccessor.getInstance());
+        docViews.detail(item.getId(), AnonymousAccessor.getInstance());
     }
 
-    @Test(expected = AccessDenied.class)
-    public void testDetailPermissionDenied() throws AccessDenied {
+    @Test(expected = ItemNotFound.class)
+    public void testDetailPermissionDenied() throws ItemNotFound {
         CrudViews<DocumentaryUnit> docViews = new CrudViews<DocumentaryUnit>(
                 graph, DocumentaryUnit.class);
-        docViews.detail(item, invalidUser);
+        docViews.detail(item.getId(), invalidUser);
     }
 
     @Test
@@ -110,10 +111,10 @@ public class CrudViewsTest extends AbstractFixtureTest {
     }
 
     @Test
-    public void testUserDetailAccessDenied() throws AccessDenied {
+    public void testUserDetailAccessDenied() throws ItemNotFound {
         CrudViews<UserProfile> userViews = new CrudViews<UserProfile>(graph,
                 UserProfile.class);
-        userViews.detail(validUser, invalidUser);
+        userViews.detail(validUser.getId(), invalidUser);
     }
 
     @Test
@@ -201,106 +202,7 @@ public class CrudViewsTest extends AbstractFixtureTest {
             for (UndeterminedRelationship ignored : d.getUndeterminedRelationships()) shouldDelete++;
         }
 
-        Integer deleted = docViews.delete(item, validUser);
+        Integer deleted = docViews.delete(item.getId(), validUser);
         assertEquals(shouldDelete, deleted);
-    }
-
-
-    @Test
-    public void testCreateDependent() throws Exception {
-        CrudViews<DocumentaryUnit> docViews = new CrudViews<DocumentaryUnit>(
-                graph, DocumentaryUnit.class);
-        Bundle bundle = Bundle.fromData(TestData.getTestDocBundle());
-        DocumentaryUnit unit = docViews.create(bundle, validUser);
-        assertEquals(TestData.TEST_COLLECTION_NAME, unit.asVertex().getProperty("name"));
-
-        Bundle descBundle = bundle
-                .getRelations(Ontology.DESCRIPTION_FOR_ENTITY)
-                .get(0).withDataValue(Ontology.IDENTIFIER_KEY, "some-new-id");
-
-        DocumentDescription changedDesc = docViews.createDependent(descBundle, unit, validUser,
-                DocumentDescription.class);
-        unit.addDescription(changedDesc);
-
-        // The order in which items are serialized is undefined, so we just have to throw
-        // an error if we don't fine the right item...
-        for (Bundle b : new Serializer(graph)
-                     .vertexFrameToBundle(unit).getRelations(Ontology
-                        .DESCRIPTION_FOR_ENTITY)) {
-            if (b.getDataValue(Ontology.IDENTIFIER_KEY).equals("some-new-id")) {
-                return;
-            }
-        }
-        fail("Item does not have description with identifier: some-new-id");
-    }
-
-    @Test(expected = ValidationError.class)
-    public void testCreateDependentWithValidationError() throws Exception {
-        CrudViews<DocumentaryUnit> docViews = new CrudViews<DocumentaryUnit>(
-                graph, DocumentaryUnit.class);
-        Bundle bundle = Bundle.fromData(TestData.getTestDocBundle());
-        DocumentaryUnit unit = docViews.create(bundle, validUser);
-        assertEquals(TestData.TEST_COLLECTION_NAME, unit.asVertex().getProperty("name"));
-
-        Bundle descBundle = bundle
-                .getRelations(Ontology.DESCRIPTION_FOR_ENTITY)
-                .get(0).removeDataValue(Ontology.NAME_KEY);
-
-        docViews.createDependent(descBundle, unit, validUser,
-                DocumentDescription.class);
-        fail("Creating a dependent should have thrown a validation error");
-    }
-
-    @Test
-    public void testUpdateDependent() throws Exception {
-        CrudViews<DocumentaryUnit> docViews = new CrudViews<DocumentaryUnit>(
-                graph, DocumentaryUnit.class);
-        Bundle bundle = Bundle.fromData(TestData.getTestDocBundle());
-        DocumentaryUnit unit = docViews.create(bundle, validUser);
-        assertEquals(TestData.TEST_COLLECTION_NAME, unit.asVertex().getProperty("name"));
-
-        long descCount = Iterables.count(unit.getDocumentDescriptions());
-        Bundle descBundle = new Serializer(graph).vertexFrameToBundle(unit)
-                .getRelations(Ontology.DESCRIPTION_FOR_ENTITY)
-                .get(0).withDataValue(Ontology.NAME_KEY, "some-new-title");
-
-        DocumentDescription changedDesc = docViews.updateDependent(descBundle, unit, validUser,
-                DocumentDescription.class).getNode();
-        assertEquals(descCount, Iterables.count(unit.getDocumentDescriptions()));
-        assertEquals("some-new-title", changedDesc.getName());
-    }
-
-    @Test(expected = ValidationError.class)
-    public void testUpdateDependentWithValidationError() throws Exception {
-        CrudViews<DocumentaryUnit> docViews = new CrudViews<DocumentaryUnit>(
-                graph, DocumentaryUnit.class);
-        Bundle bundle = Bundle.fromData(TestData.getTestDocBundle());
-        DocumentaryUnit unit = docViews.create(bundle, validUser);
-        assertEquals(TestData.TEST_COLLECTION_NAME, unit.asVertex().getProperty("name"));
-
-        Bundle descBundle = new Serializer(graph).vertexFrameToBundle(unit)
-                .getRelations(Ontology.DESCRIPTION_FOR_ENTITY)
-                .get(0).removeDataValue(Ontology.NAME_KEY);
-
-        docViews.updateDependent(descBundle, unit, validUser,
-                DocumentDescription.class).getNode();
-        fail("Updating a dependent should have thrown a validation error");
-    }
-
-    @Test
-    public void testDeleteDependent() throws Exception {
-        CrudViews<DocumentaryUnit> docViews = new CrudViews<DocumentaryUnit>(
-                graph, DocumentaryUnit.class);
-        Bundle bundle = Bundle.fromData(TestData.getTestDocBundle());
-        DocumentaryUnit unit = docViews.create(bundle, validUser);
-        assertEquals(TestData.TEST_COLLECTION_NAME, unit.asVertex().getProperty("name"));
-
-        long descCount = Iterables.count(unit.getDocumentDescriptions());
-
-        DocumentDescription d = Iterables.first(unit.getDocumentDescriptions());
-        assertNotNull(d);
-        int delCount = docViews.deleteDependent(d, unit, validUser, DocumentDescription.class);
-        assertTrue(delCount >= 1);
-        assertEquals(descCount - 1, Iterables.count(unit.getDocumentDescriptions()));
     }
 }

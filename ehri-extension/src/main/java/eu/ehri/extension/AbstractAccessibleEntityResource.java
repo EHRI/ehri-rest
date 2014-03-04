@@ -188,8 +188,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
             BadRequester {
         checkNotInTransaction();
         try {
-            E entity = views.detail(manager.getFrame(id, getEntityType(), cls),
-                    getRequesterUserProfile());
+            E entity = views.detail(id, getRequesterUserProfile());
             return Response.status(Status.OK)
                     .entity(getRepresentation(entity).getBytes()).build();
         } catch (SerializationError e) {
@@ -254,8 +253,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
         // item's graph id, which requires an extra
         // serialization/deserialization.
         try {
-            E entity = views.detail(manager.getFrame(id, getEntityType(), cls),
-                    getRequesterUserProfile());
+            E entity = views.detail(id, getRequesterUserProfile());
             Bundle rawBundle = Bundle.fromString(json);
             if (isPatch()) {
                 Serializer depSerializer = new Serializer.Builder(graph).dependentOnly().build();
@@ -288,9 +286,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
             ValidationError, BadRequester {
         checkNotInTransaction();
         try {
-            E entity = views.detail(manager.getFrame(id, getEntityType(), cls),
-                    getRequesterUserProfile());
-            views.delete(entity, getRequesterUserProfile(), getLogMessage());
+            views.delete(id, getRequesterUserProfile(), getLogMessage());
             graph.getBaseGraph().commit();
             return Response.status(Status.OK).build();
         } catch (SerializationError serializationError) {

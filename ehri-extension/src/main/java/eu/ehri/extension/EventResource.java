@@ -27,7 +27,6 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistence.Serializer;
@@ -75,13 +74,6 @@ public class EventResource extends AbstractAccessibleEntityResource<SystemEvent>
     /**
      * List actions.
      *
-     * @param offset
-     * @param limit
-     * @param eventTypes
-     * @param itemTypes
-     * @param itemIds
-     * @param users
-     * @return
      * @throws ItemNotFound
      * @throws BadRequester
      */
@@ -116,13 +108,6 @@ public class EventResource extends AbstractAccessibleEntityResource<SystemEvent>
     /**
      * List actions.
      * 
-     * @param offset
-     * @param limit
-     * @param eventTypes
-     * @param itemTypes
-     * @param itemIds
-     * @param users
-     * @return
      * @throws ItemNotFound
      * @throws BadRequester
      */
@@ -292,13 +277,12 @@ public class EventResource extends AbstractAccessibleEntityResource<SystemEvent>
     /**
      * Lookup and page the history for a given item.
      * 
-     * @param id
-     * @param offset
-     * @param limit
-     * @return
+     * @param id The event id
+     * @param offset The history offset
+     * @param limit The max number of items
+     * @return A list of events
      * @throws ItemNotFound
      * @throws BadRequester
-     * @throws PermissionDenied
      */
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
@@ -311,7 +295,7 @@ public class EventResource extends AbstractAccessibleEntityResource<SystemEvent>
             @QueryParam(FILTER_PARAM) List<String> filters)
             throws ItemNotFound, BadRequester, AccessDenied {
         Accessor user = getRequesterUserProfile();
-        SystemEvent event = views.detail(manager.getFrame(id, cls), user);
+        SystemEvent event = views.detail(id, user);
         Query<AccessibleEntity> query = new Query<AccessibleEntity>(graph,
                 AccessibleEntity.class).setOffset(offset).setLimit(limit)
                 .orderBy(order).filter(filters);
@@ -323,14 +307,13 @@ public class EventResource extends AbstractAccessibleEntityResource<SystemEvent>
 
     /**
      * Lookup and page the history for a given item.
-     * 
-     * @param id
-     * @param offset
-     * @param limit
-     * @return
+     *
+     * @param id The event id
+     * @param offset The history offset
+     * @param limit The max number of items
+     * @return A list of events
      * @throws ItemNotFound
      * @throws BadRequester
-     * @throws PermissionDenied
      */
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
@@ -344,8 +327,7 @@ public class EventResource extends AbstractAccessibleEntityResource<SystemEvent>
             throws ItemNotFound, BadRequester, AccessDenied {
         Accessor user = getRequesterUserProfile();
         AccessibleEntity item = new LoggingCrudViews<AccessibleEntity>(graph,
-                AccessibleEntity.class).detail(
-                manager.getFrame(id, AccessibleEntity.class), user);
+                AccessibleEntity.class).detail(id, user);
         Query<SystemEvent> query = new Query<SystemEvent>(graph, SystemEvent.class)
                 .setOffset(offset).setLimit(limit)
                 .orderBy(order).filter(filters);
@@ -355,13 +337,12 @@ public class EventResource extends AbstractAccessibleEntityResource<SystemEvent>
     /**
      * Lookup and page the versions for a given item.
      *
-     * @param id
-     * @param offset
-     * @param limit
-     * @return
+     * @param id The event id
+     * @param offset The history offset
+     * @param limit The max number of items
+     * @return A list of versions
      * @throws ItemNotFound
      * @throws BadRequester
-     * @throws PermissionDenied
      */
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
@@ -375,8 +356,7 @@ public class EventResource extends AbstractAccessibleEntityResource<SystemEvent>
             throws ItemNotFound, BadRequester, AccessDenied {
         Accessor user = getRequesterUserProfile();
         AccessibleEntity item = new LoggingCrudViews<AccessibleEntity>(graph,
-                AccessibleEntity.class).detail(
-                manager.getFrame(id, AccessibleEntity.class), user);
+                AccessibleEntity.class).detail(id, user);
         Query<Version> query = new Query<Version>(graph, Version.class)
                 .setOffset(offset).setLimit(limit)
                 .orderBy(order).filter(filters);

@@ -239,7 +239,7 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
             @QueryParam(FILTER_PARAM) List<String> filters)
             throws ItemNotFound, BadRequester, AccessDenied {
         Accessor user = getRequesterUserProfile();
-        Group group = views.detail(manager.getFrame(id, cls), user);
+        Group group = views.detail(id, user);
         Query<AccessibleEntity> query = new Query<AccessibleEntity>(graph, AccessibleEntity.class)
                 .filter(filters);
         return Response.ok((query.count(group.getMembersAsEntities(), user))

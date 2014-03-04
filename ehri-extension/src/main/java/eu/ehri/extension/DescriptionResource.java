@@ -3,14 +3,15 @@ package eu.ehri.extension;
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.*;
-import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.UndeterminedRelationship;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.DescribedEntity;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.Frame;
 import eu.ehri.project.persistence.Bundle;
+import eu.ehri.project.persistence.BundleDAO;
 import eu.ehri.project.persistence.Mutation;
+import eu.ehri.project.views.DescriptionViews;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.*;
@@ -22,8 +23,11 @@ import javax.ws.rs.core.*;
 @Path("description")
 public class DescriptionResource extends AbstractAccessibleEntityResource<DescribedEntity> {
 
+    private final DescriptionViews<DescribedEntity> descriptionViews;
+
     public DescriptionResource(@Context GraphDatabaseService database, @Context HttpHeaders requestHeaders) {
         super(database, requestHeaders, DescribedEntity.class);
+        descriptionViews = new DescriptionViews<DescribedEntity>(graph, DescribedEntity.class);
     }
 
     @POST
@@ -31,15 +35,14 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}")
     public Response createDescription(@PathParam("id") String id, String json)
-            throws AccessDenied, PermissionDenied, ValidationError, IntegrityError,
+            throws PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, ItemNotFound, BadRequester {
         checkNotInTransaction();
         Accessor user = getRequesterUserProfile();
         try {
-            DescribedEntity doc = views.detail(
-                    manager.getFrame(id, DescribedEntity.class), user);
-            Description desc = views.createDependent(Bundle.fromString(json),
-                    doc, user, Description.class, getLogMessage());
+            DescribedEntity doc = views.detail(id, user);
+            Description desc = descriptionViews.create(id, Bundle.fromString(json),
+                    Description.class, user, getLogMessage());
             doc.addDescription(desc);
             graph.getBaseGraph().commit();
             return buildResponse(desc, Response.Status.CREATED);
@@ -56,16 +59,12 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}")
     public Response updateDescription(@PathParam("id") String id, String json)
-            throws AccessDenied, PermissionDenied, ValidationError, IntegrityError,
+            throws PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, ItemNotFound, BadRequester, SerializationError {
         checkNotInTransaction();
-        Accessor user = getRequesterUserProfile();
-        DescribedEntity doc = views.detail(
-                manager.getFrame(id, DescribedEntity.class), user);
         try {
-            Mutation<Description> desc = views.updateDependent(Bundle.fromString(json), doc, user,
-                    Description.class,
-                    getLogMessage());
+            Mutation<Description> desc = descriptionViews.update(id, Bundle.fromString(json),
+                    Description.class, getRequesterUserProfile(), getLogMessage());
             graph.getBaseGraph().commit();
             return buildResponse(desc.getNode(), Response.Status.OK);
         } catch (SerializationError serializationError) {
@@ -93,15 +92,11 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
     @Path("/{id:.+}/{did:.+}")
     public Response deleteDocumentaryUnitDescription(
             @PathParam("id") String id, @PathParam("did") String did)
-            throws AccessDenied, PermissionDenied, ItemNotFound, ValidationError,
+            throws PermissionDenied, ItemNotFound, ValidationError,
             BadRequester, SerializationError {
         checkNotInTransaction();
-        Accessor user = getRequesterUserProfile();
-        DescribedEntity doc = views.detail(manager.getFrame(id, DescribedEntity.class), user);
-        Description desc = manager.getFrame(did, EntityClass.DOCUMENT_DESCRIPTION,
-                Description.class);
         try {
-            views.deleteDependent(desc, doc, user, Description.class, getLogMessage());
+            descriptionViews.delete(id, did, getRequesterUserProfile(), getLogMessage());
             graph.getBaseGraph().commit();
             return Response.ok().build();
         } catch (SerializationError serializationError) {
@@ -129,16 +124,14 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
     @Path("/{id:.+}/{did:.+}/" + Entities.UNDETERMINED_RELATIONSHIP)
     public Response createAccessPoint(@PathParam("id") String id,
                 @PathParam("did") String did, String json)
-            throws AccessDenied, PermissionDenied, ValidationError, IntegrityError,
+            throws PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, ItemNotFound, BadRequester {
         checkNotInTransaction();
         try {
             Accessor user = getRequesterUserProfile();
-            DescribedEntity doc = views.detail(
-                    manager.getFrame(id, DescribedEntity.class), user);
             Description desc = manager.getFrame(did, Description.class);
-            UndeterminedRelationship rel = views.createDependent(Bundle.fromString(json),
-                    doc, user, UndeterminedRelationship.class, getLogMessage());
+            UndeterminedRelationship rel = descriptionViews.create(id, Bundle.fromString(json),
+                    UndeterminedRelationship.class, user, getLogMessage());
             desc.addUndeterminedRelationship(rel);
             graph.getBaseGraph().commit();
             return buildResponse(rel, Response.Status.CREATED);
@@ -158,16 +151,17 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
             DeserializationError, ItemNotFound, BadRequester {
         checkNotInTransaction();
         try {
-            Accessor user = getRequesterUserProfile();
-            DescribedEntity doc = views.detail(
-                    manager.getFrame(id, DescribedEntity.class), user);
+            DescribedEntity doc = views.detail(id, getRequesterUserProfile());
             Description desc = manager.getFrame(did, Description.class);
+            if (!doc.equals(desc.getDescribedEntity())) {
+                throw new PermissionDenied("Description does not belong to given entity.");
+            }
             UndeterminedRelationship rel = manager.getFrame(apid, UndeterminedRelationship.class);
             if (!rel.getDescription().equals(desc)) {
-                throw new RuntimeException(
-                        new Exception("Access point does not belong to given description."));
+                throw new PermissionDenied("Access point does not belong to given description.");
             }
-            views.deleteDependent(rel, doc, user, UndeterminedRelationship.class, getLogMessage());
+            // FIXME: This could definitely be better
+            new BundleDAO(graph).delete(getSerializer().vertexFrameToBundle(rel));
             graph.getBaseGraph().commit();
             return Response.ok().build();
         } catch (SerializationError serializationError) {

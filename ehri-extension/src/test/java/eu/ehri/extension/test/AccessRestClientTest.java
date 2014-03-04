@@ -13,7 +13,7 @@ import javax.ws.rs.core.MultivaluedMap;
 
 import static com.sun.jersey.api.client.ClientResponse.Status.NOT_FOUND;
 import static com.sun.jersey.api.client.ClientResponse.Status.OK;
-import static com.sun.jersey.api.client.ClientResponse.Status.UNAUTHORIZED;
+
 
 public class AccessRestClientTest extends BaseRestClientTest {
 

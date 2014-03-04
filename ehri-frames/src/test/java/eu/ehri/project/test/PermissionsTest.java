@@ -111,7 +111,7 @@ public class PermissionsTest extends AbstractFixtureTest {
         new AclManager(graph, r1).grantPermissions(user,
                 viewHelper.getContentType(EntityClass.DOCUMENTARY_UNIT),
                 PermissionType.CREATE);
-        DocumentaryUnit c1 = views.setScope(r1).create(
+        views.setScope(r1).create(
                 Bundle.fromData(TestData.getTestDocBundle()), user);
         // We should be able to create another item with c1 as the r1,
         // and inherit the perms from r1
@@ -146,7 +146,7 @@ public class PermissionsTest extends AbstractFixtureTest {
     @Test
     public void testDeleteAsUserWithGoodPerms() throws PermissionDenied,
             ValidationError, DeserializationError, IntegrityError,
-            SerializationError {
+            SerializationError, ItemNotFound {
         acl.grantPermissions(user,
                 viewHelper.getContentType(EntityClass.DOCUMENTARY_UNIT),
                 PermissionType.CREATE);
@@ -156,12 +156,12 @@ public class PermissionsTest extends AbstractFixtureTest {
         DocumentaryUnit unit = views.create(Bundle.fromData(TestData.getTestDocBundle()),
                 user);
         assertNotNull(unit);
-        views.delete(unit, user);
+        views.delete(unit.getId(), user);
     }
 
     @Test
     public void testCreateDeleteAsUserWithOwnerPerms() throws PermissionDenied,
-            ValidationError, DeserializationError, IntegrityError,
+            ValidationError, DeserializationError, IntegrityError, ItemNotFound,
             SerializationError {
         acl.grantPermissions(user,
                 viewHelper.getContentType(EntityClass.DOCUMENTARY_UNIT),
@@ -169,13 +169,13 @@ public class PermissionsTest extends AbstractFixtureTest {
         DocumentaryUnit unit = views.create(Bundle.fromData(TestData.getTestDocBundle()),
                 user);
         assertNotNull(unit);
-        views.delete(unit, user);
+        views.delete(unit.getId(), user);
     }
 
     @Test
     public void testCreateDeleteAsCreator() throws PermissionDenied,
             ValidationError, DeserializationError, IntegrityError,
-            SerializationError {
+            SerializationError, ItemNotFound {
         acl.grantPermissions(user,
                 viewHelper.getContentType(EntityClass.DOCUMENTARY_UNIT),
                 PermissionType.CREATE);
@@ -184,13 +184,13 @@ public class PermissionsTest extends AbstractFixtureTest {
         assertNotNull(unit);
         // Since we created with item, we should have OWNER perms and
         // be able to delete it.
-        views.delete(unit, user);
+        views.delete(unit.getId(), user);
     }
 
     @Test(expected = PermissionDenied.class)
     public void testCreateDeleteAsUserWithWrongPerms() throws PermissionDenied,
             ValidationError, DeserializationError, IntegrityError,
-            SerializationError {
+            SerializationError, ItemNotFound {
         acl.grantPermissions(user,
                 viewHelper.getContentType(EntityClass.DOCUMENTARY_UNIT),
                 PermissionType.ANNOTATE);
@@ -200,7 +200,7 @@ public class PermissionsTest extends AbstractFixtureTest {
         // Revoke my owner perms...
         acl.revokePermissions(user, unit, PermissionType.OWNER);
         // This should now throw an error.
-        views.delete(unit, user);
+        views.delete(unit.getId(), user);
     }
 
     @Test(expected = ValidationError.class)
@@ -240,7 +240,7 @@ public class PermissionsTest extends AbstractFixtureTest {
     @Test
     public void testSetPermissionMatrix() throws PermissionDenied,
             ValidationError, DeserializationError, IntegrityError,
-            SerializationError {
+            SerializationError, ItemNotFound {
 
         // @formatter:off
         Map<ContentTypes,List<PermissionType>> matrix = new HashMap<ContentTypes, List<PermissionType>>() {{
@@ -259,7 +259,7 @@ public class PermissionsTest extends AbstractFixtureTest {
             DocumentaryUnit unit = views.create(
                     Bundle.fromData(TestData.getTestDocBundle()), user);
             assertNotNull(unit);
-            views.delete(unit, user);
+            views.delete(unit.getId(), user);
         }
     }
 
@@ -293,7 +293,7 @@ public class PermissionsTest extends AbstractFixtureTest {
                 DocumentaryUnit unit = views.setScope(scope).create(
                         Bundle.fromData(TestData.getTestDocBundle()), user);
                     assertNotNull(unit);
-                views.setScope(scope).delete(unit, user);
+                views.setScope(scope).delete(unit.getId(), user);
             }
         }
     }

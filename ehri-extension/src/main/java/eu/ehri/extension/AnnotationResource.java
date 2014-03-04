@@ -156,8 +156,7 @@ public class AnnotationResource extends AbstractAccessibleEntityResource<Annotat
             @QueryParam(FILTER_PARAM) List<String> filters)
                 throws AccessDenied, ItemNotFound, BadRequester, PermissionDenied {
         AccessibleEntity item = new CrudViews<AccessibleEntity>(graph, AccessibleEntity.class)
-                .detail(manager.getFrame(id, AccessibleEntity.class),
-                getRequesterUserProfile());
+                .detail(id, getRequesterUserProfile());
         Query<Annotation> query = new Query<Annotation>(graph, cls)
                 .setOffset(offset).setLimit(limit).filter(filters)
                 .orderBy(order).filter(filters);

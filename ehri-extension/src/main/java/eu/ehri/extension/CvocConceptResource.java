@@ -120,8 +120,7 @@ public class CvocConceptResource extends
     @Path("/{id:.+}/narrower/list")
     public StreamingOutput getCvocNarrowerConcepts(@PathParam("id") String id)
             throws ItemNotFound, AccessDenied, BadRequester {
-        Concept concept = views.detail(manager.getFrame(id, cls),
-                getRequesterUserProfile());
+        Concept concept = views.detail(id, getRequesterUserProfile());
         return streamingList(concept.getNarrowerConcepts());
     }
 
@@ -137,7 +136,7 @@ public class CvocConceptResource extends
 
     throws ItemNotFound, AccessDenied, BadRequester {
         Accessor user = getRequesterUserProfile();
-        Concept concept = views.detail(manager.getFrame(id, cls), user);
+        Concept concept = views.detail(id, user);
         Query<Concept> query = new Query<Concept>(graph, Concept.class)
                 .setLimit(limit).setOffset(offset).orderBy(order)
                 .filter(filters);
@@ -152,7 +151,7 @@ public class CvocConceptResource extends
             @QueryParam(FILTER_PARAM) List<String> filters)
             throws ItemNotFound, BadRequester, AccessDenied {
         Accessor user = getRequesterUserProfile();
-        Concept concept = views.detail(manager.getFrame(id, cls), user);
+        Concept concept = views.detail(id, user);
         Query<Concept> query = new Query<Concept>(graph, Concept.class)
                 .filter(filters);
         return Response.ok((query.count(concept.getNarrowerConcepts(), user))
@@ -171,7 +170,7 @@ public class CvocConceptResource extends
 
     throws ItemNotFound, AccessDenied, BadRequester {
         Accessor user = getRequesterUserProfile();
-        Concept concept = views.detail(manager.getFrame(id, cls), user);
+        Concept concept = views.detail(id, user);
         Query<Concept> query = new Query<Concept>(graph, Concept.class)
                 .setLimit(limit).setOffset(offset).orderBy(order)
                 .filter(filters);
@@ -184,14 +183,14 @@ public class CvocConceptResource extends
      * the two concept vertices.
      */
     @POST
-    @Path("/{id:.+}/narrower/{id_narrower:.+}")
+    @Path("/{id:.+}/narrower/{idNarrower:.+}")
     public Response addNarrowerCvocConcept(
                 @PathParam("id") String id,
-                @PathParam("id_narrower") String id_narrower)
+                @PathParam("idNarrower") String idNarrower)
             throws AccessDenied, PermissionDenied, ItemNotFound, BadRequester {
         Accessor accessor = getRequesterUserProfile();
-        Concept concept = views.detail(manager.getFrame(id, cls), accessor);
-        Concept relatedConcept = views.detail(manager.getFrame(id_narrower, cls), accessor);
+        Concept concept = views.detail(id, accessor);
+        Concept relatedConcept = views.detail(idNarrower, accessor);
         helper.checkEntityPermission(concept, accessor, PermissionType.UPDATE);
         helper.checkEntityPermission(relatedConcept, accessor, PermissionType.UPDATE);
         concept.addNarrowerConcept(relatedConcept);
@@ -204,15 +203,15 @@ public class CvocConceptResource extends
      * the narrower concept
      */
     @DELETE
-    @Path("/{id:.+}/narrower/{id_narrower:.+}")
+    @Path("/{id:.+}/narrower/{idNarrower:.+}")
     public Response removeNarrowerCvocConcept(
                 @PathParam("id") String id,
-                @PathParam("id_narrower") String id_narrower)
+                @PathParam("idNarrower") String idNarrower)
             throws PermissionDenied, AccessDenied, ItemNotFound, BadRequester {
 
         Accessor accessor = getRequesterUserProfile();
-        Concept concept = views.detail(manager.getFrame(id, cls), accessor);
-        Concept relatedConcept = views.detail(manager.getFrame(id_narrower, cls), accessor);
+        Concept concept = views.detail(id, accessor);
+        Concept relatedConcept = views.detail(idNarrower, accessor);
         helper.checkEntityPermission(concept, accessor, PermissionType.UPDATE);
         helper.checkEntityPermission(relatedConcept, accessor, PermissionType.UPDATE);
         concept.removeNarrowerConcept(relatedConcept);
@@ -226,8 +225,7 @@ public class CvocConceptResource extends
     public StreamingOutput getCvocBroaderConcepts(@PathParam("id") String id)
             throws ItemNotFound, AccessDenied, BadRequester {
 
-        Concept concept = views.detail(manager.getFrame(id, cls),
-                getRequesterUserProfile());
+        Concept concept = views.detail(id, getRequesterUserProfile());
 
         return streamingList(concept.getBroaderConcepts());
     }
@@ -239,8 +237,7 @@ public class CvocConceptResource extends
     public StreamingOutput getCvocRelatedConcepts(@PathParam("id") String id)
             throws ItemNotFound, AccessDenied, BadRequester {
 
-        Concept concept = views.detail(manager.getFrame(id, cls),
-                getRequesterUserProfile());
+        Concept concept = views.detail(id, getRequesterUserProfile());
 
         return streamingList(concept.getRelatedConcepts());
     }
@@ -251,8 +248,7 @@ public class CvocConceptResource extends
     public StreamingOutput getCvocRelatedByConcepts(@PathParam("id") String id)
             throws ItemNotFound, AccessDenied, BadRequester {
 
-        Concept concept = views.detail(manager.getFrame(id, cls),
-                getRequesterUserProfile());
+        Concept concept = views.detail(id, getRequesterUserProfile());
 
         return streamingList(concept.getRelatedByConcepts());
     }
@@ -262,15 +258,15 @@ public class CvocConceptResource extends
      * no vertex created
      */
     @POST
-    @Path("/{id:.+}/related/{id_related:.+}")
+    @Path("/{id:.+}/related/{idRelated:.+}")
     public Response addRelatedCvocConcept(
             @PathParam("id") String id,
-            @PathParam("id_related") String id_related)
+            @PathParam("idRelated") String idRelated)
             throws AccessDenied, PermissionDenied, ItemNotFound, BadRequester {
 
         Accessor accessor = getRequesterUserProfile();
-        Concept concept = views.detail(manager.getFrame(id, cls), accessor);
-        Concept relatedConcept = views.detail(manager.getFrame(id_related, cls), accessor);
+        Concept concept = views.detail(id, accessor);
+        Concept relatedConcept = views.detail(idRelated, accessor);
         helper.checkEntityPermission(concept, accessor, PermissionType.UPDATE);
         helper.checkEntityPermission(relatedConcept, accessor, PermissionType.UPDATE);
         concept.addRelatedConcept(relatedConcept);
@@ -283,15 +279,15 @@ public class CvocConceptResource extends
      * concept
      */
     @DELETE
-    @Path("/{id:.+}/related/{id_related:.+}")
+    @Path("/{id:.+}/related/{idRelated:.+}")
     public Response removeRelatedCvocConcept(
                 @PathParam("id") String id,
-                @PathParam("id_related") String id_related)
+                @PathParam("idRelated") String idRelated)
             throws AccessDenied, PermissionDenied, ItemNotFound, BadRequester {
 
         Accessor accessor = getRequesterUserProfile();
-        Concept concept = views.detail(manager.getFrame(id, cls), accessor);
-        Concept relatedConcept = views.detail(manager.getFrame(id_related, cls), accessor);
+        Concept concept = views.detail(id, accessor);
+        Concept relatedConcept = views.detail(idRelated, accessor);
         helper.checkEntityPermission(concept, accessor, PermissionType.UPDATE);
         helper.checkEntityPermission(relatedConcept, accessor, PermissionType.UPDATE);
         concept.removeRelatedConcept(relatedConcept);
@@ -302,9 +298,9 @@ public class CvocConceptResource extends
     /**
      * Create a top-level concept unit for this vocabulary.
      * 
-     * @param id
-     * @param json
-     * @return
+     * @param id The vocabulary id
+     * @param json The new concept data
+     * @return The new concept
      * @throws PermissionDenied
      * @throws AccessDenied
      * @throws ValidationError
@@ -322,7 +318,7 @@ public class CvocConceptResource extends
             throws AccessDenied, PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, ItemNotFound, BadRequester {
         Accessor user = getRequesterUserProfile();
-        Concept parent = views.detail(manager.getFrame(id, cls), user);
+        Concept parent = views.detail(id, user);
         try {
             Concept concept = createConcept(json, parent);
             new AclManager(graph).setAccessors(concept, getAccessors(accessors, user));
