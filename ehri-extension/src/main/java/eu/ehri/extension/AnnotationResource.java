@@ -5,6 +5,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 import javax.ws.rs.core.Response.Status;
 
+import eu.ehri.project.acl.PermissionType;
 import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.base.*;
 import eu.ehri.project.views.Query;
@@ -22,26 +23,27 @@ import eu.ehri.project.views.AnnotationViews;
  * Provides a RESTfull(ish) interface for creating.
  */
 @Path(Entities.ANNOTATION)
-public class AnnotationResource extends
-        AbstractAccessibleEntityResource<Annotation> {
+public class AnnotationResource extends AbstractAccessibleEntityResource<Annotation> {
+
+    private final AnnotationViews annotationViews;
 
     public AnnotationResource(@Context GraphDatabaseService database, @Context HttpHeaders requestHeaders) {
         super(database, requestHeaders, Annotation.class);
+        annotationViews = new AnnotationViews(graph);
     }
 
     /**
      * Retrieve an annotation by id.
      * 
-     * @param id
-     * @return
+     * @param id The item's id
+     * @return The serialized annotation
      * @throws ItemNotFound
-     * @throws PermissionDenied
+     * @throws AccessDenied
      * @throws BadRequester
      */
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/{id:.+}"
-    )
+    @Path("/{id:.+}")
     public Response getAction(@PathParam("id") String id) throws ItemNotFound,
             AccessDenied, BadRequester {
         return retrieve(id);
@@ -49,14 +51,6 @@ public class AnnotationResource extends
 
     /**
      * List all annotations.
-     * 
-     * @param offset
-     * @param limit
-     * @param order
-     * @param filters
-     * @return
-     * @throws ItemNotFound
-     * @throws BadRequester
      */
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
@@ -72,7 +66,7 @@ public class AnnotationResource extends
     
     /**
      * Create an annotation for a particular item.
-     * 
+     *
      * @param id
      * @param json
      * @param accessors
@@ -90,15 +84,13 @@ public class AnnotationResource extends
     @Path("{id:.+}")
     public Response createAnnotationFor(@PathParam("id") String id,
             String json, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
-            throws PermissionDenied, ValidationError, DeserializationError,
+            throws PermissionDenied, AccessDenied, ValidationError, DeserializationError,
             ItemNotFound, BadRequester, SerializationError {
         checkNotInTransaction();
         try {
             Accessor user = getRequesterUserProfile();
-            Annotation ann = new AnnotationViews(graph).createFor(id, id,
-                    Bundle.fromString(json), user);
-            new AclManager(graph).setAccessors(ann,
-                    getAccessors(accessors, user));
+            Annotation ann = annotationViews.createFor(id, id,
+                    Bundle.fromString(json), user, getAccessors(accessors, user));
             graph.getBaseGraph().commit();
             return buildResponseFromAnnotation(ann);
         } finally {
@@ -129,14 +121,13 @@ public class AnnotationResource extends
             @PathParam("id") String id,
             @PathParam("did") String did,
             String json, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
-            throws PermissionDenied, ValidationError, DeserializationError,
+            throws PermissionDenied, AccessDenied, ValidationError, DeserializationError,
             ItemNotFound, BadRequester, SerializationError {
         checkNotInTransaction();
         try {
             Accessor user = getRequesterUserProfile();
-            Annotation ann = new AnnotationViews(graph).createFor(id, did, Bundle.fromString(json), user);
-            new AclManager(graph).setAccessors(ann,
-                    getAccessors(accessors, user));
+            Annotation ann = annotationViews.createFor(id, did,
+                    Bundle.fromString(json), user, getAccessors(accessors, user));
             graph.getBaseGraph().commit();
             return buildResponseFromAnnotation(ann);
         } finally {

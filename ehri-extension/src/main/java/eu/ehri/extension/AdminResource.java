@@ -3,10 +3,7 @@ package eu.ehri.extension;
 // Borrowed, temporarily, from Michael Hunger:
 // https://github.com/jexp/neo4j-clean-remote-db-addon
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -33,6 +30,7 @@ import eu.ehri.project.persistence.Bundle;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -82,14 +80,15 @@ public class AdminResource extends AbstractRestResource {
     /**
      * Create a new user with a default name and identifier.
      * 
-     * @return
+     * @return A new user
      * @throws Exception
      */
     @POST
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/createDefaultUserProfile")
-    public Response createDefaultUserProfile(String jsonData) throws Exception {
+    public Response createDefaultUserProfile(String jsonData,
+            @QueryParam(GROUP_PARAM) List<String> groups) throws Exception {
         checkNotInTransaction();
         try {
             String ident = getNextDefaultUserId();
@@ -104,6 +103,13 @@ public class AdminResource extends AbstractRestResource {
                     Accessor.class);
             Crud<UserProfile> view = ViewFactory.getCrudWithLogging(graph, UserProfile.class);
             UserProfile user = view.create(bundle, accessor);
+
+            // add to the groups
+            for (String groupId: groups) {
+                Group group = manager.getFrame(groupId, EntityClass.GROUP, Group.class);
+                group.addMember(user);
+            }
+
             // Grant them owner permissions on their own account.
             new AclManager(graph).grantPermissions(user, user,
                     PermissionType.OWNER);
