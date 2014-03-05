@@ -28,7 +28,7 @@ import java.util.NoSuchElementException;
 /**
  * Implementation of GraphManager that uses a single index to manage all nodes,
  * with Neo4j Lucene query optimisations.
- * 
+ *
  * @author mike
  */
 public final class SingleIndexGraphManager<T extends Neo4jGraph> implements GraphManager {
@@ -43,7 +43,6 @@ public final class SingleIndexGraphManager<T extends Neo4jGraph> implements Grap
     }
 
     public SingleIndexGraphManager(FramedGraph<T> graph) {
-        // Accept a warning here about the unsafe cast.
         this.graph = graph;
     }
 
