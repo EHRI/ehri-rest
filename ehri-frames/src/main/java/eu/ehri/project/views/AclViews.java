@@ -14,6 +14,7 @@ import eu.ehri.project.models.PermissionGrant;
 import eu.ehri.project.models.base.*;
 import eu.ehri.project.persistence.ActionManager;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -63,7 +64,7 @@ public final class AclViews {
      * @throws PermissionDenied
      */
     public List<Map<String,GlobalPermissionSet>> setGlobalPermissionMatrix(Accessor accessor,
-            Map<ContentTypes, List<PermissionType>> permissionMap,
+            Map<ContentTypes, Collection<PermissionType>> permissionMap,
             Accessor grantee) throws PermissionDenied {
         checkGrantPermission(grantee, permissionMap);
         acl.setPermissionMatrix(accessor, permissionMap);
@@ -110,7 +111,7 @@ public final class AclViews {
      * @throws PermissionDenied
      */
     private void checkGrantPermission(Accessor accessor,
-            Map<ContentTypes, List<PermissionType>> permissionMap)
+            Map<ContentTypes, Collection<PermissionType>> permissionMap)
             throws PermissionDenied {
         // Check we have grant permissions for the requested content types
         if (!acl.belongsToAdmin(accessor)) {

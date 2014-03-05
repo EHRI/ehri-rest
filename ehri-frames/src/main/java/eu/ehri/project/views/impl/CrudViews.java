@@ -63,7 +63,7 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
      */
     public E detail(String id, Accessor user) throws ItemNotFound {
         E item = manager.getFrame(id, cls);
-        if (!acl.getAccessControl(item, user)) {
+        if (!acl.canAccess(item, user)) {
             throw new ItemNotFound(id);
         }
         return item;
@@ -110,7 +110,7 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
         // users - but it probably should...
         if (!acl.belongsToAdmin(user)) {
             acl.withScope(SystemScope.INSTANCE)
-                    .grantPermissions(user, item, PermissionType.OWNER);
+                    .grantPermission(user, item, PermissionType.OWNER);
         }
         // If the scope is not the system, set the permission scope
         // of the item too...

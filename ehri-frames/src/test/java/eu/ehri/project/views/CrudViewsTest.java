@@ -4,22 +4,17 @@ import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.acl.AnonymousAccessor;
 import eu.ehri.project.acl.ContentTypes;
 import eu.ehri.project.acl.PermissionType;
-import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.exceptions.AccessDenied;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.*;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.PermissionGrantTarget;
 import eu.ehri.project.persistence.Bundle;
-import eu.ehri.project.persistence.Serializer;
 import eu.ehri.project.test.AbstractFixtureTest;
 import eu.ehri.project.test.TestData;
 import eu.ehri.project.views.impl.CrudViews;
 import eu.ehri.project.views.impl.LoggingCrudViews;
 import org.junit.Test;
-import org.neo4j.helpers.collection.Iterables;
 
 import java.util.Iterator;
 
@@ -91,7 +86,7 @@ public class CrudViewsTest extends AbstractFixtureTest {
             PermissionGrantTarget target = manager.getFrame(
                     ContentTypes.DOCUMENTARY_UNIT.getName(),
                     PermissionGrantTarget.class);
-            new AclManager(graph).grantPermissions(invalidUser, target,
+            new AclManager(graph).grantPermission(invalidUser, target,
                     PermissionType.CREATE);
             DocumentaryUnit unit = docViews.create(bundle, invalidUser);
             assertEquals(TestData.TEST_COLLECTION_NAME, unit.asVertex().getProperty("name"));

@@ -3,6 +3,7 @@ package eu.ehri.project.acl;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
+import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.annotate.JsonValue;
 
 import java.util.Collection;
@@ -18,35 +19,68 @@ import java.util.Map;
  *      contentType -> [perms...],
  *      ...
  *  }
- *
- *  NB: This is not currently an immutable data structure.
  */
 public final class GlobalPermissionSet {
 
-    final HashMultimap<ContentTypes,PermissionType> matrix;
+    public static class Builder {
+        private final HashMultimap<ContentTypes,PermissionType> m;
 
-    public GlobalPermissionSet(Multimap<ContentTypes,PermissionType> permissionMatrix) {
+        public Builder() {
+            m = HashMultimap.create();
+        }
+
+        public Builder(Multimap<ContentTypes,PermissionType> initial) {
+            m = HashMultimap.create(initial);
+        }
+
+        public Builder set(ContentTypes contentType, Collection<PermissionType> permissionTypes) {
+            m.putAll(contentType, permissionTypes);
+            return this;
+        }
+
+        public Builder set(ContentTypes contentType, PermissionType... permissionTypes) {
+            m.putAll(contentType, Lists.newArrayList(permissionTypes));
+            return this;
+        }
+
+        public GlobalPermissionSet build() {
+            return new GlobalPermissionSet(m);
+        }
+    }
+
+    private final HashMultimap<ContentTypes,PermissionType> matrix;
+
+    @JsonCreator
+    private GlobalPermissionSet(Multimap<ContentTypes,PermissionType> permissionMatrix) {
         matrix = HashMultimap.create(permissionMatrix);
     }
 
-    public GlobalPermissionSet() {
+    private GlobalPermissionSet() {
         matrix = HashMultimap.create();
+    }
+
+    public static Builder newBuilder() {
+        return new Builder();
     }
 
     public static GlobalPermissionSet empty() {
         return new GlobalPermissionSet();
     }
 
-    public void setContentType(ContentTypes contentType, Collection<PermissionType> permissionTypes) {
-        matrix.putAll(contentType, permissionTypes);
+    public static GlobalPermissionSet from(Multimap<ContentTypes,PermissionType>  permissionMatrix) {
+        return new GlobalPermissionSet(permissionMatrix);
     }
 
-    public void setContentType(ContentTypes contentType, PermissionType ... permissionTypes) {
-        matrix.putAll(contentType, Lists.newArrayList(permissionTypes));
+    public boolean has(ContentTypes contentTypes, PermissionType permissionType) {
+        return matrix.get(contentTypes).contains(permissionType);
     }
 
     public Collection<PermissionType> get(ContentTypes type) {
         return matrix.get(type);
+    }
+
+    public GlobalPermissionSet withPermission(ContentTypes contentType, PermissionType... permission) {
+        return new Builder(matrix).set(contentType, permission).build();
     }
 
     @JsonValue
@@ -61,9 +95,7 @@ public final class GlobalPermissionSet {
 
         GlobalPermissionSet that = (GlobalPermissionSet) o;
 
-        if (!matrix.equals(that.matrix)) return false;
-
-        return true;
+        return matrix.equals(that.matrix);
     }
 
     @Override

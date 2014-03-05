@@ -1,10 +1,7 @@
 package eu.ehri.extension;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
@@ -296,7 +293,7 @@ public class PermissionsResource extends AbstractRestResource {
             String json) throws PermissionDenied, IOException, ItemNotFound,
             DeserializationError, BadRequester {
         checkNotInTransaction();
-        HashMap<ContentTypes, List<PermissionType>> globals = parseMatrix(json);
+        HashMap<ContentTypes, Collection<PermissionType>> globals = parseMatrix(json);
         Accessor accessor = manager.getFrame(userId, Accessor.class);
         Accessor grantee = getRequesterUserProfile();
         try {
@@ -394,7 +391,7 @@ public class PermissionsResource extends AbstractRestResource {
         checkNotInTransaction();
 
         try {
-            HashMap<ContentTypes, List<PermissionType>> globals = parseMatrix(json);
+            HashMap<ContentTypes, Collection<PermissionType>> globals = parseMatrix(json);
             Accessor accessor = manager.getFrame(userId, Accessor.class);
             PermissionScope scope = manager.getFrame(id, PermissionScope.class);
             Accessor grantee = getRequesterUserProfile();
@@ -458,9 +455,9 @@ public class PermissionsResource extends AbstractRestResource {
         }
     }
 
-    private HashMap<ContentTypes, List<PermissionType>> parseMatrix(String json)
+    private HashMap<ContentTypes, Collection<PermissionType>> parseMatrix(String json)
             throws DeserializationError {
-        HashMap<ContentTypes, List<PermissionType>> globals;
+        HashMap<ContentTypes, Collection<PermissionType>> globals;
         try {
             JsonFactory factory = new JsonFactory();
             ObjectMapper mapper = new ObjectMapper(factory);

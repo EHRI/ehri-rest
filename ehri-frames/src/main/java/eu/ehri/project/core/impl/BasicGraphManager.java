@@ -20,9 +20,8 @@ import java.util.NoSuchElementException;
 
 /**
  * Implementation of GraphManager that uses a single index to manage all nodes.
- * 
+ *
  * @author mike
- * 
  */
 public final class BasicGraphManager<T extends IndexableGraph> implements GraphManager {
 
@@ -35,16 +34,13 @@ public final class BasicGraphManager<T extends IndexableGraph> implements GraphM
         return graph;
     }
 
-    /**
-     * Cast one frame to another.
-     */
     public <T extends Frame> T cast(Frame frame, Class<T> cls) {
         return graph.frame(frame.asVertex(), cls);
     }
 
-    public BasicGraphManager(FramedGraph<?> graph) {
+    public BasicGraphManager(FramedGraph<T> graph) {
         // Accept a warning here about the unsafe cast.
-        this.graph = (FramedGraph<T>)graph;
+        this.graph = graph;
     }
 
     // Access functions
@@ -142,11 +138,10 @@ public final class BasicGraphManager<T extends IndexableGraph> implements GraphM
         for (String id : ids) {
             verts.add(getVertex(id));
         }
-        return new WrappingCloseableIterable(verts);
+        return new WrappingCloseableIterable<Vertex>(verts);
     }
 
-    public CloseableIterable<Vertex> getVertices(String key, Object value,
-            final EntityClass type) {
+    public CloseableIterable<Vertex> getVertices(String key, Object value, final EntityClass type) {
         // NB: This is rather annoying.
         CloseableIterable<Vertex> query = getIndex().get(key, value);
         List<Vertex> elems = Lists.newArrayList();
@@ -163,20 +158,20 @@ public final class BasicGraphManager<T extends IndexableGraph> implements GraphM
     }
 
     public Vertex createVertex(String id, EntityClass type,
-            Map<String, Object> data) throws IntegrityError {
+            Map<String, ?> data) throws IntegrityError {
         return createVertex(id, type, data, data.keySet());
     }
 
     public Vertex createVertex(String id, EntityClass type,
-            Map<String, Object> data, Iterable<String> keys) throws IntegrityError {
+            Map<String, ?> data, Iterable<String> keys) throws IntegrityError {
         Preconditions
                 .checkNotNull(id, "null vertex ID given for item creation");
         Index<Vertex> index = getIndex();
-        Map<String, Object> indexData = getVertexData(id, type, data);
+        Map<String, ?> indexData = getVertexData(id, type, data);
         Collection<String> indexKeys = getVertexKeys(keys);
         checkExists(index, id);
         Vertex node = graph.addVertex(null);
-        for (Map.Entry<String, Object> entry : indexData.entrySet()) {
+        for (Map.Entry<String, ?> entry : indexData.entrySet()) {
             if (entry.getValue() == null)
                 continue;
             node.setProperty(entry.getKey(), entry.getValue());
@@ -189,15 +184,15 @@ public final class BasicGraphManager<T extends IndexableGraph> implements GraphM
     }
 
     public Vertex updateVertex(String id, EntityClass type,
-            Map<String, Object> data) throws ItemNotFound {
+            Map<String, ?> data) throws ItemNotFound {
         return updateVertex(id, type, data, data.keySet());
     }
 
     public Vertex updateVertex(String id, EntityClass type,
-            Map<String, Object> data, Iterable<String> keys) throws ItemNotFound {
+            Map<String, ?> data, Iterable<String> keys) throws ItemNotFound {
         Preconditions.checkNotNull(id, "null vertex ID given for item update");
         Index<Vertex> index = getIndex();
-        Map<String, Object> indexData = getVertexData(id, type, data);
+        Map<String, ?> indexData = getVertexData(id, type, data);
         Collection<String> indexKeys = getVertexKeys(keys);
         CloseableIterable<Vertex> get = getIndex().get(EntityType.ID_KEY, id);
         try {
@@ -205,11 +200,8 @@ public final class BasicGraphManager<T extends IndexableGraph> implements GraphM
                 Vertex node = get.iterator().next();
                 replaceProperties(index, node, indexData, indexKeys);
                 return node;
-
             } catch (NoSuchElementException e) {
-                throw new RuntimeException(String.format(
-                        "Item with id '%s' not found in index: %s", id,
-                        INDEX_NAME));
+                throw new ItemNotFound(id);
             }
         } finally {
             get.close();
@@ -221,9 +213,9 @@ public final class BasicGraphManager<T extends IndexableGraph> implements GraphM
      * first. Blueprints' removeVertex() method does that; the Neo4jServer
      * DELETE URI does not.
      *
-     * @param id
-     *            The vertex identifier
+     * @param id The vertex identifier
      * @throws eu.ehri.project.exceptions.ItemNotFound
+     *
      */
     public void deleteVertex(String id) throws ItemNotFound {
         deleteVertex(getVertex(id));
@@ -233,9 +225,8 @@ public final class BasicGraphManager<T extends IndexableGraph> implements GraphM
      * Delete vertex with its edges Neo4j requires you delete all adjacent edges
      * first. Blueprints' removeVertex() method does that; the Neo4jServer
      * DELETE URI does not.
-     * 
-     * @param vertex
-     *            The vertex
+     *
+     * @param vertex The vertex
      */
     public void deleteVertex(Vertex vertex) {
         Index<Vertex> index = getIndex();
@@ -247,16 +238,13 @@ public final class BasicGraphManager<T extends IndexableGraph> implements GraphM
 
     /**
      * Replace properties to a property container like vertex and edge
-     * 
-     * @param index
-     *            The index of the container
-     * @param item
-     *            The container Edge or Vertex of type <code>T</code>
-     * @param data
-     *            The properties
+     *
+     * @param index The index of the container
+     * @param item  The container Edge or Vertex of type <code>T</code>
+     * @param data  The properties
      */
     private <T extends Element> void replaceProperties(Index<T> index, T item,
-            Map<String, Object> data, Collection<String> keys) {
+            Map<String, ?> data, Collection<String> keys) {
         // remove 'old' properties
         for (String key : item.getPropertyKeys()) {
             Object value = item.getProperty(key);
@@ -274,18 +262,15 @@ public final class BasicGraphManager<T extends IndexableGraph> implements GraphM
 
     /**
      * Add properties to a property container like vertex and edge
-     * 
-     * @param index
-     *            The index of the container
-     * @param item
-     *            The container Edge or Vertex of type <code>T</code>
-     * @param data
-     *            The properties
+     *
+     * @param index The index of the container
+     * @param item  The container Edge or Vertex of type <code>T</code>
+     * @param data  The properties
      */
     private <T extends Element> void addProperties(Index<T> index, T item,
-            Map<String, Object> data, Collection<String> keys) {
+            Map<String, ?> data, Collection<String> keys) {
         Preconditions.checkNotNull(data, "Data map cannot be null");
-        for (Map.Entry<String, Object> entry : data.entrySet()) {
+        for (Map.Entry<String, ?> entry : data.entrySet()) {
             if (entry.getValue() == null)
                 continue;
             item.setProperty(entry.getKey(), entry.getValue());
@@ -302,8 +287,8 @@ public final class BasicGraphManager<T extends IndexableGraph> implements GraphM
         }
     }
 
-    private Map<String, Object> getVertexData(String id, EntityClass type,
-            Map<String, Object> data) {
+    private Map<String, ?> getVertexData(String id, EntityClass type,
+            Map<String, ?> data) {
         Map<String, Object> vdata = Maps.newHashMap(data);
         vdata.put(EntityType.ID_KEY, id);
         vdata.put(EntityType.TYPE_KEY, type.getName());

@@ -123,7 +123,7 @@ public interface GraphManager {
      * @param type
      * @return
      */
-    public <T extends Vertex> CloseableIterable<T> getVertices(String key,
+    public CloseableIterable<Vertex> getVertices(String key,
             Object value, EntityClass type);
 
     /**
@@ -147,7 +147,7 @@ public interface GraphManager {
      * @throws IntegrityError
      */
     public Vertex createVertex(String id, EntityClass type,
-            Map<String, Object> data) throws IntegrityError;
+            Map<String, ?> data) throws IntegrityError;
 
     /**
      * Create a vertex with the given id, type, and data, specifying which
@@ -161,7 +161,7 @@ public interface GraphManager {
      * @throws IntegrityError
      */
     public Vertex createVertex(String id, EntityClass type,
-            Map<String, Object> data, Iterable<String> keys)
+            Map<String, ?> data, Iterable<String> keys)
             throws IntegrityError;
 
     /**
@@ -174,7 +174,7 @@ public interface GraphManager {
      * @throws IntegrityError
      */
     public Vertex updateVertex(String id, EntityClass type,
-            Map<String, Object> data) throws ItemNotFound;
+            Map<String, ?> data) throws ItemNotFound;
 
     /**
      * Create a vertex with the given id, type, and data, specifying which
@@ -188,7 +188,7 @@ public interface GraphManager {
      * @throws IntegrityError
      */
     public Vertex updateVertex(String id, EntityClass type,
-            Map<String, Object> data, Iterable<String> keys)
+            Map<String, ?> data, Iterable<String> keys)
             throws ItemNotFound;
 
     // CRUD functions
