@@ -27,9 +27,8 @@ import java.util.NoSuchElementException;
 
 /**
  * Implementation of GraphManager that uses a single index to manage all nodes.
- * 
+ *
  * @author mike
- * 
  */
 public final class SingleIndexGraphManager implements GraphManager {
 
@@ -44,7 +43,7 @@ public final class SingleIndexGraphManager implements GraphManager {
 
     public SingleIndexGraphManager(FramedGraph<?> graph) {
         // Accept a warning here about the unsafe cast.
-        this.graph = (FramedGraph<Neo4jGraph>)graph;
+        this.graph = (FramedGraph<Neo4jGraph>) graph;
     }
 
     /**
@@ -57,7 +56,7 @@ public final class SingleIndexGraphManager implements GraphManager {
     // Access functions
     public String getId(Vertex vertex) {
         Preconditions.checkNotNull(vertex);
-        return (String) vertex.getProperty(EntityType.ID_KEY);
+        return vertex.getProperty(EntityType.ID_KEY);
     }
 
     public String getId(Frame frame) {
@@ -173,20 +172,20 @@ public final class SingleIndexGraphManager implements GraphManager {
     }
 
     public Vertex createVertex(String id, EntityClass type,
-            Map<String, Object> data) throws IntegrityError {
+            Map<String, ?> data) throws IntegrityError {
         return createVertex(id, type, data, data.keySet());
     }
 
     public Vertex createVertex(String id, EntityClass type,
-            Map<String, Object> data, Iterable<String> keys) throws IntegrityError {
+            Map<String, ?> data, Iterable<String> keys) throws IntegrityError {
         Preconditions
                 .checkNotNull(id, "null vertex ID given for item creation");
         Index<Vertex> index = getIndex();
-        Map<String, Object> indexData = getVertexData(id, type, data);
+        Map<String, ?> indexData = getVertexData(id, type, data);
         Collection<String> indexKeys = getVertexKeys(keys);
         checkExists(index, id);
         Vertex node = graph.addVertex(null);
-        for (Map.Entry<String, Object> entry : indexData.entrySet()) {
+        for (Map.Entry<String, ?> entry : indexData.entrySet()) {
             if (entry.getValue() == null)
                 continue;
             node.setProperty(entry.getKey(), entry.getValue());
@@ -199,15 +198,15 @@ public final class SingleIndexGraphManager implements GraphManager {
     }
 
     public Vertex updateVertex(String id, EntityClass type,
-            Map<String, Object> data) throws ItemNotFound {
+            Map<String, ?> data) throws ItemNotFound {
         return updateVertex(id, type, data, data.keySet());
     }
 
     public Vertex updateVertex(String id, EntityClass type,
-            Map<String, Object> data, Iterable<String> keys) throws ItemNotFound {
+            Map<String, ?> data, Iterable<String> keys) throws ItemNotFound {
         Preconditions.checkNotNull(id, "null vertex ID given for item update");
         Index<Vertex> index = getIndex();
-        Map<String, Object> indexData = getVertexData(id, type, data);
+        Map<String, ?> indexData = getVertexData(id, type, data);
         Collection<String> indexKeys = getVertexKeys(keys);
         CloseableIterable<Vertex> get = getIndex().get(EntityType.ID_KEY, id);
         try {
@@ -217,9 +216,7 @@ public final class SingleIndexGraphManager implements GraphManager {
                 return node;
 
             } catch (NoSuchElementException e) {
-                throw new RuntimeException(String.format(
-                        "Item with id '%s' not found in index: %s", id,
-                        INDEX_NAME));
+                throw new ItemNotFound(id);
             }
         } finally {
             get.close();
@@ -230,9 +227,8 @@ public final class SingleIndexGraphManager implements GraphManager {
      * Delete vertex with its edges Neo4j requires you delete all adjacent edges
      * first. Blueprints' removeVertex() method does that; the Neo4jServer
      * DELETE URI does not.
-     * 
-     * @param id
-     *            The vertex identifier
+     *
+     * @param id The vertex identifier
      * @throws ItemNotFound
      */
     public void deleteVertex(String id) throws ItemNotFound {
@@ -243,9 +239,8 @@ public final class SingleIndexGraphManager implements GraphManager {
      * Delete vertex with its edges Neo4j requires you delete all adjacent edges
      * first. Blueprints' removeVertex() method does that; the Neo4jServer
      * DELETE URI does not.
-     * 
-     * @param vertex
-     *            The vertex
+     *
+     * @param vertex The vertex
      */
     public void deleteVertex(Vertex vertex) {
         Index<Vertex> index = getIndex();
@@ -257,16 +252,13 @@ public final class SingleIndexGraphManager implements GraphManager {
 
     /**
      * Replace properties to a property container like vertex and edge
-     * 
-     * @param index
-     *            The index of the container
-     * @param item
-     *            The container Edge or Vertex of type <code>T</code>
-     * @param data
-     *            The properties
+     *
+     * @param index The index of the container
+     * @param item  The container Edge or Vertex of type <code>T</code>
+     * @param data  The properties
      */
     private <T extends Element> void replaceProperties(Index<T> index, T item,
-            Map<String, Object> data, Collection<String> keys) {
+            Map<String, ?> data, Collection<String> keys) {
         // remove 'old' properties
         for (String key : item.getPropertyKeys()) {
             Object value = item.getProperty(key);
@@ -284,18 +276,15 @@ public final class SingleIndexGraphManager implements GraphManager {
 
     /**
      * Add properties to a property container like vertex and edge
-     * 
-     * @param index
-     *            The index of the container
-     * @param item
-     *            The container Edge or Vertex of type <code>T</code>
-     * @param data
-     *            The properties
+     *
+     * @param index The index of the container
+     * @param item  The container Edge or Vertex of type <code>T</code>
+     * @param data  The properties
      */
     private <T extends Element> void addProperties(Index<T> index, T item,
-            Map<String, Object> data, Collection<String> keys) {
+            Map<String, ?> data, Collection<String> keys) {
         Preconditions.checkNotNull(data, "Data map cannot be null");
-        for (Map.Entry<String, Object> entry : data.entrySet()) {
+        for (Map.Entry<String, ?> entry : data.entrySet()) {
             if (entry.getValue() == null)
                 continue;
             item.setProperty(entry.getKey(), entry.getValue());
@@ -312,8 +301,8 @@ public final class SingleIndexGraphManager implements GraphManager {
         }
     }
 
-    private Map<String, Object> getVertexData(String id, EntityClass type,
-            Map<String, Object> data) {
+    private Map<String, ?> getVertexData(String id, EntityClass type,
+            Map<String, ?> data) {
         Map<String, Object> vdata = Maps.newHashMap(data);
         vdata.put(EntityType.ID_KEY, id);
         vdata.put(EntityType.TYPE_KEY, type.getName());
