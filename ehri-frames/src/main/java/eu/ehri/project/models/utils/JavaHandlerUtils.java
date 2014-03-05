@@ -92,4 +92,22 @@ public class JavaHandlerUtils {
             return false;
         }
     }
+
+    /**
+     * Add a relationship that can only exist once between source and target.
+     *
+     * @param from  The source vertex
+     * @param to    The target vertex
+     * @param label The relationship label name
+     * @return  Whether or not changes were made to the graph.
+     */
+    public static boolean addUniqueRelationship(Vertex from, Vertex to, String label) {
+        for (Edge edge : from.getEdges(Direction.OUT, label)) {
+            if (edge.getVertex(Direction.IN).equals(to)) {
+                return false;
+            }
+        }
+        from.addEdge(label, to);
+        return true;
+    }
 }

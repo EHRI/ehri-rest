@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.models.PermissionGrant;
+import eu.ehri.project.models.base.Frame;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.utils.EmptyIterable;
 
@@ -53,6 +54,16 @@ public enum SystemScope implements PermissionScope {
 
     public Iterable<PermissionScope> getPermissionScopes() {
         return new EmptyIterable<PermissionScope>();
+    }
+
+    @Override
+    public Iterable<Frame> getContainedItems() {
+        return new EmptyIterable<Frame>();
+    }
+
+    @Override
+    public Iterable<Frame> getAllContainedItems() {
+        return new EmptyIterable<Frame>();
     }
 
     @Override

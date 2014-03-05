@@ -21,7 +21,7 @@ public interface AccessibleEntity extends PermissionGrantTarget, VersionedEntity
      * This is NOT the way to add an Accessor to a Group, use Group.addMember()
      * @param accessor 
      */
-    @Adjacency(label = Ontology.IS_ACCESSIBLE_TO)
+    @JavaHandler
     public void addAccessor(final Accessor accessor);
 
     @Adjacency(label = Ontology.IS_ACCESSIBLE_TO)
@@ -52,6 +52,11 @@ public interface AccessibleEntity extends PermissionGrantTarget, VersionedEntity
      * Implementation of complex methods.
      */
     abstract class Impl implements JavaHandlerContext<Vertex>, AccessibleEntity {
+
+        public void addAccessor(final Accessor accessor) {
+            JavaHandlerUtils.addUniqueRelationship(it(), accessor.asVertex(),
+                    Ontology.IS_ACCESSIBLE_TO);
+        }
 
         public void setPermissionScope(final PermissionScope scope) {
             JavaHandlerUtils.addSingleRelationship(it(), scope.asVertex(),
