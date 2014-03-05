@@ -114,18 +114,14 @@ public final class AclManager {
         }
 
         // Otherwise, check if there are specified permissions.
-        List<Accessor> accessors = new ArrayList<Accessor>();
-        for (Accessor acc : entity.getAccessors()) {
-            accessors.add(acc);
-        }
+        List<Accessor> accessors = Lists.newArrayList(entity.getAccessors());
 
         if (accessors.isEmpty()) {
             return true;
         } else if (isAnonymous(accessor)) {
             return false;
         } else {
-            List<Accessor> initial = new ArrayList<Accessor>();
-            initial.add(accessor);
+            List<Accessor> initial = Lists.newArrayList(accessor);
             return !searchAccess(initial, accessors).isEmpty();
         }
     }
@@ -634,22 +630,18 @@ public final class AclManager {
     private List<Accessor> searchAccess(List<Accessor> accessing,
                                         List<Accessor> allowedAccessors) {
         if (accessing.isEmpty()) {
-            return new ArrayList<Accessor>();
+            return Lists.newArrayList();
         } else {
-            List<Accessor> intersection = new ArrayList<Accessor>();
+            List<Accessor> intersection = Lists.newArrayList();
             for (Accessor acc : allowedAccessors) {
                 if (accessing.contains(acc)) {
                     intersection.add(acc);
                 }
             }
 
-            List<Accessor> parentPerms = new ArrayList<Accessor>();
-            parentPerms.addAll(intersection);
+            List<Accessor> parentPerms = Lists.newArrayList(intersection);
             for (Accessor acc : accessing) {
-                List<Accessor> parents = new ArrayList<Accessor>();
-                for (Accessor parent : acc.getAllParents()) {
-                    parents.add(parent);
-                }
+                List<Accessor> parents = Lists.newArrayList(acc.getAllParents());
                 parentPerms.addAll(searchAccess(parents, allowedAccessors));
             }
 
