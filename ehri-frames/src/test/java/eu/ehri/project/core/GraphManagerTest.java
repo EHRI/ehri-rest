@@ -9,8 +9,8 @@ import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.frames.FramedGraphFactory;
-import eu.ehri.project.core.impl.BasicGraphManager;
-import eu.ehri.project.core.impl.SingleIndexGraphManager;
+import eu.ehri.project.core.impl.BlueprintsGraphManager;
+import eu.ehri.project.core.impl.Neo4jGraphManager;
 import eu.ehri.project.exceptions.IndexNotFoundException;
 import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
@@ -44,12 +44,12 @@ public class GraphManagerTest {
 
     @Test
     public void testBasicGraphManager() throws Throwable {
-        new Suite(BasicGraphManager.class).run();
+        new Suite(BlueprintsGraphManager.class).run();
     }
 
     @Test
     public void testSingleIndexGraphManager() throws Throwable {
-        new Suite(SingleIndexGraphManager.class).run();
+        new Suite(Neo4jGraphManager.class).run();
     }
 
     /**
