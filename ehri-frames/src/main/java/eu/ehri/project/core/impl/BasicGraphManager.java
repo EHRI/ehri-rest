@@ -34,16 +34,13 @@ public final class BasicGraphManager<T extends IndexableGraph> implements GraphM
         return graph;
     }
 
-    /**
-     * Cast one frame to another.
-     */
     public <T extends Frame> T cast(Frame frame, Class<T> cls) {
         return graph.frame(frame.asVertex(), cls);
     }
 
-    public BasicGraphManager(FramedGraph<?> graph) {
+    public BasicGraphManager(FramedGraph<T> graph) {
         // Accept a warning here about the unsafe cast.
-        this.graph = (FramedGraph<T>) graph;
+        this.graph = graph;
     }
 
     // Access functions
@@ -141,11 +138,10 @@ public final class BasicGraphManager<T extends IndexableGraph> implements GraphM
         for (String id : ids) {
             verts.add(getVertex(id));
         }
-        return new WrappingCloseableIterable(verts);
+        return new WrappingCloseableIterable<Vertex>(verts);
     }
 
-    public CloseableIterable<Vertex> getVertices(String key, Object value,
-            final EntityClass type) {
+    public CloseableIterable<Vertex> getVertices(String key, Object value, final EntityClass type) {
         // NB: This is rather annoying.
         CloseableIterable<Vertex> query = getIndex().get(key, value);
         List<Vertex> elems = Lists.newArrayList();

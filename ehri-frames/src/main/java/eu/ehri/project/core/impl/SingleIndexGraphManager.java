@@ -162,12 +162,11 @@ public final class SingleIndexGraphManager implements GraphManager {
         return new WrappingCloseableIterable<Vertex>(verts);
     }
 
-    @SuppressWarnings("unchecked")
-    public CloseableIterable<Neo4jVertex> getVertices(String key, Object value,
+    public CloseableIterable<Vertex> getVertices(String key, Object value,
             EntityClass type) {
         String queryStr = getLuceneQuery(key, value, type.getName());
         IndexHits<Node> rawQuery = getRawIndex().query(queryStr);
-        return new Neo4jVertexIterable<Vertex>(rawQuery, graph.getBaseGraph(),
+        return (CloseableIterable<Vertex>)new Neo4jVertexIterable(rawQuery, graph.getBaseGraph(),
                 false);
     }
 

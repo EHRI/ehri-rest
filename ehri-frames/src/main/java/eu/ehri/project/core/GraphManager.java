@@ -123,7 +123,7 @@ public interface GraphManager {
      * @param type
      * @return
      */
-    public <T extends Vertex> CloseableIterable<T> getVertices(String key,
+    public CloseableIterable<Vertex> getVertices(String key,
             Object value, EntityClass type);
 
     /**
