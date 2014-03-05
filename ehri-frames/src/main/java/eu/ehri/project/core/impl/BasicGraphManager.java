@@ -20,9 +20,8 @@ import java.util.NoSuchElementException;
 
 /**
  * Implementation of GraphManager that uses a single index to manage all nodes.
- * 
+ *
  * @author mike
- * 
  */
 public final class BasicGraphManager<T extends IndexableGraph> implements GraphManager {
 
@@ -44,7 +43,7 @@ public final class BasicGraphManager<T extends IndexableGraph> implements GraphM
 
     public BasicGraphManager(FramedGraph<?> graph) {
         // Accept a warning here about the unsafe cast.
-        this.graph = (FramedGraph<T>)graph;
+        this.graph = (FramedGraph<T>) graph;
     }
 
     // Access functions
@@ -218,9 +217,9 @@ public final class BasicGraphManager<T extends IndexableGraph> implements GraphM
      * first. Blueprints' removeVertex() method does that; the Neo4jServer
      * DELETE URI does not.
      *
-     * @param id
-     *            The vertex identifier
+     * @param id The vertex identifier
      * @throws eu.ehri.project.exceptions.ItemNotFound
+     *
      */
     public void deleteVertex(String id) throws ItemNotFound {
         deleteVertex(getVertex(id));
@@ -230,9 +229,8 @@ public final class BasicGraphManager<T extends IndexableGraph> implements GraphM
      * Delete vertex with its edges Neo4j requires you delete all adjacent edges
      * first. Blueprints' removeVertex() method does that; the Neo4jServer
      * DELETE URI does not.
-     * 
-     * @param vertex
-     *            The vertex
+     *
+     * @param vertex The vertex
      */
     public void deleteVertex(Vertex vertex) {
         Index<Vertex> index = getIndex();
@@ -244,13 +242,10 @@ public final class BasicGraphManager<T extends IndexableGraph> implements GraphM
 
     /**
      * Replace properties to a property container like vertex and edge
-     * 
-     * @param index
-     *            The index of the container
-     * @param item
-     *            The container Edge or Vertex of type <code>T</code>
-     * @param data
-     *            The properties
+     *
+     * @param index The index of the container
+     * @param item  The container Edge or Vertex of type <code>T</code>
+     * @param data  The properties
      */
     private <T extends Element> void replaceProperties(Index<T> index, T item,
             Map<String, ?> data, Collection<String> keys) {
@@ -271,13 +266,10 @@ public final class BasicGraphManager<T extends IndexableGraph> implements GraphM
 
     /**
      * Add properties to a property container like vertex and edge
-     * 
-     * @param index
-     *            The index of the container
-     * @param item
-     *            The container Edge or Vertex of type <code>T</code>
-     * @param data
-     *            The properties
+     *
+     * @param index The index of the container
+     * @param item  The container Edge or Vertex of type <code>T</code>
+     * @param data  The properties
      */
     private <T extends Element> void addProperties(Index<T> index, T item,
             Map<String, ?> data, Collection<String> keys) {
