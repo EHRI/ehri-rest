@@ -46,9 +46,6 @@ public final class SingleIndexGraphManager<T extends Neo4jGraph> implements Grap
         this.graph = graph;
     }
 
-    /**
-     * Cast one frame to another.
-     */
     public <T extends Frame> T cast(Frame frame, Class<T> cls) {
         return graph.frame(frame.asVertex(), cls);
     }
@@ -59,19 +56,9 @@ public final class SingleIndexGraphManager<T extends Neo4jGraph> implements Grap
         return vertex.getProperty(EntityType.ID_KEY);
     }
 
-    public String getId(Frame frame) {
-        Preconditions.checkNotNull(frame);
-        return getId(frame.asVertex());
-    }
-
     public String getType(Vertex vertex) {
         Preconditions.checkNotNull(vertex);
         return vertex.getProperty(EntityType.TYPE_KEY);
-    }
-
-    public String getType(Frame frame) {
-        Preconditions.checkNotNull(frame);
-        return frame.getType();
     }
 
     public EntityClass getEntityClass(Vertex vertex) {
@@ -88,14 +75,6 @@ public final class SingleIndexGraphManager<T extends Neo4jGraph> implements Grap
         Preconditions.checkNotNull(id,
                 "attempt determine existence of a vertex with a null id");
         return getIndex().count(EntityType.ID_KEY, id) > 0L;
-    }
-
-    public boolean propertyValueExists(String key, Object value) {
-        Preconditions.checkNotNull(key,
-                "attempt determine existence of a property value with a null name");
-        Preconditions.checkNotNull(value,
-                "attempt determine existence of a property given a null value");
-        return getIndex().count(key, String.valueOf(value)) > 0L;
     }
 
     public <T> T getFrame(String id, Class<T> cls) throws ItemNotFound {

@@ -28,19 +28,9 @@ public interface GraphManager {
     public String getId(Vertex vertex);
 
     /**
-     * Get the id of a given vertex frame.
-     */
-    public String getId(Frame frame);
-
-    /**
      * Get the id of a given vertex.
      */
     public String getType(Vertex vertex);
-
-    /**
-     * Get the id of a given vertex frame.
-     */
-    public String getType(Frame frame);
 
     /**
      * Get the type of an arbitrary vertex.
@@ -56,11 +46,6 @@ public interface GraphManager {
      * Check if a node with the given ID exists or not.
      */
     public boolean exists(String id);
-
-    /**
-     * Check if a node has a property with a given value.
-     */
-    public boolean propertyValueExists(String key, Object value);
 
     /**
      * Get a node with the given ID.

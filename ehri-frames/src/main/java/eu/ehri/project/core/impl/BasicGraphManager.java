@@ -39,7 +39,6 @@ public final class BasicGraphManager<T extends IndexableGraph> implements GraphM
     }
 
     public BasicGraphManager(FramedGraph<T> graph) {
-        // Accept a warning here about the unsafe cast.
         this.graph = graph;
     }
 
@@ -48,16 +47,8 @@ public final class BasicGraphManager<T extends IndexableGraph> implements GraphM
         return vertex.getProperty(EntityType.ID_KEY);
     }
 
-    public String getId(Frame frame) {
-        return getId(frame.asVertex());
-    }
-
     public String getType(Vertex vertex) {
         return vertex.getProperty(EntityType.TYPE_KEY);
-    }
-
-    public String getType(Frame frame) {
-        return frame.getType();
     }
 
     public EntityClass getEntityClass(Vertex vertex) {
@@ -74,14 +65,6 @@ public final class BasicGraphManager<T extends IndexableGraph> implements GraphM
         Preconditions.checkNotNull(id,
                 "attempt determine existence of a vertex with a null id");
         return getIndex().count(EntityType.ID_KEY, id) > 0L;
-    }
-
-    public boolean propertyValueExists(String key, Object value) {
-        Preconditions.checkNotNull(key,
-                "attempt determine existence of a property value with a null name");
-        Preconditions.checkNotNull(value,
-                "attempt determine existence of a property given a null value");
-        return getIndex().count(key, String.valueOf(value)) > 0L;
     }
 
     public <T> T getFrame(String id, Class<T> cls) throws ItemNotFound {
