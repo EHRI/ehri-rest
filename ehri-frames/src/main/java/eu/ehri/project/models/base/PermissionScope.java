@@ -21,10 +21,22 @@ public interface PermissionScope extends IdentifiableEntity {
     @JavaHandler
     public Iterable<PermissionScope> getPermissionScopes();
 
+    @Adjacency(label = Ontology.HAS_PERMISSION_SCOPE, direction = Direction.IN)
+    public Iterable<Frame> getContainedItems();
+
+    @JavaHandler
+    public Iterable<Frame> getAllContainedItems();
+
     @JavaHandler
     public Iterable<String> idPath();
 
     abstract class Impl implements JavaHandlerContext<Vertex>, PermissionScope {
+        public Iterable<Frame> getAllContainedItems() {
+            return frameVertices(gremlin().as("n")
+                    .in(Ontology.HAS_PERMISSION_SCOPE)
+                    .loop("n", JavaHandlerUtils.noopLoopFunc, JavaHandlerUtils.noopLoopFunc));
+        }
+
         public Iterable<PermissionScope> getPermissionScopes() {
             return frameVertices(gremlin().as("n")
                     .out(Ontology.HAS_PERMISSION_SCOPE)

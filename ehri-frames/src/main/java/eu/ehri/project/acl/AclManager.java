@@ -133,48 +133,33 @@ public final class AclManager {
     /**
      * Revoke an accessor's access to an entity.
      *
-     * @param entity
-     * @param accessor
+     * @param entity The item
+     * @param accessor A user/group from whom to revoke access
      */
     public void removeAccessControl(AccessibleEntity entity, Accessor accessor) {
-        for (Accessor acc : entity.getAccessors()) {
-            if (acc.equals(accessor)) {
-                entity.removeAccessor(accessor);
-            }
-        }
+        entity.removeAccessor(accessor);
     }
 
     /**
      * Set access control on an entity to several accessors.
      *
-     * @param entity
-     * @param accessors
+     * @param entity The item
+     * @param accessors A set of users/groups who can access the item
      */
     public void setAccessors(AccessibleEntity entity,
                              Iterable<Accessor> accessors) {
-        // FIXME: Must be a more efficient way to do this, whilst
-        // ensuring that superfluous double relationships don't get created?
-        Set<Vertex> accessorVertices = Sets.newHashSet();
-        for (Accessor acc : accessors) {
-            accessorVertices.add(acc.asVertex());
-        }
-
-        Set<Vertex> existing = Sets.newHashSet();
-        Set<Vertex> remove = Sets.newHashSet();
+        Set<Accessor> accessorVertices = Sets.newHashSet(accessors);
+        Set<Accessor> remove = Sets.newHashSet();
         for (Accessor accessor : entity.getAccessors()) {
-            Vertex v = accessor.asVertex();
-            existing.add(v);
-            if (!accessorVertices.contains(v)) {
-                remove.add(v);
+            if (!accessorVertices.contains(accessor)) {
+                remove.add(accessor);
             }
         }
-        for (Vertex v : remove) {
-            entity.removeAccessor(graph.frame(v, Accessor.class));
+        for (Accessor accessor : remove) {
+            entity.removeAccessor(accessor);
         }
         for (Accessor accessor : accessors) {
-            if (!existing.contains(accessor.asVertex())) {
-                entity.addAccessor(accessor);
-            }
+            entity.addAccessor(accessor);
         }
     }
 
