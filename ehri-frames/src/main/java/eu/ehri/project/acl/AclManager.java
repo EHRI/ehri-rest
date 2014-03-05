@@ -28,7 +28,7 @@ public final class AclManager {
     private final FramedGraph<?> graph;
     private final GraphManager manager;
     private final PermissionScope scope;
-    private final HashSet<Vertex> scopes;
+    private final HashSet<PermissionScope> scopes;
 
     // Lookups to convert between the enum and node representations
     // of content and permission types.
@@ -44,7 +44,8 @@ public final class AclManager {
     /**
      * Scoped constructor.
      *
-     * @param graph
+     * @param graph The framed graph
+     * @param scope The ACL scope
      */
     public AclManager(FramedGraph<?> graph, PermissionScope scope) {
         this.graph = graph;
@@ -58,7 +59,7 @@ public final class AclManager {
     /**
      * Constructor.
      *
-     * @param graph
+     * @param graph The framed graph
      */
     public AclManager(FramedGraph<?> graph) {
         this(graph, SystemScope.getInstance());
@@ -67,7 +68,7 @@ public final class AclManager {
     /**
      * Check if an accessor is admin or a member of Admin.
      *
-     * @param accessor
+     * @param accessor The user/group
      * @return User belongs to the admin group
      */
     public boolean belongsToAdmin(Accessor accessor) {
@@ -85,7 +86,7 @@ public final class AclManager {
     /**
      * Check if an accessor is admin or a member of Admin.
      *
-     * @param accessor
+     * @param accessor The user/group
      * @return User is an anonymous accessor
      */
     public boolean isAnonymous(Accessor accessor) {
@@ -96,13 +97,13 @@ public final class AclManager {
     }
 
     /**
-     * Find the access permissions for a given accessor and entity.
+     * Determine if a user can access an entity.
      *
-     * @param entity
-     * @param accessor
+     * @param entity The item
+     * @param accessor  The user/group
      * @return Whether or not the given accessor can access the entity
      */
-    public boolean getAccessControl(AccessibleEntity entity, Accessor accessor) {
+    public boolean canAccess(AccessibleEntity entity, Accessor accessor) {
         Preconditions.checkNotNull(entity, "Entity is null");
         Preconditions.checkNotNull(accessor, "Accessor is null");
         // Admin can read/write everything and object can always read/write
@@ -183,19 +184,19 @@ public final class AclManager {
     /**
      * Set the permissions for a particular user on the given item.
      *
-     * @param accessor
-     * @param item
-     * @param permissionList
+     * @param accessor The user/group
+     * @param item The item
+     * @param permissionSet A set of permissions
      * @throws PermissionDenied
      */
     public void setEntityPermissions(Accessor accessor, AccessibleEntity item,
-                                     Set<PermissionType> permissionList) throws PermissionDenied {
+                                     Set<PermissionType> permissionSet) throws PermissionDenied {
         checkNoGrantOnAdminOrAnon(accessor);
         for (PermissionType t : PermissionType.values()) {
-            if (permissionList.contains(t)) {
-                grantPermissions(accessor, item, t);
+            if (permissionSet.contains(t)) {
+                grantPermission(accessor, item, t);
             } else {
-                revokePermissions(accessor, item, t);
+                revokePermission(accessor, item, t);
             }
         }
     }
@@ -203,7 +204,7 @@ public final class AclManager {
     /**
      * Return a permission list for the given accessor and her inherited groups.
      *
-     * @param accessor
+     * @param accessor The user/group
      * @return List of permission maps for the given accessor and his group
      *         parents.
      */
@@ -226,7 +227,7 @@ public final class AclManager {
      * Recursive helper function to ascend an accessor's groups and populate
      * their global permissions.
      *
-     * @param accessor
+     * @param accessor The user/group
      * @return Permission map for the given accessor
      */
     public GlobalPermissionSet getGlobalPermissions(Accessor accessor) {
@@ -238,26 +239,38 @@ public final class AclManager {
     /**
      * Set a matrix of global permissions for a given accessor.
      *
-     * @param accessor
+     * @param accessor The user/group
+     * @param globals  global permission map
+     * @throws PermissionDenied
+     */
+    public void setPermissionMatrix(Accessor accessor, GlobalPermissionSet globals)
+            throws PermissionDenied {
+        setPermissionMatrix(accessor, globals.asMap());
+    }
+
+    /**
+     * Set a matrix of global permissions for a given accessor.
+     *
+     * @param accessor The user/group
      * @param globals  global permission map
      * @throws PermissionDenied
      */
     public void setPermissionMatrix(Accessor accessor,
-                                    Map<ContentTypes, List<PermissionType>> globals)
+                                    Map<ContentTypes, Collection<PermissionType>> globals)
             throws PermissionDenied {
         checkNoGrantOnAdminOrAnon(accessor);
 
         for (Entry<ContentTypes, ContentType> centry : enumContentTypeMap.entrySet()) {
             ContentType target = centry.getValue();
-            List<PermissionType> pset = globals.get(centry.getKey());
+            Collection<PermissionType> pset = globals.get(centry.getKey());
             if (pset == null) {
                 continue;
             }
             for (PermissionType perm : PermissionType.values()) {
                 if (pset.contains(perm)) {
-                    grantPermissions(accessor, target, perm);
+                    grantPermission(accessor, target, perm);
                 } else {
-                    revokePermissions(accessor, target, perm);
+                    revokePermission(accessor, target, perm);
                 }
             }
         }
@@ -266,12 +279,13 @@ public final class AclManager {
     /**
      * Grant a user permissions to a content type.
      *
-     * @param accessor
-     * @param permType
+     * @param accessor The user/group
+     * @param target The grant target (content type or item)
+     * @param permType The permission type
      * @return The permission grant given for this accessor and target
      */
-    public PermissionGrant grantPermissions(Accessor accessor,
-                                            PermissionGrantTarget target, PermissionType permType) {
+    public PermissionGrant grantPermission(Accessor accessor,
+            PermissionGrantTarget target, PermissionType permType) {
         assertNoGrantOnAdminOrAnon(accessor);
         // If we can find an existing grant, use that, otherwise create a new
         // one.
@@ -297,13 +311,14 @@ public final class AclManager {
     }
 
     /**
-     * Revoke a particular permission grant.
+     * Revoke a particular permission on the given entity.
      *
-     * @param accessor
-     * @param permType
+     * @param accessor The user/group
+     * @param entity The item
+     * @param permType The permission type
      */
-    public void revokePermissions(Accessor accessor, AccessibleEntity entity,
-                                  PermissionType permType) {
+    public void revokePermission(Accessor accessor, AccessibleEntity entity,
+            PermissionType permType) {
 
         Optional<PermissionGrant> maybeGrant = findPermission(accessor, entity,
                 permType);
@@ -315,7 +330,7 @@ public final class AclManager {
     /**
      * Revoke a particular permission grant.
      *
-     * @param grant
+     * @param grant The grant to revoke
      */
     public void revokePermissionGrant(PermissionGrant grant) {
         manager.deleteVertex(grant.asVertex());
@@ -336,10 +351,7 @@ public final class AclManager {
         return new PipeFunction<Vertex, Boolean>() {
             public Boolean compute(Vertex v) {
                 Preconditions.checkNotNull(v);
-                if (v == null) {
-                    return false;
-                }
-                return typeStrings.contains(manager.getType(v));
+                return v != null && typeStrings.contains(manager.getType(v));
             }
         };
     }
@@ -348,7 +360,7 @@ public final class AclManager {
      * Build a gremlin filter function that passes through items readable by a
      * given accessor.
      *
-     * @param accessor
+     * @param accessor The user/group
      * @return A PipeFunction for filtering a set of vertices as the given user
      */
     public PipeFunction<Vertex, Boolean> getAclFilterFunction(Accessor accessor) {
@@ -388,7 +400,7 @@ public final class AclManager {
      * @param contentType    The content type
      * @param permissionType The requested permission
      * @param accessor       The user
-     * @return
+     * @return If the user has permission on the given content type within the current scope
      */
     public boolean hasPermission(ContentTypes contentType, PermissionType permissionType, Accessor accessor) {
         return hasPermission(contentType, permissionType, accessor, scopes);
@@ -400,15 +412,15 @@ public final class AclManager {
      * @param entity         The item
      * @param permissionType The requested permission
      * @param accessor       The user
-     * @return
+     * @return If the user has the permission on the given item
      */
     public boolean hasPermission(AccessibleEntity entity, PermissionType permissionType, Accessor accessor) {
 
         // Get a list of our current context scopes, plus
         // the parent scopes of the item.
-        Set<Vertex> allScopes = Sets.newHashSet(scopes);
+        Set<PermissionScope> allScopes = Sets.newHashSet(scopes);
         for (PermissionScope scope : entity.getPermissionScopes()) {
-            allScopes.add(scope.asVertex());
+            allScopes.add(scope);
         }
 
         // Check if the user has content type permissions on this item, using
@@ -427,8 +439,8 @@ public final class AclManager {
     /**
      * Set scope.
      *
-     * @param scope
-     * @return
+     * @param scope The new permission scope
+     * @return A new ACL Manager
      */
     public AclManager withScope(PermissionScope scope) {
         return new AclManager(graph, scope);
@@ -437,7 +449,7 @@ public final class AclManager {
     /**
      * Get scope.
      *
-     * @return
+     * @return The permission scope.
      */
     public PermissionScope getScope() {
         return scope;
@@ -446,14 +458,14 @@ public final class AclManager {
     /**
      * Check for a content permission with a given set of scopes.
      *
-     * @param contentType
-     * @param permissionType
-     * @param accessor
-     * @param scopes
-     * @return
+     * @param contentType The content type
+     * @param permissionType The permission type
+     * @param accessor The user/group
+     * @param scopes The item scopes
+     * @return Whether or not the user has permission
      */
     private boolean hasPermission(ContentTypes contentType, PermissionType permissionType, Accessor accessor,
-                                  Collection<Vertex> scopes) {
+                                  Collection<PermissionScope> scopes) {
 
         ContentType contentTypeNode = enumContentTypeMap.get(contentType);
         // Check the user themselves...
@@ -464,14 +476,14 @@ public final class AclManager {
     /**
      * Attempt to find a permission, searching the accessor's parent hierarchy.
      *
-     * @param target
-     * @param permissionType
-     * @param accessor
-     * @param scopes
-     * @return
+     * @param target A target permission grant
+     * @param permissionType The permission type
+     * @param accessor The user/group
+     * @param scopes A set of parent scopes
+     * @return Whether or not the grant was found
      */
     private boolean hasScopedPermission(PermissionGrantTarget target, PermissionType permissionType, Accessor accessor,
-                                        Collection<Vertex> scopes) {
+                                        Collection<PermissionScope> scopes) {
 
         for (PermissionGrant grant : accessor.getPermissionGrants()) {
             PermissionType grantPermissionType = enumForPermission(grant.getPermission());
@@ -488,7 +500,7 @@ public final class AclManager {
                 }
 
                 // Now check the scope - if there is none we're good.
-                if (grant.getScope() == null || scopes.contains(grant.getScope().asVertex())) {
+                if (grant.getScope() == null || scopes.contains(grant.getScope())) {
                     return true;
                 }
             }
@@ -507,9 +519,6 @@ public final class AclManager {
 
     /**
      * Get the permission type enum for a given node.
-     *
-     * @param perm
-     * @return
      */
     private Permission vertexForPermission(PermissionType perm) {
         return enumPermissionMap.get(perm);
@@ -517,9 +526,6 @@ public final class AclManager {
 
     /**
      * Get the permission type enum for a given node.
-     *
-     * @param perm
-     * @return
      */
     private PermissionType enumForPermission(Frame perm) {
         return permissionEnumMap.get(perm.asVertex());
@@ -529,7 +535,7 @@ public final class AclManager {
      * Get a list of global permissions for a given accessor. Returns a map of
      * content types against the grant permissions.
      *
-     * @param accessor
+     * @param accessor The user/group
      * @return List of permission names for the given accessor on the given
      *         target
      */
@@ -544,12 +550,9 @@ public final class AclManager {
             // permissions are granted. For most items it will contain zero
             // entries and thus be pretty fast, but for deeply nested
             // documentary units there might be quite a few.
-            HashSet<Vertex> scopes = Sets.newHashSet();
-            for (PermissionScope scope : entity.getPermissionScopes())
-                scopes.add(scope.asVertex());
+            HashSet<PermissionScope> scopes = Sets.newHashSet(entity.getPermissionScopes());
 
-            PermissionGrantTarget target = graph.frame(entity.asVertex(),
-                    PermissionGrantTarget.class);
+            PermissionGrantTarget target = manager.cast(entity, PermissionGrantTarget.class);
 
             for (PermissionGrant grant : accessor.getPermissionGrants()) {
                 if (Iterables.contains(grant.getTargets(), target)) {
@@ -557,7 +560,7 @@ public final class AclManager {
                 } else if (grant.getScope() != null && hasContentTypeTargets(grant)) {
                     // If there isn't a direct grant to the entity, search its
                     // parent scopes for an appropriate scoped permission
-                    if (scopes.contains(grant.getScope().asVertex())) {
+                    if (scopes.contains(grant.getScope())) {
                         list.add(enumForPermission(grant.getPermission()));
                     }
                 }
@@ -569,15 +572,10 @@ public final class AclManager {
     /**
      * Attempt to locate an existing grant with the same accessor, entity, and
      * permission, within the given scope.
-     *
-     * @param accessor
-     * @param entity
-     * @param permType
-     * @return
      */
     private Optional<PermissionGrant> findPermission(Accessor accessor,
                                                      PermissionGrantTarget entity, PermissionType permType) {
-        PermissionGrantTarget target = graph.frame(entity.asVertex(),
+        PermissionGrantTarget target = manager.cast(entity,
                 PermissionGrantTarget.class);
 
         Permission perm = enumPermissionMap.get(permType);
@@ -651,10 +649,12 @@ public final class AclManager {
 
     /**
      * For a given user, fetch a lookup of all the inherited accessors it
-     * belongs to.
+     * belongs to. NB: This returns a lookup of raw Vertices because it's
+     * used by the a Gremlin filter function, which likewise operates
+     * directly on vertices.
      *
-     * @param accessor
-     * @return
+     * @param accessor The user/group
+     * @return A lookup of accessor vertices
      */
     private HashSet<Vertex> getAllAccessors(Accessor accessor) {
 
@@ -670,23 +670,24 @@ public final class AclManager {
     }
 
     /**
-     * @param accessor
-     * @return
+     * Fetch a user's global permission set.
+     *
+     * @param accessor The user/group
+     * @return A global permission set for the given user.
      */
-    private GlobalPermissionSet getAccessorPermissions(
-            Accessor accessor) {
-        Multimap<ContentTypes, PermissionType> permmap = HashMultimap.create();
+    private GlobalPermissionSet getAccessorPermissions(Accessor accessor) {
+        GlobalPermissionSet.Builder builder = GlobalPermissionSet.newBuilder();
         for (PermissionGrant grant : accessor.getPermissionGrants()) {
             // Since these are global perms only include those where the target
             // is a content type. FIXME: if it has been deleted, the target
             // could well be null.
             PermissionScope scope = grant.getScope();
-            if (scope == null || scopes.contains(scope.asVertex())) {
+            if (scope == null || scopes.contains(scope)) {
                 for (PermissionGrantTarget target : grant.getTargets()) {
                     if (manager.getEntityClass(target).equals(EntityClass.CONTENT_TYPE)) {
                         Permission permission = grant.getPermission();
                         if (permission != null) {
-                            permmap.put(
+                            builder.set(
                                     contentTypeEnumMap.get(target.asVertex()),
                                     permissionEnumMap.get(permission.asVertex()));
                         }
@@ -694,26 +695,25 @@ public final class AclManager {
                 }
             }
         }
-        return new GlobalPermissionSet(permmap);
+        return builder.build();
     }
 
     /**
      * Get the data structure for admin permissions, which is basically all
      * available permissions turned on.
      *
-     * @return
+     * @return A global permission set for the admin user.
      */
     private GlobalPermissionSet getAdminPermissions() {
-        Multimap<ContentTypes, PermissionType> perms = HashMultimap.create();
+        GlobalPermissionSet.Builder builder = GlobalPermissionSet.newBuilder();
         for (ContentTypes ct : ContentTypes.values()) {
-            perms.putAll(ct, Arrays.asList(PermissionType.values()));
+            builder.set(ct, PermissionType.values());
         }
-        return new GlobalPermissionSet(perms);
+        return builder.build();
     }
 
     /**
-     * Pipe filter function that passes through all items. TODO: Check if we
-     * actually need this???
+     * Pipe filter function that passes through all items.
      *
      * @return A no-op PipeFunction for filtering a list of vertices as an admin
      *         user
@@ -744,14 +744,11 @@ public final class AclManager {
     }
 
     // Get a list of the current scope and its parents
-    private HashSet<Vertex> getAllScopes() {
-        HashSet<Vertex> all = Sets.newHashSet();
-        for (PermissionScope s : scope.getPermissionScopes()) {
-            all.add(s.asVertex());
-        }
+    private HashSet<PermissionScope> getAllScopes() {
+        HashSet<PermissionScope> all = Sets.newHashSet(scope.getPermissionScopes());
         // Maybe remove systemscope completely...???
         if (!scope.equals(SystemScope.getInstance())) {
-            all.add(scope.asVertex());
+            all.add(scope);
         }
         return all;
     }
@@ -766,14 +763,11 @@ public final class AclManager {
         return isSystemScope()
                 && grant.getScope() == null
                 || (grant.getScope() != null && Iterables.contains(scopes,
-                grant.getScope().asVertex()));
+                grant.getScope()));
     }
 
     /**
      * Get the content type with the given id.
-     *
-     * @param type
-     * @return
      */
     private ContentTypes getContentType(EntityClass type) {
         try {

@@ -4,23 +4,24 @@ package eu.ehri.project.acl;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
-/**
- * Created with IntelliJ IDEA.
- * User: mike
- * Date: 30/05/13
- * Time: 20:06
- * To change this template use File | Settings | File Templates.
- */
 public class GlobalPermissionSetTest {
 
     @Test
     public void testEquals() throws Exception {
-        GlobalPermissionSet a = new GlobalPermissionSet();
-        GlobalPermissionSet b = new GlobalPermissionSet();
+        GlobalPermissionSet.Builder a = GlobalPermissionSet.newBuilder();
+        GlobalPermissionSet.Builder b = GlobalPermissionSet.newBuilder();
 
-        a.setContentType(ContentTypes.COUNTRY, PermissionType.CREATE, PermissionType.UPDATE);
-        b.setContentType(ContentTypes.COUNTRY, PermissionType.UPDATE, PermissionType.CREATE);
-        assertEquals(a, b);
+        a.set(ContentTypes.COUNTRY, PermissionType.CREATE, PermissionType.UPDATE);
+        b.set(ContentTypes.COUNTRY, PermissionType.UPDATE, PermissionType.CREATE);
+        GlobalPermissionSet setA = a.build();
+        GlobalPermissionSet setB = b.build();
+        // Test ordering doesn't matter
+        assertEquals(setA, setB);
+        assertTrue(setA.has(ContentTypes.COUNTRY, PermissionType.CREATE));
+        assertTrue(setA.has(ContentTypes.COUNTRY, PermissionType.UPDATE));
+        assertFalse(setA.has(ContentTypes.COUNTRY, PermissionType.DELETE));
     }
 }

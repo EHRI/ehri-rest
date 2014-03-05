@@ -82,7 +82,7 @@ public final class ViewHelper {
      */
     public void checkReadAccess(AccessibleEntity entity, Accessor user)
             throws AccessDenied {
-        if (!acl.getAccessControl(entity, user)) {
+        if (!acl.canAccess(entity, user)) {
             // Using 'fake' permission 'read'
             throw new AccessDenied(user.getId(), entity.getId());
         }
