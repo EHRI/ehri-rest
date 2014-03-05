@@ -4,6 +4,9 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.tinkerpop.blueprints.*;
+import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
+import com.tinkerpop.blueprints.impls.neo4j.Neo4jVertex;
+import com.tinkerpop.blueprints.impls.neo4j.Neo4jVertexIterable;
 import com.tinkerpop.blueprints.util.WrappingCloseableIterable;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.core.GraphManager;
@@ -12,6 +15,10 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.Frame;
+import org.apache.lucene.queryParser.QueryParser;
+import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.index.IndexHits;
+import org.neo4j.graphdb.index.IndexManager;
 
 import java.util.Collection;
 import java.util.List;
@@ -19,11 +26,12 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 
 /**
- * Implementation of GraphManager that uses a single index to manage all nodes.
+ * Implementation of GraphManager that uses a single index to manage all nodes,
+ * with Neo4j Lucene query optimisations.
  *
- * @author mike
+ * @author Mike Bryant (http://github.com/mikesname)
  */
-public final class BasicGraphManager<T extends IndexableGraph> implements GraphManager {
+public final class Neo4jGraphManager<T extends Neo4jGraph> implements GraphManager {
 
     private static final String INDEX_NAME = "entities";
     private static final String METADATA_PREFIX = "_";
@@ -34,20 +42,21 @@ public final class BasicGraphManager<T extends IndexableGraph> implements GraphM
         return graph;
     }
 
+    public Neo4jGraphManager(FramedGraph<T> graph) {
+        this.graph = graph;
+    }
+
     public <T extends Frame> T cast(Frame frame, Class<T> cls) {
         return graph.frame(frame.asVertex(), cls);
     }
 
-    public BasicGraphManager(FramedGraph<T> graph) {
-        this.graph = graph;
-    }
-
-    // Access functions
     public String getId(Vertex vertex) {
+        Preconditions.checkNotNull(vertex);
         return vertex.getProperty(EntityType.ID_KEY);
     }
 
     public String getType(Vertex vertex) {
+        Preconditions.checkNotNull(vertex);
         return vertex.getProperty(EntityType.TYPE_KEY);
     }
 
@@ -79,8 +88,7 @@ public final class BasicGraphManager<T extends IndexableGraph> implements GraphM
     public <T> CloseableIterable<T> getFrames(EntityClass type, Class<T> cls) {
         CloseableIterable<Vertex> vertices = getVertices(type);
         try {
-            return new WrappingCloseableIterable<T>(
-                    graph.frameVertices(getVertices(type), cls));
+            return new WrappingCloseableIterable<T>(graph.frameVertices(getVertices(type), cls));
         } finally {
             vertices.close();
         }
@@ -102,14 +110,22 @@ public final class BasicGraphManager<T extends IndexableGraph> implements GraphM
     public Vertex getVertex(String id, EntityClass type) throws ItemNotFound {
         Preconditions
                 .checkNotNull(id, "attempt to fetch vertex with a null id");
-        for (Vertex v : graph.getVertices(EntityType.ID_KEY, id)) {
-            if (getEntityClass(v).equals(type))
-                return v;
+        String queryStr = getLuceneQuery(EntityType.ID_KEY, id, type.getName());
+        IndexHits<Node> rawQuery = getRawIndex().query(queryStr);
+        // NB: Not using rawQuery.getSingle here so we throw NoSuchElement
+        // other than return null.
+        try {
+            return new Neo4jVertex(rawQuery.iterator().next(),
+                    graph.getBaseGraph());
+        } catch (NoSuchElementException e) {
+            throw new ItemNotFound(id);
+        } finally {
+            rawQuery.close();
         }
-        throw new ItemNotFound(id);
     }
 
     public CloseableIterable<Vertex> getVertices(EntityClass type) {
+        Preconditions.checkNotNull(type, "EntityClass is null in vertex/type count!");
         return getIndex().get(EntityType.TYPE_KEY, type.getName());
     }
 
@@ -124,20 +140,12 @@ public final class BasicGraphManager<T extends IndexableGraph> implements GraphM
         return new WrappingCloseableIterable<Vertex>(verts);
     }
 
-    public CloseableIterable<Vertex> getVertices(String key, Object value, final EntityClass type) {
-        // NB: This is rather annoying.
-        CloseableIterable<Vertex> query = getIndex().get(key, value);
-        List<Vertex> elems = Lists.newArrayList();
-        try {
-            for (Vertex v : query) {
-                if (getEntityClass(v).equals(type)) {
-                    elems.add(v);
-                }
-            }
-        } finally {
-            query.close();
-        }
-        return new WrappingCloseableIterable<Vertex>(elems);
+    public CloseableIterable<Vertex> getVertices(String key, Object value,
+            EntityClass type) {
+        String queryStr = getLuceneQuery(key, value, type.getName());
+        IndexHits<Node> rawQuery = getRawIndex().query(queryStr);
+        return (CloseableIterable<Vertex>)new Neo4jVertexIterable(rawQuery,
+                graph.getBaseGraph(), false);
     }
 
     public Vertex createVertex(String id, EntityClass type,
@@ -183,6 +191,7 @@ public final class BasicGraphManager<T extends IndexableGraph> implements GraphM
                 Vertex node = get.iterator().next();
                 replaceProperties(index, node, indexData, indexKeys);
                 return node;
+
             } catch (NoSuchElementException e) {
                 throw new ItemNotFound(id);
             }
@@ -191,26 +200,10 @@ public final class BasicGraphManager<T extends IndexableGraph> implements GraphM
         }
     }
 
-    /**
-     * Delete vertex with its edges Neo4j requires you delete all adjacent edges
-     * first. Blueprints' removeVertex() method does that; the Neo4jServer
-     * DELETE URI does not.
-     *
-     * @param id The vertex identifier
-     * @throws eu.ehri.project.exceptions.ItemNotFound
-     *
-     */
     public void deleteVertex(String id) throws ItemNotFound {
         deleteVertex(getVertex(id));
     }
 
-    /**
-     * Delete vertex with its edges Neo4j requires you delete all adjacent edges
-     * first. Blueprints' removeVertex() method does that; the Neo4jServer
-     * DELETE URI does not.
-     *
-     * @param vertex The vertex
-     */
     public void deleteVertex(Vertex vertex) {
         Index<Vertex> index = getIndex();
         for (String key : vertex.getPropertyKeys()) {
@@ -219,13 +212,6 @@ public final class BasicGraphManager<T extends IndexableGraph> implements GraphM
         vertex.remove();
     }
 
-    /**
-     * Replace properties to a property container like vertex and edge
-     *
-     * @param index The index of the container
-     * @param item  The container Edge or Vertex of type <code>T</code>
-     * @param data  The properties
-     */
     private <T extends Element> void replaceProperties(Index<T> index, T item,
             Map<String, ?> data, Collection<String> keys) {
         // remove 'old' properties
@@ -243,13 +229,6 @@ public final class BasicGraphManager<T extends IndexableGraph> implements GraphM
         addProperties(index, item, data, keys);
     }
 
-    /**
-     * Add properties to a property container like vertex and edge
-     *
-     * @param index The index of the container
-     * @param item  The container Edge or Vertex of type <code>T</code>
-     * @param data  The properties
-     */
     private <T extends Element> void addProperties(Index<T> index, T item,
             Map<String, ?> data, Collection<String> keys) {
         Preconditions.checkNotNull(data, "Data map cannot be null");
@@ -285,6 +264,11 @@ public final class BasicGraphManager<T extends IndexableGraph> implements GraphM
         return vkeys;
     }
 
+    private org.neo4j.graphdb.index.Index<Node> getRawIndex() {
+        IndexManager index = graph.getBaseGraph().getRawGraph().index();
+        return index.forNodes(INDEX_NAME);
+    }
+
     private Index<Vertex> getIndex() {
         Index<Vertex> index = graph.getBaseGraph().getIndex(INDEX_NAME,
                 Vertex.class);
@@ -292,5 +276,13 @@ public final class BasicGraphManager<T extends IndexableGraph> implements GraphM
             index = graph.getBaseGraph().createIndex(INDEX_NAME, Vertex.class);
         }
         return index;
+    }
+
+    private String getLuceneQuery(String key, Object value, String type) {
+        return String.format("%s:\"%s\" AND %s:\"%s\"",
+                QueryParser.escape(key),
+                QueryParser.escape(String.valueOf(value)),
+                QueryParser.escape(EntityType.TYPE_KEY),
+                QueryParser.escape(type));
     }
 }
