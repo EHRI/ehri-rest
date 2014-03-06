@@ -68,6 +68,22 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
     }
 
     @Test
+    public void testCreateDeleteChildDocumentaryUnit() throws Exception {
+        // Create
+        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
+                ehriUri(Entities.DOCUMENTARY_UNIT, FIRST_DOC_ID, Entities.DOCUMENTARY_UNIT))
+                .entity(jsonDocumentaryUnitTestStr).post(ClientResponse.class);
+
+        assertStatus(CREATED, response);
+
+        // Get created doc via the response location?
+        URI location = response.getLocation();
+        response = jsonCallAs(getAdminUserProfileId(), location)
+                .get(ClientResponse.class);
+        assertStatus(OK, response);
+    }
+
+    @Test
     public void testIntegrityError() throws Exception {
         // Create
         ClientResponse response = jsonCallAs(getAdminUserProfileId(), getCreationUri())
@@ -116,7 +132,7 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
     public void testGetDocumentaryUnitByIdentifier() throws Exception {
         // Create
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                ehriUri("documentaryUnit", TEST_JSON_IDENTIFIER))
+                ehriUri(Entities.DOCUMENTARY_UNIT, TEST_JSON_IDENTIFIER))
                 .get(ClientResponse.class);
 
         assertStatus(OK, response);
@@ -135,7 +151,7 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
         // Update doc unit c1 with the test json values, which should change
         // its identifier to some-id
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                ehriUri("documentaryUnit", TEST_JSON_IDENTIFIER))
+                ehriUri(Entities.DOCUMENTARY_UNIT, TEST_JSON_IDENTIFIER))
                 .entity(jsonDocumentaryUnitTestStr)
                 .put(ClientResponse.class);
 
@@ -208,7 +224,7 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
                 .withDataValue("name", UPDATED_NAME).toJson();
 
         // -update
-        resource = client.resource(ehriUri("documentaryUnit"));
+        resource = client.resource(ehriUri(Entities.DOCUMENTARY_UNIT));
         response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
@@ -257,7 +273,7 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
                 .type(MediaType.APPLICATION_JSON)
                 .header(AbstractRestResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId())
-                .header(AbstractRestResource.PATCH_HEADER_NAME, "true")
+                .header(AbstractRestResource.PATCH_HEADER_NAME, Boolean.TRUE.toString())
                 .entity(toUpdateJson)
                 .put(ClientResponse.class);
         assertStatus(OK, response);
@@ -274,8 +290,8 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
         // -get the data and convert to a bundle, is it OK?
         String updatedJson = response.getEntity(String.class);
         Bundle updatedEntityBundle = Bundle.fromString(updatedJson);
-        assertEquals(CREATED_ID, updatedEntityBundle.getDataValue("identifier"));
-        assertEquals(PARTIAL_NAME, updatedEntityBundle.getDataValue("name"));
+        assertEquals(CREATED_ID, updatedEntityBundle.getDataValue(Ontology.IDENTIFIER_KEY));
+        assertEquals(PARTIAL_NAME, updatedEntityBundle.getDataValue(Ontology.NAME_KEY));
     }
 
     private URI getCreationUri() {
