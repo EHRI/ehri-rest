@@ -3,6 +3,9 @@ package eu.ehri.project.acl;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.tinkerpop.blueprints.Vertex;
+import com.tinkerpop.gremlin.java.GremlinPipeline;
+import com.tinkerpop.pipes.PipeFunction;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.*;
 import eu.ehri.project.models.base.Accessor;
@@ -177,8 +180,50 @@ public class AclManagerTest extends GraphTestBase {
         DocumentaryUnit c4 = manager.getFrame("c4", DocumentaryUnit.class);
 
         assertFalse(acl.hasPermission(c4, OWNER, user));
-        acl.grantPermission(user, c4, OWNER);
+        PermissionGrant grant = acl.grantPermission(user, c4, OWNER);
         assertTrue(acl.hasPermission(c4, OWNER, user));
+
+        // Try granting the same permission twice and ensure the
+        // returned grant is the same instance as before...
+        PermissionGrant grant2 = acl.grantPermission(user, c4, OWNER);
+        assertEquals(grant, grant2);
+    }
+
+    @Test
+    public void testContentTypeFilterFunction() throws Exception {
+        loader.loadTestData();
+        AclManager acl = new AclManager(graph);
+
+        Vertex c1 = manager.getVertex("c1");
+        Vertex r1 = manager.getVertex("r1");
+        // cd1 is not a content type
+        Vertex cd1 = manager.getVertex("cd1");
+        List<Vertex> frames = Lists.newArrayList(c1, r1, cd1);
+
+        GremlinPipeline<Vertex, Vertex> pipeline = new GremlinPipeline<Vertex, Vertex>(frames);
+        List<Vertex> filtered = pipeline
+                .filter(acl.getContentTypeFilterFunction()).toList();
+        assertEquals(2L, filtered.size());
+        assertFalse(filtered.contains(cd1));
+    }
+
+    @Test
+    public void testGetAclFilterFunction() throws Exception {
+        loader.loadTestData();
+        AclManager acl = new AclManager(graph);
+
+        UserProfile user = manager.getFrame("reto", UserProfile.class);
+
+        Annotation ann3v = manager.getFrame("ann3", Annotation.class); // hidden from user
+        Annotation ann4v = manager.getFrame("ann4", Annotation.class); // promoted, thus visible
+        assertFalse(acl.canAccess(ann3v, user));
+        assertTrue(acl.canAccess(ann4v, user));
+
+        PipeFunction<Vertex,Boolean> aclFilter = acl.getAclFilterFunction(user);
+        List<Vertex> filtered = new GremlinPipeline<Vertex,Vertex>(
+                Lists.newArrayList(ann3v.asVertex(), ann4v.asVertex())).filter(aclFilter).toList();
+        assertEquals(1L, filtered.size());
+        assertFalse(filtered.contains(ann3v.asVertex()));
     }
 
     @Test
