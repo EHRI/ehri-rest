@@ -9,7 +9,7 @@ import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.utils.EmptyIterable;
 
 /**
- * Implementation of an anonymous user.
+ * Implementation of an anonymous user singleton.
  * 
  * @author michaelb
  *
@@ -30,7 +30,7 @@ public enum AnonymousAccessor implements Accessor {
 
     /**
      * Obtain the shared instance of the Anonymous Accessor.
-     * @return
+     * There Can Be Only One.
      */
     public static Accessor getInstance() {
         return INSTANCE;
@@ -58,10 +58,6 @@ public enum AnonymousAccessor implements Accessor {
 
     public Iterable<Accessor> getAllParents() {
         return new EmptyIterable<Accessor>();
-    }
-
-    public Iterable<AccessibleEntity> getAccessibleEntities() {
-        return new EmptyIterable<AccessibleEntity>();
     }
 
     public Iterable<PermissionGrant> getPermissionGrants() {

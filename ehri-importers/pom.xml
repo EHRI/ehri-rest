@@ -1,52 +1,50 @@
 <?xml version="1.0"?>
 <project
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<modelVersion>4.0.0</modelVersion>
-	<parent>
-		<artifactId>ehri-data</artifactId>
-		<groupId>ehri-project</groupId>
-		<version>1.0</version>
-	</parent>
-	<artifactId>ehri-importers</artifactId>
-	<name>ehri-importers</name>
-        <version>1.1</version>
-	<url>http://maven.apache.org</url>
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-	</properties>
-	<build>
-		<plugins>
-			<plugin>
-				<!-- MB: Skip import tests unless the LOC website is back up! EAD validation 
-					fails while DTD is unavailable. -->
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.12.3</version>
-				<configuration>
-					<excludes>
-					</excludes>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
-	<dependencies>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>ehri-project</groupId>
-			<artifactId>ehri-frames</artifactId>
-			<version>0.1-SNAPSHOT</version>
-			<exclusions>
-				<exclusion>
-					<artifactId>log4j</artifactId>
-					<groupId>log4j</groupId>
-				</exclusion>
-			</exclusions>
-		</dependency>
+        xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+        xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <artifactId>ehri-data</artifactId>
+        <groupId>ehri-project</groupId>
+        <version>1.0</version>
+    </parent>
+    <artifactId>ehri-importers</artifactId>
+    <name>ehri-importers</name>
+    <version>1.1</version>
+    <url>http://maven.apache.org</url>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.16</version>
+                <configuration>
+                    <excludes>
+                    </excludes>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>ehri-project</groupId>
+            <artifactId>ehri-frames</artifactId>
+            <version>0.1-SNAPSHOT</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>log4j</artifactId>
+                    <groupId>log4j</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
 
         <dependency>
             <groupId>ehri-project</groupId>
@@ -60,22 +58,22 @@
             </exclusions>
         </dependency>
 
-		<dependency>
-			<groupId>ehri-project</groupId>
-			<artifactId>ehri-frames</artifactId>
-			<version>0.1-SNAPSHOT</version>
-			<scope>test</scope>
-			<type>test-jar</type>
-		</dependency>
+        <dependency>
+            <groupId>ehri-project</groupId>
+            <artifactId>ehri-frames</artifactId>
+            <version>0.1-SNAPSHOT</version>
+            <scope>test</scope>
+            <type>test-jar</type>
+        </dependency>
 
-		<dependency>
-			<groupId>org.neo4j</groupId>
-			<artifactId>neo4j-kernel</artifactId>
-			<version>${neo4j-version}</version>
-			<type>test-jar</type>
-			<classifier>tests</classifier>
-			<scope>test</scope>
-		</dependency>
+        <dependency>
+            <groupId>org.neo4j</groupId>
+            <artifactId>neo4j-kernel</artifactId>
+            <version>${neo4j-version}</version>
+            <type>test-jar</type>
+            <classifier>tests</classifier>
+            <scope>test</scope>
+        </dependency>
 
         <dependency>
             <groupId>com.tinkerpop</groupId>
@@ -83,15 +81,15 @@
             <version>${frames-version}</version>
             <scope>compile</scope>
         </dependency>
-		<dependency>
-			<groupId>com.tinkerpop.blueprints</groupId>
-			<artifactId>blueprints-neo4j-graph</artifactId>
-			<version>${tinkerpop-version}</version>
-			<exclusions>
-				<exclusion>
-					<artifactId>log4j</artifactId>
-					<groupId>log4j</groupId>
-				</exclusion>
+        <dependency>
+            <groupId>com.tinkerpop.blueprints</groupId>
+            <artifactId>blueprints-neo4j-graph</artifactId>
+            <version>${tinkerpop-version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>log4j</artifactId>
+                    <groupId>log4j</groupId>
+                </exclusion>
                 <exclusion>
                     <artifactId>org.neo4j</artifactId>
                     <groupId>neo4j-ha</groupId>
@@ -101,26 +99,26 @@
                     <groupId>neo4j-management</groupId>
                 </exclusion>
                 <exclusion>
-                	<artifactId>neo4j-ha</artifactId>
-                	<groupId>org.neo4j</groupId>
+                    <artifactId>neo4j-ha</artifactId>
+                    <groupId>org.neo4j</groupId>
                 </exclusion>
                 <exclusion>
-                	<artifactId>neo4j-management</artifactId>
-                	<groupId>org.neo4j</groupId>
+                    <artifactId>neo4j-management</artifactId>
+                    <groupId>org.neo4j</groupId>
                 </exclusion>
-			</exclusions>
-		</dependency>
-
-		<!-- logging -->
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<version>1.7.2</version>
+            </exclusions>
         </dependency>
-		<dependency>
-			<groupId>ch.qos.logback</groupId>
-			<artifactId>logback-classic</artifactId>
-			<version>1.0.0</version>
+
+        <!-- logging -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.2</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.0.0</version>
         </dependency>
 
         <!-- OpenCSV -->
@@ -129,7 +127,7 @@
             <artifactId>opencsv</artifactId>
             <version>2.3</version>
         </dependency>
-	</dependencies>
+    </dependencies>
     <repositories>
         <repository>
             <id>sonatype-nexus-snapshots</id>

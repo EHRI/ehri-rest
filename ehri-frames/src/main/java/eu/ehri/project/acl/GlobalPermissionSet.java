@@ -1,6 +1,7 @@
 package eu.ehri.project.acl;
 
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import org.codehaus.jackson.annotate.JsonCreator;
@@ -69,6 +70,14 @@ public final class GlobalPermissionSet {
 
     public static GlobalPermissionSet from(Multimap<ContentTypes,PermissionType>  permissionMatrix) {
         return new GlobalPermissionSet(permissionMatrix);
+    }
+
+    public static GlobalPermissionSet from(Map<ContentTypes,Collection<PermissionType>>  permissionMatrix) {
+        Multimap<ContentTypes,PermissionType> multimap = HashMultimap.create();
+        for (Map.Entry<ContentTypes,Collection<PermissionType>> entry : permissionMatrix.entrySet()) {
+            multimap.putAll(entry.getKey(), entry.getValue());
+        }
+        return from(multimap);
     }
 
     public boolean has(ContentTypes contentTypes, PermissionType permissionType) {

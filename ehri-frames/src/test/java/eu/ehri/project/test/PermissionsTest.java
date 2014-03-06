@@ -1,9 +1,6 @@
 package eu.ehri.project.test;
 
-import eu.ehri.project.acl.AclManager;
-import eu.ehri.project.acl.ContentTypes;
-import eu.ehri.project.acl.PermissionType;
-import eu.ehri.project.acl.SystemScope;
+import eu.ehri.project.acl.*;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.DocumentaryUnit;
@@ -32,7 +29,6 @@ public class PermissionsTest extends AbstractFixtureTest {
     private AclManager acl;
     private ViewHelper viewHelper;
 
-    @SuppressWarnings("unchecked")
     @Before
     public void createTestUser() throws ValidationError, IntegrityError,
             ItemNotFound {
@@ -233,21 +229,14 @@ public class PermissionsTest extends AbstractFixtureTest {
         fail();
     }
 
-    @SuppressWarnings("serial")
     @Test
     public void testSetPermissionMatrix() throws PermissionDenied,
             ValidationError, DeserializationError, IntegrityError,
             SerializationError, ItemNotFound {
 
-        // @formatter:off
-        Map<ContentTypes,Collection<PermissionType>> matrix = new HashMap<ContentTypes,
-                Collection<PermissionType>>() {{
-            put(ContentTypes.DOCUMENTARY_UNIT, new LinkedList<PermissionType>() {{
-                add(PermissionType.CREATE);
-                add(PermissionType.DELETE);
-            }});
-        }};
-        // @formatter:on
+        GlobalPermissionSet matrix = GlobalPermissionSet.newBuilder()
+                .set(ContentTypes.DOCUMENTARY_UNIT, PermissionType.CREATE, PermissionType.DELETE)
+                .build();
 
         try {
             views.create(Bundle.fromData(TestData.getTestDocBundle()), user);
@@ -261,22 +250,15 @@ public class PermissionsTest extends AbstractFixtureTest {
         }
     }
 
-    @SuppressWarnings("serial")
     @Test
     public void testSetScopedPermissionMatrix() throws PermissionDenied,
             ValidationError, DeserializationError, IntegrityError,
             SerializationError, ItemNotFound {
         Repository scope = manager.getFrame("r1", Repository.class);
 
-        // @formatter:off
-        Map<ContentTypes,Collection<PermissionType>> matrix = new HashMap<ContentTypes,
-                Collection<PermissionType>>() {{
-            put(ContentTypes.DOCUMENTARY_UNIT, new LinkedList<PermissionType>() {{
-                add(PermissionType.CREATE);
-                add(PermissionType.DELETE);
-            }});
-        }};
-        // @formatter:on
+        GlobalPermissionSet matrix = GlobalPermissionSet.newBuilder()
+                .set(ContentTypes.DOCUMENTARY_UNIT, PermissionType.CREATE, PermissionType.DELETE)
+                .build();
 
         try {
             views.setScope(scope)

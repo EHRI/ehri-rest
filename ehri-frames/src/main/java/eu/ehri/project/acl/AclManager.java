@@ -245,24 +245,13 @@ public final class AclManager {
      */
     public void setPermissionMatrix(Accessor accessor, GlobalPermissionSet globals)
             throws PermissionDenied {
-        setPermissionMatrix(accessor, globals.asMap());
-    }
 
-    /**
-     * Set a matrix of global permissions for a given accessor.
-     *
-     * @param accessor The user/group
-     * @param globals  global permission map
-     * @throws PermissionDenied
-     */
-    public void setPermissionMatrix(Accessor accessor,
-                                    Map<ContentTypes, Collection<PermissionType>> globals)
-            throws PermissionDenied {
         checkNoGrantOnAdminOrAnon(accessor);
+        Map<ContentTypes, Collection<PermissionType>> globalsMap = globals.asMap();
 
         for (Entry<ContentTypes, ContentType> centry : enumContentTypeMap.entrySet()) {
             ContentType target = centry.getValue();
-            Collection<PermissionType> pset = globals.get(centry.getKey());
+            Collection<PermissionType> pset = globalsMap.get(centry.getKey());
             if (pset == null) {
                 continue;
             }
