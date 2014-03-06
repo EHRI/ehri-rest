@@ -3,7 +3,6 @@ package eu.ehri.extension.test;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import eu.ehri.extension.AbstractRestResource;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import javax.ws.rs.core.MediaType;
@@ -12,11 +11,6 @@ import static com.sun.jersey.api.client.ClientResponse.Status.CREATED;
 import static com.sun.jersey.api.client.ClientResponse.Status.OK;
 
 public class AnnotationRestClientTest extends BaseRestClientTest {
-
-    @BeforeClass
-    public static void setUpBeforeClass() throws Exception {
-        initializeTestDb(AnnotationRestClientTest.class.getName());
-    }
 
     @Test
     public void testGetAnnotations() throws Exception {

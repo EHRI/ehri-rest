@@ -7,7 +7,6 @@ import eu.ehri.project.persistence.Bundle;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import javax.ws.rs.core.Response;
@@ -23,11 +22,6 @@ public class DescriptionRestClientTest extends BaseRestClientTest {
     private String accessPointTestStr;
     static final String TEST_DESCRIPTION_IDENTIFIER = "another-description";
     // FIXME: This ID is temporaty and will break when we decide on a proper
-
-    @BeforeClass
-    public static void setUpBeforeClass() throws Exception {
-        initializeTestDb(DescriptionRestClientTest.class.getName());
-    }
 
     @Before
     public void setUp() throws Exception {

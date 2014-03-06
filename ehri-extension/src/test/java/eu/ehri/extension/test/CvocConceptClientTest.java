@@ -7,7 +7,6 @@ import eu.ehri.project.definitions.Entities;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import javax.ws.rs.core.MediaType;
@@ -25,11 +24,6 @@ public class CvocConceptClientTest extends BaseRestClientTest {
     static final String TEST_CVOC_CONCEPT_ID = "cvocc1";
 
     private String jsonApplesTestStr;
-
-    @BeforeClass
-    public static void setUpBeforeClass() throws Exception {
-        initializeTestDb(CvocConceptClientTest.class.getName());
-    }
 
     @Before
     public void setUp() throws Exception {

@@ -11,7 +11,6 @@ import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -37,11 +36,6 @@ public class PermissionRestClientTest extends BaseRestClientTest {
     private String jsonDocumentaryUnitTestStr;
     private final JsonFactory factory = new JsonFactory();
     private final ObjectMapper mapper = new ObjectMapper(factory);
-
-    @BeforeClass
-    public static void setUpBeforeClass() throws Exception {
-        initializeTestDb(PermissionRestClientTest.class.getName());
-    }
 
     @Before
     public void setUp() throws Exception {
