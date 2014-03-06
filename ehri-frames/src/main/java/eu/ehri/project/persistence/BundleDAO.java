@@ -1,7 +1,8 @@
 package eu.ehri.project.persistence;
 
-import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Sets;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
@@ -38,8 +39,8 @@ public final class BundleDAO {
     /**
      * Constructor with a given scope.
      *
-     * @param graph
-     * @param scopeIds
+     * @param graph The graph
+     * @param scopeIds The ID set for the current scope.
      */
     public BundleDAO(FramedGraph<?> graph, Iterable<String> scopeIds) {
         this.graph = graph;
@@ -51,7 +52,7 @@ public final class BundleDAO {
     /**
      * Constructor with system scope.
      *
-     * @param graph
+     * @param graph The graph
      */
     public BundleDAO(FramedGraph<?> graph) {
         this(graph, Lists.<String>newArrayList());
@@ -60,8 +61,9 @@ public final class BundleDAO {
     /**
      * Entry-point for updating a bundle.
      *
-     * @param bundle
-     * @return
+     * @param bundle The bundle to create or update
+     * @param cls The frame class of the return type
+     * @return A framed vertex mutation
      * @throws ValidationError
      * @throws ItemNotFound
      */
@@ -76,8 +78,9 @@ public final class BundleDAO {
     /**
      * Entry-point for creating a bundle.
      *
-     * @param bundle
-     * @return
+     * @param bundle The bundle to create or update
+     * @param cls The frame class of the return type
+     * @return A framed vertex
      * @throws ValidationError
      */
     public <T extends Frame> T create(Bundle bundle, Class<T> cls)
@@ -89,8 +92,9 @@ public final class BundleDAO {
     /**
      * Entry point for creating or updating a bundle, depending on whether it has a supplied id.
      *
-     * @param bundle
-     * @return
+     * @param bundle The bundle to create or update
+     * @param cls The frame class of the return type
+     * @return A frame mutation
      * @throws ValidationError
      */
     public <T extends Frame> Mutation<T> createOrUpdate(Bundle bundle, Class<T> cls)
@@ -104,8 +108,8 @@ public final class BundleDAO {
     /**
      * Delete a bundle and dependent items, returning the total number of vertices deleted.
      *
-     * @param bundle
-     * @return
+     * @param bundle The bundle to delete
+     * @return The number of vertices deleted
      */
     public Integer delete(Bundle bundle) {
         try {
@@ -130,8 +134,8 @@ public final class BundleDAO {
      * Insert or update an item depending on a) whether it has an ID, and b) whether it has an ID and already exists. If
      * import mode is not enabled an error will be thrown.
      *
-     * @param bundle
-     * @return
+     * @param bundle The bundle to create or update
+     * @return A vertex mutation
      * @throws RuntimeException when an item is said to exist, but could not be found
      */
     private Mutation<Vertex> createOrUpdateInner(Bundle bundle) {
@@ -172,8 +176,8 @@ public final class BundleDAO {
     /**
      * Update a bundle and save its dependent items.
      *
-     * @param bundle
-     * @return
+     * @param bundle The bundle to update
+     * @return A vertex mutation
      * @throws ItemNotFound
      */
     private Mutation<Vertex> updateInner(Bundle bundle) throws ItemNotFound {
@@ -199,14 +203,13 @@ public final class BundleDAO {
     /**
      * Saves the dependent relations within a given bundle. Relations that are not dependent are ignored.
      *
-     * @param master
-     * @param cls
-     * @param relations
-     * @return errors
+     * @param master The master vertex
+     * @param cls The master vertex class
+     * @param relations A map of relations
      * @throws IntegrityError
      */
     private void createDependents(Vertex master,
-            Class<?> cls, ListMultimap<String, Bundle> relations)
+            Class<?> cls, Multimap<String, Bundle> relations)
             throws IntegrityError {
         Map<String, Direction> dependents = ClassUtils
                 .getDependentRelations(cls);
@@ -227,13 +230,12 @@ public final class BundleDAO {
     /**
      * Saves the dependent relations within a given bundle. Relations that are not dependent are ignored.
      *
-     * @param master
-     * @param cls
-     * @param relations
-     * @return errors
+     * @param master The master vertex
+     * @param cls The master vertex class
+     * @param relations A map of relations
      * @throws ItemNotFound
      */
-    private void updateDependents(Vertex master, Class<?> cls, ListMultimap<String,
+    private void updateDependents(Vertex master, Class<?> cls, Multimap<String,
             Bundle> relations) throws ItemNotFound {
 
         // Get a list of dependent relationships for this class, and their
@@ -255,8 +257,8 @@ public final class BundleDAO {
                 // relationship. This is *should* be safe, but could easily
                 // break if the model ontology is altered without this
                 // assumption in mind.
-                HashSet<Vertex> currentRels = getCurrentRelationships(master,
-                        direction, relation);
+                Set<Vertex> currentRels = getCurrentRelationships(master,
+                        relation, direction);
 
                 for (Bundle bundle : relations.get(relation)) {
                     Vertex child = createOrUpdateInner(bundle).getNode();
@@ -274,7 +276,7 @@ public final class BundleDAO {
         }
     }
 
-    private Set<String> getUpdateSet(ListMultimap<String, Bundle> relations) {
+    private Set<String> getUpdateSet(Multimap<String, Bundle> relations) {
         Set<String> updating = new HashSet<String>();
         for (String relation : relations.keySet()) {
             for (Bundle child : relations.get(relation)) {
@@ -288,7 +290,7 @@ public final class BundleDAO {
             Map<String, Direction> dependents, Set<String> updating) {
         for (Entry<String, Direction> relEntry : dependents.entrySet()) {
             for (Vertex v : getCurrentRelationships(master,
-                    relEntry.getValue(), relEntry.getKey())) {
+                    relEntry.getKey(), relEntry.getValue())) {
                 if (!updating.contains(manager.getId(v))) {
                     try {
                         delete(serializer.vertexFrameToBundle(graph.frame(v,
@@ -302,16 +304,17 @@ public final class BundleDAO {
     }
 
     /**
-     * Get the IDs of nodes that terminate a given relationship from a particular source node.
+     * Get the nodes that terminate a given relationship from a particular source node.
      *
-     * @param src
-     * @param direction
-     * @param label
-     * @return
+     *
+     * @param src The source vertex
+     * @param label The relationship label
+     * @param direction The relationship direction
+     * @return A set of related nodes
      */
-    private HashSet<Vertex> getCurrentRelationships(final Vertex src,
-            Direction direction, String label) {
-        HashSet<Vertex> out = new HashSet<Vertex>();
+    private Set<Vertex> getCurrentRelationships(final Vertex src,
+            String label, Direction direction) {
+        HashSet<Vertex> out = Sets.newHashSet();
         for (Vertex end : src.getVertices(direction, label)) {
             out.add(end);
         }
@@ -319,12 +322,12 @@ public final class BundleDAO {
     }
 
     /**
-     * Create a
+     * Create a relationship between a parent and child vertex.
      *
-     * @param master
-     * @param child
-     * @param label
-     * @param direction
+     * @param master The master vertex
+     * @param child The child vertex
+     * @param label The relationship label
+     * @param direction The direction of the relationship
      */
     private void createChildRelationship(Vertex master, Vertex child,
             String label, Direction direction) {

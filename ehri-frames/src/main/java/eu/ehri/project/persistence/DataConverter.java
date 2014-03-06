@@ -4,6 +4,7 @@ import com.google.common.collect.*;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.models.EntityClass;
+import eu.ehri.project.persistence.utils.DataUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.ObjectWriter;
 import org.w3c.dom.Document;
@@ -89,7 +90,7 @@ class DataConverter {
             data.put(Bundle.META_KEY, bundle.getMetaData());
         }
         Map<String, List<Map<String, Object>>> relations = Maps.newHashMap();
-        ListMultimap<String, Bundle> crelations = bundle.getRelations();
+        Multimap<String, Bundle> crelations = bundle.getRelations();
         for (String key : crelations.keySet()) {
             List<Map<String, Object>> rels = Lists.newArrayList();
             for (Bundle subbundle : crelations.get(key)) {
@@ -172,36 +173,31 @@ class DataConverter {
         // at the deserialization stage. I can't think of a use-case
         // where we'd need them.
         Map<String, Object> properties = getSanitisedProperties(data);
-
-        ListMultimap<String, Bundle> relationbundles = getRelationships(data);
-
-        return new Bundle(id, type, properties, relationbundles);
+        return new Bundle(id, type, properties, getRelationships(data));
     }
 
     /**
      * Extract relationships from the bundle data.
      * 
-     * TODO: Should we throw an error if something
-     * 
-     * @param data
-     * @return
+     * @param data A plain map
+     * @return A
      * @throws DeserializationError
      */
-    private static ListMultimap<String, Bundle> getRelationships(Map<?, ?> data)
+    private static Multimap<String, Bundle> getRelationships(Map<?, ?> data)
             throws DeserializationError {
-        ListMultimap<String, Bundle> relationbundles = LinkedListMultimap
+        Multimap<String, Bundle> relationBundles = LinkedListMultimap
                 .create();
 
         // It's okay to pass in a null value for relationships.
         Object relations = data.get(Bundle.REL_KEY);
         if (relations == null)
-            return relationbundles;
+            return relationBundles;
 
         if (relations instanceof Map) {
             for (Entry<?, ?> entry : ((Map<?, ?>) relations).entrySet()) {
                 if (entry.getValue() instanceof List<?>) {
                     for (Object item : (List<?>) entry.getValue()) {
-                        relationbundles.put((String) entry.getKey(),
+                        relationBundles.put((String) entry.getKey(),
                                 dataToBundle(item));
                     }
                 }
@@ -210,7 +206,7 @@ class DataConverter {
             throw new DeserializationError(
                     "Relationships value should be a map type");
         }
-        return relationbundles;
+        return relationBundles;
     }
 
     private static Map<String, Object> getSanitisedProperties(Map<?, ?> data)
@@ -244,34 +240,19 @@ class DataConverter {
     /**
      * Filter null values out of a map.
      * 
-     * @param data
-     * @return
+     * @param data A data map
+     * @return A map with null values removed
      */
     private static Map<String, Object> sanitiseProperties(Map<?, ?> data) {
         Map<String, Object> cleaned = Maps.newHashMap();
         for (Entry<?, ?> entry : data.entrySet()) {
             Object value = entry.getValue();
             // Allow any null value, as long as it's not an empty array
-            if (value != null && !isEmptySequence(value)) {
+            if (value != null && !DataUtils.isEmptySequence(value)) {
                 cleaned.put((String) entry.getKey(), entry.getValue());
             }
         }
         return cleaned;
-    }
-
-    /**
-     * Ensure a value isn't an empty array or list, which will
-     * cause Neo4j to barf.
-     * @param value
-     * @return
-     */
-    private static boolean isEmptySequence(Object value) {
-        if (value instanceof Object[]) {
-            return ((Object[]) value).length == 0;
-        } else if (value instanceof List<?>) {
-            return ((List) value).isEmpty();
-        }
-        return false;
     }
 
     /**

@@ -61,7 +61,7 @@ public final class Bundle {
     public static class Builder {
         private String id = null;
         private final EntityClass type;
-        final ListMultimap<String, Bundle> relations = ArrayListMultimap.create();
+        final Multimap<String, Bundle> relations = ArrayListMultimap.create();
         final Map<String, Object> data = Maps.newHashMap();
         final Map<String, Object> meta = Maps.newHashMap();
 
@@ -74,7 +74,7 @@ public final class Bundle {
             type = cls;
         }
 
-        public Builder addRelations(ListMultimap<String, Bundle> r) {
+        public Builder addRelations(Multimap<String, Bundle> r) {
             relations.putAll(r);
             return this;
         }
@@ -120,7 +120,7 @@ public final class Bundle {
      * @param temp      A marker to indicate the ID has been generated
      */
     private Bundle(String id, EntityClass type, final Map<String, Object> data,
-            final ListMultimap<String, Bundle> relations, final Map<String, Object> meta, boolean temp) {
+            final Multimap<String, Bundle> relations, final Map<String, Object> meta, boolean temp) {
         this.id = id;
         this.type = type;
         this.data = filterData(data);
@@ -138,7 +138,7 @@ public final class Bundle {
      * @param relations An initial set of relations
      */
     public Bundle(String id, EntityClass type, final Map<String, Object> data,
-            final ListMultimap<String, Bundle> relations) {
+            final Multimap<String, Bundle> relations) {
         this(id, type, data, relations, Maps.<String, Object>newHashMap());
     }
 
@@ -152,7 +152,7 @@ public final class Bundle {
      * @param meta      An initial map of metadata
      */
     public Bundle(String id, EntityClass type, final Map<String, Object> data,
-            final ListMultimap<String, Bundle> relations, final Map<String, Object> meta) {
+            final Multimap<String, Bundle> relations, final Map<String, Object> meta) {
         this(id, type, data, relations, meta, false);
     }
 
@@ -164,7 +164,7 @@ public final class Bundle {
      * @param relations An initial set of relations
      */
     public Bundle(EntityClass type, final Map<String, Object> data,
-            final ListMultimap<String, Bundle> relations) {
+            final Multimap<String, Bundle> relations) {
         this(null, type, data, relations, Maps.<String, Object>newHashMap());
     }
 
@@ -328,7 +328,7 @@ public final class Bundle {
      *
      * @return The full set of relations
      */
-    public ListMultimap<String, Bundle> getRelations() {
+    public Multimap<String, Bundle> getRelations() {
         return relations;
     }
 
@@ -338,8 +338,8 @@ public final class Bundle {
      * 
      * @return A multimap of dependent relations.
      */
-    public ListMultimap<String,Bundle> getDependentRelations() {
-        ListMultimap<String, Bundle> dependentRelations = ArrayListMultimap.create();
+    public Multimap<String,Bundle> getDependentRelations() {
+        Multimap<String, Bundle> dependentRelations = ArrayListMultimap.create();
         Map<String, Direction> dependents = ClassUtils
                 .getDependentRelations(type.getEntityClass());
         for (String relation : relations.keySet()) {
@@ -358,7 +358,7 @@ public final class Bundle {
      * @param relations A full set of relations
      * @return The new bundle
      */
-    public Bundle withRelations(ListMultimap<String, Bundle> relations) {
+    public Bundle withRelations(Multimap<String, Bundle> relations) {
         return new Bundle(id, type, data, relations, meta, temp);
     }
 
@@ -380,7 +380,7 @@ public final class Bundle {
      * @return A new bundle
      */
     public Bundle withRelations(String relation, List<Bundle> others) {
-        LinkedListMultimap<String, Bundle> tmp = LinkedListMultimap
+        Multimap<String, Bundle> tmp = LinkedListMultimap
                 .create(relations);
         tmp.putAll(relation, others);
         return new Bundle(id, type, data, tmp, meta, temp);
@@ -394,7 +394,7 @@ public final class Bundle {
      * @return A new bundle
      */
     public Bundle withRelation(String relation, Bundle other) {
-        LinkedListMultimap<String, Bundle> tmp = LinkedListMultimap
+        Multimap<String, Bundle> tmp = LinkedListMultimap
                 .create(relations);
         tmp.put(relation, other);
         return new Bundle(id, type, data, tmp, meta, temp);
@@ -418,7 +418,7 @@ public final class Bundle {
      * @return A new bundle
      */
     public Bundle removeRelation(String relation, Bundle item) {
-        ListMultimap<String, Bundle> tmp = LinkedListMultimap.create(relations);
+        Multimap<String, Bundle> tmp = LinkedListMultimap.create(relations);
         tmp.remove(relation, item);
         return new Bundle(id, type, data, tmp, meta, temp);
     }
@@ -572,7 +572,7 @@ public final class Bundle {
         boolean isTemp = id == null;
         IdGenerator idGen = getType().getIdgen();
         String newId = isTemp ? idGen.generateId(scopes, this) : id;
-        ListMultimap<String, Bundle> idRels = LinkedListMultimap.create();
+        Multimap<String, Bundle> idRels = LinkedListMultimap.create();
         List<String> nextScopes = Lists.newArrayList(scopes);
         nextScopes.add(idGen.getIdBase(this));
         for (Map.Entry<String, Bundle> entry : relations.entries()) {
@@ -634,7 +634,7 @@ public final class Bundle {
     /**
      * Convert the ordered relationship set into an unordered one for comparison.
      */
-    private Map<String, LinkedHashMultiset<Bundle>> unorderedRelations(final ListMultimap<String, Bundle> rels) {
+    private Map<String, LinkedHashMultiset<Bundle>> unorderedRelations(final Multimap<String, Bundle> rels) {
         Map<String, LinkedHashMultiset<Bundle>> map = Maps.newHashMap();
         for (Map.Entry<String, Collection<Bundle>> entry : rels.asMap().entrySet()) {
             map.put(entry.getKey(), LinkedHashMultiset.create(entry.getValue()));
