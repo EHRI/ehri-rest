@@ -409,6 +409,22 @@
   relationships:
     hasAnnotationTarget: c1
     hasAnnotationBody: mike
+    access: mike
+
+# This annotation is was originally
+# private to mike, but marked promotable
+# and subsequently promoted by tim.
+- id: ann4
+  type: annotation
+  data:
+    identifier: ann4
+    body: Created by
+    isPromotable: !!bool true
+  relationships:
+    access: mike
+    hasAnnotationTarget: c1
+    hasAnnotationBody: mike
+    promotedBy: tim
 
 --- # Links
  - id: link1

@@ -106,25 +106,7 @@ public final class AclManager {
     public boolean canAccess(AccessibleEntity entity, Accessor accessor) {
         Preconditions.checkNotNull(entity, "Entity is null");
         Preconditions.checkNotNull(accessor, "Accessor is null");
-        // Admin can read/write everything and object can always read/write
-        // itself
-        // FIXME: Tidy up the logic here.
-        if (belongsToAdmin(accessor)
-                || (!isAnonymous(accessor) && accessor.equals(entity))) {
-            return true;
-        }
-
-        // Otherwise, check if there are specified permissions.
-        List<Accessor> accessors = Lists.newArrayList(entity.getAccessors());
-
-        if (accessors.isEmpty()) {
-            return true;
-        } else if (isAnonymous(accessor)) {
-            return false;
-        } else {
-            List<Accessor> initial = Lists.newArrayList(accessor);
-            return !searchAccess(initial, accessors).isEmpty();
-        }
+        return getAclFilterFunction(accessor).compute(entity.asVertex());
     }
 
     /**
@@ -283,19 +265,14 @@ public final class AclManager {
         if (maybeGrant.isPresent()) {
             return maybeGrant.get();
         } else {
-            try {
-                PermissionGrant grant = createPermissionGrant();
-                accessor.addPermissionGrant(grant);
-                grant.setPermission(vertexForPermission(permType));
-                grant.addTarget(target);
-                if (!scope.equals(SystemScope.getInstance())) {
-                    grant.setScope(scope);
-                }
-                return grant;
-            } catch (Exception e) {
-                e.printStackTrace();
-                throw new RuntimeException(e);
+            PermissionGrant grant = createPermissionGrant();
+            accessor.addPermissionGrant(grant);
+            grant.setPermission(vertexForPermission(permType));
+            grant.addTarget(target);
+            if (!scope.equals(SystemScope.getInstance())) {
+                grant.setScope(scope);
             }
+            return grant;
         }
     }
 
@@ -369,7 +346,7 @@ public final class AclManager {
                     return true;
                 }
                 // If it's promoted it's publically accessible
-                if (v.getEdges(Direction.OUT, Ontology.PROMOTED_BY).iterator().hasNext()) {
+                if (isPromoted(v)) {
                     return true;
                 }
                 // Otherwise, check relevant accessors...
@@ -578,13 +555,19 @@ public final class AclManager {
         return Optional.absent();
     }
 
-    private PermissionGrant createPermissionGrant() throws IntegrityError {
+    private PermissionGrant createPermissionGrant() {
+        try {
         Vertex vertex = manager.createVertex(
                 EntityClass.PERMISSION_GRANT.getIdgen()
                         .generateId(Lists.<String>newArrayList(), null),
                 EntityClass.PERMISSION_GRANT,
                 Maps.<String, Object>newHashMap());
         return graph.frame(vertex, PermissionGrant.class);
+        } catch (IntegrityError e) {
+            e.printStackTrace();
+            throw new RuntimeException("Something very unlikely has occured because two" +
+                    " supposedly-random numbers have collided. Trying again should fix this.");
+        }
     }
 
     private void checkNoGrantOnAdminOrAnon(Accessor accessor)
@@ -604,35 +587,6 @@ public final class AclManager {
         if (accessor.isAdmin() || accessor.isAnonymous()) {
             throw new RuntimeException(
                     "Unable to grant or revoke permissions to system accounts.");
-        }
-    }
-
-    /**
-     * Search the group hierarchy of the given accessors to find an intersection
-     * with those who can access a resource.
-     *
-     * @param accessing The user(s) accessing the resource
-     * @return The accessors in the given list able to access the resource
-     */
-    private List<Accessor> searchAccess(List<Accessor> accessing,
-                                        List<Accessor> allowedAccessors) {
-        if (accessing.isEmpty()) {
-            return Lists.newArrayList();
-        } else {
-            List<Accessor> intersection = Lists.newArrayList();
-            for (Accessor acc : allowedAccessors) {
-                if (accessing.contains(acc)) {
-                    intersection.add(acc);
-                }
-            }
-
-            List<Accessor> parentPerms = Lists.newArrayList(intersection);
-            for (Accessor acc : accessing) {
-                List<Accessor> parents = Lists.newArrayList(acc.getAllParents());
-                parentPerms.addAll(searchAccess(parents, allowedAccessors));
-            }
-
-            return parentPerms;
         }
     }
 
@@ -774,5 +728,9 @@ public final class AclManager {
             }
         }
         return true;
+    }
+
+    private static boolean isPromoted(Vertex v) {
+        return v.getEdges(Direction.OUT, Ontology.PROMOTED_BY).iterator().hasNext();
     }
 }
