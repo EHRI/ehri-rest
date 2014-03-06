@@ -18,6 +18,7 @@
                 <!-- Build an executable JAR -->
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
+                <version>2.4</version>
                 <configuration>
                     <archive>
                         <manifest>
@@ -76,30 +77,30 @@
                     <groupId>log4j</groupId>
                 </exclusion>
                 <exclusion>
-                	<artifactId>neo4j-ha</artifactId>
-                	<groupId>org.neo4j</groupId>
+                    <artifactId>neo4j-ha</artifactId>
+                    <groupId>org.neo4j</groupId>
                 </exclusion>
                 <exclusion>
-                	<artifactId>neo4j-management</artifactId>
-                	<groupId>org.neo4j</groupId>
+                    <artifactId>neo4j-management</artifactId>
+                    <groupId>org.neo4j</groupId>
                 </exclusion>
             </exclusions>
         </dependency>
-<dependency>
-			<groupId>ehri-project</groupId>
-			<artifactId>ehri-frames</artifactId>
-			<version>0.1-SNAPSHOT</version>
-			<scope>test</scope>
-			<type>test-jar</type>
-		</dependency>
-		<dependency>
-			<groupId>org.neo4j</groupId>
-			<artifactId>neo4j-kernel</artifactId>
-			<version>${neo4j-version}</version>
-			<type>test-jar</type>
-			<classifier>tests</classifier>
-			<scope>test</scope>
-		</dependency>
+        <dependency>
+            <groupId>ehri-project</groupId>
+            <artifactId>ehri-frames</artifactId>
+            <version>0.1-SNAPSHOT</version>
+            <scope>test</scope>
+            <type>test-jar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.neo4j</groupId>
+            <artifactId>neo4j-kernel</artifactId>
+            <version>${neo4j-version}</version>
+            <type>test-jar</type>
+            <classifier>tests</classifier>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>ehri-project</groupId>
             <artifactId>ehri-importers</artifactId>
