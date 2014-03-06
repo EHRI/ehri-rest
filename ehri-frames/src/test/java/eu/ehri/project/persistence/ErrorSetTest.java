@@ -1,5 +1,6 @@
 package eu.ehri.project.persistence;
 
+import com.google.common.collect.*;
 import org.junit.Test;
 
 import java.util.List;
@@ -11,12 +12,52 @@ import static org.junit.Assert.*;
  * @author Mike Bryant (http://github.com/mikesname)
  */
 public class ErrorSetTest {
+    @SuppressWarnings("unchecked")
     @Test
     public void testToData() throws Exception {
         ErrorSet es = ErrorSet.fromError("foo", "bad");
         Map<String,Object> esdata = es.toData();
         System.out.println(es.toJson());
         assertEquals("bad", ((Map<String,List<String>>)esdata.get(ErrorSet.ERROR_KEY)).get("foo").get(0));
+    }
+
+    @Test
+    public void testGetErrorValue() {
+        ErrorSet es = ErrorSet.fromError("foo", "bad");
+        assertEquals(Lists.newArrayList("bad"), es.getErrorValue("foo"));
+    }
+
+    @Test
+    public void testWithErrorValue() {
+        ErrorSet es = ErrorSet.fromError("foo", "bad")
+                .withErrorValue("test", "test");
+        assertEquals(Lists.newArrayList("test"), es.getErrorValue("test"));
+    }
+
+    @Test
+    public void testWithRelation() {
+        ErrorSet es1 = ErrorSet.fromError("foo", "bad");
+        ErrorSet es2 = ErrorSet.fromError("bar", "baz");
+        ErrorSet es3 = es1.withRelation("rel", es2);
+        assertEquals(Lists.newArrayList(es2), es3.getRelations("rel"));
+    }
+
+    @Test
+    public void testWithRelations() {
+        ErrorSet es1 = ErrorSet.fromError("foo", "bad");
+        ErrorSet es2 = ErrorSet.fromError("bar", "baz");
+        ImmutableMultimap<String,ErrorSet> rel
+                = ImmutableMap.<String, ErrorSet>of("rel", es2).asMultimap();
+        ErrorSet es3 = es1.withRelations(rel);
+        assertEquals(Lists.newArrayList(es2), es3.getRelations("rel"));
+    }
+
+    @Test
+    public void testWithKeyedRelations() {
+        ErrorSet es1 = ErrorSet.fromError("foo", "bad");
+        ErrorSet es2 = ErrorSet.fromError("bar", "baz");
+        ErrorSet es3 = es1.withRelations("rel", Lists.newArrayList(es2));
+        assertEquals(Lists.newArrayList(es2), es3.getRelations("rel"));
     }
 
     @Test

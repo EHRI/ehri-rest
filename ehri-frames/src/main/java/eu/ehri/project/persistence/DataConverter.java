@@ -1,9 +1,6 @@
 package eu.ehri.project.persistence;
 
-import com.google.common.collect.LinkedListMultimap;
-import com.google.common.collect.ListMultimap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import com.google.common.collect.*;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.models.EntityClass;
@@ -43,7 +40,7 @@ class DataConverter {
         Map<String,Object> data = Maps.newHashMap();
         data.put(ErrorSet.ERROR_KEY, errorSet.getErrors().asMap());
         Map<String, List<Map<String, Object>>> relations = Maps.newHashMap();
-        ListMultimap<String, ErrorSet> crelations = errorSet.getRelations();
+        Multimap<String, ErrorSet> crelations = errorSet.getRelations();
         for (String key : crelations.keySet()) {
             List<Map<String, Object>> rels = Lists.newArrayList();
             for (ErrorSet subbundle : crelations.get(key)) {

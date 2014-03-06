@@ -15,8 +15,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Mike Bryant (http://github.com/mikesname)
  */
 public final class ErrorSet {
-    private final ImmutableListMultimap<String, String> errors;
-    private final ImmutableListMultimap<String, ErrorSet> relations;
+    private final Multimap<String, String> errors;
+    private final Multimap<String, ErrorSet> relations;
 
     /**
      * Serialization constant definitions
@@ -57,8 +57,8 @@ public final class ErrorSet {
     /**
      * Factory constructor.
      *
-     * @param key
-     * @param error
+     * @param key The property key in error
+     * @param error The string description of the property error
      */
     public static ErrorSet fromError(String key, String error) {
         LinkedListMultimap<String, String> tmp = LinkedListMultimap.create();
@@ -69,7 +69,7 @@ public final class ErrorSet {
     /**
      * Constructor.
      *
-     * @param errors
+     * @param errors A map of top-level errors
      */
     public ErrorSet(ListMultimap<String, String> errors) {
         this(errors, ArrayListMultimap.<String, ErrorSet>create());
@@ -78,10 +78,10 @@ public final class ErrorSet {
     /**
      * Constructor.
      *
-     * @param errors
-     * @param relations
+     * @param errors A map of top-level errors
+     * @param relations A map of relations
      */
-    public ErrorSet(ListMultimap<String, String> errors, final ListMultimap<String, ErrorSet> relations) {
+    public ErrorSet(Multimap<String, String> errors, final Multimap<String, ErrorSet> relations) {
         this.errors = ImmutableListMultimap.copyOf(errors);
         this.relations = ImmutableListMultimap.copyOf(relations);
     }
@@ -89,9 +89,10 @@ public final class ErrorSet {
     /**
      * Get errors for a key.
      *
-     * @return
+     * @param key A property key
+     * @return A list of errors associated with a property key
      */
-    public List<String> getErrorValue(String key) {
+    public Collection<String> getErrorValue(String key) {
         checkNotNull(key);
         return errors.get(key);
     }
@@ -99,9 +100,9 @@ public final class ErrorSet {
     /**
      * Set a value in the bundle's data.
      *
-     * @param key
-     * @param err
-     * @return
+     * @param key A property key
+     * @param err A description of the error
+     * @return A new error set
      */
     public ErrorSet withErrorValue(String key, String err) {
         if (err == null) {
@@ -114,59 +115,59 @@ public final class ErrorSet {
     }
 
     /**
-     * Get the errors.
+     * Get the top-level errors.
      *
-     * @return
+     * @return All top-level errors
      */
-    public ListMultimap<String, String> getErrors() {
+    public Multimap<String, String> getErrors() {
         return errors;
     }
 
     /**
      * Set the entire data map for this bundle.
      *
-     * @param errors
-     * @return
+     * @param errors A set of errors
+     * @return A new error set
      */
-    public ErrorSet withErrors(final ListMultimap<String, String> errors) {
+    public ErrorSet withErrors(final Multimap<String, String> errors) {
         return new ErrorSet(errors, relations);
     }
 
     /**
      * Get the bundle's relation bundles.
      *
-     * @return
+     * @return A set of relations
      */
-    public ListMultimap<String, ErrorSet> getRelations() {
+    public Multimap<String, ErrorSet> getRelations() {
         return relations;
     }
 
     /**
      * Set entire set of relations.
      *
-     * @param relations
-     * @return
+     * @param relations A map of relations
+     * @return A new error set
      */
-    public ErrorSet withRelations(ListMultimap<String, ErrorSet> relations) {
+    public ErrorSet withRelations(Multimap<String, ErrorSet> relations) {
         return new ErrorSet(errors, relations);
     }
 
     /**
      * Get a set of relations.
      *
-     * @param relation
-     * @return
+     * @param relation A relation label
+     * @return A new error set
      */
-    public List<ErrorSet> getRelations(String relation) {
+    public Collection<ErrorSet> getRelations(String relation) {
         return relations.get(relation);
     }
 
     /**
      * Set bundles for a particular relation.
      *
-     * @param relation
-     * @param others
-     * @return
+     * @param relation A relation label
+     * @param others A set of relation error sets
+     * @return A new error set
      */
     public ErrorSet withRelations(String relation, List<ErrorSet> others) {
         LinkedListMultimap<String, ErrorSet> tmp = LinkedListMultimap
@@ -178,8 +179,8 @@ public final class ErrorSet {
     /**
      * Add a bundle for a particular relation.
      *
-     * @param relation
-     * @param other
+     * @param relation A relation label
+     * @param other An error set relation
      */
     public ErrorSet withRelation(String relation, ErrorSet other) {
         LinkedListMultimap<String, ErrorSet> tmp = LinkedListMultimap
@@ -189,28 +190,9 @@ public final class ErrorSet {
     }
 
     /**
-     * Check if this bundle contains any relations.
-     *
-     * @return
-     */
-    public boolean hasRelations() {
-        return !relations.isEmpty();
-    }
-
-    /**
-     * Check if this bundle contains the given relation set.
-     *
-     * @param relation
-     * @return
-     */
-    public boolean hasRelations(String relation) {
-        return relations.containsKey(relation);
-    }
-
-    /**
      * Serialize a error set to raw data.
      *
-     * @return
+     * @return A map of data
      */
     public Map<String, Object> toData() {
         return DataConverter.errorSetToData(this);
@@ -241,11 +223,10 @@ public final class ErrorSet {
 
         ErrorSet other = (ErrorSet) o;
 
-        if (!errors.equals(other.errors)) return false;
-        if (!unorderedRelations(relations)
-                .equals(unorderedRelations(other.relations))) return false;
+        return errors.equals(other.errors)
+                && unorderedRelations(relations)
+                    .equals(unorderedRelations(other.relations));
 
-        return true;
     }
 
     @Override
@@ -256,25 +237,10 @@ public final class ErrorSet {
     }
 
     /**
-     * Convert the ordered relationship set into an unordered one for comparison.
-     * FIXME: Clean up the code and optimise this function.
-     *
-     * @param rels
-     * @return
-     */
-    private Map<String, LinkedHashMultiset<ErrorSet>> unorderedRelations(final ListMultimap<String, ErrorSet> rels) {
-        Map<String, LinkedHashMultiset<ErrorSet>> map = Maps.newHashMap();
-        for (Map.Entry<String, Collection<ErrorSet>> entry : rels.asMap().entrySet()) {
-            map.put(entry.getKey(), LinkedHashMultiset.create(entry.getValue()));
-        }
-        return map;
-    }
-
-    /**
      * Is this ErrorSet empty? It will be if there are
      * no errors and none of the relations have errors.
      *
-     * @return
+     * @return Whether or not the set is empty.
      */
     public boolean isEmpty() {
         if (!errors.isEmpty())
@@ -284,5 +250,17 @@ public final class ErrorSet {
                 return false;
         }
         return true;
+    }
+
+    /**
+     * Convert the ordered relationship set into an unordered one for comparison.
+     * FIXME: Clean up the code and optimise this function.
+     */
+    private Map<String, LinkedHashMultiset<ErrorSet>> unorderedRelations(final Multimap<String, ErrorSet> rels) {
+        Map<String, LinkedHashMultiset<ErrorSet>> map = Maps.newHashMap();
+        for (Map.Entry<String, Collection<ErrorSet>> entry : rels.asMap().entrySet()) {
+            map.put(entry.getKey(), LinkedHashMultiset.create(entry.getValue()));
+        }
+        return map;
     }
 }
