@@ -17,7 +17,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -33,15 +32,13 @@ import static org.junit.Assert.*;
 public class AclManagerTest extends GraphTestBase {
 
     private FixtureLoader loader;
-    private GraphInitializer initializer;
 
     @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        initializer = new GraphInitializer(graph);
         loader = FixtureLoaderFactory.getInstance(graph, false); // Initialize separately
-        initializer.initialize();
+        new GraphInitializer(graph).initialize();
     }
 
     @Override
