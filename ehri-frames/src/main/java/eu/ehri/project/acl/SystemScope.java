@@ -7,6 +7,7 @@ import eu.ehri.project.models.PermissionGrant;
 import eu.ehri.project.models.base.Frame;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.utils.EmptyIterable;
+import org.neo4j.helpers.collection.Iterables;
 
 /**
  * Singleton class representing the system scope for
@@ -68,6 +69,6 @@ public enum SystemScope implements PermissionScope {
 
     @Override
     public Iterable<String> idPath() {
-        return Lists.newArrayList();
+        return Iterables.empty();
     }
 }
