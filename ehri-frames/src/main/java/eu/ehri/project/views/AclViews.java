@@ -24,31 +24,31 @@ import java.util.Set;
  */
 public final class AclViews {
 
-    private final FramedGraph<?> graph;
     private final AclManager acl;
     private final ViewHelper helper;
     private final GraphManager manager;
     private final PermissionScope scope;
+    private final ActionManager actionManager;
 
     /**
      * Scoped constructor.
      * 
-     * @param graph
-     * @param scope
+     * @param graph The graph
+     * @param scope The ACL scope
      */
     public AclViews(FramedGraph<?> graph, PermissionScope scope) {
         Preconditions.checkNotNull(scope);
-        this.graph = graph;
         helper = new ViewHelper(graph, scope);
         acl = helper.getAclManager();
         manager = GraphManagerFactory.getInstance(graph);
         this.scope = scope;
+        actionManager = new ActionManager(graph);
     }
 
     /**
      * Constructor with system scope.
      * 
-     * @param graph
+     * @param graph The graph
      */
     public AclViews(FramedGraph<?> graph) {
         this(graph, SystemScope.getInstance());
@@ -56,27 +56,25 @@ public final class AclViews {
 
     /**
      * Set the global permission matrix for a user.
-     * 
      *
-     * @param accessor
-     * @param permissionMap
-     * @param grantee
+     * @param accessor The user
+     * @param permissionSet The new permissions
+     * @param grantee The user/group granting the new permissions
      * @throws PermissionDenied
      */
     public List<Map<String,GlobalPermissionSet>> setGlobalPermissionMatrix(Accessor accessor,
-            Map<ContentTypes, Collection<PermissionType>> permissionMap,
+                                       GlobalPermissionSet permissionSet,
             Accessor grantee) throws PermissionDenied {
-        checkGrantPermission(grantee, permissionMap);
-        acl.setPermissionMatrix(accessor, permissionMap);
+        checkGrantPermission(grantee, permissionSet);
+        acl.setPermissionMatrix(accessor, permissionSet);
         boolean scoped = !scope.equals(SystemScope.INSTANCE);
         // Log the action...
-        ActionManager.EventContext context = new ActionManager(graph).logEvent(
-                graph.frame(accessor.asVertex(), AccessibleEntity.class),
-                graph.frame(grantee.asVertex(), Actioner.class),
+        ActionManager.EventContext context = actionManager.logEvent(
+                manager.cast(accessor, AccessibleEntity.class),
+                manager.cast(grantee, Actioner.class),
                 EventTypes.setGlobalPermissions);
         if (scoped) {
-            context.addSubjects(
-                    graph.frame(scope.asVertex(), AccessibleEntity.class));
+            context.addSubjects(manager.cast(scope, AccessibleEntity.class));
         }
         return acl.getInheritedGlobalPermissions(accessor);
     }
@@ -85,34 +83,32 @@ public final class AclViews {
      * Set accessors for a given resource. If the given accessor set is empty
      * the resource will be globally visible.
      * 
-     * @param entity
-     * @param accessors
-     *            the list of accessors to whom this item is visible
-     * @param user
-     *            the user making the change
+     * @param entity The item
+     * @param accessors The list of users/groups who can access the item
+     * @param user The user making the change
      */
     public void setAccessors(AccessibleEntity entity, Set<Accessor> accessors,
             Accessor user) throws PermissionDenied {
         helper.checkEntityPermission(entity, user, PermissionType.UPDATE);
         acl.setAccessors(entity, accessors);
         // Log the action...
-        new ActionManager(graph).logEvent(
-                graph.frame(entity.asVertex(), AccessibleEntity.class),
-                graph.frame(user.asVertex(), Actioner.class),
-                EventTypes.setVisibility);
+        actionManager.logEvent(
+                entity, manager.cast(user, Actioner.class), EventTypes.setVisibility);
     }
 
     /**
      * Check the accessor has GRANT permissions to update another user's
      * permissions.
      * 
-     * @param accessor
-     * @param permissionMap
+     * @param accessor The user
+     * @param permissionSet The user's permissions.
      * @throws PermissionDenied
      */
     private void checkGrantPermission(Accessor accessor,
-            Map<ContentTypes, Collection<PermissionType>> permissionMap)
+            GlobalPermissionSet permissionSet)
             throws PermissionDenied {
+        Map<ContentTypes, Collection<PermissionType>> permissionMap
+                = permissionSet.asMap();
         // Check we have grant permissions for the requested content types
         if (!acl.belongsToAdmin(accessor)) {
             try {
@@ -136,10 +132,10 @@ public final class AclViews {
     /**
      * Set permissions for the given user on the given item.
      * 
-     * @param item
-     * @param accessor
-     * @param permissionList
-     * @param grantee
+     * @param item The item
+     * @param accessor The accessor
+     * @param permissionList The set of permissions to grant
+     * @param grantee The user doing the granting
      * 
      * @throws PermissionDenied
      */
@@ -149,10 +145,9 @@ public final class AclViews {
         helper.checkEntityPermission(item, grantee, PermissionType.GRANT);
         acl.setEntityPermissions(accessor, item, permissionList);
         // Log the action...
-        new ActionManager(graph).logEvent(item,
-                graph.frame(grantee.asVertex(), Actioner.class),
-                EventTypes.setItemPermissions).addSubjects(
-                graph.frame(accessor.asVertex(), AccessibleEntity.class));
+        actionManager.logEvent(item,
+                manager.cast(grantee, Actioner.class), EventTypes.setItemPermissions)
+                .addSubjects(manager.cast(accessor, AccessibleEntity.class));
     }
 
     public void revokePermissionGrant(PermissionGrant grant, Accessor user)
@@ -167,7 +162,7 @@ public final class AclViews {
                     break;
                 default:
                     helper.checkEntityPermission(
-                        graph.frame(tg.asVertex(), AccessibleEntity.class), user, PermissionType.GRANT);
+                        manager.cast(tg, AccessibleEntity.class), user, PermissionType.GRANT);
             }
         }
         acl.revokePermissionGrant(grant);
@@ -178,40 +173,38 @@ public final class AclViews {
      * has on the user, so requires grant permissions for the user as
      * we as modify permissions for the group.
      *
-     * @param group
-     * @param user
-     * @param grantee
+     * @param group The group
+     * @param user The user to add to the group
+     * @param grantee The user performing the action
      * @throws PermissionDenied
      */
     public void addAccessorToGroup(Group group, Accessor user, Accessor grantee)
             throws PermissionDenied {
         ensureCanModifyGroupMembership(group, user, grantee);
-        group.addMember(graph.frame(user.asVertex(), Accessor.class));
+        group.addMember(user);
         // Log the action...
-        new ActionManager(graph).logEvent(group,
-                graph.frame(grantee.asVertex(), Actioner.class),
-                EventTypes.addGroup).addSubjects(
-                graph.frame(user.asVertex(), AccessibleEntity.class));
+        actionManager.logEvent(group,
+                manager.cast(grantee, Actioner.class), EventTypes.addGroup)
+                .addSubjects(manager.cast(user, AccessibleEntity.class));
     }
 
     /**
      * Remove a user from a group. Just as with adding uers, this requires
      * grant permissions for the user and modify permissions for the group.
      *
-     * @param group
-     * @param user
-     * @param grantee
+     * @param group The group
+     * @param user The user to add to the group
+     * @param grantee The user performing the action
      * @throws PermissionDenied
      */
     public void removeAccessorFromGroup(Group group, Accessor user, Accessor grantee)
             throws PermissionDenied {
         ensureCanModifyGroupMembership(group, user, grantee);
-        group.removeMember(graph.frame(user.asVertex(), Accessor.class));
+        group.removeMember(user);
         // Log the action...
-        new ActionManager(graph).logEvent(group,
-                graph.frame(grantee.asVertex(), Actioner.class),
-                EventTypes.removeGroup).addSubjects(
-                graph.frame(user.asVertex(), AccessibleEntity.class));
+        actionManager.logEvent(group,
+                    manager.cast(grantee, Actioner.class), EventTypes.removeGroup)
+                .addSubjects(manager.cast(user, AccessibleEntity.class));
     }
 
     private void ensureCanModifyGroupMembership(Group group, Accessor user, Accessor grantee)
@@ -221,7 +214,6 @@ public final class AclViews {
         // b) they have the modify permission on that group, and
         // c) they have grant permissions for the user
         if (!acl.belongsToAdmin(grantee)) {
-            // FIXME: With TP 2.3.0 update this comparing of vertices shouldn't be necessary
             boolean found = false;
             for (Accessor acc : grantee.getAllParents()) {
                 if (group.equals(acc)) {
@@ -234,8 +226,8 @@ public final class AclViews {
                         "Non-admin users cannot add other users to groups that they" +
                                 " do not themselves belong to.");
             }
-            helper.checkEntityPermission(graph.frame(user.asVertex(),
-                    AccessibleEntity.class), grantee, PermissionType.GRANT);
+            helper.checkEntityPermission(manager.cast(user, AccessibleEntity.class),
+                    grantee, PermissionType.GRANT);
             helper.checkEntityPermission(group, grantee, PermissionType.UPDATE);
         }
     }
