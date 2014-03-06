@@ -2,17 +2,14 @@ package eu.ehri.project.persistence;
 
 import com.google.common.collect.*;
 import com.tinkerpop.blueprints.Direction;
-import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.idgen.IdGenerator;
 import eu.ehri.project.models.utils.ClassUtils;
 import org.w3c.dom.Document;
 
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -643,19 +640,5 @@ public final class Bundle {
             map.put(entry.getKey(), LinkedHashMultiset.create(entry.getValue()));
         }
         return map;
-    }
-
-    private List<String> getScopeIds(PermissionScope scope) {
-        if (SystemScope.INSTANCE.equals(scope)) {
-            return Lists.newArrayList();
-        } else {
-            LinkedList<String> scopeIds = Lists.newLinkedList();
-            if (scope != null) {
-                for (PermissionScope s : scope.getPermissionScopes())
-                    scopeIds.addFirst(s.getIdentifier());
-                scopeIds.add(scope.getIdentifier());
-            }
-            return scopeIds;
-        }
     }
 }
