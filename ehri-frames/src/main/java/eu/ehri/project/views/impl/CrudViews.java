@@ -101,7 +101,7 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
     public E create(Bundle bundle, Accessor user)
             throws PermissionDenied, ValidationError,
             IntegrityError {
-        helper.checkContentPermission(user, helper.getContentType(cls),
+        helper.checkContentPermission(user, helper.getContentTypeEnum(cls),
                 PermissionType.CREATE);
         E item = getPersister(scope).create(bundle, cls);
         // If a user creates an item, grant them OWNER perms on it.
@@ -133,9 +133,9 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
      */
     public Mutation<E> createOrUpdate(Bundle bundle, Accessor user)
             throws PermissionDenied, ValidationError, IntegrityError {
-        helper.checkContentPermission(user, helper.getContentType(cls),
+        helper.checkContentPermission(user, helper.getContentTypeEnum(cls),
                 PermissionType.CREATE);
-        helper.checkContentPermission(user, helper.getContentType(cls),
+        helper.checkContentPermission(user, helper.getContentTypeEnum(cls),
                 PermissionType.UPDATE);
         return getPersister(scope).createOrUpdate(bundle, cls);
     }

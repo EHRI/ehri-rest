@@ -426,6 +426,20 @@
     hasAnnotationBody: mike
     promotedBy: tim
 
+# This annotation is marked promotable
+# but isn't yet promoted.
+- id: ann5
+  type: annotation
+  data:
+    identifier: ann5
+    body: Created by
+    isPromotable: !!bool true
+  relationships:
+    hasAnnotationTarget: c1
+    hasAnnotationBody: mike
+    access: mike
+
+
 --- # Links
  - id: link1
    type: link
@@ -460,6 +474,16 @@
     hasAccessor: reto
     hasGrantee: mike
     
+# Allow user Reto to edit the r2 record directly (because, say, he
+# works for KCL and has responsibility for this.)
+- id: retoKclUpdateGrant
+  type: permissionGrant
+  relationships:
+    hasPermission: update
+    hasTarget: r2
+    hasAccessor: reto
+    hasGrantee: mike
+
 # Allow user Linda to create doc units anywhere
 - id: lindaGlobalWriteGrant
   type: permissionGrant
