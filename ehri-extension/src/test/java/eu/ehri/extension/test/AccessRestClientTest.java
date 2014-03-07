@@ -5,7 +5,6 @@ import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 import eu.ehri.extension.AbstractRestResource;
 import eu.ehri.project.definitions.Entities;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import javax.ws.rs.core.MediaType;
@@ -19,11 +18,6 @@ public class AccessRestClientTest extends BaseRestClientTest {
 
     static final String PRIVILEGED_USER_NAME = "mike";
     static final String LIMITED_USER_NAME = "reto";
-
-    @BeforeClass
-    public static void setUpBeforeClass() throws Exception {
-        initializeTestDb(AccessRestClientTest.class.getName());
-    }
 
     @Test
     public void testUserCannotRead() throws Exception {

@@ -8,6 +8,7 @@ import com.tinkerpop.frames.modules.javahandler.JavaHandlerContext;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.annotations.Fetch;
+import eu.ehri.project.models.utils.JavaHandlerUtils;
 
 /**
  * @author Mike Bryant (http://github.com/mikesname)
@@ -18,7 +19,7 @@ public interface Promotable extends AccessibleEntity {
     @Adjacency(label = Ontology.PROMOTED_BY, direction = Direction.OUT)
     public Iterable<UserProfile> getPromotors();
 
-    @Adjacency(label = Ontology.PROMOTED_BY, direction = Direction.OUT)
+    @JavaHandler
     public void addPromotion(final UserProfile user);
 
     @Adjacency(label = Ontology.PROMOTED_BY, direction = Direction.OUT)
@@ -34,6 +35,11 @@ public interface Promotable extends AccessibleEntity {
      * Implementation of complex methods.
      */
     abstract class Impl implements JavaHandlerContext<Vertex>, Promotable {
+
+        public void addPromotion(final UserProfile user) {
+            JavaHandlerUtils.addUniqueRelationship(it(), user.asVertex(),
+                    Ontology.PROMOTED_BY);
+        }
 
         public boolean isPromoted() {
             return gremlin().out(Ontology.PROMOTED_BY).hasNext();

@@ -9,7 +9,6 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.persistence.Bundle;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import javax.ws.rs.core.MultivaluedMap;
@@ -28,11 +27,6 @@ public class SystemEventRestClientTest extends BaseRestClientTest {
     static final String COUNTRY_CODE = "nl";
 
     private String jsonAgentTestString = "{\"type\": \"repository\", \"data\":{\"identifier\": \"jmp\"}}";
-
-    @BeforeClass
-    public static void setUpBeforeClass() throws Exception {
-        initializeTestDb(SystemEventRestClientTest.class.getName());
-    }
 
     @Test
     public void testListActions() throws Exception {

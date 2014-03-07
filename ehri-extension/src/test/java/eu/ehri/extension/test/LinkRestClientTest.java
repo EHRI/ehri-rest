@@ -2,23 +2,12 @@ package eu.ehri.extension.test;
 
 import com.sun.jersey.api.client.ClientResponse;
 import eu.ehri.project.definitions.Entities;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import static com.sun.jersey.api.client.ClientResponse.Status.CREATED;
 import static com.sun.jersey.api.client.ClientResponse.Status.OK;
 
 public class LinkRestClientTest extends BaseRestClientTest {
-
-    static final String UPDATED_NAME = "UpdatedNameTEST";
-
-    private String jsonLinkTestString = "{\"type\": \"link\", \"data\":{\"identifier\": \"39dj28dhs\", " +
-            "\"body\": \"test\", \"type\": \"associate\"}}";
-
-    @BeforeClass
-    public static void setUpBeforeClass() throws Exception {
-        initializeTestDb(LinkRestClientTest.class.getName());
-    }
 
     @Test
     public void testGetLinks() throws Exception {
@@ -41,6 +30,8 @@ public class LinkRestClientTest extends BaseRestClientTest {
     @Test
     public void testCreateLink() throws Exception {
         // Create a link annotation between two objects
+        String jsonLinkTestString = "{\"type\": \"link\", \"data\":{\"identifier\": \"39dj28dhs\", " +
+                "\"body\": \"test\", \"type\": \"associate\"}}";
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
                 ehriUri(Entities.LINK, "c1", "c4")).entity(jsonLinkTestString)
                 .post(ClientResponse.class);

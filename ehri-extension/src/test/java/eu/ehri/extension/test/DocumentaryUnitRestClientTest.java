@@ -10,7 +10,6 @@ import eu.ehri.project.persistence.ErrorSet;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import javax.ws.rs.core.MediaType;
@@ -36,11 +35,6 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
     // FIXME: This ID is temporaty and will break when we decide on a proper
     // prefix ID scheme
     static final String CREATED_ID = "some-id";
-
-    @BeforeClass
-    public static void setUpBeforeClass() throws Exception {
-        initializeTestDb(DocumentaryUnitRestClientTest.class.getName());
-    }
 
     @Before
     public void setUp() throws Exception {

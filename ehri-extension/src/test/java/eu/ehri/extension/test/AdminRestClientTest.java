@@ -5,7 +5,6 @@ import com.sun.jersey.api.client.WebResource;
 import eu.ehri.extension.AdminResource;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.persistence.Bundle;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import javax.ws.rs.core.MediaType;
@@ -21,11 +20,6 @@ import static org.junit.Assert.assertTrue;
  * @author michaelb
  */
 public class AdminRestClientTest extends BaseRestClientTest {
-
-    @BeforeClass
-    public static void setUpBeforeClass() throws Exception {
-        initializeTestDb(AdminRestClientTest.class.getName());
-    }
 
     @Test
     public void testHouseKeeping() throws Exception {

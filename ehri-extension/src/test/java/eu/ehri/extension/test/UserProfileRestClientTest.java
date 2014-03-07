@@ -10,7 +10,6 @@ import eu.ehri.project.persistence.Bundle;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import javax.ws.rs.core.MediaType;
@@ -32,11 +31,6 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
     static final String UPDATED_NAME = "UpdatedNameTEST";
 
     private String jsonUserProfileTestString = "{\"type\":\"userProfile\", \"data\":{\"identifier\": \"test-user\", \"name\":\"testUserName1\"}}";
-
-    @BeforeClass
-    public static void setUpBeforeClass() throws Exception {
-        initializeTestDb(UserProfileRestClientTest.class.getName());
-    }
 
     /**
      * CR(U)D cycle

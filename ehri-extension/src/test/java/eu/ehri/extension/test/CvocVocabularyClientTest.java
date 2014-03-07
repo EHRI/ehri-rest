@@ -3,7 +3,6 @@ package eu.ehri.extension.test;
 import com.sun.jersey.api.client.ClientResponse;
 import eu.ehri.project.definitions.Entities;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.net.URI;
@@ -17,11 +16,6 @@ public class CvocVocabularyClientTest extends BaseRestClientTest {
     private String jsonTestVocabularyString = "{\"type\":\"" + Entities.CVOC_VOCABULARY +
             "\",\"data\":{\"identifier\": \"plants\"}}";
     private String jsonApplesTestStr;
-
-    @BeforeClass
-    public static void setUpBeforeClass() throws Exception {
-        initializeTestDb(CvocVocabularyClientTest.class.getName());
-    }
 
     @Before
     public void setUp() throws Exception {
