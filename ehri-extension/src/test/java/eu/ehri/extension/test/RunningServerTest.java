@@ -33,7 +33,7 @@ public abstract class RunningServerTest {
     final static private String mountPoint = "ehri";
 
     private final static ServerRunner runner
-            = new ServerRunner(testServerPort, "eu.ehri.extension", mountPoint);
+            = ServerRunner.getInstance(testServerPort, "eu.ehri.extension", mountPoint);
 
     @BeforeClass
     public static void setUpBeforeClass() throws IOException {

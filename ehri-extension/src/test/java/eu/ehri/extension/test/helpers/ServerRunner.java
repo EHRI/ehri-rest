@@ -20,6 +20,8 @@ import java.io.IOException;
  */
 public class ServerRunner {
 
+    private static ServerRunner INSTANCE = null;
+
     // Graph factory.
     final static FramedGraphFactory graphFactory = new FramedGraphFactory(new JavaHandlerModule());
 
@@ -27,16 +29,20 @@ public class ServerRunner {
     private final String jaxRxPackage;
     private final String mountPoint;
 
-    private static FixtureLoader fixtureLoader;
-    private static GraphCleaner<? extends TransactionalGraph> graphCleaner;
+    private static FixtureLoader fixtureLoader = null;
+    private static GraphCleaner<? extends TransactionalGraph> graphCleaner = null;
 
 
     private CommunityNeoServer neoServer;
 
-    public ServerRunner(int port, String jaxRxPackage, String mountPoint) {
+    private ServerRunner(int port, String jaxRxPackage, String mountPoint) {
         this.port = port;
         this.jaxRxPackage = jaxRxPackage;
         this.mountPoint = mountPoint;
+    }
+
+    public static ServerRunner getInstance(int port, String jaxRxPackage, String mountPoint) {
+        return INSTANCE != null ? INSTANCE : new ServerRunner(port, jaxRxPackage, mountPoint);
     }
 
     public void start() throws IOException {
@@ -56,11 +62,15 @@ public class ServerRunner {
     }
 
     public void setUpData() {
-        fixtureLoader.loadTestData();
+        if (fixtureLoader != null) {
+            fixtureLoader.loadTestData();
+        }
     }
 
     public void tearDownData() {
-        graphCleaner.clean();
+        if (graphCleaner != null) {
+            graphCleaner.clean();
+        }
     }
 
     public void stop() {
