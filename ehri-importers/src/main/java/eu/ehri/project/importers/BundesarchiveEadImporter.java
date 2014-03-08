@@ -1,7 +1,6 @@
 package eu.ehri.project.importers;
 
 import com.google.common.collect.Iterables;
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
@@ -46,7 +45,7 @@ public class BundesarchiveEadImporter extends EadImporter {
      * @param permissionScope
      * @param log
      */
-    public BundesarchiveEadImporter(FramedGraph<Neo4jGraph> framedGraph, PermissionScope permissionScope, ImportLog log) {
+    public BundesarchiveEadImporter(FramedGraph<?> framedGraph, PermissionScope permissionScope, ImportLog log) {
         super(framedGraph, permissionScope, log);
 
     }

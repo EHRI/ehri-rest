@@ -32,7 +32,7 @@ public class SkosImporter extends XmlImporter<Map<String, Object>> {
      * @param permissionScope
      * @param log
      */
-    public SkosImporter(FramedGraph<Neo4jGraph> framedGraph, PermissionScope permissionScope,
+    public SkosImporter(FramedGraph<?> framedGraph, PermissionScope permissionScope,
             ImportLog log) {
         super(framedGraph, permissionScope, log);
     }
