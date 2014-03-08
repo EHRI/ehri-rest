@@ -7,11 +7,7 @@ import com.google.common.collect.Maps;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.blueprints.Vertex;
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
-import com.tinkerpop.frames.FramedGraphFactory;
-import com.tinkerpop.frames.modules.javahandler.JavaHandlerModule;
-import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.exceptions.DeserializationError;
@@ -25,8 +21,6 @@ import eu.ehri.project.persistence.BundleDAO;
 import eu.ehri.project.persistence.Mutation;
 import eu.ehri.project.utils.GraphInitializer;
 import eu.ehri.project.utils.fixtures.FixtureLoader;
-import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
@@ -64,18 +58,18 @@ public class YamlFixtureLoader implements FixtureLoader {
 
     public static final String GENERATE_ID_PLACEHOLDER = "?";
 
-    private static final FramedGraphFactory graphFactory = new FramedGraphFactory(new JavaHandlerModule());
     private final FramedGraph<? extends TransactionalGraph> graph;
     private final GraphManager manager;
     private static final Logger logger = LoggerFactory
             .getLogger(YamlFixtureLoader.class);
+
     private boolean initialize;
 
     /**
      * Constructor
      *
-     * @param graph
-     * @param initialize
+     * @param graph      The graph
+     * @param initialize Whether or not to initialize the graph
      */
     public YamlFixtureLoader(FramedGraph<? extends TransactionalGraph> graph, boolean initialize) {
         this.graph = graph;
@@ -86,7 +80,7 @@ public class YamlFixtureLoader implements FixtureLoader {
     /**
      * Constructor.
      *
-     * @param graph
+     * @param graph The graph
      */
     public YamlFixtureLoader(FramedGraph<? extends TransactionalGraph> graph) {
         this(graph, true);
@@ -192,14 +186,6 @@ public class YamlFixtureLoader implements FixtureLoader {
         }
     }
 
-    /**
-     * @param links
-     * @param node
-     * @throws DeserializationError
-     * @throws ValidationError
-     * @throws IntegrityError
-     * @throws ItemNotFound
-     */
     private void importNode(Map<Vertex, ListMultimap<String, String>> links,
             Map<String, Object> node) throws DeserializationError,
             ValidationError, IntegrityError, ItemNotFound {
@@ -254,12 +240,6 @@ public class YamlFixtureLoader implements FixtureLoader {
         return b;
     }
 
-    /**
-     * Extract from the relations the IDs of other non-dependent nodes.
-     *
-     * @param data
-     * @return
-     */
     private ListMultimap<String, String> getLinkedRelations(Map<String, Object> data) {
         ListMultimap<String, String> rels = LinkedListMultimap.create();
         if (data != null) {
@@ -280,12 +260,6 @@ public class YamlFixtureLoader implements FixtureLoader {
         return rels;
     }
 
-    /**
-     * Extract from the relations the nested dependent items.
-     *
-     * @param data
-     * @return
-     */
     private ListMultimap<String, Map<?, ?>> getDependentRelations(Map<String, Object> data) {
         ListMultimap<String, Map<?, ?>> rels = LinkedListMultimap.create();
         if (data != null) {
@@ -306,39 +280,7 @@ public class YamlFixtureLoader implements FixtureLoader {
         return rels;
     }
 
-    private static void registerShutdownHook(final GraphDatabaseService graphDb) {
-        // Registers a shutdown hook for the Neo4j instance so that it
-        // shuts down nicely when the VM exits (even if you "Ctrl-C" the
-        // running example before it's completed)
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            @Override
-            public void run() {
-                graphDb.shutdown();
-            }
-        });
-    }
-
     public void loadTestData() {
-            loadFixtures();
-    }
-
-    public static void main(String[] args) {
-        if (args.length < 1) {
-            throw new RuntimeException("No Neo4j database specified.");
-        }
-
-        GraphDatabaseService db = new GraphDatabaseFactory()
-                .newEmbeddedDatabase(args[0]);
-        registerShutdownHook(db);
-        try {
-            FramedGraph<? extends TransactionalGraph> graph = graphFactory.create(
-                    new Neo4jGraph(db));
-            YamlFixtureLoader loader = new YamlFixtureLoader(graph);
-            loader.loadTestData();
-        } catch (Error e) {
-            db.shutdown();
-            throw new RuntimeException(e);
-        }
-        System.exit(0);
+        loadFixtures();
     }
 }
