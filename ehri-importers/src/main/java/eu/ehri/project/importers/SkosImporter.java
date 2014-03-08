@@ -124,15 +124,6 @@ public class SkosImporter extends XmlImporter<Map<String, Object>> {
         return langs;
     }
 
-    protected <T> List<T> toList(Iterable<T> iter) {
-        Iterator<T> it = iter.iterator();
-        List<T> lst = new ArrayList<T>();
-        while (it.hasNext()) {
-            lst.add(it.next());
-        }
-        return lst;
-    }
-
     @Override
     public AccessibleEntity importItem(Map<String, Object> itemData, List<String> idPath) throws
             ValidationError {

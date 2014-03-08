@@ -27,7 +27,7 @@ abstract public class XmlImportManager implements ImportManager {
     protected final FramedGraph<? extends TransactionalGraph> framedGraph;
     protected final PermissionScope permissionScope;
     protected final Actioner actioner;
-        private Boolean tolerant = false;
+    private boolean tolerant = false;
 
         // Ugly stateful variables for tracking import state
     // and reporting errors usefully...
@@ -54,37 +54,17 @@ abstract public class XmlImportManager implements ImportManager {
      *
      * @param tolerant true means it won't validateData the xml file
      */
-    public XmlImportManager setTolerant(Boolean tolerant) {
+    public XmlImportManager setTolerant(boolean tolerant) {
         logger.info("Setting importer to tolerant: " + tolerant);
         this.tolerant = tolerant;
         return this;
     }
+
     public boolean isTolerant(){
-        return tolerant==true;
+        return tolerant;
     }
 
     
-    /**
-     * Import Description file via an URL.
-     * 
-     * @param address
-     * @param logMessage
-     *
-     * @throws IOException
-     * @throws ValidationError
-     */
-    @Override
-    public ImportLog importUrl(String address, String logMessage)
-            throws IOException, InputParseError, ValidationError {
-        URL url = new URL(address);
-        InputStream ios = url.openStream();
-        try {
-            return importFile(ios, logMessage);
-        } finally {
-            ios.close();
-        }
-    }
-
     /**
      * Import an Description file by specifying it's path.
      * 

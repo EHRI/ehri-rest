@@ -69,21 +69,6 @@ public abstract class EaImporter extends XmlImporter<Map<String, Object>> {
     }
      
     /**
-     * Utility method to return an Iterable<T> as a List<T>.
-     * 
-     * @param iter an Iterable of type T
-     * @return the input as a List of the same type T
-     */
-    protected <T> List<T> toList(Iterable<T> iter) {
-        Iterator<T> it = iter.iterator();
-        List<T> lst = new ArrayList<T>();
-        while (it.hasNext()) {
-            lst.add(it.next());
-        }
-        return lst;
-    }
-    
-    /**
      * Extract properties from the itemData Map that are marked as unknown, and return them in a new Map.
      * 
      * @param itemData a Map containing raw properties of a unit
