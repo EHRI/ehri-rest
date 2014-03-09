@@ -1,20 +1,10 @@
 package eu.ehri.extension.test;
 
-import com.tinkerpop.blueprints.TransactionalGraph;
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
-import com.tinkerpop.frames.FramedGraph;
-import com.tinkerpop.frames.FramedGraphFactory;
-import com.tinkerpop.frames.modules.javahandler.JavaHandlerModule;
-import eu.ehri.extension.AbstractRestResource;
 import eu.ehri.extension.test.helpers.ServerRunner;
-import eu.ehri.project.test.utils.GraphCleaner;
-import eu.ehri.project.utils.fixtures.FixtureLoader;
-import eu.ehri.project.utils.fixtures.FixtureLoaderFactory;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.neo4j.server.CommunityNeoServer;
 
 import java.io.IOException;
 
