@@ -12,6 +12,8 @@ import org.neo4j.server.CommunityNeoServer;
 import org.neo4j.server.helpers.ServerBuilder;
 
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Utility class to obtain a server.
@@ -32,6 +34,9 @@ public class ServerRunner {
     private static FixtureLoader fixtureLoader = null;
     private static GraphCleaner<? extends TransactionalGraph> graphCleaner = null;
 
+    private final static Logger sunLogger = Logger.getLogger("com.sun.jersey");
+    private final static Logger neoLogger = Logger.getLogger("org.neo4j.server");
+
 
     private CommunityNeoServer neoServer;
 
@@ -46,6 +51,8 @@ public class ServerRunner {
     }
 
     public void start() throws IOException {
+        sunLogger.setLevel(Level.OFF);
+        neoLogger.setLevel(Level.OFF);
         neoServer = ServerBuilder.server()
                 .onPort(port)
                 .withThirdPartyJaxRsPackage(jaxRxPackage, "/" + mountPoint)
