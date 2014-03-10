@@ -45,6 +45,7 @@ public class CmdEntryPoint extends BaseCommand {
         mmap.put(EntityAdd.NAME, EntityAdd.class);
         mmap.put(PersonalitiesImport.NAME, PersonalitiesImport.class);
         mmap.put(DeleteEntities.NAME, DeleteEntities.class);
+        mmap.put(RdfExport.NAME, RdfExport.class);
         // adaptation of UserAdd for adding countries
         mmap.put(CountryAdd.NAME, CountryAdd.class);
 
