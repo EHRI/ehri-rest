@@ -1,13 +1,10 @@
 package eu.ehri.project.importers;
 
-import com.google.common.collect.Iterables;
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.*;
 import eu.ehri.project.models.base.*;
-import eu.ehri.project.models.idgen.IdGenerator;
 import eu.ehri.project.persistence.Bundle;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -41,7 +38,7 @@ public class EadImporter extends EaImporter {
      * @param permissionScope
      * @param log
      */
-    public EadImporter(FramedGraph<Neo4jGraph> framedGraph, PermissionScope permissionScope, ImportLog log) {
+    public EadImporter(FramedGraph<?> framedGraph, PermissionScope permissionScope, ImportLog log) {
         super(framedGraph, permissionScope, log);
 
     }
@@ -145,35 +142,6 @@ public class EadImporter extends EaImporter {
         }
         return list;
     }
-    
-//    @Override
-//    protected Iterable<Map<String, Object>> extractRelations(Map<String, Object> data) {
-//        final String REL = "Access";
-//        List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
-//        for (String key : data.keySet()) {
-//            logger.debug("trying for Relations: "+key);
-//            if (key.endsWith(REL)) {
-//                if (data.get(key) instanceof List) {
-//                    //every item becomes a UndeterminedRelationship, with the key as body
-//                    for (String body : (List<String>) data.get(key)) {
-//                        list.add(createRelationNode(key, body));
-//                    }
-//                } else {
-//                    list.add(createRelationNode(key, (String) data.get(key)));
-//                }
-//            }
-//        }
-//        return list;
-//    }
-//
-//    private Map<String, Object> createRelationNode(String type, String value) {
-//        Map<String, Object> relationNode = new HashMap<String, Object>();
-//        relationNode.put(UndeterminedRelationship.NAME_KEY, value);
-//        relationNode.put(UndeterminedRelationship.UNDETERMINED_RELATIONSHIP_TYPE, type);
-//        relationNode.put(IdentifiableEntity.IDENTIFIER_KEY, (type + value).replaceAll("\\s", ""));
-//        return relationNode;
-//
-//    }
 
     /**
      * Creates a Map containing properties of a Documentary Unit.
@@ -235,26 +203,6 @@ public class EadImporter extends EaImporter {
         }
         return unit;
     }
-    
-//    /**
-//     * Creates a Map containing properties of a Documentary Unit description.
-//     * These properties are the unit description's properties: all except the doc unit identifiers and unknown properties.
-//     * @param itemData Map of all extracted information
-//     * @return a Map representing a Documentary Unit Description node
-//     * @throws ValidationError
-//     */
-//    protected Map<String, Object> extractDocumentDescription(Map<String, Object> itemData) throws ValidationError {
-//
-//        Map<String, Object> unit = new HashMap<String, Object>();
-//        for (String key : itemData.keySet()) {
-//            if (!(key.equals(OBJECT_ID) 
-//            	|| key.equals(Ontology.OTHER_IDENTIFIERS) 
-//            	|| key.startsWith(SaxXmlHandler.UNKNOWN))) {
-//                unit.put(key, itemData.get(key));
-//            }
-//        }
-//        return unit;
-//    }
 
     @Override
     public AccessibleEntity importItem(Map<String, Object> itemData) throws ValidationError {

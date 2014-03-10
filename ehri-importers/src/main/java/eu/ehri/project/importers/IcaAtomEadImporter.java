@@ -1,13 +1,10 @@
 package eu.ehri.project.importers;
 
-import com.google.common.collect.Iterables;
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.*;
 import eu.ehri.project.models.base.*;
-import eu.ehri.project.models.idgen.IdGenerator;
 import eu.ehri.project.persistence.Bundle;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -46,7 +43,7 @@ public class IcaAtomEadImporter extends EaImporter {
      * @param permissionScope
      * @param log
      */
-    public IcaAtomEadImporter(FramedGraph<Neo4jGraph> framedGraph, PermissionScope permissionScope, ImportLog log) {
+    public IcaAtomEadImporter(FramedGraph<?> framedGraph, PermissionScope permissionScope, ImportLog log) {
         super(framedGraph, permissionScope, log);
 
     }
@@ -139,35 +136,6 @@ public class IcaAtomEadImporter extends EaImporter {
         }
         return list;
     }
-//    @Override
-//    protected Iterable<Map<String, Object>> extractRelations(Map<String, Object> data) {
-//        final String REL = "Access";
-//        List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
-//        for (String key : data.keySet()) {
-//            logger.debug("trying for Relations: "+key);
-//            if (key.endsWith(REL)) {
-//                if (data.get(key) instanceof List) {
-//                    //every item becomes a UndeterminedRelationship, with the key as body
-//                    for (String body : (List<String>) data.get(key)) {
-//                        list.add(createRelationNode(key, body));
-//                    }
-//                } else {
-//                    list.add(createRelationNode(key, (String) data.get(key)));
-//                }
-//            }
-//        }
-//        return list;
-//    }
-//
-//    private Map<String, Object> createRelationNode(String type, String value) {
-//        Map<String, Object> relationNode = new HashMap<String, Object>();
-//        relationNode.put(UndeterminedRelationship.NAME_KEY, value);
-//        relationNode.put(UndeterminedRelationship.UNDETERMINED_RELATIONSHIP_TYPE, type);
-//        relationNode.put(IdentifiableEntity.IDENTIFIER_KEY, (type + value).replaceAll("\\s", ""));
-//        return relationNode;
-//
-//    }
-
     
     protected Map<String, Object> extractDocumentaryUnit(Map<String, Object> itemData, int depth) throws ValidationError {
         Map<String, Object> unit = new HashMap<String, Object>();

@@ -2,7 +2,6 @@ package eu.ehri.project.importers;
 
 import com.google.common.base.Optional;
 import com.tinkerpop.blueprints.TransactionalGraph;
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -17,12 +16,9 @@ import eu.ehri.project.importers.exceptions.InvalidXmlDocument;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.ActionManager;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import eu.ehri.project.utils.TxCheckedNeo4jGraph;
-import org.neo4j.tooling.GlobalGraphOperations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +27,7 @@ abstract public class XmlImportManager implements ImportManager {
     protected final FramedGraph<? extends TransactionalGraph> framedGraph;
     protected final PermissionScope permissionScope;
     protected final Actioner actioner;
-        private Boolean tolerant = false;
+    private boolean tolerant = false;
 
         // Ugly stateful variables for tracking import state
     // and reporting errors usefully...
@@ -58,37 +54,17 @@ abstract public class XmlImportManager implements ImportManager {
      *
      * @param tolerant true means it won't validateData the xml file
      */
-    public XmlImportManager setTolerant(Boolean tolerant) {
+    public XmlImportManager setTolerant(boolean tolerant) {
         logger.info("Setting importer to tolerant: " + tolerant);
         this.tolerant = tolerant;
         return this;
     }
+
     public boolean isTolerant(){
-        return tolerant==true;
+        return tolerant;
     }
 
     
-    /**
-     * Import Description file via an URL.
-     * 
-     * @param address
-     * @param logMessage
-     *
-     * @throws IOException
-     * @throws ValidationError
-     */
-    @Override
-    public ImportLog importUrl(String address, String logMessage)
-            throws IOException, InputParseError, ValidationError {
-        URL url = new URL(address);
-        InputStream ios = url.openStream();
-        try {
-            return importFile(ios, logMessage);
-        } finally {
-            ios.close();
-        }
-    }
-
     /**
      * Import an Description file by specifying it's path.
      * 
@@ -199,18 +175,8 @@ abstract public class XmlImportManager implements ImportManager {
             throw new RuntimeException(e);
         }
     }
-    protected int getNodeCount(FramedGraph<Neo4jGraph> graph) {
-        return toList(GlobalGraphOperations
-                .at(graph.getBaseGraph().getRawGraph()).getAllNodes()).size();
-    }
-    protected <T> List<T> toList(Iterable<T> iter) {
-        Iterator<T> it = iter.iterator();
-        List<T> lst = new ArrayList<T>();
-        while (it.hasNext())
-            lst.add(it.next());
-        return lst;
-    }
-        private String formatErrorLocation() {
+
+    private String formatErrorLocation() {
         return String.format("File: %s, XML document: %d", currentFile,
                 currentPosition);
     }

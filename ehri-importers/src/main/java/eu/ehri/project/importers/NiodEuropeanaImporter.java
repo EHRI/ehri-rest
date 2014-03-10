@@ -4,7 +4,6 @@
  */
 package eu.ehri.project.importers;
 
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
@@ -35,7 +34,7 @@ public class NiodEuropeanaImporter extends EaImporter{
      * @param permissionScope
      * @param log
      */
-    public NiodEuropeanaImporter(FramedGraph<Neo4jGraph> framedGraph, PermissionScope permissionScope, ImportLog log) {
+    public NiodEuropeanaImporter(FramedGraph<?> framedGraph, PermissionScope permissionScope, ImportLog log) {
         super(framedGraph, permissionScope, log);
     }
     

@@ -4,7 +4,6 @@
  */
 package eu.ehri.project.importers;
 
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.definitions.Ontology;
@@ -36,7 +35,7 @@ public class UkrainianUnitImporter extends XmlImporter<Object> {
     private XmlImportProperties p;
     private static final Logger logger = LoggerFactory.getLogger(UkrainianUnitImporter.class);
 
-    public UkrainianUnitImporter(FramedGraph<Neo4jGraph> framedGraph, PermissionScope permissionScope, ImportLog log) {
+    public UkrainianUnitImporter(FramedGraph<?> framedGraph, PermissionScope permissionScope, ImportLog log) {
         super(framedGraph, permissionScope, log);
         p = new XmlImportProperties("ukraine.properties");
     }

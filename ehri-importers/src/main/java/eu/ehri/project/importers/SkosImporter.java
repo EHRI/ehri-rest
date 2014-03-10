@@ -32,7 +32,7 @@ public class SkosImporter extends XmlImporter<Map<String, Object>> {
      * @param permissionScope
      * @param log
      */
-    public SkosImporter(FramedGraph<Neo4jGraph> framedGraph, PermissionScope permissionScope,
+    public SkosImporter(FramedGraph<?> framedGraph, PermissionScope permissionScope,
             ImportLog log) {
         super(framedGraph, permissionScope, log);
     }
@@ -122,15 +122,6 @@ public class SkosImporter extends XmlImporter<Map<String, Object>> {
 
         }
         return langs;
-    }
-
-    protected <T> List<T> toList(Iterable<T> iter) {
-        Iterator<T> it = iter.iterator();
-        List<T> lst = new ArrayList<T>();
-        while (it.hasNext()) {
-            lst.add(it.next());
-        }
-        return lst;
     }
 
     @Override
