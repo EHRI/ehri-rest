@@ -53,7 +53,7 @@ While Maven is doing its thing, we can install a standalone version of the Neo4j
 	
 We'll need to refer to the installation location a lot so save it as an environment variable:
 
-	export NEO4J_VERSION=1.9.3
+	export NEO4J_VERSION=1.9.6
 	export NEO4J_HOME=$HOME/apps/neo4j-community-${NEO4J_VERSION}
 	export NEO4J_DB=$NEO4J_HOME/data/graph.db
 
