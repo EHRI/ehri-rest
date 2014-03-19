@@ -4,12 +4,20 @@ import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.annotate.JsonValue;
 
 public enum PermissionType {
-    CREATE("create", 1),
-    UPDATE("update", 2),
-    DELETE("delete", 4),
-    ANNOTATE("annotate", 8),
-    OWNER("owner", 15), // Implies C,U,D,A
-    GRANT("grant", 16);
+    CREATE("create", 1)
+    , UPDATE("update", 2)
+    , DELETE("delete", 4)
+    , ANNOTATE("annotate", 8)
+    , OWNER("owner", 15) // Implies C,U,D,A
+    , GRANT("grant", 16)
+
+    , PROMOTE("promote", 32)
+    // Reserved permission types
+//    RESERVED2("reserved2", 32),
+//    RESERVED3("reserved3", 64),
+//    RESERVED4("reserved4", 128)
+    ;
+
     
     private final String name;
     private final int mask;

@@ -26,6 +26,7 @@ public class UshmmTest extends AbstractImporterTest{
     
     protected final String SINGLE_EAD = "irn50845.xml";
     protected final String IMPORTED_ITEM_ID = "50845";
+    protected final String IMPORTED_ITEM_ALT_ID = "RG-50.586*0138";
 
     // Depends on fixtures
     protected final String TEST_REPO = "r1";
@@ -40,7 +41,7 @@ public class UshmmTest extends AbstractImporterTest{
         printGraph(graph);
         
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        ImportLog log = new SaxImportManager(graph, agent, validUser, IcaAtomEadImporter.class, UshmmHandler.class)
+        ImportLog log = new SaxImportManager(graph, agent, validUser, EadImporter.class, UshmmHandler.class)
                 .setTolerant(Boolean.TRUE).importFile(ios, logMessage);
 
         printGraph(graph);
@@ -70,6 +71,16 @@ public class UshmmTest extends AbstractImporterTest{
         if (event != null) {
             logger.debug("event: " + event.getLogMessage());
         }
+        
+        // Check the alternative ID was added
+        boolean foundAltId = false;
+        for(String altId : (List<String>) unit.asVertex().getProperty("otherIdentifiers")) {
+        	if (altId.equals(IMPORTED_ITEM_ALT_ID)) {
+        		foundAltId = true;
+        		break;
+        	}
+        }
+        assertTrue(foundAltId);
 
         List<SystemEvent> actions = toList(unit.getHistory());
         // Check we've only got one action

@@ -32,7 +32,7 @@ public class SkosImporter extends XmlImporter<Map<String, Object>> {
      * @param permissionScope
      * @param log
      */
-    public SkosImporter(FramedGraph<Neo4jGraph> framedGraph, PermissionScope permissionScope,
+    public SkosImporter(FramedGraph<?> framedGraph, PermissionScope permissionScope,
             ImportLog log) {
         super(framedGraph, permissionScope, log);
     }
@@ -53,7 +53,7 @@ public class SkosImporter extends XmlImporter<Map<String, Object>> {
 
         Bundle unit = new Bundle(EntityClass.CVOC_CONCEPT,
                 extractConcept(itemData));
-        BundleDAO persister = new BundleDAO(framedGraph, permissionScope);
+        BundleDAO persister = new BundleDAO(framedGraph, permissionScope.idPath());
 
         // Add dates and descriptions to the bundle since they're @Dependent
         // relations.
@@ -124,17 +124,9 @@ public class SkosImporter extends XmlImporter<Map<String, Object>> {
         return langs;
     }
 
-    protected <T> List<T> toList(Iterable<T> iter) {
-        Iterator<T> it = iter.iterator();
-        List<T> lst = new ArrayList<T>();
-        while (it.hasNext()) {
-            lst.add(it.next());
-        }
-        return lst;
-    }
-
     @Override
-    public AccessibleEntity importItem(Map<String, Object> itemData, int depth) throws ValidationError {
+    public AccessibleEntity importItem(Map<String, Object> itemData, List<String> idPath) throws
+            ValidationError {
         throw new UnsupportedOperationException("Not supported ever.");
     }
 }

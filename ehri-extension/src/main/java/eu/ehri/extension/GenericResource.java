@@ -64,7 +64,7 @@ public class GenericResource extends AbstractAccessibleEntityResource<Accessible
         GremlinPipeline<Vertex, Vertex> filtered = new GremlinPipeline<Vertex, Vertex>(
                 vertices)
                     .filter(aclManager.getContentTypeFilterFunction()).filter(filter);
-        return streamingVertexList(filtered, serializer);
+        return streamingVertexList(filtered, getSerializer());
     }
 
     @POST
@@ -102,7 +102,7 @@ public class GenericResource extends AbstractAccessibleEntityResource<Accessible
         GremlinPipeline<Vertex, Vertex> filtered = new GremlinPipeline<Vertex, Vertex>(
                 vertices)
                 .filter(aclManager.getContentTypeFilterFunction()).filter(filter);
-        return streamingVertexList(filtered, serializer);
+        return streamingVertexList(filtered, getSerializer());
     }
 
     @GET

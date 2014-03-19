@@ -6,7 +6,6 @@ package eu.ehri.project.importers;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.definitions.Ontology;
@@ -23,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import eu.ehri.project.persistence.BundleDAO;
 import eu.ehri.project.persistence.Mutation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,12 +39,15 @@ public class PersonalitiesImporter extends XmlImporter<Object> {
 
     private static final Logger logger = LoggerFactory.getLogger(PersonalitiesImporter.class);
 
-    public PersonalitiesImporter(FramedGraph<Neo4jGraph> framedGraph, PermissionScope permissionScope, ImportLog log) {
+    public PersonalitiesImporter(FramedGraph<?> framedGraph, PermissionScope permissionScope, ImportLog log) {
         super(framedGraph, permissionScope, log);
     }
 
     @Override
     public AccessibleEntity importItem(Map<String, Object> itemData) throws ValidationError {
+
+        BundleDAO persister = getPersister();
+
         Bundle unit = new Bundle(EntityClass.HISTORICAL_AGENT, extractUnit(itemData));
 
         Bundle descBundle = new Bundle(EntityClass.HISTORICAL_AGENT_DESCRIPTION, extractUnitDescription(itemData, EntityClass.HISTORICAL_AGENT_DESCRIPTION));
@@ -69,7 +72,8 @@ public class PersonalitiesImporter extends XmlImporter<Object> {
     }
 
     @Override
-    public AccessibleEntity importItem(Map<String, Object> itemData, int depth) throws ValidationError {
+    public AccessibleEntity importItem(Map<String, Object> itemData, List<String> idPath) throws
+            ValidationError {
         throw new UnsupportedOperationException("Not supported ever.");
     }
 

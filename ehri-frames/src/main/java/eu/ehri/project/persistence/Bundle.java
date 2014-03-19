@@ -2,17 +2,14 @@ package eu.ehri.project.persistence;
 
 import com.google.common.collect.*;
 import com.tinkerpop.blueprints.Direction;
-import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.idgen.IdGenerator;
 import eu.ehri.project.models.utils.ClassUtils;
 import org.w3c.dom.Document;
 
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -41,6 +38,20 @@ public final class Bundle {
     public static final String META_KEY = "meta";
 
     /**
+     * Filter predicate function interface.
+     */
+    public static interface Filter {
+        /**
+         * Filter (remove) items in a Bundle tree that
+         * match this predicate.
+         *
+         * @param bundle The bundle
+         * @return  Whether to remove the item
+         */
+        public boolean remove(final String relationLabel, final Bundle bundle);
+    }
+
+    /**
      * Properties that are "managed", i.e. automatically set
      * date/time strings or cache values should begin with a
      * prefix and are ignored Bundle equality calculations.
@@ -50,7 +61,7 @@ public final class Bundle {
     public static class Builder {
         private String id = null;
         private final EntityClass type;
-        final ListMultimap<String, Bundle> relations = ArrayListMultimap.create();
+        final Multimap<String, Bundle> relations = ArrayListMultimap.create();
         final Map<String, Object> data = Maps.newHashMap();
         final Map<String, Object> meta = Maps.newHashMap();
 
@@ -63,7 +74,7 @@ public final class Bundle {
             type = cls;
         }
 
-        public Builder addRelations(ListMultimap<String, Bundle> r) {
+        public Builder addRelations(Multimap<String, Bundle> r) {
             relations.putAll(r);
             return this;
         }
@@ -109,7 +120,7 @@ public final class Bundle {
      * @param temp      A marker to indicate the ID has been generated
      */
     private Bundle(String id, EntityClass type, final Map<String, Object> data,
-            final ListMultimap<String, Bundle> relations, final Map<String, Object> meta, boolean temp) {
+            final Multimap<String, Bundle> relations, final Map<String, Object> meta, boolean temp) {
         this.id = id;
         this.type = type;
         this.data = filterData(data);
@@ -127,7 +138,7 @@ public final class Bundle {
      * @param relations An initial set of relations
      */
     public Bundle(String id, EntityClass type, final Map<String, Object> data,
-            final ListMultimap<String, Bundle> relations) {
+            final Multimap<String, Bundle> relations) {
         this(id, type, data, relations, Maps.<String, Object>newHashMap());
     }
 
@@ -141,7 +152,7 @@ public final class Bundle {
      * @param meta      An initial map of metadata
      */
     public Bundle(String id, EntityClass type, final Map<String, Object> data,
-            final ListMultimap<String, Bundle> relations, final Map<String, Object> meta) {
+            final Multimap<String, Bundle> relations, final Map<String, Object> meta) {
         this(id, type, data, relations, meta, false);
     }
 
@@ -153,7 +164,7 @@ public final class Bundle {
      * @param relations An initial set of relations
      */
     public Bundle(EntityClass type, final Map<String, Object> data,
-            final ListMultimap<String, Bundle> relations) {
+            final Multimap<String, Bundle> relations) {
         this(null, type, data, relations, Maps.<String, Object>newHashMap());
     }
 
@@ -213,9 +224,9 @@ public final class Bundle {
      *
      * @return The data value
      */
-    public Object getDataValue(String key) {
+    public <T> T getDataValue(String key) {
         checkNotNull(key);
-        return data.get(key);
+        return (T)data.get(key);
     }
 
     /**
@@ -317,7 +328,7 @@ public final class Bundle {
      *
      * @return The full set of relations
      */
-    public ListMultimap<String, Bundle> getRelations() {
+    public Multimap<String, Bundle> getRelations() {
         return relations;
     }
 
@@ -325,10 +336,10 @@ public final class Bundle {
      * Get only the bundle's relations which have a dependent
      * relationship.
      * 
-     * @return
+     * @return A multimap of dependent relations.
      */
-    public ListMultimap<String,Bundle> getDependentRelations() {
-        ListMultimap<String, Bundle> dependentRelations = ArrayListMultimap.create();
+    public Multimap<String,Bundle> getDependentRelations() {
+        Multimap<String, Bundle> dependentRelations = ArrayListMultimap.create();
         Map<String, Direction> dependents = ClassUtils
                 .getDependentRelations(type.getEntityClass());
         for (String relation : relations.keySet()) {
@@ -347,7 +358,7 @@ public final class Bundle {
      * @param relations A full set of relations
      * @return The new bundle
      */
-    public Bundle withRelations(ListMultimap<String, Bundle> relations) {
+    public Bundle withRelations(Multimap<String, Bundle> relations) {
         return new Bundle(id, type, data, relations, meta, temp);
     }
 
@@ -369,7 +380,7 @@ public final class Bundle {
      * @return A new bundle
      */
     public Bundle withRelations(String relation, List<Bundle> others) {
-        LinkedListMultimap<String, Bundle> tmp = LinkedListMultimap
+        Multimap<String, Bundle> tmp = LinkedListMultimap
                 .create(relations);
         tmp.putAll(relation, others);
         return new Bundle(id, type, data, tmp, meta, temp);
@@ -383,7 +394,7 @@ public final class Bundle {
      * @return A new bundle
      */
     public Bundle withRelation(String relation, Bundle other) {
-        LinkedListMultimap<String, Bundle> tmp = LinkedListMultimap
+        Multimap<String, Bundle> tmp = LinkedListMultimap
                 .create(relations);
         tmp.put(relation, other);
         return new Bundle(id, type, data, tmp, meta, temp);
@@ -407,9 +418,44 @@ public final class Bundle {
      * @return A new bundle
      */
     public Bundle removeRelation(String relation, Bundle item) {
-        ListMultimap<String, Bundle> tmp = LinkedListMultimap.create(relations);
+        Multimap<String, Bundle> tmp = LinkedListMultimap.create(relations);
         tmp.remove(relation, item);
         return new Bundle(id, type, data, tmp, meta, temp);
+    }
+
+    /**
+     * Merge this bundle's data with that of another. Note: currently
+     * relation data is not merged.
+     *
+     * @param otherBundle Another bundle
+     * @return A bundle with data merged
+     */
+    public Bundle mergeDataWith(Bundle otherBundle) {
+        Map<String, Object> mergeData = Maps.newHashMap(getData());
+        mergeData.putAll(otherBundle.getData());
+        return withData(mergeData);
+    }
+
+    /**
+     * Filter relations, removing items that *match* the given
+     * filter function.
+     *
+     * @param filter A Filter function instance
+     * @return A bundle with relations matching the
+     * given predicate function removed.
+     */
+    public Bundle filterRelations(Filter filter) {
+        Builder builder = new Builder(type)
+                .addData(data)
+                .addMetaData(meta)
+                .setId(id);
+        for (Map.Entry<String,Bundle> rel : relations.entries()) {
+            if (!filter.remove(rel.getKey(), rel.getValue())) {
+                builder.addRelation(rel.getKey(), rel.getValue()
+                        .filterRelations(filter));
+            }
+        }
+        return builder.build();
     }
 
     /**
@@ -522,27 +568,17 @@ public final class Bundle {
      * @param scopes A set of parent scopes.
      * @return A new bundle
      */
-    public Bundle generateIds(final List<String> scopes) {
+    public Bundle generateIds(final Iterable<String> scopes) {
         boolean isTemp = id == null;
         IdGenerator idGen = getType().getIdgen();
         String newId = isTemp ? idGen.generateId(scopes, this) : id;
-        ListMultimap<String, Bundle> idRels = LinkedListMultimap.create();
+        Multimap<String, Bundle> idRels = LinkedListMultimap.create();
         List<String> nextScopes = Lists.newArrayList(scopes);
         nextScopes.add(idGen.getIdBase(this));
         for (Map.Entry<String, Bundle> entry : relations.entries()) {
             idRels.put(entry.getKey(), entry.getValue().generateIds(nextScopes));
         }
         return new Bundle(newId, type, data, idRels, meta, isTemp);
-    }
-
-    /**
-     * Generate missing IDs for the subtree.
-     *
-     * @param scope A permission scope.
-     * @return A new bundle
-     */
-    public Bundle generateIds(final PermissionScope scope) {
-        return generateIds(getScopeIds(scope));
     }
 
     @Override
@@ -598,25 +634,11 @@ public final class Bundle {
     /**
      * Convert the ordered relationship set into an unordered one for comparison.
      */
-    private Map<String, LinkedHashMultiset<Bundle>> unorderedRelations(final ListMultimap<String, Bundle> rels) {
+    private Map<String, LinkedHashMultiset<Bundle>> unorderedRelations(final Multimap<String, Bundle> rels) {
         Map<String, LinkedHashMultiset<Bundle>> map = Maps.newHashMap();
         for (Map.Entry<String, Collection<Bundle>> entry : rels.asMap().entrySet()) {
             map.put(entry.getKey(), LinkedHashMultiset.create(entry.getValue()));
         }
         return map;
-    }
-
-    private List<String> getScopeIds(PermissionScope scope) {
-        if (SystemScope.INSTANCE.equals(scope)) {
-            return Lists.newArrayList();
-        } else {
-            LinkedList<String> scopeIds = Lists.newLinkedList();
-            if (scope != null) {
-                for (PermissionScope s : scope.getPermissionScopes())
-                    scopeIds.addFirst(s.getIdentifier());
-                scopeIds.add(scope.getIdentifier());
-            }
-            return scopeIds;
-        }
     }
 }

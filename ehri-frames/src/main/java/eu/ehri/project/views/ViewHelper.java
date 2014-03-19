@@ -21,8 +21,6 @@ import eu.ehri.project.models.utils.ClassUtils;
 
 /**
  * Messy stopgap class to hold a bunch of sort-of view/sort-of acl functions.
- * <p/>
- * TODO: Clarify, consolidate and remove this class.
  *
  * @author mike
  */
@@ -48,75 +46,72 @@ public final class ViewHelper {
     /**
      * Check permissions for a given type.
      *
-     * @param accessor
-     * @param ctype
-     * @param permType
+     * @param accessor The user/group
+     * @param contentType The content type
+     * @param permissionType The permission type
      * @throws PermissionDenied
      */
-    public void checkContentPermission(Accessor accessor, ContentTypes ctype,
-            PermissionType permType) throws PermissionDenied {
-        if (!acl.hasPermission(ctype, permType, accessor)) {
-            throw new PermissionDenied(accessor.getId(), ctype.toString(), permType.toString(), scope.getId());
+    public void checkContentPermission(Accessor accessor, ContentTypes contentType,
+            PermissionType permissionType) throws PermissionDenied {
+        if (!acl.hasPermission(contentType, permissionType, accessor)) {
+            throw new PermissionDenied(accessor.getId(), contentType.toString(), permissionType.toString(), scope.getId());
         }
     }
 
     /**
      * Check permissions for a given entity.
      *
+     * @param entity The item
+     * @param accessor The user/group
+     * @param permissionType The permission type
      * @throws PermissionDenied
      */
     public void checkEntityPermission(AccessibleEntity entity,
-            Accessor accessor, PermissionType permType) throws PermissionDenied {
-        if (!acl.hasPermission(entity, permType, accessor)) {
+            Accessor accessor, PermissionType permissionType) throws PermissionDenied {
+        if (!acl.hasPermission(entity, permissionType, accessor)) {
             throw new PermissionDenied(accessor.getId(), entity.getId(),
-                        permType.toString(), scope.getId());
+                        permissionType.toString(), scope.getId());
         }
     }
 
     /**
-     * Ensure an item is readable by the given user
+     * Ensure an item is readable by the given accessor
      *
-     * @param entity
-     * @param user
+     * @param entity The item
+     * @param accessor The accessor/group
      * @throws AccessDenied
      */
-    public void checkReadAccess(AccessibleEntity entity, Accessor user)
+    public void checkReadAccess(AccessibleEntity entity, Accessor accessor)
             throws AccessDenied {
-        if (!acl.getAccessControl(entity, user)) {
+        if (!acl.canAccess(entity, accessor)) {
             // Using 'fake' permission 'read'
-            throw new AccessDenied(user.getId(), entity.getId());
+            throw new AccessDenied(accessor.getId(), entity.getId());
         }
     }
 
     /**
-     * Ensure an item is writable by the given user
+     * Get the content type node with the given id.
      *
-     * @param entity
-     * @param accessor
-     * @throws PermissionDenied
+     * @param entityClass The entity class
+     * @return A vertex framed as a content entityClass
      */
-    protected void checkWriteAccess(AccessibleEntity entity, Accessor accessor)
-            throws PermissionDenied {
-        checkEntityPermission(entity, accessor, PermissionType.UPDATE);
-    }
-
-    /**
-     * Get the content type with the given id.
-     *
-     * @param type
-     * @return
-     */
-    public ContentType getContentType(EntityClass type) {
+    public ContentType getContentTypeNode(EntityClass entityClass) {
         try {
-            return manager.getFrame(type.getName(), ContentType.class);
+            return manager.getFrame(entityClass.getName(), ContentType.class);
         } catch (ItemNotFound e) {
             throw new RuntimeException(
-                    String.format("No content type node found for type: '%s'",
-                            type.getName()), e);
+                    String.format("No content entityClass node found for entityClass: '%s'",
+                            entityClass.getName()), e);
         }
     }
 
-    public ContentTypes getContentType(Class<?> cls) {
+    /**
+     * Get the content type enum value with the given id.
+     *
+     * @param cls The frame class
+     * @return A vertex framed as a content type
+     */
+    public ContentTypes getContentTypeEnum(Class<?> cls) {
         return ContentTypes.withName(ClassUtils.getEntityType(cls).getName());
     }
 
@@ -133,7 +128,8 @@ public final class ViewHelper {
      * manipulated are DocumentaryUnits. The given scope is used to compare
      * against the scope relation on PermissionGrants.
      *
-     * @param scope
+     * @param scope The new scope
+     * @return A new view helper
      */
     public ViewHelper setScope(PermissionScope scope) {
         return new ViewHelper(graph, Optional

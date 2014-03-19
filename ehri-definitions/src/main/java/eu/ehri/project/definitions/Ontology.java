@@ -55,6 +55,10 @@ public class Ontology {
     public static final String ANNOTATION_NOTES_BODY = "body";
     public static final String ANNOTATION_TYPE = "type";
 
+    // Annotation/Link promotion
+    public static final String IS_PROMOTABLE = "isPromotable";
+    public static final String PROMOTED_BY = "promotedBy";
+
     // Users/groups
     public static final String ACCESSOR_BELONGS_TO_GROUP = "belongsTo";
 

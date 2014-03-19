@@ -12,6 +12,7 @@ import eu.ehri.project.models.UndeterminedRelationship;
 import eu.ehri.project.models.base.*;
 import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.persistence.Bundle;
+import eu.ehri.project.persistence.BundleDAO;
 import eu.ehri.project.views.LinkViews;
 import eu.ehri.project.views.Query;
 import eu.ehri.project.views.ViewFactory;
@@ -149,10 +150,11 @@ public class LinkResource extends
         if (item == null) {
             throw new ItemNotFound(id);
         }
+        new ViewHelper(graph).checkEntityPermission(item, userProfile, PermissionType.UPDATE);
 
         try {
-            ViewFactory.getCrudNoLogging(graph, AccessibleEntity.class)
-                    .deleteDependent(rel, item, userProfile, UndeterminedRelationship.class);
+            // FIXME: No logging here?
+            new BundleDAO(graph).delete(getSerializer().vertexFrameToBundle(rel));
             graph.getBaseGraph().commit();
             return Response.status(Status.OK).build();
         } finally {
@@ -164,7 +166,7 @@ public class LinkResource extends
 
     private Response buildResponseFromAnnotation(Link link)
             throws SerializationError {
-        String jsonStr = serializer.vertexFrameToJson(link);
+        String jsonStr = getSerializer().vertexFrameToJson(link);
         return Response.status(Status.CREATED).entity((jsonStr).getBytes())
                 .build();
     }

@@ -4,13 +4,14 @@ FILE="${BASH_SOURCE[0]}"
 
 # The first argument to the script must be a directory containing the EAD files.
 # The second argument is the username to run the import as.
-if (( $# != 2 )); then
-    echo "Don't forget to add a directory and a username with appropriate rights."
+if (( $# != 3 )); then
+    echo "Usage: import-ushmm.sh <directory to import EADs from> <username in graph> <log message>"
     exit 1
 fi
 
 IMPORTDIR="$1/"
 USERNAME="$2"
+LOGMESSAGE="$3"
 
 # listing all USHMM XML files is too long. First create file, then check for XML.
 # Debug
@@ -55,7 +56,7 @@ ls ushmmsplitfile-*
 
 # Import each of the split files.
 for F in $( ls ushmmsplitfile-* ); do
-    ./cmd ushmm-ead-import -user $USERNAME -scope us-005578 -F "$F"
+    ./cmd ushmm-ead-import -user $USERNAME -scope us-005578 -log "$LOGMESSAGE" -F "$F"
 done
 
 # Clean up split files? Keep allushmmfiles for logs.

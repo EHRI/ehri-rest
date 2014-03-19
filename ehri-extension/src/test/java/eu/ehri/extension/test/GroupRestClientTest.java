@@ -1,16 +1,14 @@
 package eu.ehri.extension.test;
 
+import com.google.common.collect.Sets;
 import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.WebResource;
 import eu.ehri.project.definitions.Entities;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.net.URI;
-import java.util.HashSet;
 import java.util.Set;
 
 import static com.sun.jersey.api.client.ClientResponse.Status.CREATED;
@@ -20,15 +18,9 @@ import static org.junit.Assert.assertTrue;
 
 public class GroupRestClientTest extends BaseRestClientTest {
 
-    static final String UPDATED_NAME = "UpdatedNameTEST";
     static final String TEST_GROUP_NAME = "admin";
     static final String CURRENT_ADMIN_USER = "mike";
     static final String NON_ADMIN_USER = "reto";
-
-    @BeforeClass
-    public static void setUpBeforeClass() throws Exception {
-        initializeTestDb(GroupRestClientTest.class.getName());
-    }
 
     @Test
     public void testCreateDeleteGroup() throws Exception {
@@ -58,8 +50,6 @@ public class GroupRestClientTest extends BaseRestClientTest {
     @Test
     public void testRemoveUser() throws Exception {
         // Create
-        WebResource resource = client.resource(
-                ehriUri(Entities.GROUP, TEST_GROUP_NAME, CURRENT_ADMIN_USER));
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
                 ehriUri(Entities.GROUP, TEST_GROUP_NAME, CURRENT_ADMIN_USER))
                 .delete(ClientResponse.class);
@@ -69,7 +59,6 @@ public class GroupRestClientTest extends BaseRestClientTest {
     @Test
     public void testListGroupMembers() throws Exception {
         final String GROUP_ID = "kcl";
-        WebResource resource = client.resource(ehriUri(Entities.GROUP, GROUP_ID, "list"));
 
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
                 ehriUri(Entities.GROUP, GROUP_ID, "list"))
@@ -87,17 +76,15 @@ public class GroupRestClientTest extends BaseRestClientTest {
     }
 
     /**
-     * helpers **
+     * Helpers **
      */
 
     private Set<String> getIdsFromEntityListJson(String jsonString) throws JSONException {
         JSONArray jsonArray = new JSONArray(jsonString);
-        //System.out.println("id: " + obj.get("id"));
-        Set<String> ids = new HashSet<String>();
+        Set<String> ids = Sets.newHashSet();
         for (int i = 0; i < jsonArray.length(); i++) {
             JSONObject item = jsonArray.getJSONObject(i);
-            //System.out.println("id: " + item.get("id"));
-            ids.add(item.getString("id").toString());
+            ids.add(item.getString("id"));
         }
         return ids;
     }

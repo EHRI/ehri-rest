@@ -1,38 +1,35 @@
 package eu.ehri.extension.test;
 
+import com.google.common.base.Charsets;
+import com.google.common.io.Resources;
+import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
-import eu.ehri.extension.AbstractAccessibleEntityResource;
 import eu.ehri.extension.AbstractRestResource;
-import eu.ehri.extension.test.utils.ServerRunner;
+import eu.ehri.project.definitions.Entities;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.neo4j.server.configuration.ThirdPartyJaxRsPackage;
+import org.junit.Test;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
-import java.io.File;
+import javax.ws.rs.core.UriBuilder;
+import java.net.URI;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import static com.sun.jersey.api.client.ClientResponse.Status.OK;
+
 /**
  * Base class for testing the REST interface on a 'embedded' neo4j server.
  */
-public class BaseRestClientTest extends AbstractRestClientTest {
-    // Test server port - different from Neo4j default to prevent collisions.
-    final static private Integer testServerPort = 7575;
-    // Test server host
-    final static private String baseUri = "http://localhost:" + testServerPort;
-    // Mount point for EHRI resources
-    final static private String mountPoint = "/ehri";
-    final static private String extensionEntryPointUri = baseUri + mountPoint;
+public class BaseRestClientTest extends RunningServerTest {
+
+    protected static Client client = Client.create();
 
     // Admin user prefix - depends on fixture data
     final static private String adminUserProfileId = "mike";
@@ -40,67 +37,28 @@ public class BaseRestClientTest extends AbstractRestClientTest {
     // Regular user
     final static private String regularUserProfileId = "reto";
 
-    protected static ServerRunner runner;
-
-    protected String getBaseUri() {
-        return baseUri;
-    }
-
-    @Override
-    String getExtensionEntryPointUri() {
-        return extensionEntryPointUri;
-    }
-
-    @Override
-    String getAdminUserProfileId() {
+    protected String getAdminUserProfileId() {
         return adminUserProfileId;
     }
 
-    String getRegularUserProfileId() {
+    protected String getRegularUserProfileId() {
         return regularUserProfileId;
     }
 
-    @BeforeClass
-    public static void setUpBeforeClass() throws Exception {
-        initializeTestDb(BaseRestClientTest.class.getName());
-    }
-
-    @Before
-    public void setupDb() throws Exception {
-        runner.setUp();
-    }
-
-    @After
-    public void resetDb() throws Exception {
-        runner.tearDown();
-    }
-
     /**
-     * Initialise a new graph database in a given location. This should be
-     * unique for each class, because otherwise problems can be encountered when
-     * another test suite starts up whilst a database is in the process of
-     * shutting down.
-     *
-     * @param dbName
+     * Tests if we have an admin user, we need that user for doing all the other
+     * tests
      */
-    public static void initializeTestDb(String dbName) {
-        runner = ServerRunner.getInstance(dbName, testServerPort);
-        runner.getConfigurator()
-                .getThirdpartyJaxRsPackages()
-                .add(new ThirdPartyJaxRsPackage(
-                        AbstractAccessibleEntityResource.class.getPackage()
-                                .getName(), mountPoint));
-        runner.start();
-    }
-
-    /**
-     * Shut down database when test suite has run.
-     *
-     * @throws Exception
-     */
-    @AfterClass
-    public static void shutdownDatabase() throws Exception {
-        runner.stop();
+    @Test
+    public void testAdminGetUserProfile() throws Exception {
+        // get the admin user profile
+        WebResource resource = client.resource(
+                ehriUri(Entities.USER_PROFILE, getAdminUserProfileId()));
+        ClientResponse response = resource
+                .accept(MediaType.APPLICATION_JSON)
+                .header(AbstractRestResource.AUTH_HEADER_NAME,
+                        getAdminUserProfileId()).get(ClientResponse.class);
+        assertStatus(OK, response);
     }
 
     /**
@@ -160,23 +118,40 @@ public class BaseRestClientTest extends AbstractRestClientTest {
         return mapper.readValue(json, typeRef);
     }
 
-    /**
-     * Function for deleting an entire database folder. USE WITH CARE!!!
-     *
-     * @param folder
-     */
-    protected static void deleteFolder(File folder) {
-        File[] files = folder.listFiles();
-        if (files != null) { // some JVMs return null for empty dirs
-            for (File f : files) {
-                if (f.isDirectory()) {
-                    deleteFolder(f);
-                } else {
-                    f.delete();
-                }
-            }
+    protected URI ehriUri(String... segments) {
+        UriBuilder builder = UriBuilder.fromPath(getExtensionEntryPointUri());
+        for (String segment : segments) {
+            builder = builder.segment(segment);
         }
-        folder.delete();
+        return builder.build();
     }
 
+    protected WebResource.Builder jsonCallAs(String user, URI uri) {
+        return client.resource(uri)
+                .accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .header(AbstractRestResource.AUTH_HEADER_NAME, user);
+    }
+
+    public void assertStatus(ClientResponse.Status status, ClientResponse response) {
+        org.junit.Assert.assertEquals(status.getStatusCode(), response.getStatus());
+    }
+
+    protected WebResource.Builder jsonCallAs(String user, String... segments) {
+        UriBuilder builder = UriBuilder.fromPath(getExtensionEntryPointUri());
+        for (String segment : segments) {
+            builder = builder.segment(segment);
+        }
+        URI uri = builder.build();
+        return client.resource(uri)
+                .accept(MediaType.APPLICATION_JSON)
+                .type(MediaType.APPLICATION_JSON)
+                .header(AbstractRestResource.AUTH_HEADER_NAME, user);
+    }
+
+    protected String readFileAsString(String filePath)
+            throws java.io.IOException {
+        URL url = Resources.getResource(filePath);
+        return Resources.toString(url, Charsets.UTF_8);
+    }
 }

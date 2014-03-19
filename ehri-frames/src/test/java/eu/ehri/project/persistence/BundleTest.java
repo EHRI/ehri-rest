@@ -16,9 +16,7 @@ import java.util.Map;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotSame;
 import static junit.framework.Assert.assertTrue;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
+import static org.junit.Assert.*;
 
 /**
  * User: michaelb
@@ -33,8 +31,8 @@ public class BundleTest {
                 .withDataValue(Ontology.IDENTIFIER_KEY, "foobar")
                 .withRelation(Ontology.DESCRIPTION_FOR_ENTITY,
                         new Bundle(EntityClass.DOCUMENT_DESCRIPTION)
-                            .withDataValue(Ontology.NAME_KEY, "Foobar")
-                            .withDataValue(Ontology.LANGUAGE, "en"));
+                                .withDataValue(Ontology.NAME_KEY, "Foobar")
+                                .withDataValue(Ontology.LANGUAGE, "en"));
     }
 
     @After
@@ -44,7 +42,7 @@ public class BundleTest {
 
     @Test
     public void testCreationWithNullValues() throws Exception {
-        Map<String,Object> data = Maps.newHashMap();
+        Map<String, Object> data = Maps.newHashMap();
         data.put("identifier", null);
         Bundle b2 = new Bundle(EntityClass.DOCUMENTARY_UNIT, data);
         assertSame(data.get("identifier"), b2.getDataValue("identifier"));
@@ -86,13 +84,13 @@ public class BundleTest {
 
     @Test
     public void testGetData() throws Exception {
-        Map<String,Object> data = bundle.getData();
+        Map<String, Object> data = bundle.getData();
         assertEquals("foobar", data.get(Ontology.IDENTIFIER_KEY));
     }
 
     @Test
     public void testWithData() throws Exception {
-        HashMap<String,Object> map = Maps.newHashMap();
+        HashMap<String, Object> map = Maps.newHashMap();
         map.put("foo", "bar");
         Bundle b2 = bundle.withData(map);
         assertNull(b2.getDataValue(Ontology.IDENTIFIER_KEY));
@@ -117,7 +115,7 @@ public class BundleTest {
         Bundle currentDp = BundleUtils.getBundle(bundle1, "describes[0]/hasDate[0]");
         System.out.println("CURRENT: " + currentDp);
         Bundle b1_2 = BundleUtils
-                            .setBundle(bundle1, "describes[0]/hasDate[-1]", currentDp);
+                .setBundle(bundle1, "describes[0]/hasDate[-1]", currentDp);
         Bundle b1_3 = BundleUtils.setBundle(b1_2, "describes[0]/hasDate[0]", dp);
 
         Bundle b2_2 = BundleUtils.setBundle(bundle2, "describes[0]/hasDate[-1]", dp);
@@ -140,6 +138,33 @@ public class BundleTest {
         // Data that isn't managed should count
         Bundle bundle3 = bundle1.withDataValue("foo", "bar");
         assertNotSame(bundle1, bundle3);
+    }
+
+    @Test
+    public void testMergeDataWith() throws Exception {
+        Bundle merge = new Bundle(bundle.getType())
+                .withDataValue("akey", "avalue");
+        Bundle merged = bundle.mergeDataWith(merge);
+        assertNotSame(merged, bundle);
+        assertEquals(merged.getDataValue(Ontology.IDENTIFIER_KEY), "foobar");
+        assertEquals(merged.getDataValue("akey"), "avalue");
+    }
+
+    @Test
+    public void testFilterRelations() throws Exception {
+        // Remove descriptions with languageCode = "en"
+        Bundle.Filter filter = new Bundle.Filter() {
+            @Override
+            public boolean remove(String relationLabel, Bundle bundle) {
+                String lang = bundle.getDataValue(Ontology.LANGUAGE);
+                return bundle.getType().equals(EntityClass.DOCUMENT_DESCRIPTION)
+                        && (lang != null
+                            && lang.equals("en"));
+            }
+        };
+        Bundle filtered = bundle.filterRelations(filter);
+        assertFalse(bundle.getRelations(Ontology.DESCRIPTION_FOR_ENTITY).isEmpty());
+        assertTrue(filtered.getRelations(Ontology.DESCRIPTION_FOR_ENTITY).isEmpty());
     }
 
     @Test

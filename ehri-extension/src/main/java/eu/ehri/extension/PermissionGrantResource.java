@@ -6,9 +6,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.exceptions.SerializationError;
-import eu.ehri.project.views.ViewHelper;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import eu.ehri.extension.errors.BadRequester;
@@ -51,7 +49,7 @@ public class PermissionGrantResource extends AbstractRestResource {
         PermissionGrant grant = manager.getFrame(id,
                 EntityClass.PERMISSION_GRANT, PermissionGrant.class);
         return Response.status(Status.OK).entity(
-                serializer.vertexFrameToJson(grant).getBytes()).build();
+                getSerializer().vertexFrameToJson(grant).getBytes()).build();
     }
     /**
      * Revoke a particular permission grant.

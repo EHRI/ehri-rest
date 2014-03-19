@@ -1,5 +1,6 @@
 package eu.ehri.project.commands;
 
+import com.google.common.collect.Ordering;
 import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
@@ -29,6 +30,7 @@ public class CmdEntryPoint extends BaseCommand {
         mmap.put(NiodEadImport.NAME, NiodEadImport.class);
         mmap.put(ItsEadImport.NAME, ItsEadImport.class);
         mmap.put(UshmmEadImport.NAME, UshmmEadImport.class);
+        mmap.put(CegesomaEadImport.NAME, CegesomaEadImport.class);
         mmap.put(EacImport.NAME, EacImport.class);
         mmap.put(EagImport.NAME, EagImport.class);
         mmap.put(UserListEntities.NAME, UserListEntities.class);
@@ -37,11 +39,13 @@ public class CmdEntryPoint extends BaseCommand {
         mmap.put(GraphViz.NAME, GraphViz.class);
         mmap.put(LoadFixtures.NAME, LoadFixtures.class);
         mmap.put(Initialize.NAME, Initialize.class);
+        mmap.put(Reindex.NAME, Reindex.class);
         mmap.put(UserAdd.NAME, UserAdd.class);
         mmap.put(UserMod.NAME, UserMod.class);
         mmap.put(EntityAdd.NAME, EntityAdd.class);
         mmap.put(PersonalitiesImport.NAME, PersonalitiesImport.class);
         mmap.put(DeleteEntities.NAME, DeleteEntities.class);
+        mmap.put(RdfExport.NAME, RdfExport.class);
         // adaptation of UserAdd for adding countries
         mmap.put(CountryAdd.NAME, CountryAdd.class);
 
@@ -60,7 +64,7 @@ public class CmdEntryPoint extends BaseCommand {
         String help = "Command line interface for the EHRI graph database."
                 + sep + sep + "The following commands are available:" + sep
                 + sep;
-        for (String key : CmdEntryPoint.COMMANDS.keySet()) {
+        for (String key : Ordering.natural().sortedCopy(CmdEntryPoint.COMMANDS.keySet())) {
             help += "  " + key + sep;
         }
         return help;

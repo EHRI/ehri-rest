@@ -1,8 +1,6 @@
 package eu.ehri.project.persistence;
 
-import com.google.common.collect.LinkedListMultimap;
-import com.google.common.collect.ListMultimap;
-import com.google.common.collect.Maps;
+import com.google.common.collect.*;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.exceptions.SerializationError;
@@ -18,6 +16,7 @@ import org.w3c.dom.Document;
 
 import java.lang.reflect.Method;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -48,6 +47,7 @@ public final class Serializer {
     private final int maxTraversals;
     private final boolean dependentOnly;
     private final boolean liteMode;
+    private final List<String> includeProps;
     private final LruCache<String, Bundle> cache;
 
 
@@ -70,6 +70,7 @@ public final class Serializer {
         private int maxTraversals = Fetch.DEFAULT_TRAVERSALS;
         private boolean dependentOnly = false;
         private boolean liteMode = false;
+        private List<String> includeProps = Lists.newArrayList();
         private LruCache<String, Bundle> cache = null;
 
         public Builder(FramedGraph<?> graph) {
@@ -96,6 +97,11 @@ public final class Serializer {
             return this;
         }
 
+        public Builder withIncludedProperties(final List<String> properties) {
+            this.includeProps = Lists.newArrayList(properties);
+            return this;
+        }
+
         public Serializer build() {
             return new Serializer(this);
         }
@@ -104,7 +110,7 @@ public final class Serializer {
 
     public Serializer(Builder builder) {
         this(builder.graph, builder.dependentOnly,
-                builder.maxTraversals, builder.liteMode, builder.cache);
+                builder.maxTraversals, builder.liteMode, builder.includeProps, builder.cache);
     }
 
     /**
@@ -118,13 +124,24 @@ public final class Serializer {
      * @param cache         Use a cache - use for single operations serializing many vertices
      *                      with common attributes, and NOT for reusable serializers
      */
-    private Serializer(FramedGraph<?> graph, boolean dependentOnly, int depth, boolean lite, LruCache<String,
-            Bundle> cache) {
+    private Serializer(FramedGraph<?> graph, boolean dependentOnly, int depth, boolean lite,
+            List<String> includeProps, LruCache<String, Bundle> cache) {
         this.graph = graph;
         this.dependentOnly = dependentOnly;
         this.maxTraversals = depth;
         this.liteMode = lite;
+        this.includeProps = includeProps;
         this.cache = cache;
+    }
+
+    /**
+     * Create a new serializer from this one, with extra included properties.
+     * @param includeProps A set of properties to include.
+     * @return A new serializer.
+     */
+    public Serializer withIncludedProperties(List<String> includeProps) {
+        return new Serializer(graph, dependentOnly, maxTraversals, liteMode,
+                includeProps, cache);
     }
 
     /**
@@ -431,7 +448,7 @@ public final class Serializer {
     private Map<String, Object> getVertexData(Vertex item, EntityClass type, int depth, boolean lite) {
         Map<String, Object> data = Maps.newHashMap();
         Iterable<String> keys = lite
-                ? ClassUtils.getMandatoryPropertyKeys(type.getEntityClass())
+                ? getMandatoryOrSpecificProps(type)
                 : item.getPropertyKeys();
 
         for (String key : keys) {
@@ -440,6 +457,19 @@ public final class Serializer {
                 data.put(key, item.getProperty(key));
         }
         return data;
+    }
+
+    /**
+     * Get a list of properties with are either given specifically
+     * in this serializer's includeProps attr, or are mandatory for
+     * the type.
+     * @param type An EntityClass
+     * @return A list of mandatory or included properties.
+     */
+    private List<String> getMandatoryOrSpecificProps(EntityClass type) {
+        return Lists.newArrayList(
+                Iterables.concat(ClassUtils.getMandatoryPropertyKeys(type.getEntityClass()),
+                        includeProps));
     }
 
     /**

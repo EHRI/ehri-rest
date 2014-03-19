@@ -1,6 +1,6 @@
 package eu.ehri.project.importers;
 
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
+import com.google.common.collect.Iterables;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import eu.ehri.project.persistence.BundleDAO;
 import eu.ehri.project.persistence.Mutation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +45,7 @@ public class BundesarchiveEadImporter extends EadImporter {
      * @param permissionScope
      * @param log
      */
-    public BundesarchiveEadImporter(FramedGraph<Neo4jGraph> framedGraph, PermissionScope permissionScope, ImportLog log) {
+    public BundesarchiveEadImporter(FramedGraph<?> framedGraph, PermissionScope permissionScope, ImportLog log) {
         super(framedGraph, permissionScope, log);
 
     }
@@ -53,12 +54,14 @@ public class BundesarchiveEadImporter extends EadImporter {
      * Import a single archdesc or c01-12 item, keeping a reference to the hierarchical depth.
      *
      * @param itemData
-     * @param depth
+     * @param idPath The parent id path, not including the overall scope
      * @throws ValidationError
      */
     @Override
-    public DocumentaryUnit importItem(Map<String, Object> itemData, int depth)
+    public DocumentaryUnit importItem(Map<String, Object> itemData, List<String> idPath)
             throws ValidationError {
+
+        BundleDAO persister = getPersister(idPath);
 
         Bundle unit = new Bundle(EntityClass.DOCUMENTARY_UNIT, extractDocumentaryUnit(itemData));
         if (unit.getDataValue(Ontology.IDENTIFIER_KEY) == null) {
@@ -89,7 +92,7 @@ public class BundesarchiveEadImporter extends EadImporter {
             logger.error("identifier Key: "+unit.getDataValue(Ontology.IDENTIFIER_KEY).toString());
         }
         IdGenerator generator = EntityClass.DOCUMENTARY_UNIT.getIdgen();
-        String id = generator.generateId(permissionScope, unit);
+        String id = generator.generateId(Iterables.concat(permissionScope.idPath(), idPath), unit);
         if (id.equals(permissionScope.getId())) {
             throw new RuntimeException("Generated an id same as scope: " + unit.getData());
         }
@@ -102,7 +105,7 @@ public class BundesarchiveEadImporter extends EadImporter {
 
         // Set the repository/item relationship
         //TODO: figure out another way to determine we're at the root, so we can get rid of the depth param
-        if (depth == TOP_LEVEL_DEPTH && mutation.created()) {
+        if (idPath.isEmpty() && mutation.created()) {
             EntityClass scopeType = manager.getEntityClass(permissionScope);
             if (scopeType.equals(EntityClass.REPOSITORY)) {
                 Repository repository = framedGraph.frame(permissionScope.asVertex(), Repository.class);

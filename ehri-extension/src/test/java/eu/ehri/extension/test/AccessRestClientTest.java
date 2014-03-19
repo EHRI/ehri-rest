@@ -5,31 +5,26 @@ import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 import eu.ehri.extension.AbstractRestResource;
 import eu.ehri.project.definitions.Entities;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 
+import static com.sun.jersey.api.client.ClientResponse.Status.NOT_FOUND;
 import static com.sun.jersey.api.client.ClientResponse.Status.OK;
-import static com.sun.jersey.api.client.ClientResponse.Status.UNAUTHORIZED;
+
 
 public class AccessRestClientTest extends BaseRestClientTest {
 
     static final String PRIVILEGED_USER_NAME = "mike";
     static final String LIMITED_USER_NAME = "reto";
 
-    @BeforeClass
-    public static void setUpBeforeClass() throws Exception {
-        initializeTestDb(AccessRestClientTest.class.getName());
-    }
-
     @Test
     public void testUserCannotRead() throws Exception {
         // Create
         ClientResponse response = jsonCallAs(LIMITED_USER_NAME,
                 ehriUri(Entities.DOCUMENTARY_UNIT, "c1")).get(ClientResponse.class);
-        assertStatus(UNAUTHORIZED, response);
+        assertStatus(NOT_FOUND, response);
     }
 
     @Test
@@ -38,7 +33,7 @@ public class AccessRestClientTest extends BaseRestClientTest {
         ClientResponse response = jsonCallAs(LIMITED_USER_NAME,
                 ehriUri(Entities.DOCUMENTARY_UNIT, "c1")).get(ClientResponse.class);
 
-        assertStatus(UNAUTHORIZED, response);
+        assertStatus(NOT_FOUND, response);
 
         // Set the form data
         MultivaluedMap<String, String> queryParams = new MultivaluedMapImpl();
@@ -88,7 +83,7 @@ public class AccessRestClientTest extends BaseRestClientTest {
         // Try the original request again and ensure it worked...
         response = jsonCallAs(LIMITED_USER_NAME,
                 ehriUri(Entities.DOCUMENTARY_UNIT, "c1")).get(ClientResponse.class);
-        assertStatus(UNAUTHORIZED, response);
+        assertStatus(NOT_FOUND, response);
     }
 
 }

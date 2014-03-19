@@ -8,7 +8,6 @@ import eu.ehri.project.persistence.Bundle;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.net.URI;
@@ -26,11 +25,6 @@ public class RepositoryRestClientTest extends BaseRestClientTest {
 
     private String agentTestData;
     private String docTestData;
-
-    @BeforeClass
-    public static void setUpBeforeClass() throws Exception {
-        initializeTestDb(RepositoryRestClientTest.class.getName());
-    }
 
     @Before
     public void setUp() throws Exception {

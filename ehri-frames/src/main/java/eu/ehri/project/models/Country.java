@@ -13,6 +13,7 @@ import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.IdentifiableEntity;
 import eu.ehri.project.models.base.ItemHolder;
 import eu.ehri.project.models.base.PermissionScope;
+import eu.ehri.project.models.utils.JavaHandlerUtils;
 
 /**
  * User: michaelb
@@ -64,8 +65,10 @@ public interface Country extends IdentifiableEntity, AccessibleEntity,
         }
 
         public void addRepository(final Repository repository) {
-            repository.asVertex().addEdge(Ontology.REPOSITORY_HAS_COUNTRY, it());
-            updateChildCountCache();
+            if (JavaHandlerUtils.addSingleRelationship(repository.asVertex(), it(),
+                    Ontology.REPOSITORY_HAS_COUNTRY)) {
+                updateChildCountCache();
+            }
         }
     }
 }

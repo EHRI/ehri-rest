@@ -19,6 +19,7 @@ import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.cvoc.AuthoritativeSet;
 import eu.ehri.project.persistence.Bundle;
 
+import eu.ehri.project.persistence.BundleDAO;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +34,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author linda
  */
-public class Wp2PersonalitiesImporter extends XmlImporter<Object> {
+public abstract class Wp2PersonalitiesImporter extends XmlImporter<Object> {
 
     private final XmlImportProperties p = new XmlImportProperties("wp2personalities.properties");
 
@@ -53,7 +54,8 @@ public class Wp2PersonalitiesImporter extends XmlImporter<Object> {
             descBundle = descBundle.withRelation(Ontology.ENTITY_HAS_DATE, new Bundle(EntityClass.DATE_PERIOD, dpb));
         }
         unit = unit.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
-
+        
+        BundleDAO persister = getPersister();
         Mutation<HistoricalAgent> mutation = persister.createOrUpdate(unit, HistoricalAgent.class);
         HistoricalAgent frame = mutation.getNode();
 
@@ -68,7 +70,6 @@ public class Wp2PersonalitiesImporter extends XmlImporter<Object> {
 
     }
 
-    @Override
     public AccessibleEntity importItem(Map<String, Object> itemData, int depth) throws ValidationError {
         throw new UnsupportedOperationException("Not supported ever.");
     }

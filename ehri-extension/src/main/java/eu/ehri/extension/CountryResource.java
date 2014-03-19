@@ -84,7 +84,7 @@ public class CountryResource extends
             @QueryParam(FILTER_PARAM) List<String> filters)
             throws ItemNotFound, BadRequester, AccessDenied {
         Accessor user = getRequesterUserProfile();
-        Country country = views.detail(manager.getFrame(id, cls), user);
+        Country country = views.detail(id, user);
         Query<Repository> query = new Query<Repository>(graph, Repository.class)
                 .setLimit(limit).setOffset(offset).orderBy(order)
                 .filter(filters);
@@ -99,7 +99,7 @@ public class CountryResource extends
             @QueryParam(FILTER_PARAM) List<String> filters)
             throws ItemNotFound, BadRequester, AccessDenied {
         Accessor user = getRequesterUserProfile();
-        Country country = views.detail(manager.getFrame(id, cls), user);
+        Country country = views.detail(id, user);
         Query<Repository> query = new Query<Repository>(graph, Repository.class)
                 .filter(filters);
         return Response.ok((query.count(country.getRepositories(), user))
@@ -117,7 +117,7 @@ public class CountryResource extends
             @QueryParam(FILTER_PARAM) List<String> filters)
             throws ItemNotFound, BadRequester, AccessDenied {
         Accessor user = getRequesterUserProfile();
-        Country country = views.detail(manager.getFrame(id, cls), user);
+        Country country = views.detail(id, user);
         Query<Repository> query = new Query<Repository>(graph, Repository.class)
                 .setLimit(limit).setOffset(offset).orderBy(order)
                 .filter(filters);
@@ -165,9 +165,9 @@ public class CountryResource extends
     /**
      * Create a top-level repository unit for this country.
      *
-     * @param id
-     * @param json
-     * @return
+     * @param id The country id
+     * @param json The new repository data
+     * @return The new repository
      * @throws PermissionDenied
      * @throws ValidationError
      * @throws IntegrityError
@@ -184,7 +184,7 @@ public class CountryResource extends
             throws AccessDenied, PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, ItemNotFound, BadRequester {
         Accessor user = getRequesterUserProfile();
-        Country country = views.detail(manager.getFrame(id, cls), user);
+        Country country = views.detail(id, user);
         try {
             Repository repository = createRepository(json, country);
             new AclManager(graph).setAccessors(repository,
@@ -203,7 +203,7 @@ public class CountryResource extends
 
     private Response buildResponseFromRepository(Repository repository)
             throws SerializationError {
-        String jsonStr = serializer.vertexFrameToJson(repository);
+        String jsonStr = getSerializer().vertexFrameToJson(repository);
         // FIXME: Hide the details of building this path
         URI docUri = UriBuilder.fromUri(uriInfo.getBaseUri())
                 .segment(Entities.REPOSITORY)

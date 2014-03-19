@@ -3,14 +3,15 @@ package eu.ehri.extension;
 // Borrowed, temporarily, from Michael Hunger:
 // https://github.com/jexp/neo4j-clean-remote-db-addon
 
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Maps;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.*;
 import eu.ehri.project.models.cvoc.Concept;
@@ -26,12 +27,18 @@ import eu.ehri.project.acl.PermissionType;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistence.Bundle;
 
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 /**
  * Provides additional Admin methods needed by client systems.
  */
 @Path("admin")
 public class AdminResource extends AbstractRestResource {
 
+    private static ObjectMapper mapper = new ObjectMapper();
     public static String DEFAULT_USER_ID_PREFIX = "user";
     public static String DEFAULT_USER_ID_FORMAT = "%s%06d";
 
@@ -72,30 +79,41 @@ public class AdminResource extends AbstractRestResource {
     /**
      * Create a new user with a default name and identifier.
      * 
-     * @return
+     * @return A new user
      * @throws Exception
      */
     @POST
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Consumes(MediaType.APPLICATION_JSON)
     @Path("/createDefaultUserProfile")
-    public Response createDefaultUserProfile() throws Exception {
+    public Response createDefaultUserProfile(String jsonData,
+            @QueryParam(GROUP_PARAM) List<String> groups) throws Exception {
         graph.getBaseGraph().checkNotInTransaction();
         try {
             String ident = getNextDefaultUserId();
-            Bundle bundle = new Bundle(EntityClass.USER_PROFILE)
-                    .withDataValue(Ontology.IDENTIFIER_KEY, ident)
-                    .withDataValue(Ontology.NAME_KEY, ident);
+            Bundle bundle = new Bundle.Builder(EntityClass.USER_PROFILE)
+                    .addDataValue(Ontology.IDENTIFIER_KEY, ident)
+                    .addDataValue(Ontology.NAME_KEY, ident)
+                    .addData(parseUserData(jsonData))
+                    .build();
 
             // NB: This assumes that admin's ID is the same as its identifier.
             Accessor accessor = manager.getFrame(Group.ADMIN_GROUP_IDENTIFIER,
                     Accessor.class);
             Crud<UserProfile> view = ViewFactory.getCrudWithLogging(graph, UserProfile.class);
             UserProfile user = view.create(bundle, accessor);
+
+            // add to the groups
+            for (String groupId: groups) {
+                Group group = manager.getFrame(groupId, EntityClass.GROUP, Group.class);
+                group.addMember(user);
+            }
+
             // Grant them owner permissions on their own account.
-            new AclManager(graph).grantPermissions(user, user,
+            new AclManager(graph).grantPermission(user, user,
                     PermissionType.OWNER);
 
-            String jsonStr = serializer.vertexFrameToJson(user);
+            String jsonStr = getSerializer().vertexFrameToJson(user);
             graph.getBaseGraph().commit();
             return Response.status(Status.CREATED).entity((jsonStr).getBytes())
                     .build();
@@ -124,5 +142,16 @@ public class AdminResource extends AbstractRestResource {
             start++;
         return String.format(DEFAULT_USER_ID_FORMAT, DEFAULT_USER_ID_PREFIX,
                 start);
+    }
+
+    private Map<String,Object> parseUserData(String json) throws IOException {
+        if (json == null || json.trim().equals("")) {
+            return Maps.newHashMap();
+        } else {
+            TypeReference<HashMap<String,Object>> typeRef = new TypeReference<
+                                    HashMap<String,Object>
+                                    >() {};
+            return mapper.readValue(json, typeRef);
+        }
     }
 }

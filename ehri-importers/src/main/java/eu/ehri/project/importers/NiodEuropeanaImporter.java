@@ -4,7 +4,6 @@
  */
 package eu.ehri.project.importers;
 
-import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
@@ -14,6 +13,8 @@ import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.BundleDAO;
+
+import java.util.List;
 import java.util.Map;
 
 import eu.ehri.project.persistence.Mutation;
@@ -33,17 +34,19 @@ public class NiodEuropeanaImporter extends EaImporter{
      * @param permissionScope
      * @param log
      */
-    public NiodEuropeanaImporter(FramedGraph<Neo4jGraph> framedGraph, PermissionScope permissionScope, ImportLog log) {
+    public NiodEuropeanaImporter(FramedGraph<?> framedGraph, PermissionScope permissionScope, ImportLog log) {
         super(framedGraph, permissionScope, log);
     }
     
     @Override
-    public DocumentaryUnit importItem(Map<String, Object> itemData, int depth) throws ValidationError {
+    public DocumentaryUnit importItem(Map<String, Object> itemData, List<String> idPath) throws
+            ValidationError {
         return importItem(itemData);
     }
     
     public DocumentaryUnit importItem(Map<String, Object> itemData) throws ValidationError {
-        BundleDAO persister = new BundleDAO(framedGraph, permissionScope);
+        BundleDAO persister = getPersister();
+
         Bundle unit = new Bundle(EntityClass.DOCUMENTARY_UNIT, extractDocumentaryUnit(itemData));
         logger.debug("unit created");
 

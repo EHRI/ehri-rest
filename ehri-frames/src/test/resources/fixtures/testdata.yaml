@@ -49,6 +49,13 @@
     identifier: soma-group
     name: CEGES-SOMA
 
+- id: portal
+  type: group
+  data:
+    identifier: portal
+    name: Portal
+    description: Group for users of the EHRI Portal
+
 --- # Users Mike, Tim, Linda, and Reto
 
 # Mike is a member of the KCL group, but he is ALSO a member of Admin
@@ -382,6 +389,7 @@
   data:
     identifier: ann1
     body: Test Annotation
+    isPromotable: !!bool true
   relationships:
     hasAnnotationTarget: c1
     
@@ -401,6 +409,36 @@
   relationships:
     hasAnnotationTarget: c1
     hasAnnotationBody: mike
+    access: mike
+
+# This annotation is was originally
+# private to mike, but marked promotable
+# and subsequently promoted by tim.
+- id: ann4
+  type: annotation
+  data:
+    identifier: ann4
+    body: Created by
+    isPromotable: !!bool true
+  relationships:
+    access: mike
+    hasAnnotationTarget: c1
+    hasAnnotationBody: mike
+    promotedBy: tim
+
+# This annotation is marked promotable
+# but isn't yet promoted.
+- id: ann5
+  type: annotation
+  data:
+    identifier: ann5
+    body: Created by
+    isPromotable: !!bool true
+  relationships:
+    hasAnnotationTarget: c1
+    hasAnnotationBody: mike
+    access: mike
+
 
 --- # Links
  - id: link1
@@ -436,6 +474,16 @@
     hasAccessor: reto
     hasGrantee: mike
     
+# Allow user Reto to edit the r2 record directly (because, say, he
+# works for KCL and has responsibility for this.)
+- id: retoKclUpdateGrant
+  type: permissionGrant
+  relationships:
+    hasPermission: update
+    hasTarget: r2
+    hasAccessor: reto
+    hasGrantee: mike
+
 # Allow user Linda to create doc units anywhere
 - id: lindaGlobalWriteGrant
   type: permissionGrant
@@ -444,6 +492,18 @@
     hasTarget: documentaryUnit
     hasAccessor: linda
     hasGrantee: mike
+
+# Allow portal users to create annotations
+- id: portalAnnotationGrant
+  type: permissionGrant
+  relationships:
+    hasPermission: annotate
+    hasTarget:
+      - documentaryUnit
+      - repository
+      - historicalAgent
+      - cvocConcept
+    hasAccessor: portal
 
 --- # Vocabularies
 - id: cvoc1

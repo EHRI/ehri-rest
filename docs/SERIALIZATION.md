@@ -37,3 +37,6 @@ This tells the serializer to *only* include mandatory properties for _all_ items
 
 This tells the serializer to ignore all `@Fetch` traversals and only include those that are `@Dependent`.
 
+### Overriding Included Properties
+
+Sometimes you want to retrieve an item whilst insuring that a property of a relation is serialized. By default (and the default is currently fixed for the REST interface) only mandatory properties are included in automatically serialized relations. For example, when retrieving the data for a documentary unit, it's repository node is automatically included in the `relationships` data - however only the **mandatory** properties for the repository (it's `identifier` and it's description's `name` and `languageCode`s) are included in order to reduce unnecessary data transfer. We can, however, force tree serialization to include certain properties (which will apply indiscriminately to **all** data types thus serialized.)  These can be specified in the `includeProps` parameter to the serializer, which takes a list of (string) property names to include in the output. From the REST interface, this can be done with the `_ip=<propname>` parameter (which can be given multiple times.)

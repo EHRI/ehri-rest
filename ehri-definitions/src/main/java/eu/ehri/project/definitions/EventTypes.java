@@ -20,5 +20,7 @@ public enum EventTypes {
     setVisibility,
     addGroup,
     removeGroup,
-    ingest
+    ingest,
+    promotion,
+    demotion
 }

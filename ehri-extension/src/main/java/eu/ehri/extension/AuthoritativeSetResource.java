@@ -85,7 +85,7 @@ public class AuthoritativeSetResource extends
             @QueryParam(FILTER_PARAM) List<String> filters)
             throws ItemNotFound, BadRequester, AccessDenied {
         Accessor user = getRequesterUserProfile();
-        AuthoritativeSet set = views.detail(manager.getFrame(id, cls), user);
+        AuthoritativeSet set = views.detail(id, user);
         Query<AuthoritativeItem> query = new Query<AuthoritativeItem>(graph, AuthoritativeItem.class)
                 .setLimit(limit).setOffset(offset).orderBy(order)
                 .filter(filters);
@@ -100,7 +100,7 @@ public class AuthoritativeSetResource extends
             @QueryParam(FILTER_PARAM) List<String> filters)
             throws ItemNotFound, BadRequester, AccessDenied {
         Accessor user = getRequesterUserProfile();
-        AuthoritativeSet set = views.detail(manager.getFrame(id, cls), user);
+        AuthoritativeSet set = views.detail(id, user);
         Query<AuthoritativeItem> query = new Query<AuthoritativeItem>(graph, AuthoritativeItem.class)
                 .filter(filters);
         return Response.ok((query.count(set.getAuthoritativeItems(), user))
@@ -118,7 +118,7 @@ public class AuthoritativeSetResource extends
             @QueryParam(FILTER_PARAM) List<String> filters)
             throws ItemNotFound, BadRequester, AccessDenied {
         Accessor user = getRequesterUserProfile();
-        AuthoritativeSet set = views.detail(manager.getFrame(id, cls), user);
+        AuthoritativeSet set = views.detail(id, user);
         Query<AuthoritativeItem> query = new Query<AuthoritativeItem>(graph, AuthoritativeItem.class)
                 .setLimit(limit).setOffset(offset).orderBy(order)
                 .filter(filters);
@@ -178,7 +178,7 @@ public class AuthoritativeSetResource extends
         	Accessor requesterUserProfile = getRequesterUserProfile();
         	Iterable<AuthoritativeItem> agents = set.getAuthoritativeItems();
         	for (AuthoritativeItem agent : agents) {
-        		agentViews.delete(agent, requesterUserProfile);
+        		agentViews.delete(agent.getId(), requesterUserProfile);
         	}
             graph.getBaseGraph().commit();
             return Response.status(Status.OK).build();
@@ -196,9 +196,9 @@ public class AuthoritativeSetResource extends
     /**
      * Create a top-level agent unit for this set.
      *
-     * @param id
-     * @param json
-     * @return
+     * @param id The set ID
+     * @param json The item data
+     * @return A new item
      * @throws eu.ehri.project.exceptions.PermissionDenied
      * @throws eu.ehri.project.exceptions.ValidationError
      * @throws eu.ehri.project.exceptions.IntegrityError
@@ -215,7 +215,7 @@ public class AuthoritativeSetResource extends
             throws AccessDenied, PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, ItemNotFound, BadRequester {
         Accessor user = getRequesterUserProfile();
-        AuthoritativeSet set = views.detail(manager.getFrame(id, cls), user);
+        AuthoritativeSet set = views.detail(id, user);
         try {
             HistoricalAgent agent = createHistoricalAgent(json, set);
             new AclManager(graph).setAccessors(agent,
@@ -234,7 +234,7 @@ public class AuthoritativeSetResource extends
 
     private Response buildResponseFromHistoricalAgent(HistoricalAgent agent)
             throws SerializationError {
-        String jsonStr = serializer.vertexFrameToJson(agent);
+        String jsonStr = getSerializer().vertexFrameToJson(agent);
         // FIXME: Hide the details of building this path
         URI docUri = UriBuilder.fromUri(uriInfo.getBaseUri())
                 .segment(Entities.HISTORICAL_AGENT)

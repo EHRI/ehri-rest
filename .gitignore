@@ -1,6 +1,7 @@
 nb-configuration.xml
 nbactions.xml
 *.class
+*.pyc
 *.java.orig
 *.xml.orig
 *.~lock.*#

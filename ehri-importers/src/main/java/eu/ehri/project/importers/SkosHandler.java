@@ -5,6 +5,7 @@
 package eu.ehri.project.importers;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import java.util.List;
 import java.util.Map;
@@ -70,7 +71,7 @@ public class SkosHandler extends SaxXmlHandler {
                 if (!concepts.isEmpty()) {
                     // just test
                     try {
-                        importer.importItem(concepts.get(0), depth);
+                        importer.importItem(concepts.get(0), Lists.<String>newArrayList());
                     } catch (ValidationError e) {
                         // TODO Auto-generated catch block
                         e.printStackTrace();

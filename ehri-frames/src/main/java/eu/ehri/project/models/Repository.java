@@ -56,8 +56,10 @@ public interface Repository extends AccessibleEntity, DescribedEntity,
         }
 
         public void addCollection(final DocumentaryUnit collection) {
-            collection.asVertex().addEdge(Ontology.DOC_HELD_BY_REPOSITORY, it());
-            updateChildCountCache();
+            if (JavaHandlerUtils.addSingleRelationship(collection.asVertex(), it(),
+                    Ontology.DOC_HELD_BY_REPOSITORY)) {
+                updateChildCountCache();
+            }
         }
 
         public void setCountry(final Country country) {

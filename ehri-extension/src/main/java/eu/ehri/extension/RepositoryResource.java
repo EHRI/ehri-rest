@@ -83,7 +83,7 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all)
             throws ItemNotFound, BadRequester, AccessDenied {
         Accessor user = getRequesterUserProfile();
-        Repository repository = views.detail(manager.getFrame(id, cls), user);
+        Repository repository = views.detail(id, user);
         Iterable<DocumentaryUnit> units = all
                 ? repository.getAllCollections()
                 : repository.getCollections();
@@ -103,7 +103,7 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all)
             throws ItemNotFound, BadRequester, AccessDenied {
         Accessor user = getRequesterUserProfile();
-        Repository repository = views.detail(manager.getFrame(id, cls), user);
+        Repository repository = views.detail(id, user);
         Iterable<DocumentaryUnit> units = all
                 ? repository.getAllCollections()
                 : repository.getCollections();
@@ -125,7 +125,7 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all)
             throws ItemNotFound, BadRequester, AccessDenied, PermissionDenied {
         Accessor user = getRequesterUserProfile();
-        Repository repository = views.detail(manager.getFrame(id, cls), user);
+        Repository repository = views.detail(id, user);
         Iterable<DocumentaryUnit> units = all
                 ? repository.getAllCollections()
                 : repository.getCollections();
@@ -178,9 +178,9 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
     /**
      * Create a documentary unit for this repository.
      * 
-     * @param id
-     * @param json
-     * @return
+     * @param id The repository ID
+     * @param json The new unit data
+     * @return The new unit
      * @throws PermissionDenied
      * @throws ValidationError
      * @throws IntegrityError
@@ -197,7 +197,7 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
             throws AccessDenied, PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, ItemNotFound, BadRequester {
         Accessor user = getRequesterUserProfile();
-        Repository repository = views.detail(manager.getFrame(id, cls), user);
+        Repository repository = views.detail(id, user);
         try {
             DocumentaryUnit doc = createDocumentaryUnit(json, repository);
             new AclManager(graph).setAccessors(doc,
@@ -216,7 +216,7 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
 
     private Response buildResponseFromDocumentaryUnit(DocumentaryUnit doc)
             throws SerializationError {
-        String jsonStr = serializer.vertexFrameToJson(doc);
+        String jsonStr = getSerializer().vertexFrameToJson(doc);
         // FIXME: Hide the details of building this path
         URI docUri = UriBuilder.fromUri(uriInfo.getBaseUri())
                 .segment(Entities.DOCUMENTARY_UNIT)

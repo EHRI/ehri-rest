@@ -56,7 +56,7 @@ public class AccessResource extends
             acl.setAccessors(item, accessors, getRequesterUserProfile());
             graph.getBaseGraph().commit();
             return Response.status(Status.OK)
-                    .entity((serializer.vertexFrameToJson(item)).getBytes())
+                    .entity((getSerializer().vertexFrameToJson(item)).getBytes())
                     .build();
         } finally {
             cleanupTransaction();

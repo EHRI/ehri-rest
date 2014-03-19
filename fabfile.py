@@ -118,6 +118,15 @@ def online_backup(remote_dir):
     with settings(dst=remote_dir):
         run("%(neo4j_install)s/bin/neo4j-backup -from single://localhost:6362 -to %(dst)s" % env)
 
+@task
+def load_queue():
+    """Run the queue.sh script to run imports from the queue.
+    
+    """
+    with cd(env.path):
+        stop()
+        run("./scripts/queue.sh")
+        start()
 
 @task
 def online_clone_db(local_dir):
@@ -161,7 +170,7 @@ def copy_db(local_dir):
         stop()
 
         remote_db_dir = "%(neo4j_install)s/data/graph.db" % env
-        temp_file = our_temp_file = run("mktemp --suffix=.tgz")
+        temp_file = our_temp_file = run("mktemp")
         if not os.path.exists(local_dir):
             os.mkdir(local_dir)
 
@@ -352,4 +361,6 @@ def copy_lib_sh():
         put("scripts/import-ushmm.sh", "scripts/import-ushmm.sh")
         run("chmod g+x scripts/import-ushmm.sh") 
         put("scripts/cmd", "scripts/cmd")
-        run("chmod g+x scripts/cmd") 
+        run("chmod g+x scripts/cmd")  
+        put("scripts/export-wienerlibrary", "scripts/export-wienerlibrary")
+        run("chmod g+x scripts/export-wienerlibrary") 

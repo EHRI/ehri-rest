@@ -37,6 +37,9 @@ public class XmlImportProperties implements ImportProperties {
         return cachedProperties;
     }
 
+    /**
+     * Get the value for the specified key, or null.
+     */
     @Override
     public String getProperty(String key) {
         return getProperties().getProperty(key);

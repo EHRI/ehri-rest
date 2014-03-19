@@ -11,6 +11,7 @@ import javax.ws.rs.core.Response.Status;
 //import org.apache.log4j.Logger;
 import eu.ehri.project.exceptions.*;
 import eu.ehri.project.persistence.Mutation;
+import eu.ehri.project.persistence.Serializer;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import com.google.common.collect.Lists;
@@ -79,7 +80,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
     /**
      * List all instances of the 'entity' accessible to the given user.
      *
-     * @return
+     * @return A streaming list
      * @throws ItemNotFound
      * @throws BadRequester
      */
@@ -124,7 +125,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
     /**
      * Count items accessible to a given user.
      *
-     * @param filters
+     * @param filters A set of query filters
      * @return Number of items.
      * @throws BadRequester
      */
@@ -187,8 +188,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
             BadRequester {
         graph.getBaseGraph().checkNotInTransaction();
         try {
-            E entity = views.detail(manager.getFrame(id, getEntityType(), cls),
-                    getRequesterUserProfile());
+            E entity = views.detail(id, getRequesterUserProfile());
             return Response.status(Status.OK)
                     .entity(getRepresentation(entity).getBytes()).build();
         } catch (SerializationError e) {
@@ -197,24 +197,25 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
     }
 
     /**
-     * Update (change) an instance of the 'entity' in the database
+     * Update (change) an instance of the 'entity' in the database.
      *
      * @param json The json
      * @return The response of the update request
+     * @throws ItemNotFound
      * @throws PermissionDenied
      * @throws IntegrityError
      * @throws ValidationError
      * @throws DeserializationError
-     * @throws ItemNotFound
      * @throws BadRequester
      */
     public Response update(String json) throws PermissionDenied,
             IntegrityError, ValidationError, DeserializationError,
-            BadRequester {
+            BadRequester, ItemNotFound {
         graph.getBaseGraph().checkNotInTransaction();
         try {
             Bundle entityBundle = Bundle.fromString(json);
-            Mutation<E> update = views.update(entityBundle, getRequesterUserProfile(), getLogMessage());
+            Mutation<E> update = views
+                    .update(entityBundle, getRequesterUserProfile(), getLogMessage());
             graph.getBaseGraph().commit();
             return Response.status(Status.OK)
                     .entity(getRepresentation(update.getNode()).getBytes())
@@ -230,6 +231,9 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
     /**
      * Update (change) an instance of the 'entity' in the database
      *
+     * If the Patch header is true top-level bundle data will be merged
+     * instead of overwritten.
+
      * @param id   The items identifier property
      * @param json The json
      * @return The response of the update request
@@ -248,12 +252,23 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
         // specified key/value and constructs a new bundle containing the
         // item's graph id, which requires an extra
         // serialization/deserialization.
-        E entity = views.detail(manager.getFrame(id, getEntityType(), cls),
-                getRequesterUserProfile());
-        Bundle rawBundle = Bundle.fromString(json);
-        Bundle entityBundle = new Bundle(entity.getId(), getEntityType(),
-                rawBundle.getData(), rawBundle.getRelations());
-        return update(entityBundle.toJson());
+        try {
+            E entity = views.detail(id, getRequesterUserProfile());
+            Bundle rawBundle = Bundle.fromString(json);
+            if (isPatch()) {
+                Serializer depSerializer = new Serializer.Builder(graph).dependentOnly().build();
+                Bundle existing = depSerializer.vertexFrameToBundle(entity);
+                rawBundle = existing.mergeDataWith(rawBundle);
+            }
+            Bundle entityBundle = new Bundle(entity.getId(), getEntityType(),
+                    rawBundle.getData(), rawBundle.getRelations());
+            return update(entityBundle.toJson());
+        } catch (SerializationError serializationError) {
+            graph.getBaseGraph().rollback();
+            throw new RuntimeException(serializationError);
+        } finally {
+            cleanupTransaction();
+        }
     }
 
     /**
@@ -271,9 +286,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
             ValidationError, BadRequester {
         graph.getBaseGraph().checkNotInTransaction();
         try {
-            E entity = views.detail(manager.getFrame(id, getEntityType(), cls),
-                    getRequesterUserProfile());
-            views.delete(entity, getRequesterUserProfile(), getLogMessage());
+            views.delete(id, getRequesterUserProfile(), getLogMessage());
             graph.getBaseGraph().commit();
             return Response.status(Status.OK).build();
         } catch (SerializationError serializationError) {

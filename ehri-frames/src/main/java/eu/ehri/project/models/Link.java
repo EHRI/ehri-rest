@@ -10,10 +10,7 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.annotations.Mandatory;
-import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.models.base.AnnotatableEntity;
-import eu.ehri.project.models.base.LinkableEntity;
+import eu.ehri.project.models.base.*;
 
 /**
  *
@@ -23,7 +20,7 @@ import eu.ehri.project.models.base.LinkableEntity;
  * @author mik
  */
 @EntityType(EntityClass.LINK)
-public interface Link extends AccessibleEntity, AnnotatableEntity {
+public interface Link extends AccessibleEntity, AnnotatableEntity, Promotable {
 
     @Fetch(Ontology.LINK_HAS_LINKER)
     @Adjacency(label = Ontology.LINK_HAS_LINKER)

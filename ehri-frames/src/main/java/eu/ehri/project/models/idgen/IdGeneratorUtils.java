@@ -5,7 +5,6 @@ import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
 import eu.ehri.project.acl.SystemScope;
-import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.Messages;
@@ -31,11 +30,10 @@ public class IdGeneratorUtils  {
 
     protected static Logger logger = LoggerFactory.getLogger(IdGeneratorUtils.class);
 
-    public static ListMultimap<String,String> handleIdCollision(PermissionScope scope,
+    public static ListMultimap<String,String> handleIdCollision(final Iterable<String> scopeIds,
             String dataKey, String ident) {
 
-        String scopeId = scope == null ? "none" : scope.getIdentifier();
-        logger.error("ID Generation error: {}={} (scope: {})", dataKey, ident, scopeId);
+        logger.error("ID Generation error: {}={} (scope: {})", dataKey, ident, scopeIds);
         ListMultimap<String,String> errors = LinkedListMultimap.create();
         errors.put(dataKey,  MessageFormat.format(
                 Messages.getString("BundleDAO.uniquenessError"), ident));
@@ -65,7 +63,7 @@ public class IdGeneratorUtils  {
      * @param bundle The input bundle
      * @return The complete id string
      */
-    public static String generateId(final List<String> scopeIds, final Bundle bundle, String ident) {
+    public static String generateId(final Iterable<String> scopeIds, final Bundle bundle, String ident) {
 
         // Validation should have ensured that ident exists...
         if (ident == null || ident.trim().isEmpty()) {
@@ -74,7 +72,16 @@ public class IdGeneratorUtils  {
         }
         List<String> newIds = Lists.newArrayList(scopeIds);
         newIds.add(ident);
-        String scopedId =  Joiner.on(SEPARATOR).join(newIds);
+        return joinPath(newIds);
+    }
+
+    /**
+     * Join an identifier path to form a full ID.
+     * @param path A list of identifier strings.
+     * @return The resultant path ID.
+     */
+    public static String joinPath(Iterable<String> path) {
+        String scopedId =  Joiner.on(SEPARATOR).join(path);
         return Slugify.slugify(scopedId);
     }
 }

@@ -108,7 +108,7 @@ public class ActionViewsTest extends AbstractFixtureTest {
         try {
             System.out.println(new Serializer(graph).vertexFrameToBundle(events.get(0)));
         } catch (SerializationError serializationError) {
-            serializationError.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            serializationError.printStackTrace();
         }
     }
 
@@ -123,23 +123,23 @@ public class ActionViewsTest extends AbstractFixtureTest {
      */
     @Test
     public void testDelete() throws PermissionDenied, ValidationError,
-            SerializationError {
+            SerializationError, ItemNotFound {
         LoggingCrudViews<DocumentaryUnit> docViews = new LoggingCrudViews<DocumentaryUnit>(
                 graph, DocumentaryUnit.class);
-        Integer shouldDelete = 1;
+        int shouldDelete = 1;
         int origActionCount = toList(validUser.getHistory()).size();
 
         // FIXME: Surely there's a better way of doing this???
         Iterator<Description> descIter = item.getDescriptions().iterator();
         for (; descIter.hasNext(); shouldDelete++) {
             DocumentDescription d = graph.frame(descIter.next().asVertex(), DocumentDescription.class);
-            for (DatePeriod dp : d.getDatePeriods()) shouldDelete++;
-            for (UndeterminedRelationship r : d.getUndeterminedRelationships()) shouldDelete++;
+            shouldDelete += Iterables.count(d.getDatePeriods());
+            shouldDelete += Iterables.count(d.getUndeterminedRelationships());
         }
 
         String log = "Deleting item";
-        Integer deleted = docViews.delete(item, validUser, Optional.of(log));
-        assertEquals(shouldDelete, deleted);
+        Integer deleted = docViews.delete(item.getId(), validUser, Optional.of(log));
+        assertEquals(Integer.valueOf(shouldDelete), deleted);
 
         List<SystemEvent> actions = toList(validUser.getActions());
 

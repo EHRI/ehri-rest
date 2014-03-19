@@ -4,6 +4,7 @@
  */
 package eu.ehri.project.importers.test;
 
+import com.google.common.collect.Iterables;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Vertex;
@@ -21,7 +22,7 @@ import org.slf4j.LoggerFactory;
  */
 public class AbstractImporterTest extends AbstractFixtureTest {
     private static final Logger logger = LoggerFactory.getLogger(AbstractImporterTest.class);
-    protected void printGraph(FramedGraph<Neo4jGraph> graph) {
+    protected void printGraph(FramedGraph<?> graph) {
         for (Vertex v : graph.getVertices()) {
             logger.debug("-------------------------");
             for (String key : v.getPropertyKeys()) {
@@ -43,13 +44,12 @@ public class AbstractImporterTest extends AbstractFixtureTest {
         }
     }
 
-    protected Vertex getVertexByIdentifier(FramedGraph<Neo4jGraph> graph, String id) {
+    protected Vertex getVertexByIdentifier(FramedGraph<?> graph, String id) {
         Iterable<Vertex> docs = graph.getVertices(Ontology.IDENTIFIER_KEY, id);
         return docs.iterator().next();
     }
 
-    protected int getNodeCount(FramedGraph<Neo4jGraph> graph) {
-        return toList(GlobalGraphOperations
-                .at(graph.getBaseGraph().getRawGraph()).getAllNodes()).size();
+    protected int getNodeCount(FramedGraph<?> graph) {
+        return Iterables.size(graph.getVertices());
     }
 }

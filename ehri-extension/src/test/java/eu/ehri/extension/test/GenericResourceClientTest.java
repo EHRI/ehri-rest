@@ -4,7 +4,6 @@ import com.sun.jersey.api.client.ClientResponse;
 import eu.ehri.project.persistence.Bundle;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import javax.ws.rs.core.UriBuilder;
@@ -20,11 +19,6 @@ public class GenericResourceClientTest extends BaseRestClientTest {
     private static final String ITEM1 = "c1";
     private static final String ITEM2 = "c4";
     private static final String BAD_ITEM = "cd1";
-
-    @BeforeClass
-    public static void setUpBeforeClass() throws Exception {
-        initializeTestDb(GenericResourceClientTest.class.getName());
-    }
 
     @Test
     public void getMultipleGenericEntities() throws IOException {

@@ -13,9 +13,7 @@ import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraphFactory;
 import com.tinkerpop.frames.modules.javahandler.JavaHandlerModule;
 import eu.ehri.project.definitions.Entities;
-import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.UserProfile;
-import eu.ehri.project.models.utils.ClassUtils;
 import eu.ehri.project.utils.TxCheckedNeo4jGraph;
 import eu.ehri.project.models.base.Frame;
 import org.codehaus.jackson.JsonFactory;
@@ -44,7 +42,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
     public static final int DEFAULT_LIST_LIMIT = 20;
     private static final ObjectMapper mapper = new ObjectMapper();
 
-    private static final Logger logger = LoggerFactory.getLogger(TxCheckedResource.class);
+    protected static final Logger logger = LoggerFactory.getLogger(TxCheckedResource.class);
     private static final FramedGraphFactory graphFactory = new FramedGraphFactory(new JavaHandlerModule());
 
     /**
@@ -58,10 +56,13 @@ public abstract class AbstractRestResource implements TxCheckedResource {
     public static final String GROUP_PARAM = "group";
     public static final String ALL_PARAM = "all";
 
+    public static final String INCLUDE_PROPS_PARAM = "_ip";
+
     /**
      * Header names
      */
     public static final String AUTH_HEADER_NAME = "Authorization";
+    public static final String PATCH_HEADER_NAME = "Patch";
     public static final String LOG_MESSAGE_HEADER_NAME = "logMessage";
 
 
@@ -102,13 +103,21 @@ public abstract class AbstractRestResource implements TxCheckedResource {
     protected final GraphDatabaseService database;
     protected final FramedGraph<TxCheckedNeo4jGraph> graph;
     protected final GraphManager manager;
-    protected final Serializer serializer;
+    private final Serializer serializer;
 
     public AbstractRestResource(@Context GraphDatabaseService database) {
         this.database = database;
         graph = graphFactory.create(new TxCheckedNeo4jGraph(database));
         manager = GraphManagerFactory.getInstance(graph);
-        serializer  = new Serializer.Builder(graph).build();
+        serializer = new Serializer.Builder(graph).build();
+    }
+
+    public Serializer getSerializer() {
+        Optional<List<String>> includeProps = Optional.fromNullable(uriInfo.getQueryParameters(true)
+                .get(INCLUDE_PROPS_PARAM));
+        return includeProps.isPresent()
+                ? serializer.withIncludedProperties(includeProps.get())
+                : serializer;
     }
 
     public FramedGraph<TxCheckedNeo4jGraph> getGraph() {
@@ -117,15 +126,16 @@ public abstract class AbstractRestResource implements TxCheckedResource {
 
     protected void cleanupTransaction() {
         if (graph.getBaseGraph().isInTransaction()) {
-            logger.warn("Rolling back active transaction");
+            logger.error("Rolling back active transaction");
             graph.getBaseGraph().rollback();
         }
     }
 
+
     /**
      * Retrieve the account of the current user, who may be
      * anonymous.
-     * 
+     *
      * @return The UserProfile
      * @throws BadRequester
      */
@@ -145,7 +155,8 @@ public abstract class AbstractRestResource implements TxCheckedResource {
     /**
      * Retrieve the profile of the current user, throwing a
      * BadRequest if it's invalid.
-     * @return
+     *
+     * @return The current user profile
      */
     protected UserProfile getCurrentUser() throws BadRequester {
         Accessor profile = getRequesterUserProfile();
@@ -159,7 +170,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
     /**
      * Retreive an action log message from the request header.
      *
-     * @return
+     * @return An optional log message
      */
     protected Optional<String> getLogMessage() {
         List<String> list = requestHeaders.getRequestHeader(LOG_MESSAGE_HEADER_NAME);
@@ -170,9 +181,24 @@ public abstract class AbstractRestResource implements TxCheckedResource {
     }
 
     /**
+     * Determine if a PATCH header is present. Ideally, Jersey would
+     * support the HTTP PATCH method, but it doesn't so we have to
+     * user a header.
+     *
+     * @return Patch is given
+     */
+    protected Boolean isPatch() {
+        List<String> list = requestHeaders.getRequestHeader(PATCH_HEADER_NAME);
+        if (list != null && !list.isEmpty()) {
+            return Boolean.valueOf(list.get(0));
+        }
+        return false;
+    }
+
+    /**
      * Retreive the id string of the requester's UserProfile.
-     * 
-     * @return
+     *
+     * @return String ID
      */
     private Optional<String> getRequesterIdentifier() {
         List<String> list = requestHeaders.getRequestHeader(AUTH_HEADER_NAME);
@@ -184,23 +210,24 @@ public abstract class AbstractRestResource implements TxCheckedResource {
 
     /**
      * Stream a single page with total, limit, and offset info.
-     * 
-     * @param page
-     * @return
+     *
+     * @param page A page of data
+     * @return A streaming response
      */
     protected <T extends Frame> StreamingOutput streamingPage(
             final Query.Page<T> page) {
         return MediaType.TEXT_XML_TYPE.equals(checkMediaType())
-                ? getStreamingXmlOutput(page, serializer)
-                : getStreamingJsonOutput(page, serializer);
+                ? getStreamingXmlOutput(page, getSerializer())
+                : getStreamingJsonOutput(page, getSerializer());
     }
-    
+
     /**
      * Stream a single page with total, limit, and offset info, using
      * the given entity converter.
-     * 
-     * @param page
-     * @return
+     *
+     * @param page       A page of data
+     * @param serializer A custom serializer instance
+     * @return A streaming response
      */
     protected <T extends Frame> StreamingOutput streamingPage(
             final Query.Page<T> page, final Serializer serializer) {
@@ -262,23 +289,23 @@ public abstract class AbstractRestResource implements TxCheckedResource {
 
     /**
      * Return a streaming response from an iterable.
-     * 
-     * @param list
-     * @return
+     *
+     * @param list A list of framed items
+     * @return A streaming response
      */
     protected <T extends Frame> StreamingOutput streamingList(
             final Iterable<T> list) {
         return MediaType.TEXT_XML_TYPE.equals(checkMediaType())
-                ? getStreamingXmlOutput(list, serializer)
-                : getStreamingJsonOutput(list, serializer);
+                ? getStreamingXmlOutput(list, getSerializer())
+                : getStreamingJsonOutput(list, getSerializer());
     }
-        
+
     /**
      * Return a streaming response from an iterable, using the given
      * entity converter.
-     * 
-     * @param list
-     * @return
+     *
+     * @param list A list of framed items
+     * @return A streaming response
      */
     protected <T extends Frame> StreamingOutput streamingList(
             final Iterable<T> list, final Serializer serializer) {
@@ -299,7 +326,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
                 try {
                     for (T item : list) {
                         os.write(serializer.vertexFrameToXmlString(item)
-                        .getBytes(utf8));
+                                .getBytes(utf8));
                     }
                 } catch (SerializationError e) {
                     throw new RuntimeException(e);
@@ -335,11 +362,11 @@ public abstract class AbstractRestResource implements TxCheckedResource {
     /**
      * Return a streaming response from an iterable, using the given
      * entity converter.
-     *
+     * <p/>
      * FIXME: I shouldn't be here, or the other method should. Redesign API.
      *
-     * @param list
-     * @return
+     * @param list A list of vertices
+     * @return A streaming response
      */
     protected StreamingOutput streamingVertexList(
             final Iterable<Vertex> list, final Serializer serializer) {
@@ -367,11 +394,11 @@ public abstract class AbstractRestResource implements TxCheckedResource {
     /**
      * Return a streaming response from an iterable, using the given
      * entity converter.
-     *
+     * <p/>
      * FIXME: I shouldn't be here, or the other method should. Redesign API.
      *
-     * @param map
-     * @return
+     * @param map A map of vertices
+     * @return A streaming response
      */
     protected StreamingOutput streamingVertexMap(
             final Map<String, Vertex> map, final Serializer serializer) {
@@ -381,7 +408,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
             public void write(OutputStream arg0) throws IOException {
                 JsonGenerator g = f.createJsonGenerator(arg0);
                 g.writeStartObject();
-                for (Map.Entry<String,Vertex> keypair: map.entrySet()) {
+                for (Map.Entry<String, Vertex> keypair : map.entrySet()) {
                     try {
                         g.writeFieldName(keypair.getKey());
                         mapper.writeValue(g, serializer.vertexToData(keypair.getValue()));
@@ -396,43 +423,23 @@ public abstract class AbstractRestResource implements TxCheckedResource {
     }
 
     /**
-     * Return a number.
-     */
-    protected Response numberResponse(Long number) {
-        return MediaType.TEXT_XML_TYPE.equals(checkMediaType())
-                ? Response.ok(String.format("<count>%d</count>", number.longValue())
-                    .getBytes()).build()
-                : Response.ok(number.toString().getBytes()).build();
-    }
-
-    /**
-     * Return a boolean.
-     */
-    protected Response booleanResponse(boolean bool) {
-        return MediaType.TEXT_XML_TYPE.equals(checkMediaType())
-                ? Response.ok(String.format("<boolean>%s</boolean>", bool)
-                    .getBytes()).build()
-                : Response.ok(Boolean.toString(bool).getBytes()).build();
-    }
-
-    /**
      * Return a streaming response from an iterable.
-     * 
-     * @param map
-     * @return
+     *
+     * @param map A multimap of vertices
+     * @return A streaming response
      */
     protected <T extends Frame> StreamingOutput streamingMultimap(
             final ListMultimap<String, T> map) {
-        return streamingMultimap(map, serializer);
+        return streamingMultimap(map, getSerializer());
     }
-        
+
     /**
      * Return a streaming response from an iterable, using the given
      * entity converter.
-     * 
-     * @param map
-     * @param serializer
-     * @return
+     *
+     * @param map        A map of vertices
+     * @param serializer A custom serializer
+     * @return A streaming response
      */
     protected <T extends Frame> StreamingOutput streamingMultimap(
             final ListMultimap<String, T> map, final Serializer serializer) {
@@ -461,24 +468,46 @@ public abstract class AbstractRestResource implements TxCheckedResource {
     }
 
     /**
-     * Get a string representation (JSON or XML) of a given frame.
-     * @param vertex
-     * @return
+     * Return a number.
      */
-    protected String getRepresentation(Vertex vertex) throws SerializationError {
+    protected Response numberResponse(Long number) {
         return MediaType.TEXT_XML_TYPE.equals(checkMediaType())
-                ? serializer.vertexToXmlString(vertex)
-                : serializer.vertexToJson(vertex);
+                ? Response.ok(String.format("<count>%d</count>", number)
+                .getBytes()).build()
+                : Response.ok(number.toString().getBytes()).build();
+    }
+
+    /**
+     * Return a boolean.
+     */
+    protected Response booleanResponse(boolean bool) {
+        return MediaType.TEXT_XML_TYPE.equals(checkMediaType())
+                ? Response.ok(String.format("<boolean>%s</boolean>", bool)
+                .getBytes()).build()
+                : Response.ok(Boolean.toString(bool).getBytes()).build();
     }
 
     /**
      * Get a string representation (JSON or XML) of a given frame.
-     * @param frame
-     * @return
+     *
+     * @param vertex A vertex
+     * @return The string representation, according to media type
+     */
+    protected String getRepresentation(Vertex vertex) throws SerializationError {
+        return MediaType.TEXT_XML_TYPE.equals(checkMediaType())
+                ? getSerializer().vertexToXmlString(vertex)
+                : getSerializer().vertexToJson(vertex);
+    }
+
+    /**
+     * Get a string representation (JSON or XML) of a given frame.
+     *
+     * @param frame A framed item
+     * @return The string representation, according to media type
      */
     protected String getRepresentation(Frame frame) throws SerializationError {
         return MediaType.TEXT_XML_TYPE.equals(checkMediaType())
-                ? serializer.vertexFrameToXmlString(frame)
-                : serializer.vertexFrameToJson(frame);
+                ? getSerializer().vertexFrameToXmlString(frame)
+                : getSerializer().vertexFrameToJson(frame);
     }
 }

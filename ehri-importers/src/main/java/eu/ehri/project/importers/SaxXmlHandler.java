@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package eu.ehri.project.importers;
 
 import com.google.common.base.Optional;
@@ -45,6 +41,7 @@ public abstract class SaxXmlHandler extends DefaultHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(SaxXmlHandler.class);
     public static final String UNKNOWN = "UNKNOWN_";
+    public static final String OBJECT_IDENTIFIER = "objectIdentifier";
     protected final Stack<Map<String, Object>> currentGraphPath = new Stack<Map<String, Object>>();
     protected final Map<String, Map<String, Object>> languageMap = Maps.newHashMap();
     protected final Stack<String> currentPath = new Stack<String>();
@@ -54,6 +51,10 @@ public abstract class SaxXmlHandler extends DefaultHandler {
     protected final XmlImportProperties properties;
 
     protected int depth = 0;
+    
+    /**
+     * 
+     */
     private String languagePrefix;
 
     /**
@@ -77,9 +78,19 @@ public abstract class SaxXmlHandler extends DefaultHandler {
      */
     protected abstract boolean needToCreateSubNode(String qName);
 
+    /**
+     * Receive an opening tag. Initialise the current text to store the characters,
+     * create a language map to hold descriptions in different languages,
+     * push the level if this element warrants a new sub-node and store the attributes 
+     * that need to be stored.
+     */
     @Override
     public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
-        currentText.push("");
+        // initialise the text holding space
+    	currentText.push("");
+    	
+    	// retrieve the language from the attributes and
+    	// create a language map
         Optional<String> lang = languageAttribute(attributes);
         if (lang.isPresent()) {
             languagePrefix = lang.get();
@@ -93,6 +104,7 @@ public abstract class SaxXmlHandler extends DefaultHandler {
             }
         }
 
+        // Update the path with the new element name
         currentPath.push(withoutNamespace(qName));
         if (needToCreateSubNode(qName)) { //a new subgraph should be created
             depth++;
@@ -100,6 +112,7 @@ public abstract class SaxXmlHandler extends DefaultHandler {
             currentGraphPath.push(new HashMap<String, Object>());
         }
 
+        // Store attributes that are listed in the .properties file
         for (int attr = 0; attr < attributes.getLength(); attr++) { // only certain attributes get stored
             String attribute = withoutNamespace(attributes.getLocalName(attr));
             if (properties.hasAttributeProperty(attribute)
@@ -110,6 +123,10 @@ public abstract class SaxXmlHandler extends DefaultHandler {
 
     }
 
+    /**
+     * Receive an end element. Put the contents of the text holding space in the current graph
+     * as a property using the .properties file as a mapping.
+     */
     @Override
     public void endElement(String uri, String localName, String qName) throws SAXException {
         languagePrefix = null;
@@ -122,6 +139,16 @@ public abstract class SaxXmlHandler extends DefaultHandler {
 
     }
 
+
+    /**
+     * Insert a graph representation in the current graph (the one on top of 
+     * the currentGraphPath stack) as a list item at the given key.
+     * The value stored at the key is always a list - if the key did not exist
+     * yet, a new list is created to which the sub-graph is added.
+     * 
+     * @param key name of the edge to connect the sub-graph to the current graph
+     * @param subgraph Map graph representation to insert into the current graph
+     */
     @SuppressWarnings("unchecked")
     protected void putSubGraphInCurrentGraph(String key, Map<String, Object> subgraph) {
         Map<String, Object> c = currentGraphPath.peek();
@@ -137,6 +164,12 @@ public abstract class SaxXmlHandler extends DefaultHandler {
         }
     }
 
+    /**
+     * Get the language from the XML attributes, if it is there.
+     * Else return 'absent'.
+     * @param attributes SAX-parsed XML attributes
+     * @return an Optional containing the language, or 'absent'
+     */
     private Optional<String> languageAttribute(Attributes attributes) {
         for (int attr = 0; attr < attributes.getLength(); attr++) { // only certain attributes get stored
             String attribute = withoutNamespace(attributes.getLocalName(attr));
@@ -149,6 +182,12 @@ public abstract class SaxXmlHandler extends DefaultHandler {
         return Optional.absent();
     }
 
+    /**
+     * Get the element name without namespace prefix.
+     * 
+     * @param qName an element QName that may have a namespace prefix
+     * @return the element name without namespace prefix
+     */
     private String withoutNamespace(String qName) {
         String name = qName;
         int colon = qName.indexOf(":");
@@ -187,6 +226,15 @@ public abstract class SaxXmlHandler extends DefaultHandler {
         putPropertyInGraph(currentGraphPath.peek(), property, value);
     }
 
+    /**
+     * Stores this property value pair in the given graph node representation.
+     * If the value is effectively empty, nothing happens.
+     * If the property already exists, it is added to the value list.
+     *
+     * @param c a Map representation of a graph node
+     * @param property the key to store the value for
+     * @param value the value to store
+     */
     protected static void putPropertyInGraph(Map<String, Object> c, String property, String value) {
         if(value == null)
             return;
@@ -220,21 +268,30 @@ public abstract class SaxXmlHandler extends DefaultHandler {
             c.put(property, valuetrimmed);
         }
     }
+    
+    /**
+     * Overwrite a value in the current graph.
+     * 
+     * @param property name of the property to overwrite
+     * @param value new value for the property.
+     */
     protected void overwritePropertyInCurrentGraph(String property, Object value){
         overwritePropertyInCurrentGraph(currentGraphPath.peek(), property, value);
     }
+    
     private void overwritePropertyInCurrentGraph(Map<String, Object> c,String property, Object value){
         logger.debug("overwriteProp: " + property + " " + value);
         c.put(property, value);
     }
 
     /**
-     *
-     * @param path
-     * @return returns the corresponding value to this path from the properties file. the search is inside out, so if
+     * Get the property name corresponding to the given path from the .properties file.
+     * 
+     * @param path the stacked element names forming a path from the root to the current element
+     * @return the corresponding value to this path from the properties file. the search is inside out, so if
      * both eadheader/ and ead/eadheader/ are specified, it will return the value for the first
      *
-     * if this path has no corresponding value in the properties file, it will be return the entire path name, with _
+     * if this path has no corresponding value in the properties file, it will return the entire path name, with _
      * replacing the /
      */
     protected String getImportantPath(Stack<String> path) {
@@ -245,10 +302,10 @@ public abstract class SaxXmlHandler extends DefaultHandler {
      *
      * @param path
      * @param attribute
-     * @return returns the corresponding value to this path from the properties file. the search is inside out, so if
-     * both eadheader/ and ead/eadheader/ are specified, it will return the value for the first
+     * @return the corresponding value to this path from the properties file. The search is inside out, so if
+     * both eadheader/ and ead/eadheader/ are specified, it will return the value for the first.
      *
-     * if this path has no corresponding value in the properties file, it will be return the entire path name, with _
+     * If this path has no corresponding value in the properties file, it will return the entire path name, with _
      * replacing the /
      */
     private String getImportantPath(Stack<String> path, String attribute) {
