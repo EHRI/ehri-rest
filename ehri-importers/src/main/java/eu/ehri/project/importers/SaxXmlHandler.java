@@ -188,6 +188,8 @@ public abstract class SaxXmlHandler extends DefaultHandler {
     }
 
     protected static void putPropertyInGraph(Map<String, Object> c, String property, String value) {
+        if(value == null)
+            return;
         String valuetrimmed = value.trim();
         if (valuetrimmed.isEmpty()) {
             return;

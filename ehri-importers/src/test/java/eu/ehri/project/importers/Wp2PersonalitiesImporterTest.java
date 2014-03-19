@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
 public class Wp2PersonalitiesImporterTest extends AbstractImporterTest{
     
     private static final Logger logger = LoggerFactory.getLogger(Wp2PersonalitiesImporterTest.class);
-    protected final String SINGLE_EAD = "wp2_persons_small.csv";
+    protected final String SINGLE_EAD = "wp2_persons_bare.csv";
 
     @Test
     public void testImportItemsT() throws Exception {
@@ -35,23 +35,23 @@ public class Wp2PersonalitiesImporterTest extends AbstractImporterTest{
         final String logMessage = "Importing some WP2 Personalities records";
         XmlImportProperties p = new XmlImportProperties("wp2personalities.properties");
         assertTrue(p.containsProperty("id"));
-        assertTrue(p.containsProperty("dateOfBirth"));
+//        assertTrue(p.containsProperty("dateOfBirth"));
         assertTrue(p.containsProperty("name"));
         
 
         int count = getNodeCount(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        ImportLog log = new CsvImportManager(graph, authoritativeSet, validUser, Wp2PersonalitiesImporter.class).importFile(ios, logMessage);
+        ImportLog log = new CsvImportManager(graph, authoritativeSet, validUser, PersonalitiesImporter.class).importFile(ios, logMessage);
         System.out.println(Iterables.toList(authoritativeSet.getAuthoritativeItems()));
         /*
          * 16 HistAgent
          * 16 HistAgentDesc
-         * 9 more DatePeriods
+         * -- 9 more DatePeriods not 
          * 17 more import Event links (1 for every Unit, 1 for the User)
          * 1 more import Event
          */
         printGraph(graph);
-        assertEquals(count+59, getNodeCount(graph));
+        assertEquals(count+50, getNodeCount(graph));
         assertEquals(voccount + 16, toList(authoritativeSet.getAuthoritativeItems()).size());
 
         // Check permission scopes are correct.
