@@ -142,7 +142,7 @@ public final class AclViews {
             Set<PermissionType> permissionList, Accessor grantee)
             throws PermissionDenied {
         helper.checkEntityPermission(item, grantee, PermissionType.GRANT);
-        acl.setEntityPermissions(accessor, item, permissionList);
+        acl.setItemPermissions(item, accessor, permissionList);
         // Log the action...
         actionManager.logEvent(item,
                 manager.cast(grantee, Actioner.class), EventTypes.setItemPermissions)

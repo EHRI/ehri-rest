@@ -156,10 +156,10 @@ public class AclViewsTest extends AbstractFixtureTest {
         Group group = manager.getFrame("niod", Group.class);
         Accessor grantee = invalidUser;
         // Grant the user specific permissions to update the group
-        aclManager.grantPermission(grantee, graph.frame(user.asVertex(), PermissionGrantTarget.class),
-                PermissionType.GRANT);
-        aclManager.grantPermission(grantee, graph.frame(group.asVertex(), PermissionGrantTarget.class),
-                PermissionType.UPDATE);
+        aclManager.grantPermission(graph.frame(user.asVertex(), PermissionGrantTarget.class), PermissionType.GRANT, grantee
+        );
+        aclManager.grantPermission(graph.frame(group.asVertex(), PermissionGrantTarget.class), PermissionType.UPDATE, grantee
+        );
         try {
             // This should still fail, because the user doesn't belong
             // to the group himself...
@@ -185,8 +185,8 @@ public class AclViewsTest extends AbstractFixtureTest {
         group.addMember(grantee);
         assertFalse(aclManager.belongsToAdmin(grantee));
         // Grant UPDATE permissions on the Group
-        aclManager.grantPermission(grantee, graph.frame(user.asVertex(), PermissionGrantTarget.class),
-                PermissionType.GRANT);
+        aclManager.grantPermission(graph.frame(user.asVertex(), PermissionGrantTarget.class), PermissionType.GRANT, grantee
+        );
         try {
             // This should still fail, because the user does not have UPDATE
             // permissions on the Group
@@ -195,8 +195,8 @@ public class AclViewsTest extends AbstractFixtureTest {
         } catch (PermissionDenied e) {
         }
         // Grant UPDATE permissions on the Group
-        aclManager.grantPermission(grantee, graph.frame(group.asVertex(), PermissionGrantTarget.class),
-                PermissionType.UPDATE);
+        aclManager.grantPermission(graph.frame(group.asVertex(), PermissionGrantTarget.class), PermissionType.UPDATE, grantee
+        );
         aclViews.addAccessorToGroup(group, user, grantee);
     }
 }

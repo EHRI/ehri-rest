@@ -99,8 +99,8 @@ public final class AclManager {
     /**
      * Determine if a user can access an entity.
      *
-     * @param entity The item
-     * @param accessor  The user/group
+     * @param entity   The item
+     * @param accessor The user/group
      * @return Whether or not the given accessor can access the entity
      */
     public boolean canAccess(AccessibleEntity entity, Accessor accessor) {
@@ -112,7 +112,7 @@ public final class AclManager {
     /**
      * Revoke an accessor's access to an entity.
      *
-     * @param entity The item
+     * @param entity   The item
      * @param accessor A user/group from whom to revoke access
      */
     public void removeAccessControl(AccessibleEntity entity, Accessor accessor) {
@@ -122,11 +122,11 @@ public final class AclManager {
     /**
      * Set access control on an entity to several accessors.
      *
-     * @param entity The item
+     * @param entity    The item
      * @param accessors A set of users/groups who can access the item
      */
     public void setAccessors(AccessibleEntity entity,
-                             Iterable<Accessor> accessors) {
+            Iterable<Accessor> accessors) {
         Set<Accessor> accessorVertices = Sets.newHashSet(accessors);
         Set<Accessor> remove = Sets.newHashSet();
         for (Accessor accessor : entity.getAccessors()) {
@@ -149,13 +149,13 @@ public final class AclManager {
      * @param accessor The accessor
      * @return An inherited item permission set.
      */
-    public InheritedItemPermissionSet getInheritedEntityPermissions(
-            Accessor accessor, AccessibleEntity entity) {
+    public InheritedItemPermissionSet getInheritedItemPermissions(
+            AccessibleEntity entity, Accessor accessor) {
         InheritedItemPermissionSet.Builder builder
                 = new InheritedItemPermissionSet
-                .Builder(accessor, getEntityPermissions(accessor, entity));
+                .Builder(accessor, getItemPermissions(accessor, entity));
         for (Accessor parent : accessor.getAllParents()) {
-            builder.withInheritedPermissions(parent, getEntityPermissions(parent, entity));
+            builder.withInheritedPermissions(parent, getItemPermissions(parent, entity));
         }
         return builder.build();
     }
@@ -163,19 +163,19 @@ public final class AclManager {
     /**
      * Set the permissions for a particular user on the given item.
      *
-     * @param accessor The user/group
-     * @param item The item
+     * @param item          The item
+     * @param accessor      The user/group
      * @param permissionSet A set of permissions
      * @throws PermissionDenied
      */
-    public void setEntityPermissions(Accessor accessor, AccessibleEntity item,
-                                     Set<PermissionType> permissionSet) throws PermissionDenied {
+    public void setItemPermissions(AccessibleEntity item, Accessor accessor,
+            Set<PermissionType> permissionSet) throws PermissionDenied {
         checkNoGrantOnAdminOrAnon(accessor);
         for (PermissionType t : PermissionType.values()) {
             if (permissionSet.contains(t)) {
-                grantPermission(accessor, item, t);
+                grantPermission(item, t, accessor);
             } else {
-                revokePermission(accessor, item, t);
+                revokePermission(item, t, accessor);
             }
         }
     }
@@ -190,8 +190,8 @@ public final class AclManager {
     public InheritedGlobalPermissionSet getInheritedGlobalPermissions(
             Accessor accessor) {
         InheritedGlobalPermissionSet.Builder builder
-                 = new InheritedGlobalPermissionSet
-                        .Builder(accessor, getGlobalPermissions(accessor));
+                = new InheritedGlobalPermissionSet
+                .Builder(accessor, getGlobalPermissions(accessor));
         for (Accessor parent : accessor.getParents()) {
             builder.withInheritedPermissions(parent, getGlobalPermissions(parent));
         }
@@ -232,9 +232,9 @@ public final class AclManager {
             }
             for (PermissionType perm : PermissionType.values()) {
                 if (pset.contains(perm)) {
-                    grantPermission(accessor, target, perm);
+                    grantPermission(target, perm, accessor);
                 } else {
-                    revokePermission(accessor, target, perm);
+                    revokePermission(target, perm, accessor);
                 }
             }
         }
@@ -243,18 +243,18 @@ public final class AclManager {
     /**
      * Grant a user permissions to a content type.
      *
-     * @param accessor The user/group
-     * @param target The grant target (content type or item)
+     * @param target   The grant target (content type or item)
      * @param permType The permission type
+     * @param accessor The user/group
      * @return The permission grant given for this accessor and target
      */
-    public PermissionGrant grantPermission(Accessor accessor,
-            PermissionGrantTarget target, PermissionType permType) {
+    public PermissionGrant grantPermission(PermissionGrantTarget target,
+            PermissionType permType, Accessor accessor) {
         assertNoGrantOnAdminOrAnon(accessor);
         // If we can find an existing grant, use that, otherwise create a new
         // one.
-        Optional<PermissionGrant> maybeGrant = findPermission(accessor, target,
-                permType);
+        Optional<PermissionGrant> maybeGrant = findPermission(target, permType, accessor
+        );
         if (maybeGrant.isPresent()) {
             return maybeGrant.get();
         } else {
@@ -272,15 +272,15 @@ public final class AclManager {
     /**
      * Revoke a particular permission on the given entity.
      *
-     * @param accessor The user/group
-     * @param entity The item
+     * @param entity   The item
      * @param permType The permission type
+     * @param accessor The user/group
      */
-    public void revokePermission(Accessor accessor, AccessibleEntity entity,
-            PermissionType permType) {
+    public void revokePermission(AccessibleEntity entity, PermissionType permType,
+            Accessor accessor) {
 
-        Optional<PermissionGrant> maybeGrant = findPermission(accessor, entity,
-                permType);
+        Optional<PermissionGrant> maybeGrant = findPermission(entity, permType, accessor
+        );
         if (maybeGrant.isPresent()) {
             manager.deleteVertex(maybeGrant.get().asVertex());
         }
@@ -417,14 +417,14 @@ public final class AclManager {
     /**
      * Check for a content permission with a given set of scopes.
      *
-     * @param contentType The content type
+     * @param contentType    The content type
      * @param permissionType The permission type
-     * @param accessor The user/group
-     * @param scopes The item scopes
+     * @param accessor       The user/group
+     * @param scopes         The item scopes
      * @return Whether or not the user has permission
      */
     private boolean hasPermission(ContentTypes contentType, PermissionType permissionType, Accessor accessor,
-                                  Collection<PermissionScope> scopes) {
+            Collection<PermissionScope> scopes) {
 
         ContentType contentTypeNode = enumContentTypeMap.get(contentType);
         // Check the user themselves...
@@ -435,17 +435,19 @@ public final class AclManager {
     /**
      * Attempt to find a permission, searching the accessor's parent hierarchy.
      *
-     * @param target A target permission grant
+     * @param target         A target permission grant
      * @param permissionType The permission type
-     * @param accessor The user/group
-     * @param scopes A set of parent scopes
+     * @param accessor       The user/group
+     * @param scopes         A set of parent scopes
      * @return Whether or not the grant was found
      */
-    private boolean hasScopedPermission(PermissionGrantTarget target, PermissionType permissionType, Accessor accessor,
-                                        Collection<PermissionScope> scopes) {
+    private boolean hasScopedPermission(PermissionGrantTarget target,
+            PermissionType permissionType, Accessor accessor,
+            Collection<PermissionScope> scopes) {
 
         for (PermissionGrant grant : accessor.getPermissionGrants()) {
-            PermissionType grantPermissionType = enumForPermission(grant.getPermission());
+            PermissionType grantPermissionType
+                    = enumForPermission(grant.getPermission());
 
             // If it's not the permission type we want, skip it...
             if (!grantPermissionType.contains(permissionType)) {
@@ -498,8 +500,8 @@ public final class AclManager {
      * @return List of permission names for the given accessor on the given
      *         target
      */
-    private List<PermissionType> getEntityPermissions(Accessor accessor,
-                                                      AccessibleEntity entity) {
+    private List<PermissionType> getItemPermissions(Accessor accessor,
+            AccessibleEntity entity) {
         // If we're admin, add it regardless.
         if (belongsToAdmin(accessor)) {
             return Lists.newArrayList(PermissionType.values());
@@ -532,8 +534,8 @@ public final class AclManager {
      * Attempt to locate an existing grant with the same accessor, entity, and
      * permission, within the given scope.
      */
-    private Optional<PermissionGrant> findPermission(Accessor accessor,
-                                                     PermissionGrantTarget entity, PermissionType permType) {
+    private Optional<PermissionGrant> findPermission(PermissionGrantTarget entity,
+            PermissionType permType, Accessor accessor) {
         PermissionGrantTarget target = manager.cast(entity,
                 PermissionGrantTarget.class);
 
@@ -550,12 +552,12 @@ public final class AclManager {
 
     private PermissionGrant createPermissionGrant() {
         try {
-        Vertex vertex = manager.createVertex(
-                EntityClass.PERMISSION_GRANT.getIdgen()
-                        .generateId(Lists.<String>newArrayList(), null),
-                EntityClass.PERMISSION_GRANT,
-                Maps.<String, Object>newHashMap());
-        return graph.frame(vertex, PermissionGrant.class);
+            Vertex vertex = manager.createVertex(
+                    EntityClass.PERMISSION_GRANT.getIdgen()
+                            .generateId(Lists.<String>newArrayList(), null),
+                    EntityClass.PERMISSION_GRANT,
+                    Maps.<String, Object>newHashMap());
+            return graph.frame(vertex, PermissionGrant.class);
         } catch (IntegrityError e) {
             e.printStackTrace();
             throw new RuntimeException("Something very unlikely has occured because two" +

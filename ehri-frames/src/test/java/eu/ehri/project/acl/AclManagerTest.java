@@ -126,7 +126,7 @@ public class AclManagerTest extends GraphTestBase {
         // Should this behaviour be allowed? For the moment it
         // is...
         InheritedItemPermissionSet permissions
-                = acl.getInheritedEntityPermissions(user, c4);
+                = acl.getInheritedItemPermissions(c4, user);
         assertTrue(permissions.has(CREATE));
         assertFalse(permissions.has(UPDATE));
         assertFalse(permissions.has(DELETE));
@@ -145,14 +145,14 @@ public class AclManagerTest extends GraphTestBase {
         // Should this behaviour be allowed? For the moment it
         // is...
         InheritedItemPermissionSet permissions
-                = acl.getInheritedEntityPermissions(user, c4);
+                = acl.getInheritedItemPermissions(c4, user);
         assertTrue(permissions.has(CREATE));
         assertFalse(permissions.has(UPDATE));
         assertFalse(permissions.has(DELETE));
         assertFalse(permissions.has(OWNER));
 
-        acl.setEntityPermissions(user, c4, Sets.newHashSet(DELETE, UPDATE));
-        InheritedItemPermissionSet permissions2 = acl.getInheritedEntityPermissions(user, c4);
+        acl.setItemPermissions(c4, user, Sets.newHashSet(DELETE, UPDATE));
+        InheritedItemPermissionSet permissions2 = acl.getInheritedItemPermissions(c4, user);
         assertTrue(permissions2.has(CREATE));
         assertTrue(permissions2.has(UPDATE));
         assertTrue(permissions2.has(DELETE));
@@ -179,12 +179,12 @@ public class AclManagerTest extends GraphTestBase {
         DocumentaryUnit c4 = manager.getFrame("c4", DocumentaryUnit.class);
 
         assertFalse(acl.hasPermission(c4, OWNER, user));
-        PermissionGrant grant = acl.grantPermission(user, c4, OWNER);
+        PermissionGrant grant = acl.grantPermission(c4, OWNER, user);
         assertTrue(acl.hasPermission(c4, OWNER, user));
 
         // Try granting the same permission twice and ensure the
         // returned grant is the same instance as before...
-        PermissionGrant grant2 = acl.grantPermission(user, c4, OWNER);
+        PermissionGrant grant2 = acl.grantPermission(c4, OWNER, user);
         assertEquals(grant, grant2);
     }
 
@@ -234,9 +234,9 @@ public class AclManagerTest extends GraphTestBase {
         DocumentaryUnit c4 = manager.getFrame("c4", DocumentaryUnit.class);
 
         assertFalse(acl.hasPermission(c4, OWNER, user));
-        acl.grantPermission(user, c4, OWNER);
+        acl.grantPermission(c4, OWNER, user);
         assertTrue(acl.hasPermission(c4, OWNER, user));
-        acl.revokePermission(user, c4, OWNER);
+        acl.revokePermission(c4, OWNER, user);
         assertFalse(acl.hasPermission(c4, OWNER, user));
     }
 
@@ -385,10 +385,10 @@ public class AclManagerTest extends GraphTestBase {
         assertFalse(acl.hasPermission(userdoc1, OWNER, headArchivists));
 
         // Check the calculated permission sets.
-        assertTrue(acl.getInheritedEntityPermissions(user1, userdoc1).has(OWNER));
-        assertFalse(acl.getInheritedEntityPermissions(user1, userdoc2).has(OWNER));
-        assertTrue(acl.getInheritedEntityPermissions(user2, userdoc2).has(OWNER));
-        assertFalse(acl.getInheritedEntityPermissions(user2, userdoc1).has(OWNER));
+        assertTrue(acl.getInheritedItemPermissions(userdoc1, user1).has(OWNER));
+        assertFalse(acl.getInheritedItemPermissions(userdoc2, user1).has(OWNER));
+        assertTrue(acl.getInheritedItemPermissions(userdoc2, user2).has(OWNER));
+        assertFalse(acl.getInheritedItemPermissions(userdoc1, user2).has(OWNER));
 
         // Ensure user1 can update/delete his own doc
         assertTrue(acl.hasPermission(userdoc1, OWNER, user1));

@@ -332,7 +332,7 @@ public class PermissionsResource extends AbstractRestResource {
 
         return Response
                 .status(Response.Status.OK)
-                .entity(mapper.writeValueAsBytes(acl.getInheritedEntityPermissions(accessor, entity)))
+                .entity(mapper.writeValueAsBytes(acl.getInheritedItemPermissions(entity, accessor)))
                 .build();
     }
 
@@ -446,8 +446,8 @@ public class PermissionsResource extends AbstractRestResource {
                     .status(Response.Status.OK)
                     .entity(mapper
                             .writeValueAsBytes(new AclManager(
-                                    graph).getInheritedEntityPermissions(accessor,
-                                    manager.getFrame(id, AccessibleEntity.class))))
+                                    graph).getInheritedItemPermissions(manager.getFrame(id, AccessibleEntity.class), accessor
+                            )))
                     .build();
         } finally {
             cleanupTransaction();

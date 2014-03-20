@@ -29,7 +29,7 @@ public class InheritedItemPermissionSetTest extends AbstractFixtureTest {
     public void testHas() throws Exception {
         Repository r2 = manager.getFrame("r2", Repository.class);
         InheritedItemPermissionSet permissionSet
-                = aclManager.getInheritedEntityPermissions(invalidUser, r2);
+                = aclManager.getInheritedItemPermissions(r2, invalidUser);
         assertFalse(permissionSet.has(PermissionType.CREATE));
         assertTrue(permissionSet.has(PermissionType.UPDATE));
         assertFalse(permissionSet.has(PermissionType.DELETE));
@@ -38,8 +38,8 @@ public class InheritedItemPermissionSetTest extends AbstractFixtureTest {
     @Test
     public void testSerialize() throws Exception {
         InheritedItemPermissionSet permissions
-                = aclManager.getInheritedEntityPermissions(invalidUser,
-                manager.getFrame("r2", Repository.class));
+                = aclManager.getInheritedItemPermissions(manager.getFrame("r2", Repository.class), invalidUser
+        );
         List<Map<String,List<PermissionType>>> serialized = permissions.serialize();
         // Should contain Reto and Kcl
         assertEquals(2L, serialized.size());
