@@ -16,7 +16,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
-import eu.ehri.project.acl.GlobalPermissionSet;
+import eu.ehri.project.acl.*;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
@@ -25,9 +25,6 @@ import org.codehaus.jackson.type.TypeReference;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import eu.ehri.extension.errors.BadRequester;
-import eu.ehri.project.acl.AclManager;
-import eu.ehri.project.acl.ContentTypes;
-import eu.ehri.project.acl.PermissionType;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
@@ -288,7 +285,7 @@ public class PermissionsResource extends AbstractRestResource {
      */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("/{userId:.+}")
     public Response setGlobalMatrix(@PathParam("userId") String userId,
                                     String json) throws PermissionDenied, IOException, ItemNotFound,
@@ -298,7 +295,7 @@ public class PermissionsResource extends AbstractRestResource {
         Accessor accessor = manager.getFrame(userId, Accessor.class);
         Accessor grantee = getRequesterUserProfile();
         try {
-            List<Map<String, GlobalPermissionSet>> newPerms
+            InheritedGlobalPermissionSet newPerms
                     = new AclViews(graph)
                     .setGlobalPermissionMatrix(accessor, globals, grantee);
             graph.getBaseGraph().commit();

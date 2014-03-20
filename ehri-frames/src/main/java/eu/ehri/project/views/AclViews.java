@@ -15,7 +15,6 @@ import eu.ehri.project.models.base.*;
 import eu.ehri.project.persistence.ActionManager;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -62,7 +61,7 @@ public final class AclViews {
      * @param grantee The user/group granting the new permissions
      * @throws PermissionDenied
      */
-    public List<Map<String,GlobalPermissionSet>> setGlobalPermissionMatrix(Accessor accessor,
+    public InheritedGlobalPermissionSet setGlobalPermissionMatrix(Accessor accessor,
                                        GlobalPermissionSet permissionSet,
             Accessor grantee) throws PermissionDenied {
         checkGrantPermission(grantee, permissionSet);

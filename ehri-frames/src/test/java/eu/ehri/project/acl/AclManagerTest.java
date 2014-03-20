@@ -277,7 +277,7 @@ public class AclManagerTest extends GraphTestBase {
 
         AclManager acl = new AclManager(graph);
         List<Map<String, GlobalPermissionSet>> getPerms
-                = acl.getInheritedGlobalPermissions(user1);
+                = acl.getInheritedGlobalPermissions(user1).serialize();
         // It should contain two elements - the user, and his group
         assertEquals(2, getPerms.size());
         assertEquals(GlobalPermissionSet.empty(), getPerms.get(0).get(user1.getId()));

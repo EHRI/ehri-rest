@@ -36,9 +36,9 @@ public final class AclManager {
             .newEnumMap(PermissionType.class);
     private final Map<ContentTypes, ContentType> enumContentTypeMap = Maps
             .newEnumMap(ContentTypes.class);
-    private final Map<Vertex, PermissionType> permissionEnumMap = Maps
+    private final Map<Permission, PermissionType> permissionEnumMap = Maps
             .newHashMap();
-    private final Map<Vertex, ContentTypes> contentTypeEnumMap = Maps
+    private final Map<ContentType, ContentTypes> contentTypeEnumMap = Maps
             .newHashMap();
 
     /**
@@ -190,19 +190,15 @@ public final class AclManager {
      * @return List of permission maps for the given accessor and his group
      *         parents.
      */
-    public List<Map<String, GlobalPermissionSet>> getInheritedGlobalPermissions(
+    public InheritedGlobalPermissionSet getInheritedGlobalPermissions(
             Accessor accessor) {
-        List<Map<String, GlobalPermissionSet>> globals = Lists.newLinkedList();
-        Map<String, GlobalPermissionSet> userMap = Maps.newHashMap();
-        userMap.put(accessor.getId(), getGlobalPermissions(accessor));
-        globals.add(userMap);
+        InheritedGlobalPermissionSet.Builder builder
+                 = new InheritedGlobalPermissionSet
+                        .Builder(accessor, getGlobalPermissions(accessor));
         for (Accessor parent : accessor.getParents()) {
-            Map<String, GlobalPermissionSet> parentMap = Maps
-                    .newHashMap();
-            parentMap.put(parent.getId(), getGlobalPermissions(parent));
-            globals.add(parentMap);
+            builder.withInheritedPermissions(parent, getGlobalPermissions(parent));
         }
-        return globals;
+        return builder.build();
     }
 
     /**
@@ -493,8 +489,8 @@ public final class AclManager {
     /**
      * Get the permission type enum for a given node.
      */
-    private PermissionType enumForPermission(Frame perm) {
-        return permissionEnumMap.get(perm.asVertex());
+    private PermissionType enumForPermission(Permission perm) {
+        return permissionEnumMap.get(perm);
     }
 
     /**
@@ -628,11 +624,12 @@ public final class AclManager {
             if (scope == null || scopes.contains(scope)) {
                 for (PermissionGrantTarget target : grant.getTargets()) {
                     if (manager.getEntityClass(target).equals(EntityClass.CONTENT_TYPE)) {
+                        ContentType contentType = manager.cast(target, ContentType.class);
                         Permission permission = grant.getPermission();
                         if (permission != null) {
                             builder.set(
-                                    contentTypeEnumMap.get(target.asVertex()),
-                                    permissionEnumMap.get(permission.asVertex()));
+                                    contentTypeEnumMap.get(contentType),
+                                    permissionEnumMap.get(permission));
                         }
                     }
                 }
@@ -676,13 +673,13 @@ public final class AclManager {
                 ContentType.class)) {
             ContentTypes ct = ContentTypes.withName(c.getId());
             enumContentTypeMap.put(ct, c);
-            contentTypeEnumMap.put(c.asVertex(), ct);
+            contentTypeEnumMap.put(c, ct);
         }
         for (Permission p : manager.getFrames(EntityClass.PERMISSION,
                 Permission.class)) {
             PermissionType pt = PermissionType.withName(p.getId());
             enumPermissionMap.put(pt, p);
-            permissionEnumMap.put(p.asVertex(), pt);
+            permissionEnumMap.put(p, pt);
         }
     }
 
