@@ -1,7 +1,6 @@
 package eu.ehri.project.acl;
 
 import com.google.common.collect.HashMultimap;
-import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import org.codehaus.jackson.annotate.JsonCreator;

@@ -147,20 +147,17 @@ public final class AclManager {
      * inherited permissions. Returns a map of accessor IDs against grant permissions.
      *
      * @param accessor The accessor
-     * @return List of permission maps for the given target
+     * @return An inherited item permission set.
      */
-    public List<Map<String, List<PermissionType>>> getInheritedEntityPermissions(
+    public InheritedItemPermissionSet getInheritedEntityPermissions(
             Accessor accessor, AccessibleEntity entity) {
-        List<Map<String, List<PermissionType>>> list = Lists.newLinkedList();
-        Map<String, List<PermissionType>> userMap = Maps.newHashMap();
-        userMap.put(accessor.getId(), getEntityPermissions(accessor, entity));
-        list.add(userMap);
+        InheritedItemPermissionSet.Builder builder
+                = new InheritedItemPermissionSet
+                .Builder(accessor, getEntityPermissions(accessor, entity));
         for (Accessor parent : accessor.getAllParents()) {
-            Map<String, List<PermissionType>> parentMap = Maps.newHashMap();
-            list.add(parentMap);
-            parentMap.put(parent.getId(), getEntityPermissions(parent, entity));
+            builder.withInheritedPermissions(parent, getEntityPermissions(parent, entity));
         }
-        return list;
+        return builder.build();
     }
 
     /**

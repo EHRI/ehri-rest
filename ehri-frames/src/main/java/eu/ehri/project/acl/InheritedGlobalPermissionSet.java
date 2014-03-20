@@ -1,6 +1,5 @@
 package eu.ehri.project.acl;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import eu.ehri.project.models.base.Accessor;
 import org.codehaus.jackson.annotate.JsonValue;
@@ -17,52 +16,10 @@ import java.util.Map;
 public class InheritedGlobalPermissionSet {
 
     /**
-     * A pairing of an accessor and their non-inherited permissions.
-     */
-    private static class AccessorPermissions {
-        final Accessor accessor;
-        final GlobalPermissionSet permissionSet;
-
-        public AccessorPermissions(Accessor accessor, GlobalPermissionSet permissionSet) {
-            this.accessor = accessor;
-            this.permissionSet = permissionSet;
-        }
-
-        @JsonValue
-        public Map<String, GlobalPermissionSet> asMap() {
-            return ImmutableMap.of(accessor.getId(), permissionSet);
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-
-            AccessorPermissions that = (AccessorPermissions) o;
-
-            return accessor.equals(that.accessor)
-                    && permissionSet.equals(that.permissionSet);
-
-        }
-
-        @Override
-        public int hashCode() {
-            int result = accessor.hashCode();
-            result = 31 * result + permissionSet.hashCode();
-            return result;
-        }
-
-        @Override
-        public String toString() {
-            return "<" + accessor.getId() + " " + permissionSet + ">";
-        }
-    }
-
-    /**
      * Builder class for InheritedGlobalPermissionSets.
      */
     public static class Builder {
-        private List<AccessorPermissions> perms;
+        private final List<AccessorPermissions<GlobalPermissionSet>> perms = Lists.newArrayList();
 
         /**
          * Create a new builder with the primary (subject) accessor.
@@ -71,7 +28,9 @@ public class InheritedGlobalPermissionSet {
          * @param permissionSet The primary accessor's own global permissions
          */
         public Builder(Accessor accessor, GlobalPermissionSet permissionSet) {
-            perms = Lists.newArrayList(new AccessorPermissions(accessor, permissionSet));
+            AccessorPermissions<GlobalPermissionSet> permissions
+                    = new AccessorPermissions<GlobalPermissionSet>(accessor, permissionSet);
+            perms.add(permissions);
         }
 
         /**
@@ -82,7 +41,7 @@ public class InheritedGlobalPermissionSet {
          * @return The builder
          */
         public Builder withInheritedPermissions(Accessor accessor, GlobalPermissionSet permissionSet) {
-            perms.add(new AccessorPermissions(accessor, permissionSet));
+            perms.add(new AccessorPermissions<GlobalPermissionSet>(accessor, permissionSet));
             return this;
         }
 
@@ -96,9 +55,9 @@ public class InheritedGlobalPermissionSet {
         }
     }
 
-    private final List<AccessorPermissions> permissionsList;
+    private final List<AccessorPermissions<GlobalPermissionSet>> permissionsList;
 
-    private InheritedGlobalPermissionSet(List<AccessorPermissions> permissionsList) {
+    private InheritedGlobalPermissionSet(List<AccessorPermissions<GlobalPermissionSet>> permissionsList) {
         this.permissionsList = permissionsList;
     }
 
@@ -110,7 +69,7 @@ public class InheritedGlobalPermissionSet {
      * @return Whether or not the permission is present
      */
     public boolean has(ContentTypes contentType, PermissionType permissionType) {
-        for (AccessorPermissions accessorPermissions : permissionsList) {
+        for (AccessorPermissions<GlobalPermissionSet> accessorPermissions : permissionsList) {
             if (accessorPermissions.permissionSet.has(contentType, permissionType)) {
                 return true;
             }
@@ -143,7 +102,7 @@ public class InheritedGlobalPermissionSet {
     @JsonValue
     public List<Map<String, GlobalPermissionSet>> serialize() {
         List<Map<String, GlobalPermissionSet>> tmp = Lists.newArrayList();
-        for (AccessorPermissions accessorPermissions : permissionsList) {
+        for (AccessorPermissions<GlobalPermissionSet> accessorPermissions : permissionsList) {
             tmp.add(accessorPermissions.asMap());
         }
         return tmp;
