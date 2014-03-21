@@ -48,6 +48,7 @@ public class CmdEntryPoint extends BaseCommand {
         mmap.put(RdfExport.NAME, RdfExport.class);
         // adaptation of UserAdd for adding countries
         mmap.put(CountryAdd.NAME, CountryAdd.class);
+        mmap.put(WP2EadImport.NAME, WP2EadImport.class);
 
         // new command, could we use reflection code to try find all Command interface implementing classes
         // DISABLED due to brokenness... use GraphSON instead.
