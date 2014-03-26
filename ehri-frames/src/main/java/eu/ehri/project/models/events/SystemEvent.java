@@ -101,10 +101,15 @@ public interface SystemEvent extends AccessibleEntity {
                     .loop("n", JavaHandlerUtils.noopLoopFunc, new PipeFunction<LoopPipe.LoopBundle<Vertex>, Boolean>() {
                         @Override
                         public Boolean compute(LoopPipe.LoopBundle<Vertex> vertexLoopBundle) {
-                            return !vertexLoopBundle.getObject().getVertices(Direction.IN,
-                                    Ontology.ACTIONER_HAS_LIFECYCLE_ACTION).iterator().hasNext();
+                            return isValidActioner(vertexLoopBundle.getObject());
                         }
                     }));
+        }
+
+        private boolean isValidActioner(Vertex vertex) {
+            return (!vertex.getVertices(Direction.IN,
+                    Ontology.ACTIONER_HAS_LIFECYCLE_ACTION).iterator().hasNext())
+                    && vertex.getProperty(EntityType.TYPE_KEY) != null;
         }
 
         private boolean isValidTarget(Vertex vertex) {
