@@ -27,15 +27,15 @@ public class RelationAdd extends BaseCommand implements Command {
 
     @Override
     protected void setCustomOptions() {
-        options.addOption(new Option("u", "unique", false,
-                "Ensure the out entity only has one relationship of this type"));
         options.addOption(new Option("s", "single", false,
-                "Don't create this relationship if it already exists"));
+                "Ensure the out entity only has one relationship of this type by removing any others"));
+        options.addOption(new Option("d", "allow-duplicates", false,
+                "Allow creating multiple edges with the same label between the same two nodes"));
     }
 
     @Override
     public String getHelp() {
-        return "Usage: add-rel [OPTIONS] [-Pkey=value] <source> <rel-name> <target>";
+        return "Usage: add-rel [OPTIONS] <source> <rel-name> <target>";
     }
 
     @Override
@@ -65,16 +65,16 @@ public class RelationAdd extends BaseCommand implements Command {
         Vertex target = manager.getVertex(dst);
 
         try {
-            if (cmdLine.hasOption("unique")) {
+            if (cmdLine.hasOption("allow-duplicates")) {
+                source.addEdge(label, target);
+            } else if (cmdLine.hasOption("unique")) {
                 if (!JavaHandlerUtils.addUniqueRelationship(source, target, label)) {
                     System.err.println("Relationship already exists");
                 }
-            } else if (cmdLine.hasOption("single")) {
+            } else  {
                 if (!JavaHandlerUtils.addSingleRelationship(source, target, label)) {
                     System.err.println("Relationship already exists");
                 }
-            } else {
-                source.addEdge(label, target);
             }
             graph.getBaseGraph().commit();
         } catch (Exception e) {

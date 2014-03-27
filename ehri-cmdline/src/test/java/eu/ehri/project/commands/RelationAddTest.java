@@ -1,22 +1,16 @@
 package eu.ehri.project.commands;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.test.AbstractFixtureTest;
 import eu.ehri.project.test.GraphTestBase;
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.PosixParser;
 import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author Mike Bryant (http://github.com/mikesname)
@@ -38,9 +32,9 @@ public class RelationAddTest extends GraphTestBase {
     }
 
     @Test
-    public void testAddRelation() throws Exception {
+    public void testAddRelationWithDuplicates() throws Exception {
         assertEquals(0L, Iterables.size(mike.getVertices(Direction.OUT, "knows")));
-        CommandLine commandLine = relationAdd.getCmdLine(new String[]{"mike", "knows", "linda"});
+        CommandLine commandLine = relationAdd.getCmdLine(new String[]{"mike", "knows", "linda", "--allow-duplicates"});
         int retVal = relationAdd.execWithOptions(graph, commandLine);
         assertEquals(0, retVal);
         assertEquals(1L, Iterables.size(mike.getVertices(Direction.OUT, "knows")));
@@ -52,9 +46,9 @@ public class RelationAddTest extends GraphTestBase {
     }
 
     @Test
-    public void testAddUniqueRelation() throws Exception {
+    public void testAddRelation() throws Exception {
         assertEquals(0L, Iterables.size(mike.getVertices(Direction.OUT, "knows")));
-        CommandLine commandLine = relationAdd.getCmdLine(new String[]{"-u", "mike", "knows", "linda"});
+        CommandLine commandLine = relationAdd.getCmdLine(new String[]{"mike", "knows", "linda"});
         int retVal = relationAdd.execWithOptions(graph, commandLine);
         assertEquals(0, retVal);
         assertEquals(1L, Iterables.size(mike.getVertices(Direction.OUT, "knows")));
@@ -74,7 +68,7 @@ public class RelationAddTest extends GraphTestBase {
         assertEquals(1L, Iterables.size(mike.getVertices(Direction.OUT, "knows")));
         assertEquals(1L, Iterables.size(linda.getVertices(Direction.IN, "knows")));
 
-        CommandLine commandLine2 = relationAdd.getCmdLine(new String[]{"-s", "mike", "knows", "reto"});
+        CommandLine commandLine2 = relationAdd.getCmdLine(new String[]{"--single", "mike", "knows", "reto"});
         relationAdd.execWithOptions(graph, commandLine2);
         assertEquals(1L, Iterables.size(mike.getVertices(Direction.OUT, "knows")));
         assertEquals(0L, Iterables.size(linda.getVertices(Direction.IN, "knows")));
