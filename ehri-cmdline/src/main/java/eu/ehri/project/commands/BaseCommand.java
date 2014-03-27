@@ -33,6 +33,17 @@ public abstract class BaseCommand {
         return false;
     }
 
+    /**
+     * Utility to get a parsed command line from some args. This is
+     * mainly helpful for testing.
+     * @param args A list of arg strings
+     * @return The parsed command line
+     */
+    public CommandLine getCmdLine(String[] args) throws ParseException {
+        setCustomOptions();
+        return parser.parse(options, args);
+    }
+
     protected Optional<String> getLogMessage(String msg) {
         return msg.trim().isEmpty() ? Optional.<String>absent() : Optional.of(msg);
     }
