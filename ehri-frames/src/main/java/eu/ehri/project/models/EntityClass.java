@@ -52,7 +52,7 @@ public enum EntityClass {
     MAINTENANCE_EVENT ( Entities.MAINTENANCE_EVENT, "me", MaintenanceEvent.class),
     UNDETERMINED_RELATIONSHIP (Entities.UNDETERMINED_RELATIONSHIP, "rs", UndeterminedRelationship.class),
     LINK (Entities.LINK, "lnk", Link.class),
-    VIRTUAL_COLLECTION(Entities.VIRTUAL_COLLECTION, "vc", VirtualCollection.class, GenericIdGenerator.INSTANCE);
+    VIRTUAL_COLLECTION(Entities.VIRTUAL_COLLECTION, "vc", VirtualCollection.class, IdentifiableEntityIdGenerator.INSTANCE);
     // @formatter:on
 
     // Accessors.
