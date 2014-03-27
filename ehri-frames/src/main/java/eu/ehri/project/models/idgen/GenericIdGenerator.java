@@ -5,6 +5,8 @@ import com.google.common.collect.ListMultimap;
 import eu.ehri.project.persistence.Bundle;
 import com.fasterxml.uuid.Generators;
 
+import java.util.UUID;
+
 /**
  * Generates a generic ID for tertiary node types.
  *
@@ -39,6 +41,14 @@ public enum GenericIdGenerator implements IdGenerator {
      * @return The base id string.
      */
     public String getIdBase(Bundle bundle) {
-        return timeBasedGenerator.generate().toString();
+        return getTimeBasedUUID().toString();
+    }
+
+    /**
+     * Get a new time-based UUID.
+     * @return A time based UUID.
+     */
+    public static UUID getTimeBasedUUID() {
+        return timeBasedGenerator.generate();
     }
 }
