@@ -86,8 +86,8 @@ public class CrudViewsTest extends AbstractFixtureTest {
             PermissionGrantTarget target = manager.getFrame(
                     ContentTypes.DOCUMENTARY_UNIT.getName(),
                     PermissionGrantTarget.class);
-            new AclManager(graph).grantPermission(invalidUser, target,
-                    PermissionType.CREATE);
+            new AclManager(graph).grantPermission(target, PermissionType.CREATE, invalidUser
+            );
             DocumentaryUnit unit = docViews.create(bundle, invalidUser);
             assertEquals(TestData.TEST_COLLECTION_NAME, unit.asVertex().getProperty("name"));
         }

@@ -111,8 +111,8 @@ public class AdminResource extends AbstractRestResource {
             }
 
             // Grant them owner permissions on their own account.
-            new AclManager(graph).grantPermission(user, user,
-                    PermissionType.OWNER);
+            new AclManager(graph).grantPermission(user, PermissionType.OWNER, user
+            );
 
             String jsonStr = getSerializer().vertexFrameToJson(user);
             graph.getBaseGraph().commit();

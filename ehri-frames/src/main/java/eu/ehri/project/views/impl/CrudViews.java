@@ -110,7 +110,7 @@ public final class CrudViews<E extends AccessibleEntity> implements Crud<E> {
         // users - but it probably should...
         if (!acl.belongsToAdmin(user)) {
             acl.withScope(SystemScope.INSTANCE)
-                    .grantPermission(user, item, PermissionType.OWNER);
+                    .grantPermission(item, PermissionType.OWNER, user);
         }
         // If the scope is not the system, set the permission scope
         // of the item too...
