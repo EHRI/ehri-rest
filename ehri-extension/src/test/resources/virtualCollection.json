@@ -1,0 +1,11 @@
+{
+  "type": "virtualCollection",
+  "data": {
+    "name": "a virtual collection",
+    "identifier": "some-id-supplied-by-frontend",
+    "description": "Some info here"
+  },
+  "relationships": {
+
+  }
+}
