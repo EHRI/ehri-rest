@@ -5,15 +5,15 @@ import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.modules.javahandler.JavaHandler;
 import com.tinkerpop.frames.modules.javahandler.JavaHandlerContext;
+import com.tinkerpop.gremlin.java.GremlinPipeline;
 import com.tinkerpop.pipes.util.Pipeline;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
-import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.base.DescribedEntity;
-import eu.ehri.project.models.base.ItemHolder;
-import eu.ehri.project.models.base.PermissionScope;
+import eu.ehri.project.models.base.*;
 import eu.ehri.project.models.utils.JavaHandlerUtils;
+
+import static eu.ehri.project.models.utils.JavaHandlerUtils.addUniqueRelationship;
 
 @EntityType(EntityClass.VIRTUAL_COLLECTION)
 public interface VirtualCollection extends AccessibleEntity,
@@ -22,16 +22,20 @@ public interface VirtualCollection extends AccessibleEntity,
     @JavaHandler
     public Long getChildCount();
 
-    /**
-     * Get parent documentary unit, if any
-     * @return
-     */
     @Fetch(Ontology.VC_IS_PART_OF)
     @Adjacency(label = Ontology.VC_IS_PART_OF)
     public VirtualCollection getParent();
 
+    /**
+     * Add a child. Note: this should throw an exception like
+     * IllegalEdgeLoop if the operation is self-referential or
+     * results in a loop, but due to a frames limitation we can't
+     * Instead it returns a boolean indicating success/failure.
+     * @param child The child collection
+     * @return Whether or not the operation was allowed.
+     */
     @JavaHandler
-    public void addChild(final VirtualCollection child);
+    public boolean addChild(final VirtualCollection child);
 
     /*
      * Fetches a list of all ancestors (parent -> parent -> parent)
@@ -39,18 +43,17 @@ public interface VirtualCollection extends AccessibleEntity,
     @JavaHandler
     public Iterable<VirtualCollection> getAncestors();
 
-    /**
-     * Get child documentary units
-     * @return
-     */
     @JavaHandler
     public Iterable<VirtualCollection> getChildren();
 
     @JavaHandler
     public Iterable<VirtualCollection> getAllChildren();
 
-    @Adjacency(label = Ontology.DESCRIPTION_FOR_ENTITY, direction = Direction.IN)
-    public Iterable<DocumentDescription> getDocumentDescriptions();
+    @Adjacency(label = Ontology.VC_DESCRIBED_BY, direction = Direction.OUT)
+    public Iterable<Description> getDescriptions();
+
+    @Adjacency(label = Ontology.VC_HAS_AUTHOR, direction = Direction.OUT)
+    public UserProfile getAuthor();
 
     /**
      * Implementation of complex methods.
@@ -71,14 +74,34 @@ public interface VirtualCollection extends AccessibleEntity,
             return frameVertices(gremlin().in(Ontology.VC_IS_PART_OF));
         }
 
-        public void addChild(final VirtualCollection child) {
-            child.asVertex().addEdge(Ontology.VC_IS_PART_OF, it());
-            Long count = it().getProperty(CHILD_COUNT);
-            if (count == null) {
-                it().setProperty(CHILD_COUNT, gremlin().in(Ontology.VC_IS_PART_OF).count());
-            } else {
-                it().setProperty(CHILD_COUNT, count + 1);
+        public boolean addChild(final VirtualCollection child) {
+            if (child.asVertex().equals(it())) {
+                // Self-referential.
+                return false;
             }
+            for (Vertex parent : traverseAncestors()) {
+                if (child.equals(parent)) {
+                    // Loop
+                    return false;
+                }
+            }
+
+            boolean done = addUniqueRelationship(child.asVertex(), it(), Ontology.VC_IS_PART_OF);
+            if (done) {
+                Long count = it().getProperty(CHILD_COUNT);
+                if (count == null) {
+                    it().setProperty(CHILD_COUNT, gremlin().in(Ontology.VC_IS_PART_OF).count());
+                } else {
+                    it().setProperty(CHILD_COUNT, count + 1);
+                }
+            }
+            return done;
+        }
+
+        private GremlinPipeline<Vertex, Vertex> traverseAncestors() {
+            return gremlin().as("n")
+                    .out(Ontology.VC_IS_PART_OF)
+                    .loop("n", JavaHandlerUtils.defaultMaxLoops, JavaHandlerUtils.noopLoopFunc);
         }
 
         public Iterable<VirtualCollection> getAllChildren() {
@@ -90,9 +113,7 @@ public interface VirtualCollection extends AccessibleEntity,
         }
 
         public Iterable<VirtualCollection> getAncestors() {
-            return frameVertices(gremlin().as("n")
-                    .out(Ontology.VC_IS_PART_OF)
-                    .loop("n", JavaHandlerUtils.defaultMaxLoops, JavaHandlerUtils.noopLoopFunc));
+            return frameVertices(traverseAncestors());
         }
     }
 }

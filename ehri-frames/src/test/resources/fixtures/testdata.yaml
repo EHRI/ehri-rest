@@ -524,3 +524,27 @@
   relationships:
     inAuthoritativeSet: cvoc1
 
+--- # Virtual Collections
+- id: vc1
+  type: virtualCollection
+  data:
+    identifier: vc1
+  relationships:
+    hasAuthor: linda
+    hasPart: c1
+    isDescribedBy: cd1
+
+- id: vc2
+  type: virtualCollection
+  data:
+    identifier: vc2
+  relationships:
+    hasPart: c2
+    isPartOf: vc1
+
+- id: vc3
+  type: virtualCollection
+  data:
+    identifier: vc3
+  relationships:
+    hasPart: c2
