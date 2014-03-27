@@ -18,8 +18,7 @@ module Ehri
     )
     Graph.get_base_graph.commit
 
-    Core::GraphReindexer.new(Graph).reindex(Core::GraphReindexer::INDEX_NAME)
-    puts "Committed and re-indexed"
+    puts "Committed."
     Graph.get_base_graph.shutdown
   end
 end
