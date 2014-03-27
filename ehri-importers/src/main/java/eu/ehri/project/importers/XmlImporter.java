@@ -40,6 +40,7 @@ public abstract class XmlImporter<T> extends AbstractImporter<T> {
         // Yad Vashem, ICA-Atom style: 1924-1-1 - 1947-12-31
         // Yad Vashem in Wp2: 12-15-1941, 9-30-1944
         Pattern.compile("^(\\d{4}-\\d{1,2}-\\d{1,2})\\s?-\\s?(\\d{4}-\\d{1,2}-\\d{1,2})$"),
+        Pattern.compile("^(\\d{4}-\\d{1,2}-\\d{1,2})$"),
         Pattern.compile("^(\\d{4})\\s?-\\s?(\\d{4})$"),
         Pattern.compile("^(\\d{4})-\\[(\\d{4})\\]$"),
         Pattern.compile("^(\\d{4})-\\[(\\d{4})\\]$"),
@@ -65,12 +66,29 @@ public abstract class XmlImporter<T> extends AbstractImporter<T> {
         Object value;
         for (String key : data.keySet()) {
             if (dates.containsProperty(key) && (value = data.get(key)) != null) {
-                logger.debug("-----------"+key + ": " + data.get(key));
+                logger.debug("-----------" + key + ": " + value);
                 try {
-                    Map<String, Object> dpb = extractDate(value);
-                    if (dpb != null) {
-                        extractedDates.add(dpb);
+                    Map<String, Object> dpb ;
+                    if (data.get(key) instanceof String) {
+                        dpb = extractDate((String) value);
+                        if (dpb != null) {
+                            extractedDates.add(dpb);
+                        }
+                    } else if (data.get(key) instanceof List) {
+                        for (String s : (List<String>) value) {
+                            logger.debug("date: "+s);
+                            dpb = extractDate(s);
+                            if (dpb != null) {
+                                extractedDates.add(dpb);
+                            }
+                            logger.debug("nr of dates found: "+extractedDates.size());
+                        }
+                    } else {
+                        logger.error("ERROR WITH DATES " + value);
                     }
+
+
+                  
                 } catch (ValidationError e) {
                     System.out.println("ERROR WITH DATES");
                     e.printStackTrace();
@@ -91,15 +109,16 @@ public abstract class XmlImporter<T> extends AbstractImporter<T> {
     private Map<String, Object> extractDate(Object date) throws ValidationError {
         logger.debug("date value: " + date);
         Map<String, Object> data = new HashMap<String, Object>();
-        if (date instanceof String) {
+//        if (date instanceof String) {
             data = matchDate((String) date);
-        } else if (date instanceof List) {
-            for (String s : (List<String>) date) {
-                data.putAll(data);
-            }
-        } else {
-            logger.error("ERROR WITH DATES " + date);
-        }
+//        } else if (date instanceof List) {
+//            for (String s : (List<String>) date) {
+//                data.putAll(data);
+//                logger.debug("string : " + s);
+//            }
+//        } else {
+//            logger.error("ERROR WITH DATES " + date);
+//        }
         return data.isEmpty() ? null : data;
     }
 
@@ -108,6 +127,7 @@ public abstract class XmlImporter<T> extends AbstractImporter<T> {
         for (Pattern re : datePatterns) {
             Matcher matcher = re.matcher(date);
             if (matcher.matches()) {
+                logger.debug("matched "+ date);
                 data.put(Ontology.DATE_PERIOD_START_DATE, normaliseDate(matcher.group(1)));
                 data.put(Ontology.DATE_PERIOD_END_DATE, normaliseDate(matcher.group(matcher
                         .groupCount() > 1 ? 2 : 1), Ontology.DATE_PERIOD_END_DATE));

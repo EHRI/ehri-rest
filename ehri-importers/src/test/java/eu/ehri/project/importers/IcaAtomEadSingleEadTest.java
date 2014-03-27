@@ -45,7 +45,7 @@ public class IcaAtomEadSingleEadTest extends AbstractImporterTest {
         // How many new nodes will have been created? We should have
         // - 1 more DocumentaryUnit
         // - 1 more DocumentDescription
-        // - 1 more DatePeriod
+        // - 2 more DatePeriod
         //TODO: test these UR's
         // - 5 more UndeterminedRelationships
         //TODO: test this UP
@@ -73,7 +73,7 @@ public class IcaAtomEadSingleEadTest extends AbstractImporterTest {
         assertEquals(expected, scopeContent);
 
         // Check the right nodes get created.
-        int createCount = origCount + 12;
+        int createCount = origCount + 13;
 
         // - 4 more UnderterminedRelationship nodes
 
