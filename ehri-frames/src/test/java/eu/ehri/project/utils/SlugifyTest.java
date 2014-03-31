@@ -26,4 +26,22 @@ public class SlugifyTest {
         String bad = "foo---bad";
         assertEquals("foo-bad", Slugify.slugify(bad));
     }
+
+    @Test
+    public void greekTransliteration() {
+        String greek = "Καλημέρα κόσμε";
+        assertEquals("kalemera-kosme", Slugify.slugify(greek));
+    }
+
+    @Test
+    public void hebrewTransliteration() {
+        String hebrew = "ארכיון יד ושם";
+        assertEquals("rkywn-yd-wsm", Slugify.slugify(hebrew));
+    }
+
+    @Test
+    public void cyrillicTransliteration() {
+        String cyrillic = "Кіровоградська районна";
+        assertEquals("kirovogradska-rajonna", Slugify.slugify(cyrillic));
+    }
 }
