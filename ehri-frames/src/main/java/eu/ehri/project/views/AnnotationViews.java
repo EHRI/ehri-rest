@@ -88,7 +88,7 @@ public final class AnnotationViews {
         annotation.setAnnotator(graph.frame(user.asVertex(), Annotator.class));
         acl.setAccessors(annotation, accessibleTo);
         acl.withScope(SystemScope.INSTANCE)
-                .grantPermission(user, annotation, PermissionType.OWNER);
+                .grantPermission(annotation, PermissionType.OWNER, user);
 
         new ActionManager(graph, entity).logEvent(annotation,
                 graph.frame(user.asVertex(), Actioner.class),

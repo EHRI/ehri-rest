@@ -13,7 +13,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.*;
 
-import eu.ehri.project.acl.GlobalPermissionSet;
+import eu.ehri.project.acl.*;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
@@ -22,9 +22,6 @@ import org.codehaus.jackson.type.TypeReference;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import eu.ehri.extension.errors.BadRequester;
-import eu.ehri.project.acl.AclManager;
-import eu.ehri.project.acl.ContentTypes;
-import eu.ehri.project.acl.PermissionType;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
@@ -285,7 +282,7 @@ public class PermissionsResource extends AbstractRestResource {
      */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("/{userId:.+}")
     public Response setGlobalMatrix(@PathParam("userId") String userId,
                                     String json) throws PermissionDenied, IOException, ItemNotFound,
@@ -295,7 +292,7 @@ public class PermissionsResource extends AbstractRestResource {
         Accessor accessor = manager.getFrame(userId, Accessor.class);
         Accessor grantee = getRequesterUserProfile();
         try {
-            List<Map<String, GlobalPermissionSet>> newPerms
+            InheritedGlobalPermissionSet newPerms
                     = new AclViews(graph)
                     .setGlobalPermissionMatrix(accessor, globals, grantee);
             graph.getBaseGraph().commit();
@@ -332,7 +329,7 @@ public class PermissionsResource extends AbstractRestResource {
 
         return Response
                 .status(Response.Status.OK)
-                .entity(mapper.writeValueAsBytes(acl.getInheritedEntityPermissions(accessor, entity)))
+                .entity(mapper.writeValueAsBytes(acl.getInheritedItemPermissions(entity, accessor)))
                 .build();
     }
 
@@ -446,8 +443,8 @@ public class PermissionsResource extends AbstractRestResource {
                     .status(Response.Status.OK)
                     .entity(mapper
                             .writeValueAsBytes(new AclManager(
-                                    graph).getInheritedEntityPermissions(accessor,
-                                    manager.getFrame(id, AccessibleEntity.class))))
+                                    graph).getInheritedItemPermissions(manager.getFrame(id, AccessibleEntity.class), accessor
+                            )))
                     .build();
         } finally {
             cleanupTransaction();

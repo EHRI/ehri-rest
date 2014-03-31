@@ -125,12 +125,12 @@ public class AclManagerTest extends GraphTestBase {
         // can also create CHILD docs of docs within that scope.
         // Should this behaviour be allowed? For the moment it
         // is...
-        List<Map<String, List<PermissionType>>> permissions
-                = acl.getInheritedEntityPermissions(user, c4);
-        assertTrue(hasPermissionIn(permissions, user, CREATE));
-        assertFalse(hasPermissionIn(permissions, user, UPDATE));
-        assertFalse(hasPermissionIn(permissions, user, DELETE));
-        assertFalse(hasPermissionIn(permissions, user, OWNER));
+        InheritedItemPermissionSet permissions
+                = acl.getInheritedItemPermissions(c4, user);
+        assertTrue(permissions.has(CREATE));
+        assertFalse(permissions.has(UPDATE));
+        assertFalse(permissions.has(DELETE));
+        assertFalse(permissions.has(OWNER));
     }
 
     @Test
@@ -144,20 +144,19 @@ public class AclManagerTest extends GraphTestBase {
         // can also create CHILD docs of docs within that scope.
         // Should this behaviour be allowed? For the moment it
         // is...
-        List<Map<String, List<PermissionType>>> permissions
-                = acl.getInheritedEntityPermissions(user, c4);
-        assertTrue(hasPermissionIn(permissions, user, CREATE));
-        assertFalse(hasPermissionIn(permissions, user, UPDATE));
-        assertFalse(hasPermissionIn(permissions, user, DELETE));
-        assertFalse(hasPermissionIn(permissions, user, OWNER));
+        InheritedItemPermissionSet permissions
+                = acl.getInheritedItemPermissions(c4, user);
+        assertTrue(permissions.has(CREATE));
+        assertFalse(permissions.has(UPDATE));
+        assertFalse(permissions.has(DELETE));
+        assertFalse(permissions.has(OWNER));
 
-        acl.setEntityPermissions(user, c4, Sets.newHashSet(DELETE, UPDATE));
-        List<Map<String, List<PermissionType>>> permissions2
-                = Lists.newArrayList(acl.getInheritedEntityPermissions(user, c4));
-        assertTrue(hasPermissionIn(permissions2, user, CREATE));
-        assertTrue(hasPermissionIn(permissions2, user, UPDATE));
-        assertTrue(hasPermissionIn(permissions2, user, DELETE));
-        assertFalse(hasPermissionIn(permissions2, user, OWNER));
+        acl.setItemPermissions(c4, user, Sets.newHashSet(DELETE, UPDATE));
+        InheritedItemPermissionSet permissions2 = acl.getInheritedItemPermissions(c4, user);
+        assertTrue(permissions2.has(CREATE));
+        assertTrue(permissions2.has(UPDATE));
+        assertTrue(permissions2.has(DELETE));
+        assertFalse(permissions2.has(OWNER));
     }
 
     @Test
@@ -180,12 +179,12 @@ public class AclManagerTest extends GraphTestBase {
         DocumentaryUnit c4 = manager.getFrame("c4", DocumentaryUnit.class);
 
         assertFalse(acl.hasPermission(c4, OWNER, user));
-        PermissionGrant grant = acl.grantPermission(user, c4, OWNER);
+        PermissionGrant grant = acl.grantPermission(c4, OWNER, user);
         assertTrue(acl.hasPermission(c4, OWNER, user));
 
         // Try granting the same permission twice and ensure the
         // returned grant is the same instance as before...
-        PermissionGrant grant2 = acl.grantPermission(user, c4, OWNER);
+        PermissionGrant grant2 = acl.grantPermission(c4, OWNER, user);
         assertEquals(grant, grant2);
     }
 
@@ -235,9 +234,9 @@ public class AclManagerTest extends GraphTestBase {
         DocumentaryUnit c4 = manager.getFrame("c4", DocumentaryUnit.class);
 
         assertFalse(acl.hasPermission(c4, OWNER, user));
-        acl.grantPermission(user, c4, OWNER);
+        acl.grantPermission(c4, OWNER, user);
         assertTrue(acl.hasPermission(c4, OWNER, user));
-        acl.revokePermission(user, c4, OWNER);
+        acl.revokePermission(c4, OWNER, user);
         assertFalse(acl.hasPermission(c4, OWNER, user));
     }
 
@@ -277,7 +276,7 @@ public class AclManagerTest extends GraphTestBase {
 
         AclManager acl = new AclManager(graph);
         List<Map<String, GlobalPermissionSet>> getPerms
-                = acl.getInheritedGlobalPermissions(user1);
+                = acl.getInheritedGlobalPermissions(user1).serialize();
         // It should contain two elements - the user, and his group
         assertEquals(2, getPerms.size());
         assertEquals(GlobalPermissionSet.empty(), getPerms.get(0).get(user1.getId()));
@@ -386,14 +385,10 @@ public class AclManagerTest extends GraphTestBase {
         assertFalse(acl.hasPermission(userdoc1, OWNER, headArchivists));
 
         // Check the calculated permission sets.
-        assertTrue(hasPermissionIn(
-                acl.getInheritedEntityPermissions(user1, userdoc1), user1, OWNER));
-        assertFalse(hasPermissionIn(
-                acl.getInheritedEntityPermissions(user1, userdoc2), user1, OWNER));
-        assertTrue(hasPermissionIn(
-                acl.getInheritedEntityPermissions(user2, userdoc2), user2, OWNER));
-        assertFalse(hasPermissionIn(
-                acl.getInheritedEntityPermissions(user2, userdoc1), user2, OWNER));
+        assertTrue(acl.getInheritedItemPermissions(userdoc1, user1).has(OWNER));
+        assertFalse(acl.getInheritedItemPermissions(userdoc2, user1).has(OWNER));
+        assertTrue(acl.getInheritedItemPermissions(userdoc2, user2).has(OWNER));
+        assertFalse(acl.getInheritedItemPermissions(userdoc1, user2).has(OWNER));
 
         // Ensure user1 can update/delete his own doc
         assertTrue(acl.hasPermission(userdoc1, OWNER, user1));
@@ -415,16 +410,5 @@ public class AclManagerTest extends GraphTestBase {
         assertFalse(acl.hasPermission(userdoc2, OWNER, user1));
         assertFalse(acl.hasPermission(userdoc2, UPDATE, user1));
         assertFalse(acl.hasPermission(userdoc2, DELETE, user1));
-    }
-
-    private boolean hasPermissionIn(List<Map<String, List<PermissionType>>> set, Accessor user, PermissionType perm) {
-        for (Map<String, List<PermissionType>> grant : set) {
-            if (grant.containsKey(user.getId())) {
-                if (grant.get(user.getId()).contains(perm)) {
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 }
