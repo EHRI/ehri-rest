@@ -358,8 +358,21 @@ public final class Bundle {
      * @param relations A full set of relations
      * @return The new bundle
      */
-    public Bundle withRelations(Multimap<String, Bundle> relations) {
+    public Bundle replaceRelations(Multimap<String, Bundle> relations) {
         return new Bundle(id, type, data, relations, meta, temp);
+    }
+
+    /**
+     * Add a map of relations.
+     *
+     * @param relations A full set of relations
+     * @return The new bundle
+     */
+    public Bundle withRelations(Multimap<String, Bundle> relations) {
+        Multimap<String, Bundle> tmp = LinkedListMultimap
+                .create(relations);
+        tmp.putAll(relations);
+        return new Bundle(id, type, data, tmp, meta, temp);
     }
 
     /**

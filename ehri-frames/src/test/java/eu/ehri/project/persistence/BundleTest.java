@@ -1,7 +1,9 @@
 package eu.ehri.project.persistence;
 
+import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.persistence.utils.BundleUtils;
@@ -172,6 +174,30 @@ public class BundleTest {
     public void testGetRelations() throws Exception {
         List<Bundle> relations = bundle.getRelations(Ontology.DESCRIPTION_FOR_ENTITY);
         assertEquals(1L, relations.size());
+    }
+
+    @Test
+    public void testReplaceRelations() throws Exception {
+        Bundle newDesc = new Bundle(EntityClass.DOCUMENT_DESCRIPTION)
+                .withDataValue(Ontology.NAME_KEY, "Foobar")
+                .withDataValue(Ontology.LANGUAGE, "en");
+        Multimap<String,Bundle> rels = ImmutableListMultimap
+                .of(Ontology.DESCRIPTION_FOR_ENTITY, newDesc);
+        Bundle bundle2 = bundle.replaceRelations(rels);
+        assertEquals(1L, bundle2.getRelations(
+                Ontology.DESCRIPTION_FOR_ENTITY).size());
+    }
+
+    @Test
+    public void testWithRelationsMap() throws Exception {
+        Bundle newDesc = new Bundle(EntityClass.DOCUMENT_DESCRIPTION)
+                .withDataValue(Ontology.NAME_KEY, "Foobar")
+                .withDataValue(Ontology.LANGUAGE, "en");
+        Multimap<String,Bundle> rels = ImmutableListMultimap
+                .of(Ontology.DESCRIPTION_FOR_ENTITY, newDesc);
+        Bundle bundle2 = bundle.withRelations(rels);
+        assertEquals(2L, bundle2.getRelations(
+                Ontology.DESCRIPTION_FOR_ENTITY).size());
     }
 
     @Test
