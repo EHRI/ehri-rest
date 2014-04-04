@@ -17,6 +17,8 @@ import java.util.Map;
 import eu.ehri.project.persistence.BundleDAO;
 import eu.ehri.project.persistence.Mutation;
 import java.util.logging.Level;
+
+import eu.ehri.project.persistence.Serializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,6 +41,7 @@ public class IcaAtomEadImporter extends EaImporter {
      * at depth 1 (rather than 0)
      */
     private final int TOP_LEVEL_DEPTH = 1;
+    private Serializer mergeSerializer;
 
     /**
      * Construct an EadImporter object.
@@ -49,6 +52,7 @@ public class IcaAtomEadImporter extends EaImporter {
      */
     public IcaAtomEadImporter(FramedGraph<?> framedGraph, PermissionScope permissionScope, ImportLog log) {
         super(framedGraph, permissionScope, log);
+        mergeSerializer = new Serializer.Builder(framedGraph).dependentOnly().build();
 
     }
 
@@ -126,13 +130,13 @@ public class IcaAtomEadImporter extends EaImporter {
      * @throws ValidationError 
      */
     protected Mutation<DocumentaryUnit> mergeWithPreviousAndSave(Bundle unit, BundleDAO persister, Bundle descBundle) throws ValidationError {
-        final String languageOfDesc = (String) descBundle.getDataValue(Ontology.LANGUAGE_OF_DESCRIPTION);
-        Mutation<DocumentaryUnit> mutation;
-        String objectid = (String) unit.getDataValue(Ontology.IDENTIFIER_KEY);
-        if (persister.logicalUnitExists(objectid)) {
+        final String languageOfDesc = descBundle.getDataValue(Ontology.LANGUAGE_OF_DESCRIPTION);
+        Bundle withIds = unit.generateIds(getPermissionScope().idPath());
+        if (manager.exists(withIds.getId())) {
             try {
                 //read the current item’s bundle
-                Bundle oldBundle = persister.getBundle(objectid);
+                Bundle oldBundle = mergeSerializer
+                        .vertexFrameToBundle(manager.getVertex(withIds.getId()));
 
                 //filter out dependents that a) are descriptions, b) have the same language/code
                 Bundle.Filter filter = new Bundle.Filter() {
@@ -145,15 +149,12 @@ public class IcaAtomEadImporter extends EaImporter {
                     }
                 };
                 Bundle filtered = oldBundle.filterRelations(filter);
-           
-                //add your new description
-//              Bundle newBundle = filtered.mergeDataWith(unit); 
-                //this overwrites the existing 'describes' ImmutableList, instead of merging, so using withRelationship() instead
 
-                Bundle newBundle = filtered.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
+                Bundle newBundle = withIds.withRelations(filtered.getRelations())
+                        .withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
 
                 //save it
-                mutation = persister.createOrUpdate(newBundle, DocumentaryUnit.class);
+                return persister.createOrUpdate(newBundle, DocumentaryUnit.class);
 
             } catch (SerializationError ex) {
                 throw new ValidationError(unit, "serialization error", ex.getMessage());
@@ -162,9 +163,8 @@ public class IcaAtomEadImporter extends EaImporter {
             }
         } else {
             unit = unit.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
-            mutation = persister.createOrUpdate(unit, DocumentaryUnit.class);
+            return persister.createOrUpdate(unit, DocumentaryUnit.class);
         }
-        return mutation;
     }
     
     @SuppressWarnings("unchecked")
