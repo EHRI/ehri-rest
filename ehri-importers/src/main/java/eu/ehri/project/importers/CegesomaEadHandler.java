@@ -26,7 +26,7 @@ public class CegesomaEadHandler extends EadHandler {
 
     public CegesomaEadHandler(AbstractImporter<Map<String, Object>> importer) {
         super(importer, new XmlImportProperties("cegesoma.properties"));
-        this.defaultLanguage = "nld";
+        this.eadLanguage = "nld";
     }
 
     /**

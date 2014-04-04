@@ -23,7 +23,7 @@ public class ItsEadHandler extends EadHandler {
 	
 	public ItsEadHandler(AbstractImporter<Map<String, Object>> importer) {
 		super(importer, new XmlImportProperties("its.properties"));
-		this.defaultLanguage = "deu";
+		this.eadLanguage = "deu";
 	}
 
 	 @Override

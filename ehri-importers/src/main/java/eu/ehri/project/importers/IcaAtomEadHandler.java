@@ -45,7 +45,6 @@ public class IcaAtomEadHandler extends EadHandler {
         this(importer, new XmlImportProperties("icaatom.properties"));
     }
 
-    
     @Override
     protected void extractTitle(Map<String, Object> currentGraph) {
     	if (!currentGraph.containsKey(Ontology.NAME_KEY)) {

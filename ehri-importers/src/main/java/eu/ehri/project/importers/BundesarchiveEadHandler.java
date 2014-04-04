@@ -29,7 +29,7 @@ public class BundesarchiveEadHandler extends EadHandler {
     @SuppressWarnings("unchecked")
     public BundesarchiveEadHandler(AbstractImporter<Map<String, Object>> importer) {
         super(importer, new XmlImportProperties("bundesarchive.properties"));
-        defaultLanguage = "deu";
+        eadLanguage = "deu";
     }
 
 
