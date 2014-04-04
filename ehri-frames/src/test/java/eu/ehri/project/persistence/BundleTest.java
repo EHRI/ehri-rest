@@ -163,10 +163,10 @@ public class BundleTest {
             }
         };
         Bundle filtered = bundle.filterRelations(filter);
-        assertFalse(bundle.getRelations(Ontology.DESCRIPTION_FOR_ENTITY).isEmpty());
+        assertFalse((Ontology.DESCRIPTION_FOR_ENTITY).isEmpty());
         assertTrue(filtered.getRelations(Ontology.DESCRIPTION_FOR_ENTITY).isEmpty());
     }
-
+        
     @Test
     public void testGetRelations() throws Exception {
         // TODO
