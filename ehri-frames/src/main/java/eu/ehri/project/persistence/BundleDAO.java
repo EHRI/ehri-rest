@@ -154,6 +154,7 @@ public final class BundleDAO {
     }
     
     /**
+<<<<<<< HEAD
      * 
      * @param graphid, the identifier of this bundle in the graph __ID__
      * @return returns true if the identifier of this bundle already exists in the graph, false otherwise
@@ -187,6 +188,8 @@ public final class BundleDAO {
     }
 
     /**
+=======
+>>>>>>> 76e132efe41dd0b52f7c45e34590541d54b557a0
      * Insert a bundle and save its dependent items.
      *
      * @param bundle a Bundle to insert in the graph

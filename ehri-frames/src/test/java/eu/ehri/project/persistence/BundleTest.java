@@ -1,7 +1,9 @@
 package eu.ehri.project.persistence;
 
+import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.persistence.utils.BundleUtils;
@@ -11,6 +13,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static junit.framework.Assert.assertEquals;
@@ -169,32 +172,67 @@ public class BundleTest {
         
     @Test
     public void testGetRelations() throws Exception {
-        // TODO
+        List<Bundle> relations = bundle.getRelations(Ontology.DESCRIPTION_FOR_ENTITY);
+        assertEquals(1L, relations.size());
+    }
+
+    @Test
+    public void testReplaceRelations() throws Exception {
+        Bundle newDesc = new Bundle(EntityClass.DOCUMENT_DESCRIPTION)
+                .withDataValue(Ontology.NAME_KEY, "Foobar")
+                .withDataValue(Ontology.LANGUAGE, "en");
+        Multimap<String,Bundle> rels = ImmutableListMultimap
+                .of(Ontology.DESCRIPTION_FOR_ENTITY, newDesc);
+        Bundle bundle2 = bundle.replaceRelations(rels);
+        assertEquals(1L, bundle2.getRelations(
+                Ontology.DESCRIPTION_FOR_ENTITY).size());
+    }
+
+    @Test
+    public void testWithRelationsMap() throws Exception {
+        Bundle newDesc = new Bundle(EntityClass.DOCUMENT_DESCRIPTION)
+                .withDataValue(Ontology.NAME_KEY, "Foobar")
+                .withDataValue(Ontology.LANGUAGE, "en");
+        Multimap<String,Bundle> rels = ImmutableListMultimap
+                .of(Ontology.DESCRIPTION_FOR_ENTITY, newDesc);
+        Bundle bundle2 = bundle.withRelations(rels);
+        assertEquals(2L, bundle2.getRelations(
+                Ontology.DESCRIPTION_FOR_ENTITY).size());
     }
 
     @Test
     public void testWithRelations() throws Exception {
-        // TODO
+        Bundle newDesc = new Bundle(EntityClass.DOCUMENT_DESCRIPTION)
+                .withDataValue(Ontology.NAME_KEY, "Foobar")
+                .withDataValue(Ontology.LANGUAGE, "en");
+        Bundle bundle2 = bundle.withRelations(
+                Ontology.DESCRIPTION_FOR_ENTITY, Lists.newArrayList(newDesc));
+        assertEquals(2L, bundle2.getRelations(
+                Ontology.DESCRIPTION_FOR_ENTITY).size());
     }
 
     @Test
     public void testWithRelation() throws Exception {
-        // TODO
+        Bundle newDesc = new Bundle(EntityClass.DOCUMENT_DESCRIPTION)
+                .withDataValue(Ontology.NAME_KEY, "Foobar")
+                .withDataValue(Ontology.LANGUAGE, "en");
+        Bundle bundle2 = bundle.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, newDesc);
+        assertEquals(2L, bundle2.getRelations(
+                Ontology.DESCRIPTION_FOR_ENTITY).size());
     }
 
     @Test
     public void testHasRelations() throws Exception {
-        // TODO
+        assertTrue(bundle.hasRelations(Ontology.DESCRIPTION_FOR_ENTITY));
     }
 
     @Test
     public void testRemoveRelation() throws Exception {
-        // TODO
-    }
-
-    @Test
-    public void testRemoveRelations() throws Exception {
-        // TODO
+        List<Bundle> relations = bundle.getRelations(Ontology.DESCRIPTION_FOR_ENTITY);
+        assertEquals(1L, relations.size());
+        Bundle bundle2 = bundle.removeRelation(
+                Ontology.DESCRIPTION_FOR_ENTITY, relations.get(0));
+        assertFalse(bundle2.hasRelations(Ontology.DESCRIPTION_FOR_ENTITY));
     }
 
     @Test

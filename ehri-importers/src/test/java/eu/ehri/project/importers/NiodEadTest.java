@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static org.junit.Assert.*;
+import org.junit.Ignore;
 
 /**
  *
@@ -38,7 +39,7 @@ public class NiodEadTest extends AbstractImporterTest{
             C03_2 = "59";
     int origCount=0;
 
-    @Test
+    @Test @Ignore //ignore in favour of NiodEadXsdTest
     public void niodEadTest() throws ItemNotFound, IOException, ValidationError, InputParseError {
         
         PermissionScope agent = manager.getFrame(TEST_REPO, PermissionScope.class);

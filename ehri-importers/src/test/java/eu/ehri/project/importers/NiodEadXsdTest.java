@@ -80,11 +80,11 @@ public class NiodEadXsdTest extends AbstractImporterTest{
 
         // Test correct ID generation
         assertEquals("nl-r1-MF1081500".toLowerCase(), archdesc.getId());
-        assertEquals("nl-r1-MF1148873".toLowerCase(), c1.getId());
-        assertEquals("nl-r1-MF1086379".toLowerCase(), c2.getId());
-        assertEquals("nl-r1-MF1086399".toLowerCase(), c3.getId());
-        assertEquals("nl-r1-MF1086380".toLowerCase(), c2_1.getId());
-        assertEquals("nl-r1-MF1086398".toLowerCase(), c3_2.getId());
+        assertEquals("nl-r1-MF1081500-MF1148873".toLowerCase(), c1.getId());
+        assertEquals("nl-r1-MF1081500-MF1148873-MF1086379".toLowerCase(), c2.getId());
+        assertEquals("nl-r1-MF1081500-MF1148873-MF1086380-MF1086399".toLowerCase(), c3.getId());
+        assertEquals("nl-r1-MF1081500-MF1148873-MF1086380".toLowerCase(), c2_1.getId());
+        assertEquals("nl-r1-MF1081500-MF1148873-MF1086380-MF1086398".toLowerCase(), c3_2.getId());
 
         // Check permission scope and hierarchy
         assertNull(archdesc.getParent());
