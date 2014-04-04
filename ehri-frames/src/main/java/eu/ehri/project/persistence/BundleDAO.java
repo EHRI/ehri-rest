@@ -155,12 +155,12 @@ public final class BundleDAO {
     
     /**
      * 
-     * @param objectId the objectIdentifier, so this is NOT the graphid
+     * @param graphid, the identifier of this bundle in the graph __ID__
      * @return returns true if the identifier of this bundle already exists in the graph, false otherwise
      * this obviously does not check the existence of dependent relationships (like descriptions etc)
      */
-    public boolean logicalUnitExists(String objectId){
-        return getVertexByIdentifier(objectId) != null;
+    public boolean logicalUnitExists(String graphid){
+        return manager.exists(graphid);
     }
     /**
      * 
@@ -177,13 +177,13 @@ public final class BundleDAO {
     }
     /**
      * 
-     * @param id the objectIdentifier, so this is NOT the graphid
+     * @param graphid the identifier of this bundle in the graph __ID__
      * @return returns the Bundle for this id, with all dependent vertices
      * @throws SerializationError
      * @throws ItemNotFound 
      */
-    public Bundle getBundle(String objectId) throws SerializationError, ItemNotFound{
-        return serializer.vertexFrameToBundle(getVertexByIdentifier(objectId));
+    public Bundle getBundle(String graphid) throws SerializationError, ItemNotFound{
+        return serializer.vertexFrameToBundle(manager.getVertex(graphid));
     }
 
     /**

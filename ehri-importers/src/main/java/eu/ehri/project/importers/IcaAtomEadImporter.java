@@ -1,6 +1,5 @@
 package eu.ehri.project.importers;
 
-import com.google.common.collect.Multimap;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ItemNotFound;
@@ -16,7 +15,6 @@ import java.util.Map;
 
 import eu.ehri.project.persistence.BundleDAO;
 import eu.ehri.project.persistence.Mutation;
-import java.util.logging.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -128,11 +126,12 @@ public class IcaAtomEadImporter extends EaImporter {
     protected Mutation<DocumentaryUnit> mergeWithPreviousAndSave(Bundle unit, BundleDAO persister, Bundle descBundle) throws ValidationError {
         final String languageOfDesc = (String) descBundle.getDataValue(Ontology.LANGUAGE_OF_DESCRIPTION);
         Mutation<DocumentaryUnit> mutation;
-        String objectid = (String) unit.getDataValue(Ontology.IDENTIFIER_KEY);
-        if (persister.logicalUnitExists(objectid)) {
+        //use the `generateIds(scope.idPath())` method to obtain a (new) bundle with the __ID__ values calculated with the given scope.
+        unit = unit.generateIds(permissionScope.idPath());
+        if (persister.logicalUnitExists(unit.getId())) {
             try {
                 //read the current item’s bundle
-                Bundle oldBundle = persister.getBundle(objectid);
+                Bundle oldBundle = persister.getBundle(unit.getId());
 
                 //filter out dependents that a) are descriptions, b) have the same language/code
                 Bundle.Filter filter = new Bundle.Filter() {
