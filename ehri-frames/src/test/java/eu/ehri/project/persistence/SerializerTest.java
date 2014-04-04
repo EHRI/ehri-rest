@@ -68,8 +68,17 @@ public class SerializerTest extends AbstractFixtureTest {
         // Not mandatory properties should be null...
         assertNull(BundleUtils.get(serialized, "describes[0]/scopeAndContent"));
 
-        Bundle serialized2 = serializer.withIncludedProperties(Lists.newArrayList("scopeAndContent"))
+        Serializer withProps = serializer.withIncludedProperties(Lists.newArrayList("scopeAndContent"));
+        Bundle serialized2 = withProps
                 .vertexFrameToBundle(doc);
         assertNotNull(BundleUtils.get(serialized2, "describes[0]/scopeAndContent"));
+
+        // Ensure `withCache` preserves includedProperties (#31)
+        Serializer withPropsAndCache = withProps.withCache();
+        assertEquals(Lists.newArrayList("scopeAndContent"),
+                withPropsAndCache.getIncludeProperties());
+        Bundle serialized3 = withPropsAndCache
+                .vertexFrameToBundle(doc);
+        assertNotNull(BundleUtils.get(serialized3, "describes[0]/scopeAndContent"));
     }
 }
