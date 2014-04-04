@@ -330,9 +330,10 @@ public abstract class AbstractRestResource  {
      */
     protected <T extends Frame> StreamingOutput streamingList(
             final Iterable<T> list) {
+        final Serializer serializer = getSerializer();
         return MediaType.TEXT_XML_TYPE.equals(checkMediaType())
-                ? getStreamingXmlOutput(list, getSerializer())
-                : getStreamingJsonOutput(list, getSerializer());
+                ? getStreamingXmlOutput(list, serializer)
+                : getStreamingJsonOutput(list, serializer);
     }
 
     /**
