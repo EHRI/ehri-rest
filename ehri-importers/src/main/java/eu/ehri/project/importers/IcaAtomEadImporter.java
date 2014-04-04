@@ -1,7 +1,10 @@
 package eu.ehri.project.importers;
 
+import com.google.common.collect.Multimap;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.definitions.Ontology;
+import eu.ehri.project.exceptions.ItemNotFound;
+import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.*;
 import eu.ehri.project.models.base.*;
@@ -13,6 +16,7 @@ import java.util.Map;
 
 import eu.ehri.project.persistence.BundleDAO;
 import eu.ehri.project.persistence.Mutation;
+import java.util.logging.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,12 +86,14 @@ public class IcaAtomEadImporter extends EaImporter {
             logger.debug("Unknown Properties found");
             descBundle = descBundle.withRelation(Ontology.HAS_UNKNOWN_PROPERTY, new Bundle(EntityClass.UNKNOWN_PROPERTY, unknowns));
         }
-        unit = unit.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
 
-        Mutation<DocumentaryUnit> mutation =
-                persister.createOrUpdate(unit, DocumentaryUnit.class);
+        Mutation<DocumentaryUnit> mutation = mergeWithPreviousAndSave(unit, persister, descBundle);
+//                persister.createOrUpdate(unit, DocumentaryUnit.class);
         DocumentaryUnit frame = mutation.getNode();
 
+        if (mutation.created()) {
+            solveUndeterminedRelationships(frame, descBundle);
+        }
         // Set the repository/item relationship
         if (idPath.isEmpty() && mutation.created()) {
             EntityClass scopeType = manager.getEntityClass(permissionScope);
@@ -108,6 +114,59 @@ public class IcaAtomEadImporter extends EaImporter {
 
 
     }
+
+
+    /**
+     * finds any bundle in the graph with the same ObjectIdentifier. 
+     * if it exists it replaces the Description in the given language, else it just saves it
+     * @param unit - the DocumentaryUnit to be saved
+     * @param persister
+     * @param descBundle - the documentsDescription to replace any previous ones with this language
+     * @return
+     * @throws ValidationError 
+     */
+    protected Mutation<DocumentaryUnit> mergeWithPreviousAndSave(Bundle unit, BundleDAO persister, Bundle descBundle) throws ValidationError {
+        final String languageOfDesc = (String) descBundle.getDataValue(Ontology.LANGUAGE_OF_DESCRIPTION);
+        Mutation<DocumentaryUnit> mutation;
+        String objectid = (String) unit.getDataValue(Ontology.IDENTIFIER_KEY);
+        if (persister.logicalUnitExists(objectid)) {
+            try {
+                //read the current item’s bundle
+                Bundle oldBundle = persister.getBundle(objectid);
+
+                //filter out dependents that a) are descriptions, b) have the same language/code
+                Bundle.Filter filter = new Bundle.Filter() {
+                    @Override
+                    public boolean remove(String relationLabel, Bundle bundle) {
+                        String lang = bundle.getDataValue(Ontology.LANGUAGE);
+                        return bundle.getType().equals(EntityClass.DOCUMENT_DESCRIPTION)
+                                && (lang != null
+                                && lang.equals(languageOfDesc));
+                    }
+                };
+                Bundle filtered = oldBundle.filterRelations(filter);
+           
+                //add your new description
+//              Bundle newBundle = filtered.mergeDataWith(unit); 
+                //this overwrites the existing 'describes' ImmutableList, instead of merging, so using withRelationship() instead
+
+                Bundle newBundle = filtered.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
+
+                //save it
+                mutation = persister.createOrUpdate(newBundle, DocumentaryUnit.class);
+
+            } catch (SerializationError ex) {
+                throw new ValidationError(unit, "serialization error", ex.getMessage());
+            } catch (ItemNotFound ex) {
+                throw new ValidationError(unit, "item not found exception", ex.getMessage());
+            }
+        } else {
+            unit = unit.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
+            mutation = persister.createOrUpdate(unit, DocumentaryUnit.class);
+        }
+        return mutation;
+    }
+    
     @SuppressWarnings("unchecked")
 	@Override
     protected Iterable<Map<String, Object>> extractRelations(Map<String, Object> data) {
@@ -159,5 +218,9 @@ public class IcaAtomEadImporter extends EaImporter {
     @Override
     public AccessibleEntity importItem(Map<String, Object> itemData) throws ValidationError {
         throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    protected void solveUndeterminedRelationships(DocumentaryUnit frame, Bundle descBundle) throws ValidationError {
+        // can be used by subclasses to solve any undeterminedRelationships
     }
 }

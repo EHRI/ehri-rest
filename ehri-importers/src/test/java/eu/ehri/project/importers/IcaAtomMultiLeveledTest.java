@@ -16,6 +16,7 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 
+import org.junit.Ignore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,14 +46,14 @@ private final String UN_REL = "HR-HDA145corporateBodyAccessCroatianStateArchive"
 
         printGraph(graph);
         // How many new nodes will have been created? We should have
-        // - 3 more DocumentaryUnit
-        // - 3 more DocumentDescription
-        // - 3 more DatePeriod
+        // - 3 more DocumentaryUnit (1 1 1)
+        // - 3 more DocumentDescription (1 1 1)
+        // - 3 more DatePeriod (1 1 1)
         //TODO: test these UR's
-        // - 8 more UndeterminedRelationships
+        // - 8 more UndeterminedRelationships (2 4 2)
         //TODO: test this UP
-        // - 3 more UnknownProperty
-        // - 4 more import Event links
+        // - 3 more UnknownProperty (1 1 1)
+        // - 4 more import Event links (+1)
         // - 1 more import Event
 
         int createCount = origCount + 25;

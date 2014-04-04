@@ -1,0 +1,128 @@
+<ead xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="urn:isbn:1-931666-22-9" xmlns:xlink="http://www.w3.org/1999/xlink" xsi:schemaLocation="urn:isbn:1-931666-22-9 http://www.loc.gov/ead/ead.xsd">
+	<eadheader audience="internal" countryencoding="iso3166-1" dateencoding="iso8601" relatedencoding="ISAD">
+		<eadid countrycode="FI" mainagencycode="FI-HeNAF" identifier="VAKKA-326611.KA#FIN">
+VAKKA-326611.KA</eadid>
+		<filedesc>
+			<titlestmt>
+				<titleproper encodinganalog="Title">Helsingin juutalaisen seurakunnan arkisto</titleproper>
+				<subtitle/>
+				<author encodinganalog="Creator">National archives of Finland</author>
+			</titlestmt>
+			<publicationstmt>
+				<publisher encodinganalog="Publisher">National archives of Finland</publisher>
+			</publicationstmt>
+		</filedesc>
+		<profiledesc>
+			<creation>National archives of Finland
+	<date normal="20140206">02.06.2014</date>
+			</creation>
+			<langusage>
+				<language encodinganalog="Language" langcode="fin">Finnish</language>
+			</langusage>
+		</profiledesc>
+	</eadheader>
+	<archdesc level="fonds" type="inventory" relatedencoding="ISAD">
+		<did>
+			<head>Kokoelman tiedot</head>
+			<repository encodinganalog="3.1.1" label="S&#xE4;ilytt&#xE4;v&#xE4; arkistolaitoksen yksikk&#xF6;">KA</repository>
+			<origination label="Arkistonmuodostaja: " encodinganalog="3.2.1">
+				<corpname authfilenumber="VAKKA-46087.KA" role="creator">Helsingin juutalainen seurakunta</corpname>
+			</origination>
+			<unitdate encodinganalog="3.1.3" label="Rajavuodet:">1864-2011</unitdate>
+			<unittitle encodinganalog="3.1.2" label="Arkisto: ">Helsingin juutalaisen seurakunnan arkisto</unittitle>
+			<unitid label="Arkiston tunnus" encodinganalog="3.1.1" identifier="VAKKA-326611.KA" countrycode="FI" repositorycode="FI-HeNAF"/>
+		</did>
+		<accessrestrict encodinganalog="3.4.1">
+			<head>Käyttörajoitukset</head>
+			<p>Käyttö arkistolaitoksen pääjohtajan luvalla.</p>
+		</accessrestrict>
+		<custodhist encodinganalog="3.2.4">
+			<head>Omistushistoria</head>
+			<p>Kuuluu Suomen juutalaisten arkistoon.</p>
+		</custodhist>
+		<scopecontent encodinganalog="3.3.1">
+			<head>Tietosisältö</head>
+			<p>Seurakunnan arkisto sekä sen hallussa olleiden henkilöiden, yhdistysten ym. aineistoa.</p>
+		</scopecontent>
+		<dsc type="combined">
+			<head>Arkiston sisältö</head>
+			<c01 level="series">
+				<did>
+					<unittitle encodinganalog="3.1.2">HENKILÖIDEN ASIAKIRJAT / Abraham Stiller</unittitle>
+					<unitid label="Sarjan tunnus" encodinganalog="3.1.1" identifier="VAKKA-339052.KA" countrycode="FI" repositorycode="FI-HeNAF"/>
+					<unitdate type="bulk" encodinganalog="3.1.3">1940-1983</unitdate>
+				</did>
+				<c02 level="item">
+					<did>
+						<unittitle encodinganalog="3.1.2">Juutalaisten sotavankien ja heitä koskevat kirjeet</unittitle>
+						<unitdate>1941-1944</unitdate>
+						<unitid label="Arkistoyksik&#xF6;n tunniste" encodinganalog="3.1.1" identifier="VAKKA-3058288.KA" countrycode="FI" repositorycode="FI-HeNAF">1</unitid>
+						<physloc>KA</physloc>
+						<container type="KOTELO">412</container>
+					</did>
+					<accessrestrict encodinganalog="3.4.1">
+						<head>Käyttörajoitukset</head>
+						<p>Käyttö arkistolaitoksen pääjohtajan ja Helsingin juutalaisen seurakunnan luvalla.</p>
+					</accessrestrict>
+				</c02>
+				<c02 level="item">
+					<did>
+						<unittitle encodinganalog="3.1.2">Adressit ym.</unittitle>
+						<unitdate>-</unitdate>
+						<unitid label="Arkistoyksik&#xF6;n tunniste" encodinganalog="3.1.1" identifier="VAKKA-3058289.KA" countrycode="FI" repositorycode="FI-HeNAF">2</unitid>
+						<physloc>KA</physloc>
+						<container type="KOTELO">412</container>
+					</did>
+					<accessrestrict encodinganalog="3.4.1">
+						<head>Käyttörajoitukset</head>
+						<p>Käyttö arkistolaitoksen pääjohtajan ja Helsingin juutalaisen seurakunnan luvalla.</p>
+					</accessrestrict>
+				</c02>
+				<c02 level="item">
+					<did>
+						<unittitle encodinganalog="3.1.2">Pakolaisten ja heitä koskevat kirjeet</unittitle>
+						<unitdate>1943-1944</unitdate>
+						<unitid label="Arkistoyksik&#xF6;n tunniste" encodinganalog="3.1.1" identifier="VAKKA-3058290.KA" countrycode="FI" repositorycode="FI-HeNAF">3</unitid>
+						<physloc>KA</physloc>
+						<container type="KOTELO">413</container>
+					</did>
+					<accessrestrict encodinganalog="3.4.1">
+						<head>Käyttörajoitukset</head>
+						<p>Käyttö arkistolaitoksen pääjohtajan ja Helsingin juutalaisen seurakunnan luvalla.</p>
+					</accessrestrict>
+				</c02>
+				<c02 level="item">
+					<did>
+						<unittitle encodinganalog="3.1.2">Muut saapuneet kirjeet</unittitle>
+						<unitdate>1940-1983</unitdate>
+						<unitid label="Arkistoyksik&#xF6;n tunniste" encodinganalog="3.1.1" identifier="VAKKA-3058292.KA" countrycode="FI" repositorycode="FI-HeNAF">4</unitid>
+						<physloc>KA</physloc>
+						<container type="KOTELO">414</container>
+					</did>
+					<accessrestrict encodinganalog="3.4.1">
+						<head>Käyttörajoitukset</head>
+						<p>Käyttö arkistolaitoksen pääjohtajan ja Helsingin juutalaisen seurakunnan luvalla.</p>
+					</accessrestrict>
+				</c02>
+				<c02 level="item">
+					<did>
+						<unittitle encodinganalog="3.1.2">Kirjat</unittitle>
+						<unitdate>-</unitdate>
+						<unitid label="Arkistoyksik&#xF6;n tunniste" encodinganalog="3.1.1" identifier="VAKKA-3058293.KA" countrycode="FI" repositorycode="FI-HeNAF">5</unitid>
+						<physloc>KA</physloc>
+						<container type="KOTELO">436</container>
+					</did>
+					<accessrestrict encodinganalog="3.4.1">
+						<head>Käyttörajoitukset</head>
+						<p>Käyttö arkistolaitoksen pääjohtajan ja Helsingin juutalaisen seurakunnan luvalla.</p>
+					</accessrestrict>
+					<scopecontent encodinganalog="3.3.1">
+						<head>Tietosisältö</head>
+						<p>Rabbi Schmuel Noson Bukanzin omistuskirjoituksella varustettu kirja Midrash rabba 1909, runoilija Avrom Sutzkeverin omistuskirjoituksella varustettu kirja Geheimstot 1950.</p>
+					</scopecontent>
+				</c02>
+			</c01>
+                </dsc>
+        </archdesc>
+</ead>
+

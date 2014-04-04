@@ -62,15 +62,11 @@ public class Eag2896Test extends AbstractImporterTest {
 
         Iterable<Vertex> docs = graph.getVertices(Ontology.IDENTIFIER_KEY, IMPORTED_ITEM_ID);
         assertTrue(docs.iterator().hasNext());
-        Repository unit = graph.frame(
-                getVertexByIdentifier(graph, IMPORTED_ITEM_ID),
-                Repository.class);
+        Repository unit = graph.frame(getVertexByIdentifier(graph, IMPORTED_ITEM_ID), Repository.class);
         assertEquals(Entities.REPOSITORY, unit.getType());
 
         // check the child items
-        RepositoryDescription c1 = graph.frame(
-                getVertexByIdentifier(graph, AGENT_DESC_ID),
-                RepositoryDescription.class);
+        RepositoryDescription c1 = graph.frame(getVertexByIdentifier(graph, AGENT_DESC_ID), RepositoryDescription.class);
         assertEquals(Entities.REPOSITORY_DESCRIPTION, c1.getType());
         Object notes = c1.asVertex().getProperty(EagImporter.MAINTENANCE_NOTES);
         if (notes instanceof String[]) {
@@ -108,8 +104,7 @@ public class Eag2896Test extends AbstractImporterTest {
 
         // Test idempotency
         int edgeCount = getEdgeCount(graph);
-        ImportLog log2 = importManager
-                .importFile(ClassLoader.getSystemResourceAsStream(SINGLE_UNIT), logMessage);
+        ImportLog log2 = importManager.importFile(ClassLoader.getSystemResourceAsStream(SINGLE_UNIT), logMessage);
         assertFalse(log2.hasDoneWork());
         assertEquals(afterCount, getNodeCount(graph));
         assertEquals(edgeCount, getEdgeCount(graph));

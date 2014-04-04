@@ -39,11 +39,12 @@ public class EadHandler extends SaxXmlHandler {
     // Constants for elements we need to watch for.
     private final static String ARCHDESC = "archdesc";
     private final static String DID = "did";
+    private final static String DEFAULT_LANGUAGE = "eng";
 
     /**
      * Default language to use in units without language
      */
-    protected String defaultLanguage = "eng";
+    protected String eadLanguage = DEFAULT_LANGUAGE;
     
     /**
      * EAD identifier as found in `<eadid>` in the currently handled EAD file
@@ -53,6 +54,7 @@ public class EadHandler extends SaxXmlHandler {
     /**
      * Set a custom resolver so EAD DTDs are never looked up online.
      */
+    @Override
     public org.xml.sax.InputSource resolveEntity(String publicId, String systemId)
             throws org.xml.sax.SAXException, java.io.IOException {
         // This is the equivalent of returning a null dtd.
@@ -132,6 +134,12 @@ public class EadHandler extends SaxXmlHandler {
     		eadId = (String) currentGraphPath.peek().get("eadId");
     		logger.debug("Found <eadid>: "+ eadId);
     	}
+        
+        if(localName.equals("language") || qName.equals("language")){
+            String lang = (String) currentGraphPath.peek().get ("languageCode");
+            if(lang != null)
+                eadLanguage=lang;
+        }
 
         // FIXME: We need to add the 'parent' identifier to the ID stack
         // so that graph path IDs are created correctly. This currently
@@ -155,11 +163,9 @@ public class EadHandler extends SaxXmlHandler {
 
                     // Second: title
                     extractTitle(currentGraph);
-                    
-//                    extractEadLanguage(currentGraph);
-                    
 
                     useDefaultLanguage(currentGraph);
+
                     extractDate(currentGraph);
 
                     DocumentaryUnit current = (DocumentaryUnit) importer.importItem(currentGraph, pathIds());
@@ -225,7 +231,7 @@ public class EadHandler extends SaxXmlHandler {
      * for the description if no language is found.
      *
      * @param currentGraph    Data at the current node level
-     * @param defaultLanguage Language code to use as default
+     * @param eadLanguage Language code to use as default
      */
     protected void useDefaultLanguage(Map<String, Object> currentGraph, String defaultLanguage) {
 
@@ -236,7 +242,7 @@ public class EadHandler extends SaxXmlHandler {
     }
 
     protected String getDefaultLanguage() {
-        return defaultLanguage;
+        return eadLanguage;
     }
 
     /**
