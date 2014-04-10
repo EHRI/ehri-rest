@@ -9,7 +9,6 @@ import com.tinkerpop.frames.modules.javahandler.JavaHandlerContext;
 import com.tinkerpop.pipes.PipeFunction;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.PermissionGrant;
-import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.utils.JavaHandlerUtils;
 
 import java.util.List;

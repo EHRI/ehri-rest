@@ -63,6 +63,7 @@ public class IcaAtomEadImporter extends EaImporter {
     @Override
     public DocumentaryUnit importItem(Map<String, Object> itemData, List<String> idPath) throws ValidationError {
 
+        logger.debug("idpath from argumetns: " + idPath);
         BundleDAO persister = getPersister(idPath);
 
         Bundle unit = new Bundle(EntityClass.DOCUMENTARY_UNIT, extractDocumentaryUnit(itemData));
@@ -89,7 +90,7 @@ public class IcaAtomEadImporter extends EaImporter {
             descBundle = descBundle.withRelation(Ontology.HAS_UNKNOWN_PROPERTY, new Bundle(EntityClass.UNKNOWN_PROPERTY, unknowns));
         }
 
-        Mutation<DocumentaryUnit> mutation = persister.createOrUpdate(mergeWithPreviousAndSave(unit, descBundle),
+        Mutation<DocumentaryUnit> mutation = persister.createOrUpdate(mergeWithPreviousAndSave(unit, descBundle, idPath),
                 DocumentaryUnit.class);
 //                persister.createOrUpdate(unit, DocumentaryUnit.class);
         DocumentaryUnit frame = mutation.getNode();
@@ -129,9 +130,20 @@ public class IcaAtomEadImporter extends EaImporter {
      * @throws ValidationError
      */
 
-    protected Bundle mergeWithPreviousAndSave(Bundle unit, Bundle descBundle) throws ValidationError {
+    protected Bundle mergeWithPreviousAndSave(Bundle unit, Bundle descBundle, List<String> idPath) throws ValidationError {
         final String languageOfDesc = descBundle.getDataValue(Ontology.LANGUAGE_OF_DESCRIPTION);
-        Bundle withIds = unit.generateIds(getPermissionScope().idPath());
+        Iterable<String> path = getPermissionScope().idPath();
+        List lpath = new ArrayList<String>();
+        for(String p : path){
+            lpath.add(p);
+        }
+        for(String p : idPath){
+            lpath.add(p);
+        }
+        Bundle withIds = unit.generateIds(lpath);
+        
+        
+        logger.debug("idpath: "+withIds.getId());
         if (manager.exists(withIds.getId())) {
             try {
                 //read the current item’s bundle

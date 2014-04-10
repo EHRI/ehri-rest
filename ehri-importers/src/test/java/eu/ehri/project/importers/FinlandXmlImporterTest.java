@@ -23,7 +23,9 @@ public class FinlandXmlImporterTest extends AbstractImporterTest{
        protected final String SINGLE_EAD_ENG = "EHRI-test-ead.xml";
     // Depends on fixtures
     protected final String TEST_REPO = "r1",
-            C1 = "VAKKA-326611.KA";
+            C1 = "VAKKA-326611.KA",
+            C2 = "VAKKA-3058288.KA";
+    
     
 
     @Test
@@ -42,6 +44,7 @@ public class FinlandXmlImporterTest extends AbstractImporterTest{
         int count_fin = getNodeCount(graph);
         
         DocumentaryUnit c1 = graph.frame(getVertexByIdentifier(graph, C1), DocumentaryUnit.class);
+        DocumentaryUnit c2 = graph.frame(getVertexByIdentifier(graph, C2), DocumentaryUnit.class);
         Iterator<DocumentDescription> i = c1.getDocumentDescriptions().iterator();
         int nrOfDesc = 0;
         while(i.hasNext()){
@@ -65,6 +68,16 @@ public class FinlandXmlImporterTest extends AbstractImporterTest{
             nrOfDesc++;
         }
         assertEquals(2, nrOfDesc);
+       
+        i = c2.getDocumentDescriptions().iterator();
+        nrOfDesc = 0;
+        while(i.hasNext()){
+            DocumentDescription desc = i.next();
+            System.out.println("language = " + desc.getLanguageOfDescription());
+            //assertEquals("fin", desc.getLanguageOfDescription());
+            nrOfDesc++;
+        }
+        assertEquals(2, nrOfDesc);
         int count_eng = getNodeCount(graph);
         
         System.out.println(count + " " + count_fin + " " + count_eng);
@@ -72,7 +85,7 @@ public class FinlandXmlImporterTest extends AbstractImporterTest{
         ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD_ENG);
         log = importManager.importFile(ios, logMessage);
         //TODO: somehow, mike's changes seem to create three more nodes?
-        assertEquals(count_eng+3, getNodeCount(graph));
+        assertEquals(count_eng+9, getNodeCount(graph));
         
     }
 
