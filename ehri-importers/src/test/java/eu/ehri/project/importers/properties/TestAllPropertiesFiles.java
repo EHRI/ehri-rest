@@ -64,10 +64,17 @@ public class TestAllPropertiesFiles {
     public void testEagXmlProperties() {
         assertTrue(p.check(new XmlImportProperties("eag.properties"), EntityClass.REPOSITORY_DESCRIPTION));
     }
-
+@Test
+    public void testDansEadProperties() {
+        String propfile = "dansead.properties";
+        logger.debug(propfile);
+        assertTrue(p.check(new XmlImportProperties(propfile), EntityClass.DOCUMENT_DESCRIPTION));
+    }
     @Test
     public void testEadXmlProperties() {
-        assertTrue(p.check(new XmlImportProperties("icaatom.properties"), EntityClass.DOCUMENT_DESCRIPTION));
+         String propfile = "icaatom.properties";
+        logger.debug(propfile);
+        assertTrue(p.check(new XmlImportProperties(propfile), EntityClass.DOCUMENT_DESCRIPTION));
     }
     @Test
     public void testWp2EadXmlProperties() {

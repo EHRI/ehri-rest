@@ -132,9 +132,12 @@ public class IcaAtomEadImporter extends EaImporter {
 
     protected Bundle mergeWithPreviousAndSave(Bundle unit, Bundle descBundle, List<String> idPath) throws ValidationError {
         final String languageOfDesc = descBundle.getDataValue(Ontology.LANGUAGE_OF_DESCRIPTION);
-        Iterable<String> path = getPermissionScope().idPath();
-        List lpath = new ArrayList<String>();
-        for(String p : path){
+        /*
+         * for some reason, the idpath from the permissionscope does not contain the parent documentary unit.
+         * TODO: so for now, it is added manually
+         */
+        List<String> lpath = new ArrayList<String>();
+        for(String p : getPermissionScope().idPath()){
             lpath.add(p);
         }
         for(String p : idPath){
