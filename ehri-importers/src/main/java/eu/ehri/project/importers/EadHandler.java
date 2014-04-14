@@ -306,7 +306,7 @@ public class EadHandler extends SaxXmlHandler {
         //controlAccess 
         String path = getImportantPath(currentPath);
         if (path != null) {
-            need = need || path.endsWith("Access");
+            need = need || path.endsWith("AccessPoint");
         }
         return need;
     }

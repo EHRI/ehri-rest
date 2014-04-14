@@ -152,7 +152,14 @@
           <unittitle>Manuscripten, lezingen en onderzoeksmateriaal</unittitle>
           <unitdate calendar="gregorian" era="ce" normal="1978/2004">1978-1998 [2004]</unitdate>
         </did>
-        <c02 level="file">
+        <daogrp> 
+              <resource xlink:type="resource" xlink:label="start"/>  
+              <daoloc xlink:href="http://files.archieven.nl/php/get_thumb.php?adt_id=298&amp;toegang=250b&amp;id=324872297&amp;file=250b_19.jpg" xlink:type="locator" xlink:label="thumb" xlink:role="thumbnail"/>  
+              <daoloc xlink:href="http://www.archieven.nl/nl/search-modonly?mivast=298&amp;miadt=298&amp;miaet=1&amp;micode=250b&amp;minr=1182347&amp;miview=ldt" xlink:type="locator" xlink:label="reference"/>  
+              <arc xlink:type="arc" xlink:show="embed" xlink:actuate="onload" xlink:from="start" xlink:to="thumb"/>  
+              <arc xlink:type="arc" xlink:show="new" xlink:actuate="onrequest" xlink:from="thumb" xlink:to="reference"/> 
+         </daogrp> 
+         <c02 level="file">
           <did id="MF1086379">
             <unitid>1</unitid>
             <unitid audience="internal" type="handle"

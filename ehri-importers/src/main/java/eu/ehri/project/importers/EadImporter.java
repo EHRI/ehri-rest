@@ -117,7 +117,7 @@ public class EadImporter extends EaImporter {
     @SuppressWarnings("unchecked")
 	@Override
     protected Iterable<Map<String, Object>> extractRelations(Map<String, Object> data) {
-        final String REL = "Access";
+        final String REL = "AccessPoint";
         List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
         for (String key : data.keySet()) {
             if (key.endsWith(REL)) {
@@ -134,7 +134,7 @@ public class EadImporter extends EaImporter {
                         }
                     }
                     if (!relationNode.containsKey(Ontology.UNDETERMINED_RELATIONSHIP_TYPE)) {
-                        relationNode.put(Ontology.UNDETERMINED_RELATIONSHIP_TYPE, "corporateBodyAccess");
+                        relationNode.put(Ontology.UNDETERMINED_RELATIONSHIP_TYPE, "corporateBodyAccessPoint");
                     }
                     list.add(relationNode);
                 }

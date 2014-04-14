@@ -51,10 +51,10 @@ public class UshmmTest extends AbstractImporterTest{
         * 1 more Date Period
         * 2 more import Event links
         * 1 more import Event
-        * 5 more UndeterminedRelationships
+        * 4 more UndeterminedRelationships
         * 1 more UnknownProperty
         */
-        int createCount = origCount + 9;
+        int createCount = origCount + 8;
         assertEquals(createCount, getNodeCount(graph));
 
         // Yet we've only created 1 *logical* item...

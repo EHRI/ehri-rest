@@ -50,13 +50,13 @@ public class NiodEadXsdTest extends AbstractImporterTest{
 		ImportLog log = new SaxImportManager(graph, agent, validUser, IcaAtomEadImporter.class, IcaAtomEadHandler.class, new XmlImportProperties("niodead.properties")).importFile(ios, logMessage);
         printGraph(graph);
         // How many new nodes will have been created? We should have
-        // - 6 more DocumentaryUnits (archdesc, 1-7+7)
+        // - 6 more DocumentaryUnits (archdesc, 5 children)
        	// - 6 more DocumentDescription
         // - 6 more DatePeriod
-        // - 1 more UnknownProperties
+        // - 1 more UnknownProperties (1 for daogrp)
         // - 7 more import Event links (6 for every Unit, 1 for the User)
         // - 1 more import Event
-        int newCount = origCount + 27; // temporarily changed to match found numbers
+        int newCount = origCount + 27; 
         assertEquals(newCount, getNodeCount(graph));
         
         DocumentaryUnit archdesc = graph.frame(
