@@ -12,24 +12,24 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author Mike Bryant (http://github.com/mikesname)
  */
-public class VirtualCollectionTest extends AbstractFixtureTest {
+public class VirtualUnitTest extends AbstractFixtureTest {
     @Test
     public void testGetChildCount() throws Exception {
-        VirtualCollection vc1 = manager.getFrame("vc1", VirtualCollection.class);
+        VirtualUnit vc1 = manager.getFrame("vc1", VirtualUnit.class);
         assertEquals(Long.valueOf(1L), vc1.getChildCount());
     }
 
     @Test
     public void testGetParent() throws Exception {
-        VirtualCollection vc1 = manager.getFrame("vc1", VirtualCollection.class);
-        VirtualCollection vc2 = manager.getFrame("vc2", VirtualCollection.class);
+        VirtualUnit vc1 = manager.getFrame("vc1", VirtualUnit.class);
+        VirtualUnit vc2 = manager.getFrame("vc2", VirtualUnit.class);
         assertEquals(vc1, vc2.getParent());
     }
 
     @Test
     public void testAddChild() throws Exception {
-        VirtualCollection vc1 = manager.getFrame("vc1", VirtualCollection.class);
-        VirtualCollection vc3 = manager.getFrame("vc3", VirtualCollection.class);
+        VirtualUnit vc1 = manager.getFrame("vc1", VirtualUnit.class);
+        VirtualUnit vc3 = manager.getFrame("vc3", VirtualUnit.class);
         Long childCount = vc1.getChildCount();
         assertTrue(vc1.addChild(vc3));
         assertEquals(Long.valueOf(childCount + 1), vc1.getChildCount());
@@ -39,8 +39,8 @@ public class VirtualCollectionTest extends AbstractFixtureTest {
 
     @Test
     public void testAddChildWithBadChild() throws Exception {
-        VirtualCollection vc1 = manager.getFrame("vc1", VirtualCollection.class);
-        VirtualCollection vc2 = manager.getFrame("vc1", VirtualCollection.class);
+        VirtualUnit vc1 = manager.getFrame("vc1", VirtualUnit.class);
+        VirtualUnit vc2 = manager.getFrame("vc1", VirtualUnit.class);
         // This shouldn't be allowed!
         assertFalse(vc1.addChild(vc1));
         // Nor should this - loop
@@ -50,28 +50,28 @@ public class VirtualCollectionTest extends AbstractFixtureTest {
 
     @Test
     public void testGetAncestors() throws Exception {
-        VirtualCollection vc1 = manager.getFrame("vc1", VirtualCollection.class);
-        VirtualCollection vc2 = manager.getFrame("vc2", VirtualCollection.class);
+        VirtualUnit vc1 = manager.getFrame("vc1", VirtualUnit.class);
+        VirtualUnit vc2 = manager.getFrame("vc2", VirtualUnit.class);
         assertEquals(Lists.newArrayList(vc1), Lists.newArrayList(vc2.getAncestors()));
     }
 
     @Test
     public void testGetChildren() throws Exception {
-        VirtualCollection vc1 = manager.getFrame("vc1", VirtualCollection.class);
-        VirtualCollection vc2 = manager.getFrame("vc2", VirtualCollection.class);
+        VirtualUnit vc1 = manager.getFrame("vc1", VirtualUnit.class);
+        VirtualUnit vc2 = manager.getFrame("vc2", VirtualUnit.class);
         assertEquals(Lists.newArrayList(vc2), Lists.newArrayList(vc1.getChildren()));
     }
 
     @Test
     public void testGetAllChildren() throws Exception {
-        VirtualCollection vc1 = manager.getFrame("vc1", VirtualCollection.class);
-        VirtualCollection vc2 = manager.getFrame("vc2", VirtualCollection.class);
+        VirtualUnit vc1 = manager.getFrame("vc1", VirtualUnit.class);
+        VirtualUnit vc2 = manager.getFrame("vc2", VirtualUnit.class);
         assertEquals(Lists.newArrayList(vc2), Lists.newArrayList(vc1.getAllChildren()));
     }
 
     @Test
     public void testGetAuthor() throws Exception {
-        VirtualCollection vc1 = manager.getFrame("vc1", VirtualCollection.class);
+        VirtualUnit vc1 = manager.getFrame("vc1", VirtualUnit.class);
         UserProfile linda = manager.getFrame("linda", UserProfile.class);
         assertEquals(linda, vc1.getAuthor());
     }
@@ -79,7 +79,7 @@ public class VirtualCollectionTest extends AbstractFixtureTest {
     @Test
     public void testGetDescriptions() throws Exception {
         Description cd1 = manager.getFrame("cd1", Description.class);
-        VirtualCollection vc1 = manager.getFrame("vc1", VirtualCollection.class);
+        VirtualUnit vc1 = manager.getFrame("vc1", VirtualUnit.class);
         assertEquals(Lists.newArrayList(cd1), Lists.newArrayList(vc1.getDescriptions()));
     }
 }

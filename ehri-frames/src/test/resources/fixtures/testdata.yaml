@@ -524,9 +524,9 @@
   relationships:
     inAuthoritativeSet: cvoc1
 
---- # Virtual Collections
+--- # Virtual Units
 - id: vc1
-  type: virtualCollection
+  type: virtualUnit
   data:
     identifier: vc1
   relationships:
@@ -535,7 +535,7 @@
     isDescribedBy: cd1
 
 - id: vc2
-  type: virtualCollection
+  type: virtualUnit
   data:
     identifier: vc2
   relationships:
@@ -543,7 +543,7 @@
     isPartOf: vc1
 
 - id: vc3
-  type: virtualCollection
+  type: virtualUnit
   data:
     identifier: vc3
   relationships:

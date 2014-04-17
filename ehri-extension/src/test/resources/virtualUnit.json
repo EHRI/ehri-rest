@@ -1,7 +1,7 @@
 {
-  "type": "virtualCollection",
+  "type": "virtualUnit",
   "data": {
-    "name": "a virtual collection",
+    "name": "a virtual documentary unit",
     "identifier": "some-id-supplied-by-frontend",
     "description": "Some info here"
   },

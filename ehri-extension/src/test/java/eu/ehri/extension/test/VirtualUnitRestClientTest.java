@@ -22,10 +22,10 @@ import java.util.Map;
 import static com.sun.jersey.api.client.ClientResponse.Status.*;
 import static org.junit.Assert.*;
 
-public class VirtualCollectionRestClientTest extends BaseRestClientTest {
+public class VirtualUnitRestClientTest extends BaseRestClientTest {
 
-    private String jsonVirtualCollectionStr;
-    private String partialJsonVirtualCollectionTestStr;
+    private String jsonVirtualUnitStr;
+    private String partialJsonVirtualUnitTestStr;
     static final String UPDATED_NAME = "UpdatedNameTEST";
     static final String PARTIAL_DESC = "Changing the description";
     static final String TEST_JSON_IDENTIFIER = "vc1";
@@ -36,18 +36,18 @@ public class VirtualCollectionRestClientTest extends BaseRestClientTest {
 
     @Before
     public void setUp() throws Exception {
-        jsonVirtualCollectionStr = readFileAsString("virtualCollection.json");
-        partialJsonVirtualCollectionTestStr = readFileAsString("partialVirtualCollection.json");
+        jsonVirtualUnitStr = readFileAsString("virtualUnit.json");
+        partialJsonVirtualUnitTestStr = readFileAsString("partialVirtualUnit.json");
     }
 
     /**
      * CR(U)D cycle
      */
     @Test
-    public void testCreateDeleteVirtualCollection() throws Exception {
+    public void testCreateDeleteVirtualUnit() throws Exception {
         // Create
         ClientResponse response = jsonCallAs(getAdminUserProfileId(), getCreationUri())
-                .entity(jsonVirtualCollectionStr).post(ClientResponse.class);
+                .entity(jsonVirtualUnitStr).post(ClientResponse.class);
 
         assertStatus(CREATED, response);
 
@@ -59,11 +59,11 @@ public class VirtualCollectionRestClientTest extends BaseRestClientTest {
     }
 
     @Test
-    public void testCreateDeleteChildVirtualCollection() throws Exception {
+    public void testCreateDeleteChildVirtualUnit() throws Exception {
         // Create
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                ehriUri(Entities.VIRTUAL_COLLECTION, FIRST_DOC_ID, Entities.VIRTUAL_COLLECTION))
-                .entity(jsonVirtualCollectionStr).post(ClientResponse.class);
+                ehriUri(Entities.VIRTUAL_UNIT, FIRST_DOC_ID, Entities.VIRTUAL_UNIT))
+                .entity(jsonVirtualUnitStr).post(ClientResponse.class);
 
         assertStatus(CREATED, response);
 
@@ -78,14 +78,14 @@ public class VirtualCollectionRestClientTest extends BaseRestClientTest {
     public void testIntegrityError() throws Exception {
         // Create
         ClientResponse response = jsonCallAs(getAdminUserProfileId(), getCreationUri())
-                .entity(jsonVirtualCollectionStr).post(ClientResponse.class);
+                .entity(jsonVirtualUnitStr).post(ClientResponse.class);
 
         assertStatus(CREATED, response);
 
         // Okay... now if we try and do the same things again we should
         // get an integrity error because the identifiers are the same.
         response = jsonCallAs(getAdminUserProfileId(), getCreationUri())
-                .entity(jsonVirtualCollectionStr).post(ClientResponse.class);
+                .entity(jsonVirtualUnitStr).post(ClientResponse.class);
         // Check the JSON gives use the correct error
         String errString = response.getEntity(String.class);
 
@@ -99,10 +99,10 @@ public class VirtualCollectionRestClientTest extends BaseRestClientTest {
     }
 
     @Test
-    public void testGetVirtualCollectionByIdentifier() throws Exception {
+    public void testGetVirtualUnitByIdentifier() throws Exception {
         // Create
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                ehriUri(Entities.VIRTUAL_COLLECTION, TEST_JSON_IDENTIFIER))
+                ehriUri(Entities.VIRTUAL_UNIT, TEST_JSON_IDENTIFIER))
                 .get(ClientResponse.class);
 
         assertStatus(OK, response);
@@ -117,12 +117,12 @@ public class VirtualCollectionRestClientTest extends BaseRestClientTest {
     }
 
     @Test
-    public void testUpdateVirtualCollectionByIdentifier() throws Exception {
+    public void testUpdateVirtualUnitByIdentifier() throws Exception {
         // Update doc unit c1 with the test json values, which should change
         // its identifier to some-id
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                ehriUri(Entities.VIRTUAL_COLLECTION, TEST_JSON_IDENTIFIER))
-                .entity(jsonVirtualCollectionStr)
+                ehriUri(Entities.VIRTUAL_UNIT, TEST_JSON_IDENTIFIER))
+                .entity(jsonVirtualUnitStr)
                 .put(ClientResponse.class);
 
         assertStatus(OK, response);
@@ -137,9 +137,9 @@ public class VirtualCollectionRestClientTest extends BaseRestClientTest {
     }
 
     @Test
-    public void testListVirtualCollection() throws Exception {
+    public void testListVirtualUnit() throws Exception {
         List<Map<String, Object>> data = getEntityList(
-                Entities.VIRTUAL_COLLECTION, getAdminUserProfileId());
+                Entities.VIRTUAL_UNIT, getAdminUserProfileId());
         assertTrue(data.size() > 0);
         Collections.sort(data, new Comparator<Map<String, Object>>() {
             @Override
@@ -156,14 +156,14 @@ public class VirtualCollectionRestClientTest extends BaseRestClientTest {
     }
 
     @Test
-    public void testCountVirtualCollections() throws Exception {
+    public void testCountVirtualUnits() throws Exception {
         Long data = getEntityCount(
-                Entities.VIRTUAL_COLLECTION, getAdminUserProfileId());
+                Entities.VIRTUAL_UNIT, getAdminUserProfileId());
         assertEquals(Long.valueOf(3), data);
     }
 
     @Test
-    public void testUpdateVirtualCollection() throws Exception {
+    public void testUpdateVirtualUnit() throws Exception {
 
         // -create data for testing, making this a child element of c1.
         WebResource resource = client.resource(getCreationUri());
@@ -172,7 +172,7 @@ public class VirtualCollectionRestClientTest extends BaseRestClientTest {
                 .type(MediaType.APPLICATION_JSON)
                 .header(AbstractRestResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId())
-                .entity(jsonVirtualCollectionStr).post(ClientResponse.class);
+                .entity(jsonVirtualUnitStr).post(ClientResponse.class);
 
         assertStatus(CREATED, response);
         // TODO test if json is valid?
@@ -194,7 +194,7 @@ public class VirtualCollectionRestClientTest extends BaseRestClientTest {
                 .withDataValue("name", UPDATED_NAME).toJson();
 
         // -update
-        resource = client.resource(ehriUri(Entities.VIRTUAL_COLLECTION));
+        resource = client.resource(ehriUri(Entities.VIRTUAL_UNIT));
         response = resource
                 .accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON)
@@ -218,7 +218,7 @@ public class VirtualCollectionRestClientTest extends BaseRestClientTest {
     }
 
     @Test
-    public void testPatchVirtualCollection() throws Exception {
+    public void testPatchVirtualUnit() throws Exception {
 
         // -create data for testing, making this a child element of c1.
         WebResource resource = client.resource(getCreationUri());
@@ -227,14 +227,14 @@ public class VirtualCollectionRestClientTest extends BaseRestClientTest {
                 .type(MediaType.APPLICATION_JSON)
                 .header(AbstractRestResource.AUTH_HEADER_NAME,
                         getAdminUserProfileId())
-                .entity(jsonVirtualCollectionStr).post(ClientResponse.class);
+                .entity(jsonVirtualUnitStr).post(ClientResponse.class);
 
         assertStatus(CREATED, response);
 
         // Get created doc via the response location?
         URI location = response.getLocation();
 
-        String toUpdateJson = partialJsonVirtualCollectionTestStr;
+        String toUpdateJson = partialJsonVirtualUnitTestStr;
 
         // - patch the data (using the Patch header)
         resource = client.resource(location);
@@ -265,6 +265,6 @@ public class VirtualCollectionRestClientTest extends BaseRestClientTest {
     }
 
     private URI getCreationUri() {
-        return ehriUri(Entities.VIRTUAL_COLLECTION);
+        return ehriUri(Entities.VIRTUAL_UNIT);
     }
 }

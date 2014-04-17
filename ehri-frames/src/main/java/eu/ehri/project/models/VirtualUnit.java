@@ -15,8 +15,8 @@ import eu.ehri.project.models.utils.JavaHandlerUtils;
 
 import static eu.ehri.project.models.utils.JavaHandlerUtils.addUniqueRelationship;
 
-@EntityType(EntityClass.VIRTUAL_COLLECTION)
-public interface VirtualCollection extends AccessibleEntity,
+@EntityType(EntityClass.VIRTUAL_UNIT)
+public interface VirtualUnit extends AccessibleEntity,
         DescribedEntity, PermissionScope, ItemHolder {
 
     @JavaHandler
@@ -24,7 +24,7 @@ public interface VirtualCollection extends AccessibleEntity,
 
     @Fetch(Ontology.VC_IS_PART_OF)
     @Adjacency(label = Ontology.VC_IS_PART_OF)
-    public VirtualCollection getParent();
+    public VirtualUnit getParent();
 
     /**
      * Add a child. Note: this should throw an exception like
@@ -35,19 +35,19 @@ public interface VirtualCollection extends AccessibleEntity,
      * @return Whether or not the operation was allowed.
      */
     @JavaHandler
-    public boolean addChild(final VirtualCollection child);
+    public boolean addChild(final VirtualUnit child);
 
     /*
      * Fetches a list of all ancestors (parent -> parent -> parent)
      */
     @JavaHandler
-    public Iterable<VirtualCollection> getAncestors();
+    public Iterable<VirtualUnit> getAncestors();
 
     @JavaHandler
-    public Iterable<VirtualCollection> getChildren();
+    public Iterable<VirtualUnit> getChildren();
 
     @JavaHandler
-    public Iterable<VirtualCollection> getAllChildren();
+    public Iterable<VirtualUnit> getAllChildren();
 
     @Adjacency(label = Ontology.VC_DESCRIBED_BY, direction = Direction.OUT)
     public Iterable<Description> getDescriptions();
@@ -58,7 +58,7 @@ public interface VirtualCollection extends AccessibleEntity,
     /**
      * Implementation of complex methods.
      */
-    abstract class Impl implements JavaHandlerContext<Vertex>, VirtualCollection {
+    abstract class Impl implements JavaHandlerContext<Vertex>, VirtualUnit {
 
         public Long getChildCount() {
             Long count = it().getProperty(CHILD_COUNT);
@@ -68,13 +68,13 @@ public interface VirtualCollection extends AccessibleEntity,
             return count;
         }
 
-        public Iterable<VirtualCollection> getChildren() {
+        public Iterable<VirtualUnit> getChildren() {
             // Ensure value is cached when fetching.
             getChildCount();
             return frameVertices(gremlin().in(Ontology.VC_IS_PART_OF));
         }
 
-        public boolean addChild(final VirtualCollection child) {
+        public boolean addChild(final VirtualUnit child) {
             if (child.asVertex().equals(it())) {
                 // Self-referential.
                 return false;
@@ -104,7 +104,7 @@ public interface VirtualCollection extends AccessibleEntity,
                     .loop("n", JavaHandlerUtils.defaultMaxLoops, JavaHandlerUtils.noopLoopFunc);
         }
 
-        public Iterable<VirtualCollection> getAllChildren() {
+        public Iterable<VirtualUnit> getAllChildren() {
             Pipeline<Vertex,Vertex> otherPipe = gremlin().as("n").in(Ontology.VC_IS_PART_OF)
                     .loop("n", JavaHandlerUtils.noopLoopFunc, JavaHandlerUtils.noopLoopFunc);
 
@@ -112,7 +112,7 @@ public interface VirtualCollection extends AccessibleEntity,
                     .fairMerge().cast(Vertex.class));
         }
 
-        public Iterable<VirtualCollection> getAncestors() {
+        public Iterable<VirtualUnit> getAncestors() {
             return frameVertices(traverseAncestors());
         }
     }

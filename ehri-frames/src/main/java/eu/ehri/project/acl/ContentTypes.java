@@ -17,7 +17,7 @@ public enum ContentTypes {
     CVOC_CONCEPT(Entities.CVOC_CONCEPT),
     LINK(Entities.LINK),
     COUNTRY(Entities.COUNTRY),
-    VIRTUAL_COLLECTION(Entities.VIRTUAL_COLLECTION);
+    VIRTUAL_COLLECTION(Entities.VIRTUAL_UNIT);
     
     private final String name;
     
