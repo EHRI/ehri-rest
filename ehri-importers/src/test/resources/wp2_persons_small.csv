@@ -1,0 +1,17 @@
+id;name;firstName;lastName;dateOfBirth;description
+PERSON.ITI.1000156;Stössel, Wilhelm (* 14.12.1919);Wilhelm ;Stössel; 14.12.1919;
+PERSON.ITI.1000455;Storfer, Friedrich (* 28.10.1891);Friedrich ;Storfer; 28.10.1891;
+PERSON.ITI.1000559;Sträussler, Klementine (* 20.3.1862);Klementine ;Sträussler; 20.3.1862;
+PERSON.ITI.1000637;Strakosch, Nathan Isak (* 21.11.1858);Nathan Isak ;Strakosch; 21.11.1858;
+PERSON.ITI.1000988;Strauchler, Siegmund (* 23.9.1920);Siegmund ;Strauchler; 23.9.1920;
+PERSON.ITI.1001105;Strauss, Leopold (* 21.1.1897);Leopold ;Strauss; 21.1.1897;
+PERSON.ITI.1001144;Strauss, Mira (* 14.7.1900);Mira ;Strauss; 14.7.1900;
+PERSON.ITI.1001365;Stricker, Pauline (* 12.11.1888);Pauline ;Stricker; 12.11.1888;
+PERSON.JMP.455;Mengele MUDr.,lékař SS, Josef;Josef;Mengele MUDr.,lékař SS;;
+PERSON.JMP.51;Mengele, Josef;Josef;Mengele;;
+PERSON.JMP.518;Gottliebová-Babbit, Dina;Dina;Gottliebová-Babbit;;
+PERSON.JMP.678;Fischer, Avi;Avi;Fischer;;
+PERSON.JMP.680;Urbanová, Anna;Anna;Urbanová;;
+PERSON.JMP.746;Terner, Erich;Erich;Terner;;
+PERSON.JMP.784;Kulka, Erich;Erich;Kulka;;
+PERSON.JMP.881;Honey, Michael, (* 03.09.1929);Michael;Honey;03.09.1929;

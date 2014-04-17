@@ -29,6 +29,8 @@ public final class Serializer {
 
     private static final Logger logger = LoggerFactory.getLogger(Serializer.class);
 
+    private static final int DEFAULT_CACHE_SIZE = 100;
+
     private static class LruCache<A, B> extends LinkedHashMap<A, B> {
         private final int maxEntries;
 
@@ -113,7 +115,11 @@ public final class Serializer {
         }
 
         public Builder withCache() {
-            this.cache = new LruCache<String, Bundle>(100);
+            return withCache(DEFAULT_CACHE_SIZE);
+        }
+
+        public Builder withCache(int size) {
+            this.cache = new LruCache<String, Bundle>(size);
             return this;
         }
 

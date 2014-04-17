@@ -6,6 +6,7 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.exceptions.InvalidXmlDocument;
 import eu.ehri.project.importers.exceptions.InvalidInputFormatError;
+import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
@@ -35,6 +36,7 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
     private AbstractImporter<Map<String, Object>> importer;
     private Class<? extends AbstractImporter> importerClass;
     Class<? extends SaxXmlHandler> handlerClass;
+    private XmlImportProperties properties;
 
     /**
      * Constructor.
@@ -49,6 +51,21 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
         super(framedGraph, permissionScope, actioner);
         this.importerClass = importerClass;
         this.handlerClass = handlerClass;
+    }
+    /**
+     * Constructor.
+     *
+     * @param framedGraph
+     * @param permissionScope
+     * @param actioner
+     */
+    public SaxImportManager(FramedGraph<? extends TransactionalGraph> framedGraph,
+            final PermissionScope permissionScope, final Actioner actioner,
+            Class<? extends AbstractImporter> importerClass, Class<? extends SaxXmlHandler> handlerClass, XmlImportProperties properties) {
+        super(framedGraph, permissionScope, actioner);
+        this.importerClass = importerClass;
+        this.handlerClass = handlerClass;
+        this.properties=properties;
     }
 
     /**
@@ -92,7 +109,13 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
                 }
             });
             //TODO decide which handler to use, HandlerFactory? now part of constructor ...
-            SaxXmlHandler handler = handlerClass.getConstructor(AbstractImporter.class).newInstance(importer);
+            SaxXmlHandler handler;
+            if(properties == null){
+              handler = handlerClass.getConstructor(AbstractImporter.class).newInstance(importer);
+            }else{
+              handler = handlerClass.getConstructor(AbstractImporter.class, XmlImportProperties.class).newInstance(importer, properties);
+                
+            }
             logger.debug("handler of class {}", handler.getClass());
 
             SAXParserFactory spf = SAXParserFactory.newInstance();

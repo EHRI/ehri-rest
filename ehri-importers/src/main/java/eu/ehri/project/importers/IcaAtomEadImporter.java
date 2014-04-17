@@ -2,10 +2,13 @@ package eu.ehri.project.importers;
 
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.definitions.Ontology;
+import eu.ehri.project.exceptions.ItemNotFound;
+import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.*;
 import eu.ehri.project.models.base.*;
 import eu.ehri.project.persistence.Bundle;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,6 +16,8 @@ import java.util.Map;
 
 import eu.ehri.project.persistence.BundleDAO;
 import eu.ehri.project.persistence.Mutation;
+
+import eu.ehri.project.persistence.Serializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,11 +26,10 @@ import org.slf4j.LoggerFactory;
  * procedure. An EAD a single entity at the highest level of description or multiple top-level entities, with or without
  * a hierarchical structure describing their child items. This means that we need to recursively descend through the
  * archdesc and c,c01-12 levels.
- *
+ * <p/>
  * TODO: Extensive cleanups, optimisation, and rationalisation.
  *
  * @author lindar
- *
  */
 public class IcaAtomEadImporter extends EaImporter {
 
@@ -35,6 +39,7 @@ public class IcaAtomEadImporter extends EaImporter {
      * at depth 1 (rather than 0)
      */
     private final int TOP_LEVEL_DEPTH = 1;
+    private Serializer mergeSerializer;
 
     /**
      * Construct an EadImporter object.
@@ -45,6 +50,7 @@ public class IcaAtomEadImporter extends EaImporter {
      */
     public IcaAtomEadImporter(FramedGraph<?> framedGraph, PermissionScope permissionScope, ImportLog log) {
         super(framedGraph, permissionScope, log);
+        mergeSerializer = new Serializer.Builder(framedGraph).dependentOnly().build();
 
     }
 
@@ -60,7 +66,7 @@ public class IcaAtomEadImporter extends EaImporter {
         BundleDAO persister = getPersister(idPath);
 
         Bundle unit = new Bundle(EntityClass.DOCUMENTARY_UNIT, extractDocumentaryUnit(itemData));
-        
+
         // Check for missing identifier, throw an exception when there is no ID.
         if (unit.getDataValue(Ontology.IDENTIFIER_KEY) == null) {
             throw new ValidationError(unit, Ontology.IDENTIFIER_KEY,
@@ -82,12 +88,15 @@ public class IcaAtomEadImporter extends EaImporter {
             logger.debug("Unknown Properties found");
             descBundle = descBundle.withRelation(Ontology.HAS_UNKNOWN_PROPERTY, new Bundle(EntityClass.UNKNOWN_PROPERTY, unknowns));
         }
-        unit = unit.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
 
-        Mutation<DocumentaryUnit> mutation =
-                persister.createOrUpdate(unit, DocumentaryUnit.class);
+        Mutation<DocumentaryUnit> mutation = persister.createOrUpdate(mergeWithPreviousAndSave(unit, descBundle),
+                DocumentaryUnit.class);
+//                persister.createOrUpdate(unit, DocumentaryUnit.class);
         DocumentaryUnit frame = mutation.getNode();
 
+        if (mutation.created()) {
+            solveUndeterminedRelationships(frame, descBundle);
+        }
         // Set the repository/item relationship
         if (idPath.isEmpty() && mutation.created()) {
             EntityClass scopeType = manager.getEntityClass(permissionScope);
@@ -108,8 +117,53 @@ public class IcaAtomEadImporter extends EaImporter {
 
 
     }
+
+
+    /**
+     * finds any bundle in the graph with the same ObjectIdentifier.
+     * if it exists it replaces the Description in the given language, else it just saves it
+     *
+     * @param unit       - the DocumentaryUnit to be saved
+     * @param descBundle - the documentsDescription to replace any previous ones with this language
+     * @return A bundle with description relationships merged.
+     * @throws ValidationError
+     */
+    protected Bundle mergeWithPreviousAndSave(Bundle unit, Bundle descBundle) throws ValidationError {
+        final String languageOfDesc = descBundle.getDataValue(Ontology.LANGUAGE_OF_DESCRIPTION);
+        Bundle withIds = unit.generateIds(getPermissionScope().idPath());
+        if (manager.exists(withIds.getId())) {
+            try {
+                //read the current item’s bundle
+                Bundle oldBundle = mergeSerializer
+                        .vertexFrameToBundle(manager.getVertex(withIds.getId()));
+
+                //filter out dependents that a) are descriptions, b) have the same language/code
+                Bundle.Filter filter = new Bundle.Filter() {
+                    @Override
+                    public boolean remove(String relationLabel, Bundle bundle) {
+                        String lang = bundle.getDataValue(Ontology.LANGUAGE);
+                        return bundle.getType().equals(EntityClass.DOCUMENT_DESCRIPTION)
+                                && (lang != null
+                                && lang.equals(languageOfDesc));
+                    }
+                };
+                Bundle filtered = oldBundle.filterRelations(filter);
+
+                return withIds.withRelations(filtered.getRelations())
+                        .withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
+
+            } catch (SerializationError ex) {
+                throw new ValidationError(unit, "serialization error", ex.getMessage());
+            } catch (ItemNotFound ex) {
+                throw new ValidationError(unit, "item not found exception", ex.getMessage());
+            }
+        } else {
+            return unit.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
+        }
+    }
+
     @SuppressWarnings("unchecked")
-	@Override
+    @Override
     protected Iterable<Map<String, Object>> extractRelations(Map<String, Object> data) {
         final String REL = "Access";
         List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
@@ -136,7 +190,7 @@ public class IcaAtomEadImporter extends EaImporter {
         }
         return list;
     }
-    
+
     protected Map<String, Object> extractDocumentaryUnit(Map<String, Object> itemData, int depth) throws ValidationError {
         Map<String, Object> unit = new HashMap<String, Object>();
         if (itemData.get(OBJECT_ID) != null) {
@@ -159,5 +213,9 @@ public class IcaAtomEadImporter extends EaImporter {
     @Override
     public AccessibleEntity importItem(Map<String, Object> itemData) throws ValidationError {
         throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    protected void solveUndeterminedRelationships(DocumentaryUnit frame, Bundle descBundle) throws ValidationError {
+        // can be used by subclasses to solve any undeterminedRelationships
     }
 }

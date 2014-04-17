@@ -4,6 +4,7 @@
  */
 package eu.ehri.project.importers.properties;
 
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.Enumeration;
 import java.util.HashSet;
@@ -54,7 +55,6 @@ public class XmlImportProperties implements ImportProperties {
         return ps;
     }
     public String getFirstPropertyWithValue(String value){
-        Set<String> ps = new HashSet<String>();
         Properties p = getProperties();
         for(Object key : p.keySet()){
             if(value.equals(p.get(key).toString()))
@@ -152,9 +152,9 @@ abstract class PropertyLoader {
             throw new IllegalArgumentException("null input: name");
         }
 
-        if (name.startsWith("/")) {
-            name = name.substring(1);
-        }
+//        if (name.startsWith("/")) {
+//            name = name.substring(1);
+//        }
 
         if (name.endsWith(SUFFIX)) {
             name = name.substring(0, name.length() - SUFFIX.length());
@@ -198,6 +198,12 @@ abstract class PropertyLoader {
                     result.load(in); // Can throw IOException
                 } else {
                     logger.error(name + " is geen file");
+                    FileInputStream ios = new FileInputStream(name);
+                    logger.info("trying to read " +name + " as fileinputstream");
+                    
+                    in = ios;
+                    result = new Properties();
+                    result.load(in); // Can throw IOException
                 }
             }
         } catch (Exception e) {

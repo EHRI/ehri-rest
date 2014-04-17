@@ -1,0 +1,94 @@
+<ead xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="urn:isbn:1-931666-22-9"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:isbn:1-931666-22-9 http://www.loc.gov/ead/ead.xsd">
+    <eadheader langencoding="iso639-2b" scriptencoding="iso15924" dateencoding="iso8601"
+        countryencoding="iso3166-1" repositoryencoding="iso15511">
+        <eadid countrycode="IL">Beit Terezin</eadid>
+        <filedesc>
+            <titlestmt>
+                <titleproper>WP2 files of Beit Terezin</titleproper>
+            </titlestmt>
+        </filedesc>
+        <profiledesc>
+            <creation>
+                <date>2013-12-19</date>
+            </creation>
+            <langusage>
+                <language langcode="cze" scriptcode="Latn">Czech</language>
+            </langusage>
+        </profiledesc>
+    </eadheader>
+    <frontmatter/>
+    <archdesc level="recordgrp">
+        <did>
+            <unitid>wp2bt</unitid>
+            <abstract> Files and Documents compiled by Beit Terezin and edited by EHRI to be part of
+                the Terezin Research Guide. </abstract>
+        </did>
+        <dsc>
+            <c01 level="subgrp">
+                <did>
+                    <unitid>000.001.0</unitid>
+                    <unittitle>Ellinger Elsa</unittitle>
+                </did>
+                <controlaccess>
+                    <subject>aliat hanoar</subject>
+                    <persname>Ellinger Elsa</persname>
+                </controlaccess>
+                <c02 level="item">
+                    <did>
+                        <unittitle/>
+                        <unitid>000.001.1</unitid>
+                        <langmaterial/>
+                    </did>
+                    <controlaccess>
+                        <subject>aliat hanoar</subject>
+                        <persname>Ellinger Elsa</persname>
+                    </controlaccess>
+                </c02>
+            </c01>
+            <c01 level="subgrp">
+                <did>
+                    <unitid>000.002.0</unitid>
+                    <unittitle>Auerbach Sara</unittitle>
+                </did>
+                <controlaccess>
+                    <subject>personal document</subject>
+                    <subject>correspondence</subject>
+                    <subject source="wp2-keywords" authfilenumber="KEYWORD.JMP.716"
+                        >Correspondence</subject>
+                    <persname>Auerbach Sara</persname>
+                    <persname> Auerbach Yossi</persname>
+                </controlaccess>
+                <c02 level="item">
+                    <did>
+                        <unittitle/>
+                        <unitid>000.002.1</unitid>
+                        <langmaterial/>
+                        <unitdate type="inclusive" era="ce" calendar="gregorian" normal="1943"
+                            >1943</unitdate>
+                    </did>
+                    <controlaccess>
+                        <subject>personal document</subject>
+                        <subject> correspondence</subject>
+                        <persname>Auerbach Sara</persname>
+                        <persname> Auerbach Yossi</persname>
+                    </controlaccess>
+                </c02>
+                <c02 level="item">
+                    <did>
+                        <unittitle/>
+                        <unitid>000.002.2</unitid>
+                        <langmaterial/>
+                    </did>
+                    <controlaccess>
+                        <subject>personal document</subject>
+                        <subject> correspondence</subject>
+                        <persname>Auerbach Sara</persname>
+                        <persname> Auerbach Yossi</persname>
+                    </controlaccess>
+                </c02>
+            </c01>
+        </dsc>
+    </archdesc>
+</ead>

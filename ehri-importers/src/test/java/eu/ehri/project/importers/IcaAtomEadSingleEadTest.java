@@ -16,6 +16,7 @@ import org.junit.Test;
 
 
 import static org.junit.Assert.*;
+import org.junit.Ignore;
 
 /**
  *
@@ -44,7 +45,7 @@ public class IcaAtomEadSingleEadTest extends AbstractImporterTest {
         // How many new nodes will have been created? We should have
         // - 1 more DocumentaryUnit
         // - 1 more DocumentDescription
-        // - 1 more DatePeriod
+        // - 2 more DatePeriod
         //TODO: test these UR's
         // - 5 more UndeterminedRelationships
         //TODO: test this UP
@@ -52,8 +53,7 @@ public class IcaAtomEadSingleEadTest extends AbstractImporterTest {
         // - 2 more import Event links
         // - 1 more import Event
 
-        Iterable<Vertex> docs = graph.getVertices("identifier",
-                IMPORTED_ITEM_ID);
+        Iterable<Vertex> docs = graph.getVertices("identifier", IMPORTED_ITEM_ID);
         assertTrue(docs.iterator().hasNext());
         DocumentaryUnit unit = graph.frame(docs.iterator().next(), DocumentaryUnit.class);
         for(Description d : unit.getDocumentDescriptions())
@@ -73,7 +73,7 @@ public class IcaAtomEadSingleEadTest extends AbstractImporterTest {
         assertEquals(expected, scopeContent);
 
         // Check the right nodes get created.
-        int createCount = origCount + 12;
+        int createCount = origCount + 13;
 
         // - 4 more UnderterminedRelationship nodes
 

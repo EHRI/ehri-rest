@@ -22,15 +22,29 @@ public class IcaAtomEadHandler extends EadHandler {
     private static final Logger logger = LoggerFactory
             .getLogger(IcaAtomEadHandler.class);
     private final List<DocumentaryUnit>[] children = new ArrayList[12];
-    
-    
-    @SuppressWarnings("unchecked")
-    public IcaAtomEadHandler(AbstractImporter<Map<String, Object>> importer) {
-        super(importer, new XmlImportProperties("icaatom.properties"));
+
+    /**
+     * Set a custom resolver so EAD DTDs are never looked up online.
+     * @param publicId
+     * @param systemId
+     * @return returns essentially an empty dtd file
+     * @throws org.xml.sax.SAXException
+     * @throws java.io.IOException
+     */
+    public org.xml.sax.InputSource resolveEntity(String publicId, String systemId)
+            throws org.xml.sax.SAXException, java.io.IOException {
+        // This is the equivalent of returning a null dtd.
+        return new org.xml.sax.InputSource(new java.io.StringReader(""));
+    }
+    public IcaAtomEadHandler(AbstractImporter<Map<String, Object>> importer, XmlImportProperties properties) {
+        super(importer, properties);
         children[depth] = new ArrayList<DocumentaryUnit>();
     }
+    @SuppressWarnings("unchecked")
+    public IcaAtomEadHandler(AbstractImporter<Map<String, Object>> importer) {
+        this(importer, new XmlImportProperties("icaatom.properties"));
+    }
 
-    
     @Override
     protected void extractTitle(Map<String, Object> currentGraph) {
     	if (!currentGraph.containsKey(Ontology.NAME_KEY)) {
