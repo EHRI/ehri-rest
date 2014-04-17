@@ -531,7 +531,6 @@
     identifier: vc1
   relationships:
     hasAuthor: linda
-    hasPart: c1
     isDescribedBy: cd1
 
 - id: vc2
@@ -539,12 +538,12 @@
   data:
     identifier: vc2
   relationships:
-    hasPart: c2
     isPartOf: vc1
+    isDescribedBy: cd2
 
-- id: vc3
+- id: vc3  # NB: Not part of vc1 yet
   type: virtualUnit
   data:
     identifier: vc3
   relationships:
-    hasPart: c2
+    isDescribedBy: cd3
