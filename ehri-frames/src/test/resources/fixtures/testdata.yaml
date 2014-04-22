@@ -524,3 +524,26 @@
   relationships:
     inAuthoritativeSet: cvoc1
 
+--- # Virtual Units
+- id: vc1
+  type: virtualUnit
+  data:
+    identifier: vc1
+  relationships:
+    hasAuthor: linda
+    isDescribedBy: cd1
+
+- id: vc2
+  type: virtualUnit
+  data:
+    identifier: vc2
+  relationships:
+    isPartOf: vc1
+    isDescribedBy: cd2
+
+- id: vc3  # NB: Not part of vc1 yet
+  type: virtualUnit
+  data:
+    identifier: vc3
+  relationships:
+    isDescribedBy: cd3
