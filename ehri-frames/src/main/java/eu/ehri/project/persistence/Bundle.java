@@ -363,15 +363,15 @@ public final class Bundle {
     }
 
     /**
-     * Add a map of relations.
+     * Add a map of addition relationships.
      *
-     * @param relations A full set of relations
+     * @param others Additional relationship map
      * @return The new bundle
      */
-    public Bundle withRelations(Multimap<String, Bundle> relations) {
+    public Bundle withRelations(Multimap<String, Bundle> others) {
         Multimap<String, Bundle> tmp = LinkedListMultimap
                 .create(relations);
-        tmp.putAll(relations);
+        tmp.putAll(others);
         return new Bundle(id, type, data, tmp, meta, temp);
     }
 
