@@ -560,10 +560,11 @@ public class SkosCoreCvocImporter {
         Map<String, Object> descriptionData = new HashMap<String, Object>(); 
         
         // one and only one
-        extractAndAddToLanguageMapSingleValuedTextToDescriptionData(descriptionData, Ontology.NAME_KEY, "skos:prefLabel", conceptElement);
+        String prefLabel = extractAndAddToLanguageMapSingleValuedTextToDescriptionData(descriptionData, Ontology.NAME_KEY, "skos:prefLabel", conceptElement);
+
         // multiple alternatives is logical
-        extractAndAddMultiValuedTextToDescriptionData(descriptionData, 
-        		Ontology.CONCEPT_ALTLABEL, "skos:altLabel", conceptElement);
+        extractAndAddMultiValuedTextToDescriptionData(descriptionData, Ontology.CONCEPT_ALTLABEL, "skos:altLabel", conceptElement, prefLabel);
+        
         // just allow multiple, its not forbidden by Skos
         extractAndAddMultiValuedTextToDescriptionData(descriptionData, 
         		Ontology.CONCEPT_SCOPENOTE, "skos:scopeNote", conceptElement);
@@ -612,23 +613,29 @@ public class SkosCoreCvocImporter {
      * @param skosName
      * @param conceptElement
      */
-    private void extractAndAddToLanguageMapSingleValuedTextToDescriptionData(Map<String, Object> descriptionData, 
+    private String extractAndAddToLanguageMapSingleValuedTextToDescriptionData(Map<String, Object> descriptionData, 
     		String textName, String skosName, Element conceptElement) {
-
+        String prefLabelNoLang = null;
        	NodeList textNodeList = conceptElement.getElementsByTagName(skosName);
         for(int i=0; i<textNodeList.getLength(); i++){
         	  Node textNode = textNodeList.item(i);
         	  // get lang attribute, we must have that!
         	  Node langItem = textNode.getAttributes().getNamedItem("xml:lang");
+                  String text = textNode.getTextContent();
+                  if(langItem != null){
         	  String lang = langItem.getNodeValue();
         	  // get value
-        	  String text = textNode.getTextContent();
+        	  
         	  logger.debug("text: \"" + text + "\" lang: \"" + lang + "\"" + ", skos name: " + skosName);
 
         	  // add to descriptionData
         	  Map<String, Object> d = getOrCreateDescriptionForLanguage(descriptionData, lang);
     		  d.put(textName, text); // only one item with this name per description
-        }    	
+                  }else{
+                      prefLabelNoLang = text;
+                  }
+        }  
+        return prefLabelNoLang;
     }
 
     /**
@@ -639,12 +646,18 @@ public class SkosCoreCvocImporter {
      * @param skosName
      * @param conceptElement
      */
-    private void extractAndAddMultiValuedTextToDescriptionData(Map<String, Object> descriptionData, 
-    		String textName, String skosName, Element conceptElement) {
+     private void extractAndAddMultiValuedTextToDescriptionData(Map<String, Object> descriptionData, 
+    		String textName, String skosName, Element conceptElement){
 
        	NodeList textNodeList = conceptElement.getElementsByTagName(skosName);
         for(int i=0; i<textNodeList.getLength(); i++){
-        	  Node textNode = textNodeList.item(i);
+        	  doeIets(textNodeList.item(i), descriptionData, textName, skosName);
+                  
+        }    	
+    }   
+     private Map<String, Object> doeIets(Node textNode, Map<String, Object> descriptionData, 
+    		String textName, String skosName){
+        
         	  // get lang attribute, we must have that!
         	  Node langItem = textNode.getAttributes().getNamedItem("xml:lang");
         	  String lang = langItem.getNodeValue();
@@ -663,8 +676,21 @@ public class SkosCoreCvocImporter {
     			  textList.add(text);
     			  d.put(textName, textList);
     		  }
+                  return d;
+     }
+         private void extractAndAddMultiValuedTextToDescriptionData(Map<String, Object> descriptionData, 
+    		String textName, String skosName, Element conceptElement, String prefLabelNoLang) {
+             extractAndAddMultiValuedTextToDescriptionData(descriptionData, textName, skosName, conceptElement);
+         	NodeList textNodeList = conceptElement.getElementsByTagName(skosName);
+        for(int i=0; i<textNodeList.getLength(); i++){
+        	  Map<String, Object> d = doeIets(textNodeList.item(i), descriptionData, textName, skosName);
+                //if prefLabelNoLang is given, this means we need to add the prefLabel for this altLabel if no prefLabel for this language exists
+             if(prefLabelNoLang != null && ! d.containsKey(Ontology.NAME_KEY)){
+                      d.put(Ontology.NAME_KEY, prefLabelNoLang);
+                  }
+                  
         }    	
-    }    
+         }
 
     /**
      * Create a description for a specific language or return the one created before

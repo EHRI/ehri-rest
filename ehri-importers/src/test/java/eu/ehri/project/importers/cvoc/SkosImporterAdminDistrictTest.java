@@ -1,10 +1,11 @@
+package eu.ehri.project.importers.cvoc;
+
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 
 
-import eu.ehri.project.importers.cvoc.*;
 import static org.junit.Assert.assertEquals;
 
 import java.io.InputStream;
@@ -23,8 +24,8 @@ import eu.ehri.project.models.cvoc.Vocabulary;
  */
 public class SkosImporterAdminDistrictTest extends AbstractImporterTest {
 
-//    protected final String SINGLE_SKOS = "administrative-districts.rdf";
-    protected final String SINGLE_SKOS = "admin-dist.rdf";
+    protected final String SINGLE_SKOS = "admin-dist-nolang.rdf";
+//    protected final String SINGLE_SKOS = "admin-dist.rdf";
     // Depends on fixtures
     protected final String TEST_REPO = "r1";
   
