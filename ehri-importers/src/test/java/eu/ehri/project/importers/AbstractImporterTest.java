@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.PrintStream;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -31,12 +32,12 @@ public class AbstractImporterTest extends AbstractFixtureTest {
     /**
      * Util class to hold node data (for debugging the graph)
      */
-    public static class Proxy {
+    protected static class VertexProxy {
         final String id;
         final String type;
         final Object gid;
         final Map<String,Object> data;
-        public Proxy(Vertex v) {
+        public VertexProxy(Vertex v) {
             this.id = v.getProperty(EntityType.ID_KEY);
             this.type = v.getProperty(EntityType.TYPE_KEY);
             this.gid = v.getId();
@@ -51,12 +52,21 @@ public class AbstractImporterTest extends AbstractFixtureTest {
             return "<" + id + " (" + type + ") [" + gid + "]>";
         }
 
+        public String toStringVerbose() {
+            StringBuilder builder = new StringBuilder(toString());
+            builder.append("\n");
+            for (Map.Entry<String,Object> entry : data.entrySet()) {
+                builder.append(String.format("  %-15s : %s\n", entry.getKey(), entry.getValue()));
+            }
+            return builder.toString();
+        }
+
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
 
-            Proxy proxy = (Proxy) o;
+            VertexProxy proxy = (VertexProxy) o;
 
             return gid.equals(proxy.gid)
                     && !(id != null ? !id.equals(proxy.id) : proxy.id != null)
@@ -72,25 +82,49 @@ public class AbstractImporterTest extends AbstractFixtureTest {
         }
     }
 
-    public List<Proxy> getGraphState(FramedGraph<?> graph) {
-        List<Proxy> list = Lists.newArrayList();
+    protected static class GraphDiff {
+        final Set<VertexProxy> added;
+        final Set<VertexProxy> removed;
+
+        public GraphDiff(Set<VertexProxy> added, Set<VertexProxy> removed) {
+            this.added = added;
+            this.removed = removed;
+        }
+
+        public void printDebug(PrintStream printStream) {
+            printDebug(printStream, false);
+        }
+
+        public void printDebug(PrintStream printStream, boolean verbose) {
+            if (added.isEmpty() && removed.isEmpty()) {
+                printStream.println("GraphDiff - No nodes added or removed");
+            } else {
+                printStream.println("GraphDiff - Nodes added: " + added.size());
+                for (VertexProxy proxy : added) {
+                    printStream.println(verbose ? proxy.toStringVerbose() : proxy.toString());
+                }
+                printStream.println("GraphDiff - Nodes removed: " + removed.size());
+                for (VertexProxy proxy : removed) {
+                    printStream.println(verbose ? proxy.toStringVerbose() : proxy.toString());
+                }
+            }
+        }
+    }
+
+    protected static List<VertexProxy> getGraphState(FramedGraph<?> graph) {
+        List<VertexProxy> list = Lists.newArrayList();
         for (Vertex v : graph.getVertices()) {
-            list.add(new Proxy(v));
+            list.add(new VertexProxy(v));
         }
         return list;
     }
 
-    public void diffGraph(List<Proxy> list1, List<Proxy> list2) {
-        Set<Proxy> added = Sets.newHashSet(list2);
+    protected static GraphDiff diffGraph(Collection<VertexProxy> list1, Collection<VertexProxy> list2) {
+        Set<VertexProxy> added = Sets.newHashSet(list2);
         added.removeAll(list1);
-        for (Proxy proxy : added) {
-            logger.debug(" - Added:   " + proxy);
-        }
-        Set<Proxy> removed = Sets.newHashSet(list1);
+        Set<VertexProxy> removed = Sets.newHashSet(list1);
         removed.removeAll(list2);
-        for (Proxy proxy : removed) {
-            logger.debug(" - Removed: " + proxy);
-        }
+        return new GraphDiff(added, removed);
     }
 
     protected void printGraph(FramedGraph<?> graph) {
