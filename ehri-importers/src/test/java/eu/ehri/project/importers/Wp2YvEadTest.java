@@ -11,6 +11,7 @@ import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Link;
 import eu.ehri.project.models.Repository;
+import eu.ehri.project.models.VirtualUnit;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.cvoc.AuthoritativeItem;
 import eu.ehri.project.models.cvoc.AuthoritativeSet;
@@ -70,6 +71,7 @@ public class Wp2YvEadTest extends AbstractImporterTest {
         printGraph(graph);
         // How many new nodes will have been created? We should have
         // - 4 more DocumentaryUnits fonds C1 C2 C3 
+        // - 4 more VirtualUnits
         // - 4 more DocumentDescription
         // - 1 more DatePeriod 0 0 1 
         // - 11 UndeterminedRelationship, 0 0 0 11
@@ -78,7 +80,7 @@ public class Wp2YvEadTest extends AbstractImporterTest {
         // - 1 Annotation as resolved relationship 
 
 
-        int newCount = count + 27;
+        int newCount = count + 27+4;
         assertEquals(newCount, getNodeCount(graph));
 
         Iterable<Vertex> docs = graph.getVertices(Ontology.IDENTIFIER_KEY, FONDS);
@@ -89,6 +91,7 @@ public class Wp2YvEadTest extends AbstractImporterTest {
         DocumentaryUnit c1 = graph.frame(getVertexByIdentifier(graph, C1), DocumentaryUnit.class);
         DocumentaryUnit c2 = graph.frame(getVertexByIdentifier(graph, C2), DocumentaryUnit.class);
         DocumentaryUnit c3 = graph.frame(getVertexByIdentifier(graph, C3), DocumentaryUnit.class);
+        VirtualUnit v_c3 = graph.frame(getVertexByIdentifier(graph, Wp2EadImporter.VIRTUAL_PREFIX+C3), VirtualUnit.class);
 
         assertEquals(fonds, c1.getParent());
         assertEquals(c1, c2.getParent());
@@ -102,8 +105,8 @@ public class Wp2YvEadTest extends AbstractImporterTest {
         assertEquals(logMessage, log.getAction().getLogMessage());
 
         //assert keywords are matched to cvocs
-        assertTrue(toList(c3.getLinks()).size() > 0);
-        for(Link a : c3.getLinks()){
+        assertTrue(toList(v_c3.getLinks()).size() > 0);
+        for(Link a : v_c3.getLinks()){
             logger.debug(a.getLinkType());
         }
 

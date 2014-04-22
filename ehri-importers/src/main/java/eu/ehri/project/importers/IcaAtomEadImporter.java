@@ -63,7 +63,6 @@ public class IcaAtomEadImporter extends EaImporter {
     @Override
     public DocumentaryUnit importItem(Map<String, Object> itemData, List<String> idPath) throws ValidationError {
 
-        logger.debug("idpath from argumetns: " + idPath);
         BundleDAO persister = getPersister(idPath);
 
         Bundle unit = new Bundle(EntityClass.DOCUMENTARY_UNIT, extractDocumentaryUnit(itemData));

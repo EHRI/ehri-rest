@@ -11,6 +11,7 @@ import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Link;
 import eu.ehri.project.models.Repository;
+import eu.ehri.project.models.VirtualUnit;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
@@ -70,13 +71,14 @@ public class Wp2BtEadTest extends AbstractImporterTest {
         printGraph(graph);
         // How many new nodes will have been created? We should have
         // - 6 more DocumentaryUnits fonds 2C1 3C2
+        // - 6 more VirtualUnits
         // - 6 more DocumentDescription
         // - 1 more DatePeriod 0 0 1 
         // - 17 UndeterminedRelationship, 0 2 2 4 4 5
         // - 7 more import Event links (6 for every Unit, 1 for the User)
         // - 1 more import Event
         // - 1 Annotation as resolved relationship 
-        int newCount = count + 39;
+        int newCount = count + 39+6;
         assertEquals(newCount, getNodeCount(graph));
 
         Iterable<Vertex> docs = graph.getVertices(Ontology.IDENTIFIER_KEY, FONDS);
@@ -86,6 +88,7 @@ public class Wp2BtEadTest extends AbstractImporterTest {
         // check the child items
         DocumentaryUnit c1_a = graph.frame(getVertexByIdentifier(graph, C1_A), DocumentaryUnit.class);
         DocumentaryUnit c1_b = graph.frame(getVertexByIdentifier(graph, C1_B), DocumentaryUnit.class);
+        VirtualUnit v_c1_b =graph.frame(getVertexByIdentifier(graph, Wp2EadImporter.VIRTUAL_PREFIX+C1_B), VirtualUnit.class);
         DocumentaryUnit c1_a_c2 = graph.frame(getVertexByIdentifier(graph, C1_A_C2), DocumentaryUnit.class);
         DocumentaryUnit c1_b_c2_a = graph.frame(getVertexByIdentifier(graph, C1_B_C2_A), DocumentaryUnit.class);
         DocumentaryUnit c1_b_c2_b = graph.frame(getVertexByIdentifier(graph, C1_B_C2_B), DocumentaryUnit.class);
@@ -106,8 +109,8 @@ public class Wp2BtEadTest extends AbstractImporterTest {
         assertEquals(logMessage, log.getAction().getLogMessage());
 
         //assert keywords are matched to cvocs
-        assertTrue(toList(c1_b.getLinks()).size() > 0);
-        for(Link a : c1_b.getLinks()){
+        assertTrue(toList(v_c1_b.getLinks()).size() > 0);
+        for(Link a : v_c1_b.getLinks()){
             logger.debug(a.getLinkType());
         }
 

@@ -18,7 +18,7 @@ import static eu.ehri.project.definitions.Ontology.*;
 
 @EntityType(EntityClass.USER_PROFILE)
 public interface UserProfile extends Accessor, AccessibleEntity, IdentifiableEntity,
-        Annotator, Actioner, NamedEntity {
+        Annotator, Actioner, NamedEntity, PermissionScope {
 
     public static String FOLLOWER_COUNT = "_followers";
     public static String FOLLOWING_COUNT = "_following";

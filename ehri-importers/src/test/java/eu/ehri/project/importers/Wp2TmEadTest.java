@@ -11,6 +11,7 @@ import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Link;
 import eu.ehri.project.models.Repository;
+import eu.ehri.project.models.VirtualUnit;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.cvoc.AuthoritativeItem;
 import eu.ehri.project.models.cvoc.AuthoritativeSet;
@@ -69,6 +70,7 @@ public class Wp2TmEadTest extends AbstractImporterTest {
         printGraph(graph);
         // How many new nodes will have been created? We should have
         // - 3 more DocumentaryUnits fonds 2C1 
+        // - 3 more VirtualUnits
         // - 3 more DocumentDescription
         // - 4 UndeterminedRelationship, 0 3 1
         // - 2 more DatePeriod
@@ -79,7 +81,7 @@ public class Wp2TmEadTest extends AbstractImporterTest {
         //TODO: the dates are in a weird format, so they are not recognized
         // (- 2 more DatePeriod 1 0 1 )
 
-        int newCount = count + 18;
+        int newCount = count + 18+3;
         assertEquals(newCount, getNodeCount(graph));
 
         Iterable<Vertex> docs = graph.getVertices(Ontology.IDENTIFIER_KEY, FONDS);
@@ -88,6 +90,7 @@ public class Wp2TmEadTest extends AbstractImporterTest {
 
         // check the child items
         DocumentaryUnit c1_a = graph.frame(getVertexByIdentifier(graph, C1_A), DocumentaryUnit.class);
+        VirtualUnit v_c1_a = graph.frame(getVertexByIdentifier(graph, Wp2EadImporter.VIRTUAL_PREFIX+C1_A), VirtualUnit.class);
         DocumentaryUnit c1_b = graph.frame(getVertexByIdentifier(graph, C1_B), DocumentaryUnit.class);
 
         assertEquals(fonds, c1_a.getParent());
@@ -101,8 +104,8 @@ public class Wp2TmEadTest extends AbstractImporterTest {
         assertEquals(logMessage, log.getAction().getLogMessage());
 
         //assert keywords are matched to cvocs
-        assertTrue(toList(c1_a.getLinks()).size() > 0);
-        for(Link a : c1_a.getLinks()){
+        assertTrue(toList(v_c1_a.getLinks()).size() > 0);
+        for(Link a : v_c1_a.getLinks()){
             logger.debug(a.getLinkType());
         }
 

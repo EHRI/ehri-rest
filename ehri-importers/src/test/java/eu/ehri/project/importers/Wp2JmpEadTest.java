@@ -52,6 +52,7 @@ public class Wp2JmpEadTest extends AbstractImporterTest {
         printGraph(graph);
         // How many new nodes will have been created? We should have
         // - 7 more DocumentaryUnits fonds C1 C2 C3 4,5,6
+        // - 7 more VirtualUnits
         // - 7 more DocumentDescription
         // - 0 more DatePeriod 0 0 1 
         // - 3 UndeterminedRelationship, 0 0 0 11
@@ -61,7 +62,7 @@ public class Wp2JmpEadTest extends AbstractImporterTest {
         // - 1 unknownProperty
 
 
-        int newCount = count + 27;
+        int newCount = count + 27 + 7;
         assertEquals(newCount, getNodeCount(graph));
 
         Iterable<Vertex> docs = graph.getVertices(Ontology.IDENTIFIER_KEY, FONDS);

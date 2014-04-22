@@ -16,7 +16,7 @@ import eu.ehri.project.models.utils.JavaHandlerUtils;
 import static eu.ehri.project.models.utils.JavaHandlerUtils.addUniqueRelationship;
 
 @EntityType(EntityClass.VIRTUAL_UNIT)
-public interface VirtualUnit extends AccessibleEntity, PermissionScope, ItemHolder {
+public interface VirtualUnit extends AccessibleEntity, PermissionScope, ItemHolder, LinkableEntity {
 
     @JavaHandler
     public Long getChildCount();

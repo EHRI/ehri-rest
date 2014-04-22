@@ -16,14 +16,20 @@ import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Link;
 import eu.ehri.project.models.UndeterminedRelationship;
+import eu.ehri.project.models.VirtualUnit;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.persistence.Bundle;
+import eu.ehri.project.persistence.BundleDAO;
+import eu.ehri.project.persistence.Mutation;
 import eu.ehri.project.views.impl.CrudViews;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import org.slf4j.Logger;
@@ -40,6 +46,10 @@ public class Wp2EadImporter extends IcaAtomEadImporter {
     public static final String WP2AUTHOR = "EHRI - Terezin Research Guide";
     public static final String PROPERTY_AUTHOR = "authors";
 
+    
+    private List<String> idPath;
+    public static final String VIRTUAL_PREFIX = "virtual";
+    
     public Wp2EadImporter(FramedGraph<Neo4jGraph> framedGraph, PermissionScope permissionScope, ImportLog log) {
         super(framedGraph, permissionScope, log);
         try {
@@ -55,12 +65,27 @@ public class Wp2EadImporter extends IcaAtomEadImporter {
         map.put(PROPERTY_AUTHOR, WP2AUTHOR);    
         return map;
     }
+    
+    @Override
+    public DocumentaryUnit importItem(Map<String, Object> itemData, List<String> idPath) throws ValidationError {
+        this.idPath = idPath;
+        return super.importItem(itemData, idPath);
+    }
 
+
+    private List<String> getVirtualIdPath(){
+        List<String> virtualPath = new ArrayList<String>();
+        for(String step : idPath){
+            virtualPath.add(VIRTUAL_PREFIX+step);
+        }
+        return virtualPath;
+    }
     /**
      * Tries to resolve the undetermined relationships for Wp2 ead files by iterating through all
      * UndeterminedRelationships, finding the DescribedEntity meant by the 'targetUrl' in the Relationship and creating
-     * an Annotation for it.
-     *
+     * a Link for it.
+     * 
+     * since this is in the context of a VirtualCollection, the Link is not added to the DocumentaryUnit but to the VirtualUnit
      *
      * @param unit
      * @param descBundle
@@ -68,11 +93,22 @@ public class Wp2EadImporter extends IcaAtomEadImporter {
      */
     @Override
     protected void solveUndeterminedRelationships(DocumentaryUnit unit, Bundle descBundle) throws ValidationError {
+        //always create a VirtualUnit
+        BundleDAO persister = getPersister(getVirtualIdPath());
+        Map<String, Object> virtualUnitMap = new HashMap<String, Object>();
+        virtualUnitMap.put(Ontology.IDENTIFIER_KEY, VIRTUAL_PREFIX+unit.getIdentifier());
+        Bundle virtualUnitBundle = new Bundle(EntityClass.VIRTUAL_UNIT, virtualUnitMap);
+        //  add all descBundle descriptions to the VirtualUnit.  
+        virtualUnitBundle.withRelation(Ontology.VC_DESCRIBED_BY, descBundle);
+        Mutation<VirtualUnit> mutation = persister.createOrUpdate(virtualUnitBundle, VirtualUnit.class);
+        VirtualUnit virtualUnit = mutation.getNode();
+        //TODO: what is the permissionscope for this virtualcollection?
+//        virtualUnit.setPermissionScope((PermissionScope)userProfile);
+        
         //Try to resolve the undetermined relationships
         //we can only create the annotations after the DocumentaryUnit and its Description have been added to the graph,
         //so they have id's. 
         for (Description unitdesc : unit.getDescriptions()) {
-
             // Put the set of relationships into a HashSet to remove duplicates.
             for (UndeterminedRelationship rel : Sets.newHashSet(unitdesc.getUndeterminedRelationships())) {
                 /*
@@ -97,7 +133,7 @@ public class Wp2EadImporter extends IcaAtomEadImporter {
                                         .withDataValue(Ontology.LINK_HAS_TYPE, "resolved relationship")
                                         .withDataValue(Ontology.LINK_HAS_DESCRIPTION, "solved by automatic resolving");
                                 Link link = new CrudViews<Link>(framedGraph, Link.class).create(linkBundle, userProfile);
-                                unit.addLink(link);
+                                virtualUnit.addLink(link);
                                 concept.addLink(link);
                                 link.addLinkBody(rel);
                             } catch (PermissionDenied ex) {
