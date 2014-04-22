@@ -62,3 +62,6 @@ neo4j-community-1.9*
 
 # Ignore test data folder
 testdata
+
+# let devs have their own test logback
+logback-test.xml
