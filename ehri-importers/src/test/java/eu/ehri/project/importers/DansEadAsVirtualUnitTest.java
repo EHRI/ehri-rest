@@ -48,7 +48,7 @@ public class DansEadAsVirtualUnitTest extends AbstractImporterTest{
         printGraph(graph);
         /*
          * we should have
-         * - 4 DocUnits
+         * - 4 VirtualUnits
          * - 4 DocDesc
          * - 5 more import Event links (4 for every Unit, 1 for the User)
          * - 6 more Dates
@@ -59,7 +59,7 @@ public class DansEadAsVirtualUnitTest extends AbstractImporterTest{
         assertEquals(newCount, getNodeCount(graph));
         
         VirtualUnit c1 = graph.frame(getVertexByIdentifier(graph, C1), VirtualUnit.class);
-        Iterator<DocumentDescription> i = c1.getDocumentDescriptions().iterator();
+        Iterator<Description> i = c1.getDescriptions().iterator();
         int nrOfDesc = 0;
         while(i.hasNext()){
             Description desc = i.next();

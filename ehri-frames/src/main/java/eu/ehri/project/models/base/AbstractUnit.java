@@ -8,6 +8,6 @@ package eu.ehri.project.models.base;
  *
  * @author linda
  */
-public interface AbstractUnit extends AccessibleEntity, PermissionScope, ItemHolder, LinkableEntity {
+public interface AbstractUnit extends DescribedEntity, AccessibleEntity, PermissionScope, ItemHolder, LinkableEntity,  Watchable {
     
 }

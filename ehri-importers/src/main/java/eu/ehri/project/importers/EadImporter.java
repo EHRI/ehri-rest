@@ -32,8 +32,6 @@ public class EadImporter extends EaImporter {
     private static final Logger logger = LoggerFactory.getLogger(EadImporter.class);
     //the EadImporter can import ead as DocumentaryUnits, the default, or overwrite those and create VirtualUnits instead.
     private EntityClass unitEntity = EntityClass.DOCUMENTARY_UNIT;
-    private String linkToDescription = Ontology.DESCRIPTION_FOR_ENTITY;
-    private EntityClass documentEntity = EntityClass.DOCUMENT_DESCRIPTION;
 
     /**
      * Construct an EadImporter object.
@@ -70,7 +68,7 @@ public class EadImporter extends EaImporter {
                     "Missing identifier " + Ontology.IDENTIFIER_KEY);
         }
         logger.debug("Imported item: " + itemData.get("name"));
-        Bundle descBundle = new Bundle(documentEntity, extractUnitDescription(itemData, documentEntity));
+        Bundle descBundle = new Bundle(EntityClass.DOCUMENT_DESCRIPTION, extractUnitDescription(itemData, EntityClass.DOCUMENT_DESCRIPTION));
         // Add dates and descriptions to the bundle since they're @Dependent
         // relations.
         for (Map<String, Object> dpb : extractDates(itemData)) {
@@ -85,7 +83,7 @@ public class EadImporter extends EaImporter {
             logger.debug("Unknown Properties found");
             descBundle = descBundle.withRelation(Ontology.HAS_UNKNOWN_PROPERTY, new Bundle(EntityClass.UNKNOWN_PROPERTY, unknowns));
         }
-        unit = unit.withRelation(linkToDescription, descBundle);
+        unit = unit.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
 
         // Old solution to missing IDs: generate a replacement. 
         // New solution used above: throw error - Handlers should produce IDs if necessary.
@@ -215,7 +213,5 @@ public class EadImporter extends EaImporter {
     
     public void importAsVirtualCollection(){
       unitEntity = EntityClass.VIRTUAL_UNIT;
-      linkToDescription = Ontology.VC_DESCRIBED_BY;
-      documentEntity = EntityClass.DOCUMENT_DESCRIPTION;
     }
 }

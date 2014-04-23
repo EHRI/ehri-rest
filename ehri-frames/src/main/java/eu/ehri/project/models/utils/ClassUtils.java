@@ -93,7 +93,7 @@ public class ClassUtils {
     }
 
     private static Map<String, Direction> getDependentRelationsInternal(Class<?> cls) {
-        Map<String, Direction> out = new HashMap<String, Direction>();
+        Map<String, Direction> out = Maps.newHashMap();
         for (Method method : cls.getMethods()) {
             if (method.getAnnotation(Dependent.class) != null) {
                 Adjacency ann = method.getAnnotation(Adjacency.class);
