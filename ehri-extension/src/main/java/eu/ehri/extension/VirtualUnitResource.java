@@ -24,8 +24,8 @@ import java.util.List;
 public class VirtualUnitResource extends
         AbstractAccessibleEntityResource<VirtualUnit> {
 
-    public VirtualUnitResource(@Context GraphDatabaseService database) {
-        super(database, VirtualUnit.class);
+    public VirtualUnitResource(@Context GraphDatabaseService database, @Context HttpHeaders requestHeaders) {
+        super(database, requestHeaders, VirtualUnit.class);
     }
 
     @GET
