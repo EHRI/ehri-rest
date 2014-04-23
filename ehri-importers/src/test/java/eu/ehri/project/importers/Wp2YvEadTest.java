@@ -64,7 +64,7 @@ public class Wp2YvEadTest extends AbstractImporterTest {
 
         int count = getNodeCount(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        SaxImportManager importManager = new SaxImportManager(graph, agent, validUser, VirtualCollectionEadImporter.class, VirtualCollectionEadHandler.class);
+        SaxImportManager importManager = new SaxImportManager(graph, agent, validUser, EadIntoVirtualCollectionImporter.class, EadIntoVirtualCollectionHandler.class);
         
         importManager.setTolerant(Boolean.TRUE);
         VirtualUnit virtualcollection = graph.frame(getVertexByIdentifier(graph, "vc1"), VirtualUnit.class);
@@ -95,7 +95,7 @@ public class Wp2YvEadTest extends AbstractImporterTest {
         DocumentaryUnit c1 = graph.frame(getVertexByIdentifier(graph, C1), DocumentaryUnit.class);
         DocumentaryUnit c2 = graph.frame(getVertexByIdentifier(graph, C2), DocumentaryUnit.class);
         DocumentaryUnit c3 = graph.frame(getVertexByIdentifier(graph, C3), DocumentaryUnit.class);
-        VirtualUnit v_c3 = graph.frame(getVertexByIdentifier(graph, VirtualCollectionEadImporter.VIRTUAL_PREFIX+C3), VirtualUnit.class);
+        VirtualUnit v_c3 = graph.frame(getVertexByIdentifier(graph, EadIntoVirtualCollectionImporter.VIRTUAL_PREFIX+C3), VirtualUnit.class);
 
         assertEquals(fonds, c1.getParent());
         assertEquals(c1, c2.getParent());
@@ -130,7 +130,7 @@ public class Wp2YvEadTest extends AbstractImporterTest {
         
         // Check the author of the description
         for (DocumentDescription d : c1.getDocumentDescriptions()){
-            assertEquals(VirtualCollectionEadImporter.WP2AUTHOR, d.asVertex().getProperty(VirtualCollectionEadImporter.PROPERTY_AUTHOR));
+            assertEquals(EadIntoVirtualCollectionImporter.WP2AUTHOR, d.asVertex().getProperty(EadIntoVirtualCollectionImporter.PROPERTY_AUTHOR));
         }
 
         // Check the importer is Idempotent

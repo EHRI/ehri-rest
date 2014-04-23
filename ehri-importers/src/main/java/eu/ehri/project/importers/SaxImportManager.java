@@ -88,11 +88,11 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
             importer = importerClass.getConstructor(FramedGraph.class, PermissionScope.class,
                     ImportLog.class).newInstance(framedGraph, permissionScope, log);
             
-            if(importerClass.equals(VirtualCollectionEadImporter.class)){
+            if(importerClass.equals(EadIntoVirtualCollectionImporter.class)){
                 if(virtualcollection == null)
                     logger.error("this importer needs a virtualcollection to import into");
                 else{
-                    ((VirtualCollectionEadImporter)importer).setVirtualCollection(virtualcollection);
+                    ((EadIntoVirtualCollectionImporter)importer).setVirtualCollection(virtualcollection);
                 }
             }
             logger.debug("importer of class {}", importer.getClass());

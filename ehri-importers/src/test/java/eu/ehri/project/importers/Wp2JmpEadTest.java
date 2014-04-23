@@ -46,7 +46,7 @@ public class Wp2JmpEadTest extends AbstractImporterTest {
 
         int count = getNodeCount(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        SaxImportManager importManager = new SaxImportManager(graph, agent, validUser, VirtualCollectionEadImporter.class, VirtualCollectionEadHandler.class);
+        SaxImportManager importManager = new SaxImportManager(graph, agent, validUser, EadIntoVirtualCollectionImporter.class, EadIntoVirtualCollectionHandler.class);
         
         importManager.setTolerant(Boolean.TRUE);
         VirtualUnit virtualcollection = graph.frame(getVertexByIdentifier(graph, "vc1"), VirtualUnit.class);
@@ -113,7 +113,7 @@ public class Wp2JmpEadTest extends AbstractImporterTest {
         
         // Check the author of the description
         for (DocumentDescription d : c1.getDocumentDescriptions()){
-            assertEquals(VirtualCollectionEadImporter.WP2AUTHOR, d.asVertex().getProperty(VirtualCollectionEadImporter.PROPERTY_AUTHOR));
+            assertEquals(EadIntoVirtualCollectionImporter.WP2AUTHOR, d.asVertex().getProperty(EadIntoVirtualCollectionImporter.PROPERTY_AUTHOR));
         }
 
         // Check the importer is Idempotent

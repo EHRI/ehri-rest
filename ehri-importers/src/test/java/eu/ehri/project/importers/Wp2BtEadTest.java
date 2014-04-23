@@ -64,7 +64,7 @@ public class Wp2BtEadTest extends AbstractImporterTest {
 
         int count = getNodeCount(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        SaxImportManager importManager = new SaxImportManager(graph, agent, validUser, VirtualCollectionEadImporter.class, VirtualCollectionEadHandler.class);
+        SaxImportManager importManager = new SaxImportManager(graph, agent, validUser, EadIntoVirtualCollectionImporter.class, EadIntoVirtualCollectionHandler.class);
         
         importManager.setTolerant(Boolean.TRUE);
         VirtualUnit virtualcollection = graph.frame(getVertexByIdentifier(graph, "vc1"), VirtualUnit.class);
@@ -92,7 +92,7 @@ public class Wp2BtEadTest extends AbstractImporterTest {
         // check the child items
         DocumentaryUnit c1_a = graph.frame(getVertexByIdentifier(graph, C1_A), DocumentaryUnit.class);
         DocumentaryUnit c1_b = graph.frame(getVertexByIdentifier(graph, C1_B), DocumentaryUnit.class);
-        VirtualUnit v_c1_b =graph.frame(getVertexByIdentifier(graph, VirtualCollectionEadImporter.VIRTUAL_PREFIX+C1_B), VirtualUnit.class);
+        VirtualUnit v_c1_b =graph.frame(getVertexByIdentifier(graph, EadIntoVirtualCollectionImporter.VIRTUAL_PREFIX+C1_B), VirtualUnit.class);
         DocumentaryUnit c1_a_c2 = graph.frame(getVertexByIdentifier(graph, C1_A_C2), DocumentaryUnit.class);
         DocumentaryUnit c1_b_c2_a = graph.frame(getVertexByIdentifier(graph, C1_B_C2_A), DocumentaryUnit.class);
         DocumentaryUnit c1_b_c2_b = graph.frame(getVertexByIdentifier(graph, C1_B_C2_B), DocumentaryUnit.class);
@@ -136,7 +136,7 @@ public class Wp2BtEadTest extends AbstractImporterTest {
         
         // Check the author of the description
         for (DocumentDescription d : c1_a.getDocumentDescriptions()){
-            assertEquals(VirtualCollectionEadImporter.WP2AUTHOR, d.asVertex().getProperty(VirtualCollectionEadImporter.PROPERTY_AUTHOR));
+            assertEquals(EadIntoVirtualCollectionImporter.WP2AUTHOR, d.asVertex().getProperty(EadIntoVirtualCollectionImporter.PROPERTY_AUTHOR));
         }
 
         // Check the importer is Idempotent

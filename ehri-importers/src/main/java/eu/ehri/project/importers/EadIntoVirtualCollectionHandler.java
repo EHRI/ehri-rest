@@ -15,11 +15,11 @@ import org.xml.sax.SAXException;
  *
  * @author linda
  */
-public class VirtualCollectionEadHandler extends IcaAtomEadHandler {
+public class EadIntoVirtualCollectionHandler extends IcaAtomEadHandler {
 
-    private static final Logger logger = LoggerFactory.getLogger(VirtualCollectionEadHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(EadIntoVirtualCollectionHandler.class);
 
-    public VirtualCollectionEadHandler(AbstractImporter<Map<String, Object>> importer) {
+    public EadIntoVirtualCollectionHandler(AbstractImporter<Map<String, Object>> importer) {
         super(importer, new XmlImportProperties("wp2ead.properties"));
     }
 

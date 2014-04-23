@@ -42,9 +42,9 @@ import org.slf4j.LoggerFactory;
  * 
  * @author linda
  */
-public class VirtualCollectionEadImporter extends IcaAtomEadImporter {
+public class EadIntoVirtualCollectionImporter extends IcaAtomEadImporter {
 
-    private static final Logger logger = LoggerFactory.getLogger(VirtualCollectionEadImporter.class);
+    private static final Logger logger = LoggerFactory.getLogger(EadIntoVirtualCollectionImporter.class);
     private final Accessor userProfile;
     public static final String WP2AUTHOR = "EHRI";
     public static final String PROPERTY_AUTHOR = "authors";
@@ -54,7 +54,7 @@ public class VirtualCollectionEadImporter extends IcaAtomEadImporter {
     private List<String> idPath;
     public static final String VIRTUAL_PREFIX = "virtual";
     
-    public VirtualCollectionEadImporter(FramedGraph<Neo4jGraph> framedGraph, PermissionScope permissionScope, ImportLog log) {
+    public EadIntoVirtualCollectionImporter(FramedGraph<Neo4jGraph> framedGraph, PermissionScope permissionScope, ImportLog log) {
         super(framedGraph, permissionScope, log);
         try {
             userProfile = manager.getFrame(log.getActioner().getId(), Accessor.class);
@@ -141,9 +141,9 @@ public class VirtualCollectionEadImporter extends IcaAtomEadImporter {
                                 concept.addLink(link);
                                 link.addLinkBody(rel);
                             } catch (PermissionDenied ex) {
-                                java.util.logging.Logger.getLogger(VirtualCollectionEadImporter.class.getName()).log(Level.SEVERE, null, ex);
+                                java.util.logging.Logger.getLogger(EadIntoVirtualCollectionImporter.class.getName()).log(Level.SEVERE, null, ex);
                             } catch (IntegrityError ex) {
-                                java.util.logging.Logger.getLogger(VirtualCollectionEadImporter.class.getName()).log(Level.SEVERE, null, ex);
+                                java.util.logging.Logger.getLogger(EadIntoVirtualCollectionImporter.class.getName()).log(Level.SEVERE, null, ex);
                             }
 
                         }

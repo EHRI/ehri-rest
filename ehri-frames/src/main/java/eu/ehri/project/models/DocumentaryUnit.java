@@ -18,8 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @EntityType(EntityClass.DOCUMENTARY_UNIT)
-public interface DocumentaryUnit extends AccessibleEntity,
-        DescribedEntity, PermissionScope, ItemHolder, Watchable {
+public interface DocumentaryUnit extends AbstractUnit, DescribedEntity,  Watchable {
 
     static final Logger logger = LoggerFactory.getLogger(DocumentaryUnit.class);
 

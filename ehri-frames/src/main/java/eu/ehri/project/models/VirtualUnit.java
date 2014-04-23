@@ -16,7 +16,7 @@ import eu.ehri.project.models.utils.JavaHandlerUtils;
 import static eu.ehri.project.models.utils.JavaHandlerUtils.addUniqueRelationship;
 
 @EntityType(EntityClass.VIRTUAL_UNIT)
-public interface VirtualUnit extends AccessibleEntity, PermissionScope, ItemHolder, LinkableEntity {
+public interface VirtualUnit extends AbstractUnit {
 
     @JavaHandler
     public Long getChildCount();
@@ -49,7 +49,7 @@ public interface VirtualUnit extends AccessibleEntity, PermissionScope, ItemHold
     public Iterable<VirtualUnit> getAllChildren();
 
     @Adjacency(label = Ontology.VC_DESCRIBED_BY, direction = Direction.OUT)
-    public Iterable<Description> getDescriptions();
+    public Iterable<DocumentDescription> getDocumentDescriptions();
 
     @Adjacency(label = Ontology.VC_HAS_AUTHOR, direction = Direction.OUT)
     public UserProfile getAuthor();

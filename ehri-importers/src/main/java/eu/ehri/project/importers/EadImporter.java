@@ -30,6 +30,10 @@ import org.slf4j.LoggerFactory;
 public class EadImporter extends EaImporter {
 
     private static final Logger logger = LoggerFactory.getLogger(EadImporter.class);
+    //the EadImporter can import ead as DocumentaryUnits, the default, or overwrite those and create VirtualUnits instead.
+    private EntityClass unitEntity = EntityClass.DOCUMENTARY_UNIT;
+    private String linkToDescription = Ontology.DESCRIPTION_FOR_ENTITY;
+    private EntityClass documentEntity = EntityClass.DOCUMENT_DESCRIPTION;
 
     /**
      * Construct an EadImporter object.
@@ -52,13 +56,13 @@ public class EadImporter extends EaImporter {
      * @throws ValidationError when the itemData does not contain an identifier for the unit or...
      */
     @Override
-    public DocumentaryUnit importItem(Map<String, Object> itemData, List<String> idPath)
+    public AbstractUnit importItem(Map<String, Object> itemData, List<String> idPath)
             throws ValidationError {
 
         BundleDAO persister = getPersister(idPath);
 
         // extractDocumentaryUnit does not throw ValidationError on missing ID
-        Bundle unit = new Bundle(EntityClass.DOCUMENTARY_UNIT, extractDocumentaryUnit(itemData));
+        Bundle unit = new Bundle(unitEntity, extractDocumentaryUnit(itemData));
         
         // Check for missing identifier, throw an exception when there is no ID.
         if (unit.getDataValue(Ontology.IDENTIFIER_KEY) == null) {
@@ -66,7 +70,7 @@ public class EadImporter extends EaImporter {
                     "Missing identifier " + Ontology.IDENTIFIER_KEY);
         }
         logger.debug("Imported item: " + itemData.get("name"));
-        Bundle descBundle = new Bundle(EntityClass.DOCUMENT_DESCRIPTION, extractUnitDescription(itemData, EntityClass.DOCUMENT_DESCRIPTION));
+        Bundle descBundle = new Bundle(documentEntity, extractUnitDescription(itemData, documentEntity));
         // Add dates and descriptions to the bundle since they're @Dependent
         // relations.
         for (Map<String, Object> dpb : extractDates(itemData)) {
@@ -81,7 +85,7 @@ public class EadImporter extends EaImporter {
             logger.debug("Unknown Properties found");
             descBundle = descBundle.withRelation(Ontology.HAS_UNKNOWN_PROPERTY, new Bundle(EntityClass.UNKNOWN_PROPERTY, unknowns));
         }
-        unit = unit.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
+        unit = unit.withRelation(linkToDescription, descBundle);
 
         // Old solution to missing IDs: generate a replacement. 
         // New solution used above: throw error - Handlers should produce IDs if necessary.
@@ -100,7 +104,7 @@ public class EadImporter extends EaImporter {
                 Repository repository = framedGraph.frame(permissionScope.asVertex(), Repository.class);
                 frame.setRepository(repository);
                 frame.setPermissionScope(repository);
-            } else if (scopeType.equals(EntityClass.DOCUMENTARY_UNIT)) {
+            } else if (scopeType.equals(unitEntity)) {
                 DocumentaryUnit parent = framedGraph.frame(permissionScope.asVertex(), DocumentaryUnit.class);
                 parent.addChild(frame);
                 frame.setPermissionScope(parent);
@@ -207,5 +211,11 @@ public class EadImporter extends EaImporter {
     @Override
     public AccessibleEntity importItem(Map<String, Object> itemData) throws ValidationError {
         throw new UnsupportedOperationException("Not supported yet.");
+    }
+    
+    public void importAsVirtualCollection(){
+      unitEntity = EntityClass.VIRTUAL_UNIT;
+      linkToDescription = Ontology.VC_DESCRIBED_BY;
+      documentEntity = EntityClass.DOCUMENT_DESCRIPTION;
     }
 }

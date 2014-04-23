@@ -49,7 +49,7 @@ public class CmdEntryPoint extends BaseCommand {
         mmap.put(RelationAdd.NAME, RelationAdd.class);
         // adaptation of UserAdd for adding countries
         mmap.put(CountryAdd.NAME, CountryAdd.class);
-        mmap.put(VirtualCollectionEadImport.NAME, VirtualCollectionEadImport.class);
+        mmap.put(EadImportIntoVirtualCollection.NAME, EadImportIntoVirtualCollection.class);
 
         // new command, could we use reflection code to try find all Command interface implementing classes
         // DISABLED due to brokenness... use GraphSON instead.
