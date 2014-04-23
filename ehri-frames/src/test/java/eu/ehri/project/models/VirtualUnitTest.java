@@ -1,5 +1,6 @@
 package eu.ehri.project.models;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import eu.ehri.project.models.base.Description;
 import eu.ehri.project.test.AbstractFixtureTest;
@@ -45,7 +46,34 @@ public class VirtualUnitTest extends AbstractFixtureTest {
         assertFalse(vc1.addChild(vc1));
         // Nor should this - loop
         assertFalse(vc2.addChild(vc1));
+    }
 
+    @Test
+    public void testGetReferencedDescriptions() throws Exception {
+        VirtualUnit vc1 = manager.getFrame("vc1", VirtualUnit.class);
+        DocumentDescription cd1 = manager.getFrame("cd1", DocumentDescription.class);
+        assertTrue(vc1.getReferencedDescriptions().iterator().hasNext());
+        assertEquals(cd1, vc1.getReferencedDescriptions().iterator().next());
+    }
+
+    @Test
+    public void testAddReferencedDescription() throws Exception {
+        VirtualUnit vc1 = manager.getFrame("vc1", VirtualUnit.class);
+        DocumentDescription cd4 = manager.getFrame("cd4", DocumentDescription.class);
+        assertEquals(1L, Iterables.size(vc1.getReferencedDescriptions()));
+        vc1.addReferencedDescription(cd4);
+        assertEquals(2L, Iterables.size(vc1.getReferencedDescriptions()));
+        // check we can't add it twice
+        vc1.addReferencedDescription(cd4);
+        assertEquals(2L, Iterables.size(vc1.getReferencedDescriptions()));
+    }
+
+    @Test
+    public void testGetVirtualDescriptions() throws Exception {
+        VirtualUnit vc1 = manager.getFrame("vc3", VirtualUnit.class);
+        DocumentDescription cd1 = manager.getFrame("vcd3", DocumentDescription.class);
+        assertTrue(vc1.getVirtualDescriptions().iterator().hasNext());
+        assertEquals(cd1, vc1.getVirtualDescriptions().iterator().next());
     }
 
     @Test
@@ -77,9 +105,19 @@ public class VirtualUnitTest extends AbstractFixtureTest {
     }
 
     @Test
-    public void testGetDescriptions() throws Exception {
-        Description cd1 = manager.getFrame("cd1", Description.class);
+    public void testSetAuthor() throws Exception {
         VirtualUnit vc1 = manager.getFrame("vc1", VirtualUnit.class);
-        assertEquals(Lists.newArrayList(cd1), Lists.newArrayList(vc1.getDescriptions()));
+        UserProfile linda = manager.getFrame("linda", UserProfile.class);
+        Group kcl = manager.getFrame("kcl", Group.class);
+        assertEquals(linda, vc1.getAuthor());
+        vc1.setAuthor(kcl);
+        assertEquals(kcl, vc1.getAuthor());
+    }
+
+    @Test
+    public void testGetDescriptions() throws Exception {
+        DocumentDescription cd1 = manager.getFrame("cd1", DocumentDescription.class);
+        VirtualUnit vc1 = manager.getFrame("vc1", VirtualUnit.class);
+        assertEquals(Lists.newArrayList(cd1), Lists.newArrayList(vc1.getReferencedDescriptions()));
     }
 }

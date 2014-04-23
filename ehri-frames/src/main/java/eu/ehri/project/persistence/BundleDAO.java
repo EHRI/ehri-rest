@@ -213,7 +213,6 @@ public final class BundleDAO {
             throws IntegrityError {
         Map<String, Direction> dependents = ClassUtils
                 .getDependentRelations(cls);
-
         for (String relation : relations.keySet()) {
             if (dependents.containsKey(relation)) {
                 for (Bundle bundle : relations.get(relation)) {

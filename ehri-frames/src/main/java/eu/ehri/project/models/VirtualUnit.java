@@ -13,10 +13,23 @@ import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.base.*;
 import eu.ehri.project.models.utils.JavaHandlerUtils;
 
+import static eu.ehri.project.models.utils.JavaHandlerUtils.addSingleRelationship;
 import static eu.ehri.project.models.utils.JavaHandlerUtils.addUniqueRelationship;
 
+/**
+ * Virtual documentary unit. Note: a *virtual* unit can
+ * have its own descriptions which do not refer to *actual*
+ * doc units, but are structurally the same. However, the label
+ * and direction is different in these cases, with the "purely
+ * virtual" descriptions having an outgoing "describes" relationship
+ * to the VU, whereas descriptions that describe real doc units have
+ * an incoming "isDescribedBy" relationship from a VU. The difference
+ * denotes ownership (dependency) which likewise controls cascading
+ * deletions.
+ */
 @EntityType(EntityClass.VIRTUAL_UNIT)
-public interface VirtualUnit extends AccessibleEntity, PermissionScope, ItemHolder {
+public interface VirtualUnit extends AccessibleEntity, ItemHolder,
+        DescribedEntity, Watchable {
 
     @JavaHandler
     public Long getChildCount();
@@ -30,6 +43,7 @@ public interface VirtualUnit extends AccessibleEntity, PermissionScope, ItemHold
      * IllegalEdgeLoop if the operation is self-referential or
      * results in a loop, but due to a frames limitation we can't
      * Instead it returns a boolean indicating success/failure.
+     *
      * @param child The child collection
      * @return Whether or not the operation was allowed.
      */
@@ -49,15 +63,32 @@ public interface VirtualUnit extends AccessibleEntity, PermissionScope, ItemHold
     public Iterable<VirtualUnit> getAllChildren();
 
     @Adjacency(label = Ontology.VC_DESCRIBED_BY, direction = Direction.OUT)
-    public Iterable<Description> getDescriptions();
+    public Iterable<DocumentDescription> getReferencedDescriptions();
+
+    @JavaHandler
+    public void addReferencedDescription(final DocumentDescription description);
 
     @Adjacency(label = Ontology.VC_HAS_AUTHOR, direction = Direction.OUT)
-    public UserProfile getAuthor();
+    public Accessor getAuthor();
+
+    @JavaHandler
+    public void setAuthor(final Accessor accessor);
+
+    @Adjacency(label = Ontology.DESCRIPTION_FOR_ENTITY, direction = Direction.IN)
+    public Iterable<DocumentDescription> getVirtualDescriptions();
 
     /**
      * Implementation of complex methods.
      */
     abstract class Impl implements JavaHandlerContext<Vertex>, VirtualUnit {
+
+        public void setAuthor(final Accessor accessor) {
+            addSingleRelationship(it(), accessor.asVertex(), Ontology.VC_HAS_AUTHOR);
+        }
+
+        public void addReferencedDescription(final DocumentDescription description) {
+            addUniqueRelationship(it(), description.asVertex(), Ontology.VC_DESCRIBED_BY);
+        }
 
         public Long getChildCount() {
             Long count = it().getProperty(CHILD_COUNT);
@@ -104,7 +135,7 @@ public interface VirtualUnit extends AccessibleEntity, PermissionScope, ItemHold
         }
 
         public Iterable<VirtualUnit> getAllChildren() {
-            Pipeline<Vertex,Vertex> otherPipe = gremlin().as("n").in(Ontology.VC_IS_PART_OF)
+            Pipeline<Vertex, Vertex> otherPipe = gremlin().as("n").in(Ontology.VC_IS_PART_OF)
                     .loop("n", JavaHandlerUtils.noopLoopFunc, JavaHandlerUtils.noopLoopFunc);
 
             return frameVertices(gremlin().in(Ontology.VC_IS_PART_OF).cast(Vertex.class).copySplit(gremlin(), otherPipe)

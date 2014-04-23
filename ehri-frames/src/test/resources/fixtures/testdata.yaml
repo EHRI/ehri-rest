@@ -546,4 +546,11 @@
   data:
     identifier: vc3
   relationships:
-    isDescribedBy: cd3
+    describes:
+      - id: vcd3
+        type: documentDescription
+        data:
+          identifier: vcd3
+          name: Virtual Unit 3
+          languageCode: eng
+          scopeAndContent: Some description text for vc3
