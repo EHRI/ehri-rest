@@ -29,6 +29,8 @@ public final class Serializer {
 
     private static final Logger logger = LoggerFactory.getLogger(Serializer.class);
 
+    private static final int DEFAULT_CACHE_SIZE = 100;
+
     private static class LruCache<A, B> extends LinkedHashMap<A, B> {
         private final int maxEntries;
 
@@ -52,7 +54,12 @@ public final class Serializer {
 
 
     public Serializer withCache() {
-        return new Serializer(new Builder(graph).withCache());
+        return new Builder(graph)
+                .withIncludedProperties(includeProps)
+                .withLiteMode(liteMode)
+                .dependentOnly(dependentOnly)
+                .withDepth(maxTraversals)
+                .withCache().build();
     }
 
     /**
@@ -61,6 +68,16 @@ public final class Serializer {
     public Serializer(FramedGraph<?> graph) {
         this(new Builder(graph));
     }
+
+    /**
+     * Fetch the included properties.
+     *
+     * @return A list of property names that will always be serialized.
+     */
+    public List<String> getIncludeProperties() {
+        return includeProps;
+    }
+
 
     /**
      * Builder for serializers with non-default options.
@@ -87,13 +104,22 @@ public final class Serializer {
             return this;
         }
 
+        public Builder dependentOnly(boolean dependentOnly) {
+            this.dependentOnly = dependentOnly;
+            return this;
+        }
+
         public Builder withLiteMode(boolean lite) {
             this.liteMode = lite;
             return this;
         }
 
         public Builder withCache() {
-            this.cache = new LruCache<String, Bundle>(100);
+            return withCache(DEFAULT_CACHE_SIZE);
+        }
+
+        public Builder withCache(int size) {
+            this.cache = new LruCache<String, Bundle>(size);
             return this;
         }
 
@@ -136,6 +162,7 @@ public final class Serializer {
 
     /**
      * Create a new serializer from this one, with extra included properties.
+     *
      * @param includeProps A set of properties to include.
      * @return A new serializer.
      */
@@ -147,8 +174,8 @@ public final class Serializer {
     /**
      * Convert a vertex frame to a raw bundle of data.
      *
-     * @param item
-     * @return
+     * @param item The framed item
+     * @return A map of data
      * @throws SerializationError
      */
     public <T extends Frame> Map<String, Object> vertexFrameToData(T item)
@@ -159,8 +186,8 @@ public final class Serializer {
     /**
      * Convert a vertex to a raw bundle of data.
      *
-     * @param item
-     * @return
+     * @param item The item vertex
+     * @return A map of data
      * @throws SerializationError
      */
     public Map<String, Object> vertexToData(Vertex item)
@@ -172,8 +199,8 @@ public final class Serializer {
      * Convert a Frame into an EntityBundle that includes its @Fetch'd
      * relations.
      *
-     * @param item
-     * @return
+     * @param item The framed item
+     * @return A data bundle
      * @throws SerializationError
      */
     public <T extends Frame> Bundle vertexFrameToBundle(T item)
@@ -185,8 +212,8 @@ public final class Serializer {
      * Convert a Vertex into an EntityBundle that includes its @Fetch'd
      * relations.
      *
-     * @param item
-     * @return
+     * @param item The item vertex
+     * @return A data bundle
      * @throws SerializationError
      */
     public Bundle vertexFrameToBundle(Vertex item)
@@ -197,8 +224,8 @@ public final class Serializer {
     /**
      * Serialise a vertex frame to JSON.
      *
-     * @param item
-     * @return
+     * @param item The framed item
+     * @return A JSON string
      * @throws SerializationError
      */
     public <T extends Frame> String vertexFrameToJson(T item)
@@ -209,8 +236,8 @@ public final class Serializer {
     /**
      * Serialise a vertex to JSON.
      *
-     * @param item
-     * @return
+     * @param item The item vertex
+     * @return A JSON string
      * @throws SerializationError
      */
     public String vertexToJson(Vertex item)
@@ -221,8 +248,8 @@ public final class Serializer {
     /**
      * Serialise a vertex frame to XML.
      *
-     * @param item
-     * @return document
+     * @param item The item vertex
+     * @return An XML document
      * @throws SerializationError
      */
     public Document vertexFrameToXml(Vertex item)
@@ -233,20 +260,20 @@ public final class Serializer {
     /**
      * Serialise a vertex frame to XML.
      *
-     * @param item
-     * @return document
+     * @param item A framed item
+     * @return An XML document
      * @throws SerializationError
      */
     public <T extends Frame> Document vertexFrameToXml(T item)
             throws SerializationError {
-        return DataConverter.bundleToXml(vertexFrameToBundle(item));
+        return vertexFrameToXml(item.asVertex());
     }
 
     /**
      * Serialise a vertex frame to XML string.
      *
-     * @param item
-     * @return document string
+     * @param item The item vertex
+     * @return An XML document string
      * @throws SerializationError
      */
     public String vertexToXmlString(Vertex item)
@@ -257,8 +284,8 @@ public final class Serializer {
     /**
      * Serialise a vertex frame to XML string.
      *
-     * @param item
-     * @return document string
+     * @param item The framed item
+     * @return An XML document string
      * @throws SerializationError
      */
     public <T extends Frame> String vertexFrameToXmlString(T item)
@@ -282,9 +309,9 @@ public final class Serializer {
      * Convert a Frame into an EntityBundle that includes its @Fetch'd
      * relations.
      *
-     * @param item
-     * @param depth
-     * @return
+     * @param item  The item vertex
+     * @param depth The maximum serialization depth
+     * @return A data bundle
      * @throws SerializationError
      */
     private Bundle vertexToBundle(Vertex item, int depth, boolean lite)
@@ -297,13 +324,13 @@ public final class Serializer {
 
             Bundle.Builder builder = new Bundle.Builder(type);
             builder.setId(id)
-                .addRelations(getRelationData(item,
-                    depth, lite, type.getEntityClass()))
-                .addData(getVertexData(item, type, depth, lite))
-                .addMetaData(getVertexMeta(item, type, depth, lite));
+                    .addRelations(getRelationData(item,
+                            depth, lite, type.getEntityClass()))
+                    .addData(getVertexData(item, type, lite))
+                    .addMetaData(getVertexMeta(item));
             if (!lite) {
-                builder.addMetaData(getVertexMeta(item, type, depth, lite))
-                       .addMetaDataValue("gid", item.getId());
+                builder.addMetaData(getVertexMeta(item))
+                        .addMetaDataValue("gid", item.getId());
             }
             return builder.build();
         } catch (IllegalArgumentException e) {
@@ -340,7 +367,7 @@ public final class Serializer {
                 Method method = entry.getValue();
 
                 boolean isLite = liteMode || lite
-                        || shouldSerializeLite(relationName, method);
+                        || shouldSerializeLite(method);
 
                 if (shouldTraverse(relationName, method, depth, isLite)) {
                     logger.trace("Fetching relation: {}, depth {}, {}",
@@ -375,30 +402,11 @@ public final class Serializer {
         return relations;
     }
 
-    /**
-     * Determine if a relation should be serialized without its non-mandatory
-     * data. This will be the case if:
-     * <p/>
-     * - depth is > 0
-     * - item is a non-dependent relationship
-     *
-     * @param relationName
-     * @param method
-     * @return
-     */
-    private boolean shouldSerializeLite(String relationName, Method method) {
+    private boolean shouldSerializeLite(Method method) {
         Dependent dep = method.getAnnotation(Dependent.class);
         return dep == null;
     }
 
-    /**
-     * Determine if traversal should proceed on a Frames relation.
-     *
-     * @param relationName
-     * @param method
-     * @param depth
-     * @return
-     */
     private boolean shouldTraverse(String relationName, Method method, int depth, boolean lite) {
         // In order to avoid @Fetching the whole graph we track the
         // depth parameter and increase it for every traversal.
@@ -445,7 +453,7 @@ public final class Serializer {
     /**
      * Fetch a map of data from a vertex.
      */
-    private Map<String, Object> getVertexData(Vertex item, EntityClass type, int depth, boolean lite) {
+    private Map<String, Object> getVertexData(Vertex item, EntityClass type, boolean lite) {
         Map<String, Object> data = Maps.newHashMap();
         Iterable<String> keys = lite
                 ? getMandatoryOrSpecificProps(type)
@@ -463,6 +471,7 @@ public final class Serializer {
      * Get a list of properties with are either given specifically
      * in this serializer's includeProps attr, or are mandatory for
      * the type.
+     *
      * @param type An EntityClass
      * @return A list of mandatory or included properties.
      */
@@ -477,7 +486,7 @@ public final class Serializer {
      * This is anything that begins with an underscore (but now
      * two underscores)
      */
-    private Map<String, Object> getVertexMeta(Vertex item, EntityClass type, int depth, boolean lite) {
+    private Map<String, Object> getVertexMeta(Vertex item) {
         Map<String, Object> data = Maps.newHashMap();
         for (String key : item.getPropertyKeys()) {
             if (!key.startsWith("__") && key.startsWith("_")) {
@@ -487,8 +496,8 @@ public final class Serializer {
         return data;
     }
 
-    private Map<String,Object> getVertexData(Vertex item) {
-        Map<String,Object> data = Maps.newHashMap();
+    private Map<String, Object> getVertexData(Vertex item) {
+        Map<String, Object> data = Maps.newHashMap();
         for (String key : item.getPropertyKeys()) {
             data.put(key, item.getProperty(key));
         }
@@ -498,10 +507,6 @@ public final class Serializer {
     /**
      * Run a callback every time a node in a subtree is encountered, excepting
      * the top-level node.
-     *
-     * @param item
-     * @param depth
-     * @param cb
      */
     private <T extends Frame> void traverseSubtree(T item, int depth,
             final TraversalCallback cb) {

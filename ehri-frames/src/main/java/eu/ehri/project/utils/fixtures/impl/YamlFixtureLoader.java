@@ -146,7 +146,7 @@ public class YamlFixtureLoader implements FixtureLoader {
             for (Object data : yaml.loadAll(yamlStream)) {
                 for (Object node : (List<?>) data) {
                     if (node instanceof Map) {
-                        logger.debug("Importing node: {}", node);
+                        logger.trace("Importing node: {}", node);
                         importNode(links, (Map<String, Object>) node);
                     }
                 }
@@ -154,9 +154,9 @@ public class YamlFixtureLoader implements FixtureLoader {
 
             // Finally, go through and wire up all the non-dependent
             // relationships
-            logger.debug("Linking data...");
+            logger.trace("Linking data...");
             for (Entry<Vertex, ListMultimap<String, String>> entry : links.entrySet()) {
-                logger.debug("Setting links for: {}", entry.getKey());
+                logger.trace("Setting links for: {}", entry.getKey());
                 Vertex src = entry.getKey();
                 ListMultimap<String, String> rels = entry.getValue();
                 for (String relname : rels.keySet()) {
@@ -180,7 +180,7 @@ public class YamlFixtureLoader implements FixtureLoader {
             }
         }
         if (!found) {
-            logger.debug(String.format(" - %s -[%s]-> %s", src, dst,
+            logger.trace(String.format(" - %s -[%s]-> %s", src, dst,
                     relname));
             graph.addEdge(null, src, dst, relname);
         }
@@ -208,7 +208,7 @@ public class YamlFixtureLoader implements FixtureLoader {
         Bundle entityBundle = createBundle(id, isa, nodeData,
                 getDependentRelations(nodeRels));
         BundleDAO persister = new BundleDAO(graph);
-        logger.debug("Creating node with id: {}", id);
+        logger.trace("Creating node with id: {}", id);
         Mutation<Frame> frame = persister.createOrUpdate(entityBundle,
                 Frame.class);
 

@@ -151,7 +151,7 @@ public final class BundleDAO {
                     e);
         }
     }
-
+    
     /**
      * Insert a bundle and save its dependent items.
      *

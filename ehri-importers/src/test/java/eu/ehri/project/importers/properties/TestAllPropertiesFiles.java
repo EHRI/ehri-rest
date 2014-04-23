@@ -69,6 +69,12 @@ public class TestAllPropertiesFiles {
     public void testEadXmlProperties() {
         assertTrue(p.check(new XmlImportProperties("icaatom.properties"), EntityClass.DOCUMENT_DESCRIPTION));
     }
+    @Test
+    public void testWp2EadXmlProperties() {
+        String propfile = "wp2ead.properties";
+        logger.debug(propfile);
+        assertTrue(p.check(new XmlImportProperties(propfile), EntityClass.DOCUMENT_DESCRIPTION));
+    }
 
     @Test
     public void testSkosXmlProperties() {
