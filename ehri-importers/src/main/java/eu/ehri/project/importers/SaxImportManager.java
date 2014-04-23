@@ -7,6 +7,7 @@ import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.exceptions.InvalidXmlDocument;
 import eu.ehri.project.importers.exceptions.InvalidInputFormatError;
 import eu.ehri.project.importers.properties.XmlImportProperties;
+import eu.ehri.project.models.VirtualUnit;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.base.PermissionScope;
@@ -37,6 +38,7 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
     private Class<? extends AbstractImporter> importerClass;
     Class<? extends SaxXmlHandler> handlerClass;
     private XmlImportProperties properties;
+    private VirtualUnit virtualcollection;
 
     /**
      * Constructor.
@@ -62,12 +64,10 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
     public SaxImportManager(FramedGraph<? extends TransactionalGraph> framedGraph,
             final PermissionScope permissionScope, final Actioner actioner,
             Class<? extends AbstractImporter> importerClass, Class<? extends SaxXmlHandler> handlerClass, XmlImportProperties properties) {
-        super(framedGraph, permissionScope, actioner);
-        this.importerClass = importerClass;
-        this.handlerClass = handlerClass;
+        this(framedGraph, permissionScope, actioner, importerClass, handlerClass);
         this.properties=properties;
     }
-
+//
     /**
      * Import XML from the given InputStream, as part of the given action.
      *
@@ -87,6 +87,14 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
         try {
             importer = importerClass.getConstructor(FramedGraph.class, PermissionScope.class,
                     ImportLog.class).newInstance(framedGraph, permissionScope, log);
+            
+            if(importerClass.equals(VirtualCollectionEadImporter.class)){
+                if(virtualcollection == null)
+                    logger.error("this importer needs a virtualcollection to import into");
+                else{
+                    ((VirtualCollectionEadImporter)importer).setVirtualCollection(virtualcollection);
+                }
+            }
             logger.debug("importer of class {}", importer.getClass());
             importer.addCreationCallback(new ImportCallback() {
                 public void itemImported(AccessibleEntity item) {
@@ -147,5 +155,10 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
             logger.error("SAXException: " + e.getMessage());
             throw new InputParseError(e);
         }
+    }
+
+    
+    public void setVirtualCollection(VirtualUnit virtualcollection) {
+        this.virtualcollection=virtualcollection;
     }
 }

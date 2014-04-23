@@ -10,53 +10,38 @@ import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
-import eu.ehri.project.importers.AbstractImporter;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.SaxImportManager;
-import eu.ehri.project.importers.SaxXmlHandler;
+import eu.ehri.project.importers.VirtualCollectionEadHandler;
+import eu.ehri.project.importers.VirtualCollectionEadImporter;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.UserProfile;
+import eu.ehri.project.models.VirtualUnit;
 import eu.ehri.project.models.base.PermissionScope;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.Option;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.Option;
 
 /**
  *
  * @author linda
  */
-public abstract class ImportCommand extends BaseCommand implements Command{
-    protected Class<? extends SaxXmlHandler> handler;
-    protected Class<? extends AbstractImporter> importer;
-    
-    public ImportCommand(Class<? extends SaxXmlHandler> handler, Class<? extends AbstractImporter> importer){
-        this.handler = handler;
-        this.importer = importer;
-    }
-    
-    @Override
+public class VirtualCollectionEadImport extends EadImport{
+    final static String NAME = "virtualcollection-ead-import";
+	
+	public VirtualCollectionEadImport() {
+		super(VirtualCollectionEadHandler.class, VirtualCollectionEadImporter.class);
+	}
+        
+         @Override
     protected void setCustomOptions() {
-        options.addOption(new Option("scope", true,
-                "Identifier of scope to import into, i.e. repository"));
-        options.addOption(new Option("F", "files-from", true,
-                "Read list of input files from another file (or standard input, if given '-')"));
-        options.addOption(new Option("user", true,
-                "Identifier of user to import as"));
-        options.addOption(new Option("tolerant", false,
-                "Don't error if a file is not valid."));
-        options.addOption(new Option("log", true,
-                "Log message for action."));
-        options.addOption(new Option("properties", true,
-                "Provide another property file (default depends on HandlerClass)"));
-    }
-    
-     @Override
+        super.setCustomOptions();
+        options.addOption(new Option("vc", true,
+                "Identifier of virtual collection to import into, i.e. virtual unit"));
+         }
+         
+        @Override
     public int execWithOptions(final FramedGraph<? extends TransactionalGraph> graph,
             CommandLine cmdLine) throws Exception {
 
@@ -86,20 +71,30 @@ public abstract class ImportCommand extends BaseCommand implements Command{
             if (cmdLine.hasOption("scope")) {
                 scope = manager.getFrame(cmdLine.getOptionValue("scope"), PermissionScope.class);
             }
-
+            
             // Find the user
             UserProfile user = manager.getFrame(cmdLine.getOptionValue("user"),
                     UserProfile.class);
-            
-            ImportLog log;
 
+            SaxImportManager importmanager;
             if (cmdLine.hasOption("properties")) {
                 XmlImportProperties properties = new XmlImportProperties(cmdLine.getOptionValue("properties"));
-                log = new SaxImportManager(graph, scope, user, importer, handler, properties).setTolerant(cmdLine.hasOption("tolerant")).importFiles(filePaths, logMessage);
+                importmanager = new SaxImportManager(graph, scope, user, importer, handler, properties);
             } else {
-                log = new SaxImportManager(graph, scope, user, importer, handler).setTolerant(cmdLine.hasOption("tolerant")).importFiles(filePaths, logMessage);
+                importmanager = new SaxImportManager(graph, scope, user, importer, handler);
+            }
+            /* this is the diff with the ImportCommand */
+            
+            // Find the virtual unit this ead should be imported into
+            VirtualUnit virtualcollection;
+            if (cmdLine.hasOption("virtualcollection")) {
+                virtualcollection = manager.getFrame(cmdLine.getOptionValue("virtualcollection"), VirtualUnit.class);
+                importmanager.setVirtualCollection(virtualcollection);
             }
             
+            importmanager.setTolerant(cmdLine.hasOption("tolerant"));
+            ImportLog log = importmanager.importFiles(filePaths, logMessage);
+
             System.out.println("Import completed. Created: " + log.getCreated()
                     + ", Updated: " + log.getUpdated() + ", Unchanged: " + log.getUnchanged());
             if (log.getErrored() > 0) {
@@ -115,26 +110,8 @@ public abstract class ImportCommand extends BaseCommand implements Command{
         }
         return 0;
     }
+            
+    
+             
 
-    /**
-     * Read a set of file paths from an input, either a file or standard in
-     * if given the path '-'.
-     * @param listFile
-     * @param filePaths
-     * @throws Exception
-     */
-    protected void getPathsFromFile(String listFile, List<String> filePaths) throws Exception {
-        InputStreamReader reader = listFile.contentEquals("-")
-                ? new InputStreamReader(System.in)
-                : new FileReader(new File(listFile));
-        BufferedReader br = new BufferedReader(reader);
-        try {
-            String file = null;
-            while ((file = br.readLine()) != null) {
-                filePaths.add(file);
-            }
-        } finally {
-            br.close();
-        }
-    }
 }

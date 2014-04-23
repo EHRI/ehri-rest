@@ -37,20 +37,24 @@ import org.slf4j.LoggerFactory;
 
 /**
  *
+ * imports an ead file and not only constructs the DocumentaryUnits and DocumentsDescription for it, as usual, but a;so a VirtualUnit structure mirroring the DocUnits.
+ * These VirtualUnits link to the DocDescs and function as the target of the constructed Links.
+ * 
  * @author linda
  */
-public class Wp2EadImporter extends IcaAtomEadImporter {
+public class VirtualCollectionEadImporter extends IcaAtomEadImporter {
 
-    private static final Logger logger = LoggerFactory.getLogger(Wp2EadImporter.class);
+    private static final Logger logger = LoggerFactory.getLogger(VirtualCollectionEadImporter.class);
     private final Accessor userProfile;
-    public static final String WP2AUTHOR = "EHRI - Terezin Research Guide";
+    public static final String WP2AUTHOR = "EHRI";
     public static final String PROPERTY_AUTHOR = "authors";
+    private VirtualUnit virtualCollection;
 
     
     private List<String> idPath;
     public static final String VIRTUAL_PREFIX = "virtual";
     
-    public Wp2EadImporter(FramedGraph<Neo4jGraph> framedGraph, PermissionScope permissionScope, ImportLog log) {
+    public VirtualCollectionEadImporter(FramedGraph<Neo4jGraph> framedGraph, PermissionScope permissionScope, ImportLog log) {
         super(framedGraph, permissionScope, log);
         try {
             userProfile = manager.getFrame(log.getActioner().getId(), Accessor.class);
@@ -102,8 +106,8 @@ public class Wp2EadImporter extends IcaAtomEadImporter {
         virtualUnitBundle.withRelation(Ontology.VC_DESCRIBED_BY, descBundle);
         Mutation<VirtualUnit> mutation = persister.createOrUpdate(virtualUnitBundle, VirtualUnit.class);
         VirtualUnit virtualUnit = mutation.getNode();
-        //TODO: what is the permissionscope for this virtualcollection?
-//        virtualUnit.setPermissionScope((PermissionScope)userProfile);
+        logger.debug((virtualCollection == null) + " virtual collection ");
+        virtualUnit.setPermissionScope(virtualCollection);
         
         //Try to resolve the undetermined relationships
         //we can only create the annotations after the DocumentaryUnit and its Description have been added to the graph,
@@ -137,9 +141,9 @@ public class Wp2EadImporter extends IcaAtomEadImporter {
                                 concept.addLink(link);
                                 link.addLinkBody(rel);
                             } catch (PermissionDenied ex) {
-                                java.util.logging.Logger.getLogger(Wp2EadImporter.class.getName()).log(Level.SEVERE, null, ex);
+                                java.util.logging.Logger.getLogger(VirtualCollectionEadImporter.class.getName()).log(Level.SEVERE, null, ex);
                             } catch (IntegrityError ex) {
-                                java.util.logging.Logger.getLogger(Wp2EadImporter.class.getName()).log(Level.SEVERE, null, ex);
+                                java.util.logging.Logger.getLogger(VirtualCollectionEadImporter.class.getName()).log(Level.SEVERE, null, ex);
                             }
 
                         }
@@ -152,5 +156,9 @@ public class Wp2EadImporter extends IcaAtomEadImporter {
                 }
             }
         }
+    }
+
+    void setVirtualCollection(VirtualUnit virtualcollection) {
+        this.virtualCollection=virtualcollection;
     }
 }

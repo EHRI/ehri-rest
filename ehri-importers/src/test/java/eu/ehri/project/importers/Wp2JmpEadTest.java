@@ -10,6 +10,7 @@ import eu.ehri.project.models.DocumentDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Link;
 import eu.ehri.project.models.Repository;
+import eu.ehri.project.models.VirtualUnit;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.events.SystemEvent;
 import java.io.InputStream;
@@ -45,8 +46,12 @@ public class Wp2JmpEadTest extends AbstractImporterTest {
 
         int count = getNodeCount(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        XmlImportManager importManager = new SaxImportManager(graph, agent, validUser, Wp2EadImporter.class, Wp2EadHandler.class)
-                .setTolerant(Boolean.TRUE);
+        SaxImportManager importManager = new SaxImportManager(graph, agent, validUser, VirtualCollectionEadImporter.class, VirtualCollectionEadHandler.class);
+        
+        importManager.setTolerant(Boolean.TRUE);
+        VirtualUnit virtualcollection = graph.frame(getVertexByIdentifier(graph, "vc1"), VirtualUnit.class);
+        importManager.setVirtualCollection(virtualcollection);
+        
         ImportLog log = importManager.importFile(ios, logMessage);
 
         printGraph(graph);
@@ -108,7 +113,7 @@ public class Wp2JmpEadTest extends AbstractImporterTest {
         
         // Check the author of the description
         for (DocumentDescription d : c1.getDocumentDescriptions()){
-            assertEquals(Wp2EadImporter.WP2AUTHOR, d.asVertex().getProperty(Wp2EadImporter.PROPERTY_AUTHOR));
+            assertEquals(VirtualCollectionEadImporter.WP2AUTHOR, d.asVertex().getProperty(VirtualCollectionEadImporter.PROPERTY_AUTHOR));
         }
 
         // Check the importer is Idempotent

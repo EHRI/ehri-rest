@@ -18,7 +18,7 @@ import static eu.ehri.project.definitions.Ontology.*;
 
 @EntityType(EntityClass.USER_PROFILE)
 public interface UserProfile extends Accessor, AccessibleEntity, IdentifiableEntity,
-        Annotator, Actioner, NamedEntity, PermissionScope {
+        Annotator, Actioner, NamedEntity {
 
     public static String FOLLOWER_COUNT = "_followers";
     public static String FOLLOWING_COUNT = "_following";
@@ -55,6 +55,7 @@ public interface UserProfile extends Accessor, AccessibleEntity, IdentifiableEnt
     public Iterable<Link> getLinks();
 
     @Adjacency(label = Ontology.ANNOTATOR_HAS_ANNOTATION)
+    @Override
     public Iterable<Annotation> getAnnotations();
 
     @JavaHandler
@@ -90,6 +91,7 @@ public interface UserProfile extends Accessor, AccessibleEntity, IdentifiableEnt
                     gremlin().start(item).in(USER_WATCHING_ITEM), WATCHED_COUNT);
         }
 
+        @Override
         public void addFollowing(final UserProfile user) {
             if (!isFollowing(user)) {
                 it().addEdge(USER_FOLLOWS_USER, user.asVertex());
@@ -97,6 +99,7 @@ public interface UserProfile extends Accessor, AccessibleEntity, IdentifiableEnt
             }
         }
 
+        @Override
         public void removeFollowing(final UserProfile user) {
             for (Edge e : it().getEdges(Direction.OUT, USER_FOLLOWS_USER)) {
                 if (e.getVertex(Direction.IN).equals(user.asVertex())) {
@@ -106,6 +109,7 @@ public interface UserProfile extends Accessor, AccessibleEntity, IdentifiableEnt
             updateFollowCounts(it(), user.asVertex());
         }
 
+        @Override
         public boolean isFollowing(final UserProfile otherUser) {
             return gremlin().out(USER_FOLLOWS_USER).filter(new PipeFunction<Vertex, Boolean>() {
                 @Override
@@ -115,6 +119,7 @@ public interface UserProfile extends Accessor, AccessibleEntity, IdentifiableEnt
             }).hasNext();
         }
 
+        @Override
         public boolean isFollower(final UserProfile otherUser) {
             return gremlin().in(USER_FOLLOWS_USER).filter(new PipeFunction<Vertex, Boolean>() {
                 @Override
@@ -124,6 +129,7 @@ public interface UserProfile extends Accessor, AccessibleEntity, IdentifiableEnt
             }).hasNext();
         }
 
+        @Override
         public void addWatching(final Watchable item) {
             if (!isWatching(item)) {
                 it().addEdge(USER_WATCHING_ITEM, item.asVertex());
@@ -131,6 +137,7 @@ public interface UserProfile extends Accessor, AccessibleEntity, IdentifiableEnt
             }
         }
 
+        @Override
         public void removeWatching(final Watchable item) {
             for (Edge e : it().getEdges(Direction.OUT, USER_WATCHING_ITEM)) {
                 if (e.getVertex(Direction.IN).equals(item.asVertex())) {
@@ -140,6 +147,7 @@ public interface UserProfile extends Accessor, AccessibleEntity, IdentifiableEnt
             updateWatchCount(it(), item.asVertex());
         }
 
+        @Override
         public boolean isWatching(final Watchable item) {
             return gremlin().out(USER_WATCHING_ITEM).filter(new PipeFunction<Vertex, Boolean>() {
                 @Override
@@ -149,6 +157,7 @@ public interface UserProfile extends Accessor, AccessibleEntity, IdentifiableEnt
             }).hasNext();
         }
 
+        @Override
         public Iterable<UserProfile> coGroupMembers() {
             return frameVertices(gremlin().as("n")
                     .out(Ontology.ACCESSOR_BELONGS_TO_GROUP)
