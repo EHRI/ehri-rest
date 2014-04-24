@@ -4,10 +4,8 @@
  */
 package eu.ehri.project.importers;
 
+import eu.ehri.project.acl.SystemScope;
 import eu.ehri.project.importers.properties.XmlImportProperties;
-import eu.ehri.project.models.DocumentDescription;
-import eu.ehri.project.models.DocumentaryUnit;
-import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.VirtualUnit;
 import eu.ehri.project.models.base.Description;
 import java.io.InputStream;
@@ -36,13 +34,14 @@ public class DansEadAsVirtualUnitTest extends AbstractImporterTest{
     @Test
     public void testImportItemsT() throws Exception {
 
-         Repository agent = manager.getFrame(TEST_REPO, Repository.class);
-        final String logMessage = "Importing a single EAD";
+//         UserProfile agent = manager.getFrame("linda", UserProfile.class);
+        final String logMessage = "Importing a single EAD as VirtualUnits";
 
         int origCount = getNodeCount(graph);
         System.out.println(origCount);
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        XmlImportManager importManager = new SaxImportManager(graph, agent, validUser, EadAsVirtualUnitImporter.class, IcaAtomEadHandler.class, new XmlImportProperties("dansead.properties"))
+        //no scope given for Virtual Collections, so use SystemScope.getInstance() to get the system scope
+        XmlImportManager importManager = new SaxImportManager(graph, SystemScope.getInstance(), validUser, EadAsVirtualUnitImporter.class, IcaAtomEadHandler.class, new XmlImportProperties("dansead.properties"))
                 .setTolerant(Boolean.TRUE);
         ImportLog log = importManager.importFile(ios, logMessage);
         printGraph(graph);

@@ -95,8 +95,8 @@ public class EadImportIntoVirtualCollection extends EadImport {
 
             // Find the virtual unit this ead should be imported into
             VirtualUnit virtualcollection;
-            if (cmdLine.hasOption("virtualcollection")) {
-                virtualcollection = manager.getFrame(cmdLine.getOptionValue("virtualcollection"), VirtualUnit.class);
+            if (cmdLine.hasOption("vc")) {
+                virtualcollection = manager.getFrame(cmdLine.getOptionValue("vc"), VirtualUnit.class);
                 importmanager.setVirtualCollection(virtualcollection);
             }
             
