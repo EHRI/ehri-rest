@@ -159,7 +159,7 @@ public class VirtualUnitRestClientTest extends BaseRestClientTest {
     public void testCountVirtualUnits() throws Exception {
         Long data = getEntityCount(
                 Entities.VIRTUAL_UNIT, getAdminUserProfileId());
-        assertEquals(Long.valueOf(3), data);
+        assertEquals(Long.valueOf(4), data);
     }
 
     @Test
