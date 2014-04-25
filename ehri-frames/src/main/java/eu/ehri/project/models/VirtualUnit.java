@@ -6,6 +6,8 @@ import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.modules.javahandler.JavaHandler;
 import com.tinkerpop.frames.modules.javahandler.JavaHandlerContext;
 import com.tinkerpop.gremlin.java.GremlinPipeline;
+import com.tinkerpop.pipes.PipeFunction;
+import com.tinkerpop.pipes.branch.LoopPipe;
 import com.tinkerpop.pipes.util.Pipeline;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.annotations.EntityType;
@@ -78,6 +80,10 @@ public interface VirtualUnit extends AccessibleEntity, ItemHolder,
     @Adjacency(label = Ontology.DESCRIPTION_FOR_ENTITY, direction = Direction.IN)
     public Iterable<DocumentDescription> getVirtualDescriptions();
 
+    @Fetch(Ontology.DOC_HELD_BY_REPOSITORY)
+    @JavaHandler
+    public Iterable<Repository> getRepositories();
+
     /**
      * Implementation of complex methods.
      */
@@ -141,6 +147,25 @@ public interface VirtualUnit extends AccessibleEntity, ItemHolder,
 
             return frameVertices(gremlin().in(Ontology.VC_IS_PART_OF).cast(Vertex.class).copySplit(gremlin(), otherPipe)
                     .fairMerge().cast(Vertex.class));
+        }
+
+        public Iterable<Repository> getRepositories() {
+            Pipeline<Vertex,Vertex> otherPipe = gremlin()
+                    .out(Ontology.VC_DESCRIBED_BY)
+                    .out(Ontology.DESCRIPTION_FOR_ENTITY)
+                    .as("n").out(Ontology.DOC_IS_CHILD_OF)
+                    .loop("n", JavaHandlerUtils.defaultMaxLoops, new PipeFunction<LoopPipe.LoopBundle<Vertex>, Boolean>() {
+                        @Override
+                        public Boolean compute(LoopPipe.LoopBundle<Vertex> vertexLoopBundle) {
+                            return !vertexLoopBundle.getObject().getVertices(Direction.OUT,
+                                    Ontology.DOC_IS_CHILD_OF).iterator().hasNext();
+                        }
+                    });
+
+            GremlinPipeline<Vertex,Vertex> out = gremlin().cast(Vertex.class).copySplit(gremlin(), otherPipe)
+                    .exhaustMerge().out(Ontology.DOC_HELD_BY_REPOSITORY);
+
+            return frameVertices(out);
         }
 
         public Iterable<VirtualUnit> getAncestors() {
