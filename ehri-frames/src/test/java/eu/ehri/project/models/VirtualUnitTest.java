@@ -121,11 +121,4 @@ public class VirtualUnitTest extends AbstractFixtureTest {
         VirtualUnit vu1 = manager.getFrame("vu1", VirtualUnit.class);
         assertEquals(Lists.newArrayList(cd1), Lists.newArrayList(vu1.getReferencedDescriptions()));
     }
-
-    @Test
-    public void testGetCollection() throws Exception {
-        DocumentDescription cd2 = manager.getFrame("cd2", DocumentDescription.class);
-        VirtualUnit vc1 = manager.getFrame("vc1", VirtualUnit.class);
-        assertEquals(Lists.newArrayList(vc1), Lists.newArrayList(cd2.getVirtualCollections()));
-    }
 }

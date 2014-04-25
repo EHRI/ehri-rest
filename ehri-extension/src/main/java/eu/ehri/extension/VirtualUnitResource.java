@@ -6,8 +6,10 @@ import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.VirtualUnit;
 import eu.ehri.project.models.base.Accessor;
+import eu.ehri.project.models.base.DescribedEntity;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.views.Query;
+import eu.ehri.project.views.VirtualUnitViews;
 import eu.ehri.project.views.impl.LoggingCrudViews;
 import org.neo4j.graphdb.GraphDatabaseService;
 
@@ -24,8 +26,11 @@ import java.util.List;
 public class VirtualUnitResource extends
         AbstractAccessibleEntityResource<VirtualUnit> {
 
+    private VirtualUnitViews vuViews;
+
     public VirtualUnitResource(@Context GraphDatabaseService database) {
         super(database, VirtualUnit.class);
+        vuViews = new VirtualUnitViews(graph);
     }
 
     @GET
@@ -187,6 +192,23 @@ public class VirtualUnitResource extends
         } finally {
             cleanupTransaction();
         }
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/for/{id:.+}")
+    public StreamingOutput pageVirtualUnitsFor(@PathParam("id") String id,
+            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
+            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(SORT_PARAM) List<String> order,
+            @QueryParam(FILTER_PARAM) List<String> filters)
+            throws AccessDenied, ItemNotFound, BadRequester {
+        DescribedEntity item = manager.getFrame(id, DescribedEntity.class);
+        Iterable<VirtualUnit> units = vuViews.getVirtualCollections(item, getRequesterUserProfile());
+        Query.Page<VirtualUnit> page = new Query<VirtualUnit>(graph, VirtualUnit.class)
+                .filter(filters).setOffset(offset).setLimit(limit).orderBy(order)
+                .page(units, getRequesterUserProfile());
+        return streamingPage(page);
     }
 
     // Helpers
