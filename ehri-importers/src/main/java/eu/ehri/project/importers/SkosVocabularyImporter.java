@@ -28,7 +28,6 @@ import java.io.File;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * @author Mike Bryant (http://github.com/mikesname)
@@ -41,6 +40,8 @@ public class SkosVocabularyImporter {
     private final Actioner actioner;
     private final Vocabulary vocabulary;
     private final BundleDAO dao;
+
+    public static final String DEFAULT_LANG = "eng";
 
     public SkosVocabularyImporter(FramedGraph<? extends TransactionalGraph> framedGraph, Actioner actioner,
             Vocabulary vocabulary) {
@@ -60,8 +61,6 @@ public class SkosVocabularyImporter {
 
             SKOSManager manager = new SKOSManager();
             SKOSDataset vocab = manager.loadDatasetFromPhysicalURI(dataFile.toURI());
-
-            Set<SKOSConceptScheme> skosConceptSchemes = vocab.getSKOSConceptSchemes();
 
             Map<URI, Concept> imported = Maps.newHashMap();
 
@@ -150,11 +149,15 @@ public class SkosVocabularyImporter {
 
     private List<Bundle> getDescriptions(SKOSConcept skosConcept, SKOSDataset dataset) {
 
-        Map<SKOSRDFVocabulary, String> props = ImmutableMap.of(
-                SKOSRDFVocabulary.ALTLABEL, Ontology.CONCEPT_ALTLABEL,
-                SKOSRDFVocabulary.DEFINITION, Ontology.CONCEPT_DEFINITION,
-                SKOSRDFVocabulary.SCOPENOTE, Ontology.CONCEPT_SCOPENOTE
-        );
+        Map<SKOSRDFVocabulary, String> props = ImmutableMap.<SKOSRDFVocabulary,String>builder()
+               .put(SKOSRDFVocabulary.PREFLABEL, Ontology.CONCEPT_ALTLABEL)
+               .put(SKOSRDFVocabulary.ALTLABEL, Ontology.CONCEPT_ALTLABEL)
+               .put(SKOSRDFVocabulary.HIDDENLABEL, Ontology.CONCEPT_HIDDENLABEL)
+               .put(SKOSRDFVocabulary.DEFINITION, Ontology.CONCEPT_DEFINITION)
+               .put(SKOSRDFVocabulary.SCOPENOTE, Ontology.CONCEPT_SCOPENOTE)
+               .put(SKOSRDFVocabulary.NOTE, Ontology.CONCEPT_NOTE)
+               .put(SKOSRDFVocabulary.EDITORIALNOTE, Ontology.CONCEPT_EDITORIAL_NOTE)
+               .build();
 
         List<Bundle> descriptions = Lists.newArrayList();
 
@@ -164,7 +167,9 @@ public class SkosVocabularyImporter {
 
             SKOSLiteral literalPrefName = prefLabel.getAnnotationValueAsConstant();
             String lang = literalPrefName.getAsSKOSUntypedLiteral().getLang();
-            String languageCode = Helpers.iso639DashTwoCode(lang);
+            String languageCode = (lang == null || lang.trim().isEmpty())
+                    ? DEFAULT_LANG
+                    : Helpers.iso639DashTwoCode(lang);
 
             builder.addDataValue(Ontology.NAME_KEY, literalPrefName.getLiteral())
                     .addDataValue(Ontology.LANGUAGE, languageCode);
@@ -174,8 +179,11 @@ public class SkosVocabularyImporter {
                 for (SKOSAnnotation propVal : skosConcept.getSKOSAnnotationsByURI(dataset,
                         prop.getKey().getURI())) {
                     SKOSLiteral literalProp = propVal.getAnnotationValueAsConstant();
-                    if (literalProp.getAsSKOSUntypedLiteral().hasLang() &&
-                            literalProp.getAsSKOSUntypedLiteral().getLang().equals(lang)) {
+                    String propLang = literalProp.getAsSKOSUntypedLiteral().getLang();
+                    String propLanguageCode = (propLang == null || propLang.trim().isEmpty())
+                            ? DEFAULT_LANG
+                            : Helpers.iso639DashTwoCode(propLang);
+                    if (propLanguageCode.equals(languageCode)) {
                         values.add(literalProp.getLiteral());
                     }
                 }
