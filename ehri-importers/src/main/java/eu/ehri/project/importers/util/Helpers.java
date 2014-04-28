@@ -20,7 +20,7 @@ public class Helpers {
             .put("arm", "hye") // armenian
             .put("baq", "eus") // basque
             .put("ger", "deu") // german
-            .put("dut", "nlb") // dutch
+            .put("dut", "nld") // dutch
             .put("rum", "ron") // romanian
             .put("mac", "mkd") // macedonian
             .put("slo", "slk") // slovak

@@ -1,0 +1,95 @@
+<?xml version="1.0"?>
+<!DOCTYPE ead SYSTEM "ead/ead.dtd" ><?xml-stylesheet type="text/css" href="eadprint.css"?>
+<?xml-stylesheet type="text/xsl" href="eadprint-su.xsl"?>
+<ead>
+     <eadheader countryencoding="iso3166-1" langencoding="iso639-2b" dateencoding="iso8601"
+          relatedencoding="MARC21">
+          <eadid countrycode="CZ" identifier="COLLECTION.JMP.SHOAH/T">COLLECTION.JMP.SHOAH/T</eadid>
+          <filedesc>
+               <titlestmt>
+                    <titleproper>Terezín/Theresienstadt</titleproper>
+                    <author>Shoah History Department, Jewish Museum in Prague</author>
+               </titlestmt>
+               <publicationstmt>
+                    <date normal="20131213">13. 12. 2013</date>
+               </publicationstmt>
+          </filedesc>
+     </eadheader>
+     <archdesc level="collection">
+          <did>
+               <unittitle>Terezín/Theresienstadt</unittitle>
+               <unitid>COLLECTION.JMP.SHOAH/T</unitid>
+          </did>
+          <scopecontent>
+               <p> The archive records from the Terezín ghetto (24 November 1941 – 8 May 1945, and
+                    from the period after the liberation) are preserved only in fragments. </p>
+          </scopecontent>
+          <dsc>
+               <c01 level="subfonds">
+                    <did>
+                         <unittitle>Documents</unittitle>
+                         <unitid>COLLECTION.JMP.SHOAH/T/2</unitid>
+                    </did>
+                    <c02>
+                         <did>
+                              <unittitle>Documents from the period of occupation</unittitle>
+                              <unitid>COLLECTION.JMP.SHOAH/T/2/A</unitid>
+                         </did>
+                         <c03>
+                              <did>
+                                   <unittitle>Preparations for implementing the plan for the Final
+                                        Solution to the Jewish Question in the Protectorate of
+                                        Bohemia and Moravia.</unittitle>
+                                   <unitid>COLLECTION.JMP.SHOAH/T/2/A/1</unitid>
+                              </did>
+                              <c04>
+                                   <did>
+                                        <unittitle>Considerations about setting up a ghetto for Jews
+                                             in Protectorate of Bohemia and Moravia</unittitle>
+                                        <unitid>COLLECTION.JMP.SHOAH/T/2/A/1a</unitid>
+                                   </did>
+                                   <c05>
+                                        <did>
+                                             <unittitle>Statistics relating to Jewish women aged
+                                                  20-45 years</unittitle>
+                                             <unitid>COLLECTION.JMP.SHOAH/T/2/A/1a/028</unitid>
+                                        </did>
+                                        <c06>
+                                             <did>
+                                                  <unittitle>Statistics relating to Jewish women
+                                                  aged 20-45 years in the Protectorate</unittitle>
+                                                  <unitid>DOCUMENT.JMP.SHOAH/T/2/A/1a/028</unitid>
+                                                  <unitdate>September 21 1941</unitdate>
+                                                  <langmaterial label="Language(s)">
+                                                  <language langcode="ger">German</language>
+                                                  </langmaterial>
+                                                  <physdesc>
+                                                  <extent>2 Folio; 2 Pages</extent>
+                                                  </physdesc>
+                                             </did>
+                                             <dao linktype="simple" actuate="onrequest" show="new"
+                                                  href="http://collections.jewishmuseum.cz/index.php/Detail/Object/Show/object_id/5836"
+                                                  title="See online"/>
+                                             <controlaccess>
+                                                  <controlaccess>
+                                                  <head>Keywords</head>
+                                                  <subject source="terezin-terms"
+                                                  authfilenumber="KEYWORD.JMP.271">Women</subject>
+                                                  </controlaccess>
+                                                  <controlaccess>
+                                                  <head>Places</head>
+                                                  <geogname source="terezin-places"
+                                                  authfilenumber="PLACE.ČSÚ.554782">Praha</geogname>
+                                                  <geogname source="terezin-places"
+                                                  authfilenumber="PLACE.ČSÚ.582786">Brno</geogname>
+                                                  </controlaccess>
+                                             </controlaccess>
+                                        </c06>
+                                   </c05>
+                              </c04>
+                         </c03>
+                    </c02>
+               </c01>
+          </dsc>
+     </archdesc>
+</ead>

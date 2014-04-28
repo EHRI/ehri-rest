@@ -524,3 +524,45 @@
   relationships:
     inAuthoritativeSet: cvoc1
 
+--- # Virtual Units
+
+# Here we have a top-level 'collection' unit, with its own description
+# This contains a total of 3 unit items in a hierarchy, that each reference
+# other descriptions.
+- id: vc1
+  type: virtualUnit
+  data:
+    identifier: vc1
+  relationships:
+    hasAuthor: linda
+    describes:
+      - id: vcd1
+        type: documentDescription
+        data:
+          identifier: vcd1
+          name: Virtual Collection 1
+          languageCode: eng
+          scopeAndContent: Some description text for vc1
+
+- id: vu1
+  type: virtualUnit
+  data:
+    identifier: vu1
+  relationships:
+    isPartOf: vc1
+    isDescribedBy: cd1
+
+- id: vu2
+  type: virtualUnit
+  data:
+    identifier: vu2
+  relationships:
+    isPartOf: vu1
+    isDescribedBy: cd2
+
+- id: vu3  # NB: Not part of vu2 yet
+  type: virtualUnit
+  data:
+    identifier: vu3
+  relationships:
+    isDescribedBy: cd3

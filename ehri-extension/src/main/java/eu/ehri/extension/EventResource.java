@@ -167,10 +167,9 @@ public class EventResource extends AbstractAccessibleEntityResource<SystemEvent>
                     }
                 }
                 if (show.equals(SHOW_ALL) || show.equals(SHOW_FOLLOWS)) {
-                    for (Actioner e : event.getActioners()) {
-                        if (following.contains(e.getId())) {
-                            return true;
-                        }
+                    Actioner actioner = event.getActioner();
+                    if (actioner != null && following.contains(actioner.getId())) {
+                        return true;
                     }
                 }
                 return false;
@@ -241,12 +240,8 @@ public class EventResource extends AbstractAccessibleEntityResource<SystemEvent>
             pipe = pipe.filter(new PipeFunction<SystemEvent, Boolean>() {
                 @Override
                 public Boolean compute(SystemEvent event) {
-                    for (Actioner e : event.getActioners()) {
-                        if (users.contains(e.getId())) {
-                            return true;
-                        }
-                    }
-                    return false;
+                    Actioner actioner = event.getActioner();
+                    return actioner != null && users.contains(actioner.getId());
                 }
             });
         }

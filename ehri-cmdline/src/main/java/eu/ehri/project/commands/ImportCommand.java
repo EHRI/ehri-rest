@@ -14,6 +14,7 @@ import eu.ehri.project.importers.AbstractImporter;
 import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.SaxImportManager;
 import eu.ehri.project.importers.SaxXmlHandler;
+import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.PermissionScope;
 import org.apache.commons.cli.CommandLine;
@@ -51,6 +52,8 @@ public abstract class ImportCommand extends BaseCommand implements Command{
                 "Don't error if a file is not valid."));
         options.addOption(new Option("log", true,
                 "Log message for action."));
+        options.addOption(new Option("properties", true,
+                "Provide another property file (default depends on HandlerClass)"));
     }
     
      @Override
@@ -87,11 +90,15 @@ public abstract class ImportCommand extends BaseCommand implements Command{
             // Find the user
             UserProfile user = manager.getFrame(cmdLine.getOptionValue("user"),
                     UserProfile.class);
+            
+            ImportLog log;
 
-            ImportLog log = new SaxImportManager(graph, scope, user, importer, handler).setTolerant(cmdLine.hasOption
-                    ("tolerant"))
-            	.importFiles(filePaths, logMessage);
-            //ImportLog log = new SaxImportManager(graph, agent, validUser, EagImporter.class, EagHandler.class).importFile(ios, logMessage);
+            if (cmdLine.hasOption("properties")) {
+                XmlImportProperties properties = new XmlImportProperties(cmdLine.getOptionValue("properties"));
+                log = new SaxImportManager(graph, scope, user, importer, handler, properties).setTolerant(cmdLine.hasOption("tolerant")).importFiles(filePaths, logMessage);
+            } else {
+                log = new SaxImportManager(graph, scope, user, importer, handler).setTolerant(cmdLine.hasOption("tolerant")).importFiles(filePaths, logMessage);
+            }
             
             System.out.println("Import completed. Created: " + log.getCreated()
                     + ", Updated: " + log.getUpdated() + ", Unchanged: " + log.getUnchanged());

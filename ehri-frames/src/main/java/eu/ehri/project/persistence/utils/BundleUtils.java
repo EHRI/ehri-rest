@@ -261,7 +261,7 @@ public class BundleUtils {
                 relations.set(section.getIndex(),
                         mutateAttribute(subject, path.next(), op));
                 allRelations.putAll(section.getPath(), relations);
-                return bundle.withRelations(allRelations);
+                return bundle.replaceRelations(allRelations);
             } catch (IndexOutOfBoundsException e) {
                 throw new BundleIndexError(String.format(
                         "Relation index '%s[%s]' not found", section.getPath(),
@@ -309,7 +309,7 @@ public class BundleUtils {
                         setNode(subject, next, newNode));
             }
             allRelations.putAll(section.getPath(), relations);
-            return bundle.withRelations(allRelations);
+            return bundle.replaceRelations(allRelations);
         } catch (IndexOutOfBoundsException e) {
             throw new BundleIndexError(String.format(
                     "Relation index '%s[%s]' not found", next.current().getPath(),
@@ -351,7 +351,7 @@ public class BundleUtils {
             }
             if (!relations.isEmpty())
                 allRelations.putAll(section.getPath(), relations);
-            return bundle.withRelations(allRelations);
+            return bundle.replaceRelations(allRelations);
         } catch (IndexOutOfBoundsException e) {
             throw new BundleIndexError(String.format(
                     "Relation index '%s[%s]' not found", section.getPath(),
