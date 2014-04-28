@@ -22,10 +22,6 @@ import eu.ehri.project.models.utils.JavaHandlerUtils;
 @EntityType(EntityClass.SYSTEM_EVENT)
 public interface SystemEvent extends AccessibleEntity {
 
-    public static enum EventType {
-        lifecycleEvent, interactionEvent
-    }
-
     @Mandatory
     @Property(Ontology.EVENT_TIMESTAMP)
     public String getTimestamp();
@@ -39,7 +35,7 @@ public interface SystemEvent extends AccessibleEntity {
 
     @Fetch(Ontology.EVENT_HAS_ACTIONER)
     @JavaHandler
-    public Iterable<Actioner> getActioners();
+    public Actioner getActioner();
 
     @JavaHandler
     public Iterable<AccessibleEntity> getSubjects();
@@ -54,7 +50,7 @@ public interface SystemEvent extends AccessibleEntity {
     /**
      * Fetch the "scope" of this event, or the context in which a
      * given creation/modification/deletion event is happening.
-     * @return
+     * @return The event scope
      */
     @Fetch(value = Ontology.EVENT_HAS_SCOPE, ifDepth = 0)
     @Adjacency(label = Ontology.EVENT_HAS_SCOPE, direction = Direction.OUT)
@@ -95,15 +91,18 @@ public interface SystemEvent extends AccessibleEntity {
                 : null);
         }
 
-        public Iterable<Actioner> getActioners() {
-            return frameVertices(gremlin().in(Ontology.ENTITY_HAS_EVENT)
+        public Actioner getActioner() {
+            GremlinPipeline<Vertex, Vertex> actioners = gremlin().in(Ontology.ENTITY_HAS_EVENT)
                     .as("n").in(Ontology.ACTIONER_HAS_LIFECYCLE_ACTION)
                     .loop("n", JavaHandlerUtils.noopLoopFunc, new PipeFunction<LoopPipe.LoopBundle<Vertex>, Boolean>() {
                         @Override
                         public Boolean compute(LoopPipe.LoopBundle<Vertex> vertexLoopBundle) {
                             return isValidActioner(vertexLoopBundle.getObject());
                         }
-                    }));
+                    });
+            return (Actioner)(actioners.iterator().hasNext()
+                    ? frame(actioners.iterator().next())
+                    : null);
         }
 
         private boolean isValidActioner(Vertex vertex) {
