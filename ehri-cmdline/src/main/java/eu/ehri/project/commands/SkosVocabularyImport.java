@@ -5,13 +5,14 @@ import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.importers.SkosVocabularyImporter;
 import eu.ehri.project.importers.cvoc.SkosCoreCvocImporter;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
-import org.apache.commons.cli.ParseException;
 
+import java.io.File;
 import java.util.Map.Entry;
 
 /**
@@ -24,7 +25,7 @@ public class SkosVocabularyImport extends BaseCommand implements Command {
     /**
      * Constructor.
      *
-     * @throws ParseException
+     * @throws org.apache.commons.cli.ParseException
      */
     public SkosVocabularyImport() {
     }
@@ -86,9 +87,8 @@ public class SkosVocabularyImport extends BaseCommand implements Command {
             UserProfile user = manager.getFrame(cmdLine.getOptionValue("user"),
                     UserProfile.class);
 
-            SkosCoreCvocImporter importer = new SkosCoreCvocImporter(graph, user, vocabulary);
-            importer.setTolerant(cmdLine.hasOption("tolerant"));
-            ImportLog log = importer.importFile(filePath, logMessage);
+            SkosVocabularyImporter importer = new SkosVocabularyImporter(graph, user, vocabulary);
+            ImportLog log = importer.importFile(new File(filePath), logMessage);
             log.printReport();
             if (log.getErrored() > 0) {
                 System.out.println("Errors:");
