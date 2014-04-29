@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
+import org.xml.sax.ext.LexicalHandler;
 import org.xml.sax.helpers.DefaultHandler;
 
 import static eu.ehri.project.definitions.Ontology.LANGUAGE_OF_DESCRIPTION;
@@ -37,7 +38,7 @@ import static eu.ehri.project.definitions.Ontology.LANGUAGE_OF_DESCRIPTION;
  *
  * @author linda
  */
-public abstract class SaxXmlHandler extends DefaultHandler {
+public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(SaxXmlHandler.class);
     public static final String UNKNOWN = "UNKNOWN_";
@@ -47,11 +48,13 @@ public abstract class SaxXmlHandler extends DefaultHandler {
     protected final Stack<String> currentPath = new Stack<String>();
     protected final Stack<String> currentText = new Stack<String>();
 
+    protected String currentEntity = null;
+
     protected final AbstractImporter<Map<String, Object>> importer;
     protected final XmlImportProperties properties;
 
     protected int depth = 0;
-    
+
     /**
      * 
      */
@@ -78,6 +81,23 @@ public abstract class SaxXmlHandler extends DefaultHandler {
      */
     protected abstract boolean needToCreateSubNode(String qName);
 
+    @Override
+    public void startEntity(String name) {
+        currentEntity = name;
+    }
+
+    @Override
+    public void endEntity(String name) {
+        currentEntity = null;
+    }
+
+    @Override public void startDTD(String name,String publicId,String systemId) {}
+    @Override public void endDTD() {}
+    @Override public void comment(char[] ch, int start, int end) {}
+    @Override public void startCDATA() {}
+    @Override public void endCDATA() {}
+
+
     /**
      * Receive an opening tag. Initialise the current text to store the characters,
      * create a language map to hold descriptions in different languages,
@@ -88,7 +108,7 @@ public abstract class SaxXmlHandler extends DefaultHandler {
     public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
         // initialise the text holding space
     	currentText.push("");
-    	
+
     	// retrieve the language from the attributes and
     	// create a language map
         Optional<String> lang = languageAttribute(attributes);
@@ -114,10 +134,11 @@ public abstract class SaxXmlHandler extends DefaultHandler {
 
         // Store attributes that are listed in the .properties file
         for (int attr = 0; attr < attributes.getLength(); attr++) { // only certain attributes get stored
-            String attribute = withoutNamespace(attributes.getLocalName(attr));
+            String attribute = withoutNamespace(attributes.getQName(attr));
             if (properties.hasAttributeProperty(attribute)
                     && !properties.getAttributeProperty(attribute).equals(LANGUAGE_OF_DESCRIPTION)) {
-                putPropertyInCurrentGraph(getImportantPath(currentPath, "@" + properties.getAttributeProperty(attribute)), attributes.getValue(attr));
+                String path = getImportantPath(currentPath, "@" + properties.getAttributeProperty(attribute));
+                putPropertyInCurrentGraph(path, attributes.getValue(attr));
             }
         }
 
@@ -129,12 +150,12 @@ public abstract class SaxXmlHandler extends DefaultHandler {
      */
     @Override
     public void endElement(String uri, String localName, String qName) throws SAXException {
-        languagePrefix = null;
         if (languagePrefix == null) {
             putPropertyInCurrentGraph(getImportantPath(currentPath), currentText.pop());
         } else {
             putPropertyInGraph(languageMap.get(languagePrefix), getImportantPath(currentPath), currentText.pop());
         }
+
 
 
     }
@@ -209,10 +230,12 @@ public abstract class SaxXmlHandler extends DefaultHandler {
         if (data.trim().isEmpty()) {
             return;
         }
+
         // NB: Not trimming the string because this method is called
         // for chars either side of encoded entities, which means
         // that Foo &amp; Bar would end up as "Foo&Bar".
-        currentText.push((currentText.pop() + data).replaceAll("\\s+", " "));
+        String current = currentText.pop();
+        currentText.push((current + data).replaceAll("\\s+", " "));
     }
 
     /**

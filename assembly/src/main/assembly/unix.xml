@@ -56,6 +56,9 @@
                 <include>commons-cli:commons-cli</include>
                 <include>com.ibm.icu:icu4j</include>
                 <include>net.sourceforge.owlapi:owlapi-distribution</include>
+                <include>org.apache.jena:*</include>
+                <include>xerces:xercesImpl</include>
+                <include>xml-apis:xml-apis</include>
             </includes>
         </dependencySet>
     </dependencySets>
