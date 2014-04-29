@@ -31,7 +31,7 @@ public class Wp2KeywordsTest extends AbstractImporterTest {
         int count = getNodeCount(graph);
         int voccount = toList(vocabulary.getConcepts()).size();
         InputStream ios = ClassLoader.getSystemResourceAsStream(SKOS_FILE);
-        SkosVocabularyImporter importer = new SkosVocabularyImporter(graph, validUser, vocabulary);
+        JenaVocabularyImporter importer = new JenaVocabularyImporter(graph, validUser, vocabulary);
         importer.setTolerant(true);
         ImportLog log = importer.importFile(ios, logMessage);
         log.printReport();
