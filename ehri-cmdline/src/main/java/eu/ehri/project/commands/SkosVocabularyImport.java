@@ -5,14 +5,12 @@ import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.importers.ImportLog;
-import eu.ehri.project.importers.SkosVocabularyImporter;
-import eu.ehri.project.importers.cvoc.SkosCoreCvocImporter;
+import eu.ehri.project.importers.cvoc.SkosVocabularyImporter;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 
-import java.io.File;
 import java.util.Map.Entry;
 
 /**
@@ -24,8 +22,6 @@ public class SkosVocabularyImport extends BaseCommand implements Command {
 
     /**
      * Constructor.
-     *
-     * @throws org.apache.commons.cli.ParseException
      */
     public SkosVocabularyImport() {
     }
@@ -50,9 +46,8 @@ public class SkosVocabularyImport extends BaseCommand implements Command {
     @Override
     public String getUsage() {
         String sep = System.getProperty("line.separator");
-        String help = "Import a Skos file into the graph database, using the specified"
+        return "Import a Skos file into the graph database, using the specified"
                 + sep + "Vocabulary and User.";
-        return help;
     }
 
     /**
@@ -88,7 +83,7 @@ public class SkosVocabularyImport extends BaseCommand implements Command {
                     UserProfile.class);
 
             SkosVocabularyImporter importer = new SkosVocabularyImporter(graph, user, vocabulary);
-            ImportLog log = importer.importFile(new File(filePath), logMessage);
+            ImportLog log = importer.importFile(filePath, logMessage);
             log.printReport();
             if (log.getErrored() > 0) {
                 System.out.println("Errors:");

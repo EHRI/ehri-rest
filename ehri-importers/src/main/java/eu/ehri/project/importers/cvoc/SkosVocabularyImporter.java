@@ -1,4 +1,4 @@
-package eu.ehri.project.importers;
+package eu.ehri.project.importers.cvoc;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
@@ -9,6 +9,7 @@ import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.importers.ImportLog;
 import eu.ehri.project.importers.util.Helpers;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.Actioner;
@@ -23,7 +24,9 @@ import org.semanticweb.owlapi.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +45,8 @@ public class SkosVocabularyImporter {
     private final BundleDAO dao;
     private final OWLOntologyManager owlManager = OWLManager.createOWLOntologyManager();
     private final OWLDataFactory factory = owlManager.getOWLDataFactory();
+
+    private boolean tolerant = false;
 
     public static final String DEFAULT_LANG = "eng";
 
@@ -108,7 +113,23 @@ public class SkosVocabularyImporter {
         this.dao = new BundleDAO(framedGraph, vocabulary.idPath());
     }
 
-    public ImportLog importFile(File dataFile, String logMessage) throws Exception {
+    public void setTolerant(boolean tolerant) {
+        logger.debug("Setting importer to tolerant: " + tolerant);
+        this.tolerant = tolerant;
+    }
+
+    public ImportLog importFile(String filePath, String logMessage)
+            throws IOException, OWLOntologyCreationException, ValidationError {
+        FileInputStream ios = new FileInputStream(filePath);
+        try {
+            return importFile(ios, logMessage);
+        } finally {
+            ios.close();
+        }
+    }
+
+    public ImportLog importFile(InputStream ios, String logMessage)
+            throws IOException, ValidationError, OWLOntologyCreationException {
         try {
             // Create a new action for this import
             final ActionManager.EventContext eventContext = new ActionManager(framedGraph, vocabulary).logEvent(
@@ -116,26 +137,37 @@ public class SkosVocabularyImporter {
             // Create a manifest to store the results of the import.
             final ImportLog log = new ImportLog(eventContext);
 
-            OWLOntology ontology = owlManager.loadOntologyFromOntologyDocument(dataFile);
+            OWLOntology ontology = owlManager.loadOntologyFromOntologyDocument(ios);
             OWLClass conceptClass = factory.getOWLClass(IRI.create(RDFVocabulary.CONCEPT.getURI()));
 
             Map<IRI, Concept> imported = Maps.newHashMap();
 
             for (OWLClassAssertionAxiom ax : ontology.getClassAssertionAxioms(conceptClass)) {
                 OWLNamedIndividual item = ax.getIndividual().asOWLNamedIndividual();
-                Mutation<Concept> graphConcept = importConcept(item, ontology);
-                imported.put(item.getIRI(), graphConcept.getNode());
+                try {
+                    Mutation<Concept> graphConcept = importConcept(item, ontology);
+                    imported.put(item.getIRI(), graphConcept.getNode());
 
-                switch (graphConcept.getState()) {
-                    case UNCHANGED:
-                        log.addUnchanged();
-                        break;
-                    case CREATED:
-                        log.addCreated();
-                        break;
-                    case UPDATED:
-                        log.addUpdated();
-                        break;
+                    switch (graphConcept.getState()) {
+                        case UNCHANGED:
+                            log.addUnchanged();
+                            break;
+                        case CREATED:
+                            log.addCreated();
+                            eventContext.addSubjects(graphConcept.getNode());
+                            break;
+                        case UPDATED:
+                            log.addUpdated();
+                            eventContext.addSubjects(graphConcept.getNode());
+                            break;
+                    }
+                } catch (ValidationError validationError) {
+                    if (tolerant) {
+                        logger.error(validationError.getMessage());
+                        log.setErrored(item.toString(), validationError.getMessage());
+                    } else {
+                        throw validationError;
+                    }
                 }
             }
 
@@ -146,6 +178,7 @@ public class SkosVocabularyImporter {
 
             for (Concept concept : imported.values()) {
                 vocabulary.addConcept(concept);
+                concept.setPermissionScope(vocabulary);
             }
 
             if (log.hasDoneWork()) {
@@ -166,11 +199,37 @@ public class SkosVocabularyImporter {
         Bundle.Builder builder = new Bundle.Builder(EntityClass.CVOC_CONCEPT)
                 .addDataValue(Ontology.IDENTIFIER_KEY, getId(item.getIRI().toURI()));
 
+        List<Bundle> undetermined = getUndeterminedRelations(item, dataset);
         for (Bundle description : getDescriptions(item, dataset)) {
-            builder.addRelation(Ontology.DESCRIPTION_FOR_ENTITY, description);
+            Bundle withRels = description
+                    .withRelations(Ontology.HAS_ACCESS_POINT, undetermined);
+            builder.addRelation(Ontology.DESCRIPTION_FOR_ENTITY, withRels);
         }
 
         return dao.createOrUpdate(builder.build(), Concept.class);
+    }
+
+    private List<Bundle> getUndeterminedRelations(OWLNamedIndividual item, OWLOntology dataset) {
+        List<Bundle> undetermined = Lists.newArrayList();
+
+        Map<String, IRI> rels = ImmutableMap.of(
+                "owl:sameAs", IRI.create("http://www.w3.org/2002/07/owl#sameAs")
+        );
+
+        for (Map.Entry<String,IRI> rel : rels.entrySet()) {
+            OWLAnnotationProperty propName = factory.getOWLAnnotationProperty(
+                    rel.getValue());
+            Set<OWLAnnotation> annotations = item.getAnnotations(dataset, propName);
+            for (OWLAnnotation annotation : annotations) {
+                if (annotation.getValue() instanceof OWLLiteral) {
+                    undetermined.add(new Bundle(EntityClass.UNDETERMINED_RELATIONSHIP)
+                    .withDataValue(Ontology.ANNOTATION_TYPE, rel.getKey())
+                    .withDataValue(Ontology.NAME_KEY, rel.getValue().toString()));
+                }
+            }
+        }
+
+        return undetermined;
     }
 
     private static interface ConnectFunc {
@@ -222,13 +281,18 @@ public class SkosVocabularyImporter {
 
     private List<Bundle> getDescriptions(OWLNamedIndividual item, OWLOntology ontology) {
 
-        Map<URI, String> props = ImmutableMap.<URI,String>builder()
-               .put(RDFVocabulary.ALT_LABEL.getURI(), Ontology.CONCEPT_ALTLABEL)
-               .put(RDFVocabulary.HIDDEN_LABEL.getURI(), Ontology.CONCEPT_HIDDENLABEL)
-               .put(RDFVocabulary.DEFINITION.getURI(), Ontology.CONCEPT_DEFINITION)
-               .put(RDFVocabulary.SCOPE_NOTE.getURI(), Ontology.CONCEPT_SCOPENOTE)
-               .put(RDFVocabulary.NOTE.getURI(), Ontology.CONCEPT_NOTE)
-               .put(RDFVocabulary.EDITORIAL_NOTE.getURI(), Ontology.CONCEPT_EDITORIAL_NOTE)
+        Map<String, URI> props = ImmutableMap.<String,URI>builder()
+               .put(Ontology.CONCEPT_ALTLABEL, RDFVocabulary.ALT_LABEL.getURI())
+               .put(Ontology.CONCEPT_HIDDENLABEL, RDFVocabulary.HIDDEN_LABEL.getURI())
+               .put(Ontology.CONCEPT_DEFINITION, RDFVocabulary.DEFINITION.getURI())
+               .put(Ontology.CONCEPT_SCOPENOTE, RDFVocabulary.SCOPE_NOTE.getURI())
+               .put(Ontology.CONCEPT_NOTE, RDFVocabulary.NOTE.getURI())
+               .put(Ontology.CONCEPT_EDITORIAL_NOTE, RDFVocabulary.EDITORIAL_NOTE.getURI())
+                .build();
+        // Language-agnostic properties.
+        Map<String,URI> addProps = ImmutableMap.<String,URI>builder()
+               .put("latitude", URI.create("http://www.w3.org/2003/01/geo/wgs84_pos#lat"))
+               .put("longitude", URI.create("http://www.w3.org/2003/01/geo/wgs84_pos#long"))
                .build();
 
         List<Bundle> descriptions = Lists.newArrayList();
@@ -249,11 +313,20 @@ public class SkosVocabularyImporter {
             builder.addDataValue(Ontology.NAME_KEY, literalPrefName.getLiteral())
                     .addDataValue(Ontology.LANGUAGE, languageCode);
 
-            for (Map.Entry<URI, String> prop : props.entrySet()) {
+            for (Map.Entry<String, URI> prop: addProps.entrySet()) {
+                OWLAnnotationProperty annotationProperty = factory
+                        .getOWLAnnotationProperty(IRI.create(prop.getValue()));
+                for (OWLAnnotation annotation : item.getAnnotations(ontology, annotationProperty)) {
+                    OWLLiteral literalProp = (OWLLiteral)annotation.getValue();
+                    builder.addDataValue(prop.getKey(), literalProp.getLiteral());
+                }
+            }
+
+            for (Map.Entry<String, URI> prop : props.entrySet()) {
                 List<String> values = Lists.newArrayList();
 
                 OWLAnnotationProperty annotationProperty = factory
-                        .getOWLAnnotationProperty(IRI.create(prop.getKey()));
+                        .getOWLAnnotationProperty(IRI.create(prop.getValue()));
 
                 for (OWLAnnotation propVal : annotations) {
                     if (propVal.getProperty().equals(annotationProperty)) {
@@ -267,7 +340,7 @@ public class SkosVocabularyImporter {
                     }
                 }
                 if (!values.isEmpty()) {
-                    builder.addDataValue(prop.getValue(), values);
+                    builder.addDataValue(prop.getKey(), values);
                 }
             }
             Bundle bundle = builder.build();
@@ -279,8 +352,8 @@ public class SkosVocabularyImporter {
     }
 
     private String getId(URI uri) {
-        return uri.getPath()
-                + uri.getQuery()
+        return uri.getPath().substring(uri.getPath().lastIndexOf("/") + 1)
+                + (uri.getQuery() != null ? uri.getQuery() : "")
                 + (uri.getFragment() != null ? uri.getFragment() : "");
     }
 
