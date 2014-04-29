@@ -18,16 +18,16 @@ import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.BundleDAO;
 import eu.ehri.project.persistence.Mutation;
-import org.semanticweb.skos.*;
-import org.semanticweb.skosapibinding.SKOSManager;
+import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.ac.manchester.cs.skos.SKOSRDFVocabulary;
 
 import java.io.File;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Mike Bryant (http://github.com/mikesname)
@@ -40,8 +40,65 @@ public class SkosVocabularyImporter {
     private final Actioner actioner;
     private final Vocabulary vocabulary;
     private final BundleDAO dao;
+    private final OWLOntologyManager owlManager = OWLManager.createOWLOntologyManager();
+    private final OWLDataFactory factory = owlManager.getOWLDataFactory();
 
     public static final String DEFAULT_LANG = "eng";
+
+    // Borrowed from https://github.com/simonjupp/java-skos-api
+    public static enum RDFVocabulary {
+        LABEL_RELATED("labelRelated"),
+        MEMBER("member"),
+        MEMBER_LIST("memberList"),
+        MAPPING_RELATION("mappingRelation"),
+        BROAD_MATCH("broadMatch"),
+        NARROW_MATCH("narrowMatch"),
+        RELATED_MATCH("relatedMatch"),
+        EXACT_MATCH("exactMatch"),
+        BROADER("broader"),
+        NARROWER("narrower"),
+        BROADER_TRANS("broaderTransitive"),
+        NARROWER_TRANS("narrowerTransitive"),
+        RELATED("related"),
+        HAS_TOP_CONCEPT("hasTopConcept"),
+        SEMANTIC_RELATION("semanticRelation"),
+        CONCEPT("Concept"),
+        LABEL_RELATION("LabelRelation"),
+        SEE_LABEL_RELATION("seeLabelRelation"),
+        COLLECTION("Collection"),
+        CONCEPT_SCHEME("ConceptScheme"),
+        TOP_CONCEPT_OF("topConceptOf"),
+        IN_SCHEME("inScheme"),
+        CLOSE_MATCH("closeMatch"),
+        DOCUMENT("Document"),
+        IMAGE("Image"),
+        ORDERED_COLLECTION("OrderedCollection"),
+        COLLECTABLE_PROPERTY("CollectableProperty"),
+        RESOURCE("Resource"),
+        PREF_LABEL("prefLabel"),
+        ALT_LABEL("altLabel"),
+        COMMENT("comment"),
+        EXAMPLE("example"),
+        NOTE("note"),
+        NOTATION("notation"),
+        SCOPE_NOTE("scopeNote"),
+        HIDDEN_LABEL("hiddenLabel"),
+        EDITORIAL_NOTE("editorialNote"),
+        HISTORY_NOTE("historyNote"),
+        DEFINITION("definition"),
+        CHANGE_NOTE("changeNote");
+
+        private String namespace = "http://www.w3.org/2004/02/skos/core#";
+        private URI uri;
+
+        RDFVocabulary(String localName) {
+            this.uri = URI.create(namespace + localName);
+        }
+
+        public URI getURI() {
+            return uri;
+        }
+    }
 
     public SkosVocabularyImporter(FramedGraph<? extends TransactionalGraph> framedGraph, Actioner actioner,
             Vocabulary vocabulary) {
@@ -59,16 +116,15 @@ public class SkosVocabularyImporter {
             // Create a manifest to store the results of the import.
             final ImportLog log = new ImportLog(eventContext);
 
-            SKOSManager manager = new SKOSManager();
-            SKOSDataset vocab = manager.loadDatasetFromPhysicalURI(dataFile.toURI());
+            OWLOntology ontology = owlManager.loadOntologyFromOntologyDocument(dataFile);
+            OWLClass conceptClass = factory.getOWLClass(IRI.create(RDFVocabulary.CONCEPT.getURI()));
 
-            Map<URI, Concept> imported = Maps.newHashMap();
+            Map<IRI, Concept> imported = Maps.newHashMap();
 
-            System.out.println("Concepts found: " + vocab.getSKOSConcepts().size());
-
-            for (SKOSConcept concept : vocab.getSKOSConcepts()) {
-                Mutation<Concept> graphConcept = importConcept(concept, vocab);
-                imported.put(concept.getURI(), graphConcept.getNode());
+            for (OWLClassAssertionAxiom ax : ontology.getClassAssertionAxioms(conceptClass)) {
+                OWLNamedIndividual item = ax.getIndividual().asOWLNamedIndividual();
+                Mutation<Concept> graphConcept = importConcept(item, ontology);
+                imported.put(item.getIRI(), graphConcept.getNode());
 
                 switch (graphConcept.getState()) {
                     case UNCHANGED:
@@ -83,8 +139,9 @@ public class SkosVocabularyImporter {
                 }
             }
 
-            for (SKOSConcept concept : vocab.getSKOSConcepts()) {
-                hookupRelationships(concept, vocab, imported);
+            for (OWLClassAssertionAxiom ax : ontology.getClassAssertionAxioms(conceptClass)) {
+                hookupRelationships(ax.getIndividual().asOWLNamedIndividual(),
+                        ontology, imported);
             }
 
             for (Concept concept : imported.values()) {
@@ -104,97 +161,127 @@ public class SkosVocabularyImporter {
         }
     }
 
-    private Mutation<Concept> importConcept(SKOSConcept skosConcept, SKOSDataset dataset) throws ValidationError {
-        logger.debug("Importing: {}", skosConcept.getURI());
+    private Mutation<Concept> importConcept(OWLNamedIndividual item, OWLOntology dataset) throws ValidationError {
+        logger.debug("Importing: {}", item.toString());
         Bundle.Builder builder = new Bundle.Builder(EntityClass.CVOC_CONCEPT)
-                .addDataValue(Ontology.IDENTIFIER_KEY, skosConcept.getURI().toString());
+                .addDataValue(Ontology.IDENTIFIER_KEY, getId(item.getIRI().toURI()));
 
-        for (Bundle description : getDescriptions(skosConcept, dataset)) {
+        for (Bundle description : getDescriptions(item, dataset)) {
             builder.addRelation(Ontology.DESCRIPTION_FOR_ENTITY, description);
         }
 
         return dao.createOrUpdate(builder.build(), Concept.class);
     }
 
-    private void hookupRelationships(SKOSConcept skosConcept, SKOSDataset dataset, Map<URI, Concept> conceptMap) {
-        Concept current = conceptMap.get(skosConcept.getURI());
-        for (SKOSAnnotation broaderAnn : skosConcept.getSKOSAnnotationsByURI(dataset,
-                SKOSRDFVocabulary.BROADER.getURI())) {
-            Concept broader = conceptMap.get(broaderAnn.getAnnotationValue().getURI());
-            if (broader != null) {
-                broader.addNarrowerConcept(current);
-            }
-        }
+    private static interface ConnectFunc {
+        public void connect(Concept current, Concept related);
+    }
 
-        for (SKOSAnnotation narrowerAnn : skosConcept.getSKOSAnnotationsByURI(dataset,
-                SKOSRDFVocabulary.NARROWER.getURI())) {
-            SKOSEntity annotationValue = narrowerAnn.getAnnotationValue();
-            if (annotationValue != null) {
-                Concept narrower = conceptMap.get(annotationValue.getURI());
-                if (narrower != null) {
-                    current.addNarrowerConcept(narrower);
+    private void connectRelation(Concept current, OWLNamedIndividual item,
+            OWLOntology ontology, Map<IRI, Concept> others,
+            URI propUri, ConnectFunc connectFunc) {
+        OWLAnnotationProperty property = factory.getOWLAnnotationProperty(
+                IRI.create(propUri));
+        for (OWLAnnotation rel : item.getAnnotations(ontology, property)) {
+            // If it's not an IRI we can't do much here.
+            if (rel.getValue() instanceof IRI) {
+                IRI value = (IRI)rel.getValue();
+                Concept related = others.get(value);
+                if (related != null) {
+                    connectFunc.connect(current, related);
                 }
             }
         }
-
-        for (SKOSAnnotation relatedAnn : skosConcept.getSKOSAnnotationsByURI(dataset,
-                SKOSRDFVocabulary.RELATED.getURI())) {
-            Concept related = conceptMap.get(relatedAnn.getAnnotationValue().getURI());
-            if (related != null) {
-                current.addRelatedConcept(related);
-            }
-        }
-
     }
 
-    private List<Bundle> getDescriptions(SKOSConcept skosConcept, SKOSDataset dataset) {
+    private void hookupRelationships(OWLNamedIndividual item, OWLOntology dataset,
+            Map<IRI, Concept> conceptMap) {
+        Concept current = conceptMap.get(item.getIRI());
 
-        Map<SKOSRDFVocabulary, String> props = ImmutableMap.<SKOSRDFVocabulary,String>builder()
-               .put(SKOSRDFVocabulary.PREFLABEL, Ontology.CONCEPT_ALTLABEL)
-               .put(SKOSRDFVocabulary.ALTLABEL, Ontology.CONCEPT_ALTLABEL)
-               .put(SKOSRDFVocabulary.HIDDENLABEL, Ontology.CONCEPT_HIDDENLABEL)
-               .put(SKOSRDFVocabulary.DEFINITION, Ontology.CONCEPT_DEFINITION)
-               .put(SKOSRDFVocabulary.SCOPENOTE, Ontology.CONCEPT_SCOPENOTE)
-               .put(SKOSRDFVocabulary.NOTE, Ontology.CONCEPT_NOTE)
-               .put(SKOSRDFVocabulary.EDITORIALNOTE, Ontology.CONCEPT_EDITORIAL_NOTE)
+        connectRelation(current, item, dataset, conceptMap, RDFVocabulary.BROADER.getURI(), new ConnectFunc() {
+            @Override
+            public void connect(Concept current, Concept related) {
+                related.addNarrowerConcept(current);
+            }
+        });
+
+        connectRelation(current, item, dataset, conceptMap, RDFVocabulary.NARROWER.getURI(), new ConnectFunc() {
+            @Override
+            public void connect(Concept current, Concept related) {
+                current.addNarrowerConcept(related);
+            }
+        });
+
+        connectRelation(current, item, dataset, conceptMap, RDFVocabulary.RELATED.getURI(), new ConnectFunc() {
+            @Override
+            public void connect(Concept current, Concept related) {
+                current.addRelatedConcept(related);
+            }
+        });
+    }
+
+    private List<Bundle> getDescriptions(OWLNamedIndividual item, OWLOntology ontology) {
+
+        Map<URI, String> props = ImmutableMap.<URI,String>builder()
+               .put(RDFVocabulary.ALT_LABEL.getURI(), Ontology.CONCEPT_ALTLABEL)
+               .put(RDFVocabulary.HIDDEN_LABEL.getURI(), Ontology.CONCEPT_HIDDENLABEL)
+               .put(RDFVocabulary.DEFINITION.getURI(), Ontology.CONCEPT_DEFINITION)
+               .put(RDFVocabulary.SCOPE_NOTE.getURI(), Ontology.CONCEPT_SCOPENOTE)
+               .put(RDFVocabulary.NOTE.getURI(), Ontology.CONCEPT_NOTE)
+               .put(RDFVocabulary.EDITORIAL_NOTE.getURI(), Ontology.CONCEPT_EDITORIAL_NOTE)
                .build();
 
         List<Bundle> descriptions = Lists.newArrayList();
 
-        for (SKOSAnnotation prefLabel : skosConcept.getSKOSAnnotationsByURI(dataset,
-                SKOSRDFVocabulary.PREFLABEL.getURI())) {
+        Set<OWLAnnotation> annotations = item.getAnnotations(ontology);
+
+        OWLAnnotationProperty prelLabelProp = factory
+                .getOWLAnnotationProperty(IRI.create(RDFVocabulary.PREF_LABEL.getURI()));
+
+        for (OWLAnnotation property : item.getAnnotations(ontology, prelLabelProp)) {
             Bundle.Builder builder = new Bundle.Builder(EntityClass.CVOC_CONCEPT_DESCRIPTION);
 
-            SKOSLiteral literalPrefName = prefLabel.getAnnotationValueAsConstant();
-            String lang = literalPrefName.getAsSKOSUntypedLiteral().getLang();
-            String languageCode = (lang == null || lang.trim().isEmpty())
-                    ? DEFAULT_LANG
-                    : Helpers.iso639DashTwoCode(lang);
+            OWLLiteral literalPrefName = (OWLLiteral)property.getValue();
+            String languageCode = literalPrefName.hasLang()
+                    ? Helpers.iso639DashTwoCode(literalPrefName.getLang())
+                    : DEFAULT_LANG;
 
             builder.addDataValue(Ontology.NAME_KEY, literalPrefName.getLiteral())
                     .addDataValue(Ontology.LANGUAGE, languageCode);
 
-            for (Map.Entry<SKOSRDFVocabulary, String> prop : props.entrySet()) {
+            for (Map.Entry<URI, String> prop : props.entrySet()) {
                 List<String> values = Lists.newArrayList();
-                for (SKOSAnnotation propVal : skosConcept.getSKOSAnnotationsByURI(dataset,
-                        prop.getKey().getURI())) {
-                    SKOSLiteral literalProp = propVal.getAnnotationValueAsConstant();
-                    String propLang = literalProp.getAsSKOSUntypedLiteral().getLang();
-                    String propLanguageCode = (propLang == null || propLang.trim().isEmpty())
-                            ? DEFAULT_LANG
-                            : Helpers.iso639DashTwoCode(propLang);
-                    if (propLanguageCode.equals(languageCode)) {
-                        values.add(literalProp.getLiteral());
+
+                OWLAnnotationProperty annotationProperty = factory
+                        .getOWLAnnotationProperty(IRI.create(prop.getKey()));
+
+                for (OWLAnnotation propVal : annotations) {
+                    if (propVal.getProperty().equals(annotationProperty)) {
+                        OWLLiteral literalProp = (OWLLiteral)propVal.getValue();
+                        String propLanguageCode = literalProp.hasLang()
+                                ? Helpers.iso639DashTwoCode(literalProp.getLang())
+                                : DEFAULT_LANG;
+                        if (propLanguageCode.equals(languageCode)) {
+                            values.add(literalProp.getLiteral());
+                        }
                     }
                 }
                 if (!values.isEmpty()) {
                     builder.addDataValue(prop.getValue(), values);
                 }
             }
-            descriptions.add(builder.build());
+            Bundle bundle = builder.build();
+            System.out.println(bundle.toJson());
+            descriptions.add(bundle);
         }
 
         return descriptions;
+    }
+
+    private String getId(URI uri) {
+        return uri.getPath()
+                + uri.getQuery()
+                + (uri.getFragment() != null ? uri.getFragment() : "");
     }
 
     private Optional<String> getLogMessage(String msg) {

@@ -55,7 +55,7 @@
                 <include>net.sf.opencsv:opencsv</include>
                 <include>commons-cli:commons-cli</include>
                 <include>com.ibm.icu:icu4j</include>
-                <include>skos-api:distribution</include>
+                <include>net.sourceforge.owlapi:owlapi-distribution</include>
             </includes>
         </dependencySet>
     </dependencySets>
