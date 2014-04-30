@@ -17,7 +17,4 @@ public interface AuthoritativeItem extends AccessibleEntity {
     @Fetch(Ontology.ITEM_IN_AUTHORITATIVE_SET)
     @Adjacency(label = Ontology.ITEM_IN_AUTHORITATIVE_SET)
     public AuthoritativeSet getAuthoritativeSet();
-
-    @Adjacency(label = Ontology.ITEM_IN_AUTHORITATIVE_SET)
-    public void setAuthoritativeSet(final AuthoritativeSet authoritativeSet);
 }

@@ -12,8 +12,6 @@ import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Link;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.cvoc.AuthoritativeItem;
-import eu.ehri.project.models.cvoc.AuthoritativeSet;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.models.events.SystemEvent;
@@ -22,7 +20,6 @@ import eu.ehri.project.views.impl.CrudViews;
 import java.io.InputStream;
 import java.util.List;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +41,6 @@ public class Wp2YvEadTest extends AbstractImporterTest {
     protected final String C3 = "3685529";
     protected final String FONDS = "O.64.2";
 
-    @Ignore
     @Test
     public void testImportItemsT() throws Exception {
 
@@ -53,10 +49,11 @@ public class Wp2YvEadTest extends AbstractImporterTest {
                                 .withDataValue(Ontology.IDENTIFIER_KEY, "WP2_keywords");
         Bundle conceptBundle = new Bundle(EntityClass.CVOC_CONCEPT)
                                 .withDataValue(Ontology.IDENTIFIER_KEY, "KEYWORD.JMP.288");
-        AuthoritativeSet vocabulary = new CrudViews<AuthoritativeSet>(graph, AuthoritativeSet.class).create(vocabularyBundle, validUser);
+        Vocabulary vocabulary = new CrudViews<Vocabulary>(graph, Vocabulary.class).create(vocabularyBundle,
+                validUser);
         logger.debug(vocabulary.getId());
-        AuthoritativeItem concept_288 = new CrudViews<Concept>(graph, Concept.class).create(conceptBundle, validUser); 
-        vocabulary.addAuthoritativeItem(concept_288);
+        Concept concept_288 = new CrudViews<Concept>(graph, Concept.class).create(conceptBundle, validUser);
+        vocabulary.addItem(concept_288);
         
         
         Vocabulary vocabularyTest = manager.getFrame("wp2-keywords", Vocabulary.class);
@@ -70,7 +67,7 @@ public class Wp2YvEadTest extends AbstractImporterTest {
                 .setTolerant(Boolean.TRUE);
         ImportLog log = importManager.importFile(ios, logMessage);
 
-        printGraph(graph);
+        //printGraph(graph);
         // How many new nodes will have been created? We should have
         // - 4 more DocumentaryUnits fonds C1 C2 C3 
         // - 4 more DocumentDescription

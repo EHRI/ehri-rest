@@ -22,7 +22,6 @@ import eu.ehri.project.views.impl.CrudViews;
 import java.io.InputStream;
 import java.util.List;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +42,6 @@ public class Wp2TmEadTest extends AbstractImporterTest {
     protected final String C1_B = "A 11487";
     protected final String FONDS = "vzpomínky pro EHRI";
 
-    @Ignore
     @Test
     public void testImportItemsT() throws Exception {
 
@@ -55,7 +53,7 @@ public class Wp2TmEadTest extends AbstractImporterTest {
         AuthoritativeSet vocabulary = new CrudViews<AuthoritativeSet>(graph, AuthoritativeSet.class).create(vocabularyBundle, validUser);
         logger.debug(vocabulary.getId());
         AuthoritativeItem concept_191 = new CrudViews<Concept>(graph, Concept.class).create(conceptBundle, validUser); 
-        vocabulary.addAuthoritativeItem(concept_191);
+        vocabulary.addItem(concept_191);
         
         
         Vocabulary vocabularyTest = manager.getFrame("wp2-keywords", Vocabulary.class);

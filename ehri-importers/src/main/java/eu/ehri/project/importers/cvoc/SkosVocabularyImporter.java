@@ -177,7 +177,7 @@ public class SkosVocabularyImporter {
             }
 
             for (Concept concept : imported.values()) {
-                vocabulary.addConcept(concept);
+                vocabulary.addItem(concept);
                 concept.setPermissionScope(vocabulary);
             }
 

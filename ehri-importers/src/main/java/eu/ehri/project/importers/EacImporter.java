@@ -110,7 +110,7 @@ public class EacImporter extends EaImporter {
         // There may or may not be a specific scope here...
         if (!permissionScope.equals(SystemScope.getInstance())
                 && mutation.created()) {
-            frame.setAuthoritativeSet(framedGraph.frame(permissionScope.asVertex(), AuthoritativeSet.class));
+            manager.cast(permissionScope, AuthoritativeSet.class).addItem(frame);
             frame.setPermissionScope(permissionScope);
         }
 

@@ -181,7 +181,7 @@ public class CvocConceptTest extends ModelTestBase {
 		Concept apples = graph.frame(v_apples, Concept.class);
 
 		// now add the apples to the vocabulary
-        vocabulary.addConcept(apples);
+        vocabulary.addItem(apples);
         assertEquals(vocabulary.getIdentifier(), apples.getVocabulary().getIdentifier());
 	}
 	
