@@ -107,6 +107,34 @@ public class JenaVocabularyImporter {
         }
     }
 
+    // Language-sensitive properties.
+    public static final Map<String, String> LANGUAGE_PROPS = ImmutableMap.<String, String>builder()
+            .put(Ontology.CONCEPT_ALTLABEL, RDFVocabulary.ALT_LABEL.getURI())
+            .put(Ontology.CONCEPT_HIDDENLABEL, RDFVocabulary.HIDDEN_LABEL.getURI())
+            .put(Ontology.CONCEPT_DEFINITION, RDFVocabulary.DEFINITION.getURI())
+            .put(Ontology.CONCEPT_SCOPENOTE, RDFVocabulary.SCOPE_NOTE.getURI())
+            .put(Ontology.CONCEPT_NOTE, RDFVocabulary.NOTE.getURI())
+            .put(Ontology.CONCEPT_EDITORIAL_NOTE, RDFVocabulary.EDITORIAL_NOTE.getURI())
+            .build();
+
+    // Language-agnostic properties.
+    public static final Map<String, String> GENERAL_PROPS = ImmutableMap.<String, String>builder()
+            .put("latitude", "http://www.w3.org/2003/01/geo/wgs84_pos#lat")
+            .put("longitude", "http://www.w3.org/2003/01/geo/wgs84_pos#long")
+            .build();
+
+    // Properties that end up as undeterminedRelation nodes.
+    public static final Map<String, String> RELATION_PROPS = ImmutableMap.of(
+            "owl:sameAs", "http://www.w3.org/2002/07/owl#sameAs"
+    );
+
+    /**
+     * Constructor
+     *
+     * @param framedGraph The framed graph
+     * @param actioner    The actioner
+     * @param vocabulary  The target vocabulary
+     */
     public JenaVocabularyImporter(FramedGraph<? extends TransactionalGraph> framedGraph, Actioner actioner,
             Vocabulary vocabulary) {
         this.framedGraph = framedGraph;
@@ -120,6 +148,15 @@ public class JenaVocabularyImporter {
         this.tolerant = tolerant;
     }
 
+    /**
+     * Import a file by path.
+     *
+     * @param filePath   The SKOS file path
+     * @param logMessage A log message
+     * @return A log of imported nodes
+     * @throws IOException
+     * @throws ValidationError
+     */
     public ImportLog importFile(String filePath, String logMessage)
             throws IOException, ValidationError {
         FileInputStream ios = new FileInputStream(filePath);
@@ -130,6 +167,15 @@ public class JenaVocabularyImporter {
         }
     }
 
+    /**
+     * Import an input stream.
+     *
+     * @param ios        The SKOS file input stream
+     * @param logMessage A log message
+     * @return A log of imported nodes
+     * @throws IOException
+     * @throws ValidationError
+     */
     public ImportLog importFile(InputStream ios, String logMessage)
             throws IOException, ValidationError {
         try {
@@ -176,7 +222,6 @@ public class JenaVocabularyImporter {
             }
 
 
-
             for (Map.Entry<Resource, Concept> pair : imported.entrySet()) {
                 hookupRelationships(pair.getKey(), pair.getValue(), imported);
             }
@@ -217,16 +262,12 @@ public class JenaVocabularyImporter {
     private List<Bundle> getUndeterminedRelations(Resource item) {
         List<Bundle> undetermined = Lists.newArrayList();
 
-        Map<String, String> relations = ImmutableMap.of(
-                "owl:sameAs", "http://www.w3.org/2002/07/owl#sameAs"
-        );
-
-        for (Map.Entry<String,String> rel : relations.entrySet()) {
+        for (Map.Entry<String, String> rel : RELATION_PROPS.entrySet()) {
             for (RDFNode annotation : getObjectWithPredicate(item, rel.getValue())) {
                 if (annotation.isLiteral()) {
                     undetermined.add(new Bundle(EntityClass.UNDETERMINED_RELATIONSHIP)
-                    .withDataValue(Ontology.ANNOTATION_TYPE, rel.getKey())
-                    .withDataValue(Ontology.NAME_KEY, annotation.toString()));
+                            .withDataValue(Ontology.ANNOTATION_TYPE, rel.getKey())
+                            .withDataValue(Ontology.NAME_KEY, annotation.toString()));
                 }
             }
         }
@@ -238,7 +279,9 @@ public class JenaVocabularyImporter {
         public void connect(Concept current, Concept related);
     }
 
-    public List<RDFNode> getObjectWithPredicate(final Resource item, final String propUri) {
+    private List<RDFNode> getObjectWithPredicate(final Resource item, final String propUri) {
+        // NB: this should be possible with simply item.listProperties(propUri)
+        // but for some reason that doesn't work... I can't grok why.
         return item.listProperties().filterKeep(new Filter<Statement>() {
             @Override
             public boolean accept(Statement statement) {
@@ -291,19 +334,6 @@ public class JenaVocabularyImporter {
 
     private List<Bundle> getDescriptions(Resource item) {
 
-        Map<String, String> props = ImmutableMap.<String,String>builder()
-               .put(Ontology.CONCEPT_ALTLABEL, RDFVocabulary.ALT_LABEL.getURI())
-               .put(Ontology.CONCEPT_HIDDENLABEL, RDFVocabulary.HIDDEN_LABEL.getURI())
-               .put(Ontology.CONCEPT_DEFINITION, RDFVocabulary.DEFINITION.getURI())
-               .put(Ontology.CONCEPT_SCOPENOTE, RDFVocabulary.SCOPE_NOTE.getURI())
-               .put(Ontology.CONCEPT_NOTE, RDFVocabulary.NOTE.getURI())
-               .put(Ontology.CONCEPT_EDITORIAL_NOTE, RDFVocabulary.EDITORIAL_NOTE.getURI())
-                .build();
-        // Language-agnostic properties.
-        Map<String,String> addProps = ImmutableMap.<String,String>builder()
-               .put("latitude", "http://www.w3.org/2003/01/geo/wgs84_pos#lat")
-               .put("longitude", "http://www.w3.org/2003/01/geo/wgs84_pos#long")
-               .build();
 
         List<Bundle> descriptions = Lists.newArrayList();
 
@@ -322,20 +352,20 @@ public class JenaVocabularyImporter {
             builder.addDataValue(Ontology.NAME_KEY, literalPrefName.getString())
                     .addDataValue(Ontology.LANGUAGE, languageCode);
 
-            for (Map.Entry<String, String> prop: addProps.entrySet()) {
-                for (RDFNode annotation : getObjectWithPredicate(item, prop.getValue())) {
-                    if (annotation.isLiteral()) {
-                        builder.addDataValue(prop.getKey(), annotation.asLiteral().getString());
+            for (Map.Entry<String, String> prop : GENERAL_PROPS.entrySet()) {
+                for (RDFNode target : getObjectWithPredicate(item, prop.getValue())) {
+                    if (target.isLiteral()) {
+                        builder.addDataValue(prop.getKey(), target.asLiteral().getString());
                     }
                 }
             }
 
-            for (Map.Entry<String, String> prop : props.entrySet()) {
+            for (Map.Entry<String, String> prop : LANGUAGE_PROPS.entrySet()) {
                 List<String> values = Lists.newArrayList();
 
-                for (RDFNode propVal : getObjectWithPredicate(item, prop.getValue())) {
-                    if (propVal.isLiteral()) {
-                        Literal literal = propVal.asLiteral();
+                for (RDFNode target : getObjectWithPredicate(item, prop.getValue())) {
+                    if (target.isLiteral()) {
+                        Literal literal = target.asLiteral();
                         String propLanguageCode = (literal.getLanguage() != null)
                                 ? Helpers.iso639DashTwoCode(literal.getLanguage())
                                 : DEFAULT_LANG;
