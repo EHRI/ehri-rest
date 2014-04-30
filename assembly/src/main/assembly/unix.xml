@@ -59,6 +59,7 @@
                 <include>org.apache.jena:*</include>
                 <include>xerces:xercesImpl</include>
                 <include>xml-apis:xml-apis</include>
+                <include>org.apache.commons:commons-lang3</include>
             </includes>
         </dependencySet>
     </dependencySets>

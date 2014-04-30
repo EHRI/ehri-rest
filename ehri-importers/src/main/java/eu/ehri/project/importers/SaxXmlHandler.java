@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Stack;
 
 import eu.ehri.project.importers.util.Helpers;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
@@ -46,7 +47,7 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
     protected final Stack<Map<String, Object>> currentGraphPath = new Stack<Map<String, Object>>();
     protected final Map<String, Map<String, Object>> languageMap = Maps.newHashMap();
     protected final Stack<String> currentPath = new Stack<String>();
-    protected final Stack<String> currentText = new Stack<String>();
+    protected final Stack<StringBuilder> currentText = new Stack<StringBuilder>();
 
     protected String currentEntity = null;
 
@@ -107,7 +108,7 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
     @Override
     public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
         // initialise the text holding space
-    	currentText.push("");
+    	currentText.push(new StringBuilder());
 
     	// retrieve the language from the attributes and
     	// create a language map
@@ -128,7 +129,7 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
         currentPath.push(withoutNamespace(qName));
         if (needToCreateSubNode(qName)) { //a new subgraph should be created
             depth++;
-            logger.debug("Pushing depth... " + depth);
+            logger.debug("Pushing depth... " + depth + " -> " + qName);
             currentGraphPath.push(new HashMap<String, Object>());
         }
 
@@ -151,9 +152,9 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
     @Override
     public void endElement(String uri, String localName, String qName) throws SAXException {
         if (languagePrefix == null) {
-            putPropertyInCurrentGraph(getImportantPath(currentPath), currentText.pop());
+            putPropertyInCurrentGraph(getImportantPath(currentPath), currentText.pop().toString());
         } else {
-            putPropertyInGraph(languageMap.get(languagePrefix), getImportantPath(currentPath), currentText.pop());
+            putPropertyInGraph(languageMap.get(languagePrefix), getImportantPath(currentPath), currentText.pop().toString());
         }
 
 
@@ -226,16 +227,12 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
      */
     @Override
     public void characters(char ch[], int start, int length) throws SAXException {
-        String data = new String(ch, start, length);
-        if (data.trim().isEmpty()) {
-            return;
-        }
-
-        // NB: Not trimming the string because this method is called
-        // for chars either side of encoded entities, which means
-        // that Foo &amp; Bar would end up as "Foo&Bar".
-        String current = currentText.pop();
-        currentText.push((current + data).replaceAll("\\s+", " "));
+        // NB: 'Blank' (whitespace) only strings are significant here, because
+        // otherwise a sequence of character, line-break, and an entity will
+        // end up being concatenated with the line-break removed. We therefore
+        // preserve all line breaks and other whitespace here and normalize
+        // it when the text gets added to the graph.
+        currentText.peek().append(ch, start, length);
     }
 
     /**
@@ -273,6 +270,8 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
         if (property.startsWith("language")) {
             valuetrimmed = Helpers.iso639DashTwoCode(valuetrimmed);
         }
+
+        valuetrimmed = StringUtils.normalizeSpace(valuetrimmed);
 
         logger.debug("putProp: " + property + " " + valuetrimmed);
 
