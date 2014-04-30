@@ -29,8 +29,9 @@ public class Wp2EadHandler extends IcaAtomEadHandler {
         super.startElement(uri, localName, qName, attributes);
 
         for (int attr = 0; attr < attributes.getLength(); attr++) { // only certain attributes get stored
-            if (properties.hasAttributeProperty(attributes.getLocalName(attr))) {
-                putPropertyInCurrentGraph(properties.getAttributeProperty(attributes.getLocalName(attr)), attributes.getValue(attr));
+            if (properties.hasAttributeProperty(attributes.getQName(attr))) {
+                putPropertyInCurrentGraph(properties.getAttributeProperty(attributes.getQName(attr)),
+                        attributes.getValue(attr));
             }
         }
     }
