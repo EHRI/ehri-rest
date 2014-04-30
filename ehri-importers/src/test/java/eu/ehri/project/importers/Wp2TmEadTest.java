@@ -21,6 +21,8 @@ import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.views.impl.CrudViews;
 import java.io.InputStream;
 import java.util.List;
+
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +43,7 @@ public class Wp2TmEadTest extends AbstractImporterTest {
     protected final String C1_B = "A 11487";
     protected final String FONDS = "vzpomínky pro EHRI";
 
+    @Ignore
     @Test
     public void testImportItemsT() throws Exception {
 
@@ -64,9 +67,14 @@ public class Wp2TmEadTest extends AbstractImporterTest {
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
         XmlImportManager importManager = new SaxImportManager(graph, agent, validUser, Wp2EadImporter.class, Wp2EadHandler.class)
                 .setTolerant(Boolean.TRUE);
-        ImportLog log = importManager.importFile(ios, logMessage);
 
-        printGraph(graph);
+        List<VertexProxy> before = getGraphState(graph);
+        ImportLog log = importManager.importFile(ios, logMessage);
+        List<VertexProxy> after = getGraphState(graph);
+        diffGraph(before, after).printDebug(System.out, true);
+
+
+        //printGraph(graph);
         // How many new nodes will have been created? We should have
         // - 3 more DocumentaryUnits fonds 2C1 
         // - 3 more DocumentDescription

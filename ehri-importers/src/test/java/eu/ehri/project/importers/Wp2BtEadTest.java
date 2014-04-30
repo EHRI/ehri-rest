@@ -19,6 +19,8 @@ import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.views.impl.CrudViews;
 import java.io.InputStream;
 import java.util.List;
+
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,6 +44,7 @@ public class Wp2BtEadTest extends AbstractImporterTest {
     protected final String C1_B_C2_B = "000.002.2";
     protected final String FONDS = "wp2bt";
 
+    @Ignore
     @Test
     public void testImportItemsT() throws Exception {
 
