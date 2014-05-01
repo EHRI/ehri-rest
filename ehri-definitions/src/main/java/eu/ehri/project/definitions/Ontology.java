@@ -71,7 +71,10 @@ public class Ontology {
 
     // Concepts!
     public static final String CONCEPT_ALTLABEL = "altLabel";
+    public static final String CONCEPT_HIDDENLABEL = "hiddenLabel";
     public static final String CONCEPT_DEFINITION = "definition";
+    public static final String CONCEPT_NOTE = "note";
+    public static final String CONCEPT_EDITORIAL_NOTE = "editoralNote";
     public static final String CONCEPT_SCOPENOTE = "scopeNote";
     public static final String CONCEPT_HAS_BROADER = "broader";
     public static final String CONCEPT_HAS_NARROWER = "narrower";

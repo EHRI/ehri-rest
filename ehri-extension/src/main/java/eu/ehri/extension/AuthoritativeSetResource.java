@@ -255,7 +255,8 @@ public class AuthoritativeSetResource extends
                 getLogMessage());
 
         // Add it to this AuthoritativeSet's agents
-        agent.setAuthoritativeSet(set);
+        set.addItem(agent);
+        agent.setPermissionScope(set);
         return agent;
     }
 }

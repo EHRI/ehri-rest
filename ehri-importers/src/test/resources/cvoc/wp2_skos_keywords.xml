@@ -1,7 +1,11 @@
-<?xml version="1.0" encoding="utf-8" ?>
-<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+<?xml version="1.0" encoding="UTF-8"?>
+
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
-    xmlns:skos="http://www.w3.org/2004/02/skos/core#" xmlns:dct="http://purl.org/dc/elements/1.1/">
+    xmlns:skos="http://www.w3.org/2004/02/skos/core#"
+    xmlns:dct="http://purl.org/dc/elements/1.1/">
+
     <rdf:Description rdf:about="http://ehri01.dans.knaw.nl/wp2/keywords/KEYWORD.JMP.288">
         <rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
         <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
@@ -1611,11 +1615,11 @@
         <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
         <skos:inScheme rdf:resource="http://ehri01.dans.knaw.nl/wp2/keywords/"/>
         <skos:broader
-            rdf:resource="http://ehri01.dans.knaw.nl/wp2/keywords/Root node for keywords_old"/>
+            rdf:resource="http://ehri01.dans.knaw.nl/wp2/keywords/Root_node_for_keywords_old"/>
         <skos:prefLabel xml:lang="cz">poválečná svědectví</skos:prefLabel>
         <skos:prefLabel xml:lang="en">Post-WWII testimonies</skos:prefLabel>
     </rdf:Description>
-    <rdf:Description rdf:about="http://ehri01.dans.knaw.nl/wp2/keywords/Root node for keywords_old">
+    <rdf:Description rdf:about="http://ehri01.dans.knaw.nl/wp2/keywords/Root_node_for_keywords_old">
         <rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
         <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
         <skos:inScheme rdf:resource="http://ehri01.dans.knaw.nl/wp2/keywords/"/>
@@ -1802,12 +1806,12 @@
         <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
         <skos:inScheme rdf:resource="http://ehri01.dans.knaw.nl/wp2/keywords/"/>
         <skos:broader
-            rdf:resource="http://ehri01.dans.knaw.nl/wp2/keywords/Root node for object_types"/>
+            rdf:resource="http://ehri01.dans.knaw.nl/wp2/keywords/Root_node_for_object_types"/>
         <skos:prefLabel xml:lang="cz">Rozhovory</skos:prefLabel>
         <skos:prefLabel xml:lang="de">Interviews</skos:prefLabel>
         <skos:prefLabel xml:lang="en">Interviews</skos:prefLabel>
     </rdf:Description>
-    <rdf:Description rdf:about="http://ehri01.dans.knaw.nl/wp2/keywords/Root node for object_types">
+    <rdf:Description rdf:about="http://ehri01.dans.knaw.nl/wp2/keywords/Root_node_for_object_types">
         <rdf:type rdf:resource="http://www.w3.org/2000/01/rdf-schema#Resource"/>
         <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
         <skos:inScheme rdf:resource="http://ehri01.dans.knaw.nl/wp2/keywords/"/>

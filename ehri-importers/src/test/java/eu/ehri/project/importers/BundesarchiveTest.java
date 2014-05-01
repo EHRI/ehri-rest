@@ -51,6 +51,8 @@ public class BundesarchiveTest extends AbstractImporterTest{
         // - 10 more import Event links (9 for every Unit, 1 for the User)
         // - 1 more import Event
         int newCount = origCount + 32;
+
+        printGraph(graph);
         assertEquals(newCount, getNodeCount(graph));
         
         DocumentaryUnit archdesc = graph.frame(

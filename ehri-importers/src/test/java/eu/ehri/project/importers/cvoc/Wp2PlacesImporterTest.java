@@ -19,7 +19,7 @@ import static org.junit.Assert.*;
  * @author linda
  */
 public class Wp2PlacesImporterTest extends AbstractImporterTest {
-    protected final String SKOS_FILE = "wp2_skos_places.xml";
+    protected final String SKOS_FILE = "cvoc/wp2_skos_places.xml";
 
     @Test
     public void testImportItemsT() throws Exception {
@@ -30,7 +30,7 @@ public class Wp2PlacesImporterTest extends AbstractImporterTest {
         int count = getNodeCount(graph);
         int voccount = toList(vocabulary.getConcepts()).size();
         InputStream ios = ClassLoader.getSystemResourceAsStream(SKOS_FILE);
-        SkosCoreCvocImporter importer = new SkosCoreCvocImporter(graph, validUser, vocabulary);
+        SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, validUser, vocabulary);
         importer.setTolerant(true);
         ImportLog log = importer.importFile(ios, logMessage);
 

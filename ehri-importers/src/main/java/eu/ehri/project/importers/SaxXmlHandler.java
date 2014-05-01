@@ -10,10 +10,12 @@ import java.util.Map;
 import java.util.Stack;
 
 import eu.ehri.project.importers.util.Helpers;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
+import org.xml.sax.ext.LexicalHandler;
 import org.xml.sax.helpers.DefaultHandler;
 
 import static eu.ehri.project.definitions.Ontology.LANGUAGE_OF_DESCRIPTION;
@@ -37,7 +39,7 @@ import static eu.ehri.project.definitions.Ontology.LANGUAGE_OF_DESCRIPTION;
  *
  * @author linda
  */
-public abstract class SaxXmlHandler extends DefaultHandler {
+public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(SaxXmlHandler.class);
     public static final String UNKNOWN = "UNKNOWN_";
@@ -45,13 +47,15 @@ public abstract class SaxXmlHandler extends DefaultHandler {
     protected final Stack<Map<String, Object>> currentGraphPath = new Stack<Map<String, Object>>();
     protected final Map<String, Map<String, Object>> languageMap = Maps.newHashMap();
     protected final Stack<String> currentPath = new Stack<String>();
-    protected final Stack<String> currentText = new Stack<String>();
+    protected final Stack<StringBuilder> currentText = new Stack<StringBuilder>();
+
+    protected String currentEntity = null;
 
     protected final AbstractImporter<Map<String, Object>> importer;
     protected final XmlImportProperties properties;
 
     protected int depth = 0;
-    
+
     /**
      * 
      */
@@ -78,6 +82,23 @@ public abstract class SaxXmlHandler extends DefaultHandler {
      */
     protected abstract boolean needToCreateSubNode(String qName);
 
+    @Override
+    public void startEntity(String name) {
+        currentEntity = name;
+    }
+
+    @Override
+    public void endEntity(String name) {
+        currentEntity = null;
+    }
+
+    @Override public void startDTD(String name,String publicId,String systemId) {}
+    @Override public void endDTD() {}
+    @Override public void comment(char[] ch, int start, int end) {}
+    @Override public void startCDATA() {}
+    @Override public void endCDATA() {}
+
+
     /**
      * Receive an opening tag. Initialise the current text to store the characters,
      * create a language map to hold descriptions in different languages,
@@ -87,8 +108,8 @@ public abstract class SaxXmlHandler extends DefaultHandler {
     @Override
     public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
         // initialise the text holding space
-    	currentText.push("");
-    	
+    	currentText.push(new StringBuilder());
+
     	// retrieve the language from the attributes and
     	// create a language map
         Optional<String> lang = languageAttribute(attributes);
@@ -108,16 +129,17 @@ public abstract class SaxXmlHandler extends DefaultHandler {
         currentPath.push(withoutNamespace(qName));
         if (needToCreateSubNode(qName)) { //a new subgraph should be created
             depth++;
-            logger.debug("Pushing depth... " + depth);
+            logger.debug("Pushing depth... " + depth + " -> " + qName);
             currentGraphPath.push(new HashMap<String, Object>());
         }
 
         // Store attributes that are listed in the .properties file
         for (int attr = 0; attr < attributes.getLength(); attr++) { // only certain attributes get stored
-            String attribute = withoutNamespace(attributes.getLocalName(attr));
+            String attribute = withoutNamespace(attributes.getQName(attr));
             if (properties.hasAttributeProperty(attribute)
                     && !properties.getAttributeProperty(attribute).equals(LANGUAGE_OF_DESCRIPTION)) {
-                putPropertyInCurrentGraph(getImportantPath(currentPath, "@" + properties.getAttributeProperty(attribute)), attributes.getValue(attr));
+                String path = getImportantPath(currentPath, "@" + properties.getAttributeProperty(attribute));
+                putPropertyInCurrentGraph(path, attributes.getValue(attr));
             }
         }
 
@@ -129,12 +151,12 @@ public abstract class SaxXmlHandler extends DefaultHandler {
      */
     @Override
     public void endElement(String uri, String localName, String qName) throws SAXException {
-        languagePrefix = null;
         if (languagePrefix == null) {
-            putPropertyInCurrentGraph(getImportantPath(currentPath), currentText.pop());
+            putPropertyInCurrentGraph(getImportantPath(currentPath), currentText.pop().toString());
         } else {
-            putPropertyInGraph(languageMap.get(languagePrefix), getImportantPath(currentPath), currentText.pop());
+            putPropertyInGraph(languageMap.get(languagePrefix), getImportantPath(currentPath), currentText.pop().toString());
         }
+
 
 
     }
@@ -172,7 +194,7 @@ public abstract class SaxXmlHandler extends DefaultHandler {
      */
     private Optional<String> languageAttribute(Attributes attributes) {
         for (int attr = 0; attr < attributes.getLength(); attr++) { // only certain attributes get stored
-            String attribute = withoutNamespace(attributes.getLocalName(attr));
+            String attribute = withoutNamespace(attributes.getQName(attr));
             String prop = properties.getAttributeProperty(attribute);
             if (prop != null && prop.equals(LANGUAGE_OF_DESCRIPTION)) {
                 logger.debug("Language detected!");
@@ -188,7 +210,7 @@ public abstract class SaxXmlHandler extends DefaultHandler {
      * @param qName an element QName that may have a namespace prefix
      * @return the element name without namespace prefix
      */
-    private String withoutNamespace(String qName) {
+    protected String withoutNamespace(String qName) {
         String name = qName;
         int colon = qName.indexOf(":");
         if (colon > -1) {
@@ -205,14 +227,12 @@ public abstract class SaxXmlHandler extends DefaultHandler {
      */
     @Override
     public void characters(char ch[], int start, int length) throws SAXException {
-        String data = new String(ch, start, length);
-        if (data.trim().isEmpty()) {
-            return;
-        }
-        // NB: Not trimming the string because this method is called
-        // for chars either side of encoded entities, which means
-        // that Foo &amp; Bar would end up as "Foo&Bar".
-        currentText.push((currentText.pop() + data).replaceAll("\\s+", " "));
+        // NB: 'Blank' (whitespace) only strings are significant here, because
+        // otherwise a sequence of character, line-break, and an entity will
+        // end up being concatenated with the line-break removed. We therefore
+        // preserve all line breaks and other whitespace here and normalize
+        // it when the text gets added to the graph.
+        currentText.peek().append(ch, start, length);
     }
 
     /**
@@ -250,6 +270,8 @@ public abstract class SaxXmlHandler extends DefaultHandler {
         if (property.startsWith("language")) {
             valuetrimmed = Helpers.iso639DashTwoCode(valuetrimmed);
         }
+
+        valuetrimmed = StringUtils.normalizeSpace(valuetrimmed);
 
         logger.debug("putProp: " + property + " " + valuetrimmed);
 

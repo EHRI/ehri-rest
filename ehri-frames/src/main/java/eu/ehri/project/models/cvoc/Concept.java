@@ -105,7 +105,8 @@ public interface Concept extends AccessibleEntity, IdentifiableEntity,
         }
 
         public void addNarrowerConcept(final Concept concept) {
-            if (JavaHandlerUtils.addUniqueRelationship(it(),
+            if (!concept.asVertex().equals(it())
+                    && JavaHandlerUtils.addUniqueRelationship(it(),
                     concept.asVertex(), Ontology.CONCEPT_HAS_NARROWER)) {
                 updateChildCountCache();
             }
