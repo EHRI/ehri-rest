@@ -60,9 +60,9 @@ import eu.ehri.project.persistence.ActionManager.EventContext;
  * @author paulboon
  *
  */
-public class SkosCoreCvocImporter implements SkosImporter {
+public class XmlSkosImporter implements SkosImporter {
 	   private static final Logger logger = LoggerFactory
-	            .getLogger(SkosCoreCvocImporter.class);
+	            .getLogger(XmlSkosImporter.class);
     protected final FramedGraph<? extends TransactionalGraph> framedGraph;
     protected final Actioner actioner;
     protected Boolean tolerant = false;
@@ -84,8 +84,8 @@ public class SkosCoreCvocImporter implements SkosImporter {
      * @param actioner
      * @param vocabulary
      */
-    public SkosCoreCvocImporter(FramedGraph<? extends TransactionalGraph> framedGraph,
-             final Actioner actioner, Vocabulary vocabulary) {
+    public XmlSkosImporter(FramedGraph<? extends TransactionalGraph> framedGraph,
+            final Actioner actioner, Vocabulary vocabulary) {
         this.framedGraph = framedGraph;
         this.actioner = actioner;
         this.vocabulary = vocabulary;

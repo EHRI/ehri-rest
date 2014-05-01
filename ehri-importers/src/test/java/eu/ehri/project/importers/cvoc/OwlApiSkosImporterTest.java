@@ -1,10 +1,6 @@
 package eu.ehri.project.importers.cvoc;
 
 import eu.ehri.project.importers.ImportLog;
-import eu.ehri.project.models.base.Actioner;
-import eu.ehri.project.models.cvoc.Vocabulary;
-import eu.ehri.project.test.AbstractFixtureTest;
-import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -12,22 +8,7 @@ import static org.junit.Assert.assertEquals;
 /**
  * @author Mike Bryant (http://github.com/mikesname)
  */
-public class OwlApiSkosImporterTest extends AbstractFixtureTest {
-    public static String FILE1 = "cvoc/simple.xml";
-    public static String FILE2 = "cvoc/simple.n3";
-    public static String FILE3 = "cvoc/repository-types.xml";
-
-    private Actioner actioner;
-    private Vocabulary vocabulary;
-
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-        actioner = manager.cast(validUser, Actioner.class);
-        vocabulary = manager.getFrame("cvoc2", Vocabulary.class);
-    }
-
-
+public class OwlApiSkosImporterTest extends AbstractSkosImporterTest {
     @Test
     public void testImportFile1() throws Exception {
         SkosImporter importer = new OwlApiSkosImporter(graph, actioner, vocabulary);
@@ -53,5 +34,27 @@ public class OwlApiSkosImporterTest extends AbstractFixtureTest {
         ImportLog importLog2 = importer
                 .importFile(ClassLoader.getSystemResourceAsStream(FILE3), "repositories");
         assertEquals(23, importLog2.getUnchanged());
+    }
+
+    @Test
+    public void testImportFile4() throws Exception {
+        SkosImporter importer = new JenaSkosImporter(graph, actioner, vocabulary);
+        ImportLog importLog1 = importer
+                .importFile(ClassLoader.getSystemResourceAsStream(FILE4), "camps");
+        assertEquals(8, importLog1.getCreated());
+        ImportLog importLog2 = importer
+                .importFile(ClassLoader.getSystemResourceAsStream(FILE4), "camps");
+        assertEquals(8, importLog2.getUnchanged());
+    }
+
+    @Test
+    public void testImportFile5() throws Exception {
+        SkosImporter importer = new JenaSkosImporter(graph, actioner, vocabulary);
+        ImportLog importLog1 = importer
+                .importFile(ClassLoader.getSystemResourceAsStream(FILE5), "ghettos");
+        assertEquals(2, importLog1.getCreated());
+        ImportLog importLog2 = importer
+                .importFile(ClassLoader.getSystemResourceAsStream(FILE5), "ghettos");
+        assertEquals(2, importLog2.getUnchanged());
     }
 }
