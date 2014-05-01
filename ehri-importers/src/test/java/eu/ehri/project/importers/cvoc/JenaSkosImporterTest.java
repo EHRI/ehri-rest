@@ -1,6 +1,8 @@
 package eu.ehri.project.importers.cvoc;
 
 import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.cvoc.Concept;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -18,9 +20,22 @@ public class JenaSkosImporterTest extends AbstractSkosImporterTest {
     }
 
     @Test
-    public void testImportFile2() throws Exception {
+    public void testSetDefaultLang() throws Exception {
         SkosImporter importer = new JenaSkosImporter(graph, actioner, vocabulary);
-        importer.setFormat("N3");
+        // Setting a two-letter language code should result in a description
+        // being created with the corresponding 3-letter code.
+        ImportLog importLog = importer.setDefaultLang("de")
+                .importFile(ClassLoader.getSystemResourceAsStream(FILE1), "simple 1");
+        assertEquals(1, importLog.getCreated());
+        AccessibleEntity concept = importLog.getAction().getFirstSubject();
+        assertEquals("deu", manager.cast(concept, Concept.class)
+                .getDescriptions().iterator().next().getLanguageOfDescription());
+    }
+
+    @Test
+    public void testImportFile2() throws Exception {
+        SkosImporter importer = new JenaSkosImporter(graph, actioner, vocabulary)
+            .setFormat("N3");
         ImportLog importLog = importer
                 .importFile(ClassLoader.getSystemResourceAsStream(FILE2), "simple 2");
         assertEquals(1, importLog.getCreated());

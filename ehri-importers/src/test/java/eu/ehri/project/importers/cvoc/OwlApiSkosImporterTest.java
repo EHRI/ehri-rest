@@ -1,6 +1,8 @@
 package eu.ehri.project.importers.cvoc;
 
 import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.cvoc.Concept;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -15,6 +17,19 @@ public class OwlApiSkosImporterTest extends AbstractSkosImporterTest {
         ImportLog importLog = importer
                 .importFile(ClassLoader.getSystemResourceAsStream(FILE1), "simple 1");
         assertEquals(1, importLog.getCreated());
+    }
+
+    @Test
+    public void testSetDefaultLang() throws Exception {
+        SkosImporter importer = new OwlApiSkosImporter(graph, actioner, vocabulary);
+        // Setting a two-letter language code should result in a description
+        // being created with the corresponding 3-letter code.
+        ImportLog importLog = importer.setDefaultLang("de")
+                .importFile(ClassLoader.getSystemResourceAsStream(FILE1), "simple 1");
+        assertEquals(1, importLog.getCreated());
+        AccessibleEntity concept = importLog.getAction().getFirstSubject();
+        assertEquals("deu", manager.cast(concept, Concept.class)
+                .getDescriptions().iterator().next().getLanguageOfDescription());
     }
 
     @Test

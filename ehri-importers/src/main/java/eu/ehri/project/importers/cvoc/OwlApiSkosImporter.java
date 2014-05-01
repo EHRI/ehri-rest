@@ -36,7 +36,7 @@ import java.util.Set;
 /**
  * @author Mike Bryant (http://github.com/mikesname)
  */
-public class OwlApiSkosImporter implements SkosImporter {
+public final class OwlApiSkosImporter implements SkosImporter {
     private static final Logger logger = LoggerFactory
             .getLogger(OwlApiSkosImporter.class);
 
@@ -47,25 +47,42 @@ public class OwlApiSkosImporter implements SkosImporter {
     private final OWLOntologyManager owlManager = OWLManager.createOWLOntologyManager();
     private final OWLDataFactory factory = owlManager.getOWLDataFactory();
 
-    private boolean tolerant = false;
+    private final boolean tolerant;
+    private final String format;
+    private final String defaultLang;
 
     public static final String DEFAULT_LANG = "eng";
 
     public OwlApiSkosImporter(FramedGraph<? extends TransactionalGraph> framedGraph, Actioner actioner,
-            Vocabulary vocabulary) {
+            Vocabulary vocabulary, boolean tolerant, String format, String defaultLang) {
         this.framedGraph = framedGraph;
         this.actioner = actioner;
         this.vocabulary = vocabulary;
+        this.tolerant = tolerant;
+        this.format = format;
+        this.defaultLang = defaultLang;
         this.dao = new BundleDAO(framedGraph, vocabulary.idPath());
     }
 
-    public void setTolerant(boolean tolerant) {
-        logger.debug("Setting importer to tolerant: " + tolerant);
-        this.tolerant = tolerant;
+    public OwlApiSkosImporter(FramedGraph<? extends TransactionalGraph> framedGraph, Actioner actioner,
+            Vocabulary vocabulary) {
+        this(framedGraph, actioner, vocabulary, false, null, DEFAULT_LANG);
     }
 
-    public void setFormat(String format) {
-        throw new UnsupportedOperationException("Format is not currently specifiable");
+    public OwlApiSkosImporter setTolerant(boolean tolerant) {
+        logger.debug("Setting importer to tolerant: " + tolerant);
+        return new OwlApiSkosImporter(framedGraph, actioner, vocabulary, tolerant, format, defaultLang);
+    }
+
+    public OwlApiSkosImporter setFormat(String format) {
+        logger.warn("Setting format on " + getClass().getSimpleName() + " is currently ignored");
+        return this;
+    }
+
+    public OwlApiSkosImporter setDefaultLang(String lang) {
+        return new OwlApiSkosImporter(
+                framedGraph, actioner, vocabulary, tolerant, format,
+                Helpers.iso639DashTwoCode(lang));
     }
 
     public ImportLog importFile(String filePath, String logMessage)
@@ -264,7 +281,7 @@ public class OwlApiSkosImporter implements SkosImporter {
             OWLLiteral literalPrefName = (OWLLiteral)property.getValue();
             String languageCode = literalPrefName.hasLang()
                     ? Helpers.iso639DashTwoCode(literalPrefName.getLang())
-                    : DEFAULT_LANG;
+                    : defaultLang;
 
             builder.addDataValue(Ontology.NAME_KEY, literalPrefName.getLiteral())
                     .addDataValue(Ontology.LANGUAGE, languageCode);
@@ -289,7 +306,7 @@ public class OwlApiSkosImporter implements SkosImporter {
                         OWLLiteral literalProp = (OWLLiteral)propVal.getValue();
                         String propLanguageCode = literalProp.hasLang()
                                 ? Helpers.iso639DashTwoCode(literalProp.getLang())
-                                : DEFAULT_LANG;
+                                : defaultLang;
                         if (propLanguageCode.equals(languageCode)) {
                             values.add(literalProp.getLiteral());
                         }

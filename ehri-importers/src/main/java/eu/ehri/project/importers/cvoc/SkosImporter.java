@@ -43,14 +43,24 @@ public interface SkosImporter {
      * of individual item validation errors.
      *
      * @param tolerant Allow individual items to error
+     * @return A new SKOS importer with the given tolerance mode
      */
-    public void setTolerant(boolean tolerant);
+    public SkosImporter setTolerant(boolean tolerant);
 
     /**
      * Set the RDF format. Supported values are: N3, TTL, TURTLE,
      * and the default, RDF/XML.
      *
      * @param format The RDF format string.
+     * @return A new SKOS importer with the given format
      */
-    public void setFormat(String format);
+    public SkosImporter setFormat(String format);
+
+    /**
+     * Set default language for literals without a lang suffix.
+     *
+     * @param lang A two- or three-letter language code
+     * @return A new SKOS importer with the given default language
+     */
+    public SkosImporter setDefaultLang(String lang);
 }

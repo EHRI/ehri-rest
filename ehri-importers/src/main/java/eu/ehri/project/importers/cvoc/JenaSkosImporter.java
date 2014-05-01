@@ -39,7 +39,7 @@ import java.util.Map;
 /**
  * @author Mike Bryant (http://github.com/mikesname)
  */
-public class JenaSkosImporter implements SkosImporter {
+public final class JenaSkosImporter implements SkosImporter {
     private static final Logger logger = LoggerFactory
             .getLogger(JenaSkosImporter.class);
 
@@ -48,8 +48,9 @@ public class JenaSkosImporter implements SkosImporter {
     private final Vocabulary vocabulary;
     private final BundleDAO dao;
 
-    private boolean tolerant = false;
-    private String format = null;
+    private final boolean tolerant;
+    private final String format;
+    private final String defaultLang;
 
     public static final String DEFAULT_LANG = "eng";
 
@@ -65,7 +66,7 @@ public class JenaSkosImporter implements SkosImporter {
 
     // Language-agnostic properties.
     public static final Map<String, URI> GENERAL_PROPS = ImmutableMap.<String, URI>builder()
-            .put("latitude",URI.create("http://www.w3.org/2003/01/geo/wgs84_pos#lat"))
+            .put("latitude", URI.create("http://www.w3.org/2003/01/geo/wgs84_pos#lat"))
             .put("longitude", URI.create("http://www.w3.org/2003/01/geo/wgs84_pos#long"))
             .build();
 
@@ -80,22 +81,47 @@ public class JenaSkosImporter implements SkosImporter {
      * @param framedGraph The framed graph
      * @param actioner    The actioner
      * @param vocabulary  The target vocabulary
+     * @param tolerant    Whether or not to ignore single item validation errors.
+     * @param format      The RDF format
      */
     public JenaSkosImporter(FramedGraph<? extends TransactionalGraph> framedGraph, Actioner actioner,
-            Vocabulary vocabulary) {
+            Vocabulary vocabulary, boolean tolerant, String format, String defaultLang) {
         this.framedGraph = framedGraph;
         this.actioner = actioner;
         this.vocabulary = vocabulary;
+        this.tolerant = tolerant;
+        this.format = format;
+        this.defaultLang = defaultLang;
         this.dao = new BundleDAO(framedGraph, vocabulary.idPath());
     }
 
-    public void setTolerant(boolean tolerant) {
-        logger.debug("Setting importer to tolerant: " + tolerant);
-        this.tolerant = tolerant;
+    /**
+     * Constructor
+     *
+     * @param framedGraph The framed graph
+     * @param actioner    The actioner
+     * @param vocabulary  The target vocabulary
+     */
+    public JenaSkosImporter(FramedGraph<? extends TransactionalGraph> framedGraph, Actioner actioner,
+            Vocabulary vocabulary) {
+        this(framedGraph, actioner, vocabulary, false, null, DEFAULT_LANG);
     }
 
-    public void setFormat(String format) {
-        this.format = format;
+    public JenaSkosImporter setTolerant(boolean tolerant) {
+        logger.debug("Setting importer to tolerant: " + tolerant);
+        return new JenaSkosImporter(
+                framedGraph, actioner, vocabulary, tolerant, format, defaultLang);
+    }
+
+    public JenaSkosImporter setFormat(String format) {
+        return new JenaSkosImporter(
+                framedGraph, actioner, vocabulary, tolerant, format, defaultLang);
+    }
+
+    public JenaSkosImporter setDefaultLang(String lang) {
+        return new JenaSkosImporter(
+                framedGraph, actioner, vocabulary, tolerant, format,
+                Helpers.iso639DashTwoCode(lang));
     }
 
     /**
@@ -297,7 +323,7 @@ public class JenaSkosImporter implements SkosImporter {
             Literal literalPrefName = property.asLiteral();
             String languageCode = isValidLanguageCode(literalPrefName.getLanguage())
                     ? Helpers.iso639DashTwoCode(literalPrefName.getLanguage())
-                    : DEFAULT_LANG;
+                    : defaultLang;
 
             builder.addDataValue(Ontology.NAME_KEY, literalPrefName.getString())
                     .addDataValue(Ontology.LANGUAGE, languageCode);
@@ -318,7 +344,7 @@ public class JenaSkosImporter implements SkosImporter {
                         Literal literal = target.asLiteral();
                         String propLanguageCode = isValidLanguageCode(literal.getLanguage())
                                 ? Helpers.iso639DashTwoCode(literal.getLanguage())
-                                : DEFAULT_LANG;
+                                : defaultLang;
                         if (propLanguageCode.equals(languageCode)) {
                             values.add(literal.getString());
                         }
