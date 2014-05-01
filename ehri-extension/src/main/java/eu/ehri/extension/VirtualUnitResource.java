@@ -27,9 +27,9 @@ public class VirtualUnitResource extends
         AbstractAccessibleEntityResource<VirtualUnit> {
 
     private VirtualUnitViews vuViews;
-
-    public VirtualUnitResource(@Context GraphDatabaseService database) {
-        super(database, VirtualUnit.class);
+    
+    public VirtualUnitResource(@Context GraphDatabaseService database, @Context HttpHeaders requestHeaders) {
+        super(database, requestHeaders, VirtualUnit.class);
         vuViews = new VirtualUnitViews(graph);
     }
 
