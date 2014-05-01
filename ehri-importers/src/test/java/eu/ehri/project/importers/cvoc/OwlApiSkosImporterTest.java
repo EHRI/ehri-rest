@@ -12,7 +12,7 @@ import static org.junit.Assert.assertEquals;
 /**
  * @author Mike Bryant (http://github.com/mikesname)
  */
-public class JenaSkosImporterTest extends AbstractFixtureTest {
+public class OwlApiSkosImporterTest extends AbstractFixtureTest {
     public static String FILE1 = "cvoc/simple.xml";
     public static String FILE2 = "cvoc/simple.n3";
     public static String FILE3 = "cvoc/repository-types.xml";
@@ -30,7 +30,7 @@ public class JenaSkosImporterTest extends AbstractFixtureTest {
 
     @Test
     public void testImportFile1() throws Exception {
-        SkosImporter importer = new JenaSkosImporter(graph, actioner, vocabulary);
+        SkosImporter importer = new OwlApiSkosImporter(graph, actioner, vocabulary);
         ImportLog importLog = importer
                 .importFile(ClassLoader.getSystemResourceAsStream(FILE1), "simple 1");
         assertEquals(1, importLog.getCreated());
@@ -38,8 +38,7 @@ public class JenaSkosImporterTest extends AbstractFixtureTest {
 
     @Test
     public void testImportFile2() throws Exception {
-        SkosImporter importer = new JenaSkosImporter(graph, actioner, vocabulary);
-        importer.setFormat("N3");
+        SkosImporter importer = new OwlApiSkosImporter(graph, actioner, vocabulary);
         ImportLog importLog = importer
                 .importFile(ClassLoader.getSystemResourceAsStream(FILE2), "simple 2");
         assertEquals(1, importLog.getCreated());
@@ -47,7 +46,7 @@ public class JenaSkosImporterTest extends AbstractFixtureTest {
 
     @Test
     public void testImportFile3() throws Exception {
-        SkosImporter importer = new JenaSkosImporter(graph, actioner, vocabulary);
+        SkosImporter importer = new OwlApiSkosImporter(graph, actioner, vocabulary);
         ImportLog importLog1 = importer
                 .importFile(ClassLoader.getSystemResourceAsStream(FILE3), "repositories");
         assertEquals(23, importLog1.getCreated());
@@ -55,5 +54,4 @@ public class JenaSkosImporterTest extends AbstractFixtureTest {
                 .importFile(ClassLoader.getSystemResourceAsStream(FILE3), "repositories");
         assertEquals(23, importLog2.getUnchanged());
     }
-
 }

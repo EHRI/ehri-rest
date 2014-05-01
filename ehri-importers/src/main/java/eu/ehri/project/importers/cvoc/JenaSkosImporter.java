@@ -329,6 +329,7 @@ public class JenaSkosImporter implements SkosImporter {
                 }
             }
             Bundle bundle = builder.build();
+            logger.trace(bundle.toJson());
             descriptions.add(bundle);
         }
 

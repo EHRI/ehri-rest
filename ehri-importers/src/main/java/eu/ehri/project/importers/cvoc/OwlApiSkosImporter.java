@@ -300,7 +300,7 @@ public class OwlApiSkosImporter implements SkosImporter {
                 }
             }
             Bundle bundle = builder.build();
-            System.out.println(bundle.toJson());
+            logger.trace(bundle.toJson());
             descriptions.add(bundle);
         }
 
