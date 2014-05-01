@@ -194,7 +194,7 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
      */
     private Optional<String> languageAttribute(Attributes attributes) {
         for (int attr = 0; attr < attributes.getLength(); attr++) { // only certain attributes get stored
-            String attribute = withoutNamespace(attributes.getLocalName(attr));
+            String attribute = withoutNamespace(attributes.getQName(attr));
             String prop = properties.getAttributeProperty(attribute);
             if (prop != null && prop.equals(LANGUAGE_OF_DESCRIPTION)) {
                 logger.debug("Language detected!");
@@ -210,7 +210,7 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
      * @param qName an element QName that may have a namespace prefix
      * @return the element name without namespace prefix
      */
-    private String withoutNamespace(String qName) {
+    protected String withoutNamespace(String qName) {
         String name = qName;
         int colon = qName.indexOf(":");
         if (colon > -1) {
