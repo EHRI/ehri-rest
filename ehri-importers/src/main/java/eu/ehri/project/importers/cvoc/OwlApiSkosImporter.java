@@ -10,6 +10,7 @@ import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.ImportLog;
+import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.util.Helpers;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.Actioner;
@@ -35,9 +36,9 @@ import java.util.Set;
 /**
  * @author Mike Bryant (http://github.com/mikesname)
  */
-public class SkosVocabularyImporter {
+public class OwlApiSkosImporter implements SkosImporter {
     private static final Logger logger = LoggerFactory
-            .getLogger(SkosVocabularyImporter.class);
+            .getLogger(OwlApiSkosImporter.class);
 
     private final FramedGraph<? extends TransactionalGraph> framedGraph;
     private final Actioner actioner;
@@ -50,62 +51,7 @@ public class SkosVocabularyImporter {
 
     public static final String DEFAULT_LANG = "eng";
 
-    // Borrowed from https://github.com/simonjupp/java-skos-api
-    public static enum RDFVocabulary {
-        LABEL_RELATED("labelRelated"),
-        MEMBER("member"),
-        MEMBER_LIST("memberList"),
-        MAPPING_RELATION("mappingRelation"),
-        BROAD_MATCH("broadMatch"),
-        NARROW_MATCH("narrowMatch"),
-        RELATED_MATCH("relatedMatch"),
-        EXACT_MATCH("exactMatch"),
-        BROADER("broader"),
-        NARROWER("narrower"),
-        BROADER_TRANS("broaderTransitive"),
-        NARROWER_TRANS("narrowerTransitive"),
-        RELATED("related"),
-        HAS_TOP_CONCEPT("hasTopConcept"),
-        SEMANTIC_RELATION("semanticRelation"),
-        CONCEPT("Concept"),
-        LABEL_RELATION("LabelRelation"),
-        SEE_LABEL_RELATION("seeLabelRelation"),
-        COLLECTION("Collection"),
-        CONCEPT_SCHEME("ConceptScheme"),
-        TOP_CONCEPT_OF("topConceptOf"),
-        IN_SCHEME("inScheme"),
-        CLOSE_MATCH("closeMatch"),
-        DOCUMENT("Document"),
-        IMAGE("Image"),
-        ORDERED_COLLECTION("OrderedCollection"),
-        COLLECTABLE_PROPERTY("CollectableProperty"),
-        RESOURCE("Resource"),
-        PREF_LABEL("prefLabel"),
-        ALT_LABEL("altLabel"),
-        COMMENT("comment"),
-        EXAMPLE("example"),
-        NOTE("note"),
-        NOTATION("notation"),
-        SCOPE_NOTE("scopeNote"),
-        HIDDEN_LABEL("hiddenLabel"),
-        EDITORIAL_NOTE("editorialNote"),
-        HISTORY_NOTE("historyNote"),
-        DEFINITION("definition"),
-        CHANGE_NOTE("changeNote");
-
-        private String namespace = "http://www.w3.org/2004/02/skos/core#";
-        private URI uri;
-
-        RDFVocabulary(String localName) {
-            this.uri = URI.create(namespace + localName);
-        }
-
-        public URI getURI() {
-            return uri;
-        }
-    }
-
-    public SkosVocabularyImporter(FramedGraph<? extends TransactionalGraph> framedGraph, Actioner actioner,
+    public OwlApiSkosImporter(FramedGraph<? extends TransactionalGraph> framedGraph, Actioner actioner,
             Vocabulary vocabulary) {
         this.framedGraph = framedGraph;
         this.actioner = actioner;
@@ -118,8 +64,12 @@ public class SkosVocabularyImporter {
         this.tolerant = tolerant;
     }
 
+    public void setFormat(String format) {
+        throw new UnsupportedOperationException("Format is not currently specifiable");
+    }
+
     public ImportLog importFile(String filePath, String logMessage)
-            throws IOException, OWLOntologyCreationException, ValidationError {
+            throws IOException, InputParseError, ValidationError {
         FileInputStream ios = new FileInputStream(filePath);
         try {
             return importFile(ios, logMessage);
@@ -129,7 +79,7 @@ public class SkosVocabularyImporter {
     }
 
     public ImportLog importFile(InputStream ios, String logMessage)
-            throws IOException, ValidationError, OWLOntologyCreationException {
+            throws IOException, ValidationError, InputParseError {
         try {
             // Create a new action for this import
             final ActionManager.EventContext eventContext = new ActionManager(framedGraph, vocabulary).logEvent(
@@ -137,8 +87,14 @@ public class SkosVocabularyImporter {
             // Create a manifest to store the results of the import.
             final ImportLog log = new ImportLog(eventContext);
 
-            OWLOntology ontology = owlManager.loadOntologyFromOntologyDocument(ios);
-            OWLClass conceptClass = factory.getOWLClass(IRI.create(RDFVocabulary.CONCEPT.getURI()));
+            OWLOntology ontology;
+            try {
+                ontology = owlManager.loadOntologyFromOntologyDocument(ios);
+            } catch (OWLOntologyCreationException e) {
+                throw new InputParseError(e);
+            }
+
+            OWLClass conceptClass = factory.getOWLClass(IRI.create(SkosRDFVocabulary.CONCEPT.getURI()));
 
             Map<IRI, Concept> imported = Maps.newHashMap();
 
@@ -257,21 +213,21 @@ public class SkosVocabularyImporter {
             Map<IRI, Concept> conceptMap) {
         Concept current = conceptMap.get(item.getIRI());
 
-        connectRelation(current, item, dataset, conceptMap, RDFVocabulary.BROADER.getURI(), new ConnectFunc() {
+        connectRelation(current, item, dataset, conceptMap, SkosRDFVocabulary.BROADER.getURI(), new ConnectFunc() {
             @Override
             public void connect(Concept current, Concept related) {
                 related.addNarrowerConcept(current);
             }
         });
 
-        connectRelation(current, item, dataset, conceptMap, RDFVocabulary.NARROWER.getURI(), new ConnectFunc() {
+        connectRelation(current, item, dataset, conceptMap, SkosRDFVocabulary.NARROWER.getURI(), new ConnectFunc() {
             @Override
             public void connect(Concept current, Concept related) {
                 current.addNarrowerConcept(related);
             }
         });
 
-        connectRelation(current, item, dataset, conceptMap, RDFVocabulary.RELATED.getURI(), new ConnectFunc() {
+        connectRelation(current, item, dataset, conceptMap, SkosRDFVocabulary.RELATED.getURI(), new ConnectFunc() {
             @Override
             public void connect(Concept current, Concept related) {
                 current.addRelatedConcept(related);
@@ -282,12 +238,12 @@ public class SkosVocabularyImporter {
     private List<Bundle> getDescriptions(OWLNamedIndividual item, OWLOntology ontology) {
 
         Map<String, URI> props = ImmutableMap.<String,URI>builder()
-               .put(Ontology.CONCEPT_ALTLABEL, RDFVocabulary.ALT_LABEL.getURI())
-               .put(Ontology.CONCEPT_HIDDENLABEL, RDFVocabulary.HIDDEN_LABEL.getURI())
-               .put(Ontology.CONCEPT_DEFINITION, RDFVocabulary.DEFINITION.getURI())
-               .put(Ontology.CONCEPT_SCOPENOTE, RDFVocabulary.SCOPE_NOTE.getURI())
-               .put(Ontology.CONCEPT_NOTE, RDFVocabulary.NOTE.getURI())
-               .put(Ontology.CONCEPT_EDITORIAL_NOTE, RDFVocabulary.EDITORIAL_NOTE.getURI())
+               .put(Ontology.CONCEPT_ALTLABEL, SkosRDFVocabulary.ALT_LABEL.getURI())
+               .put(Ontology.CONCEPT_HIDDENLABEL, SkosRDFVocabulary.HIDDEN_LABEL.getURI())
+               .put(Ontology.CONCEPT_DEFINITION, SkosRDFVocabulary.DEFINITION.getURI())
+               .put(Ontology.CONCEPT_SCOPENOTE, SkosRDFVocabulary.SCOPE_NOTE.getURI())
+               .put(Ontology.CONCEPT_NOTE, SkosRDFVocabulary.NOTE.getURI())
+               .put(Ontology.CONCEPT_EDITORIAL_NOTE, SkosRDFVocabulary.EDITORIAL_NOTE.getURI())
                 .build();
         // Language-agnostic properties.
         Map<String,URI> addProps = ImmutableMap.<String,URI>builder()
@@ -300,7 +256,7 @@ public class SkosVocabularyImporter {
         Set<OWLAnnotation> annotations = item.getAnnotations(ontology);
 
         OWLAnnotationProperty prelLabelProp = factory
-                .getOWLAnnotationProperty(IRI.create(RDFVocabulary.PREF_LABEL.getURI()));
+                .getOWLAnnotationProperty(IRI.create(SkosRDFVocabulary.PREF_LABEL.getURI()));
 
         for (OWLAnnotation property : item.getAnnotations(ontology, prelLabelProp)) {
             Bundle.Builder builder = new Bundle.Builder(EntityClass.CVOC_CONCEPT_DESCRIPTION);

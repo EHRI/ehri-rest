@@ -5,7 +5,8 @@ import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.importers.ImportLog;
-import eu.ehri.project.importers.cvoc.JenaVocabularyImporter;
+import eu.ehri.project.importers.cvoc.SkosImporter;
+import eu.ehri.project.importers.cvoc.SkosImporterFactory;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import org.apache.commons.cli.CommandLine;
@@ -82,7 +83,7 @@ public class SkosVocabularyImport extends BaseCommand implements Command {
             UserProfile user = manager.getFrame(cmdLine.getOptionValue("user"),
                     UserProfile.class);
 
-            JenaVocabularyImporter importer = new JenaVocabularyImporter(graph, user, vocabulary);
+            SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, user, vocabulary);
             ImportLog log = importer.importFile(filePath, logMessage);
             log.printReport();
             if (log.getErrored() > 0) {

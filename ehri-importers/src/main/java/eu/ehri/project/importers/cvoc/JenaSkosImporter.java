@@ -39,9 +39,9 @@ import java.util.Map;
 /**
  * @author Mike Bryant (http://github.com/mikesname)
  */
-public class JenaVocabularyImporter {
+public class JenaSkosImporter implements SkosImporter {
     private static final Logger logger = LoggerFactory
-            .getLogger(JenaVocabularyImporter.class);
+            .getLogger(JenaSkosImporter.class);
 
     private final FramedGraph<? extends TransactionalGraph> framedGraph;
     private final Actioner actioner;
@@ -49,83 +49,29 @@ public class JenaVocabularyImporter {
     private final BundleDAO dao;
 
     private boolean tolerant = false;
+    private String format = null;
 
     public static final String DEFAULT_LANG = "eng";
 
-    // Borrowed from https://github.com/simonjupp/java-skos-api
-    public static enum RDFVocabulary {
-        LABEL_RELATED("labelRelated"),
-        MEMBER("member"),
-        MEMBER_LIST("memberList"),
-        MAPPING_RELATION("mappingRelation"),
-        BROAD_MATCH("broadMatch"),
-        NARROW_MATCH("narrowMatch"),
-        RELATED_MATCH("relatedMatch"),
-        EXACT_MATCH("exactMatch"),
-        BROADER("broader"),
-        NARROWER("narrower"),
-        BROADER_TRANS("broaderTransitive"),
-        NARROWER_TRANS("narrowerTransitive"),
-        RELATED("related"),
-        HAS_TOP_CONCEPT("hasTopConcept"),
-        SEMANTIC_RELATION("semanticRelation"),
-        CONCEPT("Concept"),
-        LABEL_RELATION("LabelRelation"),
-        SEE_LABEL_RELATION("seeLabelRelation"),
-        COLLECTION("Collection"),
-        CONCEPT_SCHEME("ConceptScheme"),
-        TOP_CONCEPT_OF("topConceptOf"),
-        IN_SCHEME("inScheme"),
-        CLOSE_MATCH("closeMatch"),
-        DOCUMENT("Document"),
-        IMAGE("Image"),
-        ORDERED_COLLECTION("OrderedCollection"),
-        COLLECTABLE_PROPERTY("CollectableProperty"),
-        RESOURCE("Resource"),
-        PREF_LABEL("prefLabel"),
-        ALT_LABEL("altLabel"),
-        COMMENT("comment"),
-        EXAMPLE("example"),
-        NOTE("note"),
-        NOTATION("notation"),
-        SCOPE_NOTE("scopeNote"),
-        HIDDEN_LABEL("hiddenLabel"),
-        EDITORIAL_NOTE("editorialNote"),
-        HISTORY_NOTE("historyNote"),
-        DEFINITION("definition"),
-        CHANGE_NOTE("changeNote");
-
-        private static String NAMESPACE = "http://www.w3.org/2004/02/skos/core#";
-        private final String localName;
-
-        RDFVocabulary(String localName) {
-            this.localName = localName;
-        }
-
-        public String getURI() {
-            return NAMESPACE + localName;
-        }
-    }
-
     // Language-sensitive properties.
-    public static final Map<String, String> LANGUAGE_PROPS = ImmutableMap.<String, String>builder()
-            .put(Ontology.CONCEPT_ALTLABEL, RDFVocabulary.ALT_LABEL.getURI())
-            .put(Ontology.CONCEPT_HIDDENLABEL, RDFVocabulary.HIDDEN_LABEL.getURI())
-            .put(Ontology.CONCEPT_DEFINITION, RDFVocabulary.DEFINITION.getURI())
-            .put(Ontology.CONCEPT_SCOPENOTE, RDFVocabulary.SCOPE_NOTE.getURI())
-            .put(Ontology.CONCEPT_NOTE, RDFVocabulary.NOTE.getURI())
-            .put(Ontology.CONCEPT_EDITORIAL_NOTE, RDFVocabulary.EDITORIAL_NOTE.getURI())
+    public static final Map<String, URI> LANGUAGE_PROPS = ImmutableMap.<String, URI>builder()
+            .put(Ontology.CONCEPT_ALTLABEL, SkosRDFVocabulary.ALT_LABEL.getURI())
+            .put(Ontology.CONCEPT_HIDDENLABEL, SkosRDFVocabulary.HIDDEN_LABEL.getURI())
+            .put(Ontology.CONCEPT_DEFINITION, SkosRDFVocabulary.DEFINITION.getURI())
+            .put(Ontology.CONCEPT_SCOPENOTE, SkosRDFVocabulary.SCOPE_NOTE.getURI())
+            .put(Ontology.CONCEPT_NOTE, SkosRDFVocabulary.NOTE.getURI())
+            .put(Ontology.CONCEPT_EDITORIAL_NOTE, SkosRDFVocabulary.EDITORIAL_NOTE.getURI())
             .build();
 
     // Language-agnostic properties.
-    public static final Map<String, String> GENERAL_PROPS = ImmutableMap.<String, String>builder()
-            .put("latitude", "http://www.w3.org/2003/01/geo/wgs84_pos#lat")
-            .put("longitude", "http://www.w3.org/2003/01/geo/wgs84_pos#long")
+    public static final Map<String, URI> GENERAL_PROPS = ImmutableMap.<String, URI>builder()
+            .put("latitude",URI.create("http://www.w3.org/2003/01/geo/wgs84_pos#lat"))
+            .put("longitude", URI.create("http://www.w3.org/2003/01/geo/wgs84_pos#long"))
             .build();
 
     // Properties that end up as undeterminedRelation nodes.
-    public static final Map<String, String> RELATION_PROPS = ImmutableMap.of(
-            "owl:sameAs", "http://www.w3.org/2002/07/owl#sameAs"
+    public static final Map<String, URI> RELATION_PROPS = ImmutableMap.of(
+            "owl:sameAs", URI.create("http://www.w3.org/2002/07/owl#sameAs")
     );
 
     /**
@@ -135,7 +81,7 @@ public class JenaVocabularyImporter {
      * @param actioner    The actioner
      * @param vocabulary  The target vocabulary
      */
-    public JenaVocabularyImporter(FramedGraph<? extends TransactionalGraph> framedGraph, Actioner actioner,
+    public JenaSkosImporter(FramedGraph<? extends TransactionalGraph> framedGraph, Actioner actioner,
             Vocabulary vocabulary) {
         this.framedGraph = framedGraph;
         this.actioner = actioner;
@@ -146,6 +92,10 @@ public class JenaVocabularyImporter {
     public void setTolerant(boolean tolerant) {
         logger.debug("Setting importer to tolerant: " + tolerant);
         this.tolerant = tolerant;
+    }
+
+    public void setFormat(String format) {
+        this.format = format;
     }
 
     /**
@@ -186,8 +136,8 @@ public class JenaVocabularyImporter {
             final ImportLog log = new ImportLog(eventContext);
 
             OntModel model = ModelFactory.createOntologyModel();
-            model.read(ios, null);
-            OntClass conceptClass = model.getOntClass(RDFVocabulary.CONCEPT.getURI());
+            model.read(ios, null, format);
+            OntClass conceptClass = model.getOntClass(SkosRDFVocabulary.CONCEPT.getURI().toString());
             ExtendedIterator<? extends OntResource> extendedIterator = conceptClass.listInstances();
             Map<Resource, Concept> imported = Maps.newHashMap();
 
@@ -262,7 +212,7 @@ public class JenaVocabularyImporter {
     private List<Bundle> getUndeterminedRelations(Resource item) {
         List<Bundle> undetermined = Lists.newArrayList();
 
-        for (Map.Entry<String, String> rel : RELATION_PROPS.entrySet()) {
+        for (Map.Entry<String, URI> rel : RELATION_PROPS.entrySet()) {
             for (RDFNode annotation : getObjectWithPredicate(item, rel.getValue())) {
                 if (annotation.isLiteral()) {
                     undetermined.add(new Bundle(EntityClass.UNDETERMINED_RELATIONSHIP)
@@ -279,13 +229,13 @@ public class JenaVocabularyImporter {
         public void connect(Concept current, Concept related);
     }
 
-    private List<RDFNode> getObjectWithPredicate(final Resource item, final String propUri) {
+    private List<RDFNode> getObjectWithPredicate(final Resource item, final URI propUri) {
         // NB: this should be possible with simply item.listProperties(propUri)
         // but for some reason that doesn't work... I can't grok why.
         return item.listProperties().filterKeep(new Filter<Statement>() {
             @Override
             public boolean accept(Statement statement) {
-                return statement.getPredicate().hasURI(propUri);
+                return statement.getPredicate().hasURI(propUri.toString());
             }
         }).mapWith(new Map1<Statement, RDFNode>() {
             @Override
@@ -296,7 +246,7 @@ public class JenaVocabularyImporter {
     }
 
     private void connectRelation(Concept current, Resource item, Map<Resource, Concept> others,
-            String propUri, ConnectFunc connectFunc) {
+            URI propUri, ConnectFunc connectFunc) {
         for (RDFNode other : getObjectWithPredicate(item, propUri)) {
             if (other.isResource()) {
                 Concept related = others.get(other.asResource());
@@ -310,21 +260,21 @@ public class JenaVocabularyImporter {
     private void hookupRelationships(Resource item, Concept current,
             Map<Resource, Concept> conceptMap) {
 
-        connectRelation(current, item, conceptMap, RDFVocabulary.BROADER.getURI(), new ConnectFunc() {
+        connectRelation(current, item, conceptMap, SkosRDFVocabulary.BROADER.getURI(), new ConnectFunc() {
             @Override
             public void connect(Concept current, Concept related) {
                 related.addNarrowerConcept(current);
             }
         });
 
-        connectRelation(current, item, conceptMap, RDFVocabulary.NARROWER.getURI(), new ConnectFunc() {
+        connectRelation(current, item, conceptMap, SkosRDFVocabulary.NARROWER.getURI(), new ConnectFunc() {
             @Override
             public void connect(Concept current, Concept related) {
                 current.addNarrowerConcept(related);
             }
         });
 
-        connectRelation(current, item, conceptMap, RDFVocabulary.RELATED.getURI(), new ConnectFunc() {
+        connectRelation(current, item, conceptMap, SkosRDFVocabulary.RELATED.getURI(), new ConnectFunc() {
             @Override
             public void connect(Concept current, Concept related) {
                 current.addRelatedConcept(related);
@@ -337,7 +287,7 @@ public class JenaVocabularyImporter {
 
         List<Bundle> descriptions = Lists.newArrayList();
 
-        for (RDFNode property : getObjectWithPredicate(item, RDFVocabulary.PREF_LABEL.getURI())) {
+        for (RDFNode property : getObjectWithPredicate(item, SkosRDFVocabulary.PREF_LABEL.getURI())) {
             if (!property.isLiteral()) {
                 continue;
             }
@@ -345,14 +295,14 @@ public class JenaVocabularyImporter {
             Bundle.Builder builder = new Bundle.Builder(EntityClass.CVOC_CONCEPT_DESCRIPTION);
 
             Literal literalPrefName = property.asLiteral();
-            String languageCode = (literalPrefName.getLanguage() != null)
+            String languageCode = isValidLanguageCode(literalPrefName.getLanguage())
                     ? Helpers.iso639DashTwoCode(literalPrefName.getLanguage())
                     : DEFAULT_LANG;
 
             builder.addDataValue(Ontology.NAME_KEY, literalPrefName.getString())
                     .addDataValue(Ontology.LANGUAGE, languageCode);
 
-            for (Map.Entry<String, String> prop : GENERAL_PROPS.entrySet()) {
+            for (Map.Entry<String, URI> prop : GENERAL_PROPS.entrySet()) {
                 for (RDFNode target : getObjectWithPredicate(item, prop.getValue())) {
                     if (target.isLiteral()) {
                         builder.addDataValue(prop.getKey(), target.asLiteral().getString());
@@ -360,13 +310,13 @@ public class JenaVocabularyImporter {
                 }
             }
 
-            for (Map.Entry<String, String> prop : LANGUAGE_PROPS.entrySet()) {
+            for (Map.Entry<String, URI> prop : LANGUAGE_PROPS.entrySet()) {
                 List<String> values = Lists.newArrayList();
 
                 for (RDFNode target : getObjectWithPredicate(item, prop.getValue())) {
                     if (target.isLiteral()) {
                         Literal literal = target.asLiteral();
-                        String propLanguageCode = (literal.getLanguage() != null)
+                        String propLanguageCode = isValidLanguageCode(literal.getLanguage())
                                 ? Helpers.iso639DashTwoCode(literal.getLanguage())
                                 : DEFAULT_LANG;
                         if (propLanguageCode.equals(languageCode)) {
@@ -393,5 +343,9 @@ public class JenaVocabularyImporter {
 
     private Optional<String> getLogMessage(String msg) {
         return msg.trim().isEmpty() ? Optional.<String>absent() : Optional.of(msg);
+    }
+
+    private boolean isValidLanguageCode(String language) {
+        return !(language == null || language.isEmpty());
     }
 }

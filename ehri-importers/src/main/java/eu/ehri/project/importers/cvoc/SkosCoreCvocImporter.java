@@ -60,7 +60,7 @@ import eu.ehri.project.persistence.ActionManager.EventContext;
  * @author paulboon
  *
  */
-public class SkosCoreCvocImporter {
+public class SkosCoreCvocImporter implements SkosImporter {
 	   private static final Logger logger = LoggerFactory
 	            .getLogger(SkosCoreCvocImporter.class);
     protected final FramedGraph<? extends TransactionalGraph> framedGraph;
@@ -91,15 +91,13 @@ public class SkosCoreCvocImporter {
         this.vocabulary = vocabulary;
     }
     
-    /**
-     * Tell the importer to simply skip invalid items rather than throwing an
-     * exception.
-     * 
-     * @param tolerant
-     */
-    public void setTolerant(Boolean tolerant) {
+    public void setTolerant(boolean tolerant) {
         logger.debug("Setting importer to tolerant: " + tolerant);
         this.tolerant = tolerant;
+    }
+
+    public void setFormat(String format) {
+        throw new UnsupportedOperationException("Only RDF/XML is supported");
     }
 
     /*** management part ***/
