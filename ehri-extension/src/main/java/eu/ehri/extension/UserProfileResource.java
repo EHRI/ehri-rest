@@ -45,6 +45,9 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
     public static final String WATCH = "watch";
     public static final String WATCHING = "watching";
     public static final String IS_WATCHING = "isWatching";
+    public static final String BLOCK = "block";
+    public static final String BLOCKED = "blocked";
+    public static final String IS_BLOCKING = "isBlocking";
 
     public UserProfileResource(@Context GraphDatabaseService database, @Context HttpHeaders requestHeaders) {
         super(database, requestHeaders, UserProfile.class);
@@ -249,6 +252,87 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
         UserProfile user = views.detail(userId, accessor);
         try {
             user.removeFollowing(manager.getFrame(otherId, UserProfile.class));
+            graph.getBaseGraph().commit();
+            return Response.status(Status.OK).build();
+        }  finally {
+            cleanupTransaction();
+        }
+    }
+
+    @GET
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Path("{userId:.+}/" + BLOCKED)
+    public StreamingOutput listBlocked(
+            @PathParam("userId") String userId,
+            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
+            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(SORT_PARAM) List<String> order,
+            @QueryParam(FILTER_PARAM) List<String> filters)
+            throws ItemNotFound, BadRequester {
+        Accessor accessor = getRequesterUserProfile();
+        UserProfile user = views.detail(userId, accessor);
+        final Iterable<UserProfile> list = querier.setOffset(offset).setLimit(limit)
+                .orderBy(order).filter(filters).list(user.getBlocked(), accessor);
+        return streamingList(list);
+    }
+
+    @GET
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Path("{userId:.+}/" + BLOCKED + "/page")
+    public StreamingOutput pageBlocked(
+            @PathParam("userId") String userId,
+            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
+            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(SORT_PARAM) List<String> order,
+            @QueryParam(FILTER_PARAM) List<String> filters)
+            throws ItemNotFound, BadRequester {
+        Accessor accessor = getRequesterUserProfile();
+        UserProfile user = views.detail(userId, accessor);
+        final Query.Page<UserProfile> page = querier.setOffset(offset).setLimit(limit)
+                .orderBy(order).filter(filters).page(user.getBlocked(), accessor);
+        return streamingPage(page);
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("{userId:.+}/" + IS_BLOCKING + "/{otherId:.+}")
+    public Response isBlocking(
+            @PathParam("userId") String userId,
+            @PathParam("otherId") String otherId)
+            throws BadRequester, PermissionDenied, ItemNotFound {
+        Accessor accessor = getRequesterUserProfile();
+        UserProfile user = views.detail(userId, accessor);
+        return booleanResponse(user.isBlocking(
+                manager.getFrame(otherId, UserProfile.class)));
+    }
+
+    @POST
+    @Path("{userId:.+}/" + BLOCK + "/{otherId:.+}")
+    public Response blockUserProfile(
+            @PathParam("userId") String userId,
+            @PathParam("otherId") String otherId)
+            throws BadRequester, PermissionDenied, ItemNotFound {
+        Accessor accessor = getRequesterUserProfile();
+        UserProfile user = views.detail(userId, accessor);
+        try {
+            user.addBlocked(manager.getFrame(otherId, UserProfile.class));
+            graph.getBaseGraph().commit();
+            return Response.status(Status.OK).build();
+        }  finally {
+            cleanupTransaction();
+        }
+    }
+
+    @DELETE
+    @Path("{userId:.+}/" + BLOCK + "/{otherId:.+}")
+    public Response unblockUserProfile(
+            @PathParam("userId") String userId,
+            @PathParam("otherId") String otherId)
+            throws BadRequester, PermissionDenied, ItemNotFound {
+        Accessor accessor = getRequesterUserProfile();
+        UserProfile user = views.detail(userId, accessor);
+        try {
+            user.removeBlocked(manager.getFrame(otherId, UserProfile.class));
             graph.getBaseGraph().commit();
             return Response.status(Status.OK).build();
         }  finally {

@@ -69,7 +69,7 @@ public class JavaHandlerUtils {
      * @param from  The source vertex
      * @param to    The target vertex
      * @param label The relationship label name
-     * @return  Whether or not changes were made to the graph.
+     * @return Whether or not changes were made to the graph.
      */
     public static boolean addSingleRelationship(Vertex from, Vertex to, String label) {
         if (!from.equals(to)) {
@@ -99,7 +99,7 @@ public class JavaHandlerUtils {
      * @param from  The source vertex
      * @param to    The target vertex
      * @param label The relationship label name
-     * @return  Whether or not changes were made to the graph.
+     * @return Whether or not changes were made to the graph.
      */
     public static boolean addUniqueRelationship(Vertex from, Vertex to, String label) {
         for (Edge edge : from.getEdges(Direction.OUT, label)) {
@@ -109,5 +109,39 @@ public class JavaHandlerUtils {
         }
         from.addEdge(label, to);
         return true;
+    }
+
+    /**
+     * Determine if a relationship with the given label(s) exists
+     * between source and target vertex.
+     *
+     * @param from   The source vertex
+     * @param to     The target vertex
+     * @param labels The set of labels
+     * @return If a matching relationship is found
+     */
+    public static boolean hasRelationship(Vertex from, Vertex to, String... labels) {
+        for (Edge edge : from.getEdges(Direction.OUT, labels)) {
+            if (edge.getVertex(Direction.IN).equals(to)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Remove all relationships with the given labels between
+     * source and target vertex.
+     *
+     * @param from   The source vertex
+     * @param to     The target vertex
+     * @param labels The set of labels
+     */
+    public static void removeAllRelationships(Vertex from, Vertex to, String... labels) {
+        for (Edge edge : from.getEdges(Direction.OUT, labels)) {
+            if (edge.getVertex(Direction.IN).equals(to)) {
+                edge.remove();
+            }
+        }
     }
 }

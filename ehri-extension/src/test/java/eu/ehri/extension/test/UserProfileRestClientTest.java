@@ -219,6 +219,32 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
     }
 
     @Test
+    public void testBlockAndUnblock() throws Exception {
+        String user1 = getRegularUserProfileId();
+        String user2 = getAdminUserProfileId();
+        String blockedUrl = "/" + Entities.USER_PROFILE + "/" + user1 + "/" + BLOCKED;
+        List<Map<String, Object>> blocked = getItemList(blockedUrl, user1);
+        assertTrue(blocked.isEmpty());
+
+        URI blockUrl = ehriUri(Entities.USER_PROFILE, user1, BLOCK, user2);
+        ClientResponse response = jsonCallAs(user1, blockUrl).post(ClientResponse.class);
+        assertStatus(OK, response);
+        blocked = getItemList(blockedUrl, user1);
+        assertFalse(blocked.isEmpty());
+
+        // Hitting the same URL as a GET should give us a boolean...
+        URI isBlockingUrl = ehriUri(Entities.USER_PROFILE, user1, IS_BLOCKING, user2);
+        response = jsonCallAs(user1, isBlockingUrl).get(ClientResponse.class);
+        assertStatus(OK, response);
+        assertEquals("true", response.getEntity(String.class));
+
+        response = jsonCallAs(user1, blockUrl).delete(ClientResponse.class);
+        assertStatus(OK, response);
+        blocked = getItemList(blockedUrl, user1);
+        assertTrue(blocked.isEmpty());
+    }
+
+    @Test
     public void testWatchingAndUnwatching() throws Exception {
         String user1 = getAdminUserProfileId();
         String item = "c1";
