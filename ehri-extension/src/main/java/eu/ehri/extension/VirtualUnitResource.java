@@ -7,6 +7,7 @@ import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.VirtualUnit;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.DescribedEntity;
+import eu.ehri.project.models.base.Frame;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.views.Query;
 import eu.ehri.project.views.VirtualUnitViews;
@@ -23,14 +24,16 @@ import java.util.List;
  * Provides a Restful interface for the VirtualUnit type
  */
 @Path(Entities.VIRTUAL_UNIT)
-public class VirtualUnitResource extends
+public final class VirtualUnitResource extends
         AbstractAccessibleEntityResource<VirtualUnit> {
 
-    private VirtualUnitViews vuViews;
+    private final VirtualUnitViews vuViews;
+    private final Query<VirtualUnit> virtualUnitQuery;
 
     public VirtualUnitResource(@Context GraphDatabaseService database) {
         super(database, VirtualUnit.class);
         vuViews = new VirtualUnitViews(graph);
+        virtualUnitQuery = new Query<VirtualUnit>(graph, cls);
     }
 
     @GET
@@ -88,7 +91,7 @@ public class VirtualUnitResource extends
         Iterable<VirtualUnit> units = all
                 ? parent.getAllChildren()
                 : parent.getChildren();
-        Query<VirtualUnit> query = new Query<VirtualUnit>(graph, cls)
+        Query<VirtualUnit> query = virtualUnitQuery
                 .setOffset(offset).setLimit(limit).filter(filters)
                 .orderBy(order).filter(filters);
         return streamingList(query.list(units, getRequesterUserProfile()));
@@ -109,7 +112,7 @@ public class VirtualUnitResource extends
         Iterable<VirtualUnit> units = all
                 ? parent.getAllChildren()
                 : parent.getChildren();
-        Query<VirtualUnit> query = new Query<VirtualUnit>(graph, cls)
+        Query<VirtualUnit> query = virtualUnitQuery
                 .setOffset(offset).setLimit(limit).filter(filters)
                 .orderBy(order).filter(filters);
         return streamingPage(query.page(units, getRequesterUserProfile()));
@@ -127,8 +130,7 @@ public class VirtualUnitResource extends
         Iterable<VirtualUnit> units = all
                 ? parent.getAllChildren()
                 : parent.getChildren();
-        Query<VirtualUnit> query = new Query<VirtualUnit>(graph, cls)
-                .filter(filters);
+        Query<VirtualUnit> query = virtualUnitQuery.filter(filters);
         return Response.ok((query.count(units,
                 getRequesterUserProfile())).toString().getBytes()).build();
     }
@@ -145,11 +147,17 @@ public class VirtualUnitResource extends
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    public Response createVirtualUnit(String json,
+    public Response createTopLevelVirtualUnit(String json,
             @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, ItemNotFound, BadRequester {
-        return create(json, accessors);
+        final Accessor currentUser = getCurrentUser();
+        return create(json, accessors, new PostProcess() {
+            @Override
+            public void process(Frame frame) {
+                manager.cast(frame, VirtualUnit.class).setAuthor(currentUser);
+            }
+        });
     }
 
     @PUT
@@ -204,10 +212,29 @@ public class VirtualUnitResource extends
             @QueryParam(FILTER_PARAM) List<String> filters)
             throws AccessDenied, ItemNotFound, BadRequester {
         DescribedEntity item = manager.getFrame(id, DescribedEntity.class);
-        Iterable<VirtualUnit> units = vuViews.getVirtualCollections(item, getRequesterUserProfile());
-        Query.Page<VirtualUnit> page = new Query<VirtualUnit>(graph, VirtualUnit.class)
+        Accessor currentUser = getRequesterUserProfile();
+        Iterable<VirtualUnit> units = vuViews.getVirtualCollections(item, currentUser);
+        Query.Page<VirtualUnit> page = virtualUnitQuery
                 .filter(filters).setOffset(offset).setLimit(limit).orderBy(order)
-                .page(units, getRequesterUserProfile());
+                .page(units, currentUser);
+        return streamingPage(page);
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/forUser/{userId:.+}")
+    public StreamingOutput pageVirtualUnitsForUser(@PathParam("userId") String userId,
+            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
+            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(SORT_PARAM) List<String> order,
+            @QueryParam(FILTER_PARAM) List<String> filters)
+            throws AccessDenied, ItemNotFound, BadRequester {
+        Accessor accessor = manager.getFrame(userId, Accessor.class);
+        Accessor currentUser = getRequesterUserProfile();
+        Iterable<VirtualUnit> units = vuViews.getVirtualCollectionsForUser(accessor, currentUser);
+        Query.Page<VirtualUnit> page = virtualUnitQuery
+                .filter(filters).setOffset(offset).setLimit(limit).orderBy(order)
+                .page(units, currentUser);
         return streamingPage(page);
     }
 
@@ -234,9 +261,10 @@ public class VirtualUnitResource extends
             PermissionDenied, ValidationError, IntegrityError, BadRequester {
         Bundle entityBundle = Bundle.fromString(json);
 
+        Accessor currentUser = getRequesterUserProfile();
         VirtualUnit doc = new LoggingCrudViews<VirtualUnit>(graph,
                 VirtualUnit.class, parent).create(entityBundle,
-                getRequesterUserProfile(), getLogMessage());
+                currentUser, getLogMessage());
         parent.addChild(doc);
         return doc;
     }

@@ -10,6 +10,7 @@ import javax.ws.rs.core.Response.Status;
 
 //import org.apache.log4j.Logger;
 import eu.ehri.project.exceptions.*;
+import eu.ehri.project.models.base.Frame;
 import eu.ehri.project.persistence.Mutation;
 import eu.ehri.project.persistence.Serializer;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -46,6 +47,19 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
     protected final LoggingCrudViews<E> views;
     protected final Query<E> querier;
     protected final Class<E> cls;
+
+    /**
+     * Functor used to post-process items.
+     */
+    public static interface PostProcess {
+        public void process(Frame frame);
+    }
+
+    public static enum NoOpPostProcess implements PostProcess {
+        INSTANCE;
+        @Override
+        public void process(Frame frame) {}
+    }
 
     /**
      * Constructor
@@ -141,6 +155,8 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * @param json        The json representation of the entity to create (no vertex
      *                    'id' fields)
      * @param accessorIds List of accessors who can initially view this item
+     * @param process A PostProcess functor. This is most commonly used to create
+     *                additional relationships on the created item.
      * @return The response of the create request, the 'location' will contain
      *         the url of the newly created instance.
      * @throws PermissionDenied
@@ -149,7 +165,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * @throws DeserializationError
      * @throws BadRequester
      */
-    public Response create(String json, List<String> accessorIds)
+    public Response create(String json, List<String> accessorIds, PostProcess process)
             throws PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, BadRequester {
         graph.getBaseGraph().checkNotInTransaction();
@@ -163,6 +179,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
 
             UriBuilder ub = uriInfo.getAbsolutePathBuilder();
             URI docUri = ub.path(entity.getId()).build();
+            process.process(entity);
             graph.getBaseGraph().commit();
             return Response.status(Status.CREATED).location(docUri)
                     .entity(getRepresentation(entity).getBytes()).build();
@@ -172,6 +189,12 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
         } finally {
             cleanupTransaction();
         }
+    }
+
+    public Response create(String json, List<String> accessorIds)
+            throws PermissionDenied, ValidationError, IntegrityError,
+            DeserializationError, BadRequester {
+        return create(json, accessorIds, NoOpPostProcess.INSTANCE);
     }
 
     /**

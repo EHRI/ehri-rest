@@ -46,22 +46,37 @@ public class VirtualUnitRestClientTest extends BaseRestClientTest {
     @Test
     public void testCreateDeleteVirtualUnit() throws Exception {
         // Create
-        ClientResponse response = jsonCallAs(getAdminUserProfileId(), getCreationUri())
+        String currentUserId = getAdminUserProfileId();
+        ClientResponse response = jsonCallAs(currentUserId, getCreationUri())
                 .entity(jsonVirtualUnitStr).post(ClientResponse.class);
 
         assertStatus(CREATED, response);
 
         // Get created doc via the response location?
         URI location = response.getLocation();
-        response = jsonCallAs(getAdminUserProfileId(), location)
+        response = jsonCallAs(currentUserId, location)
                 .get(ClientResponse.class);
         assertStatus(OK, response);
+
+        // Ensure the user now owns that item:
+        response = jsonCallAs(currentUserId,
+                ehriUri(Entities.VIRTUAL_UNIT, "forUser", currentUserId))
+                .get(ClientResponse.class);
+
+        String json = response.getEntity(String.class);
+        assertStatus(OK, response);
+        // Check the response contains a new version
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode rootNode = mapper.readValue(json, JsonNode.class);
+        assertFalse(rootNode.path("total").isMissingNode());
+        assertEquals(1, rootNode.path("total").getIntValue());
     }
 
     @Test
     public void testCreateDeleteChildVirtualUnit() throws Exception {
         // Create
-        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
+        String currentUserId = getAdminUserProfileId();
+        ClientResponse response = jsonCallAs(currentUserId,
                 ehriUri(Entities.VIRTUAL_UNIT, FIRST_DOC_ID, Entities.VIRTUAL_UNIT))
                 .entity(jsonVirtualUnitStr).post(ClientResponse.class);
 
@@ -69,7 +84,7 @@ public class VirtualUnitRestClientTest extends BaseRestClientTest {
 
         // Get created doc via the response location?
         URI location = response.getLocation();
-        response = jsonCallAs(getAdminUserProfileId(), location)
+        response = jsonCallAs(currentUserId, location)
                 .get(ClientResponse.class);
         assertStatus(OK, response);
     }
@@ -268,6 +283,21 @@ public class VirtualUnitRestClientTest extends BaseRestClientTest {
     public void testPageVirtualUnitsForItem() throws Exception {
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
                 ehriUri(Entities.VIRTUAL_UNIT, "for", "c2"))
+                .get(ClientResponse.class);
+
+        String json = response.getEntity(String.class);
+        assertStatus(OK, response);
+        // Check the response contains a new version
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode rootNode = mapper.readValue(json, JsonNode.class);
+        assertFalse(rootNode.path("total").isMissingNode());
+        assertEquals(1, rootNode.path("total").getIntValue());
+    }
+
+    @Test
+    public void testPageVirtualUnitsForUser() throws Exception {
+        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
+                ehriUri(Entities.VIRTUAL_UNIT, "forUser", "linda"))
                 .get(ClientResponse.class);
 
         String json = response.getEntity(String.class);
