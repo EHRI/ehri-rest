@@ -1,23 +1,24 @@
 package eu.ehri.extension;
 
+import com.tinkerpop.blueprints.Vertex;
+import com.tinkerpop.gremlin.java.GremlinPipeline;
+import com.tinkerpop.pipes.PipeFunction;
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.*;
+import eu.ehri.project.models.DocumentDescription;
+import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.VirtualUnit;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.DescribedEntity;
 import eu.ehri.project.models.base.Frame;
-import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.views.Query;
 import eu.ehri.project.views.VirtualUnitViews;
-import eu.ehri.project.views.impl.LoggingCrudViews;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
-import javax.ws.rs.core.Response.Status;
-import java.net.URI;
 import java.util.List;
 
 /**
@@ -27,13 +28,18 @@ import java.util.List;
 public final class VirtualUnitResource extends
         AbstractAccessibleEntityResource<VirtualUnit> {
 
+    // Query string key for description IDs
+    public static final String DESCRIPTION_ID = "description";
+
     private final VirtualUnitViews vuViews;
     private final Query<VirtualUnit> virtualUnitQuery;
+    private final AclManager aclManager;
 
     public VirtualUnitResource(@Context GraphDatabaseService database) {
         super(database, VirtualUnit.class);
         vuViews = new VirtualUnitViews(graph);
         virtualUnitQuery = new Query<VirtualUnit>(graph, cls);
+        aclManager = new AclManager(graph);
     }
 
     @GET
@@ -152,10 +158,12 @@ public final class VirtualUnitResource extends
             throws PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, ItemNotFound, BadRequester {
         final Accessor currentUser = getCurrentUser();
+
         return create(json, accessors, new PostProcess() {
             @Override
             public void process(Frame frame) {
-                manager.cast(frame, VirtualUnit.class).setAuthor(currentUser);
+                VirtualUnit virtualUnit = manager.cast(frame, VirtualUnit.class);
+                virtualUnit.setAuthor(currentUser);
             }
         });
     }
@@ -182,24 +190,25 @@ public final class VirtualUnitResource extends
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/" + Entities.VIRTUAL_UNIT)
-    public Response createVirtualUnit(@PathParam("id") String id,
-            String json, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
+    public Response createChildVirtualUnit(@PathParam("id") String id,
+            String json, @QueryParam(ACCESSOR_PARAM) List<String> accessors,
+            @QueryParam(DESCRIPTION_ID) List<String> descriptionIds)
             throws AccessDenied, PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, ItemNotFound, BadRequester {
-        Accessor user = getRequesterUserProfile();
-        VirtualUnit parent = views.detail(id, user);
-        try {
-            VirtualUnit doc = createVirtualUnit(json, parent);
-            new AclManager(graph).setAccessors(doc,
-                    getAccessors(accessors, user));
-            graph.getBaseGraph().commit();
-            return buildResponseFromVirtualUnit(doc);
-        } catch (SerializationError e) {
-            graph.getBaseGraph().rollback();
-            throw new RuntimeException(e);
-        } finally {
-            cleanupTransaction();
-        }
+        final Accessor currentUser = getRequesterUserProfile();
+        final Iterable<DocumentDescription> documentDescriptions
+                = getDocumentDescriptions(descriptionIds, currentUser);
+        final VirtualUnit parent = views.detail(id, currentUser);
+        return create(json, accessors, new PostProcess() {
+            @Override
+            public void process(Frame frame) {
+                VirtualUnit virtualUnit = manager.cast(frame, VirtualUnit.class);
+                parent.addChild(virtualUnit);
+                for (DocumentDescription description : documentDescriptions) {
+                    virtualUnit.addReferencedDescription(description);
+                }
+            }
+        });
     }
 
     @GET
@@ -238,34 +247,30 @@ public final class VirtualUnitResource extends
         return streamingPage(page);
     }
 
-    // Helpers
+    /**
+     * Fetch a set of document descriptions from a list of description IDs.
+     * We filter these for accessibility and content type (to ensure
+     * they actually are the right type.
+     */
+    private Iterable<DocumentDescription> getDocumentDescriptions(
+            List<String> descriptionIds, Accessor accessor)
+            throws ItemNotFound, BadRequester {
+        Iterable<Vertex> vertices = manager.getVertices(descriptionIds);
 
-    private Response buildResponseFromVirtualUnit(VirtualUnit doc)
-            throws SerializationError {
-        String jsonStr = getSerializer().vertexFrameToJson(doc);
+        PipeFunction<Vertex, Boolean> aclFilter = aclManager.getAclFilterFunction(accessor);
 
-        try {
-            // FIXME: Hide the details of building this path
-            URI docUri = UriBuilder.fromUri(uriInfo.getBaseUri())
-                    .segment(Entities.VIRTUAL_UNIT)
-                    .segment(doc.getId()).build();
-            return Response.status(Status.CREATED).location(docUri)
-                    .entity((jsonStr).getBytes()).build();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
+        PipeFunction<Vertex, Boolean> typeFilter = new PipeFunction<Vertex, Boolean>() {
+            @Override
+            public Boolean compute(Vertex vertex) {
+                EntityClass entityClass = manager.getEntityClass(vertex);
+                return entityClass != null && entityClass
+                        .equals(EntityClass.DOCUMENT_DESCRIPTION);
+            }
+        };
 
-    private VirtualUnit createVirtualUnit(String json,
-            VirtualUnit parent) throws DeserializationError,
-            PermissionDenied, ValidationError, IntegrityError, BadRequester {
-        Bundle entityBundle = Bundle.fromString(json);
+        GremlinPipeline<Vertex, Vertex> descriptions = new GremlinPipeline<Vertex, Vertex>(
+                vertices).filter(typeFilter).filter(aclFilter);
 
-        Accessor currentUser = getRequesterUserProfile();
-        VirtualUnit doc = new LoggingCrudViews<VirtualUnit>(graph,
-                VirtualUnit.class, parent).create(entityBundle,
-                currentUser, getLogMessage());
-        parent.addChild(doc);
-        return doc;
+        return graph.frameVertices(descriptions.toList(), DocumentDescription.class);
     }
 }
