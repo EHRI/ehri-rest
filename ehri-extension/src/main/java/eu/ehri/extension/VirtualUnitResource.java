@@ -154,16 +154,22 @@ public final class VirtualUnitResource extends
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     public Response createTopLevelVirtualUnit(String json,
-            @QueryParam(ACCESSOR_PARAM) List<String> accessors)
+            @QueryParam(ACCESSOR_PARAM) List<String> accessors,
+            @QueryParam(DESCRIPTION_ID) List<String> descriptionIds)
             throws PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, ItemNotFound, BadRequester {
         final Accessor currentUser = getCurrentUser();
+        final Iterable<DocumentDescription> documentDescriptions
+                = getDocumentDescriptions(descriptionIds, currentUser);
 
         return create(json, accessors, new PostProcess() {
             @Override
             public void process(Frame frame) {
                 VirtualUnit virtualUnit = manager.cast(frame, VirtualUnit.class);
                 virtualUnit.setAuthor(currentUser);
+                for (DocumentDescription description : documentDescriptions) {
+                    virtualUnit.addReferencedDescription(description);
+                }
             }
         });
     }
