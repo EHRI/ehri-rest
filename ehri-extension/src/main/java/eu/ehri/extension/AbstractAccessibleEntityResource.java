@@ -53,15 +53,14 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * Functor used to post-process items.
      */
     public static interface PostProcess {
-        public void process(Frame frame) throws PermissionDenied, BadRequester;
+        public void process(Frame frame) throws PermissionDenied;
     }
 
     public static enum NoOpPostProcess implements PostProcess {
         INSTANCE;
 
         @Override
-        public void process(Frame frame) throws PermissionDenied, BadRequester {
-        }
+        public void process(Frame frame) {}
     }
 
     /**
