@@ -10,7 +10,6 @@ import javax.ws.rs.core.Response.Status;
 
 //import org.apache.log4j.Logger;
 import eu.ehri.project.exceptions.*;
-import eu.ehri.project.models.base.Frame;
 import eu.ehri.project.persistence.Mutation;
 import eu.ehri.project.persistence.Serializer;
 import eu.ehri.project.views.AclViews;
@@ -52,16 +51,16 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
     /**
      * Functor used to post-process items.
      */
-    public static interface PostProcess {
-        public void process(Frame frame) throws PermissionDenied;
+    public static interface PostProcess<E extends AccessibleEntity> {
+        public void process(E frame) throws PermissionDenied;
     }
 
-    public static enum NoOpPostProcess implements PostProcess {
-        INSTANCE;
-
+    public static class NoOpPostProcess<E extends AccessibleEntity> implements PostProcess<E> {
         @Override
-        public void process(Frame frame) {}
+        public void process(E frame) {}
     }
+
+    private final PostProcess<E> noOpPostProcess = new NoOpPostProcess<E>();
 
     /**
      * Constructor
@@ -168,7 +167,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * @throws DeserializationError
      * @throws BadRequester
      */
-    public Response create(String json, List<String> accessorIds, PostProcess postProcess)
+    public Response create(String json, List<String> accessorIds, PostProcess<E> postProcess)
             throws PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, BadRequester {
         graph.getBaseGraph().checkNotInTransaction();
@@ -198,7 +197,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
     public Response create(String json, List<String> accessorIds)
             throws PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, BadRequester {
-        return create(json, accessorIds, NoOpPostProcess.INSTANCE);
+        return create(json, accessorIds, noOpPostProcess);
     }
 
     /**

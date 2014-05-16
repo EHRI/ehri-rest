@@ -107,10 +107,9 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
             for (String groupId : groupIds) {
                 groups.add(manager.getFrame(groupId, Group.class));
             }
-            return create(json, accessors, new PostProcess() {
+            return create(json, accessors, new PostProcess<UserProfile>() {
                 @Override
-                public void process(Frame frame) throws PermissionDenied {
-                    UserProfile userProfile = manager.cast(frame, UserProfile.class);
+                public void process(UserProfile userProfile) throws PermissionDenied {
                     for (Group group: groups) {
                         aclViews.addAccessorToGroup(group, userProfile, currentUser);
                     }

@@ -12,7 +12,6 @@ import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.VirtualUnit;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.DescribedEntity;
-import eu.ehri.project.models.base.Frame;
 import eu.ehri.project.views.Query;
 import eu.ehri.project.views.VirtualUnitViews;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -162,10 +161,9 @@ public final class VirtualUnitResource extends
         final Iterable<DocumentDescription> documentDescriptions
                 = getDocumentDescriptions(descriptionIds, currentUser);
 
-        return create(json, accessors, new PostProcess() {
+        return create(json, accessors, new PostProcess<VirtualUnit>() {
             @Override
-            public void process(Frame frame) {
-                VirtualUnit virtualUnit = manager.cast(frame, VirtualUnit.class);
+            public void process(VirtualUnit virtualUnit) {
                 virtualUnit.setAuthor(currentUser);
                 for (DocumentDescription description : documentDescriptions) {
                     virtualUnit.addReferencedDescription(description);
@@ -205,10 +203,9 @@ public final class VirtualUnitResource extends
         final Iterable<DocumentDescription> documentDescriptions
                 = getDocumentDescriptions(descriptionIds, currentUser);
         final VirtualUnit parent = views.detail(id, currentUser);
-        return create(json, accessors, new PostProcess() {
+        return create(json, accessors, new PostProcess<VirtualUnit>() {
             @Override
-            public void process(Frame frame) {
-                VirtualUnit virtualUnit = manager.cast(frame, VirtualUnit.class);
+            public void process(VirtualUnit virtualUnit) {
                 parent.addChild(virtualUnit);
                 for (DocumentDescription description : documentDescriptions) {
                     virtualUnit.addReferencedDescription(description);

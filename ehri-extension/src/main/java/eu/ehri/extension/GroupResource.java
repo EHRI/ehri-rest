@@ -22,7 +22,6 @@ import javax.ws.rs.core.StreamingOutput;
 import com.google.common.collect.Sets;
 import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.UserProfile;
-import eu.ehri.project.models.base.Frame;
 import eu.ehri.project.views.AclViews;
 import org.neo4j.graphdb.GraphDatabaseService;
 
@@ -102,10 +101,9 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
             for (String member : members) {
                 groupMembers.add(manager.getFrame(member, Accessor.class));
             }
-            return create(json, accessors, new PostProcess() {
+            return create(json, accessors, new PostProcess<Group>() {
                 @Override
-                public void process(Frame frame) throws PermissionDenied {
-                    Group group = manager.cast(frame, Group.class);
+                public void process(Group group) throws PermissionDenied {
                     for (Accessor member: groupMembers) {
                         aclViews.addAccessorToGroup(group, member, currentUser);
                     }

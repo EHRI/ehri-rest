@@ -20,7 +20,6 @@ import javax.ws.rs.core.StreamingOutput;
 
 import eu.ehri.project.acl.PermissionType;
 import eu.ehri.project.exceptions.*;
-import eu.ehri.project.models.base.Frame;
 import eu.ehri.project.views.ViewHelper;
 import org.neo4j.graphdb.GraphDatabaseService;
 
@@ -319,10 +318,9 @@ public class CvocConceptResource extends
             DeserializationError, ItemNotFound, BadRequester {
         final Accessor user = getRequesterUserProfile();
         final Concept parent = views.detail(id, user);
-        return create(json, accessors, new PostProcess() {
+        return create(json, accessors, new PostProcess<Concept>() {
             @Override
-            public void process(Frame frame) {
-                Concept concept = manager.cast(frame, Concept.class);
+            public void process(Concept concept) {
                 parent.addNarrowerConcept(concept);
                 concept.setVocabulary(parent.getVocabulary());
             }
