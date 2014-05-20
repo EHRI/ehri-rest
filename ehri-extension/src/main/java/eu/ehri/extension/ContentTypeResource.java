@@ -22,7 +22,7 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.ContentType;
 
 /**
- * Provides a RESTfull interface for the ContentType class. Note: ContentType instances
+ * Provides a RESTful interface for the ContentType class. Note: ContentType instances
  * are created by the system, so we do not have create/update/delete methods
  * here.
  */

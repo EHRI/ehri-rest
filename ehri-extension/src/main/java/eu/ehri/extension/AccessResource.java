@@ -21,7 +21,7 @@ import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.views.AclViews;
 
 /**
- * Provides a RESTfull(ish) interface for setting PermissionTarget perms.
+ * Provides a RESTful(ish) interface for setting PermissionTarget perms.
  */
 @Path("access")
 public class AccessResource extends

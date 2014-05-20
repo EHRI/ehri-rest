@@ -11,7 +11,7 @@ import javax.ws.rs.core.*;
 import java.util.List;
 
 /**
- * Provides a RESTfull interface for the HistoricalAgent model.
+ * Provides a RESTful interface for the HistoricalAgent model.
  */
 @Path(Entities.HISTORICAL_AGENT)
 public class HistoricalAgentResource extends AbstractAccessibleEntityResource<HistoricalAgent> {

@@ -34,7 +34,7 @@ import eu.ehri.project.views.impl.LoggingCrudViews;
 import eu.ehri.project.views.Query;
 
 /**
- * Provides a RESTfull interface for the Repository
+ * Provides a RESTful interface for the Repository
  */
 @Path(Entities.REPOSITORY)
 public class RepositoryResource extends AbstractAccessibleEntityResource<Repository> {
