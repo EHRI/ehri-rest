@@ -32,6 +32,9 @@ public interface AuthoritativeSet extends AccessibleEntity, IdentifiableEntity,
     @JavaHandler
     public void addItem(final AuthoritativeItem item);
 
+    @JavaHandler
+    public void updateChildCountCache();
+
     /**
      * Implementation of complex methods.
      */
