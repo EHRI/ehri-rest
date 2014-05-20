@@ -106,6 +106,8 @@ public class EadImporter extends EaImporter {
                 DocumentaryUnit parent = framedGraph.frame(permissionScope.asVertex(), DocumentaryUnit.class);
                 parent.addChild(frame);
                 frame.setPermissionScope(parent);
+            } else if(unitEntity.equals(EntityClass.VIRTUAL_UNIT)) {
+              // no scope needed for top VirtualUnit
             } else {
                 logger.error("Unknown scope type for documentary unit: {}", scopeType);
             }

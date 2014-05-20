@@ -4,7 +4,10 @@
  */
 package eu.ehri.project.importers;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
+import com.tinkerpop.blueprints.Direction;
+import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.definitions.Ontology;
@@ -12,13 +15,16 @@ import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.models.DocumentDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Link;
+import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.UndeterminedRelationship;
 import eu.ehri.project.models.VirtualUnit;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Description;
+import eu.ehri.project.models.base.Frame;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
@@ -29,6 +35,7 @@ import eu.ehri.project.views.impl.CrudViews;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -49,6 +56,7 @@ public class EadIntoVirtualCollectionImporter extends IcaAtomEadImporter {
     public static final String WP2AUTHOR = "EHRI";
     public static final String PROPERTY_AUTHOR = "authors";
     private VirtualUnit virtualCollection;
+    private PermissionScope virtualPermissionScope;
 
     
     private List<String> idPath;
@@ -77,13 +85,12 @@ public class EadIntoVirtualCollectionImporter extends IcaAtomEadImporter {
     }
 
 
-    private List<String> getVirtualIdPath(){
-        List<String> virtualPath = new ArrayList<String>();
-        for(String step : idPath){
-            virtualPath.add(VIRTUAL_PREFIX+step);
-        }
-        return virtualPath;
+    @Override
+    public BundleDAO getPersister() {
+        return new BundleDAO(framedGraph,
+                Iterables.concat(virtualPermissionScope.idPath(), idPath));
     }
+    
     /**
      * Tries to resolve the undetermined relationships for Wp2 ead files by iterating through all
      * UndeterminedRelationships, finding the DescribedEntity meant by the 'targetUrl' in the Relationship and creating
@@ -98,16 +105,87 @@ public class EadIntoVirtualCollectionImporter extends IcaAtomEadImporter {
     @Override
     protected void solveUndeterminedRelationships(DocumentaryUnit unit, Bundle descBundle) throws ValidationError {
         //always create a VirtualUnit
-        BundleDAO persister = getPersister(getVirtualIdPath());
+        BundleDAO persister = getPersister();//new BundleDAO(framedGraph, virtualPermissionScope.idPath());
         Map<String, Object> virtualUnitMap = new HashMap<String, Object>();
         virtualUnitMap.put(Ontology.IDENTIFIER_KEY, VIRTUAL_PREFIX+unit.getIdentifier());
         Bundle virtualUnitBundle = new Bundle(EntityClass.VIRTUAL_UNIT, virtualUnitMap);
-        //  add all descBundle descriptions to the VirtualUnit.  
-        virtualUnitBundle.withRelation(Ontology.VC_DESCRIBED_BY, descBundle);
         Mutation<VirtualUnit> mutation = persister.createOrUpdate(virtualUnitBundle, VirtualUnit.class);
         VirtualUnit virtualUnit = mutation.getNode();
-        logger.debug((virtualCollection == null) + " virtual collection ");
-        virtualUnit.setPermissionScope(virtualCollection);
+       
+        
+        //  add all descBundle descriptions to the VirtualUnit.     
+        for (DocumentDescription unitdesc : unit.getDocumentDescriptions()) {
+            String lang = unitdesc.getLanguageOfDescription();
+            if(lang != null && lang.equals(descBundle.getDataValue(Ontology.LANGUAGE_OF_DESCRIPTION))){
+               virtualUnit.addReferencedDescription(unitdesc);
+            } else {
+                logger.error("language of found description is " + lang + " which is not in the descBundle");
+            }
+        }
+        
+        if (virtualCollection != null) {
+            if (mutation.created()) {
+                logger.error("virtualPermissionScope idPath: " + virtualPermissionScope.idPath());
+                if (idPath.isEmpty() && manager.getEntityClass(permissionScope).equals(EntityClass.REPOSITORY)) {
+                    virtualCollection.addChild(virtualUnit);
+                    virtualUnit.setPermissionScope(virtualPermissionScope);
+                    virtualPermissionScope = virtualUnit;
+                    logger.error("repo " + virtualPermissionScope.idPath());
+                } else {
+                    logger.error(" not the top level");
+                    //the parent is created last, so find all the children of this unit, they already exist
+                    Iterable<Frame> children = virtualCollection.getContainedItems();
+                    int count=0;
+                    for(Frame childframe : children){
+                        count++;
+                        VirtualUnit child = framedGraph.frame(childframe.asVertex(), VirtualUnit.class);
+                        logger.debug(child.getIdentifier() + " has parent " + child.getParent().getIdentifier());
+                        if(child.getParent().getIdentifier().equals(virtualCollection.getIdentifier())){
+                            logger.error(" ----------- found child " + child.getIdentifier() + " of parent "  + virtualUnit.getIdentifier());
+                            virtualUnit.addChild(child);
+                            child.setPermissionScope(virtualUnit);
+                        }
+                            
+                    }
+                    logger.error("containedItems: " + count);
+//                    Iterable<DocumentDescription> parentDesc = docParent.getDocumentDescriptions();
+//                    for (DocumentDescription unitdesc : parentDesc) {
+//                        String lang = unitdesc.getLanguageOfDescription();
+//                        if (lang != null && lang.equals(descBundle.getDataValue(Ontology.LANGUAGE_OF_DESCRIPTION))) {
+//                            //found the description of the parent of the current DocUnit. 
+//                            //let's find the attached VirtualUnit:
+//                            Iterable<Edge> virtUnitsEdges = unitdesc.asVertex().getEdges(Direction.IN, Ontology.VC_DESCRIBED_BY);
+//                            for (Edge e : virtUnitsEdges) {
+//                                parent = framedGraph.frame(e.getVertex(Direction.OUT), VirtualUnit.class);
+//                                parent.addChild(virtualUnit);
+//                                virtualUnit.setPermissionScope(parent);
+//                                logger.error("vu " +  parent.getIdentifier());
+//                                virtualPermissionScope = parent;
+//                                break;
+//                            }
+//                        } else {
+//                            logger.error("language of found description is " + lang + " which is not in the descBundle");
+//                        }
+//                    }
+                    
+                }
+//                logger.error("virtualPermissionScope idPath: "+virtualPermissionScope.idPath() + " "+ virtualUnit.getPermissionScope().idPath());
+
+            } else{
+                logger.error("idPath isEmpty " + idPath.isEmpty() + " mutation created " + mutation.created());
+            }
+
+//            VirtualUnit parent = framedGraph.frame(virtualCollection.asVertex(), VirtualUnit.class);
+//            logger.error("parent: "+ parent.getIdentifier());
+//                parent.addChild(virtualUnit);
+//                virtualUnit.setPermissionScope(parent);
+        } else {
+            logger.error("Unknown virtualcollection for virtual unit: {}", virtualUnit.getIdentifier());
+        }
+        
+        
+        
+
         
         //Try to resolve the undetermined relationships
         //we can only create the annotations after the DocumentaryUnit and its Description have been added to the graph,
@@ -159,6 +237,7 @@ public class EadIntoVirtualCollectionImporter extends IcaAtomEadImporter {
     }
 
     void setVirtualCollection(VirtualUnit virtualcollection) {
-        this.virtualCollection=virtualcollection;
+        this.virtualCollection = virtualcollection;
+        this.virtualPermissionScope = virtualcollection;
     }
 }

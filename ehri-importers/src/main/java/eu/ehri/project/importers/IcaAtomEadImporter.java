@@ -94,11 +94,9 @@ public class IcaAtomEadImporter extends EaImporter {
 //                persister.createOrUpdate(unit, DocumentaryUnit.class);
         DocumentaryUnit frame = mutation.getNode();
 
-        if (mutation.created()) {
-            solveUndeterminedRelationships(frame, descBundle);
-        }
         // Set the repository/item relationship
         if (idPath.isEmpty() && mutation.created()) {
+            logger.error("permissionScope idPath: "+permissionScope.idPath());
             EntityClass scopeType = manager.getEntityClass(permissionScope);
             if (scopeType.equals(EntityClass.REPOSITORY)) {
                 Repository repository = framedGraph.frame(permissionScope.asVertex(), Repository.class);
@@ -111,8 +109,13 @@ public class IcaAtomEadImporter extends EaImporter {
             } else {
                 logger.error("Unknown scope type for documentary unit: {}", scopeType);
             }
+            logger.error("permissionScope idPath: "+permissionScope.idPath());
         }
         handleCallbacks(mutation);
+
+        if (mutation.created()) {
+            solveUndeterminedRelationships(frame, descBundle);
+        }
         return frame;
 
 
