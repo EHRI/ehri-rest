@@ -111,29 +111,29 @@
 		<dependency>
 			<groupId>org.neo4j</groupId>
 			<artifactId>neo4j</artifactId>
-			<version>${neo4j-version}</version>
+			<version>1.9.7</version>
 		</dependency>
 		<dependency>
 			<groupId>org.neo4j</groupId>
 			<artifactId>neo4j-kernel</artifactId>
-			<version>${neo4j-version}</version>
+			<version>1.9.7</version>
 		</dependency>
 		<dependency>
 			<groupId>org.neo4j.app</groupId>
 			<artifactId>neo4j-server</artifactId>
-			<version>${neo4j-version}</version>
+			<version>1.9.7</version>
 		</dependency>
 		<dependency>
 			<groupId>org.neo4j.app</groupId>
 			<artifactId>neo4j-server</artifactId>
-			<version>${neo4j-version}</version>
+			<version>1.9.7</version>
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.neo4j</groupId>
 			<artifactId>neo4j-kernel</artifactId>
-			<version>${neo4j-version}</version>
+			<version>1.9.7</version>
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
@@ -141,13 +141,13 @@
         <dependency>
             <groupId>com.tinkerpop</groupId>
             <artifactId>frames</artifactId>
-            <version>${frames-version}</version>
+            <version>2.4.0</version>
             <scope>compile</scope>
         </dependency>
 		<dependency>
 			<groupId>com.tinkerpop.blueprints</groupId>
 			<artifactId>blueprints-neo4j-graph</artifactId>
-			<version>${tinkerpop-version}</version><!-- was 1.2 -->
+			<version>2.4.0</version><!-- was 1.2 -->
 			<exclusions>
 				<exclusion>
 					<artifactId>log4j</artifactId>
