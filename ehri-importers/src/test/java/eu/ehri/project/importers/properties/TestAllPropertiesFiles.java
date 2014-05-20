@@ -13,6 +13,7 @@ import java.nio.charset.Charset;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -88,7 +89,7 @@ public class TestAllPropertiesFiles {
         assertTrue(p.check(new XmlImportProperties("skos.properties"), EntityClass.CVOC_CONCEPT_DESCRIPTION));
     }
 
-    @Test
+    @Test @Ignore //ignore in favour of niodead.properties
     public void testNiodXmlProperties() {
         String propfile = "niod.properties";
         logger.debug(propfile);
