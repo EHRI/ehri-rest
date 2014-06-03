@@ -442,4 +442,42 @@ public final class ActionManager {
         DateTime dt = DateTime.now();
         return ISODateTimeFormat.dateTime().print(dt);
     }
+
+    public static boolean sameAs(SystemEvent event1, SystemEvent event2) {
+        // NB: Fetching all these props and relations is potentially quite
+        // costly, so we want to short-circuit and return early is possible,
+        // starting with the least-costly to fetch attributes.
+        String eventType1 = event1.getEventType();
+        String eventType2 = event2.getEventType();
+        if (eventType1 != null && eventType2 != null && !eventType1.equals(eventType2)) {
+            return false;
+        }
+
+        String logMessage1 = event1.getLogMessage();
+        String logMessage2 = event2.getLogMessage();
+        if (logMessage1 != null && logMessage2 != null && !logMessage1.equals(logMessage2)) {
+            return false;
+        }
+
+        Frame eventScope1 = event1.getEventScope();
+        Frame eventScope2 = event2.getEventScope();
+        if (eventScope1 != null && eventScope2 != null && !eventScope1.equals(eventScope2)) {
+            return false;
+        }
+
+        AccessibleEntity entity1 = event1.getFirstSubject();
+        AccessibleEntity entity2 = event2.getFirstSubject();
+        if (entity1 != null && entity2 != null && !entity1.equals(entity2)) {
+            return false;
+        }
+
+        Actioner actioner1 = event1.getActioner();
+        Actioner actioner2 = event2.getActioner();
+        if (actioner1 != null && actioner2 != null && !actioner1.equals(actioner2)) {
+            return false;
+        }
+
+        // Okay, fall through...
+        return true;
+    }
 }

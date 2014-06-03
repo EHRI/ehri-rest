@@ -1,0 +1,387 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<rdf:RDF
+  xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+  xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+  xmlns:skos="http://www.w3.org/2004/02/skos/core#"
+  xmlns:dc="http://purl.org/dc/elements/1.1/">
+
+  <skos:ConceptScheme rdf:about="http://icaatom.ehri-project.eu/index.php/repository-types;taxonomy">
+
+                  <dc:title xml:lang="de">Aufbewahrungsart</dc:title>
+                        <dc:title xml:lang="en">Repository Types</dc:title>
+                        <dc:title xml:lang="es">tipos de repositorios</dc:title>
+                        <dc:title xml:lang="fr">Types de services d'archives</dc:title>
+                        <dc:title xml:lang="it">tipi di deposito</dc:title>
+                        <dc:title xml:lang="nl">Soorten bewaarplaatsen</dc:title>
+                        <dc:title xml:lang="pt">Tipos de entidades custodiadoras</dc:title>
+                        <dc:title xml:lang="sl">tip skladišča</dc:title>
+          
+          <skos:hasTopConcept rdf:resource="http://icaatom.ehri-project.eu/index.php/archives-of-learning-and-investigation;term"/>
+          <skos:hasTopConcept rdf:resource="http://icaatom.ehri-project.eu/index.php/archives-of-public-administration;term"/>
+          <skos:hasTopConcept rdf:resource="http://icaatom.ehri-project.eu/index.php/archives-of-religious-communities;term"/>
+          <skos:hasTopConcept rdf:resource="http://icaatom.ehri-project.eu/index.php/other-archives;term"/>
+    
+  </skos:ConceptScheme>
+
+  
+    <skos:Concept rdf:about="http://icaatom.ehri-project.eu/index.php/archives-of-economical-bodies-and-firms;term">
+
+                        <skos:prefLabel xml:lang="en">Archives of Economical Bodies and Firms</skos:prefLabel>
+              
+      
+      <skos:inScheme rdf:resource="http://icaatom.ehri-project.eu/index.php/repository-types;taxonomy"/>
+
+      
+              <skos:broader rdf:resource="http://icaatom.ehri-project.eu/index.php/other-archives;term"/>
+      
+      
+      
+    </skos:Concept>
+
+  
+    <skos:Concept rdf:about="http://icaatom.ehri-project.eu/index.php/archives-of-international-and-supranational-organisations;term">
+
+                        <skos:prefLabel xml:lang="en">Archives of International and Supranational Organisations</skos:prefLabel>
+              
+      
+      <skos:inScheme rdf:resource="http://icaatom.ehri-project.eu/index.php/repository-types;taxonomy"/>
+
+      
+              <skos:broader rdf:resource="http://icaatom.ehri-project.eu/index.php/archives-of-public-administration;term"/>
+      
+      
+      
+    </skos:Concept>
+
+  
+    <skos:Concept rdf:about="http://icaatom.ehri-project.eu/index.php/archives-of-investigative-bodies;term">
+
+                        <skos:prefLabel xml:lang="en">Archives of Investigative Bodies</skos:prefLabel>
+              
+      
+      <skos:inScheme rdf:resource="http://icaatom.ehri-project.eu/index.php/repository-types;taxonomy"/>
+
+      
+              <skos:broader rdf:resource="http://icaatom.ehri-project.eu/index.php/archives-of-learning-and-investigation;term"/>
+      
+      
+      
+    </skos:Concept>
+
+  
+    <skos:Concept rdf:about="http://icaatom.ehri-project.eu/index.php/archives-of-learning-and-investigation;term">
+
+                        <skos:prefLabel xml:lang="en">Archives of Learning and Investigation</skos:prefLabel>
+              
+      
+      <skos:inScheme rdf:resource="http://icaatom.ehri-project.eu/index.php/repository-types;taxonomy"/>
+
+      
+      
+              <skos:narrower rdf:resource="http://icaatom.ehri-project.eu/index.php/archives-of-universities-and-research-organisations;term"/>
+              <skos:narrower rdf:resource="http://icaatom.ehri-project.eu/index.php/archives-of-investigative-bodies;term"/>
+              <skos:narrower rdf:resource="http://icaatom.ehri-project.eu/index.php/archives-of-museums-and-memorial-sites;term"/>
+              <skos:narrower rdf:resource="http://icaatom.ehri-project.eu/index.php/literature-also-archival-material-in-libraries-and-arts;term"/>
+              <skos:narrower rdf:resource="http://icaatom.ehri-project.eu/index.php/media-archives;term"/>
+      
+      
+    </skos:Concept>
+
+  
+    <skos:Concept rdf:about="http://icaatom.ehri-project.eu/index.php/archives-of-museums-and-memorial-sites;term">
+
+                        <skos:prefLabel xml:lang="en">Archives of Museums and Memorial Sites</skos:prefLabel>
+              
+      
+      <skos:inScheme rdf:resource="http://icaatom.ehri-project.eu/index.php/repository-types;taxonomy"/>
+
+      
+              <skos:broader rdf:resource="http://icaatom.ehri-project.eu/index.php/archives-of-learning-and-investigation;term"/>
+      
+      
+      
+    </skos:Concept>
+
+  
+    <skos:Concept rdf:about="http://icaatom.ehri-project.eu/index.php/archives-of-political-parties-foundations;term">
+
+                        <skos:prefLabel xml:lang="en">Archives of Political Parties, Foundations</skos:prefLabel>
+              
+      
+      <skos:inScheme rdf:resource="http://icaatom.ehri-project.eu/index.php/repository-types;taxonomy"/>
+
+      
+              <skos:broader rdf:resource="http://icaatom.ehri-project.eu/index.php/other-archives;term"/>
+      
+      
+      
+    </skos:Concept>
+
+  
+    <skos:Concept rdf:about="http://icaatom.ehri-project.eu/index.php/archives-of-public-administration;term">
+
+                        <skos:prefLabel xml:lang="en">Archives of Public Administration</skos:prefLabel>
+              
+      
+      <skos:inScheme rdf:resource="http://icaatom.ehri-project.eu/index.php/repository-types;taxonomy"/>
+
+      
+      
+              <skos:narrower rdf:resource="http://icaatom.ehri-project.eu/index.php/archives-of-international-and-supranational-organisations;term"/>
+              <skos:narrower rdf:resource="http://icaatom.ehri-project.eu/index.php/federal-and-national-archives;term"/>
+              <skos:narrower rdf:resource="http://icaatom.ehri-project.eu/index.php/state-and-province-archives;term"/>
+              <skos:narrower rdf:resource="http://icaatom.ehri-project.eu/index.php/district-archives;term"/>
+              <skos:narrower rdf:resource="http://icaatom.ehri-project.eu/index.php/municipal-archives;term"/>
+      
+      
+    </skos:Concept>
+
+  
+    <skos:Concept rdf:about="http://icaatom.ehri-project.eu/index.php/archives-of-religious-communities;term">
+
+                        <skos:prefLabel xml:lang="en">Archives of Religious Communities</skos:prefLabel>
+              
+      
+      <skos:inScheme rdf:resource="http://icaatom.ehri-project.eu/index.php/repository-types;taxonomy"/>
+
+      
+      
+              <skos:narrower rdf:resource="http://icaatom.ehri-project.eu/index.php/jewish-community-archives;term"/>
+              <skos:narrower rdf:resource="http://icaatom.ehri-project.eu/index.php/catholic-church-archives;term"/>
+              <skos:narrower rdf:resource="http://icaatom.ehri-project.eu/index.php/protestant-church-archives;term"/>
+              <skos:narrower rdf:resource="http://icaatom.ehri-project.eu/index.php/orthodox-church-archives;term"/>
+              <skos:narrower rdf:resource="http://icaatom.ehri-project.eu/index.php/other-religious-community-archives;term"/>
+      
+      
+    </skos:Concept>
+
+  
+    <skos:Concept rdf:about="http://icaatom.ehri-project.eu/index.php/archives-of-universities-and-research-organisations;term">
+
+                        <skos:prefLabel xml:lang="en">Archives of Universities and Research Organisations</skos:prefLabel>
+              
+      
+      <skos:inScheme rdf:resource="http://icaatom.ehri-project.eu/index.php/repository-types;taxonomy"/>
+
+      
+              <skos:broader rdf:resource="http://icaatom.ehri-project.eu/index.php/archives-of-learning-and-investigation;term"/>
+      
+      
+      
+    </skos:Concept>
+
+  
+    <skos:Concept rdf:about="http://icaatom.ehri-project.eu/index.php/catholic-church-archives;term">
+
+                        <skos:prefLabel xml:lang="en">Catholic Church Archives</skos:prefLabel>
+              
+      
+      <skos:inScheme rdf:resource="http://icaatom.ehri-project.eu/index.php/repository-types;taxonomy"/>
+
+      
+              <skos:broader rdf:resource="http://icaatom.ehri-project.eu/index.php/archives-of-religious-communities;term"/>
+      
+      
+      
+    </skos:Concept>
+
+  
+    <skos:Concept rdf:about="http://icaatom.ehri-project.eu/index.php/district-archives;term">
+
+                        <skos:prefLabel xml:lang="en">District Archives</skos:prefLabel>
+              
+      
+      <skos:inScheme rdf:resource="http://icaatom.ehri-project.eu/index.php/repository-types;taxonomy"/>
+
+      
+              <skos:broader rdf:resource="http://icaatom.ehri-project.eu/index.php/archives-of-public-administration;term"/>
+      
+      
+      
+    </skos:Concept>
+
+  
+    <skos:Concept rdf:about="http://icaatom.ehri-project.eu/index.php/family-archives;term">
+
+                        <skos:prefLabel xml:lang="en">Family Archives</skos:prefLabel>
+              
+      
+      <skos:inScheme rdf:resource="http://icaatom.ehri-project.eu/index.php/repository-types;taxonomy"/>
+
+      
+              <skos:broader rdf:resource="http://icaatom.ehri-project.eu/index.php/other-archives;term"/>
+      
+      
+      
+    </skos:Concept>
+
+  
+    <skos:Concept rdf:about="http://icaatom.ehri-project.eu/index.php/federal-and-national-archives;term">
+
+                        <skos:prefLabel xml:lang="en">Federal and National Archives</skos:prefLabel>
+              
+      
+      <skos:inScheme rdf:resource="http://icaatom.ehri-project.eu/index.php/repository-types;taxonomy"/>
+
+      
+              <skos:broader rdf:resource="http://icaatom.ehri-project.eu/index.php/archives-of-public-administration;term"/>
+      
+      
+      
+    </skos:Concept>
+
+  
+    <skos:Concept rdf:about="http://icaatom.ehri-project.eu/index.php/jewish-community-archives;term">
+
+                        <skos:prefLabel xml:lang="en">Jewish Community Archives</skos:prefLabel>
+              
+      
+      <skos:inScheme rdf:resource="http://icaatom.ehri-project.eu/index.php/repository-types;taxonomy"/>
+
+      
+              <skos:broader rdf:resource="http://icaatom.ehri-project.eu/index.php/archives-of-religious-communities;term"/>
+      
+      
+      
+    </skos:Concept>
+
+  
+    <skos:Concept rdf:about="http://icaatom.ehri-project.eu/index.php/literature-also-archival-material-in-libraries-and-arts;term">
+
+                        <skos:prefLabel xml:lang="en">Literature (also Archival Material in Libraries) and Arts</skos:prefLabel>
+              
+      
+      <skos:inScheme rdf:resource="http://icaatom.ehri-project.eu/index.php/repository-types;taxonomy"/>
+
+      
+              <skos:broader rdf:resource="http://icaatom.ehri-project.eu/index.php/archives-of-learning-and-investigation;term"/>
+      
+      
+      
+    </skos:Concept>
+
+  
+    <skos:Concept rdf:about="http://icaatom.ehri-project.eu/index.php/media-archives;term">
+
+                        <skos:prefLabel xml:lang="en">Media Archives</skos:prefLabel>
+              
+      
+      <skos:inScheme rdf:resource="http://icaatom.ehri-project.eu/index.php/repository-types;taxonomy"/>
+
+      
+              <skos:broader rdf:resource="http://icaatom.ehri-project.eu/index.php/archives-of-learning-and-investigation;term"/>
+      
+      
+      
+    </skos:Concept>
+
+  
+    <skos:Concept rdf:about="http://icaatom.ehri-project.eu/index.php/municipal-archives;term">
+
+                        <skos:prefLabel xml:lang="en">Municipal Archives</skos:prefLabel>
+              
+      
+      <skos:inScheme rdf:resource="http://icaatom.ehri-project.eu/index.php/repository-types;taxonomy"/>
+
+      
+              <skos:broader rdf:resource="http://icaatom.ehri-project.eu/index.php/archives-of-public-administration;term"/>
+      
+      
+      
+    </skos:Concept>
+
+  
+    <skos:Concept rdf:about="http://icaatom.ehri-project.eu/index.php/orthodox-church-archives;term">
+
+                        <skos:prefLabel xml:lang="en">Orthodox Church Archives</skos:prefLabel>
+              
+      
+      <skos:inScheme rdf:resource="http://icaatom.ehri-project.eu/index.php/repository-types;taxonomy"/>
+
+      
+              <skos:broader rdf:resource="http://icaatom.ehri-project.eu/index.php/archives-of-religious-communities;term"/>
+      
+      
+      
+    </skos:Concept>
+
+  
+    <skos:Concept rdf:about="http://icaatom.ehri-project.eu/index.php/other-archives-2;term">
+
+                        <skos:prefLabel xml:lang="en">Other Archives</skos:prefLabel>
+              
+      
+      <skos:inScheme rdf:resource="http://icaatom.ehri-project.eu/index.php/repository-types;taxonomy"/>
+
+      
+              <skos:broader rdf:resource="http://icaatom.ehri-project.eu/index.php/other-archives;term"/>
+      
+      
+      
+    </skos:Concept>
+
+  
+    <skos:Concept rdf:about="http://icaatom.ehri-project.eu/index.php/other-archives;term">
+
+                        <skos:prefLabel xml:lang="en">Other Archives</skos:prefLabel>
+              
+      
+      <skos:inScheme rdf:resource="http://icaatom.ehri-project.eu/index.php/repository-types;taxonomy"/>
+
+      
+      
+              <skos:narrower rdf:resource="http://icaatom.ehri-project.eu/index.php/archives-of-economical-bodies-and-firms;term"/>
+              <skos:narrower rdf:resource="http://icaatom.ehri-project.eu/index.php/family-archives;term"/>
+              <skos:narrower rdf:resource="http://icaatom.ehri-project.eu/index.php/archives-of-political-parties-foundations;term"/>
+              <skos:narrower rdf:resource="http://icaatom.ehri-project.eu/index.php/other-archives-2;term"/>
+      
+      
+    </skos:Concept>
+
+  
+    <skos:Concept rdf:about="http://icaatom.ehri-project.eu/index.php/other-religious-community-archives;term">
+
+                        <skos:prefLabel xml:lang="en">Other Religious Community Archives</skos:prefLabel>
+              
+      
+      <skos:inScheme rdf:resource="http://icaatom.ehri-project.eu/index.php/repository-types;taxonomy"/>
+
+      
+              <skos:broader rdf:resource="http://icaatom.ehri-project.eu/index.php/archives-of-religious-communities;term"/>
+      
+      
+      
+    </skos:Concept>
+
+  
+    <skos:Concept rdf:about="http://icaatom.ehri-project.eu/index.php/protestant-church-archives;term">
+
+                        <skos:prefLabel xml:lang="en">Protestant Church Archives</skos:prefLabel>
+              
+      
+      <skos:inScheme rdf:resource="http://icaatom.ehri-project.eu/index.php/repository-types;taxonomy"/>
+
+      
+              <skos:broader rdf:resource="http://icaatom.ehri-project.eu/index.php/archives-of-religious-communities;term"/>
+      
+      
+      
+    </skos:Concept>
+
+  
+    <skos:Concept rdf:about="http://icaatom.ehri-project.eu/index.php/state-and-province-archives;term">
+
+                        <skos:prefLabel xml:lang="en">State and Province Archives</skos:prefLabel>
+              
+      
+      <skos:inScheme rdf:resource="http://icaatom.ehri-project.eu/index.php/repository-types;taxonomy"/>
+
+      
+              <skos:broader rdf:resource="http://icaatom.ehri-project.eu/index.php/archives-of-public-administration;term"/>
+      
+      
+      
+    </skos:Concept>
+
+  
+</rdf:RDF>

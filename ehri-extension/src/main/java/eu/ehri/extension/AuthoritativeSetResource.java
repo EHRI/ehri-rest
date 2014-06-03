@@ -20,7 +20,7 @@ import java.net.URI;
 import java.util.List;
 
 /**
- * Provides a RESTfull interface for the AuthoritativeSet Also for managing the
+ * Provides a RESTful interface for the AuthoritativeSet Also for managing the
  * HistoricalAgents that are in the AuthoritativeSet
  * 
  * @author mikeb
@@ -255,7 +255,8 @@ public class AuthoritativeSetResource extends
                 getLogMessage());
 
         // Add it to this AuthoritativeSet's agents
-        agent.setAuthoritativeSet(set);
+        set.addItem(agent);
+        agent.setPermissionScope(set);
         return agent;
     }
 }

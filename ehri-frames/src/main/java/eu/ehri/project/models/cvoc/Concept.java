@@ -15,6 +15,7 @@ import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.DescribedEntity;
 import eu.ehri.project.models.base.IdentifiableEntity;
 import eu.ehri.project.models.base.ItemHolder;
+import eu.ehri.project.models.utils.JavaHandlerUtils;
 
 /**
  * This models the thesaurus terms or keywords in a way that is better managing multi-linguality. 
@@ -68,7 +69,7 @@ public interface Concept extends AccessibleEntity, IdentifiableEntity,
     @Adjacency(label = Ontology.CONCEPT_HAS_RELATED)
     public Iterable<Concept> getRelatedConcepts();
 
-    @Adjacency(label = Ontology.CONCEPT_HAS_RELATED)
+    @JavaHandler
     public void addRelatedConcept(final Concept concept);
 
     @Adjacency(label = Ontology.CONCEPT_HAS_RELATED)
@@ -98,9 +99,17 @@ public interface Concept extends AccessibleEntity, IdentifiableEntity,
             return count;
         }
 
+        public void addRelatedConcept(final Concept related) {
+            JavaHandlerUtils.addUniqueRelationship(it(),
+                    related.asVertex(), Ontology.CONCEPT_HAS_RELATED);
+        }
+
         public void addNarrowerConcept(final Concept concept) {
-            it().addEdge(Ontology.CONCEPT_HAS_NARROWER, concept.asVertex());
-            updateChildCountCache();
+            if (!concept.asVertex().equals(it())
+                    && JavaHandlerUtils.addUniqueRelationship(it(),
+                    concept.asVertex(), Ontology.CONCEPT_HAS_NARROWER)) {
+                updateChildCountCache();
+            }
         }
 
         public void removeNarrowerConcept(final Concept concept) {

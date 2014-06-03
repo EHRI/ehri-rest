@@ -40,19 +40,21 @@ public class ActionManagerTest extends AbstractFixtureTest {
         Bundle repoBundle = Bundle.fromData(TestData.getTestAgentBundle());
         Repository repository = new BundleDAO(graph).create(repoBundle, Repository.class);
 
-        SystemEvent second = am.logEvent(repository,
+        ActionManager.EventContext eventContext = am.logEvent(repository,
                 graph.frame(validUser.asVertex(), Actioner.class),
-                EventTypes.creation)
+                EventTypes.creation);
+        assertEquals(EventTypes.creation, eventContext.getEventType());
+        SystemEvent second = eventContext
                 .getSystemEvent();
 
         // Check exactly one Event was created
         assertEquals(1, Iterables.count(second.getSubjects()));
         // Check item cache is correct...
         assertEquals(1L, second.asVertex().getProperty(ItemHolder.CHILD_COUNT));
-        assertEquals(1, Iterables.count(second.getActioners()));
+        assertNotNull(second.getActioner());
 
         // Check the user is correctly linked
-        assertEquals(validUser, Iterables.first(second.getActioners()));
+        assertEquals(validUser, second.getActioner());
 
         assertEquals(1, Iterables.count(repository.getHistory()));
         assertNotNull(repository.getLatestEvent());
@@ -90,7 +92,7 @@ public class ActionManagerTest extends AbstractFixtureTest {
         Bundle docBundle = Bundle.fromData(TestData.getTestDocBundle());
         BundleDAO dao = new BundleDAO(graph);
         DocumentaryUnit doc = dao.create(docBundle, DocumentaryUnit.class);
-        SystemEvent log = am.logEvent(doc,
+        am.logEvent(doc,
                 graph.frame(validUser.asVertex(), Actioner.class),
                 EventTypes.creation).getSystemEvent();
         assertNull(doc.getPriorVersion());

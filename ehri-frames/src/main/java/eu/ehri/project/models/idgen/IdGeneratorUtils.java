@@ -33,7 +33,7 @@ public class IdGeneratorUtils  {
     public static ListMultimap<String,String> handleIdCollision(final Iterable<String> scopeIds,
             String dataKey, String ident) {
 
-        logger.error("ID Generation error: {}={} (scope: {})", dataKey, ident, scopeIds);
+        logger.error("ID Generation error: {}={} (scope: {})", dataKey, ident, Lists.newArrayList(scopeIds));
         ListMultimap<String,String> errors = LinkedListMultimap.create();
         errors.put(dataKey,  MessageFormat.format(
                 Messages.getString("BundleDAO.uniquenessError"), ident));

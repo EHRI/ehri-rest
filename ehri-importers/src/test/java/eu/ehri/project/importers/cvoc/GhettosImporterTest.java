@@ -19,7 +19,7 @@ import static org.junit.Assert.*;
  * @author linda
  */
 public class GhettosImporterTest extends AbstractImporterTest {
-    protected final String SKOS_FILE = "ghettos.rdf";
+    protected final String SKOS_FILE = "cvoc/ghettos.rdf";
 
     @Test
     public void testImportItemsT() throws Exception {
@@ -30,9 +30,10 @@ public class GhettosImporterTest extends AbstractImporterTest {
         int count = getNodeCount(graph);
         int voccount = toList(vocabulary.getConcepts()).size();
         InputStream ios = ClassLoader.getSystemResourceAsStream(SKOS_FILE);
-        SkosCoreCvocImporter importer = new SkosCoreCvocImporter(graph, validUser, vocabulary);
+        SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, validUser, vocabulary);
         importer.setTolerant(true);
         ImportLog log = importer.importFile(ios, logMessage);
+        //printGraph(graph);
 
         /*  How many new nodes will have been created? We should have
          * 2 more Concepts
