@@ -51,17 +51,17 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
     /**
      * Functor used to post-process items.
      */
-    public static interface PostProcess<E extends AccessibleEntity> {
+    public static interface PostCreateHandler<E extends AccessibleEntity> {
         public void process(E frame) throws PermissionDenied;
     }
 
-    public static class NoOpPostProcess<E extends AccessibleEntity> implements PostProcess<E> {
+    public static class NoOpHandler<E extends AccessibleEntity> implements PostCreateHandler<E> {
         @Override
         public void process(E frame) {
         }
     }
 
-    private final PostProcess<E> noOpPostProcess = new NoOpPostProcess<E>();
+    private final PostCreateHandler<E> noOpHandler = new NoOpHandler<E>();
 
     /**
      * Constructor
@@ -158,7 +158,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * @param json        The json representation of the entity to create (no vertex
      *                    'id' fields)
      * @param accessorIds List of accessors who can initially view this item
-     * @param postProcess A callback function that allows additional operations
+     * @param handler     A callback function that allows additional operations
      *                    to be run on the created object after it is initialised
      *                    but before the response is generated. This is useful for adding
      *                    relationships to the new item.
@@ -170,7 +170,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * @throws DeserializationError
      * @throws BadRequester
      */
-    public Response create(String json, List<String> accessorIds, PostProcess<E> postProcess)
+    public Response create(String json, List<String> accessorIds, PostCreateHandler<E> handler)
             throws PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, BadRequester {
         graph.getBaseGraph().checkNotInTransaction();
@@ -181,7 +181,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
             aclViews.setAccessors(entity, getAccessors(accessorIds, user), user);
 
             // run post-creation callbacks
-            postProcess.process(entity);
+            handler.process(entity);
 
             graph.getBaseGraph().commit();
             URI docUri = uriInfo.getBaseUriBuilder()
@@ -200,7 +200,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
     public Response create(String json, List<String> accessorIds)
             throws PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, BadRequester {
-        return create(json, accessorIds, noOpPostProcess);
+        return create(json, accessorIds, noOpHandler);
     }
 
     /**
@@ -301,9 +301,11 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
     }
 
     /**
-     * Delete (remove) an instance of the 'entity' in the database
+     * Delete (remove) an instance of the 'entity' in the database,
+     * running a handler callback beforehand.
      *
-     * @param id The vertex id
+     * @param id         The vertex id
+     * @param preProcess A handler to run before deleting the item
      * @return The response of the delete request
      * @throws AccessDenied
      * @throws PermissionDenied
@@ -311,11 +313,14 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * @throws ValidationError
      * @throws BadRequester
      */
-    protected Response delete(String id) throws AccessDenied, PermissionDenied, ItemNotFound,
+    protected Response delete(String id, PostCreateHandler<E> preProcess) throws AccessDenied, PermissionDenied,
+            ItemNotFound,
             ValidationError, BadRequester {
         graph.getBaseGraph().checkNotInTransaction();
         try {
-            views.delete(id, getRequesterUserProfile(), getLogMessage());
+            Accessor user = getRequesterUserProfile();
+            preProcess.process(views.detail(id, user));
+            views.delete(id, user, getLogMessage());
             graph.getBaseGraph().commit();
             return Response.status(Status.OK).build();
         } catch (SerializationError serializationError) {
@@ -326,6 +331,22 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
         }
     }
 
+    /**
+     * Delete (remove) an instance of the 'entity' in the database
+     *
+     * @param id         The vertex id
+     * @return The response of the delete request
+     * @throws AccessDenied
+     * @throws PermissionDenied
+     * @throws ItemNotFound
+     * @throws ValidationError
+     * @throws BadRequester
+     */
+    protected Response delete(String id) throws AccessDenied, PermissionDenied,
+            ItemNotFound,
+            ValidationError, BadRequester {
+        return delete(id, noOpHandler);
+    }
     // Helpers
 
     private EntityClass getEntityType() {

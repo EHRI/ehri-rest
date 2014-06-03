@@ -101,7 +101,7 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
             for (String member : members) {
                 groupMembers.add(manager.getFrame(member, Accessor.class));
             }
-            return create(json, accessors, new PostProcess<Group>() {
+            return create(json, accessors, new PostCreateHandler<Group>() {
                 @Override
                 public void process(Group group) throws PermissionDenied {
                     for (Accessor member: groupMembers) {
