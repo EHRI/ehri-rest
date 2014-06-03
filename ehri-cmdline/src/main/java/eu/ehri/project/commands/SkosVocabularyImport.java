@@ -84,7 +84,9 @@ public class SkosVocabularyImport extends BaseCommand implements Command {
                     UserProfile.class);
 
             SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, user, vocabulary);
-            ImportLog log = importer.importFile(filePath, logMessage);
+            ImportLog log = importer
+                    .setTolerant(cmdLine.hasOption("tolerant"))
+                    .importFile(filePath, logMessage);
             log.printReport();
             if (log.getErrored() > 0) {
                 System.out.println("Errors:");
