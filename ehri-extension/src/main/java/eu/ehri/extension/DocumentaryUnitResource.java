@@ -33,7 +33,7 @@ import eu.ehri.project.views.impl.LoggingCrudViews;
 import eu.ehri.project.views.Query;
 
 /**
- * Provides a RESTfull interface for the DocumentaryUnit
+ * Provides a RESTful interface for the DocumentaryUnit
  */
 @Path(Entities.DOCUMENTARY_UNIT)
 public class DocumentaryUnitResource extends

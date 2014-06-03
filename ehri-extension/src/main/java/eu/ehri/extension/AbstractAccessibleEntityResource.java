@@ -57,7 +57,8 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
 
     public static class NoOpPostProcess<E extends AccessibleEntity> implements PostProcess<E> {
         @Override
-        public void process(E frame) {}
+        public void process(E frame) {
+        }
     }
 
     private final PostProcess<E> noOpPostProcess = new NoOpPostProcess<E>();
@@ -157,8 +158,10 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * @param json        The json representation of the entity to create (no vertex
      *                    'id' fields)
      * @param accessorIds List of accessors who can initially view this item
-     * @param postProcess A PostProcess functor. This is most commonly used to create
-     *                    additional relationships on the created item.
+     * @param postProcess A callback function that allows additional operations
+     *                    to be run on the created object after it is initialised
+     *                    but before the response is generated. This is useful for adding
+     *                    relationships to the new item.
      * @return The response of the create request, the 'location' will contain
      *         the url of the newly created instance.
      * @throws PermissionDenied
@@ -177,13 +180,13 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
             E entity = views.create(entityBundle, user, getLogMessage());
             aclViews.setAccessors(entity, getAccessors(accessorIds, user), user);
 
-            URI docUri = uriInfo.getBaseUriBuilder()
-                    .path(getClass())
-                    .path(entity.getId()).build();
-
+            // run post-creation callbacks
             postProcess.process(entity);
 
             graph.getBaseGraph().commit();
+            URI docUri = uriInfo.getBaseUriBuilder()
+                    .path(getClass())
+                    .path(entity.getId()).build();
             return Response.status(Status.CREATED).location(docUri)
                     .entity(getRepresentation(entity).getBytes()).build();
         } catch (SerializationError serializationError) {

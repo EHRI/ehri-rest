@@ -34,7 +34,7 @@ import eu.ehri.project.views.impl.LoggingCrudViews;
 import eu.ehri.project.views.Query;
 
 /**
- * Provides a RESTfull interface for the Vocabulary Also for managing the
+ * Provides a RESTful interface for the Vocabulary Also for managing the
  * Concepts that are in the Vocabulary
  * 
  * @author paulboon

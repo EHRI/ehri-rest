@@ -18,7 +18,7 @@ import eu.ehri.project.models.PermissionGrant;
 import eu.ehri.project.views.AclViews;
 
 /**
- * Provides a RESTfull interface for the PermissionGrant class.
+ * Provides a RESTful interface for the PermissionGrant class.
  * 
  * FIXME: PermissionGrant is not currently an AccessibleEntity so
  * handling it is complicated. We need to re-architect the REST views

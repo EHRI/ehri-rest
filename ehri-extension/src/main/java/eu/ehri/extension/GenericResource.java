@@ -29,7 +29,7 @@ import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.base.AccessibleEntity;
 
 /**
- * Provides a RESTfull interface for generic items.
+ * Provides a RESTful interface for generic items.
  */
 @Path("entities")
 public class GenericResource extends AbstractAccessibleEntityResource<AccessibleEntity> {

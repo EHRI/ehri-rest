@@ -37,7 +37,7 @@ import eu.ehri.project.views.impl.LoggingCrudViews;
 import eu.ehri.project.views.Query;
 
 /**
- * Provides a RESTfull interface for the Event class. Note: Event instances
+ * Provides a RESTful interface for the Event class. Note: Event instances
  * are created by the system, so we do not have create/update/delete methods
  * here.
  */
