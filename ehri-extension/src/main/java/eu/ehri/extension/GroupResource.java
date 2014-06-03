@@ -1,6 +1,7 @@
 package eu.ehri.extension;
 
 import java.util.List;
+import java.util.Set;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -15,7 +16,9 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.*;
 import javax.ws.rs.core.Response.Status;
 
+import com.google.common.collect.Sets;
 import eu.ehri.project.exceptions.*;
+import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.views.AclViews;
 import org.neo4j.graphdb.GraphDatabaseService;
 
@@ -27,11 +30,15 @@ import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.views.Query;
 
+import static eu.ehri.extension.RestHelpers.produceErrorMessageJson;
+
 /**
  * Provides a RESTfull interface for the Group class.
  */
 @Path(Entities.GROUP)
 public class GroupResource extends AbstractAccessibleEntityResource<Group> {
+
+    public static final String MEMBER_PARAM = "member";
 
     public GroupResource(@Context GraphDatabaseService database, @Context HttpHeaders requestHeaders) {
         super(database, requestHeaders, Group.class);
@@ -81,10 +88,29 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     public Response createGroup(String json,
-            @QueryParam(ACCESSOR_PARAM) List<String> accessors)
+            @QueryParam(ACCESSOR_PARAM) List<String> accessors,
+            @QueryParam(MEMBER_PARAM) List<String> members)
             throws PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, ItemNotFound, BadRequester {
-        return create(json, accessors);
+        final UserProfile currentUser = getCurrentUser();
+        try {
+            final Set<Accessor> groupMembers = Sets.newHashSet();
+            for (String member : members) {
+                groupMembers.add(manager.getFrame(member, Accessor.class));
+            }
+            return create(json, accessors, new PostProcess<Group>() {
+                @Override
+                public void process(Group group) throws PermissionDenied {
+                    for (Accessor member: groupMembers) {
+                        aclViews.addAccessorToGroup(group, member, currentUser);
+                    }
+                }
+            });
+        } catch (ItemNotFound e) {
+            graph.getBaseGraph().rollback();
+            return Response.status(Status.BAD_REQUEST)
+                    .entity((produceErrorMessageJson(e)).getBytes()).build();
+        }
     }
 
     @PUT
@@ -108,25 +134,17 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
 
     /**
      * Add an accessor to a group.
-     *
-     * @param id
-     * @param atype
-     * @param aid
-     * @return
-     * @throws PermissionDenied
-     * @throws ItemNotFound
-     * @throws BadRequester
      */
     @POST
     @Path("/{id:[^/]+}/{aid:.+}")
     public Response addMember(@PathParam("id") String id,
-            @PathParam("atype") String atype, @PathParam("aid") String aid)
+            @PathParam("aid") String aid)
             throws PermissionDenied, ItemNotFound, BadRequester {
         checkNotInTransaction();
         Group group = manager.getFrame(id, EntityClass.GROUP, Group.class);
         Accessor accessor = manager.getFrame(aid, Accessor.class);
         try {
-            new AclViews(graph).addAccessorToGroup(group, accessor, getRequesterUserProfile());
+            aclViews.addAccessorToGroup(group, accessor, getRequesterUserProfile());
             graph.getBaseGraph().commit();
             return Response.status(Status.OK).build();
         } finally {
@@ -136,14 +154,6 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
 
     /**
      * Remove an accessor from a group.
-     *
-     * @param id
-     * @param aid
-     * @param aid
-     * @return
-     * @throws PermissionDenied
-     * @throws ItemNotFound
-     * @throws BadRequester
      */
     @DELETE
     @Path("/{id:[^/]+}/{aid:.+}")
@@ -165,15 +175,6 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
     /**
      * list members of the specified group;
      * UserProfiles and sub-Groups (direct descendants)
-     *
-     * @param id
-     * @param offset
-     * @param limit
-     * @param order
-     * @param filters
-     * @return
-     * @throws ItemNotFound
-     * @throws BadRequester
      */
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
@@ -200,15 +201,6 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
     /**
      * list members of the specified group; 
      * UserProfiles and sub-Groups (direct descendants)
-     * 
-     * @param id
-     * @param offset
-     * @param limit
-     * @param order
-     * @param filters
-     * @return
-     * @throws ItemNotFound
-     * @throws BadRequester
      */
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
@@ -248,13 +240,6 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
 
     /**
      * Delete a group with the given identifier string.
-     *
-     * @param id
-     * @return
-     * @throws PermissionDenied
-     * @throws ItemNotFound
-     * @throws ValidationError
-     * @throws BadRequester
      */
     @DELETE
     @Path("/{id:.+}")

@@ -14,7 +14,6 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.VirtualUnit;
 import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.models.base.DescribedEntity;
 import eu.ehri.project.models.base.Frame;
 import eu.ehri.project.models.utils.JavaHandlerUtils;
 
@@ -78,5 +77,21 @@ public class VirtualUnitViews {
                 }).filter(aclManager.getAclFilterFunction(accessor));
 
         return graph.frameVertices(out, VirtualUnit.class);
+    }
+
+    /**
+     * Find virtual collections to which this user belongs.
+     *
+     * @param user     An user (typically a documentary unit)
+     * @param accessor The current user
+     * @return A set of top-level virtual units
+     */
+    public Iterable<VirtualUnit> getVirtualCollectionsForUser(Frame user, Accessor accessor) {
+        GremlinPipeline<Vertex, Vertex> pipe = new GremlinPipeline<Vertex, Vertex>();
+        Pipeline<Vertex, Vertex> filtered = pipe.start(user.asVertex())
+                .in(Ontology.VC_HAS_AUTHOR)
+                .filter(aclManager.getAclFilterFunction(accessor));
+
+        return graph.frameVertices(filtered, VirtualUnit.class);
     }
 }

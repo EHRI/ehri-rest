@@ -3,6 +3,7 @@ package eu.ehri.project.views;
 import com.google.common.collect.Lists;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.VirtualUnit;
+import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.test.AbstractFixtureTest;
 import org.junit.Before;
 import org.junit.Test;
@@ -32,5 +33,14 @@ public class VirtualUnitViewsTest extends AbstractFixtureTest {
         Iterable<VirtualUnit> virtualCollectionsForC2 = views.getVirtualCollections(c2, validUser);
         assertEquals(Lists.newArrayList(vc1), Lists.newArrayList(virtualCollectionsForC1));
         assertEquals(Lists.newArrayList(vc1), Lists.newArrayList(virtualCollectionsForC2));
+    }
+
+    @Test
+    public void testGetVirtualCollectionsForUser() throws Exception {
+        VirtualUnit vc1 = manager.getFrame("vc1", VirtualUnit.class);
+        Accessor linda = manager.getFrame("linda", Accessor.class);
+        Iterable<VirtualUnit> virtualCollectionsForUser
+                = views.getVirtualCollectionsForUser(linda, validUser);
+        assertEquals(Lists.newArrayList(vc1), Lists.newArrayList(virtualCollectionsForUser));
     }
 }

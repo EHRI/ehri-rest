@@ -74,6 +74,7 @@ public interface VirtualUnit extends AccessibleEntity, ItemHolder,
     @Adjacency(label = Ontology.VC_HAS_AUTHOR, direction = Direction.OUT)
     public Accessor getAuthor();
 
+    @Fetch(Ontology.VC_HAS_AUTHOR)
     @JavaHandler
     public void setAuthor(final Accessor accessor);
 

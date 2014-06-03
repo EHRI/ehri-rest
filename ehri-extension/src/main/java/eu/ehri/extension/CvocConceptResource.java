@@ -1,6 +1,5 @@
 package eu.ehri.extension;
 
-import java.net.URI;
 import java.util.List;
 
 import javax.ws.rs.Consumes;
@@ -22,12 +21,9 @@ import eu.ehri.project.views.ViewHelper;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import eu.ehri.extension.errors.BadRequester;
-import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.cvoc.Concept;
-import eu.ehri.project.persistence.Bundle;
-import eu.ehri.project.views.impl.LoggingCrudViews;
 import eu.ehri.project.views.Query;
 
 /**
@@ -317,51 +313,14 @@ public class CvocConceptResource extends
             String json, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws AccessDenied, PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, ItemNotFound, BadRequester {
-        Accessor user = getRequesterUserProfile();
-        Concept parent = views.detail(id, user);
-        try {
-            Concept concept = createConcept(json, parent);
-            new AclManager(graph).setAccessors(concept, getAccessors(accessors, user));
-            graph.getBaseGraph().commit();
-            return buildResponseFromConcept(concept);
-        } catch (SerializationError e) {
-            graph.getBaseGraph().rollback();
-            throw new RuntimeException(e);
-        } finally {
-            cleanupTransaction();
-        }
-    }
-
-    // Helpers
-
-    private Response buildResponseFromConcept(Concept concept)
-            throws SerializationError {
-        String jsonStr = getSerializer().vertexFrameToJson(concept);
-        // FIXME: Hide the details of building this path
-        URI docUri = UriBuilder.fromUri(uriInfo.getBaseUri())
-                .segment(Entities.CVOC_CONCEPT)
-                .segment(concept.getId())
-                .build();
-
-        return Response.status(Status.CREATED).location(docUri)
-                .entity((jsonStr).getBytes()).build();
-    }
-
-    private Concept createConcept(String json, Concept parent)
-            throws DeserializationError, PermissionDenied, ValidationError,
-            IntegrityError, BadRequester {
-        Bundle entityBundle = Bundle.fromString(json);
-
-        // NB: Because concepts aren't strictly hierarchical (they can have
-        // more than one broader term) we use the containing vocabulary as
-        // the permission scope here, rather than the immediate parent.
-        Concept concept = new LoggingCrudViews<Concept>(graph, Concept.class,
-                parent.getPermissionScope()).create(entityBundle,
-                getRequesterUserProfile(), getLogMessage());
-
-        // Add it to this Vocabulary's concepts
-        parent.addNarrowerConcept(concept);
-        concept.setVocabulary(parent.getVocabulary());
-        return concept;
+        final Accessor user = getRequesterUserProfile();
+        final Concept parent = views.detail(id, user);
+        return create(json, accessors, new PostProcess<Concept>() {
+            @Override
+            public void process(Concept concept) {
+                parent.addNarrowerConcept(concept);
+                concept.setVocabulary(parent.getVocabulary());
+            }
+        });
     }
 }
