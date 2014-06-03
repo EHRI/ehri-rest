@@ -186,8 +186,7 @@ public class VocabularyResource extends
 
     @DELETE
     @Path("/{id:.+}/all")
-    public Response deleteAllVocabularyConcepts(
-            @PathParam("id") String id)
+    public Response deleteAllVocabularyConcepts(@PathParam("id") String id)
             throws ItemNotFound, BadRequester, AccessDenied, PermissionDenied {
         Vocabulary vocabulary = new Query<Vocabulary>(graph, Vocabulary.class).get(id,
                 getRequesterUserProfile());
@@ -197,11 +196,14 @@ public class VocabularyResource extends
             CrudViews<Concept> conceptViews = new CrudViews<Concept>(
                     graph, Concept.class, vocabulary);
             ActionManager actionManager = new ActionManager(graph, vocabulary);
-            ActionManager.EventContext context = actionManager
-                    .logEvent(user, EventTypes.deletion);
-            for (Concept concept : vocabulary.getConcepts()) {
-                context.addSubjects(concept);
-                conceptViews.delete(concept.getId(), user);
+            Iterable<Concept> concepts = vocabulary.getConcepts();
+            if (concepts.iterator().hasNext()) {
+                ActionManager.EventContext context = actionManager
+                        .logEvent(user, EventTypes.deletion, getLogMessage());
+                for (Concept concept : concepts) {
+                    context.addSubjects(concept);
+                    conceptViews.delete(concept.getId(), user);
+                }
             }
             graph.getBaseGraph().commit();
             return Response.status(Status.OK).build();
