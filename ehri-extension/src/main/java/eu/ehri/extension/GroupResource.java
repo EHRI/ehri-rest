@@ -33,7 +33,7 @@ import eu.ehri.project.views.Query;
 import static eu.ehri.extension.RestHelpers.produceErrorMessageJson;
 
 /**
- * Provides a RESTfull interface for the Group class.
+ * Provides a RESTful interface for the Group class.
  */
 @Path(Entities.GROUP)
 public class GroupResource extends AbstractAccessibleEntityResource<Group> {

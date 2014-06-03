@@ -18,7 +18,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 
 /**
- * Provides a RESTfull interface for dealing with described entities.
+ * Provides a RESTful interface for dealing with described entities.
  */
 @Path("description")
 public class DescriptionResource extends AbstractAccessibleEntityResource<DescribedEntity> {

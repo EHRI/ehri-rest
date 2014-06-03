@@ -19,7 +19,7 @@ import java.net.URI;
 import java.util.List;
 
 /**
- * Provides a RESTfull interface for managing countries
+ * Provides a RESTful interface for managing countries
  * and creating repositories within them.
  * 
  * @author mike

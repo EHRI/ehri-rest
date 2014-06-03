@@ -20,7 +20,7 @@ import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.views.AnnotationViews;
 
 /**
- * Provides a RESTfull(ish) interface for creating.
+ * Provides a RESTful(ish) interface for creating.
  */
 @Path(Entities.ANNOTATION)
 public class AnnotationResource extends AbstractAccessibleEntityResource<Annotation> {

@@ -35,7 +35,7 @@ import eu.ehri.project.views.AclViews;
 import eu.ehri.project.views.Query;
 
 /**
- * Provides a RESTfull(ish) interface for setting PermissionTarget perms.
+ * Provides a RESTful(ish) interface for setting PermissionTarget perms.
  *
  * @author http://github.com/mikesname
  */

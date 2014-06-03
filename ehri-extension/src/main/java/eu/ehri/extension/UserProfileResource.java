@@ -29,7 +29,7 @@ import eu.ehri.project.definitions.Entities;
 import static eu.ehri.extension.RestHelpers.produceErrorMessageJson;
 
 /**
- * Provides a RESTfull interface for the UserProfile.
+ * Provides a RESTful interface for the UserProfile.
  */
 @Path(Entities.USER_PROFILE)
 public class UserProfileResource extends AbstractAccessibleEntityResource<UserProfile> {

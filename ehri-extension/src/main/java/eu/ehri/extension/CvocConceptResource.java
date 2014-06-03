@@ -27,7 +27,7 @@ import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.views.Query;
 
 /**
- * Provides a RESTfull interface for the cvoc.Concept. Note that the concept
+ * Provides a RESTful interface for the cvoc.Concept. Note that the concept
  * creation endpoint is part of the VocabularyResource and creation without a
  * Vocabulary is not possible via this API
  */
