@@ -16,7 +16,11 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.*;
 import javax.ws.rs.core.Response.Status;
 
+import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.exceptions.*;
+import eu.ehri.project.models.UserProfile;
+import eu.ehri.project.persistence.ActionManager;
+import eu.ehri.project.views.impl.CrudViews;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import eu.ehri.extension.errors.BadRequester;
@@ -32,9 +36,8 @@ import eu.ehri.project.views.Query;
 /**
  * Provides a RESTful interface for the Vocabulary Also for managing the
  * Concepts that are in the Vocabulary
- * 
+ *
  * @author paulboon
- * 
  */
 @Path(Entities.CVOC_VOCABULARY)
 public class VocabularyResource extends
@@ -173,25 +176,31 @@ public class VocabularyResource extends
         return delete(id);
     }
 
-    /*** Concept manipulation ***/
+    /**
+     * Concept manipulation **
+     */
 
     @DELETE
     @Path("/{id:.+}/all")
-    public Response deleteAllVocabularyConcepts(
-            @PathParam("id") String id)
+    public Response deleteAllVocabularyConcepts(@PathParam("id") String id)
             throws ItemNotFound, BadRequester, AccessDenied, PermissionDenied {
         Vocabulary vocabulary = new Query<Vocabulary>(graph, Vocabulary.class).get(id,
                 getRequesterUserProfile());
-        
-        //return deleteAllConcepts(vocabulary);
+
         try {
-        	LoggingCrudViews<Concept> conceptViews = new LoggingCrudViews<Concept>(graph,
-            		Concept.class, vocabulary);
-        	Accessor requesterUserProfile = getRequesterUserProfile();
-        	Iterable<Concept> concepts = vocabulary.getConcepts();
-        	for (Concept concept : concepts) {
-        		conceptViews.delete(concept.getId(), requesterUserProfile);
-        	}
+            UserProfile user = getCurrentUser();
+            CrudViews<Concept> conceptViews = new CrudViews<Concept>(
+                    graph, Concept.class, vocabulary);
+            ActionManager actionManager = new ActionManager(graph, vocabulary);
+            Iterable<Concept> concepts = vocabulary.getConcepts();
+            if (concepts.iterator().hasNext()) {
+                ActionManager.EventContext context = actionManager
+                        .logEvent(user, EventTypes.deletion, getLogMessage());
+                for (Concept concept : concepts) {
+                    context.addSubjects(concept);
+                    conceptViews.delete(concept.getId(), user);
+                }
+            }
             graph.getBaseGraph().commit();
             return Response.status(Status.OK).build();
         } catch (SerializationError e) {
@@ -207,8 +216,8 @@ public class VocabularyResource extends
 
     /**
      * Create a top-level concept unit for this vocabulary.
-     * 
-     * @param id The vocabulary ID
+     *
+     * @param id   The vocabulary ID
      * @param json The new concept data
      * @return The new concept
      * @throws PermissionDenied
@@ -225,7 +234,7 @@ public class VocabularyResource extends
     public Response createVocabularyConcept(@PathParam("id") String id,
             String json, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws PermissionDenied, ValidationError, IntegrityError,
-                DeserializationError, ItemNotFound, BadRequester {
+            DeserializationError, ItemNotFound, BadRequester {
         Accessor user = getRequesterUserProfile();
         Vocabulary vocabulary = views.detail(id, user);
         try {

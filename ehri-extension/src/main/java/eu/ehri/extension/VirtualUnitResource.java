@@ -159,7 +159,7 @@ public final class VirtualUnitResource extends
         final Iterable<DocumentDescription> documentDescriptions
                 = getDocumentDescriptions(descriptionIds, currentUser);
 
-        return create(json, accessors, new PostProcess<VirtualUnit>() {
+        return create(json, accessors, new PostCreateHandler<VirtualUnit>() {
             @Override
             public void process(VirtualUnit virtualUnit) {
                 virtualUnit.setAuthor(currentUser);
@@ -201,7 +201,7 @@ public final class VirtualUnitResource extends
         final Iterable<DocumentDescription> documentDescriptions
                 = getDocumentDescriptions(descriptionIds, currentUser);
         final VirtualUnit parent = views.detail(id, currentUser);
-        return create(json, accessors, new PostProcess<VirtualUnit>() {
+        return create(json, accessors, new PostCreateHandler<VirtualUnit>() {
             @Override
             public void process(VirtualUnit virtualUnit) {
                 parent.addChild(virtualUnit);
