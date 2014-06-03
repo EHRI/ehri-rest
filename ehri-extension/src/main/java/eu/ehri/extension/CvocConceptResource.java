@@ -318,7 +318,7 @@ public class CvocConceptResource extends
             DeserializationError, ItemNotFound, BadRequester {
         final Accessor user = getRequesterUserProfile();
         final Concept parent = views.detail(id, user);
-        return create(json, accessors, new PostProcess<Concept>() {
+        return create(json, accessors, new PostCreateHandler<Concept>() {
             @Override
             public void process(Concept concept) {
                 parent.addNarrowerConcept(concept);
