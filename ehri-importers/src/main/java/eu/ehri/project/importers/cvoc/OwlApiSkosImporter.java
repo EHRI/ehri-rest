@@ -169,7 +169,7 @@ public final class OwlApiSkosImporter implements SkosImporter {
 
     private Mutation<Concept> importConcept(OWLNamedIndividual item, OWLOntology dataset) throws ValidationError {
         logger.debug("Importing: {}", item.toString());
-        Bundle.Builder builder = new Bundle.Builder(EntityClass.CVOC_CONCEPT)
+        Bundle.Builder builder = Bundle.Builder.withClass(EntityClass.CVOC_CONCEPT)
                 .addDataValue(Ontology.IDENTIFIER_KEY, getId(item.getIRI().toURI()));
 
         List<Bundle> undetermined = getUndeterminedRelations(item, dataset);
@@ -276,7 +276,7 @@ public final class OwlApiSkosImporter implements SkosImporter {
                 .getOWLAnnotationProperty(IRI.create(SkosRDFVocabulary.PREF_LABEL.getURI()));
 
         for (OWLAnnotation property : item.getAnnotations(ontology, prelLabelProp)) {
-            Bundle.Builder builder = new Bundle.Builder(EntityClass.CVOC_CONCEPT_DESCRIPTION);
+            Bundle.Builder builder = Bundle.Builder.withClass(EntityClass.CVOC_CONCEPT_DESCRIPTION);
 
             OWLLiteral literalPrefName = (OWLLiteral)property.getValue();
             String languageCode = literalPrefName.hasLang()

@@ -40,6 +40,7 @@ public interface SystemEvent extends AccessibleEntity {
     @JavaHandler
     public Iterable<AccessibleEntity> getSubjects();
 
+    @Fetch(value = Ontology.VERSION_HAS_EVENT, ifDepth = 0)
     @Adjacency(label = Ontology.VERSION_HAS_EVENT, direction = Direction.IN)
     public Iterable<Version> getPriorVersions();
 
