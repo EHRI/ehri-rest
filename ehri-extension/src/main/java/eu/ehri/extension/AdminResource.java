@@ -99,7 +99,7 @@ public class AdminResource extends AbstractRestResource {
         graph.getBaseGraph().checkNotInTransaction();
         try {
             String ident = getNextDefaultUserId();
-            Bundle bundle = new Bundle.Builder(EntityClass.USER_PROFILE)
+            Bundle bundle = Bundle.Builder.withClass(EntityClass.USER_PROFILE)
                     .addDataValue(Ontology.IDENTIFIER_KEY, ident)
                     .addDataValue(Ontology.NAME_KEY, ident)
                     .addData(parseUserData(jsonData))

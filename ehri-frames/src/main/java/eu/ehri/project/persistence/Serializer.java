@@ -322,11 +322,11 @@ public final class Serializer {
             String id = item.getProperty(EntityType.ID_KEY);
             logger.trace("Serializing {} ({}) at depth {}", id, type, depth);
 
-            Bundle.Builder builder = new Bundle.Builder(type);
-            builder.setId(id)
+            Bundle.Builder builder = Bundle.Builder.withClass(type)
+                    .setId(id)
+                    .addData(getVertexData(item, type, lite))
                     .addRelations(getRelationData(item,
                             depth, lite, type.getEntityClass()))
-                    .addData(getVertexData(item, type, lite))
                     .addMetaData(getVertexMeta(item));
             if (!lite) {
                 builder.addMetaData(getVertexMeta(item))

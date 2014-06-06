@@ -76,7 +76,7 @@ public class LinkViewsTest extends AbstractFixtureTest {
     }
 
     private Bundle getLinkBundle(String linkDesc, String linkType) {
-        return new Bundle.Builder(EntityClass.LINK)
+        return Bundle.Builder.withClass(EntityClass.LINK)
                 .addDataValue(Ontology.LINK_HAS_TYPE, linkType)
                 .addDataValue(Ontology.LINK_HAS_DESCRIPTION, linkDesc)
                 .build();

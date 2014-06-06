@@ -169,10 +169,11 @@ public final class ActionManager {
          */
         public EventContext createVersion(Frame frame, Bundle bundle) {
             try {
-                Bundle version = new Bundle(EntityClass.VERSION)
-                        .withDataValue(Ontology.VERSION_ENTITY_ID, frame.getId())
-                        .withDataValue(Ontology.VERSION_ENTITY_CLASS, frame.getType())
-                        .withDataValue(Ontology.VERSION_ENTITY_DATA, bundle.toJson());
+                Bundle version = Bundle.Builder.withClass(EntityClass.VERSION)
+                        .addDataValue(Ontology.VERSION_ENTITY_ID, frame.getId())
+                        .addDataValue(Ontology.VERSION_ENTITY_CLASS, frame.getType())
+                        .addDataValue(Ontology.VERSION_ENTITY_DATA, bundle.toJson())
+                        .build();
                 Version ev = new BundleDAO(actionManager.graph)
                         .create(version, Version.class);
                 actionManager.replaceAtHead(frame.asVertex(), ev.asVertex(),
@@ -258,7 +259,7 @@ public final class ActionManager {
     private SystemEvent createGlobalEvent(EventTypes type, Optional<String> logMessage) {
         try {
             Vertex system = manager.getVertex(GLOBAL_EVENT_ROOT, EntityClass.SYSTEM);
-            Bundle ge = new Bundle.Builder(EntityClass.SYSTEM_EVENT)
+            Bundle ge = Bundle.Builder.withClass(EntityClass.SYSTEM_EVENT)
                     .addDataValue(Ontology.EVENT_TYPE, type.toString())
                     .addDataValue(Ontology.EVENT_TIMESTAMP, getTimestamp())
                     .addDataValue(Ontology.EVENT_LOG_MESSAGE, logMessage.or(""))

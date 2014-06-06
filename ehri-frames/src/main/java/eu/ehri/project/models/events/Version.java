@@ -31,6 +31,7 @@ public interface Version extends AccessibleEntity {
     /**
      * Serialized snapshot of the item's data.
      */
+    @Mandatory
     @Property(Ontology.VERSION_ENTITY_DATA)
     public String getEntityData();
 
