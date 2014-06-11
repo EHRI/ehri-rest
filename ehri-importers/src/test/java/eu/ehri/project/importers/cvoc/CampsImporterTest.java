@@ -74,7 +74,8 @@ public class CampsImporterTest extends AbstractImporterTest {
         int count = getNodeCount(graph);
         int voccount = toList(vocabulary.getConcepts()).size();
         InputStream ios = ClassLoader.getSystemResourceAsStream(SKOS_FILE);
-        SkosCoreCvocImporter importer = new SkosCoreCvocImporter(graph, validUser, vocabulary);
+//        SkosCoreCvocImporter importer = new SkosCoreCvocImporter(graph, validUser, vocabulary);
+        SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, validUser, vocabulary);
         importer.setTolerant(true);
         ImportLog log = importer.importFile(ios, "Importing the camps as a SKOS file");
 
@@ -105,7 +106,9 @@ public class CampsImporterTest extends AbstractImporterTest {
         
         //import version 2
         ios = ClassLoader.getSystemResourceAsStream(SKOS_FILE_VERSION2);
-        importer = new SkosCoreCvocImporter(graph, validUser, vocabulary);
+//        importer = new SkosCoreCvocImporter(graph, validUser, vocabulary);
+        importer = SkosImporterFactory.newSkosImporter(graph, validUser, vocabulary);
+
         importer.setTolerant(true);
         log = importer.importFile(ios, "Importing the modified camps as a SKOS file");
 

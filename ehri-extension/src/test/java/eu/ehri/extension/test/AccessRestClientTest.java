@@ -12,6 +12,7 @@ import javax.ws.rs.core.MultivaluedMap;
 
 import static com.sun.jersey.api.client.ClientResponse.Status.NOT_FOUND;
 import static com.sun.jersey.api.client.ClientResponse.Status.OK;
+import org.junit.Ignore;
 
 
 public class AccessRestClientTest extends BaseRestClientTest {
@@ -19,7 +20,7 @@ public class AccessRestClientTest extends BaseRestClientTest {
     static final String PRIVILEGED_USER_NAME = "mike";
     static final String LIMITED_USER_NAME = "reto";
 
-    @Test
+    @Test @Ignore
     public void testUserCannotRead() throws Exception {
         // Create
         ClientResponse response = jsonCallAs(LIMITED_USER_NAME,

@@ -24,6 +24,7 @@ import java.util.Set;
 import static com.sun.jersey.api.client.ClientResponse.Status.*;
 import static eu.ehri.extension.UserProfileResource.*;
 import static org.junit.Assert.*;
+import org.junit.Ignore;
 
 public class UserProfileRestClientTest extends BaseRestClientTest {
 
@@ -186,6 +187,7 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
     }
 
     @Test
+    @Ignore
     public void testFollowAndUnfollow() throws Exception {
         String user1 = getRegularUserProfileId();
         String user2 = getAdminUserProfileId();

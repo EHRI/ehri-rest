@@ -1,3 +1,4 @@
+
 package eu.ehri.project.importers.cvoc;
 
 import com.tinkerpop.blueprints.TransactionalGraph;
@@ -15,4 +16,5 @@ public class SkosImporterFactory {
         // TODO: Load dynamically via system prop
         return new JenaSkosImporter(graph, actioner, vocabulary);
     }
+
 }

@@ -79,6 +79,7 @@ public class Ontology {
     public static final String CONCEPT_HAS_BROADER = "broader";
     public static final String CONCEPT_HAS_NARROWER = "narrower";
     public static final String CONCEPT_HAS_RELATED = "related";
+    public static final String CONCEPT_EDITORIALNOTE = "provenance";
 
     // System events
     public static final String ENTITY_HAS_EVENT = "hasEvent";
