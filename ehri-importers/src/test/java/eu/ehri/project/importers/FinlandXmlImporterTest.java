@@ -84,8 +84,7 @@ public class FinlandXmlImporterTest extends AbstractImporterTest{
 
         ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD_ENG);
         log = importManager.importFile(ios, logMessage);
-        //TODO: somehow, mike's changes seem to create three more nodes?
-        assertEquals(count_eng+9, getNodeCount(graph));
+        assertEquals(count_eng, getNodeCount(graph));
         
     }
 
