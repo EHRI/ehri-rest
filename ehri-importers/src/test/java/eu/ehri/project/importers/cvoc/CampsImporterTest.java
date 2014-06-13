@@ -13,7 +13,7 @@ import java.util.List;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,8 +23,8 @@ import org.slf4j.LoggerFactory;
  */
 public class CampsImporterTest extends AbstractImporterTest {
     private static final Logger logger = LoggerFactory.getLogger(CampsImporterTest.class);
-    protected final String SKOS_FILE = "camps.rdf";
-    protected final String SKOS_FILE_VERSION2 = "campsv02.rdf";
+    protected final String SKOS_FILE = "cvoc/camps.rdf";
+    protected final String SKOS_FILE_VERSION2 = "cvoc/campsv02.rdf";
 
     @Test
     public void testImportItemsT() throws Exception {
@@ -35,6 +35,8 @@ public class CampsImporterTest extends AbstractImporterTest {
         int count = getNodeCount(graph);
         int voccount = toList(vocabulary.getConcepts()).size();
         InputStream ios = ClassLoader.getSystemResourceAsStream(SKOS_FILE);
+        assertNotNull(ios);
+        
         SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, validUser, vocabulary);
         importer.setTolerant(true);
         ImportLog log = importer.importFile(ios, logMessage);

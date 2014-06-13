@@ -137,6 +137,8 @@ public abstract class EaImporter extends XmlImporter<Map<String, Object>> {
         for (String key : itemData.keySet()) {
             if (key.equals("descriptionIdentifier")) {
                 description.put(Ontology.IDENTIFIER_KEY, itemData.get(key));
+            }else if(key.equals("conditionsOfAccess")){
+                description.put(key, changeForbiddenMultivaluedProperties(key, itemData.get(key), entity));
             }else if ( !key.startsWith(SaxXmlHandler.UNKNOWN) 
                     && ! key.equals("objectIdentifier") 
                     && ! key.equals(Ontology.IDENTIFIER_KEY)

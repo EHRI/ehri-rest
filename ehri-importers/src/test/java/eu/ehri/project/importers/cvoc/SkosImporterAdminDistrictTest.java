@@ -25,7 +25,7 @@ import eu.ehri.project.models.cvoc.Vocabulary;
  */
 public class SkosImporterAdminDistrictTest extends AbstractImporterTest {
 
-    protected final String SINGLE_SKOS = "admin-dist-nolang.rdf";
+    protected final String SINGLE_SKOS = "cvoc/admin-dist-nolang.rdf";
 //    protected final String SINGLE_SKOS = "admin-dist.rdf";
     // Depends on fixtures
     protected final String TEST_REPO = "r1";
@@ -49,10 +49,10 @@ public class SkosImporterAdminDistrictTest extends AbstractImporterTest {
 
         // How many new nodes will have been created? We should have
         // - 3 more Concept
-        // - 4 more ConceptDescription ( 3 de + 1 fr )
+        // - 5 more ConceptDescription ( 3 de + 1 fr + 1 eng (:when no lang is given in the prefLabel:) )
         // - 4 more ImportEvents ( 3 + 1 )
         // - 1 more import Action
-        assertEquals(count + 12, getNodeCount(graph));
+        assertEquals(count + 13, getNodeCount(graph));
 
     }
 }
