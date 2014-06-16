@@ -37,7 +37,7 @@ import eu.ehri.project.views.impl.LoggingCrudViews;
 import eu.ehri.project.views.Query;
 
 /**
- * Provides a RESTfull interface for the Event class. Note: Event instances
+ * Provides a RESTful interface for the Event class. Note: Event instances
  * are created by the system, so we do not have create/update/delete methods
  * here.
  */
@@ -170,10 +170,9 @@ public class EventResource extends AbstractAccessibleEntityResource<SystemEvent>
                     }
                 }
                 if (show.equals(SHOW_ALL) || show.equals(SHOW_FOLLOWS)) {
-                    for (Actioner e : event.getActioners()) {
-                        if (following.contains(e.getId())) {
-                            return true;
-                        }
+                    Actioner actioner = event.getActioner();
+                    if (actioner != null && following.contains(actioner.getId())) {
+                        return true;
                     }
                 }
                 return false;
@@ -244,12 +243,8 @@ public class EventResource extends AbstractAccessibleEntityResource<SystemEvent>
             pipe = pipe.filter(new PipeFunction<SystemEvent, Boolean>() {
                 @Override
                 public Boolean compute(SystemEvent event) {
-                    for (Actioner e : event.getActioners()) {
-                        if (users.contains(e.getId())) {
-                            return true;
-                        }
-                    }
-                    return false;
+                    Actioner actioner = event.getActioner();
+                    return actioner != null && users.contains(actioner.getId());
                 }
             });
         }

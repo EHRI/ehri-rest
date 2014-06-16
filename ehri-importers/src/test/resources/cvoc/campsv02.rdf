@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:skos="http://www.w3.org/2004/02/skos/core#"
+>
+  <rdf:Description rdf:about="http://ehri01.dans.knaw.nl/989">
+    <skos:editorialNote xml:lang="en">Modification and editorial changes were made in March 2014 by EHRI project team members</skos:editorialNote>
+    <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+    <skos:prefLabel xml:lang="en">Böhlerwerk</skos:prefLabel>
+    <skos:altLabel xml:lang="en">Boehlerwerk</skos:altLabel>
+    <skos:editorialNote xml:lang="en">source: ITS Arolsen</skos:editorialNote>
+    <skos:inScheme>http://ehri01.dans.knaw.nl/camps/</skos:inScheme>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://ehri01.dans.knaw.nl/386">
+    <skos:altLabel xml:lang="en">Litomerice- Richard II</skos:altLabel>
+    <skos:editorialNote xml:lang="en">source: ITS Arolsen</skos:editorialNote>
+    <skos:broader rdf:resource="http://ehri01.dans.knaw.nl/226"/>
+    <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+    <skos:inScheme>http://ehri01.dans.knaw.nl/camps/</skos:inScheme>
+    <skos:prefLabel xml:lang="en">Leitmeritz - Richard II</skos:prefLabel>
+  </rdf:Description>
+</rdf:RDF>

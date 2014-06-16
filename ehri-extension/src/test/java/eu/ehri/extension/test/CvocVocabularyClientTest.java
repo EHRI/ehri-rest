@@ -75,6 +75,18 @@ public class CvocVocabularyClientTest extends BaseRestClientTest {
     }
 
     @Test
+    public void testDeleteVocabularyTerms() throws Exception {
+        URI uri = ehriUri(Entities.CVOC_VOCABULARY, TEST_CVOC_ID, "all");
+        testDelete(uri);
+
+        // Check it's really gone...
+        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
+                ehriUri(Entities.CVOC_CONCEPT, "cvocc1"))
+                .get(ClientResponse.class);
+        assertStatus(NOT_FOUND, response);
+    }
+
+    @Test
     public void testDeleteVocabulary() throws Exception {
         URI uri = ehriUri(Entities.CVOC_VOCABULARY, TEST_CVOC_ID);
         testDelete(uri);

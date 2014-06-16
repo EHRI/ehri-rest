@@ -71,11 +71,15 @@ public class Ontology {
 
     // Concepts!
     public static final String CONCEPT_ALTLABEL = "altLabel";
+    public static final String CONCEPT_HIDDENLABEL = "hiddenLabel";
     public static final String CONCEPT_DEFINITION = "definition";
+    public static final String CONCEPT_NOTE = "note";
+    public static final String CONCEPT_EDITORIAL_NOTE = "editoralNote";
     public static final String CONCEPT_SCOPENOTE = "scopeNote";
     public static final String CONCEPT_HAS_BROADER = "broader";
     public static final String CONCEPT_HAS_NARROWER = "narrower";
     public static final String CONCEPT_HAS_RELATED = "related";
+    public static final String CONCEPT_EDITORIALNOTE = "provenance";
 
     // System events
     public static final String ENTITY_HAS_EVENT = "hasEvent";
@@ -100,6 +104,7 @@ public class Ontology {
     public static final String VC_IS_PART_OF = "isPartOf";
     public static final String VC_HAS_AUTHOR = "hasAuthor";
     public static final String VC_DESCRIBED_BY = "isDescribedBy";
+    public static final String VC_IN_COLLECTION = "isInVirtualCollection";
 
     // User relationships
     public static final String USER_FOLLOWS_USER = "isFollowing";

@@ -40,7 +40,7 @@ public class FinlandXmlImporterTest extends AbstractImporterTest{
         XmlImportManager importManager = new SaxImportManager(graph, agent, validUser, IcaAtomEadImporter.class, IcaAtomEadHandler.class, new XmlImportProperties("finlandead.properties"))
                 .setTolerant(Boolean.TRUE);
         ImportLog log = importManager.importFile(ios, logMessage);
-        printGraph(graph);
+//        printGraph(graph);
         int count_fin = getNodeCount(graph);
         
         DocumentaryUnit c1 = graph.frame(getVertexByIdentifier(graph, C1), DocumentaryUnit.class);
@@ -84,7 +84,6 @@ public class FinlandXmlImporterTest extends AbstractImporterTest{
 
         ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD_ENG);
         log = importManager.importFile(ios, logMessage);
-        
         assertEquals(count_eng, getNodeCount(graph));
         
     }

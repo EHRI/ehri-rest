@@ -169,10 +169,11 @@ public final class ActionManager {
          */
         public EventContext createVersion(Frame frame, Bundle bundle) {
             try {
-                Bundle version = new Bundle(EntityClass.VERSION)
-                        .withDataValue(Ontology.VERSION_ENTITY_ID, frame.getId())
-                        .withDataValue(Ontology.VERSION_ENTITY_CLASS, frame.getType())
-                        .withDataValue(Ontology.VERSION_ENTITY_DATA, bundle.toJson());
+                Bundle version = Bundle.Builder.withClass(EntityClass.VERSION)
+                        .addDataValue(Ontology.VERSION_ENTITY_ID, frame.getId())
+                        .addDataValue(Ontology.VERSION_ENTITY_CLASS, frame.getType())
+                        .addDataValue(Ontology.VERSION_ENTITY_DATA, bundle.toJson())
+                        .build();
                 Version ev = new BundleDAO(actionManager.graph)
                         .create(version, Version.class);
                 actionManager.replaceAtHead(frame.asVertex(), ev.asVertex(),
@@ -258,7 +259,7 @@ public final class ActionManager {
     private SystemEvent createGlobalEvent(EventTypes type, Optional<String> logMessage) {
         try {
             Vertex system = manager.getVertex(GLOBAL_EVENT_ROOT, EntityClass.SYSTEM);
-            Bundle ge = new Bundle.Builder(EntityClass.SYSTEM_EVENT)
+            Bundle ge = Bundle.Builder.withClass(EntityClass.SYSTEM_EVENT)
                     .addDataValue(Ontology.EVENT_TYPE, type.toString())
                     .addDataValue(Ontology.EVENT_TIMESTAMP, getTimestamp())
                     .addDataValue(Ontology.EVENT_LOG_MESSAGE, logMessage.or(""))
@@ -441,5 +442,43 @@ public final class ActionManager {
     public static String getTimestamp() {
         DateTime dt = DateTime.now();
         return ISODateTimeFormat.dateTime().print(dt);
+    }
+
+    public static boolean sameAs(SystemEvent event1, SystemEvent event2) {
+        // NB: Fetching all these props and relations is potentially quite
+        // costly, so we want to short-circuit and return early is possible,
+        // starting with the least-costly to fetch attributes.
+        String eventType1 = event1.getEventType();
+        String eventType2 = event2.getEventType();
+        if (eventType1 != null && eventType2 != null && !eventType1.equals(eventType2)) {
+            return false;
+        }
+
+        String logMessage1 = event1.getLogMessage();
+        String logMessage2 = event2.getLogMessage();
+        if (logMessage1 != null && logMessage2 != null && !logMessage1.equals(logMessage2)) {
+            return false;
+        }
+
+        Frame eventScope1 = event1.getEventScope();
+        Frame eventScope2 = event2.getEventScope();
+        if (eventScope1 != null && eventScope2 != null && !eventScope1.equals(eventScope2)) {
+            return false;
+        }
+
+        AccessibleEntity entity1 = event1.getFirstSubject();
+        AccessibleEntity entity2 = event2.getFirstSubject();
+        if (entity1 != null && entity2 != null && !entity1.equals(entity2)) {
+            return false;
+        }
+
+        Actioner actioner1 = event1.getActioner();
+        Actioner actioner2 = event2.getActioner();
+        if (actioner1 != null && actioner2 != null && !actioner1.equals(actioner2)) {
+            return false;
+        }
+
+        // Okay, fall through...
+        return true;
     }
 }

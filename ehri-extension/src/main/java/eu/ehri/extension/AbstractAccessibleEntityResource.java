@@ -12,6 +12,7 @@ import javax.ws.rs.core.Response.Status;
 import eu.ehri.project.exceptions.*;
 import eu.ehri.project.persistence.Mutation;
 import eu.ehri.project.persistence.Serializer;
+import eu.ehri.project.views.AclViews;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import com.google.common.collect.Lists;
@@ -19,7 +20,6 @@ import com.google.common.collect.Sets;
 import com.tinkerpop.blueprints.Vertex;
 
 import eu.ehri.extension.errors.BadRequester;
-import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
@@ -44,8 +44,24 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
     // .getLogger(AbstractAccessibleEntityResource.class);
 
     protected final LoggingCrudViews<E> views;
+    protected final AclViews aclViews;
     protected final Query<E> querier;
     protected final Class<E> cls;
+
+    /**
+     * Functor used to post-process items.
+     */
+    public static interface PostCreateHandler<E extends AccessibleEntity> {
+        public void process(E frame) throws PermissionDenied;
+    }
+
+    public static class NoOpHandler<E extends AccessibleEntity> implements PostCreateHandler<E> {
+        @Override
+        public void process(E frame) {
+        }
+    }
+
+    private final PostCreateHandler<E> noOpHandler = new NoOpHandler<E>();
 
     /**
      * Constructor
@@ -58,6 +74,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
         super(database);
         this.cls = cls;
         views = new LoggingCrudViews<E>(graph, cls);
+        aclViews = new AclViews(graph);
         querier = new Query<E>(graph, cls);
     }
 
@@ -141,6 +158,10 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * @param json        The json representation of the entity to create (no vertex
      *                    'id' fields)
      * @param accessorIds List of accessors who can initially view this item
+     * @param handler     A callback function that allows additional operations
+     *                    to be run on the created object after it is initialised
+     *                    but before the response is generated. This is useful for adding
+     *                    relationships to the new item.
      * @return The response of the create request, the 'location' will contain
      *         the url of the newly created instance.
      * @throws PermissionDenied
@@ -149,7 +170,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * @throws DeserializationError
      * @throws BadRequester
      */
-    public Response create(String json, List<String> accessorIds)
+    public Response create(String json, List<String> accessorIds, PostCreateHandler<E> handler)
             throws PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, BadRequester {
         graph.getBaseGraph().checkNotInTransaction();
@@ -157,13 +178,15 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
         Bundle entityBundle = Bundle.fromString(json);
         try {
             E entity = views.create(entityBundle, user, getLogMessage());
-            // TODO: Move elsewhere
-            new AclManager(graph).setAccessors(entity,
-                    getAccessors(accessorIds, user));
+            aclViews.setAccessors(entity, getAccessors(accessorIds, user), user);
 
-            UriBuilder ub = uriInfo.getAbsolutePathBuilder();
-            URI docUri = ub.path(entity.getId()).build();
+            // run post-creation callbacks
+            handler.process(entity);
+
             graph.getBaseGraph().commit();
+            URI docUri = uriInfo.getBaseUriBuilder()
+                    .path(getClass())
+                    .path(entity.getId()).build();
             return Response.status(Status.CREATED).location(docUri)
                     .entity(getRepresentation(entity).getBytes()).build();
         } catch (SerializationError serializationError) {
@@ -172,6 +195,12 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
         } finally {
             cleanupTransaction();
         }
+    }
+
+    public Response create(String json, List<String> accessorIds)
+            throws PermissionDenied, ValidationError, IntegrityError,
+            DeserializationError, BadRequester {
+        return create(json, accessorIds, noOpHandler);
     }
 
     /**
@@ -230,10 +259,10 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
 
     /**
      * Update (change) an instance of the 'entity' in the database
-     *
+     * <p/>
      * If the Patch header is true top-level bundle data will be merged
      * instead of overwritten.
-
+     *
      * @param id   The items identifier property
      * @param json The json
      * @return The response of the update request
@@ -272,9 +301,11 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
     }
 
     /**
-     * Delete (remove) an instance of the 'entity' in the database
+     * Delete (remove) an instance of the 'entity' in the database,
+     * running a handler callback beforehand.
      *
-     * @param id The vertex id
+     * @param id         The vertex id
+     * @param preProcess A handler to run before deleting the item
      * @return The response of the delete request
      * @throws AccessDenied
      * @throws PermissionDenied
@@ -282,11 +313,14 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * @throws ValidationError
      * @throws BadRequester
      */
-    protected Response delete(String id) throws AccessDenied, PermissionDenied, ItemNotFound,
+    protected Response delete(String id, PostCreateHandler<E> preProcess) throws AccessDenied, PermissionDenied,
+            ItemNotFound,
             ValidationError, BadRequester {
         graph.getBaseGraph().checkNotInTransaction();
         try {
-            views.delete(id, getRequesterUserProfile(), getLogMessage());
+            Accessor user = getRequesterUserProfile();
+            preProcess.process(views.detail(id, user));
+            views.delete(id, user, getLogMessage());
             graph.getBaseGraph().commit();
             return Response.status(Status.OK).build();
         } catch (SerializationError serializationError) {
@@ -297,13 +331,29 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
         }
     }
 
+    /**
+     * Delete (remove) an instance of the 'entity' in the database
+     *
+     * @param id         The vertex id
+     * @return The response of the delete request
+     * @throws AccessDenied
+     * @throws PermissionDenied
+     * @throws ItemNotFound
+     * @throws ValidationError
+     * @throws BadRequester
+     */
+    protected Response delete(String id) throws AccessDenied, PermissionDenied,
+            ItemNotFound,
+            ValidationError, BadRequester {
+        return delete(id, noOpHandler);
+    }
     // Helpers
 
     private EntityClass getEntityType() {
         return ClassUtils.getEntityType(cls);
     }
 
-    protected Iterable<Accessor> getAccessors(List<String> accessorIds,
+    protected Set<Accessor> getAccessors(List<String> accessorIds,
             Accessor current) {
 
         Set<Vertex> accessorV = Sets.newHashSet();

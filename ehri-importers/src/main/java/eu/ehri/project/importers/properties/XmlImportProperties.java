@@ -197,7 +197,7 @@ abstract class PropertyLoader {
                     result = new Properties();
                     result.load(in); // Can throw IOException
                 } else {
-                    logger.error(name + " is geen file");
+                    logger.error(name + " is not a Resource");
                     FileInputStream ios = new FileInputStream(name);
                     logger.info("trying to read " +name + " as fileinputstream");
                     

@@ -62,7 +62,7 @@ public class PersonalitiesImporter extends XmlImporter<Object> {
 
         if (!permissionScope.equals(SystemScope.getInstance())
                 && mutation.created()) {
-            frame.setAuthoritativeSet(framedGraph.frame(permissionScope.asVertex(), AuthoritativeSet.class));
+            manager.cast(permissionScope, AuthoritativeSet.class).addItem(frame);
             frame.setPermissionScope(permissionScope);
         }
 

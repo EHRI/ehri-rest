@@ -5,7 +5,7 @@
 <rdf:Description rdf:about="http://data.ehri-project.eu/places/admindistricts/ehri-district-231">
     <skos:broader rdf:resource="http://data.ehri-project.eu/places/admindistricts/ehri-district-229"/>
     <skos:prefLabel>Departement Mayenne</skos:prefLabel>
-<skos:prefLabel xml:lang="de">Departement Mayenne</skos:prefLabel>
+    <skos:prefLabel xml:lang="de">Departement Mayenne</skos:prefLabel>
     <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
     <skos:prefLabel xml:lang="fr">Département de la Mayenne</skos:prefLabel>
     <skos:inScheme rdf:resource="http://data.ehri-project.eu/places/admindistricts/"/>

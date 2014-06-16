@@ -23,55 +23,55 @@ public class VirtualUnitTest extends AbstractFixtureTest {
     @Test
     public void testGetParent() throws Exception {
         VirtualUnit vc1 = manager.getFrame("vc1", VirtualUnit.class);
-        VirtualUnit vc2 = manager.getFrame("vc2", VirtualUnit.class);
-        assertEquals(vc1, vc2.getParent());
+        VirtualUnit vu1 = manager.getFrame("vu1", VirtualUnit.class);
+        assertEquals(vc1, vu1.getParent());
     }
 
     @Test
     public void testAddChild() throws Exception {
-        VirtualUnit vc1 = manager.getFrame("vc1", VirtualUnit.class);
-        VirtualUnit vc3 = manager.getFrame("vc3", VirtualUnit.class);
-        Long childCount = vc1.getChildCount();
-        assertTrue(vc1.addChild(vc3));
-        assertEquals(Long.valueOf(childCount + 1), vc1.getChildCount());
+        VirtualUnit vu2 = manager.getFrame("vu2", VirtualUnit.class);
+        VirtualUnit vu3 = manager.getFrame("vu3", VirtualUnit.class);
+        Long childCount = vu2.getChildCount();
+        assertTrue(vu2.addChild(vu3));
+        assertEquals(Long.valueOf(childCount + 1), vu2.getChildCount());
         // Doing the same thing twice should return false
-        assertFalse(vc1.addChild(vc3));
+        assertFalse(vu2.addChild(vu3));
     }
 
     @Test
     public void testAddChildWithBadChild() throws Exception {
         VirtualUnit vc1 = manager.getFrame("vc1", VirtualUnit.class);
-        VirtualUnit vc2 = manager.getFrame("vc1", VirtualUnit.class);
+        VirtualUnit vc1Alt = manager.getFrame("vc1", VirtualUnit.class);
         // This shouldn't be allowed!
         assertFalse(vc1.addChild(vc1));
         // Nor should this - loop
-        assertFalse(vc2.addChild(vc1));
+        assertFalse(vc1Alt.addChild(vc1));
     }
 
     @Test
     public void testGetReferencedDescriptions() throws Exception {
-        VirtualUnit vc1 = manager.getFrame("vc1", VirtualUnit.class);
+        VirtualUnit vu1 = manager.getFrame("vu1", VirtualUnit.class);
         DocumentDescription cd1 = manager.getFrame("cd1", DocumentDescription.class);
-        assertTrue(vc1.getReferencedDescriptions().iterator().hasNext());
-        assertEquals(cd1, vc1.getReferencedDescriptions().iterator().next());
+        assertTrue(vu1.getReferencedDescriptions().iterator().hasNext());
+        assertEquals(cd1, vu1.getReferencedDescriptions().iterator().next());
     }
 
     @Test
     public void testAddReferencedDescription() throws Exception {
-        VirtualUnit vc1 = manager.getFrame("vc1", VirtualUnit.class);
+        VirtualUnit vu1 = manager.getFrame("vu1", VirtualUnit.class);
         DocumentDescription cd4 = manager.getFrame("cd4", DocumentDescription.class);
-        assertEquals(1L, Iterables.size(vc1.getReferencedDescriptions()));
-        vc1.addReferencedDescription(cd4);
-        assertEquals(2L, Iterables.size(vc1.getReferencedDescriptions()));
+        assertEquals(1L, Iterables.size(vu1.getReferencedDescriptions()));
+        vu1.addReferencedDescription(cd4);
+        assertEquals(2L, Iterables.size(vu1.getReferencedDescriptions()));
         // check we can't add it twice
-        vc1.addReferencedDescription(cd4);
-        assertEquals(2L, Iterables.size(vc1.getReferencedDescriptions()));
+        vu1.addReferencedDescription(cd4);
+        assertEquals(2L, Iterables.size(vu1.getReferencedDescriptions()));
     }
 
     @Test
     public void testGetVirtualDescriptions() throws Exception {
-        VirtualUnit vc1 = manager.getFrame("vc3", VirtualUnit.class);
-        DocumentDescription cd1 = manager.getFrame("vcd3", DocumentDescription.class);
+        VirtualUnit vc1 = manager.getFrame("vc1", VirtualUnit.class);
+        DocumentDescription cd1 = manager.getFrame("vcd1", DocumentDescription.class);
         assertTrue(vc1.getVirtualDescriptions().iterator().hasNext());
         assertEquals(cd1, vc1.getVirtualDescriptions().iterator().next());
     }
@@ -79,22 +79,23 @@ public class VirtualUnitTest extends AbstractFixtureTest {
     @Test
     public void testGetAncestors() throws Exception {
         VirtualUnit vc1 = manager.getFrame("vc1", VirtualUnit.class);
-        VirtualUnit vc2 = manager.getFrame("vc2", VirtualUnit.class);
-        assertEquals(Lists.newArrayList(vc1), Lists.newArrayList(vc2.getAncestors()));
+        VirtualUnit vu1 = manager.getFrame("vu1", VirtualUnit.class);
+        VirtualUnit vu2 = manager.getFrame("vu2", VirtualUnit.class);
+        assertEquals(Lists.newArrayList(vu1, vc1), Lists.newArrayList(vu2.getAncestors()));
     }
 
     @Test
     public void testGetChildren() throws Exception {
-        VirtualUnit vc1 = manager.getFrame("vc1", VirtualUnit.class);
-        VirtualUnit vc2 = manager.getFrame("vc2", VirtualUnit.class);
-        assertEquals(Lists.newArrayList(vc2), Lists.newArrayList(vc1.getChildren()));
+        VirtualUnit vu1 = manager.getFrame("vu1", VirtualUnit.class);
+        VirtualUnit vu2 = manager.getFrame("vu2", VirtualUnit.class);
+        assertEquals(Lists.newArrayList(vu2), Lists.newArrayList(vu1.getChildren()));
     }
 
     @Test
     public void testGetAllChildren() throws Exception {
-        VirtualUnit vc1 = manager.getFrame("vc1", VirtualUnit.class);
-        VirtualUnit vc2 = manager.getFrame("vc2", VirtualUnit.class);
-        assertEquals(Lists.newArrayList(vc2), Lists.newArrayList(vc1.getAllChildren()));
+        VirtualUnit vu1 = manager.getFrame("vu1", VirtualUnit.class);
+        VirtualUnit vu2 = manager.getFrame("vu2", VirtualUnit.class);
+        assertEquals(Lists.newArrayList(vu2), Lists.newArrayList(vu1.getAllChildren()));
     }
 
     @Test
@@ -117,7 +118,14 @@ public class VirtualUnitTest extends AbstractFixtureTest {
     @Test
     public void testGetDescriptions() throws Exception {
         DocumentDescription cd1 = manager.getFrame("cd1", DocumentDescription.class);
-        VirtualUnit vc1 = manager.getFrame("vc1", VirtualUnit.class);
-        assertEquals(Lists.newArrayList(cd1), Lists.newArrayList(vc1.getReferencedDescriptions()));
+        VirtualUnit vu1 = manager.getFrame("vu1", VirtualUnit.class);
+        assertEquals(Lists.newArrayList(cd1), Lists.newArrayList(vu1.getReferencedDescriptions()));
+    }
+
+    @Test
+    public void testGetRepositories() throws Exception {
+        VirtualUnit vu2 = manager.getFrame("vu2", VirtualUnit.class);
+        Repository r1 = manager.getFrame("r1", Repository.class);
+        assertEquals(Lists.newArrayList(r1), Lists.newArrayList(vu2.getRepositories()));
     }
 }

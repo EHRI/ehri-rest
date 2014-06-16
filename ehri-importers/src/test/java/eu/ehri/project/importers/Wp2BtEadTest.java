@@ -22,10 +22,12 @@ import eu.ehri.project.views.impl.CrudViews;
 import java.io.InputStream;
 import java.util.Iterator;
 import java.util.List;
+
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import static org.junit.Assert.*;
+import org.junit.Ignore;
 
 /**
  *
@@ -46,6 +48,7 @@ public class Wp2BtEadTest extends AbstractImporterTest {
     protected final String FONDS = "wp2bt";
 
     @Test
+    @Ignore
     public void testImportItemsT() throws Exception {
 
         Repository agent = manager.getFrame(TEST_REPO, Repository.class);
@@ -56,7 +59,7 @@ public class Wp2BtEadTest extends AbstractImporterTest {
         Vocabulary vocabulary = new CrudViews<Vocabulary>(graph, Vocabulary.class).create(vocabularyBundle, validUser);
         logger.debug(vocabulary.getId());
         Concept concept_716 = new CrudViews<Concept>(graph, Concept.class).create(conceptBundle, validUser); 
-        vocabulary.addConcept(concept_716);
+        vocabulary.addItem(concept_716);
         
         
         Vocabulary vocabularyTest = manager.getFrame("wp2-keywords", Vocabulary.class);

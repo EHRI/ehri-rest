@@ -24,7 +24,6 @@ public class CmdEntryPoint extends BaseCommand {
     private static final Map<String, Class<? extends Command>> COMMANDS;
     static {
         Map<String, Class<? extends Command>> mmap = new HashMap<String, Class<? extends Command>>();
-        mmap.put(SkosVocabularyImport.NAME, SkosVocabularyImport.class);
         mmap.put(EadImport.NAME, EadImport.class);
         mmap.put(BaEadImport.NAME, BaEadImport.class);
         mmap.put(NiodEadImport.NAME, NiodEadImport.class);
@@ -47,6 +46,7 @@ public class CmdEntryPoint extends BaseCommand {
         mmap.put(DeleteEntities.NAME, DeleteEntities.class);
         mmap.put(RdfExport.NAME, RdfExport.class);
         mmap.put(RelationAdd.NAME, RelationAdd.class);
+        mmap.put(SkosVocabularyImport.NAME, SkosVocabularyImport.class);
         // adaptation of UserAdd for adding countries
         mmap.put(CountryAdd.NAME, CountryAdd.class);
         mmap.put(EadImportIntoVirtualCollection.NAME, EadImportIntoVirtualCollection.class);

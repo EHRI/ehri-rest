@@ -14,7 +14,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Maps;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.*;
+import eu.ehri.project.models.cvoc.AuthoritativeSet;
 import eu.ehri.project.models.cvoc.Concept;
+import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.views.Crud;
 import eu.ehri.project.views.ViewFactory;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -67,6 +69,12 @@ public class AdminResource extends AbstractRestResource {
             for (Concept concept : manager.getFrames(EntityClass.CVOC_CONCEPT, Concept.class)) {
                 concept.updateChildCountCache();
             }
+            for (Vocabulary vocabulary : manager.getFrames(EntityClass.CVOC_VOCABULARY, Vocabulary.class)) {
+                vocabulary.updateChildCountCache();
+            }
+            for (AuthoritativeSet set : manager.getFrames(EntityClass.AUTHORITATIVE_SET, AuthoritativeSet.class)) {
+                set.updateChildCountCache();
+            }
 
             graph.getBaseGraph().commit();
             return Response.status(Status.OK).build();
@@ -91,7 +99,7 @@ public class AdminResource extends AbstractRestResource {
         graph.getBaseGraph().checkNotInTransaction();
         try {
             String ident = getNextDefaultUserId();
-            Bundle bundle = new Bundle.Builder(EntityClass.USER_PROFILE)
+            Bundle bundle = Bundle.Builder.withClass(EntityClass.USER_PROFILE)
                     .addDataValue(Ontology.IDENTIFIER_KEY, ident)
                     .addDataValue(Ontology.NAME_KEY, ident)
                     .addData(parseUserData(jsonData))

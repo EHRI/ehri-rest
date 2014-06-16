@@ -28,7 +28,7 @@ import javax.ws.rs.core.StreamingOutput;
 import java.util.List;
 
 /**
- * Provides a RESTfull(ish) interface for creating/reading item links.
+ * Provides a RESTful(ish) interface for creating/reading item links.
  */
 @Path(Entities.LINK)
 public class LinkResource extends

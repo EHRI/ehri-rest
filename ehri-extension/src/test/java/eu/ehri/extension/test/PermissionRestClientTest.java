@@ -88,6 +88,7 @@ public class PermissionRestClientTest extends BaseRestClientTest {
     }
 
     @Test
+    @Ignore
     public void testPermissionSetPermissionDenied() throws Exception {
 
         // Test a user setting his own permissions over REST - this should

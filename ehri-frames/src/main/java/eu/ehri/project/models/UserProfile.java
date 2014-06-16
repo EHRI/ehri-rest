@@ -12,8 +12,8 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.base.*;
-import eu.ehri.project.models.utils.JavaHandlerUtils;
 
+import static eu.ehri.project.models.utils.JavaHandlerUtils.*;
 import static eu.ehri.project.definitions.Ontology.*;
 
 @EntityType(EntityClass.USER_PROFILE)
@@ -64,6 +64,18 @@ public interface UserProfile extends Accessor, AccessibleEntity, IdentifiableEnt
     @JavaHandler
     public void removeWatching(final Watchable item);
 
+    @JavaHandler
+    public void addBlocked(final UserProfile userProfile);
+
+    @JavaHandler
+    public void removeBlocked(final UserProfile userProfile);
+
+    @Adjacency(label = Ontology.USER_BLOCKS_USER)
+    public Iterable<UserProfile> getBlocked();
+
+    @JavaHandler
+    public boolean isBlocking(final UserProfile userProfile);
+
     /**
      * Users who share groups with this user.
      */
@@ -76,17 +88,17 @@ public interface UserProfile extends Accessor, AccessibleEntity, IdentifiableEnt
     abstract class Impl implements JavaHandlerContext<Vertex>, UserProfile {
 
         private void updateFollowCounts(Vertex user, Vertex other) {
-            JavaHandlerUtils.cacheCount(
+            cacheCount(
                     user, gremlin().out(USER_FOLLOWS_USER), FOLLOWING_COUNT);
-            JavaHandlerUtils.cacheCount(
+            cacheCount(
                     other,
                     gremlin().start(other).in(USER_FOLLOWS_USER), FOLLOWER_COUNT);
         }
 
         private void updateWatchCount(Vertex user, Vertex item) {
-            JavaHandlerUtils.cacheCount(
+            cacheCount(
                     user, gremlin().out(USER_WATCHING_ITEM), WATCHING_COUNT);
-            JavaHandlerUtils.cacheCount(
+            cacheCount(
                     item,
                     gremlin().start(item).in(USER_WATCHING_ITEM), WATCHED_COUNT);
         }
@@ -161,22 +173,37 @@ public interface UserProfile extends Accessor, AccessibleEntity, IdentifiableEnt
         public Iterable<UserProfile> coGroupMembers() {
             return frameVertices(gremlin().as("n")
                     .out(Ontology.ACCESSOR_BELONGS_TO_GROUP)
-                    .loop("n", JavaHandlerUtils.defaultMaxLoops, JavaHandlerUtils.noopLoopFunc)
+                    .loop("n", defaultMaxLoops, noopLoopFunc)
                     .in(Ontology.ACCESSOR_BELONGS_TO_GROUP).filter(new PipeFunction<Vertex, Boolean>() {
-                @Override
-                public Boolean compute(Vertex vertex) {
-                    // Exclude the current user...
-                    if (it().equals(vertex)) {
-                        return false;
-                    }
-                    // Exclude other groups...
-                    String type = vertex.getProperty(EntityType.TYPE_KEY);
-                    if (type == null || !type.equals(Entities.USER_PROFILE)) {
-                        return false;
-                    }
-                    return true;
-                }
-            }));
+                        @Override
+                        public Boolean compute(Vertex vertex) {
+                            // Exclude the current user...
+                            if (it().equals(vertex)) {
+                                return false;
+                            }
+                            // Exclude other groups...
+                            String type = vertex.getProperty(EntityType.TYPE_KEY);
+                            if (type == null || !type.equals(Entities.USER_PROFILE)) {
+                                return false;
+                            }
+                            return true;
+                        }
+                    }));
+        }
+
+        public void addBlocked(final UserProfile userProfile) {
+            addUniqueRelationship(it(), userProfile.asVertex(),
+                    Ontology.USER_BLOCKS_USER);
+        }
+
+        public void removeBlocked(final UserProfile userProfile) {
+            removeAllRelationships(it(), userProfile.asVertex(),
+                    Ontology.USER_BLOCKS_USER);
+        }
+
+        public boolean isBlocking(final UserProfile userProfile) {
+            return hasRelationship(it(), userProfile.asVertex(),
+                    Ontology.USER_BLOCKS_USER);
         }
     }
 }

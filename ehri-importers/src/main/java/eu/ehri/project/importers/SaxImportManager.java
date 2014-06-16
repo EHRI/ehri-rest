@@ -135,6 +135,7 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
             }
             logger.debug("isValidating: " + spf.isValidating());
             SAXParser saxParser = spf.newSAXParser();
+            saxParser.setProperty("http://xml.org/sax/properties/lexical-handler", handler);
             saxParser.parse(ios, handler);
         } catch (InstantiationException ex) {
             logger.error("InstantiationException: " + ex.getMessage());

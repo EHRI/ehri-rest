@@ -84,4 +84,19 @@ public class UserProfileTest extends AbstractFixtureTest {
         assertTrue(profiles.contains(reto));
         assertTrue(profiles.contains(veerle));
     }
+
+    @Test
+    public void testBlocking() throws Exception {
+        UserProfile mike = manager.getFrame("mike", UserProfile.class);
+        UserProfile reto = manager.getFrame("reto", UserProfile.class);
+        UserProfile linda = manager.getFrame("linda", UserProfile.class);
+        mike.addBlocked(reto);
+        mike.addBlocked(linda);
+        assertTrue(mike.isBlocking(reto));
+        assertTrue(mike.isBlocking(linda));
+        assertTrue(Lists.newArrayList(mike.getBlocked()).contains(reto));
+        assertTrue(Lists.newArrayList(mike.getBlocked()).contains(linda));
+        mike.removeBlocked(reto);
+        assertFalse(Lists.newArrayList(mike.getBlocked()).contains(reto));
+    }
 }
