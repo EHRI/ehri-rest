@@ -64,7 +64,7 @@ public interface VirtualUnit extends AccessibleEntity, ItemHolder,
     @JavaHandler
     public Iterable<VirtualUnit> getAllChildren();
 
-    @Fetch(Ontology.VC_DESCRIBED_BY)
+    @Fetch(value = Ontology.VC_DESCRIBED_BY, full = true)
     @Adjacency(label = Ontology.VC_DESCRIBED_BY, direction = Direction.OUT)
     public Iterable<DocumentDescription> getReferencedDescriptions();
 

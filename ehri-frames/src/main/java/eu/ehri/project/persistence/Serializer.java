@@ -402,9 +402,15 @@ public final class Serializer {
         return relations;
     }
 
+    /**
+     * Determine how to serialize the properties of an item. We use lite serialization if:
+     *  - it's not a dependent relation
+     *  - it doesn't have the full property set on the fetch annotation
+     */
     private boolean shouldSerializeLite(Method method) {
         Dependent dep = method.getAnnotation(Dependent.class);
-        return dep == null;
+        Fetch fetch = method.getAnnotation(Fetch.class);
+        return dep == null && (fetch == null || !fetch.full());
     }
 
     private boolean shouldTraverse(String relationName, Method method, int depth, boolean lite) {
