@@ -63,6 +63,7 @@ public class IcaAtomEadImporter extends EaImporter {
     @Override
     public DocumentaryUnit importItem(Map<String, Object> itemData, List<String> idPath) throws ValidationError {
 
+
         BundleDAO persister = getPersister(idPath);
 
         Bundle unit = new Bundle(EntityClass.DOCUMENTARY_UNIT, extractDocumentaryUnit(itemData));
@@ -89,6 +90,12 @@ public class IcaAtomEadImporter extends EaImporter {
             descBundle = descBundle.withRelation(Ontology.HAS_UNKNOWN_PROPERTY, new Bundle(EntityClass.UNKNOWN_PROPERTY, unknowns));
         }
 
+        for (Map<String, Object> dpb : extractMaintenanceEvent(itemData)) {
+            logger.debug("maintenance event found");
+            //dates in maintenanceEvents are no DatePeriods, they are not something to search on
+            descBundle = descBundle.withRelation(Ontology.HAS_MAINTENANCE_EVENT, new Bundle(EntityClass.MAINTENANCE_EVENT, dpb));
+        }
+
         Mutation<DocumentaryUnit> mutation = persister.createOrUpdate(mergeWithPreviousAndSave(unit, descBundle, idPath),
                 DocumentaryUnit.class);
 //                persister.createOrUpdate(unit, DocumentaryUnit.class);
@@ -96,7 +103,6 @@ public class IcaAtomEadImporter extends EaImporter {
 
         // Set the repository/item relationship
         if (idPath.isEmpty() && mutation.created()) {
-            logger.error("permissionScope idPath: "+permissionScope.idPath());
             EntityClass scopeType = manager.getEntityClass(permissionScope);
             if (scopeType.equals(EntityClass.REPOSITORY)) {
                 Repository repository = framedGraph.frame(permissionScope.asVertex(), Repository.class);
@@ -109,7 +115,6 @@ public class IcaAtomEadImporter extends EaImporter {
             } else {
                 logger.error("Unknown scope type for documentary unit: {}", scopeType);
             }
-            logger.error("permissionScope idPath: "+permissionScope.idPath());
         }
         handleCallbacks(mutation);
 

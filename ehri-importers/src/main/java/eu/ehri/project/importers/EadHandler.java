@@ -1,15 +1,20 @@
 package eu.ehri.project.importers;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.models.DocumentDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 
+import eu.ehri.project.models.MaintenanceEvent;
+import eu.ehri.project.models.base.Frame;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
+import java.util.logging.Level;
 import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
@@ -28,9 +33,13 @@ import org.xml.sax.SAXException;
  * @author ben
  */
 public class EadHandler extends SaxXmlHandler {
-
+    private final ImmutableMap<String, Class<? extends Frame>> possibleSubnodes
+            = ImmutableMap.<String, Class<? extends Frame>>builder().put(
+            "maintenanceEvent", MaintenanceEvent.class).build();
+    
     private static final Logger logger = LoggerFactory
             .getLogger(EadHandler.class);
+    
     protected final List<DocumentaryUnit>[] children = new ArrayList[12];
     protected final Stack<String> scopeIds = new Stack<String>();
     // Pattern for EAD nodes that represent a child item
@@ -40,6 +49,10 @@ public class EadHandler extends SaxXmlHandler {
     private final static String ARCHDESC = "archdesc";
     private final static String DID = "did";
     private final static String DEFAULT_LANGUAGE = "eng";
+    /**
+     * used to attach the MaintenanceEvents to
+     */
+    private DocumentaryUnit topLevel;
 
     /**
      * Default language to use in units without language
@@ -169,6 +182,7 @@ public class EadHandler extends SaxXmlHandler {
                     extractDate(currentGraph);
 
                     DocumentaryUnit current = (DocumentaryUnit) importer.importItem(currentGraph, pathIds());
+                    topLevel=current; // if it is not overwritten, the current DU is the topLevel
                     logger.debug("importer used: " + importer.getClass());
                     if (depth > 0) { // if not on root level
                         children[depth - 1].add(current); // add child to parent offspring
@@ -196,6 +210,17 @@ public class EadHandler extends SaxXmlHandler {
         }
 
         currentPath.pop();
+        if(currentPath.isEmpty()){
+//            try {
+                //we're back at the top. find the maintenanceevents and add to the topLevel DU
+                Map<String, Object> current = currentGraphPath.pop();
+                importer.importTopLevelProperties(topLevel, current);
+                //importer.importItem(currentGraphPath.pop(), Lists.<String>newArrayList());
+//            } catch (ValidationError ex) {
+//                logger.error(ex.getMessage());
+//            }
+        }
+        
     }
     
     /**
@@ -308,8 +333,9 @@ public class EadHandler extends SaxXmlHandler {
         if (path != null) {
             need = need || path.endsWith("AccessPoint");
         }
-        return need;
+        return need || possibleSubnodes.containsKey(getImportantPath(currentPath));
     }
+    
 
     @Override
     protected List<String> getSchemas() {

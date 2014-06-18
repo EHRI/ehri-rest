@@ -39,8 +39,8 @@ public class BundesarchiveSplitTest extends AbstractImporterTest{
 
         origCount = getNodeCount(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(XMLFILE);
-        ImportLog log = new SaxImportManager(graph, agent, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("bundesarchive.properties")).importFile(ios, logMessage);
-//        printGraph(graph);
+        ImportLog log = new SaxImportManager(graph, agent, validUser, IcaAtomEadImporter.class, EadHandler.class, new XmlImportProperties("bundesarchive.properties")).importFile(ios, logMessage);
+        printGraph(graph);
         // How many new nodes will have been created? We should have
         // - 1 more DocumentaryUnits (archdesc)
        	// - 1 more DocumentDescription
@@ -49,7 +49,8 @@ public class BundesarchiveSplitTest extends AbstractImporterTest{
         // - 3 more Relationships
         // - 2 more import Event links (1 for every Unit, 1 for the User)
         // - 1 more import Event
-        int newCount = origCount + 9+2;
+        // - 4 more MaintenanceEvents
+        int newCount = origCount + 9+2+4;
 
         assertEquals(newCount, getNodeCount(graph));
         
