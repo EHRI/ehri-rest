@@ -55,6 +55,7 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
     protected final XmlImportProperties properties;
 
     protected int depth = 0;
+    String attribute=null;
 
     /**
      * 
@@ -135,14 +136,18 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
 
         // Store attributes that are listed in the .properties file
         for (int attr = 0; attr < attributes.getLength(); attr++) { // only certain attributes get stored
-            String attribute = withoutNamespace(attributes.getQName(attr));
-            if (properties.hasAttributeProperty(attribute)
-                    && !properties.getAttributeProperty(attribute).equals(LANGUAGE_OF_DESCRIPTION)) {
-                String path = getImportantPath(currentPath, "@" + properties.getAttributeProperty(attribute));
-                putPropertyInCurrentGraph(path, attributes.getValue(attr));
+            String attributeName = withoutNamespace(attributes.getQName(attr));
+            if (properties.hasAttributeProperty(attributeName)
+                    && !properties.getAttributeProperty(attributeName).equals(LANGUAGE_OF_DESCRIPTION)) {
+              
+                if (isKeyInPropertyFile(currentPath, "@" + properties.getAttributeProperty(attributeName), "")) {
+                    String path = getImportantPath(currentPath, "@" + properties.getAttributeProperty(attributeName), "");
+                    putPropertyInCurrentGraph(path, attributes.getValue(attr));
+                } else if (isKeyInPropertyFile(currentPath, "@" + properties.getAttributeProperty(attributeName), "$" + attributes.getValue(attr))) {
+                    this.attribute = getImportantPath(currentPath, "@" + properties.getAttributeProperty(attributeName), "$" + attributes.getValue(attr));
+                }
             }
         }
-
     }
 
     /**
@@ -152,7 +157,12 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
     @Override
     public void endElement(String uri, String localName, String qName) throws SAXException {
         if (languagePrefix == null) {
-            putPropertyInCurrentGraph(getImportantPath(currentPath), currentText.pop().toString());
+            if(attribute == null){
+                putPropertyInCurrentGraph(getImportantPath(currentPath), currentText.pop().toString());
+            }else{
+                putPropertyInCurrentGraph(attribute, currentText.pop().toString());
+                attribute= null;
+            }
         } else {
             putPropertyInGraph(languageMap.get(languagePrefix), getImportantPath(currentPath), currentText.pop().toString());
         }
@@ -174,9 +184,6 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
     @SuppressWarnings("unchecked")
     protected void putSubGraphInCurrentGraph(String key, Map<String, Object> subgraph) {
         Map<String, Object> c = currentGraphPath.peek();
-//        for(String subkey : subgraph.keySet()){
-//            logger.debug(subkey + ":" + subgraph.get(key));
-//        }
         if (c.containsKey(key)) {
             ((List<Map<String, Object>>) c.get(key)).add(subgraph);
         } else {
@@ -194,8 +201,8 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
      */
     private Optional<String> languageAttribute(Attributes attributes) {
         for (int attr = 0; attr < attributes.getLength(); attr++) { // only certain attributes get stored
-            String attribute = withoutNamespace(attributes.getQName(attr));
-            String prop = properties.getAttributeProperty(attribute);
+            String isLangAttribute = withoutNamespace(attributes.getQName(attr));
+            String prop = properties.getAttributeProperty(isLangAttribute);
             if (prop != null && prop.equals(LANGUAGE_OF_DESCRIPTION)) {
                 logger.debug("Language detected!");
                 return Optional.of(attributes.getValue(attr));
@@ -317,28 +324,54 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
      * replacing the /
      */
     protected String getImportantPath(Stack<String> path) {
-        return getImportantPath(path, "");
+        return getImportantPath(path, "", "");
     }
     
     /**
-     *
-     * @param path
-     * @param attribute
+     * did/unitid/@ehrilabel$ehri_main_identifier=objectIdentifier
+     * 
+     * @param path did/unitid/
+     * @param attribute @ehrilabel
+     * @param attributevalue $ehri_main_identifier
+     * 
      * @return the corresponding value to this path from the properties file. The search is inside out, so if
      * both eadheader/ and ead/eadheader/ are specified, it will return the value for the first.
      *
      * If this path has no corresponding value in the properties file, it will return the entire path name, with _
      * replacing the /
      */
-    private String getImportantPath(Stack<String> path, String attribute) {
+    private String getImportantPath(Stack<String> path, String attribute, String attributevalue) {
+        
         String all = "";
         for (int i = path.size(); i > 0; i--) {
             all = path.get(i - 1) + "/" + all;
-            if (properties.getProperty(all+attribute) != null) {
-                return properties.getProperty(all+attribute);
+            if (properties.getProperty(all+attribute+attributevalue) != null) {
+                return properties.getProperty(all+attribute+attributevalue);
             }
         }
         return UNKNOWN + all.replace("/", "_");
+    }
+    /**
+     * did/unitid/@ehrilabel$ehri_main_identifier=objectIdentifier
+     * 
+     * @param path did/unitid/
+     * @param attribute @ehrilabel
+     * @param attributevalue $ehri_main_identifier
+     * 
+     * @return returns true if this path is a key in the properties file. 
+     *
+     * If this path has no corresponding value in the properties file, it will return false
+     */
+    private boolean isKeyInPropertyFile(Stack<String> path, String attribute, String attributevalue) {
+        
+        String all = "";
+        for (int i = path.size(); i > 0; i--) {
+            all = path.get(i - 1) + "/" + all;
+            if (properties.getProperty(all+attribute+attributevalue) != null) {
+                return true;
+            }
+        }
+        return false;
     }
     
     /**

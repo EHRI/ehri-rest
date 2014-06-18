@@ -16,8 +16,6 @@ import java.util.regex.Pattern;
 import eu.ehri.project.models.base.PermissionScope;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
@@ -49,6 +47,8 @@ public abstract class XmlImporter<T> extends AbstractImporter<T> {
         Pattern.compile("^(\\d{2})th century$"),
 //        Pattern.compile("^(\\d{1,2}-\\d{1,2}-\\d{4}) - (\\d{1,2}-\\d{1,2}-\\d{4})$"),
         Pattern.compile("^\\s*(\\d{4})\\s*-\\s*(\\d{4})"),
+        //bundesarchive: 1906/19
+        Pattern.compile("^\\s*(\\d{4})/(\\d{2})"),
         Pattern.compile("^\\s*(\\d{4})\\s*/\\s*(\\d{4})")
     };
 
@@ -56,6 +56,16 @@ public abstract class XmlImporter<T> extends AbstractImporter<T> {
         super(framedGraph, permissionScope, log);
     }
 
+    private void extractDateFromValue(List<Map<String, Object>> extractedDates, String value) throws ValidationError {
+        logger.debug("date: " + value);
+        Map<String, Object> dpb;
+        dpb = extractDate(value);
+        if (dpb != null) {
+            extractedDates.add(dpb);
+        }
+        logger.debug("nr of dates found: " + extractedDates.size());
+
+    }
     /**
      * Extract a list of entity bundles for DatePeriods from the data, attempting to parse the unitdate attribute.
      *
@@ -66,22 +76,16 @@ public abstract class XmlImporter<T> extends AbstractImporter<T> {
         Object value;
         for (String key : data.keySet()) {
             if (dates.containsProperty(key) && (value = data.get(key)) != null) {
-                logger.debug("-----------" + key + ": " + value);
+                logger.debug("---- extract dates -------" + key + ": " + value);
                 try {
-                    Map<String, Object> dpb ;
                     if (data.get(key) instanceof String) {
-                        dpb = extractDate((String) value);
-                        if (dpb != null) {
-                            extractedDates.add(dpb);
+                        String dateValue = (String) value;
+                        for(String d : dateValue.split(",")){
+                            extractDateFromValue(extractedDates, d);
                         }
                     } else if (data.get(key) instanceof List) {
                         for (String s : (List<String>) value) {
-                            logger.debug("date: "+s);
-                            dpb = extractDate(s);
-                            if (dpb != null) {
-                                extractedDates.add(dpb);
-                            }
-                            logger.debug("nr of dates found: "+extractedDates.size());
+                            extractDateFromValue(extractedDates, s);
                         }
                     } else {
                         logger.error("ERROR WITH DATES " + value);
@@ -108,17 +112,7 @@ public abstract class XmlImporter<T> extends AbstractImporter<T> {
      */
     private Map<String, Object> extractDate(Object date) throws ValidationError {
         logger.debug("date value: " + date);
-        Map<String, Object> data = new HashMap<String, Object>();
-//        if (date instanceof String) {
-            data = matchDate((String) date);
-//        } else if (date instanceof List) {
-//            for (String s : (List<String>) date) {
-//                data.putAll(data);
-//                logger.debug("string : " + s);
-//            }
-//        } else {
-//            logger.error("ERROR WITH DATES " + date);
-//        }
+        Map<String, Object> data = matchDate((String) date);
         return data.isEmpty() ? null : data;
     }
 
@@ -144,6 +138,12 @@ public abstract class XmlImporter<T> extends AbstractImporter<T> {
     public static String normaliseDate(String date, String beginOrEnd) {
         DateTimeFormatter fmt = ISODateTimeFormat.date();
         String returndate = fmt.print(DateTime.parse(date));
+        if(returndate.startsWith("00")){
+//            logger.debug("strange date: " + returndate);
+            returndate = "19"+returndate.substring(2);
+            date = "19"+date;
+//            logger.debug("strange date: " + returndate);
+        }
         if (Ontology.DATE_PERIOD_END_DATE.equals(beginOrEnd)) {
             if (!date.equals(returndate)) {
                 ParsePosition p = new ParsePosition(0);
