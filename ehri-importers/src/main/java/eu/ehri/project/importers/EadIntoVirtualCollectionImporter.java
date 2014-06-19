@@ -134,7 +134,7 @@ public class EadIntoVirtualCollectionImporter extends IcaAtomEadImporter {
                 } else {
                     logger.error(" not the top level");
                     //the parent is created last, so find all the children of this unit, they already exist
-                    Iterable<Frame> children = virtualCollection.getContainedItems();
+                    Iterable<Frame> children = unit.getContainedItems();
                     int count=0;
                     for(Frame childframe : children){
                         count++;

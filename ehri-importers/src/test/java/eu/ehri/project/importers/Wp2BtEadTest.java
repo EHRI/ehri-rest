@@ -68,16 +68,16 @@ public class Wp2BtEadTest extends AbstractImporterTest {
         final String logMessage = "Importing Beit Terezin EAD";
 
         int count = getNodeCount(graph);
-        InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        SaxImportManager importManager = new SaxImportManager(graph, agent, validUser, EadIntoVirtualCollectionImporter.class, EadIntoVirtualCollectionHandler.class);
+        InputStream iosVC = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
+        SaxImportManager importManagerVC = new SaxImportManager(graph, agent, validUser, EadIntoVirtualCollectionImporter.class, EadIntoVirtualCollectionHandler.class);
         
-        importManager.setTolerant(Boolean.TRUE);
+        importManagerVC.setTolerant(Boolean.TRUE);
         VirtualUnit virtualcollection = graph.frame(getVertexByIdentifier(graph, "vc1"), VirtualUnit.class);
-        importManager.setVirtualCollection(virtualcollection);
+        importManagerVC.setVirtualCollection(virtualcollection);
         
-        ImportLog log = importManager.importFile(ios, logMessage);
+        ImportLog logVC = importManagerVC.importFile(iosVC, logMessage);
 
-//        printGraph(graph);
+        printGraph(graph);
         // How many new nodes will have been created? We should have
         // - 6 more DocumentaryUnits fonds 2C1 3C2
         // - 6 more VirtualUnits
@@ -92,8 +92,7 @@ public class Wp2BtEadTest extends AbstractImporterTest {
 
         Iterable<Vertex> docs = graph.getVertices(Ontology.IDENTIFIER_KEY, FONDS);
         assertTrue(docs.iterator().hasNext());
-        
-        
+                
         DocumentaryUnit fonds = graph.frame(getVertexByIdentifier(graph, FONDS), DocumentaryUnit.class);
         Iterator<DocumentDescription> i = fonds.getDocumentDescriptions().iterator();
         int countDocDesc = 0;
@@ -141,9 +140,9 @@ public class Wp2BtEadTest extends AbstractImporterTest {
         // Ensure the import action has the right number of subjects.
         //        Iterable<Action> actions = unit.getHistory();
         // Check we've created 6 items
-        assertEquals(6, log.getCreated());
-        assertTrue(log.getAction() instanceof SystemEvent);
-        assertEquals(logMessage, log.getAction().getLogMessage());
+        assertEquals(6, logVC.getCreated());
+        assertTrue(logVC.getAction() instanceof SystemEvent);
+        assertEquals(logMessage, logVC.getAction().getLogMessage());
 
         //assert keywords are matched to cvocs
         assertTrue(toList(v_c1_b.getLinks()).size() > 0);
@@ -151,13 +150,13 @@ public class Wp2BtEadTest extends AbstractImporterTest {
             logger.debug(a.getLinkType());
         }
 
-        List<AccessibleEntity> subjects = toList(log.getAction().getSubjects());
+        List<AccessibleEntity> subjects = toList(logVC.getAction().getSubjects());
         for (AccessibleEntity subject : subjects) {
             logger.info("identifier: " + subject.getId());
         }
 
         assertEquals(6, subjects.size());
-        assertEquals(log.getChanged(), subjects.size());
+        assertEquals(logVC.getChanged(), subjects.size());
 
         //check permissionscope of VU's
         System.out.println("virtual_fonds.getPermissionScope().idPath() : "+ virtual_fonds.getPermissionScope().getIdentifier());
@@ -186,7 +185,7 @@ public class Wp2BtEadTest extends AbstractImporterTest {
         }
 
         // Check the importer is Idempotent
-        ImportLog log2 = importManager.importFile(ClassLoader.getSystemResourceAsStream(SINGLE_EAD), logMessage);
+        ImportLog log2 = importManagerVC.importFile(ClassLoader.getSystemResourceAsStream(SINGLE_EAD), logMessage);
         assertEquals(6, log2.getUnchanged());
         //assertEquals(0, log2.getChanged());
         assertEquals(newCount, getNodeCount(graph));
