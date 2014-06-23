@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?><ead>
+    <eadheader>
+        <eadid>30602</eadid>
+        <filedesc>
+            <titlestmt>
+                <titleproper>Beschrijving van de collectie Bart de Kok en Jozef van
+                    Poppel</titleproper>
+            </titlestmt>
+            <publicationstmt>
+                <publisher>Stadsarchief Amsterdam</publisher>
+            </publicationstmt>
+        </filedesc>
+        <revisiondesc>
+            <change>
+                <date>2014/06/16 18:48:16</date>
+                <item>EHRI added a unitid with label "ehri_internal_identifier" to give every node an unique id.</item>
+            </change>
+            <change>
+                <date>2014/06/16 18:46:16</date>
+                <item>EHRI added a unitid with label "ehri_main_identifier" to indicate the identifier provided by the institution that EHRI will use as the identifier of the unit.</item>
+            </change>
+            <change>
+                <date>2014/06/16 18:44:11</date>
+                <item>EHRI added a unitid with label "ehri_structure" to indicate the structure of the EAD file on every c-node. This is done to make comparisons of two versions of the same EAD (as indicated by the eadid) possible.</item>
+            </change>
+         </revisiondesc>
+    </eadheader>
+    <archdesc level="fonds">
+        <did id="NL-SAA-22626598">
+            <head>Overzicht</head>
+<unitid label="ehri_main_identifier">NL-SAA-22626598</unitid>
+<unitid label="ehri_internal_id">0</unitid>
+<unitid label="ehri_structure">0</unitid>
+            <unitid label="Toegangsnummer">30602</unitid>
+            <unittitle label="Naam">Collectie Bart de Kok en Jozef van Poppel</unittitle>
+            <unitdate label="Datering">1931 - 1944</unitdate>
+            <langmaterial>dut</langmaterial>
+            <repository>
+                <corpname>Stadsarchief Amsterdam</corpname>
+            </repository>
+        </did>
+        <odd>
+            <head>Inleiding</head>
+            <p> In 2010 werden op een zolder in Amsterdam-Zuid een groot aantal foto's gevonden die
+                werden gemaakt door de 'foute' fotograaf Bart de Kok. Het zijn unieke foto's van
+                onder meer de anti-joodse relletjes op het Thorbeckeplein </p>
+        </odd>
+        <dsc>
+            <head>Inventaris</head>
+            <c01 level="series">
+                <did id="NL-SAA-22730932">
+<unitid label="ehri_main_identifier">NL-SAA-22730932</unitid>
+<unitid label="ehri_internal_id">1</unitid>
+<unitid label="ehri_structure">0.0</unitid>
+                    <unitid label="Rubriekscode">1</unitid>
+                    <unittitle>Documentaire foto's door Bart de Kok</unittitle>
+                </did>
+                <c02 level="file">
+                    <did id="NL-SAA-22730310">
+<unitid label="ehri_main_identifier">NL-SAA-22730310</unitid>
+<unitid label="ehri_internal_id">2</unitid>
+<unitid label="ehri_structure">0.0.0</unitid>
+                        <unitid label="Inventarisnummer">1</unitid>
+                        <unittitle>Foto's van de joodse zondagsmarkt in de Eerste Van
+                            Swindenstraat</unittitle>
+                        <unitdate>1941 ca.</unitdate>
+                        <physdesc>2 stukken</physdesc>
+                        <note label="ImageId">
+                            <p> KOKBB00005000001 KOKBB00005000002 KOKBB00005000003 KOKBB00005000004
+                            </p>
+                        </note>
+                        <dao href="http://beeldbank.amsterdam.nl/beeldbank/weergave/search/layout/result/indeling/grid?f_sk_archief=30602/1">
+                            <daodesc>
+                                <p>Beeldbank</p>
+                            </daodesc>
+                        </dao>
+                    </did>
+                </c02>
+                <c02 level="file">
+                    <did id="NL-SAA-22730311">
+<unitid label="ehri_main_identifier">NL-SAA-22730311</unitid>
+<unitid label="ehri_internal_id">3</unitid>
+<unitid label="ehri_structure">0.0.1</unitid>
+                        <unitid label="Inventarisnummer">2</unitid>
+                        <unittitle>Foto's van mensen op straat in de Eerste Van
+                            Swindenstraat</unittitle>
+                        <unitdate>1941 ca.</unitdate>
+                        <physdesc>4 stukken</physdesc>
+                        <note label="ImageId">
+                            <p> KOKBB00006000001 KOKBB00006000002 KOKBB00006000003 KOKBB00006000004
+                                KOKBB00006000005 KOKBB00006000006 KOKBB00006000007 KOKBB00006000008
+                            </p>
+                        </note>
+                        <dao href="http://beeldbank.amsterdam.nl/beeldbank/weergave/search/layout/result/indeling/grid?f_sk_archief=30602/2">
+                            <daodesc>
+                                <p>Beeldbank</p>
+                            </daodesc>
+                        </dao>
+                    </did>
+                    <c03 level="file">
+                        <did id="NL-SAA-22752512">
+<unitid label="ehri_main_identifier">NL-SAA-22752512</unitid>
+<unitid label="ehri_internal_id">4</unitid>
+<unitid label="ehri_structure">0.0.1.1</unitid>
+                            <unitid label="Inventarisnummer">29</unitid>
+                            <unittitle>Foto's van clandestiene slachterijen</unittitle>
+                            <unitdate>1941 ca.</unitdate>
+                            <physdesc>1 omslag</physdesc>
+                            <note label="ImageId">
+                                <p> KOKBB00044000001 KOKBB00044000002 KOKBB00044000003
+                                    KOKBB00044000004 KOKBB00044000005 KOKBB00044000006
+                                    KOKBB00044000007 KOKBB00044000008 KOKBB00044000009
+                                    KOKBB00044000010 KOKBB00044000011 KOKBB00044000012
+                                    KOKBB00044000013 KOKBB00044000014 KOKBB00044000015
+                                    KOKBB00044000016 KOKBB00044000017 KOKBB00044000018
+                                    KOKBB00044000019 KOKBB00044000020 KOKBB00044000021
+                                    KOKBB00044000022 KOKBB00044000023 KOKBB00044000024
+                                    KOKBB00044000025 KOKBB00044000026 KOKBB00044000027
+                                    KOKBB00044000028 </p>
+                            </note>
+                            <dao href="http://beeldbank.amsterdam.nl/beeldbank/weergave/search/layout/result/indeling/grid?f_sk_archief=30602/29">
+                                <daodesc>
+                                    <p>Beeldbank</p>
+                                </daodesc>
+                            </dao>
+                        </did>
+                    </c03>
+                    <c03 level="file">
+                        <did id="NL-SAA-22752538">
+<unitid label="ehri_main_identifier">NL-SAA-22752538</unitid>
+<unitid label="ehri_internal_id">5</unitid>
+<unitid label="ehri_structure">0.0.1.2</unitid>
+                            <unitid label="Inventarisnummer">30</unitid>
+                            <unittitle>Foto's van de ontdekking van een kalf in een kleedhokje op
+                                een voetbalterrein aan de Velserweg</unittitle>
+                            <unitdate>1941 ca.</unitdate>
+                            <physdesc>2 stukken</physdesc>
+                            <note label="ImageId">
+                                <p> KOKBB00045000001 KOKBB00045000002 KOKBB00045000003
+                                    KOKBB00045000004 </p>
+                            </note>
+                            <dao href="http://beeldbank.amsterdam.nl/beeldbank/weergave/search/layout/result/indeling/grid?f_sk_archief=30602/30">
+                                <daodesc>
+                                    <p>Beeldbank</p>
+                                </daodesc>
+                            </dao>
+                        </did>
+                    </c03>
+                </c02>
+            </c01>
+        </dsc>
+    </archdesc>
+</ead>

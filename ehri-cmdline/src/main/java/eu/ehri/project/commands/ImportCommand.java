@@ -95,6 +95,7 @@ public abstract class ImportCommand extends BaseCommand implements Command{
 
             if (cmdLine.hasOption("properties")) {
                 XmlImportProperties properties = new XmlImportProperties(cmdLine.getOptionValue("properties"));
+                logMessage += "Using properties file : " + cmdLine.getOptionValue("properties");
                 log = new SaxImportManager(graph, scope, user, importer, handler, properties).setTolerant(cmdLine.hasOption("tolerant")).importFiles(filePaths, logMessage);
             } else {
                 log = new SaxImportManager(graph, scope, user, importer, handler).setTolerant(cmdLine.hasOption("tolerant")).importFiles(filePaths, logMessage);

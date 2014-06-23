@@ -4,22 +4,22 @@ import org.apache.commons.cli.Option;
 
 import eu.ehri.project.importers.AbstractImporter;
 import eu.ehri.project.importers.EadHandler;
-import eu.ehri.project.importers.EadImporter;
+import eu.ehri.project.importers.IcaAtomEadImporter;
 import eu.ehri.project.importers.SaxXmlHandler;
 
 /**
  * Import EAD from the command line...
  * 
  */
-public class EadImport extends ImportCommand implements Command {
+public class IcaAtomEadImport extends ImportCommand implements Command {
 
-    final static String NAME = "ead-import";
+    final static String NAME = "ica-atom-ead-import";
 
     /**
      * Constructor.
      */
-    public EadImport() {
-        this(EadHandler.class, EadImporter.class);
+    public IcaAtomEadImport() {
+        this(EadHandler.class, IcaAtomEadImporter.class);
     }
     
     /**
@@ -27,7 +27,7 @@ public class EadImport extends ImportCommand implements Command {
      * @param handler The Handler class to be used for import
      * @param importer The Importer class to be used. If null, IcaAtomEadImporter is used.
      */
-    public EadImport(Class<? extends SaxXmlHandler> handler, Class<? extends AbstractImporter> importer) {
+    public IcaAtomEadImport(Class<? extends SaxXmlHandler> handler, Class<? extends AbstractImporter> importer) {
     	super(handler, importer);
     }
 

@@ -25,7 +25,7 @@ public class CmdEntryPoint extends BaseCommand {
     static {
         Map<String, Class<? extends Command>> mmap = new HashMap<String, Class<? extends Command>>();
         mmap.put(EadImport.NAME, EadImport.class);
-        mmap.put(NiodEadImport.NAME, NiodEadImport.class);
+        mmap.put(IcaAtomEadImport.NAME, IcaAtomEadImport.class);
         mmap.put(ItsEadImport.NAME, ItsEadImport.class);
         mmap.put(UshmmEadImport.NAME, UshmmEadImport.class);
         mmap.put(CegesomaEadImport.NAME, CegesomaEadImport.class);

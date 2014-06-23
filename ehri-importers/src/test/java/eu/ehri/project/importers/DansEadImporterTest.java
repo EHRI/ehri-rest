@@ -40,7 +40,7 @@ public class DansEadImporterTest extends AbstractImporterTest{
         int origCount = getNodeCount(graph);
         System.out.println(origCount);
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        XmlImportManager importManager = new SaxImportManager(graph, agent, validUser, IcaAtomEadImporter.class, IcaAtomEadHandler.class, new XmlImportProperties("dansead.properties"))
+        XmlImportManager importManager = new SaxImportManager(graph, agent, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("dansead.properties"))
                 .setTolerant(Boolean.TRUE);
         ImportLog log = importManager.importFile(ios, logMessage);
         printGraph(graph);

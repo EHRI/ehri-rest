@@ -37,7 +37,7 @@ public class FinlandXmlImporterTest extends AbstractImporterTest{
         int count = getNodeCount(graph);
         System.out.println(count);
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        XmlImportManager importManager = new SaxImportManager(graph, agent, validUser, IcaAtomEadImporter.class, IcaAtomEadHandler.class, new XmlImportProperties("finlandead.properties"))
+        XmlImportManager importManager = new SaxImportManager(graph, agent, validUser, IcaAtomEadImporter.class, EadHandler.class, new XmlImportProperties("finlandead.properties"))
                 .setTolerant(Boolean.TRUE);
         ImportLog log = importManager.importFile(ios, logMessage);
 //        printGraph(graph);

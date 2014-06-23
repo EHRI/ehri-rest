@@ -53,6 +53,8 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
         super(framedGraph, permissionScope, actioner);
         this.importerClass = importerClass;
         this.handlerClass = handlerClass;
+        logger.info("importer used: " + importerClass);
+        logger.info("handler used: " + handlerClass);
     }
     /**
      * Constructor.
@@ -95,7 +97,6 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
                     ((EadIntoVirtualCollectionImporter)importer).setVirtualCollection(virtualcollection);
                 }
             }
-            logger.debug("importer of class {}", importer.getClass());
             importer.addCreationCallback(new ImportCallback() {
                 public void itemImported(AccessibleEntity item) {
                     logger.info("Item created: {}", item.getId());
@@ -124,7 +125,6 @@ public class SaxImportManager extends XmlImportManager implements ImportManager 
               handler = handlerClass.getConstructor(AbstractImporter.class, XmlImportProperties.class).newInstance(importer, properties);
                 
             }
-            logger.debug("handler of class {}", handler.getClass());
 
             SAXParserFactory spf = SAXParserFactory.newInstance();
             spf.setNamespaceAware(false);
