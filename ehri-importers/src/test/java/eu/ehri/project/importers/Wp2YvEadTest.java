@@ -6,6 +6,7 @@ package eu.ehri.project.importers;
 
 import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.definitions.Ontology;
+import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.DocumentDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
@@ -62,12 +63,19 @@ public class Wp2YvEadTest extends AbstractImporterTest {
         final String logMessage = "Importing Yad Vashem EAD";
 
         int count = getNodeCount(graph);
+// Before...
+//       List<VertexProxy> graphState1 = getGraphState(graph);
+
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        SaxImportManager importManager = new SaxImportManager(graph, agent, validUser, EadImporter.class, EadHandler.class);
+        SaxImportManager importManager = new SaxImportManager(graph, agent, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("wp2ead.properties"));
         
         importManager.setTolerant(Boolean.TRUE);
         
         ImportLog log = importManager.importFile(ios, logMessage);
+ // After...
+//       List<VertexProxy> graphState2 = getGraphState(graph);
+//       GraphDiff diff = diffGraph(graphState1, graphState2);
+//       diff.printDebug(System.out);
 
         //printGraph(graph);
         // How many new nodes will have been created? We should have
@@ -77,10 +85,11 @@ public class Wp2YvEadTest extends AbstractImporterTest {
         // - 11 UndeterminedRelationship, 0 0 0 11
         // - 5 more import Event links (4 for every Unit, 1 for the User)
         // - 1 more import Event
-        // - 1 Annotation as resolved relationship 
+       
+        // - 1 Link as resolved relationship 
 
-printGraph(graph);
-        int newCount = count + 27+1;
+//printGraph(graph);
+        int newCount = count + 26 + 1;
         assertEquals(newCount, getNodeCount(graph));
 
         Iterable<Vertex> docs = graph.getVertices(Ontology.IDENTIFIER_KEY, FONDS);
@@ -125,7 +134,9 @@ printGraph(graph);
         
         // Check the author of the description
         for (DocumentDescription d : c1.getDocumentDescriptions()){
-            assertEquals(EadIntoVirtualCollectionImporter.WP2AUTHOR, d.asVertex().getProperty(EadIntoVirtualCollectionImporter.PROPERTY_AUTHOR));
+            for(String key : d.asVertex().getPropertyKeys())
+                logger.debug("key: " + key);
+            assertEquals("BT", d.asVertex().getProperty(EadHandler.AUTHOR));
         }
 
         // Check the importer is Idempotent

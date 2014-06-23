@@ -6,14 +6,13 @@ package eu.ehri.project.importers;
 
 import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.definitions.Ontology;
+import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.DocumentDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Link;
 import eu.ehri.project.models.Repository;
-import eu.ehri.project.models.VirtualUnit;
 import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.models.events.SystemEvent;
@@ -69,25 +68,24 @@ public class Wp2BtEadTest extends AbstractImporterTest {
 
         int count = getNodeCount(graph);
         InputStream iosVC = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        SaxImportManager importManagerVC = new SaxImportManager(graph, agent, validUser, EadIntoVirtualCollectionImporter.class, EadIntoVirtualCollectionHandler.class);
+//        SaxImportManager importManagerVC = new SaxImportManager(graph, agent, validUser, EadIntoVirtualCollectionImporter.class, EadIntoVirtualCollectionHandler.class);
+        SaxImportManager importManager = new SaxImportManager(graph, agent, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("wp2ead.properties"));
+
         
-        importManagerVC.setTolerant(Boolean.TRUE);
-        VirtualUnit virtualcollection = graph.frame(getVertexByIdentifier(graph, "vc1"), VirtualUnit.class);
-        importManagerVC.setVirtualCollection(virtualcollection);
+        importManager.setTolerant(Boolean.TRUE);
         
-        ImportLog logVC = importManagerVC.importFile(iosVC, logMessage);
+        ImportLog logVC = importManager.importFile(iosVC, logMessage);
 
         printGraph(graph);
         // How many new nodes will have been created? We should have
         // - 6 more DocumentaryUnits fonds 2C1 3C2
-        // - 6 more VirtualUnits
         // - 6 more DocumentDescription
         // - 1 more DatePeriod 0 0 1 
         // - 17 UndeterminedRelationship, 0 2 2 4 4 5
         // - 7 more import Event links (6 for every Unit, 1 for the User)
         // - 1 more import Event
         // - 1 Annotation as resolved relationship 
-        int newCount = count + 39+6;
+        int newCount = count + 39;
         assertEquals(newCount, getNodeCount(graph));
 
         Iterable<Vertex> docs = graph.getVertices(Ontology.IDENTIFIER_KEY, FONDS);
@@ -102,29 +100,11 @@ public class Wp2BtEadTest extends AbstractImporterTest {
         }        
         assertEquals(1, countDocDesc);
         
-//the virtual fonds should have no Descriptions 'describing' the virtual fonds        
-        VirtualUnit virtual_fonds = graph.frame(getVertexByIdentifier(graph, EadIntoVirtualCollectionImporter.VIRTUAL_PREFIX+FONDS), VirtualUnit.class);
-        Iterator<Description> v_i = virtual_fonds.getDescriptions().iterator();
-        countDocDesc = 0;
-        while(v_i.hasNext()){
-            Description desc  = v_i.next();
-            countDocDesc++;
-        }
-        assertEquals(0, countDocDesc);
         
-//the virtual fonds should have 1 referencedDescription, the DocumentsDescription of the actual fonds.
-        Iterator<DocumentDescription> v_i_ref = virtual_fonds.getReferencedDescriptions().iterator();
-        countDocDesc = 0;
-        while(v_i_ref.hasNext()){
-            DocumentDescription desc  = v_i_ref.next();
-            countDocDesc++;
-        }
-        assertEquals(1, countDocDesc);
 
         // check the child items
         DocumentaryUnit c1_a = graph.frame(getVertexByIdentifier(graph, C1_A), DocumentaryUnit.class);
         DocumentaryUnit c1_b = graph.frame(getVertexByIdentifier(graph, C1_B), DocumentaryUnit.class);
-        VirtualUnit v_c1_b =graph.frame(getVertexByIdentifier(graph, EadIntoVirtualCollectionImporter.VIRTUAL_PREFIX+C1_B), VirtualUnit.class);
         DocumentaryUnit c1_a_c2 = graph.frame(getVertexByIdentifier(graph, C1_A_C2), DocumentaryUnit.class);
         DocumentaryUnit c1_b_c2_a = graph.frame(getVertexByIdentifier(graph, C1_B_C2_A), DocumentaryUnit.class);
         DocumentaryUnit c1_b_c2_b = graph.frame(getVertexByIdentifier(graph, C1_B_C2_B), DocumentaryUnit.class);
@@ -145,8 +125,8 @@ public class Wp2BtEadTest extends AbstractImporterTest {
         assertEquals(logMessage, logVC.getAction().getLogMessage());
 
         //assert keywords are matched to cvocs
-        assertTrue(toList(v_c1_b.getLinks()).size() > 0);
-        for(Link a : v_c1_b.getLinks()){
+        assertTrue(toList(c1_b.getLinks()).size() > 0);
+        for(Link a : c1_b.getLinks()){
             logger.debug(a.getLinkType());
         }
 
@@ -158,19 +138,6 @@ public class Wp2BtEadTest extends AbstractImporterTest {
         assertEquals(6, subjects.size());
         assertEquals(logVC.getChanged(), subjects.size());
 
-        //check permissionscope of VU's
-        System.out.println("virtual_fonds.getPermissionScope().idPath() : "+ virtual_fonds.getPermissionScope().getIdentifier());
-        assertEquals(virtualcollection, virtual_fonds.getPermissionScope());
-        assertNotNull(v_c1_b);
-        assertNotNull(v_c1_b.getPermissionScope());
-        System.out.println("v_c1_b.getPermissionScope().idPath() : "+ v_c1_b.getPermissionScope().idPath());
-        assertEquals(virtual_fonds, v_c1_b.getPermissionScope());
-
-        //check parents of VU's
-        assertEquals(virtualcollection, virtual_fonds.getParent());
-        assertEquals(virtual_fonds, v_c1_b.getParent());
-
-        
         // Check permission scopes
         assertEquals(agent, fonds.getPermissionScope());
         assertEquals(fonds, c1_a.getPermissionScope());
@@ -181,11 +148,11 @@ public class Wp2BtEadTest extends AbstractImporterTest {
         
         // Check the author of the description
         for (DocumentDescription d : c1_a.getDocumentDescriptions()){
-            assertEquals(EadIntoVirtualCollectionImporter.WP2AUTHOR, d.asVertex().getProperty(EadIntoVirtualCollectionImporter.PROPERTY_AUTHOR));
+            assertEquals("EHRI", d.asVertex().getProperty(EadHandler.AUTHOR));
         }
 
         // Check the importer is Idempotent
-        ImportLog log2 = importManagerVC.importFile(ClassLoader.getSystemResourceAsStream(SINGLE_EAD), logMessage);
+        ImportLog log2 = importManager.importFile(ClassLoader.getSystemResourceAsStream(SINGLE_EAD), logMessage);
         assertEquals(6, log2.getUnchanged());
         //assertEquals(0, log2.getChanged());
         assertEquals(newCount, getNodeCount(graph));

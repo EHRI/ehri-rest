@@ -5,7 +5,6 @@ import com.google.common.collect.Lists;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.exceptions.ValidationError;
-import eu.ehri.project.models.DocumentDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 
 import eu.ehri.project.models.MaintenanceEvent;
@@ -14,7 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
-import java.util.logging.Level;
 import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
@@ -33,6 +31,7 @@ import org.xml.sax.SAXException;
  * @author ben
  */
 public class EadHandler extends SaxXmlHandler {
+    public static final String AUTHOR = "authors";
     private final ImmutableMap<String, Class<? extends Frame>> possibleSubnodes
             = ImmutableMap.<String, Class<? extends Frame>>builder().put(
             "maintenanceEvent", MaintenanceEvent.class).build();
@@ -63,6 +62,7 @@ public class EadHandler extends SaxXmlHandler {
      * EAD identifier as found in `<eadid>` in the currently handled EAD file
      */
     private String eadId;
+    private String author;
 
     /**
      * Set a custom resolver so EAD DTDs are never looked up online.
@@ -82,6 +82,7 @@ public class EadHandler extends SaxXmlHandler {
     @SuppressWarnings("unchecked")
     public EadHandler(AbstractImporter<Map<String, Object>> importer) {
         this(importer, new XmlImportProperties("icaatom.properties"));
+        logger.warn("icaatom.properties used");
     }
 
     /**
@@ -147,6 +148,10 @@ public class EadHandler extends SaxXmlHandler {
     		eadId = (String) currentGraphPath.peek().get("eadId");
     		logger.debug("Found <eadid>: "+ eadId);
     	}
+        else if (localName.equals("author") || qName.equals("author")) {
+    		author = (String) currentGraphPath.peek().get(AUTHOR);
+    		logger.debug("Found <author>: "+ author);
+    	}
         
         if(localName.equals("language") || qName.equals("language")){
             String lang = (String) currentGraphPath.peek().get ("languageCode");
@@ -180,6 +185,8 @@ public class EadHandler extends SaxXmlHandler {
                     useDefaultLanguage(currentGraph);
 
                     extractDate(currentGraph);
+                    
+                    addAuthor(currentGraph);
 
                     DocumentaryUnit current = (DocumentaryUnit) importer.importItem(currentGraph, pathIds());
                     topLevel=current; // if it is not overwritten, the current DU is the topLevel
@@ -214,7 +221,7 @@ public class EadHandler extends SaxXmlHandler {
 //            try {
                 //we're back at the top. find the maintenanceevents and add to the topLevel DU
                 Map<String, Object> current = currentGraphPath.pop();
-                importer.importTopLevelProperties(topLevel, current);
+                importer.importTopLevelExtraNodes(topLevel, current);
                 //importer.importItem(currentGraphPath.pop(), Lists.<String>newArrayList());
 //            } catch (ValidationError ex) {
 //                logger.error(ex.getMessage());
@@ -229,6 +236,9 @@ public class EadHandler extends SaxXmlHandler {
      */
     protected String getEadId() {
     	return eadId;
+    }
+    protected String getAuthor(){
+        return author;
     }
 
     /**
@@ -353,5 +363,17 @@ public class EadHandler extends SaxXmlHandler {
      */
     protected static boolean isUnitDelimiter(String elementName) {
         return childItemPattern.matcher(elementName).matches() || elementName.equals(ARCHDESC);
+    }
+
+    private void addAuthor(Map<String, Object> currentGraph) {
+        if(getAuthor() != null && ! currentGraph.containsKey(AUTHOR)){
+            currentGraph.put(AUTHOR, getAuthor());
+            logger.debug(AUTHOR + " " + getAuthor() + " added");
+        }
+        else{
+            logger.error("no author added");
+        }
+        
+            
     }
 }

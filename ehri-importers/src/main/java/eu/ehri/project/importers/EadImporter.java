@@ -1,10 +1,16 @@
 package eu.ehri.project.importers;
 
+import com.google.common.collect.Sets;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.definitions.Ontology;
+import eu.ehri.project.exceptions.IntegrityError;
+import eu.ehri.project.exceptions.ItemNotFound;
+import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.*;
 import eu.ehri.project.models.base.*;
+import eu.ehri.project.models.cvoc.Concept;
+import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.persistence.Bundle;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,6 +19,8 @@ import java.util.Map;
 
 import eu.ehri.project.persistence.BundleDAO;
 import eu.ehri.project.persistence.Mutation;
+import eu.ehri.project.views.impl.CrudViews;
+import java.util.logging.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -113,18 +121,87 @@ public class EadImporter extends EaImporter {
             }
         }
         handleCallbacks(mutation);
+        if (mutation.created()) {
+            solveUndeterminedRelationships(frame, descBundle);
+        }
         return frame;
 
 
     }
 
+    /**
+     * subclasses can override this method to cater to their special needs for UndeterminedRelationships
+     * by default, it expects something like this in the original EAD:
+     * 
+     * <persname source="terezin-victims" authfilenumber="PERSON.ITI.1514982">Kien,
+                        Leonhard (* 11.5.1886)</persname>
+     *
+     * it works in unison with the extractRelations() method. 
+     * 
+                        * 
+     * @param unit
+     * @param descBundle - not used
+     * @throws ValidationError 
+     */
+    protected void solveUndeterminedRelationships(DocumentaryUnit unit, Bundle descBundle) throws ValidationError {
+        //Try to resolve the undetermined relationships
+        //we can only create the annotations after the DocumentaryUnit and its Description have been added to the graph,
+        //so they have id's. 
+        for (Description unitdesc : unit.getDescriptions()) {
+            // Put the set of relationships into a HashSet to remove duplicates.
+            for (UndeterminedRelationship rel : Sets.newHashSet(unitdesc.getUndeterminedRelationships())) {
+                /*
+                 * the wp2 undetermined relationship that can be resolved have a 'cvoc' and a 'concept' attribute.
+                 * they need to be found in the vocabularies that are in the graph
+                 */
+                for (String property : rel.asVertex().getPropertyKeys()) {
+                    logger.debug(property);
+                }
+                if (rel.asVertex().getPropertyKeys().contains("cvoc")) {
+                    String cvoc_id = (String) rel.asVertex().getProperty("cvoc");
+                    String concept_id = (String) rel.asVertex().getProperty("concept");
+                    logger.debug(cvoc_id + "  " + concept_id);
+                    Vocabulary vocabulary;
+                    try {
+                        vocabulary = manager.getFrame(cvoc_id, Vocabulary.class);
+                        for (Concept concept : vocabulary.getConcepts()) {
+                        logger.debug("*********************" + concept.getId() + " " + concept.getIdentifier());
+                        if (concept.getIdentifier().equals(concept_id)) {
+                            try {
+                                Bundle linkBundle = new Bundle(EntityClass.LINK)
+                                        .withDataValue(Ontology.LINK_HAS_TYPE, "resolved relationship")
+                                        .withDataValue(Ontology.LINK_HAS_DESCRIPTION, "solved by automatic resolving");
+                                UserProfile user = manager.getFrame(this.log.getActioner().getId(), UserProfile.class);
+                                Link link = new CrudViews<Link>(framedGraph, Link.class).create(linkBundle, user);
+                                unit.addLink(link);
+                                concept.addLink(link);
+                                link.addLinkBody(rel);
+                            } catch (PermissionDenied ex) {
+                                java.util.logging.Logger.getLogger(EadIntoVirtualCollectionImporter.class.getName()).log(Level.SEVERE, null, ex);
+                            } catch (IntegrityError ex) {
+                                java.util.logging.Logger.getLogger(EadIntoVirtualCollectionImporter.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+
+                        }
+
+                    }
+                    } catch (ItemNotFound ex) {
+                        logger.error("Vocabulary with id " + cvoc_id +" not found. "+ex.getMessage());
+                    }
+                    
+                }
+            }
+        }
+    }
+
     @SuppressWarnings("unchecked")
-	@Override
+   @Override
     protected Iterable<Map<String, Object>> extractRelations(Map<String, Object> data) {
         final String REL = "AccessPoint";
         List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
         for (String key : data.keySet()) {
             if (key.endsWith(REL)) {
+                logger.debug(key + " found in data");
                 //type, targetUrl, targetName, notes
                 for (Map<String, Object> origRelation : (List<Map<String, Object>>) data.get(key)) {
                     Map<String, Object> relationNode = new HashMap<String, Object>();

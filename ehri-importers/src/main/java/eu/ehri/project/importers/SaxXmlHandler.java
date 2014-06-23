@@ -145,6 +145,8 @@ public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHan
                     putPropertyInCurrentGraph(path, attributes.getValue(attr));
                 } else if (isKeyInPropertyFile(currentPath, "@" + properties.getAttributeProperty(attributeName), "$" + attributes.getValue(attr))) {
                     this.attribute = getImportantPath(currentPath, "@" + properties.getAttributeProperty(attributeName), "$" + attributes.getValue(attr));
+                } else{
+                    logger.debug("attribute " + attributeName + " not found in properties");
                 }
             }
         }

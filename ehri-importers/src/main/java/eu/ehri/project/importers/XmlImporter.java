@@ -9,7 +9,6 @@ import eu.ehri.project.models.DocumentDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.MaintenanceEvent;
-import eu.ehri.project.models.Repository;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -24,7 +23,6 @@ import eu.ehri.project.persistence.BundleDAO;
 import eu.ehri.project.persistence.Mutation;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
-import java.util.logging.Level;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
@@ -145,7 +143,7 @@ public abstract class XmlImporter<T> extends AbstractImporter<T> {
     }
     
     @Override
-    public void importTopLevelProperties(DocumentaryUnit topLevelUnit, Map<String, Object> itemData){
+    public void importTopLevelExtraNodes(DocumentaryUnit topLevelUnit, Map<String, Object> itemData){
         BundleDAO persister = new BundleDAO(framedGraph, permissionScope.idPath());
         for (Map<String, Object> event : extractMaintenanceEvent(itemData) ){
             try {

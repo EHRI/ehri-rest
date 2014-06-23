@@ -6,6 +6,7 @@ package eu.ehri.project.importers;
 
 import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.definitions.Ontology;
+import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.DocumentDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Link;
@@ -46,18 +47,15 @@ public class Wp2JmpEadTest extends AbstractImporterTest {
 
         int count = getNodeCount(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        SaxImportManager importManager = new SaxImportManager(graph, agent, validUser, EadIntoVirtualCollectionImporter.class, EadIntoVirtualCollectionHandler.class);
+        SaxImportManager importManager = new SaxImportManager(graph, agent, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("wp2ead.properties"));
         
         importManager.setTolerant(Boolean.TRUE);
-        VirtualUnit virtualcollection = graph.frame(getVertexByIdentifier(graph, "vc1"), VirtualUnit.class);
-        importManager.setVirtualCollection(virtualcollection);
         
         ImportLog log = importManager.importFile(ios, logMessage);
 
         printGraph(graph);
         // How many new nodes will have been created? We should have
         // - 7 more DocumentaryUnits fonds C1 C2 C3 4,5,6
-        // - 7 more VirtualUnits
         // - 7 more DocumentDescription
         // - 0 more DatePeriod 0 0 1 
         // - 3 UndeterminedRelationship, 0 0 0 11
@@ -67,7 +65,7 @@ public class Wp2JmpEadTest extends AbstractImporterTest {
         // - 1 unknownProperty
 
 
-        int newCount = count + 27 + 7;
+        int newCount = count + 27 ;
         assertEquals(newCount, getNodeCount(graph));
 
         Iterable<Vertex> docs = graph.getVertices(Ontology.IDENTIFIER_KEY, FONDS);
@@ -113,7 +111,7 @@ public class Wp2JmpEadTest extends AbstractImporterTest {
         
         // Check the author of the description
         for (DocumentDescription d : c1.getDocumentDescriptions()){
-            assertEquals(EadIntoVirtualCollectionImporter.WP2AUTHOR, d.asVertex().getProperty(EadIntoVirtualCollectionImporter.PROPERTY_AUTHOR));
+            assertEquals("Shoah History Department, Jewish Museum in Prague", d.asVertex().getProperty(EadHandler.AUTHOR));
         }
 
         // Check the importer is Idempotent
