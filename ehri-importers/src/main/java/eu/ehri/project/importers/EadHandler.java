@@ -186,6 +186,7 @@ public class EadHandler extends SaxXmlHandler {
 
                     extractDate(currentGraph);
                     
+                    //add the <author> of the ead to every description
                     addAuthor(currentGraph);
 
                     DocumentaryUnit current = (DocumentaryUnit) importer.importItem(currentGraph, pathIds());
@@ -368,12 +369,6 @@ public class EadHandler extends SaxXmlHandler {
     private void addAuthor(Map<String, Object> currentGraph) {
         if(getAuthor() != null && ! currentGraph.containsKey(AUTHOR)){
             currentGraph.put(AUTHOR, getAuthor());
-            logger.debug(AUTHOR + " " + getAuthor() + " added");
         }
-        else{
-            logger.error("no author added");
-        }
-        
-            
     }
 }

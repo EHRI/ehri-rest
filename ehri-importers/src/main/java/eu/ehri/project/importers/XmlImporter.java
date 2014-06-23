@@ -119,7 +119,6 @@ public abstract class XmlImporter<T> extends AbstractImporter<T> {
     public Iterable<Map<String, Object>> extractMaintenanceEvent(Map<String, Object> itemData)  {
         List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
         for (String key : itemData.keySet()) {
-            logger.debug("key: " + key);
             if (key.equals("maintenanceEvent")) {
                 for (Map<String, Object> event : (List<Map<String, Object>>) itemData.get(key)) {
                     Map<String, Object> e2 = new HashMap<String, Object>();

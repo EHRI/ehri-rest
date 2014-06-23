@@ -64,7 +64,7 @@ public class Wp2YvEadTest extends AbstractImporterTest {
 
         int count = getNodeCount(graph);
 // Before...
-//       List<VertexProxy> graphState1 = getGraphState(graph);
+       List<VertexProxy> graphState1 = getGraphState(graph);
 
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
         SaxImportManager importManager = new SaxImportManager(graph, agent, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("wp2ead.properties"));
@@ -73,9 +73,9 @@ public class Wp2YvEadTest extends AbstractImporterTest {
         
         ImportLog log = importManager.importFile(ios, logMessage);
  // After...
-//       List<VertexProxy> graphState2 = getGraphState(graph);
-//       GraphDiff diff = diffGraph(graphState1, graphState2);
-//       diff.printDebug(System.out);
+       List<VertexProxy> graphState2 = getGraphState(graph);
+       GraphDiff diff = diffGraph(graphState1, graphState2);
+       diff.printDebug(System.out);
 
         //printGraph(graph);
         // How many new nodes will have been created? We should have

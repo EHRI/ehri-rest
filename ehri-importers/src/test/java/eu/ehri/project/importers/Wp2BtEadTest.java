@@ -47,7 +47,6 @@ public class Wp2BtEadTest extends AbstractImporterTest {
     protected final String FONDS = "wp2bt";
 
     @Test
-    @Ignore
     public void testImportItemsT() throws Exception {
 
         Repository agent = manager.getFrame(TEST_REPO, Repository.class);

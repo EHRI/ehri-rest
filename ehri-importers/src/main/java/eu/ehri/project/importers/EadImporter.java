@@ -20,7 +20,6 @@ import java.util.Map;
 import eu.ehri.project.persistence.BundleDAO;
 import eu.ehri.project.persistence.Mutation;
 import eu.ehri.project.views.impl.CrudViews;
-import java.util.logging.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,7 +82,7 @@ public class EadImporter extends EaImporter {
             descBundle = descBundle.withRelation(Ontology.ENTITY_HAS_DATE, new Bundle(EntityClass.DATE_PERIOD, dpb));
         }
         for (Map<String, Object> rel : extractRelations(itemData)) {//, (String) unit.getErrors().get(IdentifiableEntity.IDENTIFIER_KEY)
-            logger.debug("relation found " + rel.get(Ontology.IDENTIFIER_KEY));
+            logger.debug("relation found: " + rel.get(Ontology.NAME_KEY));
             descBundle = descBundle.withRelation(Ontology.HAS_ACCESS_POINT, new Bundle(EntityClass.UNDETERMINED_RELATIONSHIP, rel));
         }
         Map<String, Object> unknowns = extractUnknownProperties(itemData);
@@ -154,9 +153,6 @@ public class EadImporter extends EaImporter {
                  * the wp2 undetermined relationship that can be resolved have a 'cvoc' and a 'concept' attribute.
                  * they need to be found in the vocabularies that are in the graph
                  */
-                for (String property : rel.asVertex().getPropertyKeys()) {
-                    logger.debug(property);
-                }
                 if (rel.asVertex().getPropertyKeys().contains("cvoc")) {
                     String cvoc_id = (String) rel.asVertex().getProperty("cvoc");
                     String concept_id = (String) rel.asVertex().getProperty("concept");
@@ -177,9 +173,9 @@ public class EadImporter extends EaImporter {
                                 concept.addLink(link);
                                 link.addLinkBody(rel);
                             } catch (PermissionDenied ex) {
-                                java.util.logging.Logger.getLogger(EadIntoVirtualCollectionImporter.class.getName()).log(Level.SEVERE, null, ex);
+                                logger.error(ex.getMessage());
                             } catch (IntegrityError ex) {
-                                java.util.logging.Logger.getLogger(EadIntoVirtualCollectionImporter.class.getName()).log(Level.SEVERE, null, ex);
+                                logger.error(ex.getMessage());
                             }
 
                         }
