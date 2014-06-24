@@ -188,8 +188,6 @@ public final class BundleDAO {
     }
 
     /**
-=======
->>>>>>> 76e132efe41dd0b52f7c45e34590541d54b557a0
      * Insert a bundle and save its dependent items.
      *
      * @param bundle a Bundle to insert in the graph

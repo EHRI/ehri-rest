@@ -48,7 +48,7 @@ public class CmdEntryPoint extends BaseCommand {
         mmap.put(SkosVocabularyImport.NAME, SkosVocabularyImport.class);
         // adaptation of UserAdd for adding countries
         mmap.put(CountryAdd.NAME, CountryAdd.class);
-        mmap.put(EadImportAsVirtualUnit.NAME, EadImportAsVirtualUnit.class);
+        mmap.put(EadAsVirtualCollectionImport.NAME, EadAsVirtualCollectionImport.class);
 
         // new command, could we use reflection code to try find all Command interface implementing classes
         // DISABLED due to brokenness... use GraphSON instead.

@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+	some rules governing virtual collections:
+	
+	the archdesc should describe the purpose of this vc. it can not in itself refer to a DU.
+	
+	every c level is either 1) a virtual level, or 2) it points to an existing DocumentaryUnit (and consequently to the entire subtree beneath it)
+	1) there is no repository-tag with a ehri-label
+	2) there is exactly one repository-tag with an ehri-label
+	<repository label="ehri_repository_vc">il-002777</repository>
+	(this will not be shown in the portal)
+	and exactly one unitid with a ehri-main-identifier label, that is identical to the existing unitid within the graph for this repository
+	
+	all other tags will be ignored, since the DocumentsDescription of the referred DocumentaryUnit will be shown.
+	there should not be any c-levels beneath such a c-level
+	
+	
+-->
+<ead xmlns="urn:isbn:1-931666-22-9" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="urn:isbn:1-931666-22-9 http://www.loc.gov/ead/ead.xsd">
+	<eadheader>
+		<eadid>EHRI Terezin Research Guide</eadid>
+		<!-- add a unique code for this EAD file -->
+		<filedesc>
+			<titlestmt>
+				<titleproper>The Terezin Research Guide</titleproper>
+				<!-- add a title for this finding aid -->
+				<author>Dr. Michal Frankl</author>
+			</titlestmt>
+			<publicationstmt>
+				<publisher>EHRI</publisher>
+				<date/>
+			</publicationstmt>
+		</filedesc>
+		<profiledesc>
+			<creation>
+				<date>2014-04-23</date>
+			</creation>
+			<langusage>
+				<language langcode="eng" scriptcode="Latn">English</language>
+			</langusage>
+		</profiledesc>
+	</eadheader>
+	<archdesc type="ResearchGuide" level="collection">
+		<did>
+			<unitid label="ehri_main_identifier">ehri terezin research guide</unitid>
+			<!-- add a unique code for the unit which is described -->
+			<unittitle>Virtual Collection Terezin</unittitle>
+			<!-- add a titel for the unit which is described -->
+			<unitdate/>
+			<physdesc>
+				<extent/>
+			</physdesc>
+			<abstract>The aim of the EHRI Terezín Research Guide is to create a comprehensive, innovative and easy to use guide through the dispersed
+				and fragmented Terezín (Theresienstadt) archival material and to empower further research on the history of the ghetto. </abstract>
+			<repository>Beit Terezin</repository>
+			<repository>Terezin Memorial</repository>
+			<repository>Yad Vashem</repository>
+			<repository>Jewish Museum Prague</repository>
+			<origination>
+				<corpname>Terezin Council of Elders</corpname>
+				<persname>Karel Herrmann</persname>
+				<persname>H.G. Adler</persname>
+				<persname>Zeev Scheck</persname>
+				<corpname>Hechalutz</corpname>
+				<persname>Egon Redlich</persname>
+				<corpname>Dokumentacni akce</corpname>
+			</origination>
+			<!-- I expect that there are controlled authorities available for the record creators -->
+			<!-- how should we make the distinction between the record creators and the virtual collection creators? -->
+		</did>
+		<bioghist>
+			<p>The ghetto in Terezín (Theresienstadt in German) was one of the major places of suffering and death of Jews from Bohemia and Moravia,
+				Germany, Austria, the Netherlands, Denmark and other European countries. </p>
+		</bioghist>
+		<!-- should <bioghist> contain information about the background of Terezin or also about the compilers of the research guide? -->
+		<custodhist>
+			<p>The Terezín "Council of Elders", the Jewish "self-administration", produced a large amount of documents</p>
+		</custodhist>
+		<!-- should <custodhist> contain information about the custodial history of the repositories were the material is kept or about the custodial history of the research guide? -->
+		<!-- the original text from WP2 contains footnotes these are not included at the moment -->
+		<dsc>
+			<c01 level="collection">
+				<did>
+					<unitid label="ehri_main_identifier">wp2-bt</unitid>
+					<repository label="ehri_repository_vc">il-002777</repository>
+				</did>
+			</c01>
+			<c01 level="fonds">
+				<did>
+					<unitid label="ehri_main_identifier">vc-tm</unitid>
+					<unittitle>Terezin Research Guide files from Terezin Memorial</unittitle>
+					<repository>Terezin Memorial</repository>
+				</did>
+				<scopecontent><p>The files from the Terezin Memorial picked by EHRI to be part of the Terezin Research Guide</p></scopecontent>
+				<c02 level="collection">
+					<did>
+						<unitid label="ehri_main_identifier">vzpomínky pro EHRI</unitid>
+						<repository label="ehri_repository_vc">cz-002302</repository>
+					</did>
+				</c02>
+			</c01>
+		</dsc>
+	</archdesc>
+</ead>

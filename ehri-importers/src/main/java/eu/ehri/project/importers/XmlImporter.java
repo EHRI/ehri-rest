@@ -9,6 +9,8 @@ import eu.ehri.project.models.DocumentDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.MaintenanceEvent;
+import eu.ehri.project.models.base.AbstractUnit;
+import eu.ehri.project.models.base.Description;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -142,13 +144,13 @@ public abstract class XmlImporter<T> extends AbstractImporter<T> {
     }
     
     @Override
-    public void importTopLevelExtraNodes(DocumentaryUnit topLevelUnit, Map<String, Object> itemData){
+    public void importTopLevelExtraNodes(AbstractUnit topLevelUnit, Map<String, Object> itemData){
         BundleDAO persister = new BundleDAO(framedGraph, permissionScope.idPath());
         for (Map<String, Object> event : extractMaintenanceEvent(itemData) ){
             try {
                 Bundle unit = new Bundle(EntityClass.MAINTENANCE_EVENT, event);
                 Mutation<MaintenanceEvent> mutation = persister.createOrUpdate(unit, MaintenanceEvent.class);
-                for(DocumentDescription d : topLevelUnit.getDocumentDescriptions()){
+                for(Description d : topLevelUnit.getDescriptions()){
                     d.addMaintenanceEvent(mutation.getNode());
                 }
             } catch (ValidationError ex) {

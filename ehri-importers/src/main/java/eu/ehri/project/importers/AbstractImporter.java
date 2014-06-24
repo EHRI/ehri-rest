@@ -9,6 +9,7 @@ import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.properties.NodeProperties;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
+import eu.ehri.project.models.base.AbstractUnit;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.PermissionScope;
 
@@ -210,5 +211,5 @@ public abstract class AbstractImporter<T> {
  * @param topLevelUnit the top level DocumentaryUnit to append the maintenanceEvents to (if any)
  * @param itemData the item representation to import, in which to search for maintenanceEvents
  */
-    public abstract void importTopLevelExtraNodes(DocumentaryUnit topLevelUnit, Map<String, Object> itemData);
+    public abstract void importTopLevelExtraNodes(AbstractUnit topLevelUnit, Map<String, Object> itemData);
 }

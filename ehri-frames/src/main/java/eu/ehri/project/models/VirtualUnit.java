@@ -83,10 +83,6 @@ public interface VirtualUnit extends AbstractUnit {
     @Adjacency(label = Ontology.DESCRIPTION_FOR_ENTITY, direction = Direction.IN)
     public Iterable<DocumentDescription> getVirtualDescriptions();
 
-    @Fetch(Ontology.DOC_HELD_BY_REPOSITORY)
-    @JavaHandler
-    public Iterable<Repository> getRepositories();
-
     /**
      * Implementation of complex methods.
      */
