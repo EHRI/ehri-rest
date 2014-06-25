@@ -124,10 +124,10 @@ public class VirtualEadImporter extends EaImporter {
         //TODO: figure out another way to determine we're at the root, so we can get rid of the depth param
         if (idPath.isEmpty() && mutation.created()) {
             EntityClass scopeType = manager.getEntityClass(permissionScope);
-            if (scopeType.equals(EntityClass.REPOSITORY)) {
+            if (scopeType.equals(EntityClass.USER_PROFILE)) {
                 UserProfile responsibleUser = framedGraph.frame(permissionScope.asVertex(), UserProfile.class);
                 frame.setAuthor(responsibleUser);
-                frame.setPermissionScope(responsibleUser);
+                //the top Virtual Unit does not have a permissionScope. 
             } else if (scopeType.equals(unitEntity)) {
                 VirtualUnit parent = framedGraph.frame(permissionScope.asVertex(), VirtualUnit.class);
                 parent.addChild(frame);

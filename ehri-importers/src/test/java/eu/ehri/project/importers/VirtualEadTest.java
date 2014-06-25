@@ -14,6 +14,7 @@ import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Repository;
+import eu.ehri.project.models.VirtualUnit;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.views.impl.CrudViews;
@@ -37,7 +38,7 @@ public class VirtualEadTest extends AbstractImporterTest{
     private static final String UNIT1 ="wp2-bt";
     private static final String UNIT2 ="vzpomínky pro EHRI";
     
-    private static final String ARCHDESC = "EHRI Terezin Research Guide";
+    private static final String ARCHDESC = "ehri terezin research guide";
     private static final String C01_VirtualReferrer = REPO1+"-"+UNIT1;
     private static final String C01_VirtualLevel = "vc-tm";
     private static final String C02 = REPO2+"-"+UNIT2;
@@ -82,6 +83,9 @@ public void setStageTest() throws PermissionDenied, ValidationError, IntegrityEr
         // - 1 more import Event
         int newCount = origCount + 12; 
         assertEquals(newCount, getNodeCount(graph));
+        
+        VirtualUnit toplevel = graph.frame(getVertexByIdentifier(graph, ARCHDESC), VirtualUnit.class);
+        assertEquals(agent, toplevel.getAuthor());
     }
 
     private void setStage() throws PermissionDenied, ValidationError, IntegrityError {

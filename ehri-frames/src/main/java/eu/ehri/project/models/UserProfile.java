@@ -17,7 +17,7 @@ import static eu.ehri.project.models.utils.JavaHandlerUtils.*;
 import static eu.ehri.project.definitions.Ontology.*;
 
 @EntityType(EntityClass.USER_PROFILE)
-public interface UserProfile extends Accessor, AccessibleEntity, IdentifiableEntity, PermissionScope,
+public interface UserProfile extends Accessor, AccessibleEntity, IdentifiableEntity, 
         Annotator, Actioner, NamedEntity {
 
     public static String FOLLOWER_COUNT = "_followers";
@@ -191,16 +191,19 @@ public interface UserProfile extends Accessor, AccessibleEntity, IdentifiableEnt
                     }));
         }
 
+        @Override
         public void addBlocked(final UserProfile userProfile) {
             addUniqueRelationship(it(), userProfile.asVertex(),
                     Ontology.USER_BLOCKS_USER);
         }
 
+        @Override
         public void removeBlocked(final UserProfile userProfile) {
             removeAllRelationships(it(), userProfile.asVertex(),
                     Ontology.USER_BLOCKS_USER);
         }
 
+        @Override
         public boolean isBlocking(final UserProfile userProfile) {
             return hasRelationship(it(), userProfile.asVertex(),
                     Ontology.USER_BLOCKS_USER);
