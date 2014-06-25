@@ -32,8 +32,8 @@ import java.util.Map;
  * @author linda
  */
 public abstract class ImportCommand extends BaseCommand implements Command{
-    private Class<? extends SaxXmlHandler> handler;
-    Class<? extends AbstractImporter> importer;
+    protected Class<? extends SaxXmlHandler> handler;
+    protected Class<? extends AbstractImporter> importer;
     
     public ImportCommand(Class<? extends SaxXmlHandler> handler, Class<? extends AbstractImporter> importer){
         this.handler = handler;
@@ -95,6 +95,7 @@ public abstract class ImportCommand extends BaseCommand implements Command{
 
             if (cmdLine.hasOption("properties")) {
                 XmlImportProperties properties = new XmlImportProperties(cmdLine.getOptionValue("properties"));
+                logMessage += "Using properties file : " + cmdLine.getOptionValue("properties");
                 log = new SaxImportManager(graph, scope, user, importer, handler, properties).setTolerant(cmdLine.hasOption("tolerant")).importFiles(filePaths, logMessage);
             } else {
                 log = new SaxImportManager(graph, scope, user, importer, handler).setTolerant(cmdLine.hasOption("tolerant")).importFiles(filePaths, logMessage);
@@ -123,7 +124,7 @@ public abstract class ImportCommand extends BaseCommand implements Command{
      * @param filePaths
      * @throws Exception
      */
-    private void getPathsFromFile(String listFile, List<String> filePaths) throws Exception {
+    protected void getPathsFromFile(String listFile, List<String> filePaths) throws Exception {
         InputStreamReader reader = listFile.contentEquals("-")
                 ? new InputStreamReader(System.in)
                 : new FileReader(new File(listFile));

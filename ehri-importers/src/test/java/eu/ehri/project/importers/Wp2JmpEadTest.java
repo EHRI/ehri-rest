@@ -6,10 +6,12 @@ package eu.ehri.project.importers;
 
 import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.definitions.Ontology;
+import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.DocumentDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Link;
 import eu.ehri.project.models.Repository;
+import eu.ehri.project.models.VirtualUnit;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.events.SystemEvent;
 import java.io.InputStream;
@@ -45,8 +47,10 @@ public class Wp2JmpEadTest extends AbstractImporterTest {
 
         int count = getNodeCount(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        XmlImportManager importManager = new SaxImportManager(graph, agent, validUser, Wp2EadImporter.class, Wp2EadHandler.class)
-                .setTolerant(Boolean.TRUE);
+        SaxImportManager importManager = new SaxImportManager(graph, agent, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("wp2ead.properties"));
+        
+        importManager.setTolerant(Boolean.TRUE);
+        
         ImportLog log = importManager.importFile(ios, logMessage);
 
         printGraph(graph);
@@ -61,7 +65,7 @@ public class Wp2JmpEadTest extends AbstractImporterTest {
         // - 1 unknownProperty
 
 
-        int newCount = count + 27;
+        int newCount = count + 27 ;
         assertEquals(newCount, getNodeCount(graph));
 
         Iterable<Vertex> docs = graph.getVertices(Ontology.IDENTIFIER_KEY, FONDS);
@@ -107,7 +111,7 @@ public class Wp2JmpEadTest extends AbstractImporterTest {
         
         // Check the author of the description
         for (DocumentDescription d : c1.getDocumentDescriptions()){
-            assertEquals(Wp2EadImporter.WP2AUTHOR, d.asVertex().getProperty(Wp2EadImporter.PROPERTY_AUTHOR));
+            assertEquals("Shoah History Department, Jewish Museum in Prague", d.asVertex().getProperty(EadHandler.AUTHOR));
         }
 
         // Check the importer is Idempotent

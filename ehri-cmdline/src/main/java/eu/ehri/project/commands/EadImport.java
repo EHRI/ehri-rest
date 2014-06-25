@@ -4,7 +4,7 @@ import org.apache.commons.cli.Option;
 
 import eu.ehri.project.importers.AbstractImporter;
 import eu.ehri.project.importers.EadHandler;
-import eu.ehri.project.importers.IcaAtomEadImporter;
+import eu.ehri.project.importers.EadImporter;
 import eu.ehri.project.importers.SaxXmlHandler;
 
 /**
@@ -19,7 +19,7 @@ public class EadImport extends ImportCommand implements Command {
      * Constructor.
      */
     public EadImport() {
-        this(EadHandler.class, IcaAtomEadImporter.class);
+        this(EadHandler.class, EadImporter.class);
     }
     
     /**

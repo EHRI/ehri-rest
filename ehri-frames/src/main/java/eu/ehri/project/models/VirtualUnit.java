@@ -30,8 +30,9 @@ import static eu.ehri.project.models.utils.JavaHandlerUtils.addUniqueRelationshi
  * deletions.
  */
 @EntityType(EntityClass.VIRTUAL_UNIT)
-public interface VirtualUnit extends AccessibleEntity, ItemHolder,
-        DescribedEntity, Watchable {
+
+public interface VirtualUnit extends AbstractUnit {
+
 
     @JavaHandler
     public Long getChildCount();
@@ -71,6 +72,7 @@ public interface VirtualUnit extends AccessibleEntity, ItemHolder,
     @JavaHandler
     public void addReferencedDescription(final DocumentDescription description);
 
+
     @Adjacency(label = Ontology.VC_HAS_AUTHOR, direction = Direction.OUT)
     public Accessor getAuthor();
 
@@ -80,10 +82,6 @@ public interface VirtualUnit extends AccessibleEntity, ItemHolder,
 
     @Adjacency(label = Ontology.DESCRIPTION_FOR_ENTITY, direction = Direction.IN)
     public Iterable<DocumentDescription> getVirtualDescriptions();
-
-    @Fetch(Ontology.DOC_HELD_BY_REPOSITORY)
-    @JavaHandler
-    public Iterable<Repository> getRepositories();
 
     /**
      * Implementation of complex methods.

@@ -52,7 +52,7 @@ public class IcaAtomEadHandler extends EadHandler {
             if (currentGraph.containsKey("title")) {
                 currentGraph.put(Ontology.NAME_KEY, currentGraph.get("title"));
             } else {
-                logger.error("IcaAtom node without name field: ");
+                logger.warn("DocumentaryUnit node without name field: ");
                 currentGraph.put(Ontology.NAME_KEY, "UNKNOWN title");
             }
         }

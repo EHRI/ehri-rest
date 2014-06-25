@@ -23,7 +23,9 @@ public class FinlandXmlImporterTest extends AbstractImporterTest{
        protected final String SINGLE_EAD_ENG = "EHRI-test-ead.xml";
     // Depends on fixtures
     protected final String TEST_REPO = "r1",
-            C1 = "VAKKA-326611.KA";
+            C1 = "VAKKA-326611.KA",
+            C2 = "VAKKA-3058288.KA";
+    
     
 
     @Test
@@ -35,13 +37,14 @@ public class FinlandXmlImporterTest extends AbstractImporterTest{
         int count = getNodeCount(graph);
         System.out.println(count);
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        XmlImportManager importManager = new SaxImportManager(graph, agent, validUser, IcaAtomEadImporter.class, IcaAtomEadHandler.class, new XmlImportProperties("finlandead.properties"))
+        XmlImportManager importManager = new SaxImportManager(graph, agent, validUser, IcaAtomEadImporter.class, EadHandler.class, new XmlImportProperties("finlandead.properties"))
                 .setTolerant(Boolean.TRUE);
         ImportLog log = importManager.importFile(ios, logMessage);
 //        printGraph(graph);
         int count_fin = getNodeCount(graph);
         
         DocumentaryUnit c1 = graph.frame(getVertexByIdentifier(graph, C1), DocumentaryUnit.class);
+        DocumentaryUnit c2 = graph.frame(getVertexByIdentifier(graph, C2), DocumentaryUnit.class);
         Iterator<DocumentDescription> i = c1.getDocumentDescriptions().iterator();
         int nrOfDesc = 0;
         while(i.hasNext()){
@@ -57,6 +60,16 @@ public class FinlandXmlImporterTest extends AbstractImporterTest{
         printGraph(graph);
         
         i = c1.getDocumentDescriptions().iterator();
+        nrOfDesc = 0;
+        while(i.hasNext()){
+            DocumentDescription desc = i.next();
+            System.out.println("language = " + desc.getLanguageOfDescription());
+            //assertEquals("fin", desc.getLanguageOfDescription());
+            nrOfDesc++;
+        }
+        assertEquals(2, nrOfDesc);
+       
+        i = c2.getDocumentDescriptions().iterator();
         nrOfDesc = 0;
         while(i.hasNext()){
             DocumentDescription desc = i.next();

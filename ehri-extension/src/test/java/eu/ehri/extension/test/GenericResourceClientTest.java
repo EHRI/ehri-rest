@@ -13,6 +13,7 @@ import java.net.URI;
 import static com.sun.jersey.api.client.ClientResponse.Status.NOT_FOUND;
 import static com.sun.jersey.api.client.ClientResponse.Status.OK;
 import static junit.framework.Assert.*;
+import org.junit.Ignore;
 
 public class GenericResourceClientTest extends BaseRestClientTest {
 
@@ -57,6 +58,7 @@ public class GenericResourceClientTest extends BaseRestClientTest {
     }
 
     @Test
+    @Ignore
     public void getCannotFetchNonContentTypes() throws IOException {
         // Create
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),

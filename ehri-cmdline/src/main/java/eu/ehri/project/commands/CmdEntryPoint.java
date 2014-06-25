@@ -25,8 +25,7 @@ public class CmdEntryPoint extends BaseCommand {
     static {
         Map<String, Class<? extends Command>> mmap = new HashMap<String, Class<? extends Command>>();
         mmap.put(EadImport.NAME, EadImport.class);
-        mmap.put(BaEadImport.NAME, BaEadImport.class);
-        mmap.put(NiodEadImport.NAME, NiodEadImport.class);
+        mmap.put(IcaAtomEadImport.NAME, IcaAtomEadImport.class);
         mmap.put(ItsEadImport.NAME, ItsEadImport.class);
         mmap.put(UshmmEadImport.NAME, UshmmEadImport.class);
         mmap.put(CegesomaEadImport.NAME, CegesomaEadImport.class);
@@ -49,7 +48,7 @@ public class CmdEntryPoint extends BaseCommand {
         mmap.put(SkosVocabularyImport.NAME, SkosVocabularyImport.class);
         // adaptation of UserAdd for adding countries
         mmap.put(CountryAdd.NAME, CountryAdd.class);
-        mmap.put(WP2EadImport.NAME, WP2EadImport.class);
+        mmap.put(EadAsVirtualCollectionImport.NAME, EadAsVirtualCollectionImport.class);
 
         // new command, could we use reflection code to try find all Command interface implementing classes
         // DISABLED due to brokenness... use GraphSON instead.

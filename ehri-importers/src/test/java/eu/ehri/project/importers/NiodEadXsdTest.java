@@ -7,13 +7,13 @@ package eu.ehri.project.importers;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.exceptions.InputParseError;
+import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.DocumentDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.base.PermissionScope;
 import java.io.IOException;
 import java.io.InputStream;
-
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,18 +24,18 @@ import static org.junit.Assert.*;
  *
  * @author linda
  */
-public class NiodEadTest extends AbstractImporterTest{
+public class NiodEadXsdTest extends AbstractImporterTest{
     
-	private static final Logger logger = LoggerFactory.getLogger(NiodEadTest.class);
+	private static final Logger logger = LoggerFactory.getLogger(NiodEadXsdTest.class);
     protected final String TEST_REPO = "r1";
-    protected final String XMLFILE = "NIOD-38640-ca1.xml";
+    protected final String XMLFILE = "NIOD-38474.xml";
     // Identifiers of nodes in the imported documentary units
-    protected final String ARCHDESC = "197a", //"197a",
-            C01 = "1.",
-            C02 = "5-15",
-            C02_1 = "8",
-            C03 = "58-61",
-            C03_2 = "59";
+    protected final String ARCHDESC = "MF1081500", //"197a",
+            C01 = "MF1148873",
+            C02 = "MF1086379",
+            C02_1 = "MF1086380",
+            C03 = "MF1086399",
+            C03_2 = "MF1086398";
     int origCount=0;
 
     @Test
@@ -45,18 +45,21 @@ public class NiodEadTest extends AbstractImporterTest{
         final String logMessage = "Importing a part of a NIOD EAD";
 
         origCount = getNodeCount(graph);
+        
+ // Before...
+//       List<VertexProxy> graphState1 = getGraphState(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(XMLFILE);
         @SuppressWarnings("unused")
-		ImportLog log = new SaxImportManager(graph, agent, validUser, IcaAtomEadImporter.class, NiodEadHandler.class).importFile(ios, logMessage);
-//        printGraph(graph);
+		ImportLog log = new SaxImportManager(graph, agent, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("niodead.properties")).importFile(ios, logMessage);
+        printGraph(graph);
         // How many new nodes will have been created? We should have
-        // - 24 more DocumentaryUnits (archdesc, 1-7+7)
-       	// - 24 more DocumentDescription
-        // - 13 more DatePeriod
-        // - 1? more UnknownProperties
-        // - 25 more import Event links (24 for every Unit, 1 for the User)
+        // - 6 more DocumentaryUnits (archdesc, 5 children)
+       	// - 6 more DocumentDescription
+        // - 5 more DatePeriod
+        // - 2 more UnknownProperties (1 for daogrp)
+        // - 7 more import Event links (6 for every Unit, 1 for the User)
         // - 1 more import Event
-        int newCount = origCount + 105; // temporarily changed to match found numbers
+        int newCount = origCount + 27; 
         assertEquals(newCount, getNodeCount(graph));
         
         DocumentaryUnit archdesc = graph.frame(
@@ -79,12 +82,12 @@ public class NiodEadTest extends AbstractImporterTest{
                 DocumentaryUnit.class);
 
         // Test correct ID generation
-        assertEquals("nl-r1-197a", archdesc.getId());
-        assertEquals("nl-r1-197a-1-", c1.getId());
-        assertEquals("nl-r1-197a-1-5-15", c2.getId());
-        assertEquals("nl-r1-197a-1-58-61", c3.getId());
-        assertEquals("nl-r1-197a-1-5-15-8", c2_1.getId());
-        assertEquals("nl-r1-197a-1-58-61-59", c3_2.getId());
+        assertEquals("nl-r1-MF1081500".toLowerCase(), archdesc.getId());
+        assertEquals("nl-r1-MF1081500-MF1148873".toLowerCase(), c1.getId());
+        assertEquals("nl-r1-MF1081500-MF1148873-MF1086379".toLowerCase(), c2.getId());
+        assertEquals("nl-r1-MF1081500-MF1148873-MF1086380-MF1086399".toLowerCase(), c3.getId());
+        assertEquals("nl-r1-MF1081500-MF1148873-MF1086380".toLowerCase(), c2_1.getId());
+        assertEquals("nl-r1-MF1081500-MF1148873-MF1086380-MF1086398".toLowerCase(), c3_2.getId());
 
         // Check permission scope and hierarchy
         assertNull(archdesc.getParent());
@@ -94,29 +97,20 @@ public class NiodEadTest extends AbstractImporterTest{
         assertEquals(archdesc, c1.getPermissionScope());
         assertEquals(c1, c2.getParent());
         assertEquals(c1, c2.getPermissionScope());
-        assertEquals(c1, c3.getParent());
-        assertEquals(c1, c3.getPermissionScope());
-        assertEquals(c2, c2_1.getParent());
-        assertEquals(c2, c2_1.getPermissionScope());
-        assertEquals(c3, c3_2.getParent());
-        assertEquals(c3, c3_2.getPermissionScope());
+        assertEquals(c2_1, c3.getParent());
+        assertEquals(c2_1, c3.getPermissionScope());
+        assertEquals(c1, c2_1.getParent());
+        assertEquals(c1, c2_1.getPermissionScope());
+        assertEquals(c2_1, c3_2.getParent());
+        assertEquals(c2_1, c3_2.getPermissionScope());
 
 
     //test titles
-//        for(DocumentDescription d : archdesc.getDocumentDescriptions()){
-//            assertEquals("Stichting Centraal Bureau van Onderzoek inzake de Vererving van de Nalatenschappen van Vermiste Personen", d.getName());
-//        }
+        for(DocumentDescription d : archdesc.getDocumentDescriptions()){
+            assertEquals("Caransa, A.", d.getName());
+        }
         for(DocumentDescription desc : c1.getDocumentDescriptions()){
-                assertEquals("Algemene zaken", desc.getName());
-        }
-        for(DocumentDescription desc : c2.getDocumentDescriptions()){
-                assertEquals("Agenda's der ingekomen stukken", desc.getName());
-        }
-        for(DocumentDescription d : c2_1.getDocumentDescriptions()){
-            assertEquals("1950-51 No's .3634/50-1506/51", d.getName());
-        }
-        for(DocumentDescription d : c3_2.getDocumentDescriptions()){
-            assertEquals("Ingekomen formulieren met negatieve antwoorden (S 9a)", d.getName());
+                assertEquals("Manuscripten, lezingen en onderzoeksmateriaal", desc.getName());
         }
     //test hierarchy
         assertEquals(new Long(1), archdesc.getChildCount());
@@ -130,12 +124,12 @@ public class NiodEadTest extends AbstractImporterTest{
     //test dates
         for(DocumentDescription d : c2_1.getDocumentDescriptions()){
         	// Single date is just a string
-        	assertEquals("1506/1950", d.asVertex().getProperty("unitDates"));
+        	assertEquals("1980", d.asVertex().getProperty("unitDates"));
         	for (DatePeriod dp : d.getDatePeriods()){
         		logger.debug("startDate: " + dp.getStartDate());
         		logger.debug("endDate: " + dp.getEndDate());
-        		assertEquals("1506-01-01", dp.getStartDate());
-        		assertEquals("1950-12-31", dp.getEndDate());
+        		assertEquals("1980-01-01", dp.getStartDate());
+        		assertEquals("1980-12-31", dp.getEndDate());
         	}
         }
 //        
@@ -155,3 +149,4 @@ public class NiodEadTest extends AbstractImporterTest{
         
     }
 }
+    

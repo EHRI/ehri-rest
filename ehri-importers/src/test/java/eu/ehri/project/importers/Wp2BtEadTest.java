@@ -6,6 +6,7 @@ package eu.ehri.project.importers;
 
 import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.definitions.Ontology;
+import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.DocumentDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
@@ -18,12 +19,14 @@ import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.views.impl.CrudViews;
 import java.io.InputStream;
+import java.util.Iterator;
 import java.util.List;
 
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import static org.junit.Assert.*;
+import org.junit.Ignore;
 
 /**
  *
@@ -41,7 +44,7 @@ public class Wp2BtEadTest extends AbstractImporterTest {
     protected final String C1_A_C2 = "000.001.1";
     protected final String C1_B_C2_A = "000.002.1";
     protected final String C1_B_C2_B = "000.002.2";
-    protected final String FONDS = "wp2bt";
+    protected final String FONDS = "wp2-bt";
 
     @Test
     public void testImportItemsT() throws Exception {
@@ -61,14 +64,24 @@ public class Wp2BtEadTest extends AbstractImporterTest {
         assertNotNull(vocabularyTest);
         
         final String logMessage = "Importing Beit Terezin EAD";
+ // Before...
+       List<VertexProxy> graphState1 = getGraphState(graph);
 
         int count = getNodeCount(graph);
-        InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
-        XmlImportManager importManager = new SaxImportManager(graph, agent, validUser, Wp2EadImporter.class, Wp2EadHandler.class)
-                .setTolerant(Boolean.TRUE);
-        ImportLog log = importManager.importFile(ios, logMessage);
+        InputStream iosVC = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
+//        SaxImportManager importManagerVC = new SaxImportManager(graph, agent, validUser, EadIntoVirtualCollectionImporter.class, EadIntoVirtualCollectionHandler.class);
+        SaxImportManager importManager = new SaxImportManager(graph, agent, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("wp2ead.properties"));
 
-        printGraph(graph);
+        
+        importManager.setTolerant(Boolean.TRUE);
+        
+        ImportLog logVC = importManager.importFile(iosVC, logMessage);
+         // After...
+       List<VertexProxy> graphState2 = getGraphState(graph);
+       GraphDiff diff = diffGraph(graphState1, graphState2);
+       diff.printDebug(System.out);
+
+//        printGraph(graph);
         // How many new nodes will have been created? We should have
         // - 6 more DocumentaryUnits fonds 2C1 3C2
         // - 6 more DocumentDescription
@@ -81,8 +94,18 @@ public class Wp2BtEadTest extends AbstractImporterTest {
         assertEquals(newCount, getNodeCount(graph));
 
         Iterable<Vertex> docs = graph.getVertices(Ontology.IDENTIFIER_KEY, FONDS);
-        assertTrue(docs.iterator().hasNext());
+//        assertTrue(docs.iterator().hasNext());
+                
         DocumentaryUnit fonds = graph.frame(getVertexByIdentifier(graph, FONDS), DocumentaryUnit.class);
+        Iterator<DocumentDescription> i = fonds.getDocumentDescriptions().iterator();
+        int countDocDesc = 0;
+        while(i.hasNext()){
+            DocumentDescription desc  = i.next();
+            countDocDesc++;
+        }        
+        assertEquals(1, countDocDesc);
+        
+        
 
         // check the child items
         DocumentaryUnit c1_a = graph.frame(getVertexByIdentifier(graph, C1_A), DocumentaryUnit.class);
@@ -102,9 +125,9 @@ public class Wp2BtEadTest extends AbstractImporterTest {
         // Ensure the import action has the right number of subjects.
         //        Iterable<Action> actions = unit.getHistory();
         // Check we've created 6 items
-        assertEquals(6, log.getCreated());
-        assertTrue(log.getAction() instanceof SystemEvent);
-        assertEquals(logMessage, log.getAction().getLogMessage());
+        assertEquals(6, logVC.getCreated());
+        assertTrue(logVC.getAction() instanceof SystemEvent);
+        assertEquals(logMessage, logVC.getAction().getLogMessage());
 
         //assert keywords are matched to cvocs
         assertTrue(toList(c1_b.getLinks()).size() > 0);
@@ -112,13 +135,13 @@ public class Wp2BtEadTest extends AbstractImporterTest {
             logger.debug(a.getLinkType());
         }
 
-        List<AccessibleEntity> subjects = toList(log.getAction().getSubjects());
+        List<AccessibleEntity> subjects = toList(logVC.getAction().getSubjects());
         for (AccessibleEntity subject : subjects) {
             logger.info("identifier: " + subject.getId());
         }
 
         assertEquals(6, subjects.size());
-        assertEquals(log.getChanged(), subjects.size());
+        assertEquals(logVC.getChanged(), subjects.size());
 
         // Check permission scopes
         assertEquals(agent, fonds.getPermissionScope());
@@ -130,7 +153,7 @@ public class Wp2BtEadTest extends AbstractImporterTest {
         
         // Check the author of the description
         for (DocumentDescription d : c1_a.getDocumentDescriptions()){
-            assertEquals(Wp2EadImporter.WP2AUTHOR, d.asVertex().getProperty(Wp2EadImporter.PROPERTY_AUTHOR));
+            assertEquals("EHRI", d.asVertex().getProperty(EadHandler.AUTHOR));
         }
 
         // Check the importer is Idempotent

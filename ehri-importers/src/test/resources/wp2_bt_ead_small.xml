@@ -7,6 +7,7 @@
         <filedesc>
             <titlestmt>
                 <titleproper>WP2 files of Beit Terezin</titleproper>
+                <author>EHRI</author>
             </titlestmt>
         </filedesc>
         <profiledesc>
@@ -21,7 +22,8 @@
     <frontmatter/>
     <archdesc level="recordgrp">
         <did>
-            <unitid>wp2bt</unitid>
+            <unittitle>Ellinger Elsa</unittitle>
+            <unitid>wp2-bt</unitid>
             <abstract> Files and Documents compiled by Beit Terezin and edited by EHRI to be part of
                 the Terezin Research Guide. </abstract>
         </did>
@@ -37,7 +39,7 @@
                 </controlaccess>
                 <c02 level="item">
                     <did>
-                        <unittitle/>
+                        <unittitle>Ellinger Elsa</unittitle>
                         <unitid>000.001.1</unitid>
                         <langmaterial/>
                     </did>
@@ -62,7 +64,7 @@
                 </controlaccess>
                 <c02 level="item">
                     <did>
-                        <unittitle/>
+                        <unittitle>Ellinger Elsa</unittitle>
                         <unitid>000.002.1</unitid>
                         <langmaterial/>
                         <unitdate type="inclusive" era="ce" calendar="gregorian" normal="1943"
@@ -77,7 +79,7 @@
                 </c02>
                 <c02 level="item">
                     <did>
-                        <unittitle/>
+                        <unittitle>Ellinger Elsa</unittitle>
                         <unitid>000.002.2</unitid>
                         <langmaterial/>
                     </did>
