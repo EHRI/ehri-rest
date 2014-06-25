@@ -11,6 +11,7 @@ import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.importers.properties.XmlImportProperties;
+import eu.ehri.project.models.DocumentDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Repository;
@@ -20,7 +21,6 @@ import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.views.impl.CrudViews;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +39,6 @@ public class VirtualEadTest extends AbstractImporterTest{
     private static final String UNIT2 ="vzpomínky pro EHRI";
     
     private static final String ARCHDESC = "ehri terezin research guide";
-    private static final String C01_VirtualReferrer = REPO1+"-"+UNIT1;
     private static final String C01_VirtualLevel = "vc-tm";
     private static final String C02 = REPO2+"-"+UNIT2;
     
@@ -61,21 +60,21 @@ public void setStageTest() throws PermissionDenied, ValidationError, IntegrityEr
         setStage();
         
         PermissionScope agent = manager.getFrame(TEST_REPO, PermissionScope.class);
-        final String logMessage = "Importing a part of a NIOD EAD";
+        final String logMessage = "Importing an EAD as a Virtual collection";
 
         origCount = getNodeCount(graph);
         
  // Before...
-       List<VertexProxy> graphState1 = getGraphState(graph);
+//       List<VertexProxy> graphState1 = getGraphState(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(XMLFILE);
-        @SuppressWarnings("unused")
-	ImportLog log = new SaxImportManager(graph, agent, validUser, VirtualEadImporter.class, VirtualEadHandler.class, new XmlImportProperties("vc.properties")).importFile(ios, logMessage);
+//	ImportLog log = 
+                new SaxImportManager(graph, agent, validUser, VirtualEadImporter.class, VirtualEadHandler.class, new XmlImportProperties("vc.properties")).importFile(ios, logMessage);
          // After...
-       List<VertexProxy> graphState2 = getGraphState(graph);
-       GraphDiff diff = diffGraph(graphState1, graphState2);
-       diff.printDebug(System.out);
+//       List<VertexProxy> graphState2 = getGraphState(graph);
+//       GraphDiff diff = diffGraph(graphState1, graphState2);
+//       diff.printDebug(System.out);
 
-        printGraph(graph);
+//        printGraph(graph);
         // How many new nodes will have been created? We should have
         // - 4 more VirtualUnits (archdesc, 3 children)
        	// - 2 more DocumentDescription
@@ -86,6 +85,27 @@ public void setStageTest() throws PermissionDenied, ValidationError, IntegrityEr
         
         VirtualUnit toplevel = graph.frame(getVertexByIdentifier(graph, ARCHDESC), VirtualUnit.class);
         assertEquals(agent, toplevel.getAuthor());
+
+        VirtualUnit c1_vreferrer = graph.frame(getVertexById(graph, toplevel.getId()+"-"+UNIT1), VirtualUnit.class);
+        assertEquals(toplevel, c1_vreferrer.getParent());
+        boolean foundDesc = false;
+        for(DocumentDescription d: c1_vreferrer.getReferencedDescriptions()){
+            //the describedEntity of a VirtualReferrer type VirtualUnit is the described DocumentaryUnit
+            assertEquals(unit1, d.getDescribedEntity());
+            foundDesc=true;
+        }
+        assertTrue(foundDesc);
+        
+        VirtualUnit c1_vlevel = graph.frame(getVertexById(graph, toplevel.getId()+"-"+C01_VirtualLevel), VirtualUnit.class);
+        assertEquals(toplevel, c1_vlevel.getParent());
+        foundDesc=false;
+        for(DocumentDescription d: c1_vlevel.getVirtualDescriptions()){
+            //the describedEntity of a VirtualLevel type VirtualUnit is the VirtualUnit itself
+            assertEquals(c1_vlevel, d.getDescribedEntity());
+            foundDesc=true;
+        }
+        assertTrue(foundDesc);
+        
     }
 
     private void setStage() throws PermissionDenied, ValidationError, IntegrityError {

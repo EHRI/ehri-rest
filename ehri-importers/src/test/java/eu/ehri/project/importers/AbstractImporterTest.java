@@ -185,11 +185,26 @@ public class AbstractImporterTest extends AbstractFixtureTest {
         }
     }
 
-    protected Vertex getVertexByIdentifier(FramedGraph<?> graph, String id) {
-        Iterable<Vertex> docs = graph.getVertices(Ontology.IDENTIFIER_KEY, id);
+    /**
+     * 
+     * @param graph
+     * @param identifier the value of the property 'identifier'
+     * @return 
+     */
+    protected Vertex getVertexByIdentifier(FramedGraph<?> graph, String identifier) {
+        Iterable<Vertex> docs = graph.getVertices(Ontology.IDENTIFIER_KEY, identifier);
         return docs.iterator().next();
     }
-
+    /**
+     * 
+     * @param graph
+     * @param id the value of the property '__ID__'
+     * @return 
+     */
+    protected Vertex getVertexById(FramedGraph<?> graph, String id) {
+        Iterable<Vertex> docs = graph.getVertices(EntityType.ID_KEY, id);
+        return docs.iterator().next();
+    }
     protected int getNodeCount(FramedGraph<?> graph) {
         long l = Iterables.count(graph.getVertices());
         if (l < Integer.MIN_VALUE || l > Integer.MAX_VALUE)
