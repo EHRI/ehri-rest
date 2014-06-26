@@ -104,6 +104,18 @@ public class NiodEadXsdTest extends AbstractImporterTest{
         assertEquals(c2_1, c3_2.getParent());
         assertEquals(c2_1, c3_2.getPermissionScope());
 
+        //test ref
+        boolean hasRef = false;
+        for(DocumentDescription d : c1.getDocumentDescriptions()){
+          for(String key: d.asVertex().getPropertyKeys()){
+            if(key.equals("ref")){
+                assertEquals("http://www.archieven.nl/nl/search-modonly?mivast=298&mizig=210&miadt=298&miaet=1&micode=809&minr=1086379&miview=inv2", d.asVertex().getProperty(key));
+                hasRef=true;
+            }
+            logger.debug(key);
+          }
+        }
+        assertTrue(hasRef);
 
     //test titles
         for(DocumentDescription d : archdesc.getDocumentDescriptions()){
