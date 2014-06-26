@@ -164,8 +164,12 @@ public class EadImporter extends EaImporter {
                         logger.debug("*********************" + concept.getId() + " " + concept.getIdentifier());
                         if (concept.getIdentifier().equals(concept_id)) {
                             try {
+                                String type=rel.asVertex().getProperty("type").toString();
+                                if(type.endsWith("Point")){
+                                    type = type.substring(0, type.indexOf("Point"));
+                                }
                                 Bundle linkBundle = new Bundle(EntityClass.LINK)
-                                        .withDataValue(Ontology.LINK_HAS_TYPE, "resolved relationship")
+                                        .withDataValue(Ontology.LINK_HAS_TYPE, type)
                                         .withDataValue(Ontology.LINK_HAS_DESCRIPTION, "solved by automatic resolving");
                                 UserProfile user = manager.getFrame(this.log.getActioner().getId(), UserProfile.class);
                                 Link link = new CrudViews<Link>(framedGraph, Link.class).create(linkBundle, user);

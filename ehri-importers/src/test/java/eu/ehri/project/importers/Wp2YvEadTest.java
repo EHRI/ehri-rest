@@ -75,7 +75,7 @@ public class Wp2YvEadTest extends AbstractImporterTest {
  // After...
        List<VertexProxy> graphState2 = getGraphState(graph);
        GraphDiff diff = diffGraph(graphState1, graphState2);
-       diff.printDebug(System.out);
+//       diff.printDebug(System.out);
 
         //printGraph(graph);
         // How many new nodes will have been created? We should have
@@ -116,6 +116,7 @@ public class Wp2YvEadTest extends AbstractImporterTest {
         assertTrue(toList(c3.getLinks()).size() > 0);
         for(Link a : c3.getLinks()){
             logger.debug(a.getLinkType());
+            assertEquals("subjectAccess", a.getLinkType());
         }
 
         List<AccessibleEntity> subjects = toList(log.getAction().getSubjects());
