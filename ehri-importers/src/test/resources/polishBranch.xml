@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ead xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="urn:isbn:1-931666-22-9"
+   xsi:schemaLocation="urn:isbn:1-931666-22-9 http://www.loc.gov/ead/ead.xsd">
+   <eadheader>
+      <eadid countrycode="PL"/>
+      <filedesc>
+         <titlestmt>
+            <titleproper/>
+            <author/>
+         </titlestmt>
+      </filedesc>
+      <profiledesc>
+         <creation> Created by the EHRI project (http://www.ehri-project.eu) from Book INFORMATOR O ZASOBIE ARCHIWALNYM INSTYTUTU PAMIĘCI NARODOWEJ,
+            Ed. Jerzy Bednarek, Rafał Leśkiewicz, ISBN 978-83-7629-068-3 http://inwentarz.ipn.gov.pl/doc/informator.pdf Statement of rules <date
+               calendar="gregorian" era="ce">2014-06-13T12:01:10.877+02:00</date>
+         </creation>
+         <langusage>
+            <language langcode="pol" scriptcode="Latn">Polish</language>
+         </langusage>
+      </profiledesc>
+   </eadheader>
+   <archdesc level="otherlevel">
+      <did>
+          <unitid>Pamięci Narodowej</unitid>
+         <unittitle>Collections from Oddział Instytutu Pamięci Narodowej we Wrocławiu</unittitle>
+         <repository>
+            <corpname>"Instytut Pamięci Narodowej – Komisja Ścigania Zbrodni przeciwko Narodowi Polskiemu</corpname>
+         </repository>
+      </did>
+      <processinfo>
+         <p>This selection has been made by the authors as part of the "" book</p>
+         <p>EHRI has made a selection of relevant collections, excluding non-holocaust relevant material</p>
+      </processinfo>
+      <dsc>
+         <c01 level="collection">
+            <did>
+               <unitid label="book_id">2746</unitid>
+               <unittitle>Cukrownia w Pszennie – August Gross i Synowie [August Gross &amp; Söhne Zuckerfabrik Weizenrodau] </unittitle>
+               <origination>
+                  <corpname> Cukrownia w Pszennie – August Gross i Synowie </corpname>
+               </origination>
+               <langmaterial>
+                  <language>J. niemiecki</language>
+               </langmaterial>
+               <unitdate>1941-1942</unitdate>
+               <physdesc>
+                  <dimensions>1 j.a.; 0,04 mb</dimensions>
+               </physdesc>
+            </did>
+            <scopecontent>
+               <p> – akta administracyjne (dokumentacja dotycząca robotników przymusowych) </p>
+            </scopecontent>
+            <controlaccess>
+               <subject>Organy represji i administracji III Rzeszy Niemieckiej</subject>
+            </controlaccess>
+            <otherfindaid>
+               <p>Spis zdawczo-odbiorczy </p>
+            </otherfindaid>
+         </c01>
+         <c01 level="collection">
+            <did>
+               <unitid label="book_id">2747</unitid>
+               <unittitle>Dokumenty Petera Krupskiego – członka 351 Hufca Hitlerjugend w Kamiennej Górze </unittitle>
+               <origination>
+                  <corpname> – </corpname>
+               </origination>
+               <langmaterial>
+                  <language>J. niemiecki</language>
+               </langmaterial>
+               <unitdate>1941–1945</unitdate>
+               <physdesc>
+                  <dimensions>1 j.a.; 0,01 mb</dimensions>
+               </physdesc>
+            </did>
+            <scopecontent>
+               <p> – dokumenty osobiste Petera Krupskiego </p>
+            </scopecontent>
+            <controlaccess>
+               <subject>Organy represji i administracji III Rzeszy Niemieckiej</subject>
+            </controlaccess>
+            <otherfindaid>
+               <p>Spis zdawczo-odbiorczy </p>
+            </otherfindaid>
+         </c01>
+      </dsc>
+   </archdesc>
+</ead>

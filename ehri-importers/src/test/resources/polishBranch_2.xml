@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ead xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xmlns:xs="http://www.w3.org/2001/XMLSchema"
+     xmlns="urn:isbn:1-931666-22-9"
+     xsi:schemaLocation="urn:isbn:1-931666-22-9 http://www.loc.gov/ead/ead.xsd">
+   <eadheader>
+      <eadid countrycode="PL"/>
+      <filedesc>
+         <titlestmt>
+            <titleproper/>
+            <author> 
+  Maria Ciesielska, Bożena Cisek, Agata Dawidowicz, Maria From, Maciej Frydrychowicz, 
+Zofia Furmanek, Katarzyna Kominek, Andrzej Pieczunko, Janusz Piwowar, Małgorzata Rybak, 
+Stanisław Sokół, Anna Włoch, Jacek Woyno, Ewa Wójcicka, Monika Żak, Dominika Żurek
+  </author>
+         </titlestmt>
+      </filedesc>
+      <profiledesc>
+         <creation> Created by the EHRI project (http://www.ehri-project.eu) from Book
+                    INFORMATOR O ZASOBIE ARCHIWALNYM INSTYTUTU PAMIĘCI NARODOWEJ, Ed. Jerzy
+                    Bednarek, Rafał Leśkiewicz, ISBN 978-83-7629-068-3
+                    http://inwentarz.ipn.gov.pl/doc/informator.pdf Statement of rules
+                    <date calendar="gregorian" era="ce">2014-06-13T12:01:10.877+02:00</date>
+         </creation>
+         <langusage>
+            <language langcode="pol" scriptcode="Latn">Polish</language>
+         </langusage>
+      </profiledesc>
+   </eadheader>
+   <archdesc level="otherlevel">
+      <did>
+          <unitid>Biuro Udostępniania</unitid>
+         <unittitle>Collections from Biuro Udostępniania i Archiwizacji Dokumentów w Warszawie</unittitle>
+         <repository>
+            <corpname>"Instytut Pamięci Narodowej – Komisja Ścigania Zbrodni przeciwko
+                        Narodowi Polskiemu</corpname>
+         </repository>
+      </did>
+      <processinfo>
+         <p>This selection has been made by the authors as part of the "" book</p>
+         <p>EHRI has made a selection of relevant collections, excluding non-holocaust
+                    relevant material</p>
+      </processinfo>
+      <dsc>
+         <c01 level="collection">
+            <did>
+               <unitid label="book_id">1</unitid>
+               <unittitle>Areszt Śledczy Sądowy w Poznaniu [Untersuchungshaftanstalt Posen]
+</unittitle>
+               <origination>
+                  <corpname> 
+Więzienie w Poznaniu [Gefängnis Posen] (1939–1940)</corpname>
+                  <corpname> Areszt Śledczy Sądowy w Poznaniu
+[Untersuchungshaftanstalt Posen] (1940–1943)
+</corpname>
+               </origination>
+               <langmaterial>
+                  <language>J. niemiecki </language>
+               </langmaterial>
+               <unitdate>1940-1943</unitdate>
+               <physdesc>
+                  <dimensions>40 j.a.; 0,15 mb</dimensions>
+               </physdesc>
+            </did>
+            <scopecontent>
+               <p> 
+– akta osobowe więźniów skazanych wyrokami sądów specjalnych w Poznaniu, Inowrocławiu, Włocławku, Bydgoszczy i Grudziądzu na karę śmierci i straconych w latach 1941–1942
+– akta administracyjne (wykazy więźniów rozstrzelanych i zgilotynowanych na terenie więzienia w Poznaniu; korespondencja Prokuratury przy Sądzie Specjalnym w Toruniu, Bydgoszczy
+i Grudziądzu w sprawach przekazywania zwłok straconych więźniów Instytutowi Anatomii
+Uniwersytetu w Poznaniu oraz Instytutowi Anatomii Medycznej w Gdańsku)
+</p>
+            </scopecontent>
+            <controlaccess>
+               <subject>Organy represji i administracji III Rzeszy Niemieckiej</subject>
+            </controlaccess>
+            <otherfindaid>
+               <p>Inwentarz kartkowy</p>
+            </otherfindaid>
+         </c01>
+         <c01 level="collection">
+            <did>
+               <unitid label="book_id">2</unitid>
+               <unittitle>Burmistrz jako Miejscowa Władza Policyjna. Oddział Policji Ochronnej w Krapkowicach
+[Der Bürgermeister als Ortspolizeibehörde-Schutzpolizei. Dienstabteilung Krappitz] 
+</unittitle>
+               <origination>
+                  <corpname> 
+Burmistrz jako Miejscowa Władza Policyjna. Oddział Policji Ochronnej w Krapkowicach
+</corpname>
+               </origination>
+               <langmaterial>
+                  <language>J. niemiecki</language>
+               </langmaterial>
+               <unitdate>1936–1944</unitdate>
+               <physdesc>
+                  <dimensions>72 j.a.; 1 mb</dimensions>
+               </physdesc>
+            </did>
+            <scopecontent>
+               <p>
+– akta administracyjne (zarządzenia i korespondencja dot. spraw organizacyjnych, personalnych, finansowych, wyposażenia policji, rezerwy policyjnej, kursów szkoleniowych, urlopów, odkomenderowań, nadawania odznak, awansów, wykroczeń służbowych, obchodów dnia
+policji niemieckiej i związanej z nim zbiórki na pomoc zimową 1940/1941, przesiedlenia
+volksdeutschów z Wołynia i Besarabii, rejestracji żołnierzy zwolnionych z Wehrmachtu, Waffen-SS, obrony przeciwlotniczej, likwidacji szkód powstałych w wyniku bombardowań, meldunki o ucieczkach jeńców wojennych)
+– materiały inne (wycinki z Dziennika Rozporządzeń Ministerstwa Spraw Wewnętrznych
+Rzeszy i Prus)
+</p>
+            </scopecontent>
+            <controlaccess>
+               <subject>Organy represji i administracji III Rzeszy Niemieckiej</subject>
+            </controlaccess>
+            <otherfindaid>
+               <p>Inwentarz książkowy </p>
+            </otherfindaid>
+         </c01>
+      </dsc>
+   </archdesc>
+</ead>
