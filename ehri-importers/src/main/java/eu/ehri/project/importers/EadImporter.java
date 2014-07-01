@@ -41,7 +41,7 @@ public class EadImporter extends EaImporter {
     private static final Logger logger = LoggerFactory.getLogger(EadImporter.class);
     //the EadImporter can import ead as DocumentaryUnits, the default, or overwrite those and create VirtualUnits instead.
     private EntityClass unitEntity = EntityClass.DOCUMENTARY_UNIT;
-private Serializer mergeSerializer;
+    private Serializer mergeSerializer;
     /**
      * Construct an EadImporter object.
      *
@@ -51,7 +51,7 @@ private Serializer mergeSerializer;
      */
     public EadImporter(FramedGraph<?> framedGraph, PermissionScope permissionScope, ImportLog log) {
         super(framedGraph, permissionScope, log);
- mergeSerializer = new Serializer.Builder(framedGraph).dependentOnly().build();
+        mergeSerializer = new Serializer.Builder(framedGraph).dependentOnly().build();
     }
 
     /**
@@ -97,19 +97,12 @@ private Serializer mergeSerializer;
             //dates in maintenanceEvents are no DatePeriods, they are not something to search on
             descBundle = descBundle.withRelation(Ontology.HAS_MAINTENANCE_EVENT, new Bundle(EntityClass.MAINTENANCE_EVENT, dpb));
         }
-//        unit = unit.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
-
-        // Old solution to missing IDs: generate a replacement. 
-        // New solution used above: throw error - Handlers should produce IDs if necessary.
-
-
 
         Mutation<DocumentaryUnit> mutation =
                 persister.createOrUpdate(mergeWithPreviousAndSave(unit, descBundle, idPath), DocumentaryUnit.class);
         DocumentaryUnit frame = mutation.getNode();
 
         // Set the repository/item relationship
-        //TODO: figure out another way to determine we're at the root, so we can get rid of the depth param
         if (idPath.isEmpty() && mutation.created()) {
             EntityClass scopeType = manager.getEntityClass(permissionScope);
             if (scopeType.equals(EntityClass.REPOSITORY)) {
@@ -120,8 +113,6 @@ private Serializer mergeSerializer;
                 DocumentaryUnit parent = framedGraph.frame(permissionScope.asVertex(), DocumentaryUnit.class);
                 parent.addChild(frame);
                 frame.setPermissionScope(parent);
-            } else if(unitEntity.equals(EntityClass.VIRTUAL_UNIT)) {
-              // no scope needed for top VirtualUnit
             } else {
                 logger.error("Unknown scope type for documentary unit: {}", scopeType);
             }

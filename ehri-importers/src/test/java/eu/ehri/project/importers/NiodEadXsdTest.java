@@ -4,6 +4,7 @@
  */
 package eu.ehri.project.importers;
 
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.exceptions.InputParseError;
@@ -51,7 +52,7 @@ public class NiodEadXsdTest extends AbstractImporterTest{
         InputStream ios = ClassLoader.getSystemResourceAsStream(XMLFILE);
         @SuppressWarnings("unused")
 	ImportLog log = new SaxImportManager(graph, agent, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("niodead.properties")).importFile(ios, logMessage);
-        printGraph(graph);
+//        printGraph(graph);
         // How many new nodes will have been created? We should have
         // - 6 more DocumentaryUnits (archdesc, 5 children)
        	// - 6 more DocumentDescription
@@ -109,7 +110,10 @@ public class NiodEadXsdTest extends AbstractImporterTest{
         for(DocumentDescription d : c1.getDocumentDescriptions()){
           for(String key: d.asVertex().getPropertyKeys()){
             if(key.equals("ref")){
-                assertEquals("http://www.archieven.nl/nl/search-modonly?mivast=298&mizig=210&miadt=298&miaet=1&micode=809&minr=1086379&miview=inv2", d.asVertex().getProperty(key));
+                assertTrue(d.asVertex().getProperty(key).toString().contains("http://www.archieven.nl/nl/search-modonly?mivast=298&mizig=210&miadt=298&miaet=1&micode=809&minr=1086379&miview=inv2"));
+                
+                assertTrue(d.asVertex().getProperty(key).toString().contains("http://files.archieven.nl/php/get_thumb.php?adt_id=298&toegang=250b&id=324872297&file=250b_19.jpg"));
+                assertTrue(d.asVertex().getProperty(key).toString().contains("http://www.archieven.nl/nl/search-modonly?mivast=298&miadt=298&miaet=1&micode=250b&minr=1182347&miview=ldt"));
                 hasRef=true;
             }
           }
@@ -120,6 +124,10 @@ public class NiodEadXsdTest extends AbstractImporterTest{
         for(DocumentDescription d : archdesc.getDocumentDescriptions()){
             assertEquals("Caransa, A.", d.getName());
         }
+        //test other identifiers
+        assertNull(c1.asVertex().getProperty(Ontology.OTHER_IDENTIFIERS));
+        assertEquals("NL-AsdNIOD/809/2", c2_1.asVertex().getProperty(Ontology.OTHER_IDENTIFIERS));
+
         for(DocumentDescription desc : c1.getDocumentDescriptions()){
                 assertEquals("Manuscripten, lezingen en onderzoeksmateriaal", desc.getName());
         }

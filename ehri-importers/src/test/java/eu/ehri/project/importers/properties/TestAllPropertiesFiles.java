@@ -101,6 +101,8 @@ public class TestAllPropertiesFiles {
         String propfile = "niodead.properties";
         logger.debug(propfile);
         assertTrue(p.check(new XmlImportProperties(propfile), EntityClass.DOCUMENT_DESCRIPTION));
+        XmlImportProperties prop = new XmlImportProperties(propfile);
+        assertEquals("xref", prop.getAttributeProperty("href"));
     }
     
     @Test

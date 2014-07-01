@@ -10,6 +10,7 @@ import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.MaintenanceEvent;
 import eu.ehri.project.models.base.Frame;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
@@ -31,7 +32,12 @@ import org.xml.sax.SAXException;
  * @author ben
  */
 public class EadHandler extends SaxXmlHandler {
-    public static final String AUTHOR = "authors";
+    
+    public static final String EADID = "eadId",
+            MAINAGENCYCODE = "mainagencycode",
+            AUTHOR = "author";
+                            
+    public static final String AUTHORS = "authors";
     private final ImmutableMap<String, Class<? extends Frame>> possibleSubnodes
             = ImmutableMap.<String, Class<? extends Frame>>builder().put(
             "maintenanceEvent", MaintenanceEvent.class).build();
@@ -61,8 +67,10 @@ public class EadHandler extends SaxXmlHandler {
     /**
      * EAD identifier as found in `<eadid>` in the currently handled EAD file
      */
-    private String eadId;
-    private String author;
+    Map<String, String> eadfileValues;
+//    private String eadId;
+//    private String author;
+//    private String mainagency;
 
     /**
      * Set a custom resolver so EAD DTDs are never looked up online.
@@ -95,6 +103,7 @@ public class EadHandler extends SaxXmlHandler {
             XmlImportProperties xmlImportProperties) {
         super(importer, xmlImportProperties);
         children[depth] = Lists.newArrayList();
+        eadfileValues  = new HashMap<String,String>();
     }
 
     @Override
@@ -104,6 +113,11 @@ public class EadHandler extends SaxXmlHandler {
         if (isUnitDelimiter(qName)) { //a new DocumentaryUnit should be created
             children[depth] = Lists.newArrayList();
         }
+        if(attributes.getValue(MAINAGENCYCODE) != null){
+            eadfileValues.put(MAINAGENCYCODE, attributes.getValue(MAINAGENCYCODE));
+    	    logger.debug("Found @MAINAGENCYCODE: "+ eadfileValues.get(MAINAGENCYCODE));
+        }
+            
     }
 
     protected List<String> pathIds() {
@@ -145,12 +159,12 @@ public class EadHandler extends SaxXmlHandler {
     	// If this is the <eadid> element, store its content
 //    	logger.debug("localName: " + localName + ", qName: " + qName);
     	if (localName.equals("eadid") || qName.equals("eadid")) {
-    		eadId = (String) currentGraphPath.peek().get("eadId");
-    		logger.debug("Found <eadid>: "+ eadId);
+            eadfileValues.put(EADID, (String) currentGraphPath.peek().get("eadIdentifier"));
+    	    logger.debug("Found <eadid>: "+ eadfileValues.get(EADID));
     	}
         else if (localName.equals("author") || qName.equals("author")) {
-    		author = (String) currentGraphPath.peek().get(AUTHOR);
-    		logger.debug("Found <author>: "+ author);
+            eadfileValues.put(AUTHOR, (String) currentGraphPath.peek().get(AUTHORS));
+    		logger.debug("Found <author>: "+ eadfileValues.get(AUTHOR));
     	}
         
         if(localName.equals("language") || qName.equals("language")){
@@ -236,10 +250,10 @@ public class EadHandler extends SaxXmlHandler {
      * @return the <code><eadid></code> or null if it was not parsed yet or empty
      */
     protected String getEadId() {
-    	return eadId;
+    	return eadfileValues.get(EADID);
     }
     protected String getAuthor(){
-        return author;
+        return eadfileValues.get(AUTHOR);
     }
 
     /**
@@ -308,7 +322,18 @@ public class EadHandler extends SaxXmlHandler {
      * @param currentGraph Data at the current node level
      */
     protected void extractIdentifier(Map<String, Object> currentGraph) {
-
+        if (eadfileValues.get(MAINAGENCYCODE) != null) {
+            if (eadfileValues.get(MAINAGENCYCODE).equals("NL-AsdNIOD")) {
+                if (currentGraph.containsKey("levelOfDescription")
+                        && currentGraph.get("levelOfDescription").equals("file") && currentGraph.get("inventarisNummer") != null) {
+                    //create new identifier
+                    //isil code / archiefnr / inventarisnr
+                    String newObjectId = eadfileValues.get(MAINAGENCYCODE) + "/" + eadfileValues.get(EADID) + "/" + currentGraph.get("inventarisNummer");
+                    currentGraph.remove("inventarisNummer");
+                    putPropertyInCurrentGraph(Ontology.OTHER_IDENTIFIERS, newObjectId);
+                }
+            }
+        }
     }
 
     /**
@@ -320,6 +345,8 @@ public class EadHandler extends SaxXmlHandler {
      * @param otherIdentifier the alternative identifier to add
      */
     protected void addOtherIdentifier(Map<String, Object> currentGraph, String otherIdentifier) {
+       
+
         if (currentGraph.containsKey(Ontology.OTHER_IDENTIFIERS)) {
             logger.debug("adding alternative id: " + otherIdentifier);
             Object oids = currentGraph.get(Ontology.OTHER_IDENTIFIERS);
@@ -367,8 +394,8 @@ public class EadHandler extends SaxXmlHandler {
     }
 
     private void addAuthor(Map<String, Object> currentGraph) {
-        if(getAuthor() != null && ! currentGraph.containsKey(AUTHOR)){
-            currentGraph.put(AUTHOR, getAuthor());
+        if(getAuthor() != null && ! currentGraph.containsKey(AUTHORS)){
+            currentGraph.put(AUTHORS, getAuthor());
         }
     }
 }
