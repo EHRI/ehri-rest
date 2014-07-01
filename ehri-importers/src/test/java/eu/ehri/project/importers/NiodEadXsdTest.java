@@ -26,7 +26,7 @@ import static org.junit.Assert.*;
  */
 public class NiodEadXsdTest extends AbstractImporterTest{
     
-	private static final Logger logger = LoggerFactory.getLogger(NiodEadXsdTest.class);
+    private static final Logger logger = LoggerFactory.getLogger(NiodEadXsdTest.class);
     protected final String TEST_REPO = "r1";
     protected final String XMLFILE = "NIOD-38474.xml";
     // Identifiers of nodes in the imported documentary units
@@ -50,7 +50,7 @@ public class NiodEadXsdTest extends AbstractImporterTest{
 //       List<VertexProxy> graphState1 = getGraphState(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(XMLFILE);
         @SuppressWarnings("unused")
-		ImportLog log = new SaxImportManager(graph, agent, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("niodead.properties")).importFile(ios, logMessage);
+	ImportLog log = new SaxImportManager(graph, agent, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("niodead.properties")).importFile(ios, logMessage);
         printGraph(graph);
         // How many new nodes will have been created? We should have
         // - 6 more DocumentaryUnits (archdesc, 5 children)
@@ -112,7 +112,6 @@ public class NiodEadXsdTest extends AbstractImporterTest{
                 assertEquals("http://www.archieven.nl/nl/search-modonly?mivast=298&mizig=210&miadt=298&miaet=1&micode=809&minr=1086379&miview=inv2", d.asVertex().getProperty(key));
                 hasRef=true;
             }
-            logger.debug(key);
           }
         }
         assertTrue(hasRef);
@@ -129,35 +128,23 @@ public class NiodEadXsdTest extends AbstractImporterTest{
         for(DocumentaryUnit d : archdesc.getChildren()){
             assertEquals(C01, d.getIdentifier());
         }
-    //test level-of-desc
         for(DocumentDescription d : c3_2.getDocumentDescriptions()){
+            //test level-of-desc
             assertEquals("file", d.asVertex().getProperty("levelOfDescription"));
+            
+            //test odd -> notes
+            assertTrue(d.asVertex().getProperty("notes").toString().contains("Fotokopieën"));
+            assertTrue(d.asVertex().getProperty("notes").toString().contains("ONTWIKKELINGSSTADIUM"));
         }
     //test dates
         for(DocumentDescription d : c2_1.getDocumentDescriptions()){
         	// Single date is just a string
         	assertEquals("1980", d.asVertex().getProperty("unitDates"));
         	for (DatePeriod dp : d.getDatePeriods()){
-        		logger.debug("startDate: " + dp.getStartDate());
-        		logger.debug("endDate: " + dp.getEndDate());
         		assertEquals("1980-01-01", dp.getStartDate());
         		assertEquals("1980-12-31", dp.getEndDate());
         	}
         }
-//        
-//        // Second fonds has two dates with different types -> list
-//        for(DocumentDescription d : c3_2.getDocumentDescriptions()){
-//        	// unitDates still around?
-//        	assertEquals("1943-1944", d.asVertex().getProperty("unitDates"));
-//        	// start and end dates correctly parsed and setup
-//        	for(DatePeriod dp : d.getDatePeriods()){
-//        		assertEquals("1943-01-01", dp.getStartDate());
-//        		assertEquals("1944-12-31", dp.getEndDate());
-//        	}
-//        	
-//        	// Since there was a list of unitDateTypes, it should now be deleted
-//        	assertNull(d.asVertex().getProperty("unitDatesTypes"));
-//        }
         
     }
 }

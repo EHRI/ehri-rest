@@ -214,24 +214,7 @@ public class IcaAtomEadImporter extends EaImporter {
         return list;
     }
 
-    protected Map<String, Object> extractDocumentaryUnit(Map<String, Object> itemData, int depth) throws ValidationError {
-        Map<String, Object> unit = new HashMap<String, Object>();
-        if (itemData.get(OBJECT_ID) != null) {
-            unit.put(Ontology.IDENTIFIER_KEY, itemData.get(OBJECT_ID));
-        }
-        return unit;
-    }
-
-    protected Map<String, Object> extractDocumentDescription(Map<String, Object> itemData, int depth) throws ValidationError {
-
-        Map<String, Object> unit = new HashMap<String, Object>();
-        for (String key : itemData.keySet()) {
-            if (!(key.equals(OBJECT_ID) || key.startsWith(SaxXmlHandler.UNKNOWN))) {
-                unit.put(key, itemData.get(key));
-            }
-        }
-        return unit;
-    }
+   
 
     @Override
     public AccessibleEntity importItem(Map<String, Object> itemData) throws ValidationError {

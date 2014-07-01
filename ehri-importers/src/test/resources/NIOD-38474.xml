@@ -203,6 +203,9 @@
               <unitdate calendar="gregorian" era="ce" normal="1985/1986">1985-1986</unitdate>
               <physdesc>1 omslag</physdesc>
             </did>
+            <odd type="ONTWIKKELINGSSTADIUM"> 
+              <p>Fotokopieën</p> 
+            </odd>
           </c03>
         </c02>
       </c01>
