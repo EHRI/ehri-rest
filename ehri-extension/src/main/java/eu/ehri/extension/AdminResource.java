@@ -14,6 +14,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Maps;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.*;
+import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.cvoc.AuthoritativeSet;
 import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
@@ -83,6 +84,41 @@ public class AdminResource extends AbstractRestResource {
         }
     }
 
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/_findReplaceProperty")
+    public Response renamePropertyValue(
+            @QueryParam("type") String entityType,
+            @QueryParam("name") String propName,
+            @QueryParam("from") String oldValue,
+            @QueryParam("to") String newValue) throws Exception {
+        graph.getBaseGraph().checkNotInTransaction();
+        EntityClass entityClass = EntityClass.withName(entityType);
+        CloseableIterable<Vertex> vertices = manager.getVertices(entityClass);
+        if (propName == null
+                || propName.trim().isEmpty()
+                || propName.equals(EntityType.ID_KEY)
+                || propName.equals(EntityType.TYPE_KEY)) {
+            throw new IllegalArgumentException("Invalid propery key: " + propName);
+        }
+        try {
+            int changes = 0;
+            for (Vertex v : vertices) {
+                Object current = v.getProperty(propName);
+                if (oldValue.equals(current)) {
+                    changes++;
+                    manager.setProperty(v, propName, newValue);
+                }
+            }
+            graph.getBaseGraph().commit();
+            return Response.status(Status.OK)
+                    .entity(Integer.valueOf(changes).toString().getBytes())
+                    .build();
+        } finally {
+            vertices.close();
+            cleanupTransaction();
+        }
+    }
 
     /**
      * Create a new user with a default name and identifier.

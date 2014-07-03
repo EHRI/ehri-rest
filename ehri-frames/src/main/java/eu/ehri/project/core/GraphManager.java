@@ -194,6 +194,15 @@ public interface GraphManager {
     public Vertex updateVertex(String id, EntityClass type,
             Map<String, ?> data, Iterable<String> keys) throws ItemNotFound;
 
+    /**
+     * Set a property on a vertex.
+     *
+     * @param vertex The vertex
+     * @param key    The property key
+     * @param value  The property value
+     */
+    public void setProperty(Vertex vertex, String key, String value);
+
     // CRUD functions
 
     /**
