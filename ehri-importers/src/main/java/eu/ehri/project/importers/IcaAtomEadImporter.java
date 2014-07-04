@@ -63,6 +63,7 @@ public class IcaAtomEadImporter extends EaImporter {
     @Override
     public DocumentaryUnit importItem(Map<String, Object> itemData, List<String> idPath) throws ValidationError {
 
+
         BundleDAO persister = getPersister(idPath);
 
         Bundle unit = new Bundle(EntityClass.DOCUMENTARY_UNIT, extractDocumentaryUnit(itemData));
@@ -89,14 +90,17 @@ public class IcaAtomEadImporter extends EaImporter {
             descBundle = descBundle.withRelation(Ontology.HAS_UNKNOWN_PROPERTY, new Bundle(EntityClass.UNKNOWN_PROPERTY, unknowns));
         }
 
-        Mutation<DocumentaryUnit> mutation = persister.createOrUpdate(mergeWithPreviousAndSave(unit, descBundle),
+        for (Map<String, Object> dpb : extractMaintenanceEvent(itemData)) {
+            logger.debug("maintenance event found");
+            //dates in maintenanceEvents are no DatePeriods, they are not something to search on
+            descBundle = descBundle.withRelation(Ontology.HAS_MAINTENANCE_EVENT, new Bundle(EntityClass.MAINTENANCE_EVENT, dpb));
+        }
+
+        Mutation<DocumentaryUnit> mutation = persister.createOrUpdate(mergeWithPreviousAndSave(unit, descBundle, idPath),
                 DocumentaryUnit.class);
 //                persister.createOrUpdate(unit, DocumentaryUnit.class);
         DocumentaryUnit frame = mutation.getNode();
 
-        if (mutation.created()) {
-            solveUndeterminedRelationships(frame, descBundle);
-        }
         // Set the repository/item relationship
         if (idPath.isEmpty() && mutation.created()) {
             EntityClass scopeType = manager.getEntityClass(permissionScope);
@@ -113,6 +117,10 @@ public class IcaAtomEadImporter extends EaImporter {
             }
         }
         handleCallbacks(mutation);
+
+        if (mutation.created()) {
+            solveUndeterminedRelationships(frame, descBundle);
+        }
         return frame;
 
 
@@ -128,9 +136,24 @@ public class IcaAtomEadImporter extends EaImporter {
      * @return A bundle with description relationships merged.
      * @throws ValidationError
      */
-    protected Bundle mergeWithPreviousAndSave(Bundle unit, Bundle descBundle) throws ValidationError {
+
+    protected Bundle mergeWithPreviousAndSave(Bundle unit, Bundle descBundle, List<String> idPath) throws ValidationError {
         final String languageOfDesc = descBundle.getDataValue(Ontology.LANGUAGE_OF_DESCRIPTION);
-        Bundle withIds = unit.generateIds(getPermissionScope().idPath());
+        /*
+         * for some reason, the idpath from the permissionscope does not contain the parent documentary unit.
+         * TODO: so for now, it is added manually
+         */
+        List<String> lpath = new ArrayList<String>();
+        for(String p : getPermissionScope().idPath()){
+            lpath.add(p);
+        }
+        for(String p : idPath){
+            lpath.add(p);
+        }
+        Bundle withIds = unit.generateIds(lpath);
+        
+        
+        logger.debug("idpath: "+withIds.getId());
         if (manager.exists(withIds.getId())) {
             try {
                 //read the current item’s bundle
@@ -165,7 +188,7 @@ public class IcaAtomEadImporter extends EaImporter {
     @SuppressWarnings("unchecked")
     @Override
     protected Iterable<Map<String, Object>> extractRelations(Map<String, Object> data) {
-        final String REL = "Access";
+        final String REL = "AccessPoint";
         List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
         for (String key : data.keySet()) {
             if (key.endsWith(REL)) {
@@ -182,7 +205,7 @@ public class IcaAtomEadImporter extends EaImporter {
                         }
                     }
                     if (!relationNode.containsKey(Ontology.UNDETERMINED_RELATIONSHIP_TYPE)) {
-                        relationNode.put(Ontology.UNDETERMINED_RELATIONSHIP_TYPE, "corporateBodyAccess");
+                        relationNode.put(Ontology.UNDETERMINED_RELATIONSHIP_TYPE, "corporateBodyAccessPoint");
                     }
                     list.add(relationNode);
                 }

@@ -222,7 +222,7 @@ public final class JenaSkosImporter implements SkosImporter {
 
     private Mutation<Concept> importConcept(Resource item) throws ValidationError {
         logger.debug("Importing: {}", item.toString());
-        Bundle.Builder builder = new Bundle.Builder(EntityClass.CVOC_CONCEPT)
+        Bundle.Builder builder = Bundle.Builder.withClass(EntityClass.CVOC_CONCEPT)
                 .addDataValue(Ontology.IDENTIFIER_KEY, getId(URI.create(item.getURI())));
 
         List<Bundle> undetermined = getUndeterminedRelations(item);
@@ -318,7 +318,7 @@ public final class JenaSkosImporter implements SkosImporter {
                 continue;
             }
 
-            Bundle.Builder builder = new Bundle.Builder(EntityClass.CVOC_CONCEPT_DESCRIPTION);
+            Bundle.Builder builder = Bundle.Builder.withClass(EntityClass.CVOC_CONCEPT_DESCRIPTION);
 
             Literal literalPrefName = property.asLiteral();
             String languageCode = isValidLanguageCode(literalPrefName.getLanguage())

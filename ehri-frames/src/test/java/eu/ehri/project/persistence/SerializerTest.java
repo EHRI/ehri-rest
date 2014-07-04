@@ -2,6 +2,7 @@ package eu.ehri.project.persistence;
 
 import com.google.common.collect.Lists;
 import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.VirtualUnit;
 import eu.ehri.project.persistence.utils.BundleUtils;
 import eu.ehri.project.test.AbstractFixtureTest;
 import org.junit.Test;
@@ -54,6 +55,23 @@ public class SerializerTest extends AbstractFixtureTest {
 
         assertEquals("NIOD Description",
                 BundleUtils.get(serialized, "heldBy[0]/describes[0]/name"));
+    }
+
+    @Test
+    public void testFullSerialization() throws Exception {
+        VirtualUnit doc = manager.getFrame("vu1", VirtualUnit.class);
+
+        Bundle serialized = new Serializer.Builder(graph).build()
+                .vertexFrameToBundle(doc);
+
+        // Name of doc and repository should be serialized
+        assertEquals("Documentary Unit 1",
+                BundleUtils.get(serialized, "isDescribedBy[0]/name"));
+        // Non mandatory properties should not be null 'cos full serialization
+        // is enabled
+        assertNotNull(BundleUtils.get(serialized, "isDescribedBy[0]/scopeAndContent"));
+        assertEquals("Some description text for c1",
+                BundleUtils.get(serialized, "isDescribedBy[0]/scopeAndContent"));
     }
 
     @Test

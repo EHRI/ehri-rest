@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<enunciate label="platform-gateway-api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://enunciate.codehaus.org/schemas/enunciate-1.23.xsd">
+
+    <api-import pattern="com.intuit.platform.gateway.common.DetailedResponse" />
+    <api-import pattern="com.intuit.platform.gateway.service.access.domain.*" />
+    <api-import pattern="com.intuit.platform.gateway.service.identity.domain.Identity" />
+
+    <deployment protocol="https" host="(host)" context="/gateway-service-access-pox" />
+
+    <namespaces>
+        <namespace uri="http://schema.intuit.com/platform/integration/detailedResponse/v1" id="common" />
+        <namespace uri="http://schema.intuit.com/platform/identity/user/v1" id="user" />
+        <namespace uri="http://schema.intuit.com/platform/access/token/v1" id="token" />
+    </namespaces>
+
+    <services>
+        <rest defaultRestSubcontext="/gateway-service-access-pox" />
+    </services>
+
+    <modules>
+        <!-- Docs -->
+        <!--<docs splashPackage="com.intuit.platform.gateway.service.ticket.api" title="Platform Gateway Access API"
+            copyright="Intuit Inc">
+            <download name="License" file="LICENSE" description="The license file governing the use of this API." />
+        </docs> -->
+        <!-- Disable all the client generation tools -->
+        <basic-app disabled="true" />
+        <c disabled="true" />
+        <csharp disabled="true" />
+        <java-client disabled="true" />
+        <jaxws-client disabled="true" />
+        <jaxws-ri disabled="true" />
+        <jaxws-support disabled="true" />
+        <jersey disabled="true" />
+        <obj-c disabled="true" />
+        <xml disabled="true" />
+    </modules>
+</enunciate>

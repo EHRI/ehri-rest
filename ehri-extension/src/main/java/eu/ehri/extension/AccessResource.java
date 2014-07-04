@@ -19,7 +19,6 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.views.AclViews;
 
 /**
  * Provides a RESTful(ish) interface for setting PermissionTarget perms.
@@ -36,8 +35,8 @@ public class AccessResource extends
      * Set the accessors who are able to view an item. If no accessors
      * are set, the item is globally readable.
      *
-     * @param id
-     * @param accessorIds
+     * @param id          The ID of the item
+     * @param accessorIds The IDs of the users who can access this item.
      * @return the updated object
      * @throws PermissionDenied
      * @throws ItemNotFound
@@ -53,8 +52,7 @@ public class AccessResource extends
         try {
             AccessibleEntity item = manager.getFrame(id, AccessibleEntity.class);
             Set<Accessor> accessors = extractAccessors(accessorIds);
-            AclViews acl = new AclViews(graph);
-            acl.setAccessors(item, accessors, getRequesterUserProfile());
+            aclViews.setAccessors(item, accessors, getRequesterUserProfile());
             graph.getBaseGraph().commit();
             return Response.status(Status.OK)
                     .entity((getSerializer().vertexFrameToJson(item)).getBytes())
@@ -67,10 +65,6 @@ public class AccessResource extends
 
     /**
      * Get a set of Accessors from the given IDs.
-     *
-     * @param accessorIds
-     * @return
-     * @throws ItemNotFound
      */
     private Set<Accessor> extractAccessors(Iterable<String> accessorIds) throws ItemNotFound {
         Set<Accessor> accs = Sets.newHashSet();

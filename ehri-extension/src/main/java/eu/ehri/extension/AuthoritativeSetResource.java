@@ -1,7 +1,6 @@
 package eu.ehri.extension;
 
 import eu.ehri.extension.errors.BadRequester;
-import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.base.Accessor;
@@ -218,7 +217,7 @@ public class AuthoritativeSetResource extends
         AuthoritativeSet set = views.detail(id, user);
         try {
             HistoricalAgent agent = createHistoricalAgent(json, set);
-            new AclManager(graph).setAccessors(agent,
+            aclManager.setAccessors(agent,
                     getAccessors(accessors, user));
             graph.getBaseGraph().commit();
             return buildResponseFromHistoricalAgent(agent);

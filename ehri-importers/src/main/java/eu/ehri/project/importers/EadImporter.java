@@ -1,10 +1,16 @@
 package eu.ehri.project.importers;
 
+import com.google.common.collect.Sets;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.definitions.Ontology;
+import eu.ehri.project.exceptions.IntegrityError;
+import eu.ehri.project.exceptions.ItemNotFound;
+import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.*;
 import eu.ehri.project.models.base.*;
+import eu.ehri.project.models.cvoc.Concept;
+import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.persistence.Bundle;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,6 +19,7 @@ import java.util.Map;
 
 import eu.ehri.project.persistence.BundleDAO;
 import eu.ehri.project.persistence.Mutation;
+import eu.ehri.project.views.impl.CrudViews;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,6 +37,8 @@ import org.slf4j.LoggerFactory;
 public class EadImporter extends EaImporter {
 
     private static final Logger logger = LoggerFactory.getLogger(EadImporter.class);
+    //the EadImporter can import ead as DocumentaryUnits, the default, or overwrite those and create VirtualUnits instead.
+    private EntityClass unitEntity = EntityClass.DOCUMENTARY_UNIT;
 
     /**
      * Construct an EadImporter object.
@@ -52,13 +61,13 @@ public class EadImporter extends EaImporter {
      * @throws ValidationError when the itemData does not contain an identifier for the unit or...
      */
     @Override
-    public DocumentaryUnit importItem(Map<String, Object> itemData, List<String> idPath)
+    public AbstractUnit importItem(Map<String, Object> itemData, List<String> idPath)
             throws ValidationError {
 
         BundleDAO persister = getPersister(idPath);
 
         // extractDocumentaryUnit does not throw ValidationError on missing ID
-        Bundle unit = new Bundle(EntityClass.DOCUMENTARY_UNIT, extractDocumentaryUnit(itemData));
+        Bundle unit = new Bundle(unitEntity, extractDocumentaryUnit(itemData));
         
         // Check for missing identifier, throw an exception when there is no ID.
         if (unit.getDataValue(Ontology.IDENTIFIER_KEY) == null) {
@@ -73,7 +82,7 @@ public class EadImporter extends EaImporter {
             descBundle = descBundle.withRelation(Ontology.ENTITY_HAS_DATE, new Bundle(EntityClass.DATE_PERIOD, dpb));
         }
         for (Map<String, Object> rel : extractRelations(itemData)) {//, (String) unit.getErrors().get(IdentifiableEntity.IDENTIFIER_KEY)
-            logger.debug("relation found " + rel.get(Ontology.IDENTIFIER_KEY));
+            logger.debug("relation found: " + rel.get(Ontology.NAME_KEY));
             descBundle = descBundle.withRelation(Ontology.HAS_ACCESS_POINT, new Bundle(EntityClass.UNDETERMINED_RELATIONSHIP, rel));
         }
         Map<String, Object> unknowns = extractUnknownProperties(itemData);
@@ -100,27 +109,95 @@ public class EadImporter extends EaImporter {
                 Repository repository = framedGraph.frame(permissionScope.asVertex(), Repository.class);
                 frame.setRepository(repository);
                 frame.setPermissionScope(repository);
-            } else if (scopeType.equals(EntityClass.DOCUMENTARY_UNIT)) {
+            } else if (scopeType.equals(unitEntity)) {
                 DocumentaryUnit parent = framedGraph.frame(permissionScope.asVertex(), DocumentaryUnit.class);
                 parent.addChild(frame);
                 frame.setPermissionScope(parent);
+            } else if(unitEntity.equals(EntityClass.VIRTUAL_UNIT)) {
+              // no scope needed for top VirtualUnit
             } else {
                 logger.error("Unknown scope type for documentary unit: {}", scopeType);
             }
         }
         handleCallbacks(mutation);
+        if (mutation.created()) {
+            solveUndeterminedRelationships(frame, descBundle);
+        }
         return frame;
 
 
     }
 
+    /**
+     * subclasses can override this method to cater to their special needs for UndeterminedRelationships
+     * by default, it expects something like this in the original EAD:
+     * 
+     * <persname source="terezin-victims" authfilenumber="PERSON.ITI.1514982">Kien,
+                        Leonhard (* 11.5.1886)</persname>
+     *
+     * it works in unison with the extractRelations() method. 
+     * 
+                        * 
+     * @param unit
+     * @param descBundle - not used
+     * @throws ValidationError 
+     */
+    protected void solveUndeterminedRelationships(DocumentaryUnit unit, Bundle descBundle) throws ValidationError {
+        //Try to resolve the undetermined relationships
+        //we can only create the annotations after the DocumentaryUnit and its Description have been added to the graph,
+        //so they have id's. 
+        for (Description unitdesc : unit.getDescriptions()) {
+            // Put the set of relationships into a HashSet to remove duplicates.
+            for (UndeterminedRelationship rel : Sets.newHashSet(unitdesc.getUndeterminedRelationships())) {
+                /*
+                 * the wp2 undetermined relationship that can be resolved have a 'cvoc' and a 'concept' attribute.
+                 * they need to be found in the vocabularies that are in the graph
+                 */
+                if (rel.asVertex().getPropertyKeys().contains("cvoc")) {
+                    String cvoc_id = (String) rel.asVertex().getProperty("cvoc");
+                    String concept_id = (String) rel.asVertex().getProperty("concept");
+                    logger.debug(cvoc_id + "  " + concept_id);
+                    Vocabulary vocabulary;
+                    try {
+                        vocabulary = manager.getFrame(cvoc_id, Vocabulary.class);
+                        for (Concept concept : vocabulary.getConcepts()) {
+                        logger.debug("*********************" + concept.getId() + " " + concept.getIdentifier());
+                        if (concept.getIdentifier().equals(concept_id)) {
+                            try {
+                                Bundle linkBundle = new Bundle(EntityClass.LINK)
+                                        .withDataValue(Ontology.LINK_HAS_TYPE, "resolved relationship")
+                                        .withDataValue(Ontology.LINK_HAS_DESCRIPTION, "solved by automatic resolving");
+                                UserProfile user = manager.getFrame(this.log.getActioner().getId(), UserProfile.class);
+                                Link link = new CrudViews<Link>(framedGraph, Link.class).create(linkBundle, user);
+                                unit.addLink(link);
+                                concept.addLink(link);
+                                link.addLinkBody(rel);
+                            } catch (PermissionDenied ex) {
+                                logger.error(ex.getMessage());
+                            } catch (IntegrityError ex) {
+                                logger.error(ex.getMessage());
+                            }
+
+                        }
+
+                    }
+                    } catch (ItemNotFound ex) {
+                        logger.error("Vocabulary with id " + cvoc_id +" not found. "+ex.getMessage());
+                    }
+                    
+                }
+            }
+        }
+    }
+
     @SuppressWarnings("unchecked")
-	@Override
+   @Override
     protected Iterable<Map<String, Object>> extractRelations(Map<String, Object> data) {
-        final String REL = "Access";
+        final String REL = "AccessPoint";
         List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
         for (String key : data.keySet()) {
             if (key.endsWith(REL)) {
+                logger.debug(key + " found in data");
                 //type, targetUrl, targetName, notes
                 for (Map<String, Object> origRelation : (List<Map<String, Object>>) data.get(key)) {
                     Map<String, Object> relationNode = new HashMap<String, Object>();
@@ -134,7 +211,7 @@ public class EadImporter extends EaImporter {
                         }
                     }
                     if (!relationNode.containsKey(Ontology.UNDETERMINED_RELATIONSHIP_TYPE)) {
-                        relationNode.put(Ontology.UNDETERMINED_RELATIONSHIP_TYPE, "corporateBodyAccess");
+                        relationNode.put(Ontology.UNDETERMINED_RELATIONSHIP_TYPE, "corporateBodyAccessPoint");
                     }
                     list.add(relationNode);
                 }
@@ -207,5 +284,9 @@ public class EadImporter extends EaImporter {
     @Override
     public AccessibleEntity importItem(Map<String, Object> itemData) throws ValidationError {
         throw new UnsupportedOperationException("Not supported yet.");
+    }
+    
+    public void importAsVirtualCollection(){
+      unitEntity = EntityClass.VIRTUAL_UNIT;
     }
 }

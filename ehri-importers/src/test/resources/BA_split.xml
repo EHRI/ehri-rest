@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ead xmlns="urn:isbn:1-931666-22-9">
+  <eadheader>
+    <eadid countrycode="DE"/>
+    <filedesc>
+      <titlestmt>
+        <titleproper/>
+        <author>Bundesarchiv</author>
+      </titlestmt>
+    </filedesc>
+    <profiledesc>
+      <creation> Bundesarchiv from Basys2 <date>17.06.2013 13:06</date></creation>
+      <langusage>
+        <language langcode="ger" scriptcode="Latn">German</language>
+      </langusage>
+    </profiledesc>
+    <revisiondesc>
+      <change>
+        <date>2014/06/16 18:48:16</date>
+        <item>EHRI added a unitid with label "ehri_internal_identifier" to give every node an unique id.</item>
+      </change>
+      <change>
+        <date>2014/06/16 18:46:16</date>
+        <item>EHRI added a unitid with label "ehri_main_identifier" to indicate the identifier provided by the institution that EHRI will use as the identifier of the unit.</item>
+      </change>
+      <change>
+        <date>2014/06/16 18:44:11</date>
+        <item>EHRI added a unitid with label "ehri_structure" to indicate the structure of the EAD file on every c-node. This is done to make comparisons of two versions of the same EAD (as indicated by the eadid) possible.</item>
+      </change>
+      <change>
+        <date calendar="gregorian" era="ce">2014-06-13T16:19:21.917+02:00</date>
+        <item>preprocessing transformation</item>
+      </change>
+    </revisiondesc>
+  </eadheader>
+  <frontmatter/>
+  <archdesc level="fonds">
+    <did>
+      <unitid label="ehri_internal_id">0</unitid>
+      <unitid label="ehri_structure">0</unitid>
+      <unitid encodinganalog="Bestandssignatur">NS 1</unitid>
+      <unittitle encodinganalog="Bestandsbezeichnung">Reichsschatzmeister der NSDAP</unittitle>
+      <unitdate encodinganalog="Bestandslaufzeit">1906/19, 1922/45</unitdate>
+      <unittitle encodinganalog="Langbezeichnung">Reichsschatzmeister der NSDAP</unittitle>
+      <unittitle encodinganalog="Kurzbezeichnung"/>
+      <unitdate encodinganalog="Provenienzlaufzeit">1935/45</unitdate>
+      <physdesc>
+        <extent>3567 AE</extent>
+        <genreform>Schriftgut</genreform>
+      </physdesc>
+      <unitid label="ehri_main_identifier">NS 1</unitid>
+      <physloc encodinganalog="Benutzungsort">Berlin-Lichterfelde</physloc>
+    </did>
+    <descgrp encodinganalog="Bestandsbeschreibung">
+      <p>Bestandsgeschichte</p>
+      <p>Im September/ Oktober 1962 gelangte aus den Sammlungen des ehemaligen Berlin Document Center Berlin u. a. ein großer Bestand an Schriftgut des Reichsschatzmeisters der NSDAP in das Bundesarchiv. Weitere Abgaben durch das Berlin Document Center folgten in den Jahren1978, 1980 und 1988.</p>
+    </descgrp>
+    <processinfo encodinganalog="Erschließungszustand">
+      <p>Online-Findbuch (2011)</p>
+    </processinfo>
+    <bibliography encodinganalog="Amtliche_Druckschriften">
+      <p>Besoldungs- und Versorgungsblatt der NSDAP. Parteiamtliches Mitteilungsblatt für die vom Reichsschatzmeister der NSDAP herausgegebenen vermögensrechtlichen Personalbestimmungen,</p>
+      <p> Mitteilungsblatt der Reichszeugmeisterei der NSDAP, 1934 ff.</p>
+    </bibliography>
+    <bibliography encodinganalog="Literatur">
+      <p>Lingg, Anton: Die Verwaltung der Nationalsozialistischen Arbeiterpartei, München 1939.</p>
+      <p> Ulf Lükeman: Der Reichsschatzmeister der NSDAP. Ein Beitrag zur inneren Parteistruktur, Diss. phil., Berlin 1963.</p>
+      <p> Inventar archivalischer Quellen des NS-Staates, hrsg. von Heinz Boberach, München 1991/1995, Teil 1, S. 461-463.</p>
+      <p> The Holdings of the Berlin Document Center. A Guide to the Collections, Berlin Document Center (im Buchhandel nicht erhältlich), 1994, S. 115-128.</p>
+      <p>Diether Degreif Franz: Xaver Schwarz. Das Reichsschatzmeisteramt der NSDAP, 1989.</p>
+      <p>Wolfgang Benz (Hrsg.): Wie wurde man Parteigenosse, 2009.</p>
+    </bibliography>
+    <bioghist>
+      <p>Die Funktion des Reichsschatzmeisters wurde bereits in der Satzung der NSDAP von 1926 verankert. Als Vorsitzender des Finanzausschusses der Partei war er verantwortlich für das gesamte Kassenwesen sowie die Sicherung der finanziellen Grundlagen der "Bewegung".</p>
+      <p> 1931 durch Verfügung Hitlers bevollmächtigt zur Wahrnehmung und Vertretung aller Wirtschafts-, Finanz-, Vermögens- und Rechtsangelegenheiten der Partei; zuständig auch für alle Fragen des Mitgliedschaftswesens. Ihm unterstand die gesamte Finanz- und Verwaltungsorganisation.</p>
+      <p>Dienststellen, die dem Reichsschatzmeister unterstanden und/ oder über die er die Finanzhoheit ausübte:</p>
+    </bioghist>
+    <processinfo encodinganalog="Bearbeitungshinweise">
+      <p>Online-Findbuch (2011)</p>
+    </processinfo>
+    <controlaccess>
+      <subject>Norddeutscher Bund und Deutsches Reich (1867/1871-1945)</subject>
+      <subject>Einrichtungen der NSDAP</subject>
+      <subject>Reichsleitung</subject>
+    </controlaccess>
+    <processinfo>
+      <p>this fonds was selected by EHRI from their holding
+                                                guide, based on date range and subject</p>
+    </processinfo>
+  </archdesc>
+</ead>

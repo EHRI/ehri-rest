@@ -45,6 +45,7 @@ public class XmlImportProperties implements ImportProperties {
     public String getProperty(String key) {
         return getProperties().getProperty(key);
     }
+    
     public Set<String> getPropertiesWithValue(String value){
         Set<String> ps = new HashSet<String>();
         Properties p = getProperties();
@@ -119,6 +120,22 @@ public class XmlImportProperties implements ImportProperties {
     @Override
     public String getAttributeProperty(String key) {
         return getProperty("@" + key);
+    }
+    /**
+     * used to try to find the xml attribute value 'ehri_main_identifier' in properties like 'did/unitid/@ehrilabel$ehri_main_identifier=objectIdentifier'
+     * @param key did/unitid/
+     * @param attribute @ehrilabel
+     * @return ehri_main_identifier or null if no attribute value could be found in this property file
+     */
+    public String getValueForAttributeProperty(String key, String attribute){
+        Properties p = getProperties();
+        for(Object k_object : p.keySet()){
+            String k = k_object.toString();
+            if(k.startsWith(key+attribute) && k.contains("$")){
+                return k.substring(1+k.indexOf("$"));
+            }
+        }
+        return null;
     }
 }
 
@@ -197,7 +214,7 @@ abstract class PropertyLoader {
                     result = new Properties();
                     result.load(in); // Can throw IOException
                 } else {
-                    logger.error(name + " is geen file");
+                    logger.error(name + " is not a Resource");
                     FileInputStream ios = new FileInputStream(name);
                     logger.info("trying to read " +name + " as fileinputstream");
                     

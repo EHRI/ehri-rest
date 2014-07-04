@@ -13,6 +13,7 @@ import java.nio.charset.Charset;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -64,10 +65,17 @@ public class TestAllPropertiesFiles {
     public void testEagXmlProperties() {
         assertTrue(p.check(new XmlImportProperties("eag.properties"), EntityClass.REPOSITORY_DESCRIPTION));
     }
-
+@Test
+    public void testDansEadProperties() {
+        String propfile = "dansead.properties";
+        logger.debug(propfile);
+        assertTrue(p.check(new XmlImportProperties(propfile), EntityClass.DOCUMENT_DESCRIPTION));
+    }
     @Test
     public void testEadXmlProperties() {
-        assertTrue(p.check(new XmlImportProperties("icaatom.properties"), EntityClass.DOCUMENT_DESCRIPTION));
+         String propfile = "icaatom.properties";
+        logger.debug(propfile);
+        assertTrue(p.check(new XmlImportProperties(propfile), EntityClass.DOCUMENT_DESCRIPTION));
     }
     @Test
     public void testWp2EadXmlProperties() {
@@ -81,7 +89,7 @@ public class TestAllPropertiesFiles {
         assertTrue(p.check(new XmlImportProperties("skos.properties"), EntityClass.CVOC_CONCEPT_DESCRIPTION));
     }
 
-    @Test
+    @Test @Ignore //ignore in favour of niodead.properties
     public void testNiodXmlProperties() {
         String propfile = "niod.properties";
         logger.debug(propfile);

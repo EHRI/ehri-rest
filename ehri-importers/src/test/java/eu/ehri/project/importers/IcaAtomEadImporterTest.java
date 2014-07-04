@@ -45,16 +45,17 @@ public class IcaAtomEadImporterTest extends AbstractImporterTest{
         XmlImportManager importManager = new SaxImportManager(graph, agent, validUser, IcaAtomEadImporter.class, IcaAtomEadHandler.class)
                 .setTolerant(Boolean.TRUE);
         ImportLog log = importManager.importFile(ios, logMessage);
+//        printGraph(graph);
 
         // How many new nodes will have been created? We should have
         // - 5 more DocumentaryUnits
        	// - 5 more DocumentDescription
 	// - 1 more DatePeriod
-        // - 2 more UnknownProperties
+        // - 1 more UnknownProperties
         // - 1 UndeterminedRelationship, from origination/name
 	// - 6 more import Event links (4 for every Unit, 1 for the User)
         // - 1 more import Event
-        int newCount = count + 21;
+        int newCount = count + 20;
         assertEquals(newCount, getNodeCount(graph));
 
         Iterable<Vertex> docs = graph.getVertices(Ontology.IDENTIFIER_KEY,

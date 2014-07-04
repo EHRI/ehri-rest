@@ -20,7 +20,6 @@ import eu.ehri.project.exceptions.*;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import eu.ehri.extension.errors.BadRequester;
-import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.DocumentaryUnit;
@@ -196,7 +195,7 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
         Repository repository = views.detail(id, user);
         try {
             DocumentaryUnit doc = createDocumentaryUnit(json, repository);
-            new AclManager(graph).setAccessors(doc,
+            aclManager.setAccessors(doc,
                     getAccessors(accessors, user));
             graph.getBaseGraph().commit();
             return buildResponseFromDocumentaryUnit(doc);

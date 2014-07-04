@@ -3,13 +3,16 @@ package eu.ehri.extension.test;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import eu.ehri.extension.AdminResource;
+import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
+import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.persistence.Bundle;
 import org.junit.Test;
 
 import javax.ws.rs.core.MediaType;
 
 import static com.sun.jersey.api.client.ClientResponse.Status.CREATED;
+import static com.sun.jersey.api.client.ClientResponse.Status.INTERNAL_SERVER_ERROR;
 import static com.sun.jersey.api.client.ClientResponse.Status.OK;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -27,6 +30,31 @@ public class AdminRestClientTest extends BaseRestClientTest {
         ClientResponse response = resource.accept(MediaType.APPLICATION_JSON)
                 .type(MediaType.APPLICATION_JSON).post(ClientResponse.class);
         assertStatus(OK, response);
+    }
+
+    @Test
+    public void testPropertyRename() throws Exception {
+        WebResource resource = client.resource(ehriUri("admin", "_findReplaceProperty"))
+                .queryParam("type", Entities.ADDRESS)
+                .queryParam("name", "streetAddress")
+                .queryParam("from", "Strand")
+                .queryParam("to", "Drury Lane");
+        ClientResponse response = resource
+                .type(MediaType.APPLICATION_JSON).post(ClientResponse.class);
+        assertStatus(OK, response);
+        assertEquals("1", response.getEntity(String.class));
+
+        // check it fails for invalid properties...
+        for (String badProp: new String[]{EntityType.ID_KEY, EntityType.TYPE_KEY}) {
+            resource = client.resource(ehriUri("admin", "_findReplaceProperty"))
+                    .queryParam("type", Entities.ADDRESS)
+                    .queryParam("name", badProp)
+                    .queryParam("from", "foo")
+                    .queryParam("to", "bar");
+            response = resource
+                    .type(MediaType.APPLICATION_JSON).post(ClientResponse.class);
+            assertStatus(INTERNAL_SERVER_ERROR, response);
+        }
     }
 
     @Test

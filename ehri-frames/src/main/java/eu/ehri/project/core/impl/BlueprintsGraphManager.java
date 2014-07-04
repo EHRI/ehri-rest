@@ -190,6 +190,27 @@ public final class BlueprintsGraphManager<T extends IndexableGraph> implements G
         }
     }
 
+    @Override
+    public void setProperty(Vertex vertex, String key, String value) {
+        Preconditions.checkNotNull(vertex);
+        Preconditions.checkNotNull(key);
+        Preconditions.checkArgument(
+                !(key.trim().isEmpty() ||
+                        key.equals(EntityType.ID_KEY) || key.equals(EntityType.TYPE_KEY)),
+                "Invalid property key: %s", key);
+        Index<Vertex> index = getIndex();
+        Object current = vertex.getProperty(key);
+        if (current != null) {
+            index.remove(key, current, vertex);
+        }
+        if (value == null) {
+            vertex.removeProperty(key);
+        } else {
+            vertex.setProperty(key, value);
+            index.put(key, value, vertex);
+        }
+    }
+
     public void deleteVertex(String id) throws ItemNotFound {
         deleteVertex(getVertex(id));
     }

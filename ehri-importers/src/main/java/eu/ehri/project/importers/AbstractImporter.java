@@ -7,7 +7,9 @@ import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.properties.NodeProperties;
+import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
+import eu.ehri.project.models.base.AbstractUnit;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.PermissionScope;
 
@@ -199,4 +201,15 @@ public abstract class AbstractImporter<T> {
             return value;
         }
     }
+    
+    public abstract Iterable<Map<String, Object>> extractMaintenanceEvent(Map<String, Object> itemData);
+
+/**
+ * all data that is stored above the first imported DocumentaryUnit will be processed here, and added to the DocumentDescriptions.
+ * this might include MaintenanceEvents, or in the case of EAD there might be author/creation data.
+ * 
+ * @param topLevelUnit the top level DocumentaryUnit to append the maintenanceEvents to (if any)
+ * @param itemData the item representation to import, in which to search for maintenanceEvents
+ */
+    public abstract void importTopLevelExtraNodes(AbstractUnit topLevelUnit, Map<String, Object> itemData);
 }

@@ -52,11 +52,11 @@ private final String UN_REL = "HR-HDA145corporateBodyAccessCroatianStateArchive"
         //TODO: test these UR's
         // - 8 more UndeterminedRelationships (2 4 2)
         //TODO: test this UP
-        // - 3 more UnknownProperty (1 1 1)
+        // - 1 more UnknownProperty (1 1 1)
         // - 4 more import Event links (+1)
         // - 1 more import Event
 
-        int createCount = origCount + 25;
+        int createCount = origCount + 23;
 
 
         assertEquals(createCount, getNodeCount(graph));

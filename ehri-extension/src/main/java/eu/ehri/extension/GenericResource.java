@@ -12,6 +12,7 @@ import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.gremlin.java.GremlinPipeline;
 import com.tinkerpop.pipes.PipeFunction;
+import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.SerializationError;
 import org.codehaus.jackson.JsonFactory;
@@ -20,7 +21,6 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 import org.neo4j.graphdb.GraphDatabaseService;
 import eu.ehri.extension.errors.BadRequester;
-import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.base.AccessibleEntity;
@@ -31,11 +31,8 @@ import eu.ehri.project.models.base.AccessibleEntity;
 @Path("entities")
 public class GenericResource extends AbstractAccessibleEntityResource<AccessibleEntity> {
 
-    final AclManager aclManager;
-
     public GenericResource(@Context GraphDatabaseService database, @Context HttpHeaders requestHeaders) {
         super(database, requestHeaders, AccessibleEntity.class);
-        aclManager = new AclManager(graph);
     }
 
     /**
@@ -56,7 +53,7 @@ public class GenericResource extends AbstractAccessibleEntityResource<Accessible
             PermissionDenied, BadRequester {
         // Object a lazily-computed view of the ids->vertices...
         Iterable<Vertex> vertices = manager.getVertices(ids);
-        PipeFunction<Vertex,Boolean> filter = aclManager
+        PipeFunction<Vertex,Boolean> filter = AclManager
                 .getAclFilterFunction(getRequesterUserProfile());
         GremlinPipeline<Vertex, Vertex> filtered = new GremlinPipeline<Vertex, Vertex>(
                 vertices)
@@ -94,7 +91,7 @@ public class GenericResource extends AbstractAccessibleEntityResource<Accessible
             }
         });
 
-        PipeFunction<Vertex,Boolean> filter = aclManager
+        PipeFunction<Vertex,Boolean> filter = AclManager
                 .getAclFilterFunction(getRequesterUserProfile());
         GremlinPipeline<Vertex, Vertex> filtered = new GremlinPipeline<Vertex, Vertex>(
                 vertices)
@@ -111,7 +108,7 @@ public class GenericResource extends AbstractAccessibleEntityResource<Accessible
         // gremlin acl and type filtering for one item...
         List<String> ids = Lists.newArrayList(id);
         Iterable<Vertex> vertices = manager.getVertices(ids);
-        PipeFunction<Vertex,Boolean> filter = aclManager
+        PipeFunction<Vertex,Boolean> filter = AclManager
                 .getAclFilterFunction(getRequesterUserProfile());
         GremlinPipeline<Vertex, Vertex> filtered = new GremlinPipeline<Vertex, Vertex>(
                 vertices)

@@ -1,0 +1,208 @@
+<ead audience="external" xmlns="urn:isbn:1-931666-22-9" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <eadheader countryencoding="iso3166-1" dateencoding="iso8601"
+    findaidstatus="unverified-full-draft" langencoding="iso639-2b" repositoryencoding="iso15511"
+    scriptencoding="iso15924">
+    <eadid countrycode="NL" mainagencycode="NL-AsdNIOD">809</eadid>
+    <filedesc>
+      <titlestmt>
+        <titleproper>Caransa, A.</titleproper>
+      </titlestmt>
+      <publicationstmt>
+        <publisher>NIOD Instituut voor Oorlogs-, Holocaust- en Genocidestudies</publisher>
+        <date calendar="gregorian" era="ce" normal="2014">2014</date>
+      </publicationstmt>
+    </filedesc>
+    <profiledesc>
+      <langusage>
+        <language langcode="nld">Nederlands</language>
+      </langusage>
+    </profiledesc>
+  </eadheader>
+  <archdesc level="fonds" type="inventory">
+    <did id="MF1081500">
+      <unittitle>Caransa, A.</unittitle>
+      <unitid countrycode="NL" repositorycode="NL-AsdNIOD">809</unitid>
+      <unitdate calendar="gregorian" era="ce" normal="1945/2005">1945-2005</unitdate>
+      <note type="Over het archief">
+        <p>Ab Caransa (1927-2006) was secretaris van het Auschwitz-comité en had de leiding bij de
+          oprichting van de Stichting Restauratie Joodse Begraafplaats Pyskowice.</p>
+      </note>
+      <note type="Openbaarheid">
+        <p>Volledig openbaar</p>
+      </note>
+      <physdesc>0.3 meter (37 nummers)</physdesc>
+    </did>
+    <controlaccess>
+      <controlaccess>
+        <head>Categorie</head>
+        <subject>Families en Personen</subject>
+      </controlaccess>
+    </controlaccess>
+    <descgrp type="context">
+      <head><![CDATA[Inleiding]]></head>
+      <odd type="unittitle">
+        <head><![CDATA[titel archief]]></head>
+        <p><![CDATA[Archief van A. Caransa]]></p>
+      </odd>
+      <odd type="origination">
+        <head><![CDATA[archiefvormer]]></head>
+        <p><![CDATA[Het archief is gevormd door Ab Caransa.]]></p>
+      </odd>
+      <odd type="physdesc">
+        <head><![CDATA[omvang]]></head>
+        <p><![CDATA[0.3 meter (37 nummers)]]></p>
+      </odd>
+      <prefercite>
+        <head><![CDATA[citeer en aanvraaginstructie]]></head>
+        <p><![CDATA[Archiefstukken uit dit archief kunnen in de studiezaal van het NIOD worden aangevraagd onder vermelding van: archief 809, inv.no. ...]]></p>
+        <p><![CDATA[Bij het citeren in annotatie en verantwoording dient het archief tenminste eenmaal volledig en zonder afkortingen te worden vermeld. Daarna volstaat een verkorte aanhaling:]]></p>
+        <p><![CDATA[<u>volledig:</u> Nederlands Instituut voor Oorlogsdocumentatie, Amsterdam, archief van A. Caransa, inv.no. ...]]></p>
+        <p><![CDATA[<u>verkort:</u> NIOD, archief 809, inv.no. ...]]></p>
+      </prefercite>
+      <custodhist>
+        <head><![CDATA[periode van ontstaan]]></head>
+        <p><![CDATA[Het archief is gevormd in de periode 1945-2005.]]></p>
+      </custodhist>
+      <custodhist>
+        <head><![CDATA[beheersgeschiedenis/overbrenging naar het NIOD]]></head>
+        <p><![CDATA[Het archief is in 2006 geschonken aan het NIOD.]]></p>
+      </custodhist>
+      <scopecontent>
+        <head><![CDATA[aard van de archiefbestanddelen]]></head>
+        <p><![CDATA[Het archief bevat voornamelijk manuscripten en lezingen van Caransa. Verder bevat het archief een kleine hoeveelheid correspondentiemateriaal en een aantal oudere documenten, zoals een verslag van de terugreis naar Nederland, dat hij in 1945 schreef.]]></p>
+      </scopecontent>
+      <arrangement>
+        <head><![CDATA[ordening van de archiefbestanddelen]]></head>
+        <p><![CDATA[Het archief bestaat uit twee delen. In het eerste deel bevinden zich manuscripten, lezingen en onderzoeksmateriaal van Caransa. Het tweede deel bevat stukken over diverse onderwerpen, waaronder materiaal met betrekking tot de Pyskowice-Stichting.]]></p>
+      </arrangement>
+      <appraisal>
+        <head><![CDATA[selectie, vernietiging en bewerking]]></head>
+        <p><![CDATA[Na ontvangst door het NIOD zijn de doubletten vernietigd tijdens de bewerking van het archief.]]></p>
+      </appraisal>
+      <accruals>
+        <head><![CDATA[aanvullingen]]></head>
+        <p><![CDATA[Aanvullingen worden niet verwacht.]]></p>
+      </accruals>
+      <acqinfo>
+        <head><![CDATA[wettelijke status]]></head>
+        <p><![CDATA[Het archief is eigendom van het NIOD.]]></p>
+      </acqinfo>
+      <userestrict>
+        <head><![CDATA[reproductiebeperkingen]]></head>
+        <p><![CDATA[Behoudens de algemene regels die gelden voor het vermenigvuldigen van stukken gelden geen beperkingen voor de reproductie.]]></p>
+      </userestrict>
+      <odd type="langmaterial">
+        <head><![CDATA[taal van de archiefbescheiden]]></head>
+        <p><![CDATA[Het merendeel van de archiefstukken is Nederlandstalig.]]></p>
+      </odd>
+      <phystech>
+        <head><![CDATA[materiële staat]]></head>
+        <p><![CDATA[De materiële toestand van de archiefstukken verzet zich niet tegen gebruikelijke raadpleging van de originelen in de studiezaal van het NIOD.]]></p>
+      </phystech>
+      <processinfo>
+        <head><![CDATA[bewerking]]></head>
+        <p><![CDATA[De inventaris is in 2007 vervaardigd door Petra Links.]]></p>
+      </processinfo>
+    </descgrp>
+    <descgrp type="allied_materials">
+      <head><![CDATA[Literatuur en verwante collecties]]></head>
+      <p><![CDATA[Voor vervolgonderzoek raadplege men de volgende archieven en literatuur.]]></p>
+      <bibliography>
+        <head><![CDATA[Literatuur]]></head>
+        <bibliography>
+          <p><![CDATA[Caransa, Ab, <i>Verzamelen op het Transvaalplein: ter nagedachtenis van het Joodse proletariaat van Amsterdam</i> (Baarn 1984) blz. 111]]></p>
+        </bibliography>
+        <bibliography>
+          <p><![CDATA[Caransa, Ab, <i>Van school verwijderd. Jood.: Dokumenten betreffende de verwijdering van joodse leerlingen van Amsterdamse ambachtsscholen in 1941</i> (Haarlem 1990) blz. 51]]></p>
+        </bibliography>
+        <bibliography>
+          <p><![CDATA[Caransa, Ab, Aussenberg, Adolf, <i>Adolf Aussenberg: kunstenaar in Theresienstadt</i> (Haarlem 1993) blz. 48]]></p>
+        </bibliography>
+        <bibliography>
+          <p><![CDATA[Caransa, Ab, <i>Dag meneer Blom: afscheid van een stad</i> (Haarlem 1997) blz. 93]]></p>
+        </bibliography>
+      </bibliography>
+      <relatedmaterial>
+        <head><![CDATA[Verwante collecties]]></head>
+        <p><![CDATA[Zie voor meer informatie ook de kamparchieven van het NIOD, waaronder het archief van Kamp Westerbork (<a class=uline href=http://www.archieven.nl/pls/m/zk2.inv?p_q=15163198 target=_blank>archiefnummer 250i</a>).]]></p>
+      </relatedmaterial>
+    </descgrp>
+    <accessrestrict>
+      <head><![CDATA[Openbaarheid]]></head>
+      <p><![CDATA[Het archief is volledig openbaar.]]></p>
+    </accessrestrict>
+    <bioghist>
+      <head><![CDATA[Levensloop]]></head>
+      <p><![CDATA[Ab Caransa werd in 1927 in een joods gezin in Amsterdam geboren. Op veertienjarige leeftijd werd hij samen met zijn vader, Joseph Caransa, op transport gesteld naar Westerbork. Van daaruit kwamen beiden terecht in Theresienstadt, vanwaar zij werden doorgevoerd naar Auschwitz. Samen overleefden zij dit vernietigingskamp. Na een lange reis via onder andere Polen, Tsjechië en Frankrijk kwamen zij in 1945 terug in Nederland. Ook zijn moeder, Flora Caransa-Slier, overleefde de oorlog.]]></p>
+      <p><![CDATA[In 1981 ging Caransa samen met de KRO-radio voor een reportagereis terug naar Auschwitz, waar hij sinds de oorlog niet meer was geweest. Deze reis maakte hem opnieuw bewust van zijn verleden en sinds die tijd gaf hij lezingen en schreef hij over zijn herinneringen en zijn joodse achtergrond. In 1984 kwam zijn boek ‘Verzamelen op het Transvaalplein: ter nagedachtenis van de Joodse proletariaat van Amsterdam’ uit, over de buurt waarin Caransa opgroeide.]]></p>
+      <p><![CDATA[Naast deze activiteiten was Caransa ook enkele jaren secretaris van het Auschwitz-comité en had hij de leiding bij de oprichting van de Stichting Restauratie Joodse Begraafplaats Pyskowice. Deze stichting zette zich in voor het onderhoud van de graven in Pyskowice in Zuid-Polen waar een groep Nederlanders begraven ligt die gedurende de marsen aan het einde van de oorlog waren overleden. Caransa, die veel van deze mensen had zien sterven, had na zijn terugkomst in 1945 tevergeefs geprobeerd deze mensen aan te merken voor de oorlogsgravenvoorziening van het Nederlandse Rode Kruis. Toen hij in de jaren tachtig deze graven bezocht en zag dat deze er vervuild en slecht onderhouden bijlagen, mobiliseerde hij een groep mensen, waaronder de VU-pedagoog prof. Johan van Hulst, om hier iets aan te doen. De stichting verzamelde geld voor de restauratie van de begraafplaats Pyskowice en de verzorging van de graven. Bovendien zorgde de stichting ervoor dat alle graven van een naam werden voorzien.<br/><br/> In 2006 overleed Caransa op 78-jarige leeftijd.]]></p>
+    </bioghist>
+    <dsc type="combined">
+      <c01>
+        <did>
+          <unitid/>
+        </did>
+        <dsc type="othertype">
+          <p><![CDATA[<b>aanvraaginstructie</b><br/><br/>Archiefstukken uit dit archief kunnen in de studiezaal van het NIOD worden aangevraagd<br/> onder vermelding van: archief 809, inv.no. ...<br/> Het inventarisnummer is vermeld in numeriek oplopende volgorde,<br/> links naast de beschrijving van de stukken<br/>]]></p>
+        </dsc>
+      </c01>
+      <c01 level="series">
+        <did id="MF1148873">
+          <unitid type="series_code">1.</unitid>
+          <unittitle>Manuscripten, lezingen en onderzoeksmateriaal</unittitle>
+          <unitdate calendar="gregorian" era="ce" normal="1978/2004">1978-1998 [2004]</unitdate>
+        </did>
+        <daogrp> 
+              <resource xlink:type="resource" xlink:label="start"/>  
+              <daoloc xlink:href="http://files.archieven.nl/php/get_thumb.php?adt_id=298&amp;toegang=250b&amp;id=324872297&amp;file=250b_19.jpg" xlink:type="locator" xlink:label="thumb" xlink:role="thumbnail"/>  
+              <daoloc xlink:href="http://www.archieven.nl/nl/search-modonly?mivast=298&amp;miadt=298&amp;miaet=1&amp;micode=250b&amp;minr=1182347&amp;miview=ldt" xlink:type="locator" xlink:label="reference"/>  
+              <arc xlink:type="arc" xlink:show="embed" xlink:actuate="onload" xlink:from="start" xlink:to="thumb"/>  
+              <arc xlink:type="arc" xlink:show="new" xlink:actuate="onrequest" xlink:from="thumb" xlink:to="reference"/> 
+         </daogrp> 
+         <c02 level="file">
+          <did id="MF1086379">
+            <unitid>1</unitid>
+            <unitid audience="internal" type="handle"
+              >http://www.archieven.nl/nl/search-modonly?mivast=298&amp;mizig=210&amp;miadt=298&amp;miaet=1&amp;micode=809&amp;minr=1086379&amp;miview=inv2</unitid>
+            <unittitle>&apos;Blessuretijd. Een persoonlijke verantwoording en poging tot
+              verwerken.&apos; Bevat tevens een aantal bedankbrieven van instellingen aan wie
+              Caransa dit manuscript opstuurde, 1978, 1980-1981.</unittitle>
+            <unitdate calendar="gregorian" era="ce" normal="1978/1981"/>
+            <physdesc>1 omslag</physdesc>
+          </did>
+        </c02>
+        <c02 level="file">
+          <did id="MF1086380">
+            <unitid>2</unitid>
+            <unitid audience="internal" type="handle"
+              >http://www.archieven.nl/nl/search-modonly?mivast=298&amp;mizig=210&amp;miadt=298&amp;miaet=1&amp;micode=809&amp;minr=1086380&amp;miview=inv2</unitid>
+            <unittitle>&apos;.... Whether you have ever been there before&apos;,
+              1980.</unittitle>
+            <unitdate calendar="gregorian" era="ce" normal="1980"/>
+            <physdesc>1 omslag</physdesc>
+          </did>
+          <c03 level="file">
+            <did id="MF1086399">
+              <unitid>5</unitid>
+              <unitid audience="internal" type="handle"
+                >http://www.archieven.nl/nl/search-modonly?mivast=298&amp;mizig=210&amp;miadt=298&amp;miaet=1&amp;micode=809&amp;minr=1086399&amp;miview=inv2</unitid>
+              <unittitle>Onderzoeksmateriaal</unittitle>
+              <unitdate calendar="gregorian" era="ce" normal="1981/1982">1981-1982</unitdate>
+              <physdesc>1 omslag</physdesc>
+            </did>
+          </c03>
+          <c03 level="file">
+            <did id="MF1086398">
+              <unitid>6</unitid>
+              <unitid audience="internal" type="handle"
+                >http://www.archieven.nl/nl/search-modonly?mivast=298&amp;mizig=210&amp;miadt=298&amp;miaet=1&amp;micode=809&amp;minr=1086398&amp;miview=inv2</unitid>
+              <unittitle>Correspondentie</unittitle>
+              <unitdate calendar="gregorian" era="ce" normal="1985/1986">1985-1986</unitdate>
+              <physdesc>1 omslag</physdesc>
+            </did>
+          </c03>
+        </c02>
+      </c01>
+    </dsc>
+  </archdesc>
+</ead>

@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ead xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns="urn:isbn:1-931666-22-9"
+    xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/"
+    xmlns:oai="http://www.openarchives.org/OAI/2.0/"
+    xmlns:dc="http://purl.org/dc/elements/1.1/"
+    xsi:schemaLocation="urn:isbn:1-931666-22-9 http://www.loc.gov/ead/ead.xsd">
+    <eadheader>
+        <eadid countrycode="NL" mainagencycode="NL-HaDANS">easy-collection:2#DUT</eadid>
+        <filedesc>
+            <titlestmt>
+                <titleproper>World War II</titleproper>
+            </titlestmt>
+        </filedesc>
+        <profiledesc>
+            <creation>Automatically converted OAI-PMH ...
+                <date calendar="gregorian" era="ce">2014-04-07T12:18:19.484+02:00</date>
+            </creation>
+            <langusage>
+                <language langcode="dut">Dutch</language>
+            </langusage>
+        </profiledesc>
+    </eadheader>
+    <archdesc level="fonds">
+        <did>
+            <unitid>easy-collection:2</unitid>
+            <unittitle>World War II</unittitle>
+            <repository>
+                <corpname>DANS</corpname>
+            </repository>
+        </did>
+        <dsc>
+            <c01 level="item">
+                <did>
+                    <unitid>urn:nbn:nl:ui:13-4i8-gpf</unitid>
+                    <langmaterial>
+                        <language>nl</language>
+                    </langmaterial>
+                    <origination>
+                        <corpname>Veteranen Instituut</corpname>
+                    </origination>
+                    <unitdate>2008-06-13</unitdate>
+                    <unitdate>2010-03-15</unitdate>
+                    <unitdate>1930-1942</unitdate>
+                    <unittitle>Veteranen Instituut, IPNV, interview 463</unittitle>
+                </did>
+                <scopecontent>
+                    <p>Deze in 1925 in Batavia geboren Indische man groeide op in een kindertehuis in Soekaboemi. In 1941 meldde hij zich als 16-jarige vrijwillig bij het Korps Mariniers. Zijn interview gaat over de mariniersopleiding in Soerabaja, die niet vrij was van racisme, en de oorlog tegen de Japanse bezetter, waaraan deze marinier actief heeft deelgenomen.</p>
+                </scopecontent>
+                <controlaccess>
+                    <subject>Humanities</subject>
+                    <geogname>Soekaboemi</geogname>
+                </controlaccess>
+                <relatedmaterial>
+                    <p>title=Veteranen Instituut, IPNV, interview 483; URI=http://persistent-identifier.nl/?identifier=urn:nbn:nl:ui:13-wog-33j</p>
+                    <p>title=Veteranen Instituut, IPNV, interview 488; URI=http://persistent-identifier.nl/?identifier=urn:nbn:nl:ui:13-3i5-fhg</p>
+                    <p>title=Veteranen Instituut, IPNV, interview 489; URI=http://persistent-identifier.nl/?identifier=urn:nbn:nl:ui:13-sle-hqx</p>
+                </relatedmaterial>
+                <otherfindaid>
+                    <p>http://www.persistent-identifier.nl/?identifier=urn:nbn:nl:ui:13-4i8-gpf</p>
+                </otherfindaid>
+                <userestrict>
+                    <p>REQUEST_PERMISSION</p>
+                    <p>http://www.dans.knaw.nl/en/content/dans-licence-agreement-deposited-data</p>
+                </userestrict>
+            </c01>
+            <c01 level="subfonds">
+                <did>
+                    <unitid>easy-collection:2:3</unitid>
+                    <unittitle>Getuigenverhalen</unittitle>
+                </did>
+                <c02 level="item">
+                    <did>
+                        <unitid>urn:nbn:nl:ui:13-qa8-3r5</unitid>
+                        <langmaterial>
+                            <language>nl</language>
+                        </langmaterial>
+                        <origination>
+                            <corpname>Stichting Nationaal Monument Kamp Vught</corpname>
+                        </origination>
+                        <unitdate>2009</unitdate>
+                        <unitdate>2009-06-05</unitdate>
+                        <unitdate>2009-06-05</unitdate>
+                        <unittitle>Thematische collectie: Erfgoed van de Oorlog, Getuigen Verhalen, Project 'Retourtje Sachsenhausen'</unittitle>
+                    </did>
+                    <scopecontent>
+                        <p>Retourtje Sachsenhausen gaat over de deportaties van gevangenen vanuit Kamp Vught naar concentratiekamp Sachsenhausen. Hoewel er gedurende de hele oorlog gevangenen vanuit Vught naar Sachsenhausen werden afgevoerd, zijn de treinen die op 5 en 6 september 1944 vertrokken het meest berucht. Zo'n drieduizend mannen werden toen gedeporteerd, slechts de helft keerde terug.             
+                            
+                            Bij de Sachsenhausen-herdenking in september 2006 riep een oud-gevangene zijn mede-slachtoffers op om over hun ervaringen in de concentratiekampen Vught en Sachsenhausen te vertellen, omdat er niet lang nog overlevenden zullen zijn die hun verhalen kunnen doorgeven. Deze oproep was voor de gemeente Vught aanleiding het initiatief te nemen voor het project 'Retourtje Sachsenhausen'. Samen met het Vughts Historisch Museum en Nationaal Monument Kamp Vught is het project uitgewerkt. Het project bestaat uit drie onderdelen: het vastleggen van wat er gebeurd was d.m.v. 11 interviews met overlevenden, een documentaire waarin een overlevende de reis per trein nogmaals maakt, vergezeld van een scholier die hem daarover vragen stelt. Het derde deel bestaat uit een lespakket voor middelbare scholen.</p>
+                    </scopecontent>
+                    <controlaccess>
+                        <subject>oral history</subject>
+                        <geogname>Vught</geogname>
+                    </controlaccess>
+                    <otherfindaid>
+                        <p>http://www.persistent-identifier.nl/?identifier=urn:nbn:nl:ui:13-qa8-3r5</p>
+                    </otherfindaid>
+                    <userestrict>
+                        <p>OPEN_ACCESS</p>
+                        <p>http://www.dans.knaw.nl/en/content/dans-licence-agreement-deposited-data</p>
+                    </userestrict>
+                </c02>
+            </c01>
+        </dsc>
+    </archdesc>
+</ead>

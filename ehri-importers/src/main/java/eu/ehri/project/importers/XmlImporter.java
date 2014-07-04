@@ -5,6 +5,12 @@ import eu.ehri.project.importers.properties.XmlImportProperties;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.exceptions.ValidationError;
 
+import eu.ehri.project.models.DocumentDescription;
+import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.EntityClass;
+import eu.ehri.project.models.MaintenanceEvent;
+import eu.ehri.project.models.base.AbstractUnit;
+import eu.ehri.project.models.base.Description;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -14,10 +20,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import eu.ehri.project.models.base.PermissionScope;
+import eu.ehri.project.persistence.Bundle;
+import eu.ehri.project.persistence.BundleDAO;
+import eu.ehri.project.persistence.Mutation;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
@@ -49,6 +56,8 @@ public abstract class XmlImporter<T> extends AbstractImporter<T> {
         Pattern.compile("^(\\d{2})th century$"),
 //        Pattern.compile("^(\\d{1,2}-\\d{1,2}-\\d{4}) - (\\d{1,2}-\\d{1,2}-\\d{4})$"),
         Pattern.compile("^\\s*(\\d{4})\\s*-\\s*(\\d{4})"),
+        //bundesarchive: 1906/19
+        Pattern.compile("^\\s*(\\d{4})/(\\d{2})"),
         Pattern.compile("^\\s*(\\d{4})\\s*/\\s*(\\d{4})")
     };
 
@@ -56,6 +65,16 @@ public abstract class XmlImporter<T> extends AbstractImporter<T> {
         super(framedGraph, permissionScope, log);
     }
 
+    private void extractDateFromValue(List<Map<String, Object>> extractedDates, String value) throws ValidationError {
+        logger.debug("date: " + value);
+        Map<String, Object> dpb;
+        dpb = extractDate(value);
+        if (dpb != null) {
+            extractedDates.add(dpb);
+        }
+        logger.debug("nr of dates found: " + extractedDates.size());
+
+    }
     /**
      * Extract a list of entity bundles for DatePeriods from the data, attempting to parse the unitdate attribute.
      *
@@ -66,22 +85,16 @@ public abstract class XmlImporter<T> extends AbstractImporter<T> {
         Object value;
         for (String key : data.keySet()) {
             if (dates.containsProperty(key) && (value = data.get(key)) != null) {
-                logger.debug("-----------" + key + ": " + value);
+                logger.debug("---- extract dates -------" + key + ": " + value);
                 try {
-                    Map<String, Object> dpb ;
                     if (data.get(key) instanceof String) {
-                        dpb = extractDate((String) value);
-                        if (dpb != null) {
-                            extractedDates.add(dpb);
+                        String dateValue = (String) value;
+                        for(String d : dateValue.split(",")){
+                            extractDateFromValue(extractedDates, d);
                         }
                     } else if (data.get(key) instanceof List) {
                         for (String s : (List<String>) value) {
-                            logger.debug("date: "+s);
-                            dpb = extractDate(s);
-                            if (dpb != null) {
-                                extractedDates.add(dpb);
-                            }
-                            logger.debug("nr of dates found: "+extractedDates.size());
+                            extractDateFromValue(extractedDates, s);
                         }
                     } else {
                         logger.error("ERROR WITH DATES " + value);
@@ -98,7 +111,55 @@ public abstract class XmlImporter<T> extends AbstractImporter<T> {
         }
         return extractedDates;
     }
+    /**
+     * Extract an Iterable of representations of maintenance events from the itemData.
+     * 
+     * @param itemData a Map containing raw properties of a unit
+     * @return
+     */
+    @Override
+    public Iterable<Map<String, Object>> extractMaintenanceEvent(Map<String, Object> itemData)  {
+        List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+        for (String key : itemData.keySet()) {
+            if (key.equals("maintenanceEvent")) {
+                for (Map<String, Object> event : (List<Map<String, Object>>) itemData.get(key)) {
+                    Map<String, Object> e2 = new HashMap<String, Object>();
+                    for (String eventkey : event.keySet()) {
+                        if (eventkey.equals("maintenanceEvent/type")) {
+                            e2.put(MaintenanceEvent.EVENTTYPE, event.get(eventkey));
+                        } else if (eventkey.equals("maintenanceEvent/agentType")) {
+                            e2.put(MaintenanceEvent.AGENTTYPE, event.get(eventkey));
+                        } else {
+                            e2.put(eventkey, event.get(eventkey));
+                        }
+                    }
+                    if (!e2.containsKey(MaintenanceEvent.EVENTTYPE)){
+                        e2.put(MaintenanceEvent.EVENTTYPE, "unknown event type");
+                    }
+                    list.add(e2);
+                }
+            }
+        }
+        return list;
+    }
+    
+    @Override
+    public void importTopLevelExtraNodes(AbstractUnit topLevelUnit, Map<String, Object> itemData){
+        BundleDAO persister = new BundleDAO(framedGraph, permissionScope.idPath());
+        for (Map<String, Object> event : extractMaintenanceEvent(itemData) ){
+            try {
+                Bundle unit = new Bundle(EntityClass.MAINTENANCE_EVENT, event);
+                Mutation<MaintenanceEvent> mutation = persister.createOrUpdate(unit, MaintenanceEvent.class);
+                for(Description d : topLevelUnit.getDescriptions()){
+                    d.addMaintenanceEvent(mutation.getNode());
+                }
+            } catch (ValidationError ex) {
+                logger.error(ex.getMessage());
+            }
+        }
 
+
+    }
     /**
      * Attempt to extract some date periods. This does not currently put the dates into ISO form.
      *
@@ -108,17 +169,7 @@ public abstract class XmlImporter<T> extends AbstractImporter<T> {
      */
     private Map<String, Object> extractDate(Object date) throws ValidationError {
         logger.debug("date value: " + date);
-        Map<String, Object> data = new HashMap<String, Object>();
-//        if (date instanceof String) {
-            data = matchDate((String) date);
-//        } else if (date instanceof List) {
-//            for (String s : (List<String>) date) {
-//                data.putAll(data);
-//                logger.debug("string : " + s);
-//            }
-//        } else {
-//            logger.error("ERROR WITH DATES " + date);
-//        }
+        Map<String, Object> data = matchDate((String) date);
         return data.isEmpty() ? null : data;
     }
 
@@ -144,6 +195,12 @@ public abstract class XmlImporter<T> extends AbstractImporter<T> {
     public static String normaliseDate(String date, String beginOrEnd) {
         DateTimeFormatter fmt = ISODateTimeFormat.date();
         String returndate = fmt.print(DateTime.parse(date));
+        if(returndate.startsWith("00")){
+//            logger.debug("strange date: " + returndate);
+            returndate = "19"+returndate.substring(2);
+            date = "19"+date;
+//            logger.debug("strange date: " + returndate);
+        }
         if (Ontology.DATE_PERIOD_END_DATE.equals(beginOrEnd)) {
             if (!date.equals(returndate)) {
                 ParsePosition p = new ParsePosition(0);

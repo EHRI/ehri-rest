@@ -17,7 +17,6 @@ import javax.ws.rs.core.Response.Status;
 
 import eu.ehri.project.acl.PermissionType;
 import eu.ehri.project.exceptions.*;
-import eu.ehri.project.views.ViewHelper;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import eu.ehri.extension.errors.BadRequester;
@@ -35,11 +34,8 @@ import eu.ehri.project.views.Query;
 public class CvocConceptResource extends
         AbstractAccessibleEntityResource<Concept> {
 
-    private final ViewHelper helper;
-
     public CvocConceptResource(@Context GraphDatabaseService database, @Context HttpHeaders requestHeaders) {
         super(database, requestHeaders, Concept.class);
-        helper = new ViewHelper(graph);
     }
 
     @GET
@@ -315,7 +311,7 @@ public class CvocConceptResource extends
             DeserializationError, ItemNotFound, BadRequester {
         final Accessor user = getRequesterUserProfile();
         final Concept parent = views.detail(id, user);
-        return create(json, accessors, new PostCreateHandler<Concept>() {
+        return create(json, accessors, new Handler<Concept>() {
             @Override
             public void process(Concept concept) {
                 parent.addNarrowerConcept(concept);

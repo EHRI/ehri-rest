@@ -4,10 +4,8 @@ import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.MaintenanceEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -138,12 +136,15 @@ public abstract class EaImporter extends XmlImporter<Map<String, Object>> {
         for (String key : itemData.keySet()) {
             if (key.equals("descriptionIdentifier")) {
                 description.put(Ontology.IDENTIFIER_KEY, itemData.get(key));
+            }else if(key.equals("conditionsOfAccess")){
+                description.put(key, changeForbiddenMultivaluedProperties(key, itemData.get(key), entity));
             }else if ( !key.startsWith(SaxXmlHandler.UNKNOWN) 
                     && ! key.equals("objectIdentifier") 
                     && ! key.equals(Ontology.IDENTIFIER_KEY)
                     && ! key.equals(Ontology.OTHER_IDENTIFIERS)
                     && ! key.startsWith("maintenanceEvent") 
                     && ! key.startsWith("relation")
+                    && ! key.startsWith("IGNORE")
                     && ! key.startsWith("address/")
                     && ! key.endsWith("Access")) {
                description.put(key, changeForbiddenMultivaluedProperties(key, itemData.get(key), entity));
@@ -153,41 +154,6 @@ public abstract class EaImporter extends XmlImporter<Map<String, Object>> {
         return description;
     }
     
-    /**
-     * Extract an Iterable of representations of maintenance events from the itemData.
-     * 
-     * TODO the unitid parameter is not used in the code.
-     * 
-     * @param itemData a Map containing raw properties of a unit
-     * @param unitid
-     * @return
-     */
-    @SuppressWarnings("unchecked")
-    protected Iterable<Map<String, Object>> extractMaintenanceEvent(Map<String, Object> itemData, String unitid)  {
-        List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
-        for (String key : itemData.keySet()) {
-            if (key.equals("maintenanceEvent")) {
-                for (Map<String, Object> event : (List<Map<String, Object>>) itemData.get(key)) {
-                    Map<String, Object> e2 = new HashMap<String, Object>();
-                    for (String eventkey : event.keySet()) {
-                        if (eventkey.equals("maintenanceEvent/type")) {
-                            e2.put(MaintenanceEvent.EVENTTYPE, event.get(eventkey));
-                        } else if (eventkey.equals("maintenanceEvent/agentType")) {
-                            e2.put(MaintenanceEvent.AGENTTYPE, event.get(eventkey));
-                        } else {
-                            e2.put(eventkey, event.get(eventkey));
-                        }
-                    }
-                    if (!e2.containsKey(MaintenanceEvent.EVENTTYPE)){
-                        e2.put(MaintenanceEvent.EVENTTYPE, "unknown event type");
-                    }
-                    list.add(e2);
-                }
-            }
-        }
-        return list;
-    }
-
     /**
      * Extract an address node representation from the itemData.
      * 

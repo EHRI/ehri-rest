@@ -70,8 +70,12 @@ public final class Bundle {
             return this;
         }
 
-        public Builder(EntityClass cls) {
+        private Builder(EntityClass cls) {
             type = cls;
+        }
+
+        public static Builder withClass(EntityClass cls) {
+            return new Builder(cls);
         }
 
         public Builder addRelations(Multimap<String, Bundle> r) {
