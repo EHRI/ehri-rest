@@ -1,7 +1,6 @@
 package eu.ehri.extension;
 
 import eu.ehri.extension.errors.BadRequester;
-import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.Repository;
@@ -187,7 +186,7 @@ public class CountryResource extends
         Country country = views.detail(id, user);
         try {
             Repository repository = createRepository(json, country);
-            new AclManager(graph).setAccessors(repository,
+            aclManager.setAccessors(repository,
                     getAccessors(accessors, user));
             graph.getBaseGraph().commit();
             return buildResponseFromRepository(repository);

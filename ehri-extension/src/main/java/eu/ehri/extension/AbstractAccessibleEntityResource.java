@@ -9,10 +9,12 @@ import javax.ws.rs.core.*;
 import javax.ws.rs.core.Response.Status;
 
 //import org.apache.log4j.Logger;
+import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.exceptions.*;
 import eu.ehri.project.persistence.Mutation;
 import eu.ehri.project.persistence.Serializer;
 import eu.ehri.project.views.AclViews;
+import eu.ehri.project.views.ViewHelper;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import com.google.common.collect.Lists;
@@ -38,30 +40,28 @@ import eu.ehri.project.views.Query;
 public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
         extends AbstractRestResource {
 
-    // FIXME: Logger gives NoClassDefFound when run on server, probably because
-    // Log4j isn't available in the default Neo4j server/lib dir.
-    // protected final static Logger logger = Logger
-    // .getLogger(AbstractAccessibleEntityResource.class);
-
     protected final LoggingCrudViews<E> views;
+    protected final AclManager aclManager;
     protected final AclViews aclViews;
     protected final Query<E> querier;
     protected final Class<E> cls;
+    protected final ViewHelper helper;
+
 
     /**
      * Functor used to post-process items.
      */
-    public static interface PostCreateHandler<E extends AccessibleEntity> {
+    public static interface Handler<E extends AccessibleEntity> {
         public void process(E frame) throws PermissionDenied;
     }
 
-    public static class NoOpHandler<E extends AccessibleEntity> implements PostCreateHandler<E> {
+    public static class NoOpHandler<E extends AccessibleEntity> implements Handler<E> {
         @Override
         public void process(E frame) {
         }
     }
 
-    private final PostCreateHandler<E> noOpHandler = new NoOpHandler<E>();
+    private final Handler<E> noOpHandler = new NoOpHandler<E>();
 
     /**
      * Constructor
@@ -74,8 +74,10 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
         super(database);
         this.cls = cls;
         views = new LoggingCrudViews<E>(graph, cls);
+        aclManager = new AclManager(graph);
         aclViews = new AclViews(graph);
         querier = new Query<E>(graph, cls);
+        helper = new ViewHelper(graph);
     }
 
     /**
@@ -170,7 +172,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * @throws DeserializationError
      * @throws BadRequester
      */
-    public Response create(String json, List<String> accessorIds, PostCreateHandler<E> handler)
+    public Response create(String json, List<String> accessorIds, Handler<E> handler)
             throws PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, BadRequester {
         graph.getBaseGraph().checkNotInTransaction();
@@ -313,7 +315,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * @throws ValidationError
      * @throws BadRequester
      */
-    protected Response delete(String id, PostCreateHandler<E> preProcess) throws AccessDenied, PermissionDenied,
+    protected Response delete(String id, Handler<E> preProcess) throws AccessDenied, PermissionDenied,
             ItemNotFound,
             ValidationError, BadRequester {
         graph.getBaseGraph().checkNotInTransaction();

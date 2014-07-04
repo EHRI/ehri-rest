@@ -23,6 +23,7 @@ import java.util.Set;
  */
 public final class AclViews {
 
+    private final FramedGraph<?> graph;
     private final AclManager acl;
     private final ViewHelper helper;
     private final GraphManager manager;
@@ -37,11 +38,12 @@ public final class AclViews {
      */
     public AclViews(FramedGraph<?> graph, PermissionScope scope) {
         Preconditions.checkNotNull(scope);
+        this.graph = graph;
+        this.scope = scope;
         helper = new ViewHelper(graph, scope);
         acl = helper.getAclManager();
         manager = GraphManagerFactory.getInstance(graph);
-        this.scope = scope;
-        actionManager = new ActionManager(graph);
+        actionManager = new ActionManager(graph, scope);
     }
 
     /**
@@ -229,5 +231,9 @@ public final class AclViews {
                     grantee, PermissionType.GRANT);
             helper.checkEntityPermission(group, grantee, PermissionType.UPDATE);
         }
+    }
+
+    public AclViews withScope(PermissionScope scope) {
+        return new AclViews(graph, scope);
     }
 }
