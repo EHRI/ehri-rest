@@ -37,7 +37,6 @@ public class EadHandler extends SaxXmlHandler {
             MAINAGENCYCODE = "mainagencycode",
             AUTHOR = "author";
                             
-    public static final String AUTHORS = "authors";
     private final ImmutableMap<String, Class<? extends Frame>> possibleSubnodes
             = ImmutableMap.<String, Class<? extends Frame>>builder().put(
             "maintenanceEvent", MaintenanceEvent.class).build();
@@ -163,7 +162,7 @@ public class EadHandler extends SaxXmlHandler {
     	    logger.debug("Found <eadid>: "+ eadfileValues.get(EADID));
     	}
         else if (localName.equals("author") || qName.equals("author")) {
-            eadfileValues.put(AUTHOR, (String) currentGraphPath.peek().get(AUTHORS));
+            eadfileValues.put(AUTHOR, (String) currentGraphPath.peek().get(AUTHOR));
     		logger.debug("Found <author>: "+ eadfileValues.get(AUTHOR));
     	}
         
@@ -394,8 +393,8 @@ public class EadHandler extends SaxXmlHandler {
     }
 
     private void addAuthor(Map<String, Object> currentGraph) {
-        if(getAuthor() != null && ! currentGraph.containsKey(AUTHORS)){
-            currentGraph.put(AUTHORS, getAuthor());
+        if(getAuthor() != null && ! currentGraph.containsKey(AUTHOR)){
+            currentGraph.put(AUTHOR, getAuthor());
         }
     }
 }

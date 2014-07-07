@@ -146,7 +146,8 @@ public abstract class EaImporter extends XmlImporter<Map<String, Object>> {
                     && ! key.startsWith("relation")
                     && ! key.startsWith("IGNORE")
                     && ! key.startsWith("address/")
-                    && ! key.endsWith("Access")) {
+                    && ! key.endsWith("Access")
+                    && ! key.endsWith("AccessPoint")) {
                description.put(key, changeForbiddenMultivaluedProperties(key, itemData.get(key), entity));
             }
         }

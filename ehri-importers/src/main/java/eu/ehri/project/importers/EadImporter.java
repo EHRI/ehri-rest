@@ -219,12 +219,8 @@ public class EadImporter extends EaImporter {
                         logger.debug("*********************" + concept.getId() + " " + concept.getIdentifier());
                         if (concept.getIdentifier().equals(concept_id)) {
                             try {
-                                String type=rel.asVertex().getProperty("type").toString();
-                                if(type.endsWith("Point")){
-                                    type = type.substring(0, type.indexOf("Point"));
-                                }
                                 Bundle linkBundle = new Bundle(EntityClass.LINK)
-                                        .withDataValue(Ontology.LINK_HAS_TYPE, type)
+                                        .withDataValue(Ontology.LINK_HAS_TYPE, rel.asVertex().getProperty("type").toString())
                                         .withDataValue(Ontology.LINK_HAS_DESCRIPTION, "solved by automatic resolving");
                                 UserProfile user = manager.getFrame(this.log.getActioner().getId(), UserProfile.class);
                                 Link link = new CrudViews<Link>(framedGraph, Link.class).create(linkBundle, user);
@@ -256,21 +252,21 @@ public class EadImporter extends EaImporter {
         List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
         for (String key : data.keySet()) {
             if (key.endsWith(REL)) {
-                logger.debug(key + " found in data");
                 //type, targetUrl, targetName, notes
                 for (Map<String, Object> origRelation : (List<Map<String, Object>>) data.get(key)) {
                     Map<String, Object> relationNode = new HashMap<String, Object>();
                     for (String eventkey : origRelation.keySet()) {
-                        logger.debug(eventkey);
+//                        logger.debug(eventkey);
                         if (eventkey.endsWith(REL)) {
-                            relationNode.put(Ontology.UNDETERMINED_RELATIONSHIP_TYPE, eventkey);
+                            relationNode.put(Ontology.UNDETERMINED_RELATIONSHIP_TYPE, eventkey.substring(0, eventkey.indexOf("Point")));
                             relationNode.put(Ontology.NAME_KEY, origRelation.get(eventkey));
+logger.debug("------------------" + eventkey.substring(0, eventkey.indexOf("Point")) + ": "+ origRelation.get(eventkey));                            
                         } else {
                             relationNode.put(eventkey, origRelation.get(eventkey));
                         }
                     }
                     if (!relationNode.containsKey(Ontology.UNDETERMINED_RELATIONSHIP_TYPE)) {
-                        relationNode.put(Ontology.UNDETERMINED_RELATIONSHIP_TYPE, "corporateBodyAccessPoint");
+                        relationNode.put(Ontology.UNDETERMINED_RELATIONSHIP_TYPE, "corporateBodyAccess");
                     }
                     list.add(relationNode);
                 }

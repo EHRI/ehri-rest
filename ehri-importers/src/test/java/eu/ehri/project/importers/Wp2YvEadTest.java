@@ -137,7 +137,7 @@ public class Wp2YvEadTest extends AbstractImporterTest {
         for (DocumentDescription d : c1.getDocumentDescriptions()){
             for(String key : d.asVertex().getPropertyKeys())
                 logger.debug("key: " + key);
-            assertEquals("BT", d.asVertex().getProperty(EadHandler.AUTHORS));
+            assertEquals("BT", d.asVertex().getProperty(EadHandler.AUTHOR));
         }
 
         // Check the importer is Idempotent
