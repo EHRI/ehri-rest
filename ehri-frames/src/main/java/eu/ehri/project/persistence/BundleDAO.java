@@ -204,7 +204,7 @@ public final class BundleDAO {
             // Mmmn, if we get here, it means that there's been an ID generation error
             // which was not handled by an exception.. so throw a runtime error...
             throw new RuntimeException(
-                    "Unexpected state: ID generation error not handled by IdGenerator class");
+                    "Unexpected state: ID generation error not handled by IdGenerator class " + e.getMessage());
         }
     }
 
