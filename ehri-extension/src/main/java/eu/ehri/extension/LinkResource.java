@@ -73,6 +73,17 @@ public class LinkResource extends
     }
 
     /**
+     * Update a link,
+     */
+    @PUT
+    @Path("/{id:.+}")
+    public Response updateLink(@PathParam("id") String id, String json)
+            throws AccessDenied, PermissionDenied, ItemNotFound, ValidationError,
+            BadRequester, DeserializationError, IntegrityError {
+        return update(id, json);
+    }
+
+    /**
      * Create a link between two items.
      *
      * @param targetId  The link target
