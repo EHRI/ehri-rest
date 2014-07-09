@@ -132,9 +132,8 @@ public class EventResource extends AbstractAccessibleEntityResource<SystemEvent>
         UserProfile user = getCurrentUser();
         Query<SystemEvent> query = new Query<SystemEvent>(graph, SystemEvent.class);
         ActionManager am = new ActionManager(graph);
-        AclManager acl = new AclManager(graph);
 
-        final PipeFunction<Vertex, Boolean> aclFilterTest = acl.getAclFilterFunction(user);
+        final PipeFunction<Vertex, Boolean> aclFilterTest = aclManager.getAclFilterFunction(user);
 
         // Set IDs to items this user is watching...
         final List<String> watching = Lists.newArrayList();

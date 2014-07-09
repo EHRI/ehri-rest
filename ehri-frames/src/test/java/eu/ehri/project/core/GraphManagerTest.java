@@ -15,6 +15,7 @@ import eu.ehri.project.exceptions.IndexNotFoundException;
 import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.EntityClass;
+import eu.ehri.project.models.annotations.EntityType;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -211,6 +212,31 @@ public class GraphManagerTest {
 
             // Check the metadata remains unharmed
             assertEquals(testMetaValue, vertex.getProperty(testMetaKey));
+        }
+
+        @Test
+        public void testSetProperty() throws Exception {
+            Map<String, String> data = Maps
+                    .newHashMap(ImmutableMap.of(TEST_KEY, TEST_VALUE));
+            Vertex vertex = manager.createVertex(TEST_ID1, TEST_TYPE, data);
+            manager.setProperty(vertex, TEST_KEY, "foo");
+            assertEquals("foo", vertex.getProperty(TEST_KEY));
+        }
+
+        @Test(expected = IllegalArgumentException.class)
+        public void testSetPropertyWithBlankPropArg() throws Exception {
+            Map<String, String> data = Maps
+                    .newHashMap(ImmutableMap.of(TEST_KEY, TEST_VALUE));
+            Vertex vertex = manager.createVertex(TEST_ID1, TEST_TYPE, data);
+            manager.setProperty(vertex, "", "foo");
+        }
+
+        @Test(expected = IllegalArgumentException.class)
+        public void testSetPropertyWithBadPropArg() throws Exception {
+            Map<String, String> data = Maps
+                    .newHashMap(ImmutableMap.of(TEST_KEY, TEST_VALUE));
+            Vertex vertex = manager.createVertex(TEST_ID1, TEST_TYPE, data);
+            manager.setProperty(vertex, EntityType.ID_KEY, "foo");
         }
 
         @Test

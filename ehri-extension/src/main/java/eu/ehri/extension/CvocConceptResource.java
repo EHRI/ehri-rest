@@ -38,11 +38,8 @@ import eu.ehri.project.views.Query;
 public class CvocConceptResource extends
         AbstractAccessibleEntityResource<Concept> {
 
-    private final ViewHelper helper;
-
     public CvocConceptResource(@Context GraphDatabaseService database) {
         super(database, Concept.class);
-        helper = new ViewHelper(graph);
     }
 
     @GET
@@ -318,7 +315,7 @@ public class CvocConceptResource extends
             DeserializationError, ItemNotFound, BadRequester {
         final Accessor user = getRequesterUserProfile();
         final Concept parent = views.detail(id, user);
-        return create(json, accessors, new PostCreateHandler<Concept>() {
+        return create(json, accessors, new Handler<Concept>() {
             @Override
             public void process(Concept concept) {
                 parent.addNarrowerConcept(concept);

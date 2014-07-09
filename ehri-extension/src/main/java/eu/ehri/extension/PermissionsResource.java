@@ -47,8 +47,13 @@ public class PermissionsResource extends AbstractRestResource {
 
     private final ObjectMapper mapper = new ObjectMapper();
 
+    private final AclManager aclManager;
+    private final AclViews aclViews;
+
     public PermissionsResource(@Context GraphDatabaseService database) {
         super(database);
+        aclManager = new AclManager(graph);
+        aclViews = new AclViews(graph);
     }
 
     /**
@@ -262,12 +267,12 @@ public class PermissionsResource extends AbstractRestResource {
             throws PermissionDenied, IOException, ItemNotFound {
         graph.getBaseGraph().checkNotInTransaction();
         Accessor accessor = manager.getFrame(userId, Accessor.class);
-        AclManager acl = new AclManager(graph);
 
         return Response
                 .status(Response.Status.OK)
                 .entity(mapper
-                        .writeValueAsBytes(acl.getInheritedGlobalPermissions(accessor)))
+                        .writeValueAsBytes(aclManager
+                                .getInheritedGlobalPermissions(accessor)))
                 .build();
     }
 
@@ -296,7 +301,7 @@ public class PermissionsResource extends AbstractRestResource {
         Accessor grantee = getRequesterUserProfile();
         try {
             InheritedGlobalPermissionSet newPerms
-                    = new AclViews(graph)
+                    = aclViews
                     .setGlobalPermissionMatrix(accessor, globals, grantee);
             graph.getBaseGraph().commit();
             return Response
@@ -328,7 +333,7 @@ public class PermissionsResource extends AbstractRestResource {
         graph.getBaseGraph().checkNotInTransaction();
         Accessor accessor = manager.getFrame(userId, Accessor.class);
         AccessibleEntity entity = manager.getFrame(id, AccessibleEntity.class);
-        AclManager acl = new AclManager(graph, entity.getPermissionScope());
+        AclManager acl = aclManager.withScope(entity.getPermissionScope());
 
         return Response
                 .status(Response.Status.OK)
@@ -357,7 +362,7 @@ public class PermissionsResource extends AbstractRestResource {
         graph.getBaseGraph().checkNotInTransaction();
         Accessor accessor = manager.getFrame(userId, Accessor.class);
         PermissionScope scope = manager.getFrame(id, PermissionScope.class);
-        AclManager acl = new AclManager(graph, scope);
+        AclManager acl = aclManager.withScope(scope);
 
         return Response
                 .status(Response.Status.OK)
@@ -394,7 +399,7 @@ public class PermissionsResource extends AbstractRestResource {
             Accessor accessor = manager.getFrame(userId, Accessor.class);
             PermissionScope scope = manager.getFrame(id, PermissionScope.class);
             Accessor grantee = getRequesterUserProfile();
-            AclViews acl = new AclViews(graph, scope);
+            AclViews acl = aclViews.withScope(scope);
             acl.setGlobalPermissionMatrix(accessor, globals, grantee);
             graph.getBaseGraph().commit();
             return getScopedMatrix(userId, id);

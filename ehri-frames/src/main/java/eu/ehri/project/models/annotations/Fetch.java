@@ -34,6 +34,8 @@ public @interface Fetch {
 
     boolean whenNotLite() default false;
 
+    boolean full() default false;
+
     String value();
 
 }

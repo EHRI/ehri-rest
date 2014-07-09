@@ -4,7 +4,6 @@ import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.gremlin.java.GremlinPipeline;
 import com.tinkerpop.pipes.PipeFunction;
 import eu.ehri.extension.errors.BadRequester;
-import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.DocumentDescription;
@@ -32,13 +31,11 @@ public final class VirtualUnitResource extends
 
     private final VirtualUnitViews vuViews;
     private final Query<VirtualUnit> virtualUnitQuery;
-    private final AclManager aclManager;
 
     public VirtualUnitResource(@Context GraphDatabaseService database) {
         super(database, VirtualUnit.class);
         vuViews = new VirtualUnitViews(graph);
         virtualUnitQuery = new Query<VirtualUnit>(graph, cls);
-        aclManager = new AclManager(graph);
     }
 
     @GET
@@ -161,7 +158,7 @@ public final class VirtualUnitResource extends
         final Iterable<DocumentDescription> documentDescriptions
                 = getDocumentDescriptions(descriptionIds, currentUser);
 
-        return create(json, accessors, new PostCreateHandler<VirtualUnit>() {
+        return create(json, accessors, new Handler<VirtualUnit>() {
             @Override
             public void process(VirtualUnit virtualUnit) {
                 virtualUnit.setAuthor(currentUser);
@@ -203,7 +200,7 @@ public final class VirtualUnitResource extends
         final Iterable<DocumentDescription> documentDescriptions
                 = getDocumentDescriptions(descriptionIds, currentUser);
         final VirtualUnit parent = views.detail(id, currentUser);
-        return create(json, accessors, new PostCreateHandler<VirtualUnit>() {
+        return create(json, accessors, new Handler<VirtualUnit>() {
             @Override
             public void process(VirtualUnit virtualUnit) {
                 parent.addChild(virtualUnit);

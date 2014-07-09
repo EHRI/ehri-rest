@@ -23,7 +23,6 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 import org.neo4j.graphdb.GraphDatabaseService;
 import eu.ehri.extension.errors.BadRequester;
-import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.base.AccessibleEntity;
@@ -34,11 +33,8 @@ import eu.ehri.project.models.base.AccessibleEntity;
 @Path("entities")
 public class GenericResource extends AbstractAccessibleEntityResource<AccessibleEntity> {
 
-    final AclManager aclManager;
-
     public GenericResource(@Context GraphDatabaseService database) {
         super(database, AccessibleEntity.class);
-        aclManager = new AclManager(graph);
     }
 
     /**
