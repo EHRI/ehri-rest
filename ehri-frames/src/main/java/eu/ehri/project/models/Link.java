@@ -20,7 +20,7 @@ import eu.ehri.project.models.base.*;
  * @author mik
  */
 @EntityType(EntityClass.LINK)
-public interface Link extends AccessibleEntity, AnnotatableEntity, Promotable {
+public interface Link extends AccessibleEntity, AnnotatableEntity, Promotable, TemporalEntity {
 
     @Fetch(Ontology.LINK_HAS_LINKER)
     @Adjacency(label = Ontology.LINK_HAS_LINKER)
