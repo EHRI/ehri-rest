@@ -55,6 +55,9 @@ documentDescription,publicationNote,,,
 documentDescription,datesOfDescription,,,
 documentDescription,archivistNote,,,
 documentDescription,provenance,,,
+documentDescription,sources,,,1
+documentDescription,relatedUnitsOfDescription,,,1
+documentDescription,maintenanceEvent,,,1
 historicalAgentDescription,lastName,,,
 historicalAgentDescription,firstName,,,
 historicalAgentDescription,source,,,1
