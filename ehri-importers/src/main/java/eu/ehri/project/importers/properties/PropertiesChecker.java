@@ -4,6 +4,7 @@
  */
 package eu.ehri.project.importers.properties;
 
+import eu.ehri.project.importers.EadImporter;
 import eu.ehri.project.models.EntityClass;
 import java.util.Set;
 import org.slf4j.Logger;
@@ -51,7 +52,13 @@ public class PropertiesChecker {
                 testresult=false;
             }
             if (!handler.contains(property)) {
-                logger.warn(node + " should NOT contain " + property);
+                if(nodeEntity.equals(EntityClass.DOCUMENT_DESCRIPTION) &&
+                    property.endsWith(EadImporter.ACCESS_POINT)){
+                    logger.debug(property.substring(0, property.indexOf(EadImporter.ACCESS_POINT)+6));
+                 
+                }else{
+                    logger.warn(node + " should NOT contain " + property);
+                }
 //                testresult = false;
             }
         }

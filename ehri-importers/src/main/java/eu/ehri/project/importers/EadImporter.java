@@ -42,6 +42,7 @@ public class EadImporter extends EaImporter {
     //the EadImporter can import ead as DocumentaryUnits, the default, or overwrite those and create VirtualUnits instead.
     private EntityClass unitEntity = EntityClass.DOCUMENTARY_UNIT;
     private Serializer mergeSerializer;
+    public static final String ACCESS_POINT = "AccessPoint";
     /**
      * Construct an EadImporter object.
      *
@@ -248,16 +249,15 @@ public class EadImporter extends EaImporter {
     @SuppressWarnings("unchecked")
    @Override
     protected Iterable<Map<String, Object>> extractRelations(Map<String, Object> data) {
-        final String REL = "AccessPoint";
         List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
         for (String key : data.keySet()) {
-            if (key.endsWith(REL)) {
+            if (key.endsWith(ACCESS_POINT)) {
                 //type, targetUrl, targetName, notes
                 for (Map<String, Object> origRelation : (List<Map<String, Object>>) data.get(key)) {
                     Map<String, Object> relationNode = new HashMap<String, Object>();
                     for (String eventkey : origRelation.keySet()) {
 //                        logger.debug(eventkey);
-                        if (eventkey.endsWith(REL)) {
+                        if (eventkey.endsWith(ACCESS_POINT)) {
                             relationNode.put(Ontology.UNDETERMINED_RELATIONSHIP_TYPE, eventkey.substring(0, eventkey.indexOf("Point")));
                             relationNode.put(Ontology.NAME_KEY, origRelation.get(eventkey));
 logger.debug("------------------" + eventkey.substring(0, eventkey.indexOf("Point")) + ": "+ origRelation.get(eventkey));                            

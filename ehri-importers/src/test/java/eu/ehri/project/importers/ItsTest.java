@@ -34,10 +34,9 @@ public class ItsTest extends AbstractImporterTest {
     // Depends on fixtures
     protected final String TEST_REPO = "r1";
     DocumentaryUnit archdesc, c1, c2, c7_1, c7_2;
-    int origCount=0;
 	
-	@Test
-	public void testItsImportEsterwegen() throws Exception {
+    @Test
+    public void testItsImportEsterwegen() throws Exception {
 	Repository agent = manager.getFrame(TEST_REPO, Repository.class);
         final String logMessage = "Importing a single EAD by ItsTest";
 
@@ -93,12 +92,15 @@ public class ItsTest extends AbstractImporterTest {
         
         for(Description d : unit.getDocumentDescriptions()) {
         	logger.debug("Description language: " + d.getLanguageOfDescription());
-        	if(d.getLanguageOfDescription().equals("en")) {
+        	if(d.getLanguageOfDescription().equals("eng")) {
         		assertEquals("Concentration Camp Esterwegen", d.getName());
+                        
         	}
-        	else if (d.getLanguageOfDescription().equals("de")){
+        	else if (d.getLanguageOfDescription().equals("deu")){
         		assertEquals("Konzentrationslager Esterwegen", d.getName());
-        	}
+        	}else{
+                    fail();
+                }
         }
             
 
@@ -154,6 +156,7 @@ public class ItsTest extends AbstractImporterTest {
         }
 
          @Test
+         @Ignore
         public void testGestapoWhole() throws ItemNotFound, IOException, ValidationError, InputParseError{
         Repository agent = manager.getFrame(TEST_REPO, Repository.class);
         final String logMessage = "Importing the gestapo (provenance) EAD by ItsTest";
@@ -191,6 +194,7 @@ public class ItsTest extends AbstractImporterTest {
         }
 
          @Test
+         @Ignore
         public void testEsterwegenWhole() throws ItemNotFound, IOException, ValidationError, InputParseError{
         Repository agent = manager.getFrame(TEST_REPO, Repository.class);
         final String logMessage = "Importing the esterwegen (pertinence) EAD by ItsTest";
