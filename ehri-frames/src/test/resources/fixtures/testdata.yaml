@@ -455,7 +455,7 @@
    type: link
    data:
      type: associative
-     body: Test link
+     body: Test access point link
    relationships:
      hasLinkTarget: c1
      hasLinkTarget: a1
