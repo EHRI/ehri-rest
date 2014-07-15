@@ -242,8 +242,15 @@
             - id: ur1
               type: relationship
               data:
-                name: test
+                name: Subject Access 1
                 type: subjectAccess
+                description: test description
+                category: associative
+            - id: ur2
+              type: relationship
+              data:
+                name: Person Access 1
+                type: personAccess
                 description: test description
                 category: associative
       - id: cd1-2

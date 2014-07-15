@@ -20,7 +20,7 @@ public class SubtreeTraverserTest extends AbstractFixtureTest {
 
     @Test
     public void testSubtreeSerializationTouchesAllNodes() throws Exception {
-        // Doc c1 has five nodes in its subtree
+        // Doc c1 has six nodes in its subtree
         final Counter counter = new Counter();
         System.out.println(new Serializer(graph).vertexFrameToJson(item));
         new Serializer.Builder(graph).dependentOnly().build()
@@ -29,6 +29,6 @@ public class SubtreeTraverserTest extends AbstractFixtureTest {
                 counter.count++;
             }
         });
-        assertEquals(5, counter.count);
+        assertEquals(6, counter.count);
     }
 }
