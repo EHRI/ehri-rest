@@ -447,8 +447,9 @@
      type: associative
      body: Test link
    relationships:
-     hasLinkTarget: c1
-     hasLinkTarget: c4
+     hasLinkTarget:
+      - c1
+      - c4
      hasLinker: mike
 
  - id: link2
@@ -457,8 +458,9 @@
      type: associative
      body: Test access point link
    relationships:
-     hasLinkTarget: c1
-     hasLinkTarget: a1
+     hasLinkTarget:
+      - c1
+      - a1
      hasLinkBody: ur1
      hasLinker: mike
 
