@@ -18,7 +18,7 @@ public interface Accessor extends IdentifiableEntity {
     @JavaHandler
     public boolean isAnonymous();
 
-    @Adjacency(label = Ontology.ACCESSOR_BELONGS_TO_GROUP)
+    @Adjacency(label = Ontology.ACCESSOR_BELONGS_TO_GROUP, direction = Direction.OUT)
     public Iterable<Accessor> getParents();
 
     @JavaHandler
@@ -43,7 +43,8 @@ public interface Accessor extends IdentifiableEntity {
         public Iterable<Accessor> getAllParents() {
             return frameVertices(gremlin().as("n")
                     .out(Ontology.ACCESSOR_BELONGS_TO_GROUP)
-                    .loop("n", JavaHandlerUtils.defaultMaxLoops, JavaHandlerUtils.noopLoopFunc));
+                    .loop("n", JavaHandlerUtils.defaultMaxLoops, JavaHandlerUtils.defaultMaxLoops)
+                    .dedup());
         }
     }
 }

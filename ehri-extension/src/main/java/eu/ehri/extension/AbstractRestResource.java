@@ -11,8 +11,8 @@ import javax.ws.rs.core.*;
 import com.google.common.base.Optional;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraphFactory;
-import com.tinkerpop.frames.FramedTransactionalGraph;
 import com.tinkerpop.frames.modules.javahandler.JavaHandlerModule;
+import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.acl.wrapper.AclGraph;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.models.UserProfile;
@@ -109,16 +109,11 @@ public abstract class AbstractRestResource  {
 
     public AbstractRestResource(@Context GraphDatabaseService database, @Context final HttpHeaders requestHeaders) {
         this.database = database;
-        final TxCheckedNeo4jGraph txGraph = new TxCheckedNeo4jGraph(database);
+        TxCheckedNeo4jGraph txGraph = new TxCheckedNeo4jGraph(database);
+        GraphManager tmp = GraphManagerFactory.getInstance(graphFactory.create(txGraph));
+        Optional<Vertex> accessorOpt = getAccessor(tmp, requestHeaders);
         AclGraph<TxCheckedNeo4jGraph> aclGraph
-                = new AclGraph<TxCheckedNeo4jGraph>(txGraph, new AclGraph.AccessorFetcher() {
-            @Override
-            public Accessor fetch() {
-                return getAccessorOrAnonymous(
-                        GraphManagerFactory.getInstance(
-                                graphFactory.create(txGraph)), requestHeaders);
-            }
-        });
+                = new AclGraph<TxCheckedNeo4jGraph>(txGraph, AclManager.getAclFilter(accessorOpt));
         graph = graphFactory.create(aclGraph);
         manager = GraphManagerFactory.getInstance(graph);
         serializer = new Serializer.Builder(graph).build();
@@ -132,17 +127,17 @@ public abstract class AbstractRestResource  {
                 : serializer;
     }
 
-    protected Accessor getAccessorOrAnonymous(GraphManager tmp, HttpHeaders requestHeaders) {
+    protected Optional<Vertex> getAccessor(GraphManager tmp, HttpHeaders requestHeaders) {
         List<String> list = requestHeaders.getRequestHeader(AUTH_HEADER_NAME);
         if (list != null && !list.isEmpty()) {
             String id = list.get(0);
             try {
-                return tmp.getFrame(id, Accessor.class);
+                return Optional.of(tmp.getVertex(id));
             } catch (ItemNotFound e) {
-                return AnonymousAccessor.getInstance();
+                return Optional.absent();
             }
         }
-        return AnonymousAccessor.getInstance();
+        return Optional.absent();
     }
 
     protected boolean isInTransaction() {

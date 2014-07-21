@@ -53,19 +53,19 @@ public class AclManagerTest extends GraphTestBase {
     @Test
     public void testIsAdmin() throws Exception {
         Group admin = manager.getFrame(Group.ADMIN_GROUP_IDENTIFIER, Group.class);
-        assertTrue(new AclManager(graph).belongsToAdmin(admin));
+        assertTrue(AclManager.belongsToAdmin(admin));
     }
 
     @Test
     public void testBelongsToAdmin() throws Exception {
         loader.loadTestData();
         UserProfile mike = manager.getFrame("mike", UserProfile.class);
-        assertTrue(new AclManager(graph).belongsToAdmin(mike));
+        assertTrue(AclManager.belongsToAdmin(mike));
 
         // Test a user not directly in admin, but belonging to a group that is,
         // is also an admin user.
         UserProfile tim = manager.getFrame("tim", UserProfile.class);
-        assertTrue(new AclManager(graph).belongsToAdmin(tim));
+        assertTrue(AclManager.belongsToAdmin(tim));
     }
 
     @Test
@@ -73,9 +73,9 @@ public class AclManagerTest extends GraphTestBase {
         Accessor admin = manager.getFrame(Group.ADMIN_GROUP_IDENTIFIER, Group.class);
         Accessor anon = AnonymousAccessor.getInstance();
         AclManager acl = new AclManager(graph);
-        assertFalse(acl.belongsToAdmin(anon));
-        assertTrue(acl.isAnonymous(anon));
-        assertFalse(acl.isAnonymous(admin));
+        assertFalse(AclManager.belongsToAdmin(anon));
+        assertTrue(AclManager.isAnonymous(anon));
+        assertFalse(AclManager.isAnonymous(admin));
     }
 
     @Test
@@ -85,8 +85,8 @@ public class AclManagerTest extends GraphTestBase {
         UserProfile user1 = manager.getFrame("mike", UserProfile.class);
         UserProfile user2 = manager.getFrame("reto", UserProfile.class);
         AclManager acl = new AclManager(graph);
-        assertTrue(acl.canAccess(c1, user1));
-        assertFalse(acl.canAccess(c1, user2));
+        assertTrue(AclManager.canAccess(c1, user1));
+        assertFalse(AclManager.canAccess(c1, user2));
     }
 
     @Test
@@ -107,11 +107,11 @@ public class AclManagerTest extends GraphTestBase {
         UserProfile user1 = manager.getFrame("mike", UserProfile.class);
         UserProfile user2 = manager.getFrame("reto", UserProfile.class);
         AclManager acl = new AclManager(graph);
-        assertTrue(acl.canAccess(c1, user1));
-        assertFalse(acl.canAccess(c1, user2));
+        assertTrue(AclManager.canAccess(c1, user1));
+        assertFalse(AclManager.canAccess(c1, user2));
         acl.setAccessors(c1, Lists.<Accessor>newArrayList(user1, user2));
-        assertTrue(acl.canAccess(c1, user1));
-        assertTrue(acl.canAccess(c1, user2));
+        assertTrue(AclManager.canAccess(c1, user1));
+        assertTrue(AclManager.canAccess(c1, user2));
     }
 
     @Test
@@ -215,10 +215,10 @@ public class AclManagerTest extends GraphTestBase {
 
         Annotation ann3v = manager.getFrame("ann3", Annotation.class); // hidden from user
         Annotation ann4v = manager.getFrame("ann4", Annotation.class); // promoted, thus visible
-        assertFalse(acl.canAccess(ann3v, user));
-        assertTrue(acl.canAccess(ann4v, user));
+        assertFalse(AclManager.canAccess(ann3v, user));
+        assertTrue(AclManager.canAccess(ann4v, user));
 
-        PipeFunction<Vertex,Boolean> aclFilter = acl.getAclFilterFunction(user);
+        PipeFunction<Vertex,Boolean> aclFilter = AclManager.getAclFilterFunction(user);
         List<Vertex> filtered = new GremlinPipeline<Vertex,Vertex>(
                 Lists.newArrayList(ann3v.asVertex(), ann4v.asVertex())).filter(aclFilter).toList();
         assertEquals(1L, filtered.size());

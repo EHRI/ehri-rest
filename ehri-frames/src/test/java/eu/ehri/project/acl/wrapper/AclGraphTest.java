@@ -1,12 +1,13 @@
 package eu.ehri.project.acl.wrapper;
 
+import com.google.common.base.Optional;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Vertex;
+import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.annotations.EntityType;
-import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.test.AbstractFixtureTest;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,18 +32,9 @@ public class AclGraphTest extends AbstractFixtureTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        validUserGraph = new AclGraph(graph.getBaseGraph(), new AclGraph.AccessorFetcher() {
-            @Override
-            public Accessor fetch() {
-                return validUser;
-            }
-        });
-        invalidUserGraph =  new AclGraph(graph.getBaseGraph(), new AclGraph.AccessorFetcher() {
-            @Override
-            public Accessor fetch() {
-                return invalidUser;
-            }
-        });
+        validUserGraph = new AclGraph(graph.getBaseGraph(), AclManager.getAclFilter(Optional.<Vertex>of(validUser.asVertex())));
+        invalidUserGraph =  new AclGraph(graph.getBaseGraph(), AclManager.getAclFilter(Optional.<Vertex>of(invalidUser
+                .asVertex())));
     }
 
     @Test

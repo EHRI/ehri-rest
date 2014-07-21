@@ -2,7 +2,6 @@ package eu.ehri.project.acl.wrapper;
 
 import com.tinkerpop.blueprints.Element;
 import com.tinkerpop.blueprints.util.ElementHelper;
-import eu.ehri.project.models.base.Accessor;
 
 import java.util.Set;
 
@@ -49,11 +48,6 @@ public abstract class AclElement implements Element {
     }
 
     @Override
-    public String toString() {
-        return "[" + getId() + " (" + graph.getAccessor().getId() + ")]";
-    }
-
-    @Override
     public boolean equals(final Object object) {
         return ElementHelper.areEqual(this, object);
     }
@@ -68,9 +62,5 @@ public abstract class AclElement implements Element {
 
     public Element getBaseElement() {
         return baseElement;
-    }
-
-    public Accessor getAccessor() {
-        return graph.getAccessor();
     }
 }

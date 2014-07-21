@@ -2,9 +2,6 @@ package eu.ehri.project.acl.wrapper;
 
 import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.Edge;
-import com.tinkerpop.blueprints.Vertex;
-import com.tinkerpop.pipes.PipeFunction;
-import eu.ehri.project.acl.AclManager;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;

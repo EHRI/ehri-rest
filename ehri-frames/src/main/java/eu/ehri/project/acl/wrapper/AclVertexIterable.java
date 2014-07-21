@@ -14,12 +14,10 @@ import java.util.NoSuchElementException;
 public class AclVertexIterable implements CloseableIterable<Vertex> {
     private final Iterable<Vertex> iterable;
     private final AclGraph<?> graph;
-    private final PipeFunction<Vertex,Boolean> aclFilter;
 
     public AclVertexIterable(final Iterable<Vertex> iterable, final AclGraph<?> graph) {
         this.iterable = iterable;
         this.graph = graph;
-        this.aclFilter = AclManager.getAclFilterFunction(graph.getAccessor());
     }
 
     @Override
@@ -42,7 +40,7 @@ public class AclVertexIterable implements CloseableIterable<Vertex> {
                 }
                 while (this.itty.hasNext()) {
                     final Vertex vertex = this.itty.next();
-                    if (aclFilter.compute(vertex)) {
+                    if (graph.test(vertex)) {
                         this.nextVertex = new AclVertex(vertex, graph);
                         return true;
                     }
@@ -60,7 +58,7 @@ public class AclVertexIterable implements CloseableIterable<Vertex> {
                 } else {
                     while (this.itty.hasNext()) {
                         final Vertex vertex = this.itty.next();
-                        if (aclFilter.compute(vertex)) {
+                        if (graph.test(vertex)) {
                             return new AclVertex(vertex, graph);
                         }
                     }

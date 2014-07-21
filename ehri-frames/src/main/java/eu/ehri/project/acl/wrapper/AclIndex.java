@@ -1,8 +1,9 @@
 package eu.ehri.project.acl.wrapper;
 
+import com.google.common.collect.Iterables;
 import com.tinkerpop.blueprints.*;
 import com.tinkerpop.blueprints.util.StringFactory;
-import org.neo4j.helpers.collection.Iterables;
+
 
 /**
  * @author Mike Bryant (http://github.com/mikesname)
@@ -59,7 +60,7 @@ public class AclIndex<T extends Element> implements Index<T> {
 
     @Override
     public long count(String s, Object o) {
-        return Iterables.count(get(s, o));
+        return Iterables.size(get(s, o));
     }
 
     @Override

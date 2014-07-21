@@ -13,6 +13,7 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.*;
+import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.*;
 
 import java.util.*;
@@ -72,15 +73,7 @@ public final class AclManager {
      * @return User belongs to the admin group
      */
     public static boolean belongsToAdmin(Accessor accessor) {
-        if (accessor.isAdmin()) {
-            return true;
-        }
-        for (Accessor parent : accessor.getParents()) {
-            if (belongsToAdmin(parent)) {
-                return true;
-            }
-        }
-        return false;
+        return !isAnonymous(accessor) && belongsToAdmin(accessor.asVertex());
     }
 
     /**
@@ -92,8 +85,7 @@ public final class AclManager {
     public static boolean isAnonymous(Accessor accessor) {
         Preconditions.checkNotNull(accessor, "NULL accessor given.");
         return accessor instanceof AnonymousAccessor
-                || accessor.getId().equals(
-                Group.ANONYMOUS_GROUP_IDENTIFIER);
+                || Group.ANONYMOUS_GROUP_IDENTIFIER.equals(accessor.getId());
     }
 
     /**
@@ -324,33 +316,80 @@ public final class AclManager {
      */
     public static PipeFunction<Vertex, Boolean> getAclFilterFunction(Accessor accessor) {
         Preconditions.checkNotNull(accessor, "Accessor is null");
-        if (belongsToAdmin(accessor)) {
-            return noopFilterFunction();
-        }
+        return getAclFilter(accessor.isAnonymous() ? Optional.<Vertex>absent() : Optional.<Vertex>of(accessor
+                .asVertex()));
+    }
 
-        final HashSet<Vertex> all = getAllAccessors(accessor);
-        return new PipeFunction<Vertex, Boolean>() {
-            public Boolean compute(Vertex v) {
-                Iterable<Vertex> verts = v.getVertices(Direction.OUT,
-                        Ontology.IS_ACCESSIBLE_TO);
-                // If there's no Access conditions, it's
-                // read-only...
-                if (!verts.iterator().hasNext()) {
-                    return true;
-                }
-                // If it's promoted it's publically accessible
-                if (isPromoted(v)) {
-                    return true;
-                }
-                // Otherwise, check relevant accessors...
-                for (Vertex other : verts) {
-                    if (all.contains(other)) {
+    private static Set<Vertex> getAncestors(Vertex item) {
+        Set<Vertex> parents = Sets.newHashSet();
+        for (Vertex v : item.getVertices(Direction.OUT, Ontology.ACCESSOR_BELONGS_TO_GROUP)) {
+            parents.addAll(getAncestors(v));
+            parents.add(v);
+        }
+        return parents;
+    }
+
+    private static boolean isAdmin(Vertex item) {
+        return Group.ADMIN_GROUP_IDENTIFIER.equals(item.getProperty(EntityType.ID_KEY));
+    }
+
+    private static boolean belongsToAdmin(Vertex item) {
+        if (isAdmin(item)) {
+            return true;
+        }
+        for (Vertex v : getAncestors(item)) {
+            if (isAdmin(v)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static PipeFunction<Vertex,Boolean> getAclFilter(Optional<Vertex> accessorVertex) {
+        if (!accessorVertex.isPresent()) {
+            return new PipeFunction<Vertex, Boolean>() {
+                @Override
+                public Boolean compute(Vertex vertex) {
+                    if (isPromoted(vertex)) {
                         return true;
                     }
+
+                    Iterable<Vertex> accessRels = vertex.getVertices(Direction.OUT,
+                            Ontology.IS_ACCESSIBLE_TO);
+                    return !accessRels.iterator().hasNext();
                 }
-                return false;
-            }
-        };
+            };
+        } else {
+            final Vertex thisItem = accessorVertex.get();
+            final Set<Vertex> ancestors = getAncestors(thisItem);
+            final boolean isAdmin = belongsToAdmin(thisItem);
+            return new PipeFunction<Vertex, Boolean>() {
+                @Override
+                public Boolean compute(Vertex vertex) {
+                    if (isAdmin) {
+                        return true;
+                    }
+
+                    if (isPromoted(vertex)) {
+                        return true;
+                    }
+
+                    Iterable<Vertex> accessRels = vertex.getVertices(Direction.OUT,
+                            Ontology.IS_ACCESSIBLE_TO);
+                    if (!accessRels.iterator().hasNext()) {
+                        return true;
+                    }
+
+                    for (Vertex canAccess : accessRels) {
+                        if (canAccess.equals(thisItem) ||
+                                ancestors.contains(canAccess)) {
+                            return true;
+                        }
+                    }
+                    return false;
+                }
+            };
+        }
     }
 
     /**
@@ -586,28 +625,6 @@ public final class AclManager {
     }
 
     /**
-     * For a given user, fetch a lookup of all the inherited accessors it
-     * belongs to. NB: This returns a lookup of raw Vertices because it's
-     * used by the a Gremlin filter function, which likewise operates
-     * directly on vertices.
-     *
-     * @param accessor The user/group
-     * @return A lookup of accessor vertices
-     */
-    private static HashSet<Vertex> getAllAccessors(Accessor accessor) {
-
-        final HashSet<Vertex> all = Sets.newHashSet();
-        if (!isAnonymous(accessor)) {
-            Iterable<Accessor> parents = accessor.getAllParents();
-            for (Accessor a : parents) {
-                all.add(a.asVertex());
-            }
-            all.add(accessor.asVertex());
-        }
-        return all;
-    }
-
-    /**
      * Fetch a user's global permission set.
      *
      * @param accessor The user/group
@@ -649,20 +666,6 @@ public final class AclManager {
             builder.set(ct, PermissionType.values());
         }
         return builder.build();
-    }
-
-    /**
-     * Pipe filter function that passes through all items.
-     *
-     * @return A no-op PipeFunction for filtering a list of vertices as an admin
-     *         user
-     */
-    private static PipeFunction<Vertex, Boolean> noopFilterFunction() {
-        return new PipeFunction<Vertex, Boolean>() {
-            public Boolean compute(Vertex v) {
-                return true;
-            }
-        };
     }
 
     private void populateEnumNodeLookups() {

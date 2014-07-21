@@ -107,13 +107,13 @@ public interface SystemEvent extends AccessibleEntity {
         }
 
         private boolean isValidActioner(Vertex vertex) {
-            return (!vertex.getVertices(Direction.IN,
+            return (!vertex.getEdges(Direction.IN,
                     Ontology.ACTIONER_HAS_LIFECYCLE_ACTION).iterator().hasNext())
                     && vertex.getProperty(EntityType.TYPE_KEY) != null;
         }
 
         private boolean isValidTarget(Vertex vertex) {
-            return (!vertex.getVertices(Direction.IN,
+            return (!vertex.getEdges(Direction.IN,
                     Ontology.ENTITY_HAS_LIFECYCLE_EVENT).iterator().hasNext())
                     && vertex.getProperty(EntityType.TYPE_KEY) != null;
         }

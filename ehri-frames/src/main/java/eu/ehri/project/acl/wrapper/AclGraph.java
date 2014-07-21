@@ -1,16 +1,10 @@
 package eu.ehri.project.acl.wrapper;
 
-import com.google.common.base.Supplier;
-import com.google.common.base.Suppliers;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.*;
 import com.tinkerpop.blueprints.util.wrappers.WrappedGraphQuery;
 import com.tinkerpop.blueprints.util.wrappers.WrapperGraph;
-import com.tinkerpop.gremlin.java.GremlinPipeline;
 import com.tinkerpop.pipes.PipeFunction;
-import eu.ehri.project.acl.AclManager;
-import eu.ehri.project.models.base.Accessor;
 
 import java.util.List;
 
@@ -20,31 +14,16 @@ import java.util.List;
 public class AclGraph<T extends TransactionalGraph & IndexableGraph> implements TransactionalGraph,
         WrapperGraph<T>, IndexableGraph {
 
-    public static interface AccessorFetcher {
-        public Accessor fetch();
+    protected final T baseGraph;
+    private final PipeFunction<Vertex,Boolean> test;
+
+    public AclGraph(final T graph, final PipeFunction<Vertex,Boolean> test) {
+        this.baseGraph = graph;
+        this.test = test;
     }
 
-    protected final T baseGraph;
-    private final AccessorFetcher accessorFetcher;
-
-    private final Supplier<Accessor> _supplier = new Supplier<Accessor>() {
-        @Override
-        public Accessor get() {
-            return accessorFetcher.fetch();
-        }
-    };
-    private volatile Supplier<Accessor> accessorSupplier = Suppliers.memoize(_supplier);
-    private final Supplier<PipeFunction<Vertex,Boolean>> _afsupplier = new Supplier<PipeFunction<Vertex,Boolean>>() {
-        @Override
-        public PipeFunction<Vertex,Boolean> get() {
-            return AclManager.getAclFilterFunction(accessorSupplier.get());
-        }
-    };
-    private volatile Supplier<PipeFunction<Vertex,Boolean>> afsupplier = Suppliers.memoize(_afsupplier);
-
-    public AclGraph(T graph, AccessorFetcher accessorFetcher) {
-        this.baseGraph = graph;
-        this.accessorFetcher = accessorFetcher;
+    public boolean test(Vertex v) {
+        return test.compute(v);
     }
 
     @Override
@@ -62,7 +41,7 @@ public class AclGraph<T extends TransactionalGraph & IndexableGraph> implements 
         Vertex vertex = baseGraph.getVertex(o);
         return vertex != null
                 ? (
-                    getAclFilter().compute(vertex)
+                    test.compute(vertex)
                             ? new AclVertex(vertex, this)
                             : null)
                 : null;
@@ -114,16 +93,16 @@ public class AclGraph<T extends TransactionalGraph & IndexableGraph> implements 
 
     @Override
     public GraphQuery query() {
-        final AclGraph<?> partitionGraph = this;
+        final AclGraph<?> aclGraph = this;
         return new WrappedGraphQuery(this.baseGraph.query()) {
             @Override
             public Iterable<Edge> edges() {
-                return new AclEdgeIterable(this.query.edges(), partitionGraph);
+                return new AclEdgeIterable(this.query.edges(), aclGraph);
             }
 
             @Override
             public Iterable<Vertex> vertices() {
-                return new AclVertexIterable(this.query.vertices(), partitionGraph);
+                return new AclVertexIterable(this.query.vertices(), aclGraph);
             }
         };
     }
@@ -152,14 +131,6 @@ public class AclGraph<T extends TransactionalGraph & IndexableGraph> implements 
     @Override
     public T getBaseGraph() {
         return baseGraph;
-    }
-
-    public PipeFunction<Vertex,Boolean> getAclFilter() {
-        return afsupplier.get();
-    }
-
-    public Accessor getAccessor() {
-        return accessorSupplier.get();
     }
 
     @Override
