@@ -31,12 +31,13 @@ public class ServerRunner {
     private final String jaxRxPackage;
     private final String mountPoint;
 
+    private Level logLevel = Level.OFF;
+
     private static FixtureLoader fixtureLoader = null;
     private static GraphCleaner<? extends TransactionalGraph> graphCleaner = null;
 
     private final static Logger sunLogger = Logger.getLogger("com.sun.jersey");
     private final static Logger neoLogger = Logger.getLogger("org.neo4j.server");
-
 
     private CommunityNeoServer neoServer;
 
@@ -47,17 +48,21 @@ public class ServerRunner {
     }
 
     public static ServerRunner getInstance(int port, String jaxRxPackage, String mountPoint) {
-        return INSTANCE != null ? INSTANCE : new ServerRunner(port, jaxRxPackage, mountPoint);
+        if (INSTANCE == null) {
+            INSTANCE = new ServerRunner(port, jaxRxPackage, mountPoint);
+        }
+        return INSTANCE;
     }
 
     public void start() throws IOException {
-        sunLogger.setLevel(Level.OFF);
-        neoLogger.setLevel(Level.OFF);
+        sunLogger.setLevel(logLevel);
+        neoLogger.setLevel(logLevel);
         neoServer = ServerBuilder.server()
                 .onPort(port)
                 .withThirdPartyJaxRsPackage(jaxRxPackage, "/" + mountPoint)
                 .build();
         neoServer.start();
+
         FramedGraph<? extends TransactionalGraph> framedGraph
                 = graphFactory.create(new Neo4jGraph(neoServer.getDatabase().getGraph()));
         fixtureLoader = FixtureLoaderFactory.getInstance(framedGraph);
@@ -66,6 +71,10 @@ public class ServerRunner {
 
     public CommunityNeoServer getServer() {
         return neoServer;
+    }
+
+    public void setLogLevel(Level logLevel) {
+        this.logLevel = logLevel;
     }
 
     public void setUpData() {

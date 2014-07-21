@@ -291,7 +291,8 @@ def reindex_all():
     "Run a full reindex of Neo4j -> Solr data"
     all_types = ["documentaryUnit", "repository", "country",
             "historicalAgent", "cvocVocabulary", "cvocConcept",
-            "authoritativeSet", "userProfile", "group"]
+            "authoritativeSet", "userProfile", "group",
+            "virtualUnit"]
     indexer_cmd = [
         "java", "-jar", env.index_helper,
         "--clear-all",

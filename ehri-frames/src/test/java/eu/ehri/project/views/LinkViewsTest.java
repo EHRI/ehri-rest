@@ -6,10 +6,14 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.models.*;
 import eu.ehri.project.models.base.Description;
+import eu.ehri.project.models.base.LinkableEntity;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.test.AbstractFixtureTest;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -25,6 +29,14 @@ public class LinkViewsTest extends AbstractFixtureTest {
     public void setUp() throws Exception {
         super.setUp();
         linkViews = new LinkViews(graph);
+    }
+
+    @Test
+    public void testLinks() throws Exception {
+        Link link1 = manager.getFrame("link1", Link.class);
+        List<LinkableEntity> targets = Lists.newArrayList(link1.getLinkTargets());
+        assertTrue(targets.contains(manager.getFrame("c1", LinkableEntity.class)));
+        assertTrue(targets.contains(manager.getFrame("c4", LinkableEntity.class)));
     }
 
     @Test
