@@ -9,6 +9,7 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.events.SystemEvent;
 
 import java.io.InputStream;
@@ -104,6 +105,11 @@ public class IcaAtomEadImporterTest extends AbstractImporterTest{
         
         assertEquals(5, subjects.size());
         assertEquals(log.getChanged(), subjects.size());
+
+        // Check all descriptions have an IMPORT creationProcess
+        for (Description d : c1.getDocumentDescriptions()) {
+            assertEquals(Description.CreationProcess.IMPORT, d.getCreationProcess());
+        }
 
         // Check permission scopes
         assertEquals(agent, fonds_unit.getPermissionScope());
