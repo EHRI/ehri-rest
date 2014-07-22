@@ -20,8 +20,7 @@ import com.tinkerpop.pipes.PipeFunction;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.exceptions.AccessDenied;
 import eu.ehri.project.models.UserProfile;
-import eu.ehri.project.models.base.Actioner;
-import eu.ehri.project.models.base.Watchable;
+import eu.ehri.project.models.base.*;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.models.events.Version;
 import eu.ehri.project.persistence.ActionManager;
@@ -30,8 +29,6 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistence.Serializer;
 import eu.ehri.project.views.impl.LoggingCrudViews;
 import eu.ehri.project.views.Query;
@@ -178,17 +175,22 @@ public class EventResource extends AbstractAccessibleEntityResource<SystemEvent>
             }
         });
 
-        // Filter items accessible to this user... show the event
-        // if any of the subjects are accessible to the user...
+        // Filter items accessible to this user... hide the
+        // event if any subjects or the scope are inaccessible
+        // to the user.
         pipe = pipe.filter(new PipeFunction<SystemEvent, Boolean>() {
             @Override
             public Boolean compute(SystemEvent event) {
+                Frame eventScope = event.getEventScope();
+                if (eventScope != null && !aclFilterTest.compute(eventScope.asVertex())) {
+                    return false;
+                }
                 for (AccessibleEntity e : event.getSubjects()) {
-                    if (aclFilterTest.compute(e.asVertex())) {
-                        return true;
+                    if (!aclFilterTest.compute(e.asVertex())) {
+                        return false;
                     }
                 }
-                return false;
+                return true;
             }
         });
 

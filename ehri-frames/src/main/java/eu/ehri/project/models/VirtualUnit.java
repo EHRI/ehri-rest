@@ -41,6 +41,8 @@ public interface VirtualUnit extends AbstractUnit {
     @Adjacency(label = Ontology.VC_IS_PART_OF)
     public VirtualUnit getParent();
 
+
+
     /**
      * Add a child. Note: this should throw an exception like
      * IllegalEdgeLoop if the operation is self-referential or

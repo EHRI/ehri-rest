@@ -26,6 +26,7 @@ public class Ontology {
     public static final String LINK_HAS_LINKER = "hasLinker";
     public static final String LINK_HAS_TYPE = "type";
     public static final String LINK_HAS_DESCRIPTION = "description";
+    public static final String LINK_HAS_CONTEXT = "inContextOf"; // points to a TL virtual unit
 
     public static final String HAS_PERMISSION_SCOPE = "hasPermissionScope";
     public static final String IS_ACCESSIBLE_TO = "access";
@@ -104,6 +105,7 @@ public class Ontology {
     public static final String VC_IS_PART_OF = "isPartOf";
     public static final String VC_HAS_AUTHOR = "hasAuthor";
     public static final String VC_DESCRIBED_BY = "isDescribedBy";
+    public static final String VC_INCLUDES_UNIT = "includesUnit";
     public static final String VC_IN_COLLECTION = "isInVirtualCollection";
 
     // User relationships
