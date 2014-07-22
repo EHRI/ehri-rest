@@ -45,7 +45,7 @@ public enum DescriptionIdGenerator implements IdGenerator {
     public String getIdBase(Bundle bundle) {
         String lang = bundle.getDataValue(LANGUAGE_OF_DESCRIPTION);
         String ident = bundle.getDataValue(IDENTIFIER_KEY);
-        if (ident != null && ident.trim().equals("")) {
+        if (ident != null && ident.trim().isEmpty()) {
             ident = null;
         }
         return Joiner.on(IdGeneratorUtils.SEPARATOR)
