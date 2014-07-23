@@ -69,11 +69,20 @@ public interface VirtualUnit extends AbstractUnit {
 
     @Fetch(value = Ontology.VC_DESCRIBED_BY, full = true)
     @Adjacency(label = Ontology.VC_DESCRIBED_BY, direction = Direction.OUT)
+    @Deprecated
     public Iterable<DocumentDescription> getReferencedDescriptions();
 
+    
+    @Adjacency(label = Ontology.VC_INCLUDES_UNIT, direction = Direction.OUT)
+    public Iterable<AbstractUnit> getIncludedUnits();
+    
+    
     @JavaHandler
+    @Deprecated
     public void addReferencedDescription(final DocumentDescription description);
 
+    @JavaHandler
+    public void addIncludedUnit(final DocumentaryUnit unit);
 
     @Adjacency(label = Ontology.VC_HAS_AUTHOR, direction = Direction.OUT)
     public Accessor getAuthor();
@@ -94,8 +103,13 @@ public interface VirtualUnit extends AbstractUnit {
             addSingleRelationship(it(), accessor.asVertex(), Ontology.VC_HAS_AUTHOR);
         }
 
+        @Deprecated
         public void addReferencedDescription(final DocumentDescription description) {
             addUniqueRelationship(it(), description.asVertex(), Ontology.VC_DESCRIBED_BY);
+        }
+        
+        public void addIncludedUnit(final DocumentaryUnit unit) {
+            addUniqueRelationship(it(), unit.asVertex(), Ontology.VC_INCLUDES_UNIT);
         }
 
         public Long getChildCount() {

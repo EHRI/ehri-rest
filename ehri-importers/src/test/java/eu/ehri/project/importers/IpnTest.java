@@ -62,13 +62,13 @@ public class IpnTest extends AbstractImporterTest{
         
         printGraph(graph);
         // How many new nodes will have been created? We should have
-        // - 7 more VirtualUnits (archdesc, 2 children with each 2 children)
+        // - 3 more VirtualUnits (archdesc, 2 children with each 2 children)
        	// - 3 more DocumentDescription
-        // - 8 more import Event links (6 for every Unit, 1 for the User)
+        // - 4 more import Event links (6 for every Unit, 1 for the User)
         // - 1 more import Event
 
         // - 0 more MaintenanceEvents
-        int newCount = origCount + 19; 
+        int newCount = origCount + 11; 
         assertEquals(newCount, getNodeCount(graph));
         
         VirtualUnit archdesc = graph.frame(

@@ -18,31 +18,29 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Import EAD describing a Virtual Collection.
- * some rules governing virtual collections:
- *	
- *	the archdesc should describe the purpose of this vc. it can not in itself refer to a DU.
- *	
- *	every c level is either 1) a virtual level (=VirtualLevel), or 2) it points to an existing DocumentaryUnit (=VirtualReferrer) (and consequently to the entire subtree beneath it)
- *	1) there is no repository-tag with a ehri-label
- *	
- *	2) there is exactly one repository-tag with an ehri-label
- *	<repository label="ehri_repository_vc">il-002777</repository>
- *	(this will not be shown in the portal)
- *	and exactly one unitid with a ehri-main-identifier label, that is identical to the existing unitid within the graph for this repository
- *	
- *	all other tags will be ignored, since the DocumentsDescription of the referred DocumentaryUnit will be shown.
- *	there should not be any c-levels beneath such a c-level
- *	
+ * Import EAD describing a Virtual Collection. some rules governing virtual collections:
+ *
+ * the archdesc should describe the purpose of this vc. it can not in itself refer to a DU.
+ *
+ * every c level is either 1) a virtual level (=VirtualLevel), or 2) it points to an existing DocumentaryUnit
+ * (=VirtualReferrer) (and consequently to the entire subtree beneath it) 1) there is no repository-tag with a
+ * ehri-label
+ *
+ * 2) there is exactly one repository-tag with an ehri-label <repository
+ * label="ehri_repository_vc">il-002777</repository> (this will not be shown in the portal) and exactly one unitid with
+ * a ehri-main-identifier label, that is identical to the existing unitid within the graph for this repository
+ *
+ * all other tags will be ignored, since the DocumentsDescription of the referred DocumentaryUnit will be shown. there
+ * should not be any c-levels beneath such a c-level
+ *
  *
  * @author lindar
  *
  */
 public class VirtualEadImporter extends EaImporter {
-    protected static final String REPOID="vcRepository";
-    protected static final String UNITID="objectIdentifier";
-    
 
+    protected static final String REPOID = "vcRepository";
+    protected static final String UNITID = "objectIdentifier";
     private static final Logger logger = LoggerFactory.getLogger(VirtualEadImporter.class);
     //the EadImporter can import ead as DocumentaryUnits, the default, or overwrite those and create VirtualUnits instead.
     private EntityClass unitEntity = EntityClass.VIRTUAL_UNIT;
@@ -60,13 +58,12 @@ public class VirtualEadImporter extends EaImporter {
     }
 
     /**
-     * Import a single archdesc or c01-12 item, keeping a reference to the hierarchical depth.
-     * this will import the structure as VirtualUnits, which either have a DocDescription (VirtualLevel, like series)
-     * or they point to an existing DocDesc from an existing DocumentaryUnit (VirtualReferrer).
+     * Import a single archdesc or c01-12 item, keeping a reference to the hierarchical depth. this will import the
+     * structure as VirtualUnits, which either have a DocDescription (VirtualLevel, like series) or they point to an
+     * existing DocDesc from an existing DocumentaryUnit (VirtualReferrer).
      *
      * @param itemData The data map
-     * @param idPath The identifiers of parent documents,
-     *               not including those of the overall permission scope
+     * @param idPath The identifiers of parent documents, not including those of the overall permission scope
      * @throws ValidationError when the itemData does not contain an identifier for the unit or...
      */
     @Override
@@ -77,7 +74,7 @@ public class VirtualEadImporter extends EaImporter {
 
         boolean isVirtualLevel = isVirtualLevel(itemData);
         Bundle unit = new Bundle(unitEntity, extractVirtualUnit(itemData));
-        
+
         if (isVirtualLevel) { //VirtualLevel
             // Check for missing identifier, throw an exception when there is no ID.
             if (unit.getDataValue(Ontology.IDENTIFIER_KEY) == null) {
@@ -101,56 +98,53 @@ public class VirtualEadImporter extends EaImporter {
                 descBundle = descBundle.withRelation(Ontology.HAS_UNKNOWN_PROPERTY, new Bundle(EntityClass.UNKNOWN_PROPERTY, unknowns));
             }
             unit = unit.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
-        }
-
-        Mutation<VirtualUnit> mutation =
-                persister.createOrUpdate(unit, VirtualUnit.class);
-        VirtualUnit frame = mutation.getNode();
-
-        //add the referencedTo DocumentDescriptions
-        if (!isVirtualLevel) {//VirtualReferrer
+            Mutation<VirtualUnit> mutation =
+                    persister.createOrUpdate(unit, VirtualUnit.class);
+            VirtualUnit frame = mutation.getNode();
+            // Set the repository/item relationship
+            //TODO: figure out another way to determine we're at the root, so we can get rid of the depth param
+            if (idPath.isEmpty() && mutation.created()) {
+                EntityClass scopeType = manager.getEntityClass(permissionScope);
+                if (scopeType.equals(EntityClass.USER_PROFILE)) {
+                    UserProfile responsibleUser = framedGraph.frame(permissionScope.asVertex(), UserProfile.class);
+                    frame.setAuthor(responsibleUser);
+                    //the top Virtual Unit does not have a permissionScope. 
+                } else if (scopeType.equals(unitEntity)) {
+                    VirtualUnit parent = framedGraph.frame(permissionScope.asVertex(), VirtualUnit.class);
+                    parent.addChild(frame);
+                    frame.setPermissionScope(parent);
+                } else if (unitEntity.equals(EntityClass.VIRTUAL_UNIT)) {
+                    // no scope needed for top VirtualUnit
+                } else {
+                    logger.error("Unknown scope type for virtual unit: {}", scopeType);
+                }
+            }
+            handleCallbacks(mutation);
+//        if (mutation.created()) {
+//            solveUndeterminedRelationships(frame, descBundle);
+//        }
+            return frame;
+        } //find the referred Documentary Unit and RETURN it
+        //if (!isVirtualLevel) {//VirtualReferrer
+        else {
             try {
                 //find the DocumentaryUnit using the repository_id/unit_id combo
                 DocumentaryUnit d = findReferredToDocumentaryUnit(itemData);
-                for (DocumentDescription desc : d.getDocumentDescriptions()) {
-                    frame.addReferencedDescription(desc);
-                }
+//                for (DocumentDescription desc : d.getDocumentDescriptions()) {
+//                    frame.addReferencedDescription(desc);
+//                }
+                return d;
             } catch (ItemNotFound ex) {
                 throw new ValidationError(unit, ex.getKey(), ex.getMessage());
             }
         }
 
-        // Set the repository/item relationship
-        //TODO: figure out another way to determine we're at the root, so we can get rid of the depth param
-        if (idPath.isEmpty() && mutation.created()) {
-            EntityClass scopeType = manager.getEntityClass(permissionScope);
-            if (scopeType.equals(EntityClass.USER_PROFILE)) {
-                UserProfile responsibleUser = framedGraph.frame(permissionScope.asVertex(), UserProfile.class);
-                frame.setAuthor(responsibleUser);
-                //the top Virtual Unit does not have a permissionScope. 
-            } else if (scopeType.equals(unitEntity)) {
-                VirtualUnit parent = framedGraph.frame(permissionScope.asVertex(), VirtualUnit.class);
-                parent.addChild(frame);
-                frame.setPermissionScope(parent);
-            } else if(unitEntity.equals(EntityClass.VIRTUAL_UNIT)) {
-              // no scope needed for top VirtualUnit
-            } else {
-                logger.error("Unknown scope type for virtual unit: {}", scopeType);
-            }
-        }
-        handleCallbacks(mutation);
-//        if (mutation.created()) {
-//            solveUndeterminedRelationships(frame, descBundle);
-//        }
-        return frame;
 
 
     }
 
-    
-
     @SuppressWarnings("unchecked")
-   @Override
+    @Override
     protected Iterable<Map<String, Object>> extractRelations(Map<String, Object> data) {
         final String REL = "AccessPoint";
         List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
@@ -181,20 +175,21 @@ public class VirtualEadImporter extends EaImporter {
 
     /**
      * Creates a Map containing properties of a Virtual Unit.
-     * 
+     *
      * These properties are the unit's identifiers.
+     *
      * @param itemData Map of all extracted information
      * @return a Map representing a Documentary Unit node
      * @throws ValidationError
      */
     protected Map<String, Object> extractVirtualUnit(Map<String, Object> itemData) throws ValidationError {
-        
+
         Map<String, Object> unit = new HashMap<String, Object>();
         if (itemData.get(OBJECT_ID) != null) {
             unit.put(Ontology.IDENTIFIER_KEY, itemData.get(OBJECT_ID));
         }
         if (itemData.get(Ontology.OTHER_IDENTIFIERS) != null) {
-        	logger.debug("otherIdentifiers is not null");
+            logger.debug("otherIdentifiers is not null");
             unit.put(Ontology.OTHER_IDENTIFIERS, itemData.get(Ontology.OTHER_IDENTIFIERS));
         }
         return unit;
@@ -204,9 +199,11 @@ public class VirtualEadImporter extends EaImporter {
     protected Map<String, Object> extractDocumentaryUnit(Map<String, Object> itemData) throws ValidationError {
         throw new UnsupportedOperationException("Not supported ever.");
     }
+
     /**
-     * Creates a Map containing properties of a Documentary Unit description.
-     * These properties are the unit description's properties: all except the doc unit identifiers and unknown properties.
+     * Creates a Map containing properties of a Documentary Unit description. These properties are the unit
+     * description's properties: all except the doc unit identifiers and unknown properties.
+     *
      * @param itemData Map of all extracted information
      * @param depth depth of node in the tree
      * @return a Map representing a Documentary Unit Description node
@@ -216,9 +213,9 @@ public class VirtualEadImporter extends EaImporter {
 
         Map<String, Object> unit = new HashMap<String, Object>();
         for (String key : itemData.keySet()) {
-            if (!(key.equals(OBJECT_ID) 
-            	|| key.equals(Ontology.OTHER_IDENTIFIERS) 
-            	|| key.startsWith(SaxXmlHandler.UNKNOWN))) {
+            if (!(key.equals(OBJECT_ID)
+                    || key.equals(Ontology.OTHER_IDENTIFIERS)
+                    || key.startsWith(SaxXmlHandler.UNKNOWN))) {
                 unit.put(key, itemData.get(key));
             }
         }
@@ -229,33 +226,35 @@ public class VirtualEadImporter extends EaImporter {
     public AccessibleEntity importItem(Map<String, Object> itemData) throws ValidationError {
         throw new UnsupportedOperationException("Not supported yet.");
     }
-    
-    public void importAsVirtualCollection(){
-      unitEntity = EntityClass.VIRTUAL_UNIT;
+
+    public void importAsVirtualCollection() {
+        unitEntity = EntityClass.VIRTUAL_UNIT;
     }
 
     /**
      * if the itemData contains a known repository_id/unit_id pair, this will return false, true otherwise
+     *
      * @param itemData
-     * @return 
+     * @return
      */
     private boolean isVirtualLevel(Map<String, Object> itemData) {
-        return ! (itemData.containsKey(REPOID) && itemData.containsKey(UNITID));
+        return !(itemData.containsKey(REPOID) && itemData.containsKey(UNITID));
     }
 
     private DocumentaryUnit findReferredToDocumentaryUnit(Map<String, Object> itemData) throws ItemNotFound {
-        if(itemData.containsKey(REPOID) && itemData.containsKey(UNITID)){
+        if (itemData.containsKey(REPOID) && itemData.containsKey(UNITID)) {
             String repositoryid = itemData.get(REPOID).toString();
             String unitid = itemData.get(UNITID).toString();
             Repository repository = manager.getFrame(repositoryid, Repository.class);
-            for (DocumentaryUnit unit : repository.getAllCollections()){
-                logger.debug(unit.getIdentifier() + " " + unit.getId() + " "+ unitid);
-                if(unit.getIdentifier().equals(unitid))
+            for (DocumentaryUnit unit : repository.getAllCollections()) {
+                logger.debug(unit.getIdentifier() + " " + unit.getId() + " " + unitid);
+                if (unit.getIdentifier().equals(unitid)) {
                     return unit;
+                }
             }
-            throw new ItemNotFound(String.format("No item %s found in repo %s", unitid, repositoryid) );
+            throw new ItemNotFound(String.format("No item %s found in repo %s", unitid, repositoryid));
         }
         throw new ItemNotFound(String.format("Apparently no repositoryid/unitid combo given"));
-        
+
     }
 }

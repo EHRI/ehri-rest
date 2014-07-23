@@ -16,6 +16,8 @@ import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.VirtualUnit;
+import eu.ehri.project.models.base.AbstractUnit;
+import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.views.impl.CrudViews;
@@ -76,35 +78,43 @@ public void setStageTest() throws PermissionDenied, ValidationError, IntegrityEr
 
 //        printGraph(graph);
         // How many new nodes will have been created? We should have
-        // - 4 more VirtualUnits (archdesc, 3 children)
+        // - 2 more VirtualUnits (archdesc, 1 child (other 2 children are already existing DUs))
        	// - 2 more DocumentDescription
-        // - 5 more import Event links (4 for every Unit, 1 for the User)
+        // - 3 more import Event links (4 for every Unit, 1 for the User)
         // - 1 more import Event
-        int newCount = origCount + 12; 
+        int newCount = origCount + 8; 
         assertEquals(newCount, getNodeCount(graph));
         
         VirtualUnit toplevel = graph.frame(getVertexByIdentifier(graph, ARCHDESC), VirtualUnit.class);
         assertEquals(agent, toplevel.getAuthor());
+        assertEquals("ehri terezin research guide", toplevel.getIdentifier());
+        assertEquals(1, toList(toplevel.getIncludedUnits()).size());
 
-        VirtualUnit c1_vreferrer = graph.frame(getVertexById(graph, toplevel.getId()+"-"+UNIT1), VirtualUnit.class);
-        assertEquals(toplevel, c1_vreferrer.getParent());
-        boolean foundDesc = false;
-        for(DocumentDescription d: c1_vreferrer.getReferencedDescriptions()){
-            //the describedEntity of a VirtualReferrer type VirtualUnit is the described DocumentaryUnit
-            assertEquals(unit1, d.getDescribedEntity());
-            foundDesc=true;
+        DocumentaryUnit c1_vreferrer = graph.frame(getVertexById(graph, UNIT1), DocumentaryUnit.class);
+        for(AbstractUnit d : toplevel.getIncludedUnits()){
+            assertEquals(c1_vreferrer, d);
         }
-        assertTrue(foundDesc);
+        
+        boolean foundDesc = false;
         
         VirtualUnit c1_vlevel = graph.frame(getVertexById(graph, toplevel.getId()+"-"+C01_VirtualLevel), VirtualUnit.class);
         assertEquals(toplevel, c1_vlevel.getParent());
-        foundDesc=false;
         for(DocumentDescription d: c1_vlevel.getVirtualDescriptions()){
             //the describedEntity of a VirtualLevel type VirtualUnit is the VirtualUnit itself
             assertEquals(c1_vlevel, d.getDescribedEntity());
             foundDesc=true;
         }
         assertTrue(foundDesc);
+        
+        int countIncludedUnits = 0;
+        for(AbstractUnit included : c1_vlevel.getIncludedUnits()){
+            countIncludedUnits ++;
+            for(Description d : included.getDescriptions()){
+               assertEquals(UNIT2+"title", d.getName()); 
+               assertEquals("cze", d.getLanguageOfDescription());
+            }
+        }
+        assertEquals(1, countIncludedUnits);
         
     }
 
@@ -125,7 +135,7 @@ public void setStageTest() throws PermissionDenied, ValidationError, IntegrityEr
         Bundle documentDescription2Bundle = new Bundle(EntityClass.DOCUMENT_DESCRIPTION)
                                 .withDataValue(Ontology.IDENTIFIER_KEY, UNIT2+"desc")
                                 .withDataValue(Ontology.NAME_KEY, UNIT2+"title")
-                                .withDataValue(Ontology.LANGUAGE_OF_DESCRIPTION, "eng");
+                                .withDataValue(Ontology.LANGUAGE_OF_DESCRIPTION, "cze");
 
         repository1 = new CrudViews<Repository>(graph, Repository.class).create(repo1Bundle, validUser);
         repository2 = new CrudViews<Repository>(graph, Repository.class).create(repo2Bundle, validUser);

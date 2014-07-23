@@ -2,12 +2,15 @@ package eu.ehri.project.importers;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.VirtualUnit;
 
 import eu.ehri.project.models.MaintenanceEvent;
+import eu.ehri.project.models.base.AbstractUnit;
 import eu.ehri.project.models.base.Frame;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +37,7 @@ public class VirtualEadHandler extends SaxXmlHandler {
     private static final Logger logger = LoggerFactory
             .getLogger(VirtualEadHandler.class);
     
-    protected final List<VirtualUnit>[] children = new ArrayList[12];
+    protected final List<AbstractUnit>[] children = new ArrayList[12];
     protected final Stack<String> scopeIds = new Stack<String>();
     // Pattern for EAD nodes that represent a child item
     private final static Pattern childItemPattern = Pattern.compile("^/*c(?:\\d*)$");
@@ -184,21 +187,37 @@ public class VirtualEadHandler extends SaxXmlHandler {
                     //add the <author> of the ead to every description
                     addAuthor(currentGraph);
 
-                    VirtualUnit current = (VirtualUnit) importer.importItem(currentGraph, pathIds());
-                    topLevel=current; // if it is not overwritten, the current DU is the topLevel
-                    logger.debug("importer used: " + importer.getClass());
-                    if (depth > 0) { // if not on root level
-                        children[depth - 1].add(current); // add child to parent offspring
-                        // set the parent child relationships by hand
-                        // as we don't have the parent Documentary unit yet.
-                        // only when closing a DocUnit, one can set the relationship to its children,
-                        // but not its parent, as that has not yet been closed.
-                        for (VirtualUnit child : children[depth]) {
-                            if (child != null) {
-                                
-                                current.addChild(child);
-                                child.setPermissionScope(current);
+                    AbstractUnit current = (AbstractUnit) importer.importItem(currentGraph, pathIds());
+                    if (current.getType().equals(Entities.VIRTUAL_UNIT)) {
+                        logger.debug("virtual unit created: " + current.getIdentifier());
+                        topLevel = (VirtualUnit) current; // if it is not overwritten, the current DU is the topLevel
+                        logger.debug("importer used: " + importer.getClass());
+                        if (depth > 0) { // if not on root level
+                            children[depth - 1].add((VirtualUnit) current); // add child to parent offspring
+                            // set the parent child relationships by hand
+                            // as we don't have the parent Documentary unit yet.
+                            // only when closing a DocUnit, one can set the relationship to its children,
+                            // but not its parent, as that has not yet been closed.
+                            for (AbstractUnit child : children[depth]) {
+                                if (child != null) {
+                                    if (child.getType().equals(Entities.VIRTUAL_UNIT)) {
+                                        logger.debug("virtual child");
+
+                                        ((VirtualUnit) current).addChild(((VirtualUnit) child));
+                                        child.setPermissionScope(current);
+                                    } else { //child.getType().equals(Entities.DOCUMENTARY_UNIT)
+                                        logger.debug("documentary child");
+                                        ((VirtualUnit) current).addIncludedUnit(((DocumentaryUnit) child));
+
+                                    }
+                                }
                             }
+                        }
+                    } else{
+                        //nothing has to happen, since the DocumentaryUnit is already created before
+                        logger.debug("documentary Unit found: " + current.getIdentifier());
+                        if (depth > 0) { // if not on root level
+                            children[depth - 1].add((DocumentaryUnit) current); // add child to parent offspring
                         }
                     }
                 } catch (ValidationError ex) {
