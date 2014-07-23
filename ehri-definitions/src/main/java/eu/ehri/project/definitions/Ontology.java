@@ -15,6 +15,7 @@ public class Ontology {
     public static final String ENTITY_HAS_ADDRESS = "hasAddress";
 
     // Properties
+    public static final String CREATION_PROCESS = "creationProcess";
     public static final String LANGUAGE_OF_DESCRIPTION = "languageCode";
     public static final String LANGUAGE = LANGUAGE_OF_DESCRIPTION; //"languageCode";
 
