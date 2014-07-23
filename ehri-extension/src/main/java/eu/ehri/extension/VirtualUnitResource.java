@@ -213,24 +213,6 @@ public final class VirtualUnitResource extends
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/for/{id:.+}")
-    public StreamingOutput pageVirtualUnitsFor(@PathParam("id") String id,
-            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
-            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
-            @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)
-            throws AccessDenied, ItemNotFound, BadRequester {
-        DescribedEntity item = manager.getFrame(id, DescribedEntity.class);
-        Accessor currentUser = getRequesterUserProfile();
-        Iterable<VirtualUnit> units = vuViews.getVirtualCollections(item, currentUser);
-        Query.Page<VirtualUnit> page = virtualUnitQuery
-                .filter(filters).setOffset(offset).setLimit(limit).orderBy(order)
-                .page(units, currentUser);
-        return streamingPage(page);
-    }
-
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
     @Path("/forUser/{userId:.+}")
     public StreamingOutput pageVirtualUnitsForUser(@PathParam("userId") String userId,
             @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,

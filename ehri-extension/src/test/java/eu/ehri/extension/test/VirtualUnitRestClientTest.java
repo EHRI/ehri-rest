@@ -280,21 +280,6 @@ public class VirtualUnitRestClientTest extends BaseRestClientTest {
     }
 
     @Test
-    public void testPageVirtualUnitsForItem() throws Exception {
-        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
-                ehriUri(Entities.VIRTUAL_UNIT, "for", "c2"))
-                .get(ClientResponse.class);
-
-        String json = response.getEntity(String.class);
-        assertStatus(OK, response);
-        // Check the response contains a new version
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode rootNode = mapper.readValue(json, JsonNode.class);
-        assertFalse(rootNode.path("total").isMissingNode());
-        assertEquals(1, rootNode.path("total").getIntValue());
-    }
-
-    @Test
     public void testPageVirtualUnitsForUser() throws Exception {
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
                 ehriUri(Entities.VIRTUAL_UNIT, "forUser", "linda"))

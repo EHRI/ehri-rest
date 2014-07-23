@@ -75,7 +75,9 @@ public interface VirtualUnit extends AbstractUnit {
     
     @Adjacency(label = Ontology.VC_INCLUDES_UNIT, direction = Direction.OUT)
     public Iterable<AbstractUnit> getIncludedUnits();
-    
+
+    @JavaHandler
+    public Iterable<Repository> getRepositories();
     
     @JavaHandler
     @Deprecated
@@ -162,25 +164,6 @@ public interface VirtualUnit extends AbstractUnit {
 
             return frameVertices(gremlin().in(Ontology.VC_IS_PART_OF).cast(Vertex.class).copySplit(gremlin(), otherPipe)
                     .fairMerge().cast(Vertex.class));
-        }
-
-        public Iterable<Repository> getRepositories() {
-            Pipeline<Vertex,Vertex> otherPipe = gremlin()
-                    .out(Ontology.VC_DESCRIBED_BY)
-                    .out(Ontology.DESCRIPTION_FOR_ENTITY)
-                    .as("n").out(Ontology.DOC_IS_CHILD_OF)
-                    .loop("n", JavaHandlerUtils.defaultMaxLoops, new PipeFunction<LoopPipe.LoopBundle<Vertex>, Boolean>() {
-                        @Override
-                        public Boolean compute(LoopPipe.LoopBundle<Vertex> vertexLoopBundle) {
-                            return !vertexLoopBundle.getObject().getVertices(Direction.OUT,
-                                    Ontology.DOC_IS_CHILD_OF).iterator().hasNext();
-                        }
-                    });
-
-            GremlinPipeline<Vertex,Vertex> out = gremlin().cast(Vertex.class).copySplit(gremlin(), otherPipe)
-                    .exhaustMerge().out(Ontology.DOC_HELD_BY_REPOSITORY);
-
-            return frameVertices(out);
         }
 
         public Iterable<VirtualUnit> getAncestors() {

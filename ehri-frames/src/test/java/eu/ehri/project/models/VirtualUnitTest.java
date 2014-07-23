@@ -115,13 +115,4 @@ public class VirtualUnitTest extends AbstractFixtureTest {
         vc1.setAuthor(kcl);
         assertEquals(kcl, vc1.getAuthor());
     }
-
-
-    @Test
-    @Ignore //VirtualUnits do not belong to a Repository
-    public void testGetRepositories() throws Exception {
-        VirtualUnit vu2 = manager.getFrame("vu2", VirtualUnit.class);
-        Repository r1 = manager.getFrame("r1", Repository.class);
-//        assertEquals(Lists.newArrayList(r1), Lists.newArrayList(vu2.getRepositories()));
-    }
 }
