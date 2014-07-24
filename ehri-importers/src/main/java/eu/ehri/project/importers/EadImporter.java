@@ -6,6 +6,7 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
+import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.models.*;
 import eu.ehri.project.models.base.*;
@@ -19,6 +20,7 @@ import java.util.Map;
 
 import eu.ehri.project.persistence.BundleDAO;
 import eu.ehri.project.persistence.Mutation;
+import eu.ehri.project.persistence.Serializer;
 import eu.ehri.project.views.impl.CrudViews;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +41,8 @@ public class EadImporter extends EaImporter {
     private static final Logger logger = LoggerFactory.getLogger(EadImporter.class);
     //the EadImporter can import ead as DocumentaryUnits, the default, or overwrite those and create VirtualUnits instead.
     private EntityClass unitEntity = EntityClass.DOCUMENTARY_UNIT;
-
+    private Serializer mergeSerializer;
+    public static final String ACCESS_POINT = "AccessPoint";
     /**
      * Construct an EadImporter object.
      *
@@ -49,7 +52,7 @@ public class EadImporter extends EaImporter {
      */
     public EadImporter(FramedGraph<?> framedGraph, PermissionScope permissionScope, ImportLog log) {
         super(framedGraph, permissionScope, log);
-
+        mergeSerializer = new Serializer.Builder(framedGraph).dependentOnly().build();
     }
 
     /**
@@ -90,19 +93,17 @@ public class EadImporter extends EaImporter {
             logger.debug("Unknown Properties found");
             descBundle = descBundle.withRelation(Ontology.HAS_UNKNOWN_PROPERTY, new Bundle(EntityClass.UNKNOWN_PROPERTY, unknowns));
         }
-        unit = unit.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
-
-        // Old solution to missing IDs: generate a replacement. 
-        // New solution used above: throw error - Handlers should produce IDs if necessary.
-
-
+        for (Map<String, Object> dpb : extractMaintenanceEvent(itemData)) {
+            logger.debug("maintenance event found");
+            //dates in maintenanceEvents are no DatePeriods, they are not something to search on
+            descBundle = descBundle.withRelation(Ontology.HAS_MAINTENANCE_EVENT, new Bundle(EntityClass.MAINTENANCE_EVENT, dpb));
+        }
 
         Mutation<DocumentaryUnit> mutation =
-                persister.createOrUpdate(unit, DocumentaryUnit.class);
+                persister.createOrUpdate(mergeWithPreviousAndSave(unit, descBundle, idPath), DocumentaryUnit.class);
         DocumentaryUnit frame = mutation.getNode();
 
         // Set the repository/item relationship
-        //TODO: figure out another way to determine we're at the root, so we can get rid of the depth param
         if (idPath.isEmpty() && mutation.created()) {
             EntityClass scopeType = manager.getEntityClass(permissionScope);
             if (scopeType.equals(EntityClass.REPOSITORY)) {
@@ -113,8 +114,6 @@ public class EadImporter extends EaImporter {
                 DocumentaryUnit parent = framedGraph.frame(permissionScope.asVertex(), DocumentaryUnit.class);
                 parent.addChild(frame);
                 frame.setPermissionScope(parent);
-            } else if(unitEntity.equals(EntityClass.VIRTUAL_UNIT)) {
-              // no scope needed for top VirtualUnit
             } else {
                 logger.error("Unknown scope type for documentary unit: {}", scopeType);
             }
@@ -126,6 +125,63 @@ public class EadImporter extends EaImporter {
         return frame;
 
 
+    }
+/**
+     * finds any bundle in the graph with the same ObjectIdentifier.
+     * if it exists it replaces the Description in the given language, else it just saves it
+     *
+     * @param unit       - the DocumentaryUnit to be saved
+     * @param descBundle - the documentsDescription to replace any previous ones with this language
+     * @return A bundle with description relationships merged.
+     * @throws ValidationError
+     */
+
+    protected Bundle mergeWithPreviousAndSave(Bundle unit, Bundle descBundle, List<String> idPath) throws ValidationError {
+        final String languageOfDesc = descBundle.getDataValue(Ontology.LANGUAGE_OF_DESCRIPTION);
+        /*
+         * for some reason, the idpath from the permissionscope does not contain the parent documentary unit.
+         * TODO: so for now, it is added manually
+         */
+        List<String> lpath = new ArrayList<String>();
+        for(String p : getPermissionScope().idPath()){
+            lpath.add(p);
+        }
+        for(String p : idPath){
+            lpath.add(p);
+        }
+        Bundle withIds = unit.generateIds(lpath);
+        
+        
+        logger.debug("idpath: "+withIds.getId());
+        if (manager.exists(withIds.getId())) {
+            try {
+                //read the current item’s bundle
+                Bundle oldBundle = mergeSerializer
+                        .vertexFrameToBundle(manager.getVertex(withIds.getId()));
+
+                //filter out dependents that a) are descriptions, b) have the same language/code
+                Bundle.Filter filter = new Bundle.Filter() {
+                    @Override
+                    public boolean remove(String relationLabel, Bundle bundle) {
+                        String lang = bundle.getDataValue(Ontology.LANGUAGE);
+                        return bundle.getType().equals(EntityClass.DOCUMENT_DESCRIPTION)
+                                && (lang != null
+                                && lang.equals(languageOfDesc));
+                    }
+                };
+                Bundle filtered = oldBundle.filterRelations(filter);
+
+                return withIds.withRelations(filtered.getRelations())
+                        .withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
+
+            } catch (SerializationError ex) {
+                throw new ValidationError(unit, "serialization error", ex.getMessage());
+            } catch (ItemNotFound ex) {
+                throw new ValidationError(unit, "item not found exception", ex.getMessage());
+            }
+        } else {
+            return unit.withRelation(Ontology.DESCRIPTION_FOR_ENTITY, descBundle);
+        }
     }
 
     /**
@@ -165,7 +221,7 @@ public class EadImporter extends EaImporter {
                         if (concept.getIdentifier().equals(concept_id)) {
                             try {
                                 Bundle linkBundle = new Bundle(EntityClass.LINK)
-                                        .withDataValue(Ontology.LINK_HAS_TYPE, "resolved relationship")
+                                        .withDataValue(Ontology.LINK_HAS_TYPE, rel.asVertex().getProperty("type").toString())
                                         .withDataValue(Ontology.LINK_HAS_DESCRIPTION, "solved by automatic resolving");
                                 UserProfile user = manager.getFrame(this.log.getActioner().getId(), UserProfile.class);
                                 Link link = new CrudViews<Link>(framedGraph, Link.class).create(linkBundle, user);
@@ -193,25 +249,24 @@ public class EadImporter extends EaImporter {
     @SuppressWarnings("unchecked")
    @Override
     protected Iterable<Map<String, Object>> extractRelations(Map<String, Object> data) {
-        final String REL = "AccessPoint";
         List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
         for (String key : data.keySet()) {
-            if (key.endsWith(REL)) {
-                logger.debug(key + " found in data");
+            if (key.endsWith(ACCESS_POINT)) {
                 //type, targetUrl, targetName, notes
                 for (Map<String, Object> origRelation : (List<Map<String, Object>>) data.get(key)) {
                     Map<String, Object> relationNode = new HashMap<String, Object>();
                     for (String eventkey : origRelation.keySet()) {
-                        logger.debug(eventkey);
-                        if (eventkey.endsWith(REL)) {
-                            relationNode.put(Ontology.UNDETERMINED_RELATIONSHIP_TYPE, eventkey);
+//                        logger.debug(eventkey);
+                        if (eventkey.endsWith(ACCESS_POINT)) {
+                            relationNode.put(Ontology.UNDETERMINED_RELATIONSHIP_TYPE, eventkey.substring(0, eventkey.indexOf("Point")));
                             relationNode.put(Ontology.NAME_KEY, origRelation.get(eventkey));
+logger.debug("------------------" + eventkey.substring(0, eventkey.indexOf("Point")) + ": "+ origRelation.get(eventkey));                            
                         } else {
                             relationNode.put(eventkey, origRelation.get(eventkey));
                         }
                     }
                     if (!relationNode.containsKey(Ontology.UNDETERMINED_RELATIONSHIP_TYPE)) {
-                        relationNode.put(Ontology.UNDETERMINED_RELATIONSHIP_TYPE, "corporateBodyAccessPoint");
+                        relationNode.put(Ontology.UNDETERMINED_RELATIONSHIP_TYPE, "corporateBodyAccess");
                     }
                     list.add(relationNode);
                 }

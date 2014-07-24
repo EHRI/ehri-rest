@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.PrintStream;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -94,6 +95,16 @@ public class AbstractImporterTest extends AbstractFixtureTest {
         public void printDebug(PrintStream printStream) {
             printDebug(printStream, false);
         }
+        private Map<String, Integer> countDistinctTypes(Set<VertexProxy> vs){
+            Map<String, Integer> counts = new HashMap<String, Integer>();
+            for(VertexProxy v : vs){
+                if(counts.containsKey(v.type))
+                    counts.put(v.type, counts.get(v.type) + 1);
+                else
+                    counts.put(v.type, new Integer(1));
+            }
+            return counts;
+        }
 
         public void printDebug(PrintStream printStream, boolean verbose) {
             if (added.isEmpty() && removed.isEmpty()) {
@@ -103,9 +114,17 @@ public class AbstractImporterTest extends AbstractFixtureTest {
                 for (VertexProxy proxy : added) {
                     printStream.println(verbose ? proxy.toStringVerbose() : proxy.toString());
                 }
+                Map<String, Integer> counts = countDistinctTypes(added);
+                for(String key: counts.keySet()){
+                    printStream.println(key + ": " + counts.get(key));
+                }
                 printStream.println("GraphDiff - Nodes removed: " + removed.size());
                 for (VertexProxy proxy : removed) {
                     printStream.println(verbose ? proxy.toStringVerbose() : proxy.toString());
+                }
+                counts = countDistinctTypes(removed);
+                for(String key: counts.keySet()){
+                    printStream.println(key + ": " + counts.get(key));
                 }
             }
         }
@@ -185,11 +204,26 @@ public class AbstractImporterTest extends AbstractFixtureTest {
         }
     }
 
-    protected Vertex getVertexByIdentifier(FramedGraph<?> graph, String id) {
-        Iterable<Vertex> docs = graph.getVertices(Ontology.IDENTIFIER_KEY, id);
+    /**
+     * 
+     * @param graph
+     * @param identifier the value of the property 'identifier'
+     * @return 
+     */
+    protected Vertex getVertexByIdentifier(FramedGraph<?> graph, String identifier) {
+        Iterable<Vertex> docs = graph.getVertices(Ontology.IDENTIFIER_KEY, identifier);
         return docs.iterator().next();
     }
-
+    /**
+     * 
+     * @param graph
+     * @param id the value of the property '__ID__'
+     * @return 
+     */
+    protected Vertex getVertexById(FramedGraph<?> graph, String id) {
+        Iterable<Vertex> docs = graph.getVertices(EntityType.ID_KEY, id);
+        return docs.iterator().next();
+    }
     protected int getNodeCount(FramedGraph<?> graph) {
         long l = Iterables.count(graph.getVertices());
         if (l < Integer.MIN_VALUE || l > Integer.MAX_VALUE)

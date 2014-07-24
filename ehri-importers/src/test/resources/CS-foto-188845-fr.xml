@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet TYPE="text/xsl" href="http://pallas.cegesoma.be/ead/res/cs4Fie.xsl"?>
+<!DOCTYPE Ead PUBLIC "-//Society of American Archivists//DTD ead.dtd (Encoded
+Archival Description (EAD) Version 1.0)//EN" "http://pallas.cegesoma.be/ead/res/ead.dtd" [ 
+<!ENTITY % eadnotat PUBLIC "-//Society of American Archivists//DTD eadnotat.ent
+(EAD Notation Declarations)//EN" "http://pallas.cegesoma.be/ead/res/eadnotat.ent"> 
+%eadnotat;
+]>
+<ead relatedencoding="MARC21">
+  <eadheader audience="internal" langencoding="ISO 639-2" findaidstatus="EDITED-FULL-DRAFT" id="a0">
+    <eadid systemid="CEGESOMA_188845" source="Centre de Recherches et d&#39;&#233;tudes Guerre et Soci&#233;t&#233;s contemporaines" encodinganalog="852">CEGESOMA_188845</eadid>
+    <filedesc>
+      <titlestmt>
+        <subtitle>Inventaire "Dessin caricatural d&#39;un juif ayant tir&#233; sur des troupes Allemandes en Russie"</subtitle>
+        <author>G&#233;n&#233;r&#233; automatiquement par PALLAS syst&#232;me</author>
+      </titlestmt>
+      <publicationstmt>
+        <publisher>Centre de Recherches et d&#39;&#233;tudes Guerre et Soci&#233;t&#233;s contemporaines</publisher>
+        <date>09/01/2014</date>
+        <address>Square de l&#39;Aviation 29 - 1070 Bruxelles (Belgique)</address>
+      </publicationstmt>
+    </filedesc>
+    <profiledesc>
+       <creation><date>09/01/2014</date>G&#233;n&#233;r&#233; automatiquement par PALLAS syst&#232;me</creation>
+       <langusage>F</langusage>
+    </profiledesc>
+  </eadheader>
+  <archdesc level="otherlevel" langmaterial="" type="inventory">
+    <did id="a1">
+      <head>Dessin caricatural d&#39;un juif ayant tir&#233; sur des troupes Allemandes en Russie</head>
+<repository encodinganalog="852$a" label="D&#233;pot:"><addressline>Luchtvaartsquare 29 - 1070 Brussel (Belgi&#235;)</addressline>Centre de Recherches et d&#39;&#233;tudes Guerre et Soci&#233;t&#233;s contemporaines</repository>
+      <unittitle encodinganalog="245$a" label="Titre:">Dessin caricatural d&#39;un juif ayant tir&#233; sur des troupes Allemandes en Russie</unittitle>
+      <unitdate type="inclusive" encodinganalog="245$f" label="Dates:">1940-1945</unitdate>
+      <unitid encodinganalog="099" countrycode="BE" label="Identification:">CA FE 1437</unitid>
+    </did>
+    <organization encodinganalog="351$a" id="a4">
+      <head>Organisation</head>
+      <p></p>
+    </organization>
+    <arrangement encodinganalog="351$b" id="a5">
+      <head>Classement</head>
+      <p></p>
+    </arrangement>
+    <controlaccess id="a12">
+    <head>Sujets</head>
+      <controlaccess>
+      <head>Mots-cl&#233;</head>
+      <subject encodinganalog="650">caricatures et dessins humoristiques--urss</subject>
+      <subject encodinganalog="650">juifs--russie--histoire</subject>
+      </controlaccess>
+      <controlaccess>
+      <head>Titre</head>
+      <title encodinganalog="630">Dessin caricatural d&#39;un juif ayant tir&#233; sur des troupes Allemandes en Russie</title>
+    </controlaccess>
+    </controlaccess>
+    <dsc id="a23" type="combined">
+<head>Description d&#233;taill&#233;e</head>
+    </dsc>
+  </archdesc>
+</ead>

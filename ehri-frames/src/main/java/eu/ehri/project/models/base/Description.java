@@ -13,12 +13,23 @@ import eu.ehri.project.models.annotations.Mandatory;
 
 public interface Description extends NamedEntity, AccessibleEntity {
 
+    /**
+     * Process by which this description was created. Currently supported
+     * values allow for automatic import or manual creation (by a human).
+     */
+    public static enum CreationProcess {
+        MANUAL, IMPORT
+    }
+
     @Adjacency(label = Ontology.DESCRIPTION_FOR_ENTITY)
     public DescribedEntity getEntity();
 
     @Mandatory
     @Property(Ontology.LANGUAGE_OF_DESCRIPTION)
     public String getLanguageOfDescription();
+
+    @Property(Ontology.CREATION_PROCESS)
+    public CreationProcess getCreationProcess();
 
     /**
      * Get the described entity of a description. This 

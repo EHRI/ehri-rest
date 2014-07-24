@@ -41,6 +41,8 @@ public interface VirtualUnit extends AbstractUnit {
     @Adjacency(label = Ontology.VC_IS_PART_OF)
     public VirtualUnit getParent();
 
+
+
     /**
      * Add a child. Note: this should throw an exception like
      * IllegalEdgeLoop if the operation is self-referential or
@@ -67,11 +69,22 @@ public interface VirtualUnit extends AbstractUnit {
 
     @Fetch(value = Ontology.VC_DESCRIBED_BY, full = true)
     @Adjacency(label = Ontology.VC_DESCRIBED_BY, direction = Direction.OUT)
+    @Deprecated
     public Iterable<DocumentDescription> getReferencedDescriptions();
 
+    
+    @Adjacency(label = Ontology.VC_INCLUDES_UNIT, direction = Direction.OUT)
+    public Iterable<AbstractUnit> getIncludedUnits();
+
     @JavaHandler
+    public Iterable<Repository> getRepositories();
+    
+    @JavaHandler
+    @Deprecated
     public void addReferencedDescription(final DocumentDescription description);
 
+    @JavaHandler
+    public void addIncludedUnit(final DocumentaryUnit unit);
 
     @Adjacency(label = Ontology.VC_HAS_AUTHOR, direction = Direction.OUT)
     public Accessor getAuthor();
@@ -92,8 +105,13 @@ public interface VirtualUnit extends AbstractUnit {
             addSingleRelationship(it(), accessor.asVertex(), Ontology.VC_HAS_AUTHOR);
         }
 
+        @Deprecated
         public void addReferencedDescription(final DocumentDescription description) {
             addUniqueRelationship(it(), description.asVertex(), Ontology.VC_DESCRIBED_BY);
+        }
+        
+        public void addIncludedUnit(final DocumentaryUnit unit) {
+            addUniqueRelationship(it(), unit.asVertex(), Ontology.VC_INCLUDES_UNIT);
         }
 
         public Long getChildCount() {
@@ -146,25 +164,6 @@ public interface VirtualUnit extends AbstractUnit {
 
             return frameVertices(gremlin().in(Ontology.VC_IS_PART_OF).cast(Vertex.class).copySplit(gremlin(), otherPipe)
                     .fairMerge().cast(Vertex.class));
-        }
-
-        public Iterable<Repository> getRepositories() {
-            Pipeline<Vertex,Vertex> otherPipe = gremlin()
-                    .out(Ontology.VC_DESCRIBED_BY)
-                    .out(Ontology.DESCRIPTION_FOR_ENTITY)
-                    .as("n").out(Ontology.DOC_IS_CHILD_OF)
-                    .loop("n", JavaHandlerUtils.defaultMaxLoops, new PipeFunction<LoopPipe.LoopBundle<Vertex>, Boolean>() {
-                        @Override
-                        public Boolean compute(LoopPipe.LoopBundle<Vertex> vertexLoopBundle) {
-                            return !vertexLoopBundle.getObject().getVertices(Direction.OUT,
-                                    Ontology.DOC_IS_CHILD_OF).iterator().hasNext();
-                        }
-                    });
-
-            GremlinPipeline<Vertex,Vertex> out = gremlin().cast(Vertex.class).copySplit(gremlin(), otherPipe)
-                    .exhaustMerge().out(Ontology.DOC_HELD_BY_REPOSITORY);
-
-            return frameVertices(out);
         }
 
         public Iterable<VirtualUnit> getAncestors() {

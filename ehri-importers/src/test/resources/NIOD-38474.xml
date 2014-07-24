@@ -149,6 +149,9 @@
       <c01 level="series">
         <did id="MF1148873">
           <unitid type="series_code">1.</unitid>
+          <unitid audience="internal" type="handle"
+              >http://www.archieven.nl/nl/search-modonly?mivast=298&amp;mizig=210&amp;miadt=298&amp;miaet=1&amp;micode=809&amp;minr=1086379&amp;miview=inv2</unitid>
+
           <unittitle>Manuscripten, lezingen en onderzoeksmateriaal</unittitle>
           <unitdate calendar="gregorian" era="ce" normal="1978/2004">1978-1998 [2004]</unitdate>
         </did>
@@ -200,6 +203,9 @@
               <unitdate calendar="gregorian" era="ce" normal="1985/1986">1985-1986</unitdate>
               <physdesc>1 omslag</physdesc>
             </did>
+            <odd type="ONTWIKKELINGSSTADIUM"> 
+              <p>Fotokopieën</p> 
+            </odd>
           </c03>
         </c02>
       </c01>

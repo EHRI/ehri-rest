@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.PermissionScope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -133,6 +134,9 @@ public abstract class EaImporter extends XmlImporter<Map<String, Object>> {
      */
     protected Map<String, Object> extractUnitDescription(Map<String, Object> itemData, EntityClass entity) {
         Map<String, Object> description = new HashMap<String, Object>();
+
+        description.put(Ontology.CREATION_PROCESS, Description.CreationProcess.IMPORT.toString());
+
         for (String key : itemData.keySet()) {
             if (key.equals("descriptionIdentifier")) {
                 description.put(Ontology.IDENTIFIER_KEY, itemData.get(key));
@@ -146,7 +150,8 @@ public abstract class EaImporter extends XmlImporter<Map<String, Object>> {
                     && ! key.startsWith("relation")
                     && ! key.startsWith("IGNORE")
                     && ! key.startsWith("address/")
-                    && ! key.endsWith("Access")) {
+                    && ! key.endsWith("Access")
+                    && ! key.endsWith("AccessPoint")) {
                description.put(key, changeForbiddenMultivaluedProperties(key, itemData.get(key), entity));
             }
         }

@@ -49,23 +49,24 @@ public class VirtualUnitTest extends AbstractFixtureTest {
     }
 
     @Test
-    public void testGetReferencedDescriptions() throws Exception {
+    public void testGetIncludedUnits() throws Exception {
         VirtualUnit vu1 = manager.getFrame("vu1", VirtualUnit.class);
-        DocumentDescription cd1 = manager.getFrame("cd1", DocumentDescription.class);
-        assertTrue(vu1.getReferencedDescriptions().iterator().hasNext());
-        assertEquals(cd1, vu1.getReferencedDescriptions().iterator().next());
+        DocumentaryUnit c1 = manager.getFrame("c1", DocumentaryUnit.class);
+        assertTrue(vu1.getIncludedUnits().iterator().hasNext());
+        assertEquals(c1, vu1.getIncludedUnits().iterator().next());
     }
 
     @Test
-    public void testAddReferencedDescription() throws Exception {
+    public void testAddIncludedUnit() throws Exception {
         VirtualUnit vu1 = manager.getFrame("vu1", VirtualUnit.class);
-        DocumentDescription cd4 = manager.getFrame("cd4", DocumentDescription.class);
-        assertEquals(1L, Iterables.size(vu1.getReferencedDescriptions()));
-        vu1.addReferencedDescription(cd4);
-        assertEquals(2L, Iterables.size(vu1.getReferencedDescriptions()));
+        DocumentaryUnit c4 = manager.getFrame("c4", DocumentaryUnit.class);
+        assertEquals(1L, Iterables.size(vu1.getIncludedUnits()));
+        vu1.addIncludedUnit(c4);
+//        vu1.addReferencedDescription(cd4);
+        assertEquals(2L, Iterables.size(vu1.getIncludedUnits()));
         // check we can't add it twice
-        vu1.addReferencedDescription(cd4);
-        assertEquals(2L, Iterables.size(vu1.getReferencedDescriptions()));
+        vu1.addIncludedUnit(c4);
+        assertEquals(2L, Iterables.size(vu1.getIncludedUnits()));
     }
 
     @Test
@@ -113,20 +114,5 @@ public class VirtualUnitTest extends AbstractFixtureTest {
         assertEquals(linda, vc1.getAuthor());
         vc1.setAuthor(kcl);
         assertEquals(kcl, vc1.getAuthor());
-    }
-
-    @Test
-    public void testGetDescriptions() throws Exception {
-        DocumentDescription cd1 = manager.getFrame("cd1", DocumentDescription.class);
-        VirtualUnit vu1 = manager.getFrame("vu1", VirtualUnit.class);
-        assertEquals(Lists.newArrayList(cd1), Lists.newArrayList(vu1.getReferencedDescriptions()));
-    }
-
-    @Test
-    @Ignore //VirtualUnits do not belong to a Repository
-    public void testGetRepositories() throws Exception {
-        VirtualUnit vu2 = manager.getFrame("vu2", VirtualUnit.class);
-        Repository r1 = manager.getFrame("r1", Repository.class);
-//        assertEquals(Lists.newArrayList(r1), Lists.newArrayList(vu2.getRepositories()));
     }
 }

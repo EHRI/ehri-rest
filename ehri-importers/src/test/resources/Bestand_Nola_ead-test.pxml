@@ -23,7 +23,10 @@ Archival Description (EAD) Version 1.0)//EN" "http://pallas.cegesoma.be/ead/res/
     </filedesc>
     <profiledesc>
        <creation><date>28/03/2013</date>Automatisch gegenereerd door PALLAS systeem</creation>
-       <langusage>F</langusage>
+       <!-- changed from original : was <langusage>F</langusage>-->
+       <langusage>
+           <language>nld</language>
+       </langusage>
     </profiledesc>
   </eadheader>
   <archdesc level="fonds" type="inventory">
@@ -37,7 +40,8 @@ Archival Description (EAD) Version 1.0)//EN" "http://pallas.cegesoma.be/ead/res/
       <unitdate type="inclusive" encodinganalog="245$f" label="Data:">1944-1979</unitdate>
       <unitdate type="bulk" encodinganalog="245$g" label="Overwegend:">1944-1948</unitdate>
       <physdesc encodinganalog="300$a" label="Omvang:">41 fardes</physdesc>
-      <unitid encodinganalog="099" countrycode="BE" label="Identificatie:">AA 1134</unitid>
+      <!-- changed from original : label added -->
+      <unitid encodinganalog="099" countrycode="BE" label="ehri_main_identifier">AA 1134</unitid>
     </did>
     <organization encodinganalog="351$a" id="a4">
       <head>Organisatie</head>
@@ -105,6 +109,8 @@ Archival Description (EAD) Version 1.0)//EN" "http://pallas.cegesoma.be/ead/res/
     <did>
       <unittitle encodinganalog="245$a" label="Titel:">Documenten betreffende l&#39;Union nationale de la R&#233;sistance</unittitle>
       <unitdate type="inclusive" encodinganalog="245$f" label="Data:"></unitdate>
+      <!-- changed from original : no id given, added one -->
+      <unitid encodinganalog="099" countrycode="BE" label="ehri_main_identifier">1234</unitid>
     </did>
     <organization encodinganalog="351$a" id="a4">
       <head>Organisatie</head>
@@ -120,6 +126,8 @@ Archival Description (EAD) Version 1.0)//EN" "http://pallas.cegesoma.be/ead/res/
       <unitdate type="inclusive" encodinganalog="245$f" label="Data:">1944-1948</unitdate>
       <physdesc encodinganalog="300$a" label="Omvang:">47 st.</physdesc>
       <unitid encodinganalog="099" countrycode="BE" label="Identificatie:">AA 1134 / 32</unitid>
+      <!-- changed from original : label changed -->
+      <unitid encodinganalog="099" countrycode="BE" label="ehri_main_identifier">AA 1134 / 32</unitid>
     </did>
     <organization encodinganalog="351$a" id="a4">
       <head>Organisatie</head>
@@ -135,7 +143,8 @@ Archival Description (EAD) Version 1.0)//EN" "http://pallas.cegesoma.be/ead/res/
       <unittitle encodinganalog="245$a" label="Titel:">Documenten van en in verband met verzetsgroepen en vaderlandslievende verenigingen en briefwisseling Pirenne-Joset/G&#233;rard betr. geme</unittitle>
       <unitdate type="inclusive" encodinganalog="245$f" label="Data:">1944-1948</unitdate>
       <physdesc encodinganalog="300$a" label="Omvang:">22 st.</physdesc>
-      <unitid encodinganalog="099" countrycode="BE" label="Identificatie:">AA 1134 / 33</unitid>
+      <!-- changed from original : label changed -->
+      <unitid encodinganalog="099" countrycode="BE" label="ehri_main_identifier">AA 1134 / 33</unitid>
     </did>
     <organization encodinganalog="351$a" id="a4">
       <head>Organisatie</head>
@@ -151,7 +160,8 @@ Archival Description (EAD) Version 1.0)//EN" "http://pallas.cegesoma.be/ead/res/
       <unittitle encodinganalog="245$a" label="Titel:">Wetteksten (U.) S.R.A.</unittitle>
       <unitdate type="inclusive" encodinganalog="245$f" label="Data:"></unitdate>
       <physdesc encodinganalog="300$a" label="Omvang:">2 st.</physdesc>
-      <unitid encodinganalog="099" countrycode="BE" label="Identificatie:">AA 1134 / 34</unitid>
+      <!-- changed from original : label changed -->
+      <unitid encodinganalog="099" countrycode="BE" label="ehri_main_identifier">AA 1134 / 34</unitid>
     </did>
     <organization encodinganalog="351$a" id="a4">
       <head>Organisatie</head>

@@ -17,6 +17,7 @@ import java.util.List;
 
 import org.junit.Test;
 import static org.junit.Assert.*;
+import org.junit.Ignore;
 
 /**
  * Test the import of a Cegesoma EAD file.
@@ -24,7 +25,7 @@ import static org.junit.Assert.*;
  * @author linda
  * @author ben
  */
-public class CegesomaTest extends AbstractImporterTest{
+public class CegesomaOldTest extends AbstractImporterTest{
     
     protected final String TEST_REPO = "r1";
     protected final String XMLFILE = "Bestand_Nola_ead-test.pxml";
@@ -36,6 +37,7 @@ public class CegesomaTest extends AbstractImporterTest{
     int origCount=0;
             
     @Test
+    @Ignore // use CegesomeNolaTest instead. also: CegesomaFotoTest.
     public void cegesomaTest() throws ItemNotFound, IOException, ValidationError, InputParseError {
         
         PermissionScope agent = manager.getFrame(TEST_REPO, PermissionScope.class);

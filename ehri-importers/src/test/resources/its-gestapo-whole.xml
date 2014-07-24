@@ -1,0 +1,4715 @@
+<?xml version="1.0" encoding="UTF-8"?><!-- Exception scanning External DTD Subset.  True contents of DTD cannot be determined.  Processing will continue as XMLInputFactory.IS_VALIDATING == false. --><ead audience="external">
+<eadheader repositoryencoding="iso15511" langencoding="iso639-2b" countryencoding="iso3166-1" dateencoding="iso8601" scriptencoding="iso15924">
+<eadid countrycode="DE" mainagencycode="DE-ITS" identifier="\\Officeserver\its\Verwaltung\IT-Systemadministration\Hoffmann\EAD Konversion\Testexport 20140109 R2-Gestapo EHRI_0_5.xml">R2_Gestapo</eadid>
+<filedesc>
+<titlestmt>
+<titleproper>Findbuch zum Bestand R 2 - Geheime Staatspolizei (Gestapo)</titleproper>
+</titlestmt>
+<publicationstmt>
+<publisher>International Tracing Service (ITS)</publisher>
+<date>2014</date>
+<address>
+<addressline>Große Allee 5-9, 34454 Bad Arolsen, Germany</addressline>
+</address>
+</publicationstmt>
+<seriesstmt>
+<titleproper>Archivrepertorien des Internationalen Suchdienstes</titleproper>
+</seriesstmt>
+</filedesc>
+<profiledesc>
+<creation>OuSArchiv.DescExport Version 1.2</creation>
+<langusage>
+<language langcode="deu"></language>
+</langusage>
+</profiledesc>
+<revisiondesc>
+<change>
+<date>2014-07-08 12:27:07</date>
+<item>EHRI has choosen the ehri_internal_id to be the unitid with label ehri_main_identifier if none were given. If multiple ehri_main_identifier were given, their label was renamed to ehri_multiple_identifier</item>
+</change>
+<change>
+<date>2014/07/08 12:27:06</date>
+<item>EHRI added a unitid with label "ehri_internal_identifier" to give every node a unique id.</item>
+</change>
+<change>
+<date>2014-07-08 12:27:05</date>
+<item>EHRI added a unitid with label "ehri_structure" to indicate the structure of the EAD file on every c-node. This is done to make comparisons of two versions of the same EAD (as indicated by the eadid) possible.</item>
+</change>
+</revisiondesc>
+</eadheader>
+<archdesc level="fonds">
+<did>
+<unitid label="ehri_internal_id">0</unitid>
+<unitid label="ehri_structure">0</unitid>
+<unittitle>Geheime Staatspolizei (Gestapo)</unittitle>
+<unitdate normal="1933-04-04/1945-04-22">1933-04-04 - 1945-04-22</unitdate>
+<origination label="final">Staatspolizeistelle Düsseldorf und Außendienststellen Essen, Duisburg, Mönchen-Gladbach, Krefeld, Gestapo Linz, Gestapo KZ Neuengamme, Gestapo KZ Sachsenhausen, Gestapo Stuttgart (Arbeitserziehungslager Rudersberg)</origination>
+<langmaterial>deu</langmaterial>
+<repository>Internationaler Suchdienst (ITS), Bad Arolsen, Germany</repository>
+<physdesc>
+<extent>467 Verzeichnungseinheiten (Akten)</extent>
+</physdesc>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_0</unitid>
+</did>
+<scopecontent>
+<p>Das Findbuch umfasst 467 im Original vorhandene Personen-Einzelfallakten (Personenakten) der Staatspolizei(leit)stelle Düsseldorf sowie deren Außendienststellen Essen, Duisburg und Krefeld, der Gestapo Linz, der Gestapo KZ Neuengamme, der Gestapo KZ Sachsenhausen sowie aus dem der Gestapo Stuttgart unterstehenden Arbeitserziehungslager Rudersberg.</p>
+<p></p>
+<p>
+<lb></lb>Der Bestand stammt aus den Zentralregistraturen der jeweiligen Staatspolizei(leit)stellen, an die die Außendienststellen die Personenakten in der Regel nach deren Schließung übergeben haben.</p>
+<p></p>
+<p>
+<lb></lb>Die Akten betreffen zum überwiegenden Teil Personengruppen, die in das Mandat des ITS fallen, und beinhalten in der Regel Personalbogen, Vernehmungsniederschriften, Einlieferungs- bzw. Entlassungsanzeigen, Korrespondenz, Gerichtsurteile sowie Schutzhaftbefehle.</p>
+</scopecontent>
+<processinfo>
+<p>Die Richtlinien zur Erschließung von Archivgut im Internationalen Suchdienst sowie die Richtlinienspezifikation für den Bestand R 2 liegen im ITS zur Einsichtnahme auf.<lb></lb>Die Titelaufnahme erfolgte nach dem Muster:</p>
+<p></p>
+<p>
+<lb></lb>Vorname Nachname (Nachname anonymisiert) (Geburtsdatum, Geburtsort (ggf. Kreis, Land), Religion, Staatsbürgerschaft), Grund für Ermittlungen bzw. die Verhaftung durch die Gestapo (Terminologie der Akten), ggf. Schutzhaft und Dauer der Schutzhaft oder sonstige verfügte „staatspolizeiliche Maßnahme“, ggf. Konzentrationslager, in das die Häftlinge verschleppt wurden oder andere Haftstätte.</p>
+<p></p>
+<p>Die Verfolgungstatbestände wurden dabei in der Regel als wörtliche Zitate aus den Akten übernommen.<lb></lb>
+</p>
+</processinfo>
+<custodhist>
+<p>Der exakte Akzessionszeitpunkt aller Gestapo-Personenakten im Archiv des ITS lässt sich nicht mehr genau feststellen.</p>
+<p></p>
+<p>
+<lb></lb>Ein großer Teil der aus der Staatspolizeileitstelle Düsseldorf und ihren Außendienststellen stammenden Personenakten ist vom 55th British Search Bureau an den ITS übergeben worden, ein Teil davon wurde im Jahr 1948, andere wurden auch bereits im Jahr 1947 registriert. Ein weiterer Teil von Personenakten der Gestapo Düsseldorf wurde von der British Zone Division in den Jahren 1944, 1946 und 1949 - 1951 an den ITS abgegeben. Die Personenakten der Gestapo Linz wiederum wurden zum überwiegenden Teil vom Austrian Tracing Bureau an den ITS abgeliefert und in den Jahren 1947, 1948 und 1951 vom ITS registriert.</p>
+<p></p>
+<p>
+<lb></lb>Weitere 14 Akten der Gestapo Düsseldorf, die Schweizer Staatsbürger betreffen, sind im Jahr 1963 von der Agence Centrale des Recherches (ACR) des Internationalen Komitees vom Roten Kreuz in Genf an den ITS überreicht worden. Die Akten wurden in der Folge für die Arbeit des Suchdienstes verwendet, zum Teil voneinander getrennt und nach der Personen- oder Ortsprovenienz des ITS abgelegt. Die Akten sind vom ITS bzw. seinen Vorgängerorganisationen durchwegs alphabetisch nach den Nachnamen sortiert worden, ein Teil der Akten außerdem nach der Nationalität der Betroffenen.<lb></lb>
+</p>
+<p></p>
+<p>
+<lb></lb>Die Gestapo-Personenakten, die sich in der Pertinenzordnung in den als „Listenmaterial“ der Konzentrationslager Auschwitz, Buchenwald, Dachau, Groß-Rosen, Mauthausen, Neuengamme, Ravensbrück, Papenburg und Sachsenhausen bezeichneten Teilbeständen befinden, wurden im Jahr 2012, zusammen mit den im Teilbestand „Gruppe P.P.“ (Prisoned Persons) befindlichen, im Zuge eines Projektes von der Abteilung Archivische Erschließung nach dem Provenienzprinzip verzeichnet und im vorliegenden Findbuch virtuell zusammengeführt.</p>
+<p></p>
+<p>
+<lb></lb>Die Erschließung erfolgte auf Aktenebene und es wurden ausschließlich im ITS im Original vorliegende Gestapo-Personenakten dafür herangezogen.<lb></lb>
+</p>
+</custodhist>
+<bioghist>
+<p>1. Die Gründung der Gestapo<lb></lb>
+</p>
+<p></p>
+<p>
+<lb></lb>
+</p>
+<p>Nachdem Hermann Göring als preußischer Innenminister mit dem Gesetz vom 26. April 1933 eine als Geheime Staatspolizei (Gestapo) bezeichnete neue politische Polizei gegründet hatte, wurde die Gestapo in Preußen innerhalb weniger Monate zu einem von der übrigen Polizeiverwaltung getrennten, selbständigen Zweig der inneren Verwaltung ausgebaut, zunächst unter der Leitung von Rudolf Diels, ab April 1934 von Reinhard Heydrich. Die Gründungsgeschichte ist durch laufend veränderte Strukturen und Machtkämpfe gekennzeichnet. Ihre Organisationsform, ihre Befugnisse und ihr Aufgabenspektrum machten die Geheime Staatspolizei zur exemplarischen Institution des nationalsozialistischen „Maßnahmenstaates“ (Ernst Fraenkel) schlechthin.<lb></lb>Von Mai 1933 bis Kriegsende befand sich die Zentrale der Gestapo, das Geheime Staatspolizeiamt (Gestapa), das über eine Weisungsbefugnis gegenüber anderen Behörden verfügte, in der Prinz-Albrecht-Straße 8 in Berlin (heute: Niederkirchnerstraße 8).<lb></lb>In der Folge wurden zahlreiche Außenstellen - sogenannte Staatspolizeistellen bzw. Staatspolizeileitstellen - geschaffen, so dass im September 1941 insgesamt 67 Stapostellen existierten, davon 26 in den besetzten Gebieten außerhalb des „Altreichs“, wo sie teilweise in die Zuständigkeit des Befehlshabers der Sicherheitspolizei (BdS) bzw. der diesen nachgeordneten Kommandeure (KdS) fielen. Wo die Gestapo selbst über keine eigenen Dependancen verfügte, wurden von ihr auch örtliche Polizeibehörden für ihre Zwecke herangezogen.<lb></lb>
+</p>
+<p></p>
+<p>
+<lb></lb>
+</p>
+<p>2. Die "Verreichlichung" der Gestapo<lb></lb>
+</p>
+<p></p>
+<p>
+<lb></lb>Nach seiner Ernennung zum „Chef der deutschen Polizei im Reichsministerium des Innern“ zentralisierte der „Reichsführer-SS“ Heinrich Himmler am 17. Juni 1936 die verschiedenen politischen Polizeien der Länder im Deutschen Reich unter der einheitlichen Bezeichnung „Geheime Staatspolizei“ und unterstellte sie zugleich der Leitung der SS, ein Vorgang, der in der Forschung auch als „Verreichlichung“ der Gestapo bezeichnet wird. Die darin sichtbare Verflechtung von SS und Polizei, von NSDAP-Parteiorganisationen und staatlicher Exekutive ist gleichsam strukturelles Kennzeichen für die NS-Herrschaft insgesamt und bildete die institutionelle Grundlage für die von der Gestapo ausgeübte „Praxis des Weltanschauungsterrors“ (Gerhard Paul).<lb></lb>
+</p>
+<p></p>
+<p>
+<lb></lb>3. Die Gestapo als Amt IV des Reichssicherheitshauptamtes (RSHA)<lb></lb>
+</p>
+<p></p>
+<p>
+<lb></lb>Im Rahmen des – ebenfalls auf Betreiben Himmlers – am 27. September 1939 als Minsterialbehörde und SS-Hauptamt zugleich neu errichteten Reichssicherheitshauptamtes (RSHA) bildete die Gestapo dessen Amt IV, und firmierte dort, geleitet von Heinrich Müller, ab 1940 unter der Bezeichnung „Gegnererforschung und Gegnerbekämpfung“. RSHA und Stapoleitstellen sowie SD-Leitabschnitte wurden in weiterer Folge noch sogenannte Inspekteure der Sicherheitspolizei und des SD sowie diesen nachgeordnete Kommandeure zwischengeschaltet, in deren Zuständigkeitsbereich jeweils ein Wehrkreis fiel.<lb></lb>Außerdem waren mit Gründung des RSHA unter der Leitung des Chefs der Sicherheitspolizei und des SD Reinhard Heydrich (ab 30.1.1943 Ernst Kaltenbrunner), das Geheime Staatspolizeiamt (Gestapa), das Büro des Politischen Polizeikommandeurs der Länder (außerhalb Preußens), das Reichskriminalpolizeiamt, das Hauptamt Sicherheitspolizei und das Sicherheitshauptamt (SD-Hauptamt) der SS zusammengeführt worden, wobei die Zuständigkeit für alle Staatspolizeistellen im Deutschen Reich und den besetzten Gebieten beim Amt IV lag.<lb></lb>
+</p>
+<p></p>
+<p>
+<lb></lb>4. Der interne Aufbau des Amtes IV<lb></lb>
+</p>
+<p></p>
+<p>
+<lb></lb>Innerhalb des RSHA kam dem Amt IV sowohl personell, als auch im Hinblick auf die Kompetenzen eine herausgehobene Stellung zu. Bis zur Neuorganisation im Jahr 1943/44 setzte das Amt IV sich aus sechs verschiedenen Gruppen zusammen, die wiederum in eine unterschiedliche Anzahl von Referaten untergliedert waren: IV A Verfolgung politischer Gegner („Kommunismus, Marxismus, Reaktion“), IV B Verfolgung der Kirchen und Juden („Politische Kirchen, Sekten, Juden“), IV C Schutzhaft und Personenkartei, Presse und NSDAP („Personenkartei, Personenaktenverwaltung, Schutzhaft, Presse und Partei“), IV D Besetzte Gebiete („Großdeutsche Einflußgebiete, Protektorat, Generalgouvernement, besetztes Ausland“), IV E Abwehr, IV F Passwesen und Ausländerpolizei. Das berüchtigte Referat IV B 4 unter Adolf Eichmann war für „Judenangelegenheiten“ zuständig, die Hauptkartei und die Fotokartei wurden in der Gruppe IV C 1 geführt. „Schutzhaftangelegenheiten“, u.a. die Ausstellung von Schutzhaftbefehlen, gehörten zu den Agenden des Referats IV C 2.<lb></lb>
+</p>
+<p></p>
+<p>
+<emph render="underline"></emph>
+<lb></lb>5. Rahmenbedingungen und Arbeitsweise der Gestapo<lb></lb>
+</p>
+<p></p>
+<p>
+<lb></lb>Das Dritte Gestapo-Gesetz vom 10. Februar 1936 enthielt eine Art Generalermächtigungsklausel und definierte das Aufgabenprofil der Gestapo dahingehend, „alle staatsgefährlichen Bestrebungen im gesamten Staatsgebiet zu erforschen und zu bekämpfen“, wobei die Interpreten des Gesetzes „staatsgefährlich“ bewusst äußerst weitreichend verstanden wissen wollten und nicht allein auf die Sphäre des Politischen beschränkt. Der Gestapo oblag also zunächst die Definition der Gegner, die der neueren Gestapoforschung zufolge durch eine quantitative und qualitative Entgrenzung der Gegnergruppen charakterisiert ist, deren Überwachung und Verfolgung sie im Sinne des nationalsozialistischen Gesellschaftsprogramms und der NS-Rassenideologie unternahm.<lb></lb>Als Teil der Weltanschauungsexekutive übte die Gestapo, mit weitreichenden Befugnissen jenseits rechtsstaatlicher Normen ausgestattet, ihren Staatsterrorismus gegenüber sogenannten „Volksfeinden“ (Heydrich) aus.<lb></lb>Diese Entwicklung findet ihren Niederschlag in den im vorliegenden Findbuch verzeichneten Akten, die zum überwiegenden Teil jene Personengruppen umfassen, die wegen der auf Grundlage der NS-Weltanschauung erfolgten Definition von Gegnern und/oder bestimmten Vergehen in das Fadenkreuz der Gestapo gerieten, was Ermittlungen in Gang setzte und in die Bildung der vorliegenden Personenakten mündete.<lb></lb>
+</p>
+<p></p>
+<p>
+<lb></lb>6. "Staatspolizeiliche Maßnahmen"</p>
+<p></p>
+<p>
+<lb></lb>Eine der wichtigsten „staatspolizeilichen Maßnahmen“, die aus den Ermittlungen in der Regel resultierten, war die sogenannte „Schutzhaft“, die – gestützt auf die „Verordnung des Reichspräsidenten zum Schutz von Volk und Staat“ vom 28. Februar 1933 – außergerichtlich verhängt wurde und sowohl in Gefängnissen als auch im KZ vollstreckt werden konnte.<lb></lb>Die Gestapo verfügte dabei über das Schutzhaftmonopol. Insbesondere für Juden war Schutzhaft meist gleichbedeutend mit einer Verschleppung in ein Konzentrationslager, aus dem es nach Kriegsbeginn keine Entlassung mehr gegeben hat. Mit den „Arbeitserziehungslagern“ (AEL) verfügte die Geheime Staatspolizei darüber hinaus noch über Lager eines eigenen Typus außerhalb des KZ-Systems, in welchem sie bereits die politischen Abteilungen innehatte.<lb></lb>
+</p>
+<p></p>
+<p>
+<lb></lb>7. Ergebnisse der Neueren Gestapoforschung</p>
+<p></p>
+<p>
+<lb></lb>Die jüngere Gestapoforschung hat nicht nur gezeigt, dass sich das Personal der Geheimen Staatspolizei zu wesentlichen Teilen aus den bürgerlichen Funktionseliten rekrutierte, sondern auch, dass – entgegen dem von der NS-Führung selbst verbreiteten Mythos ihrer Allgegenwärtigkeit – ihr Erfolg auf zahlreichen Denunziationen aus der Bevölkerung beruhte.</p>
+<p></p>
+<p></p>
+<p>Quellen:<lb></lb>
+</p>
+<p></p>
+<p>
+<lb></lb>Ämter, Abkürzungen, Aktionen des NS-Staates : Handbuch für die Benutzung von Quellen der nationalsozialistischen Zeit ; Amtsbezeichnungen, Ränge und Verwaltungsgliederungen, Abkürzungen und nicht militärische Tarnbezeichnungen / Im Auftr. des Instituts für Zeitgeschichte bearb. von Heinz Boberach ; Rolf Thommes und Hermann Weiss, München 1997. (Texte und Materialien zur Zeitgeschichte ; Bd. 5)<lb></lb>
+</p>
+<p></p>
+<p>
+<lb></lb>
+</p>
+<p>Dams, Carsten/ Stolle, Michael: Die Gestapo : Herrschaft und Terror im Dritten Reich , München 2008.<lb></lb>
+</p>
+<p></p>
+<p>
+<lb></lb>Paul, Gerhard / Mallmann, Klaus-Michael (Hrsg.): Die Gestapo im Zweiten Weltkrieg : "Heimatfront" und besetztes Europa, Darmstadt 2000.<lb></lb>
+<lb></lb>
+</p>
+<p></p>
+<p>
+<lb></lb>
+</p>
+</bioghist>
+<acqinfo>
+<p>British Zone Divison (1944 abgegeben, 1946, 1949-1951 registriert); 55th British Search Bureau (1947 und 1948 registriert); Austrian Tracing Bureau (1947, 1948 und 1951 registriert); Agence Centrale des Recherches (ACR) Genf, IKRK (1963)</p>
+</acqinfo>
+<relatedmaterial>
+<p>Die im ITS befindlichen Gestapo-Personenakten stammen aus der Registratur der jeweiligen Gestapo-Dienststellen und stellen durchwegs eine Splitter- bzw. Teil-Überlieferung dar, zu der in Ergänzung auch die entsprechenden Bestände in anderen Archiven herangezogen werden müssen.<lb></lb>
+</p>
+<p></p>
+<p>
+<lb></lb>Der größte überlieferte Bestand von Gestapo-Personeneinzelfallakten befindet sich mit jenen der Staatspolizei(leit)stelle Düsseldorf (71269 Einheiten) unter der Signatur RW 58 im Landesarchiv Nordrhein-Westfalen, Abteilung Rheinland (Findbücher 411.03.0 - 411.03.34). Außerdem befinden sich dort Kopien (teilweise auch Mikrofilme) von 102 der beim ITS im Original vorliegenden Gestapo-Personeneinzelfallakten, unter „1.4.1 Internationaler Suchdienst-Gestapoakten“.<lb></lb>
+</p>
+<p></p>
+<p>
+<lb></lb>Weitere Gestapoakten liegen u.a. im Sonderarchiv beim Staatlichen Militärarchiv Moskau und beim Bundesarchiv (siehe dort Findbuch R 58 Reichssicherheitshauptamt).<lb></lb>
+</p>
+<p></p>
+<p>
+<lb></lb>Im Archiv des ITS sind weitere Personenakten der Gestapo Düsseldorf in Form von Kopien vorhanden, deren Digitalisate unter dem Gliederungspunkt „1.2.3.14 Akten der Gestapo Düsseldorf“ in der hauseigenen Recherchedatenbank einsehbar sind. Ferner sind vereinzelt Kopien von Personenakten der Staatspolizeileitstelle Zichenau unter „1.2.2.1 Gruppe P.P., Ordner 0590“ vorhanden. Im Teilbestand „1.1.8.3 Individuelle Unterlagen Männer Flossenbürg“ und in den entsprechenden Gruppen anderer Konzentrationslagerbestände, die über eine Datenbank mittels Namensabfrage zugänglich sind, sind ebenfalls noch vereinzelt Gestapo-Personenakten im Original zu erwarten.<lb></lb>
+</p>
+<p></p>
+<p>
+<lb></lb>Darüber hinaus gibt es im ITS sowohl unter dem Pertinenzordnungs-Gliederungspunkt „1.2.3 Gestapo“, als auch unter „1.2.2.1 Gruppe P.P.“ noch Schriftgut verschiedener Dienststellen der Geheimen Staatspolizei innerhalb des damaligen Deutschen Reiches und in den okkupierten Gebieten, überwiegend in Kopie, zum Teil auch im Original. Im Bestand „1.2.3 Gestapo“ befinden sich u.a. Karteien (zum Teil im Original) der Gestapo Frankfurt, Hamburg, Koblenz, Lenne, Luxemburg, Münster, Neustadt, Osnabrück, Trier, Wiesbaden, Luxemburg - Unterkommando Diekirch und es gibt überdies den Teilbestand „1.2.2.4 Kartei Gestapa Berlin“.<lb></lb>Die zuletzt genannten Karteien sind über eine Datenbank nach Personalien (Name, Geburtsdatum) erschlossen.<lb></lb>
+</p>
+<p></p>
+<p>
+<lb></lb>Transportlisten der Gestapo in Kopie sowie vereinzelt im Original und als Abschrift oder Nachkriegsaufstellung hat der ITS unter „1.2.1.1 Transportlisten Gestapo“ abgelegt.<lb></lb>Weiteres Schriftgut mit Gestapo-Bezug – darunter ein Verzeichnis der Staatspolizeileitstellen sowie Geschäftsverteilungspläne – ist unter „1.1.0.2 Reichssicherheitshauptamt“ verfügbar.<lb></lb>Zu den Arbeitserziehungslagern Essen-Mühlheim (Flughafen Recklinghausen), Hallendorf, Hunswinkel und Watenstedt kann unter „1.1.0.3 Arbeitserziehungslager allgemein“ recherchiert werden.<lb></lb>
+</p>
+</relatedmaterial>
+<prefercite>
+<p>ITS Archive, R 2 / [Nr.]</p>
+</prefercite>
+<userestrict>
+<p>Die Akten sind vollständig digitalisiert und aus konservatorischen Gründen grundsätzlich nur in digitaler Form einsehbar.</p>
+</userestrict>
+<bibliography>
+<p>• Ämter, Abkürzungen, Aktionen des NS-Staates : Handbuch für die Benutzung von Quellen der nationalsozialistischen Zeit ; Amtsbezeichnungen, Ränge und Verwaltungsgliederungen, Abkürzungen und nicht militärische Tarnbezeichnungen / Im Auftr. des Instituts für Zeitgeschichte bearb. von Heinz Boberach ; Rolf Thommes und Hermann Weiss, München 1997. (Texte und Materialien zur Zeitgeschichte ; Bd. 5)<lb></lb>• Arbeitserziehungslager, In: Der Ort des Terrors. Geschichte der nationalsozialistischen Konzentrationslager, Band 9: Arbeitserziehungslager, Ghettos, Jungendschutzlager, Polizeihaftlager, Sonderlager, Zigeunerlager, Zwangsarbeitslager / Hrsg. v. Wolfgang Benz und Barbara Distel, München: C.H. Beck, 2009, S. 75-99.<lb></lb>• Berschel, Holger: Bürokratie und Terror : Das Judenreferat der Gestapo Düsseldorf 1935 – 1945, Essen 2001.<lb></lb>• Dams, Carsten/ Stolle, Michael: Die Gestapo : Herrschaft und Terror im Dritten Reich , München 2008.<lb></lb>• Das Schriftgut der NSDAP, ihrer Gliederungen und angeschlossenen Verbände in der Überlieferung staatlicher Behörden im Bereich des heutigen Landes Nordrhein-Westfalen.Teil 1-3 / Eingeleitet von Peter Dohms und Klaus Wisotzky, bearbeitet von Klaus Wisotzky, Selbstverlag des Nordrh.-Westf. Hauptstaatsarchivs, Düsseldorf 1981.<lb></lb>• Das Schriftgut der NSDAP, ihrer Gliederungen und angeschlossenen Verbände in der Überlieferung staatlicher Behörden im Bereich des heutigen Landes Nordrhein-Westfalen; Teil 4 / Bearbeitet von Annelie Buntenbach und Hans Georg Radel, Selbstverlag des Nordrh.-Westf. Staatsarchivs, Detmold 1983.<lb></lb>• Davy, Ulrike: Die Geheime Staatspolizei in Österreich : Organisation und Aufgaben der Geheimen Staatspolizei im "Dritten Reich" und die Weiterführung ihrer Geschäfte durch österreichische Sicherheitsbehörden , Wien : Manz, 1990. (Österreichische rechtswissenschaftliche Studien ; 8)<lb></lb>• Dohms, Peter: Flugschriften in Gestapo-Akten : Nachweis und Analyse der Flugschriften in den Gestapo-Akten des Hauptstaatsarchivs Düsseldorf ; Mit einem Literaturbericht und einer Quellenübersicht zu Widerstand und Verfolgung im Rhein-Ruhr-Gebiet 1933–1945 / Hrsg. vom Hauptstaatsarchiv Düsseldorf, Respublica-Verlag, Siegburg 1977.<lb></lb>• Gellately, Robert: The Gestapo and German Society: Enforcing Racial Policy 1933-1945 (Oxford University Press, 1991. (Dt.: Gellately, Robert: Die Gestapo und die deutsche Gesellschaft : Die Durchsetzung der Rassenpolitik 1933-1945, Paderborn 1994.)<lb></lb>• Gellately, Robert: The Gestapo and German Society: Political Denunciation in the Gestapo Case Files, In: The Journal of Modern History, Vol. 60, No. 4, December 1988.<lb></lb>• Gutermuth, Frank / Netzbandt, Arno: Die Gestapo, Berlin 2005.<lb></lb>• Gutermuth, Frank /Netzbrandt, Arno: Die Gestapo, Berlin 2005.<lb></lb>• Lederle, Julia: Gestapo-Personenakten, In: Unbekannte Quellen: „Massenakten“ des 20. Jahrhunderts ; Untersuchungen seriellen Schriftguts aus normierten Verwaltungsverfahren / im Auftrag des Landesarchivs hrsg. von Jens Heckl, Düsseldorf 2010.<lb></lb>• Lotfi, Gabriele: KZ der Gestapo : Arbeitserziehungslager im Dritten Reich. Stuttgart 2000.<lb></lb>• Paul, Gerhard / Mallmann, Klaus-Michael (Hrsg.): Die Gestapo : Mythos und Realität, Darmstadt 2003.<lb></lb>• Paul, Gerhard / Mallmann, Klaus-Michael (Hrsg.): Die Gestapo im Zweiten Weltkrieg : "Heimatfront" und besetztes Europa, Darmstadt 2000.<lb></lb>• Romeyk, Horst: Verwaltungs- und Behördengeschichte der Rheinprovinz 1914-1945, Düsseldorf 1985.<lb></lb>• Ruckenbiel, Jan: Soziale Kontrolle im NS-Regime : Protest, Denunziation und Verfolgung ; Zur Praxis alltäglicher Unterdrückung im Wechselspiel von Bevölkerung und Gestapo. Köln 2003.<lb></lb>• Schuster, Walter: Quellen zur nationalsozialistischen Überwachung und Repression am Beispiel der Stadt Linz, In: German Studies Association Newsletter, Volume XXXI, Number 2, Winter 2006, S. 73-78.<lb></lb>• Schwegel, Andreas: Der Polizeibegriff im NS-Staat : Polizeirecht, juristische Publizistik und Judikative 1931 – 1944, Tübingen : Mohr Siebeck, 2005. (Beiträge zur Rechtsgeschichte des 20. Jahrhunderts ; 48)<lb></lb>• Vollmer, Gisela: Der Bestand Gestapoleitstelle Düsseldorf im Hauptstaatsarchiv Düsseldorf : Zur Erschließung von Personenakten, In: Der Archivar. Mitteilungsblatt für deutsches Archivwesen 2/1963, S. 287–294.<lb></lb>
+<lb></lb>
+</p>
+</bibliography>
+<dsc type="in-depth">
+<c01 level="subfonds">
+<did>
+<unitid label="ehri_internal_id">1</unitid>
+<unitid label="ehri_structure">0.0</unitid>
+<unittitle>Gestapo Düsseldorf</unittitle>
+<unitdate normal="1933-04-04/1944-08-29">1933-04-04 - 1944-08-29</unitdate>
+<repository>Internationaler Suchdienst (ITS), Bad Arolsen, Germany</repository>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_1</unitid>
+</did>
+<scopecontent>
+<p>Personen-Einzelfallakten (Personenakten) der Staatspolizei(leit)stelle Düsseldorf sowie deren Außendienststellen Essen, Duisburg und Krefeld</p>
+</scopecontent>
+<bioghist>
+<p>Die Staatspolizeistelle Düsseldorf (1933 Staatspolizeistelle, ab Sept. 1939 Staatspolizeileitstelle) unterstand dem Höheren SS- und Polizeiführer bei den Oberpräsidenten von Westfalen, Hannover, der Rheinprovinz und beim Reichsstatthalter in Lippe und Schaumburg-Lippe im Wehrkreis VI, Düsseldorf.<lb></lb>Insgesamt existierten nach dem Stand vom April 1943 neben der Staatspolizeileitstelle Düsseldorf die Staatspolizeistellen Aachen, Dortmund, Köln, Münster, die Staatspolizei-Außendienststellen Bielefeld, Duisburg, Essen, Hamborn, Krefeld, Mülheim/Ruhr, Mönchengladbach, Oberhausen, Remscheid, Solingen, Velbert, Wuppertal, Bochum, Hamm, Hagen, Meschede, Siegen, Bonn, Bottrop, Gelsenkirchen und –Buer, Gladbeck, Meppen, Osnabrück, Paderborn, Recklinghausen.<lb></lb>Neben den genannten Außendienststellen unterstanden der Düsseldorfer Gestapo einige Grenzpolizeikommissariate, die ebenfalls als Außendienststellen fungierten: die Grenzpolizeikommissariate in Emmerich, Kaldenkirchen und Kleve mit nachgeordneten Dienststellen als Hilfsorgane u.a. Amt Breyell, Amt Goch und Asperden, Amt Lobberich sowie Amt Marienbaum als Ortspolizeibehörden.<lb></lb>Der Zuständigkeitsbereich der Geheimen Staatspolizei(leit)stelle Düsseldorf umfasste den damaligen Regierungsbezirk Düsseldorf mit ca. 4,2 Millionen Einwohnern (1939). Das Personal der Staatspolizeileitstelle Düsseldorf und ihrer Untergliederungen umfasste im März 1937 insgesamt 291, im September 1941 waren es in Summe 349 Mitarbeiter.<lb></lb>
+<lb></lb>Quellen:<lb></lb>
+<lb></lb>Ämter, Abkürzungen, Aktionen des NS-Staates : Handbuch für die Benutzung von Quellen der nationalsozialistischen Zeit ; Amtsbezeichnungen, Ränge und Verwaltungsgliederungen, Abkürzungen und nicht militärische Tarnbezeichnungen / Im Auftr. des Instituts für Zeitgeschichte bearb. von Heinz Boberach ; Rolf Thommes und Hermann Weiss, München 1997. (Texte und Materialien zur Zeitgeschichte ; Bd. 5)<lb></lb>
+<lb></lb>Dams, Carsten/ Stolle, Michael: Die Gestapo : Herrschaft und Terror im Dritten Reich , München 2008.<lb></lb>
+<lb></lb>Paul, Gerhard / Mallmann, Klaus-Michael (Hrsg.): Die Gestapo im Zweiten Weltkrieg : "Heimatfront" und besetztes Europa, Darmstadt 2000.<lb></lb>
+</p>
+</bioghist>
+<c02 level="subfonds">
+<did>
+<unitid label="ehri_internal_id">2</unitid>
+<unitid label="ehri_structure">0.0.0</unitid>
+<unittitle>Staatspolizeileitstelle Düsseldorf</unittitle>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_2</unitid>
+</did>
+<scopecontent>
+<p>Personen-Einzelfallakten (Personenakten) der Staatspolizei(leit)stelle Düsseldorf</p>
+</scopecontent>
+<c03 level="subfonds">
+<did>
+<unitid label="ehri_internal_id">3</unitid>
+<unitid label="ehri_structure">0.0.0.0</unitid>
+<unittitle>Ermittlung und Inhaftierung (Einzelfälle)</unittitle>
+<repository>Internationaler Suchdienst (ITS), Bad Arolsen, Germany</repository>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_3</unitid>
+</did>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">4</unitid>
+<unitid label="ehri_structure">0.0.0.0.0</unitid>
+<unitid type="bestellnummer">R 2 10697</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_4</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">5</unitid>
+<unitid label="ehri_structure">0.0.0.0.1</unitid>
+<unitid type="bestellnummer">R 2 8687</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_5</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">6</unitid>
+<unitid label="ehri_structure">0.0.0.0.2</unitid>
+<unitid type="bestellnummer">R 2 10252</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_6</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">7</unitid>
+<unitid label="ehri_structure">0.0.0.0.3</unitid>
+<unitid type="bestellnummer">R 2 10203</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_7</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">8</unitid>
+<unitid label="ehri_structure">0.0.0.0.4</unitid>
+<unitid type="bestellnummer">R 2 10291</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_8</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">9</unitid>
+<unitid label="ehri_structure">0.0.0.0.5</unitid>
+<unitid type="bestellnummer">R 2 10677</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_9</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">10</unitid>
+<unitid label="ehri_structure">0.0.0.0.6</unitid>
+<unitid type="bestellnummer">R 2 8611</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_10</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">11</unitid>
+<unitid label="ehri_structure">0.0.0.0.7</unitid>
+<unitid type="bestellnummer">R 2 10268</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_11</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">12</unitid>
+<unitid label="ehri_structure">0.0.0.0.8</unitid>
+<unitid type="bestellnummer">R 2 10199</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_12</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">13</unitid>
+<unitid label="ehri_structure">0.0.0.0.9</unitid>
+<unitid type="bestellnummer">R 2 10699</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_13</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">14</unitid>
+<unitid label="ehri_structure">0.0.0.0.10</unitid>
+<unitid type="bestellnummer">R 2 10282</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_14</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">15</unitid>
+<unitid label="ehri_structure">0.0.0.0.11</unitid>
+<unitid type="bestellnummer">R 2 10235</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_15</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">16</unitid>
+<unitid label="ehri_structure">0.0.0.0.12</unitid>
+<unitid type="bestellnummer">R 2 10251</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_16</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">17</unitid>
+<unitid label="ehri_structure">0.0.0.0.13</unitid>
+<unitid type="bestellnummer">R 2 10232</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_17</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">18</unitid>
+<unitid label="ehri_structure">0.0.0.0.14</unitid>
+<unitid type="bestellnummer">R 2 10290</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_18</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">19</unitid>
+<unitid label="ehri_structure">0.0.0.0.15</unitid>
+<unitid type="bestellnummer">R 2 10234</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_19</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">20</unitid>
+<unitid label="ehri_structure">0.0.0.0.16</unitid>
+<unitid type="bestellnummer">R 2 10228</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_20</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">21</unitid>
+<unitid label="ehri_structure">0.0.0.0.17</unitid>
+<unitid type="bestellnummer">R 2 10255</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_21</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">22</unitid>
+<unitid label="ehri_structure">0.0.0.0.18</unitid>
+<unitid type="bestellnummer">R 2 10272</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_22</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">23</unitid>
+<unitid label="ehri_structure">0.0.0.0.19</unitid>
+<unitid type="bestellnummer">R 2 8615</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_23</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">24</unitid>
+<unitid label="ehri_structure">0.0.0.0.20</unitid>
+<unitid type="bestellnummer">R 2 10229</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_24</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">25</unitid>
+<unitid label="ehri_structure">0.0.0.0.21</unitid>
+<unitid type="bestellnummer">R 2 10208</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_25</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">26</unitid>
+<unitid label="ehri_structure">0.0.0.0.22</unitid>
+<unitid type="bestellnummer">R 2 8619</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_26</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">27</unitid>
+<unitid label="ehri_structure">0.0.0.0.23</unitid>
+<unitid type="bestellnummer">R 2 10298</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_27</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">28</unitid>
+<unitid label="ehri_structure">0.0.0.0.24</unitid>
+<unitid type="bestellnummer">R 2 10204</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_28</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">29</unitid>
+<unitid label="ehri_structure">0.0.0.0.25</unitid>
+<unitid type="bestellnummer">R 2 10286</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_29</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">30</unitid>
+<unitid label="ehri_structure">0.0.0.0.26</unitid>
+<unitid type="bestellnummer">R 2 8690</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_30</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">31</unitid>
+<unitid label="ehri_structure">0.0.0.0.27</unitid>
+<unitid type="bestellnummer">R 2 10273</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_31</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">32</unitid>
+<unitid label="ehri_structure">0.0.0.0.28</unitid>
+<unitid type="bestellnummer">R 2 8600</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_32</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">33</unitid>
+<unitid label="ehri_structure">0.0.0.0.29</unitid>
+<unitid type="bestellnummer">R 2 8669</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_33</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">34</unitid>
+<unitid label="ehri_structure">0.0.0.0.30</unitid>
+<unitid type="bestellnummer">R 2 8679</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_34</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">35</unitid>
+<unitid label="ehri_structure">0.0.0.0.31</unitid>
+<unitid type="bestellnummer">R 2 10295</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_35</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">36</unitid>
+<unitid label="ehri_structure">0.0.0.0.32</unitid>
+<unitid type="bestellnummer">R 2 8692</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_36</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">37</unitid>
+<unitid label="ehri_structure">0.0.0.0.33</unitid>
+<unitid type="bestellnummer">R 2 10216</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_37</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">38</unitid>
+<unitid label="ehri_structure">0.0.0.0.34</unitid>
+<unitid type="bestellnummer">R 2 10301</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_38</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">39</unitid>
+<unitid label="ehri_structure">0.0.0.0.35</unitid>
+<unitid type="bestellnummer">R 2 10702</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_39</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">40</unitid>
+<unitid label="ehri_structure">0.0.0.0.36</unitid>
+<unitid type="bestellnummer">R 2 10196</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_40</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">41</unitid>
+<unitid label="ehri_structure">0.0.0.0.37</unitid>
+<unitid type="bestellnummer">R 2 8677</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_41</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">42</unitid>
+<unitid label="ehri_structure">0.0.0.0.38</unitid>
+<unitid type="bestellnummer">R 2 10219</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_42</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">43</unitid>
+<unitid label="ehri_structure">0.0.0.0.39</unitid>
+<unitid type="bestellnummer">R 2 8688</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_43</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">44</unitid>
+<unitid label="ehri_structure">0.0.0.0.40</unitid>
+<unitid type="bestellnummer">R 2 8683</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_44</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">45</unitid>
+<unitid label="ehri_structure">0.0.0.0.41</unitid>
+<unitid type="bestellnummer">R 2 8676</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_45</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">46</unitid>
+<unitid label="ehri_structure">0.0.0.0.42</unitid>
+<unitid type="bestellnummer">R 2 10676</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_46</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">47</unitid>
+<unitid label="ehri_structure">0.0.0.0.43</unitid>
+<unitid type="bestellnummer">R 2 8617</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_47</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">48</unitid>
+<unitid label="ehri_structure">0.0.0.0.44</unitid>
+<unitid type="bestellnummer">R 2 8671</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_48</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">49</unitid>
+<unitid label="ehri_structure">0.0.0.0.45</unitid>
+<unitid type="bestellnummer">R 2 8603</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_49</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">50</unitid>
+<unitid label="ehri_structure">0.0.0.0.46</unitid>
+<unitid type="bestellnummer">R 2 10195</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_50</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">51</unitid>
+<unitid label="ehri_structure">0.0.0.0.47</unitid>
+<unitid type="bestellnummer">R 2 10696</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_51</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">52</unitid>
+<unitid label="ehri_structure">0.0.0.0.48</unitid>
+<unitid type="bestellnummer">R 2 8598</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_52</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">53</unitid>
+<unitid label="ehri_structure">0.0.0.0.49</unitid>
+<unitid type="bestellnummer">R 2 8674</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_53</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">54</unitid>
+<unitid label="ehri_structure">0.0.0.0.50</unitid>
+<unitid type="bestellnummer">R 2 10214</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_54</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">55</unitid>
+<unitid label="ehri_structure">0.0.0.0.51</unitid>
+<unitid type="bestellnummer">R 2 8599</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_55</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">56</unitid>
+<unitid label="ehri_structure">0.0.0.0.52</unitid>
+<unitid type="bestellnummer">R 2 8678</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_56</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">57</unitid>
+<unitid label="ehri_structure">0.0.0.0.53</unitid>
+<unitid type="bestellnummer">R 2 10300</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_57</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">58</unitid>
+<unitid label="ehri_structure">0.0.0.0.54</unitid>
+<unitid type="bestellnummer">R 2 10238</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_58</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">59</unitid>
+<unitid label="ehri_structure">0.0.0.0.55</unitid>
+<unitid type="bestellnummer">R 2 10270</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_59</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">60</unitid>
+<unitid label="ehri_structure">0.0.0.0.56</unitid>
+<unitid type="bestellnummer">R 2 10276</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_60</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">61</unitid>
+<unitid label="ehri_structure">0.0.0.0.57</unitid>
+<unitid type="bestellnummer">R 2 10198</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_61</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">62</unitid>
+<unitid label="ehri_structure">0.0.0.0.58</unitid>
+<unitid type="bestellnummer">R 2 10297</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_62</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">63</unitid>
+<unitid label="ehri_structure">0.0.0.0.59</unitid>
+<unitid type="bestellnummer">R 2 10285</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_63</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">64</unitid>
+<unitid label="ehri_structure">0.0.0.0.60</unitid>
+<unitid type="bestellnummer">R 2 8691</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_64</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">65</unitid>
+<unitid label="ehri_structure">0.0.0.0.61</unitid>
+<unitid type="bestellnummer">R 2 8618</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_65</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">66</unitid>
+<unitid label="ehri_structure">0.0.0.0.62</unitid>
+<unitid type="bestellnummer">R 2 10260</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_66</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">67</unitid>
+<unitid label="ehri_structure">0.0.0.0.63</unitid>
+<unitid type="bestellnummer">R 2 10240</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_67</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">68</unitid>
+<unitid label="ehri_structure">0.0.0.0.64</unitid>
+<unitid type="bestellnummer">R 2 10192</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_68</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">69</unitid>
+<unitid label="ehri_structure">0.0.0.0.65</unitid>
+<unitid type="bestellnummer">R 2 10207</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_69</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">70</unitid>
+<unitid label="ehri_structure">0.0.0.0.66</unitid>
+<unitid type="bestellnummer">R 2 10220</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_70</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">71</unitid>
+<unitid label="ehri_structure">0.0.0.0.67</unitid>
+<unitid type="bestellnummer">R 2 10224</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_71</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">72</unitid>
+<unitid label="ehri_structure">0.0.0.0.68</unitid>
+<unitid type="bestellnummer">R 2 10201</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_72</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">73</unitid>
+<unitid label="ehri_structure">0.0.0.0.69</unitid>
+<unitid type="bestellnummer">R 2 10211</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_73</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">74</unitid>
+<unitid label="ehri_structure">0.0.0.0.70</unitid>
+<unitid type="bestellnummer">R 2 10191</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_74</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">75</unitid>
+<unitid label="ehri_structure">0.0.0.0.71</unitid>
+<unitid type="bestellnummer">R 2 10271</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_75</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">76</unitid>
+<unitid label="ehri_structure">0.0.0.0.72</unitid>
+<unitid type="bestellnummer">R 2 8699</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_76</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">77</unitid>
+<unitid label="ehri_structure">0.0.0.0.73</unitid>
+<unitid type="bestellnummer">R 2 10256</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_77</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">78</unitid>
+<unitid label="ehri_structure">0.0.0.0.74</unitid>
+<unitid type="bestellnummer">R 2 10294</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_78</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">79</unitid>
+<unitid label="ehri_structure">0.0.0.0.75</unitid>
+<unitid type="bestellnummer">R 2 10210</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_79</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">80</unitid>
+<unitid label="ehri_structure">0.0.0.0.76</unitid>
+<unitid type="bestellnummer">R 2 10292</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_80</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">81</unitid>
+<unitid label="ehri_structure">0.0.0.0.77</unitid>
+<unitid type="bestellnummer">R 2 10269</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_81</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">82</unitid>
+<unitid label="ehri_structure">0.0.0.0.78</unitid>
+<unitid type="bestellnummer">R 2 10277</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_82</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">83</unitid>
+<unitid label="ehri_structure">0.0.0.0.79</unitid>
+<unitid type="bestellnummer">R 2 8694</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_83</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">84</unitid>
+<unitid label="ehri_structure">0.0.0.0.80</unitid>
+<unitid type="bestellnummer">R 2 8698</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_84</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">85</unitid>
+<unitid label="ehri_structure">0.0.0.0.81</unitid>
+<unitid type="bestellnummer">R 2 8696</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_85</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">86</unitid>
+<unitid label="ehri_structure">0.0.0.0.82</unitid>
+<unitid type="bestellnummer">R 2 10243</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_86</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">87</unitid>
+<unitid label="ehri_structure">0.0.0.0.83</unitid>
+<unitid type="bestellnummer">R 2 8695</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_87</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">88</unitid>
+<unitid label="ehri_structure">0.0.0.0.84</unitid>
+<unitid type="bestellnummer">R 2 10193</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_88</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">89</unitid>
+<unitid label="ehri_structure">0.0.0.0.85</unitid>
+<unitid type="bestellnummer">R 2 10194</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_89</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">90</unitid>
+<unitid label="ehri_structure">0.0.0.0.86</unitid>
+<unitid type="bestellnummer">R 2 10230</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_90</unitid>
+</did>
+</c04>
+</c03>
+</c02>
+<c02 level="subfonds">
+<did>
+<unitid label="ehri_internal_id">91</unitid>
+<unitid label="ehri_structure">0.0.1</unitid>
+<unittitle>Außendienststelle Duisburg</unittitle>
+
+
+
+<unitid label="ehri_main_identifier">R 2 10230</unitid>
+</did>
+<scopecontent>
+<p>Personen-Einzelfallakten (Personenakten) der Außendienststelle Duisburg der Geheimen Staatspolizei</p>
+</scopecontent>
+<c03 level="subfonds">
+<did>
+<unitid label="ehri_internal_id">92</unitid>
+<unitid label="ehri_structure">0.0.1.1</unitid>
+<unittitle>Ermittlung und Inhaftierung (Einzelfälle)</unittitle>
+<repository>Internationaler Suchdienst (ITS), Bad Arolsen, Germany</repository>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_92</unitid>
+</did>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">93</unitid>
+<unitid label="ehri_structure">0.0.1.1.1</unitid>
+<unitid type="bestellnummer">R 2 10259</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_93</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">94</unitid>
+<unitid label="ehri_structure">0.0.1.1.2</unitid>
+<unitid type="bestellnummer">R 2 10700</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_94</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">95</unitid>
+<unitid label="ehri_structure">0.0.1.1.3</unitid>
+<unitid type="bestellnummer">R 2 8700</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_95</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">96</unitid>
+<unitid label="ehri_structure">0.0.1.1.4</unitid>
+<unitid type="bestellnummer">R 2 10701</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_96</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">97</unitid>
+<unitid label="ehri_structure">0.0.1.1.5</unitid>
+<unitid type="bestellnummer">R 2 8602</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_97</unitid>
+</did>
+</c04>
+</c03>
+</c02>
+<c02 level="subfonds">
+<did>
+<unitid label="ehri_internal_id">98</unitid>
+<unitid label="ehri_structure">0.0.2</unitid>
+<unittitle>Außendienststelle Essen</unittitle>
+
+
+<repository>Internationaler Suchdienst (ITS), Bad Arolsen, Germany</repository>
+
+<unitid label="ehri_main_identifier">R 2 8602</unitid>
+</did>
+<scopecontent>
+<p>Personen-Einzelfallakten (Personenakten) der Außendienststelle Essen der Geheimen Staatspolizei</p>
+</scopecontent>
+<c03 level="subfonds">
+<did>
+<unitid label="ehri_internal_id">99</unitid>
+<unitid label="ehri_structure">0.0.2.1</unitid>
+<unittitle>Ermittlung und Inhaftierung (Einzelfälle)</unittitle>
+<repository>Internationaler Suchdienst (ITS), Bad Arolsen, Germany</repository>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_99</unitid>
+</did>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">100</unitid>
+<unitid label="ehri_structure">0.0.2.1.1</unitid>
+<unitid type="bestellnummer">R 2 10284</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_100</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">101</unitid>
+<unitid label="ehri_structure">0.0.2.1.2</unitid>
+<unitid type="bestellnummer">R 2 10703</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_101</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">102</unitid>
+<unitid label="ehri_structure">0.0.2.1.3</unitid>
+<unitid type="bestellnummer">R 2 8701</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_102</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">103</unitid>
+<unitid label="ehri_structure">0.0.2.1.4</unitid>
+<unitid type="bestellnummer">R 2 10296</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_103</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">104</unitid>
+<unitid label="ehri_structure">0.0.2.1.5</unitid>
+<unitid type="bestellnummer">R 2 8697</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_104</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">105</unitid>
+<unitid label="ehri_structure">0.0.2.1.6</unitid>
+<unitid type="bestellnummer">R 2 8595</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_105</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">106</unitid>
+<unitid label="ehri_structure">0.0.2.1.7</unitid>
+<unitid type="bestellnummer">R 2 8682</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_106</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">107</unitid>
+<unitid label="ehri_structure">0.0.2.1.8</unitid>
+<unitid type="bestellnummer">R 2 10197</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_107</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">108</unitid>
+<unitid label="ehri_structure">0.0.2.1.9</unitid>
+<unitid type="bestellnummer">R 2 10289</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_108</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">109</unitid>
+<unitid label="ehri_structure">0.0.2.1.10</unitid>
+<unitid type="bestellnummer">R 2 10280</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_109</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">110</unitid>
+<unitid label="ehri_structure">0.0.2.1.11</unitid>
+<unitid type="bestellnummer">R 2 10698</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_110</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">111</unitid>
+<unitid label="ehri_structure">0.0.2.1.12</unitid>
+<unitid type="bestellnummer">R 2 10299</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_111</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">112</unitid>
+<unitid label="ehri_structure">0.0.2.1.13</unitid>
+<unitid type="bestellnummer">R 2 8684</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_112</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">113</unitid>
+<unitid label="ehri_structure">0.0.2.1.14</unitid>
+<unitid type="bestellnummer">R 2 10241</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_113</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">114</unitid>
+<unitid label="ehri_structure">0.0.2.1.15</unitid>
+<unitid type="bestellnummer">R 2 8673</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_114</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">115</unitid>
+<unitid label="ehri_structure">0.0.2.1.16</unitid>
+<unitid type="bestellnummer">R 2 8670</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_115</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">116</unitid>
+<unitid label="ehri_structure">0.0.2.1.17</unitid>
+<unitid type="bestellnummer">R 2 8616</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_116</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">117</unitid>
+<unitid label="ehri_structure">0.0.2.1.18</unitid>
+<unitid type="bestellnummer">R 2 8685</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_117</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">118</unitid>
+<unitid label="ehri_structure">0.0.2.1.19</unitid>
+<unitid type="bestellnummer">R 2 10213</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_118</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">119</unitid>
+<unitid label="ehri_structure">0.0.2.1.20</unitid>
+<unitid type="bestellnummer">R 2 8686</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_119</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">120</unitid>
+<unitid label="ehri_structure">0.0.2.1.21</unitid>
+<unitid type="bestellnummer">R 2 10202</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_120</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">121</unitid>
+<unitid label="ehri_structure">0.0.2.1.22</unitid>
+<unitid type="bestellnummer">R 2 8689</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_121</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">122</unitid>
+<unitid label="ehri_structure">0.0.2.1.23</unitid>
+<unitid type="bestellnummer">R 2 8610</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_122</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">123</unitid>
+<unitid label="ehri_structure">0.0.2.1.24</unitid>
+<unitid type="bestellnummer">R 2 10225</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_123</unitid>
+</did>
+</c04>
+</c03>
+</c02>
+<c02 level="subfonds">
+<did>
+<unitid label="ehri_internal_id">124</unitid>
+<unitid label="ehri_structure">0.0.3</unitid>
+<unittitle>Außendienststelle Krefeld</unittitle>
+
+
+<repository>Internationaler Suchdienst (ITS), Bad Arolsen, Germany</repository>
+
+<unitid label="ehri_main_identifier">R 2 10225</unitid>
+</did>
+<scopecontent>
+<p>Personen-Einzelfallakten (Personenakten) der Außendienststelle Krefeld der Geheimen Staatspolizei</p>
+</scopecontent>
+<c03 level="subfonds">
+<did>
+<unitid label="ehri_internal_id">125</unitid>
+<unitid label="ehri_structure">0.0.3.1</unitid>
+<unittitle>Ermittlung und Inhaftierung (Einzelfälle)</unittitle>
+<repository>Internationaler Suchdienst (ITS), Bad Arolsen, Germany</repository>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_125</unitid>
+</did>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">126</unitid>
+<unitid label="ehri_structure">0.0.3.1.1</unitid>
+<unitid type="bestellnummer">R 2 10278</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_126</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">127</unitid>
+<unitid label="ehri_structure">0.0.3.1.2</unitid>
+<unitid type="bestellnummer">R 2 8680</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_127</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">128</unitid>
+<unitid label="ehri_structure">0.0.3.1.3</unitid>
+<unitid type="bestellnummer">R 2 10287</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_128</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">129</unitid>
+<unitid label="ehri_structure">0.0.3.1.4</unitid>
+<unitid type="bestellnummer">R 2 10293</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_129</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">130</unitid>
+<unitid label="ehri_structure">0.0.3.1.5</unitid>
+<unitid type="bestellnummer">R 2 8693</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_130</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">131</unitid>
+<unitid label="ehri_structure">0.0.3.1.6</unitid>
+<unitid type="bestellnummer">R 2 10248</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_131</unitid>
+</did>
+</c04>
+</c03>
+</c02>
+<c02 level="subfonds">
+<did>
+<unitid label="ehri_internal_id">132</unitid>
+<unitid label="ehri_structure">0.0.4</unitid>
+<unittitle>Außendienststelle Mönchen-Gladbach</unittitle>
+
+
+
+<unitid label="ehri_main_identifier">R 2 10248</unitid>
+</did>
+<scopecontent>
+<p>Personen-Einzelfallakten (Personenakten) der Außendienststelle Mönchen-Gladbach der Geheimen Staatspolizei</p>
+</scopecontent>
+<c03 level="subfonds">
+<did>
+<unitid label="ehri_internal_id">133</unitid>
+<unitid label="ehri_structure">0.0.4.1</unitid>
+<unittitle>Ermittlung und Inhaftierung (Einzelfälle)</unittitle>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_133</unitid>
+</did>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">134</unitid>
+<unitid label="ehri_structure">0.0.4.1.1</unitid>
+<unitid type="bestellnummer">R 2 10244</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_134</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">135</unitid>
+<unitid label="ehri_structure">0.0.4.1.2</unitid>
+<unitid type="bestellnummer">R 2 10209</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_135</unitid>
+</did>
+</c04>
+<c04 level="file">
+<did>
+<unitid label="ehri_internal_id">136</unitid>
+<unitid label="ehri_structure">0.0.4.1.3</unitid>
+<unitid type="bestellnummer">R 2 10190</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_136</unitid>
+</did>
+</c04>
+</c03>
+</c02>
+</c01>
+<c01 level="subfonds">
+<did>
+<unitid label="ehri_internal_id">137</unitid>
+<unitid label="ehri_structure">0.1</unitid>
+<unittitle>Gestapo Linz</unittitle>
+
+
+<unitdate normal="1938-03-16/1945-04-22">1938-03-16 - 1945-04-22</unitdate>
+
+<unitid label="ehri_main_identifier">R 2 10190</unitid>
+</did>
+<scopecontent>
+<p>Personen-Einzelfallakten (Personenakten) der Staatspolizei(leit)stelle Linz an der Donau</p>
+</scopecontent>
+<custodhist>
+<p>Was die Registratur der Staatspolizeileitstelle Linz betrifft, so ist bei Kriegsende offensichtlich ein erheblicher Überlieferungsverlust eingetreten. Der Großteil der Gestapo-Registratur dürfte entweder von den Gestapo-Mitarbeitern selbst noch vor dem Eintreffen der US-Armee oder eventuell einige Tage zuvor bei einem Bombenangriff auf die Stadt Linz am 25. April 1945 vernichtet worden sein. Die beim ITS verwahrten Einzelfallakten der Gestapo Linz betreffen ausschließlich Personen, deren Nachnamen mit den Buchstaben B, D, P und T beginnen.<lb></lb>
+<lb></lb>Quellen:<lb></lb>
+<lb></lb>Schuster, Walter: Quellen zur nationalsozialistischen Überwachung und Repression am Beispiel der Stadt Linz, In: German Studies Association Newsletter, Volume XXXI, Number 2, Winter 2006, S. 73-78.<lb></lb>
+<lb></lb>
+<lb></lb>
+</p>
+</custodhist>
+<bioghist>
+<p>Nach dem „Anschluss“ Österreichs an das Deutsche Reich wurden die dort bereits bestehenden staatspolizeilichen Strukturen zum großen Teil übernommen. Ein Erlass Himmlers vom 15. März 1938 über die Organisation der Geheimen Staatspolizei in Österreich etablierte die Staatspolizeileitstelle Wien, der nun u.a. die bisherigen politisch-polizeilichen Aufgaben der Generaldirektion für die öffentliche Sicherheit und der Polizeidirektion und Sicherheitsdirektion in Wien übertragen wurden.<lb></lb>Die Sicherheitsdirektionen der Landeshauptstädte, darunter auch jene in Linz, wurden in der Folge ebenfalls zu Staatspolizeileitstellen umgewandelt, die einerseits dem Chef der Sicherheitspolizei bzw. dem Geheimen Staatspolizeiamt Berlin und andererseits der obersten regulären Polizeibehörde im Land Österreich, dem Ministerium für innere und kulturelle Angelegenheiten, unterstellt waren.<lb></lb>
+<lb></lb>Den Aufbau der Gestapo in Österreich koordinierten zwei von Himmler am 21. März 1938 eingesetzte Sonderstäbe, die in enger Verbindung mit den Berliner Zentralstellen operierten, in denen vorübergehend spezielle "Österreich-Gruppen" eingerichtet waren, die dann im Herbst 1938 zusammen mit den beiden Wiener Sonderstäben wieder aufgelöst wurden.<lb></lb>Ab September 1938 fiel die Gestapo somit in den Einflussbereich von Ernst Kaltenbrunner in seiner Funktion als "Staatssekretär für das Sicherheitswesen in Österreich", danach in seiner Eigenschaft als "Höherer SS- und Polizeiführer" für den Wehrkreis XVII. Dem zweiten Wehrkreis (XVIII) auf ehemals österreichischem Staatsgebiet stand Alfred Rohdenbücher vor.<lb></lb>Von 1940 an wurde darüber hinaus ein „Reichsstatthalter“ an der Spitze der mit dem "Ostmarkgesetz" vom 14. April 1939 neu geschaffenen „Reichsgaue“ gestellt, der zugleich als Landespolizeibehörde fungierte.<lb></lb>
+<lb></lb>Im Jahr 1944 kam es zu einer größeren Umstrukturierung, indem - nach Absetzung des bisherigen Inspekteurs - ein Befehlshaber der Sicherheitspolizei und des SD eingesetzte wurde, der die Zusammenlegung der Dienststellen von Gestapo, Kriminalpolizei und SD zu „Kommandeurstellen der Sicherheitspolizei und des SD“ organisierte und auf diese Weise der SS unterordnete.<lb></lb>Im "Gau Oberdonau" wurde diese Neuorganisation Anfang Dezember 1944 eingeleitet, die u.a. eine direkte Verfügung der jeweiligen Gestapo-Leiter über alle Exekutivkräfte der Sicherheitspolizei und des SD in ihrem Amtsbereich beinhaltete. Mit ihr verbunden war auch eine umfassendere Weisungsbefugnis der Wiener Gestapo in "Nieder- und Oberdonau".<lb></lb>
+<lb></lb>In der Endphase des „Großdeutschen Reiches“ wurde ab Mitte April in Linz und Umgebung noch eine für die gesamte „Ostmark“ zuständige Sicherheitspolizeibehörde geschaffen, die vom ehemaligen Wiener Gestapo-Chef Huber und dessen Vertreter Dr. Mildner geleitet wurde. Mit der Eroberung von Linz durch US-Streitkräfte am 5. Mai 1945 wurde diese schließlich aufgelöst.<lb></lb>
+<lb></lb>Der Amtsbereich der Linzer Gestapo umfasste das durch das „Ostmarkgesetz“ geschaffene "Reichsgau Oberdonau", das sich neben dem Bundesland Oberösterreich noch auf das von der Steiermark abgetrennte Ausseerland sowie auf die im Herbst 1938 annektierten südböhmischen Bezirke Kaplitz und Krumau erstreckte. Der „Gau Oberdonau“ hatte damit 1.042.000 Einwohner in 716 Gemeinden. Der Sitz der Staatspolizeistelle Linz befand sich im beschlagnahmten ehemaligen Haus des katholischen Gesellenvereins in der Langgasse 13.<lb></lb>
+<lb></lb>Quellen:<lb></lb>
+<lb></lb>
+</p>
+<p>Dams, Carsten/ Stolle, Michael: Die Gestapo : Herrschaft und Terror im Dritten Reich , München 2008.<lb></lb>
+<lb></lb>Davy, Ulrike: Die Geheime Staatspolizei in Österreich : Organisation und Aufgaben der Geheimen Staatspolizei im "Dritten Reich" und die Weiterführung ihrer Geschäfte durch österreichische Sicherheitsbehörden , Wien : Manz, 1990. (Österreichische rechtswissenschaftliche Studien ; 8)<lb></lb>
+<lb></lb>Paul, Gerhard / Mallmann, Klaus-Michael (Hrsg.): Die Gestapo : Mythos und Realität, Darmstadt 2003<lb></lb>
+<lb></lb>Schuster, Walter: Quellen zur nationalsozialistischen Überwachung und Repression am Beispiel der Stadt Linz, In: German Studies Association Newsletter, Volume XXXI, Number 2, Winter 2006, S. 73-78.<lb></lb>
+<lb></lb>
+<lb></lb>
+</p>
+</bioghist>
+<c02 level="subfonds">
+<did>
+<unitid label="ehri_internal_id">138</unitid>
+<unitid label="ehri_structure">0.1.1</unitid>
+<unittitle>Ermittlung und Inhaftierung (Einzelfälle)</unittitle>
+<repository>Internationaler Suchdienst (ITS), Bad Arolsen, Germany</repository>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_138</unitid>
+</did>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">139</unitid>
+<unitid label="ehri_structure">0.1.1.1</unitid>
+<unitid type="bestellnummer">R 2 10524</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_139</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">140</unitid>
+<unitid label="ehri_structure">0.1.1.2</unitid>
+<unitid type="bestellnummer">R 2 10521</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_140</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">141</unitid>
+<unitid label="ehri_structure">0.1.1.3</unitid>
+<unitid type="bestellnummer">R 2 10558</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_141</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">142</unitid>
+<unitid label="ehri_structure">0.1.1.4</unitid>
+<unitid type="bestellnummer">R 2 10477</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_142</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">143</unitid>
+<unitid label="ehri_structure">0.1.1.5</unitid>
+<unitid type="bestellnummer">R 2 10671</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_143</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">144</unitid>
+<unitid label="ehri_structure">0.1.1.6</unitid>
+<unitid type="bestellnummer">R 2 8604</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_144</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">145</unitid>
+<unitid label="ehri_structure">0.1.1.7</unitid>
+<unitid type="bestellnummer">R 2 10656</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_145</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">146</unitid>
+<unitid label="ehri_structure">0.1.1.8</unitid>
+<unitid type="bestellnummer">R 2 10409</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_146</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">147</unitid>
+<unitid label="ehri_structure">0.1.1.9</unitid>
+<unitid type="bestellnummer">R 2 10439</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_147</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">148</unitid>
+<unitid label="ehri_structure">0.1.1.10</unitid>
+<unitid type="bestellnummer">R 2 10397</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_148</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">149</unitid>
+<unitid label="ehri_structure">0.1.1.11</unitid>
+<unitid type="bestellnummer">R 2 10449</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_149</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">150</unitid>
+<unitid label="ehri_structure">0.1.1.12</unitid>
+<unitid type="bestellnummer">R 2 10394</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_150</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">151</unitid>
+<unitid label="ehri_structure">0.1.1.13</unitid>
+<unitid type="bestellnummer">R 2 10642</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_151</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">152</unitid>
+<unitid label="ehri_structure">0.1.1.14</unitid>
+<unitid type="bestellnummer">R 2 10356</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_152</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">153</unitid>
+<unitid label="ehri_structure">0.1.1.15</unitid>
+<unitid type="bestellnummer">R 2 10488</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_153</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">154</unitid>
+<unitid label="ehri_structure">0.1.1.16</unitid>
+<unitid type="bestellnummer">R 2 10490</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_154</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">155</unitid>
+<unitid label="ehri_structure">0.1.1.17</unitid>
+<unitid type="bestellnummer">R 2 10491</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_155</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">156</unitid>
+<unitid label="ehri_structure">0.1.1.18</unitid>
+<unitid type="bestellnummer">R 2 10474</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_156</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">157</unitid>
+<unitid label="ehri_structure">0.1.1.19</unitid>
+<unitid type="bestellnummer">R 2 10660</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_157</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">158</unitid>
+<unitid label="ehri_structure">0.1.1.20</unitid>
+<unitid type="bestellnummer">R 2 10648</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_158</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">159</unitid>
+<unitid label="ehri_structure">0.1.1.21</unitid>
+<unitid type="bestellnummer">R 2 10309</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_159</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">160</unitid>
+<unitid label="ehri_structure">0.1.1.22</unitid>
+<unitid type="bestellnummer">R 2 10666</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_160</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">161</unitid>
+<unitid label="ehri_structure">0.1.1.23</unitid>
+<unitid type="bestellnummer">R 2 10674</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_161</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">162</unitid>
+<unitid label="ehri_structure">0.1.1.24</unitid>
+<unitid type="bestellnummer">R 2 10547</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_162</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">163</unitid>
+<unitid label="ehri_structure">0.1.1.25</unitid>
+<unitid type="bestellnummer">R 2 10623</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_163</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">164</unitid>
+<unitid label="ehri_structure">0.1.1.26</unitid>
+<unitid type="bestellnummer">R 2 10448</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_164</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">165</unitid>
+<unitid label="ehri_structure">0.1.1.27</unitid>
+<unitid type="bestellnummer">R 2 8668</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_165</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">166</unitid>
+<unitid label="ehri_structure">0.1.1.28</unitid>
+<unitid type="bestellnummer">R 2 10326</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_166</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">167</unitid>
+<unitid label="ehri_structure">0.1.1.29</unitid>
+<unitid type="bestellnummer">R 2 10457</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_167</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">168</unitid>
+<unitid label="ehri_structure">0.1.1.30</unitid>
+<unitid type="bestellnummer">R 2 10391</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_168</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">169</unitid>
+<unitid label="ehri_structure">0.1.1.31</unitid>
+<unitid type="bestellnummer">R 2 10562</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_169</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">170</unitid>
+<unitid label="ehri_structure">0.1.1.32</unitid>
+<unitid type="bestellnummer">R 2 10404</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_170</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">171</unitid>
+<unitid label="ehri_structure">0.1.1.33</unitid>
+<unitid type="bestellnummer">R 2 10333</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_171</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">172</unitid>
+<unitid label="ehri_structure">0.1.1.34</unitid>
+<unitid type="bestellnummer">R 2 10475</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_172</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">173</unitid>
+<unitid label="ehri_structure">0.1.1.35</unitid>
+<unitid type="bestellnummer">R 2 10472</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_173</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">174</unitid>
+<unitid label="ehri_structure">0.1.1.36</unitid>
+<unitid type="bestellnummer">R 2 10340</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_174</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">175</unitid>
+<unitid label="ehri_structure">0.1.1.37</unitid>
+<unitid type="bestellnummer">R 2 10401</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_175</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">176</unitid>
+<unitid label="ehri_structure">0.1.1.38</unitid>
+<unitid type="bestellnummer">R 2 10494</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_176</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">177</unitid>
+<unitid label="ehri_structure">0.1.1.39</unitid>
+<unitid type="bestellnummer">R 2 10647</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_177</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">178</unitid>
+<unitid label="ehri_structure">0.1.1.40</unitid>
+<unitid type="bestellnummer">R 2 10673</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_178</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">179</unitid>
+<unitid label="ehri_structure">0.1.1.41</unitid>
+<unitid type="bestellnummer">R 2 10450</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_179</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">180</unitid>
+<unitid label="ehri_structure">0.1.1.42</unitid>
+<unitid type="bestellnummer">R 2 10555</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_180</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">181</unitid>
+<unitid label="ehri_structure">0.1.1.43</unitid>
+<unitid type="bestellnummer">R 2 10318</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_181</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">182</unitid>
+<unitid label="ehri_structure">0.1.1.44</unitid>
+<unitid type="bestellnummer">R 2 10440</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_182</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">183</unitid>
+<unitid label="ehri_structure">0.1.1.45</unitid>
+<unitid type="bestellnummer">R 2 10353</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_183</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">184</unitid>
+<unitid label="ehri_structure">0.1.1.46</unitid>
+<unitid type="bestellnummer">R 2 10670</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_184</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">185</unitid>
+<unitid label="ehri_structure">0.1.1.47</unitid>
+<unitid type="bestellnummer">R 2 10311</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_185</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">186</unitid>
+<unitid label="ehri_structure">0.1.1.48</unitid>
+<unitid type="bestellnummer">R 2 10615</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_186</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">187</unitid>
+<unitid label="ehri_structure">0.1.1.49</unitid>
+<unitid type="bestellnummer">R 2 10451</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_187</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">188</unitid>
+<unitid label="ehri_structure">0.1.1.50</unitid>
+<unitid type="bestellnummer">R 2 10480</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_188</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">189</unitid>
+<unitid label="ehri_structure">0.1.1.51</unitid>
+<unitid type="bestellnummer">R 2 10320</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_189</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">190</unitid>
+<unitid label="ehri_structure">0.1.1.52</unitid>
+<unitid type="bestellnummer">R 2 10665</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_190</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">191</unitid>
+<unitid label="ehri_structure">0.1.1.53</unitid>
+<unitid type="bestellnummer">R 2 10361</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_191</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">192</unitid>
+<unitid label="ehri_structure">0.1.1.54</unitid>
+<unitid type="bestellnummer">R 2 10336</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_192</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">193</unitid>
+<unitid label="ehri_structure">0.1.1.55</unitid>
+<unitid type="bestellnummer">R 2 10447</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_193</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">194</unitid>
+<unitid label="ehri_structure">0.1.1.56</unitid>
+<unitid type="bestellnummer">R 2 10445</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_194</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">195</unitid>
+<unitid label="ehri_structure">0.1.1.57</unitid>
+<unitid type="bestellnummer">R 2 10576</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_195</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">196</unitid>
+<unitid label="ehri_structure">0.1.1.58</unitid>
+<unitid type="bestellnummer">R 2 10663</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_196</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">197</unitid>
+<unitid label="ehri_structure">0.1.1.59</unitid>
+<unitid type="bestellnummer">R 2 10305</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_197</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">198</unitid>
+<unitid label="ehri_structure">0.1.1.60</unitid>
+<unitid type="bestellnummer">R 2 10538</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_198</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">199</unitid>
+<unitid label="ehri_structure">0.1.1.61</unitid>
+<unitid type="bestellnummer">R 2 10444</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_199</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">200</unitid>
+<unitid label="ehri_structure">0.1.1.62</unitid>
+<unitid type="bestellnummer">R 2 10456</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_200</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">201</unitid>
+<unitid label="ehri_structure">0.1.1.63</unitid>
+<unitid type="bestellnummer">R 2 10308</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_201</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">202</unitid>
+<unitid label="ehri_structure">0.1.1.64</unitid>
+<unitid type="bestellnummer">R 2 10330</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_202</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">203</unitid>
+<unitid label="ehri_structure">0.1.1.65</unitid>
+<unitid type="bestellnummer">R 2 10443</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_203</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">204</unitid>
+<unitid label="ehri_structure">0.1.1.66</unitid>
+<unitid type="bestellnummer">R 2 10498</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_204</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">205</unitid>
+<unitid label="ehri_structure">0.1.1.67</unitid>
+<unitid type="bestellnummer">R 2 10541</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_205</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">206</unitid>
+<unitid label="ehri_structure">0.1.1.68</unitid>
+<unitid type="bestellnummer">R 2 10331</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_206</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">207</unitid>
+<unitid label="ehri_structure">0.1.1.69</unitid>
+<unitid type="bestellnummer">R 2 10662</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_207</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">208</unitid>
+<unitid label="ehri_structure">0.1.1.70</unitid>
+<unitid type="bestellnummer">R 2 10344</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_208</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">209</unitid>
+<unitid label="ehri_structure">0.1.1.71</unitid>
+<unitid type="bestellnummer">R 2 10465</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_209</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">210</unitid>
+<unitid label="ehri_structure">0.1.1.72</unitid>
+<unitid type="bestellnummer">R 2 10537</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_210</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">211</unitid>
+<unitid label="ehri_structure">0.1.1.73</unitid>
+<unitid type="bestellnummer">R 2 10323</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_211</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">212</unitid>
+<unitid label="ehri_structure">0.1.1.74</unitid>
+<unitid type="bestellnummer">R 2 10319</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_212</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">213</unitid>
+<unitid label="ehri_structure">0.1.1.75</unitid>
+<unitid type="bestellnummer">R 2 10572</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_213</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">214</unitid>
+<unitid label="ehri_structure">0.1.1.76</unitid>
+<unitid type="bestellnummer">R 2 10650</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_214</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">215</unitid>
+<unitid label="ehri_structure">0.1.1.77</unitid>
+<unitid type="bestellnummer">R 2 10405</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_215</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">216</unitid>
+<unitid label="ehri_structure">0.1.1.78</unitid>
+<unitid type="bestellnummer">R 2 10307</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_216</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">217</unitid>
+<unitid label="ehri_structure">0.1.1.79</unitid>
+<unitid type="bestellnummer">R 2 10452</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_217</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">218</unitid>
+<unitid label="ehri_structure">0.1.1.80</unitid>
+<unitid type="bestellnummer">R 2 10327</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_218</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">219</unitid>
+<unitid label="ehri_structure">0.1.1.81</unitid>
+<unitid type="bestellnummer">R 2 10466</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_219</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">220</unitid>
+<unitid label="ehri_structure">0.1.1.82</unitid>
+<unitid type="bestellnummer">R 2 10644</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_220</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">221</unitid>
+<unitid label="ehri_structure">0.1.1.83</unitid>
+<unitid type="bestellnummer">R 2 10408</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_221</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">222</unitid>
+<unitid label="ehri_structure">0.1.1.84</unitid>
+<unitid type="bestellnummer">R 2 10381</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_222</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">223</unitid>
+<unitid label="ehri_structure">0.1.1.85</unitid>
+<unitid type="bestellnummer">R 2 10493</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_223</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">224</unitid>
+<unitid label="ehri_structure">0.1.1.86</unitid>
+<unitid type="bestellnummer">R 2 10332</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_224</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">225</unitid>
+<unitid label="ehri_structure">0.1.1.87</unitid>
+<unitid type="bestellnummer">R 2 10329</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_225</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">226</unitid>
+<unitid label="ehri_structure">0.1.1.88</unitid>
+<unitid type="bestellnummer">R 2 10304</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_226</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">227</unitid>
+<unitid label="ehri_structure">0.1.1.89</unitid>
+<unitid type="bestellnummer">R 2 10434</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_227</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">228</unitid>
+<unitid label="ehri_structure">0.1.1.90</unitid>
+<unitid type="bestellnummer">R 2 10328</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_228</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">229</unitid>
+<unitid label="ehri_structure">0.1.1.91</unitid>
+<unitid type="bestellnummer">R 2 8675</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_229</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">230</unitid>
+<unitid label="ehri_structure">0.1.1.92</unitid>
+<unitid type="bestellnummer">R 2 10667</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_230</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">231</unitid>
+<unitid label="ehri_structure">0.1.1.93</unitid>
+<unitid type="bestellnummer">R 2 10566</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_231</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">232</unitid>
+<unitid label="ehri_structure">0.1.1.94</unitid>
+<unitid type="bestellnummer">R 2 10561</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_232</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">233</unitid>
+<unitid label="ehri_structure">0.1.1.95</unitid>
+<unitid type="bestellnummer">R 2 10407</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_233</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">234</unitid>
+<unitid label="ehri_structure">0.1.1.96</unitid>
+<unitid type="bestellnummer">R 2 10396</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_234</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">235</unitid>
+<unitid label="ehri_structure">0.1.1.97</unitid>
+<unitid type="bestellnummer">R 2 10325</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_235</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">236</unitid>
+<unitid label="ehri_structure">0.1.1.98</unitid>
+<unitid type="bestellnummer">R 2 10504</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_236</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">237</unitid>
+<unitid label="ehri_structure">0.1.1.99</unitid>
+<unitid type="bestellnummer">R 2 10315</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_237</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">238</unitid>
+<unitid label="ehri_structure">0.1.1.100</unitid>
+<unitid type="bestellnummer">R 2 10310</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_238</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">239</unitid>
+<unitid label="ehri_structure">0.1.1.101</unitid>
+<unitid type="bestellnummer">R 2 10382</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_239</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">240</unitid>
+<unitid label="ehri_structure">0.1.1.102</unitid>
+<unitid type="bestellnummer">R 2 10312</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_240</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">241</unitid>
+<unitid label="ehri_structure">0.1.1.103</unitid>
+<unitid type="bestellnummer">R 2 10638</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_241</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">242</unitid>
+<unitid label="ehri_structure">0.1.1.104</unitid>
+<unitid type="bestellnummer">R 2 10314</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_242</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">243</unitid>
+<unitid label="ehri_structure">0.1.1.105</unitid>
+<unitid type="bestellnummer">R 2 10567</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_243</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">244</unitid>
+<unitid label="ehri_structure">0.1.1.106</unitid>
+<unitid type="bestellnummer">R 2 10485</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_244</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">245</unitid>
+<unitid label="ehri_structure">0.1.1.107</unitid>
+<unitid type="bestellnummer">R 2 10616</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_245</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">246</unitid>
+<unitid label="ehri_structure">0.1.1.108</unitid>
+<unitid type="bestellnummer">R 2 10617</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_246</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">247</unitid>
+<unitid label="ehri_structure">0.1.1.109</unitid>
+<unitid type="bestellnummer">R 2 10554</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_247</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">248</unitid>
+<unitid label="ehri_structure">0.1.1.110</unitid>
+<unitid type="bestellnummer">R 2 10629</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_248</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">249</unitid>
+<unitid label="ehri_structure">0.1.1.111</unitid>
+<unitid type="bestellnummer">R 2 10675</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_249</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">250</unitid>
+<unitid label="ehri_structure">0.1.1.112</unitid>
+<unitid type="bestellnummer">R 2 10582</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_250</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">251</unitid>
+<unitid label="ehri_structure">0.1.1.113</unitid>
+<unitid type="bestellnummer">R 2 10633</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_251</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">252</unitid>
+<unitid label="ehri_structure">0.1.1.114</unitid>
+<unitid type="bestellnummer">R 2 10378</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_252</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">253</unitid>
+<unitid label="ehri_structure">0.1.1.115</unitid>
+<unitid type="bestellnummer">R 2 10486</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_253</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">254</unitid>
+<unitid label="ehri_structure">0.1.1.116</unitid>
+<unitid type="bestellnummer">R 2 10540</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_254</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">255</unitid>
+<unitid label="ehri_structure">0.1.1.117</unitid>
+<unitid type="bestellnummer">R 2 10503</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_255</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">256</unitid>
+<unitid label="ehri_structure">0.1.1.118</unitid>
+<unitid type="bestellnummer">R 2 10459</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_256</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">257</unitid>
+<unitid label="ehri_structure">0.1.1.119</unitid>
+<unitid type="bestellnummer">R 2 10442</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_257</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">258</unitid>
+<unitid label="ehri_structure">0.1.1.120</unitid>
+<unitid type="bestellnummer">R 2 10533</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_258</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">259</unitid>
+<unitid label="ehri_structure">0.1.1.121</unitid>
+<unitid type="bestellnummer">R 2 10467</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_259</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">260</unitid>
+<unitid label="ehri_structure">0.1.1.122</unitid>
+<unitid type="bestellnummer">R 2 10514</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_260</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">261</unitid>
+<unitid label="ehri_structure">0.1.1.123</unitid>
+<unitid type="bestellnummer">R 2 10672</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_261</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">262</unitid>
+<unitid label="ehri_structure">0.1.1.124</unitid>
+<unitid type="bestellnummer">R 2 10631</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_262</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">263</unitid>
+<unitid label="ehri_structure">0.1.1.125</unitid>
+<unitid type="bestellnummer">R 2 10659</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_263</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">264</unitid>
+<unitid label="ehri_structure">0.1.1.126</unitid>
+<unitid type="bestellnummer">R 2 10624</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_264</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">265</unitid>
+<unitid label="ehri_structure">0.1.1.127</unitid>
+<unitid type="bestellnummer">R 2 10438</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_265</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">266</unitid>
+<unitid label="ehri_structure">0.1.1.128</unitid>
+<unitid type="bestellnummer">R 2 10569</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_266</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">267</unitid>
+<unitid label="ehri_structure">0.1.1.129</unitid>
+<unitid type="bestellnummer">R 2 10393</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_267</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">268</unitid>
+<unitid label="ehri_structure">0.1.1.130</unitid>
+<unitid type="bestellnummer">R 2 10510</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_268</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">269</unitid>
+<unitid label="ehri_structure">0.1.1.131</unitid>
+<unitid type="bestellnummer">R 2 10306</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_269</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">270</unitid>
+<unitid label="ehri_structure">0.1.1.132</unitid>
+<unitid type="bestellnummer">R 2 10355</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_270</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">271</unitid>
+<unitid label="ehri_structure">0.1.1.133</unitid>
+<unitid type="bestellnummer">R 2 10575</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_271</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">272</unitid>
+<unitid label="ehri_structure">0.1.1.134</unitid>
+<unitid type="bestellnummer">R 2 10357</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_272</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">273</unitid>
+<unitid label="ehri_structure">0.1.1.135</unitid>
+<unitid type="bestellnummer">R 2 10406</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_273</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">274</unitid>
+<unitid label="ehri_structure">0.1.1.136</unitid>
+<unitid type="bestellnummer">R 2 10630</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_274</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">275</unitid>
+<unitid label="ehri_structure">0.1.1.137</unitid>
+<unitid type="bestellnummer">R 2 10400</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_275</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">276</unitid>
+<unitid label="ehri_structure">0.1.1.138</unitid>
+<unitid type="bestellnummer">R 2 10636</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_276</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">277</unitid>
+<unitid label="ehri_structure">0.1.1.139</unitid>
+<unitid type="bestellnummer">R 2 10458</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_277</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">278</unitid>
+<unitid label="ehri_structure">0.1.1.140</unitid>
+<unitid type="bestellnummer">R 2 10525</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_278</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">279</unitid>
+<unitid label="ehri_structure">0.1.1.141</unitid>
+<unitid type="bestellnummer">R 2 10412</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_279</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">280</unitid>
+<unitid label="ehri_structure">0.1.1.142</unitid>
+<unitid type="bestellnummer">R 2 10469</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_280</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">281</unitid>
+<unitid label="ehri_structure">0.1.1.143</unitid>
+<unitid type="bestellnummer">R 2 10321</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_281</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">282</unitid>
+<unitid label="ehri_structure">0.1.1.144</unitid>
+<unitid type="bestellnummer">R 2 10496</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_282</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">283</unitid>
+<unitid label="ehri_structure">0.1.1.145</unitid>
+<unitid type="bestellnummer">R 2 8596</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_283</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">284</unitid>
+<unitid label="ehri_structure">0.1.1.146</unitid>
+<unitid type="bestellnummer">R 2 10664</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_284</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">285</unitid>
+<unitid label="ehri_structure">0.1.1.147</unitid>
+<unitid type="bestellnummer">R 2 10479</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_285</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">286</unitid>
+<unitid label="ehri_structure">0.1.1.148</unitid>
+<unitid type="bestellnummer">R 2 10368</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_286</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">287</unitid>
+<unitid label="ehri_structure">0.1.1.149</unitid>
+<unitid type="bestellnummer">R 2 10497</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_287</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">288</unitid>
+<unitid label="ehri_structure">0.1.1.150</unitid>
+<unitid type="bestellnummer">R 2 10358</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_288</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">289</unitid>
+<unitid label="ehri_structure">0.1.1.151</unitid>
+<unitid type="bestellnummer">R 2 8681</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_289</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">290</unitid>
+<unitid label="ehri_structure">0.1.1.152</unitid>
+<unitid type="bestellnummer">R 2 10424</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_290</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">291</unitid>
+<unitid label="ehri_structure">0.1.1.153</unitid>
+<unitid type="bestellnummer">R 2 10334</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_291</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">292</unitid>
+<unitid label="ehri_structure">0.1.1.154</unitid>
+<unitid type="bestellnummer">R 2 10364</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_292</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">293</unitid>
+<unitid label="ehri_structure">0.1.1.155</unitid>
+<unitid type="bestellnummer">R 2 10655</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_293</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">294</unitid>
+<unitid label="ehri_structure">0.1.1.156</unitid>
+<unitid type="bestellnummer">R 2 10471</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_294</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">295</unitid>
+<unitid label="ehri_structure">0.1.1.157</unitid>
+<unitid type="bestellnummer">R 2 10649</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_295</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">296</unitid>
+<unitid label="ehri_structure">0.1.1.158</unitid>
+<unitid type="bestellnummer">R 2 10643</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_296</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">297</unitid>
+<unitid label="ehri_structure">0.1.1.159</unitid>
+<unitid type="bestellnummer">R 2 10563</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_297</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">298</unitid>
+<unitid label="ehri_structure">0.1.1.160</unitid>
+<unitid type="bestellnummer">R 2 10363</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_298</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">299</unitid>
+<unitid label="ehri_structure">0.1.1.161</unitid>
+<unitid type="bestellnummer">R 2 10316</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_299</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">300</unitid>
+<unitid label="ehri_structure">0.1.1.162</unitid>
+<unitid type="bestellnummer">R 2 10657</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_300</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">301</unitid>
+<unitid label="ehri_structure">0.1.1.163</unitid>
+<unitid type="bestellnummer">R 2 10352</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_301</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">302</unitid>
+<unitid label="ehri_structure">0.1.1.164</unitid>
+<unitid type="bestellnummer">R 2 10339</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_302</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">303</unitid>
+<unitid label="ehri_structure">0.1.1.165</unitid>
+<unitid type="bestellnummer">R 2 10347</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_303</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">304</unitid>
+<unitid label="ehri_structure">0.1.1.166</unitid>
+<unitid type="bestellnummer">R 2 10646</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_304</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">305</unitid>
+<unitid label="ehri_structure">0.1.1.167</unitid>
+<unitid type="bestellnummer">R 2 10628</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_305</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">306</unitid>
+<unitid label="ehri_structure">0.1.1.168</unitid>
+<unitid type="bestellnummer">R 2 10338</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_306</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">307</unitid>
+<unitid label="ehri_structure">0.1.1.169</unitid>
+<unitid type="bestellnummer">R 2 10539</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_307</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">308</unitid>
+<unitid label="ehri_structure">0.1.1.170</unitid>
+<unitid type="bestellnummer">R 2 10579</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_308</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">309</unitid>
+<unitid label="ehri_structure">0.1.1.171</unitid>
+<unitid type="bestellnummer">R 2 10348</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_309</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">310</unitid>
+<unitid label="ehri_structure">0.1.1.172</unitid>
+<unitid type="bestellnummer">R 2 10365</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_310</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">311</unitid>
+<unitid label="ehri_structure">0.1.1.173</unitid>
+<unitid type="bestellnummer">R 2 10527</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_311</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">312</unitid>
+<unitid label="ehri_structure">0.1.1.174</unitid>
+<unitid type="bestellnummer">R 2 10542</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_312</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">313</unitid>
+<unitid label="ehri_structure">0.1.1.175</unitid>
+<unitid type="bestellnummer">R 2 10651</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_313</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">314</unitid>
+<unitid label="ehri_structure">0.1.1.176</unitid>
+<unitid type="bestellnummer">R 2 10499</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_314</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">315</unitid>
+<unitid label="ehri_structure">0.1.1.177</unitid>
+<unitid type="bestellnummer">R 2 10411</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_315</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">316</unitid>
+<unitid label="ehri_structure">0.1.1.178</unitid>
+<unitid type="bestellnummer">R 2 10351</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_316</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">317</unitid>
+<unitid label="ehri_structure">0.1.1.179</unitid>
+<unitid type="bestellnummer">R 2 10523</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_317</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">318</unitid>
+<unitid label="ehri_structure">0.1.1.180</unitid>
+<unitid type="bestellnummer">R 2 10581</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_318</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">319</unitid>
+<unitid label="ehri_structure">0.1.1.181</unitid>
+<unitid type="bestellnummer">R 2 8594</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_319</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">320</unitid>
+<unitid label="ehri_structure">0.1.1.182</unitid>
+<unitid type="bestellnummer">R 2 10337</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_320</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">321</unitid>
+<unitid label="ehri_structure">0.1.1.183</unitid>
+<unitid type="bestellnummer">R 2 10487</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_321</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">322</unitid>
+<unitid label="ehri_structure">0.1.1.184</unitid>
+<unitid type="bestellnummer">R 2 10372</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_322</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">323</unitid>
+<unitid label="ehri_structure">0.1.1.185</unitid>
+<unitid type="bestellnummer">R 2 10461</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_323</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">324</unitid>
+<unitid label="ehri_structure">0.1.1.186</unitid>
+<unitid type="bestellnummer">R 2 10370</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_324</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">325</unitid>
+<unitid label="ehri_structure">0.1.1.187</unitid>
+<unitid type="bestellnummer">R 2 10366</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_325</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">326</unitid>
+<unitid label="ehri_structure">0.1.1.188</unitid>
+<unitid type="bestellnummer">R 2 10343</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_326</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">327</unitid>
+<unitid label="ehri_structure">0.1.1.189</unitid>
+<unitid type="bestellnummer">R 2 10350</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_327</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">328</unitid>
+<unitid label="ehri_structure">0.1.1.190</unitid>
+<unitid type="bestellnummer">R 2 10505</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_328</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">329</unitid>
+<unitid label="ehri_structure">0.1.1.191</unitid>
+<unitid type="bestellnummer">R 2 8601</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_329</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">330</unitid>
+<unitid label="ehri_structure">0.1.1.192</unitid>
+<unitid type="bestellnummer">R 2 10557</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_330</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">331</unitid>
+<unitid label="ehri_structure">0.1.1.193</unitid>
+<unitid type="bestellnummer">R 2 10536</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_331</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">332</unitid>
+<unitid label="ehri_structure">0.1.1.194</unitid>
+<unitid type="bestellnummer">R 2 10556</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_332</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">333</unitid>
+<unitid label="ehri_structure">0.1.1.195</unitid>
+<unitid type="bestellnummer">R 2 10530</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_333</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">334</unitid>
+<unitid label="ehri_structure">0.1.1.196</unitid>
+<unitid type="bestellnummer">R 2 10435</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_334</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">335</unitid>
+<unitid label="ehri_structure">0.1.1.197</unitid>
+<unitid type="bestellnummer">R 2 10512</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_335</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">336</unitid>
+<unitid label="ehri_structure">0.1.1.198</unitid>
+<unitid type="bestellnummer">R 2 10531</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_336</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">337</unitid>
+<unitid label="ehri_structure">0.1.1.199</unitid>
+<unitid type="bestellnummer">R 2 10641</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_337</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">338</unitid>
+<unitid label="ehri_structure">0.1.1.200</unitid>
+<unitid type="bestellnummer">R 2 10367</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_338</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">339</unitid>
+<unitid label="ehri_structure">0.1.1.201</unitid>
+<unitid type="bestellnummer">R 2 10425</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_339</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">340</unitid>
+<unitid label="ehri_structure">0.1.1.202</unitid>
+<unitid type="bestellnummer">R 2 10635</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_340</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">341</unitid>
+<unitid label="ehri_structure">0.1.1.203</unitid>
+<unitid type="bestellnummer">R 2 10379</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_341</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">342</unitid>
+<unitid label="ehri_structure">0.1.1.204</unitid>
+<unitid type="bestellnummer">R 2 10511</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_342</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">343</unitid>
+<unitid label="ehri_structure">0.1.1.205</unitid>
+<unitid type="bestellnummer">R 2 10519</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_343</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">344</unitid>
+<unitid label="ehri_structure">0.1.1.206</unitid>
+<unitid type="bestellnummer">R 2 10495</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_344</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">345</unitid>
+<unitid label="ehri_structure">0.1.1.207</unitid>
+<unitid type="bestellnummer">R 2 10529</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_345</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">346</unitid>
+<unitid label="ehri_structure">0.1.1.208</unitid>
+<unitid type="bestellnummer">R 2 10349</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_346</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">347</unitid>
+<unitid label="ehri_structure">0.1.1.209</unitid>
+<unitid type="bestellnummer">R 2 10369</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_347</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">348</unitid>
+<unitid label="ehri_structure">0.1.1.210</unitid>
+<unitid type="bestellnummer">R 2 10619</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_348</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">349</unitid>
+<unitid label="ehri_structure">0.1.1.211</unitid>
+<unitid type="bestellnummer">R 2 10543</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_349</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">350</unitid>
+<unitid label="ehri_structure">0.1.1.212</unitid>
+<unitid type="bestellnummer">R 2 10377</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_350</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">351</unitid>
+<unitid label="ehri_structure">0.1.1.213</unitid>
+<unitid type="bestellnummer">R 2 10668</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_351</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">352</unitid>
+<unitid label="ehri_structure">0.1.1.214</unitid>
+<unitid type="bestellnummer">R 2 10354</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_352</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">353</unitid>
+<unitid label="ehri_structure">0.1.1.215</unitid>
+<unitid type="bestellnummer">R 2 10528</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_353</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">354</unitid>
+<unitid label="ehri_structure">0.1.1.216</unitid>
+<unitid type="bestellnummer">R 2 10515</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_354</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">355</unitid>
+<unitid label="ehri_structure">0.1.1.217</unitid>
+<unitid type="bestellnummer">R 2 10518</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_355</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">356</unitid>
+<unitid label="ehri_structure">0.1.1.218</unitid>
+<unitid type="bestellnummer">R 2 10346</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_356</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">357</unitid>
+<unitid label="ehri_structure">0.1.1.219</unitid>
+<unitid type="bestellnummer">R 2 10568</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_357</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">358</unitid>
+<unitid label="ehri_structure">0.1.1.220</unitid>
+<unitid type="bestellnummer">R 2 10375</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_358</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">359</unitid>
+<unitid label="ehri_structure">0.1.1.221</unitid>
+<unitid type="bestellnummer">R 2 10483</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_359</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">360</unitid>
+<unitid label="ehri_structure">0.1.1.222</unitid>
+<unitid type="bestellnummer">R 2 10506</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_360</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">361</unitid>
+<unitid label="ehri_structure">0.1.1.223</unitid>
+<unitid type="bestellnummer">R 2 10437</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_361</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">362</unitid>
+<unitid label="ehri_structure">0.1.1.224</unitid>
+<unitid type="bestellnummer">R 2 10455</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_362</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">363</unitid>
+<unitid label="ehri_structure">0.1.1.225</unitid>
+<unitid type="bestellnummer">R 2 10535</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_363</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">364</unitid>
+<unitid label="ehri_structure">0.1.1.226</unitid>
+<unitid type="bestellnummer">R 2 10324</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_364</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">365</unitid>
+<unitid label="ehri_structure">0.1.1.227</unitid>
+<unitid type="bestellnummer">R 2 10345</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_365</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">366</unitid>
+<unitid label="ehri_structure">0.1.1.228</unitid>
+<unitid type="bestellnummer">R 2 10422</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_366</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">367</unitid>
+<unitid label="ehri_structure">0.1.1.229</unitid>
+<unitid type="bestellnummer">R 2 10565</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_367</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">368</unitid>
+<unitid label="ehri_structure">0.1.1.230</unitid>
+<unitid type="bestellnummer">R 2 10618</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_368</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">369</unitid>
+<unitid label="ehri_structure">0.1.1.231</unitid>
+<unitid type="bestellnummer">R 2 10376</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_369</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">370</unitid>
+<unitid label="ehri_structure">0.1.1.232</unitid>
+<unitid type="bestellnummer">R 2 10634</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_370</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">371</unitid>
+<unitid label="ehri_structure">0.1.1.233</unitid>
+<unitid type="bestellnummer">R 2 10303</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_371</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">372</unitid>
+<unitid label="ehri_structure">0.1.1.234</unitid>
+<unitid type="bestellnummer">R 2 8606</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_372</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">373</unitid>
+<unitid label="ehri_structure">0.1.1.235</unitid>
+<unitid type="bestellnummer">R 2 10462</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_373</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">374</unitid>
+<unitid label="ehri_structure">0.1.1.236</unitid>
+<unitid type="bestellnummer">R 2 10463</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_374</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">375</unitid>
+<unitid label="ehri_structure">0.1.1.237</unitid>
+<unitid type="bestellnummer">R 2 8667</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_375</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">376</unitid>
+<unitid label="ehri_structure">0.1.1.238</unitid>
+<unitid type="bestellnummer">R 2 10621</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_376</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">377</unitid>
+<unitid label="ehri_structure">0.1.1.239</unitid>
+<unitid type="bestellnummer">R 2 8608</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_377</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">378</unitid>
+<unitid label="ehri_structure">0.1.1.240</unitid>
+<unitid type="bestellnummer">R 2 10335</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_378</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">379</unitid>
+<unitid label="ehri_structure">0.1.1.241</unitid>
+<unitid type="bestellnummer">R 2 10421</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_379</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">380</unitid>
+<unitid label="ehri_structure">0.1.1.242</unitid>
+<unitid type="bestellnummer">R 2 10626</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_380</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">381</unitid>
+<unitid label="ehri_structure">0.1.1.243</unitid>
+<unitid type="bestellnummer">R 2 10516</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_381</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">382</unitid>
+<unitid label="ehri_structure">0.1.1.244</unitid>
+<unitid type="bestellnummer">R 2 10322</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_382</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">383</unitid>
+<unitid label="ehri_structure">0.1.1.245</unitid>
+<unitid type="bestellnummer">R 2 10482</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_383</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">384</unitid>
+<unitid label="ehri_structure">0.1.1.246</unitid>
+<unitid type="bestellnummer">R 2 10430</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_384</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">385</unitid>
+<unitid label="ehri_structure">0.1.1.247</unitid>
+<unitid type="bestellnummer">R 2 10398</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_385</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">386</unitid>
+<unitid label="ehri_structure">0.1.1.248</unitid>
+<unitid type="bestellnummer">R 2 10313</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_386</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">387</unitid>
+<unitid label="ehri_structure">0.1.1.249</unitid>
+<unitid type="bestellnummer">R 2 10546</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_387</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">388</unitid>
+<unitid label="ehri_structure">0.1.1.250</unitid>
+<unitid type="bestellnummer">R 2 10436</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_388</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">389</unitid>
+<unitid label="ehri_structure">0.1.1.251</unitid>
+<unitid type="bestellnummer">R 2 10509</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_389</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">390</unitid>
+<unitid label="ehri_structure">0.1.1.252</unitid>
+<unitid type="bestellnummer">R 2 10653</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_390</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">391</unitid>
+<unitid label="ehri_structure">0.1.1.253</unitid>
+<unitid type="bestellnummer">R 2 10373</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_391</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">392</unitid>
+<unitid label="ehri_structure">0.1.1.254</unitid>
+<unitid type="bestellnummer">R 2 10640</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_392</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">393</unitid>
+<unitid label="ehri_structure">0.1.1.255</unitid>
+<unitid type="bestellnummer">R 2 10652</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_393</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">394</unitid>
+<unitid label="ehri_structure">0.1.1.256</unitid>
+<unitid type="bestellnummer">R 2 10476</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_394</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">395</unitid>
+<unitid label="ehri_structure">0.1.1.257</unitid>
+<unitid type="bestellnummer">R 2 10658</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_395</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">396</unitid>
+<unitid label="ehri_structure">0.1.1.258</unitid>
+<unitid type="bestellnummer">R 2 8607</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_396</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">397</unitid>
+<unitid label="ehri_structure">0.1.1.259</unitid>
+<unitid type="bestellnummer">R 2 10454</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_397</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">398</unitid>
+<unitid label="ehri_structure">0.1.1.260</unitid>
+<unitid type="bestellnummer">R 2 8609</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_398</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">399</unitid>
+<unitid label="ehri_structure">0.1.1.261</unitid>
+<unitid type="bestellnummer">R 2 8605</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_399</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">400</unitid>
+<unitid label="ehri_structure">0.1.1.262</unitid>
+<unitid type="bestellnummer">R 2 8672</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_400</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">401</unitid>
+<unitid label="ehri_structure">0.1.1.263</unitid>
+<unitid type="bestellnummer">R 2 10360</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_401</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">402</unitid>
+<unitid label="ehri_structure">0.1.1.264</unitid>
+<unitid type="bestellnummer">R 2 10508</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_402</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">403</unitid>
+<unitid label="ehri_structure">0.1.1.265</unitid>
+<unitid type="bestellnummer">R 2 10627</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_403</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">404</unitid>
+<unitid label="ehri_structure">0.1.1.266</unitid>
+<unitid type="bestellnummer">R 2 10669</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_404</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">405</unitid>
+<unitid label="ehri_structure">0.1.1.267</unitid>
+<unitid type="bestellnummer">R 2 8597</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_405</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">406</unitid>
+<unitid label="ehri_structure">0.1.1.268</unitid>
+<unitid type="bestellnummer">R 2 10420</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_406</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">407</unitid>
+<unitid label="ehri_structure">0.1.1.269</unitid>
+<unitid type="bestellnummer">R 2 10639</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_407</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">408</unitid>
+<unitid label="ehri_structure">0.1.1.270</unitid>
+<unitid type="bestellnummer">R 2 10661</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_408</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">409</unitid>
+<unitid label="ehri_structure">0.1.1.271</unitid>
+<unitid type="bestellnummer">R 2 10371</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_409</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">410</unitid>
+<unitid label="ehri_structure">0.1.1.272</unitid>
+<unitid type="bestellnummer">R 2 10573</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_410</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">411</unitid>
+<unitid label="ehri_structure">0.1.1.273</unitid>
+<unitid type="bestellnummer">R 2 10534</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_411</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">412</unitid>
+<unitid label="ehri_structure">0.1.1.274</unitid>
+<unitid type="bestellnummer">R 2 10478</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_412</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">413</unitid>
+<unitid label="ehri_structure">0.1.1.275</unitid>
+<unitid type="bestellnummer">R 2 10500</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_413</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">414</unitid>
+<unitid label="ehri_structure">0.1.1.276</unitid>
+<unitid type="bestellnummer">R 2 10532</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_414</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">415</unitid>
+<unitid label="ehri_structure">0.1.1.277</unitid>
+<unitid type="bestellnummer">R 2 10545</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_415</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">416</unitid>
+<unitid label="ehri_structure">0.1.1.278</unitid>
+<unitid type="bestellnummer">R 2 10551</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_416</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">417</unitid>
+<unitid label="ehri_structure">0.1.1.279</unitid>
+<unitid type="bestellnummer">R 2 10564</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_417</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">418</unitid>
+<unitid label="ehri_structure">0.1.1.280</unitid>
+<unitid type="bestellnummer">R 2 10342</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_418</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">419</unitid>
+<unitid label="ehri_structure">0.1.1.281</unitid>
+<unitid type="bestellnummer">R 2 10574</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_419</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">420</unitid>
+<unitid label="ehri_structure">0.1.1.282</unitid>
+<unitid type="bestellnummer">R 2 10552</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_420</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">421</unitid>
+<unitid label="ehri_structure">0.1.1.283</unitid>
+<unitid type="bestellnummer">R 2 10526</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_421</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">422</unitid>
+<unitid label="ehri_structure">0.1.1.284</unitid>
+<unitid type="bestellnummer">R 2 10570</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_422</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">423</unitid>
+<unitid label="ehri_structure">0.1.1.285</unitid>
+<unitid type="bestellnummer">R 2 10560</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_423</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">424</unitid>
+<unitid label="ehri_structure">0.1.1.286</unitid>
+<unitid type="bestellnummer">R 2 10622</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_424</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">425</unitid>
+<unitid label="ehri_structure">0.1.1.287</unitid>
+<unitid type="bestellnummer">R 2 10492</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_425</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">426</unitid>
+<unitid label="ehri_structure">0.1.1.288</unitid>
+<unitid type="bestellnummer">R 2 10544</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_426</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">427</unitid>
+<unitid label="ehri_structure">0.1.1.289</unitid>
+<unitid type="bestellnummer">R 2 10362</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_427</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">428</unitid>
+<unitid label="ehri_structure">0.1.1.290</unitid>
+<unitid type="bestellnummer">R 2 10468</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_428</unitid>
+</did>
+</c03>
+</c02>
+</c01>
+<c01 level="subfonds">
+<did>
+<unitid label="ehri_internal_id">429</unitid>
+<unitid label="ehri_structure">0.2</unitid>
+<unittitle>Gestapo KZ Neuengamme</unittitle>
+
+
+<unitdate normal="1943-01-07/1943-09-30">1943-01-07 - 1943-09-30</unitdate>
+
+<unitid label="ehri_main_identifier">R 2 10468</unitid>
+</did>
+<scopecontent>
+<p>Aktendeckel von Häftlingsakten aus der Politischen Abteilung des KZ Neuengamme</p>
+</scopecontent>
+<custodhist>
+<p>Die in den Aktenüberresten aus dem Konzentrationslagern Neuengamme zu findenden Namen hat der Internationale Suchdienst im Jahr 1950 verkartet, wie aus den darauf befindlichen Stempeln hervorgeht.</p>
+</custodhist>
+<bioghist>
+<p>Im System der Konzentrationslager verfügte die Gestapo über die sogenannten „Politischen Abteilungen“, die als eigene administrative Einheiten geführt wurden und einen integralen Teil der Lagerstruktur bildeten. Sie waren zum einen dem Reichssicherheitshauptamt und den lokalen Gestapostellen untergeordnet und zum anderen den Lagerleitern und der Inspektion der Konzentrationslager. In der Regel wurden sie von einem aus der Staatspolizei(leit)stelle oder einer die Kriminalpolizei(leit)stellen abgeordneten Beamten geleitet, außerdem wurden auch Häftlinge als Schreiber und Registratoren eingesetzt. In den Politischen Abteilungen wurden Neuzugänge aufgenommen, die Häftlinge erkennungsdienstlich behandelt und verhört, es wurden Karteien und Akten über sie geführt und dort begannen auch bereits die Misshandlungen durch die SS. Überstellungen sowie Entlassungen organisierte die Politische Abteilung ebenfalls und ihnen oblag die administrative Bearbeitung aller Todesfälle im Lager. Mit Kriegsbeginn wirkten die Politischen Abteilungen verstärkt an Hinrichtungen und Massenmord mit sowie an den Versuchen zur Verschleierung derselben.<lb></lb>
+<lb></lb>Quellen:<lb></lb>
+<lb></lb>Dams, Carsten/ Stolle, Michael: Die Gestapo : Herrschaft und Terror im Dritten Reich , München 2008.<lb></lb>
+<lb></lb>Tuchel, Johannes: Registrierung, Mißhandlung und Exekution : Die "Politischen Abteilungen" in den Konzentrationslagern, In: Paul, Gerhard / Mallmann, Klaus-Michael (Hrsg.): Die Gestapo im Zweiten Weltkrieg : "Heimatfront" und besetztes Europa, Darmstadt 2000.<lb></lb>
+</p>
+</bioghist>
+<c02 level="subfonds">
+<did>
+<unitid label="ehri_internal_id">430</unitid>
+<unitid label="ehri_structure">0.2.1</unitid>
+<unittitle>Ermittlung und Inhaftierung</unittitle>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_430</unitid>
+</did>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">431</unitid>
+<unitid label="ehri_structure">0.2.1.1</unitid>
+<unitid type="bestellnummer">R 2 8612</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_431</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">432</unitid>
+<unitid label="ehri_structure">0.2.1.2</unitid>
+<unitid type="bestellnummer">R 2 8614</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_432</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">433</unitid>
+<unitid label="ehri_structure">0.2.1.3</unitid>
+<unitid type="bestellnummer">R 2 8613</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_433</unitid>
+</did>
+</c03>
+</c02>
+</c01>
+<c01 level="subfonds">
+<did>
+<unitid label="ehri_internal_id">434</unitid>
+<unitid label="ehri_structure">0.3</unitid>
+<unittitle>Gestapo KZ Sachsenhausen</unittitle>
+
+
+<unitdate normal="1934-07-11/1943-09-08">1934-07-11 - 1943-09-08</unitdate>
+
+<unitid label="ehri_main_identifier">R 2 8613</unitid>
+</did>
+<scopecontent>
+<p>Enthält vor allem Aktendeckel von Häftlingsakten (Schutzhaft, Polizeiliche Vorbeugungshaft) aus der Politischen Abteilung des Konzentrationslagers Sachsenhausen</p>
+</scopecontent>
+<custodhist>
+<p>Die in den Aktenüberresten aus dem Konzentrationslagern Sachsenhausen zu findenden Namen hat der Internationale Suchdienst in den Jahren 1949 und 1950 verkartet, wie aus den darauf befindlichen Stempeln hervorgeht.</p>
+</custodhist>
+<bioghist>
+<p>Im System der Konzentrationslager verfügte die Gestapo über die sogenannten „Politischen Abteilungen“, die als eigene administrative Einheiten geführt wurden und einen integralen Teil der Lagerstruktur bildeten. Sie waren zum einen dem Reichssicherheitshauptamt und den lokalen Gestapostellen untergeordnet und zum anderen den Lagerleitern und der Inspektion der Konzentrationslager. In der Regel wurden sie von einem aus der Staatspolizei(leit)stelle oder einer die Kriminalpolizei(leit)stellen abgeordneten Beamten geleitet, außerdem wurden auch Häftlinge als Schreiber und Registratoren eingesetzt. In den Politischen Abteilungen wurden Neuzugänge aufgenommen, die Häftlinge erkennungsdienstlich behandelt und verhört, es wurden Karteien und Akten über sie geführt und dort begannen auch bereits die Misshandlungen durch die SS. Überstellungen sowie Entlassungen organisierte die Politische Abteilung ebenfalls und ihnen oblag die administrative Bearbeitung aller Todesfälle im Lager. Mit Kriegsbeginn wirkten die Politischen Abteilungen verstärkt an Hinrichtungen und Massenmord mit sowie an den Versuchen zur Verschleierung derselben.<lb></lb>
+<lb></lb>Quellen:<lb></lb>
+<lb></lb>Dams, Carsten/ Stolle, Michael: Die Gestapo : Herrschaft und Terror im Dritten Reich , München 2008.<lb></lb>
+<lb></lb>Tuchel, Johannes: Registrierung, Mißhandlung und Exekution : Die "Politischen Abteilungen" in den Konzentrationslagern, In: Paul, Gerhard / Mallmann, Klaus-Michael (Hrsg.): Die Gestapo im Zweiten Weltkrieg : "Heimatfront" und besetztes Europa, Darmstadt 2000.</p>
+</bioghist>
+<c02 level="subfonds">
+<did>
+<unitid label="ehri_internal_id">435</unitid>
+<unitid label="ehri_structure">0.3.1</unitid>
+<unittitle>Ermittlung und Inhaftierung (Einzelfälle)</unittitle>
+<repository>Internationaler Suchdienst (ITS), Bad Arolsen, Germany</repository>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_435</unitid>
+</did>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">436</unitid>
+<unitid label="ehri_structure">0.3.1.1</unitid>
+<unitid type="bestellnummer">R 2 8637</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_436</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">437</unitid>
+<unitid label="ehri_structure">0.3.1.2</unitid>
+<unitid type="bestellnummer">R 2 8658</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_437</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">438</unitid>
+<unitid label="ehri_structure">0.3.1.3</unitid>
+<unitid type="bestellnummer">R 2 8623</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_438</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">439</unitid>
+<unitid label="ehri_structure">0.3.1.4</unitid>
+<unitid type="bestellnummer">R 2 8650</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_439</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">440</unitid>
+<unitid label="ehri_structure">0.3.1.5</unitid>
+<unitid type="bestellnummer">R 2 8659</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_440</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">441</unitid>
+<unitid label="ehri_structure">0.3.1.6</unitid>
+<unitid type="bestellnummer">R 2 8636</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_441</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">442</unitid>
+<unitid label="ehri_structure">0.3.1.7</unitid>
+<unitid type="bestellnummer">R 2 8640</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_442</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">443</unitid>
+<unitid label="ehri_structure">0.3.1.8</unitid>
+<unitid type="bestellnummer">R 2 8646</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_443</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">444</unitid>
+<unitid label="ehri_structure">0.3.1.9</unitid>
+<unitid type="bestellnummer">R 2 8664</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_444</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">445</unitid>
+<unitid label="ehri_structure">0.3.1.10</unitid>
+<unitid type="bestellnummer">R 2 8628</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_445</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">446</unitid>
+<unitid label="ehri_structure">0.3.1.11</unitid>
+<unitid type="bestellnummer">R 2 8627</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_446</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">447</unitid>
+<unitid label="ehri_structure">0.3.1.12</unitid>
+<unitid type="bestellnummer">R 2 8655</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_447</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">448</unitid>
+<unitid label="ehri_structure">0.3.1.13</unitid>
+<unitid type="bestellnummer">R 2 8629</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_448</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">449</unitid>
+<unitid label="ehri_structure">0.3.1.14</unitid>
+<unitid type="bestellnummer">R 2 8657</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_449</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">450</unitid>
+<unitid label="ehri_structure">0.3.1.15</unitid>
+<unitid type="bestellnummer">R 2 8644</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_450</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">451</unitid>
+<unitid label="ehri_structure">0.3.1.16</unitid>
+<unitid type="bestellnummer">R 2 8622</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_451</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">452</unitid>
+<unitid label="ehri_structure">0.3.1.17</unitid>
+<unitid type="bestellnummer">R 2 8651</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_452</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">453</unitid>
+<unitid label="ehri_structure">0.3.1.18</unitid>
+<unitid type="bestellnummer">R 2 8625</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_453</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">454</unitid>
+<unitid label="ehri_structure">0.3.1.19</unitid>
+<unitid type="bestellnummer">R 2 8656</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_454</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">455</unitid>
+<unitid label="ehri_structure">0.3.1.20</unitid>
+<unitid type="bestellnummer">R 2 8654</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_455</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">456</unitid>
+<unitid label="ehri_structure">0.3.1.21</unitid>
+<unitid type="bestellnummer">R 2 8648</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_456</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">457</unitid>
+<unitid label="ehri_structure">0.3.1.22</unitid>
+<unitid type="bestellnummer">R 2 8660</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_457</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">458</unitid>
+<unitid label="ehri_structure">0.3.1.23</unitid>
+<unitid type="bestellnummer">R 2 8639</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_458</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">459</unitid>
+<unitid label="ehri_structure">0.3.1.24</unitid>
+<unitid type="bestellnummer">R 2 8645</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_459</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">460</unitid>
+<unitid label="ehri_structure">0.3.1.25</unitid>
+<unitid type="bestellnummer">R 2 8666</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_460</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">461</unitid>
+<unitid label="ehri_structure">0.3.1.26</unitid>
+<unitid type="bestellnummer">R 2 8652</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_461</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">462</unitid>
+<unitid label="ehri_structure">0.3.1.27</unitid>
+<unitid type="bestellnummer">R 2 8632</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_462</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">463</unitid>
+<unitid label="ehri_structure">0.3.1.28</unitid>
+<unitid type="bestellnummer">R 2 8662</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_463</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">464</unitid>
+<unitid label="ehri_structure">0.3.1.29</unitid>
+<unitid type="bestellnummer">R 2 8665</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_464</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">465</unitid>
+<unitid label="ehri_structure">0.3.1.30</unitid>
+<unitid type="bestellnummer">R 2 8653</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_465</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">466</unitid>
+<unitid label="ehri_structure">0.3.1.31</unitid>
+<unitid type="bestellnummer">R 2 8663</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_466</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">467</unitid>
+<unitid label="ehri_structure">0.3.1.32</unitid>
+<unitid type="bestellnummer">R 2 8647</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_467</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">468</unitid>
+<unitid label="ehri_structure">0.3.1.33</unitid>
+<unitid type="bestellnummer">R 2 8624</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_468</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">469</unitid>
+<unitid label="ehri_structure">0.3.1.34</unitid>
+<unitid type="bestellnummer">R 2 8649</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_469</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">470</unitid>
+<unitid label="ehri_structure">0.3.1.35</unitid>
+<unitid type="bestellnummer">R 2 8633</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_470</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">471</unitid>
+<unitid label="ehri_structure">0.3.1.36</unitid>
+<unitid type="bestellnummer">R 2 8626</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_471</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">472</unitid>
+<unitid label="ehri_structure">0.3.1.37</unitid>
+<unitid type="bestellnummer">R 2 8661</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_472</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">473</unitid>
+<unitid label="ehri_structure">0.3.1.38</unitid>
+<unitid type="bestellnummer">R 2 8638</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_473</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">474</unitid>
+<unitid label="ehri_structure">0.3.1.39</unitid>
+<unitid type="bestellnummer">R 2 8643</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_474</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">475</unitid>
+<unitid label="ehri_structure">0.3.1.40</unitid>
+<unitid type="bestellnummer">R 2 8630</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_475</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">476</unitid>
+<unitid label="ehri_structure">0.3.1.41</unitid>
+<unitid type="bestellnummer">R 2 8635</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_476</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">477</unitid>
+<unitid label="ehri_structure">0.3.1.42</unitid>
+<unitid type="bestellnummer">R 2 8641</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_477</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">478</unitid>
+<unitid label="ehri_structure">0.3.1.43</unitid>
+<unitid type="bestellnummer">R 2 8634</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_478</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">479</unitid>
+<unitid label="ehri_structure">0.3.1.44</unitid>
+<unitid type="bestellnummer">R 2 8642</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_479</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">480</unitid>
+<unitid label="ehri_structure">0.3.1.45</unitid>
+<unitid type="bestellnummer">R 2 8621</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_480</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">481</unitid>
+<unitid label="ehri_structure">0.3.1.46</unitid>
+<unitid type="bestellnummer">R 2 8631</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_481</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">482</unitid>
+<unitid label="ehri_structure">0.3.1.47</unitid>
+<unitid type="bestellnummer">R 2 8620</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_482</unitid>
+</did>
+</c03>
+</c02>
+</c01>
+<c01 level="subfonds">
+<did>
+<unitid label="ehri_internal_id">483</unitid>
+<unitid label="ehri_structure">0.4</unitid>
+<unittitle>Gestapo Stuttgart</unittitle>
+
+
+<unitdate normal="1944-10-02/1945-03-29">1944-10-02 - 1945-03-29</unitdate>
+
+<unitid label="ehri_main_identifier">R 2 8620</unitid>
+</did>
+<scopecontent>
+<p>Enthält vor allem das Arbeitserziehungslager Rudersberg betreffende Unterlagen</p>
+</scopecontent>
+<bioghist>
+<p>1. Das Arbeitserziehungslager Rudersberg<lb></lb>
+<lb></lb>
+</p>
+<p>Die Staatspolizeileitstelle Stuttgart eröffnete am 1. Juli 1942 in der Gemeinde Rudersberg bei Welzheim ein Frauenarbeitserziehungslager in einem beschlagnahmten ehemaligen Gasthaus, das für diesen Zweck umgebaut worden war. Zwischen 200 und 700 Frauen waren darin inhaftiert und wurden dazu gezwungen, im gegenüber dem Lager gelegenen Holzwerk Rudersberg Munitionskisten für die Wehrmacht herzustellen. Schätzungen zufolge stammte ungefähr die Hälfte der im AEL Rudersberg Inhaftierten aus Osteuropa, ungefähr ein Viertel kam aus Deutschland und die Weiteren aus Westeuropa.<lb></lb>
+</p>
+<p></p>
+<p>2. Zur Geschichte der Arbeitserziehungslager<lb></lb>
+<lb></lb>Mit den ab 1939/40 auf Initiative lokaler Instanzen errichteten sogenannten Arbeitserziehungslagern besaßen die regionalen Gestapo-Dienststellen Lager eines eigenen Typs. Die meisten AEL wurden in der Nähe von Industriebetrieben errichtet, zum Teil sogar auf dem Werksgelände selbst. Darüber hinaus gab es auch in folgenden Konzentrationslagern eigene Arbeitserziehungslager: Auschwitz, Buchenwald, Dachau, Groß-Rosen, Plaszow und Stutthof. Die Einweisung in ein solches „KZ der Gestapo“ (Gabriele Lotfi) erfolgte meist nach einer Denunziation durch örtliche Instanzen, u.a. der Arbeitsverwaltung und privatwirtschaftlicher Betriebe bzw. des Werkschutzes.<lb></lb>
+<lb></lb>Existierten im Jahr 1940 insgesamt 8 AEL, so waren es bei Kriegsende ca. 200 Lager im Reichsgebiet und in den besetzten Gebieten, in denen zwischen 1939 und 1945 insgesamt ca. 500.000 Menschen inhaftiert waren. Mittels Arbeitserziehungshaft wollte die Gestapo die Arbeitsdisziplin deutscher und insbesondere ausländischer Arbeitskräfte erhöhen und außerdem über den Kreis der unmittelbar Betroffenen hinaus eine abschreckende Wirkung entfalten.<lb></lb>
+<lb></lb>Außer sogenannter „Arbeitsbummelei“, „Arbeitsverweigerung“ bzw. „Arbeitsvertragsbruch“, konnte auch jeder Verstoß gegen die Bestimmungen für Zwangsarbeiter sowie andere willkürliche Gründe zur Inhaftierung in einem AEL führen. Die Haftdauer in einem AEL war zeitlich begrenzt – da die Arbeitskräfte danach wieder an ihrem Arbeitsplatz eingesetzt werden sollten - und betrug in der Regel 21 bis 56 Tagen. Eine Inhaftierung in einem AEL bedeutete „kurzfristigen, aber dafür umso brutaleren Arbeitsterror“ (Gabriele Lotfi). Spätestens seit 1942 wurde eine sogenannte Arbeitserziehungshaft überwiegend gegen aus Osteuropa in das Deutsche Reich verschleppte Zwangsarbeiterinnen und Zwangarbeiter sowie Zivilarbeiterinnen und Zivilarbeiter verhängt, wobei vor allem gegen Kriegsende Fluchtversuche und der Versuch der Rückkehr in die osteuropäische Heimat zu einem massenhaften Grund für Arbeitserziehungshaft wurden.<lb></lb>
+<lb></lb>Quellen:<lb></lb>
+<lb></lb>Dams, Carsten/ Stolle, Michael: Die Gestapo : Herrschaft und Terror im Dritten Reich , München 2008.<lb></lb>
+<lb></lb>Lotfi, Gabriele: KZ der Gestapo : Arbeitserziehungslager im Dritten Reich. Stuttgart 2000.<lb></lb>
+<lb></lb>Lotfi, Gabriele: Stätten des Terrors. Die "Arbeitserziehungslager" der Gestapo, In: Paul, Gerhard / Mallmann, Klaus-Michael (Hrsg.): Die Gestapo im Zweiten Weltkrieg : "Heimatfront" und besetztes Europa, Darmstadt 2000, S. 255-269</p>
+</bioghist>
+<c02 level="subfonds">
+<did>
+<unitid label="ehri_internal_id">484</unitid>
+<unitid label="ehri_structure">0.4.1</unitid>
+<unittitle>Ermittlung und Inhaftierung (Einzelfälle)</unittitle>
+<repository>Internationaler Suchdienst (ITS), Bad Arolsen, Germany</repository>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_484</unitid>
+</did>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">485</unitid>
+<unitid label="ehri_structure">0.4.1.1</unitid>
+<unitid type="bestellnummer">R 2 8705</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_485</unitid>
+</did>
+</c03>
+<c03 level="file">
+<did>
+<unitid label="ehri_internal_id">486</unitid>
+<unitid label="ehri_structure">0.4.1.2</unitid>
+<unitid type="bestellnummer">R 2 8704</unitid>
+
+<unitid label="ehri_main_identifier">R2_Gestapo_486</unitid>
+</did>
+</c03>
+</c02>
+</c01>
+</dsc>
+</archdesc>
+</ead>

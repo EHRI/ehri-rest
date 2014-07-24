@@ -72,6 +72,7 @@ public class TestAllPropertiesFiles {
         assertTrue(p.check(new XmlImportProperties(propfile), EntityClass.DOCUMENT_DESCRIPTION));
     }
     @Test
+    @Ignore //not used anymore
     public void testEadXmlProperties() {
          String propfile = "icaatom.properties";
         logger.debug(propfile);
@@ -101,6 +102,8 @@ public class TestAllPropertiesFiles {
         String propfile = "niodead.properties";
         logger.debug(propfile);
         assertTrue(p.check(new XmlImportProperties(propfile), EntityClass.DOCUMENT_DESCRIPTION));
+        XmlImportProperties prop = new XmlImportProperties(propfile);
+        assertEquals("xref", prop.getAttributeProperty("href"));
     }
     
     @Test
@@ -111,6 +114,7 @@ public class TestAllPropertiesFiles {
     }
 
     @Test
+    @Ignore //not used anymore
     public void testUkrainianDescXmlProperties() {
         String propfile = "ukraine.properties";
         logger.debug(propfile);
@@ -125,6 +129,34 @@ public class TestAllPropertiesFiles {
     }
 
     @Test
+    public void testItsProperties() {
+        String propfile = "its.properties";
+        logger.debug(propfile);
+        assertTrue(p.check(new XmlImportProperties(propfile), EntityClass.DOCUMENT_DESCRIPTION));
+    }
+
+    @Test
+    public void testCegesomaNolaProperties() {
+        String propfile = "cegesomaNola.properties";
+        logger.debug(propfile);
+        assertTrue(p.check(new XmlImportProperties(propfile), EntityClass.DOCUMENT_DESCRIPTION));
+    }
+
+    @Test
+    public void testCegesomaProperties() {
+        String propfile = "cegesoma.properties";
+        logger.debug(propfile);
+        assertTrue(p.check(new XmlImportProperties(propfile), EntityClass.DOCUMENT_DESCRIPTION));
+    }
+    @Test
+    public void testGenericProperties() {
+        String propfile = "generic.properties";
+        logger.debug(propfile);
+        assertTrue(p.check(new XmlImportProperties(propfile), EntityClass.DOCUMENT_DESCRIPTION));
+    }
+
+    @Test
+    @Ignore //not used anymore
     public void testUkrainianRepoXmlProperties() {
         String propfile = "ukraine_repo.properties";
         logger.debug(propfile);

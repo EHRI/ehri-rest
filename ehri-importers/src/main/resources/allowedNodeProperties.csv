@@ -40,6 +40,7 @@ documentDescription,conditionsOfReproduction,,,
 documentDescription,extentAndMedium,,,
 documentDescription,locationOfCopies,,,1
 documentDescription,locationOfOriginals,,,1
+documentDescription,physicalLocation,,,1
 documentDescription,physicalCharacteristics,,,
 documentDescription,scopeAndContent,,,
 documentDescription,systemOfArrangement,,,
@@ -54,6 +55,9 @@ documentDescription,publicationNote,,,
 documentDescription,datesOfDescription,,,
 documentDescription,archivistNote,,,
 documentDescription,provenance,,,
+documentDescription,sources,,,1
+documentDescription,relatedUnitsOfDescription,,,1
+documentDescription,maintenanceEvent,,,1
 historicalAgentDescription,lastName,,,
 historicalAgentDescription,firstName,,,
 historicalAgentDescription,source,,,1

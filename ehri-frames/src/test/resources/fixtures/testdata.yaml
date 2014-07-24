@@ -559,7 +559,7 @@
     identifier: vu1
   relationships:
     isPartOf: vc1
-    isDescribedBy: cd1
+    includesUnit: c1
 
 - id: vu2
   type: virtualUnit
@@ -567,11 +567,9 @@
     identifier: vu2
   relationships:
     isPartOf: vu1
-    isDescribedBy: cd2
+    includesUnit: c4
 
 - id: vu3  # NB: Not part of vu2 yet
   type: virtualUnit
   data:
     identifier: vu3
-  relationships:
-    isDescribedBy: cd3

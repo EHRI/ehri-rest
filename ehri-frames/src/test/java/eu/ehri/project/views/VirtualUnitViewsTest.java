@@ -9,6 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import org.junit.Ignore;
 
 /**
  * @author Mike Bryant (http://github.com/mikesname)
@@ -23,14 +24,15 @@ public class VirtualUnitViewsTest extends AbstractFixtureTest {
     }
 
     @Test
+    @Ignore
     public void testGetVirtualCollections() throws Exception {
         VirtualUnit vc1 = manager.getFrame("vc1", VirtualUnit.class);
         // Both of these units are present in vc1
         DocumentaryUnit c1 = manager.getFrame("c1", DocumentaryUnit.class);
-        DocumentaryUnit c2 = manager.getFrame("c2", DocumentaryUnit.class);
+        DocumentaryUnit c4 = manager.getFrame("c4", DocumentaryUnit.class);
 
         Iterable<VirtualUnit> virtualCollectionsForC1 = views.getVirtualCollections(c1, validUser);
-        Iterable<VirtualUnit> virtualCollectionsForC2 = views.getVirtualCollections(c2, validUser);
+        Iterable<VirtualUnit> virtualCollectionsForC2 = views.getVirtualCollections(c4, validUser);
         assertEquals(Lists.newArrayList(vc1), Lists.newArrayList(virtualCollectionsForC1));
         assertEquals(Lists.newArrayList(vc1), Lists.newArrayList(virtualCollectionsForC2));
     }
