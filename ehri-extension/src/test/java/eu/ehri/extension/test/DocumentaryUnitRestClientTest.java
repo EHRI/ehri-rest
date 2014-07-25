@@ -1,5 +1,6 @@
 package eu.ehri.extension.test;
 
+import com.google.common.net.HttpHeaders;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import eu.ehri.extension.AbstractRestResource;
@@ -20,7 +21,9 @@ import java.util.List;
 import java.util.Map;
 
 import static com.sun.jersey.api.client.ClientResponse.Status.*;
+import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.*;
+import static org.junit.matchers.JUnitMatchers.containsString;
 
 public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
 
@@ -59,6 +62,27 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
         response = jsonCallAs(getAdminUserProfileId(), location)
                 .get(ClientResponse.class);
         assertStatus(OK, response);
+    }
+
+    @Test
+    public void testCacheControl() throws Exception {
+        // Create
+        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
+                ehriUri(Entities.DOCUMENTARY_UNIT, "c1"))
+                .get(ClientResponse.class);
+        assertStatus(OK, response);
+        String c1cc = response.getHeaders().getFirst(HttpHeaders.CACHE_CONTROL);
+        assertThat(c1cc, containsString("no-cache"));
+        assertThat(c1cc, containsString("no-store"));
+        // C4 is unrestricted and thus has a max-age set
+        response = jsonCallAs(getAdminUserProfileId(),
+                ehriUri(Entities.DOCUMENTARY_UNIT, "c4"))
+                .get(ClientResponse.class);
+        assertStatus(OK, response);
+        String c4cc = response.getHeaders().getFirst(HttpHeaders.CACHE_CONTROL);
+        assertThat(c4cc, not(containsString("no-cache")));
+        assertThat(c4cc, not(containsString("no-store")));
+        assertThat(c4cc, containsString("max-age=" + AbstractRestResource.ITEM_CACHE_TIME));
     }
 
     @Test

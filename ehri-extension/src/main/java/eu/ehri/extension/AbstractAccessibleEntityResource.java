@@ -190,7 +190,8 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
                     .path(getClass())
                     .path(entity.getId()).build();
             return Response.status(Status.CREATED).location(docUri)
-                    .entity(getRepresentation(entity).getBytes()).build();
+                    .entity(getRepresentation(entity).getBytes())
+                    .cacheControl(getCacheControl(entity)).build();
         } catch (SerializationError serializationError) {
             graph.getBaseGraph().rollback();
             throw new RuntimeException(serializationError);
@@ -221,7 +222,8 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
         try {
             E entity = views.detail(id, getRequesterUserProfile());
             return Response.status(Status.OK)
-                    .entity(getRepresentation(entity).getBytes()).build();
+                    .entity(getRepresentation(entity).getBytes())
+                    .cacheControl(getCacheControl(entity)).build();
         } catch (SerializationError e) {
             throw new WebApplicationException(e);
         }
@@ -250,6 +252,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
             graph.getBaseGraph().commit();
             return Response.status(Status.OK)
                     .entity(getRepresentation(update.getNode()).getBytes())
+                    .cacheControl(getCacheControl(update.getNode()))
                     .build();
         } catch (SerializationError serializationError) {
             graph.getBaseGraph().rollback();
@@ -336,7 +339,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
     /**
      * Delete (remove) an instance of the 'entity' in the database
      *
-     * @param id         The vertex id
+     * @param id The vertex id
      * @return The response of the delete request
      * @throws AccessDenied
      * @throws PermissionDenied
@@ -377,5 +380,24 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
             accessors.add(current);
         }
         return accessors;
+    }
+
+    /**
+     * Get a cache control header based on the access restrictions
+     * set on the item. If it is restricted, instruct clients not
+     * to cache the response.
+     *
+     * @param item The item
+     * @return A cache control object.
+     */
+    protected CacheControl getCacheControl(E item) {
+        CacheControl cc = new CacheControl();
+        if (!item.hasAccessRestriction()) {
+            cc.setMaxAge(ITEM_CACHE_TIME);
+        } else {
+            cc.setNoStore(true);
+            cc.setNoCache(true);
+        }
+        return cc;
     }
 }

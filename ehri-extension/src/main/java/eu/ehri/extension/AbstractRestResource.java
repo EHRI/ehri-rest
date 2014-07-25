@@ -40,6 +40,7 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractRestResource implements TxCheckedResource {
 
     public static final int DEFAULT_LIST_LIMIT = 20;
+    public static final int ITEM_CACHE_TIME = 60 * 5; // 5 minutes
     private static final ObjectMapper mapper = new ObjectMapper();
 
     protected static final Logger logger = LoggerFactory.getLogger(TxCheckedResource.class);
