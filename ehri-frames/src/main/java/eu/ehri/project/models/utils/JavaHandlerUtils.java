@@ -144,4 +144,16 @@ public class JavaHandlerUtils {
             }
         }
     }
+
+    /**
+     * Check if a vertex has edges with the given direct/label.
+     *
+     * @param vertex    The source vertex
+     * @param direction The edge direction
+     * @param labels    The set of labels
+     * @return Whether any edges exist
+     */
+    public static boolean hasEdge(Vertex vertex, Direction direction, String... labels) {
+        return vertex.getEdges(direction, labels).iterator().hasNext();
+    }
 }

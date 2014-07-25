@@ -1,5 +1,6 @@
 package eu.ehri.project.models.base;
 
+import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.modules.javahandler.JavaHandler;
@@ -9,6 +10,10 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.annotations.Fetch;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.models.utils.JavaHandlerUtils;
+
+import static eu.ehri.project.models.utils.JavaHandlerUtils.addSingleRelationship;
+import static eu.ehri.project.models.utils.JavaHandlerUtils.addUniqueRelationship;
+import static eu.ehri.project.models.utils.JavaHandlerUtils.hasEdge;
 
 public interface AccessibleEntity extends PermissionGrantTarget, VersionedEntity, AnnotatableEntity {
 
@@ -48,18 +53,21 @@ public interface AccessibleEntity extends PermissionGrantTarget, VersionedEntity
     @JavaHandler
     public SystemEvent getLatestEvent();
 
+    @JavaHandler
+    boolean hasAccessRestriction();
+
     /**
      * Implementation of complex methods.
      */
     abstract class Impl implements JavaHandlerContext<Vertex>, AccessibleEntity {
 
         public void addAccessor(final Accessor accessor) {
-            JavaHandlerUtils.addUniqueRelationship(it(), accessor.asVertex(),
+            addUniqueRelationship(it(), accessor.asVertex(),
                     Ontology.IS_ACCESSIBLE_TO);
         }
 
         public void setPermissionScope(final PermissionScope scope) {
-            JavaHandlerUtils.addSingleRelationship(it(), scope.asVertex(),
+            addSingleRelationship(it(), scope.asVertex(),
                     Ontology.HAS_PERMISSION_SCOPE);
         }
 
@@ -80,6 +88,11 @@ public interface AccessibleEntity extends PermissionGrantTarget, VersionedEntity
             return frameVertices(gremlin().as("n").out(Ontology.ENTITY_HAS_LIFECYCLE_EVENT)
                     .loop("n", JavaHandlerUtils.noopLoopFunc, JavaHandlerUtils.noopLoopFunc)
                     .out(Ontology.ENTITY_HAS_EVENT));
+        }
+
+        public boolean hasAccessRestriction() {
+            return hasEdge(it(), Direction.OUT, Ontology.IS_ACCESSIBLE_TO)
+                    && !hasEdge(it(), Direction.OUT, Ontology.PROMOTED_BY);
         }
     }
 }
