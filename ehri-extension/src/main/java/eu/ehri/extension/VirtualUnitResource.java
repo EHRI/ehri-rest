@@ -10,7 +10,6 @@ import eu.ehri.project.models.DocumentDescription;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.VirtualUnit;
 import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.models.base.DescribedEntity;
 import eu.ehri.project.views.Query;
 import eu.ehri.project.views.VirtualUnitViews;
 import org.neo4j.graphdb.GraphDatabaseService;

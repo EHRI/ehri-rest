@@ -13,10 +13,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
+import javax.ws.rs.core.*;
 import javax.ws.rs.core.Response.Status;
 
 import com.google.common.collect.Sets;
@@ -37,15 +34,12 @@ import static eu.ehri.extension.RestHelpers.produceErrorMessageJson;
 @Path(Entities.USER_PROFILE)
 public class UserProfileResource extends AbstractAccessibleEntityResource<UserProfile> {
 
-    public static final String FOLLOW = "follow";
     public static final String FOLLOWING = "following";
     public static final String FOLLOWERS = "followers";
     public static final String IS_FOLLOWING = "isFollowing";
     public static final String IS_FOLLOWER = "isFollower";
-    public static final String WATCH = "watch";
     public static final String WATCHING = "watching";
     public static final String IS_WATCHING = "isWatching";
-    public static final String BLOCK = "block";
     public static final String BLOCKED = "blocked";
     public static final String IS_BLOCKING = "isBlocking";
 
@@ -157,13 +151,14 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
             @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
             @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
             @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)
-            throws ItemNotFound, BadRequester {
+            @QueryParam(FILTER_PARAM) List<String> filters,
+            @QueryParam(FULL_PARAM) @DefaultValue("true") boolean full)
+            throws ItemNotFound, BadRequester, SerializationError {
         Accessor accessor = getRequesterUserProfile();
         UserProfile user = views.detail(userId, accessor);
         final Iterable<UserProfile> list = querier.setOffset(offset).setLimit(limit)
                 .orderBy(order).filter(filters).list(user.getFollowers(), accessor);
-        return streamingList(list);
+        return fullOrLiteList(list, full);
     }
 
     @GET
@@ -174,13 +169,14 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
             @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
             @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
             @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)
-            throws ItemNotFound, BadRequester {
+            @QueryParam(FILTER_PARAM) List<String> filters,
+            @QueryParam(FULL_PARAM) @DefaultValue("true") boolean full)
+            throws ItemNotFound, BadRequester, SerializationError {
         Accessor accessor = getRequesterUserProfile();
         UserProfile user = views.detail(userId, accessor);
         final Query.Page<UserProfile> page = querier.setOffset(offset).setLimit(limit)
                 .orderBy(order).filter(filters).page(user.getFollowers(), accessor);
-        return streamingPage(page);
+        return fullOrLitePage(page, full);
     }
 
     @GET
@@ -191,13 +187,14 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
             @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
             @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
             @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)
-            throws ItemNotFound, BadRequester {
+            @QueryParam(FILTER_PARAM) List<String> filters,
+            @QueryParam(FULL_PARAM) @DefaultValue("true") boolean full)
+            throws ItemNotFound, BadRequester, SerializationError {
         Accessor accessor = getRequesterUserProfile();
         UserProfile user = views.detail(userId, accessor);
         final Iterable<UserProfile> list = querier.setOffset(offset).setLimit(limit)
                 .orderBy(order).filter(filters).list(user.getFollowing(), accessor);
-        return streamingList(list);
+        return fullOrLiteList(list, full);
     }
 
     @GET
@@ -208,13 +205,14 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
             @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
             @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
             @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)
-            throws ItemNotFound, BadRequester {
+            @QueryParam(FILTER_PARAM) List<String> filters,
+            @QueryParam(FULL_PARAM) @DefaultValue("true") boolean full)
+            throws ItemNotFound, BadRequester, SerializationError {
         Accessor accessor = getRequesterUserProfile();
         UserProfile user = views.detail(userId, accessor);
         final Query.Page<UserProfile> page = querier.setOffset(offset).setLimit(limit)
                 .orderBy(order).filter(filters).page(user.getFollowing(), accessor);
-        return streamingPage(page);
+        return fullOrLitePage(page, full);
     }
 
     @GET
@@ -244,15 +242,17 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
     }
 
     @POST
-    @Path("{userId:.+}/" + FOLLOW + "/{otherId:.+}")
+    @Path("{userId:.+}/" + FOLLOWING)
     public Response followUserProfile(
             @PathParam("userId") String userId,
-            @PathParam("otherId") String otherId)
+            @QueryParam(ID_PARAM) List<String> otherIds)
             throws BadRequester, PermissionDenied, ItemNotFound {
         Accessor accessor = getRequesterUserProfile();
         UserProfile user = views.detail(userId, accessor);
         try {
-            user.addFollowing(manager.getFrame(otherId, UserProfile.class));
+            for (String id : otherIds) {
+                user.addFollowing(manager.getFrame(id, UserProfile.class));
+            }
             graph.getBaseGraph().commit();
             return Response.status(Status.OK).build();
         }  finally {
@@ -261,15 +261,17 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
     }
 
     @DELETE
-    @Path("{userId:.+}/" + FOLLOW + "/{otherId:.+}")
+    @Path("{userId:.+}/" + FOLLOWING)
     public Response unfollowUserProfile(
             @PathParam("userId") String userId,
-            @PathParam("otherId") String otherId)
+            @QueryParam(ID_PARAM) List<String> otherIds)
             throws BadRequester, PermissionDenied, ItemNotFound {
         Accessor accessor = getRequesterUserProfile();
         UserProfile user = views.detail(userId, accessor);
         try {
-            user.removeFollowing(manager.getFrame(otherId, UserProfile.class));
+            for (String id : otherIds) {
+                user.removeFollowing(manager.getFrame(id, UserProfile.class));
+            }
             graph.getBaseGraph().commit();
             return Response.status(Status.OK).build();
         }  finally {
@@ -285,13 +287,14 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
             @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
             @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
             @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)
-            throws ItemNotFound, BadRequester {
+            @QueryParam(FILTER_PARAM) List<String> filters,
+            @QueryParam(FULL_PARAM) @DefaultValue("true") boolean full)
+            throws ItemNotFound, BadRequester, SerializationError {
         Accessor accessor = getRequesterUserProfile();
         UserProfile user = views.detail(userId, accessor);
         final Iterable<UserProfile> list = querier.setOffset(offset).setLimit(limit)
                 .orderBy(order).filter(filters).list(user.getBlocked(), accessor);
-        return streamingList(list);
+        return fullOrLiteList(list, full);
     }
 
     @GET
@@ -302,13 +305,14 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
             @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
             @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
             @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)
-            throws ItemNotFound, BadRequester {
+            @QueryParam(FILTER_PARAM) List<String> filters,
+            @QueryParam(FULL_PARAM) @DefaultValue("true") boolean full)
+            throws ItemNotFound, BadRequester, SerializationError {
         Accessor accessor = getRequesterUserProfile();
         UserProfile user = views.detail(userId, accessor);
         final Query.Page<UserProfile> page = querier.setOffset(offset).setLimit(limit)
                 .orderBy(order).filter(filters).page(user.getBlocked(), accessor);
-        return streamingPage(page);
+        return fullOrLitePage(page, full);
     }
 
     @GET
@@ -325,15 +329,17 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
     }
 
     @POST
-    @Path("{userId:.+}/" + BLOCK + "/{otherId:.+}")
+    @Path("{userId:.+}/" + BLOCKED)
     public Response blockUserProfile(
             @PathParam("userId") String userId,
-            @PathParam("otherId") String otherId)
+            @QueryParam(ID_PARAM) List<String> otherIds)
             throws BadRequester, PermissionDenied, ItemNotFound {
         Accessor accessor = getRequesterUserProfile();
         UserProfile user = views.detail(userId, accessor);
         try {
-            user.addBlocked(manager.getFrame(otherId, UserProfile.class));
+            for (String id : otherIds) {
+                user.addBlocked(manager.getFrame(id, UserProfile.class));
+            }
             graph.getBaseGraph().commit();
             return Response.status(Status.OK).build();
         }  finally {
@@ -342,15 +348,17 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
     }
 
     @DELETE
-    @Path("{userId:.+}/" + BLOCK + "/{otherId:.+}")
+    @Path("{userId:.+}/" + BLOCKED)
     public Response unblockUserProfile(
             @PathParam("userId") String userId,
-            @PathParam("otherId") String otherId)
+            @QueryParam(ID_PARAM) List<String> otherIds)
             throws BadRequester, PermissionDenied, ItemNotFound {
         Accessor accessor = getRequesterUserProfile();
         UserProfile user = views.detail(userId, accessor);
         try {
-            user.removeBlocked(manager.getFrame(otherId, UserProfile.class));
+            for (String id : otherIds) {
+                user.removeBlocked(manager.getFrame(id, UserProfile.class));
+            }
             graph.getBaseGraph().commit();
             return Response.status(Status.OK).build();
         }  finally {
@@ -366,14 +374,15 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
             @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
             @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
             @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)
-            throws ItemNotFound, BadRequester {
+            @QueryParam(FILTER_PARAM) List<String> filters,
+            @QueryParam(FULL_PARAM) @DefaultValue("true") boolean full)
+            throws ItemNotFound, BadRequester, SerializationError {
         Accessor accessor = getRequesterUserProfile();
         UserProfile user = views.detail(userId, accessor);
         final Iterable<Watchable> list = new Query<Watchable>(graph,
                 Watchable.class).setOffset(offset).setLimit(limit)
                 .orderBy(order).filter(filters).list(user.getWatching(), accessor);
-        return streamingList(list);
+        return fullOrLiteList(list, full);
     }
 
     @GET
@@ -384,26 +393,29 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
             @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
             @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
             @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)
-            throws ItemNotFound, BadRequester {
+            @QueryParam(FILTER_PARAM) List<String> filters,
+            @QueryParam(FULL_PARAM) @DefaultValue("true") boolean full)
+            throws ItemNotFound, BadRequester, SerializationError {
         Accessor accessor = getRequesterUserProfile();
         UserProfile user = views.detail(userId, accessor);
         final Query.Page<Watchable> page = new Query<Watchable>(graph,
                 Watchable.class).setOffset(offset).setLimit(limit)
                 .orderBy(order).filter(filters).page(user.getWatching(), accessor);
-        return streamingPage(page);
+        return fullOrLitePage(page, full);
     }
 
     @POST
-    @Path("{userId:.+}/" + WATCH + "/{otherId:.+}")
+    @Path("{userId:.+}/" + WATCHING)
     public Response watchItem(
             @PathParam("userId") String userId,
-            @PathParam("otherId") String otherId)
+            @QueryParam(ID_PARAM) List<String> otherIds)
             throws BadRequester, PermissionDenied, ItemNotFound {
         Accessor accessor = getRequesterUserProfile();
         UserProfile user = views.detail(userId, accessor);
         try {
-            user.addWatching(manager.getFrame(otherId, Watchable.class));
+            for (String id : otherIds) {
+                user.addWatching(manager.getFrame(id, Watchable.class));
+            }
             graph.getBaseGraph().commit();
             return Response.status(Status.OK).build();
         }  finally {
@@ -412,15 +424,17 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
     }
 
     @DELETE
-    @Path("{userId:.+}/" + WATCH + "/{otherId:.+}")
+    @Path("{userId:.+}/" + WATCHING)
     public Response unwatchItem(
             @PathParam("userId") String userId,
-            @PathParam("otherId") String otherId)
+            @QueryParam(ID_PARAM) List<String> otherIds)
             throws BadRequester, PermissionDenied, ItemNotFound {
         Accessor accessor = getRequesterUserProfile();
         UserProfile user = views.detail(userId, accessor);
         try {
-            user.removeWatching(manager.getFrame(otherId, Watchable.class));
+            for (String id :  otherIds) {
+                user.removeWatching(manager.getFrame(id, Watchable.class));
+            }
             graph.getBaseGraph().commit();
             return Response.status(Status.OK).build();
         }  finally {
@@ -449,14 +463,15 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
             @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
             @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
             @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)
-            throws ItemNotFound, BadRequester {
+            @QueryParam(FILTER_PARAM) List<String> filters,
+            @QueryParam(FULL_PARAM) @DefaultValue("true") boolean full)
+            throws ItemNotFound, BadRequester, SerializationError {
         Accessor accessor = getRequesterUserProfile();
         UserProfile user = views.detail(userId, accessor);
         final Query.Page<Annotation> page = new Query<Annotation>(graph,
                 Annotation.class).setOffset(offset).setLimit(limit)
                 .orderBy(order).filter(filters).page(user.getAnnotations(), accessor);
-        return streamingPage(page);
+        return fullOrLitePage(page, full);
     }
 
     @GET
@@ -467,13 +482,14 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
             @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
             @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
             @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)
-            throws ItemNotFound, BadRequester {
+            @QueryParam(FILTER_PARAM) List<String> filters,
+            @QueryParam(FULL_PARAM) @DefaultValue("true") boolean full)
+            throws ItemNotFound, BadRequester, SerializationError {
         Accessor accessor = getRequesterUserProfile();
         UserProfile user = views.detail(userId, accessor);
         final Query.Page<Link> page = new Query<Link>(graph,
                 Link.class).setOffset(offset).setLimit(limit)
                 .orderBy(order).filter(filters).page(user.getLinks(), accessor);
-        return streamingPage(page);
+        return fullOrLitePage(page, full);
     }
 }

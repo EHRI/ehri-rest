@@ -9,7 +9,9 @@ import java.util.Map;
 
 import javax.ws.rs.core.*;
 
+import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.common.collect.Iterables;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraphFactory;
 import com.tinkerpop.frames.modules.javahandler.JavaHandlerModule;
@@ -20,6 +22,7 @@ import eu.ehri.project.models.base.Frame;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.type.TypeReference;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import com.google.common.collect.ListMultimap;
@@ -43,6 +46,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
     public static final int DEFAULT_LIST_LIMIT = 20;
     public static final int ITEM_CACHE_TIME = 60 * 5; // 5 minutes
     private static final ObjectMapper mapper = new ObjectMapper();
+    private static final JsonFactory jsonFactory = new JsonFactory();
 
     protected static final Logger logger = LoggerFactory.getLogger(TxCheckedResource.class);
     private static final FramedGraphFactory graphFactory = new FramedGraphFactory(new JavaHandlerModule());
@@ -57,6 +61,8 @@ public abstract class AbstractRestResource implements TxCheckedResource {
     public static final String ACCESSOR_PARAM = "accessibleTo";
     public static final String GROUP_PARAM = "group";
     public static final String ALL_PARAM = "all";
+    public static final String FULL_PARAM = "full";
+    public static final String ID_PARAM = "id";
 
     public static final String INCLUDE_PROPS_PARAM = "_ip";
 
@@ -262,12 +268,11 @@ public abstract class AbstractRestResource implements TxCheckedResource {
     }
 
     private <T extends Frame> StreamingOutput getStreamingJsonOutput(final Query.Page<T> page, final Serializer serializer) {
-        final JsonFactory f = new JsonFactory();
         final Serializer cacheSerializer = serializer.withCache();
         return new StreamingOutput() {
             @Override
             public void write(OutputStream os) throws IOException {
-                JsonGenerator g = f.createJsonGenerator(os);
+                JsonGenerator g = jsonFactory.createJsonGenerator(os);
                 g.writeStartObject();
                 g.writeNumberField("total", page.getCount());
                 g.writeNumberField("offset", page.getOffset());
@@ -340,12 +345,11 @@ public abstract class AbstractRestResource implements TxCheckedResource {
     }
 
     private <T extends Frame> StreamingOutput getStreamingJsonOutput(final Iterable<T> list, final Serializer serializer) {
-        final JsonFactory f = new JsonFactory();
         final Serializer cacheSerializer = serializer.withCache();
         return new StreamingOutput() {
             @Override
             public void write(OutputStream arg0) throws IOException {
-                JsonGenerator g = f.createJsonGenerator(arg0);
+                JsonGenerator g = jsonFactory.createJsonGenerator(arg0);
                 g.writeStartArray();
                 for (T item : list) {
                     g.writeRaw('\n');
@@ -373,12 +377,11 @@ public abstract class AbstractRestResource implements TxCheckedResource {
      */
     protected StreamingOutput streamingVertexList(
             final Iterable<Vertex> list, final Serializer serializer) {
-        final JsonFactory f = new JsonFactory();
         final Serializer cacheSerializer = serializer.withCache();
         return new StreamingOutput() {
             @Override
             public void write(OutputStream arg0) throws IOException {
-                JsonGenerator g = f.createJsonGenerator(arg0);
+                JsonGenerator g = jsonFactory.createJsonGenerator(arg0);
                 g.writeStartArray();
                 for (Vertex item : list) {
                     try {
@@ -405,11 +408,10 @@ public abstract class AbstractRestResource implements TxCheckedResource {
      */
     protected StreamingOutput streamingVertexMap(
             final Map<String, Vertex> map, final Serializer serializer) {
-        final JsonFactory f = new JsonFactory();
         return new StreamingOutput() {
             @Override
             public void write(OutputStream arg0) throws IOException {
-                JsonGenerator g = f.createJsonGenerator(arg0);
+                JsonGenerator g = jsonFactory.createJsonGenerator(arg0);
                 g.writeStartObject();
                 for (Map.Entry<String, Vertex> keypair : map.entrySet()) {
                     try {
@@ -446,11 +448,10 @@ public abstract class AbstractRestResource implements TxCheckedResource {
      */
     protected <T extends Frame> StreamingOutput streamingMultimap(
             final ListMultimap<String, T> map, final Serializer serializer) {
-        final JsonFactory f = new JsonFactory();
         return new StreamingOutput() {
             @Override
             public void write(OutputStream arg0) throws IOException {
-                JsonGenerator g = f.createJsonGenerator(arg0);
+                JsonGenerator g = jsonFactory.createJsonGenerator(arg0);
                 g.writeStartObject();
                 for (String itemId : map.keySet()) {
                     g.writeFieldName(itemId);
@@ -501,6 +502,98 @@ public abstract class AbstractRestResource implements TxCheckedResource {
                 ? Response.ok(String.format("<boolean>%s</boolean>", bool)
                 .getBytes()).build()
                 : Response.ok(Boolean.toString(bool).getBytes()).build();
+    }
+
+    /**
+     * Write a string list to a response.
+
+     * @throws SerializationError
+     */
+    protected Response listResponse(Iterable<String> list) throws SerializationError {
+        try {
+            String json = mapper.writerWithType(new TypeReference<Iterable<String>>() {
+            }).writeValueAsString(list);
+            return Response.ok().entity(json.getBytes()).build();
+        } catch (IOException e) {
+            throw new SerializationError(e.getMessage());
+        }
+    }
+
+    protected StreamingOutput fullOrLiteList(Iterable<? extends Frame> list, boolean full) throws SerializationError {
+        if (full) {
+            return streamingList(list);
+        } else {
+            Iterable<String> stringIterable = Iterables.transform(list, new Function<Frame, String>() {
+                @Override
+                public String apply(Frame f) {
+                    return f.getId();
+
+                }
+            });
+            return streamingStringList(stringIterable);
+        }
+    }
+
+    protected StreamingOutput fullOrLitePage(Query.Page<? extends Frame> page, boolean full) throws SerializationError{
+        if (full) {
+            return streamingPage(page);
+        } else {
+            Iterable<String> strings = Iterables.transform(page.getIterable(), new Function<Frame, String>() {
+                @Override
+                public String apply(Frame f) {
+                    return f.getId();
+                }
+            });
+            Query.Page<String> stringPage = new Query.Page<String>(
+                    strings, page.getCount(), page.getOffset(), page.getLimit(), page.getSort());
+            return streamingStringPage(stringPage);
+        }
+    }
+
+    /**
+     * Write a string list to a streaming response.
+
+     * @throws SerializationError
+     */
+    protected StreamingOutput streamingStringList(final Iterable<String> list) throws SerializationError {
+        return new StreamingOutput() {
+            @Override
+            public void write(OutputStream arg0) throws IOException {
+                JsonGenerator g = jsonFactory.createJsonGenerator(arg0);
+                g.writeStartArray();
+                for (String item : list) {
+                    g.writeString(item);
+                }
+                g.writeEndArray();
+                g.close();
+            }
+        };
+    }
+
+    /**
+     * Write a string page to a streaming response.
+
+     * @throws SerializationError
+     */
+    protected StreamingOutput streamingStringPage(final Query.Page<String> page) throws SerializationError {
+        return new StreamingOutput() {
+            @Override
+            public void write(OutputStream arg0) throws IOException {
+                JsonGenerator g = jsonFactory.createJsonGenerator(arg0);
+                g.writeStartObject();
+                g.writeNumberField("total", page.getCount());
+                g.writeNumberField("offset", page.getOffset());
+                g.writeNumberField("limit", page.getLimit());
+                g.writeFieldName("values");
+                g.writeStartArray();
+                for (String item : page.getIterable()) {
+                    g.writeString(item);
+                }
+                g.writeEndArray();
+                g.writeEndObject();
+                g.close();
+            }
+        };
     }
 
     /**
