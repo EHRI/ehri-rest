@@ -476,6 +476,13 @@ public abstract class AbstractRestResource implements TxCheckedResource {
                 .path(item.getId()).build();
     }
 
+    protected Response creationResponse(Frame frame) throws SerializationError {
+        return Response.status(Response.Status.CREATED).location(getItemUri(frame))
+                .entity(getRepresentation(frame))
+                .build();
+    }
+
+
     /**
      * Return a number.
      */

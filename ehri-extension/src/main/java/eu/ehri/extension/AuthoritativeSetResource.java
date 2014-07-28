@@ -15,7 +15,6 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 import javax.ws.rs.core.Response.Status;
-import java.net.URI;
 import java.util.List;
 
 /**
@@ -220,7 +219,7 @@ public class AuthoritativeSetResource extends
             aclManager.setAccessors(agent,
                     getAccessors(accessors, user));
             graph.getBaseGraph().commit();
-            return buildResponseFromHistoricalAgent(agent);
+            return creationResponse(agent);
         } catch (SerializationError e) {
             graph.getBaseGraph().rollback();
             throw new RuntimeException(e);
@@ -230,20 +229,6 @@ public class AuthoritativeSetResource extends
     }
 
     // Helpers
-
-    private Response buildResponseFromHistoricalAgent(HistoricalAgent agent)
-            throws SerializationError {
-        String jsonStr = getSerializer().vertexFrameToJson(agent);
-        // FIXME: Hide the details of building this path
-        URI docUri = UriBuilder.fromUri(uriInfo.getBaseUri())
-                .segment(Entities.HISTORICAL_AGENT)
-                .segment(agent.getId())
-                .build();
-
-        return Response.status(Status.CREATED).location(docUri)
-                .entity((jsonStr).getBytes()).build();
-    }
-
     private HistoricalAgent createHistoricalAgent(String json, AuthoritativeSet set)
             throws DeserializationError, PermissionDenied, ValidationError,
             IntegrityError, BadRequester {

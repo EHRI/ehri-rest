@@ -6,9 +6,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
-import javax.ws.rs.core.Response.Status;
 
-import eu.ehri.project.acl.PermissionType;
 import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.base.*;
 import eu.ehri.project.views.Query;
@@ -16,7 +14,6 @@ import eu.ehri.project.views.impl.CrudViews;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import eu.ehri.extension.errors.BadRequester;
-import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.models.Annotation;
 import eu.ehri.project.persistence.Bundle;
@@ -38,7 +35,7 @@ public class AnnotationResource extends
 
     /**
      * Retrieve an annotation by id.
-     * 
+     *
      * @param id The item's id
      * @return The serialized annotation
      * @throws ItemNotFound
@@ -67,14 +64,14 @@ public class AnnotationResource extends
             throws ItemNotFound, BadRequester {
         return list(offset, limit, order, filters);
     }
-    
+
     /**
      * Create an annotation for a particular item.
      *
-     * @param id
-     * @param json
-     * @param accessors
-     * @return
+     * @param id        The ID of the item being annotation
+     * @param json      The JSON representation of the annotation
+     * @param accessors User IDs who can access the annotation
+     * @return The annotation
      * @throws PermissionDenied
      * @throws ValidationError
      * @throws DeserializationError
@@ -96,7 +93,7 @@ public class AnnotationResource extends
             Annotation ann = annotationViews.createFor(id, id,
                     Bundle.fromString(json), user, getAccessors(accessors, user));
             graph.getBaseGraph().commit();
-            return buildResponseFromAnnotation(ann);
+            return creationResponse(ann);
         } finally {
             cleanupTransaction();
         }
@@ -105,11 +102,11 @@ public class AnnotationResource extends
     /**
      * Create an annotation for a dependent node on a given item.
      *
-     * @param id
-     * @param did
-     * @param json
-     * @param accessors
-     * @return
+     * @param id        The ID of the item being annotation
+     * @param did       The ID of the description being annotated
+     * @param json      The JSON representation of the annotation
+     * @param accessors User IDs who can access the annotation
+     * @return The annotation
      * @throws PermissionDenied
      * @throws ValidationError
      * @throws DeserializationError
@@ -133,7 +130,7 @@ public class AnnotationResource extends
             Annotation ann = annotationViews.createFor(id, did,
                     Bundle.fromString(json), user, getAccessors(accessors, user));
             graph.getBaseGraph().commit();
-            return buildResponseFromAnnotation(ann);
+            return creationResponse(ann);
         } finally {
             cleanupTransaction();
         }
@@ -142,9 +139,9 @@ public class AnnotationResource extends
     /**
      * Return a map of annotations for the subtree of the given item and its
      * child items.
-     * 
-     * @param id
-     * @return
+     *
+     * @param id The item ID
+     * @return A list of annotations on the item and it's dependent children.
      * @throws ItemNotFound
      * @throws BadRequester
      * @throws PermissionDenied
@@ -158,7 +155,7 @@ public class AnnotationResource extends
             @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
             @QueryParam(SORT_PARAM) List<String> order,
             @QueryParam(FILTER_PARAM) List<String> filters)
-                throws AccessDenied, ItemNotFound, BadRequester, PermissionDenied {
+            throws AccessDenied, ItemNotFound, BadRequester, PermissionDenied {
         AccessibleEntity item = new CrudViews<AccessibleEntity>(graph, AccessibleEntity.class)
                 .detail(id, getRequesterUserProfile());
         Query<Annotation> query = new Query<Annotation>(graph, cls)
@@ -168,17 +165,11 @@ public class AnnotationResource extends
 
     }
 
-    private Response buildResponseFromAnnotation(Annotation ann)
-            throws SerializationError {
-        String jsonStr = getSerializer().vertexFrameToJson(ann);
-        return Response.status(Status.CREATED).entity((jsonStr).getBytes())
-                .build();
-    }
-
     /**
      * Update an annotation.
-     * @param id
-     * @return
+     *
+     * @param id The annotation ID
+     * @return The updated item
      * @throws PermissionDenied
      * @throws ItemNotFound
      * @throws ValidationError
@@ -194,8 +185,8 @@ public class AnnotationResource extends
 
     /**
      * Delete an annotation.
-     * @param id
-     * @return
+     *
+     * @param id The annotation ID
      * @throws PermissionDenied
      * @throws ItemNotFound
      * @throws ValidationError

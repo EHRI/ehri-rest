@@ -1,6 +1,5 @@
 package eu.ehri.extension;
 
-import java.net.URI;
 import java.util.List;
 
 import javax.ws.rs.Consumes;
@@ -16,9 +15,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
-import javax.ws.rs.core.UriBuilder;
 
 import eu.ehri.project.exceptions.*;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -202,7 +199,7 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
             aclManager.setAccessors(doc,
                     getAccessors(accessors, user));
             graph.getBaseGraph().commit();
-            return buildResponseFromDocumentaryUnit(doc);
+            return creationResponse(doc);
         } catch (SerializationError e) {
             graph.getBaseGraph().rollback();
             throw new RuntimeException(e);
@@ -212,19 +209,6 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
     }
 
     // Helpers
-
-    private Response buildResponseFromDocumentaryUnit(DocumentaryUnit doc)
-            throws SerializationError {
-        String jsonStr = getSerializer().vertexFrameToJson(doc);
-        // FIXME: Hide the details of building this path
-        URI docUri = UriBuilder.fromUri(uriInfo.getBaseUri())
-                .segment(Entities.DOCUMENTARY_UNIT)
-                .segment(doc.getId())
-                .build();
-
-        return Response.status(Status.CREATED).location(docUri)
-                .entity((jsonStr).getBytes()).build();
-    }
 
     private DocumentaryUnit createDocumentaryUnit(String json, Repository repository)
             throws DeserializationError, PermissionDenied, ValidationError,

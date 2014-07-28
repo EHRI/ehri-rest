@@ -1,6 +1,5 @@
 package eu.ehri.extension;
 
-import java.net.URI;
 import java.util.List;
 
 import javax.ws.rs.Consumes;
@@ -245,7 +244,7 @@ public class VocabularyResource extends
             aclManager.setAccessors(concept,
                     getAccessors(accessors, user));
             graph.getBaseGraph().commit();
-            return buildResponseFromConcept(concept);
+            return creationResponse(concept);
         } catch (SerializationError e) {
             graph.getBaseGraph().rollback();
             throw new RuntimeException(e);
@@ -255,19 +254,6 @@ public class VocabularyResource extends
     }
 
     // Helpers
-
-    private Response buildResponseFromConcept(Concept concept)
-            throws SerializationError {
-        String jsonStr = getSerializer().vertexFrameToJson(concept);
-        // FIXME: Hide the details of building this path
-        URI docUri = UriBuilder.fromUri(uriInfo.getBaseUri())
-                .segment(Entities.CVOC_CONCEPT)
-                .segment(concept.getId())
-                .build();
-
-        return Response.status(Status.CREATED).location(docUri)
-                .entity((jsonStr).getBytes()).build();
-    }
 
     private Concept createConcept(String json, Vocabulary vocabulary)
             throws DeserializationError, PermissionDenied, ValidationError,

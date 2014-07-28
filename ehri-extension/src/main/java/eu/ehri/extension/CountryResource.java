@@ -13,8 +13,6 @@ import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
-import javax.ws.rs.core.Response.Status;
-import java.net.URI;
 import java.util.List;
 
 /**
@@ -189,7 +187,7 @@ public class CountryResource extends
             aclManager.setAccessors(repository,
                     getAccessors(accessors, user));
             graph.getBaseGraph().commit();
-            return buildResponseFromRepository(repository);
+            return creationResponse(repository);
         } catch (SerializationError e) {
             graph.getBaseGraph().rollback();
             throw new RuntimeException(e);
@@ -199,19 +197,6 @@ public class CountryResource extends
     }
 
     // Helpers
-
-    private Response buildResponseFromRepository(Repository repository)
-            throws SerializationError {
-        String jsonStr = getSerializer().vertexFrameToJson(repository);
-        // FIXME: Hide the details of building this path
-        URI docUri = UriBuilder.fromUri(uriInfo.getBaseUri())
-                .segment(Entities.REPOSITORY)
-                .segment(repository.getId())
-                .build();
-
-        return Response.status(Status.CREATED).location(docUri)
-                .entity((jsonStr).getBytes()).build();
-    }
 
     private Repository createRepository(String json, Country country)
             throws DeserializationError, PermissionDenied, ValidationError,

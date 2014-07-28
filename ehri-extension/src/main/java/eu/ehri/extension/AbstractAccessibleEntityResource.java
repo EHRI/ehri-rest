@@ -1,6 +1,5 @@
 package eu.ehri.extension;
 
-import java.net.URI;
 import java.util.List;
 import java.util.Set;
 
@@ -186,12 +185,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
             handler.process(entity);
 
             graph.getBaseGraph().commit();
-            URI docUri = uriInfo.getBaseUriBuilder()
-                    .path(getClass())
-                    .path(entity.getId()).build();
-            return Response.status(Status.CREATED).location(docUri)
-                    .entity(getRepresentation(entity).getBytes())
-                    .cacheControl(getCacheControl(entity)).build();
+            return creationResponse(entity);
         } catch (SerializationError serializationError) {
             graph.getBaseGraph().rollback();
             throw new RuntimeException(serializationError);

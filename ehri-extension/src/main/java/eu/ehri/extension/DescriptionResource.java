@@ -38,14 +38,14 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
             throws PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, ItemNotFound, BadRequester {
         graph.getBaseGraph().checkNotInTransaction();
-        Accessor user = getRequesterUserProfile();
         try {
-            DescribedEntity doc = views.detail(id, user);
+            Accessor user = getRequesterUserProfile();
+            DescribedEntity item = views.detail(id, user);
             Description desc = descriptionViews.create(id, Bundle.fromString(json),
                     Description.class, user, getLogMessage());
-            doc.addDescription(desc);
+            item.addDescription(desc);
             graph.getBaseGraph().commit();
-            return buildResponse(desc, Response.Status.CREATED);
+            return buildResponse(item, desc, Response.Status.CREATED);
         } catch (SerializationError serializationError) {
             graph.getBaseGraph().rollback();
             throw new RuntimeException(serializationError);
@@ -63,10 +63,12 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
             DeserializationError, ItemNotFound, BadRequester, SerializationError {
         graph.getBaseGraph().checkNotInTransaction();
         try {
+            Accessor userProfile = getRequesterUserProfile();
+            DescribedEntity item = views.detail(id, userProfile);
             Mutation<Description> desc = descriptionViews.update(id, Bundle.fromString(json),
-                    Description.class, getRequesterUserProfile(), getLogMessage());
+                    Description.class, userProfile, getLogMessage());
             graph.getBaseGraph().commit();
-            return buildResponse(desc.getNode(), Response.Status.OK);
+            return buildResponse(item, desc.getNode(), Response.Status.OK);
         } catch (SerializationError serializationError) {
             graph.getBaseGraph().rollback();
             throw new RuntimeException(serializationError);
@@ -96,9 +98,11 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
             BadRequester, SerializationError {
         graph.getBaseGraph().checkNotInTransaction();
         try {
-            descriptionViews.delete(id, did, getRequesterUserProfile(), getLogMessage());
+            Accessor user = getRequesterUserProfile();
+            DescribedEntity item = views.detail(id, user);
+            descriptionViews.delete(id, did, user, getLogMessage());
             graph.getBaseGraph().commit();
-            return Response.ok().build();
+            return Response.ok().location(getItemUri(item)).build();
         } catch (SerializationError serializationError) {
             graph.getBaseGraph().rollback();
             throw new RuntimeException(serializationError);
@@ -108,11 +112,11 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
     }
 
 
-    private Response buildResponse(Frame doc, Response.Status status)
+    private Response buildResponse(DescribedEntity item, Frame data, Response.Status status)
             throws SerializationError {
         try {
-            return Response.status(status)
-                    .entity((getSerializer().vertexFrameToJson(doc)).getBytes()).build();
+            return Response.status(status).location(getItemUri(item))
+                    .entity((getSerializer().vertexFrameToJson(data)).getBytes()).build();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -129,12 +133,13 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
         graph.getBaseGraph().checkNotInTransaction();
         try {
             Accessor user = getRequesterUserProfile();
+            DescribedEntity item = views.detail(id, user);
             Description desc = manager.getFrame(did, Description.class);
             UndeterminedRelationship rel = descriptionViews.create(id, Bundle.fromString(json),
                     UndeterminedRelationship.class, user, getLogMessage());
             desc.addUndeterminedRelationship(rel);
             graph.getBaseGraph().commit();
-            return buildResponse(rel, Response.Status.CREATED);
+            return buildResponse(item, rel, Response.Status.CREATED);
         } catch (SerializationError serializationError) {
             graph.getBaseGraph().rollback();
             throw new RuntimeException(serializationError);

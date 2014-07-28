@@ -34,8 +34,8 @@ public class PermissionGrantResource extends AbstractRestResource {
     /**
      * Fetch a given permission grant.
      *
-     * @param id
-     * @return
+     * @param id The ID of the permission grant
+     * @return The permission grant
      * @throws ItemNotFound
      * @throws PermissionDenied
      * @throws BadRequester
@@ -53,9 +53,8 @@ public class PermissionGrantResource extends AbstractRestResource {
     }
     /**
      * Revoke a particular permission grant.
-     * 
-     * @param id
-     * @return
+     *
+     * @param id The ID of the permission grant
      * @throws ItemNotFound
      * @throws PermissionDenied
      * @throws BadRequester

@@ -20,7 +20,6 @@ import javax.ws.rs.core.StreamingOutput;
 
 import eu.ehri.project.acl.PermissionType;
 import eu.ehri.project.exceptions.*;
-import eu.ehri.project.views.ViewHelper;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import eu.ehri.extension.errors.BadRequester;

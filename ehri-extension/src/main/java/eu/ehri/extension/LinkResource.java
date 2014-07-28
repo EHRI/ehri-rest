@@ -14,7 +14,6 @@ import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.BundleDAO;
 import eu.ehri.project.views.LinkViews;
 import eu.ehri.project.views.Query;
-import eu.ehri.project.views.ViewHelper;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.*;
@@ -117,7 +116,7 @@ public class LinkResource extends
             aclManager.setAccessors(link,
                     getAccessors(accessors, user));
             graph.getBaseGraph().commit();
-            return buildResponseFromAnnotation(link);
+            return creationResponse(link);
         } catch (SerializationError e) {
             graph.getBaseGraph().rollback();
             throw new RuntimeException(e);
@@ -159,13 +158,6 @@ public class LinkResource extends
         } finally {
             cleanupTransaction();
         }
-    }
-
-    private Response buildResponseFromAnnotation(Link link)
-            throws SerializationError {
-        String jsonStr = getSerializer().vertexFrameToJson(link);
-        return Response.status(Status.CREATED).entity((jsonStr).getBytes())
-                .build();
     }
 
     /**

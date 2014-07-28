@@ -17,7 +17,6 @@ import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.gremlin.java.GremlinPipeline;
 import com.tinkerpop.pipes.PipeFunction;
-import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.exceptions.AccessDenied;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.*;
