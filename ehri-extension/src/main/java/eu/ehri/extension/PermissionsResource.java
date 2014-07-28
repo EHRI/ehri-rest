@@ -11,10 +11,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
+import javax.ws.rs.core.*;
 
 import eu.ehri.project.acl.*;
 import org.codehaus.jackson.JsonFactory;
@@ -54,6 +51,12 @@ public class PermissionsResource extends AbstractRestResource {
         super(database);
         aclManager = new AclManager(graph);
         aclViews = new AclViews(graph);
+    }
+
+    private CacheControl getCacheControl() {
+        CacheControl cacheControl = new CacheControl();
+        cacheControl.setMaxAge(AbstractRestResource.ITEM_CACHE_TIME);
+        return cacheControl;
     }
 
     /**
@@ -273,6 +276,7 @@ public class PermissionsResource extends AbstractRestResource {
                 .entity(mapper
                         .writeValueAsBytes(aclManager
                                 .getInheritedGlobalPermissions(accessor)))
+                .cacheControl(getCacheControl())
                 .build();
     }
 
@@ -338,6 +342,7 @@ public class PermissionsResource extends AbstractRestResource {
         return Response
                 .status(Response.Status.OK)
                 .entity(mapper.writeValueAsBytes(acl.getInheritedItemPermissions(entity, accessor)))
+                .cacheControl(getCacheControl())
                 .build();
     }
 
@@ -369,6 +374,7 @@ public class PermissionsResource extends AbstractRestResource {
                 .entity(mapper
                         .writeValueAsBytes(acl
                                 .getInheritedGlobalPermissions(accessor)))
+                .cacheControl(getCacheControl() )
                 .build();
     }
 

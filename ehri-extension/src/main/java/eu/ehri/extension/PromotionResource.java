@@ -45,7 +45,7 @@ public class PromotionResource extends AbstractRestResource {
             PromotionViews pv = new PromotionViews(graph);
             pv.promoteItem(item, currentUser);
             graph.getBaseGraph().commit();
-            return Response.ok().build();
+            return Response.ok().location(getItemUri(item)).build();
         } catch (PromotionViews.NotPromotableError e) {
             return Response.status(Response.Status.BAD_REQUEST.getStatusCode())
                     .entity(e.getMessage()).build();
@@ -75,7 +75,7 @@ public class PromotionResource extends AbstractRestResource {
             PromotionViews pv = new PromotionViews(graph);
             pv.demoteItem(item, currentUser);
             graph.getBaseGraph().commit();
-            return Response.ok().build();
+            return Response.ok().location(getItemUri(item)).build();
         } finally {
             if (graph.getBaseGraph().isInTransaction()) {
                 graph.getBaseGraph().rollback();

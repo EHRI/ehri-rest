@@ -149,7 +149,7 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
         try {
             aclViews.addAccessorToGroup(group, accessor, getRequesterUserProfile());
             graph.getBaseGraph().commit();
-            return Response.status(Status.OK).build();
+            return Response.status(Status.OK).location(getItemUri(accessor)).build();
         } finally {
             cleanupTransaction();
         }
@@ -169,7 +169,7 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
         try {
             new AclViews(graph).removeAccessorFromGroup(group, accessor, getRequesterUserProfile());
             graph.getBaseGraph().commit();
-            return Response.status(Status.OK).build();
+            return Response.status(Status.OK).location(getItemUri(accessor)).build();
         } finally {
             cleanupTransaction();
         }

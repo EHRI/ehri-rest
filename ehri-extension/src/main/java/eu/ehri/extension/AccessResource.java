@@ -42,7 +42,6 @@ public class AccessResource extends
      * @throws BadRequester
      */
     @POST
-    @Consumes(MediaType.APPLICATION_JSON)
     @Path("/{id:[^/]+}")
     public Response setVisibility(@PathParam("id") String id,
             @QueryParam(ACCESSOR_PARAM) List<String> accessorIds)
@@ -53,7 +52,7 @@ public class AccessResource extends
             Set<Accessor> accessors = extractAccessors(accessorIds);
             aclViews.setAccessors(item, accessors, getRequesterUserProfile());
             graph.getBaseGraph().commit();
-            return Response.status(Status.OK)
+            return Response.status(Status.OK).location(getItemUri(item))
                     .entity((getSerializer().vertexFrameToJson(item)).getBytes())
                     .build();
         } finally {

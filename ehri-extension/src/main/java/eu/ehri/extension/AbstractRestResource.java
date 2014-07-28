@@ -2,6 +2,7 @@ package eu.ehri.extension;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
@@ -467,6 +468,12 @@ public abstract class AbstractRestResource implements TxCheckedResource {
                 g.close();
             }
         };
+    }
+
+    protected URI getItemUri(Frame item) {
+        return uriInfo.getBaseUriBuilder()
+                .path(item.getType())
+                .path(item.getId()).build();
     }
 
     /**
