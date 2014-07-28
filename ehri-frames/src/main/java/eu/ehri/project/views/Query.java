@@ -154,7 +154,7 @@ public final class Query<E extends AccessibleEntity> {
         private final Integer limit;
         private final Map<String, Sort> sort;
 
-        Page(Iterable<T> iterable, long count, Integer offset, Integer limit,
+        public Page(Iterable<T> iterable, long count, Integer offset, Integer limit,
                 Map<String, Sort> sort) {
             this.iterable = iterable;
             this.count = count;
