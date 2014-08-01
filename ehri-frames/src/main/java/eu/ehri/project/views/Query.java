@@ -87,14 +87,16 @@ public final class Query<E extends AccessibleEntity> {
      * @param page
      */
     private Query(FramedGraph<?> graph, Class<E> cls,
-            PermissionScope scope, Optional<Integer> offset,
-            Optional<Integer> limit, final SortedMap<String, Sort> sort,
+            PermissionScope scope,
+            final Optional<Integer> offset,
+            final Optional<Integer> limit,
+            final SortedMap<String, Sort> sort,
             final SortedMap<QueryUtils.TraversalPath, Sort> traversalSort,
             final Optional<Pair<String, Sort>> defSort,
             final SortedMap<String, Pair<FilterPredicate, String>> filters,
             final Map<Pair<String, Direction>, Integer> depthFilters,
             final List<GremlinPipeline<Vertex, Vertex>> traversalFilters,
-            Boolean page) {
+            final Boolean page) {
         this.graph = graph;
         this.cls = cls;
         this.scope = scope;
@@ -214,48 +216,6 @@ public final class Query<E extends AccessibleEntity> {
                     return this.iterator.next().asVertex();
                 }
             };
-        }
-    }
-
-    /**
-     * Fetch an item by property id. The first matching item will be returned.
-     *
-     * @param id
-     * @param user
-     * @return The matching framed vertex.
-     * @throws PermissionDenied
-     * @throws ItemNotFound
-     */
-    public E get(String id, Accessor user) throws AccessDenied,
-            ItemNotFound {
-        E item = manager.getFrame(id, cls);
-        helper.checkReadAccess(item, user);
-        return item;
-    }
-
-    /**
-     * Fetch an item by property key/value. The first matching item will be
-     * returned.
-     *
-     * @param key
-     * @param value
-     * @param user
-     * @return The matching framed vertex.
-     * @throws PermissionDenied
-     * @throws ItemNotFound
-     */
-    public E get(String key, String value, Accessor user)
-            throws AccessDenied, ItemNotFound {
-        CloseableIterable<Vertex> indexQuery = manager.getVertices(key, value,
-                ClassUtils.getEntityType(cls));
-        try {
-            E item = graph.frame(indexQuery.iterator().next(), cls);
-            helper.checkReadAccess(item, user);
-            return item;
-        } catch (NoSuchElementException e) {
-            throw new ItemNotFound(key, value);
-        } finally {
-            indexQuery.close();
         }
     }
 

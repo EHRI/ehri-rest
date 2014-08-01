@@ -168,15 +168,14 @@ public class AuthoritativeSetResource extends
     public Response deleteAllAuthoritativeSetHistoricalAgents(
             @PathParam("id") String id)
             throws ItemNotFound, BadRequester, AccessDenied, PermissionDenied {
-        AuthoritativeSet set = new Query<AuthoritativeSet>(graph, AuthoritativeSet.class).get(id,
-                getRequesterUserProfile());
+        Accessor user = getRequesterUserProfile();
+        AuthoritativeSet set = views.detail(id, user);
         try {
         	LoggingCrudViews<AuthoritativeItem> agentViews = new LoggingCrudViews<AuthoritativeItem>(graph,
                     AuthoritativeItem.class, set);
-        	Accessor requesterUserProfile = getRequesterUserProfile();
         	Iterable<AuthoritativeItem> agents = set.getAuthoritativeItems();
         	for (AuthoritativeItem agent : agents) {
-        		agentViews.delete(agent.getId(), requesterUserProfile);
+        		agentViews.delete(agent.getId(), user);
         	}
             graph.getBaseGraph().commit();
             return Response.status(Status.OK).build();

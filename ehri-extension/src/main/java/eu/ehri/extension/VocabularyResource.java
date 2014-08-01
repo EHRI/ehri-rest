@@ -16,7 +16,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
-import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.Response.Status;
 
 import eu.ehri.project.definitions.EventTypes;
@@ -186,11 +185,9 @@ public class VocabularyResource extends
     @Path("/{id:.+}/all")
     public Response deleteAllVocabularyConcepts(@PathParam("id") String id)
             throws ItemNotFound, BadRequester, AccessDenied, PermissionDenied {
-        Vocabulary vocabulary = new Query<Vocabulary>(graph, Vocabulary.class).get(id,
-                getRequesterUserProfile());
-
         try {
             UserProfile user = getCurrentUser();
+            Vocabulary vocabulary = views.detail(id, user);
             CrudViews<Concept> conceptViews = new CrudViews<Concept>(
                     graph, Concept.class, vocabulary);
             ActionManager actionManager = new ActionManager(graph, vocabulary);

@@ -7,7 +7,6 @@ import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.exceptions.AccessDenied;
 import eu.ehri.project.exceptions.IndexNotFoundException;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.DocumentaryUnit;
@@ -279,32 +278,5 @@ public class QueryTest extends AbstractFixtureTest {
                 Ontology.IDENTIFIER_KEY, "__GONNAFAIL__", validUser));
         assertTrue(list.isEmpty());
         assertEquals(0, list.size());
-    }
-
-    @Test
-    public void testGet() throws ItemNotFound,
-            IndexNotFoundException, AccessDenied {
-        Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
-                DocumentaryUnit.class);
-        DocumentaryUnit doc = query.get(Ontology.IDENTIFIER_KEY, "c1",
-                validUser);
-        assertEquals("c1", doc.getIdentifier());
-    }
-
-    @Test(expected = ItemNotFound.class)
-    public void testGetItemNotFound() throws ItemNotFound,
-            IndexNotFoundException, AccessDenied {
-        Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
-                DocumentaryUnit.class);
-        query.get(Ontology.IDENTIFIER_KEY, "IDONTEXIST", validUser);
-    }
-
-    @Test(expected = AccessDenied.class)
-    public void testGetAccessDenied() throws AccessDenied,
-            ItemNotFound, IndexNotFoundException {
-        Accessor accessor = manager.getFrame("reto", Accessor.class);
-        Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
-                DocumentaryUnit.class);
-        query.get(Ontology.IDENTIFIER_KEY, "c1", accessor);
     }
 }
