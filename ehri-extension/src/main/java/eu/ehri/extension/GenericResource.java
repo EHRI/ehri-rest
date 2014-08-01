@@ -1,31 +1,29 @@
 package eu.ehri.extension;
 
-import java.io.IOException;
-import java.util.List;
-
-import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
-
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.gremlin.java.GremlinPipeline;
 import com.tinkerpop.pipes.PipeFunction;
+import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.exceptions.DeserializationError;
+import eu.ehri.project.exceptions.ItemNotFound;
+import eu.ehri.project.exceptions.PermissionDenied;
 import eu.ehri.project.exceptions.SerializationError;
+import eu.ehri.project.models.base.AccessibleEntity;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 import org.neo4j.graphdb.GraphDatabaseService;
-import eu.ehri.extension.errors.BadRequester;
-import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.models.base.AccessibleEntity;
+
+import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.io.IOException;
+import java.util.List;
 
 /**
  * Provides a RESTful interface for generic items.
@@ -44,14 +42,14 @@ public class GenericResource extends AbstractAccessibleEntityResource<Accessible
     @POST
     @Produces({MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML})
     @Consumes(MediaType.APPLICATION_JSON)
-    public StreamingOutput listFromJson(String json)
+    public Response listFromJson(String json)
             throws ItemNotFound, PermissionDenied, BadRequester, DeserializationError, IOException {
         return list(parseIds(json));
     }
 
     @GET
     @Produces({MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML})
-    public StreamingOutput list(@QueryParam("id") List<String> ids) throws ItemNotFound,
+    public Response list(@QueryParam("id") List<String> ids) throws ItemNotFound,
             PermissionDenied, BadRequester {
         // Object a lazily-computed view of the ids->vertices...
         Iterable<Vertex> vertices = manager.getVertices(ids);
@@ -66,7 +64,7 @@ public class GenericResource extends AbstractAccessibleEntityResource<Accessible
     @POST
     @Produces({MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML})
     @Path("/listByGraphId")
-    public StreamingOutput listByGidFromJson(String json) throws ItemNotFound,
+    public Response listByGidFromJson(String json) throws ItemNotFound,
             PermissionDenied, DeserializationError, BadRequester, IOException {
 
         return listByGid(parseGraphIds(json));
@@ -75,7 +73,7 @@ public class GenericResource extends AbstractAccessibleEntityResource<Accessible
     @GET
     @Produces({MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML})
     @Path("/listByGraphId")
-    public StreamingOutput listByGid(@QueryParam("gid") List<Long> ids) throws ItemNotFound,
+    public Response listByGid(@QueryParam("gid") List<Long> ids) throws ItemNotFound,
             PermissionDenied, BadRequester {
         // FIXME: This is ugly, but to return 404 on a bad item we have to
         // iterate the list first otherwise the streaming response will be

@@ -1,27 +1,7 @@
 package eu.ehri.extension;
 
-import java.io.IOException;
-import java.util.*;
-
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.*;
-
-import eu.ehri.project.acl.*;
-import org.codehaus.jackson.JsonFactory;
-import org.codehaus.jackson.JsonGenerationException;
-import org.codehaus.jackson.map.JsonMappingException;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.type.TypeReference;
-import org.neo4j.graphdb.GraphDatabaseService;
-
 import eu.ehri.extension.errors.BadRequester;
+import eu.ehri.project.acl.*;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
@@ -33,6 +13,23 @@ import eu.ehri.project.models.base.PermissionGrantTarget;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.views.AclViews;
 import eu.ehri.project.views.Query;
+import org.codehaus.jackson.JsonFactory;
+import org.codehaus.jackson.JsonGenerationException;
+import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.type.TypeReference;
+import org.neo4j.graphdb.GraphDatabaseService;
+
+import javax.ws.rs.*;
+import javax.ws.rs.core.CacheControl;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Provides a RESTful(ish) interface for setting PermissionTarget perms.
@@ -71,10 +68,10 @@ public class PermissionsResource extends AbstractRestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/list/{id:.+}")
-    public StreamingOutput listPermissionGrants(
+    public Response listPermissionGrants(
             @PathParam("id") String id,
-            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
-            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(PAGE_PARAM) @DefaultValue("1") int page,
+            @QueryParam(COUNT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int count,
             @QueryParam(SORT_PARAM) List<String> order,
             @QueryParam(FILTER_PARAM) List<String> filters)
             throws PermissionDenied, ItemNotFound, BadRequester {
@@ -82,37 +79,9 @@ public class PermissionsResource extends AbstractRestResource {
         Accessor user = manager.getFrame(id, Accessor.class);
         Accessor accessor = getRequesterUserProfile();
         Query<AccessibleEntity> query = new Query<AccessibleEntity>(graph,
-                AccessibleEntity.class).setOffset(offset).setLimit(limit)
-                .orderBy(order).filter(filters);
-        return streamingList(query.list(user.getPermissionGrants(), accessor,
-                PermissionGrant.class));
-    }
-
-    /**
-     * Get a page of permission grants for the given user
-     *
-     * @param id The user's id
-     * @return A page of permission grants for the user
-     * @throws PermissionDenied
-     * @throws ItemNotFound
-     * @throws BadRequester
-     */
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("/page/{id:.+}")
-    public StreamingOutput pagePermissionGrants(
-            @PathParam("id") String id,
-            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
-            @QueryParam(SORT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
-            @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)
-            throws PermissionDenied, ItemNotFound, BadRequester {
-        graph.getBaseGraph().checkNotInTransaction();
-        Accessor user = manager.getFrame(id, Accessor.class);
-        Accessor accessor = getRequesterUserProfile();
-        Query<AccessibleEntity> query = new Query<AccessibleEntity>(graph,
-                AccessibleEntity.class).setOffset(offset).setLimit(limit)
-                .orderBy(order).filter(filters);
+                AccessibleEntity.class).setPage(page).setCount(count)
+                .orderBy(order).filter(filters)
+                .setStream(isStreaming());
         return streamingPage(query.page(user.getPermissionGrants(), accessor,
                 PermissionGrant.class));
     }
@@ -128,10 +97,10 @@ public class PermissionsResource extends AbstractRestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/listForItem/{id:.+}")
-    public StreamingOutput listPermissionGrantsForItem(
+    public Response listPermissionGrantsForItem(
             @PathParam("id") String id,
-            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
-            @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(PAGE_PARAM) @DefaultValue("1") int page,
+            @QueryParam(COUNT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int count,
             @QueryParam(SORT_PARAM) List<String> order,
             @QueryParam(FILTER_PARAM) List<String> filters)
             throws PermissionDenied, ItemNotFound, BadRequester {
@@ -140,37 +109,9 @@ public class PermissionsResource extends AbstractRestResource {
                 PermissionGrantTarget.class);
         Accessor accessor = getRequesterUserProfile();
         Query<AccessibleEntity> query = new Query<AccessibleEntity>(graph,
-                AccessibleEntity.class).setOffset(offset).setLimit(limit)
-                .orderBy(order).filter(filters);
-        return streamingList(query.list(target.getPermissionGrants(), accessor,
-                PermissionGrant.class));
-    }
-
-    /**
-     * List all the permission grants that relate specifically to this item.
-     *
-     * @return A list of grants
-     * @throws PermissionDenied
-     * @throws ItemNotFound
-     * @throws BadRequester
-     */
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("/pageForItem/{id:.+}")
-    public StreamingOutput pagePermissionGrantsForItem(
-            @PathParam("id") String id,
-            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
-            @QueryParam("limit") @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
-            @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)
-            throws PermissionDenied, ItemNotFound, BadRequester {
-        graph.getBaseGraph().checkNotInTransaction();
-        PermissionGrantTarget target = manager.getFrame(id,
-                PermissionGrantTarget.class);
-        Accessor accessor = getRequesterUserProfile();
-        Query<AccessibleEntity> query = new Query<AccessibleEntity>(graph,
-                AccessibleEntity.class).setOffset(offset).setLimit(limit)
-                .orderBy(order).filter(filters);
+                AccessibleEntity.class).setPage(page).setCount(count)
+                .orderBy(order).filter(filters)
+                .setStream(isStreaming());
         return streamingPage(query.page(target.getPermissionGrants(), accessor,
                 PermissionGrant.class));
     }
@@ -186,10 +127,10 @@ public class PermissionsResource extends AbstractRestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/listForScope/{id:.+}")
-    public StreamingOutput listPermissionGrantsForScope(
+    public Response listPermissionGrantsForScope(
             @PathParam("id") String id,
-            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
-            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(PAGE_PARAM) @DefaultValue("1") int page,
+            @QueryParam(COUNT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int count,
             @QueryParam(SORT_PARAM) List<String> order,
             @QueryParam(FILTER_PARAM) List<String> filters)
             throws PermissionDenied, ItemNotFound, BadRequester {
@@ -197,36 +138,9 @@ public class PermissionsResource extends AbstractRestResource {
         PermissionScope scope = manager.getFrame(id, PermissionScope.class);
         Accessor accessor = getRequesterUserProfile();
         Query<AccessibleEntity> query = new Query<AccessibleEntity>(graph,
-                AccessibleEntity.class).setOffset(offset).setLimit(limit)
-                .orderBy(order).filter(filters);
-        return streamingList(query.list(scope.getPermissionGrants(), accessor,
-                PermissionGrant.class));
-    }
-
-    /**
-     * List all the permission grants that relate specifically to this scope.
-     *
-     * @return The grants for the given scope
-     * @throws PermissionDenied
-     * @throws ItemNotFound
-     * @throws BadRequester
-     */
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("/pageForScope/{id:.+}")
-    public StreamingOutput pagePermissionGrantsForScope(
-            @PathParam("id") String id,
-            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
-            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
-            @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)
-            throws PermissionDenied, ItemNotFound, BadRequester {
-        graph.getBaseGraph().checkNotInTransaction();
-        PermissionScope scope = manager.getFrame(id, PermissionScope.class);
-        Accessor accessor = getRequesterUserProfile();
-        Query<AccessibleEntity> query = new Query<AccessibleEntity>(graph,
-                AccessibleEntity.class).setOffset(offset).setLimit(limit)
-                .orderBy(order).filter(filters);
+                AccessibleEntity.class).setPage(page).setCount(count)
+                .orderBy(order).filter(filters)
+                .setStream(isStreaming());
         return streamingPage(query.page(scope.getPermissionGrants(), accessor,
                 PermissionGrant.class));
     }

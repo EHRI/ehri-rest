@@ -3,16 +3,18 @@ package eu.ehri.extension;
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.*;
+import eu.ehri.project.models.Country;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.models.Country;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.views.Query;
 import eu.ehri.project.views.impl.LoggingCrudViews;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.*;
-import javax.ws.rs.core.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.util.List;
 
 /**
@@ -41,13 +43,13 @@ public class CountryResource extends
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/list")
-    public StreamingOutput listCountries(
-            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
-            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+    public Response listCountries(
+            @QueryParam(PAGE_PARAM) @DefaultValue("1") int page,
+            @QueryParam(COUNT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int count,
             @QueryParam(SORT_PARAM) List<String> order,
             @QueryParam(FILTER_PARAM) List<String> filters)
             throws ItemNotFound, BadRequester {
-        return list(offset, limit, order, filters);
+        return page(page, count, order, filters);
     }
 
     @GET
@@ -60,32 +62,20 @@ public class CountryResource extends
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/page")
-    public StreamingOutput pageCountries(
-            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
-            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
-            @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)
-            throws ItemNotFound, BadRequester {
-        return page(offset, limit, order, filters);
-    }
-
-    @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/list")
-    public StreamingOutput listCountryRepositories(
+    public Response listCountryRepositories(
             @PathParam("id") String id,
-            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
-            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(PAGE_PARAM) @DefaultValue("1") int page,
+            @QueryParam(COUNT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int count,
             @QueryParam(SORT_PARAM) List<String> order,
             @QueryParam(FILTER_PARAM) List<String> filters)
             throws ItemNotFound, BadRequester, AccessDenied {
         Accessor user = getRequesterUserProfile();
         Country country = views.detail(id, user);
         Query<Repository> query = new Query<Repository>(graph, Repository.class)
-                .setLimit(limit).setOffset(offset).orderBy(order)
+                .setCount(count).setPage(page).orderBy(order)
                 .filter(filters);
-        return streamingList(query.list(country.getRepositories(), user));
+        return streamingPage(query.page(country.getRepositories(), user));
     }
 
     @GET
@@ -101,24 +91,6 @@ public class CountryResource extends
                 .filter(filters);
         return Response.ok((query.count(country.getRepositories(), user))
                 .toString().getBytes()).build();
-    }
-
-    @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/{id:.+}/page")
-    public StreamingOutput pageCountryRepositories(
-            @PathParam("id") String id,
-            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
-            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
-            @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)
-            throws ItemNotFound, BadRequester, AccessDenied {
-        Accessor user = getRequesterUserProfile();
-        Country country = views.detail(id, user);
-        Query<Repository> query = new Query<Repository>(graph, Repository.class)
-                .setLimit(limit).setOffset(offset).orderBy(order)
-                .filter(filters);
-        return streamingPage(query.page(country.getRepositories(), user));
     }
 
     @POST

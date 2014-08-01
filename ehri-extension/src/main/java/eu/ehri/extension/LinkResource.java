@@ -2,8 +2,8 @@ package eu.ehri.extension;
 
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.acl.PermissionType;
-import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.definitions.Entities;
+import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Link;
@@ -21,7 +21,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.StreamingOutput;
 import java.util.List;
 
 /**
@@ -62,13 +61,13 @@ public class LinkResource extends
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/list")
-    public StreamingOutput listLinks(
-            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
-            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+    public Response listLinks(
+            @QueryParam(PAGE_PARAM) @DefaultValue("1") int page,
+            @QueryParam(COUNT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int count,
             @QueryParam(SORT_PARAM) List<String> order,
             @QueryParam(FILTER_PARAM) List<String> filters)
             throws ItemNotFound, BadRequester {
-        return list(offset, limit, order, filters);
+        return page(page, count, order, filters);
     }
 
     /**
@@ -166,10 +165,11 @@ public class LinkResource extends
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/for/{id:.+}")
-    public StreamingOutput listRelatedItems(@PathParam("id") String id)
+    public Response listRelatedItems(@PathParam("id") String id)
             throws ItemNotFound, BadRequester {
-        Query<Link> linkQuery = new Query<Link>(graph, Link.class);
-        return streamingList(linkQuery.list(
+        Query<Link> linkQuery = new Query<Link>(graph, Link.class)
+                .setStream(isStreaming());
+        return streamingPage(linkQuery.setStream(isStreaming()).page(
                 manager.getFrame(id, LinkableEntity.class).getLinks(),
                 getRequesterUserProfile()));
     }

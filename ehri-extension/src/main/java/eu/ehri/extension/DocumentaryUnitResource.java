@@ -1,32 +1,20 @@
 package eu.ehri.extension;
 
-import java.util.List;
-
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
-
-import eu.ehri.project.exceptions.*;
-import org.neo4j.graphdb.GraphDatabaseService;
-
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.definitions.Entities;
+import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistence.Bundle;
-import eu.ehri.project.views.impl.LoggingCrudViews;
 import eu.ehri.project.views.Query;
+import eu.ehri.project.views.impl.LoggingCrudViews;
+import org.neo4j.graphdb.GraphDatabaseService;
+
+import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.util.List;
 
 /**
  * Provides a RESTful interface for the DocumentaryUnit
@@ -50,25 +38,13 @@ public class DocumentaryUnitResource extends
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/list")
-    public StreamingOutput listDocumentaryUnits(
-            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
-            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+    public Response listDocumentaryUnits(
+            @QueryParam(PAGE_PARAM) @DefaultValue("1") int page,
+            @QueryParam(COUNT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int count,
             @QueryParam(SORT_PARAM) List<String> order,
             @QueryParam(FILTER_PARAM) List<String> filters)
             throws ItemNotFound, BadRequester {
-        return list(offset, limit, order, filters);
-    }
-
-    @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/page")
-    public StreamingOutput pageDocumentaryUnits(
-            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
-            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
-            @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)
-            throws ItemNotFound, BadRequester {
-        return page(offset, limit, order, filters);
+        return page(page, count, order, filters);
     }
 
     @GET
@@ -82,10 +58,10 @@ public class DocumentaryUnitResource extends
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/list")
-    public StreamingOutput listChildDocumentaryUnits(
+    public Response listChildDocumentaryUnits(
             @PathParam("id") String id,
-            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
-            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(PAGE_PARAM) @DefaultValue("1") int page,
+            @QueryParam(COUNT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int count,
             @QueryParam(SORT_PARAM) List<String> order,
             @QueryParam(FILTER_PARAM) List<String> filters,
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all)
@@ -95,28 +71,7 @@ public class DocumentaryUnitResource extends
                 ? parent.getAllChildren()
                 : parent.getChildren();
         Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph, cls)
-                .setOffset(offset).setLimit(limit).filter(filters)
-                .orderBy(order).filter(filters);
-        return streamingList(query.list(units, getRequesterUserProfile()));
-    }
-
-    @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/{id:.+}/page")
-    public StreamingOutput pageChildDocumentaryUnits(
-            @PathParam("id") String id,
-            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
-            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
-            @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters,
-            @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all)
-            throws ItemNotFound, BadRequester, PermissionDenied {
-        DocumentaryUnit parent = manager.getFrame(id, DocumentaryUnit.class);
-        Iterable<DocumentaryUnit> units = all
-                ? parent.getAllChildren()
-                : parent.getChildren();
-        Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph, cls)
-                .setOffset(offset).setLimit(limit).filter(filters)
+                .setPage(page).setCount(count).filter(filters)
                 .orderBy(order).filter(filters);
         return streamingPage(query.page(units, getRequesterUserProfile()));
     }

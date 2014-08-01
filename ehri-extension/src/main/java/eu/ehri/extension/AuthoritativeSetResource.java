@@ -3,8 +3,8 @@ package eu.ehri.extension;
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.*;
-import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.HistoricalAgent;
+import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.cvoc.AuthoritativeItem;
 import eu.ehri.project.models.cvoc.AuthoritativeSet;
 import eu.ehri.project.persistence.Bundle;
@@ -13,7 +13,9 @@ import eu.ehri.project.views.impl.LoggingCrudViews;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.*;
-import javax.ws.rs.core.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import java.util.List;
 
@@ -43,13 +45,13 @@ public class AuthoritativeSetResource extends
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/list")
-    public StreamingOutput listAuthoritativeSets(
-            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
-            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+    public Response listAuthoritativeSets(
+            @QueryParam(PAGE_PARAM) @DefaultValue("1") int page,
+            @QueryParam(COUNT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int count,
             @QueryParam(SORT_PARAM) List<String> order,
             @QueryParam(FILTER_PARAM) List<String> filters)
             throws ItemNotFound, BadRequester {
-        return list(offset, limit, order, filters);
+        return page(page, count, order, filters);
     }
 
     @GET
@@ -62,32 +64,20 @@ public class AuthoritativeSetResource extends
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/page")
-    public StreamingOutput pageAuthoritativeSets(
-            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
-            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
-            @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)
-            throws ItemNotFound, BadRequester {
-        return page(offset, limit, order, filters);
-    }
-
-    @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/list")
-    public StreamingOutput listAuthoritativeSetHistoricalAgents(
+    public Response listAuthoritativeSetHistoricalAgents(
             @PathParam("id") String id,
-            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
-            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(PAGE_PARAM) @DefaultValue("1") int page,
+            @QueryParam(COUNT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int count,
             @QueryParam(SORT_PARAM) List<String> order,
             @QueryParam(FILTER_PARAM) List<String> filters)
             throws ItemNotFound, BadRequester, AccessDenied {
         Accessor user = getRequesterUserProfile();
         AuthoritativeSet set = views.detail(id, user);
         Query<AuthoritativeItem> query = new Query<AuthoritativeItem>(graph, AuthoritativeItem.class)
-                .setLimit(limit).setOffset(offset).orderBy(order)
+                .setCount(count).setPage(page).orderBy(order)
                 .filter(filters);
-        return streamingList(query.list(set.getAuthoritativeItems(), user));
+        return streamingPage(query.page(set.getAuthoritativeItems(), user));
     }
 
     @GET
@@ -103,24 +93,6 @@ public class AuthoritativeSetResource extends
                 .filter(filters);
         return Response.ok((query.count(set.getAuthoritativeItems(), user))
                 .toString().getBytes()).build();
-    }
-
-    @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/{id:.+}/page")
-    public StreamingOutput pageAuthoritativeSetHistoricalAgents(
-            @PathParam("id") String id,
-            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
-            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
-            @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)
-            throws ItemNotFound, BadRequester, AccessDenied {
-        Accessor user = getRequesterUserProfile();
-        AuthoritativeSet set = views.detail(id, user);
-        Query<AuthoritativeItem> query = new Query<AuthoritativeItem>(graph, AuthoritativeItem.class)
-                .setLimit(limit).setOffset(offset).orderBy(order)
-                .filter(filters);
-        return streamingPage(query.page(set.getAuthoritativeItems(), user));
     }
 
     @POST

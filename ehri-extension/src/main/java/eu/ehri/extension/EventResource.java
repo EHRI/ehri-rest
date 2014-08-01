@@ -1,36 +1,29 @@
 package eu.ehri.extension;
 
-import java.util.List;
-
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
-
 import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.gremlin.java.GremlinPipeline;
 import com.tinkerpop.pipes.PipeFunction;
+import eu.ehri.extension.errors.BadRequester;
+import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.AccessDenied;
+import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.*;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.models.events.Version;
 import eu.ehri.project.persistence.ActionManager;
+import eu.ehri.project.persistence.Serializer;
+import eu.ehri.project.views.Query;
+import eu.ehri.project.views.impl.LoggingCrudViews;
 import org.neo4j.graphdb.GraphDatabaseService;
 
-import eu.ehri.extension.errors.BadRequester;
-import eu.ehri.project.definitions.Entities;
-import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.persistence.Serializer;
-import eu.ehri.project.views.impl.LoggingCrudViews;
-import eu.ehri.project.views.Query;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
+import java.util.List;
 
 /**
  * Provides a RESTful interface for the Event class. Note: Event instances
@@ -79,9 +72,9 @@ public class EventResource extends AbstractAccessibleEntityResource<SystemEvent>
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/list")
-    public StreamingOutput listEvents(
-            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
-            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+    public Response listEvents(
+            @QueryParam(PAGE_PARAM) @DefaultValue("1") int page,
+            @QueryParam(COUNT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int count,
             final @QueryParam(EVENT_TYPE_PARAM) List<String> eventTypes,
             final @QueryParam(ITEM_TYPE_PARAM) List<String> itemTypes,
             final @QueryParam(ITEM_ID_PARAM) List<String> itemIds,
@@ -93,7 +86,7 @@ public class EventResource extends AbstractAccessibleEntityResource<SystemEvent>
         ActionManager am = new ActionManager(graph);
 
         Iterable<SystemEvent> list = query
-                .list(am.getLatestGlobalEvents(), getRequesterUserProfile());
+                .page(am.getLatestGlobalEvents(), getRequesterUserProfile());
 
         // Add optional filters for event type, item type, and user...
         GremlinPipeline<SystemEvent,SystemEvent> pipe = new GremlinPipeline<SystemEvent, SystemEvent>(
@@ -101,7 +94,7 @@ public class EventResource extends AbstractAccessibleEntityResource<SystemEvent>
 
         pipe = filterEvents(pipe, eventTypes, itemTypes, users, from, to, itemIds);
 
-        return streamingList(pipe.range(offset, offset + (limit - 1)));
+        return streamingList(pipe.range(page <= 1 ? 0 : ((page - 1) * count), ((page - 1) * count) + count));
     }
 
     /**
@@ -113,9 +106,9 @@ public class EventResource extends AbstractAccessibleEntityResource<SystemEvent>
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/forUser/{userId:.+}")
-    public StreamingOutput listEventsForUser(
-            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
-            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+    public Response listEventsForUser(
+            @QueryParam(PAGE_PARAM) @DefaultValue("1") int page,
+            @QueryParam(COUNT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int count,
             final @QueryParam(EVENT_TYPE_PARAM) List<String> eventTypes,
             final @QueryParam(ITEM_TYPE_PARAM) List<String> itemTypes,
             final @QueryParam(ITEM_ID_PARAM) List<String> itemIds,
@@ -126,7 +119,8 @@ public class EventResource extends AbstractAccessibleEntityResource<SystemEvent>
             throws ItemNotFound, BadRequester {
 
         UserProfile user = getCurrentUser();
-        Query<SystemEvent> query = new Query<SystemEvent>(graph, SystemEvent.class);
+        Query<SystemEvent> query = new Query<SystemEvent>(graph, SystemEvent.class)
+                .setStream(true);
         ActionManager am = new ActionManager(graph);
 
         final PipeFunction<Vertex, Boolean> aclFilterTest = aclManager.getAclFilterFunction(user);
@@ -143,7 +137,7 @@ public class EventResource extends AbstractAccessibleEntityResource<SystemEvent>
         }
 
         Iterable<SystemEvent> list = query
-                .list(am.getLatestGlobalEvents(), getRequesterUserProfile());
+                .page(am.getLatestGlobalEvents(), getRequesterUserProfile());
 
         // Add optional filters for event type, item type, and user...
         GremlinPipeline<SystemEvent,SystemEvent> pipe = new GremlinPipeline<SystemEvent, SystemEvent>(
@@ -193,7 +187,7 @@ public class EventResource extends AbstractAccessibleEntityResource<SystemEvent>
             }
         });
 
-        return streamingList(pipe.range(offset, offset + (limit - 1)));
+        return streamingList(pipe.range(getRangeStart(page, count), getRangeEnd(page, count)));
     }
 
     private GremlinPipeline<SystemEvent, SystemEvent> filterEvents(
@@ -276,8 +270,8 @@ public class EventResource extends AbstractAccessibleEntityResource<SystemEvent>
      * Lookup and page the history for a given item.
      * 
      * @param id The event id
-     * @param offset The history offset
-     * @param limit The max number of items
+     * @param page The history page offset
+     * @param count The max number of items
      * @return A list of events
      * @throws ItemNotFound
      * @throws BadRequester
@@ -285,18 +279,21 @@ public class EventResource extends AbstractAccessibleEntityResource<SystemEvent>
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/subjects")
-    public StreamingOutput pageSubjectsForEvent(
+    public Response pageSubjectsForEvent(
             @PathParam("id") String id,
-            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
-            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(PAGE_PARAM) @DefaultValue("1") int page,
+            @QueryParam(COUNT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int count,
             @QueryParam(SORT_PARAM) List<String> order,
             @QueryParam(FILTER_PARAM) List<String> filters)
             throws ItemNotFound, BadRequester, AccessDenied {
         Accessor user = getRequesterUserProfile();
         SystemEvent event = views.detail(id, user);
         Query<AccessibleEntity> query = new Query<AccessibleEntity>(graph,
-                AccessibleEntity.class).setOffset(offset).setLimit(limit)
-                .orderBy(order).filter(filters);
+                AccessibleEntity.class)
+                .setPage(page)
+                .setCount(count)
+                .orderBy(order).filter(filters)
+                .setStream(true);
         // NB: Taking a pragmatic decision here to only stream the first
         // level of the subject's tree.
         return streamingPage(query.page(event.getSubjects(), user),
@@ -307,8 +304,8 @@ public class EventResource extends AbstractAccessibleEntityResource<SystemEvent>
      * Lookup and page the history for a given item.
      *
      * @param id The event id
-     * @param offset The history offset
-     * @param limit The max number of items
+     * @param page The history page offset
+     * @param count The max number of items
      * @return A list of events
      * @throws ItemNotFound
      * @throws BadRequester
@@ -316,10 +313,10 @@ public class EventResource extends AbstractAccessibleEntityResource<SystemEvent>
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/for/{id:.+}")
-    public StreamingOutput pageEventsForItem(
+    public Response pageEventsForItem(
             @PathParam("id") String id,
-            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
-            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(PAGE_PARAM) @DefaultValue("1") int page,
+            @QueryParam(COUNT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int count,
             @QueryParam(SORT_PARAM) List<String> order,
             @QueryParam(FILTER_PARAM) List<String> filters)
             throws ItemNotFound, BadRequester, AccessDenied {
@@ -327,8 +324,9 @@ public class EventResource extends AbstractAccessibleEntityResource<SystemEvent>
         AccessibleEntity item = new LoggingCrudViews<AccessibleEntity>(graph,
                 AccessibleEntity.class).detail(id, user);
         Query<SystemEvent> query = new Query<SystemEvent>(graph, SystemEvent.class)
-                .setOffset(offset).setLimit(limit)
-                .orderBy(order).filter(filters);
+                .setPage(page).setCount(count)
+                .orderBy(order).filter(filters)
+                .setStream(true);
         return streamingPage(query.page(item.getHistory(), user));
     }
 
@@ -336,8 +334,8 @@ public class EventResource extends AbstractAccessibleEntityResource<SystemEvent>
      * Lookup and page the versions for a given item.
      *
      * @param id The event id
-     * @param offset The history offset
-     * @param limit The max number of items
+     * @param page The history page offset
+     * @param count The max number of items
      * @return A list of versions
      * @throws ItemNotFound
      * @throws BadRequester
@@ -345,10 +343,10 @@ public class EventResource extends AbstractAccessibleEntityResource<SystemEvent>
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/versions/{id:.+}")
-    public StreamingOutput pageVersionsForItem(
+    public Response pageVersionsForItem(
             @PathParam("id") String id,
-            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
-            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(PAGE_PARAM) @DefaultValue("1") int page,
+            @QueryParam(COUNT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int count,
             @QueryParam(SORT_PARAM) List<String> order,
             @QueryParam(FILTER_PARAM) List<String> filters)
             throws ItemNotFound, BadRequester, AccessDenied {
@@ -356,8 +354,19 @@ public class EventResource extends AbstractAccessibleEntityResource<SystemEvent>
         AccessibleEntity item = new LoggingCrudViews<AccessibleEntity>(graph,
                 AccessibleEntity.class).detail(id, user);
         Query<Version> query = new Query<Version>(graph, Version.class)
-                .setOffset(offset).setLimit(limit)
-                .orderBy(order).filter(filters);
+                .setPage(page)
+                .setCount(count)
+                .orderBy(order)
+                .filter(filters)
+                .setStream(true);
         return streamingPage(query.page(item.getAllPriorVersions(), user));
+    }
+
+    private int getRangeStart(int page, int count) {
+        return page <= 1 ? 0 : (page - 1) * count;
+    }
+
+    private int getRangeEnd(int page, int count) {
+        return getRangeStart(page, count) + count;
     }
 }

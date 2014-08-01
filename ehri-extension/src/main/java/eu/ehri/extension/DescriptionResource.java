@@ -15,7 +15,9 @@ import eu.ehri.project.views.DescriptionViews;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.*;
-import javax.ws.rs.core.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 /**
  * Provides a RESTful interface for dealing with described entities.

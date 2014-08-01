@@ -1,22 +1,23 @@
 package eu.ehri.extension;
 
-import java.util.List;
-import java.util.Set;
-
-import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-
 import com.google.common.collect.Sets;
-import eu.ehri.project.exceptions.SerializationError;
-import org.neo4j.graphdb.GraphDatabaseService;
-
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.PermissionDenied;
+import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
+import org.neo4j.graphdb.GraphDatabaseService;
+
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Provides a RESTful(ish) interface for setting PermissionTarget perms.

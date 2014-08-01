@@ -10,13 +10,14 @@ import eu.ehri.project.models.DocumentDescription;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.VirtualUnit;
 import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.models.base.DescribedEntity;
 import eu.ehri.project.views.Query;
 import eu.ehri.project.views.VirtualUnitViews;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.*;
-import javax.ws.rs.core.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.util.List;
 
 /**
@@ -49,25 +50,13 @@ public final class VirtualUnitResource extends
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/list")
-    public StreamingOutput listVirtualUnits(
-            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
-            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+    public Response listVirtualUnits(
+            @QueryParam(PAGE_PARAM) @DefaultValue("1") int page,
+            @QueryParam(COUNT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int count,
             @QueryParam(SORT_PARAM) List<String> order,
             @QueryParam(FILTER_PARAM) List<String> filters)
             throws ItemNotFound, BadRequester {
-        return list(offset, limit, order, filters);
-    }
-
-    @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/page")
-    public StreamingOutput pageVirtualUnits(
-            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
-            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
-            @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)
-            throws ItemNotFound, BadRequester {
-        return page(offset, limit, order, filters);
+        return page(page, count, order, filters);
     }
 
     @GET
@@ -81,10 +70,10 @@ public final class VirtualUnitResource extends
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/list")
-    public StreamingOutput listChildVirtualUnits(
+    public Response listChildVirtualUnits(
             @PathParam("id") String id,
-            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
-            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(PAGE_PARAM) @DefaultValue("1") int page,
+            @QueryParam(COUNT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int count,
             @QueryParam(SORT_PARAM) List<String> order,
             @QueryParam(FILTER_PARAM) List<String> filters,
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all)
@@ -94,29 +83,9 @@ public final class VirtualUnitResource extends
                 ? parent.getAllChildren()
                 : parent.getChildren();
         Query<VirtualUnit> query = virtualUnitQuery
-                .setOffset(offset).setLimit(limit).filter(filters)
-                .orderBy(order).filter(filters);
-        return streamingList(query.list(units, getRequesterUserProfile()));
-    }
-
-    @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/{id:.+}/page")
-    public StreamingOutput pageChildVirtualUnits(
-            @PathParam("id") String id,
-            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
-            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
-            @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters,
-            @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all)
-            throws ItemNotFound, BadRequester, PermissionDenied {
-        VirtualUnit parent = manager.getFrame(id, VirtualUnit.class);
-        Iterable<VirtualUnit> units = all
-                ? parent.getAllChildren()
-                : parent.getChildren();
-        Query<VirtualUnit> query = virtualUnitQuery
-                .setOffset(offset).setLimit(limit).filter(filters)
-                .orderBy(order).filter(filters);
+                .setPage(page).setCount(count).filter(filters)
+                .orderBy(order).filter(filters)
+                .setStream(isStreaming());
         return streamingPage(query.page(units, getRequesterUserProfile()));
     }
 
@@ -133,8 +102,7 @@ public final class VirtualUnitResource extends
                 ? parent.getAllChildren()
                 : parent.getChildren();
         Query<VirtualUnit> query = virtualUnitQuery.filter(filters);
-        return Response.ok((query.count(units,
-                getRequesterUserProfile())).toString().getBytes()).build();
+        return numberResponse(query.count(units, getRequesterUserProfile()));
     }
 
     @PUT
@@ -214,19 +182,20 @@ public final class VirtualUnitResource extends
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/forUser/{userId:.+}")
-    public StreamingOutput pageVirtualUnitsForUser(@PathParam("userId") String userId,
-            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
-            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+    public Response listVirtualUnitsForUser(@PathParam("userId") String userId,
+            @QueryParam(PAGE_PARAM) @DefaultValue("1") int page,
+            @QueryParam(COUNT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int count,
             @QueryParam(SORT_PARAM) List<String> order,
             @QueryParam(FILTER_PARAM) List<String> filters)
             throws AccessDenied, ItemNotFound, BadRequester {
         Accessor accessor = manager.getFrame(userId, Accessor.class);
         Accessor currentUser = getRequesterUserProfile();
         Iterable<VirtualUnit> units = vuViews.getVirtualCollectionsForUser(accessor, currentUser);
-        Query.Page<VirtualUnit> page = virtualUnitQuery
-                .filter(filters).setOffset(offset).setLimit(limit).orderBy(order)
+        Query.Page<VirtualUnit> list = virtualUnitQuery
+                .filter(filters).setPage(page).setCount(count).orderBy(order)
+                .setStream(isStreaming())
                 .page(units, currentUser);
-        return streamingPage(page);
+        return streamingPage(list);
     }
 
     /**

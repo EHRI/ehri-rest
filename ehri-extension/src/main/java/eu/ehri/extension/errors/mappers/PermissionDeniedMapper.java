@@ -1,16 +1,14 @@
 package eu.ehri.extension.errors.mappers;
 
-import java.util.HashMap;
-import java.util.Map;
+import eu.ehri.project.exceptions.PermissionDenied;
+import org.codehaus.jackson.map.ObjectMapper;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
-
-import org.codehaus.jackson.map.ObjectMapper;
-
-import eu.ehri.project.exceptions.PermissionDenied;
+import java.util.HashMap;
+import java.util.Map;
 
 @Provider
 public class PermissionDeniedMapper implements ExceptionMapper<PermissionDenied> {

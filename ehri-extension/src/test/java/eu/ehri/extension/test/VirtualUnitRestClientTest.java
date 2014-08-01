@@ -13,6 +13,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
 import java.net.URI;
 import java.util.Collections;
 import java.util.Comparator;
@@ -66,10 +67,7 @@ public class VirtualUnitRestClientTest extends BaseRestClientTest {
         String json = response.getEntity(String.class);
         assertStatus(OK, response);
         // Check the response contains a new version
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode rootNode = mapper.readValue(json, JsonNode.class);
-        assertFalse(rootNode.path("total").isMissingNode());
-        assertEquals(1, rootNode.path("total").getIntValue());
+        assertEquals(Integer.valueOf(1), getPaginationTotal(response));
     }
 
     @Test
@@ -285,13 +283,8 @@ public class VirtualUnitRestClientTest extends BaseRestClientTest {
                 ehriUri(Entities.VIRTUAL_UNIT, "forUser", "linda"))
                 .get(ClientResponse.class);
 
-        String json = response.getEntity(String.class);
         assertStatus(OK, response);
-        // Check the response contains a new version
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode rootNode = mapper.readValue(json, JsonNode.class);
-        assertFalse(rootNode.path("total").isMissingNode());
-        assertEquals(1, rootNode.path("total").getIntValue());
+        assertEquals(Integer.valueOf(1), getPaginationTotal(response));
     }
 
     private URI getCreationUri() {

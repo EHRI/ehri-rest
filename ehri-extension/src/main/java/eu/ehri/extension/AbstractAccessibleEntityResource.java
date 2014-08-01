@@ -1,33 +1,32 @@
 package eu.ehri.extension;
 
-import java.util.List;
-import java.util.Set;
-
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.*;
-import javax.ws.rs.core.Response.Status;
-
-//import org.apache.log4j.Logger;
-import eu.ehri.project.acl.AclManager;
-import eu.ehri.project.exceptions.*;
-import eu.ehri.project.persistence.Mutation;
-import eu.ehri.project.persistence.Serializer;
-import eu.ehri.project.views.AclViews;
-import eu.ehri.project.views.ViewHelper;
-import org.neo4j.graphdb.GraphDatabaseService;
-
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.tinkerpop.blueprints.Vertex;
-
 import eu.ehri.extension.errors.BadRequester;
+import eu.ehri.project.acl.AclManager;
+import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.utils.ClassUtils;
 import eu.ehri.project.persistence.Bundle;
-import eu.ehri.project.views.impl.LoggingCrudViews;
+import eu.ehri.project.persistence.Mutation;
+import eu.ehri.project.persistence.Serializer;
+import eu.ehri.project.views.AclViews;
 import eu.ehri.project.views.Query;
+import eu.ehri.project.views.ViewHelper;
+import eu.ehri.project.views.impl.LoggingCrudViews;
+import org.neo4j.graphdb.GraphDatabaseService;
+
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.CacheControl;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+import java.util.List;
+import java.util.Set;
+
+//import org.apache.log4j.Logger;
 
 /**
  * Handle CRUD operations on AccessibleEntity's by using the
@@ -86,13 +85,14 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * @throws ItemNotFound
      * @throws BadRequester
      */
-    public StreamingOutput page(Integer offset, Integer limit,
+    public Response page(Integer page, Integer count,
             Iterable<String> order, Iterable<String> filters)
             throws ItemNotFound, BadRequester {
         graph.getBaseGraph().checkNotInTransaction();
-        final Query.Page<E> page = querier.setOffset(offset).setLimit(limit)
-                .orderBy(order).filter(filters).page(getRequesterUserProfile());
-        return streamingPage(page);
+        final Query.Page<E> list = querier.setPage(page).setCount(count)
+                .orderBy(order).filter(filters)
+                .setStream(isStreaming()).page(getRequesterUserProfile());
+        return streamingPage(list);
     }
 
     /**
@@ -102,42 +102,13 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * @throws ItemNotFound
      * @throws BadRequester
      */
-    public StreamingOutput page(Integer offset, Integer limit)
+    public Response page(Integer page, Integer count)
             throws ItemNotFound, BadRequester {
-        final Query.Page<E> page = querier.setOffset(offset).setLimit(limit)
+        final Query.Page<E> list = querier.setPage(page).setCount(count)
+                .setStream(isStreaming())
                 .page(getRequesterUserProfile());
 
-        return streamingPage(page);
-    }
-
-    /**
-     * List all instances of the 'entity' accessible to the given user.
-     *
-     * @return List of entities
-     * @throws ItemNotFound
-     * @throws BadRequester
-     */
-    public StreamingOutput list(Integer offset, Integer limit,
-            Iterable<String> order, Iterable<String> filters)
-            throws ItemNotFound, BadRequester {
-        graph.getBaseGraph().checkNotInTransaction();
-        final Query<E> query = querier.setOffset(offset).setLimit(limit)
-                .orderBy(order).filter(filters);
-        return streamingList(query.list(getRequesterUserProfile()));
-    }
-
-    /**
-     * List all instances of the 'entity' accessible to the given user.
-     *
-     * @return List of entities
-     * @throws ItemNotFound
-     * @throws BadRequester
-     */
-    public StreamingOutput list(Integer offset, Integer limit)
-            throws ItemNotFound, BadRequester {
-        graph.getBaseGraph().checkNotInTransaction();
-        return list(offset, limit, Lists.<String>newArrayList(),
-                Lists.<String>newArrayList());
+        return streamingPage(list);
     }
 
     /**

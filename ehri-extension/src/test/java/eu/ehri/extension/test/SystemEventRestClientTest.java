@@ -116,7 +116,7 @@ public class SystemEventRestClientTest extends BaseRestClientTest {
         // Check the response contains a new version
         ObjectMapper mapper = new ObjectMapper();
         JsonNode rootNode = mapper.readValue(json, JsonNode.class);
-        assertFalse(rootNode.path("values").path(0).path(Bundle.DATA_KEY)
+        assertFalse(rootNode.path(0).path(Bundle.DATA_KEY)
                 .path(Ontology.VERSION_ENTITY_DATA).isMissingNode());
         assertStatus(OK, response);
     }

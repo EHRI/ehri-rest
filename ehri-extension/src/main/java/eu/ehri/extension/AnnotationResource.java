@@ -1,23 +1,22 @@
 package eu.ehri.extension;
 
-import java.util.List;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
-
+import eu.ehri.extension.errors.BadRequester;
+import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.*;
-import eu.ehri.project.models.base.*;
+import eu.ehri.project.models.Annotation;
+import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessor;
+import eu.ehri.project.persistence.Bundle;
+import eu.ehri.project.views.AnnotationViews;
 import eu.ehri.project.views.Query;
 import eu.ehri.project.views.impl.CrudViews;
 import org.neo4j.graphdb.GraphDatabaseService;
 
-import eu.ehri.extension.errors.BadRequester;
-import eu.ehri.project.definitions.Entities;
-import eu.ehri.project.models.Annotation;
-import eu.ehri.project.persistence.Bundle;
-import eu.ehri.project.views.AnnotationViews;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.util.List;
 
 /**
  * Provides a RESTful(ish) interface for creating.
@@ -56,13 +55,13 @@ public class AnnotationResource extends
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/list")
-    public StreamingOutput listAnnotations(
-            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
-            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+    public Response listAnnotations(
+            @QueryParam(PAGE_PARAM) @DefaultValue("1") int page,
+            @QueryParam(COUNT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int count,
             @QueryParam(SORT_PARAM) List<String> order,
             @QueryParam(FILTER_PARAM) List<String> filters)
             throws ItemNotFound, BadRequester {
-        return list(offset, limit, order, filters);
+        return page(page, count, order, filters);
     }
 
     /**
@@ -149,19 +148,20 @@ public class AnnotationResource extends
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/for/{id:.+}")
-    public StreamingOutput listAnnotationsForSubtree(
+    public Response listAnnotationsForSubtree(
             @PathParam("id") String id,
-            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
-            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
+            @QueryParam(PAGE_PARAM) @DefaultValue("1") int page,
+            @QueryParam(COUNT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int count,
             @QueryParam(SORT_PARAM) List<String> order,
             @QueryParam(FILTER_PARAM) List<String> filters)
             throws AccessDenied, ItemNotFound, BadRequester, PermissionDenied {
         AccessibleEntity item = new CrudViews<AccessibleEntity>(graph, AccessibleEntity.class)
                 .detail(id, getRequesterUserProfile());
         Query<Annotation> query = new Query<Annotation>(graph, cls)
-                .setOffset(offset).setLimit(limit).filter(filters)
-                .orderBy(order).filter(filters);
-        return streamingList(query.list(item.getAnnotations(), getRequesterUserProfile()));
+                .setPage(page).setCount(count).filter(filters)
+                .orderBy(order).filter(filters)
+                .setStream(isStreaming());
+        return streamingPage(query.page(item.getAnnotations(), getRequesterUserProfile()));
 
     }
 

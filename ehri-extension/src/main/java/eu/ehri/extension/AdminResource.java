@@ -3,33 +3,30 @@ package eu.ehri.extension;
 // Borrowed, temporarily, from Michael Hunger:
 // https://github.com/jexp/neo4j-clean-remote-db-addon
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Maps;
+import com.tinkerpop.blueprints.CloseableIterable;
+import com.tinkerpop.blueprints.Vertex;
+import eu.ehri.project.acl.AclManager;
+import eu.ehri.project.acl.PermissionType;
+import eu.ehri.project.definitions.Ontology;
+import eu.ehri.project.models.*;
+import eu.ehri.project.models.annotations.EntityType;
+import eu.ehri.project.models.base.Accessor;
+import eu.ehri.project.models.cvoc.AuthoritativeSet;
+import eu.ehri.project.models.cvoc.Concept;
+import eu.ehri.project.models.cvoc.Vocabulary;
+import eu.ehri.project.persistence.Bundle;
+import eu.ehri.project.views.Crud;
+import eu.ehri.project.views.ViewFactory;
+import org.neo4j.graphdb.GraphDatabaseService;
+
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.Maps;
-import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.models.*;
-import eu.ehri.project.models.annotations.EntityType;
-import eu.ehri.project.models.cvoc.AuthoritativeSet;
-import eu.ehri.project.models.cvoc.Concept;
-import eu.ehri.project.models.cvoc.Vocabulary;
-import eu.ehri.project.views.Crud;
-import eu.ehri.project.views.ViewFactory;
-import org.neo4j.graphdb.GraphDatabaseService;
-
-import com.tinkerpop.blueprints.CloseableIterable;
-import com.tinkerpop.blueprints.Vertex;
-
-import eu.ehri.project.acl.AclManager;
-import eu.ehri.project.acl.PermissionType;
-import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.persistence.Bundle;
-
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
