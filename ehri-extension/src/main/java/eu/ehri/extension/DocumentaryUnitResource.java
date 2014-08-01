@@ -72,7 +72,8 @@ public class DocumentaryUnitResource extends
                 : parent.getChildren();
         Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph, cls)
                 .setPage(page).setCount(count).filter(filters)
-                .orderBy(order).filter(filters);
+                .orderBy(order).filter(filters)
+                .setStream(isStreaming());
         return streamingPage(query.page(units, getRequesterUserProfile()));
     }
 

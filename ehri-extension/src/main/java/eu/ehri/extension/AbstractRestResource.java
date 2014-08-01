@@ -254,7 +254,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
     private <T extends Frame> Response getStreamingXmlOutput(final Query.Page<T> page, final Serializer serializer) {
         final Charset utf8 = Charset.forName("UTF-8");
         final String header = String.format("<list total=\"%d\" offset=\"%d\" limit=\"%d\">\n",
-                page.getTotal(), page.getPage(), page.getCount());
+                page.getTotal(), page.getPage(), page.getTotal());
         final String tail = "</page>\n";
 
         return Response.ok(new StreamingOutput() {

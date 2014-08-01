@@ -41,7 +41,8 @@ public class QueryTest extends AbstractFixtureTest {
         assertEquals(toList(allDocs).size(), list.size());
 
         // Test the limit function
-        list = toList(query.setCount(1).page(validUser));
+        Page<DocumentaryUnit> page = query.setCount(1).page(validUser);
+        list = toList(page);
         assertFalse(list.isEmpty());
         assertEquals(1, list.size());
 

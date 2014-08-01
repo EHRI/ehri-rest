@@ -39,8 +39,8 @@ public final class Query<E extends AccessibleEntity> {
 
     private static final Logger logger = LoggerFactory.getLogger(Query.class);
 
-    private final Optional<Integer> page;
-    private final Optional<Integer> count;
+    private final int page;
+    private final int count;
     private final SortedMap<String, Sort> sort;
     private final SortedMap<QueryUtils.TraversalPath, Sort> traversalSort;
     private final Optional<Pair<String, Sort>> defaultSort;
@@ -84,8 +84,8 @@ public final class Query<E extends AccessibleEntity> {
      */
     private Query(FramedGraph<?> graph, Class<E> cls,
             PermissionScope scope,
-            final Optional<Integer> page,
-            final Optional<Integer> count,
+            final int page,
+            final int count,
             final SortedMap<String, Sort> sort,
             final SortedMap<QueryUtils.TraversalPath, Sort> traversalSort,
             final Optional<Pair<String, Sort>> defSort,
@@ -117,7 +117,7 @@ public final class Query<E extends AccessibleEntity> {
      */
     public Query(FramedGraph<?> graph, Class<E> cls) {
         this(graph, cls, SystemScope.getInstance(),
-                Optional.<Integer>absent(), Optional.<Integer>absent(),
+                1, DEFAULT_COUNT,
                 ImmutableSortedMap.<String, Sort>of(), ImmutableSortedMap
                 .<QueryUtils.TraversalPath, Sort>of(), Optional
                 .<Pair<String, Sort>>absent(), ImmutableSortedMap
@@ -145,18 +145,16 @@ public final class Query<E extends AccessibleEntity> {
      */
     public static class Page<T> implements Iterable<T> {
         private final Iterable<T> iterable;
-        private final long count;
-        private final Integer offset;
-        private final Integer limit;
-        private final Map<String, Sort> sort;
+        private final int page;
+        private final int count;
+        private final long total;
 
-        public Page(Iterable<T> iterable, long count, Integer offset, Integer limit,
+        public Page(Iterable<T> iterable, int page, int count, long total,
                 Map<String, Sort> sort) {
             this.iterable = iterable;
+            this.total = total;
+            this.page = page;
             this.count = count;
-            this.offset = offset;
-            this.limit = limit;
-            this.sort = sort;
         }
 
         public Iterable<T> getIterable() {
@@ -164,24 +162,25 @@ public final class Query<E extends AccessibleEntity> {
         }
 
         public long getTotal() {
-            return count;
+            return total;
         }
 
         public Integer getPage() {
-            return offset;
+            return page;
         }
 
         public Integer getCount() {
-            return limit;
-        }
-
-        public Map<String, Sort> getSort() {
-            return sort;
+            return count;
         }
 
         @Override
         public Iterator<T> iterator() {
             return iterable.iterator();
+        }
+
+        @Override
+        public String toString() {
+            return String.format("<Page[...] %d %d (%d)", page, count, total);
         }
     }
 
@@ -219,8 +218,8 @@ public final class Query<E extends AccessibleEntity> {
     }
 
     /**
-     * Return a Page instance containing a count of total items, and an iterable
-     * for the given offset/limit.
+     * Return a Page instance containing a total of total items, and an iterable
+     * for the given page/count.
      *
      * @param user
      * @return Page instance
@@ -230,8 +229,8 @@ public final class Query<E extends AccessibleEntity> {
     }
 
     /**
-     * Return a Page instance containing a count of total items, and an iterable
-     * for the given offset/limit.
+     * Return a Page instance containing a total of total items, and an iterable
+     * for the given page/count.
      *
      * @param user
      * @return Page instance
@@ -241,8 +240,8 @@ public final class Query<E extends AccessibleEntity> {
     }
 
     /**
-     * Return a Page instance containing a count of total items, and an iterable
-     * for the given offset/limit.
+     * Return a Page instance containing a total of total items, and an iterable
+     * for the given page/count.
      *
      * @param vertices
      * @param user
@@ -253,8 +252,8 @@ public final class Query<E extends AccessibleEntity> {
     }
 
     /**
-     * Return a Page instance containing a count of total items, and an iterable
-     * for the given offset/limit.
+     * Return a Page instance containing a total of total items, and an iterable
+     * for the given page/count.
      *
      * @param vertices
      * @param user
@@ -266,22 +265,29 @@ public final class Query<E extends AccessibleEntity> {
         PipeFunction<Vertex, Boolean> aclFilterFunction = new AclManager(graph)
                 .getAclFilterFunction(user);
 
-        // FIXME: We have to read the vertices into memory here since we
-        // can't re-use the iterator for counting and streaming.
-        ArrayList<Vertex> userVerts = Lists.newArrayList(applyFilters(
-                new GremlinPipeline<E, Vertex>(
-                        new FramedVertexIterableAdaptor<T>(vertices))
-                        .filter(aclFilterFunction)).iterator());
+        GremlinPipeline<E, Vertex> pipeline = new GremlinPipeline<E, Vertex>(
+                new FramedVertexIterableAdaptor<T>(vertices))
+                .filter(aclFilterFunction);
 
-        return new Page<T>(graph.frameVertices(
-                setPipelineRange(setOrder(applyFilters(new GremlinPipeline<Vertex, Vertex>(
-                        userVerts)))), cls), userVerts.size(), page.or(1),
-                count.or(DEFAULT_COUNT), sort);
+        if (stream) {
+            return new Page<T>(graph.frameVertices(
+                    setPipelineRange(setOrder(applyFilters(pipeline))), cls), page, count, -1,
+                    sort);
+        } else {
+            // FIXME: We have to read the vertices into memory here since we
+            // can't re-use the iterator for counting and streaming.
+            ArrayList<Vertex> userVerts = Lists.newArrayList(applyFilters(pipeline).iterator());
+            Iterable<T> iterable = graph.frameVertices(
+                    setPipelineRange(setOrder(new GremlinPipeline<Vertex, Vertex>(
+                            userVerts))), cls);
+            return new Page<T>(iterable, page, count, userVerts.size(),
+                    sort);
+        }
     }
 
     /**
-     * Return a Page instance containing a count of total items, and an iterable
-     * for the given offset/limit.
+     * Return a Page instance containing a total of total items, and an iterable
+     * for the given page/count.
      *
      * @param key
      * @param query
@@ -306,8 +312,8 @@ public final class Query<E extends AccessibleEntity> {
                         graph.frameVertices(
                                 setPipelineRange(setOrder(applyFilters(new GremlinPipeline<Vertex, Vertex>(
                                         indexQ).filter(aclFilterFunction)))),
-                                cls), numItems, page.or(1),
-                        count.or(DEFAULT_COUNT), sort);
+                                cls), page, count, numItems,
+                        sort);
             } finally {
                 indexQ.close();
             }
@@ -340,7 +346,7 @@ public final class Query<E extends AccessibleEntity> {
      *
      * @param vertices
      * @param user
-     * @return Long count of items accessible to the given accessor
+     * @return Long total of items accessible to the given accessor
      */
     public <T> Long count(Iterable<T> vertices, Accessor user) {
         GremlinPipeline<T, Vertex> filter = new GremlinPipeline<T, Vertex>(vertices);
@@ -365,25 +371,25 @@ public final class Query<E extends AccessibleEntity> {
      *
      * @param page An integer page to the stream.
      */
-    public Query<E> setPage(Integer page) {
-        return new Query<E>(graph, cls, scope, Optional.fromNullable(page),
+    public Query<E> setPage(int page) {
+        return new Query<E>(graph, cls, scope, page,
                 count, sort, traversalSort, defaultSort, filters, depthFilters, traversalFilters, stream);
     }
 
     /**
-     * Set the count applied to this query.
+     * Set the total applied to this query.
      *
-     * @param count An integer count, or -1 for an unbounded stream.
+     * @param count An integer total, or -1 for an unbounded stream.
      */
-    public Query<E> setCount(Integer count) {
+    public Query<E> setCount(int count) {
         return new Query<E>(graph, cls, scope, page,
-                Optional.fromNullable(count), sort, traversalSort, defaultSort, filters,
+                count, sort, traversalSort, defaultSort, filters,
                 depthFilters, traversalFilters, stream);
     }
 
     /**
      * Indicate that we want a stream of results and therefore
-     * don't care about the item count (which will be -1 as a
+     * don't care about the item total (which will be -1 as a
      * result).
      *
      * @param stream Whether to stream results lazily.
@@ -554,25 +560,21 @@ public final class Query<E extends AccessibleEntity> {
         return query;
     }
 
-    private int getOffset() {
-        return page.or(1) == 1
-            ? 0
-            : (page.or(1) * count.or(DEFAULT_COUNT)) + 1;
+    private int getRangeLow() {
+        return page <= 1 ? 0 : (page - 1) * count;
     }
 
-    private int getLimit() {
-        return count.or(DEFAULT_COUNT) < 0
-                ? -1
-                : count.or(DEFAULT_COUNT);
+    private int getRangeHigh() {
+        return count < 1 ? -1 : (count * (page < 1 ? 1 : page));
     }
 
     // Helpers
 
     private <EE> GremlinPipeline<EE, Vertex> setPipelineRange(
             GremlinPipeline<EE, Vertex> filter) {
-        int low = Math.max(getOffset(), 0);
-        int high = low + Math.max(getLimit(), 0) - 1;
-        return filter.range(low, high);
+        // NB: Seems to be a bug - the top should not be exclusive
+        // but it does in fact seem to be.
+        return filter.range(getRangeLow(), getRangeHigh() - 1);
     }
 
     private <EE> GremlinPipeline<EE, Vertex> setOrder(

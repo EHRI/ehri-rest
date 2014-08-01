@@ -89,10 +89,10 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
             Iterable<String> order, Iterable<String> filters)
             throws ItemNotFound, BadRequester {
         graph.getBaseGraph().checkNotInTransaction();
-        final Query.Page<E> list = querier.setPage(page).setCount(count)
+        final Query<E> query = querier.setPage(page).setCount(count)
                 .orderBy(order).filter(filters)
-                .setStream(isStreaming()).page(getRequesterUserProfile());
-        return streamingPage(list);
+                .setStream(isStreaming());
+        return streamingPage(query.page(getRequesterUserProfile()));
     }
 
     /**
@@ -104,11 +104,9 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      */
     public Response page(Integer page, Integer count)
             throws ItemNotFound, BadRequester {
-        final Query.Page<E> list = querier.setPage(page).setCount(count)
-                .setStream(isStreaming())
-                .page(getRequesterUserProfile());
-
-        return streamingPage(list);
+        final Query<E> query = querier.setPage(page).setCount(count)
+                .setStream(isStreaming());
+        return streamingPage(query.page(getRequesterUserProfile()));
     }
 
     /**
