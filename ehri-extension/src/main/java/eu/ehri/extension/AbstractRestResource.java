@@ -34,12 +34,18 @@ import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
 
-
+/**
+ * Base class for web service resources.
+ *
+ * @author Mike Bryant (http://github.com/mikesname)
+ */
 public abstract class AbstractRestResource implements TxCheckedResource {
 
     public static final int DEFAULT_LIST_LIMIT = 20;
     public static final int ITEM_CACHE_TIME = 60 * 5; // 5 minutes
-    private static final ObjectMapper mapper = new ObjectMapper();
+
+    protected static final ObjectMapper jsonMapper = new ObjectMapper();
+    protected static final JsonFactory jsonFactory = new JsonFactory();
 
     protected static final Logger logger = LoggerFactory.getLogger(TxCheckedResource.class);
     private static final FramedGraphFactory graphFactory = new FramedGraphFactory(new JavaHandlerModule());
@@ -100,6 +106,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
      */
     @Context
     protected UriInfo uriInfo;
+
     protected final GraphDatabaseService database;
     protected final FramedGraph<TxCheckedNeo4jGraph> graph;
     protected final GraphManager manager;
@@ -124,6 +131,10 @@ public abstract class AbstractRestResource implements TxCheckedResource {
         return graph;
     }
 
+    /**
+     * If graph is in a transaction, roll it back. Otherwise,
+     * do nothing.
+     */
     protected void cleanupTransaction() {
         if (graph.getBaseGraph().isInTransaction()) {
             logger.error("Rolling back active transaction");
@@ -231,9 +242,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
      */
     protected <T extends Frame> Response streamingPage(
             final Query.Page<T> page) {
-        return MediaType.TEXT_XML_TYPE.equals(checkMediaType())
-                ? getStreamingXmlOutput(page, getSerializer())
-                : getStreamingJsonOutput(page, getSerializer());
+        return streamingPage(page, getSerializer());
     }
 
     /**
@@ -251,6 +260,14 @@ public abstract class AbstractRestResource implements TxCheckedResource {
                 : getStreamingJsonOutput(page, serializer);
     }
 
+    /**
+     * Return XML output from a page of data.
+     *
+     * @param page       The page object
+     * @param serializer The serializer
+     * @param <T>        The type of item in the page
+     * @return An XML response.
+     */
     private <T extends Frame> Response getStreamingXmlOutput(final Query.Page<T> page, final Serializer serializer) {
         final Charset utf8 = Charset.forName("UTF-8");
         final String header = String.format("<list total=\"%d\" offset=\"%d\" limit=\"%d\">\n",
@@ -271,23 +288,42 @@ public abstract class AbstractRestResource implements TxCheckedResource {
                 }
                 os.write(tail.getBytes(utf8));
             }
-        }).header("Content-Range", String.format("page=%d; count=%d; total=%d",
-                page.getPage(), page.getCount(), page.getTotal()))
+        }).header("Content-Range", getPaginationResponseHeader(page))
                 .build();
     }
 
+    /**
+     * Get a response header string for a page of data.
+     * <p/>
+     * NB: Subject to change!
+     *
+     * @param page The input page
+     * @return The pagination data formatted as a string.
+     */
+    private String getPaginationResponseHeader(Query.Page<?> page) {
+        return String.format("page=%d; count=%d; total=%d",
+                page.getPage(), page.getCount(), page.getTotal());
+    }
+
+    /**
+     * Return a JSON output from a page of data
+     *
+     * @param page       The page object
+     * @param serializer The serializer
+     * @param <T>        The type of item in the page
+     * @return A JSON response
+     */
     private <T extends Frame> Response getStreamingJsonOutput(final Query.Page<T> page, final Serializer serializer) {
-        final JsonFactory f = new JsonFactory();
         final Serializer cacheSerializer = serializer.withCache();
         StreamingOutput output = new StreamingOutput() {
             @Override
             public void write(OutputStream os) throws IOException {
-                JsonGenerator g = f.createJsonGenerator(os);
+                JsonGenerator g = jsonFactory.createJsonGenerator(os);
                 g.writeStartArray();
                 for (T item : page.getIterable()) {
                     try {
                         g.writeRaw('\n');
-                        mapper.writeValue(g, cacheSerializer.vertexFrameToData(item));
+                        jsonMapper.writeValue(g, cacheSerializer.vertexFrameToData(item));
                     } catch (SerializationError e) {
                         throw new RuntimeException(e);
                     }
@@ -297,8 +333,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
             }
         };
         return Response.ok(output)
-                .header("Content-Range", String.format("page=%d; count=%d; total=%d",
-                        page.getPage(), page.getCount(), page.getTotal()))
+                .header("Content-Range", getPaginationResponseHeader(page))
                 .build();
     }
 
@@ -310,10 +345,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
      */
     protected <T extends Frame> Response streamingList(
             final Iterable<T> list) {
-        final Serializer serializer = getSerializer();
-        return MediaType.TEXT_XML_TYPE.equals(checkMediaType())
-                ? getStreamingXmlOutput(list, serializer)
-                : getStreamingJsonOutput(list, serializer);
+        return streamingList(list, getSerializer());
     }
 
     /**
@@ -353,17 +385,16 @@ public abstract class AbstractRestResource implements TxCheckedResource {
     }
 
     private <T extends Frame> Response getStreamingJsonOutput(final Iterable<T> list, final Serializer serializer) {
-        final JsonFactory f = new JsonFactory();
         final Serializer cacheSerializer = serializer.withCache();
         return Response.ok(new StreamingOutput() {
             @Override
             public void write(OutputStream arg0) throws IOException {
-                JsonGenerator g = f.createJsonGenerator(arg0);
+                JsonGenerator g = jsonFactory.createJsonGenerator(arg0);
                 g.writeStartArray();
                 for (T item : list) {
                     g.writeRaw('\n');
                     try {
-                        mapper.writeValue(g, cacheSerializer.vertexFrameToData(item));
+                        jsonMapper.writeValue(g, cacheSerializer.vertexFrameToData(item));
                     } catch (SerializationError e) {
                         e.printStackTrace();
                         throw new RuntimeException(e);
@@ -386,17 +417,16 @@ public abstract class AbstractRestResource implements TxCheckedResource {
      */
     protected Response streamingVertexList(
             final Iterable<Vertex> list, final Serializer serializer) {
-        final JsonFactory f = new JsonFactory();
         final Serializer cacheSerializer = serializer.withCache();
         return Response.ok(new StreamingOutput() {
             @Override
             public void write(OutputStream arg0) throws IOException {
-                JsonGenerator g = f.createJsonGenerator(arg0);
+                JsonGenerator g = jsonFactory.createJsonGenerator(arg0);
                 g.writeStartArray();
                 for (Vertex item : list) {
                     try {
                         g.writeRaw('\n');
-                        mapper.writeValue(g, cacheSerializer.vertexToData(item));
+                        jsonMapper.writeValue(g, cacheSerializer.vertexToData(item));
                     } catch (SerializationError e) {
                         throw new RuntimeException(e);
                     }
@@ -418,16 +448,15 @@ public abstract class AbstractRestResource implements TxCheckedResource {
      */
     protected Response streamingVertexMap(
             final Map<String, Vertex> map, final Serializer serializer) {
-        final JsonFactory f = new JsonFactory();
         return Response.ok(new StreamingOutput() {
             @Override
             public void write(OutputStream arg0) throws IOException {
-                JsonGenerator g = f.createJsonGenerator(arg0);
+                JsonGenerator g = jsonFactory.createJsonGenerator(arg0);
                 g.writeStartObject();
                 for (Map.Entry<String, Vertex> keypair : map.entrySet()) {
                     try {
                         g.writeFieldName(keypair.getKey());
-                        mapper.writeValue(g, serializer.vertexToData(keypair.getValue()));
+                        jsonMapper.writeValue(g, serializer.vertexToData(keypair.getValue()));
                     } catch (SerializationError e) {
                         throw new RuntimeException(e);
                     }
@@ -459,18 +488,17 @@ public abstract class AbstractRestResource implements TxCheckedResource {
      */
     protected <T extends Frame> Response streamingMultimap(
             final ListMultimap<String, T> map, final Serializer serializer) {
-        final JsonFactory f = new JsonFactory();
         return Response.ok(new StreamingOutput() {
             @Override
             public void write(OutputStream arg0) throws IOException {
-                JsonGenerator g = f.createJsonGenerator(arg0);
+                JsonGenerator g = jsonFactory.createJsonGenerator(arg0);
                 g.writeStartObject();
                 for (String itemId : map.keySet()) {
                     g.writeFieldName(itemId);
                     g.writeStartArray();
                     for (T item : map.get(itemId)) {
                         try {
-                            mapper.writeValue(g, serializer.vertexFrameToData(item));
+                            jsonMapper.writeValue(g, serializer.vertexFrameToData(item));
                         } catch (SerializationError e) {
                             throw new RuntimeException(e);
                         }
@@ -483,18 +511,30 @@ public abstract class AbstractRestResource implements TxCheckedResource {
         }).build();
     }
 
+    /**
+     * Get the URI for a given item.
+     *
+     * @param item The item
+     * @return The resource URI for that item.
+     */
     protected URI getItemUri(Frame item) {
         return uriInfo.getBaseUriBuilder()
                 .path(item.getType())
                 .path(item.getId()).build();
     }
 
+    /**
+     * Return a response from a new item with a 201 CREATED status.
+     *
+     * @param frame A newly-created item
+     * @return A 201 response.
+     * @throws SerializationError
+     */
     protected Response creationResponse(Frame frame) throws SerializationError {
         return Response.status(Response.Status.CREATED).location(getItemUri(frame))
                 .entity(getRepresentation(frame))
                 .build();
     }
-
 
     /**
      * Return a number.
