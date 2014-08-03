@@ -38,21 +38,15 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/list")
-    public Response listRepositories(
-            @QueryParam(PAGE_PARAM) @DefaultValue("1") int page,
-            @QueryParam(COUNT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int count,
-            @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)
-            throws ItemNotFound, BadRequester {
-        return page(page, count, order, filters);
+    public Response listRepositories() throws ItemNotFound, BadRequester {
+        return page();
     }
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/count")
-    public Response countDocumentaryUnits(@QueryParam(FILTER_PARAM) List<String> filters)
-            throws ItemNotFound, BadRequester {
-        return count(filters);
+    public Response countDocumentaryUnits() throws ItemNotFound, BadRequester {
+        return count();
     }
 
     @GET
@@ -60,10 +54,6 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
     @Path("/{id:.+}/list")
     public Response listRepositoryDocumentaryUnits(
             @PathParam("id") String id,
-            @QueryParam(PAGE_PARAM) @DefaultValue("1") int page,
-            @QueryParam(COUNT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int count,
-            @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters,
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all)
             throws ItemNotFound, BadRequester, AccessDenied {
         Accessor user = getRequesterUserProfile();
@@ -71,12 +61,8 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
         Iterable<DocumentaryUnit> units = all
                 ? repository.getAllCollections()
                 : repository.getCollections();
-        Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
-                DocumentaryUnit.class).setCount(count).setPage(page)
-                .orderBy(order)
-                .filter(filters)
-                .setStream(isStreaming());
-        return streamingPage(query.page(units, user));
+        return streamingPage(getQuery(DocumentaryUnit.class)
+                .page(units, user));
     }
 
     @GET
@@ -84,7 +70,6 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
     @Path("/{id:.+}/count")
     public Response countRepositoryDocumentaryUnits(
             @PathParam("id") String id,
-            @QueryParam(FILTER_PARAM) List<String> filters,
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all)
             throws ItemNotFound, BadRequester, AccessDenied {
         Accessor user = getRequesterUserProfile();
@@ -92,10 +77,7 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
         Iterable<DocumentaryUnit> units = all
                 ? repository.getAllCollections()
                 : repository.getCollections();
-        Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
-                DocumentaryUnit.class)
-                .filter(filters);
-        return numberResponse(query.count(units, user));
+        return numberResponse(getQuery(DocumentaryUnit.class).count(units, user));
     }
 
     @PUT

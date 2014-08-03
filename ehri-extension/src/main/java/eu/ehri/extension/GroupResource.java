@@ -10,7 +10,6 @@ import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.views.AclViews;
-import eu.ehri.project.views.Query;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.*;
@@ -46,21 +45,15 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/list")
-    public Response listGroups(
-            @QueryParam(PAGE_PARAM) @DefaultValue("1") int page,
-            @QueryParam(COUNT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int count,
-            @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)
-            throws ItemNotFound, BadRequester {
-        return page(page, count, order, filters);
+    public Response listGroups() throws ItemNotFound, BadRequester {
+        return page();
     }
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/count")
-    public Response countVocabularies(@QueryParam(FILTER_PARAM) List<String> filters)
-            throws ItemNotFound, BadRequester {
-        return count(filters);
+    public Response countVocabularies() throws ItemNotFound, BadRequester {
+        return count();
     }
 
     @POST
@@ -160,10 +153,6 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
     @Path("/{id:[^/]+}/list")
     public Response listGroupMembers(
             @PathParam("id") String id,
-            @QueryParam(PAGE_PARAM) @DefaultValue("1") int page,
-            @QueryParam(COUNT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int count,
-            @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters,
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all)
             throws ItemNotFound, BadRequester {
         Group group = manager.getFrame(id, EntityClass.GROUP, Group.class);
@@ -171,26 +160,19 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
         Iterable<AccessibleEntity> members = all
                 ? group.getAllUserProfileMembers()
                 : group.getMembersAsEntities();
-        Query<AccessibleEntity> query = new Query<AccessibleEntity>(graph, AccessibleEntity.class)
-                .setPage(page).setCount(count)
-                .orderBy(order).filter(filters)
-                .setStream(isStreaming());
-        return streamingPage(query.page(members, getRequesterUserProfile()));
+        return streamingPage(getQuery(AccessibleEntity.class)
+                .page(members, getRequesterUserProfile()));
     }
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/count")
-    public Response countGroupMembers(
-            @PathParam("id") String id,
-            @QueryParam(FILTER_PARAM) List<String> filters)
+    public Response countGroupMembers(@PathParam("id") String id)
             throws ItemNotFound, BadRequester, AccessDenied {
         Accessor user = getRequesterUserProfile();
         Group group = views.detail(id, user);
-        Query<AccessibleEntity> query = new Query<AccessibleEntity>(graph, AccessibleEntity.class)
-                .filter(filters);
-        return Response.ok((query.count(group.getMembersAsEntities(), user))
-                .toString().getBytes()).build();
+        return numberResponse(getQuery(AccessibleEntity.class)
+                .count(group.getMembersAsEntities(), user));
     }
 
     /**

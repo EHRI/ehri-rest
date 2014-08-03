@@ -10,7 +10,6 @@ import eu.ehri.project.models.Link;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Watchable;
-import eu.ehri.project.views.Query;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.*;
@@ -18,7 +17,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.StreamingOutput;
 import java.util.List;
 import java.util.Set;
 
@@ -57,21 +55,15 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/count")
-    public Response countUserProfiles(@QueryParam(FILTER_PARAM) List<String> filters)
-            throws ItemNotFound, BadRequester {
-        return count(filters);
+    public Response countUserProfiles() throws ItemNotFound, BadRequester {
+        return count();
     }
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/list")
-    public Response listUserProfiles(
-            @QueryParam(PAGE_PARAM) @DefaultValue("1") int page,
-            @QueryParam(COUNT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int count,
-            @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)
-            throws ItemNotFound, BadRequester {
-        return page(page, count, order, filters);
+    public Response listUserProfiles() throws ItemNotFound, BadRequester {
+        return page();
     }
 
     @POST
@@ -133,37 +125,23 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("{userId:.+}/" + FOLLOWERS)
-    public Response listFollowers(
-            @PathParam("userId") String userId,
-            @QueryParam(PAGE_PARAM) @DefaultValue("1") int page,
-            @QueryParam(COUNT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int count,
-            @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)
+    public Response listFollowers(@PathParam("userId") String userId)
             throws ItemNotFound, BadRequester {
         Accessor accessor = getRequesterUserProfile();
         UserProfile user = views.detail(userId, accessor);
-        final Query.Page<UserProfile> list = querier.setPage(page).setCount(count)
-                .orderBy(order).filter(filters)
-                .setStream(isStreaming()).page(user.getFollowers(), accessor);
-        return streamingPage(list);
+        return streamingPage(getQuery(UserProfile.class)
+                .page(user.getFollowers(), accessor));
     }
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("{userId:.+}/" + FOLLOWING)
-    public Response listFollowing(
-            @PathParam("userId") String userId,
-            @QueryParam(PAGE_PARAM) @DefaultValue("1") int page,
-            @QueryParam(COUNT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int count,
-            @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)
+    public Response listFollowing(@PathParam("userId") String userId)
             throws ItemNotFound, BadRequester {
         Accessor accessor = getRequesterUserProfile();
         UserProfile user = views.detail(userId, accessor);
-        final Query.Page<UserProfile> list = querier.setPage(page).setCount(count)
-                .orderBy(order).filter(filters)
-                .setStream(isStreaming()).page(user.getFollowing(), accessor);
-        return streamingPage(list);
+        return streamingPage(getQuery(UserProfile.class)
+                .page(user.getFollowing(), accessor));
     }
 
     @GET
@@ -229,19 +207,11 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("{userId:.+}/" + BLOCKED)
-    public Response listBlocked(
-            @PathParam("userId") String userId,
-            @QueryParam(PAGE_PARAM) @DefaultValue("1") int page,
-            @QueryParam(COUNT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int count,
-            @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)
+    public Response listBlocked(@PathParam("userId") String userId)
             throws ItemNotFound, BadRequester {
         Accessor accessor = getRequesterUserProfile();
         UserProfile user = views.detail(userId, accessor);
-        final Query.Page<UserProfile> list = querier.setPage(page).setCount(count)
-                .orderBy(order).filter(filters)
-                .setStream(isStreaming()).page(user.getBlocked(), accessor);
-        return streamingPage(list);
+        return streamingPage(getQuery(UserProfile.class).page(user.getBlocked(), accessor));
     }
 
     @GET
@@ -294,20 +264,12 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("{userId:.+}/" + WATCHING)
-    public Response listWatching(
-            @PathParam("userId") String userId,
-            @QueryParam(PAGE_PARAM) @DefaultValue("1") int page,
-            @QueryParam(COUNT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int count,
-            @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)
+    public Response listWatching(@PathParam("userId") String userId)
             throws ItemNotFound, BadRequester {
         Accessor accessor = getRequesterUserProfile();
         UserProfile user = views.detail(userId, accessor);
-        final Iterable<Watchable> list = new Query<Watchable>(graph,
-                Watchable.class).setPage(page).setCount(count)
-                .orderBy(order).filter(filters)
-                .setStream(isStreaming()).page(user.getWatching(), accessor);
-        return streamingList(list);
+        return streamingList(getQuery(Watchable.class)
+                .page(user.getWatching(), accessor));
     }
 
     @POST
@@ -360,39 +322,21 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("{userId:.+}/" + Entities.ANNOTATION)
-    public Response listAnnotations(
-            @PathParam("userId") String userId,
-            @QueryParam(PAGE_PARAM) @DefaultValue("1") int page,
-            @QueryParam(COUNT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int count,
-            @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)
+    public Response listAnnotations(@PathParam("userId") String userId)
             throws ItemNotFound, BadRequester {
         Accessor accessor = getRequesterUserProfile();
         UserProfile user = views.detail(userId, accessor);
-        final Query.Page<Annotation> list = new Query<Annotation>(graph,
-                Annotation.class).setPage(page).setCount(count)
-                .orderBy(order).filter(filters)
-                .setStream(isStreaming()).page(user.getAnnotations(), accessor);
-        return streamingPage(list);
+        return streamingPage(getQuery(Annotation.class)
+                .page(user.getAnnotations(), accessor));
     }
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("{userId:.+}/" + Entities.LINK)
-    public Response pageLinks(
-            @PathParam("userId") String userId,
-            @QueryParam(PAGE_PARAM) @DefaultValue("1") int page,
-            @QueryParam(COUNT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int count,
-            @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)
+    public Response pageLinks(@PathParam("userId") String userId)
             throws ItemNotFound, BadRequester {
         Accessor accessor = getRequesterUserProfile();
         UserProfile user = views.detail(userId, accessor);
-        final Query.Page<Link> list = new Query<Link>(graph,
-                Link.class).setPage(page).setCount(count)
-                .orderBy(order).filter(filters)
-                .setStream(isStreaming())
-                .page(user.getLinks(), accessor);
-        return streamingPage(list);
+        return streamingPage(getQuery(Link.class).page(user.getLinks(), accessor));
     }
 }

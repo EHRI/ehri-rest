@@ -6,7 +6,6 @@ import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.cvoc.Concept;
-import eu.ehri.project.views.Query;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.*;
@@ -40,21 +39,15 @@ public class CvocConceptResource extends
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/list")
-    public Response listCvocConcepts(
-            @QueryParam(PAGE_PARAM) @DefaultValue("1") int page,
-            @QueryParam(COUNT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int count,
-            @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)
-            throws ItemNotFound, BadRequester {
-        return page(page, count, order, filters);
+    public Response listCvocConcepts() throws ItemNotFound, BadRequester {
+        return page();
     }
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/count")
-    public Response countCvocConcepts(@QueryParam(FILTER_PARAM) List<String> filters)
-            throws ItemNotFound, BadRequester {
-        return count(filters);
+    public Response countCvocConcepts() throws ItemNotFound, BadRequester {
+        return count();
     }
 
     @PUT
@@ -98,34 +91,23 @@ public class CvocConceptResource extends
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/list")
-    public Response listCvocNarrowerConcepts(
-            @PathParam("id") String id,
-            @QueryParam(PAGE_PARAM) @DefaultValue("1") int page,
-            @QueryParam(COUNT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int count,
-            @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)
-
-    throws ItemNotFound, AccessDenied, BadRequester {
+    public Response listCvocNarrowerConcepts(@PathParam("id") String id)
+            throws ItemNotFound, AccessDenied, BadRequester {
         Accessor user = getRequesterUserProfile();
         Concept concept = views.detail(id, user);
-        Query<Concept> query = new Query<Concept>(graph, Concept.class)
-                .setCount(count).setPage(page).orderBy(order)
-                .filter(filters);
-        return streamingPage(query.page(concept.getNarrowerConcepts(), user));
+        return streamingPage(getQuery(Concept.class)
+                .page(concept.getNarrowerConcepts(), user));
     }
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/count")
-    public Response countCvocNarrowerConcepts(
-            @PathParam("id") String id,
-            @QueryParam(FILTER_PARAM) List<String> filters)
+    public Response countCvocNarrowerConcepts(@PathParam("id") String id)
             throws ItemNotFound, BadRequester, AccessDenied {
         Accessor user = getRequesterUserProfile();
         Concept concept = views.detail(id, user);
-        Query<Concept> query = new Query<Concept>(graph, Concept.class)
-                .filter(filters);
-        return numberResponse(query.count(concept.getNarrowerConcepts(), user));
+        return numberResponse(getQuery(Concept.class)
+                .count(concept.getNarrowerConcepts(), user));
     }
 
     /**

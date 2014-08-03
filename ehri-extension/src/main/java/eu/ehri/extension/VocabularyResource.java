@@ -10,7 +10,6 @@ import eu.ehri.project.models.cvoc.Concept;
 import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.persistence.Bundle;
-import eu.ehri.project.views.Query;
 import eu.ehri.project.views.impl.CrudViews;
 import eu.ehri.project.views.impl.LoggingCrudViews;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -47,55 +46,38 @@ public class VocabularyResource extends
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/count")
-    public Response countVocabularies(@QueryParam(FILTER_PARAM) List<String> filters)
-            throws ItemNotFound, BadRequester {
-        return count(filters);
+    public Response countVocabularies() throws ItemNotFound, BadRequester {
+        return count();
     }
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/list")
-    public Response listVocabularies(
-            @QueryParam(PAGE_PARAM) @DefaultValue("1") int page,
-            @QueryParam(COUNT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int count,
-            @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)
-            throws ItemNotFound, BadRequester {
-        return page(page, count, order, filters);
+    public Response listVocabularies() throws ItemNotFound, BadRequester {
+        return page();
     }
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/count")
     public Response countVocabularyConcepts(
-            @PathParam("id") String id,
-            @QueryParam(FILTER_PARAM) List<String> filters)
+            @PathParam("id") String id)
             throws ItemNotFound, BadRequester, AccessDenied {
         Accessor user = getRequesterUserProfile();
         Vocabulary vocabulary = views.detail(id, user);
-        Query<Concept> query = new Query<Concept>(graph, Concept.class)
-                .filter(filters);
-        return Response.ok((query.count(vocabulary.getConcepts(), user))
-                .toString().getBytes()).build();
+        return numberResponse(getQuery(cls).count(vocabulary.getConcepts(), user));
     }
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/list")
     public Response listVocabularyConcepts(
-            @PathParam("id") String id,
-            @QueryParam(PAGE_PARAM) @DefaultValue("1") int page,
-            @QueryParam(COUNT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int count,
-            @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)
+            @PathParam("id") String id)
             throws ItemNotFound, BadRequester, AccessDenied {
         Accessor user = getRequesterUserProfile();
         Vocabulary vocabulary = views.detail(id, user);
-        Query<Concept> query = new Query<Concept>(graph, Concept.class)
-                .setCount(count).setPage(page).orderBy(order)
-                .filter(filters)
-                .setStream(isStreaming());
-        return streamingPage(query.page(vocabulary.getConcepts(), user));
+        return streamingPage(getQuery(Concept.class)
+                .page(vocabulary.getConcepts(), user));
     }
 
     @POST

@@ -43,39 +43,26 @@ public class CountryResource extends
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/list")
-    public Response listCountries(
-            @QueryParam(PAGE_PARAM) @DefaultValue("1") int page,
-            @QueryParam(COUNT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int count,
-            @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)
-            throws ItemNotFound, BadRequester {
-        return page(page, count, order, filters);
+    public Response listCountries() throws ItemNotFound, BadRequester {
+        return page();
     }
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/count")
-    public Response countCountries(@QueryParam(FILTER_PARAM) List<String> filters)
-            throws ItemNotFound, BadRequester {
-        return count(filters);
+    public Response countCountries() throws ItemNotFound, BadRequester {
+        return count();
     }
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/list")
-    public Response listCountryRepositories(
-            @PathParam("id") String id,
-            @QueryParam(PAGE_PARAM) @DefaultValue("1") int page,
-            @QueryParam(COUNT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int count,
-            @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)
+    public Response listCountryRepositories(@PathParam("id") String id)
             throws ItemNotFound, BadRequester, AccessDenied {
         Accessor user = getRequesterUserProfile();
         Country country = views.detail(id, user);
-        Query<Repository> query = new Query<Repository>(graph, Repository.class)
-                .setCount(count).setPage(page).orderBy(order)
-                .filter(filters);
-        return streamingPage(query.page(country.getRepositories(), user));
+        return streamingPage(getQuery(Repository.class)
+                .page(country.getRepositories(), user));
     }
 
     @GET

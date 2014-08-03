@@ -38,21 +38,16 @@ public class DocumentaryUnitResource extends
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/list")
-    public Response listDocumentaryUnits(
-            @QueryParam(PAGE_PARAM) @DefaultValue("1") int page,
-            @QueryParam(COUNT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int count,
-            @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)
+    public Response listDocumentaryUnits()
             throws ItemNotFound, BadRequester {
-        return page(page, count, order, filters);
+        return page();
     }
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/count")
-    public Response countDocumentaryUnits(@QueryParam(FILTER_PARAM) List<String> filters)
-            throws ItemNotFound, BadRequester {
-        return count(filters);
+    public Response countDocumentaryUnits() throws ItemNotFound, BadRequester {
+        return count();
     }
 
     @GET
@@ -60,21 +55,13 @@ public class DocumentaryUnitResource extends
     @Path("/{id:.+}/list")
     public Response listChildDocumentaryUnits(
             @PathParam("id") String id,
-            @QueryParam(PAGE_PARAM) @DefaultValue("1") int page,
-            @QueryParam(COUNT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int count,
-            @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters,
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all)
             throws ItemNotFound, BadRequester, PermissionDenied {
         DocumentaryUnit parent = manager.getFrame(id, DocumentaryUnit.class);
         Iterable<DocumentaryUnit> units = all
                 ? parent.getAllChildren()
                 : parent.getChildren();
-        Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph, cls)
-                .setPage(page).setCount(count).filter(filters)
-                .orderBy(order).filter(filters)
-                .setStream(isStreaming());
-        return streamingPage(query.page(units, getRequesterUserProfile()));
+        return streamingPage(getQuery(cls).page(units, getRequesterUserProfile()));
     }
 
     @GET
@@ -82,16 +69,13 @@ public class DocumentaryUnitResource extends
     @Path("/{id:.+}/count")
     public Response countChildDocumentaryUnits(
             @PathParam("id") String id,
-            @QueryParam(FILTER_PARAM) List<String> filters,
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all)
             throws ItemNotFound, BadRequester, PermissionDenied {
         DocumentaryUnit parent = manager.getFrame(id, DocumentaryUnit.class);
         Iterable<DocumentaryUnit> units = all
                 ? parent.getAllChildren()
                 : parent.getChildren();
-        Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph, cls)
-                .filter(filters);
-        return Response.ok((query.count(units,
+        return Response.ok((getQuery(cls).count(units,
                 getRequesterUserProfile())).toString().getBytes()).build();
     }
 

@@ -22,7 +22,6 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
 import java.util.List;
 
 /**
@@ -270,8 +269,6 @@ public class EventResource extends AbstractAccessibleEntityResource<SystemEvent>
      * Lookup and page the history for a given item.
      * 
      * @param id The event id
-     * @param page The history page offset
-     * @param count The max number of items
      * @return A list of events
      * @throws ItemNotFound
      * @throws BadRequester
@@ -279,24 +276,14 @@ public class EventResource extends AbstractAccessibleEntityResource<SystemEvent>
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/subjects")
-    public Response pageSubjectsForEvent(
-            @PathParam("id") String id,
-            @QueryParam(PAGE_PARAM) @DefaultValue("1") int page,
-            @QueryParam(COUNT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int count,
-            @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)
+    public Response pageSubjectsForEvent(@PathParam("id") String id)
             throws ItemNotFound, BadRequester, AccessDenied {
         Accessor user = getRequesterUserProfile();
         SystemEvent event = views.detail(id, user);
-        Query<AccessibleEntity> query = new Query<AccessibleEntity>(graph,
-                AccessibleEntity.class)
-                .setPage(page)
-                .setCount(count)
-                .orderBy(order).filter(filters)
-                .setStream(true);
         // NB: Taking a pragmatic decision here to only stream the first
         // level of the subject's tree.
-        return streamingPage(query.page(event.getSubjects(), user),
+        return streamingPage(getQuery(AccessibleEntity.class)
+                .setStream(true).page(event.getSubjects(), user),
                 subjectSerializer.withCache());
     }
 
@@ -304,8 +291,6 @@ public class EventResource extends AbstractAccessibleEntityResource<SystemEvent>
      * Lookup and page the history for a given item.
      *
      * @param id The event id
-     * @param page The history page offset
-     * @param count The max number of items
      * @return A list of events
      * @throws ItemNotFound
      * @throws BadRequester
@@ -313,29 +298,19 @@ public class EventResource extends AbstractAccessibleEntityResource<SystemEvent>
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/for/{id:.+}")
-    public Response pageEventsForItem(
-            @PathParam("id") String id,
-            @QueryParam(PAGE_PARAM) @DefaultValue("1") int page,
-            @QueryParam(COUNT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int count,
-            @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)
+    public Response pageEventsForItem(@PathParam("id") String id)
             throws ItemNotFound, BadRequester, AccessDenied {
         Accessor user = getRequesterUserProfile();
         AccessibleEntity item = new LoggingCrudViews<AccessibleEntity>(graph,
                 AccessibleEntity.class).detail(id, user);
-        Query<SystemEvent> query = new Query<SystemEvent>(graph, SystemEvent.class)
-                .setPage(page).setCount(count)
-                .orderBy(order).filter(filters)
-                .setStream(true);
-        return streamingPage(query.page(item.getHistory(), user));
+        return streamingPage(getQuery(cls).setStream(true)
+                .page(item.getHistory(), user));
     }
 
     /**
      * Lookup and page the versions for a given item.
      *
      * @param id The event id
-     * @param page The history page offset
-     * @param count The max number of items
      * @return A list of versions
      * @throws ItemNotFound
      * @throws BadRequester
@@ -343,23 +318,13 @@ public class EventResource extends AbstractAccessibleEntityResource<SystemEvent>
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/versions/{id:.+}")
-    public Response pageVersionsForItem(
-            @PathParam("id") String id,
-            @QueryParam(PAGE_PARAM) @DefaultValue("1") int page,
-            @QueryParam(COUNT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int count,
-            @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)
+    public Response pageVersionsForItem(@PathParam("id") String id)
             throws ItemNotFound, BadRequester, AccessDenied {
         Accessor user = getRequesterUserProfile();
         AccessibleEntity item = new LoggingCrudViews<AccessibleEntity>(graph,
                 AccessibleEntity.class).detail(id, user);
-        Query<Version> query = new Query<Version>(graph, Version.class)
-                .setPage(page)
-                .setCount(count)
-                .orderBy(order)
-                .filter(filters)
-                .setStream(true);
-        return streamingPage(query.page(item.getAllPriorVersions(), user));
+        return streamingPage(getQuery(Version.class).setStream(true)
+                .page(item.getAllPriorVersions(), user));
     }
 
     private int getRangeStart(int page, int count) {

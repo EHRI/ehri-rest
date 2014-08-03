@@ -68,21 +68,13 @@ public class PermissionsResource extends AbstractRestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/list/{id:.+}")
-    public Response listPermissionGrants(
-            @PathParam("id") String id,
-            @QueryParam(PAGE_PARAM) @DefaultValue("1") int page,
-            @QueryParam(COUNT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int count,
-            @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)
+    public Response listPermissionGrants(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound, BadRequester {
         graph.getBaseGraph().checkNotInTransaction();
         Accessor user = manager.getFrame(id, Accessor.class);
         Accessor accessor = getRequesterUserProfile();
-        Query<AccessibleEntity> query = new Query<AccessibleEntity>(graph,
-                AccessibleEntity.class).setPage(page).setCount(count)
-                .orderBy(order).filter(filters)
-                .setStream(isStreaming());
-        return streamingPage(query.page(user.getPermissionGrants(), accessor,
+        return streamingPage(getQuery(AccessibleEntity.class)
+                .page(user.getPermissionGrants(), accessor,
                 PermissionGrant.class));
     }
 
@@ -97,23 +89,14 @@ public class PermissionsResource extends AbstractRestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/listForItem/{id:.+}")
-    public Response listPermissionGrantsForItem(
-            @PathParam("id") String id,
-            @QueryParam(PAGE_PARAM) @DefaultValue("1") int page,
-            @QueryParam(COUNT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int count,
-            @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)
+    public Response listPermissionGrantsForItem(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound, BadRequester {
         graph.getBaseGraph().checkNotInTransaction();
         PermissionGrantTarget target = manager.getFrame(id,
                 PermissionGrantTarget.class);
         Accessor accessor = getRequesterUserProfile();
-        Query<AccessibleEntity> query = new Query<AccessibleEntity>(graph,
-                AccessibleEntity.class).setPage(page).setCount(count)
-                .orderBy(order).filter(filters)
-                .setStream(isStreaming());
-        return streamingPage(query.page(target.getPermissionGrants(), accessor,
-                PermissionGrant.class));
+        return streamingPage(getQuery(AccessibleEntity.class)
+                .page(target.getPermissionGrants(), accessor, PermissionGrant.class));
     }
 
     /**
@@ -127,21 +110,13 @@ public class PermissionsResource extends AbstractRestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/listForScope/{id:.+}")
-    public Response listPermissionGrantsForScope(
-            @PathParam("id") String id,
-            @QueryParam(PAGE_PARAM) @DefaultValue("1") int page,
-            @QueryParam(COUNT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int count,
-            @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)
+    public Response listPermissionGrantsForScope(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound, BadRequester {
         graph.getBaseGraph().checkNotInTransaction();
         PermissionScope scope = manager.getFrame(id, PermissionScope.class);
         Accessor accessor = getRequesterUserProfile();
-        Query<AccessibleEntity> query = new Query<AccessibleEntity>(graph,
-                AccessibleEntity.class).setPage(page).setCount(count)
-                .orderBy(order).filter(filters)
-                .setStream(isStreaming());
-        return streamingPage(query.page(scope.getPermissionGrants(), accessor,
+        return streamingPage(getQuery(AccessibleEntity.class)
+                .page(scope.getPermissionGrants(), accessor,
                 PermissionGrant.class));
     }
 

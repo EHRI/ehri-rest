@@ -8,7 +8,6 @@ import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.cvoc.AuthoritativeItem;
 import eu.ehri.project.models.cvoc.AuthoritativeSet;
 import eu.ehri.project.persistence.Bundle;
-import eu.ehri.project.views.Query;
 import eu.ehri.project.views.impl.LoggingCrudViews;
 import org.neo4j.graphdb.GraphDatabaseService;
 
@@ -45,54 +44,39 @@ public class AuthoritativeSetResource extends
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/list")
-    public Response listAuthoritativeSets(
-            @QueryParam(PAGE_PARAM) @DefaultValue("1") int page,
-            @QueryParam(COUNT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int count,
-            @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)
-            throws ItemNotFound, BadRequester {
-        return page(page, count, order, filters);
+    public Response listAuthoritativeSets() throws ItemNotFound, BadRequester {
+        return page();
     }
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/count")
-    public Response countAuthoritativeSets(@QueryParam(FILTER_PARAM) List<String> filters)
-            throws ItemNotFound, BadRequester {
-        return count(filters);
+    public Response countAuthoritativeSets() throws ItemNotFound, BadRequester {
+        return count();
     }
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/list")
     public Response listAuthoritativeSetHistoricalAgents(
-            @PathParam("id") String id,
-            @QueryParam(PAGE_PARAM) @DefaultValue("1") int page,
-            @QueryParam(COUNT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int count,
-            @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)
+            @PathParam("id") String id)
             throws ItemNotFound, BadRequester, AccessDenied {
         Accessor user = getRequesterUserProfile();
         AuthoritativeSet set = views.detail(id, user);
-        Query<AuthoritativeItem> query = new Query<AuthoritativeItem>(graph, AuthoritativeItem.class)
-                .setCount(count).setPage(page).orderBy(order)
-                .filter(filters);
-        return streamingPage(query.page(set.getAuthoritativeItems(), user));
+        return streamingPage(getQuery(AuthoritativeItem.class)
+                .page(set.getAuthoritativeItems(), user));
     }
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/count")
     public Response countAuthoritativeSetHistoricalAgents(
-            @PathParam("id") String id,
-            @QueryParam(FILTER_PARAM) List<String> filters)
+            @PathParam("id") String id)
             throws ItemNotFound, BadRequester, AccessDenied {
         Accessor user = getRequesterUserProfile();
         AuthoritativeSet set = views.detail(id, user);
-        Query<AuthoritativeItem> query = new Query<AuthoritativeItem>(graph, AuthoritativeItem.class)
-                .filter(filters);
-        return Response.ok((query.count(set.getAuthoritativeItems(), user))
-                .toString().getBytes()).build();
+        return numberResponse(getQuery(AuthoritativeItem.class)
+                .count(set.getAuthoritativeItems(), user));
     }
 
     @POST

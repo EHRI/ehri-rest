@@ -2,6 +2,7 @@ package eu.ehri.extension;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Lists;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.frames.FramedGraphFactory;
@@ -14,6 +15,7 @@ import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.SerializationError;
 import eu.ehri.project.models.UserProfile;
+import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Frame;
 import eu.ehri.project.persistence.Serializer;
@@ -129,6 +131,29 @@ public abstract class AbstractRestResource implements TxCheckedResource {
 
     public FramedGraph<TxCheckedNeo4jGraph> getGraph() {
         return graph;
+    }
+
+    protected List<String> getStringListQueryParam(String key) {
+        List<String> value = uriInfo.getQueryParameters().get(key);
+        return value == null ? Lists.<String>newArrayList() : value;
+    }
+
+    protected int getIntQueryParam(String key, int defaultValue) {
+        String value = uriInfo.getQueryParameters().getFirst(key);
+        try {
+            return Integer.valueOf(value);
+        } catch (Exception e) {
+            return defaultValue;
+        }
+    }
+
+    protected <T extends AccessibleEntity> Query<T> getQuery(Class<T> cls) {
+        return new Query<T>(graph, cls)
+                .setPage(getIntQueryParam(PAGE_PARAM, 1))
+                .setCount(getIntQueryParam(COUNT_PARAM, DEFAULT_LIST_LIMIT))
+                .filter(getStringListQueryParam(FILTER_PARAM))
+                .orderBy(getStringListQueryParam(SORT_PARAM))
+                .setStream(isStreaming());
     }
 
     /**

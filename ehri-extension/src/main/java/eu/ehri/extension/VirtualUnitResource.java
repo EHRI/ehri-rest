@@ -10,7 +10,6 @@ import eu.ehri.project.models.DocumentDescription;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.VirtualUnit;
 import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.views.Query;
 import eu.ehri.project.views.VirtualUnitViews;
 import org.neo4j.graphdb.GraphDatabaseService;
 
@@ -31,12 +30,10 @@ public final class VirtualUnitResource extends
     public static final String DESCRIPTION_ID = "description";
 
     private final VirtualUnitViews vuViews;
-    private final Query<VirtualUnit> virtualUnitQuery;
 
     public VirtualUnitResource(@Context GraphDatabaseService database) {
         super(database, VirtualUnit.class);
         vuViews = new VirtualUnitViews(graph);
-        virtualUnitQuery = new Query<VirtualUnit>(graph, cls);
     }
 
     @GET
@@ -50,21 +47,15 @@ public final class VirtualUnitResource extends
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/list")
-    public Response listVirtualUnits(
-            @QueryParam(PAGE_PARAM) @DefaultValue("1") int page,
-            @QueryParam(COUNT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int count,
-            @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)
-            throws ItemNotFound, BadRequester {
-        return page(page, count, order, filters);
+    public Response listVirtualUnits() throws ItemNotFound, BadRequester {
+        return page();
     }
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/count")
-    public Response countVirtualUnits(@QueryParam(FILTER_PARAM) List<String> filters)
-            throws ItemNotFound, BadRequester {
-        return count(filters);
+    public Response countVirtualUnits() throws ItemNotFound, BadRequester {
+        return count();
     }
 
     @GET
@@ -72,21 +63,13 @@ public final class VirtualUnitResource extends
     @Path("/{id:.+}/list")
     public Response listChildVirtualUnits(
             @PathParam("id") String id,
-            @QueryParam(PAGE_PARAM) @DefaultValue("1") int page,
-            @QueryParam(COUNT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int count,
-            @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters,
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all)
             throws ItemNotFound, BadRequester, PermissionDenied {
         VirtualUnit parent = manager.getFrame(id, VirtualUnit.class);
         Iterable<VirtualUnit> units = all
                 ? parent.getAllChildren()
                 : parent.getChildren();
-        Query<VirtualUnit> query = virtualUnitQuery
-                .setPage(page).setCount(count).filter(filters)
-                .orderBy(order).filter(filters)
-                .setStream(isStreaming());
-        return streamingPage(query.page(units, getRequesterUserProfile()));
+        return streamingPage(getQuery(cls).page(units, getRequesterUserProfile()));
     }
 
     @GET
@@ -94,15 +77,13 @@ public final class VirtualUnitResource extends
     @Path("/{id:.+}/count")
     public Response countChildVirtualUnits(
             @PathParam("id") String id,
-            @QueryParam(FILTER_PARAM) List<String> filters,
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all)
             throws ItemNotFound, BadRequester, PermissionDenied {
         VirtualUnit parent = manager.getFrame(id, VirtualUnit.class);
         Iterable<VirtualUnit> units = all
                 ? parent.getAllChildren()
                 : parent.getChildren();
-        Query<VirtualUnit> query = virtualUnitQuery.filter(filters);
-        return numberResponse(query.count(units, getRequesterUserProfile()));
+        return numberResponse(getQuery(cls).count(units, getRequesterUserProfile()));
     }
 
     @PUT
@@ -182,20 +163,12 @@ public final class VirtualUnitResource extends
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/forUser/{userId:.+}")
-    public Response listVirtualUnitsForUser(@PathParam("userId") String userId,
-            @QueryParam(PAGE_PARAM) @DefaultValue("1") int page,
-            @QueryParam(COUNT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int count,
-            @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)
+    public Response listVirtualUnitsForUser(@PathParam("userId") String userId)
             throws AccessDenied, ItemNotFound, BadRequester {
         Accessor accessor = manager.getFrame(userId, Accessor.class);
         Accessor currentUser = getRequesterUserProfile();
         Iterable<VirtualUnit> units = vuViews.getVirtualCollectionsForUser(accessor, currentUser);
-        Query.Page<VirtualUnit> list = virtualUnitQuery
-                .filter(filters).setPage(page).setCount(count).orderBy(order)
-                .setStream(isStreaming())
-                .page(units, currentUser);
-        return streamingPage(list);
+        return streamingPage(getQuery(cls).page(units, getRequesterUserProfile()));
     }
 
     /**

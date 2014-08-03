@@ -85,41 +85,21 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * @throws ItemNotFound
      * @throws BadRequester
      */
-    public Response page(Integer page, Integer count,
-            Iterable<String> order, Iterable<String> filters)
-            throws ItemNotFound, BadRequester {
+    public Response page() throws ItemNotFound, BadRequester {
         graph.getBaseGraph().checkNotInTransaction();
-        final Query<E> query = querier.setPage(page).setCount(count)
-                .orderBy(order).filter(filters)
-                .setStream(isStreaming());
-        return streamingPage(query.page(getRequesterUserProfile()));
-    }
-
-    /**
-     * List all instances of the 'entity' accessible to the given user.
-     *
-     * @return A streaming list
-     * @throws ItemNotFound
-     * @throws BadRequester
-     */
-    public Response page(Integer page, Integer count)
-            throws ItemNotFound, BadRequester {
-        final Query<E> query = querier.setPage(page).setCount(count)
-                .setStream(isStreaming());
-        return streamingPage(query.page(getRequesterUserProfile()));
+        return streamingPage(getQuery(cls).page(getRequesterUserProfile()));
     }
 
     /**
      * Count items accessible to a given user.
      *
-     * @param filters A set of query filters
      * @return Number of items.
      * @throws BadRequester
      */
-    public Response count(Iterable<String> filters) throws BadRequester {
-        Long count = querier.filter(filters).count(getRequesterUserProfile());
+    public Response count() throws BadRequester {
         graph.getBaseGraph().checkNotInTransaction();
-        return numberResponse(count);
+        return numberResponse(getQuery(cls)
+                .count(getRequesterUserProfile()));
     }
 
     /**
