@@ -57,7 +57,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
      */
     public static final String SORT_PARAM = "sort";
     public static final String FILTER_PARAM = "filter";
-    public static final String COUNT_PARAM = "count";
+    public static final String COUNT_PARAM = "limit";
     public static final String PAGE_PARAM = "page";
     public static final String ACCESSOR_PARAM = "accessibleTo";
     public static final String GROUP_PARAM = "group";
