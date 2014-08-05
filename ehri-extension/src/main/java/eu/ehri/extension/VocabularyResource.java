@@ -65,7 +65,7 @@ public class VocabularyResource extends
             throws ItemNotFound, BadRequester, AccessDenied {
         Accessor user = getRequesterUserProfile();
         Vocabulary vocabulary = views.detail(id, user);
-        return numberResponse(getQuery(cls).count(vocabulary.getConcepts(), user));
+        return numberResponse(getQuery(cls).count(vocabulary.getConcepts()));
     }
 
     @GET

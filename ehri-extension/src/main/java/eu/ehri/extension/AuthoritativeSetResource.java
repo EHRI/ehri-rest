@@ -76,7 +76,7 @@ public class AuthoritativeSetResource extends
         Accessor user = getRequesterUserProfile();
         AuthoritativeSet set = views.detail(id, user);
         return numberResponse(getQuery(AuthoritativeItem.class)
-                .count(set.getAuthoritativeItems(), user));
+                .count(set.getAuthoritativeItems()));
     }
 
     @POST

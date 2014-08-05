@@ -172,7 +172,7 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
         Accessor user = getRequesterUserProfile();
         Group group = views.detail(id, user);
         return numberResponse(getQuery(AccessibleEntity.class)
-                .count(group.getMembersAsEntities(), user));
+                .count(group.getMembersAsEntities()));
     }
 
     /**

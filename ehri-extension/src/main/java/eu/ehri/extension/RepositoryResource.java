@@ -77,7 +77,7 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
         Iterable<DocumentaryUnit> units = all
                 ? repository.getAllCollections()
                 : repository.getCollections();
-        return numberResponse(getQuery(DocumentaryUnit.class).count(units, user));
+        return numberResponse(getQuery(DocumentaryUnit.class).count(units));
     }
 
     @PUT

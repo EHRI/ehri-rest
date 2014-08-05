@@ -7,6 +7,7 @@ import eu.ehri.extension.EventResource;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.persistence.Bundle;
+import eu.ehri.project.views.EventViews;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Test;
@@ -132,12 +133,11 @@ public class SystemEventRestClientTest extends BaseRestClientTest {
         assertStatus(OK, response);
 
         // At present, the personalised event stream for the validUser user should
-        // be empty because she's not watching any items
-
+        // contain all the regular events.
         String user = getRegularUserProfileId();
         String personalisedEventUrl = "/" + Entities.SYSTEM_EVENT + "/forUser/" + user;
         List<Map<String, Object>> events = getItemList(personalisedEventUrl, user);
-        assertTrue(events.isEmpty());
+        assertFalse(events.isEmpty());
 
         // Now start watching item r1
         URI watchUrl = ehriUri(Entities.USER_PROFILE, user, WATCH, "r1");
@@ -151,7 +151,7 @@ public class SystemEventRestClientTest extends BaseRestClientTest {
         // Only get events for people we follow, excluding those
         // for items we watch...
         events = getItemList(personalisedEventUrl + "?" + EventResource.SHOW
-                + "=" + EventResource.SHOW_FOLLOWS, user);
+                + "=" + EventViews.ShowType.followed, user);
         assertEquals(0, events.size());
 
         // Now follow the other user...
@@ -160,7 +160,7 @@ public class SystemEventRestClientTest extends BaseRestClientTest {
 
         // We should get the event again...
         events = getItemList(personalisedEventUrl + "?" + EventResource.SHOW
-                + "=" + EventResource.SHOW_FOLLOWS, user);
+                + "=" + EventViews.ShowType.followed, user);
         assertEquals(1, events.size());
     }
 }

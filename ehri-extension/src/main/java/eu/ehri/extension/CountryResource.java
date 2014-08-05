@@ -76,8 +76,7 @@ public class CountryResource extends
         Country country = views.detail(id, user);
         Query<Repository> query = new Query<Repository>(graph, Repository.class)
                 .filter(filters);
-        return Response.ok((query.count(country.getRepositories(), user))
-                .toString().getBytes()).build();
+        return numberResponse(query.count(country.getRepositories()));
     }
 
     @POST

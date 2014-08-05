@@ -448,8 +448,8 @@ public final class ActionManager {
         // NB: Fetching all these props and relations is potentially quite
         // costly, so we want to short-circuit and return early is possible,
         // starting with the least-costly to fetch attributes.
-        String eventType1 = event1.getEventType();
-        String eventType2 = event2.getEventType();
+        EventTypes eventType1 = event1.getEventType();
+        EventTypes eventType2 = event2.getEventType();
         if (eventType1 != null && eventType2 != null && !eventType1.equals(eventType2)) {
             return false;
         }

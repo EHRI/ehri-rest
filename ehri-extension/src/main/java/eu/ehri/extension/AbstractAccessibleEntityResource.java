@@ -98,8 +98,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      */
     public Response count() throws BadRequester {
         graph.getBaseGraph().checkNotInTransaction();
-        return numberResponse(getQuery(cls)
-                .count(getRequesterUserProfile()));
+        return numberResponse(getQuery(cls).count());
     }
 
     /**

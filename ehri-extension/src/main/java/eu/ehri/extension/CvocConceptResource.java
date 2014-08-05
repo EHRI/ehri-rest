@@ -107,7 +107,7 @@ public class CvocConceptResource extends
         Accessor user = getRequesterUserProfile();
         Concept concept = views.detail(id, user);
         return numberResponse(getQuery(Concept.class)
-                .count(concept.getNarrowerConcepts(), user));
+                .count(concept.getNarrowerConcepts()));
     }
 
     /**

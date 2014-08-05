@@ -268,7 +268,7 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
             throws ItemNotFound, BadRequester {
         Accessor accessor = getRequesterUserProfile();
         UserProfile user = views.detail(userId, accessor);
-        return streamingList(getQuery(Watchable.class)
+        return streamingPage(getQuery(Watchable.class)
                 .page(user.getWatching(), accessor));
     }
 

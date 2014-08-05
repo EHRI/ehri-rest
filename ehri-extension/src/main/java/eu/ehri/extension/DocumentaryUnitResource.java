@@ -6,7 +6,6 @@ import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistence.Bundle;
-import eu.ehri.project.views.Query;
 import eu.ehri.project.views.impl.LoggingCrudViews;
 import org.neo4j.graphdb.GraphDatabaseService;
 
@@ -75,8 +74,7 @@ public class DocumentaryUnitResource extends
         Iterable<DocumentaryUnit> units = all
                 ? parent.getAllChildren()
                 : parent.getChildren();
-        return Response.ok((getQuery(cls).count(units,
-                getRequesterUserProfile())).toString().getBytes()).build();
+        return numberResponse(getQuery(cls).count(units));
     }
 
     @PUT

@@ -44,7 +44,7 @@ public enum SystemScope implements PermissionScope {
         // TODO: Determine if there's a better approach to this.
         // Since PermissionScope can be implemented by several
         // types of node, comparing them by vertex is the only
-        // reliable approach. Really, this operation should
+        // reliable approach. ReRally, this operation should
         // throw an UnsupportedOperationException().
         return null;
     }

@@ -1,20 +1,16 @@
 package eu.ehri.extension;
 
-import com.google.common.collect.Lists;
-import com.tinkerpop.blueprints.Vertex;
-import com.tinkerpop.gremlin.java.GremlinPipeline;
-import com.tinkerpop.pipes.PipeFunction;
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.definitions.Entities;
+import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.exceptions.AccessDenied;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.*;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.models.events.Version;
-import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.persistence.Serializer;
-import eu.ehri.project.views.Query;
+import eu.ehri.project.views.EventViews;
 import eu.ehri.project.views.impl.LoggingCrudViews;
 import org.neo4j.graphdb.GraphDatabaseService;
 
@@ -38,10 +34,7 @@ public class EventResource extends AbstractAccessibleEntityResource<SystemEvent>
     public final static String USER_PARAM = "user";
     public final static String FROM_PARAM = "from";
     public final static String TO_PARAM = "to";
-    public final static String SHOW = "show"; // all, watched, follows
-    public final static String SHOW_ALL = "all";
-    public final static String SHOW_WATCHED = "watched";
-    public final static String SHOW_FOLLOWS = "follows";
+    public final static String SHOW = "show"; // watched, follows
 
 
     private final Serializer subjectSerializer;
@@ -72,33 +65,29 @@ public class EventResource extends AbstractAccessibleEntityResource<SystemEvent>
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/list")
     public Response listEvents(
-            @QueryParam(PAGE_PARAM) @DefaultValue("1") int page,
-            @QueryParam(COUNT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int count,
-            final @QueryParam(EVENT_TYPE_PARAM) List<String> eventTypes,
+            final @QueryParam(EVENT_TYPE_PARAM) List<EventTypes> eventTypes,
             final @QueryParam(ITEM_TYPE_PARAM) List<String> itemTypes,
             final @QueryParam(ITEM_ID_PARAM) List<String> itemIds,
             final @QueryParam(USER_PARAM) List<String> users,
             final @QueryParam(FROM_PARAM) String from,
             final @QueryParam(TO_PARAM) String to)
             throws ItemNotFound, BadRequester {
-        Query<SystemEvent> query = new Query<SystemEvent>(graph, SystemEvent.class);
-        ActionManager am = new ActionManager(graph);
 
-        Iterable<SystemEvent> list = query
-                .page(am.getLatestGlobalEvents(), getRequesterUserProfile());
+        Accessor user = getRequesterUserProfile();
+        EventViews eventViews = new EventViews(graph)
+                .withEventTypes(eventTypes.toArray(new EventTypes[eventTypes.size()]))
+                .withEntityTypes(itemTypes.toArray(new String[itemTypes.size()]))
+                .withIds(itemIds.toArray(new String[itemIds.size()]))
+                .withUsers(users.toArray(new String[users.size()]))
+                .from(from)
+                .to(to);
 
-        // Add optional filters for event type, item type, and user...
-        GremlinPipeline<SystemEvent,SystemEvent> pipe = new GremlinPipeline<SystemEvent, SystemEvent>(
-                list);
-
-        pipe = filterEvents(pipe, eventTypes, itemTypes, users, from, to, itemIds);
-
-        return streamingList(pipe.range(page <= 1 ? 0 : ((page - 1) * count), ((page - 1) * count) + count));
+        return streamingList(eventViews.list(getQuery(cls), user));
     }
 
     /**
      * List actions.
-     * 
+     *
      * @throws ItemNotFound
      * @throws BadRequester
      */
@@ -106,163 +95,28 @@ public class EventResource extends AbstractAccessibleEntityResource<SystemEvent>
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/forUser/{userId:.+}")
     public Response listEventsForUser(
-            @QueryParam(PAGE_PARAM) @DefaultValue("1") int page,
-            @QueryParam(COUNT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int count,
-            final @QueryParam(EVENT_TYPE_PARAM) List<String> eventTypes,
+            final @PathParam("userId") String userId,
+            final @QueryParam(EVENT_TYPE_PARAM) List<EventTypes> eventTypes,
             final @QueryParam(ITEM_TYPE_PARAM) List<String> itemTypes,
             final @QueryParam(ITEM_ID_PARAM) List<String> itemIds,
             final @QueryParam(USER_PARAM) List<String> users,
             final @QueryParam(FROM_PARAM) String from,
             final @QueryParam(TO_PARAM) String to,
-            final @QueryParam(SHOW) @DefaultValue(SHOW_ALL) String show)
+            final @QueryParam(SHOW) List<EventViews.ShowType> show)
             throws ItemNotFound, BadRequester {
 
-        UserProfile user = getCurrentUser();
-        Query<SystemEvent> query = new Query<SystemEvent>(graph, SystemEvent.class)
-                .setStream(true);
-        ActionManager am = new ActionManager(graph);
+        Accessor user = getRequesterUserProfile();
+        UserProfile asUser = manager.getFrame(userId, UserProfile.class);
+        EventViews eventViews = new EventViews(graph)
+                .withShowType(show.toArray(new EventViews.ShowType[show.size()]))
+                .withEventTypes(eventTypes.toArray(new EventTypes[eventTypes.size()]))
+                .withEntityTypes(itemTypes.toArray(new String[itemTypes.size()]))
+                .withIds(itemIds.toArray(new String[itemIds.size()]))
+                .withUsers(users.toArray(new String[users.size()]))
+                .from(from)
+                .to(to);
 
-        final PipeFunction<Vertex, Boolean> aclFilterTest = aclManager.getAclFilterFunction(user);
-
-        // Set IDs to items this user is watching...
-        final List<String> watching = Lists.newArrayList();
-        for (Watchable item : user.getWatching()) {
-            watching.add(item.getId());
-        }
-
-        final List<String> following = Lists.newArrayList();
-        for (UserProfile other : user.getFollowing()) {
-            following.add(other.getId());
-        }
-
-        Iterable<SystemEvent> list = query
-                .page(am.getLatestGlobalEvents(), getRequesterUserProfile());
-
-        // Add optional filters for event type, item type, and user...
-        GremlinPipeline<SystemEvent,SystemEvent> pipe = new GremlinPipeline<SystemEvent, SystemEvent>(
-                list);
-
-        // Add additional generic filters
-        pipe = filterEvents(pipe, eventTypes, itemTypes, users, from, to, itemIds);
-
-        // Filter out those we're not watching, or are actioned
-        // by users we're not following...
-        pipe = pipe.filter(new PipeFunction<SystemEvent, Boolean>() {
-            @Override
-            public Boolean compute(SystemEvent event) {
-                if (show.equals(SHOW_ALL) || show.equals(SHOW_WATCHED)) {
-                    for (AccessibleEntity e : event.getSubjects()) {
-                        if (watching.contains(e.getId())) {
-                            return true;
-                        }
-                    }
-                }
-                if (show.equals(SHOW_ALL) || show.equals(SHOW_FOLLOWS)) {
-                    Actioner actioner = event.getActioner();
-                    if (actioner != null && following.contains(actioner.getId())) {
-                        return true;
-                    }
-                }
-                return false;
-            }
-        });
-
-        // Filter items accessible to this user... hide the
-        // event if any subjects or the scope are inaccessible
-        // to the user.
-        pipe = pipe.filter(new PipeFunction<SystemEvent, Boolean>() {
-            @Override
-            public Boolean compute(SystemEvent event) {
-                Frame eventScope = event.getEventScope();
-                if (eventScope != null && !aclFilterTest.compute(eventScope.asVertex())) {
-                    return false;
-                }
-                for (AccessibleEntity e : event.getSubjects()) {
-                    if (!aclFilterTest.compute(e.asVertex())) {
-                        return false;
-                    }
-                }
-                return true;
-            }
-        });
-
-        return streamingList(pipe.range(getRangeStart(page, count), getRangeEnd(page, count)));
-    }
-
-    private GremlinPipeline<SystemEvent, SystemEvent> filterEvents(
-            GremlinPipeline<SystemEvent, SystemEvent> pipe,
-            final List<String> eventTypes, final List<String> itemTypes,
-            final List<String> users, final String from, final String to,
-            final List<String> itemIds) {
-
-        if (!eventTypes.isEmpty()) {
-            pipe = pipe.filter(new PipeFunction<SystemEvent, Boolean>() {
-                @Override
-                public Boolean compute(SystemEvent event) {
-                    return eventTypes.contains(event.getEventType());
-                }
-            });
-        }
-
-        if (!itemIds.isEmpty()) {
-            pipe = pipe.filter(new PipeFunction<SystemEvent, Boolean>() {
-                @Override
-                public Boolean compute(SystemEvent event) {
-                    for (AccessibleEntity e : event.getSubjects()) {
-                        if (itemIds.contains(e.getId())) {
-                            return true;
-                        }
-                    }
-                    return false;
-                }
-            });
-        }
-
-        if (!itemTypes.isEmpty()) {
-            pipe = pipe.filter(new PipeFunction<SystemEvent, Boolean>() {
-                @Override
-                public Boolean compute(SystemEvent event) {
-                    for (AccessibleEntity e : event.getSubjects()) {
-                        if (itemTypes.contains(e.getType())) {
-                            return true;
-                        }
-                    }
-                    return false;
-                }
-            });
-        }
-
-        if (!users.isEmpty()) {
-            pipe = pipe.filter(new PipeFunction<SystemEvent, Boolean>() {
-                @Override
-                public Boolean compute(SystemEvent event) {
-                    Actioner actioner = event.getActioner();
-                    return actioner != null && users.contains(actioner.getId());
-                }
-            });
-        }
-
-        // Add from/to filters (depends on timestamp strings comparing the right way!
-        if (from != null) {
-            pipe = pipe.filter(new PipeFunction<SystemEvent, Boolean>() {
-                @Override
-                public Boolean compute(SystemEvent event) {
-                    String timestamp = event.getTimestamp();
-                    return from.compareTo(timestamp) <= 0;
-                }
-            });
-        }
-
-        if (to != null) {
-            pipe = pipe.filter(new PipeFunction<SystemEvent, Boolean>() {
-                @Override
-                public Boolean compute(SystemEvent event) {
-                    String timestamp = event.getTimestamp();
-                    return to.compareTo(timestamp) >= 0;
-                }
-            });
-        }
-        return pipe;
+        return streamingList(eventViews.listAsUser(getQuery(cls), asUser, user));
     }
 
     /**
@@ -325,13 +179,5 @@ public class EventResource extends AbstractAccessibleEntityResource<SystemEvent>
                 AccessibleEntity.class).detail(id, user);
         return streamingPage(getQuery(Version.class).setStream(true)
                 .page(item.getAllPriorVersions(), user));
-    }
-
-    private int getRangeStart(int page, int count) {
-        return page <= 1 ? 0 : (page - 1) * count;
-    }
-
-    private int getRangeEnd(int page, int count) {
-        return getRangeStart(page, count) + count;
     }
 }

@@ -24,8 +24,8 @@ public class QueryUtils {
     /**
      * Parse a list of string filter specifications.
      *
-     * @param filterList
-     * @return
+     * @param filterList A list of filter spec strings
+     * @return A map of filter specs
      */
     static SortedMap<String, Pair<Query.FilterPredicate, String>> parseFilters(
             Iterable<String> filterList) {
@@ -58,8 +58,8 @@ public class QueryUtils {
     /**
      * Parse a list of sort specifications.
      *
-     * @param orderSpecs
-     * @return
+     * @param orderSpecs A list of order spec strings
+     * @return A map of order specs
      */
     static SortedMap<String, Query.Sort> parseOrderSpecs(Iterable<String> orderSpecs) {
         ImmutableSortedMap.Builder<String, Query.Sort> builder = new ImmutableSortedMap.Builder<String, Query.Sort>(
@@ -112,8 +112,8 @@ public class QueryUtils {
      *
      *  ->relation1->relation2.propertyName
      *
-     * @param input
-     * @return
+     * @param input A traversal path spec
+     * @return A traversal path
      */
     public static Optional<TraversalPath> getTraversalPath(String input) {
 

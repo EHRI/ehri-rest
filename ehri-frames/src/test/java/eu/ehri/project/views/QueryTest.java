@@ -15,6 +15,7 @@ import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.test.AbstractFixtureTest;
 import eu.ehri.project.views.Query.Page;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.List;
@@ -23,13 +24,21 @@ import static org.junit.Assert.*;
 
 public class QueryTest extends AbstractFixtureTest {
 
+    private AclManager aclManager;
+
+    @Before
+    public void setUp() throws Exception {
+        super.setUp();
+        aclManager = new AclManager(graph);
+    }
+
     @Test
     public void testAdminCanListEverything() throws IndexNotFoundException {
         Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
                 DocumentaryUnit.class);
 
         // Check we're not admin
-        assertTrue(new AclManager(graph).belongsToAdmin(validUser));
+        assertTrue(aclManager.belongsToAdmin(validUser));
 
         // Get the total number of DocumentaryUnits the old-fashioned way
         Iterable<Vertex> allDocs = manager
@@ -50,6 +59,14 @@ public class QueryTest extends AbstractFixtureTest {
         list = toList(query.setCount(2).setPage(1).page(validUser));
         assertFalse(list.isEmpty());
         assertEquals(2, list.size());
+
+        // Test negative count (all items)
+        list = toList(query.setCount(-1).setPage(1).page(validUser));
+        assertFalse(list.isEmpty());
+        assertEquals(4, list.size());
+
+        list = toList(query.setCount(0).setPage(1).page(validUser));
+        assertEquals(0, list.size());
     }
 
     @Test
@@ -58,7 +75,7 @@ public class QueryTest extends AbstractFixtureTest {
                 DocumentaryUnit.class);
 
         // Check we're not admin
-        assertTrue(new AclManager(graph).belongsToAdmin(validUser));
+        assertTrue(aclManager.belongsToAdmin(validUser));
 
         // Get the total number of DocumentaryUnits the old-fashioned way
         Iterable<Vertex> allDocs = manager
@@ -73,6 +90,12 @@ public class QueryTest extends AbstractFixtureTest {
     }
 
     @Test
+    public void testCount() throws Exception {
+        Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph, DocumentaryUnit.class);
+        assertEquals(4, query.count());
+    }
+
+    @Test
     public void testUserCannotListPrivate() throws IndexNotFoundException,
             ItemNotFound {
         Query<DocumentaryUnit> query = new Query<DocumentaryUnit>(graph,
@@ -82,7 +105,7 @@ public class QueryTest extends AbstractFixtureTest {
         Accessor accessor = manager.getFrame("reto", Accessor.class);
         DocumentaryUnit cantRead = manager
                 .getFrame("c1", DocumentaryUnit.class);
-        assertFalse(new AclManager(graph).belongsToAdmin(accessor));
+        assertFalse(aclManager.belongsToAdmin(accessor));
 
         List<DocumentaryUnit> list = toList(query.page(accessor));
         assertFalse(list.isEmpty());
@@ -192,13 +215,16 @@ public class QueryTest extends AbstractFixtureTest {
         assertEquals("c2", list.get(1).getIdentifier());
 
         // Greater than or equal... should get two items (c3,c4)
-        list = toList(query.filter(Ontology.IDENTIFIER_KEY,
+        Query<DocumentaryUnit> fQuery = query.filter(Ontology.IDENTIFIER_KEY,
                 Query.FilterPredicate.GTE, "c3")
-                .orderBy(Ontology.IDENTIFIER_KEY, Query.Sort.ASC)
+                .orderBy(Ontology.IDENTIFIER_KEY, Query.Sort.ASC);
+        list = toList(fQuery
                 .page(EntityClass.DOCUMENTARY_UNIT, validUser));
         assertEquals(2, list.size());
         assertEquals("c3", list.get(0).getIdentifier());
         assertEquals("c4", list.get(1).getIdentifier());
+        assertEquals(4, toList(fQuery.clearFilters()
+                .page(EntityClass.DOCUMENTARY_UNIT, validUser)).size());
 
     }
 
@@ -254,13 +280,20 @@ public class QueryTest extends AbstractFixtureTest {
         assertFalse(page.getTotal() == 0);
         assertEquals("c1", toList(page.getIterable()).get(0).getIdentifier());
 
-        page = query.orderBy(Ontology.IDENTIFIER_KEY, Query.Sort.DESC)
+        Query<DocumentaryUnit> orderQuery = query
+                .orderBy(Ontology.IDENTIFIER_KEY, Query.Sort.DESC);
+        page = orderQuery
                 .page(EntityClass.DOCUMENTARY_UNIT, validUser);
         assertFalse(page.getTotal() == 0);
 
         // NB: This will break if other collections are added to the
         // fixtures. Adjust as necessary.
         assertEquals("c4", toList(page.getIterable()).get(0).getIdentifier());
+        assertEquals("c1", toList(orderQuery
+                .clearOrdering()
+                .defaultOrderBy(Ontology.IDENTIFIER_KEY, Query.Sort.ASC)
+                .page(EntityClass.DOCUMENTARY_UNIT, validUser)
+                .getIterable()).get(0).getIdentifier());
     }
 
     @Test

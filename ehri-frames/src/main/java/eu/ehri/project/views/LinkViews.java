@@ -26,7 +26,7 @@ import java.util.List;
  *
  * @author mike
  */
-public final class LinkViews {
+public final class LinkViews implements Scoped<LinkViews> {
 
     private final FramedGraph<?> graph;
     private final ViewHelper helper;
@@ -35,8 +35,8 @@ public final class LinkViews {
     /**
      * Scoped constructor.
      *
-     * @param graph
-     * @param scope
+     * @param graph The framed graph
+     * @param scope The permission scope
      */
     public LinkViews(FramedGraph<?> graph, PermissionScope scope) {
         this.graph = graph;
@@ -48,7 +48,7 @@ public final class LinkViews {
     /**
      * Constructor with system scope.
      *
-     * @param graph
+     * @param graph The framed graph
      */
     public LinkViews(FramedGraph<?> graph) {
         this(graph, SystemScope.getInstance());
@@ -60,8 +60,8 @@ public final class LinkViews {
      * @param targetId1 the identifier of a AccessibleEntity target of this Annotation
      * @param targetId2 the identifier of a Annotator source of this Annotation
      * @param bundle    the annotation itself
-     * @param user
-     * @return
+     * @param user the current user
+     * @return A new link
      * @throws eu.ehri.project.exceptions.ItemNotFound
      *
      * @throws eu.ehri.project.exceptions.ValidationError
@@ -98,8 +98,8 @@ public final class LinkViews {
      * @param targetId1       the identifier of a AccessibleEntity target of this Annotation
      * @param targetId2 the identifier of a Annotator source of this Annotation
      * @param bundle   the annotation itself
-     * @param user
-     * @return
+     * @param user The current user
+     * @return A new link
      * @throws ItemNotFound
      * @throws ValidationError
      * @throws PermissionDenied
@@ -128,5 +128,10 @@ public final class LinkViews {
                 t1, graph.frame(user.asVertex(), Actioner.class), EventTypes.link);
         eventContext.addSubjects(link).addSubjects(t2).addSubjects(rel);
         return link;
+    }
+
+    @Override
+    public LinkViews withScope(PermissionScope scope) {
+        return new LinkViews(graph, scope);
     }
 }

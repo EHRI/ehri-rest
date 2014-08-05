@@ -83,7 +83,7 @@ public final class VirtualUnitResource extends
         Iterable<VirtualUnit> units = all
                 ? parent.getAllChildren()
                 : parent.getChildren();
-        return numberResponse(getQuery(cls).count(units, getRequesterUserProfile()));
+        return numberResponse(getQuery(cls).count(units));
     }
 
     @PUT
