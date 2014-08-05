@@ -22,6 +22,7 @@ import javax.ws.rs.core.StreamingOutput;
 import com.google.common.collect.Sets;
 import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.UserProfile;
+import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.views.AclViews;
 import org.neo4j.graphdb.GraphDatabaseService;
 
@@ -90,7 +91,7 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    public Response createGroup(String json,
+    public Response createGroup(Bundle bundle,
             @QueryParam(ACCESSOR_PARAM) List<String> accessors,
             @QueryParam(MEMBER_PARAM) List<String> members)
             throws PermissionDenied, ValidationError, IntegrityError,
@@ -101,7 +102,7 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
             for (String member : members) {
                 groupMembers.add(manager.getFrame(member, Accessor.class));
             }
-            return create(json, accessors, new Handler<Group>() {
+            return create(bundle, accessors, new Handler<Group>() {
                 @Override
                 public void process(Group group) throws PermissionDenied {
                     for (Accessor member: groupMembers) {
@@ -119,10 +120,10 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    public Response updateGroup(String json) throws AccessDenied, PermissionDenied,
+    public Response updateGroup(Bundle bundle) throws AccessDenied, PermissionDenied,
             IntegrityError, ValidationError, DeserializationError,
             ItemNotFound, BadRequester {
-        return update(json);
+        return update(bundle);
     }
 
     @PUT

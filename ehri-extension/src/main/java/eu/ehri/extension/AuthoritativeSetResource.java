@@ -126,21 +126,21 @@ public class AuthoritativeSetResource extends
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    public Response createAuthoritativeSet(String json,
+    public Response createAuthoritativeSet(Bundle bundle,
             @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, ItemNotFound, BadRequester {
-        return create(json, accessors);
+        return create(bundle, accessors);
     }
 
     // Note: json contains id
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    public Response updateAuthoritativeSet(String json) throws PermissionDenied,
+    public Response updateAuthoritativeSet(Bundle bundle) throws PermissionDenied,
             IntegrityError, ValidationError, DeserializationError,
             ItemNotFound, BadRequester {
-        return update(json);
+        return update(bundle);
     }
 
     @PUT

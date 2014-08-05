@@ -147,10 +147,10 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    public Response updateRepository(String json) throws PermissionDenied,
+    public Response updateRepository(Bundle bundle) throws PermissionDenied,
             IntegrityError, ValidationError, DeserializationError,
             ItemNotFound, BadRequester {
-        return update(json);
+        return update(bundle);
     }
 
     @PUT

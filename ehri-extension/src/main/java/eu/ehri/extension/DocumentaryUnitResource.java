@@ -142,10 +142,10 @@ public class DocumentaryUnitResource extends
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    public Response updateDocumentaryUnit(String json) throws PermissionDenied,
+    public Response updateDocumentaryUnit(Bundle bundle) throws PermissionDenied,
             IntegrityError, ValidationError, DeserializationError,
             ItemNotFound, BadRequester {
-        return update(json);
+        return update(bundle);
     }
 
     @PUT

@@ -87,7 +87,7 @@ public class LinkResource extends
      *
      * @param targetId  The link target
      * @param sourceId  The link source
-     * @param json      The link body data
+     * @param bundle      The link body data
      * @param bodies    optional list of entities to provide the body
      * @param accessors The IDs of accessors who can see this link
      * @return The created link item
@@ -104,7 +104,7 @@ public class LinkResource extends
     @Path("{targetId:.+}/{sourceId:.+}")
     public Response createLinkFor(
             @PathParam("targetId") String targetId,
-            @PathParam("sourceId") String sourceId, String json,
+            @PathParam("sourceId") String sourceId, Bundle bundle,
             @QueryParam(BODY_PARAM) List<String> bodies,
             @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws PermissionDenied, ValidationError, DeserializationError,
@@ -112,7 +112,7 @@ public class LinkResource extends
         Accessor user = getRequesterUserProfile();
         try {
             Link link = linkViews.createLink(targetId,
-                    sourceId, bodies, Bundle.fromString(json), user);
+                    sourceId, bodies, bundle, user);
             aclManager.setAccessors(link,
                     getAccessors(accessors, user));
             graph.getBaseGraph().commit();

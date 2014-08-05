@@ -156,13 +156,13 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
     /**
      * Create an instance of the 'entity' in the database
      *
-     * @param json        The json representation of the entity to create (no vertex
-     *                    'id' fields)
-     * @param accessorIds List of accessors who can initially view this item
-     * @param handler     A callback function that allows additional operations
-     *                    to be run on the created object after it is initialised
-     *                    but before the response is generated. This is useful for adding
-     *                    relationships to the new item.
+     * @param entityBundle A bundle of item data
+     *                     'id' fields)
+     * @param accessorIds  List of accessors who can initially view this item
+     * @param handler      A callback function that allows additional operations
+     *                     to be run on the created object after it is initialised
+     *                     but before the response is generated. This is useful for adding
+     *                     relationships to the new item.
      * @return The response of the create request, the 'location' will contain
      *         the url of the newly created instance.
      * @throws PermissionDenied
@@ -171,12 +171,11 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * @throws DeserializationError
      * @throws BadRequester
      */
-    public Response create(String json, List<String> accessorIds, Handler<E> handler)
+    public Response create(Bundle entityBundle, List<String> accessorIds, Handler<E> handler)
             throws PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, BadRequester {
         graph.getBaseGraph().checkNotInTransaction();
         Accessor user = getRequesterUserProfile();
-        Bundle entityBundle = Bundle.fromString(json);
         try {
             E entity = views.create(entityBundle, user, getLogMessage());
             aclViews.setAccessors(entity, getAccessors(accessorIds, user), user);
@@ -194,10 +193,10 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
         }
     }
 
-    public Response create(String json, List<String> accessorIds)
+    public Response create(Bundle entityBundle, List<String> accessorIds)
             throws PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, BadRequester {
-        return create(json, accessorIds, noOpHandler);
+        return create(entityBundle, accessorIds, noOpHandler);
     }
 
     /**
@@ -226,7 +225,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
     /**
      * Update (change) an instance of the 'entity' in the database.
      *
-     * @param json The json
+     * @param entityBundle The bundle
      * @return The response of the update request
      * @throws ItemNotFound
      * @throws PermissionDenied
@@ -235,12 +234,11 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * @throws DeserializationError
      * @throws BadRequester
      */
-    public Response update(String json) throws PermissionDenied,
+    public Response update(Bundle entityBundle) throws PermissionDenied,
             IntegrityError, ValidationError, DeserializationError,
             BadRequester, ItemNotFound {
         graph.getBaseGraph().checkNotInTransaction();
         try {
-            Bundle entityBundle = Bundle.fromString(json);
             Mutation<E> update = views
                     .update(entityBundle, getRequesterUserProfile(), getLogMessage());
             graph.getBaseGraph().commit();
@@ -276,10 +274,6 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
     public Response update(String id, String json) throws AccessDenied, PermissionDenied,
             IntegrityError, ValidationError, DeserializationError,
             ItemNotFound, BadRequester {
-        // FIXME: This is nasty because it searches for an item with the
-        // specified key/value and constructs a new bundle containing the
-        // item's graph id, which requires an extra
-        // serialization/deserialization.
         try {
             E entity = views.detail(id, getRequesterUserProfile());
             Bundle rawBundle = Bundle.fromString(json);
@@ -290,7 +284,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
             }
             Bundle entityBundle = new Bundle(entity.getId(), getEntityType(),
                     rawBundle.getData(), rawBundle.getRelations());
-            return update(entityBundle.toJson());
+            return update(entityBundle);
         } catch (SerializationError serializationError) {
             graph.getBaseGraph().rollback();
             throw new RuntimeException(serializationError);

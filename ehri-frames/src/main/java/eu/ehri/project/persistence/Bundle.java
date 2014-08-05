@@ -9,6 +9,7 @@ import eu.ehri.project.models.idgen.IdGenerator;
 import eu.ehri.project.models.utils.ClassUtils;
 import org.w3c.dom.Document;
 
+import java.io.InputStream;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -532,6 +533,17 @@ public final class Bundle {
      */
     public static Bundle fromString(String json) throws DeserializationError {
         return DataConverter.jsonToBundle(json);
+    }
+
+    /**
+     * Create a bundle from a stream containing JSON data..
+     *
+     * @param stream A JSON stream
+     * @return A bundle
+     * @throws DeserializationError
+     */
+    public static Bundle fromStream(InputStream stream) throws DeserializationError {
+        return DataConverter.streamToBundle(stream);
     }
 
     @Override
