@@ -8,7 +8,6 @@ import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
-import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.IntegrityError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.SerializationError;
@@ -153,40 +152,6 @@ public final class BundleDAO {
         }
     }
     
-    /**
-<<<<<<< HEAD
-     * 
-     * @param graphid, the identifier of this bundle in the graph __ID__
-     * @return returns true if the identifier of this bundle already exists in the graph, false otherwise
-     * this obviously does not check the existence of dependent relationships (like descriptions etc)
-     */
-    public boolean logicalUnitExists(String graphid){
-        return manager.exists(graphid);
-    }
-    /**
-     * 
-     * @param objectId, the objectIdentifier, so this is NOT the graphid
-     * @return 
-     */
-    private Vertex getVertexByIdentifier(String objectId) {
-        try{
-            Iterable<Vertex> docs = graph.getVertices(Ontology.IDENTIFIER_KEY, objectId);
-            return docs.iterator().next();
-        }catch (java.util.NoSuchElementException e){
-            return null;
-        }
-    }
-    /**
-     * 
-     * @param graphid the identifier of this bundle in the graph __ID__
-     * @return returns the Bundle for this id, with all dependent vertices
-     * @throws SerializationError
-     * @throws ItemNotFound 
-     */
-    public Bundle getBundle(String graphid) throws SerializationError, ItemNotFound{
-        return serializer.vertexFrameToBundle(manager.getVertex(graphid));
-    }
-
     /**
      * Insert a bundle and save its dependent items.
      *
