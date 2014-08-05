@@ -55,8 +55,8 @@ public class ServerRunner {
     }
 
     public void start() throws IOException {
-        sunLogger.setLevel(logLevel);
-        neoLogger.setLevel(logLevel);
+//        sunLogger.setLevel(logLevel);
+//        neoLogger.setLevel(logLevel);
         neoServer = ServerBuilder.server()
                 .onPort(port)
                 .withThirdPartyJaxRsPackage(jaxRxPackage, "/" + mountPoint)

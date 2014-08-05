@@ -3,10 +3,7 @@ package eu.ehri.extension.test;
 import com.sun.jersey.api.client.ClientResponse;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
-import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.persistence.Bundle;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -83,15 +80,6 @@ public class HistoricalAgentRestClientTest extends BaseRestClientTest {
                 .post(ClientResponse.class);
 
         assertStatus(BAD_REQUEST, response);
-
-        // Check the JSON gives use the correct error
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode rootNode = mapper.readValue(response.getEntity(String.class),
-                JsonNode.class);
-        JsonNode errValue = rootNode.path("error");
-        assertFalse(errValue.isMissingNode());
-        assertEquals(DeserializationError.class.getSimpleName(),
-                errValue.asText());
     }
 
     @Test

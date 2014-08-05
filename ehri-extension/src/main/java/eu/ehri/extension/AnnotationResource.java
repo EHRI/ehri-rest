@@ -63,7 +63,7 @@ public class AnnotationResource extends
      * Create an annotation for a particular item.
      *
      * @param id        The ID of the item being annotation
-     * @param json      The JSON representation of the annotation
+     * @param bundle      The JSON representation of the annotation
      * @param accessors User IDs who can access the annotation
      * @return The annotation
      * @throws PermissionDenied
@@ -78,14 +78,14 @@ public class AnnotationResource extends
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("{id:.+}")
     public Response createAnnotationFor(@PathParam("id") String id,
-            String json, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
+            Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws PermissionDenied, AccessDenied, ValidationError, DeserializationError,
             ItemNotFound, BadRequester, SerializationError {
         graph.getBaseGraph().checkNotInTransaction();
         try {
             Accessor user = getRequesterUserProfile();
             Annotation ann = annotationViews.createFor(id, id,
-                    Bundle.fromString(json), user, getAccessors(accessors, user));
+                    bundle, user, getAccessors(accessors, user));
             graph.getBaseGraph().commit();
             return creationResponse(ann);
         } finally {
@@ -98,7 +98,7 @@ public class AnnotationResource extends
      *
      * @param id        The ID of the item being annotation
      * @param did       The ID of the description being annotated
-     * @param json      The JSON representation of the annotation
+     * @param bundle      The JSON representation of the annotation
      * @param accessors User IDs who can access the annotation
      * @return The annotation
      * @throws PermissionDenied
@@ -115,14 +115,14 @@ public class AnnotationResource extends
     public Response createAnnotationFor(
             @PathParam("id") String id,
             @PathParam("did") String did,
-            String json, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
+            Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws PermissionDenied, AccessDenied, ValidationError, DeserializationError,
             ItemNotFound, BadRequester, SerializationError {
         graph.getBaseGraph().checkNotInTransaction();
         try {
             Accessor user = getRequesterUserProfile();
             Annotation ann = annotationViews.createFor(id, did,
-                    Bundle.fromString(json), user, getAccessors(accessors, user));
+                    bundle, user, getAccessors(accessors, user));
             graph.getBaseGraph().commit();
             return creationResponse(ann);
         } finally {

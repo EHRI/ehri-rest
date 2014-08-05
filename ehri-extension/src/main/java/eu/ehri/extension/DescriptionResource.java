@@ -36,14 +36,14 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}")
-    public Response createDescription(@PathParam("id") String id, String json)
+    public Response createDescription(@PathParam("id") String id, Bundle bundle)
             throws PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, ItemNotFound, BadRequester {
         graph.getBaseGraph().checkNotInTransaction();
         try {
             Accessor user = getRequesterUserProfile();
             DescribedEntity item = views.detail(id, user);
-            Description desc = descriptionViews.create(id, Bundle.fromString(json),
+            Description desc = descriptionViews.create(id, bundle,
                     Description.class, user, getLogMessage());
             item.addDescription(desc);
             graph.getBaseGraph().commit();
@@ -60,14 +60,14 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}")
-    public Response updateDescription(@PathParam("id") String id, String json)
+    public Response updateDescription(@PathParam("id") String id, Bundle bundle)
             throws PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, ItemNotFound, BadRequester, SerializationError {
         graph.getBaseGraph().checkNotInTransaction();
         try {
             Accessor userProfile = getRequesterUserProfile();
             DescribedEntity item = views.detail(id, userProfile);
-            Mutation<Description> desc = descriptionViews.update(id, Bundle.fromString(json),
+            Mutation<Description> desc = descriptionViews.update(id, bundle,
                     Description.class, userProfile, getLogMessage());
             graph.getBaseGraph().commit();
             return buildResponse(item, desc.getNode(), Response.Status.OK);
@@ -84,12 +84,12 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/{did:.+}")
     public Response updateDescriptionWithId(@PathParam("id") String id,
-            @PathParam("did") String did, String json)
+            @PathParam("did") String did, Bundle bundle)
             throws AccessDenied, PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, ItemNotFound, BadRequester, SerializationError {
         // FIXME: Inefficient conversion to/from JSON just to insert the ID. We
         // should rethink this somehow.
-        return updateDescription(id, Bundle.fromString(json).withId(did).toJson());
+        return updateDescription(id, bundle.withId(did));
     }
 
     @DELETE
@@ -129,7 +129,7 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/{did:.+}/" + Entities.UNDETERMINED_RELATIONSHIP)
     public Response createAccessPoint(@PathParam("id") String id,
-                @PathParam("did") String did, String json)
+                @PathParam("did") String did, Bundle bundle)
             throws PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, ItemNotFound, BadRequester {
         graph.getBaseGraph().checkNotInTransaction();
@@ -137,7 +137,7 @@ public class DescriptionResource extends AbstractAccessibleEntityResource<Descri
             Accessor user = getRequesterUserProfile();
             DescribedEntity item = views.detail(id, user);
             Description desc = manager.getFrame(did, Description.class);
-            UndeterminedRelationship rel = descriptionViews.create(id, Bundle.fromString(json),
+            UndeterminedRelationship rel = descriptionViews.create(id, bundle,
                     UndeterminedRelationship.class, user, getLogMessage());
             desc.addUndeterminedRelationship(rel);
             graph.getBaseGraph().commit();

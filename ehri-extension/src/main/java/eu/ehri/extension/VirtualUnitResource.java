@@ -10,6 +10,7 @@ import eu.ehri.project.models.DocumentDescription;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.VirtualUnit;
 import eu.ehri.project.models.base.Accessor;
+import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.views.VirtualUnitViews;
 import org.neo4j.graphdb.GraphDatabaseService;
 
@@ -89,16 +90,16 @@ public final class VirtualUnitResource extends
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    public Response updateVirtualUnit(String json) throws PermissionDenied,
+    public Response updateVirtualUnit(Bundle bundle) throws PermissionDenied,
             IntegrityError, ValidationError, DeserializationError,
             ItemNotFound, BadRequester {
-        return update(json);
+        return update(bundle);
     }
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    public Response createTopLevelVirtualUnit(String json,
+    public Response createTopLevelVirtualUnit(Bundle bundle,
             @QueryParam(ACCESSOR_PARAM) List<String> accessors,
             @QueryParam(DESCRIPTION_ID) List<String> descriptionIds)
             throws PermissionDenied, ValidationError, IntegrityError,
@@ -107,7 +108,7 @@ public final class VirtualUnitResource extends
         final Iterable<DocumentDescription> documentDescriptions
                 = getDocumentDescriptions(descriptionIds, currentUser);
 
-        return create(json, accessors, new Handler<VirtualUnit>() {
+        return create(bundle, accessors, new Handler<VirtualUnit>() {
             @Override
             public void process(VirtualUnit virtualUnit) {
                 virtualUnit.setAuthor(currentUser);
@@ -141,7 +142,7 @@ public final class VirtualUnitResource extends
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/" + Entities.VIRTUAL_UNIT)
     public Response createChildVirtualUnit(@PathParam("id") String id,
-            String json, @QueryParam(ACCESSOR_PARAM) List<String> accessors,
+            Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors,
             @QueryParam(DESCRIPTION_ID) List<String> descriptionIds)
             throws AccessDenied, PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, ItemNotFound, BadRequester {
@@ -149,7 +150,7 @@ public final class VirtualUnitResource extends
         final Iterable<DocumentDescription> documentDescriptions
                 = getDocumentDescriptions(descriptionIds, currentUser);
         final VirtualUnit parent = views.detail(id, currentUser);
-        return create(json, accessors, new Handler<VirtualUnit>() {
+        return create(bundle, accessors, new Handler<VirtualUnit>() {
             @Override
             public void process(VirtualUnit virtualUnit) {
                 parent.addChild(virtualUnit);

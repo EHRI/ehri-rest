@@ -6,6 +6,7 @@ import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.cvoc.Concept;
+import eu.ehri.project.persistence.Bundle;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.*;
@@ -53,10 +54,10 @@ public class CvocConceptResource extends
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    public Response updateCvocConcept(String json) throws PermissionDenied,
+    public Response updateCvocConcept(Bundle bundle) throws PermissionDenied,
             IntegrityError, ValidationError, DeserializationError,
             ItemNotFound, BadRequester {
-        return update(json);
+        return update(bundle);
     }
 
     @PUT
@@ -232,7 +233,7 @@ public class CvocConceptResource extends
      * Create a top-level concept unit for this vocabulary.
      * 
      * @param id The vocabulary id
-     * @param json The new concept data
+     * @param bundle The new concept data
      * @return The new concept
      * @throws PermissionDenied
      * @throws AccessDenied
@@ -247,12 +248,12 @@ public class CvocConceptResource extends
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/" + Entities.CVOC_CONCEPT)
     public Response createNarrowerConcept(@PathParam("id") String id,
-            String json, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
+            Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws AccessDenied, PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, ItemNotFound, BadRequester {
         final Accessor user = getRequesterUserProfile();
         final Concept parent = views.detail(id, user);
-        return create(json, accessors, new Handler<Concept>() {
+        return create(bundle, accessors, new Handler<Concept>() {
             @Override
             public void process(Concept concept) {
                 parent.addNarrowerConcept(concept);

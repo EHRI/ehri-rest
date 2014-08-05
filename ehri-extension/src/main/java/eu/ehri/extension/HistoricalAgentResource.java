@@ -4,6 +4,7 @@ import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.HistoricalAgent;
+import eu.ehri.project.persistence.Bundle;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.*;
@@ -47,20 +48,20 @@ public class HistoricalAgentResource extends AbstractAccessibleEntityResource<Hi
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    public Response createAuthority(String json,
+    public Response createAuthority(Bundle bundle,
             @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, ItemNotFound, BadRequester {
-        return create(json, accessors);
+        return create(bundle, accessors);
     }
 
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    public Response updateAuthority(String json) throws PermissionDenied,
+    public Response updateAuthority(Bundle bundle) throws PermissionDenied,
             IntegrityError, ValidationError, DeserializationError,
             ItemNotFound, BadRequester {
-        return update(json);
+        return update(bundle);
     }
 
     @PUT

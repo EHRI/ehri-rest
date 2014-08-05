@@ -10,6 +10,7 @@ import eu.ehri.project.models.Link;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Watchable;
+import eu.ehri.project.persistence.Bundle;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.*;
@@ -69,7 +70,7 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    public Response createUserProfile(String json,
+    public Response createUserProfile(Bundle bundle,
     		@QueryParam(GROUP_PARAM) List<String> groupIds,
     		@QueryParam(ACCESSOR_PARAM) List<String> accessors) throws PermissionDenied,
             ValidationError, IntegrityError, DeserializationError,
@@ -80,7 +81,7 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
             for (String groupId : groupIds) {
                 groups.add(manager.getFrame(groupId, Group.class));
             }
-            return create(json, accessors, new Handler<UserProfile>() {
+            return create(bundle, accessors, new Handler<UserProfile>() {
                 @Override
                 public void process(UserProfile userProfile) throws PermissionDenied {
                     for (Group group: groups) {
@@ -98,10 +99,10 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    public Response updateUserProfile(String json) throws PermissionDenied,
+    public Response updateUserProfile(Bundle bundle) throws PermissionDenied,
             IntegrityError, ValidationError, DeserializationError,
             ItemNotFound, BadRequester {
-        return update(json);
+        return update(bundle);
     }
 
     @PUT
