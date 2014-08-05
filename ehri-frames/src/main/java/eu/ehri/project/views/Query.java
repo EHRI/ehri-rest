@@ -517,21 +517,15 @@ public final class Query<E extends AccessibleEntity> implements Scoped<Query> {
 
     private <EE> GremlinPipeline<EE, Vertex> setPipelineRange(
             GremlinPipeline<EE, Vertex> filter) {
-        if (count == 0) {
+        int low = Math.max(0, (page - 1) * count);
+        if (count < 0) {
+            return filter; // No filtering
+        } else if (count == 0) {
             return new GremlinPipeline<EE, Vertex>(Lists.newArrayList());
         } else {
-            // NB: Seems to be a bug - the top should not be exclusive
-            // but it does in fact seem to be.
-            return filter.range(getRangeLow(), getRangeHigh());
+            // NB: The high range is inclusive, oddly.
+            return filter.range(low, low + (count - 1));
         }
-    }
-
-    private int getRangeLow() {
-        return Math.max(0, (page - 1) * count);
-    }
-
-    private int getRangeHigh() {
-        return Math.max(-1, ((page < 1 ? 1 : page) * count) - 1);
     }
 
     private <EE> GremlinPipeline<EE, Vertex> setOrder(
