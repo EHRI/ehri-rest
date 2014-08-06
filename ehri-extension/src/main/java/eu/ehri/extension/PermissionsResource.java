@@ -58,7 +58,7 @@ public class PermissionsResource extends AbstractRestResource {
      * @throws BadRequester
      */
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/list/{id:.+}")
     public Response listPermissionGrants(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound, BadRequester {
@@ -79,7 +79,7 @@ public class PermissionsResource extends AbstractRestResource {
      * @throws BadRequester
      */
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/listForItem/{id:.+}")
     public Response listPermissionGrantsForItem(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound, BadRequester {
@@ -100,7 +100,7 @@ public class PermissionsResource extends AbstractRestResource {
      * @throws BadRequester
      */
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/listForScope/{id:.+}")
     public Response listPermissionGrantsForScope(@PathParam("id") String id)
             throws PermissionDenied, ItemNotFound, BadRequester {
@@ -233,7 +233,7 @@ public class PermissionsResource extends AbstractRestResource {
      */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("/{userId:.+}/scope/{id:.+}")
     public InheritedGlobalPermissionSet setScopedPermissions(
             @PathParam("userId") String userId,
