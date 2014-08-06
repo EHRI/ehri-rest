@@ -172,10 +172,10 @@ public class AnnotationResource extends
      */
     @PUT
     @Path("/{id:.+}")
-    public Response updateAnnotation(@PathParam("id") String id, String json)
+    public Response updateAnnotation(@PathParam("id") String id, Bundle bundle)
             throws AccessDenied, PermissionDenied, ItemNotFound, ValidationError,
             BadRequester, DeserializationError, IntegrityError {
-        return update(id, json);
+        return update(id, bundle);
     }
 
     /**

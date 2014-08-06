@@ -91,9 +91,9 @@ public class DocumentaryUnitResource extends
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}")
     public Response updateDocumentaryUnit(@PathParam("id") String id,
-            String json) throws AccessDenied, PermissionDenied, IntegrityError,
+            Bundle bundle) throws AccessDenied, PermissionDenied, IntegrityError,
             ValidationError, DeserializationError, ItemNotFound, BadRequester {
-        return update(id, json);
+        return update(id, bundle);
     }
 
     @DELETE

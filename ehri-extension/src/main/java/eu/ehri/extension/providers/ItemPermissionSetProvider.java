@@ -19,7 +19,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author Mike Bryant (http://github.com/mikesname)

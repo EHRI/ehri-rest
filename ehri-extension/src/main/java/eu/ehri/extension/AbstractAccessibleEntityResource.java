@@ -5,10 +5,8 @@ import com.tinkerpop.blueprints.Vertex;
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.exceptions.*;
-import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.models.utils.ClassUtils;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.Mutation;
 import eu.ehri.project.persistence.Serializer;
@@ -26,7 +24,6 @@ import javax.ws.rs.core.Response.Status;
 import java.util.List;
 import java.util.Set;
 
-//import org.apache.log4j.Logger;
 
 /**
  * Handle CRUD operations on AccessibleEntity's by using the
@@ -209,7 +206,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * instead of overwritten.
      *
      * @param id   The items identifier property
-     * @param json The json
+     * @param rawBundle The bundle
      * @return The response of the update request
      * @throws AccessDenied
      * @throws PermissionDenied
@@ -219,20 +216,18 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * @throws ItemNotFound
      * @throws BadRequester
      */
-    public Response update(String id, String json) throws AccessDenied, PermissionDenied,
+    public Response update(String id, Bundle rawBundle) throws AccessDenied, PermissionDenied,
             IntegrityError, ValidationError, DeserializationError,
             ItemNotFound, BadRequester {
         try {
             E entity = views.detail(id, getRequesterUserProfile());
-            Bundle rawBundle = Bundle.fromString(json);
             if (isPatch()) {
                 Serializer depSerializer = new Serializer.Builder(graph).dependentOnly().build();
                 Bundle existing = depSerializer.vertexFrameToBundle(entity);
-                rawBundle = existing.mergeDataWith(rawBundle);
+                return update(existing.mergeDataWith(rawBundle));
+            } else {
+                return update(rawBundle.withId(entity.getId()));
             }
-            Bundle entityBundle = new Bundle(entity.getId(), getEntityType(),
-                    rawBundle.getData(), rawBundle.getRelations());
-            return update(entityBundle);
         } catch (SerializationError serializationError) {
             graph.getBaseGraph().rollback();
             throw new RuntimeException(serializationError);
@@ -290,10 +285,6 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
     }
     // Helpers
 
-    private EntityClass getEntityType() {
-        return ClassUtils.getEntityType(cls);
-    }
-
     protected Set<Accessor> getAccessors(List<String> accessorIds,
             Accessor current) {
 
@@ -305,8 +296,6 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
                 accessors.add(av);
                 accessorV.add(av.asVertex());
             } catch (ItemNotFound e) {
-                // FIXME: Using the logger gives a noclassdef found error
-                // logger.error("Invalid accessor given: " + id);
                 System.err.println("Invalid accessor given: " + id);
             }
         }
