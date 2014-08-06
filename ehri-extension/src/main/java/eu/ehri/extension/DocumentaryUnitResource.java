@@ -45,7 +45,7 @@ public class DocumentaryUnitResource extends
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/count")
-    public Response countDocumentaryUnits() throws ItemNotFound, BadRequester {
+    public long countDocumentaryUnits() throws ItemNotFound, BadRequester {
         return count();
     }
 
@@ -66,7 +66,7 @@ public class DocumentaryUnitResource extends
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/count")
-    public Response countChildDocumentaryUnits(
+    public long countChildDocumentaryUnits(
             @PathParam("id") String id,
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all)
             throws ItemNotFound, BadRequester, PermissionDenied {
@@ -74,7 +74,7 @@ public class DocumentaryUnitResource extends
         Iterable<DocumentaryUnit> units = all
                 ? parent.getAllChildren()
                 : parent.getChildren();
-        return numberResponse(getQuery(cls).count(units));
+        return getQuery(cls).count(units);
     }
 
     @PUT

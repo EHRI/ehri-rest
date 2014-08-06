@@ -564,26 +564,6 @@ public abstract class AbstractRestResource implements TxCheckedResource {
     }
 
     /**
-     * Return a number.
-     */
-    protected Response numberResponse(Long number) {
-        return MediaType.TEXT_XML_TYPE.equals(checkMediaType())
-                ? Response.ok(String.format("<count>%d</count>", number)
-                .getBytes()).build()
-                : Response.ok(number.toString().getBytes()).build();
-    }
-
-    /**
-     * Return a boolean.
-     */
-    protected Response booleanResponse(boolean bool) {
-        return MediaType.TEXT_XML_TYPE.equals(checkMediaType())
-                ? Response.ok(String.format("<boolean>%s</boolean>", bool)
-                .getBytes()).build()
-                : Response.ok(Boolean.toString(bool).getBytes()).build();
-    }
-
-    /**
      * Get a string representation (JSON or XML) of a given frame.
      *
      * @param vertex A vertex

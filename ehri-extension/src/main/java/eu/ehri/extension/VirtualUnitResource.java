@@ -55,7 +55,7 @@ public final class VirtualUnitResource extends
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/count")
-    public Response countVirtualUnits() throws ItemNotFound, BadRequester {
+    public long countVirtualUnits() throws ItemNotFound, BadRequester {
         return count();
     }
 
@@ -76,7 +76,7 @@ public final class VirtualUnitResource extends
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/count")
-    public Response countChildVirtualUnits(
+    public long countChildVirtualUnits(
             @PathParam("id") String id,
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all)
             throws ItemNotFound, BadRequester, PermissionDenied {
@@ -84,7 +84,7 @@ public final class VirtualUnitResource extends
         Iterable<VirtualUnit> units = all
                 ? parent.getAllChildren()
                 : parent.getChildren();
-        return numberResponse(getQuery(cls).count(units));
+        return getQuery(cls).count(units);
     }
 
     @PUT

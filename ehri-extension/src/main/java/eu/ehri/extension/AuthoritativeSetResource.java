@@ -51,7 +51,7 @@ public class AuthoritativeSetResource extends
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/count")
-    public Response countAuthoritativeSets() throws ItemNotFound, BadRequester {
+    public long countAuthoritativeSets() throws ItemNotFound, BadRequester {
         return count();
     }
 
@@ -70,13 +70,12 @@ public class AuthoritativeSetResource extends
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/count")
-    public Response countAuthoritativeSetHistoricalAgents(
+    public long countAuthoritativeSetHistoricalAgents(
             @PathParam("id") String id)
             throws ItemNotFound, BadRequester, AccessDenied {
         Accessor user = getRequesterUserProfile();
         AuthoritativeSet set = views.detail(id, user);
-        return numberResponse(getQuery(AuthoritativeItem.class)
-                .count(set.getAuthoritativeItems()));
+        return getQuery(AuthoritativeItem.class).count(set.getAuthoritativeItems());
     }
 
     @POST

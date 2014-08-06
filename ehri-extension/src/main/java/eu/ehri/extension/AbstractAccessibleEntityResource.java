@@ -93,9 +93,9 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * @return Number of items.
      * @throws BadRequester
      */
-    public Response count() throws BadRequester {
+    public long count() throws BadRequester {
         graph.getBaseGraph().checkNotInTransaction();
-        return numberResponse(getQuery(cls).count());
+        return getQuery(cls).count();
     }
 
     /**

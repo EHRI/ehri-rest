@@ -46,7 +46,7 @@ public class VocabularyResource extends
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/count")
-    public Response countVocabularies() throws ItemNotFound, BadRequester {
+    public long countVocabularies() throws ItemNotFound, BadRequester {
         return count();
     }
 
@@ -60,12 +60,12 @@ public class VocabularyResource extends
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/count")
-    public Response countVocabularyConcepts(
+    public long countVocabularyConcepts(
             @PathParam("id") String id)
             throws ItemNotFound, BadRequester, AccessDenied {
         Accessor user = getRequesterUserProfile();
         Vocabulary vocabulary = views.detail(id, user);
-        return numberResponse(getQuery(cls).count(vocabulary.getConcepts()));
+        return getQuery(cls).count(vocabulary.getConcepts());
     }
 
     @GET

@@ -53,7 +53,7 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/count")
-    public Response countUserProfiles() throws ItemNotFound, BadRequester {
+    public long countUserProfiles() throws ItemNotFound, BadRequester {
         return count();
     }
 
@@ -143,29 +143,28 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
     }
 
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("{userId:.+}/" + IS_FOLLOWING + "/{otherId:.+}")
-    public Response isFollowing(
+    public boolean isFollowing(
             @PathParam("userId") String userId,
             @PathParam("otherId") String otherId)
             throws BadRequester, PermissionDenied, ItemNotFound {
         Accessor accessor = getRequesterUserProfile();
         UserProfile user = views.detail(userId, accessor);
-        return booleanResponse(user.isFollowing(
-                manager.getFrame(otherId, UserProfile.class)));
+        return user.isFollowing(
+                manager.getFrame(otherId, UserProfile.class));
     }
 
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("{userId:.+}/" + IS_FOLLOWER + "/{otherId:.+}")
-    public Response isFollower(
+    public boolean isFollower(
             @PathParam("userId") String userId,
             @PathParam("otherId") String otherId)
             throws BadRequester, PermissionDenied, ItemNotFound {
         Accessor accessor = getRequesterUserProfile();
         UserProfile user = views.detail(userId, accessor);
-        return booleanResponse(user
-                .isFollower(manager.getFrame(otherId, UserProfile.class)));
+        return user.isFollower(manager.getFrame(otherId, UserProfile.class));
     }
 
     @POST
@@ -217,16 +216,15 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
     }
 
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("{userId:.+}/" + IS_BLOCKING + "/{otherId:.+}")
-    public Response isBlocking(
+    public boolean isBlocking(
             @PathParam("userId") String userId,
             @PathParam("otherId") String otherId)
             throws BadRequester, PermissionDenied, ItemNotFound {
         Accessor accessor = getRequesterUserProfile();
         UserProfile user = views.detail(userId, accessor);
-        return booleanResponse(user.isBlocking(
-                manager.getFrame(otherId, UserProfile.class)));
+        return user.isBlocking(manager.getFrame(otherId, UserProfile.class));
     }
 
     @POST
@@ -319,14 +317,13 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("{userId:.+}/" + IS_WATCHING + "/{otherId:.+}")
-    public Response isWatching(
+    public boolean isWatching(
             @PathParam("userId") String userId,
             @PathParam("otherId") String otherId)
             throws BadRequester, PermissionDenied, ItemNotFound {
         Accessor accessor = getRequesterUserProfile();
         UserProfile user = views.detail(userId, accessor);
-        return booleanResponse(user
-                .isWatching(manager.getFrame(otherId, Watchable.class)));
+        return user.isWatching(manager.getFrame(otherId, Watchable.class));
     }
 
     @GET

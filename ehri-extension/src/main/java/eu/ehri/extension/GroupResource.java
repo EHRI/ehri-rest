@@ -53,7 +53,7 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/count")
-    public Response countVocabularies() throws ItemNotFound, BadRequester {
+    public long countVocabularies() throws ItemNotFound, BadRequester {
         return count();
     }
 
@@ -168,12 +168,12 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/count")
-    public Response countGroupMembers(@PathParam("id") String id)
+    public long countGroupMembers(@PathParam("id") String id)
             throws ItemNotFound, BadRequester, AccessDenied {
         Accessor user = getRequesterUserProfile();
         Group group = views.detail(id, user);
-        return numberResponse(getQuery(AccessibleEntity.class)
-                .count(group.getMembersAsEntities()));
+        return getQuery(AccessibleEntity.class)
+                .count(group.getMembersAsEntities());
     }
 
     /**

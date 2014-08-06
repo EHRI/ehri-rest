@@ -44,7 +44,7 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/count")
-    public Response countDocumentaryUnits() throws ItemNotFound, BadRequester {
+    public long countDocumentaryUnits() throws ItemNotFound, BadRequester {
         return count();
     }
 
@@ -67,7 +67,7 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/count")
-    public Response countRepositoryDocumentaryUnits(
+    public long countRepositoryDocumentaryUnits(
             @PathParam("id") String id,
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all)
             throws ItemNotFound, BadRequester, AccessDenied {
@@ -76,7 +76,7 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
         Iterable<DocumentaryUnit> units = all
                 ? repository.getAllCollections()
                 : repository.getCollections();
-        return numberResponse(getQuery(DocumentaryUnit.class).count(units));
+        return getQuery(DocumentaryUnit.class).count(units);
     }
 
     @PUT

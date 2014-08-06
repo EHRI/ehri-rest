@@ -41,7 +41,7 @@ public class HistoricalAgentResource extends AbstractAccessibleEntityResource<Hi
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/count")
-    public Response countHistoricalAgents() throws ItemNotFound, BadRequester {
+    public long countHistoricalAgents() throws ItemNotFound, BadRequester {
         return count();
     }
 

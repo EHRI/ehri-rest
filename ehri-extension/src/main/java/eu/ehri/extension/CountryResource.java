@@ -50,7 +50,7 @@ public class CountryResource extends
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/count")
-    public Response countCountries() throws ItemNotFound, BadRequester {
+    public long countCountries() throws ItemNotFound, BadRequester {
         return count();
     }
 
@@ -68,7 +68,7 @@ public class CountryResource extends
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/count")
-    public Response countCountryRepositories(
+    public long countCountryRepositories(
             @PathParam("id") String id,
             @QueryParam(FILTER_PARAM) List<String> filters)
             throws ItemNotFound, BadRequester, AccessDenied {
@@ -76,7 +76,7 @@ public class CountryResource extends
         Country country = views.detail(id, user);
         Query<Repository> query = new Query<Repository>(graph, Repository.class)
                 .filter(filters);
-        return numberResponse(query.count(country.getRepositories()));
+        return query.count(country.getRepositories());
     }
 
     @POST

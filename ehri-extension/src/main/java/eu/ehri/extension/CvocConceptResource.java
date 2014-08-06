@@ -47,7 +47,7 @@ public class CvocConceptResource extends
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/count")
-    public Response countCvocConcepts() throws ItemNotFound, BadRequester {
+    public long countCvocConcepts() throws ItemNotFound, BadRequester {
         return count();
     }
 
@@ -103,12 +103,11 @@ public class CvocConceptResource extends
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/count")
-    public Response countCvocNarrowerConcepts(@PathParam("id") String id)
+    public long countCvocNarrowerConcepts(@PathParam("id") String id)
             throws ItemNotFound, BadRequester, AccessDenied {
         Accessor user = getRequesterUserProfile();
         Concept concept = views.detail(id, user);
-        return numberResponse(getQuery(Concept.class)
-                .count(concept.getNarrowerConcepts()));
+        return getQuery(Concept.class).count(concept.getNarrowerConcepts());
     }
 
     /**
