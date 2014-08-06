@@ -1,15 +1,20 @@
 package eu.ehri.extension.providers;
 
+import com.sun.net.httpserver.Headers;
+import eu.ehri.extension.PermissionsResource;
 import eu.ehri.project.acl.InheritedItemPermissionSet;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.map.ObjectMapper;
 
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
+import javax.xml.ws.Response;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.annotation.Annotation;
@@ -33,7 +38,7 @@ public class InheritedItemPermissionSetProvider implements MessageBodyWriter<Inh
     @Override
     public long getSize(InheritedItemPermissionSet permissionSet, Class<?> aClass, Type type, Annotation[] annotations,
             MediaType mediaType) {
-        return 0;
+        return -1L;
     }
 
     @Override
@@ -41,6 +46,8 @@ public class InheritedItemPermissionSetProvider implements MessageBodyWriter<Inh
             Class<?> aClass, Type type, Annotation[] annotations,
             MediaType mediaType, MultivaluedMap<String, Object> headers,
             OutputStream outputStream) throws IOException, WebApplicationException {
+        headers.putSingle(HttpHeaders.CACHE_CONTROL,
+                PermissionsResource.getCacheControl().toString());
         mapper.writeValue(outputStream, itemPermissionSet);
     }
 }

@@ -1,11 +1,13 @@
 package eu.ehri.extension.providers;
 
+import eu.ehri.extension.PermissionsResource;
 import eu.ehri.project.acl.InheritedGlobalPermissionSet;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyWriter;
@@ -33,7 +35,7 @@ public class InheritedGlobalPermissionSetProvider implements MessageBodyWriter<I
     @Override
     public long getSize(InheritedGlobalPermissionSet globalPermissionSet, Class<?> aClass, Type type, Annotation[] annotations,
             MediaType mediaType) {
-        return 0;
+        return -1L;
     }
 
     @Override
@@ -41,6 +43,8 @@ public class InheritedGlobalPermissionSetProvider implements MessageBodyWriter<I
             Class<?> aClass, Type type, Annotation[] annotations,
             MediaType mediaType, MultivaluedMap<String, Object> headers,
             OutputStream outputStream) throws IOException, WebApplicationException {
+        headers.putSingle(HttpHeaders.CACHE_CONTROL,
+                PermissionsResource.getCacheControl().toString());
         mapper.writeValue(outputStream, globalPermissionSet);
     }
 }

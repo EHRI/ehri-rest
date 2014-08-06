@@ -11,9 +11,6 @@ import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.PermissionGrantTarget;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.views.AclViews;
-import org.codehaus.jackson.JsonGenerationException;
-import org.codehaus.jackson.map.JsonMappingException;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.*;
@@ -21,7 +18,6 @@ import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.io.IOException;
 
 /**
  * Provides a RESTful(ish) interface for setting PermissionTarget perms.
@@ -30,8 +26,6 @@ import java.io.IOException;
  */
 @Path(Entities.PERMISSION)
 public class PermissionsResource extends AbstractRestResource {
-
-    private final ObjectMapper mapper = new ObjectMapper();
 
     private final AclManager aclManager;
     private final AclViews aclViews;
@@ -42,7 +36,13 @@ public class PermissionsResource extends AbstractRestResource {
         aclViews = new AclViews(graph);
     }
 
-    private CacheControl getCacheControl() {
+    /**
+     * Get the cache control that should be applied to permission
+     * data.
+     *
+     * @return A cache control object
+     */
+    public static CacheControl getCacheControl() {
         CacheControl cacheControl = new CacheControl();
         cacheControl.setMaxAge(AbstractRestResource.ITEM_CACHE_TIME);
         return cacheControl;
@@ -118,19 +118,15 @@ public class PermissionsResource extends AbstractRestResource {
      *
      * @return The current user's global permissions
      * @throws PermissionDenied
-     * @throws JsonGenerationException
-     * @throws JsonMappingException
-     * @throws IOException
      * @throws ItemNotFound
      * @throws BadRequester
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getGlobalMatrix() throws PermissionDenied, IOException,
+    public InheritedGlobalPermissionSet getGlobalMatrix() throws PermissionDenied,
             ItemNotFound, BadRequester {
         graph.getBaseGraph().checkNotInTransaction();
-        Accessor accessor = getRequesterUserProfile();
-        return getGlobalMatrix(accessor.getId());
+        return getGlobalMatrix(getRequesterUserProfile().getId());
     }
 
     /**
@@ -139,26 +135,16 @@ public class PermissionsResource extends AbstractRestResource {
      * @param userId The user ID
      * @return The user's global permissions
      * @throws PermissionDenied
-     * @throws JsonGenerationException
-     * @throws JsonMappingException
-     * @throws IOException
      * @throws ItemNotFound
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{userId:.+}")
-    public Response getGlobalMatrix(@PathParam("userId") String userId)
-            throws PermissionDenied, IOException, ItemNotFound {
+    public InheritedGlobalPermissionSet getGlobalMatrix(@PathParam("userId") String userId)
+            throws PermissionDenied, ItemNotFound {
         graph.getBaseGraph().checkNotInTransaction();
         Accessor accessor = manager.getFrame(userId, Accessor.class);
-
-        return Response
-                .status(Response.Status.OK)
-                .entity(mapper
-                        .writeValueAsBytes(aclManager
-                                .getInheritedGlobalPermissions(accessor)))
-                .cacheControl(getCacheControl())
-                .build();
+        return aclManager.getInheritedGlobalPermissions(accessor);
     }
 
     /**
@@ -168,7 +154,6 @@ public class PermissionsResource extends AbstractRestResource {
      * @param globals The permission matrix data
      * @return The new permissions
      * @throws PermissionDenied
-     * @throws IOException
      * @throws ItemNotFound
      * @throws BadRequester
      */
@@ -176,21 +161,18 @@ public class PermissionsResource extends AbstractRestResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{userId:.+}")
-    public Response setGlobalMatrix(
+    public InheritedGlobalPermissionSet setGlobalMatrix(
             @PathParam("userId") String userId,
-            GlobalPermissionSet globals) throws PermissionDenied, IOException, ItemNotFound,
-            BadRequester {
+            GlobalPermissionSet globals) throws PermissionDenied, ItemNotFound, BadRequester {
         graph.getBaseGraph().checkNotInTransaction();
-        Accessor accessor = manager.getFrame(userId, Accessor.class);
-        Accessor grantee = getRequesterUserProfile();
         try {
+            Accessor accessor = manager.getFrame(userId, Accessor.class);
+            Accessor grantee = getRequesterUserProfile();
             InheritedGlobalPermissionSet newPerms
                     = aclViews
                     .setGlobalPermissionMatrix(accessor, globals, grantee);
             graph.getBaseGraph().commit();
-            return Response
-                    .status(Response.Status.OK)
-                    .entity(mapper.writeValueAsBytes(newPerms)).build();
+            return newPerms;
         } finally {
             cleanupTransaction();
         }
@@ -203,27 +185,19 @@ public class PermissionsResource extends AbstractRestResource {
      * @param id     The item id
      * @return The user's permissions for that item
      * @throws PermissionDenied
-     * @throws JsonGenerationException
-     * @throws JsonMappingException
-     * @throws IOException
      * @throws ItemNotFound
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{userId:.+}/{id:.+}")
-    public Response getEntityMatrix(@PathParam("userId") String userId,
-            @PathParam("id") String id) throws PermissionDenied, IOException,
-            ItemNotFound {
+    public InheritedItemPermissionSet getEntityMatrix(
+            @PathParam("userId") String userId,
+            @PathParam("id") String id) throws PermissionDenied, ItemNotFound {
         graph.getBaseGraph().checkNotInTransaction();
         Accessor accessor = manager.getFrame(userId, Accessor.class);
         AccessibleEntity entity = manager.getFrame(id, AccessibleEntity.class);
         AclManager acl = aclManager.withScope(entity.getPermissionScope());
-
-        return Response
-                .status(Response.Status.OK)
-                .entity(mapper.writeValueAsBytes(acl.getInheritedItemPermissions(entity, accessor)))
-                .cacheControl(getCacheControl())
-                .build();
+        return acl.getInheritedItemPermissions(entity, accessor);
     }
 
     /**
@@ -232,29 +206,18 @@ public class PermissionsResource extends AbstractRestResource {
      * @param userId The user's permissions
      * @param id     The scope ID
      * @return The matrix for the given scope
-     * @throws IOException
-     * @throws JsonMappingException
-     * @throws JsonGenerationException
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/{userId:.+}/scope/{id:.+}")
-    public Response getScopedMatrix(@PathParam("userId") String userId,
-            @PathParam("id") String id) throws PermissionDenied, ItemNotFound,
-            IOException {
+    public InheritedGlobalPermissionSet getScopedMatrix(@PathParam("userId") String userId,
+            @PathParam("id") String id) throws PermissionDenied, ItemNotFound {
         graph.getBaseGraph().checkNotInTransaction();
         Accessor accessor = manager.getFrame(userId, Accessor.class);
         PermissionScope scope = manager.getFrame(id, PermissionScope.class);
         AclManager acl = aclManager.withScope(scope);
-
-        return Response
-                .status(Response.Status.OK)
-                .entity(mapper
-                        .writeValueAsBytes(acl
-                                .getInheritedGlobalPermissions(accessor)))
-                .cacheControl(getCacheControl())
-                .build();
+        return acl.getInheritedGlobalPermissions(accessor);
     }
 
     /**
@@ -265,7 +228,6 @@ public class PermissionsResource extends AbstractRestResource {
      * @param globals the serialized permission list
      * @return The new permission matrix
      * @throws PermissionDenied
-     * @throws IOException
      * @throws ItemNotFound
      * @throws BadRequester
      */
@@ -273,13 +235,11 @@ public class PermissionsResource extends AbstractRestResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{userId:.+}/scope/{id:.+}")
-    public Response setScopedPermissions(
+    public InheritedGlobalPermissionSet setScopedPermissions(
             @PathParam("userId") String userId,
             @PathParam("id") String id,
-            GlobalPermissionSet globals) throws PermissionDenied,
-            IOException, ItemNotFound, BadRequester {
+            GlobalPermissionSet globals) throws PermissionDenied, ItemNotFound, BadRequester {
         graph.getBaseGraph().checkNotInTransaction();
-
         try {
             Accessor accessor = manager.getFrame(userId, Accessor.class);
             PermissionScope scope = manager.getFrame(id, PermissionScope.class);
@@ -296,11 +256,10 @@ public class PermissionsResource extends AbstractRestResource {
     /**
      * Set a user's permissions on a given item.
      *
-     * @param id          the item id
-     * @param userId      the user id
-     * @param scopedPerms the serialized permission list
+     * @param id        the item id
+     * @param userId    the user id
+     * @param itemPerms the serialized permission list
      * @throws PermissionDenied
-     * @throws IOException
      * @throws ItemNotFound
      * @throws BadRequester
      */
@@ -308,27 +267,18 @@ public class PermissionsResource extends AbstractRestResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{userId:.+}/{id:.+}")
-    public Response setItemPermissions(
+    public InheritedItemPermissionSet setItemPermissions(
             @PathParam("userId") String userId,
             @PathParam("id") String id,
-            ItemPermissionSet scopedPerms) throws PermissionDenied,
-            IOException, ItemNotFound, BadRequester {
+            ItemPermissionSet itemPerms) throws PermissionDenied, ItemNotFound, BadRequester {
         graph.getBaseGraph().checkNotInTransaction();
         try {
             Accessor accessor = manager.getFrame(userId, Accessor.class);
-
             AccessibleEntity item = manager.getFrame(id, AccessibleEntity.class);
             Accessor grantee = getRequesterUserProfile();
-            AclViews acl = new AclViews(graph);
-            acl.setItemPermissions(item, accessor, scopedPerms.asSet(), grantee);
+            aclViews.setItemPermissions(item, accessor, itemPerms.asSet(), grantee);
             graph.getBaseGraph().commit();
-            return Response
-                    .status(Response.Status.OK)
-                    .entity(mapper
-                            .writeValueAsBytes(new AclManager(
-                                    graph).getInheritedItemPermissions(manager.getFrame(id, AccessibleEntity.class), accessor
-                            )))
-                    .build();
+            return aclManager.getInheritedItemPermissions(item, accessor);
         } finally {
             cleanupTransaction();
         }
