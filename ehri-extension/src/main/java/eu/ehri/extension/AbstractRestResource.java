@@ -36,6 +36,7 @@ import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
 
+
 /**
  * Base class for web service resources.
  *
@@ -62,6 +63,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
     public static final String ACCESSOR_PARAM = "accessibleTo";
     public static final String GROUP_PARAM = "group";
     public static final String ALL_PARAM = "all";
+    public static final String ID_PARAM = "id";
 
     public static final String INCLUDE_PROPS_PARAM = "_ip";
 

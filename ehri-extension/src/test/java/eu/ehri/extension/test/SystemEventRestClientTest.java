@@ -1,7 +1,6 @@
 package eu.ehri.extension.test;
 
 import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 import eu.ehri.extension.EventResource;
 import eu.ehri.project.definitions.Entities;
@@ -13,14 +12,16 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Test;
 
 import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
 import static com.sun.jersey.api.client.ClientResponse.Status.CREATED;
 import static com.sun.jersey.api.client.ClientResponse.Status.OK;
-import static eu.ehri.extension.UserProfileResource.FOLLOW;
-import static eu.ehri.extension.UserProfileResource.WATCH;
+import static eu.ehri.extension.AbstractRestResource.ID_PARAM;
+import static eu.ehri.extension.UserProfileResource.FOLLOWING;
+import static eu.ehri.extension.UserProfileResource.WATCHING;
 import static org.junit.Assert.*;
 
 public class SystemEventRestClientTest extends BaseRestClientTest {
@@ -83,7 +84,7 @@ public class SystemEventRestClientTest extends BaseRestClientTest {
     public void testGetActionsForItem() throws Exception {
 
         // Create an item
-        WebResource resource = client.resource(
+        client.resource(
                 ehriUri(Entities.COUNTRY, COUNTRY_CODE, Entities.REPOSITORY));
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
                 ehriUri(Entities.COUNTRY, COUNTRY_CODE, Entities.REPOSITORY))
@@ -140,7 +141,11 @@ public class SystemEventRestClientTest extends BaseRestClientTest {
         assertFalse(events.isEmpty());
 
         // Now start watching item r1
-        URI watchUrl = ehriUri(Entities.USER_PROFILE, user, WATCH, "r1");
+        URI watchUrl = UriBuilder.fromPath(getExtensionEntryPointUri())
+                .segment(Entities.USER_PROFILE)
+                .segment(user)
+                .segment(WATCHING)
+                .queryParam(ID_PARAM, "r1").build();
 
         jsonCallAs(user, watchUrl).post(ClientResponse.class);
 
@@ -155,7 +160,11 @@ public class SystemEventRestClientTest extends BaseRestClientTest {
         assertEquals(0, events.size());
 
         // Now follow the other user...
-        URI followUrl = ehriUri(Entities.USER_PROFILE, user, FOLLOW, getAdminUserProfileId());
+        URI followUrl = UriBuilder.fromPath(getExtensionEntryPointUri())
+                .segment(Entities.USER_PROFILE)
+                .segment(user)
+                .segment(FOLLOWING)
+                .queryParam(ID_PARAM, getAdminUserProfileId()).build();
         jsonCallAs(user, followUrl).post(ClientResponse.class);
 
         // We should get the event again...

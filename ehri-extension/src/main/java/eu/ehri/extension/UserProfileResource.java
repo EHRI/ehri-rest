@@ -29,15 +29,12 @@ import static eu.ehri.extension.RestHelpers.produceErrorMessageJson;
 @Path(Entities.USER_PROFILE)
 public class UserProfileResource extends AbstractAccessibleEntityResource<UserProfile> {
 
-    public static final String FOLLOW = "follow";
     public static final String FOLLOWING = "following";
     public static final String FOLLOWERS = "followers";
     public static final String IS_FOLLOWING = "isFollowing";
     public static final String IS_FOLLOWER = "isFollower";
-    public static final String WATCH = "watch";
     public static final String WATCHING = "watching";
     public static final String IS_WATCHING = "isWatching";
-    public static final String BLOCK = "block";
     public static final String BLOCKED = "blocked";
     public static final String IS_BLOCKING = "isBlocking";
 
@@ -172,15 +169,17 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
     }
 
     @POST
-    @Path("{userId:.+}/" + FOLLOW + "/{otherId:.+}")
+    @Path("{userId:.+}/" + FOLLOWING)
     public Response followUserProfile(
             @PathParam("userId") String userId,
-            @PathParam("otherId") String otherId)
+            @QueryParam(ID_PARAM) List<String> otherIds)
             throws BadRequester, PermissionDenied, ItemNotFound {
         Accessor accessor = getRequesterUserProfile();
         UserProfile user = views.detail(userId, accessor);
         try {
-            user.addFollowing(manager.getFrame(otherId, UserProfile.class));
+            for (String id : otherIds) {
+                user.addFollowing(manager.getFrame(id, UserProfile.class));
+            }
             graph.getBaseGraph().commit();
             return Response.status(Status.OK).build();
         }  finally {
@@ -189,15 +188,17 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
     }
 
     @DELETE
-    @Path("{userId:.+}/" + FOLLOW + "/{otherId:.+}")
+    @Path("{userId:.+}/" + FOLLOWING)
     public Response unfollowUserProfile(
             @PathParam("userId") String userId,
-            @PathParam("otherId") String otherId)
+            @QueryParam(ID_PARAM) List<String> otherIds)
             throws BadRequester, PermissionDenied, ItemNotFound {
         Accessor accessor = getRequesterUserProfile();
         UserProfile user = views.detail(userId, accessor);
         try {
-            user.removeFollowing(manager.getFrame(otherId, UserProfile.class));
+            for (String id : otherIds) {
+                user.removeFollowing(manager.getFrame(id, UserProfile.class));
+            }
             graph.getBaseGraph().commit();
             return Response.status(Status.OK).build();
         }  finally {
@@ -229,15 +230,17 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
     }
 
     @POST
-    @Path("{userId:.+}/" + BLOCK + "/{otherId:.+}")
+    @Path("{userId:.+}/" + BLOCKED)
     public Response blockUserProfile(
             @PathParam("userId") String userId,
-            @PathParam("otherId") String otherId)
+            @QueryParam(ID_PARAM) List<String> otherIds)
             throws BadRequester, PermissionDenied, ItemNotFound {
         Accessor accessor = getRequesterUserProfile();
         UserProfile user = views.detail(userId, accessor);
         try {
-            user.addBlocked(manager.getFrame(otherId, UserProfile.class));
+            for (String id : otherIds) {
+                user.addBlocked(manager.getFrame(id, UserProfile.class));
+            }
             graph.getBaseGraph().commit();
             return Response.status(Status.OK).build();
         }  finally {
@@ -246,15 +249,17 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
     }
 
     @DELETE
-    @Path("{userId:.+}/" + BLOCK + "/{otherId:.+}")
+    @Path("{userId:.+}/" + BLOCKED)
     public Response unblockUserProfile(
             @PathParam("userId") String userId,
-            @PathParam("otherId") String otherId)
+            @QueryParam(ID_PARAM) List<String> otherIds)
             throws BadRequester, PermissionDenied, ItemNotFound {
         Accessor accessor = getRequesterUserProfile();
         UserProfile user = views.detail(userId, accessor);
         try {
-            user.removeBlocked(manager.getFrame(otherId, UserProfile.class));
+            for (String id : otherIds) {
+                user.removeBlocked(manager.getFrame(id, UserProfile.class));
+            }
             graph.getBaseGraph().commit();
             return Response.status(Status.OK).build();
         }  finally {
@@ -274,15 +279,17 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
     }
 
     @POST
-    @Path("{userId:.+}/" + WATCH + "/{otherId:.+}")
+    @Path("{userId:.+}/" + WATCHING)
     public Response watchItem(
             @PathParam("userId") String userId,
-            @PathParam("otherId") String otherId)
+            @QueryParam(ID_PARAM) List<String> otherIds)
             throws BadRequester, PermissionDenied, ItemNotFound {
         Accessor accessor = getRequesterUserProfile();
         UserProfile user = views.detail(userId, accessor);
         try {
-            user.addWatching(manager.getFrame(otherId, Watchable.class));
+            for (String id : otherIds) {
+                user.addWatching(manager.getFrame(id, Watchable.class));
+            }
             graph.getBaseGraph().commit();
             return Response.status(Status.OK).build();
         }  finally {
@@ -291,15 +298,17 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
     }
 
     @DELETE
-    @Path("{userId:.+}/" + WATCH + "/{otherId:.+}")
+    @Path("{userId:.+}/" + WATCHING)
     public Response unwatchItem(
             @PathParam("userId") String userId,
-            @PathParam("otherId") String otherId)
+            @QueryParam(ID_PARAM) List<String> otherIds)
             throws BadRequester, PermissionDenied, ItemNotFound {
         Accessor accessor = getRequesterUserProfile();
         UserProfile user = views.detail(userId, accessor);
         try {
-            user.removeWatching(manager.getFrame(otherId, Watchable.class));
+            for (String id :  otherIds) {
+                user.removeWatching(manager.getFrame(id, Watchable.class));
+            }
             graph.getBaseGraph().commit();
             return Response.status(Status.OK).build();
         }  finally {

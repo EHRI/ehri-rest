@@ -195,7 +195,11 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
         List<Map<String, Object>> followers = getItemList(followingUrl, user1);
         assertTrue(followers.isEmpty());
 
-        URI followUrl = ehriUri(Entities.USER_PROFILE, user1, FOLLOW, user2);
+        URI followUrl = UriBuilder.fromPath(getExtensionEntryPointUri())
+                .segment(Entities.USER_PROFILE)
+                .segment(user1)
+                .segment(FOLLOWING)
+                .queryParam(ID_PARAM, user2).build();
         ClientResponse response = jsonCallAs(user1, followUrl).post(ClientResponse.class);
         assertStatus(OK, response);
         followers = getItemList(followingUrl, user1);
@@ -226,8 +230,13 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
         List<Map<String, Object>> blocked = getItemList(blockedUrl, user1);
         assertTrue(blocked.isEmpty());
 
-        URI blockUrl = ehriUri(Entities.USER_PROFILE, user1, BLOCK, user2);
-        ClientResponse response = jsonCallAs(user1, blockUrl).post(ClientResponse.class);
+        URI blockUrl = UriBuilder.fromPath(getExtensionEntryPointUri())
+                .segment(Entities.USER_PROFILE)
+                .segment(user1)
+                .segment(BLOCKED)
+                .queryParam(ID_PARAM, user2).build();
+        ClientResponse response = jsonCallAs(user1, blockUrl)
+                .post(ClientResponse.class);
         assertStatus(OK, response);
         blocked = getItemList(blockedUrl, user1);
         assertFalse(blocked.isEmpty());
@@ -252,7 +261,11 @@ public class UserProfileRestClientTest extends BaseRestClientTest {
         List<Map<String, Object>> watching = getItemList(watchersUrl, user1);
         assertTrue(watching.isEmpty());
 
-        URI watchUrl = ehriUri(Entities.USER_PROFILE, user1, WATCH, item);
+        URI watchUrl = UriBuilder.fromPath(getExtensionEntryPointUri())
+            .segment(Entities.USER_PROFILE)
+            .segment(user1)
+            .segment(WATCHING)
+            .queryParam(ID_PARAM, item).build();
         ClientResponse response = jsonCallAs(user1, watchUrl).post(ClientResponse.class);
         assertStatus(OK, response);
         watching = getItemList(watchersUrl, user1);
