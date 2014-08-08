@@ -6,7 +6,7 @@ import com.tinkerpop.pipes.PipeFunction;
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.*;
-import eu.ehri.project.models.DocumentDescription;
+import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.VirtualUnit;
 import eu.ehri.project.models.base.Accessor;
@@ -26,9 +26,6 @@ import java.util.List;
 @Path(Entities.VIRTUAL_UNIT)
 public final class VirtualUnitResource extends
         AbstractAccessibleEntityResource<VirtualUnit> {
-
-    // Query string key for description IDs
-    public static final String DESCRIPTION_ID = "description";
 
     private final VirtualUnitViews vuViews;
 
@@ -101,19 +98,19 @@ public final class VirtualUnitResource extends
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     public Response createTopLevelVirtualUnit(Bundle bundle,
             @QueryParam(ACCESSOR_PARAM) List<String> accessors,
-            @QueryParam(DESCRIPTION_ID) List<String> descriptionIds)
+            @QueryParam(ID_PARAM) List<String> includedIds)
             throws PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, ItemNotFound, BadRequester {
         final Accessor currentUser = getCurrentUser();
-        final Iterable<DocumentDescription> documentDescriptions
-                = getDocumentDescriptions(descriptionIds, currentUser);
+        final Iterable<DocumentaryUnit> includedUnits
+                = getIncludedUnits(includedIds, currentUser);
 
         return create(bundle, accessors, new Handler<VirtualUnit>() {
             @Override
             public void process(VirtualUnit virtualUnit) {
                 virtualUnit.setAuthor(currentUser);
-                for (DocumentDescription description : documentDescriptions) {
-                    virtualUnit.addReferencedDescription(description);
+                for (DocumentaryUnit include : includedUnits) {
+                    virtualUnit.addIncludedUnit(include);
                 }
             }
         });
@@ -143,19 +140,19 @@ public final class VirtualUnitResource extends
     @Path("/{id:.+}/" + Entities.VIRTUAL_UNIT)
     public Response createChildVirtualUnit(@PathParam("id") String id,
             Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors,
-            @QueryParam(DESCRIPTION_ID) List<String> descriptionIds)
+            @QueryParam(ID_PARAM) List<String> includedIds)
             throws AccessDenied, PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, ItemNotFound, BadRequester {
         final Accessor currentUser = getRequesterUserProfile();
-        final Iterable<DocumentDescription> documentDescriptions
-                = getDocumentDescriptions(descriptionIds, currentUser);
+        final Iterable<DocumentaryUnit> includedUnits
+                = getIncludedUnits(includedIds, currentUser);
         final VirtualUnit parent = views.detail(id, currentUser);
         return create(bundle, accessors, new Handler<VirtualUnit>() {
             @Override
             public void process(VirtualUnit virtualUnit) {
                 parent.addChild(virtualUnit);
-                for (DocumentDescription description : documentDescriptions) {
-                    virtualUnit.addReferencedDescription(description);
+                for (DocumentaryUnit included : includedUnits) {
+                    virtualUnit.addIncludedUnit(included);
                 }
             }
         });
@@ -177,10 +174,10 @@ public final class VirtualUnitResource extends
      * We filter these for accessibility and content type (to ensure
      * they actually are the right type.
      */
-    private Iterable<DocumentDescription> getDocumentDescriptions(
-            List<String> descriptionIds, Accessor accessor)
+    private Iterable<DocumentaryUnit> getIncludedUnits(
+            List<String> ids, Accessor accessor)
             throws ItemNotFound, BadRequester {
-        Iterable<Vertex> vertices = manager.getVertices(descriptionIds);
+        Iterable<Vertex> vertices = manager.getVertices(ids);
 
         PipeFunction<Vertex, Boolean> aclFilter = aclManager.getAclFilterFunction(accessor);
 
@@ -189,13 +186,13 @@ public final class VirtualUnitResource extends
             public Boolean compute(Vertex vertex) {
                 EntityClass entityClass = manager.getEntityClass(vertex);
                 return entityClass != null && entityClass
-                        .equals(EntityClass.DOCUMENT_DESCRIPTION);
+                        .equals(EntityClass.DOCUMENTARY_UNIT);
             }
         };
 
-        GremlinPipeline<Vertex, Vertex> descriptions = new GremlinPipeline<Vertex, Vertex>(
+        GremlinPipeline<Vertex, Vertex> units = new GremlinPipeline<Vertex, Vertex>(
                 vertices).filter(typeFilter).filter(aclFilter);
 
-        return graph.frameVertices(descriptions.toList(), DocumentDescription.class);
+        return graph.frameVertices(units, DocumentaryUnit.class);
     }
 }

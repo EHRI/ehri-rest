@@ -13,7 +13,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
 import java.net.URI;
 import java.util.Collections;
 import java.util.Comparator;
@@ -64,7 +63,6 @@ public class VirtualUnitRestClientTest extends BaseRestClientTest {
                 ehriUri(Entities.VIRTUAL_UNIT, "forUser", currentUserId))
                 .get(ClientResponse.class);
 
-        String json = response.getEntity(String.class);
         assertStatus(OK, response);
         // Check the response contains a new version
         assertEquals(Integer.valueOf(1), getPaginationTotal(response));
