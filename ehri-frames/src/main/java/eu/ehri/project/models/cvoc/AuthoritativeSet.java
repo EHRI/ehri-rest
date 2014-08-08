@@ -12,10 +12,7 @@ import com.tinkerpop.frames.modules.javahandler.JavaHandlerContext;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
-import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.base.IdentifiableEntity;
-import eu.ehri.project.models.base.ItemHolder;
-import eu.ehri.project.models.base.PermissionScope;
+import eu.ehri.project.models.base.*;
 import eu.ehri.project.models.utils.JavaHandlerUtils;
 
 /**
@@ -24,7 +21,7 @@ import eu.ehri.project.models.utils.JavaHandlerUtils;
  */
 @EntityType(EntityClass.AUTHORITATIVE_SET)
 public interface AuthoritativeSet extends AccessibleEntity, IdentifiableEntity,
-        PermissionScope, ItemHolder {
+        PermissionScope, ItemHolder, NamedEntity {
 
     @Adjacency(label = Ontology.ITEM_IN_AUTHORITATIVE_SET, direction = Direction.IN)
     public Iterable<AuthoritativeItem> getAuthoritativeItems();

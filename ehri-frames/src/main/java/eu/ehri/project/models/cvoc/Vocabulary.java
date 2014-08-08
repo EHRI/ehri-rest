@@ -7,6 +7,7 @@ import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.IdentifiableEntity;
+import eu.ehri.project.models.base.NamedEntity;
 import eu.ehri.project.models.base.PermissionScope;
 
 /**
@@ -18,7 +19,7 @@ import eu.ehri.project.models.base.PermissionScope;
  */
 @EntityType(EntityClass.CVOC_VOCABULARY)
 public interface Vocabulary extends AccessibleEntity, IdentifiableEntity,
-        PermissionScope, AuthoritativeSet {
+        PermissionScope, AuthoritativeSet, NamedEntity {
 
     @Adjacency(label = Ontology.ITEM_IN_AUTHORITATIVE_SET, direction = Direction.IN)
     public Iterable<Concept> getConcepts();
