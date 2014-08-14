@@ -8,6 +8,7 @@ import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
+import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.VirtualUnit;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistence.Bundle;
@@ -26,6 +27,8 @@ import java.util.List;
 @Path(Entities.VIRTUAL_UNIT)
 public final class VirtualUnitResource extends
         AbstractAccessibleEntityResource<VirtualUnit> {
+
+    public static final String INCLUDED = "includes";
 
     private final VirtualUnitViews vuViews;
 
@@ -68,6 +71,53 @@ public final class VirtualUnitResource extends
                 ? parent.getAllChildren()
                 : parent.getChildren();
         return streamingPage(getQuery(cls).page(units, getRequesterUserProfile()));
+    }
+
+    @GET
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Path("/{id:.+}/" + INCLUDED)
+    public Response listIncludedVirtualUnits(
+            @PathParam("id") String id)
+            throws ItemNotFound, BadRequester, PermissionDenied {
+        VirtualUnit parent = manager.getFrame(id, VirtualUnit.class);
+        return streamingPage(getQuery(DocumentaryUnit.class)
+                .page(parent.getIncludedUnits(), getRequesterUserProfile()));
+    }
+
+    @POST
+    @Path("/{id:.+}/" + INCLUDED)
+    public Response addIncludedVirtualUnits(
+            @PathParam("id") String id, @QueryParam(ID_PARAM) List<String> includedIds)
+            throws ItemNotFound, BadRequester, PermissionDenied {
+        try {
+            UserProfile currentUser = getCurrentUser();
+            VirtualUnit parent = manager.getFrame(id, VirtualUnit.class);
+            for (DocumentaryUnit unit : getIncludedUnits(includedIds, currentUser)) {
+                parent.addIncludedUnit(unit);
+            }
+            graph.getBaseGraph().commit();
+            return Response.status(Response.Status.OK).build();
+        } finally {
+            cleanupTransaction();
+        }
+    }
+
+    @DELETE
+    @Path("/{id:.+}/" + INCLUDED)
+    public Response removeIncludedVirtualUnits(
+            @PathParam("id") String id, @QueryParam(ID_PARAM) List<String> includedIds)
+            throws ItemNotFound, BadRequester, PermissionDenied {
+        try {
+            UserProfile currentUser = getCurrentUser();
+            VirtualUnit parent = manager.getFrame(id, VirtualUnit.class);
+            for (DocumentaryUnit unit : getIncludedUnits(includedIds, currentUser)) {
+                parent.removeIncludedUnit(unit);
+            }
+            graph.getBaseGraph().commit();
+            return Response.status(Response.Status.OK).build();
+        } finally {
+            cleanupTransaction();
+        }
     }
 
     @GET
