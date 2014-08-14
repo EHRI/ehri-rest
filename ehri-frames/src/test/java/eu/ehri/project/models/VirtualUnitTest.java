@@ -70,6 +70,14 @@ public class VirtualUnitTest extends AbstractFixtureTest {
     }
 
     @Test
+    public void testRemoveIncludedUnit() throws Exception {
+        VirtualUnit vu1 = manager.getFrame("vu1", VirtualUnit.class);
+        DocumentaryUnit c1 = manager.getFrame("c1", DocumentaryUnit.class);
+        vu1.removeIncludedUnit(c1);
+        assertFalse(Lists.newArrayList(vu1.getIncludedUnits()).contains(c1));
+    }
+
+    @Test
     public void testGetVirtualDescriptions() throws Exception {
         VirtualUnit vc1 = manager.getFrame("vc1", VirtualUnit.class);
         DocumentDescription cd1 = manager.getFrame("vcd1", DocumentDescription.class);
