@@ -173,9 +173,9 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
             @PathParam("userId") String userId,
             @QueryParam(ID_PARAM) List<String> otherIds)
             throws BadRequester, PermissionDenied, ItemNotFound {
-        Accessor accessor = getRequesterUserProfile();
-        UserProfile user = views.detail(userId, accessor);
         try {
+            Accessor accessor = getRequesterUserProfile();
+            UserProfile user = views.detail(userId, accessor);
             for (String id : otherIds) {
                 user.addFollowing(manager.getFrame(id, UserProfile.class));
             }
@@ -192,9 +192,9 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
             @PathParam("userId") String userId,
             @QueryParam(ID_PARAM) List<String> otherIds)
             throws BadRequester, PermissionDenied, ItemNotFound {
-        Accessor accessor = getRequesterUserProfile();
-        UserProfile user = views.detail(userId, accessor);
         try {
+            Accessor accessor = getRequesterUserProfile();
+            UserProfile user = views.detail(userId, accessor);
             for (String id : otherIds) {
                 user.removeFollowing(manager.getFrame(id, UserProfile.class));
             }
@@ -233,9 +233,9 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
             @PathParam("userId") String userId,
             @QueryParam(ID_PARAM) List<String> otherIds)
             throws BadRequester, PermissionDenied, ItemNotFound {
-        Accessor accessor = getRequesterUserProfile();
-        UserProfile user = views.detail(userId, accessor);
         try {
+            Accessor accessor = getRequesterUserProfile();
+            UserProfile user = views.detail(userId, accessor);
             for (String id : otherIds) {
                 user.addBlocked(manager.getFrame(id, UserProfile.class));
             }
@@ -252,9 +252,9 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
             @PathParam("userId") String userId,
             @QueryParam(ID_PARAM) List<String> otherIds)
             throws BadRequester, PermissionDenied, ItemNotFound {
-        Accessor accessor = getRequesterUserProfile();
-        UserProfile user = views.detail(userId, accessor);
         try {
+            Accessor accessor = getRequesterUserProfile();
+            UserProfile user = views.detail(userId, accessor);
             for (String id : otherIds) {
                 user.removeBlocked(manager.getFrame(id, UserProfile.class));
             }
@@ -282,9 +282,9 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
             @PathParam("userId") String userId,
             @QueryParam(ID_PARAM) List<String> otherIds)
             throws BadRequester, PermissionDenied, ItemNotFound {
-        Accessor accessor = getRequesterUserProfile();
-        UserProfile user = views.detail(userId, accessor);
         try {
+            Accessor accessor = getRequesterUserProfile();
+            UserProfile user = views.detail(userId, accessor);
             for (String id : otherIds) {
                 user.addWatching(manager.getFrame(id, Watchable.class));
             }
@@ -301,9 +301,9 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
             @PathParam("userId") String userId,
             @QueryParam(ID_PARAM) List<String> otherIds)
             throws BadRequester, PermissionDenied, ItemNotFound {
-        Accessor accessor = getRequesterUserProfile();
-        UserProfile user = views.detail(userId, accessor);
         try {
+            Accessor accessor = getRequesterUserProfile();
+            UserProfile user = views.detail(userId, accessor);
             for (String id :  otherIds) {
                 user.removeWatching(manager.getFrame(id, Watchable.class));
             }
