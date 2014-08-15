@@ -91,10 +91,9 @@ public final class VirtualUnitResource extends
             throws ItemNotFound, BadRequester, PermissionDenied {
         try {
             UserProfile currentUser = getCurrentUser();
-            VirtualUnit parent = manager.getFrame(id, VirtualUnit.class);
-            for (DocumentaryUnit unit : getIncludedUnits(includedIds, currentUser)) {
-                parent.addIncludedUnit(unit);
-            }
+            VirtualUnit parent = views.detail(id, currentUser);
+            vuViews.addIncludedUnits(parent,
+                    getIncludedUnits(includedIds, currentUser), currentUser);
             graph.getBaseGraph().commit();
             return Response.status(Response.Status.OK).build();
         } finally {
@@ -109,10 +108,9 @@ public final class VirtualUnitResource extends
             throws ItemNotFound, BadRequester, PermissionDenied {
         try {
             UserProfile currentUser = getCurrentUser();
-            VirtualUnit parent = manager.getFrame(id, VirtualUnit.class);
-            for (DocumentaryUnit unit : getIncludedUnits(includedIds, currentUser)) {
-                parent.removeIncludedUnit(unit);
-            }
+            VirtualUnit parent = views.detail(id, currentUser);
+            vuViews.removeIncludedUnits(parent,
+                    getIncludedUnits(includedIds, currentUser), currentUser);
             graph.getBaseGraph().commit();
             return Response.status(Response.Status.OK).build();
         } finally {
