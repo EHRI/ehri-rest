@@ -79,6 +79,7 @@ public interface VirtualUnit extends AbstractUnit {
     @JavaHandler
     public void removeIncludedUnit(final DocumentaryUnit unit);
 
+    @Fetch(Ontology.VC_HAS_AUTHOR)
     @Adjacency(label = Ontology.VC_HAS_AUTHOR, direction = Direction.OUT)
     public Accessor getAuthor();
 
