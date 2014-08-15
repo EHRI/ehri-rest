@@ -58,6 +58,9 @@ public interface UserProfile extends Accessor, AccessibleEntity, IdentifiableEnt
     @Override
     public Iterable<Annotation> getAnnotations();
 
+    @Adjacency(label = Ontology.VC_HAS_AUTHOR, direction = Direction.IN)
+    public Iterable<VirtualUnit> getVirtualUnits();
+
     @JavaHandler
     public void addWatching(final Watchable item);
 

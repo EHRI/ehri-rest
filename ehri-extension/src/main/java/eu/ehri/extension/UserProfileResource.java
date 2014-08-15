@@ -4,10 +4,7 @@ import com.google.common.collect.Sets;
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.*;
-import eu.ehri.project.models.Annotation;
-import eu.ehri.project.models.Group;
-import eu.ehri.project.models.Link;
-import eu.ehri.project.models.UserProfile;
+import eu.ehri.project.models.*;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.base.Watchable;
 import eu.ehri.project.persistence.Bundle;
@@ -345,5 +342,16 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
         Accessor accessor = getRequesterUserProfile();
         UserProfile user = views.detail(userId, accessor);
         return streamingPage(getQuery(Link.class).page(user.getLinks(), accessor));
+    }
+
+    @GET
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Path("{userId:.+}/" + Entities.VIRTUAL_UNIT)
+    public Response pageVirtualUnits(@PathParam("userId") String userId)
+            throws ItemNotFound, BadRequester {
+        Accessor accessor = getRequesterUserProfile();
+        UserProfile user = views.detail(userId, accessor);
+        return streamingPage(getQuery(VirtualUnit.class)
+                .page(user.getVirtualUnits(), accessor));
     }
 }
