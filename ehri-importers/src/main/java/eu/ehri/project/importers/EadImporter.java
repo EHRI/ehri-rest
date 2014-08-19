@@ -252,6 +252,10 @@ public class EadImporter extends EaImporter {
         List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
         for (String key : data.keySet()) {
             if (key.endsWith(ACCESS_POINT)) {
+                logger.debug(key + data.get(key).getClass());
+                for(Object o : (List) data.get(key)){
+                    logger.debug(""+o.getClass());
+                }
                 //type, targetUrl, targetName, notes
                 for (Map<String, Object> origRelation : (List<Map<String, Object>>) data.get(key)) {
                     Map<String, Object> relationNode = new HashMap<String, Object>();

@@ -70,4 +70,15 @@ public class NodePropertiesTest {
         assertEquals("objectIdentifier", f.getProperty("did/unitid/@ehrilabel$ehri_main_identifier"));
         assertEquals("ehri_main_identifier", f.getValueForAttributeProperty("did/unitid/", "@ehrilabel"));
     }
+    
+    @Test
+    public void getPropertyWithoutSchema(){
+        String propfile = "dceuropeana.properties";
+        logger.debug(propfile);
+        XmlImportProperties f = new XmlImportProperties(propfile);
+        
+        assertTrue(f.containsProperty("identifier/"));
+        assertEquals("objectIdentifier", f.getProperty("identifier/"));
+        
+    }
 }
