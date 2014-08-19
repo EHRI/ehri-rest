@@ -122,6 +122,8 @@ public class EacImporter extends EaImporter {
     @Override
     protected Map<String, Object> extractUnitDescription(Map<String, Object> itemData, EntityClass entity) {
         Map<String, Object> description = new HashMap<String, Object>();
+        description.put(Ontology.CREATION_PROCESS, Description.CreationProcess.IMPORT.toString());
+
         for (String key : itemData.keySet()) {
             if (key.equals("descriptionIdentifier")) {
                 description.put(Ontology.IDENTIFIER_KEY, itemData.get(key));
