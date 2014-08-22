@@ -14,6 +14,7 @@ import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.HistoricalAgent;
 import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.cvoc.AuthoritativeSet;
 import eu.ehri.project.persistence.Bundle;
@@ -107,6 +108,8 @@ public class PersonalitiesImporter extends XmlImporter<Object> {
 
     private Map<String, Object> extractUnitDescription(Map<String, Object> itemData, EntityClass entityClass) {
         Map<String, Object> item = new HashMap<String, Object>();
+        item.put(Ontology.CREATION_PROCESS, Description.CreationProcess.IMPORT.toString());
+
 
         SaxXmlHandler.putPropertyInGraph(item, Ontology.NAME_KEY, getName(itemData));
         for (String key : itemData.keySet()) {

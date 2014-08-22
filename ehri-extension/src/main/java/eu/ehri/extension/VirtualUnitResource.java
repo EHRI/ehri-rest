@@ -118,6 +118,26 @@ public final class VirtualUnitResource extends
         }
     }
 
+    @POST
+    @Path("/{from:.+}/" + INCLUDED + "/{to:.+}")
+    public Response moveIncludedVirtualUnits(
+            @PathParam("from") String fromId, @PathParam("to") String toId,
+            @QueryParam(ID_PARAM) List<String> includedIds)
+            throws ItemNotFound, BadRequester, PermissionDenied {
+        try {
+            UserProfile currentUser = getCurrentUser();
+            VirtualUnit fromVu = views.detail(fromId, currentUser);
+            VirtualUnit toVu = views.detail(toId, currentUser);
+            Iterable<DocumentaryUnit> units = getIncludedUnits(includedIds, currentUser);
+            vuViews.removeIncludedUnits(fromVu, units, currentUser);
+            vuViews.addIncludedUnits(toVu, units, currentUser);
+            graph.getBaseGraph().commit();
+            return Response.status(Response.Status.OK).build();
+        } finally {
+            cleanupTransaction();
+        }
+    }
+
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/count")

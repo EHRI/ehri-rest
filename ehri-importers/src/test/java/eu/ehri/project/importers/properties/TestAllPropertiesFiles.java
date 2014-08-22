@@ -112,7 +112,12 @@ public class TestAllPropertiesFiles {
         logger.debug(propfile);
         assertTrue(p.check(new XmlImportProperties(propfile), EntityClass.DOCUMENT_DESCRIPTION));
     }
-
+  @Test
+    public void testDcEuropeanaProperties() {
+        String propfile = "dceuropeana.properties";
+        logger.debug(propfile);
+        assertTrue(p.check(new XmlImportProperties(propfile), EntityClass.DOCUMENT_DESCRIPTION));
+    }
     @Test
     @Ignore //not used anymore
     public void testUkrainianDescXmlProperties() {
