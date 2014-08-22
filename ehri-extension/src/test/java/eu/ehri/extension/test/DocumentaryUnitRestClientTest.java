@@ -65,6 +65,15 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
     }
 
     @Test
+    public void testNotFoundWithValidUrl() throws Exception {
+        // Create
+        ClientResponse response = jsonCallAs(getAdminUserProfileId(),
+                ehriUri(Entities.DOCUMENTARY_UNIT, "r1"))
+                .get(ClientResponse.class);
+        assertStatus(NOT_FOUND, response);
+    }
+
+    @Test
     public void testCacheControl() throws Exception {
         // Create
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),

@@ -159,6 +159,9 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
         graph.getBaseGraph().checkNotInTransaction();
         try {
             E entity = views.detail(id, getRequesterUserProfile());
+            if (!manager.getEntityClass(entity).getEntityClass().equals(cls)) {
+                throw new ItemNotFound(id);
+            }
             return Response.status(Status.OK)
                     .entity(getRepresentation(entity).getBytes())
                     .cacheControl(getCacheControl(entity)).build();
