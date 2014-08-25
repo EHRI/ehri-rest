@@ -54,7 +54,7 @@ public class CegesomaNolaTest extends AbstractImporterTest{
        GraphDiff diff = diffGraph(graphState1, graphState2);
        diff.printDebug(System.out);
         
-        printGraph(graph);
+//        printGraph(graph);
         // How many new nodes will have been created? We should have
         /** 
          * event links: 6
