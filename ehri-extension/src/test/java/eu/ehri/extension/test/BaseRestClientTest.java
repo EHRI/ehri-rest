@@ -21,6 +21,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static com.sun.jersey.api.client.ClientResponse.Status.OK;
 
@@ -30,6 +32,8 @@ import static com.sun.jersey.api.client.ClientResponse.Status.OK;
 public class BaseRestClientTest extends RunningServerTest {
 
     protected static Client client = Client.create();
+
+    protected static Pattern paginationPattern = Pattern.compile("page=(-?\\d+); count=(-?\\d+); total=(-?\\d+)");
 
     // Admin user prefix - depends on fixture data
     final static private String adminUserProfileId = "mike";
@@ -101,6 +105,28 @@ public class BaseRestClientTest extends RunningServerTest {
     protected List<Map<String, Object>> getEntityList(String entityType,
             String userId, MultivaluedMap<String, String> params) throws Exception {
         return getItemList("/" + entityType + "/list", userId, params);
+    }
+
+    protected Integer getPaginationPage(ClientResponse response) {
+        MultivaluedMap<String,String> headers = response.getHeaders();
+        String range = headers.getFirst("Content-Range");
+        if (range != null && range.matches(paginationPattern.pattern())) {
+            Matcher matcher = paginationPattern.matcher(range);
+            matcher.find();
+            return Integer.valueOf(matcher.group(1));
+        }
+        return null;
+    }
+
+    protected Integer getPaginationTotal(ClientResponse response) {
+        MultivaluedMap<String,String> headers = response.getHeaders();
+        String range = headers.getFirst("Content-Range");
+        if (range != null && range.matches(paginationPattern.pattern())) {
+            Matcher matcher = paginationPattern.matcher(range);
+            matcher.find();
+            return Integer.valueOf(matcher.group(3));
+        }
+        return null;
     }
 
     protected Long getEntityCount(String entityType,

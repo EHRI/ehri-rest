@@ -51,7 +51,7 @@ public class GhettosImporterTest extends AbstractImporterTest {
         Query<Concept> query = new Query<Concept>(graph, Concept.class);
 
         // Query for document identifier.
-        List<Concept> list = toList(query.setLimit(1).list(
+        List<Concept> list = toList(query.setCount(1).page(
                 Ontology.IDENTIFIER_KEY, skosConceptId, validUser));
 
         Concept ghetto0 = list.get(0);

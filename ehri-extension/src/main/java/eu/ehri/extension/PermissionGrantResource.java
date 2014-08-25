@@ -1,21 +1,20 @@
 package eu.ehri.extension;
 
+import eu.ehri.extension.errors.BadRequester;
+import eu.ehri.project.definitions.Entities;
+import eu.ehri.project.exceptions.ItemNotFound;
+import eu.ehri.project.exceptions.PermissionDenied;
+import eu.ehri.project.exceptions.SerializationError;
+import eu.ehri.project.models.EntityClass;
+import eu.ehri.project.models.PermissionGrant;
+import eu.ehri.project.views.AclViews;
+import org.neo4j.graphdb.GraphDatabaseService;
+
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-
-import eu.ehri.project.exceptions.SerializationError;
-import org.neo4j.graphdb.GraphDatabaseService;
-
-import eu.ehri.extension.errors.BadRequester;
-import eu.ehri.project.definitions.Entities;
-import eu.ehri.project.exceptions.ItemNotFound;
-import eu.ehri.project.exceptions.PermissionDenied;
-import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.PermissionGrant;
-import eu.ehri.project.views.AclViews;
 
 /**
  * Provides a RESTful interface for the PermissionGrant class.
@@ -34,8 +33,8 @@ public class PermissionGrantResource extends AbstractRestResource {
     /**
      * Fetch a given permission grant.
      *
-     * @param id
-     * @return
+     * @param id The ID of the permission grant
+     * @return The permission grant
      * @throws ItemNotFound
      * @throws PermissionDenied
      * @throws BadRequester
@@ -53,9 +52,8 @@ public class PermissionGrantResource extends AbstractRestResource {
     }
     /**
      * Revoke a particular permission grant.
-     * 
-     * @param id
-     * @return
+     *
+     * @param id The ID of the permission grant
      * @throws ItemNotFound
      * @throws PermissionDenied
      * @throws BadRequester

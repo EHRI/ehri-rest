@@ -9,6 +9,7 @@ import com.tinkerpop.frames.modules.javahandler.JavaHandlerContext;
 import com.tinkerpop.gremlin.java.GremlinPipeline;
 import com.tinkerpop.pipes.PipeFunction;
 import com.tinkerpop.pipes.branch.LoopPipe;
+import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.annotations.EntityType;
@@ -28,7 +29,7 @@ public interface SystemEvent extends AccessibleEntity {
 
     @Mandatory
     @Property(Ontology.EVENT_TYPE)
-    public String getEventType();
+    public EventTypes getEventType();
 
     @Property(Ontology.EVENT_LOG_MESSAGE)
     public String getLogMessage();

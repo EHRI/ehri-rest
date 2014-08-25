@@ -1,33 +1,20 @@
 package eu.ehri.extension;
 
-import java.util.List;
+import eu.ehri.extension.errors.BadRequester;
+import eu.ehri.project.acl.PermissionType;
+import eu.ehri.project.definitions.Entities;
+import eu.ehri.project.exceptions.*;
+import eu.ehri.project.models.base.Accessor;
+import eu.ehri.project.models.cvoc.Concept;
+import eu.ehri.project.persistence.Bundle;
+import org.neo4j.graphdb.GraphDatabaseService;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.StreamingOutput;
-
-import eu.ehri.project.acl.PermissionType;
-import eu.ehri.project.exceptions.*;
-import eu.ehri.project.views.ViewHelper;
-import org.neo4j.graphdb.GraphDatabaseService;
-
-import eu.ehri.extension.errors.BadRequester;
-import eu.ehri.project.definitions.Entities;
-import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.models.cvoc.Concept;
-import eu.ehri.project.views.Query;
+import java.util.List;
 
 /**
  * Provides a RESTful interface for the cvoc.Concept. Note that the concept
@@ -53,52 +40,34 @@ public class CvocConceptResource extends
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/list")
-    public StreamingOutput listCvocConcepts(
-            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
-            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
-            @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)
-            throws ItemNotFound, BadRequester {
-        return list(offset, limit, order, filters);
+    public Response listCvocConcepts() throws ItemNotFound, BadRequester {
+        return page();
     }
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/count")
-    public Response countCvocConcepts(@QueryParam(FILTER_PARAM) List<String> filters)
-            throws ItemNotFound, BadRequester {
-        return count(filters);
-    }
-
-    @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/page")
-    public StreamingOutput pageCvocConcepts(
-            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
-            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
-            @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)
-            throws ItemNotFound, BadRequester {
-        return page(offset, limit, order, filters);
+    public long countCvocConcepts() throws ItemNotFound, BadRequester {
+        return count();
     }
 
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    public Response updateCvocConcept(String json) throws PermissionDenied,
+    public Response updateCvocConcept(Bundle bundle) throws PermissionDenied,
             IntegrityError, ValidationError, DeserializationError,
             ItemNotFound, BadRequester {
-        return update(json);
+        return update(bundle);
     }
 
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}")
-    public Response updateCvocConcept(@PathParam("id") String id, String json)
+    public Response updateCvocConcept(@PathParam("id") String id, Bundle bundle)
             throws AccessDenied, PermissionDenied, IntegrityError, ValidationError,
             DeserializationError, ItemNotFound, BadRequester {
-        return update(id, json);
+        return update(id, bundle);
     }
 
     @DELETE
@@ -114,7 +83,7 @@ public class CvocConceptResource extends
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/narrower/list")
-    public StreamingOutput getCvocNarrowerConcepts(@PathParam("id") String id)
+    public Response getCvocNarrowerConcepts(@PathParam("id") String id)
             throws ItemNotFound, AccessDenied, BadRequester {
         Concept concept = views.detail(id, getRequesterUserProfile());
         return streamingList(concept.getNarrowerConcepts());
@@ -123,54 +92,22 @@ public class CvocConceptResource extends
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/list")
-    public StreamingOutput listCvocNarrowerConcepts(
-            @PathParam("id") String id,
-            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
-            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
-            @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)
-
-    throws ItemNotFound, AccessDenied, BadRequester {
+    public Response listCvocNarrowerConcepts(@PathParam("id") String id)
+            throws ItemNotFound, AccessDenied, BadRequester {
         Accessor user = getRequesterUserProfile();
         Concept concept = views.detail(id, user);
-        Query<Concept> query = new Query<Concept>(graph, Concept.class)
-                .setLimit(limit).setOffset(offset).orderBy(order)
-                .filter(filters);
-        return streamingList(query.list(concept.getNarrowerConcepts(), user));
+        return streamingPage(getQuery(Concept.class)
+                .page(concept.getNarrowerConcepts(), user));
     }
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/count")
-    public Response countCvocNarrowerConcepts(
-            @PathParam("id") String id,
-            @QueryParam(FILTER_PARAM) List<String> filters)
+    public long countCvocNarrowerConcepts(@PathParam("id") String id)
             throws ItemNotFound, BadRequester, AccessDenied {
         Accessor user = getRequesterUserProfile();
         Concept concept = views.detail(id, user);
-        Query<Concept> query = new Query<Concept>(graph, Concept.class)
-                .filter(filters);
-        return Response.ok((query.count(concept.getNarrowerConcepts(), user))
-                .toString().getBytes()).build();
-    }
-
-    @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/{id:.+}/page")
-    public StreamingOutput pageCvocNarrowerConcepts(
-            @PathParam("id") String id,
-            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
-            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
-            @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)
-
-    throws ItemNotFound, AccessDenied, BadRequester {
-        Accessor user = getRequesterUserProfile();
-        Concept concept = views.detail(id, user);
-        Query<Concept> query = new Query<Concept>(graph, Concept.class)
-                .setLimit(limit).setOffset(offset).orderBy(order)
-                .filter(filters);
-        return streamingPage(query.page(concept.getNarrowerConcepts(), user));
+        return getQuery(Concept.class).count(concept.getNarrowerConcepts());
     }
 
     /**
@@ -218,7 +155,7 @@ public class CvocConceptResource extends
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/broader/list")
-    public StreamingOutput getCvocBroaderConcepts(@PathParam("id") String id)
+    public Response getCvocBroaderConcepts(@PathParam("id") String id)
             throws ItemNotFound, AccessDenied, BadRequester {
 
         Concept concept = views.detail(id, getRequesterUserProfile());
@@ -230,7 +167,7 @@ public class CvocConceptResource extends
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/related/list")
-    public StreamingOutput getCvocRelatedConcepts(@PathParam("id") String id)
+    public Response getCvocRelatedConcepts(@PathParam("id") String id)
             throws ItemNotFound, AccessDenied, BadRequester {
 
         Concept concept = views.detail(id, getRequesterUserProfile());
@@ -241,7 +178,7 @@ public class CvocConceptResource extends
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/relatedBy/list")
-    public StreamingOutput getCvocRelatedByConcepts(@PathParam("id") String id)
+    public Response getCvocRelatedByConcepts(@PathParam("id") String id)
             throws ItemNotFound, AccessDenied, BadRequester {
 
         Concept concept = views.detail(id, getRequesterUserProfile());
@@ -295,7 +232,7 @@ public class CvocConceptResource extends
      * Create a top-level concept unit for this vocabulary.
      * 
      * @param id The vocabulary id
-     * @param json The new concept data
+     * @param bundle The new concept data
      * @return The new concept
      * @throws PermissionDenied
      * @throws AccessDenied
@@ -310,12 +247,12 @@ public class CvocConceptResource extends
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/" + Entities.CVOC_CONCEPT)
     public Response createNarrowerConcept(@PathParam("id") String id,
-            String json, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
+            Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws AccessDenied, PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, ItemNotFound, BadRequester {
         final Accessor user = getRequesterUserProfile();
         final Concept parent = views.detail(id, user);
-        return create(json, accessors, new Handler<Concept>() {
+        return create(bundle, accessors, new Handler<Concept>() {
             @Override
             public void process(Concept concept) {
                 parent.addNarrowerConcept(concept);

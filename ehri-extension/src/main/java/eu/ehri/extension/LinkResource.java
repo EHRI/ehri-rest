@@ -2,8 +2,8 @@ package eu.ehri.extension;
 
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.acl.PermissionType;
-import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.definitions.Entities;
+import eu.ehri.project.definitions.EventTypes;
 import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.Link;
@@ -14,7 +14,6 @@ import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.BundleDAO;
 import eu.ehri.project.views.LinkViews;
 import eu.ehri.project.views.Query;
-import eu.ehri.project.views.ViewHelper;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.*;
@@ -22,7 +21,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.StreamingOutput;
 import java.util.List;
 
 /**
@@ -63,13 +61,8 @@ public class LinkResource extends
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/list")
-    public StreamingOutput listLinks(
-            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
-            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
-            @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)
-            throws ItemNotFound, BadRequester {
-        return list(offset, limit, order, filters);
+    public Response listLinks() throws ItemNotFound, BadRequester {
+        return page();
     }
 
     /**
@@ -77,10 +70,10 @@ public class LinkResource extends
      */
     @PUT
     @Path("/{id:.+}")
-    public Response updateLink(@PathParam("id") String id, String json)
+    public Response updateLink(@PathParam("id") String id, Bundle bundle)
             throws AccessDenied, PermissionDenied, ItemNotFound, ValidationError,
             BadRequester, DeserializationError, IntegrityError {
-        return update(id, json);
+        return update(id, bundle);
     }
 
     /**
@@ -88,7 +81,7 @@ public class LinkResource extends
      *
      * @param targetId  The link target
      * @param sourceId  The link source
-     * @param json      The link body data
+     * @param bundle      The link body data
      * @param bodies    optional list of entities to provide the body
      * @param accessors The IDs of accessors who can see this link
      * @return The created link item
@@ -105,7 +98,7 @@ public class LinkResource extends
     @Path("{targetId:.+}/{sourceId:.+}")
     public Response createLinkFor(
             @PathParam("targetId") String targetId,
-            @PathParam("sourceId") String sourceId, String json,
+            @PathParam("sourceId") String sourceId, Bundle bundle,
             @QueryParam(BODY_PARAM) List<String> bodies,
             @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws PermissionDenied, ValidationError, DeserializationError,
@@ -113,11 +106,11 @@ public class LinkResource extends
         Accessor user = getRequesterUserProfile();
         try {
             Link link = linkViews.createLink(targetId,
-                    sourceId, bodies, Bundle.fromString(json), user);
+                    sourceId, bodies, bundle, user);
             aclManager.setAccessors(link,
                     getAccessors(accessors, user));
             graph.getBaseGraph().commit();
-            return buildResponseFromAnnotation(link);
+            return creationResponse(link);
         } catch (SerializationError e) {
             graph.getBaseGraph().rollback();
             throw new RuntimeException(e);
@@ -161,23 +154,17 @@ public class LinkResource extends
         }
     }
 
-    private Response buildResponseFromAnnotation(Link link)
-            throws SerializationError {
-        String jsonStr = getSerializer().vertexFrameToJson(link);
-        return Response.status(Status.CREATED).entity((jsonStr).getBytes())
-                .build();
-    }
-
     /**
      * Returns a list of items linked to the given description.
      */
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/for/{id:.+}")
-    public StreamingOutput listRelatedItems(@PathParam("id") String id)
+    public Response listRelatedItems(@PathParam("id") String id)
             throws ItemNotFound, BadRequester {
-        Query<Link> linkQuery = new Query<Link>(graph, Link.class);
-        return streamingList(linkQuery.list(
+        Query<Link> linkQuery = new Query<Link>(graph, Link.class)
+                .setStream(isStreaming());
+        return streamingPage(linkQuery.setStream(isStreaming()).page(
                 manager.getFrame(id, LinkableEntity.class).getLinks(),
                 getRequesterUserProfile()));
     }

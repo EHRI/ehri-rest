@@ -1,37 +1,25 @@
 package eu.ehri.extension;
 
-import java.util.List;
-import java.util.Set;
+import com.google.common.collect.Sets;
+import eu.ehri.extension.errors.BadRequester;
+import eu.ehri.project.definitions.Entities;
+import eu.ehri.project.exceptions.*;
+import eu.ehri.project.models.EntityClass;
+import eu.ehri.project.models.Group;
+import eu.ehri.project.models.UserProfile;
+import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessor;
+import eu.ehri.project.persistence.Bundle;
+import eu.ehri.project.views.AclViews;
+import org.neo4j.graphdb.GraphDatabaseService;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.StreamingOutput;
-
-import com.google.common.collect.Sets;
-import eu.ehri.project.exceptions.*;
-import eu.ehri.project.models.UserProfile;
-import eu.ehri.project.views.AclViews;
-import org.neo4j.graphdb.GraphDatabaseService;
-
-import eu.ehri.extension.errors.BadRequester;
-import eu.ehri.project.definitions.Entities;
-import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.Group;
-import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.views.Query;
+import java.util.List;
+import java.util.Set;
 
 import static eu.ehri.extension.RestHelpers.produceErrorMessageJson;
 
@@ -58,39 +46,21 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/list")
-    public StreamingOutput listGroups(
-            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
-            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
-            @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)
-            throws ItemNotFound, BadRequester {
-        return list(offset, limit, order, filters);
+    public Response listGroups() throws ItemNotFound, BadRequester {
+        return page();
     }
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/count")
-    public Response countVocabularies(@QueryParam(FILTER_PARAM) List<String> filters)
-            throws ItemNotFound, BadRequester {
-        return count(filters);
-    }
-
-    @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/page")
-    public StreamingOutput pageGroups(
-            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
-            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
-            @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)
-            throws ItemNotFound, BadRequester {
-        return page(offset, limit, order, filters);
+    public long countVocabularies() throws ItemNotFound, BadRequester {
+        return count();
     }
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    public Response createGroup(String json,
+    public Response createGroup(Bundle bundle,
             @QueryParam(ACCESSOR_PARAM) List<String> accessors,
             @QueryParam(MEMBER_PARAM) List<String> members)
             throws PermissionDenied, ValidationError, IntegrityError,
@@ -101,7 +71,7 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
             for (String member : members) {
                 groupMembers.add(manager.getFrame(member, Accessor.class));
             }
-            return create(json, accessors, new Handler<Group>() {
+            return create(bundle, accessors, new Handler<Group>() {
                 @Override
                 public void process(Group group) throws PermissionDenied {
                     for (Accessor member: groupMembers) {
@@ -119,20 +89,20 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    public Response updateGroup(String json) throws AccessDenied, PermissionDenied,
+    public Response updateGroup(Bundle bundle) throws AccessDenied, PermissionDenied,
             IntegrityError, ValidationError, DeserializationError,
             ItemNotFound, BadRequester {
-        return update(json);
+        return update(bundle);
     }
 
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}")
-    public Response updateGroup(@PathParam("id") String id, String json)
+    public Response updateGroup(@PathParam("id") String id, Bundle bundle)
             throws AccessDenied, PermissionDenied, IntegrityError, ValidationError,
             DeserializationError, ItemNotFound, BadRequester {
-        return update(id, json);
+        return update(id, bundle);
     }
 
     /**
@@ -149,7 +119,7 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
         try {
             aclViews.addAccessorToGroup(group, accessor, getRequesterUserProfile());
             graph.getBaseGraph().commit();
-            return Response.status(Status.OK).build();
+            return Response.status(Status.OK).location(getItemUri(accessor)).build();
         } finally {
             cleanupTransaction();
         }
@@ -169,7 +139,7 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
         try {
             new AclViews(graph).removeAccessorFromGroup(group, accessor, getRequesterUserProfile());
             graph.getBaseGraph().commit();
-            return Response.status(Status.OK).build();
+            return Response.status(Status.OK).location(getItemUri(accessor)).build();
         } finally {
             cleanupTransaction();
         }
@@ -182,12 +152,8 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:[^/]+}/list")
-    public StreamingOutput listGroupMembers(
+    public Response listGroupMembers(
             @PathParam("id") String id,
-            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
-            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
-            @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters,
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all)
             throws ItemNotFound, BadRequester {
         Group group = manager.getFrame(id, EntityClass.GROUP, Group.class);
@@ -195,50 +161,19 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
         Iterable<AccessibleEntity> members = all
                 ? group.getAllUserProfileMembers()
                 : group.getMembersAsEntities();
-        Query<AccessibleEntity> query = new Query<AccessibleEntity>(graph, AccessibleEntity.class)
-                .setOffset(offset).setLimit(limit)
-                .orderBy(order).filter(filters);
-        return streamingList(query.list(members, getRequesterUserProfile()));
-    }
-
-    /**
-     * list members of the specified group; 
-     * UserProfiles and sub-Groups (direct descendants)
-     */
-    @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/{id:[^/]+}/page")
-    public StreamingOutput pageGroupMembers(
-    		@PathParam("id") String id,
-            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
-            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
-            @QueryParam(SORT_PARAM) List<String> order,            
-            @QueryParam(FILTER_PARAM) List<String> filters,
-            @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all)
-            throws ItemNotFound, BadRequester {
-        Group group = manager.getFrame(id, EntityClass.GROUP, Group.class);
-        Iterable<AccessibleEntity> members = all
-                ? group.getAllUserProfileMembers()
-                : group.getMembersAsEntities();
-        Query<AccessibleEntity> query = new Query<AccessibleEntity>(graph, AccessibleEntity.class)
-                .setOffset(offset).setLimit(limit)
-                .orderBy(order).filter(filters);
-        return streamingPage(query.page(members, getRequesterUserProfile()));
+        return streamingPage(getQuery(AccessibleEntity.class)
+                .page(members, getRequesterUserProfile()));
     }
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/count")
-    public Response countGroupMembers(
-            @PathParam("id") String id,
-            @QueryParam(FILTER_PARAM) List<String> filters)
+    public long countGroupMembers(@PathParam("id") String id)
             throws ItemNotFound, BadRequester, AccessDenied {
         Accessor user = getRequesterUserProfile();
         Group group = views.detail(id, user);
-        Query<AccessibleEntity> query = new Query<AccessibleEntity>(graph, AccessibleEntity.class)
-                .filter(filters);
-        return Response.ok((query.count(group.getMembersAsEntities(), user))
-                .toString().getBytes()).build();
+        return getQuery(AccessibleEntity.class)
+                .count(group.getMembersAsEntities());
     }
 
     /**

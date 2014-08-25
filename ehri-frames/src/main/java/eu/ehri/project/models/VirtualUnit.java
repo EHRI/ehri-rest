@@ -6,8 +6,6 @@ import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.modules.javahandler.JavaHandler;
 import com.tinkerpop.frames.modules.javahandler.JavaHandlerContext;
 import com.tinkerpop.gremlin.java.GremlinPipeline;
-import com.tinkerpop.pipes.PipeFunction;
-import com.tinkerpop.pipes.branch.LoopPipe;
 import com.tinkerpop.pipes.util.Pipeline;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.models.annotations.EntityType;
@@ -17,6 +15,7 @@ import eu.ehri.project.models.utils.JavaHandlerUtils;
 
 import static eu.ehri.project.models.utils.JavaHandlerUtils.addSingleRelationship;
 import static eu.ehri.project.models.utils.JavaHandlerUtils.addUniqueRelationship;
+import static eu.ehri.project.models.utils.JavaHandlerUtils.removeAllRelationships;
 
 /**
  * Virtual documentary unit. Note: a *virtual* unit can
@@ -67,25 +66,20 @@ public interface VirtualUnit extends AbstractUnit {
     @JavaHandler
     public Iterable<VirtualUnit> getAllChildren();
 
-    @Fetch(value = Ontology.VC_DESCRIBED_BY, full = true)
-    @Adjacency(label = Ontology.VC_DESCRIBED_BY, direction = Direction.OUT)
-    @Deprecated
-    public Iterable<DocumentDescription> getReferencedDescriptions();
-
-    
+    @Fetch(value = Ontology.VC_INCLUDES_UNIT, full = true)
     @Adjacency(label = Ontology.VC_INCLUDES_UNIT, direction = Direction.OUT)
-    public Iterable<AbstractUnit> getIncludedUnits();
+    public Iterable<DocumentaryUnit> getIncludedUnits();
 
     @JavaHandler
     public Iterable<Repository> getRepositories();
     
     @JavaHandler
-    @Deprecated
-    public void addReferencedDescription(final DocumentDescription description);
-
-    @JavaHandler
     public void addIncludedUnit(final DocumentaryUnit unit);
 
+    @JavaHandler
+    public void removeIncludedUnit(final DocumentaryUnit unit);
+
+    @Fetch(Ontology.VC_HAS_AUTHOR)
     @Adjacency(label = Ontology.VC_HAS_AUTHOR, direction = Direction.OUT)
     public Accessor getAuthor();
 
@@ -105,13 +99,12 @@ public interface VirtualUnit extends AbstractUnit {
             addSingleRelationship(it(), accessor.asVertex(), Ontology.VC_HAS_AUTHOR);
         }
 
-        @Deprecated
-        public void addReferencedDescription(final DocumentDescription description) {
-            addUniqueRelationship(it(), description.asVertex(), Ontology.VC_DESCRIBED_BY);
-        }
-        
         public void addIncludedUnit(final DocumentaryUnit unit) {
             addUniqueRelationship(it(), unit.asVertex(), Ontology.VC_INCLUDES_UNIT);
+        }
+
+        public void removeIncludedUnit(final DocumentaryUnit unit) {
+            removeAllRelationships(it(), unit.asVertex(), Ontology.VC_INCLUDES_UNIT);
         }
 
         public Long getChildCount() {

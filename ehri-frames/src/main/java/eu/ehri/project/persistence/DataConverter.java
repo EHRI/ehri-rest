@@ -19,10 +19,7 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
+import java.io.*;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -34,11 +31,12 @@ class DataConverter {
 
     /**
      * Convert an error set to a generic data structure.
-     * @param errorSet
-     * @return
+     *
+     * @param errorSet An ErrorSet instance
+     * @return A map containing the error set data
      */
-    public static Map<String,Object> errorSetToData(ErrorSet errorSet) {
-        Map<String,Object> data = Maps.newHashMap();
+    public static Map<String, Object> errorSetToData(ErrorSet errorSet) {
+        Map<String, Object> data = Maps.newHashMap();
         data.put(ErrorSet.ERROR_KEY, errorSet.getErrors().asMap());
         Map<String, List<Map<String, Object>>> relations = Maps.newHashMap();
         Multimap<String, ErrorSet> crelations = errorSet.getRelations();
@@ -56,10 +54,9 @@ class DataConverter {
     /**
      * Convert an error set to JSON.
      *
-     * @param errorSet
-     * @return
+     * @param errorSet An ErrorSet instance
+     * @return A JSON string representing the error set
      * @throws SerializationError
-     *
      */
     public static String errorSetToJson(ErrorSet errorSet) throws SerializationError {
         Map<String, Object> data = errorSetToData(errorSet);
@@ -77,9 +74,9 @@ class DataConverter {
 
     /**
      * Convert a bundle to a generic data structure.
-     * 
-     * @param bundle
-     * @return
+     *
+     * @param bundle The bundle
+     * @return A data map
      */
     public static Map<String, Object> bundleToData(Bundle bundle) {
         Map<String, Object> data = Maps.newHashMap();
@@ -104,11 +101,10 @@ class DataConverter {
 
     /**
      * Convert a bundle to JSON.
-     * 
-     * @param bundle
-     * @return
+     *
+     * @param bundle The bundle
+     * @return A JSON string representing the bundle
      * @throws SerializationError
-     * 
      */
     public static String bundleToJson(Bundle bundle) throws SerializationError {
         Map<String, Object> data = bundleToData(bundle);
@@ -126,18 +122,31 @@ class DataConverter {
 
     /**
      * Convert some JSON into an EntityBundle.
-     * 
-     * @param json
-     * @return
+     *
+     * @param inputStream An input stream containing JSON representing the bundle
+     * @return The bundle
+     * @throws DeserializationError
+     */
+    public static Bundle streamToBundle(InputStream inputStream) throws DeserializationError {
+        try {
+            return dataToBundle(mapper.readValue(inputStream, Map.class));
+        } catch (DeserializationError e) {
+            throw e;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new DeserializationError("Error decoding JSON", e);
+        }
+    }
+
+    /**
+     * Convert some JSON into an EntityBundle.
+     *
+     * @param json A JSON string representing the bundle
+     * @return The bundle
      * @throws DeserializationError
      */
     public static Bundle jsonToBundle(String json) throws DeserializationError {
         try {
-            // FIXME: For some reason I can't fathom, a type reference is not
-            // working here.
-            // When I add one in for HashMap<String,Object>, the return value of
-            // readValue
-            // just seems to be Object ???
             return dataToBundle(mapper.readValue(json, Map.class));
         } catch (DeserializationError e) {
             throw e;
@@ -149,21 +158,21 @@ class DataConverter {
 
     /**
      * Convert generic data into a bundle.
-     * 
+     * <p/>
      * Prize to whomever can remove all the unchecked warnings. I don't really
      * know how else to do this otherwise.
-     * 
+     * <p/>
      * NB: We also strip out all NULL property values at this stage.
-     * 
+     *
      * @throws DeserializationError
      */
     public static Bundle dataToBundle(Object rawData)
             throws DeserializationError {
-        
+
         // Check what we've been given is actually a Map...
         if (!(rawData instanceof Map<?, ?>))
             throw new DeserializationError("Bundle data must be a map value.");
-        
+
         Map<?, ?> data = (Map<?, ?>) rawData;
         String id = (String) data.get(Bundle.ID_KEY);
         EntityClass type = getType(data);
@@ -178,7 +187,7 @@ class DataConverter {
 
     /**
      * Extract relationships from the bundle data.
-     * 
+     *
      * @param data A plain map
      * @return A
      * @throws DeserializationError
@@ -222,9 +231,9 @@ class DataConverter {
     /**
      * Get the type key, which should correspond the one of the EntityTypes enum
      * values.
-     * 
-     * @param data
-     * @return
+     *
+     * @param data The data, as an untyped map
+     * @return A type, extracted from the data
      * @throws DeserializationError
      */
     private static EntityClass getType(Map<?, ?> data)
@@ -237,12 +246,6 @@ class DataConverter {
         }
     }
 
-    /**
-     * Filter null values out of a map.
-     * 
-     * @param data A data map
-     * @return A map with null values removed
-     */
     private static Map<String, Object> sanitiseProperties(Map<?, ?> data) {
         Map<String, Object> cleaned = Maps.newHashMap();
         for (Entry<?, ?> entry : data.entrySet()) {
@@ -257,8 +260,9 @@ class DataConverter {
 
     /**
      * Convert a bundle to an XML document (currently with a very ad-hoc schema.)
-     * @param bundle
-     * @return
+     *
+     * @param bundle The bundle
+     * @return An XML document
      */
     public static Document bundleToXml(Bundle bundle) {
         DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
@@ -290,8 +294,8 @@ class DataConverter {
     /**
      * Pretty-print an XML document.
      *
-     * @param doc
-     * @param out
+     * @param doc The document
+     * @param out An OutputStream instance
      * @throws IOException
      * @throws TransformerException
      */
@@ -314,7 +318,7 @@ class DataConverter {
         root.setAttribute(Bundle.TYPE_KEY, bundle.getType().getName());
         Element data = document.createElement(Bundle.DATA_KEY);
         root.appendChild(data);
-        for (Entry<String,Object> entry : bundle.getData().entrySet()) {
+        for (Entry<String, Object> entry : bundle.getData().entrySet()) {
             String key = entry.getKey();
             Object value = entry.getValue();
             if (value != null) {
@@ -325,7 +329,7 @@ class DataConverter {
         if (!bundle.getRelations().isEmpty()) {
             Element relations = document.createElement(Bundle.REL_KEY);
             root.appendChild(relations);
-            for (Entry<String,Collection<Bundle>> entry : bundle.getRelations().asMap().entrySet()) {
+            for (Entry<String, Collection<Bundle>> entry : bundle.getRelations().asMap().entrySet()) {
                 Element relation = document.createElement(entry.getKey());
                 relations.appendChild(relation);
                 for (Bundle relationBundle : entry.getValue()) {
@@ -337,10 +341,10 @@ class DataConverter {
         return root;
     }
 
-    private  static Element bundleDataValueToElement(final Document document, String key, Object value) {
-        if (value instanceof  Object[]) {
+    private static Element bundleDataValueToElement(final Document document, String key, Object value) {
+        if (value instanceof Object[]) {
             Element dataValue = document.createElement("propertySequence");
-            for (Object item : (Object[])value) {
+            for (Object item : (Object[]) value) {
                 dataValue.appendChild(bundleDataValueToElement(document, key, item));
             }
             return dataValue;

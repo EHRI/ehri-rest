@@ -15,7 +15,7 @@ import static com.sun.jersey.api.client.ClientResponse.Status.OK;
 import static junit.framework.Assert.*;
 import org.junit.Ignore;
 
-public class GenericResourceClientTest extends BaseRestClientTest {
+public class GenericRestClientTest extends BaseRestClientTest {
 
     private static final String ITEM1 = "c1";
     private static final String ITEM2 = "c4";
@@ -28,19 +28,23 @@ public class GenericResourceClientTest extends BaseRestClientTest {
                 .segment("entities")
                 .queryParam("id", ITEM1)
                 .queryParam("id", ITEM2).build();
-        System.out.println("URI: " + uri);
         ClientResponse response = jsonCallAs(getAdminUserProfileId(), uri)
                 .get(ClientResponse.class);
         assertStatus(OK, response);
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode rootNode = mapper.readValue(response.getEntity(String.class),
-                JsonNode.class);
-        JsonNode idValue = rootNode.path(0).path(Bundle.ID_KEY);
-        assertFalse(idValue.isMissingNode());
-        assertEquals(ITEM1, idValue.getTextValue());
-        // ensure only one item was returned...
-        assertFalse(rootNode.path(1).isMissingNode());
-        assertTrue(rootNode.path(2).isMissingNode());
+        testResponse(response, ITEM1);
+    }
+
+    @Test
+    public void getMultipleGenericEntitiesByPost() throws IOException {
+        // Create
+        String payload = String.format("[\"%s\", \"%s\"]", ITEM1, ITEM2);
+        URI uri = UriBuilder.fromUri(getExtensionEntryPointUri())
+                .segment("entities").build();
+        ClientResponse response = jsonCallAs(getAdminUserProfileId(), uri)
+                .entity(payload)
+                .post(ClientResponse.class);
+        assertStatus(OK, response);
+        testResponse(response, ITEM1);
     }
 
     @Test
@@ -76,5 +80,17 @@ public class GenericResourceClientTest extends BaseRestClientTest {
 
         ClientResponse response = jsonCallAs(getAdminUserProfileId(), uri).get(ClientResponse.class);
         assertStatus(NOT_FOUND, response);
+    }
+
+    private void testResponse(ClientResponse response, String expectedId) throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode rootNode = mapper.readValue(response.getEntity(String.class),
+                JsonNode.class);
+        JsonNode idValue = rootNode.path(0).path(Bundle.ID_KEY);
+        assertFalse(idValue.isMissingNode());
+        assertEquals(expectedId, idValue.getTextValue());
+        // ensure only one item was returned...
+        assertFalse(rootNode.path(1).isMissingNode());
+        assertTrue(rootNode.path(2).isMissingNode());
     }
 }

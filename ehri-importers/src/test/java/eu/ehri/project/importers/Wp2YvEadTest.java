@@ -47,7 +47,8 @@ public class Wp2YvEadTest extends AbstractImporterTest {
 
         Repository agent = manager.getFrame(TEST_REPO, Repository.class);
         Bundle vocabularyBundle = new Bundle(EntityClass.CVOC_VOCABULARY)
-                                .withDataValue(Ontology.IDENTIFIER_KEY, "WP2_keywords");
+                                .withDataValue(Ontology.IDENTIFIER_KEY, "WP2_keywords")
+                                .withDataValue(Ontology.NAME_KEY, "WP2 Keywords");
         Bundle conceptBundle = new Bundle(EntityClass.CVOC_CONCEPT)
                                 .withDataValue(Ontology.IDENTIFIER_KEY, "KEYWORD.JMP.288");
         Vocabulary vocabulary = new CrudViews<Vocabulary>(graph, Vocabulary.class).create(vocabularyBundle,

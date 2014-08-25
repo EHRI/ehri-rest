@@ -24,7 +24,7 @@ import java.util.Set;
  *
  * @author mike
  */
-public final class AnnotationViews {
+public final class AnnotationViews implements Scoped<AnnotationViews> {
 
     private final FramedGraph<?> graph;
     private final AclManager acl;
@@ -107,5 +107,10 @@ public final class AnnotationViews {
             }
         });
         return deps.contains(child.getId());
+    }
+
+    @Override
+    public AnnotationViews withScope(PermissionScope scope) {
+        return new AnnotationViews(graph, scope);
     }
 }

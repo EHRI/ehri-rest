@@ -8,9 +8,12 @@ import com.tinkerpop.pipes.PipeFunction;
 import com.tinkerpop.pipes.branch.LoopPipe;
 import com.tinkerpop.pipes.util.Pipeline;
 import eu.ehri.project.acl.AclManager;
+import eu.ehri.project.acl.PermissionType;
 import eu.ehri.project.core.GraphManager;
 import eu.ehri.project.core.GraphManagerFactory;
 import eu.ehri.project.definitions.Ontology;
+import eu.ehri.project.exceptions.PermissionDenied;
+import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.EntityClass;
 import eu.ehri.project.models.VirtualUnit;
 import eu.ehri.project.models.base.Accessor;
@@ -25,11 +28,46 @@ public class VirtualUnitViews {
     private final FramedGraph<?> graph;
     private final GraphManager manager;
     private final AclManager aclManager;
+    private final ViewHelper viewHelper;
 
     public VirtualUnitViews(FramedGraph<?> graph) {
         this.graph = graph;
         this.manager = GraphManagerFactory.getInstance(graph);
         this.aclManager = new AclManager(graph);
+        this.viewHelper = new ViewHelper(graph);
+
+    }
+
+    /**
+     * Add documentary units to be included in a virtual unit as child items.
+     *
+     * @param parent   The parent VU
+     * @param included A set of child DUs
+     * @param accessor The current user
+     * @throws PermissionDenied
+     */
+    public void addIncludedUnits(VirtualUnit parent, Iterable<DocumentaryUnit> included, Accessor accessor)
+            throws PermissionDenied {
+        viewHelper.checkEntityPermission(parent, accessor, PermissionType.UPDATE);
+        for (DocumentaryUnit unit : included) {
+            parent.addIncludedUnit(unit);
+        }
+    }
+
+    /**
+     * Remove documentary units from a virtual unit as child items.
+     *
+     * @param parent   The parent VU
+     * @param included A set of child DUs
+     * @param accessor The current user
+     * @throws PermissionDenied
+     */
+    public void removeIncludedUnits(VirtualUnit parent, Iterable<DocumentaryUnit> included, Accessor accessor)
+            throws PermissionDenied {
+        viewHelper.checkEntityPermission(parent, accessor, PermissionType.UPDATE);
+        for (DocumentaryUnit unit : included) {
+            parent.removeIncludedUnit(unit);
+        }
     }
 
     /**

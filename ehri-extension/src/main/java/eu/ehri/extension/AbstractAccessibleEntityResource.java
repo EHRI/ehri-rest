@@ -1,34 +1,29 @@
 package eu.ehri.extension;
 
-import java.net.URI;
-import java.util.List;
-import java.util.Set;
-
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.*;
-import javax.ws.rs.core.Response.Status;
-
-//import org.apache.log4j.Logger;
+import com.google.common.collect.Sets;
+import com.tinkerpop.blueprints.Vertex;
+import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.exceptions.*;
+import eu.ehri.project.models.base.AccessibleEntity;
+import eu.ehri.project.models.base.Accessor;
+import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.Mutation;
 import eu.ehri.project.persistence.Serializer;
 import eu.ehri.project.views.AclViews;
+import eu.ehri.project.views.Query;
 import eu.ehri.project.views.ViewHelper;
+import eu.ehri.project.views.impl.LoggingCrudViews;
 import org.neo4j.graphdb.GraphDatabaseService;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-import com.tinkerpop.blueprints.Vertex;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.CacheControl;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+import java.util.List;
+import java.util.Set;
 
-import eu.ehri.extension.errors.BadRequester;
-import eu.ehri.project.models.EntityClass;
-import eu.ehri.project.models.base.AccessibleEntity;
-import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.models.utils.ClassUtils;
-import eu.ehri.project.persistence.Bundle;
-import eu.ehri.project.views.impl.LoggingCrudViews;
-import eu.ehri.project.views.Query;
 
 /**
  * Handle CRUD operations on AccessibleEntity's by using the
@@ -87,83 +82,32 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * @throws ItemNotFound
      * @throws BadRequester
      */
-    public StreamingOutput page(Integer offset, Integer limit,
-            Iterable<String> order, Iterable<String> filters)
-            throws ItemNotFound, BadRequester {
+    public Response page() throws ItemNotFound, BadRequester {
         graph.getBaseGraph().checkNotInTransaction();
-        final Query.Page<E> page = querier.setOffset(offset).setLimit(limit)
-                .orderBy(order).filter(filters).page(getRequesterUserProfile());
-        return streamingPage(page);
-    }
-
-    /**
-     * List all instances of the 'entity' accessible to the given user.
-     *
-     * @return A streaming list
-     * @throws ItemNotFound
-     * @throws BadRequester
-     */
-    public StreamingOutput page(Integer offset, Integer limit)
-            throws ItemNotFound, BadRequester {
-        final Query.Page<E> page = querier.setOffset(offset).setLimit(limit)
-                .page(getRequesterUserProfile());
-
-        return streamingPage(page);
-    }
-
-    /**
-     * List all instances of the 'entity' accessible to the given user.
-     *
-     * @return List of entities
-     * @throws ItemNotFound
-     * @throws BadRequester
-     */
-    public StreamingOutput list(Integer offset, Integer limit,
-            Iterable<String> order, Iterable<String> filters)
-            throws ItemNotFound, BadRequester {
-        graph.getBaseGraph().checkNotInTransaction();
-        final Query<E> query = querier.setOffset(offset).setLimit(limit)
-                .orderBy(order).filter(filters);
-        return streamingList(query.list(getRequesterUserProfile()));
-    }
-
-    /**
-     * List all instances of the 'entity' accessible to the given user.
-     *
-     * @return List of entities
-     * @throws ItemNotFound
-     * @throws BadRequester
-     */
-    public StreamingOutput list(Integer offset, Integer limit)
-            throws ItemNotFound, BadRequester {
-        graph.getBaseGraph().checkNotInTransaction();
-        return list(offset, limit, Lists.<String>newArrayList(),
-                Lists.<String>newArrayList());
+        return streamingPage(getQuery(cls).page(getRequesterUserProfile()));
     }
 
     /**
      * Count items accessible to a given user.
      *
-     * @param filters A set of query filters
      * @return Number of items.
      * @throws BadRequester
      */
-    public Response count(Iterable<String> filters) throws BadRequester {
-        Long count = querier.filter(filters).count(getRequesterUserProfile());
+    public long count() throws BadRequester {
         graph.getBaseGraph().checkNotInTransaction();
-        return numberResponse(count);
+        return getQuery(cls).count();
     }
 
     /**
      * Create an instance of the 'entity' in the database
      *
-     * @param json        The json representation of the entity to create (no vertex
-     *                    'id' fields)
-     * @param accessorIds List of accessors who can initially view this item
-     * @param handler     A callback function that allows additional operations
-     *                    to be run on the created object after it is initialised
-     *                    but before the response is generated. This is useful for adding
-     *                    relationships to the new item.
+     * @param entityBundle A bundle of item data
+     *                     'id' fields)
+     * @param accessorIds  List of accessors who can initially view this item
+     * @param handler      A callback function that allows additional operations
+     *                     to be run on the created object after it is initialised
+     *                     but before the response is generated. This is useful for adding
+     *                     relationships to the new item.
      * @return The response of the create request, the 'location' will contain
      *         the url of the newly created instance.
      * @throws PermissionDenied
@@ -172,12 +116,11 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * @throws DeserializationError
      * @throws BadRequester
      */
-    public Response create(String json, List<String> accessorIds, Handler<E> handler)
+    public Response create(Bundle entityBundle, List<String> accessorIds, Handler<E> handler)
             throws PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, BadRequester {
         graph.getBaseGraph().checkNotInTransaction();
         Accessor user = getRequesterUserProfile();
-        Bundle entityBundle = Bundle.fromString(json);
         try {
             E entity = views.create(entityBundle, user, getLogMessage());
             aclViews.setAccessors(entity, getAccessors(accessorIds, user), user);
@@ -186,11 +129,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
             handler.process(entity);
 
             graph.getBaseGraph().commit();
-            URI docUri = uriInfo.getBaseUriBuilder()
-                    .path(getClass())
-                    .path(entity.getId()).build();
-            return Response.status(Status.CREATED).location(docUri)
-                    .entity(getRepresentation(entity).getBytes()).build();
+            return creationResponse(entity);
         } catch (SerializationError serializationError) {
             graph.getBaseGraph().rollback();
             throw new RuntimeException(serializationError);
@@ -199,10 +138,10 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
         }
     }
 
-    public Response create(String json, List<String> accessorIds)
+    public Response create(Bundle entityBundle, List<String> accessorIds)
             throws PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, BadRequester {
-        return create(json, accessorIds, noOpHandler);
+        return create(entityBundle, accessorIds, noOpHandler);
     }
 
     /**
@@ -220,8 +159,12 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
         graph.getBaseGraph().checkNotInTransaction();
         try {
             E entity = views.detail(id, getRequesterUserProfile());
+            if (!manager.getEntityClass(entity).getEntityClass().equals(cls)) {
+                throw new ItemNotFound(id);
+            }
             return Response.status(Status.OK)
-                    .entity(getRepresentation(entity).getBytes()).build();
+                    .entity(getRepresentation(entity).getBytes())
+                    .cacheControl(getCacheControl(entity)).build();
         } catch (SerializationError e) {
             throw new WebApplicationException(e);
         }
@@ -230,7 +173,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
     /**
      * Update (change) an instance of the 'entity' in the database.
      *
-     * @param json The json
+     * @param entityBundle The bundle
      * @return The response of the update request
      * @throws ItemNotFound
      * @throws PermissionDenied
@@ -239,17 +182,17 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * @throws DeserializationError
      * @throws BadRequester
      */
-    public Response update(String json) throws PermissionDenied,
+    public Response update(Bundle entityBundle) throws PermissionDenied,
             IntegrityError, ValidationError, DeserializationError,
             BadRequester, ItemNotFound {
         graph.getBaseGraph().checkNotInTransaction();
         try {
-            Bundle entityBundle = Bundle.fromString(json);
             Mutation<E> update = views
                     .update(entityBundle, getRequesterUserProfile(), getLogMessage());
             graph.getBaseGraph().commit();
             return Response.status(Status.OK)
                     .entity(getRepresentation(update.getNode()).getBytes())
+                    .cacheControl(getCacheControl(update.getNode()))
                     .build();
         } catch (SerializationError serializationError) {
             graph.getBaseGraph().rollback();
@@ -266,7 +209,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * instead of overwritten.
      *
      * @param id   The items identifier property
-     * @param json The json
+     * @param rawBundle The bundle
      * @return The response of the update request
      * @throws AccessDenied
      * @throws PermissionDenied
@@ -276,24 +219,18 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * @throws ItemNotFound
      * @throws BadRequester
      */
-    public Response update(String id, String json) throws AccessDenied, PermissionDenied,
+    public Response update(String id, Bundle rawBundle) throws AccessDenied, PermissionDenied,
             IntegrityError, ValidationError, DeserializationError,
             ItemNotFound, BadRequester {
-        // FIXME: This is nasty because it searches for an item with the
-        // specified key/value and constructs a new bundle containing the
-        // item's graph id, which requires an extra
-        // serialization/deserialization.
         try {
             E entity = views.detail(id, getRequesterUserProfile());
-            Bundle rawBundle = Bundle.fromString(json);
             if (isPatch()) {
                 Serializer depSerializer = new Serializer.Builder(graph).dependentOnly().build();
                 Bundle existing = depSerializer.vertexFrameToBundle(entity);
-                rawBundle = existing.mergeDataWith(rawBundle);
+                return update(existing.mergeDataWith(rawBundle));
+            } else {
+                return update(rawBundle.withId(entity.getId()));
             }
-            Bundle entityBundle = new Bundle(entity.getId(), getEntityType(),
-                    rawBundle.getData(), rawBundle.getRelations());
-            return update(entityBundle.toJson());
         } catch (SerializationError serializationError) {
             graph.getBaseGraph().rollback();
             throw new RuntimeException(serializationError);
@@ -336,7 +273,7 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
     /**
      * Delete (remove) an instance of the 'entity' in the database
      *
-     * @param id         The vertex id
+     * @param id The vertex id
      * @return The response of the delete request
      * @throws AccessDenied
      * @throws PermissionDenied
@@ -351,10 +288,6 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
     }
     // Helpers
 
-    private EntityClass getEntityType() {
-        return ClassUtils.getEntityType(cls);
-    }
-
     protected Set<Accessor> getAccessors(List<String> accessorIds,
             Accessor current) {
 
@@ -366,8 +299,6 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
                 accessors.add(av);
                 accessorV.add(av.asVertex());
             } catch (ItemNotFound e) {
-                // FIXME: Using the logger gives a noclassdef found error
-                // logger.error("Invalid accessor given: " + id);
                 System.err.println("Invalid accessor given: " + id);
             }
         }
@@ -377,5 +308,24 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
             accessors.add(current);
         }
         return accessors;
+    }
+
+    /**
+     * Get a cache control header based on the access restrictions
+     * set on the item. If it is restricted, instruct clients not
+     * to cache the response.
+     *
+     * @param item The item
+     * @return A cache control object.
+     */
+    protected CacheControl getCacheControl(E item) {
+        CacheControl cc = new CacheControl();
+        if (!item.hasAccessRestriction()) {
+            cc.setMaxAge(ITEM_CACHE_TIME);
+        } else {
+            cc.setNoStore(true);
+            cc.setNoCache(true);
+        }
+        return cc;
     }
 }

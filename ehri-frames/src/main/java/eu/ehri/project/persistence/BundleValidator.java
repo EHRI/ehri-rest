@@ -11,7 +11,6 @@ import eu.ehri.project.models.annotations.EntityType;
 import eu.ehri.project.models.utils.ClassUtils;
 
 import java.text.MessageFormat;
-import java.util.List;
 import java.util.Map;
 
 /**

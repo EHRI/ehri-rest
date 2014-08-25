@@ -1,25 +1,27 @@
 package eu.ehri.extension.test;
 
 import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 import eu.ehri.extension.EventResource;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.persistence.Bundle;
+import eu.ehri.project.views.EventViews;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Test;
 
 import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
 import static com.sun.jersey.api.client.ClientResponse.Status.CREATED;
 import static com.sun.jersey.api.client.ClientResponse.Status.OK;
-import static eu.ehri.extension.UserProfileResource.FOLLOW;
-import static eu.ehri.extension.UserProfileResource.WATCH;
+import static eu.ehri.extension.AbstractRestResource.ID_PARAM;
+import static eu.ehri.extension.UserProfileResource.FOLLOWING;
+import static eu.ehri.extension.UserProfileResource.WATCHING;
 import static org.junit.Assert.*;
 
 public class SystemEventRestClientTest extends BaseRestClientTest {
@@ -82,7 +84,7 @@ public class SystemEventRestClientTest extends BaseRestClientTest {
     public void testGetActionsForItem() throws Exception {
 
         // Create an item
-        WebResource resource = client.resource(
+        client.resource(
                 ehriUri(Entities.COUNTRY, COUNTRY_CODE, Entities.REPOSITORY));
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
                 ehriUri(Entities.COUNTRY, COUNTRY_CODE, Entities.REPOSITORY))
@@ -116,7 +118,7 @@ public class SystemEventRestClientTest extends BaseRestClientTest {
         // Check the response contains a new version
         ObjectMapper mapper = new ObjectMapper();
         JsonNode rootNode = mapper.readValue(json, JsonNode.class);
-        assertFalse(rootNode.path("values").path(0).path(Bundle.DATA_KEY)
+        assertFalse(rootNode.path(0).path(Bundle.DATA_KEY)
                 .path(Ontology.VERSION_ENTITY_DATA).isMissingNode());
         assertStatus(OK, response);
     }
@@ -132,15 +134,18 @@ public class SystemEventRestClientTest extends BaseRestClientTest {
         assertStatus(OK, response);
 
         // At present, the personalised event stream for the validUser user should
-        // be empty because she's not watching any items
-
+        // contain all the regular events.
         String user = getRegularUserProfileId();
         String personalisedEventUrl = "/" + Entities.SYSTEM_EVENT + "/forUser/" + user;
         List<Map<String, Object>> events = getItemList(personalisedEventUrl, user);
-        assertTrue(events.isEmpty());
+        assertFalse(events.isEmpty());
 
         // Now start watching item r1
-        URI watchUrl = ehriUri(Entities.USER_PROFILE, user, WATCH, "r1");
+        URI watchUrl = UriBuilder.fromPath(getExtensionEntryPointUri())
+                .segment(Entities.USER_PROFILE)
+                .segment(user)
+                .segment(WATCHING)
+                .queryParam(ID_PARAM, "r1").build();
 
         jsonCallAs(user, watchUrl).post(ClientResponse.class);
 
@@ -151,16 +156,20 @@ public class SystemEventRestClientTest extends BaseRestClientTest {
         // Only get events for people we follow, excluding those
         // for items we watch...
         events = getItemList(personalisedEventUrl + "?" + EventResource.SHOW
-                + "=" + EventResource.SHOW_FOLLOWS, user);
+                + "=" + EventViews.ShowType.followed, user);
         assertEquals(0, events.size());
 
         // Now follow the other user...
-        URI followUrl = ehriUri(Entities.USER_PROFILE, user, FOLLOW, getAdminUserProfileId());
+        URI followUrl = UriBuilder.fromPath(getExtensionEntryPointUri())
+                .segment(Entities.USER_PROFILE)
+                .segment(user)
+                .segment(FOLLOWING)
+                .queryParam(ID_PARAM, getAdminUserProfileId()).build();
         jsonCallAs(user, followUrl).post(ClientResponse.class);
 
         // We should get the event again...
         events = getItemList(personalisedEventUrl + "?" + EventResource.SHOW
-                + "=" + EventResource.SHOW_FOLLOWS, user);
+                + "=" + EventViews.ShowType.followed, user);
         assertEquals(1, events.size());
     }
 }

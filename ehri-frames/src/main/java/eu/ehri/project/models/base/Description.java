@@ -35,8 +35,6 @@ public interface Description extends NamedEntity, AccessibleEntity {
      * Get the described entity of a description. This 
      * method if @Fetch serialized only if the description
      * is at the top level of the requested subtree.
-     * 
-     * @return
      */
     @Fetch(value = Ontology.DESCRIPTION_FOR_ENTITY, ifDepth=0)
     @Adjacency(label = Ontology.DESCRIPTION_FOR_ENTITY)

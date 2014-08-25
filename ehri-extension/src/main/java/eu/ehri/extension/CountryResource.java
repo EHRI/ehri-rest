@@ -3,18 +3,18 @@ package eu.ehri.extension;
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.*;
+import eu.ehri.project.models.Country;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.base.Accessor;
-import eu.ehri.project.models.Country;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.views.Query;
 import eu.ehri.project.views.impl.LoggingCrudViews;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.*;
-import javax.ws.rs.core.*;
-import javax.ws.rs.core.Response.Status;
-import java.net.URI;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.util.List;
 
 /**
@@ -43,57 +43,32 @@ public class CountryResource extends
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/list")
-    public StreamingOutput listCountries(
-            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
-            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
-            @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)
-            throws ItemNotFound, BadRequester {
-        return list(offset, limit, order, filters);
+    public Response listCountries() throws ItemNotFound, BadRequester {
+        return page();
     }
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/count")
-    public Response countCountries(@QueryParam(FILTER_PARAM) List<String> filters)
-            throws ItemNotFound, BadRequester {
-        return count(filters);
-    }
-
-    @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/page")
-    public StreamingOutput pageCountries(
-            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
-            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
-            @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)
-            throws ItemNotFound, BadRequester {
-        return page(offset, limit, order, filters);
+    public long countCountries() throws ItemNotFound, BadRequester {
+        return count();
     }
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/list")
-    public StreamingOutput listCountryRepositories(
-            @PathParam("id") String id,
-            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
-            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
-            @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)
+    public Response listCountryRepositories(@PathParam("id") String id)
             throws ItemNotFound, BadRequester, AccessDenied {
         Accessor user = getRequesterUserProfile();
         Country country = views.detail(id, user);
-        Query<Repository> query = new Query<Repository>(graph, Repository.class)
-                .setLimit(limit).setOffset(offset).orderBy(order)
-                .filter(filters);
-        return streamingList(query.list(country.getRepositories(), user));
+        return streamingPage(getQuery(Repository.class)
+                .page(country.getRepositories(), user));
     }
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/count")
-    public Response countCountryRepositories(
+    public long countCountryRepositories(
             @PathParam("id") String id,
             @QueryParam(FILTER_PARAM) List<String> filters)
             throws ItemNotFound, BadRequester, AccessDenied {
@@ -101,56 +76,37 @@ public class CountryResource extends
         Country country = views.detail(id, user);
         Query<Repository> query = new Query<Repository>(graph, Repository.class)
                 .filter(filters);
-        return Response.ok((query.count(country.getRepositories(), user))
-                .toString().getBytes()).build();
-    }
-
-    @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/{id:.+}/page")
-    public StreamingOutput pageCountryRepositories(
-            @PathParam("id") String id,
-            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
-            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
-            @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)
-            throws ItemNotFound, BadRequester, AccessDenied {
-        Accessor user = getRequesterUserProfile();
-        Country country = views.detail(id, user);
-        Query<Repository> query = new Query<Repository>(graph, Repository.class)
-                .setLimit(limit).setOffset(offset).orderBy(order)
-                .filter(filters);
-        return streamingPage(query.page(country.getRepositories(), user));
+        return query.count(country.getRepositories());
     }
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    public Response createCountry(String json,
+    public Response createCountry(Bundle bundle,
             @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, ItemNotFound, BadRequester {
-        return create(json, accessors);
+        return create(bundle, accessors);
     }
 
     // Note: json contains id
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    public Response updateCountry(String json) throws PermissionDenied,
+    public Response updateCountry(Bundle bundle) throws PermissionDenied,
             IntegrityError, ValidationError, DeserializationError,
             ItemNotFound, BadRequester {
-        return update(json);
+        return update(bundle);
     }
 
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}")
-    public Response updateCountry(@PathParam("id") String id, String json)
+    public Response updateCountry(@PathParam("id") String id, Bundle bundle)
             throws AccessDenied, PermissionDenied, IntegrityError, ValidationError,
             DeserializationError, ItemNotFound, BadRequester {
-        return update(id, json);
+        return update(id, bundle);
     }
 
     @DELETE
@@ -189,7 +145,7 @@ public class CountryResource extends
             aclManager.setAccessors(repository,
                     getAccessors(accessors, user));
             graph.getBaseGraph().commit();
-            return buildResponseFromRepository(repository);
+            return creationResponse(repository);
         } catch (SerializationError e) {
             graph.getBaseGraph().rollback();
             throw new RuntimeException(e);
@@ -199,19 +155,6 @@ public class CountryResource extends
     }
 
     // Helpers
-
-    private Response buildResponseFromRepository(Repository repository)
-            throws SerializationError {
-        String jsonStr = getSerializer().vertexFrameToJson(repository);
-        // FIXME: Hide the details of building this path
-        URI docUri = UriBuilder.fromUri(uriInfo.getBaseUri())
-                .segment(Entities.REPOSITORY)
-                .segment(repository.getId())
-                .build();
-
-        return Response.status(Status.CREATED).location(docUri)
-                .entity((jsonStr).getBytes()).build();
-    }
 
     private Repository createRepository(String json, Country country)
             throws DeserializationError, PermissionDenied, ValidationError,

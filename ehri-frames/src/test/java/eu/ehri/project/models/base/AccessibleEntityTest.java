@@ -107,6 +107,15 @@ public class AccessibleEntityTest extends AbstractFixtureTest {
         assertNotNull(c1.getLatestEvent());
     }
 
+    @Test
+    public void testHasAccessRestrictions() throws Exception {
+        AccessibleEntity ann3 = manager.getFrame("ann3", AccessibleEntity.class);
+        // Because ann4 is promoted, access is unrestricted.
+        AccessibleEntity ann4 = manager.getFrame("ann4", AccessibleEntity.class);
+        assertTrue(ann3.hasAccessRestriction());
+        assertFalse(ann4.hasAccessRestriction());
+    }
+
     private Mutation<DocumentaryUnit> doUpdate(DocumentaryUnit unit) throws Exception {
         Bundle doc = new Serializer(graph).vertexFrameToBundle(unit)
                 .withDataValue("somekey", "someval");

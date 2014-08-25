@@ -15,10 +15,11 @@ import eu.ehri.project.persistence.ActionManager;
  *
  * @author Mike Bryant (http://github.com/mikesname)
  */
-public class PromotionViews {
+public class PromotionViews implements Scoped<PromotionViews> {
 
     private final ViewHelper helper;
     private final ActionManager actionManager;
+    private final FramedGraph<?> graph;
 
     public static class NotPromotableError extends Exception {
         public NotPromotableError(String itemId) {
@@ -33,6 +34,7 @@ public class PromotionViews {
      * @param scope An item scope
      */
     public PromotionViews(FramedGraph<?> graph, PermissionScope scope) {
+        this.graph = graph;
         helper = new ViewHelper(graph, scope);
         actionManager = new ActionManager(graph, scope);
     }
@@ -74,5 +76,10 @@ public class PromotionViews {
         // I think probably not, since this is then correcting an error...
         item.removePromotion(user);
         actionManager.logEvent(item, user, EventTypes.demotion);
+    }
+
+    @Override
+    public PromotionViews withScope(PermissionScope scope) {
+        return new PromotionViews(graph, scope);
     }
 }

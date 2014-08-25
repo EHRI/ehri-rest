@@ -188,17 +188,13 @@ public class CvocConceptTest extends ModelTestBase {
 	// test creation of a vocabulary using the BundleDAO
 	@Test
 	public void testCreateVocabulary() throws Exception {
-		String name = "voc-test-id";
-		
-	  	System.out.println("Creating vocabulary: \"" + name + "\"");
-        Map<String, Object> vocabularyData = new HashMap<String, Object>();
-        vocabularyData.put(Ontology.IDENTIFIER_KEY, name);
-        //vocabularyData.put(EntityType.ID_KEY, name);
-        //vocabularyData.put("name", name);
-        Bundle bundle = new Bundle(EntityClass.CVOC_VOCABULARY, vocabularyData);
-        bundle = bundle.withId(name);
-        
+        String vocid = "voc-test-id";
+        Bundle bundle = Bundle.Builder.withClass(EntityClass.CVOC_VOCABULARY)
+                .setId(vocid)
+                .addDataValue(Ontology.IDENTIFIER_KEY, vocid)
+                .addDataValue(Ontology.NAME_KEY, "Test Vocabulaey")
+                .build();
          Vocabulary vocabulary = new BundleDAO(graph).create(bundle, Vocabulary.class);
-         assertEquals(name, vocabulary.getIdentifier());
+         assertEquals(vocid, vocabulary.getIdentifier());
 	}
 }

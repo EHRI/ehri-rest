@@ -3,19 +3,19 @@ package eu.ehri.extension;
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.*;
-import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.HistoricalAgent;
+import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.models.cvoc.AuthoritativeItem;
 import eu.ehri.project.models.cvoc.AuthoritativeSet;
 import eu.ehri.project.persistence.Bundle;
-import eu.ehri.project.views.Query;
 import eu.ehri.project.views.impl.LoggingCrudViews;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.*;
-import javax.ws.rs.core.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import java.net.URI;
 import java.util.List;
 
 /**
@@ -44,114 +44,68 @@ public class AuthoritativeSetResource extends
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/list")
-    public StreamingOutput listAuthoritativeSets(
-            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
-            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
-            @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)
-            throws ItemNotFound, BadRequester {
-        return list(offset, limit, order, filters);
+    public Response listAuthoritativeSets() throws ItemNotFound, BadRequester {
+        return page();
     }
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/count")
-    public Response countAuthoritativeSets(@QueryParam(FILTER_PARAM) List<String> filters)
-            throws ItemNotFound, BadRequester {
-        return count(filters);
-    }
-
-    @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/page")
-    public StreamingOutput pageAuthoritativeSets(
-            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
-            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
-            @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)
-            throws ItemNotFound, BadRequester {
-        return page(offset, limit, order, filters);
+    public long countAuthoritativeSets() throws ItemNotFound, BadRequester {
+        return count();
     }
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/list")
-    public StreamingOutput listAuthoritativeSetHistoricalAgents(
-            @PathParam("id") String id,
-            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
-            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
-            @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)
+    public Response listAuthoritativeSetHistoricalAgents(
+            @PathParam("id") String id)
             throws ItemNotFound, BadRequester, AccessDenied {
         Accessor user = getRequesterUserProfile();
         AuthoritativeSet set = views.detail(id, user);
-        Query<AuthoritativeItem> query = new Query<AuthoritativeItem>(graph, AuthoritativeItem.class)
-                .setLimit(limit).setOffset(offset).orderBy(order)
-                .filter(filters);
-        return streamingList(query.list(set.getAuthoritativeItems(), user));
+        return streamingPage(getQuery(AuthoritativeItem.class)
+                .page(set.getAuthoritativeItems(), user));
     }
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/count")
-    public Response countAuthoritativeSetHistoricalAgents(
-            @PathParam("id") String id,
-            @QueryParam(FILTER_PARAM) List<String> filters)
+    public long countAuthoritativeSetHistoricalAgents(
+            @PathParam("id") String id)
             throws ItemNotFound, BadRequester, AccessDenied {
         Accessor user = getRequesterUserProfile();
         AuthoritativeSet set = views.detail(id, user);
-        Query<AuthoritativeItem> query = new Query<AuthoritativeItem>(graph, AuthoritativeItem.class)
-                .filter(filters);
-        return Response.ok((query.count(set.getAuthoritativeItems(), user))
-                .toString().getBytes()).build();
-    }
-
-    @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/{id:.+}/page")
-    public StreamingOutput pageAuthoritativeSetHistoricalAgents(
-            @PathParam("id") String id,
-            @QueryParam(OFFSET_PARAM) @DefaultValue("0") int offset,
-            @QueryParam(LIMIT_PARAM) @DefaultValue("" + DEFAULT_LIST_LIMIT) int limit,
-            @QueryParam(SORT_PARAM) List<String> order,
-            @QueryParam(FILTER_PARAM) List<String> filters)
-            throws ItemNotFound, BadRequester, AccessDenied {
-        Accessor user = getRequesterUserProfile();
-        AuthoritativeSet set = views.detail(id, user);
-        Query<AuthoritativeItem> query = new Query<AuthoritativeItem>(graph, AuthoritativeItem.class)
-                .setLimit(limit).setOffset(offset).orderBy(order)
-                .filter(filters);
-        return streamingPage(query.page(set.getAuthoritativeItems(), user));
+        return getQuery(AuthoritativeItem.class).count(set.getAuthoritativeItems());
     }
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    public Response createAuthoritativeSet(String json,
+    public Response createAuthoritativeSet(Bundle bundle,
             @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, ItemNotFound, BadRequester {
-        return create(json, accessors);
+        return create(bundle, accessors);
     }
 
     // Note: json contains id
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    public Response updateAuthoritativeSet(String json) throws PermissionDenied,
+    public Response updateAuthoritativeSet(Bundle bundle) throws PermissionDenied,
             IntegrityError, ValidationError, DeserializationError,
             ItemNotFound, BadRequester {
-        return update(json);
+        return update(bundle);
     }
 
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}")
-    public Response updateAuthoritativeSet(@PathParam("id") String id, String json)
+    public Response updateAuthoritativeSet(@PathParam("id") String id, Bundle bundle)
             throws AccessDenied, PermissionDenied, IntegrityError, ValidationError,
             DeserializationError, ItemNotFound, BadRequester {
-        return update(id, json);
+        return update(id, bundle);
     }
 
     @DELETE
@@ -169,15 +123,14 @@ public class AuthoritativeSetResource extends
     public Response deleteAllAuthoritativeSetHistoricalAgents(
             @PathParam("id") String id)
             throws ItemNotFound, BadRequester, AccessDenied, PermissionDenied {
-        AuthoritativeSet set = new Query<AuthoritativeSet>(graph, AuthoritativeSet.class).get(id,
-                getRequesterUserProfile());
+        Accessor user = getRequesterUserProfile();
+        AuthoritativeSet set = views.detail(id, user);
         try {
         	LoggingCrudViews<AuthoritativeItem> agentViews = new LoggingCrudViews<AuthoritativeItem>(graph,
                     AuthoritativeItem.class, set);
-        	Accessor requesterUserProfile = getRequesterUserProfile();
         	Iterable<AuthoritativeItem> agents = set.getAuthoritativeItems();
         	for (AuthoritativeItem agent : agents) {
-        		agentViews.delete(agent.getId(), requesterUserProfile);
+        		agentViews.delete(agent.getId(), user);
         	}
             graph.getBaseGraph().commit();
             return Response.status(Status.OK).build();
@@ -220,7 +173,7 @@ public class AuthoritativeSetResource extends
             aclManager.setAccessors(agent,
                     getAccessors(accessors, user));
             graph.getBaseGraph().commit();
-            return buildResponseFromHistoricalAgent(agent);
+            return creationResponse(agent);
         } catch (SerializationError e) {
             graph.getBaseGraph().rollback();
             throw new RuntimeException(e);
@@ -230,20 +183,6 @@ public class AuthoritativeSetResource extends
     }
 
     // Helpers
-
-    private Response buildResponseFromHistoricalAgent(HistoricalAgent agent)
-            throws SerializationError {
-        String jsonStr = getSerializer().vertexFrameToJson(agent);
-        // FIXME: Hide the details of building this path
-        URI docUri = UriBuilder.fromUri(uriInfo.getBaseUri())
-                .segment(Entities.HISTORICAL_AGENT)
-                .segment(agent.getId())
-                .build();
-
-        return Response.status(Status.CREATED).location(docUri)
-                .entity((jsonStr).getBytes()).build();
-    }
-
     private HistoricalAgent createHistoricalAgent(String json, AuthoritativeSet set)
             throws DeserializationError, PermissionDenied, ValidationError,
             IntegrityError, BadRequester {

@@ -12,7 +12,6 @@ import org.junit.Test;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.net.URI;
-import java.util.Iterator;
 
 import static com.sun.jersey.api.client.ClientResponse.Status.*;
 import static org.junit.Assert.assertFalse;
@@ -223,28 +222,9 @@ public class CvocConceptClientTest extends BaseRestClientTest {
         String json = response.getEntity(String.class);
         ObjectMapper mapper = new ObjectMapper();
         JsonNode rootNode = mapper.readValue(json, JsonNode.class);
-        return containsIdentifier(rootNode.getElements(), idStr);
-    }
+        JsonNode idPath = rootNode.path(0).path("data").path("identifier");
+        return idPath.isTextual() && idPath.asText().equals(idStr);
 
-    public boolean containsIdentifier(final Iterator<JsonNode> elements,
-            final String idStr) {
-        if (idStr == null || elements == null)
-            return false;
-
-        boolean result = false;
-        while (elements.hasNext()) {
-            JsonNode node = elements.next();
-            // assume only one 'identifier' field under the 'data' element
-            JsonNode idNode = node.findValue("identifier");
-            if (null == idNode)
-                continue;
-
-            if (0 == idStr.compareTo(idNode.asText())) {
-                result = true;
-                break; // found!
-            }
-        }
-        return result;
     }
 
     private ClientResponse testGet(URI url) {

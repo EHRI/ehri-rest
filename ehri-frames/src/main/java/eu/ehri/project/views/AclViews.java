@@ -21,7 +21,7 @@ import java.util.Set;
 /**
  * Views class for permission operations.
  */
-public final class AclViews {
+public final class AclViews implements Scoped<AclViews> {
 
     private final FramedGraph<?> graph;
     private final AclManager acl;
@@ -233,6 +233,7 @@ public final class AclViews {
         }
     }
 
+    @Override
     public AclViews withScope(PermissionScope scope) {
         return new AclViews(graph, scope);
     }
