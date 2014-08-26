@@ -56,7 +56,17 @@ Archival Description (EAD) Version 1.0)//EN" "http://pallas.cegesoma.be/ead/res/
       <head>Andere toegangen</head>
       <p>Groupe Nola / door D. Martin (Soma, januari 1984, 12 p.)</p>
       </otherfindaid>
+      <relatedmaterial encodinganalog="544 1" id="a6">
+      <head>Verwante materialen</head>
+      <p>Zie ook AA 1297</p>
+      </relatedmaterial>
     </add>
+    <odd encodinganalog="500" id="a11">
+      <head>Algemene Info</head>
+      <p>Nr 1-2-13: fotokopies Bibliothek Universit&#228;t Konstanz (1943) (via Insa Meinen)
+Nr 3-4-5-7-8-11-17 : fotokopies Fondation Jacquemotte (1943)
+Nr 12-13-14-15-16 : fotokopies (1944) BAK</p>
+    </odd>
     <controlaccess id="a12">
     <head>Onderwerpen</head>
       <controlaccess>

@@ -95,6 +95,9 @@ public class CegesomaAATest extends AbstractImporterTest{
             assertEquals("Deelarchief betreffende het actienetwerk Nola (1942-1944)", dd.getName());
             assertEquals("nld", dd.getLanguageOfDescription());
             assertEquals("In het Frans", dd.asVertex().getProperty("languageOfMaterial"));
+            assertEquals("Zie ook AA 1297", dd.asVertex().getProperty("relatedMaterial"));
+            assertTrue(dd.asVertex().getProperty("notes").toString().startsWith("Nr 1-2-13: fotokopies Bibliothek"));
+            assertEquals("Groupe Nola / door D. Martin (Soma, januari 1984, 12 p.)", dd.asVertex().getProperty("findingAids"));
 //            for(String key : dd.asVertex().getPropertyKeys())
 //                System.out.println(key);
             assertEquals("Automatisch gegenereerd door PALLAS systeem", dd.asVertex().getProperty(EadHandler.AUTHOR));
