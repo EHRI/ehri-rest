@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ead xmlns="urn:isbn:1-931666-22-9" xmlns:xlink="http://www.w3.org/1999/xlink" audience="external">
+            <eadheader>
+                        <eadid countrycode="DE"/>
+                        <filedesc>
+                                    <titlestmt>
+                                                <titleproper/>
+                                                <author>IfZ</author>
+                                    </titlestmt>
+                        </filedesc>
+                        <profiledesc>
+                                    <creation>
+                                                <date>2014-08-19 17:50:23</date>
+                                                EHRI created this EAD based on the Faust-output and selection from the IfZ Muenchen.
+                                    </creation>
+                                    <langusage>
+                                                <language langcode="ger" scriptcode="Latn">German</language>
+                                    </langusage>
+                        </profiledesc>
+            </eadheader>
+            <frontmatter/>
+            <archdesc level="recordgrp">
+                        <did>
+                                    <unitid>ED</unitid>
+                                    <unittitle>TO BE FILLED</unittitle>
+                        </did>
+                        <scopecontent>
+                                    <p>TO BE FILLED</p>
+                        </scopecontent>
+                        <processinfo>
+                                    <p>TO BE FILLED with selection</p>
+                        </processinfo>
+                        <dsc>
+                                    <c01 level="series">
+                                                <did>
+                                                            <unitid encodinganalog="Signatur from the gesamt.xml"
+                                                                        identifier="the internal db nr from the bestandsang.xml">ED 457</unitid>
+                                                            <unittitle encodinganalog="Bestand from the gesamt.xml">Lohmeier, Cornelia</unittitle>
+                                                </did>
+                                                <bioghist encodinganalog="Vita">
+                                                            <p/>
+                                                </bioghist>
+                                                <scopecontent encodinganalog="Zum_Bestand">
+                                                            <p/>
+                                                </scopecontent>
+                                                <userestrict encodinganalog="Bestandsnutzung">
+                                                            <p/>
+                                                </userestrict>
+                                                <c02 level="file">
+                                                            <did>
+<unitid encodinganalog="Bandnummer" identifier="the internal db nr">ED 457 / 185</unitid>
+                                                                        <unittitle encodinganalog="Titel">Dachau, III</unittitle>
+                                                                        <unitdate encodinganalog="Laufzeit">1991/2008</unitdate>
+                                                                        <physdesc encodinganalog="Art">Band</physdesc>
+                                                                        <origination encodinganalog="Autor"/>
+                                                            </did>
+                                                            <bioghist encodinganalog="Bestandskurzbeschreibung">
+                                                                        <p>Cornelia Lohmeier // Diplompsychologin // Korrespondenz, Protokolle,
+                                                                           programmatische Schriften Deutsche Jungdemokraten Bayern und Bund, FDP
+                                                                           Bayern und Bund, Sammlung 7. Jugendbericht der Bundesregierung,
+                                                                           Internationale Jugendbegegnungsstätte Dachau, Materialsammlung
+                                                                           Gleichstellungspolitik und Stadtplanung München, Rechtsextremismus und
+                                                                           Antifaschismus, Bürgerrechte, Bayerisches Polizeiaufgabengesetz, 1969-2008.
+                                                                           - Originale, 209 Bände.</p>
+                                                            </bioghist>
+                                                            <scopecontent encodinganalog="Enthält">
+                                                                        <p>Protokolle, Konzepte und Broschüren, 1991-2008, von und über die Arbeit des
+                                                                           Förderverein Internationale Jugendbegegnungsstätte Dachau.</p>
+                                                            </scopecontent>
+                                                            <scopecontent encodinganalog="Darin_auch">
+                                                                        <p/>
+                                                            </scopecontent>
+                                                            <controlaccess>
+                                                                        <head>Thesaurus</head>
+                                                                        <subject encodinganalog="Thesaurus">5(reg.; Orte in der BRD,
+                                                                           alphabet.)</subject>
+                                                                        <subject encodinganalog="Thesaurus">politische Bildung</subject>
+                                                                        <subject encodinganalog="Thesaurus">Pädagogik [u. Didaktik]</subject>
+                                                                        <subject encodinganalog="Thesaurus">Konzentrationslager/Folgeprobleme
+                                                                           [KZs/Folge]</subject>
+                                                                        <subject encodinganalog="Thesaurus">Kultur[arbeit]</subject>
+                                                            </controlaccess>
+                                                            <controlaccess>
+                                                                        <head>Sachregister</head>
+                                                                        <subject encodinganalog="Sachregister">Förderverein für Internationale
+                                                                           Jugendbegegnung und Gedenkstättenarbeit in Dachau e.V.</subject>
+                                                                        <subject encodinganalog="Sachregister"> Internationale Jugendbegegnungsstätte
+                                                                           Dachau</subject>
+                                                            </controlaccess>
+                                                            <controlaccess>
+                                                                        <head>Personen</head>
+                                                                        <persname encodinganalog="Personenregister">Lohmeier, Cornelia</persname>
+                                                            </controlaccess>
+                                                            <controlaccess>
+                                                                        <head>Beruf</head>
+                                                                        <subject encodinganalog="Beruf"/>
+                                                            </controlaccess>
+                                                </c02>
+                                                <c02 level="file">
+                                                            <did>
+<unitid encodinganalog="Bandnummer" identifier="the internal db nr">ED 457 / 186</unitid>
+                                                                        <unittitle encodinganalog="Titel">Dachau, IV</unittitle>
+                                                                        <unitdate encodinganalog="Laufzeit">1987/2004</unitdate>
+                                                                        <physdesc encodinganalog="Art">Band</physdesc>
+                                                                        
+                                                            </did>
+                                                            <bioghist encodinganalog="Bestandskurzbeschreibung">
+                                                                        <p>Cornelia Lohmeier // Diplompsychologin // Korrespondenz, Protokolle,
+                                                                           programmatische Schriften Deutsche Jungdemokraten Bayern und Bund, FDP
+                                                                           Bayern und Bund, Sammlung 7. Jugendbericht der Bundesregierung,
+                                                                           Internationale Jugendbegegnungsstätte Dachau, Materialsammlung
+                                                                           Gleichstellungspolitik und Stadtplanung München, Rechtsextremismus und
+                                                                           Antifaschismus, Bürgerrechte, Bayerisches Polizeiaufgabengesetz, 1969-2008.
+                                                                           - Originale, 209 Bände.</p>
+                                                            </bioghist>
+                                                            <scopecontent encodinganalog="Enthält">
+                                                                        <p>Presse Förderverein Internationale Jugendbegegnungsstätte Dachau und
+                                                                           Informationsmaterial andere Konzentrationslager-Gedenkstätten,
+                                                                           1987-2004.</p>
+                                                            </scopecontent>
+                                                            <scopecontent encodinganalog="Darin_auch">
+                                                                        <p/>
+                                                            </scopecontent>
+                                                            <controlaccess>
+                                                                        <head>Thesaurus</head>
+                                                                        <subject encodinganalog="Thesaurus">5(reg.; Orte in der BRD,
+                                                                           alphabet.)</subject>
+                                                                        <subject encodinganalog="Thesaurus">politische Bildung</subject>
+                                                                        <subject encodinganalog="Thesaurus">Pädagogik [u. Didaktik]</subject>
+                                                                        <subject encodinganalog="Thesaurus">Konzentrationslager/Folgeprobleme
+                                                                           [KZs/Folge]</subject>
+                                                                        <subject encodinganalog="Thesaurus">Kultur[arbeit]</subject>
+                                                            </controlaccess>
+                                                            <controlaccess>
+                                                                        <head>Sachregister</head>
+                                                                        <subject encodinganalog="Sachregister">Förderverein für Internationale
+                                                                           Jugendbegegnung und Gedenkstättenarbeit in Dachau e.V.</subject>
+                                                                        <subject encodinganalog="Sachregister"> Internationale Jugendbegegnungsstätte
+                                                                           Dachau</subject>
+                                                                        <subject encodinganalog="Sachregister"> Internationale Jugendbegegnungsstätte
+                                                                           Auschwitz</subject>
+                                                                        <subject encodinganalog="Sachregister"> KZ-Gedenkstätte
+                                                                           Bergen-Belsen</subject>
+                                                                        <subject encodinganalog="Sachregister"> Arbeitsgemeinschaft Bergen-Belsen
+                                                                           e.V.</subject>
+                                                                        <subject encodinganalog="Sachregister"> Gesellschaft für Politische
+                                                                           Aufklärung, Sekretariat Innsbruck</subject>
+                                                            </controlaccess>
+                                                           
+                                                </c02>
+
+                                    </c01>
+                        </dsc>
+            </archdesc>
+</ead>

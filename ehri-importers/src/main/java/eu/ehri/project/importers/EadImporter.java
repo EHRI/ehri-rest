@@ -266,13 +266,15 @@ public class EadImporter extends EaImporter {
                 }
                 //type, targetUrl, targetName, notes
                 for (Map<String, Object> origRelation : (List<Map<String, Object>>) data.get(key)) {
+                    if(origRelation.isEmpty()){
+                        break;
+                    }
                     Map<String, Object> relationNode = new HashMap<String, Object>();
                     for (String eventkey : origRelation.keySet()) {
-//                        logger.debug(eventkey);
                         if (eventkey.endsWith(ACCESS_POINT)) {
                             relationNode.put(Ontology.UNDETERMINED_RELATIONSHIP_TYPE, eventkey.substring(0, eventkey.indexOf("Point")));
                             relationNode.put(Ontology.NAME_KEY, origRelation.get(eventkey));
-logger.debug("------------------" + eventkey.substring(0, eventkey.indexOf("Point")) + ": "+ origRelation.get(eventkey));                            
+//logger.debug("------------------" + eventkey.substring(0, eventkey.indexOf("Point")) + ": "+ origRelation.get(eventkey));                            
                         } else {
                             relationNode.put(eventkey, origRelation.get(eventkey));
                         }
@@ -280,7 +282,10 @@ logger.debug("------------------" + eventkey.substring(0, eventkey.indexOf("Poin
                     if (!relationNode.containsKey(Ontology.UNDETERMINED_RELATIONSHIP_TYPE)) {
                         relationNode.put(Ontology.UNDETERMINED_RELATIONSHIP_TYPE, "corporateBodyAccess");
                     }
-                    list.add(relationNode);
+                    //if no name is given, it was apparently an empty <controlaccess> tag?
+                    if(relationNode.containsKey(Ontology.NAME_KEY)){
+                        list.add(relationNode);
+                    }
                 }
             }
         }
