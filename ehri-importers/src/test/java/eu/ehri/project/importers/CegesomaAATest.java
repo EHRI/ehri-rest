@@ -20,15 +20,15 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 /**
- * Test the import of a Cegesoma EAD file.
+ * Test the import of a Cegesoma AA EAD file.
  * This file was based on BundesarchiveTest.java.
  * @author linda
  * @author ben
  */
-public class CegesomaNolaTest extends AbstractImporterTest{
+public class CegesomaAATest extends AbstractImporterTest{
     
     protected final String TEST_REPO = "r1";
-    protected final String XMLFILE = "Bestand_Nola_ead-test.pxml";
+    protected final String XMLFILE = "CegesomaAA.pxml";
     protected final String ARCHDESC = "AA 1134",
             C01 = "1234",
             C02_01 = "AA 1134 / 32",
@@ -48,7 +48,7 @@ public class CegesomaNolaTest extends AbstractImporterTest{
        List<VertexProxy> graphState1 = getGraphState(graph);
         
         InputStream ios = ClassLoader.getSystemResourceAsStream(XMLFILE);
-        ImportLog log = new SaxImportManager(graph, agent, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("cegesomaNola.properties")).importFile(ios, logMessage);
+        ImportLog log = new SaxImportManager(graph, agent, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("cegesomaAA.properties")).importFile(ios, logMessage);
  // After...
        List<VertexProxy> graphState2 = getGraphState(graph);
        GraphDiff diff = diffGraph(graphState1, graphState2);
@@ -94,8 +94,9 @@ public class CegesomaNolaTest extends AbstractImporterTest{
         for(DocumentDescription dd : archdesc.getDocumentDescriptions()){
             assertEquals("Deelarchief betreffende het actienetwerk Nola (1942-1944)", dd.getName());
             assertEquals("nld", dd.getLanguageOfDescription());
-            for(String key : dd.asVertex().getPropertyKeys())
-                System.out.println(key);
+            assertEquals("In het Frans", dd.asVertex().getProperty("languageOfMaterial"));
+//            for(String key : dd.asVertex().getPropertyKeys())
+//                System.out.println(key);
             assertEquals("Automatisch gegenereerd door PALLAS systeem", dd.asVertex().getProperty(EadHandler.AUTHOR));
         }
         

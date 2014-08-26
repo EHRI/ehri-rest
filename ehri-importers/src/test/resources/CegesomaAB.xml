@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet TYPE="text/xsl" href="http://pallas.cegesoma.be/ead/res/cs4Fie.xsl"?>
+<ead relatedencoding="MARC21">
+  <eadheader id="a0" audience="internal" langencoding="ISO 639-2" findaidstatus="EDITED-FULL-DRAFT">
+    <eadid systemid="CEGESOMA_113401" encodinganalog="852" source="Centre de Recherches et d'études Guerre et Sociétés contemporaines">CEGESOMA_113401#FRE</eadid>
+    <filedesc>
+      <titlestmt>
+        <subtitle>Inventaire "Liste des objets, documents et témoignages rassemblés pour l'exposition : ("Résister à la solution finale")"</subtitle>
+        <author>Cege Soma</author>
+      </titlestmt>
+      <publicationstmt>
+        <publisher>Centre de Recherches et d'études Guerre et Sociétés contemporaines</publisher>
+        <date>09/01/2014</date>
+        <address>Square de l'Aviation 29 - 1070 Bruxelles (Belgique)</address>
+      </publicationstmt>
+    </filedesc>
+    <profiledesc>
+       <creation><date>09/01/2014</date>Généré automatiquement par PALLAS système</creation>
+       <langusage><language>fre</language></langusage>
+    </profiledesc>
+  <revisiondesc>
+<change>
+<date>2014-07-07 17:14:32</date>
+<item>EHRI has choosen the ehri_internal_id to be the unitid with label ehri_main_identifier if none were given. If multiple ehri_main_identifier were given, their label was renamed to ehri_multiple_identifier</item>
+</change>
+<change>
+<date>2014/07/07 17:12:52</date>
+<item>EHRI added a unitid with label ehri_main_identifier to indicate the identifier provided by the institution that EHRI will use as the identifier of the unit.</item></change><change><date>07-07-2014</date><item>Deze toegang is voorbewerkt door EHRI met behulp van https://github.com/EHRI/ehri-ead-preprocessing/commit/c1e1265a8b8dfb446e33738051a255d3d61277f6</item>
+</change>
+<change>
+<date>2014/07/07 17:11:11</date>
+<item>EHRI added a unitid with label "ehri_internal_identifier" to give every node a unique id.</item>
+</change>
+<change>
+<date>2014/07/07 17:09:16</date>
+<item>EHRI added a unitid with label "ehri_structure" to indicate the structure of the EAD file on every c-node. This is done to make comparisons of two versions of the same EAD (as indicated by the eadid) possible.</item>
+</change>
+<change><date>07-07-2014</date><item>Deze toegang is voorbewerkt door EHRI met behulp van https://github.com/EHRI/ehri-ead-preprocessing/commit/c1e1265a8b8dfb446e33738051a255d3d61277f6. De volgende wijzigingen zijn aangebracht: (1) language gewijzigd naar ISO-639-2. (2) eadid heeft suffix met taal-aanduiding (om onderscheid tussen fre/nld beschrijving van dezelfde toegang mogelijk te maken) (3) author aangepast. hier stond ten onrechte Pallas. Dit is naar de creation verplaatst. author=Cege Soma</item></change></revisiondesc></eadheader>
+  <archdesc level="otherlevel" langmaterial="en français et en anglais" type="inventory">
+    <did id="a1">
+      <head>Liste des objets, documents et témoignages rassemblés pour l'exposition : ("Résister à la solution finale")</head>
+<unitid label="ehri_internal_id">0</unitid>
+<unitid label="ehri_structure">0</unitid>
+<repository encodinganalog="852$a" label="Dépot:"><addressline>Luchtvaartsquare 29 - 1070 Brussel (België)</addressline>Centre de Recherches et d'études Guerre et Sociétés contemporaines</repository>
+      <unittitle encodinganalog="245$a" label="Titre:">Liste des objets, documents et témoignages rassemblés pour l'exposition : ("Résister à la solution finale")</unittitle>
+      <unitdate encodinganalog="245$f" label="Dates:" type="inclusive">1940-1945</unitdate>
+      <physdesc encodinganalog="300$a" label="Volume:">53+98+9 p.</physdesc>
+      <unitid encodinganalog="099" countrycode="BE" label="Identification:">AB 2029</unitid>
+
+
+    
+<unitid label="ehri_main_identifier">AB 2029</unitid>
+</did>
+    <organization id="a4" encodinganalog="351$a">
+      <head>Organisation</head>
+      <p></p>
+    </organization>
+    <arrangement id="a5" encodinganalog="351$b">
+      <head>Classement</head>
+      <p></p>
+    </arrangement>
+    <controlaccess id="a12">
+    <head>Sujets</head>
+      <controlaccess>
+      <head>Personnes</head>
+      <persname encodinganalog="600">José Gotovitch</persname>
+      </controlaccess>
+      <controlaccess>
+      <head>Mots-clé</head>
+      <subject encodinganalog="650">guerre mondiale (1939-1945)--juifs--resistance--belgique</subject>
+      <subject encodinganalog="650">juifs--vie pratique--belgique</subject>
+      </controlaccess>
+      <controlaccess>
+      <head>Titre</head>
+      <title encodinganalog="630">Liste des objets, documents et témoignages rassemblés pour l'exposition : ("Résister à la solution finale")</title>
+    </controlaccess>
+    </controlaccess>
+    <dsc id="a23" type="combined">
+<head>Description détaillée</head>
+    </dsc>
+  </archdesc>
+</ead>

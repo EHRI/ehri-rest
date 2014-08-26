@@ -141,15 +141,22 @@ public class TestAllPropertiesFiles {
     }
 
     @Test
-    public void testCegesomaNolaProperties() {
-        String propfile = "cegesomaNola.properties";
+    public void testCegesomaAAProperties() {
+        String propfile = "cegesomaAA.properties";
         logger.debug(propfile);
         assertTrue(p.check(new XmlImportProperties(propfile), EntityClass.DOCUMENT_DESCRIPTION));
     }
 
     @Test
-    public void testCegesomaProperties() {
-        String propfile = "cegesoma.properties";
+    public void testCegesomaABProperties() {
+        String propfile = "cegesomaAB.properties";
+        logger.debug(propfile);
+        assertTrue(p.check(new XmlImportProperties(propfile), EntityClass.DOCUMENT_DESCRIPTION));
+    }
+    
+    @Test
+    public void testCegesomaCAProperties() {
+        String propfile = "cegesomaCA.properties";
         logger.debug(propfile);
         assertTrue(p.check(new XmlImportProperties(propfile), EntityClass.DOCUMENT_DESCRIPTION));
     }

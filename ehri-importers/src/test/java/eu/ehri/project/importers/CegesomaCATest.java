@@ -20,12 +20,12 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 /**
- * Test the import of a Cegesoma EAD file.
+ * Test the import of a Cegesoma CA EAD file.
  * This file was based on BundesarchiveTest.java.
  * @author linda
  * @author ben
  */
-public class CegesomaFotoTest extends AbstractImporterTest{
+public class CegesomaCATest extends AbstractImporterTest{
     
     protected final String TEST_REPO = "r1";
     protected final String XMLFILE_NL = "CS-foto-188845-nl.xml";
@@ -42,7 +42,7 @@ public class CegesomaFotoTest extends AbstractImporterTest{
 
         origCount = getNodeCount(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(XMLFILE_NL);
-        ImportLog log = new SaxImportManager(graph, agent, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("cegesoma.properties")).importFile(ios, logMessage);
+        ImportLog log = new SaxImportManager(graph, agent, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("cegesomaCA.properties")).importFile(ios, logMessage);
         printGraph(graph);
         // How many new nodes will have been created? We should have
         // - 1 more DocumentaryUnits (archdesc)

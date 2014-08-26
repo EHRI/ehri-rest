@@ -29,7 +29,7 @@ Archival Description (EAD) Version 1.0)//EN" "http://pallas.cegesoma.be/ead/res/
        </langusage>
     </profiledesc>
   </eadheader>
-  <archdesc level="fonds" type="inventory">
+  <archdesc level="fonds" langmaterial="In het Frans" type="inventory">
     <did id="a1">
       <head>Deelarchief betreffende het actienetwerk Nola (1942-1944)</head>
       <repository encodinganalog="852$a" label="Depot:"><addressline>Luchtvaartsquare 29 - 1070 Brussel (Belgi&#235;)</addressline>Studie- en Documentatiecentrum Oorlog en Hedendaagse Maatschappij</repository>
