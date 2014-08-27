@@ -4,6 +4,7 @@
  */
 package eu.ehri.project.importers;
 
+import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import java.util.List;
@@ -46,6 +47,10 @@ public class DcEuropeanaHandler extends SaxXmlHandler {
                 try {
                     //we're back at the top. find the maintenanceevents and add to the topLevel DU
                     currentMap.put("languageCode", "nld");
+                    
+                    extractIdentifier(currentMap);
+                    extractName(currentMap);
+                    
                     if (currentMap.containsKey("unitDates")) {
                         if (currentMap.get("unitDates") instanceof List) {
                             for (Object d : (List) currentMap.get("unitDates")) {
@@ -102,4 +107,36 @@ public class DcEuropeanaHandler extends SaxXmlHandler {
     private boolean isUnitDelimiter(String qName) {
         return qName.equals("europeana:record");
     }
+
+    private void extractName(Map<String, Object> currentMap) {
+        if (!currentMap.containsKey(Ontology.NAME_KEY) && currentMap.containsKey("scopeAndContent")) {
+            String name;
+            String scope = currentMap.get("scopeAndContent").toString();
+            if (scope.length() > 50) {
+                if (scope.indexOf(" ", 50) >= 0) {
+                    name = scope.substring(0, scope.indexOf(" ", 50));
+                } else {
+                    name = scope.substring(0, 50);
+                }
+                name += " ...";
+            } else {
+                name = scope;
+            }
+            currentMap.put(Ontology.NAME_KEY, name);
+        }
+    }
+
+    private void extractIdentifier(Map<String, Object> currentMap) {
+        if (currentMap.containsKey("objectIdentifier")){
+        logger.debug(currentMap.get("objectIdentifier")+"");
+            String id = currentMap.get("objectIdentifier").toString();
+            if(id.startsWith("http://www.beeldbankwo2.nl/detail_no.jsp?action=detail&imid=")){
+                currentMap.put("objectIdentifier", id.substring(60));
+            }
+        }else{
+            for(String key: currentMap.keySet())
+                logger.debug(key);
+        }
+    }
+    
 }
