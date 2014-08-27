@@ -8,7 +8,7 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import org.junit.Ignore;
+
 
 /**
  * @author Mike Bryant (http://github.com/mikesname)
@@ -17,7 +17,7 @@ public class VirtualUnitTest extends AbstractFixtureTest {
     @Test
     public void testGetChildCount() throws Exception {
         VirtualUnit vc1 = manager.getFrame("vc1", VirtualUnit.class);
-        assertEquals(Long.valueOf(1L), vc1.getChildCount());
+        assertEquals(1L, vc1.getChildCount());
     }
 
     @Test
@@ -33,7 +33,7 @@ public class VirtualUnitTest extends AbstractFixtureTest {
         VirtualUnit vu3 = manager.getFrame("vu3", VirtualUnit.class);
         Long childCount = vu2.getChildCount();
         assertTrue(vu2.addChild(vu3));
-        assertEquals(Long.valueOf(childCount + 1), vu2.getChildCount());
+        assertEquals(childCount + 1, vu2.getChildCount());
         // Doing the same thing twice should return false
         assertFalse(vu2.addChild(vu3));
     }
@@ -54,6 +54,26 @@ public class VirtualUnitTest extends AbstractFixtureTest {
         DocumentaryUnit c1 = manager.getFrame("c1", DocumentaryUnit.class);
         assertTrue(vu1.getIncludedUnits().iterator().hasNext());
         assertEquals(c1, vu1.getIncludedUnits().iterator().next());
+    }
+
+    @Test
+    public void testChildCount() throws Exception {
+        VirtualUnit vu1 = manager.getFrame("vu1", VirtualUnit.class);
+        VirtualUnit vu3 = manager.getFrame("vu3", VirtualUnit.class);
+        DocumentaryUnit c4 = manager.getFrame("c4", DocumentaryUnit.class);
+        assertTrue(vu1.getAllChildren().iterator().hasNext());
+        assertTrue(vu1.getIncludedUnits().iterator().hasNext());
+        long childCount = vu1.getChildCount();
+        assertEquals(2L, childCount);
+        vu1.addIncludedUnit(c4);
+        assertEquals(childCount + 1, vu1.getChildCount());
+        vu1.removeIncludedUnit(c4);
+        assertEquals(childCount, vu1.getChildCount());
+        vu1.addChild(vu3);
+        assertEquals(childCount + 1, vu1.getChildCount());
+        vu1.removeChild(vu3);
+        assertEquals(childCount, vu1.getChildCount());
+
     }
 
     @Test

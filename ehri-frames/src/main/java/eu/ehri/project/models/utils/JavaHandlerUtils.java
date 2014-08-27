@@ -137,12 +137,15 @@ public class JavaHandlerUtils {
      * @param to     The target vertex
      * @param labels The set of labels
      */
-    public static void removeAllRelationships(Vertex from, Vertex to, String... labels) {
+    public static boolean removeAllRelationships(Vertex from, Vertex to, String... labels) {
+        int removed = 0;
         for (Edge edge : from.getEdges(Direction.OUT, labels)) {
             if (edge.getVertex(Direction.IN).equals(to)) {
                 edge.remove();
+                removed++;
             }
         }
+        return removed > 0;
     }
 
     /**

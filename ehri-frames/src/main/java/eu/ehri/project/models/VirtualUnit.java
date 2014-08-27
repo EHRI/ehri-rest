@@ -1,5 +1,6 @@
 package eu.ehri.project.models;
 
+import com.google.common.collect.Iterables;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.Adjacency;
@@ -34,13 +35,11 @@ public interface VirtualUnit extends AbstractUnit {
 
 
     @JavaHandler
-    public Long getChildCount();
+    public long getChildCount();
 
     @Fetch(Ontology.VC_IS_PART_OF)
     @Adjacency(label = Ontology.VC_IS_PART_OF)
     public VirtualUnit getParent();
-
-
 
     /**
      * Add a child. Note: this should throw an exception like
@@ -53,6 +52,12 @@ public interface VirtualUnit extends AbstractUnit {
      */
     @JavaHandler
     public boolean addChild(final VirtualUnit child);
+
+    @JavaHandler
+    public boolean removeChild(final VirtualUnit child);
+
+    @JavaHandler
+    public void updateChildCountCache();
 
     /*
      * Fetches a list of all ancestors (parent -> parent -> parent)
@@ -99,25 +104,26 @@ public interface VirtualUnit extends AbstractUnit {
             addSingleRelationship(it(), accessor.asVertex(), Ontology.VC_HAS_AUTHOR);
         }
 
-        public void addIncludedUnit(final DocumentaryUnit unit) {
-            addUniqueRelationship(it(), unit.asVertex(), Ontology.VC_INCLUDES_UNIT);
+        public void updateChildCountCache() {
+            it().setProperty(CHILD_COUNT, childCount(it(), gremlin()));
         }
 
         public void removeIncludedUnit(final DocumentaryUnit unit) {
-            removeAllRelationships(it(), unit.asVertex(), Ontology.VC_INCLUDES_UNIT);
+            boolean done = removeAllRelationships(it(), unit.asVertex(), Ontology.VC_INCLUDES_UNIT);
+            if (done) {
+                decrementChildCount(it(), gremlin());
+            }
         }
 
-        public Long getChildCount() {
+        public long getChildCount() {
             Long count = it().getProperty(CHILD_COUNT);
             if (count == null) {
-                count = gremlin().in(Ontology.VC_IS_PART_OF).count();
+                return childCount(it(), gremlin());
             }
             return count;
         }
 
         public Iterable<VirtualUnit> getChildren() {
-            // Ensure value is cached when fetching.
-            getChildCount();
             return frameVertices(gremlin().in(Ontology.VC_IS_PART_OF));
         }
 
@@ -135,12 +141,15 @@ public interface VirtualUnit extends AbstractUnit {
 
             boolean done = addUniqueRelationship(child.asVertex(), it(), Ontology.VC_IS_PART_OF);
             if (done) {
-                Long count = it().getProperty(CHILD_COUNT);
-                if (count == null) {
-                    it().setProperty(CHILD_COUNT, gremlin().in(Ontology.VC_IS_PART_OF).count());
-                } else {
-                    it().setProperty(CHILD_COUNT, count + 1);
-                }
+                incrementChildCount(it(), gremlin());
+            }
+            return done;
+        }
+
+        public boolean removeChild(final VirtualUnit child) {
+            boolean done = removeAllRelationships(child.asVertex(), it(), Ontology.VC_IS_PART_OF);
+            if (done) {
+                decrementChildCount(it(), gremlin());
             }
             return done;
         }
@@ -161,6 +170,38 @@ public interface VirtualUnit extends AbstractUnit {
 
         public Iterable<VirtualUnit> getAncestors() {
             return frameVertices(traverseAncestors());
+        }
+
+        public void addIncludedUnit(final DocumentaryUnit unit) {
+            addUniqueRelationship(it(), unit.asVertex(), Ontology.VC_INCLUDES_UNIT);
+            boolean done = addUniqueRelationship(it(), unit.asVertex(), Ontology.VC_INCLUDES_UNIT);
+            if (done) {
+                incrementChildCount(it(), gremlin());
+            }
+        }
+
+        private static long childCount(Vertex self, GremlinPipeline<Vertex, Object> selfPipe) {
+            int incCount = Iterables.size(self.getVertices(Direction.OUT, Ontology.VC_INCLUDES_UNIT));
+            int vcCount = Iterables.size(self.getVertices(Direction.IN, Ontology.VC_IS_PART_OF));
+            return incCount + vcCount;
+        }
+
+        private static void incrementChildCount(Vertex self, GremlinPipeline<Vertex, Object> selfPipe) {
+            Long count = self.getProperty(CHILD_COUNT);
+            if (count == null) {
+                self.setProperty(CHILD_COUNT, childCount(self, selfPipe));
+            } else {
+                self.setProperty(CHILD_COUNT, count + 1);
+            }
+        }
+
+        private static void decrementChildCount(Vertex self, GremlinPipeline<Vertex, Object> selfPipe) {
+            Long count = self.getProperty(CHILD_COUNT);
+            if (count == null) {
+                self.setProperty(CHILD_COUNT, childCount(self, selfPipe));
+            } else {
+                self.setProperty(CHILD_COUNT, Math.max(0, count - 1));
+            }
         }
     }
 }

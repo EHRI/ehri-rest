@@ -73,6 +73,9 @@ public class AdminResource extends AbstractRestResource {
             for (AuthoritativeSet set : manager.getFrames(EntityClass.AUTHORITATIVE_SET, AuthoritativeSet.class)) {
                 set.updateChildCountCache();
             }
+            for (VirtualUnit vu : manager.getFrames(EntityClass.VIRTUAL_UNIT, VirtualUnit.class)) {
+                vu.updateChildCountCache();
+            }
 
             graph.getBaseGraph().commit();
             return Response.status(Status.OK).build();
