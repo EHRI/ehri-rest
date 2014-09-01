@@ -295,13 +295,14 @@ public class EadHandler extends SaxXmlHandler {
     }
 
     /**
-     * Handler-specific code for extraction or generation of unit titles.
-     * Default method is empty; override when necessary.
-     *
+     * if no NAME_KEY is provided, use the IDENTIFIER_KEY
+     * 
      * @param currentGraph Data at the current node level
      */
     protected void extractTitle(Map<String, Object> currentGraph) {
-
+        if(! currentGraph.containsKey(Ontology.NAME_KEY)){
+            currentGraph.put(Ontology.NAME_KEY, currentGraph.get(Ontology.IDENTIFIER_KEY));
+        }
     }
 
     /**
