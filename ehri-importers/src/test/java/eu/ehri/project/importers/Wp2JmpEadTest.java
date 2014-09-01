@@ -87,6 +87,14 @@ public class Wp2JmpEadTest extends AbstractImporterTest {
 //        for(Link a : c6.getLinks()){
 //            logger.debug(a.getLinkType());
 //        }
+        
+//        languages
+        for(DocumentDescription d : c2.getDocumentDescriptions()){
+            for(String key : d.asVertex().getPropertyKeys()){
+                System.out.println(key);
+            }
+            assertEquals("deu", d.asVertex().getProperty("languageOfMaterial").toString());
+        }
 
         List<AccessibleEntity> subjects = toList(log.getAction().getSubjects());
         for (AccessibleEntity subject : subjects) {
