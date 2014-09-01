@@ -51,7 +51,7 @@ public class Wp2JmpEadTest extends AbstractImporterTest {
         
         ImportLog log = importManager.importFile(ios, logMessage);
 
-        printGraph(graph);
+//        printGraph(graph);
         // How many new nodes will have been created? We should have
         // - 7 more DocumentaryUnits fonds C1 C2 C3 4,5,6
         // - 7 more DocumentDescription

@@ -301,7 +301,8 @@ public class EadHandler extends SaxXmlHandler {
      */
     protected void extractTitle(Map<String, Object> currentGraph) {
         if(! currentGraph.containsKey(Ontology.NAME_KEY)){
-            currentGraph.put(Ontology.NAME_KEY, currentGraph.get(Ontology.IDENTIFIER_KEY));
+            logger.error("no NAME found, using IDENTIFIER " + currentGraph.get("objectIdentifier"));
+            currentGraph.put(Ontology.NAME_KEY, currentGraph.get("objectIdentifier"));
         }
     }
 
