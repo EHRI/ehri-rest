@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<enunciate label="ehri-ws-api" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://enunciate.codehaus.org/schemas/enunciate-1.25.xsd">
+
+    <services>
+        <rest defaultRestSubcontext="/ehri"/>
+    </services>
+
+    <api-classes>
+        <include pattern="eu.ehri.extension.*"/>
+    </api-classes>
+
+    <modules>
+        <docs 
+            docsDir="restapi"
+            title="EHRI REST API"
+            copyright="The EHRI Project"
+             />
+    </modules>
+</enunciate>
