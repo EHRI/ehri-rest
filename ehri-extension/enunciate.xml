@@ -13,7 +13,7 @@
     <modules>
         <docs 
             docsDir="restapi"
-            title="EHRI REST API"
+            title="EHRI Web Service API"
             copyright="The EHRI Project"
              />
     </modules>
