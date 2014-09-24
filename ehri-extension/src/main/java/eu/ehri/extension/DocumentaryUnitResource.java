@@ -26,6 +26,15 @@ public class DocumentaryUnitResource extends
         super(database, DocumentaryUnit.class);
     }
 
+    /**
+     * Fetch a documentary unit by id.
+     *
+     * @param id The requested item id
+     * @return A serialized item representation
+     * @throws ItemNotFound
+     * @throws AccessDenied
+     * @throws BadRequester
+     */
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}")
@@ -34,6 +43,13 @@ public class DocumentaryUnitResource extends
         return retrieve(id);
     }
 
+    /**
+     * List available documentary units.
+     *
+     * @return A list of serialized item representations
+     * @throws ItemNotFound
+     * @throws BadRequester
+     */
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/list")
@@ -42,6 +58,13 @@ public class DocumentaryUnitResource extends
         return page();
     }
 
+    /**
+     * Count the number of available documentary units.
+     *
+     * @return The total number of applicable items
+     * @throws ItemNotFound
+     * @throws BadRequester
+     */
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/count")
@@ -49,6 +72,17 @@ public class DocumentaryUnitResource extends
         return count();
     }
 
+    /**
+     * List the child documentary units held by this item.
+     *
+     * @param id  The requested item id
+     * @param all Whether to list all child items, or just those at the
+     *            immediate sub-level.
+     * @return A list of serialized item representations
+     * @throws ItemNotFound
+     * @throws BadRequester
+     * @throws PermissionDenied
+     */
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/list")
@@ -63,6 +97,17 @@ public class DocumentaryUnitResource extends
         return streamingPage(getQuery(cls).page(units, getRequesterUserProfile()));
     }
 
+    /**
+     * Count the number of available documentary units held by this item.
+     *
+     * @param id  The requested item id
+     * @param all Whether to count all child items, or just those at the
+     *            immediate sub-level.
+     * @return The total number of applicable items
+     * @throws ItemNotFound
+     * @throws BadRequester
+     * @throws PermissionDenied
+     */
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/count")
