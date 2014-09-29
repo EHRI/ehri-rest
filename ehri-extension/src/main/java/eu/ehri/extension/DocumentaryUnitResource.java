@@ -6,7 +6,6 @@ import eu.ehri.project.exceptions.*;
 import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistence.Bundle;
-import eu.ehri.project.views.impl.LoggingCrudViews;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.*;
@@ -27,7 +26,7 @@ public class DocumentaryUnitResource extends
     }
 
     /**
-     * Fetch a documentary unit by id.
+     * Fetch a resource by id.
      *
      * @param id The requested item id
      * @return A serialized item representation
@@ -44,7 +43,7 @@ public class DocumentaryUnitResource extends
     }
 
     /**
-     * List available documentary units.
+     * List available resources.
      *
      * @return A list of serialized item representations
      * @throws ItemNotFound
@@ -59,7 +58,7 @@ public class DocumentaryUnitResource extends
     }
 
     /**
-     * Count the number of available documentary units.
+     * Count the number of available resources.
      *
      * @return The total number of applicable items
      * @throws ItemNotFound
@@ -73,7 +72,7 @@ public class DocumentaryUnitResource extends
     }
 
     /**
-     * List the child documentary units held by this item.
+     * List the child resources held by this item.
      *
      * @param id  The requested item id
      * @param all Whether to list all child items, or just those at the
@@ -98,7 +97,7 @@ public class DocumentaryUnitResource extends
     }
 
     /**
-     * Count the number of available documentary units held by this item.
+     * Count the number of available resources held by this item.
      *
      * @param id  The requested item id
      * @param all Whether to count all child items, or just those at the
@@ -122,6 +121,18 @@ public class DocumentaryUnitResource extends
         return getQuery(cls).count(units);
     }
 
+    /**
+     * Update a resource.
+     *
+     * @param bundle A resource bundle, including its ID.
+     * @return A serialized representation of the updated resource.
+     * @throws PermissionDenied
+     * @throws IntegrityError
+     * @throws ValidationError
+     * @throws DeserializationError
+     * @throws ItemNotFound
+     * @throws BadRequester
+     */
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
@@ -131,6 +142,20 @@ public class DocumentaryUnitResource extends
         return update(bundle);
     }
 
+    /**
+     * Update a resource.
+     *
+     * @param id     The resource ID.
+     * @param bundle A resource bundle, with or without an ID.
+     * @return A serialized representation of the updated resource.
+     * @throws AccessDenied
+     * @throws PermissionDenied
+     * @throws IntegrityError
+     * @throws ValidationError
+     * @throws DeserializationError
+     * @throws ItemNotFound
+     * @throws BadRequester
+     */
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
@@ -141,6 +166,18 @@ public class DocumentaryUnitResource extends
         return update(id, bundle);
     }
 
+    /**
+     * Delete a resource.
+     *
+     * @param id The resource ID.
+     * @return A response with 200 representing a successful deletion.
+     * @throws AccessDenied
+     * @throws PermissionDenied
+     * @throws ItemNotFound
+     * @throws ValidationError
+     * @throws BadRequester
+     * @throws SerializationError
+     */
     @DELETE
     @Path("/{id:.+}")
     public Response deleteDocumentaryUnit(@PathParam("id") String id)
@@ -149,43 +186,40 @@ public class DocumentaryUnitResource extends
         return delete(id);
     }
 
+    /**
+     * Create a child resource.
+     *
+     * @param id The parent resource ID.
+     * @param bundle A resource bundle.
+     * @param accessors The users/groups who can access this item.
+     * @return A serialized representation of the created resource.
+     * @throws AccessDenied
+     * @throws PermissionDenied
+     * @throws ValidationError
+     * @throws IntegrityError
+     * @throws DeserializationError
+     * @throws ItemNotFound
+     * @throws BadRequester
+     */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/" + Entities.DOCUMENTARY_UNIT)
     public Response createChildDocumentaryUnit(@PathParam("id") String id,
-            String json, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
+            Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws AccessDenied, PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, ItemNotFound, BadRequester {
-        Accessor user = getRequesterUserProfile();
-        DocumentaryUnit parent = views.detail(id, user);
         try {
-            DocumentaryUnit doc = createDocumentaryUnit(json, parent);
-            aclManager.setAccessors(doc,
-                    getAccessors(accessors, user));
-            graph.getBaseGraph().commit();
-            return creationResponse(doc);
-        } catch (SerializationError e) {
-            graph.getBaseGraph().rollback();
-            throw new RuntimeException(e);
+            Accessor user = getRequesterUserProfile();
+            final DocumentaryUnit parent = views.detail(id, user);
+            return create(bundle, accessors, new Handler<DocumentaryUnit>() {
+                @Override
+                public void process(DocumentaryUnit doc) throws PermissionDenied {
+                    parent.addChild(doc);
+                }
+            });
         } finally {
             cleanupTransaction();
         }
-    }
-
-    // Helpers
-
-    private DocumentaryUnit createDocumentaryUnit(String json,
-            DocumentaryUnit parent) throws DeserializationError,
-            PermissionDenied, ValidationError, IntegrityError, BadRequester {
-        Bundle entityBundle = Bundle.fromString(json);
-
-        DocumentaryUnit doc = new LoggingCrudViews<DocumentaryUnit>(graph,
-                DocumentaryUnit.class, parent).create(entityBundle,
-                getRequesterUserProfile(), getLogMessage());
-        // NB: We no longer add this item to the
-        // parent's Repository directly.
-        parent.addChild(doc);
-        return doc;
     }
 }
