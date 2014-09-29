@@ -1,6 +1,5 @@
 package eu.ehri.project.commands;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Ordering;
 import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.frames.FramedGraph;
@@ -14,6 +13,7 @@ import java.util.*;
 /**
  * Entry point for launching admin commands.
  *
+ * @author Paul Boon (http://github.com/PaulBoon)
  * @author Mike Bryant (http://github.com/mikesname)
  */
 public class CmdEntryPoint extends BaseCommand {

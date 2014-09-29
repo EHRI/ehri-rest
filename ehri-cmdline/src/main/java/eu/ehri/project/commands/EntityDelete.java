@@ -1,5 +1,6 @@
 package eu.ehri.project.commands;
 
+import com.google.common.base.Optional;
 import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.frames.FramedGraph;
 import eu.ehri.project.core.GraphManager;
@@ -14,21 +15,23 @@ import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistence.ActionManager;
+import eu.ehri.project.views.Crud;
 import eu.ehri.project.views.impl.CrudViews;
+import eu.ehri.project.views.impl.LoggingCrudViews;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 
 /**
  * Delete an entire class of stuff via the command line.
  */
-public class DeleteEntities extends BaseCommand implements Command {
+public class EntityDelete extends BaseCommand implements Command {
 
-    final static String NAME = "delete-all";
+    final static String NAME = "delete";
 
     /**
      * Constructor.
      */
-    public DeleteEntities() {
+    public EntityDelete() {
     }
 
     @Override
@@ -46,12 +49,12 @@ public class DeleteEntities extends BaseCommand implements Command {
 
     @Override
     public String getHelp() {
-        return String.format("Usage: %s [OPTIONS] <type>", NAME);
+        return String.format("Usage: %s --user <user> [OPTIONS] <id>", NAME);
     }
 
     @Override
     public String getUsage() {
-        return "Delete ALL entities of a given type.";
+        return "Delete an item by ID.";
     }
 
     /**
@@ -66,16 +69,12 @@ public class DeleteEntities extends BaseCommand implements Command {
         // the first argument is the entity type, and that must be specified
         if (cmdLine.getArgList().size() < 1)
             throw new RuntimeException(getHelp());
-        EntityClass type = EntityClass.withName(cmdLine.getArgs()[0]);
-        Class<?> cls = type.getEntityClass();
+        String id = cmdLine.getArgs()[1];
 
-        String logMessage = "Deleting items of type " + type.toString() + " via the command-line";
+        String logMessage = "Deleting item " + id + " via the command-line";
         if (cmdLine.hasOption("log")) {
             logMessage = cmdLine.getOptionValue("log");
         }
-
-        if (!AccessibleEntity.class.isAssignableFrom(cls))
-            throw new RuntimeException("Unknown accessible entity: " + type);
 
         GraphManager manager = GraphManagerFactory.getInstance(graph);
 
@@ -84,10 +83,9 @@ public class DeleteEntities extends BaseCommand implements Command {
                 UserProfile.class);
 
         try {
-            new ActionManager(graph).logEvent(user,
-                    EventTypes.deletion,
-                    getLogMessage(logMessage));
-            deleteIds(graph, manager, type, user);
+            LoggingCrudViews<AccessibleEntity> api = new LoggingCrudViews<AccessibleEntity>(
+                    graph, AccessibleEntity.class);
+            api.delete(id, user, Optional.of(logMessage));
             graph.getBaseGraph().commit();
         } catch (Exception e) {
             graph.getBaseGraph().rollback();
@@ -95,14 +93,5 @@ public class DeleteEntities extends BaseCommand implements Command {
         }
 
         return 0;
-    }
-
-    private void deleteIds(FramedGraph<? extends TransactionalGraph> graph, GraphManager manager, EntityClass type, UserProfile user)
-            throws SerializationError, ValidationError, ItemNotFound, PermissionDenied {
-        CrudViews<AccessibleEntity> views = new CrudViews<AccessibleEntity>(graph, AccessibleEntity.class);
-        for (AccessibleEntity acc : manager.getFrames(type, AccessibleEntity.class)) {
-            System.out.println(acc.getId());
-            views.delete(acc.getId(), graph.frame(user.asVertex(), Accessor.class));
-        }
     }
 }
