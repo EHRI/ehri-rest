@@ -24,7 +24,7 @@ import static org.junit.Assert.*;
 import org.slf4j.LoggerFactory;
 
 /**
- * @author linda
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class Eag2896Test extends AbstractImporterTest {
 

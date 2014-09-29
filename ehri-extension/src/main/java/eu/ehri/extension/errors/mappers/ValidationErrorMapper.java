@@ -32,7 +32,7 @@ import javax.ws.rs.ext.Provider;
  *   }
  * }
  * 
- * @author michaelb
+ * @author Mike Bryant (http://github.com/mikesname)
  *
  */
 @Provider

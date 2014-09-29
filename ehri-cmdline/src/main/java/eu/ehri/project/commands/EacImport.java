@@ -9,7 +9,7 @@ import eu.ehri.project.importers.EacImporter;
 
 /**
  *
- * @author linda
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class EacImport extends ImportCommand implements Command {
 

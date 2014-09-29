@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
  *
  * wrapper class for the mapping of xml files to be imported. 
  * 
- * @author linda
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class XmlImportProperties implements ImportProperties {
 

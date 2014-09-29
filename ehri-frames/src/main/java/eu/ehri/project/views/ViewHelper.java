@@ -22,7 +22,7 @@ import eu.ehri.project.models.utils.ClassUtils;
 /**
  * Messy stopgap class to hold a bunch of sort-of view/sort-of acl functions.
  *
- * @author mike
+ * @author Mike Bryant (http://github.com/mikesname)
  */
 public final class ViewHelper {
 

@@ -16,6 +16,8 @@ import java.util.List;
 
 /**
  * Provides a RESTful interface for the DocumentaryUnit
+ *
+ * @author Mike Bryant (http://github.com/mikesname)
  */
 @Path(Entities.DOCUMENTARY_UNIT)
 public class DocumentaryUnitResource extends

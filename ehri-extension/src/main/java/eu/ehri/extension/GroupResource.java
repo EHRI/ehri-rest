@@ -25,6 +25,8 @@ import static eu.ehri.extension.RestHelpers.produceErrorMessageJson;
 
 /**
  * Provides a RESTful interface for the Group class.
+ *
+ * @author Mike Bryant (http://github.com/mikesname)
  */
 @Path(Entities.GROUP)
 public class GroupResource extends AbstractAccessibleEntityResource<Group> {

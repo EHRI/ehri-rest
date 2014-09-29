@@ -6,8 +6,8 @@ import eu.ehri.project.importers.UshmmHandler;
 /**
  * Import command for USHMM EAD files. 
  * This imports files using the UshmmEadHandler and IcaAtomEadImporter.
- * @author ben
  *
+ * @author Ben Companjen (http://github.com/bencomp)
  */
 public class UshmmEadImport extends EadImport {
 	final static String NAME = "ushmm-ead-import";

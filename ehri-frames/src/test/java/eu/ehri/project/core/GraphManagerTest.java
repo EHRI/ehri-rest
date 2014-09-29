@@ -33,8 +33,8 @@ import static org.junit.Assert.*;
  * reflectiveness to create a re-useable suite that
  * can be run for each implementation.
  *
- * @author paulboon
- * @author http://github.com/mikesname
+ * @author Paul Boon (http://github.com/PaulBoon)
+ * @author Mike Bryant (http://github.com/mikesname)
  */
 public class GraphManagerTest {
     private static final String NON_EXISTING_ID = "non-existing-id-12345678";

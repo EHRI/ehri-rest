@@ -9,7 +9,7 @@ import java.util.Map;
 
 /**
  *
- * @author linda
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class PropertiesRow {
 

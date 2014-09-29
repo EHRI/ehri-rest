@@ -17,7 +17,7 @@ import eu.ehri.project.models.base.*;
  * Links two items together with a given body, with may either be
  * a text property or some other entity.
  * 
- * @author mik
+ * @author Mike Bryant (http://github.com/mikesname)
  */
 @EntityType(EntityClass.LINK)
 public interface Link extends AccessibleEntity, AnnotatableEntity, Promotable, TemporalEntity {

@@ -3,7 +3,7 @@ package eu.ehri.project.importers.exceptions;
 /**
  * Indicate that an XML document contains an excepted document type.
  * 
- * @author michaelb
+ * @author Mike Bryant (http://github.com/mikesname)
  *
  */
 public class InvalidXmlDocument extends Exception {

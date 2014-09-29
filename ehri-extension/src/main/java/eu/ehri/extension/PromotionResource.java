@@ -18,6 +18,8 @@ import javax.ws.rs.core.Response;
 
 /**
  * Endpoints for promoting and demoting items.
+ *
+ * @author Mike Bryant (http://github.com/mikesname)
  */
 @Path("promote")
 public class PromotionResource extends AbstractRestResource {

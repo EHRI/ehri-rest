@@ -29,7 +29,7 @@ import java.util.Map;
 
 /**
  *
- * @author linda
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public abstract class ImportCommand extends BaseCommand implements Command{
     protected Class<? extends SaxXmlHandler> handler;

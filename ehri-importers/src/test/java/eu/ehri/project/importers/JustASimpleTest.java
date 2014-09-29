@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  *
- * @author linda
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class JustASimpleTest extends AbstractImporterTest {
 private static final Logger logger = LoggerFactory.getLogger(JustASimpleTest.class);

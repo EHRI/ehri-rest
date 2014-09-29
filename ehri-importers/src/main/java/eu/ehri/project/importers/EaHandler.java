@@ -14,7 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * @author linda
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public abstract class EaHandler extends SaxXmlHandler {
     private static final Logger logger = LoggerFactory.getLogger(EaHandler.class);

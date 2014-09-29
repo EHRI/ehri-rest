@@ -31,7 +31,7 @@ import java.util.Map.Entry;
  * TODO: Possibly refactor more of the ACL logic into AclManager.
  *
  * @param <E>
- * @author mike
+ * @author Mike Bryant (http://github.com/mikesname)
  */
 public final class Query<E extends AccessibleEntity> implements Scoped<Query> {
 
@@ -64,7 +64,7 @@ public final class Query<E extends AccessibleEntity> implements Scoped<Query> {
     /**
      * Filter predicates
      *
-     * @author mike
+     * @author Mike Bryant (http://github.com/mikesname)
      */
     public static enum FilterPredicate {
         EQUALS, IEQUALS, STARTSWITH, ENDSWITH, CONTAINS, ICONTAINS, MATCHES, GT, GTE, LT, LTE

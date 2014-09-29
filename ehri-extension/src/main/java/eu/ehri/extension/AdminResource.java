@@ -34,6 +34,8 @@ import java.util.Map;
 
 /**
  * Provides additional Admin methods needed by client systems.
+ *
+ * @author Mike Bryant (http://github.com/mikesname)
  */
 @Path("admin")
 public class AdminResource extends AbstractRestResource {

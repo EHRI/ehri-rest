@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  *
- * @author linda
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class Wp2OrganisationsTest extends AbstractImporterTest {
     private static final Logger logger = LoggerFactory.getLogger(Wp2KeywordsTest.class);

@@ -21,7 +21,7 @@ import eu.ehri.project.models.cvoc.Vocabulary;
 
 /**
  *
- * @author linda
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class SkosImporterAdminDistrictTest extends AbstractImporterTest {
 

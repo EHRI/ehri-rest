@@ -11,7 +11,7 @@ import eu.ehri.project.models.base.AccessibleEntity;
 
 /**
  *
- * @author linda
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public interface AuthoritativeItem extends AccessibleEntity {
     @Fetch(Ontology.ITEM_IN_AUTHORITATIVE_SET)

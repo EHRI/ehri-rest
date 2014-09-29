@@ -17,7 +17,9 @@ import javax.ws.rs.core.Response;
 import java.util.List;
 
 /**
- * Provides a RESTful interface for the Repository
+ * Provides a RESTful interface for the Repository.
+ *
+ * @author Mike Bryant (http://github.com/mikesname)
  */
 @Path(Entities.REPOSITORY)
 public class RepositoryResource extends AbstractAccessibleEntityResource<Repository> {

@@ -7,7 +7,7 @@ import java.io.*;
 /**
  * Static helpers for dealing with REST conversions.
  * 
- * @author michaelb
+ * @author Mike Bryant (http://github.com/mikesname)
  * 
  */
 public class RestHelpers {

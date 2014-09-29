@@ -22,7 +22,7 @@ import java.util.List;
  * Provides a RESTful interface for the AuthoritativeSet Also for managing the
  * HistoricalAgents that are in the AuthoritativeSet
  * 
- * @author mikeb
+ * @author Mike Bryant (http://github.com/mikesname)
  * 
  */
 @Path(Entities.AUTHORITATIVE_SET)

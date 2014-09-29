@@ -30,7 +30,7 @@ import org.junit.Ignore;
 
 /**
  *
- * @author linda
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class Wp2BtEadTest extends AbstractImporterTest {
 

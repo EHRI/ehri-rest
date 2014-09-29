@@ -10,7 +10,7 @@ import static eu.ehri.project.definitions.Ontology.IDENTIFIER_KEY;
  * Generates an ID for nodes which represent IdentifiableEntities, where
  * The graph id is .
  * 
- * @author michaelb
+ * @author Mike Bryant (http://github.com/mikesname)
  * 
  */
 public enum IdentifiableEntityIdGenerator implements IdGenerator {

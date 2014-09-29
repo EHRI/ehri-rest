@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
  * <p/>
  * Should be part of SingleIndexGraphManager, so implicitly assumed it is compatible
  *
- * @author paulboon
+ * @author Paul Boon (http://github.com/PaulBoon)
  */
 public class GraphReindexer<T extends TransactionalGraph & IndexableGraph> {
     private static Logger logger = LoggerFactory.getLogger(GraphReindexer.class);

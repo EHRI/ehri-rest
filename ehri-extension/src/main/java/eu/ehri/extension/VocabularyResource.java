@@ -25,7 +25,7 @@ import java.util.List;
  * Provides a RESTful interface for the Vocabulary Also for managing the
  * Concepts that are in the Vocabulary
  *
- * @author paulboon
+ * @author Paul Boon (http://github.com/PaulBoon)
  */
 @Path(Entities.CVOC_VOCABULARY)
 public class VocabularyResource extends

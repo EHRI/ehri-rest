@@ -25,6 +25,8 @@ import java.util.List;
  * Provides a RESTful interface for the Event class. Note: Event instances
  * are created by the system, so we do not have create/update/delete methods
  * here.
+ *
+ * @author Mike Bryant (http://github.com/mikesname)
  */
 @Path(Entities.SYSTEM_EVENT)
 public class EventResource extends AbstractAccessibleEntityResource<SystemEvent> {

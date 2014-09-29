@@ -25,6 +25,8 @@ import java.util.List;
 
 /**
  * Provides a RESTful(ish) interface for creating/reading item links.
+ *
+ * @author Mike Bryant (http://github.com/mikesname)
  */
 @Path(Entities.LINK)
 public class LinkResource extends

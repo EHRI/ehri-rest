@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Import EAC for a given repository into the database.
  *
- * @author lindar
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  *
  */
 public abstract class EaImporter extends XmlImporter<Map<String, Object>> {

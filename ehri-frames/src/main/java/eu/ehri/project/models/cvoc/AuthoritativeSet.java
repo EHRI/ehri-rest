@@ -17,7 +17,7 @@ import eu.ehri.project.models.utils.JavaHandlerUtils;
 
 /**
  *
- * @author linda
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 @EntityType(EntityClass.AUTHORITATIVE_SET)
 public interface AuthoritativeSet extends AccessibleEntity, IdentifiableEntity,

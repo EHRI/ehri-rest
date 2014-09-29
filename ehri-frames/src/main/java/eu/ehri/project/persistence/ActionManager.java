@@ -53,7 +53,7 @@ import java.util.Iterator;
  * |                       |                       |
  * e1--[hasActioner]-<-- Event 1 ---[hasEvent]--<--e1
  *
- * @author michaelb
+ * @author Mike Bryant (http://github.com/mikesname)
  */
 public final class ActionManager {
 
@@ -94,7 +94,7 @@ public final class ActionManager {
      * EventContext is a handle to a particular action to which additional
      * subjects can be added.
      *
-     * @author mike
+     * @author Mike Bryant (http://github.com/mikesname)
      */
     public static class EventContext {
         private final ActionManager actionManager;

@@ -20,6 +20,8 @@ import java.util.List;
 
 /**
  * Provides a RESTful(ish) interface for creating.
+ *
+ * @author Mike Bryant (http://github.com/mikesname)
  */
 @Path(Entities.ANNOTATION)
 public class AnnotationResource extends

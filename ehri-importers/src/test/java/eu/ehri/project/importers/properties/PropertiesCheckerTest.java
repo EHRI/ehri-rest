@@ -11,7 +11,7 @@ import org.junit.Before;
 
 /**
  *
- * @author linda
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class PropertiesCheckerTest {
 

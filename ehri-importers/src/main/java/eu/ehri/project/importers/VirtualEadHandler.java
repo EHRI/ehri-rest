@@ -26,7 +26,7 @@ import org.xml.sax.SAXException;
 /**
  * Handler of Virtual EAD files. 
  *
- * @author linda
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class VirtualEadHandler extends SaxXmlHandler {
     public static final String AUTHOR = "authors";
