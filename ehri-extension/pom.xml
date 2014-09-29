@@ -60,11 +60,11 @@
             <plugin>
                 <groupId>org.codehaus.enunciate</groupId>
                 <artifactId>maven-enunciate-plugin</artifactId>
+                <version>1.29</version>
                 <configuration>
                     <configFile>enunciate.xml</configFile>
-                    <exports>
-                        <jaxws.client.library.binaries>client.jar</jaxws.client.library.binaries>
-                    </exports>
+                    <enunciateArtifactId>docs</enunciateArtifactId>
+                    <moduleName>docs</moduleName>
                 </configuration>
                 <executions>
                     <execution>
@@ -191,13 +191,6 @@
             <groupId>ehri-project</groupId>
             <artifactId>ehri-definitions</artifactId>
             <version>1.0</version>
-        </dependency>
-
-        <!-- documentation generation -->
-        <dependency>
-            <groupId>org.codehaus.enunciate</groupId>
-            <artifactId>enunciate-rt</artifactId>
-            <version>1.28</version>
         </dependency>
     </dependencies>
 
