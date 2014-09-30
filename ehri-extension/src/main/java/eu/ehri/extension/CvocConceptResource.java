@@ -258,6 +258,6 @@ public class CvocConceptResource extends
                 parent.addNarrowerConcept(concept);
                 concept.setVocabulary(parent.getVocabulary());
             }
-        }, views.setScope(parent));
+        }, views.setScope(parent.getVocabulary()));
     }
 }
