@@ -108,6 +108,9 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      *                     to be run on the created object after it is initialised
      *                     but before the response is generated. This is useful for adding
      *                     relationships to the new item.
+     * @param views        The view instance to use to create the item. This allows callers
+     *                     to override the scope and the class used.
+     * @param <T>          The generic type of class T
      * @return The response of the create request, the 'location' will contain
      *         the url of the newly created instance.
      * @throws PermissionDenied
@@ -116,14 +119,18 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
      * @throws DeserializationError
      * @throws BadRequester
      */
-    public Response create(Bundle entityBundle, List<String> accessorIds, Handler<E> handler)
+    public <T extends AccessibleEntity> Response create(Bundle entityBundle, List<String> accessorIds,
+            Handler<T> handler, LoggingCrudViews<T> views)
             throws PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, BadRequester {
         graph.getBaseGraph().checkNotInTransaction();
-        Accessor user = getRequesterUserProfile();
         try {
-            E entity = views.create(entityBundle, user, getLogMessage());
-            aclViews.setAccessors(entity, getAccessors(accessorIds, user), user);
+            Accessor user = getRequesterUserProfile();
+            T entity = views
+                    .create(entityBundle, user, getLogMessage());
+            if (!accessorIds.isEmpty()) {
+                aclViews.setAccessors(entity, getAccessors(accessorIds, user), user);
+            }
 
             // run post-creation callbacks
             handler.process(entity);
@@ -136,6 +143,30 @@ public class AbstractAccessibleEntityResource<E extends AccessibleEntity>
         } finally {
             cleanupTransaction();
         }
+    }
+
+    /**
+     * Create an instance of the 'entity' in the database
+     *
+     * @param entityBundle A bundle of item data
+     *                     'id' fields)
+     * @param accessorIds  List of accessors who can initially view this item
+     * @param handler      A callback function that allows additional operations
+     *                     to be run on the created object after it is initialised
+     *                     but before the response is generated. This is useful for adding
+     *                     relationships to the new item.
+     * @return The response of the create request, the 'location' will contain
+     *         the url of the newly created instance.
+     * @throws PermissionDenied
+     * @throws ValidationError
+     * @throws IntegrityError
+     * @throws DeserializationError
+     * @throws BadRequester
+     */
+    public Response create(Bundle entityBundle, List<String> accessorIds, Handler<E> handler)
+            throws PermissionDenied, ValidationError, IntegrityError,
+            DeserializationError, BadRequester {
+        return create(entityBundle, accessorIds, handler, views);
     }
 
     public Response create(Bundle entityBundle, List<String> accessorIds)

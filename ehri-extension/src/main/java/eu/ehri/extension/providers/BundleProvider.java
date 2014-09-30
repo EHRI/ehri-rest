@@ -1,5 +1,6 @@
 package eu.ehri.extension.providers;
 
+import eu.ehri.extension.errors.WebDeserializationError;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.persistence.Bundle;
 
@@ -7,7 +8,6 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.Provider;
 import java.io.IOException;
@@ -34,7 +34,7 @@ public class BundleProvider implements MessageBodyReader<Bundle> {
         try {
             return Bundle.fromStream(stream);
         } catch (DeserializationError deserializationError) {
-            throw new WebApplicationException(deserializationError, Response.Status.BAD_REQUEST);
+            throw new WebDeserializationError(deserializationError);
         }
     }
 }

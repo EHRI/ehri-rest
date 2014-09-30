@@ -47,6 +47,7 @@ public class SystemEventRestClientTest extends BaseRestClientTest {
 
         List<Map<String, Object>> actionsAfter = getEntityList(
                 Entities.SYSTEM_EVENT, getAdminUserProfileId());
+        System.out.println(actionsAfter);
 
         // Having created a new Repository, we should have at least one Event.
         assertEquals(actionsBefore.size() + 1, actionsAfter.size());

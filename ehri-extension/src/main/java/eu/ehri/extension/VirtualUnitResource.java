@@ -223,7 +223,7 @@ public final class VirtualUnitResource extends
                     virtualUnit.addIncludedUnit(included);
                 }
             }
-        });
+        }, views.setScope(parent));
     }
 
     @GET

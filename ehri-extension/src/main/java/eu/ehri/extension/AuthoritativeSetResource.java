@@ -149,7 +149,7 @@ public class AuthoritativeSetResource extends
      * Create a top-level agent unit for this set.
      *
      * @param id The set ID
-     * @param json The item data
+     * @param bundle The item data
      * @return A new item
      * @throws eu.ehri.project.exceptions.PermissionDenied
      * @throws eu.ehri.project.exceptions.ValidationError
@@ -163,38 +163,21 @@ public class AuthoritativeSetResource extends
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/" + Entities.HISTORICAL_AGENT)
     public Response createAuthoritativeSetHistoricalAgent(@PathParam("id") String id,
-            String json, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
+            Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws AccessDenied, PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, ItemNotFound, BadRequester {
-        Accessor user = getRequesterUserProfile();
-        AuthoritativeSet set = views.detail(id, user);
         try {
-            HistoricalAgent agent = createHistoricalAgent(json, set);
-            aclManager.setAccessors(agent,
-                    getAccessors(accessors, user));
-            graph.getBaseGraph().commit();
-            return creationResponse(agent);
-        } catch (SerializationError e) {
-            graph.getBaseGraph().rollback();
-            throw new RuntimeException(e);
+            Accessor user = getRequesterUserProfile();
+            final AuthoritativeSet set = views.detail(id, user);
+            return create(bundle, accessors, new Handler<HistoricalAgent>() {
+                @Override
+                public void process(HistoricalAgent agent) throws PermissionDenied {
+                    set.addItem(agent);
+                    agent.setPermissionScope(set);
+                }
+            }, views.setScope(set).setClass(HistoricalAgent.class));
         } finally {
             cleanupTransaction();
         }
-    }
-
-    // Helpers
-    private HistoricalAgent createHistoricalAgent(String json, AuthoritativeSet set)
-            throws DeserializationError, PermissionDenied, ValidationError,
-            IntegrityError, BadRequester {
-        Bundle entityBundle = Bundle.fromString(json);
-
-        HistoricalAgent agent = new LoggingCrudViews<HistoricalAgent>(graph, HistoricalAgent.class,
-                set).create(entityBundle, getRequesterUserProfile(),
-                getLogMessage());
-
-        // Add it to this AuthoritativeSet's agents
-        set.addItem(agent);
-        agent.setPermissionScope(set);
-        return agent;
     }
 }

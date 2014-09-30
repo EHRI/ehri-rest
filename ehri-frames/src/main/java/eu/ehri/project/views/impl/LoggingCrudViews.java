@@ -22,6 +22,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
     private final CrudViews<E> views;
     private final FramedGraph<?> graph;
     private final Class<E> cls;
+    private final PermissionScope scope;
 
     /**
      * Scoped Constructor.
@@ -34,6 +35,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
             PermissionScope scope) {
         this.graph = graph;
         this.cls = cls;
+        this.scope = scope;
         actionManager = new ActionManager(graph, scope);
         views = new CrudViews<E>(graph, cls, scope);
     }
@@ -182,7 +184,7 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * Delete an object bundle, following dependency cascades, saving an Action
      * log with the default deletion message.
      *
-     * @param id The item ID
+     * @param id   The item ID
      * @param user The current user
      * @return The number of vertices deleted
      * @throws ItemNotFound
@@ -199,8 +201,8 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
      * Delete an object bundle, following dependency cascades, saving an Action
      * log with the given deletion message.
      *
-     * @param id The item ID
-     * @param user The current user
+     * @param id         The item ID
+     * @param user       The current user
      * @param logMessage A log message
      * @return The number of vertices deleted
      * @throws ItemNotFound
@@ -219,6 +221,18 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
     }
 
     /**
+     * Fetch an item, as a user.
+     *
+     * @param id   The item ID
+     * @param user The current user
+     * @return The item
+     * @throws ItemNotFound
+     */
+    public E detail(String id, Accessor user) throws ItemNotFound {
+        return views.detail(id, user);
+    }
+
+    /**
      * Set the permission scope of the view.
      *
      * @param scope A permission scope
@@ -230,14 +244,13 @@ public class LoggingCrudViews<E extends AccessibleEntity> implements Crud<E> {
     }
 
     /**
-     * Fetch an item, as a user.
+     * Obtain a new view for a different class.
      *
-     * @param id The item ID
-     * @param user The current user
-     * @return The item
-     * @throws ItemNotFound
+     * @param cls The class of the item T
+     * @param <T> The generic type of the given class
+     * @return A new view object
      */
-    public E detail(String id, Accessor user) throws ItemNotFound {
-        return views.detail(id, user);
+    public <T extends AccessibleEntity> LoggingCrudViews<T> setClass(Class<T> cls) {
+        return new LoggingCrudViews<T>(graph, cls, scope);
     }
 }

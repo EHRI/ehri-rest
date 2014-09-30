@@ -210,14 +210,15 @@ public class DocumentaryUnitResource extends
             throws AccessDenied, PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, ItemNotFound, BadRequester {
         try {
-            Accessor user = getRequesterUserProfile();
+            final Accessor user = getRequesterUserProfile();
             final DocumentaryUnit parent = views.detail(id, user);
             return create(bundle, accessors, new Handler<DocumentaryUnit>() {
                 @Override
                 public void process(DocumentaryUnit doc) throws PermissionDenied {
                     parent.addChild(doc);
                 }
-            });
+            },
+            views.setScope(parent));
         } finally {
             cleanupTransaction();
         }
