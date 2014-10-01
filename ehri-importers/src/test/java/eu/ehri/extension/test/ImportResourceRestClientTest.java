@@ -1,9 +1,8 @@
-package eu.ehri.extension;
+package eu.ehri.extension.test;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.sun.jersey.api.client.ClientResponse;
-import eu.ehri.extension.test.BaseRestClientTest;
 import eu.ehri.project.importers.IcaAtomEadHandler;
 import org.codehaus.jackson.JsonNode;
 import org.junit.Test;
