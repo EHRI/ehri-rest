@@ -52,7 +52,6 @@ public class ImportResource extends AbstractRestResource {
      * <pre>
      * <code>curl -X POST \
      *      -H "Authorization: mike" \
-     *      -H "Content-type: text/plain" \
      *      --data-binary @skos-data.rdf \
      *      "http://localhost:7474/ehri/import/skos?scope=gb-my-vocabulary&log=testing&tolerant=true"
      * </code>
