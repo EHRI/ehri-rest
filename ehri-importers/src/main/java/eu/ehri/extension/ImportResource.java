@@ -43,11 +43,15 @@ public class ImportResource extends AbstractRestResource {
      * <p/>
      * The way you would run with would typically be:
      * <p/>
+     * <pre>
+     * <code>
      * curl -X POST \
-     * -H "Authorization: mike" \
-     * -H "Content-type: text/plain" \
-     * --data-binary @wl-list.txt \
-     * "http://localhost:7474/ehri/import/ead?scope=gb-003348&log=testing&tolerant=true"
+     *      -H "Authorization: mike" \
+     *      -H "Content-type: text/plain" \
+     *      --data-binary @wl-list.txt \
+     *      "http://localhost:7474/ehri/import/ead?scope=gb-003348&log=testing&tolerant=true"
+     * </code>
+     * </pre>
      * <p/>
      * (Assuming wl-list.txt is a list of newline separated EAD file paths.)
      * <p/>
@@ -60,8 +64,12 @@ public class ImportResource extends AbstractRestResource {
      * @param scopeId       The id of the import scope (i.e. repository)
      * @param tolerant      Whether or not to die on the first validation error
      * @param logMessage    Log message for import
-     * @param handlerClass  The fully-qualified handler class name (defaults to IcaAtomEadHandler)
-     * @param importerClass The fully-qualified import class name (defaults to IcaAtomEadImporter)
+     * @param handlerClass  The fully-qualified handler class name
+     *                      (defaults to IcaAtomEadHandler)
+     * @param importerClass The fully-qualified import class name
+     *                      (defaults to IcaAtomEadImporter)
+     * @return A JSON structure showing how many records were created,
+     *         updated, or unchanged.
      */
     @POST
     @Produces(MediaType.APPLICATION_JSON)
