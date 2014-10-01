@@ -8,7 +8,6 @@ import eu.ehri.project.acl.PermissionType;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.persistence.Bundle;
 import org.codehaus.jackson.JsonFactory;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -35,7 +34,6 @@ public class PermissionRestClientTest extends BaseRestClientTest {
 
     private String jsonDocumentaryUnitTestStr;
     private final JsonFactory factory = new JsonFactory();
-    private final ObjectMapper mapper = new ObjectMapper(factory);
 
     @Before
     public void setUp() throws Exception {
@@ -64,7 +62,7 @@ public class PermissionRestClientTest extends BaseRestClientTest {
         // Set the permission via REST
         response = jsonCallAs(getAdminUserProfileId(),
                 ehriUri(Entities.PERMISSION, LIMITED_USER_NAME))
-                .entity(mapper.writeValueAsBytes(getTestMatrix()))
+                .entity(jsonMapper.writeValueAsBytes(getTestMatrix()))
                 .post(ClientResponse.class);
 
         assertStatus(OK, response);
@@ -93,7 +91,7 @@ public class PermissionRestClientTest extends BaseRestClientTest {
 
         // Test a user setting his own permissions over REST - this should
         // obviously fail...
-        byte[] bytes = mapper.writeValueAsBytes(getTestMatrix());
+        byte[] bytes = jsonMapper.writeValueAsBytes(getTestMatrix());
         ClientResponse response = jsonCallAs(LIMITED_USER_NAME,
                 ehriUri(Entities.PERMISSION, LIMITED_USER_NAME))
                 .post(ClientResponse.class, bytes);
@@ -113,7 +111,7 @@ public class PermissionRestClientTest extends BaseRestClientTest {
                         PermissionType.CREATE.getName()).build());
 
         // Set the permission via REST
-        byte[] bytes = mapper.writeValueAsBytes(testMatrix);
+        byte[] bytes = jsonMapper.writeValueAsBytes(testMatrix);
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
                 ehriUri(Entities.PERMISSION, LIMITED_USER_NAME))
                 .post(ClientResponse.class, bytes);
@@ -129,7 +127,7 @@ public class PermissionRestClientTest extends BaseRestClientTest {
         assertStatus(UNAUTHORIZED, response);
 
         // Set the permission via REST
-        byte[] bytes = mapper.writeValueAsBytes(getTestMatrix());
+        byte[] bytes = jsonMapper.writeValueAsBytes(getTestMatrix());
         response = jsonCallAs(getAdminUserProfileId(),
                 ehriUri(Entities.PERMISSION, LIMITED_USER_NAME))
                 .post(ClientResponse.class, bytes);
@@ -259,7 +257,7 @@ public class PermissionRestClientTest extends BaseRestClientTest {
     private List<Map<String, Map<String, List<String>>>> getInheritedMatrix(String json) throws IOException {
         TypeReference<LinkedList<HashMap<String, Map<String, List<String>>>>> typeRef = new TypeReference<LinkedList<HashMap<String, Map<String, List<String>>>>>() {
         };
-        return mapper.readValue(json, typeRef);
+        return jsonMapper.readValue(json, typeRef);
     }
 
     @SuppressWarnings("serial")

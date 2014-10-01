@@ -5,7 +5,6 @@ import com.sun.jersey.api.client.WebResource;
 import eu.ehri.extension.AbstractRestResource;
 import eu.ehri.project.definitions.Entities;
 import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -220,8 +219,7 @@ public class CvocConceptClientTest extends BaseRestClientTest {
     public boolean containsIdentifier(final ClientResponse response,
             final String idStr) throws IOException {
         String json = response.getEntity(String.class);
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode rootNode = mapper.readValue(json, JsonNode.class);
+        JsonNode rootNode = jsonMapper.readValue(json, JsonNode.class);
         JsonNode idPath = rootNode.path(0).path("data").path("identifier");
         return idPath.isTextual() && idPath.asText().equals(idStr);
 

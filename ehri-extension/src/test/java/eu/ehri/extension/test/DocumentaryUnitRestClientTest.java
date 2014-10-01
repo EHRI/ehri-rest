@@ -9,7 +9,6 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.ErrorSet;
 import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -127,8 +126,7 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
 
         assertStatus(BAD_REQUEST, response);
 
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode rootNode = mapper.readValue(errString, JsonNode.class);
+        JsonNode rootNode = jsonMapper.readValue(errString, JsonNode.class);
         JsonNode errValue = rootNode.path(ErrorSet.ERROR_KEY).path(
                 Ontology.IDENTIFIER_KEY);
         assertFalse(errValue.isMissingNode());
@@ -147,8 +145,7 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
         // Check the JSON gives use the correct error
         // In this case the start and end dates for the
         // first date relation should be missing
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode rootNode = mapper.readValue(errorJson, JsonNode.class);
+        JsonNode rootNode = jsonMapper.readValue(errorJson, JsonNode.class);
         JsonNode errValue1 = rootNode.path(ErrorSet.REL_KEY)
                 .path(Ontology.DESCRIPTION_FOR_ENTITY).path(0)
                 .path(ErrorSet.ERROR_KEY).path(Ontology.NAME_KEY);
@@ -164,8 +161,7 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
 
         assertStatus(OK, response);
 
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode rootNode = mapper.readValue(response.getEntity(String.class),
+        JsonNode rootNode = jsonMapper.readValue(response.getEntity(String.class),
                 JsonNode.class);
         JsonNode errValue = rootNode.path("data").path(
                 Ontology.IDENTIFIER_KEY);
@@ -184,8 +180,7 @@ public class DocumentaryUnitRestClientTest extends BaseRestClientTest {
 
         assertStatus(OK, response);
 
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode rootNode = mapper.readValue(response.getEntity(String.class),
+        JsonNode rootNode = jsonMapper.readValue(response.getEntity(String.class),
                 JsonNode.class);
         JsonNode errValue = rootNode.path("data").path(
                 Ontology.IDENTIFIER_KEY);
