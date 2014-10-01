@@ -3,6 +3,7 @@ package eu.ehri.extension;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import eu.ehri.extension.errors.BadRequester;
+import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.*;
@@ -63,7 +64,7 @@ public class ImportResource extends AbstractRestResource {
      * @param importerClass The fully-qualified import class name (defaults to IcaAtomEadImporter)
      */
     @POST
-    @Produces(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.TEXT_PLAIN)
     @Path("/ead")
     public Response importEad(
@@ -73,7 +74,8 @@ public class ImportResource extends AbstractRestResource {
             @QueryParam("handler") String handlerClass,
             @QueryParam("importer") String importerClass,
             String pathList)
-            throws BadRequester, ItemNotFound, ValidationError, IOException, ClassNotFoundException {
+            throws BadRequester, ItemNotFound, ValidationError,
+            IOException, DeserializationError {
 
         try {
             Class<? extends SaxXmlHandler> handler = getEadHandler(handlerClass);
@@ -93,10 +95,9 @@ public class ImportResource extends AbstractRestResource {
                     .importFiles(paths, logMessage);
 
             graph.getBaseGraph().commit();
-            return Response.ok(logToText(log).getBytes()).build();
+            return Response.ok(jsonMapper.writeValueAsBytes(log.getData())).build();
         } catch (ClassNotFoundException e) {
-            return Response.status(Response.Status.BAD_REQUEST.getStatusCode())
-                    .entity(("Class not found: " + e.getMessage() + "\n").getBytes()).build();
+            throw new DeserializationError("Class not found: " + e.getMessage());
         } finally {
             if (graph.getBaseGraph().isInTransaction()) {
                 graph.getBaseGraph().rollback();
@@ -122,14 +123,6 @@ public class ImportResource extends AbstractRestResource {
     }
 
     /**
-     * Format an import log.
-     */
-    private static String logToText(ImportLog log) {
-        return String.format("Created: %s\nUpdated: %s\nUnchanged: %s\n",
-                log.getCreated(), log.getUpdated(), log.getUnchanged());
-    }
-
-    /**
      * Load a handler by name. Note: a valid class that's not a valid handler
      * will throw a `NoSuchMethodException` in the import manager but not actually
      * crash, so the import will appear to do nothing.
@@ -140,11 +133,16 @@ public class ImportResource extends AbstractRestResource {
      */
     @SuppressWarnings("unchecked")
     private static Class<? extends SaxXmlHandler> getEadHandler(String handlerName)
-            throws ClassNotFoundException {
+            throws ClassNotFoundException, DeserializationError {
         if (handlerName == null || handlerName.trim().isEmpty()) {
             return DEFAULT_EAD_HANDLER;
         } else {
-            return (Class<? extends SaxXmlHandler>) Class.forName(handlerName);
+            Class<?> handler = Class.forName(handlerName);
+            if (!SaxXmlHandler.class.isAssignableFrom(handler)) {
+                throw new DeserializationError("Class '" + handlerName + "' is" +
+                        " not an instance of " + SaxXmlHandler.class.getSimpleName());
+            }
+            return (Class<? extends SaxXmlHandler>) handler;
         }
     }
 
@@ -159,11 +157,16 @@ public class ImportResource extends AbstractRestResource {
      */
     @SuppressWarnings("unchecked")
     private static Class<? extends AbstractImporter> getEadImporter(String importerName)
-            throws ClassNotFoundException {
+            throws ClassNotFoundException, DeserializationError {
         if (importerName == null || importerName.trim().isEmpty()) {
             return DEFAULT_EAD_IMPORTER;
         } else {
-            return (Class<? extends AbstractImporter>) Class.forName(importerName);
+            Class<?> importer = Class.forName(importerName);
+            if (!AbstractImporter.class.isAssignableFrom(importer)) {
+                throw new DeserializationError("Class '" + importerName + "' is" +
+                        " not an instance of " + AbstractImporter.class.getSimpleName());
+            }
+            return (Class<? extends AbstractImporter>) importer;
         }
     }
 }
