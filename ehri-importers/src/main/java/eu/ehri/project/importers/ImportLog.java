@@ -6,6 +6,7 @@ import com.google.common.collect.Maps;
 import eu.ehri.project.models.base.Actioner;
 import eu.ehri.project.models.events.SystemEvent;
 import eu.ehri.project.persistence.ActionManager.EventContext;
+import org.codehaus.jackson.annotate.JsonValue;
 
 /**
  * Class that serves as a manifest for an import batch,
@@ -130,6 +131,15 @@ public class ImportLog {
      */
     public int getChanged() {
         return created + updated;
+    }
+
+    @JsonValue
+    public Map<String,Integer> getData() {
+        Map<String,Integer> data = Maps.newHashMap();
+        data.put("created", created);
+        data.put("updated", updated);
+        data.put("unchanged", unchanged);
+        return data;
     }
 
     public void printReport() {
