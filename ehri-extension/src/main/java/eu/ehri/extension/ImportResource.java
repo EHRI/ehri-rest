@@ -2,13 +2,18 @@ package eu.ehri.extension;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
+import com.hp.hpl.jena.shared.NoReaderForLangException;
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.exceptions.DeserializationError;
 import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.exceptions.ValidationError;
 import eu.ehri.project.importers.*;
+import eu.ehri.project.importers.cvoc.SkosImporter;
+import eu.ehri.project.importers.cvoc.SkosImporterFactory;
+import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.PermissionScope;
+import eu.ehri.project.models.cvoc.Vocabulary;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.*;
@@ -17,6 +22,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 /**
@@ -34,6 +40,68 @@ public class ImportResource extends AbstractRestResource {
 
     public ImportResource(@Context GraphDatabaseService database) {
         super(database);
+    }
+
+
+    /**
+     * Import a SKOS file.
+     * <p/>
+     * Example:
+     * <p/>
+     * <pre>
+     * <code>
+     * curl -X POST \
+     *      -H "Authorization: mike" \
+     *      -H "Content-type: text/plain" \
+     *      --data-binary @skos-data.rdf \
+     *      "http://localhost:7474/ehri/import/skos?scope=gb-my-vocabulary&log=testing&tolerant=true"
+     * </code>
+     * </pre>
+     * <p/>
+     * (TODO: Might be better to use a different way of encoding the local file paths...)
+     *
+     * @param scopeId    The id of the import scope (i.e. repository)
+     * @param tolerant   Whether or not to die on the first validation error
+     * @param logMessage Log message for import
+     * @param stream     A stream of SKOS data in a valid format.
+     * @return A JSON structure showing how many records were created,
+     *         updated, or unchanged.
+     */
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/skos")
+    public Response importSkos(
+            @QueryParam("scope") String scopeId,
+            @DefaultValue("false") @QueryParam("tolerant") Boolean tolerant,
+            @QueryParam("log") String logMessage,
+            @QueryParam("format") String format,
+            InputStream stream)
+            throws BadRequester, ItemNotFound, ValidationError,
+            IOException, DeserializationError {
+
+        try {
+            // Get the current user from the Authorization header and the scope
+            // from the query params...
+            UserProfile user = getCurrentUser();
+            Vocabulary scope = manager.getFrame(scopeId, Vocabulary.class);
+            SkosImporter importer = SkosImporterFactory.newSkosImporter(graph, user, scope);
+
+            ImportLog log = importer
+                    .setFormat(format)
+                    .setTolerant(tolerant)
+                    .importFile(stream, logMessage);
+
+            graph.getBaseGraph().commit();
+            return Response.ok(jsonMapper.writeValueAsBytes(log.getData())).build();
+        } catch (InputParseError e) {
+            throw new DeserializationError("Unable to parse input: " + e.getMessage());
+        } catch (NoReaderForLangException e) {
+            throw new DeserializationError("Unable to read language: " + format);
+        } finally {
+            if (graph.getBaseGraph().isInTransaction()) {
+                graph.getBaseGraph().rollback();
+            }
+        }
     }
 
     /**
@@ -58,8 +126,7 @@ public class ImportResource extends AbstractRestResource {
      * (NB: Data is sent using --data-binary to preserve linebreaks - otherwise
      * it needs url encoding.)
      * <p/>
-     * (NB2: Might be better to use a different way of encoding the local
-     * file paths...)
+     * (TODO: Might be better to use a different way of encoding the local file paths...)
      *
      * @param scopeId       The id of the import scope (i.e. repository)
      * @param tolerant      Whether or not to die on the first validation error
@@ -68,6 +135,8 @@ public class ImportResource extends AbstractRestResource {
      *                      (defaults to IcaAtomEadHandler)
      * @param importerClass The fully-qualified import class name
      *                      (defaults to IcaAtomEadImporter)
+     * @param pathList      A string containing a list of local file paths
+     *                      to import.
      * @return A JSON structure showing how many records were created,
      *         updated, or unchanged.
      */

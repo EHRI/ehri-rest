@@ -2,6 +2,7 @@ package eu.ehri.extension.test;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
+import com.google.common.io.Resources;
 import com.sun.jersey.api.client.ClientResponse;
 import eu.ehri.project.importers.IcaAtomEadHandler;
 import org.codehaus.jackson.JsonNode;
@@ -24,7 +25,33 @@ import static org.junit.Assert.assertTrue;
  * @author Mike Bryant (http://github.com/mikesname)
  */
 public class ImportResourceRestClientTest extends BaseRestClientTest {
+    // NB: This file is *copied* into the extension test resources because
+    // I can't figure out how to refer to resources in another module...
     protected static final String SINGLE_EAD = "single-ead.xml";
+
+    @Test
+    public void testImportSkos() throws Exception {
+        // Get the path of an EAD file
+        InputStream payloadStream = ClassLoader.getSystemResourceAsStream("simple.n3");
+
+        URI uri = ehriUriBuilder("import", "skos")
+                .queryParam("log", "Testing SKOS")
+                .queryParam("scope", "cvoc1")
+                .queryParam("tolerant", "true")
+                .queryParam("format", "N3")
+                .build();
+        ClientResponse response = callAs(getAdminUserProfileId(), uri)
+                .entity(payloadStream)
+                .post(ClientResponse.class);
+
+        assertStatus(ClientResponse.Status.OK, response);
+        String output = response.getEntity(String.class);
+        System.out.println("SKOS: " + output);
+        JsonNode rootNode = jsonMapper.readValue(output, JsonNode.class);
+        assertEquals(1, rootNode.path("created").asInt());
+        assertEquals(0, rootNode.path("updated").asInt());
+        assertEquals(0, rootNode.path("unchanged").asInt());
+    }
 
     @Test
     public void testImportEad() throws Exception {
@@ -101,7 +128,7 @@ public class ImportResourceRestClientTest extends BaseRestClientTest {
             throws URISyntaxException, UnsupportedEncodingException {
         List<String> paths = Lists.newArrayList();
         for (String resourceName : resources) {
-            URL resource = ClassLoader.getSystemResource(resourceName);
+            URL resource = Resources.getResource(resourceName);
             paths.add(new File(resource.toURI()).getAbsolutePath());
         }
         String payloadText = Joiner.on("\n").join(paths) + "\n";
