@@ -38,7 +38,7 @@ public class ImportResourceRestClientTest extends BaseRestClientTest {
                 .queryParam("log", "Testing SKOS")
                 .queryParam("scope", "cvoc1")
                 .queryParam("tolerant", "true")
-                .queryParam("format", "N3")
+                .queryParam("format", "Turtle")
                 .build();
         ClientResponse response = callAs(getAdminUserProfileId(), uri)
                 .entity(payloadStream)

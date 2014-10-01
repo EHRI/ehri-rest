@@ -44,27 +44,26 @@ public class ImportResource extends AbstractRestResource {
 
 
     /**
-     * Import a SKOS file.
+     * Import a SKOS file, of varying formats, as specified by the &quot;language&quot;
+     * column of the file extensions table <a href="https://jena.apache.org/documentation/io/">here</a>.
      * <p/>
      * Example:
      * <p/>
      * <pre>
-     * <code>
-     * curl -X POST \
+     * <code>curl -X POST \
      *      -H "Authorization: mike" \
      *      -H "Content-type: text/plain" \
      *      --data-binary @skos-data.rdf \
      *      "http://localhost:7474/ehri/import/skos?scope=gb-my-vocabulary&log=testing&tolerant=true"
      * </code>
      * </pre>
-     * <p/>
-     * (TODO: Might be better to use a different way of encoding the local file paths...)
      *
      * @param scopeId    The id of the import scope (i.e. repository)
      * @param tolerant   Whether or not to die on the first validation error
      * @param logMessage Log message for import
+     * @param format     The RDF format of the POSTed data
      * @param stream     A stream of SKOS data in a valid format.
-     * @return A JSON structure showing how many records were created,
+     * @return A JSON object showing how many records were created,
      *         updated, or unchanged.
      */
     @POST
@@ -112,19 +111,18 @@ public class ImportResource extends AbstractRestResource {
      * The way you would run with would typically be:
      * <p/>
      * <pre>
-     * <code>
-     * curl -X POST \
+     * <code>curl -X POST \
      *      -H "Authorization: mike" \
      *      -H "Content-type: text/plain" \
-     *      --data-binary @wl-list.txt \
-     *      "http://localhost:7474/ehri/import/ead?scope=gb-003348&log=testing&tolerant=true"
+     *      --data-binary @ead-list.txt \
+     *      "http://localhost:7474/ehri/import/ead?scope=my-repo-id&log=testing&tolerant=true"
+     *
+     * # NB: Data is sent using --data-binary to preserve line-breaks - otherwise
+     * # it needs url encoding.
      * </code>
      * </pre>
      * <p/>
-     * (Assuming wl-list.txt is a list of newline separated EAD file paths.)
-     * <p/>
-     * (NB: Data is sent using --data-binary to preserve linebreaks - otherwise
-     * it needs url encoding.)
+     * (Assuming <code>ead-list.txt</code> is a list of newline separated EAD file paths.)
      * <p/>
      * (TODO: Might be better to use a different way of encoding the local file paths...)
      *
@@ -137,7 +135,7 @@ public class ImportResource extends AbstractRestResource {
      *                      (defaults to IcaAtomEadImporter)
      * @param pathList      A string containing a list of local file paths
      *                      to import.
-     * @return A JSON structure showing how many records were created,
+     * @return A JSON object showing how many records were created,
      *         updated, or unchanged.
      */
     @POST
