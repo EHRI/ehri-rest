@@ -102,6 +102,7 @@ public class Wp2BtEadTest extends AbstractImporterTest {
         int countDocDesc = 0;
         while(i.hasNext()){
             DocumentDescription desc  = i.next();
+            assertEquals("mul", desc.getLanguageOfDescription());
             countDocDesc++;
         }        
         assertEquals(1, countDocDesc);

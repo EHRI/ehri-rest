@@ -269,6 +269,48 @@ def update_db_test(local_dir):
     run("chown %s.webadm -R %s" % (env.user, remote_db_dir))
     run("chmod -R g+w " + remote_db_dir)
     
+@task
+def reindex_users():
+    "Run a partial reindex of Neo4j -> Solr data"
+    all_types = ["userProfile", "group"]
+    indexer_cmd = [
+       "java", "-jar", env.index_helper,
+        "--index",
+        "-H", "Authorization=admin",
+        "--stats",
+        "--solr", "http://localhost:8080/ehri/portal",
+        "--rest", "http://localhost:7474/ehri",
+    ] + all_types
+    run(" ".join(indexer_cmd))
+
+@task
+def reindex_concepts():
+    "Run a partial reindex of Neo4j -> Solr data"
+    all_types = ["historicalAgent", "cvocVocabulary", 
+                 "cvocConcept", "authoritativeSet"]
+    indexer_cmd = [
+       "java", "-jar", env.index_helper,
+        "--index",
+        "-H", "Authorization=admin",
+        "--stats",
+        "--solr", "http://localhost:8080/ehri/portal",
+        "--rest", "http://localhost:7474/ehri",
+    ] + all_types
+    run(" ".join(indexer_cmd))
+
+@task
+def reindex_virtualcollections():
+    "Run a partial reindex of Neo4j -> Solr data"
+    all_types = ["virtualUnit"]
+    indexer_cmd = [
+       "java", "-jar", env.index_helper,
+        "--index",
+        "-H", "Authorization=admin",
+        "--stats",
+        "--solr", "http://localhost:8080/ehri/portal",
+        "--rest", "http://localhost:7474/ehri",
+    ] + all_types
+    run(" ".join(indexer_cmd))
 
 @task
 def reindex_repository(repo_id):

@@ -108,9 +108,10 @@ public class IfzTest extends AbstractImporterTest{
 
         // There should be one DocumentDescription for the (second) <c02>
         for(DocumentDescription dd : c2_2.getDocumentDescriptions()){
-            assertEquals("Dachau, IV", dd.getName());
+            assertEquals(C02_02, dd.getName());
             assertEquals("deu", dd.getLanguageOfDescription());
             assertEquals("file", dd.asVertex().getProperty("levelOfDescription"));
+            assertEquals("www.ifz-muenchen.de/archiv/ED_0066_0001_0000.pdf", dd.asVertex().getProperty("ref"));
         }
     //Band
         for(DocumentDescription dd : c2_1.getDocumentDescriptions()){
