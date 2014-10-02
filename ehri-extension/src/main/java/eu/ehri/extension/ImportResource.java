@@ -43,6 +43,7 @@ public class ImportResource extends AbstractRestResource {
     public static final String TOLERANT_PARAM = "tolerant";
     public static final String HANDLER_PARAM = "handler";
     public static final String IMPORTER_PARAM = "importer";
+    public static final String PROPERTIES_PARAM = "properties";
     public static final String FORMAT_PARAM = "format";
 
     public ImportResource(@Context GraphDatabaseService database) {
@@ -119,7 +120,6 @@ public class ImportResource extends AbstractRestResource {
      * <pre>
      * <code>curl -X POST \
      *      -H "Authorization: mike" \
-     *      -H "Content-type: text/plain" \
      *      --data-binary @ead-list.txt \
      *      "http://localhost:7474/ehri/import/ead?scope=my-repo-id&log=testing&tolerant=true"
      *
@@ -148,13 +148,12 @@ public class ImportResource extends AbstractRestResource {
      */
     @POST
     @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.TEXT_PLAIN)
     @Path("/ead")
     public Response importEad(
             @QueryParam(SCOPE_PARAM) String scopeId,
             @DefaultValue("false") @QueryParam(TOLERANT_PARAM) Boolean tolerant,
             @QueryParam(LOG_PARAM) String logMessage,
-            @QueryParam("properties") String propertyFile,
+            @QueryParam(PROPERTIES_PARAM) String propertyFile,
             @QueryParam(HANDLER_PARAM) String handlerClass,
             @QueryParam(IMPORTER_PARAM) String importerClass,
             String pathList)
@@ -162,7 +161,7 @@ public class ImportResource extends AbstractRestResource {
             IOException, DeserializationError {
 
         try {
-            checkPropertiesFile(propertyFile);
+            checkPropertyFile(propertyFile);
             Class<? extends SaxXmlHandler> handler = getEadHandler(handlerClass);
             Class<? extends AbstractImporter> importer = getEadImporter(importerClass);
 
@@ -184,6 +183,8 @@ public class ImportResource extends AbstractRestResource {
             return Response.ok(jsonMapper.writeValueAsBytes(log.getData())).build();
         } catch (ClassNotFoundException e) {
             throw new DeserializationError("Class not found: " + e.getMessage());
+        } catch (IllegalArgumentException e) {
+            throw new DeserializationError(e.getMessage());
         } finally {
             if (graph.getBaseGraph().isInTransaction()) {
                 graph.getBaseGraph().rollback();
@@ -201,11 +202,22 @@ public class ImportResource extends AbstractRestResource {
         List<String> files = Lists.newArrayList();
         for (String path : Splitter.on("\n").omitEmptyStrings().trimResults().split(pathList)) {
             if (!new File(path).exists()) {
-                throw new IllegalArgumentException("File not found: " + path);
+                throw new IllegalArgumentException("File specified in payload not found: " + path);
             }
             files.add(path);
         }
         return files;
+    }
+
+    private static void checkPropertyFile(String properties)  {
+        // Null properties are allowed
+        if (properties != null) {
+            File file = new File(properties);
+            if (!(file.isFile() && file.exists())) {
+                throw new IllegalArgumentException("Properties file '" + properties + "' " +
+                        "either does not exist, or is not a file.");
+            }
+        }
     }
 
     /**
@@ -229,18 +241,6 @@ public class ImportResource extends AbstractRestResource {
                         " not an instance of " + SaxXmlHandler.class.getSimpleName());
             }
             return (Class<? extends SaxXmlHandler>) handler;
-        }
-    }
-
-    private static void checkPropertiesFile(String properties)
-            throws DeserializationError {
-        // Null properties are allowed
-        if (properties != null) {
-            File file = new File(properties);
-            if (!(file.isFile() && file.exists())) {
-                throw new DeserializationError("Properties file '" + properties + "' " +
-                        "either does not exist, or is not a file.");
-            }
         }
     }
 
