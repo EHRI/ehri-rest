@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Provides additional Admin methods needed by client systems.
@@ -46,13 +47,19 @@ public class AdminResource extends AbstractRestResource {
         super(database);
     }
 
+    /**
+     * Update the childCount property on hierarchical items with the number of
+     * children they contain.
+     *
+     * @throws Exception
+     */
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/_rebuildChildCache")
     public Response rebuildChildCache() throws Exception {
         graph.getBaseGraph().checkNotInTransaction();
         try {
-            for (DocumentaryUnit unit: manager.getFrames(EntityClass.DOCUMENTARY_UNIT, DocumentaryUnit.class)) {
+            for (DocumentaryUnit unit : manager.getFrames(EntityClass.DOCUMENTARY_UNIT, DocumentaryUnit.class)) {
                 unit.updateChildCountCache();
             }
             for (Repository repository : manager.getFrames(EntityClass.REPOSITORY, Repository.class)) {
@@ -84,10 +91,22 @@ public class AdminResource extends AbstractRestResource {
         }
     }
 
+    /**
+     * Find an replace a property value across an entire entity class, e.g.
+     * if a DocumentaryUnit has a property with name &quot;foo&quot; and value &quot;bar&quot;,
+     * change the value to &quot;baz&quot; on all items.
+     *
+     * @param entityType The type of entity
+     * @param propName   The name of the property to find and replace
+     * @param oldValue   The property value to change
+     * @param newValue   The new value
+     * @return How many items have been changed
+     * @throws Exception
+     */
     @POST
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/_findReplaceProperty")
-    public Response renamePropertyValue(
+    @Path("/_findReplacePropertyValue")
+    public Long renamePropertyValue(
             @QueryParam("type") String entityType,
             @QueryParam("name") String propName,
             @QueryParam("from") String oldValue,
@@ -99,10 +118,10 @@ public class AdminResource extends AbstractRestResource {
                 || propName.trim().isEmpty()
                 || propName.equals(EntityType.ID_KEY)
                 || propName.equals(EntityType.TYPE_KEY)) {
-            throw new IllegalArgumentException("Invalid propery key: " + propName);
+            throw new IllegalArgumentException("Invalid property key: " + propName);
         }
         try {
-            int changes = 0;
+            Long changes = 0L;
             for (Vertex v : vertices) {
                 Object current = v.getProperty(propName);
                 if (oldValue.equals(current)) {
@@ -111,9 +130,51 @@ public class AdminResource extends AbstractRestResource {
                 }
             }
             graph.getBaseGraph().commit();
-            return Response.status(Status.OK)
-                    .entity(Integer.valueOf(changes).toString().getBytes())
-                    .build();
+            return changes;
+        } finally {
+            vertices.close();
+            cleanupTransaction();
+        }
+    }
+
+    /**
+     * Change a property key name across an entire entity class.
+     *
+     * @param entityType The type of entity
+     * @param oldKeyName The existing property key name
+     * @param newKeyName The new property key name
+     * @return The number of items changed
+     * @throws Exception
+     */
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/_findReplacePropertyName")
+    public Long renamePropertyName(
+            @QueryParam("type") String entityType,
+            @QueryParam("from") String oldKeyName,
+            @QueryParam("to") String newKeyName) throws Exception {
+        graph.getBaseGraph().checkNotInTransaction();
+        EntityClass entityClass = EntityClass.withName(entityType);
+        CloseableIterable<Vertex> vertices = manager.getVertices(entityClass);
+        if (oldKeyName == null
+                || oldKeyName.trim().isEmpty()
+                || oldKeyName.equals(EntityType.ID_KEY)
+                || oldKeyName.equals(EntityType.TYPE_KEY)) {
+            throw new IllegalArgumentException("Invalid property name: " + oldKeyName);
+        }
+        try {
+            Long changes = 0L;
+            for (Vertex v : vertices) {
+                Set<String> propertyKeys = v.getPropertyKeys();
+                if (propertyKeys.contains(oldKeyName)) {
+                    Object current = v.getProperty(oldKeyName);
+                    manager.setProperty(v, newKeyName, current);
+                    manager.setProperty(v, oldKeyName, null);
+                    changes++;
+                }
+            }
+            graph.getBaseGraph().commit();
+            return changes;
         } finally {
             vertices.close();
             cleanupTransaction();
@@ -122,7 +183,7 @@ public class AdminResource extends AbstractRestResource {
 
     /**
      * Create a new user with a default name and identifier.
-     * 
+     *
      * @return A new user
      * @throws Exception
      */
@@ -131,7 +192,7 @@ public class AdminResource extends AbstractRestResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/createDefaultUserProfile")
     public Response createDefaultUserProfile(String jsonData,
-            @QueryParam(GROUP_PARAM) List<String> groups) throws Exception {
+                                             @QueryParam(GROUP_PARAM) List<String> groups) throws Exception {
         graph.getBaseGraph().checkNotInTransaction();
         try {
             String ident = getNextDefaultUserId();
@@ -148,7 +209,7 @@ public class AdminResource extends AbstractRestResource {
             UserProfile user = view.create(bundle, accessor);
 
             // add to the groups
-            for (String groupId: groups) {
+            for (String groupId : groups) {
                 Group group = manager.getFrame(groupId, EntityClass.GROUP, Group.class);
                 group.addMember(user);
             }
@@ -185,13 +246,14 @@ public class AdminResource extends AbstractRestResource {
                 start);
     }
 
-    private Map<String,Object> parseUserData(String json) throws IOException {
+    private Map<String, Object> parseUserData(String json) throws IOException {
         if (json == null || json.trim().equals("")) {
             return Maps.newHashMap();
         } else {
-            TypeReference<HashMap<String,Object>> typeRef = new TypeReference<
-                                    HashMap<String,Object>
-                                    >() {};
+            TypeReference<HashMap<String, Object>> typeRef = new TypeReference<
+                    HashMap<String, Object>
+                    >() {
+            };
             return mapper.readValue(json, typeRef);
         }
     }

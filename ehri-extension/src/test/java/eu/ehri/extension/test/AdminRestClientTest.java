@@ -34,7 +34,7 @@ public class AdminRestClientTest extends BaseRestClientTest {
 
     @Test
     public void testPropertyRename() throws Exception {
-        WebResource resource = client.resource(ehriUri("admin", "_findReplaceProperty"))
+        WebResource resource = client.resource(ehriUri("admin", "_findReplacePropertyValue"))
                 .queryParam("type", Entities.ADDRESS)
                 .queryParam("name", "streetAddress")
                 .queryParam("from", "Strand")
@@ -46,7 +46,7 @@ public class AdminRestClientTest extends BaseRestClientTest {
 
         // check it fails for invalid properties...
         for (String badProp: new String[]{EntityType.ID_KEY, EntityType.TYPE_KEY}) {
-            resource = client.resource(ehriUri("admin", "_findReplaceProperty"))
+            resource = client.resource(ehriUri("admin", "_findReplacePropertyValue"))
                     .queryParam("type", Entities.ADDRESS)
                     .queryParam("name", badProp)
                     .queryParam("from", "foo")
@@ -55,6 +55,18 @@ public class AdminRestClientTest extends BaseRestClientTest {
                     .type(MediaType.APPLICATION_JSON).post(ClientResponse.class);
             assertStatus(INTERNAL_SERVER_ERROR, response);
         }
+    }
+
+    @Test
+    public void testPropertyKeyRename() throws Exception {
+        WebResource resource = client.resource(ehriUri("admin", "_findReplacePropertyName"))
+                .queryParam("type", Entities.ADDRESS)
+                .queryParam("from", "streetAddress")
+                .queryParam("to", "somethingElse");
+        ClientResponse response = resource
+                .type(MediaType.APPLICATION_JSON).post(ClientResponse.class);
+        assertStatus(OK, response);
+        assertEquals("2", response.getEntity(String.class));
     }
 
     @Test
