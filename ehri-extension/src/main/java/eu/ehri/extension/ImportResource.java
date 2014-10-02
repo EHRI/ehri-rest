@@ -139,6 +139,8 @@ public class ImportResource extends AbstractRestResource {
      *                      (defaults to IcaAtomEadHandler)
      * @param importerClass The fully-qualified import class name
      *                      (defaults to IcaAtomEadImporter)
+     * @param propertyFile  A local file path pointing to an import properties
+     *                      configuration file.
      * @param pathList      A string containing a list of local file paths
      *                      to import.
      * @return A JSON object showing how many records were created,
@@ -150,8 +152,9 @@ public class ImportResource extends AbstractRestResource {
     @Path("/ead")
     public Response importEad(
             @QueryParam(SCOPE_PARAM) String scopeId,
-            @QueryParam(TOLERANT_PARAM) Boolean tolerant,
+            @DefaultValue("false") @QueryParam(TOLERANT_PARAM) Boolean tolerant,
             @QueryParam(LOG_PARAM) String logMessage,
+            @QueryParam("properties") String propertyFile,
             @QueryParam(HANDLER_PARAM) String handlerClass,
             @QueryParam(IMPORTER_PARAM) String importerClass,
             String pathList)
@@ -159,6 +162,7 @@ public class ImportResource extends AbstractRestResource {
             IOException, DeserializationError {
 
         try {
+            checkPropertiesFile(propertyFile);
             Class<? extends SaxXmlHandler> handler = getEadHandler(handlerClass);
             Class<? extends AbstractImporter> importer = getEadImporter(importerClass);
 
@@ -172,6 +176,7 @@ public class ImportResource extends AbstractRestResource {
 
             // Run the import!
             ImportLog log = new SaxImportManager(graph, scope, user, importer, handler)
+                    .setProperties(propertyFile)
                     .setTolerant(tolerant)
                     .importFiles(paths, logMessage);
 
@@ -224,6 +229,18 @@ public class ImportResource extends AbstractRestResource {
                         " not an instance of " + SaxXmlHandler.class.getSimpleName());
             }
             return (Class<? extends SaxXmlHandler>) handler;
+        }
+    }
+
+    private static void checkPropertiesFile(String properties)
+            throws DeserializationError {
+        // Null properties are allowed
+        if (properties != null) {
+            File file = new File(properties);
+            if (!(file.isFile() && file.exists())) {
+                throw new DeserializationError("Properties file '" + properties + "' " +
+                        "either does not exist, or is not a file.");
+            }
         }
     }
 
