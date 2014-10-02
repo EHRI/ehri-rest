@@ -199,7 +199,7 @@ public final class BlueprintsGraphManager<T extends IndexableGraph> implements G
     }
 
     @Override
-    public void setProperty(Vertex vertex, String key, String value) {
+    public void setProperty(Vertex vertex, String key, Object value) {
         Preconditions.checkNotNull(vertex);
         Preconditions.checkNotNull(key);
         Preconditions.checkArgument(
