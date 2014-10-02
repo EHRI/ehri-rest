@@ -39,6 +39,8 @@ import java.util.Iterator;
  * by timestamp, etc. Schematically, the graph thus formed looks
  * something like:
  * <p/>
+ * <pre>
+ * <code>
  * Actioner            SystemEventQueue             Subject
  * \/                      \/                      \/
  * [lifecycleAction]   [lifecycleActionStream]     [lifecycleEvent]
@@ -52,6 +54,8 @@ import java.util.Iterator;
  * [lifecycleAction]       [lifecycleAction]       [lifecycleEvent]
  * |                       |                       |
  * e1--[hasActioner]-<-- Event 1 ---[hasEvent]--<--e1
+ * </code>
+ * </pre>
  *
  * @author michaelb
  */
@@ -113,7 +117,7 @@ public final class ActionManager {
          * @param logMessage    An optional log message
          */
         public EventContext(ActionManager actionManager, SystemEvent systemEvent,
-                Actioner actioner, EventTypes type, Optional<String> logMessage) {
+                            Actioner actioner, EventTypes type, Optional<String> logMessage) {
             this.actionManager = actionManager;
             this.actionType = type;
             this.systemEvent = systemEvent;
@@ -331,7 +335,7 @@ public final class ActionManager {
      * @return An EventContext object
      */
     public EventContext logEvent(AccessibleEntity subject, Actioner user,
-            EventTypes type) {
+                                 EventTypes type) {
         return logEvent(subject, user, type, Optional.<String>absent());
     }
 
@@ -345,7 +349,7 @@ public final class ActionManager {
      * @return An EventContext object
      */
     public EventContext logEvent(AccessibleEntity subject, Actioner user,
-            EventTypes type, String logMessage) {
+                                 EventTypes type, String logMessage) {
         return logEvent(subject, user, type, Optional.of(logMessage));
     }
 
@@ -359,7 +363,7 @@ public final class ActionManager {
      * @return An EventContext object
      */
     public EventContext logEvent(AccessibleEntity subject, Actioner user,
-            EventTypes type, Optional<String> logMessage) {
+                                 EventTypes type, Optional<String> logMessage) {
         EventContext context = logEvent(user, type, logMessage);
         context.addSubjects(subject);
         return context;
@@ -393,7 +397,7 @@ public final class ActionManager {
     /**
      * Add a subjectLinkNode node to an event and increment the subjectLinkNode count cache.
      *
-     * @param event   The event node
+     * @param event           The event node
      * @param subjectLinkNode The subjectLinkNode node
      */
     private void addSubjectAndIncrementCount(Vertex event, Vertex subjectLinkNode) {
@@ -421,7 +425,7 @@ public final class ActionManager {
      * @param direction The direction of the relationship
      */
     private void replaceAtHead(Vertex head, Vertex newHead, String headRelation,
-            String relation, Direction direction) {
+                               String relation, Direction direction) {
         Iterator<Vertex> iter = head.getVertices(direction, headRelation).iterator();
         if (iter.hasNext()) {
             Vertex current = iter.next();
