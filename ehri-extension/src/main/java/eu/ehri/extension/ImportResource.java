@@ -104,9 +104,7 @@ public class ImportResource extends AbstractRestResource {
         } catch (NoReaderForLangException e) {
             throw new DeserializationError("Unable to read language: " + format);
         } finally {
-            if (graph.getBaseGraph().isInTransaction()) {
-                graph.getBaseGraph().rollback();
-            }
+            cleanupTransaction();
         }
     }
 
@@ -186,9 +184,7 @@ public class ImportResource extends AbstractRestResource {
         } catch (IllegalArgumentException e) {
             throw new DeserializationError(e.getMessage());
         } finally {
-            if (graph.getBaseGraph().isInTransaction()) {
-                graph.getBaseGraph().rollback();
-            }
+            cleanupTransaction();
         }
     }
 

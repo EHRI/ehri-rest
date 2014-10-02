@@ -1,10 +1,5 @@
 package eu.ehri.extension;
 
-// Borrowed, temporarily, from Michael Hunger:
-// https://github.com/jexp/neo4j-clean-remote-db-addon
-
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Maps;
 import com.tinkerpop.blueprints.CloseableIterable;
 import com.tinkerpop.blueprints.Vertex;
@@ -20,6 +15,7 @@ import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.views.Crud;
 import eu.ehri.project.views.ViewFactory;
+import org.codehaus.jackson.type.TypeReference;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.*;
@@ -34,12 +30,14 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Provides additional Admin methods needed by client systems.
+ * Provides additional Admin methods needed by client systems
+ * and general graph-maintenance functionality.
+ *
+ * @author Mike Bryant (http://github.com/mikesname)
  */
 @Path("admin")
 public class AdminResource extends AbstractRestResource {
 
-    private static ObjectMapper mapper = new ObjectMapper();
     public static String DEFAULT_USER_ID_PREFIX = "user";
     public static String DEFAULT_USER_ID_FORMAT = "%s%06d";
 
@@ -184,6 +182,8 @@ public class AdminResource extends AbstractRestResource {
     /**
      * Create a new user with a default name and identifier.
      *
+     * @param jsonData Additional key/value data for the created object
+     * @param groups   IDs for groups to which the user should belong
      * @return A new user
      * @throws Exception
      */
@@ -251,10 +251,10 @@ public class AdminResource extends AbstractRestResource {
             return Maps.newHashMap();
         } else {
             TypeReference<HashMap<String, Object>> typeRef = new TypeReference<
-                    HashMap<String, Object>
-                    >() {
+                                HashMap<String, Object>
+                                >() {
             };
-            return mapper.readValue(json, typeRef);
+            return jsonMapper.readValue(json, typeRef);
         }
     }
 }
