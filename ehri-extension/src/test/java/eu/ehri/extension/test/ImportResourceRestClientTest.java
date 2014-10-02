@@ -17,6 +17,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.List;
+import static eu.ehri.extension.ImportResource.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -35,10 +36,10 @@ public class ImportResourceRestClientTest extends BaseRestClientTest {
         InputStream payloadStream = ClassLoader.getSystemResourceAsStream("simple.n3");
 
         URI uri = ehriUriBuilder("import", "skos")
-                .queryParam("log", "Testing SKOS")
-                .queryParam("scope", "cvoc1")
-                .queryParam("tolerant", "true")
-                .queryParam("format", "Turtle")
+                .queryParam(LOG_PARAM, "Testing SKOS")
+                .queryParam(SCOPE_PARAM, "cvoc1")
+                .queryParam(TOLERANT_PARAM, "true")
+                .queryParam(FORMAT_PARAM, "Turtle")
                 .build();
         ClientResponse response = callAs(getAdminUserProfileId(), uri)
                 .entity(payloadStream)
@@ -59,7 +60,7 @@ public class ImportResourceRestClientTest extends BaseRestClientTest {
         InputStream payloadStream = getPayloadStream(SINGLE_EAD);
 
         URI uri = getImportUrl("r1", "Testing import", false)
-                .queryParam("handler", IcaAtomEadHandler.class.getName())
+                .queryParam(HANDLER_PARAM, IcaAtomEadHandler.class.getName())
                 .build();
         ClientResponse response = callAs(getAdminUserProfileId(), uri)
                 .header("Content-Type", "text/plain")
@@ -81,7 +82,7 @@ public class ImportResourceRestClientTest extends BaseRestClientTest {
         InputStream payloadStream = getPayloadStream(SINGLE_EAD);
 
         URI uri = getImportUrl("r1", "Test", false)
-                .queryParam("handler", "IDontExist") // oops
+                .queryParam(HANDLER_PARAM, "IDontExist") // oops
                 .build();
         ClientResponse response = callAs(getAdminUserProfileId(), uri)
                 .header("Content-Type", "text/plain")
@@ -102,7 +103,7 @@ public class ImportResourceRestClientTest extends BaseRestClientTest {
         InputStream payloadStream = getPayloadStream(SINGLE_EAD);
 
         URI uri = getImportUrl("r1", "Test", false)
-                .queryParam("handler", "java.lang.String") // oops
+                .queryParam(HANDLER_PARAM, "java.lang.String") // oops
                 .build();
         ClientResponse response = callAs(getAdminUserProfileId(), uri)
                 .header("Content-Type", "text/plain")
@@ -119,9 +120,9 @@ public class ImportResourceRestClientTest extends BaseRestClientTest {
 
     private UriBuilder getImportUrl(String scopeId, String log, boolean tolerant) {
         return ehriUriBuilder("import", "ead")
-                .queryParam("log", log)
-                .queryParam("scope", scopeId)
-                .queryParam("tolerant", String.valueOf(tolerant));
+                .queryParam(LOG_PARAM, log)
+                .queryParam(SCOPE_PARAM, scopeId)
+                .queryParam(TOLERANT_PARAM, String.valueOf(tolerant));
     }
 
     private InputStream getPayloadStream(String... resources)

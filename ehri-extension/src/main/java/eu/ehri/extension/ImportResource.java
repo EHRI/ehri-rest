@@ -38,6 +38,13 @@ public class ImportResource extends AbstractRestResource {
     private static final Class<? extends AbstractImporter> DEFAULT_EAD_IMPORTER
             = IcaAtomEadImporter.class;
 
+    public static final String LOG_PARAM = "log";
+    public static final String SCOPE_PARAM = "scope";
+    public static final String TOLERANT_PARAM = "tolerant";
+    public static final String HANDLER_PARAM = "handler";
+    public static final String IMPORTER_PARAM = "importer";
+    public static final String FORMAT_PARAM = "format";
+
     public ImportResource(@Context GraphDatabaseService database) {
         super(database);
     }
@@ -69,10 +76,10 @@ public class ImportResource extends AbstractRestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/skos")
     public Response importSkos(
-            @QueryParam("scope") String scopeId,
-            @DefaultValue("false") @QueryParam("tolerant") Boolean tolerant,
-            @QueryParam("log") String logMessage,
-            @QueryParam("format") String format,
+            @QueryParam(SCOPE_PARAM) String scopeId,
+            @DefaultValue("false") @QueryParam(TOLERANT_PARAM) Boolean tolerant,
+            @QueryParam(LOG_PARAM) String logMessage,
+            @QueryParam(FORMAT_PARAM) String format,
             InputStream stream)
             throws BadRequester, ItemNotFound, ValidationError,
             IOException, DeserializationError {
@@ -142,11 +149,11 @@ public class ImportResource extends AbstractRestResource {
     @Consumes(MediaType.TEXT_PLAIN)
     @Path("/ead")
     public Response importEad(
-            @QueryParam("scope") String scopeId,
-            @QueryParam("tolerant") Boolean tolerant,
-            @QueryParam("log") String logMessage,
-            @QueryParam("handler") String handlerClass,
-            @QueryParam("importer") String importerClass,
+            @QueryParam(SCOPE_PARAM) String scopeId,
+            @QueryParam(TOLERANT_PARAM) Boolean tolerant,
+            @QueryParam(LOG_PARAM) String logMessage,
+            @QueryParam(HANDLER_PARAM) String handlerClass,
+            @QueryParam(IMPORTER_PARAM) String importerClass,
             String pathList)
             throws BadRequester, ItemNotFound, ValidationError,
             IOException, DeserializationError {
