@@ -8,7 +8,6 @@ import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.views.Query;
-import eu.ehri.project.views.impl.LoggingCrudViews;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.*;
@@ -121,7 +120,7 @@ public class CountryResource extends
      * Create a top-level repository unit for this country.
      *
      * @param id The country id
-     * @param json The new repository data
+     * @param bundle The new repository data
      * @return The new repository
      * @throws PermissionDenied
      * @throws ValidationError
@@ -135,37 +134,20 @@ public class CountryResource extends
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/" + Entities.REPOSITORY)
     public Response createCountryRepository(@PathParam("id") String id,
-            String json, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
+            Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws AccessDenied, PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, ItemNotFound, BadRequester {
-        Accessor user = getRequesterUserProfile();
-        Country country = views.detail(id, user);
         try {
-            Repository repository = createRepository(json, country);
-            aclManager.setAccessors(repository,
-                    getAccessors(accessors, user));
-            graph.getBaseGraph().commit();
-            return creationResponse(repository);
-        } catch (SerializationError e) {
-            graph.getBaseGraph().rollback();
-            throw new RuntimeException(e);
+            final Accessor user = getRequesterUserProfile();
+            final Country country = views.detail(id, user);
+            return create(bundle, accessors, new Handler<Repository>() {
+                @Override
+                public void process(Repository repository) throws PermissionDenied {
+                    repository.setCountry(country);
+                }
+            }, views.setScope(country).setClass(Repository.class));
         } finally {
             cleanupTransaction();
         }
-    }
-
-    // Helpers
-
-    private Repository createRepository(String json, Country country)
-            throws DeserializationError, PermissionDenied, ValidationError,
-            IntegrityError, BadRequester {
-        Bundle entityBundle = Bundle.fromString(json);
-
-        Repository repository = new LoggingCrudViews<Repository>(graph, Repository.class,
-                country).create(entityBundle, getRequesterUserProfile(), getLogMessage());
-
-        // Add it to this Vocabulary's concepts
-        repository.setCountry(country);
-        return repository;
     }
 }

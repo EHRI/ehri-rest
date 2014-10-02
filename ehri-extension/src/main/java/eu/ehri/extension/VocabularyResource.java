@@ -11,7 +11,6 @@ import eu.ehri.project.models.cvoc.Vocabulary;
 import eu.ehri.project.persistence.ActionManager;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.views.impl.CrudViews;
-import eu.ehri.project.views.impl.LoggingCrudViews;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.*;
@@ -157,8 +156,8 @@ public class VocabularyResource extends
     /**
      * Create a top-level concept unit for this vocabulary.
      *
-     * @param id   The vocabulary ID
-     * @param json The new concept data
+     * @param id     The vocabulary ID
+     * @param bundle The new concept data
      * @return The new concept
      * @throws PermissionDenied
      * @throws ValidationError
@@ -172,38 +171,20 @@ public class VocabularyResource extends
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/" + Entities.CVOC_CONCEPT)
     public Response createVocabularyConcept(@PathParam("id") String id,
-            String json, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
+            Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, ItemNotFound, BadRequester {
-        Accessor user = getRequesterUserProfile();
-        Vocabulary vocabulary = views.detail(id, user);
         try {
-            Concept concept = createConcept(json, vocabulary);
-            aclManager.setAccessors(concept,
-                    getAccessors(accessors, user));
-            graph.getBaseGraph().commit();
-            return creationResponse(concept);
-        } catch (SerializationError e) {
-            graph.getBaseGraph().rollback();
-            throw new RuntimeException(e);
+            final Accessor user = getRequesterUserProfile();
+            final Vocabulary vocabulary = views.detail(id, user);
+            return create(bundle, accessors, new Handler<Concept>() {
+                @Override
+                public void process(Concept concept) throws PermissionDenied {
+                    concept.setVocabulary(vocabulary);
+                }
+            }, views.setScope(vocabulary).setClass(Concept.class));
         } finally {
             cleanupTransaction();
         }
     }
-
-    // Helpers
-
-    private Concept createConcept(String json, Vocabulary vocabulary)
-            throws DeserializationError, PermissionDenied, ValidationError,
-            IntegrityError, BadRequester {
-        Bundle entityBundle = Bundle.fromString(json);
-
-        Concept concept = new LoggingCrudViews<Concept>(graph, Concept.class,
-                vocabulary).create(entityBundle, getRequesterUserProfile(), getLogMessage());
-
-        // Add it to this Vocabulary's concepts
-        concept.setVocabulary(vocabulary);
-        return concept;
-    }
-
 }

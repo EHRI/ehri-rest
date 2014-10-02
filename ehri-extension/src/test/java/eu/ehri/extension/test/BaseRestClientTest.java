@@ -33,6 +33,8 @@ public class BaseRestClientTest extends RunningServerTest {
 
     protected static Client client = Client.create();
 
+    protected static final ObjectMapper jsonMapper = new ObjectMapper();
+
     protected static Pattern paginationPattern = Pattern.compile("page=(-?\\d+); count=(-?\\d+); total=(-?\\d+)");
 
     // Admin user prefix - depends on fixture data
@@ -138,24 +140,30 @@ public class BaseRestClientTest extends RunningServerTest {
                 .header(AbstractRestResource.AUTH_HEADER_NAME, userId)
                 .get(ClientResponse.class);
         String json = response.getEntity(String.class);
-        ObjectMapper mapper = new ObjectMapper();
         TypeReference<Long> typeRef = new TypeReference<Long>() {
         };
-        return mapper.readValue(json, typeRef);
+        return jsonMapper.readValue(json, typeRef);
     }
 
-    protected URI ehriUri(String... segments) {
+    protected UriBuilder ehriUriBuilder(String... segments) {
         UriBuilder builder = UriBuilder.fromPath(getExtensionEntryPointUri());
         for (String segment : segments) {
             builder = builder.segment(segment);
         }
-        return builder.build();
+        return builder;
+    }
+
+    protected URI ehriUri(String... segments) {
+        return ehriUriBuilder(segments).build();
     }
 
     protected WebResource.Builder jsonCallAs(String user, URI uri) {
+        return callAs(user, uri)
+                .type(MediaType.APPLICATION_JSON);
+    }
+
+    protected WebResource.Builder callAs(String user, URI uri) {
         return client.resource(uri)
-                .accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
                 .header(AbstractRestResource.AUTH_HEADER_NAME, user);
     }
 

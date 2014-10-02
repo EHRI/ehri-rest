@@ -7,7 +7,6 @@ import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.Repository;
 import eu.ehri.project.models.base.Accessor;
 import eu.ehri.project.persistence.Bundle;
-import eu.ehri.project.views.impl.LoggingCrudViews;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.*;
@@ -110,7 +109,7 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
      * Create a documentary unit for this repository.
      * 
      * @param id The repository ID
-     * @param json The new unit data
+     * @param bundle The new unit data
      * @return The new unit
      * @throws PermissionDenied
      * @throws ValidationError
@@ -124,37 +123,20 @@ public class RepositoryResource extends AbstractAccessibleEntityResource<Reposit
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/" + Entities.DOCUMENTARY_UNIT)
     public Response createRepositoryDocumentaryUnit(@PathParam("id") String id,
-            String json, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
+            Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws AccessDenied, PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, ItemNotFound, BadRequester {
-        Accessor user = getRequesterUserProfile();
-        Repository repository = views.detail(id, user);
         try {
-            DocumentaryUnit doc = createDocumentaryUnit(json, repository);
-            aclManager.setAccessors(doc,
-                    getAccessors(accessors, user));
-            graph.getBaseGraph().commit();
-            return creationResponse(doc);
-        } catch (SerializationError e) {
-            graph.getBaseGraph().rollback();
-            throw new RuntimeException(e);
+            final Accessor user = getRequesterUserProfile();
+            final Repository repository = views.detail(id, user);
+            return create(bundle, accessors, new Handler<DocumentaryUnit>() {
+                @Override
+                public void process(DocumentaryUnit doc) throws PermissionDenied {
+                    repository.addCollection(doc);
+                }
+            }, views.setScope(repository).setClass(DocumentaryUnit.class));
         } finally {
             cleanupTransaction();
         }
-    }
-
-    // Helpers
-
-    private DocumentaryUnit createDocumentaryUnit(String json, Repository repository)
-            throws DeserializationError, PermissionDenied, ValidationError,
-            IntegrityError, BadRequester {
-        Bundle entityBundle = Bundle.fromString(json);
-
-        DocumentaryUnit doc = new LoggingCrudViews<DocumentaryUnit>(graph,
-                DocumentaryUnit.class, repository).create(entityBundle,
-                getRequesterUserProfile(), getLogMessage());
-        // Add it to this repository's collections
-        doc.setRepository(repository);
-        return doc;
     }
 }

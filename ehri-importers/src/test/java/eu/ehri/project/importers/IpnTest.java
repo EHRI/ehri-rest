@@ -75,7 +75,7 @@ public class IpnTest extends AbstractImporterTest{
                 getVertexByIdentifier(graph,"ipn vc"),
                 VirtualUnit.class);
         
-        assertEquals(new Long(2), archdesc.getChildCount());
+        assertEquals(2L, archdesc.getChildCount());
         
 
     }

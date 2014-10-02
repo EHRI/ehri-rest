@@ -8,7 +8,6 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.persistence.ErrorSet;
 import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -102,8 +101,7 @@ public class VirtualUnitRestClientTest extends BaseRestClientTest {
 
         assertStatus(BAD_REQUEST, response);
 
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode rootNode = mapper.readValue(errString, JsonNode.class);
+        JsonNode rootNode = jsonMapper.readValue(errString, JsonNode.class);
         JsonNode errValue = rootNode.path(ErrorSet.ERROR_KEY).path(
                 Ontology.IDENTIFIER_KEY);
         assertFalse(errValue.isMissingNode());
@@ -118,8 +116,7 @@ public class VirtualUnitRestClientTest extends BaseRestClientTest {
 
         assertStatus(OK, response);
 
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode rootNode = mapper.readValue(response.getEntity(String.class),
+        JsonNode rootNode = jsonMapper.readValue(response.getEntity(String.class),
                 JsonNode.class);
         JsonNode errValue = rootNode.path("data").path(
                 Ontology.IDENTIFIER_KEY);
@@ -138,8 +135,7 @@ public class VirtualUnitRestClientTest extends BaseRestClientTest {
 
         assertStatus(OK, response);
 
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode rootNode = mapper.readValue(response.getEntity(String.class),
+        JsonNode rootNode = jsonMapper.readValue(response.getEntity(String.class),
                 JsonNode.class);
         JsonNode errValue = rootNode.path("data").path(
                 Ontology.IDENTIFIER_KEY);

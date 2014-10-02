@@ -3,7 +3,6 @@ package eu.ehri.extension.test;
 import com.sun.jersey.api.client.ClientResponse;
 import eu.ehri.project.persistence.Bundle;
 import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Test;
 
 import javax.ws.rs.core.UriBuilder;
@@ -53,8 +52,7 @@ public class GenericRestClientTest extends BaseRestClientTest {
         ClientResponse response = jsonCallAs(getAdminUserProfileId(),
                 ehriUri("entities", ITEM1)).get(ClientResponse.class);
         assertStatus(OK, response);
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode rootNode = mapper.readValue(response.getEntity(String.class),
+        JsonNode rootNode = jsonMapper.readValue(response.getEntity(String.class),
                 JsonNode.class);
         JsonNode idValue = rootNode.path(Bundle.ID_KEY);
         assertFalse(idValue.isMissingNode());
@@ -83,8 +81,7 @@ public class GenericRestClientTest extends BaseRestClientTest {
     }
 
     private void testResponse(ClientResponse response, String expectedId) throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode rootNode = mapper.readValue(response.getEntity(String.class),
+        JsonNode rootNode = jsonMapper.readValue(response.getEntity(String.class),
                 JsonNode.class);
         JsonNode idValue = rootNode.path(0).path(Bundle.ID_KEY);
         assertFalse(idValue.isMissingNode());

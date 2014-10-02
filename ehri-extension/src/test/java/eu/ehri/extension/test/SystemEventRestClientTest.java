@@ -8,7 +8,6 @@ import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.persistence.Bundle;
 import eu.ehri.project.views.EventViews;
 import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Test;
 
 import javax.ws.rs.core.MultivaluedMap;
@@ -47,6 +46,7 @@ public class SystemEventRestClientTest extends BaseRestClientTest {
 
         List<Map<String, Object>> actionsAfter = getEntityList(
                 Entities.SYSTEM_EVENT, getAdminUserProfileId());
+        System.out.println(actionsAfter);
 
         // Having created a new Repository, we should have at least one Event.
         assertEquals(actionsBefore.size() + 1, actionsAfter.size());
@@ -116,8 +116,7 @@ public class SystemEventRestClientTest extends BaseRestClientTest {
 
         String json = response.getEntity(String.class);
         // Check the response contains a new version
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode rootNode = mapper.readValue(json, JsonNode.class);
+        JsonNode rootNode = jsonMapper.readValue(json, JsonNode.class);
         assertFalse(rootNode.path(0).path(Bundle.DATA_KEY)
                 .path(Ontology.VERSION_ENTITY_DATA).isMissingNode());
         assertStatus(OK, response);

@@ -215,6 +215,10 @@ public final class VirtualUnitResource extends
         final Iterable<DocumentaryUnit> includedUnits
                 = getIncludedUnits(includedIds, currentUser);
         final VirtualUnit parent = views.detail(id, currentUser);
+
+        // NB: Unlike most other items created in another context, virtual
+        // units do not inherit the permission scope of their 'parent',
+        // because they make have many parents.
         return create(bundle, accessors, new Handler<VirtualUnit>() {
             @Override
             public void process(VirtualUnit virtualUnit) {
