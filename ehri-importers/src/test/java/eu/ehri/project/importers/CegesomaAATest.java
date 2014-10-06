@@ -7,6 +7,7 @@ import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.models.DatePeriod;
 import eu.ehri.project.models.DocumentDescription;
 import eu.ehri.project.models.DocumentaryUnit;
+import eu.ehri.project.models.MaintenanceEvent;
 import eu.ehri.project.models.base.PermissionScope;
 import java.io.IOException;
 import java.io.InputStream;
@@ -49,7 +50,7 @@ public class CegesomaAATest extends AbstractImporterTest{
  // After...
        List<VertexProxy> graphState2 = getGraphState(graph);
        GraphDiff diff = diffGraph(graphState1, graphState2);
-       diff.printDebug(System.out);
+//       diff.printDebug(System.out);
         
 //        printGraph(graph);
         // How many new nodes will have been created? We should have
@@ -61,9 +62,9 @@ public class CegesomaAATest extends AbstractImporterTest{
          * unknown property: 1
          * systemEvent: 1
          * datePeriod: 4
+         * maintenanceEvent: 1
          */
-        // --- = 56
-        int newCount = origCount + 56;
+        int newCount = origCount + 57;
         assertEquals(newCount, getNodeCount(graph));
         
         archdesc = graph.frame(
@@ -97,13 +98,21 @@ public class CegesomaAATest extends AbstractImporterTest{
             assertEquals("Groupe Nola / door D. Martin (Soma, januari 1984, 12 p.)", dd.asVertex().getProperty("findingAids"));
 //            for(String key : dd.asVertex().getPropertyKeys())
 //                System.out.println(key);
-            assertEquals("Automatisch gegenereerd door PALLAS systeem", dd.asVertex().getProperty(EadHandler.AUTHOR));
+            for (MaintenanceEvent me : dd.getMaintenanceEvents()){
+              assertEquals("Automatisch gegenereerd door PALLAS systeem", me.asVertex().getProperty("source"));
+              assertEquals("28/03/2013", me.asVertex().getProperty("date"));
+              assertEquals(MaintenanceEvent.EventType.CREATED.toString(), me.asVertex().getProperty("eventType"));
+            }
+            assertEquals("SOMA_CEGES_72695#NLD", dd.asVertex().getProperty("sourceFileId"));
         }
         
         // There should be one DocumentDescription for the (only) <c01>
         for(DocumentDescription dd : c1.getDocumentDescriptions()){
             assertEquals("Documenten betreffende l'Union nationale de la Résistance", dd.getName());
             assertEquals("nld", dd.getLanguageOfDescription());
+            assertEquals("SOMA_CEGES_72695#NLD", dd.asVertex().getProperty("sourceFileId"));
+//            TODO
+//            assertEquals(1, toList(dd.getMaintenanceEvents()).size());
         }
 
         // There should be one DocumentDescription for the (second) <c02>

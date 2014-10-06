@@ -49,8 +49,8 @@ public class CegesomaCATest extends AbstractImporterTest{
         // - 1 UP
         // - 2 more import Event links (1 for each Unit, 1 for the User)
         // - 1 more import Event
-        // --- = 9
-        int newCount = origCount + 9;
+        // MaintenanceEvent 1
+        int newCount = origCount + 10;
         assertEquals(newCount, getNodeCount(graph));
         
         archdesc = graph.frame(

@@ -138,11 +138,9 @@ public class Wp2YvEadTest extends AbstractImporterTest {
         assertEquals(c1, c2.getPermissionScope());
         assertEquals(c2, c3.getPermissionScope());
         
-        // Check the author of the description
-        for (DocumentDescription d : c1.getDocumentDescriptions()){
-            for(String key : d.asVertex().getPropertyKeys())
-                logger.debug("key: " + key);
-            assertEquals("BT", d.asVertex().getProperty(EadHandler.AUTHOR));
+        // Check the author of the top level description
+        for (DocumentDescription d : fonds.getDocumentDescriptions()){
+            assertEquals("BT", d.asVertex().getProperty("processInfo"));
         }
 
         // Check the importer is Idempotent

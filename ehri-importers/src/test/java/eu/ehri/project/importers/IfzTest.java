@@ -20,7 +20,7 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 /**
- * Test the import of a Cegesoma AA EAD file.
+ * Test the import of a Ifz EAD file.
  * This file was based on BundesarchiveTest.java.
  * @author linda
  * @author ben
@@ -63,10 +63,10 @@ public class IfzTest extends AbstractImporterTest{
          * documentDescription: 4
          * unknown property: 2
          * systemEvent: 1
+         * maintenanceEvent: 1
          * datePeriod: 2
          */
-        // --- = 37
-        int newCount = origCount + 37;
+        int newCount = origCount + 38;
         assertEquals(newCount, getNodeCount(graph));
         
         archdesc = graph.frame(
@@ -94,7 +94,7 @@ public class IfzTest extends AbstractImporterTest{
         for(DocumentDescription dd : archdesc.getDocumentDescriptions()){
             assertEquals("TO BE FILLED", dd.getName());
             assertEquals("deu", dd.getLanguageOfDescription());
-            assertEquals("IfZ", dd.asVertex().getProperty(EadHandler.AUTHOR));
+            assertEquals("IfZ", dd.asVertex().getProperty("processInfo"));
             assertEquals("recordgrp", dd.asVertex().getProperty("levelOfDescription"));
             
         }
@@ -120,10 +120,11 @@ public class IfzTest extends AbstractImporterTest{
             assertEquals("file", dd.asVertex().getProperty("levelOfDescription"));
             assertEquals("Band", dd.asVertex().getProperty("extentAndMedium"));
         }
+        
         /**
          * Test hierarchy
          */
-        assertEquals(new Long(1), archdesc.getChildCount());
+        assertEquals(1L, archdesc.getChildCount());
         for(DocumentaryUnit du : archdesc.getChildren()){
             assertEquals(C01, du.getIdentifier());
         }

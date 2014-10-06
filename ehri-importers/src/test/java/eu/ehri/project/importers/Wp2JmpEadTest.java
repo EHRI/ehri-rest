@@ -111,8 +111,8 @@ public class Wp2JmpEadTest extends AbstractImporterTest {
         assertEquals(c2, c3.getPermissionScope());
         
         // Check the author of the description
-        for (DocumentDescription d : c1.getDocumentDescriptions()){
-            assertEquals("Shoah History Department, Jewish Museum in Prague", d.asVertex().getProperty(EadHandler.AUTHOR));
+        for (DocumentDescription d : fonds.getDocumentDescriptions()){
+            assertEquals("Shoah History Department, Jewish Museum in Prague", d.asVertex().getProperty("processInfo"));
         }
 
         // Check the importer is Idempotent
