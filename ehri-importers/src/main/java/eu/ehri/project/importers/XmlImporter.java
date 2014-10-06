@@ -144,14 +144,22 @@ public abstract class XmlImporter<T> extends AbstractImporter<T> {
     }
     
     @Override
+    //TODO: should not be added to all descriptions of this topLevelUnit, 
+//            only to the one recently created, use the eadid (=sourceFileId) !
     public void importTopLevelExtraNodes(AbstractUnit topLevelUnit, Map<String, Object> itemData){
         BundleDAO persister = new BundleDAO(framedGraph, permissionScope.idPath());
         for (Map<String, Object> event : extractMaintenanceEvent(itemData) ){
             try {
                 Bundle unit = new Bundle(EntityClass.MAINTENANCE_EVENT, event);
-                Mutation<MaintenanceEvent> mutation = persister.createOrUpdate(unit, MaintenanceEvent.class);
-                for(Description d : topLevelUnit.getDescriptions()){
-                    d.addMaintenanceEvent(mutation.getNode());
+                //only if some source is given (especially with a creation) should a ME be created
+                for(String e : unit.getPropertyKeys()){
+                    logger.debug(e);
+                }
+                if (unit.getDataValue("source") != null) {
+                    Mutation<MaintenanceEvent> mutation = persister.createOrUpdate(unit, MaintenanceEvent.class);
+                    for (Description d : topLevelUnit.getDescriptions()) {
+                        d.addMaintenanceEvent(mutation.getNode());
+                    }
                 }
             } catch (ValidationError ex) {
                 logger.error(ex.getMessage());

@@ -52,8 +52,9 @@ public class DansEadImporterTest extends AbstractImporterTest{
          * - 6 more Dates
          * - 6 more UndeterminedRelation
          * - 1 more import Event
+         * - 1 MaintenaceEvent
          */
-        int newCount = origCount + 14 + 6 + 6; // temporarily changed to match found numbers
+        int newCount = origCount + 14 + 6 + 6 + 1; 
         assertEquals(newCount, getNodeCount(graph));
         
         DocumentaryUnit c1 = graph.frame(getVertexByIdentifier(graph, C1), DocumentaryUnit.class);

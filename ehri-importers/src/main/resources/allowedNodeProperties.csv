@@ -54,8 +54,9 @@ documentDescription,findingAids,,,
 documentDescription,publicationNote,,,
 documentDescription,datesOfDescription,,,
 documentDescription,archivistNote,,,
-documentDescription,provenance,,,
+documentDescription,processInfo,,,1
 documentDescription,sources,,,1
+documentDescription,sourceFileId,,1,
 documentDescription,relatedUnitsOfDescription,,,1
 documentDescription,maintenanceEvent,,,1
 historicalAgentDescription,lastName,,,

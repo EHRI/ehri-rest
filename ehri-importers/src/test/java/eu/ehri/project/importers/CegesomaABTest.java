@@ -65,9 +65,9 @@ public class CegesomaABTest extends AbstractImporterTest{
          * unknown property: 1
          * systemEvent: 1
          * datePeriod: 1
+         * maintenanceEvent: 7
          */
-        // --- = 10
-        int newCount = origCount + 10;
+        int newCount = origCount + 17;
         assertEquals(newCount, getNodeCount(graph));
         
         archdesc = graph.frame(
@@ -98,7 +98,7 @@ public class CegesomaABTest extends AbstractImporterTest{
             assertEquals("fra", dd.getLanguageOfDescription());
 //            for(String key : dd.asVertex().getPropertyKeys())
 //                System.out.println(key);
-            assertEquals("Cege Soma", dd.asVertex().getProperty(EadHandler.AUTHOR));
+            assertEquals("Cege Soma", dd.asVertex().getProperty("processInfo"));
             assertEquals("en français et en anglais", dd.asVertex().getProperty("languageOfMaterial"));
         }
         

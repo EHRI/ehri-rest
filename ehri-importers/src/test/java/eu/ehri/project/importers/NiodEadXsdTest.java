@@ -15,6 +15,7 @@ import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.base.PermissionScope;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,19 +48,24 @@ public class NiodEadXsdTest extends AbstractImporterTest{
 
         origCount = getNodeCount(graph);
         
- // Before...
-//       List<VertexProxy> graphState1 = getGraphState(graph);
+//  Before...
+       List<VertexProxy> graphState1 = getGraphState(graph);
         InputStream ios = ClassLoader.getSystemResourceAsStream(XMLFILE);
         @SuppressWarnings("unused")
 	ImportLog log = new SaxImportManager(graph, agent, validUser, EadImporter.class, EadHandler.class, new XmlImportProperties("niodead.properties")).importFile(ios, logMessage);
+        // After...
+       List<VertexProxy> graphState2 = getGraphState(graph);
+       GraphDiff diff = diffGraph(graphState1, graphState2);
+//       diff.printDebug(System.out);
 //        printGraph(graph);
-        // How many new nodes will have been created? We should have
-        // - 6 more DocumentaryUnits (archdesc, 5 children)
-       	// - 6 more DocumentDescription
-        // - 5 more DatePeriod
-        // - 2 more UnknownProperties (1 for daogrp)
-        // - 7 more import Event links (6 for every Unit, 1 for the User)
-        // - 1 more import Event
+       /*
+        * null: 7
+        * documentaryUnit: 6
+        * property: 1
+        * documentDescription: 6
+        * systemEvent: 1
+        * datePeriod: 6
+        */
         int newCount = origCount + 27; 
         assertEquals(newCount, getNodeCount(graph));
         

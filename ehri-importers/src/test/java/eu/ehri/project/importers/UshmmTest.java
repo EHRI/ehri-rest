@@ -38,8 +38,6 @@ public class UshmmTest extends AbstractImporterTest{
 
         int origCount = getNodeCount(graph);
 
-        printGraph(graph);
-        
         InputStream ios = ClassLoader.getSystemResourceAsStream(SINGLE_EAD);
         ImportLog log = new SaxImportManager(graph, agent, validUser, EadImporter.class, UshmmHandler.class)
                 .setTolerant(Boolean.TRUE).importFile(ios, logMessage);
@@ -53,8 +51,9 @@ public class UshmmTest extends AbstractImporterTest{
         * 1 more import Event
         * 4 more UndeterminedRelationships
         * 1 more UnknownProperty
+        * 1 more MaintenanceEvent (creation)
         */
-        int createCount = origCount + 8;
+        int createCount = origCount + 9;
         assertEquals(createCount, getNodeCount(graph));
 
         // Yet we've only created 1 *logical* item...

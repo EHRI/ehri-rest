@@ -61,6 +61,7 @@ public class DcEuropeanaHandler extends SaxXmlHandler {
                         }
 
                     }
+                    putPropertyInGraph(currentMap, "sourceFileId", currentMap.get("objectIdentifier").toString());
                     importer.importItem(currentMap, new Stack<String>());
 //                importer.importTopLevelExtraNodes(topLevel, current);
                     //importer.importItem(currentGraphPath.pop(), Lists.<String>newArrayList());

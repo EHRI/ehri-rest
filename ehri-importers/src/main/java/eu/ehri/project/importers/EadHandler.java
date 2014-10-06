@@ -34,6 +34,7 @@ import org.xml.sax.SAXException;
 public class EadHandler extends SaxXmlHandler {
     
     public static final String EADID = "eadId",
+            SOURCEFILEID = "sourceFileId",
             MAINAGENCYCODE = "mainagencycode",
             AUTHOR = "author";
                             
@@ -112,6 +113,12 @@ public class EadHandler extends SaxXmlHandler {
         if (isUnitDelimiter(qName)) { //a new DocumentaryUnit should be created
             children[depth] = Lists.newArrayList();
         }
+        if(qName.equals("change")){
+            putPropertyInCurrentGraph("eventType", MaintenanceEvent.EventType.REVISED.toString());
+        }
+        if(qName.equals("profiledesc")){
+            putPropertyInCurrentGraph("eventType", MaintenanceEvent.EventType.CREATED.toString());
+        }
         if(attributes.getValue(MAINAGENCYCODE) != null){
             eadfileValues.put(MAINAGENCYCODE, attributes.getValue(MAINAGENCYCODE));
     	    logger.debug("Found @MAINAGENCYCODE: "+ eadfileValues.get(MAINAGENCYCODE));
@@ -158,7 +165,7 @@ public class EadHandler extends SaxXmlHandler {
     	// If this is the <eadid> element, store its content
 //    	logger.debug("localName: " + localName + ", qName: " + qName);
     	if (localName.equals("eadid") || qName.equals("eadid")) {
-            eadfileValues.put(EADID, (String) currentGraphPath.peek().get("eadIdentifier"));
+            eadfileValues.put(EADID, (String) currentGraphPath.peek().get(SOURCEFILEID));
     	    logger.debug("Found <eadid>: "+ eadfileValues.get(EADID));
     	}
         else if (localName.equals("author") || qName.equals("author")) {
@@ -199,8 +206,14 @@ public class EadHandler extends SaxXmlHandler {
 
                     extractDate(currentGraph);
                     
-                    //add the <author> of the ead to every description
-                    addAuthor(currentGraph);
+                    //add eadid as sourceFileId
+                    currentGraph.put(SOURCEFILEID, getSourceFileId());
+                    
+                    //only on toplevel description:
+                    if(qName.equals("archdesc")){
+                    //add the <author> of the ead to the processInfo
+                        addAuthor(currentGraph);
+                    }
 
                     DocumentaryUnit current = (DocumentaryUnit) importer.importItem(currentGraph, pathIds());
                     topLevel=current; // if it is not overwritten, the current DU is the topLevel
@@ -233,9 +246,9 @@ public class EadHandler extends SaxXmlHandler {
         currentPath.pop();
         if(currentPath.isEmpty()){
 //            try {
-                //we're back at the top. find the maintenanceevents and add to the topLevel DU
+                //we're back at the top. find the maintenanceevents and add to the topLevel DD
                 Map<String, Object> current = currentGraphPath.pop();
-                importer.importTopLevelExtraNodes(topLevel, current);
+                importer.importTopLevelExtraNodes(topLevel, current); //TODO: add getEadId()
                 //importer.importItem(currentGraphPath.pop(), Lists.<String>newArrayList());
 //            } catch (ValidationError ex) {
 //                logger.error(ex.getMessage());
@@ -249,7 +262,20 @@ public class EadHandler extends SaxXmlHandler {
      * @return the <code><eadid></code> or null if it was not parsed yet or empty
      */
     protected String getEadId() {
+        logger.error("EADID not set yet, or not given in eadfile");
     	return eadfileValues.get(EADID);
+    }
+    /**
+     * 
+     * @return the <code><eadid></code>, extended with the languageTag or null if it was not parsed yet or empty
+     */
+    protected String getSourceFileId(){
+        if(getEadId()
+                .toLowerCase()
+                .endsWith("#"+getDefaultLanguage()
+                    .toLowerCase()))
+            return getEadId();
+        return getEadId()+"#"+getDefaultLanguage().toUpperCase();
     }
     protected String getAuthor(){
         return eadfileValues.get(AUTHOR);
@@ -395,8 +421,9 @@ public class EadHandler extends SaxXmlHandler {
     }
 
     private void addAuthor(Map<String, Object> currentGraph) {
-        if(getAuthor() != null && ! currentGraph.containsKey(AUTHOR)){
-            currentGraph.put(AUTHOR, getAuthor());
+        logger.info("in addAuthor "+ getAuthor());
+        if(getAuthor() != null ){
+            putPropertyInGraph(currentGraph, "processInfo", getAuthor());
         }
     }
 }
