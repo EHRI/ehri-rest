@@ -1,13 +1,75 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0                              http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0                              http://maven.apache.org/maven-v4_0_0.xsd">
+
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>ehri-project</groupId>
     <artifactId>ehri-data</artifactId>
     <packaging>pom</packaging>
     <version>1.0</version>
-    <name>Neo4j EHRI Project</name>
+    <name>EHRI Backend</name>
+    <description>An API and web service on top of the Blueprints graph database abstraction layer.</description>
+    <url>https://github.com/EHRI</url>
+    <organization>
+        <name>The European Holocaust Research Infrastructure (EHRI)</name>
+        <url>http://ehri-project.eu</url>
+    </organization>
+
+    <developers>
+        <developer>
+            <id>ben</id>
+            <name>Ben Companjen</name>
+            <email>ben.companjen@dans.knaw.nl</email>
+            <url>http://github.com/bencomp</url>
+            <organization>Data Archiving and Networked Services (DANS)</organization>
+            <organizationUrl>http://www.dans.knaw.nl</organizationUrl>
+            <roles>
+                <role>developer</role>
+            </roles>
+            <timezone>+1</timezone>
+        </developer>
+        <developer>
+            <id>paul</id>
+            <name>Paul Boon</name>
+            <email>paul.boon@dans.knaw.nl</email>
+            <url>http://github.com/PaulBoon</url>
+            <organization>Data Archiving and Networked Services (DANS)</organization>
+            <organizationUrl>http://www.dans.knaw.nl</organizationUrl>
+            <roles>
+                <role>developer</role>
+            </roles>
+            <timezone>+1</timezone>
+        </developer>
+        <developer>
+            <id>linda</id>
+            <name>Linda Reijnhoudt</name>
+            <email>linda.reijnhoudt@dans.knaw.nl</email>
+            <url>http://github.com/bencomp</url>
+            <organization>Data Archiving and Networked Services (DANS)</organization>
+            <organizationUrl>http://www.dans.knaw.nl</organizationUrl>
+            <roles>
+                <role>developer</role>
+            </roles>
+            <timezone>+1</timezone>
+        </developer>
+        <developer>
+            <id>mike</id>
+            <name>Mike Bryant</name>
+            <email>michael.bryant@kcl.ac.uk</email>
+            <url>http://github.com/mikesname</url>
+            <organization>King's College London</organization>
+            <organizationUrl>http://www.kcl.ac.uk/innovation/groups/cerch/index.aspx</organizationUrl>
+            <roles>
+                <role>developer</role>
+            </roles>
+            <timezone>0</timezone>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:git://github.com/EHRI/ehri-rest</connection>
+        <url>https://github.com/EHRI/ehri-rest</url>
+    </scm>
 
     <modules>
         <module>ehri-frames</module>
@@ -17,15 +79,7 @@
         <module>ehri-definitions</module>
         <module>assembly</module>
     </modules>
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>junit</groupId>
-                <artifactId>junit</artifactId>
-                <version>4.10</version>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
+
     <properties>
         <neo4j.version>1.9.7</neo4j.version>
         <tinkerpop.version>2.4.0</tinkerpop.version>
@@ -36,6 +90,19 @@
         <yid>/Users/paulboon/Documents/Development/yworks-uml-doclet-3.0_02-jdk1.5</yid>
     </properties>
 
+    <distributionManagement>
+        <downloadUrl>http://github/com/EHRI/ehri-rest</downloadUrl>
+        <repository>
+            <id>github</id>
+            <url>http://github/com/EHRI/ehri-rest</url>
+        </repository>
+        <site>
+            <id>github</id>
+            <name>Github IO Site</name>
+            <url>http://github/com/EHRI/ehri-rest</url>
+        </site>
+    </distributionManagement>
+
     <build>
         <plugins>
             <plugin>
@@ -44,6 +111,36 @@
                 <configuration>
                     <source>1.6</source>
                     <target>1.6</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-site-plugin</artifactId>
+                <version>3.2</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.apache.maven.doxia</groupId>
+                        <artifactId>doxia-module-markdown</artifactId>
+                        <version>1.3</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-project-info-reports-plugin</artifactId>
+                <version>2.7</version>
+                <configuration>
+                    <dependencyDetailsEnabled>false</dependencyDetailsEnabled>
+                    <dependencyLocationsEnabled>false</dependencyLocationsEnabled>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-site-plugin</artifactId>
+                <version>3.4</version>
+                <configuration>
+                    <port>9001</port>
+                    <tempWebappDirectory>${basedir}/target/site/tempdir</tempWebappDirectory>
                 </configuration>
             </plugin>
         </plugins>
@@ -139,8 +236,6 @@
                                     <goal>aggregate</goal>
                                 </goals>
                                 <phase>site</phase>
-                                <configuration>
-                                </configuration>
                             </execution>
                         </executions>
                     </plugin>
