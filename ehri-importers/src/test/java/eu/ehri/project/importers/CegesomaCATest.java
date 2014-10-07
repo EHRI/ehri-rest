@@ -22,8 +22,8 @@ import static org.junit.Assert.*;
 /**
  * Test the import of a Cegesoma CA EAD file.
  * This file was based on BundesarchiveTest.java.
- * @author linda
- * @author ben
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
+ * @author Ben Companjen (http://github.com/bencomp)
  */
 public class CegesomaCATest extends AbstractImporterTest{
     

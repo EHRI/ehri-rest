@@ -12,7 +12,7 @@ import eu.ehri.project.models.annotations.Fetch;
 
 /**
  *
- * @author linda
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public interface AddressableEntity {
 

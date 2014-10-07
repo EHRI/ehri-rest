@@ -13,7 +13,7 @@ import org.codehaus.jackson.annotate.JsonValue;
  * detailing how many items were created and updated,
  * and how many failed.
  *
- * @author mike
+ * @author Mike Bryant (http://github.com/mikesname)
  */
 public class ImportLog {
 

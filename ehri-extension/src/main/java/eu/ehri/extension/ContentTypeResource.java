@@ -19,6 +19,8 @@ import javax.ws.rs.core.Response;
  * Provides a RESTful interface for the ContentType class. Note: ContentType instances
  * are created by the system, so we do not have create/update/delete methods
  * here.
+ *
+ * @author Mike Bryant (http://github.com/mikesname)
  */
 @Path(Entities.CONTENT_TYPE)
 public class ContentTypeResource extends AbstractAccessibleEntityResource<ContentType> {

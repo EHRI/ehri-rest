@@ -21,6 +21,8 @@ import javax.ws.rs.core.Response;
 
 /**
  * Provides a RESTful interface for dealing with described entities.
+ *
+ * @author Mike Bryant (http://github.com/mikesname)
  */
 @Path("description")
 public class DescriptionResource extends AbstractAccessibleEntityResource<DescribedEntity> {

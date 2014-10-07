@@ -22,7 +22,7 @@ import org.junit.Ignore;
 
 /**
  *
- * @author linda
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class BundesarchiveSplitTest extends AbstractImporterTest{
     

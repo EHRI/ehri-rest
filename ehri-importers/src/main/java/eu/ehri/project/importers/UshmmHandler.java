@@ -16,7 +16,7 @@ import eu.ehri.project.importers.properties.XmlImportProperties;
 /**
  * Handler for importing EAD files converted from the USHMM Solr index file.
  * These files were converted using the solr2ead XSLT stylesheet.
- * @author ben
+ * @author Ben Companjen (http://github.com/bencomp)
  */
 public class UshmmHandler extends EadHandler {
 

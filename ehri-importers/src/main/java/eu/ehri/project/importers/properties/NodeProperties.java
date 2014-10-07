@@ -14,7 +14,7 @@ import java.util.Set;
 
 /**
  *
- * @author linda
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class NodeProperties {
 

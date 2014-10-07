@@ -12,7 +12,7 @@ import static org.junit.Assert.*;
 
 /**
  *
- * @author linda
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class XmlImporterTest {
     

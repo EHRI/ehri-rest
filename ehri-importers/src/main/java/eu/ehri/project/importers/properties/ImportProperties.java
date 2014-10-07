@@ -9,7 +9,7 @@ import java.util.Set;
 /**
  * defines the interface for all import mappings
  * 
- * @author linda
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public interface ImportProperties {
 

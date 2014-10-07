@@ -37,7 +37,7 @@ import static eu.ehri.project.definitions.Ontology.LANGUAGE_OF_DESCRIPTION;
  * all tags not included in the properties file that have a  nodevalue will be put in a unknownproperties node, 
  * with an edge to the unit-description.
  *
- * @author linda
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public abstract class SaxXmlHandler extends DefaultHandler implements LexicalHandler {
 

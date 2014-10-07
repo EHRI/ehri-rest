@@ -12,7 +12,7 @@ import java.util.Map;
 /**
  * Helpers for working with the bundle format.
  * 
- * @author michaelb
+ * @author Mike Bryant (http://github.com/mikesname)
  * 
  */
 public class BundleUtils {

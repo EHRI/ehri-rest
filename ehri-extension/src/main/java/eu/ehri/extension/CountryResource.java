@@ -20,7 +20,7 @@ import java.util.List;
  * Provides a RESTful interface for managing countries
  * and creating repositories within them.
  * 
- * @author mike
+ * @author Mike Bryant (http://github.com/mikesname)
  * 
  */
 @Path(Entities.COUNTRY)

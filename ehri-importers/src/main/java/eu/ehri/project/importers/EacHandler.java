@@ -27,7 +27,7 @@ import org.xml.sax.SAXException;
  *
  * makes use of eac.properties with format: part/of/path/=attribute
  *
- * @author linda
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class EacHandler extends EaHandler {
 

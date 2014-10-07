@@ -20,7 +20,7 @@ import org.junit.Ignore;
 
 /**
  *
- * @author linda
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class IcaAtomEadSingleEadTest extends AbstractImporterTest {
     protected final String SINGLE_EAD = "single-ead.xml";

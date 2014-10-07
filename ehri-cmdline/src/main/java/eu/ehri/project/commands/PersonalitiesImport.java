@@ -8,7 +8,7 @@ import eu.ehri.project.importers.PersonalitiesImporter;
 
 /**
  *
- * @author linda
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class PersonalitiesImport extends ImportCsvCommand implements Command {
 

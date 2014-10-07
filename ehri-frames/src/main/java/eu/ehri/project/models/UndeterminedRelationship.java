@@ -20,7 +20,7 @@ import eu.ehri.project.models.base.NamedEntity;
  * Holds the information on a relationship specified in some Description,
  * but without the target-end of the relationship being determined.
  * 
- * @author linda
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 @EntityType(EntityClass.UNDETERMINED_RELATIONSHIP)
 public interface UndeterminedRelationship extends AccessibleEntity, NamedEntity, Annotator {

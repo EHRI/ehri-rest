@@ -9,7 +9,7 @@ import eu.ehri.project.importers.EagImporter;
 
 /**
  *
- * @author linda
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class EagImport  extends ImportCommand implements Command {
 

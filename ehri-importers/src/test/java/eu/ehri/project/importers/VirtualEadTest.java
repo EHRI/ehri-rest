@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 import static org.junit.Assert.*;
 /**
  *
- * @author linda
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class VirtualEadTest extends AbstractImporterTest{
     private static final Logger logger = LoggerFactory.getLogger(VirtualEadTest.class);

@@ -20,7 +20,7 @@ import org.xml.sax.SAXException;
  *
  * dc files are imported directly beneath the scope provided
  * there is NO structure beneath that
- * @author linda
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class DcEuropeanaHandler extends SaxXmlHandler {
 

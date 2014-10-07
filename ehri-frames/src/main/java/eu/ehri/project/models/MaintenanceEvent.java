@@ -15,7 +15,7 @@ import eu.ehri.project.models.base.TemporalEntity;
 
 /**
  *
- * @author linda
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 @EntityType(EntityClass.MAINTENANCE_EVENT)
 public interface MaintenanceEvent extends TemporalEntity, AccessibleEntity {

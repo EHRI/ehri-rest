@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  *
- * @author linda
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class IcaAtomEadImporterTest extends AbstractImporterTest{
     private static final Logger logger = LoggerFactory.getLogger(IcaAtomEadImporterTest.class);

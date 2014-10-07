@@ -24,7 +24,7 @@ import org.xml.sax.SAXException;
  *
  * to be used in conjunction with EagImporter
  *
- * @author linda
+ * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class EagHandler extends SaxXmlHandler {
 

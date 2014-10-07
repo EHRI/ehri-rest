@@ -57,7 +57,7 @@ import eu.ehri.project.persistence.ActionManager.EventContext;
  * Note: most code was copied from the EadImportManager and its base classes
  * Also note that: We don't have an Repository for the CVOCs, but a Vocabulary instead!
  *
- * @author paulboon
+ * @author Paul Boon (http://github.com/PaulBoon)
  */
 public final class XmlSkosImporter implements SkosImporter {
     private static final Logger logger = LoggerFactory
@@ -712,8 +712,6 @@ public final class XmlSkosImporter implements SkosImporter {
 
     /**
      * Used in the lookup which is needed for creating the Vocabulary structure
-     *
-     * @author paulboon
      */
     private class ConceptPlaceholder {
         public String storeId; // the identifier used for storage and referring in the repository
