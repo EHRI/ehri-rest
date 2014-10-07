@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package eu.ehri.project.models;
 
 import com.tinkerpop.blueprints.Direction;
@@ -14,7 +10,6 @@ import eu.ehri.project.models.base.AccessibleEntity;
 import eu.ehri.project.models.base.TemporalEntity;
 
 /**
- *
  * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 @EntityType(EntityClass.MAINTENANCE_EVENT)

@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package eu.ehri.project.importers;
 
 import com.google.common.collect.Lists;
@@ -21,7 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
  * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class IcaAtomMultiLeveledTest extends AbstractImporterTest{

@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package eu.ehri.project.importers;
 
 import com.tinkerpop.frames.FramedGraph;
@@ -25,7 +21,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
  * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class EagImporter extends EaImporter {
@@ -38,9 +33,9 @@ public class EagImporter extends EaImporter {
     /**
      * Construct an EagImporter object.
      *
-     * @param framedGraph
-     * @param permissionScope
-     * @param log
+     * @param framedGraph     The graph instance
+     * @param permissionScope A permission scope, e.g. a country
+     * @param log             An import log instance
      */
     public EagImporter(FramedGraph<?> framedGraph, PermissionScope permissionScope, ImportLog log) {
         super(framedGraph, permissionScope, log);
@@ -76,9 +71,7 @@ public class EagImporter extends EaImporter {
     }
 
     /**
-     *
-     *
-     * @param itemData
+     * @param itemData A data tree
      * @throws ValidationError
      */
     @Override

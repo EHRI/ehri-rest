@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package eu.ehri.project.importers.properties;
 
 import org.junit.Test;
@@ -10,7 +6,6 @@ import org.junit.Before;
 import org.slf4j.LoggerFactory;
 
 /**
- *
  * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class NodePropertiesTest {

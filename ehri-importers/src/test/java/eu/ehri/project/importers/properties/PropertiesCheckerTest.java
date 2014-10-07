@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package eu.ehri.project.importers.properties;
 
 import eu.ehri.project.models.EntityClass;
@@ -10,7 +6,6 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 
 /**
- *
  * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class PropertiesCheckerTest {

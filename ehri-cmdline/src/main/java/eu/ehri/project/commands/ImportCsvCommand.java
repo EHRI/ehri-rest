@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package eu.ehri.project.commands;
 
 import com.tinkerpop.blueprints.TransactionalGraph;
@@ -22,7 +18,6 @@ import java.util.List;
 import java.util.Map;
 
 /**
- *
  * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public abstract class ImportCsvCommand extends BaseCommand implements Command{

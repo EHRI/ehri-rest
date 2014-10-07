@@ -1,14 +1,9 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package eu.ehri.project.commands;
 
 import eu.ehri.project.importers.EagHandler;
 import eu.ehri.project.importers.EagImporter;
 
 /**
- *
  * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class EagImport  extends ImportCommand implements Command {

@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package eu.ehri.project.models;
 
 import com.tinkerpop.blueprints.Direction;
@@ -16,7 +12,6 @@ import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.NamedEntity;
 
 /**
- *
  * Holds the information on a relationship specified in some Description,
  * but without the target-end of the relationship being determined.
  * 

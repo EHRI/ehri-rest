@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package eu.ehri.project.importers;
 
 import eu.ehri.project.definitions.Ontology;
@@ -17,18 +13,12 @@ import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
 /**
- *
  * dc files are imported directly beneath the scope provided
  * there is NO structure beneath that
  * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class DcEuropeanaHandler extends SaxXmlHandler {
 
-
-    // Constants for elements we need to watch for.
-    private final static String DEFAULT_LANGUAGE = "nld";
-    
-    protected String eadLanguage = DEFAULT_LANGUAGE;
     private static final Logger logger = LoggerFactory.getLogger(DcEuropeanaHandler.class);
 
     public DcEuropeanaHandler(AbstractImporter<Map<String, Object>> importer, XmlImportProperties xmlImportProperties) {

@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package eu.ehri.project.models;
 
 import com.tinkerpop.frames.Adjacency;
@@ -13,7 +9,6 @@ import eu.ehri.project.models.annotations.Mandatory;
 import eu.ehri.project.models.base.*;
 
 /**
- *
  * Links two items together with a given body, with may either be
  * a text property or some other entity.
  * 
@@ -24,7 +19,7 @@ public interface Link extends AccessibleEntity, AnnotatableEntity, Promotable, T
 
     @Fetch(Ontology.LINK_HAS_LINKER)
     @Adjacency(label = Ontology.LINK_HAS_LINKER)
-    public Iterable<UserProfile> getLinker();
+    public UserProfile getLinker();
 
     @Adjacency(label = Ontology.LINK_HAS_LINKER)
     public void setLinker(final Accessor accessor);
