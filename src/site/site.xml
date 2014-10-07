@@ -23,9 +23,19 @@
 
 
     <body>
-        <menu>
-            <item name="Documentation" href="intro.html"/>
+        <menu name="Developer Notes">
+            <item href="install.html" name="Installation" />
+            <item href="deployment.html" name="Deployment" />
+            <item href="import.html" name="Importing Data" />
+            <item href="gotchas.html" name="Gotchas" />
+            <item href="migrations.html" name="DB Migration History" />
+            <item href="scripting.html" name="Scripting" />
+            <item href="permissions.html" name="Permissions" />
+            <item href="serialization.html" name="Data Serialization Config" />
+            <item href="validation.html" name="Validation" />
+            <item href="identifiers.html" name="Identifiers" />
         </menu>
+        <menu ref="modules"/>
         <menu ref="reports" />
     </body>
 </project>
