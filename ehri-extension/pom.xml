@@ -54,7 +54,11 @@
                     <includePom>true</includePom>
                 </configuration>
             </plugin>
+        </plugins>
+    </build>
 
+    <reporting>
+        <plugins>
             <plugin>
                 <groupId>org.codehaus.enunciate</groupId>
                 <artifactId>maven-enunciate-plugin</artifactId>
@@ -63,18 +67,19 @@
                     <configFile>enunciate.xml</configFile>
                     <enunciateArtifactId>docs</enunciateArtifactId>
                     <moduleName>docs</moduleName>
+                    <docsSubdir>wsdocs</docsSubdir>
                 </configuration>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>docs</goal>
-                        </goals>
-                    </execution>
-                </executions>
+                <reportSets>
+                    <reportSet>
+                        <id>ws-docs</id>
+                        <reports>
+                            <report>docs</report>
+                        </reports>
+                    </reportSet>
+                </reportSets>
             </plugin>
         </plugins>
-    </build>
+    </reporting>
 
     <dependencies>
         <!-- the ehri data via tinkerpop frames project -->

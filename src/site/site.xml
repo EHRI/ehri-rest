@@ -16,12 +16,14 @@
     <custom>
         <fluidoSkin>
             <sideBarEnabled>true</sideBarEnabled>
-            <googlePlusOne />
         </fluidoSkin>
     </custom>
 
-
     <body>
+        <breadcrumbs>
+            <item name="${project.name}" href="index.html"/>
+        </breadcrumbs>
+
         <menu name="Developer Notes">
             <item href="install.html" name="Installation" />
             <item href="deployment.html" name="Deployment" />
@@ -34,7 +36,25 @@
             <item href="validation.html" name="Validation" />
             <item href="identifiers.html" name="Identifiers" />
         </menu>
-        <menu ref="modules"/>
+
+        <!-- Doing this manually instead of using ref="modules" because we want
+            to exclude the assembly module -->
+        <menu name="Modules">
+            <item href="ehri-definitions/index.html" name="Data Definitions"/>
+            <item href="ehri-frames/index.html" name="Core Java API"/>
+            <item href="ehri-extension/index.html" name="Web Service"/>
+            <item href="ehri-importers/index.html" name="Import Tools"/>
+            <item href="ehri-cmdline/index.html" name="Command Line Utilities"/>
+        </menu>
+
         <menu ref="reports" />
+
+        <menu name="API Docs">
+            <item href="apidocs/index.html" name="Javadocs"/>
+        </menu>
+
+        <menu name="Web Service Docs">
+            <item href="ehri-extension/wsdocs/index.html" name="Web API"/>
+        </menu>
     </body>
 </project>
