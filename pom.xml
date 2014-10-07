@@ -138,6 +138,11 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>2.10.1</version>
+                <configuration>
+                    <!-- Since we host the docs on Git, the timestamp causes lots
+                        of unnecessary file changes. -->
+                    <notimestamp>true</notimestamp>
+                </configuration>
                 <reportSets>
                     <reportSet>
                         <id>default</id>
