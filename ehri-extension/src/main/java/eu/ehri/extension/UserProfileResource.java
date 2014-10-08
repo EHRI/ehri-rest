@@ -1,6 +1,10 @@
 package eu.ehri.extension;
 
 import com.google.common.collect.Sets;
+import eu.ehri.extension.base.DeleteResource;
+import eu.ehri.extension.base.GetResource;
+import eu.ehri.extension.base.ListResource;
+import eu.ehri.extension.base.UpdateResource;
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.*;
@@ -24,7 +28,8 @@ import static eu.ehri.extension.RestHelpers.produceErrorMessageJson;
  * Provides a RESTful interface for the UserProfile.
  */
 @Path(Entities.USER_PROFILE)
-public class UserProfileResource extends AbstractAccessibleEntityResource<UserProfile> {
+public class UserProfileResource extends AbstractAccessibleEntityResource<UserProfile>
+        implements GetResource, ListResource, UpdateResource, DeleteResource {
 
     public static final String FOLLOWING = "following";
     public static final String FOLLOWERS = "followers";
@@ -42,23 +47,26 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}")
-    public Response getUserProfile(@PathParam("id") String id)
-            throws AccessDenied, ItemNotFound, PermissionDenied, BadRequester {
-        return retrieve(id);
+    @Override
+    public Response get(@PathParam("id") String id)
+            throws AccessDenied, ItemNotFound, BadRequester {
+        return getItem(id);
     }
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/count")
-    public long countUserProfiles() throws ItemNotFound, BadRequester {
-        return count();
+    @Override
+    public long count() throws BadRequester {
+        return countItems();
     }
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/list")
-    public Response listUserProfiles() throws ItemNotFound, BadRequester {
-        return page();
+    @Override
+    public Response list() throws BadRequester {
+        return listItems();
     }
 
     @POST
@@ -75,10 +83,10 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
             for (String groupId : groupIds) {
                 groups.add(manager.getFrame(groupId, Group.class));
             }
-            return create(bundle, accessors, new Handler<UserProfile>() {
+            return createItem(bundle, accessors, new Handler<UserProfile>() {
                 @Override
                 public void process(UserProfile userProfile) throws PermissionDenied {
-                    for (Group group: groups) {
+                    for (Group group : groups) {
                         aclViews.addAccessorToGroup(group, userProfile, currentUser);
                     }
                 }
@@ -93,28 +101,31 @@ public class UserProfileResource extends AbstractAccessibleEntityResource<UserPr
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    public Response updateUserProfile(Bundle bundle) throws PermissionDenied,
+    @Override
+    public Response update(Bundle bundle) throws PermissionDenied,
             IntegrityError, ValidationError, DeserializationError,
             ItemNotFound, BadRequester {
-        return update(bundle);
+        return updateItem(bundle);
     }
 
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}")
-    public Response updateUserProfile(@PathParam("id") String id, Bundle bundle)
+    @Override
+    public Response update(@PathParam("id") String id, Bundle bundle)
             throws AccessDenied, PermissionDenied, IntegrityError, ValidationError,
             DeserializationError, ItemNotFound, BadRequester {
-        return update(id, bundle);
+        return updateItem(id, bundle);
     }
 
     @DELETE
     @Path("/{id:.+}")
-    public Response deleteUserProfile(@PathParam("id") String id)
+    @Override
+    public Response delete(@PathParam("id") String id)
             throws AccessDenied, PermissionDenied, ItemNotFound, ValidationError,
             BadRequester {
-        return delete(id);
+        return deleteItem(id);
     }
 
     @GET

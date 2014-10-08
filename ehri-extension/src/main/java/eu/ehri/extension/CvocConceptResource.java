@@ -1,5 +1,6 @@
 package eu.ehri.extension;
 
+import eu.ehri.extension.base.*;
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.acl.PermissionType;
 import eu.ehri.project.definitions.Entities;
@@ -25,8 +26,9 @@ import java.util.List;
  * @author Mike Bryant (http://github.com/mikesname)
  */
 @Path(Entities.CVOC_CONCEPT)
-public class CvocConceptResource extends
-        AbstractAccessibleEntityResource<Concept> {
+public class CvocConceptResource
+        extends AbstractAccessibleEntityResource<Concept>
+        implements ParentResource, GetResource, ListResource, UpdateResource, DeleteResource {
 
     public CvocConceptResource(@Context GraphDatabaseService database) {
         super(database, Concept.class);
@@ -35,68 +37,67 @@ public class CvocConceptResource extends
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}")
-    public Response getCvocConcept(@PathParam("id") String id)
+    @Override
+    public Response get(@PathParam("id") String id)
             throws ItemNotFound, AccessDenied, BadRequester {
-        return retrieve(id);
+        return getItem(id);
     }
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/list")
-    public Response listCvocConcepts() throws ItemNotFound, BadRequester {
-        return page();
+    @Override
+    public Response list() throws BadRequester {
+        return listItems();
     }
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/count")
-    public long countCvocConcepts() throws ItemNotFound, BadRequester {
-        return count();
+    @Override
+    public long count() throws BadRequester {
+        return countItems();
     }
 
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    public Response updateCvocConcept(Bundle bundle) throws PermissionDenied,
+    @Override
+    public Response update(Bundle bundle) throws PermissionDenied,
             IntegrityError, ValidationError, DeserializationError,
             ItemNotFound, BadRequester {
-        return update(bundle);
+        return updateItem(bundle);
     }
 
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}")
-    public Response updateCvocConcept(@PathParam("id") String id, Bundle bundle)
+    @Override
+    public Response update(@PathParam("id") String id, Bundle bundle)
             throws AccessDenied, PermissionDenied, IntegrityError, ValidationError,
             DeserializationError, ItemNotFound, BadRequester {
-        return update(id, bundle);
+        return updateItem(id, bundle);
     }
 
     @DELETE
     @Path("/{id:.+}")
-    public Response deleteCvocConcept(@PathParam("id") String id)
+    @Override
+    public Response delete(@PathParam("id") String id)
             throws AccessDenied, PermissionDenied, ItemNotFound, ValidationError,
-            BadRequester {
-        return delete(id);
+            BadRequester, SerializationError {
+        return deleteItem(id);
     }
 
     /*** 'related' concepts ***/
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    @Path("/{id:.+}/narrower/list")
-    public Response getCvocNarrowerConcepts(@PathParam("id") String id)
-            throws ItemNotFound, AccessDenied, BadRequester {
-        Concept concept = views.detail(id, getRequesterUserProfile());
-        return streamingList(concept.getNarrowerConcepts());
-    }
-
-    @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/list")
-    public Response listCvocNarrowerConcepts(@PathParam("id") String id)
-            throws ItemNotFound, AccessDenied, BadRequester {
+    @Override
+    public Response listChildren(@PathParam("id") String id,
+                @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all)
+            throws ItemNotFound, BadRequester {
         Accessor user = getRequesterUserProfile();
         Concept concept = views.detail(id, user);
         return streamingPage(getQuery(Concept.class)
@@ -106,8 +107,10 @@ public class CvocConceptResource extends
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/count")
-    public long countCvocNarrowerConcepts(@PathParam("id") String id)
-            throws ItemNotFound, BadRequester, AccessDenied {
+    @Override
+    public long countChildren(@PathParam("id") String id,
+                              @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all)
+            throws ItemNotFound, BadRequester {
         Accessor user = getRequesterUserProfile();
         Concept concept = views.detail(id, user);
         return getQuery(Concept.class).count(concept.getNarrowerConcepts());
@@ -231,31 +234,18 @@ public class CvocConceptResource extends
         return Response.status(Status.OK).build();
     }
 
-    /**
-     * Create a top-level concept unit for this vocabulary.
-     * 
-     * @param id The vocabulary id
-     * @param bundle The new concept data
-     * @return The new concept
-     * @throws PermissionDenied
-     * @throws AccessDenied
-     * @throws ValidationError
-     * @throws IntegrityError
-     * @throws DeserializationError
-     * @throws ItemNotFound
-     * @throws BadRequester
-     */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/" + Entities.CVOC_CONCEPT)
-    public Response createNarrowerConcept(@PathParam("id") String id,
-            Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
+    @Override
+    public Response createChild(@PathParam("id") String id,
+                                Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws AccessDenied, PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, ItemNotFound, BadRequester {
         final Accessor user = getRequesterUserProfile();
         final Concept parent = views.detail(id, user);
-        return create(bundle, accessors, new Handler<Concept>() {
+        return createItem(bundle, accessors, new Handler<Concept>() {
             @Override
             public void process(Concept concept) {
                 parent.addNarrowerConcept(concept);

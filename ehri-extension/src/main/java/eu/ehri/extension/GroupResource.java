@@ -1,6 +1,10 @@
 package eu.ehri.extension;
 
 import com.google.common.collect.Sets;
+import eu.ehri.extension.base.DeleteResource;
+import eu.ehri.extension.base.GetResource;
+import eu.ehri.extension.base.ListResource;
+import eu.ehri.extension.base.UpdateResource;
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.*;
@@ -29,7 +33,9 @@ import static eu.ehri.extension.RestHelpers.produceErrorMessageJson;
  * @author Mike Bryant (http://github.com/mikesname)
  */
 @Path(Entities.GROUP)
-public class GroupResource extends AbstractAccessibleEntityResource<Group> {
+public class GroupResource
+        extends AbstractAccessibleEntityResource<Group>
+        implements GetResource, ListResource, UpdateResource, DeleteResource {
 
     public static final String MEMBER_PARAM = "member";
 
@@ -40,23 +46,26 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}")
-    public Response getGroup(@PathParam("id") String id) throws ItemNotFound,
+    @Override
+    public Response get(@PathParam("id") String id) throws ItemNotFound,
             AccessDenied, BadRequester {
-        return retrieve(id);
+        return getItem(id);
     }
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/list")
-    public Response listGroups() throws ItemNotFound, BadRequester {
-        return page();
+    @Override
+    public Response list() throws BadRequester {
+        return listItems();
     }
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/count")
-    public long countVocabularies() throws ItemNotFound, BadRequester {
-        return count();
+    @Override
+    public long count() throws BadRequester {
+        return countItems();
     }
 
     @POST
@@ -73,10 +82,10 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
             for (String member : members) {
                 groupMembers.add(manager.getFrame(member, Accessor.class));
             }
-            return create(bundle, accessors, new Handler<Group>() {
+            return createItem(bundle, accessors, new Handler<Group>() {
                 @Override
                 public void process(Group group) throws PermissionDenied {
-                    for (Accessor member: groupMembers) {
+                    for (Accessor member : groupMembers) {
                         aclViews.addAccessorToGroup(group, member, currentUser);
                     }
                 }
@@ -91,20 +100,22 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    public Response updateGroup(Bundle bundle) throws AccessDenied, PermissionDenied,
+    @Override
+    public Response update(Bundle bundle) throws PermissionDenied,
             IntegrityError, ValidationError, DeserializationError,
             ItemNotFound, BadRequester {
-        return update(bundle);
+        return updateItem(bundle);
     }
 
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}")
-    public Response updateGroup(@PathParam("id") String id, Bundle bundle)
+    @Override
+    public Response update(@PathParam("id") String id, Bundle bundle)
             throws AccessDenied, PermissionDenied, IntegrityError, ValidationError,
             DeserializationError, ItemNotFound, BadRequester {
-        return update(id, bundle);
+        return updateItem(id, bundle);
     }
 
     /**
@@ -154,7 +165,7 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:[^/]+}/list")
-    public Response listGroupMembers(
+    public Response listChildren(
             @PathParam("id") String id,
             @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all)
             throws ItemNotFound, BadRequester {
@@ -170,12 +181,16 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/count")
-    public long countGroupMembers(@PathParam("id") String id)
-            throws ItemNotFound, BadRequester, AccessDenied {
+    public long countChildResources(@PathParam("id") String id,
+                @QueryParam(ALL_PARAM) @DefaultValue("false")  boolean all)
+            throws ItemNotFound, BadRequester {
         Accessor user = getRequesterUserProfile();
         Group group = views.detail(id, user);
+        Iterable<AccessibleEntity> members = all
+                ? group.getAllUserProfileMembers()
+                : group.getMembersAsEntities();
         return getQuery(AccessibleEntity.class)
-                .count(group.getMembersAsEntities());
+                .count(members);
     }
 
     /**
@@ -183,9 +198,10 @@ public class GroupResource extends AbstractAccessibleEntityResource<Group> {
      */
     @DELETE
     @Path("/{id:.+}")
-    public Response deleteGroup(@PathParam("id") String id)
+    @Override
+    public Response delete(@PathParam("id") String id)
             throws AccessDenied, PermissionDenied, ItemNotFound, ValidationError,
             BadRequester {
-        return delete(id);
+        return deleteItem(id);
     }
 }

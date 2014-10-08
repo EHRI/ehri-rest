@@ -1,5 +1,8 @@
 package eu.ehri.extension;
 
+import eu.ehri.extension.base.DeleteResource;
+import eu.ehri.extension.base.GetResource;
+import eu.ehri.extension.base.UpdateResource;
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.acl.PermissionType;
 import eu.ehri.project.definitions.Entities;
@@ -29,8 +32,8 @@ import java.util.List;
  * @author Mike Bryant (http://github.com/mikesname)
  */
 @Path(Entities.LINK)
-public class LinkResource extends
-        AbstractAccessibleEntityResource<Link> {
+public class LinkResource extends AbstractAccessibleEntityResource<Link>
+        implements GetResource, DeleteResource, UpdateResource {
 
     public static final String BODY_PARAM = "body";
 
@@ -41,41 +44,44 @@ public class LinkResource extends
         linkViews = new LinkViews(graph);
     }
 
-    /**
-     * Retrieve an annotation by id.
-     *
-     * @param id The annotation ID
-     * @return The annotation
-     * @throws ItemNotFound
-     * @throws BadRequester
-     */
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}")
-    public Response getAction(@PathParam("id") String id) throws ItemNotFound,
+    @Override
+    public Response get(@PathParam("id") String id) throws ItemNotFound,
             AccessDenied, BadRequester {
-        return retrieve(id);
+        return getItem(id);
     }
 
-    /**
-     * List all annotations.
-     */
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/list")
-    public Response listLinks() throws ItemNotFound, BadRequester {
-        return page();
+    public Response list() throws BadRequester {
+        return listItems();
     }
 
-    /**
-     * Update a link,
-     */
+    @GET
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Path("/count")
+    public long countResources() throws BadRequester {
+        return countItems();
+    }
+
     @PUT
     @Path("/{id:.+}")
-    public Response updateLink(@PathParam("id") String id, Bundle bundle)
+    @Override
+    public Response update(@PathParam("id") String id, Bundle bundle)
             throws AccessDenied, PermissionDenied, ItemNotFound, ValidationError,
             BadRequester, DeserializationError, IntegrityError {
-        return update(id, bundle);
+        return updateItem(id, bundle);
+    }
+
+    @PUT
+    @Override
+    public Response update(Bundle bundle)
+            throws PermissionDenied, ItemNotFound, ValidationError,
+            BadRequester, DeserializationError, IntegrityError {
+        return updateItem(bundle);
     }
 
     /**
@@ -198,9 +204,10 @@ public class LinkResource extends
      */
     @DELETE
     @Path("/{id:.+}")
-    public Response deleteLink(@PathParam("id") String id)
+    @Override
+    public Response delete(@PathParam("id") String id)
             throws AccessDenied, PermissionDenied, ItemNotFound, ValidationError,
             BadRequester {
-        return delete(id);
+        return deleteItem(id);
     }
 }

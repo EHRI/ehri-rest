@@ -299,7 +299,7 @@ public abstract class AbstractRestResource implements TxCheckedResource {
         final Charset utf8 = Charset.forName("UTF-8");
         final String header = String.format("<list total=\"%d\" offset=\"%d\" limit=\"%d\">\n",
                 page.getTotal(), page.getPage(), page.getTotal());
-        final String tail = "</page>\n";
+        final String tail = "</listItems>\n";
 
         return Response.ok(new StreamingOutput() {
             @Override

@@ -3,6 +3,10 @@ package eu.ehri.extension;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.gremlin.java.GremlinPipeline;
 import com.tinkerpop.pipes.PipeFunction;
+import eu.ehri.extension.base.DeleteResource;
+import eu.ehri.extension.base.GetResource;
+import eu.ehri.extension.base.ListResource;
+import eu.ehri.extension.base.UpdateResource;
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.*;
@@ -26,7 +30,8 @@ import java.util.List;
  */
 @Path(Entities.VIRTUAL_UNIT)
 public final class VirtualUnitResource extends
-        AbstractAccessibleEntityResource<VirtualUnit> {
+        AbstractAccessibleEntityResource<VirtualUnit>
+        implements GetResource, ListResource, UpdateResource, DeleteResource {
 
     public static final String INCLUDED = "includes";
 
@@ -40,23 +45,26 @@ public final class VirtualUnitResource extends
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}")
-    public Response getVirtualUnit(@PathParam("id") String id)
+    @Override
+    public Response get(@PathParam("id") String id)
             throws ItemNotFound, AccessDenied, BadRequester {
-        return retrieve(id);
+        return getItem(id);
     }
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/list")
-    public Response listVirtualUnits() throws ItemNotFound, BadRequester {
-        return page();
+    @Override
+    public Response list() throws BadRequester {
+        return listItems();
     }
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/count")
-    public long countVirtualUnits() throws ItemNotFound, BadRequester {
-        return count();
+    @Override
+    public long count() throws BadRequester {
+        return countItems();
     }
 
     @GET
@@ -152,15 +160,6 @@ public final class VirtualUnitResource extends
         return getQuery(cls).count(units);
     }
 
-    @PUT
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    public Response updateVirtualUnit(Bundle bundle) throws PermissionDenied,
-            IntegrityError, ValidationError, DeserializationError,
-            ItemNotFound, BadRequester {
-        return update(bundle);
-    }
-
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
@@ -173,7 +172,7 @@ public final class VirtualUnitResource extends
         final Iterable<DocumentaryUnit> includedUnits
                 = getIncludedUnits(includedIds, currentUser);
 
-        return create(bundle, accessors, new Handler<VirtualUnit>() {
+        return createItem(bundle, accessors, new Handler<VirtualUnit>() {
             @Override
             public void process(VirtualUnit virtualUnit) {
                 virtualUnit.setAuthor(currentUser);
@@ -187,19 +186,31 @@ public final class VirtualUnitResource extends
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Override
+    public Response update(Bundle bundle) throws PermissionDenied,
+            IntegrityError, ValidationError, DeserializationError,
+            ItemNotFound, BadRequester {
+        return updateItem(bundle);
+    }
+
+    @PUT
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}")
-    public Response updateVirtualUnit(@PathParam("id") String id,
-            Bundle bundle) throws AccessDenied, PermissionDenied, IntegrityError,
+    @Override
+    public Response update(@PathParam("id") String id,
+                           Bundle bundle) throws AccessDenied, PermissionDenied, IntegrityError,
             ValidationError, DeserializationError, ItemNotFound, BadRequester {
-        return update(id, bundle);
+        return updateItem(id, bundle);
     }
 
     @DELETE
     @Path("/{id:.+}")
-    public Response deleteVirtualUnit(@PathParam("id") String id)
+    @Override
+    public Response delete(@PathParam("id") String id)
             throws AccessDenied, PermissionDenied, ItemNotFound, ValidationError,
             BadRequester, SerializationError {
-        return delete(id);
+        return deleteItem(id);
     }
 
     @POST
@@ -219,7 +230,7 @@ public final class VirtualUnitResource extends
         // NB: Unlike most other items created in another context, virtual
         // units do not inherit the permission scope of their 'parent',
         // because they make have many parents.
-        return create(bundle, accessors, new Handler<VirtualUnit>() {
+        return createItem(bundle, accessors, new Handler<VirtualUnit>() {
             @Override
             public void process(VirtualUnit virtualUnit) {
                 parent.addChild(virtualUnit);

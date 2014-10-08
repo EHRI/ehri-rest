@@ -1,5 +1,6 @@
 package eu.ehri.extension;
 
+import eu.ehri.extension.base.*;
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.definitions.EventTypes;
@@ -27,8 +28,8 @@ import java.util.List;
  * @author Paul Boon (http://github.com/PaulBoon)
  */
 @Path(Entities.CVOC_VOCABULARY)
-public class VocabularyResource extends
-        AbstractAccessibleEntityResource<Vocabulary> {
+public class VocabularyResource extends AbstractAccessibleEntityResource<Vocabulary>
+        implements GetResource, ListResource, DeleteResource, CreateResource, UpdateResource, ParentResource {
 
     public VocabularyResource(@Context GraphDatabaseService database) {
         super(database, Vocabulary.class);
@@ -37,31 +38,36 @@ public class VocabularyResource extends
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}")
-    public Response getVocabulary(@PathParam("id") String id)
+    @Override
+    public Response get(@PathParam("id") String id)
             throws ItemNotFound, AccessDenied, BadRequester {
-        return retrieve(id);
+        return getItem(id);
     }
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/count")
-    public long countVocabularies() throws ItemNotFound, BadRequester {
-        return count();
+    @Override
+    public long count() throws BadRequester {
+        return countItems();
     }
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/list")
-    public Response listVocabularies() throws ItemNotFound, BadRequester {
-        return page();
+    @Override
+    public Response list() throws BadRequester {
+        return listItems();
     }
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/count")
-    public long countVocabularyConcepts(
-            @PathParam("id") String id)
-            throws ItemNotFound, BadRequester, AccessDenied {
+    @Override
+    public long countChildren(
+            @PathParam("id") String id,
+            @QueryParam(ALL_PARAM) @DefaultValue("false") boolean all)
+            throws ItemNotFound, BadRequester {
         Accessor user = getRequesterUserProfile();
         Vocabulary vocabulary = views.detail(id, user);
         return getQuery(cls).count(vocabulary.getConcepts());
@@ -70,9 +76,11 @@ public class VocabularyResource extends
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/list")
-    public Response listVocabularyConcepts(
-            @PathParam("id") String id)
-            throws ItemNotFound, BadRequester, AccessDenied {
+    @Override
+    public Response listChildren(
+            @PathParam("id") String id,
+            @QueryParam(ALL_PARAM) @DefaultValue("false")  boolean all)
+            throws ItemNotFound, BadRequester {
         Accessor user = getRequesterUserProfile();
         Vocabulary vocabulary = views.detail(id, user);
         return streamingPage(getQuery(Concept.class)
@@ -82,39 +90,43 @@ public class VocabularyResource extends
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    public Response createVocabulary(Bundle bundle,
-            @QueryParam(ACCESSOR_PARAM) List<String> accessors)
+    @Override
+    public Response create(Bundle bundle,
+                           @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws PermissionDenied, ValidationError, IntegrityError,
-            DeserializationError, ItemNotFound, BadRequester {
-        return create(bundle, accessors);
+            DeserializationError, BadRequester {
+        return createItem(bundle, accessors);
     }
 
     // Note: bundle contains id
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    public Response updateVocabulary(Bundle bundle) throws PermissionDenied,
+    @Override
+    public Response update(Bundle bundle) throws PermissionDenied,
             IntegrityError, ValidationError, DeserializationError,
             ItemNotFound, BadRequester {
-        return update(bundle);
+        return updateItem(bundle);
     }
 
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}")
-    public Response updateVocabulary(@PathParam("id") String id, Bundle bundle)
+    @Override
+    public Response update(@PathParam("id") String id, Bundle bundle)
             throws AccessDenied, PermissionDenied, IntegrityError, ValidationError,
             DeserializationError, ItemNotFound, BadRequester {
-        return update(id, bundle);
+        return updateItem(id, bundle);
     }
 
     @DELETE
     @Path("/{id:.+}")
-    public Response deleteVocabulary(@PathParam("id") String id)
+    @Override
+    public Response delete(@PathParam("id") String id)
             throws AccessDenied, PermissionDenied, ItemNotFound, ValidationError,
             BadRequester {
-        return delete(id);
+        return deleteItem(id);
     }
 
     /**
@@ -170,14 +182,15 @@ public class VocabularyResource extends
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}/" + Entities.CVOC_CONCEPT)
-    public Response createVocabularyConcept(@PathParam("id") String id,
-            Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
+    @Override
+    public Response createChild(@PathParam("id") String id,
+                                Bundle bundle, @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, ItemNotFound, BadRequester {
         try {
             final Accessor user = getRequesterUserProfile();
             final Vocabulary vocabulary = views.detail(id, user);
-            return create(bundle, accessors, new Handler<Concept>() {
+            return createItem(bundle, accessors, new Handler<Concept>() {
                 @Override
                 public void process(Concept concept) throws PermissionDenied {
                     concept.setVocabulary(vocabulary);

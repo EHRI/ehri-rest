@@ -1,5 +1,6 @@
 package eu.ehri.extension;
 
+import eu.ehri.extension.base.CreateResource;
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.*;
@@ -24,8 +25,9 @@ import java.util.List;
  * 
  */
 @Path(Entities.COUNTRY)
-public class CountryResource extends
-        AbstractAccessibleEntityResource<Country> {
+public class CountryResource
+        extends AbstractAccessibleEntityResource<Country>
+        implements CreateResource {
 
     public CountryResource(@Context GraphDatabaseService database) {
         super(database, Country.class);
@@ -36,21 +38,21 @@ public class CountryResource extends
     @Path("/{id:.+}")
     public Response getCountry(@PathParam("id") String id)
             throws ItemNotFound, AccessDenied, BadRequester {
-        return retrieve(id);
+        return getItem(id);
     }
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/list")
     public Response listCountries() throws ItemNotFound, BadRequester {
-        return page();
+        return listItems();
     }
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/count")
     public long countCountries() throws ItemNotFound, BadRequester {
-        return count();
+        return countItems();
     }
 
     @GET
@@ -81,11 +83,12 @@ public class CountryResource extends
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
-    public Response createCountry(Bundle bundle,
-            @QueryParam(ACCESSOR_PARAM) List<String> accessors)
+    @Override
+    public Response create(Bundle bundle,
+                           @QueryParam(ACCESSOR_PARAM) List<String> accessors)
             throws PermissionDenied, ValidationError, IntegrityError,
             DeserializationError, ItemNotFound, BadRequester {
-        return create(bundle, accessors);
+        return createItem(bundle, accessors);
     }
 
     // Note: json contains id
@@ -95,7 +98,7 @@ public class CountryResource extends
     public Response updateCountry(Bundle bundle) throws PermissionDenied,
             IntegrityError, ValidationError, DeserializationError,
             ItemNotFound, BadRequester {
-        return update(bundle);
+        return updateItem(bundle);
     }
 
     @PUT
@@ -105,7 +108,7 @@ public class CountryResource extends
     public Response updateCountry(@PathParam("id") String id, Bundle bundle)
             throws AccessDenied, PermissionDenied, IntegrityError, ValidationError,
             DeserializationError, ItemNotFound, BadRequester {
-        return update(id, bundle);
+        return updateItem(id, bundle);
     }
 
     @DELETE
@@ -113,7 +116,7 @@ public class CountryResource extends
     public Response deleteCountry(@PathParam("id") String id)
             throws AccessDenied, PermissionDenied, ItemNotFound, ValidationError,
             BadRequester {
-        return delete(id);
+        return deleteItem(id);
     }
 
     /**
@@ -140,7 +143,7 @@ public class CountryResource extends
         try {
             final Accessor user = getRequesterUserProfile();
             final Country country = views.detail(id, user);
-            return create(bundle, accessors, new Handler<Repository>() {
+            return createItem(bundle, accessors, new Handler<Repository>() {
                 @Override
                 public void process(Repository repository) throws PermissionDenied {
                     repository.setCountry(country);

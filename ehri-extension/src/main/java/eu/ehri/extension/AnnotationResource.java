@@ -1,5 +1,9 @@
 package eu.ehri.extension;
 
+import eu.ehri.extension.base.DeleteResource;
+import eu.ehri.extension.base.GetResource;
+import eu.ehri.extension.base.ListResource;
+import eu.ehri.extension.base.UpdateResource;
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.*;
@@ -24,8 +28,9 @@ import java.util.List;
  * @author Mike Bryant (http://github.com/mikesname)
  */
 @Path(Entities.ANNOTATION)
-public class AnnotationResource extends
-        AbstractAccessibleEntityResource<Annotation> {
+public class AnnotationResource
+        extends AbstractAccessibleEntityResource<Annotation>
+        implements GetResource, ListResource, UpdateResource, DeleteResource {
 
     private final AnnotationViews annotationViews;
 
@@ -34,32 +39,31 @@ public class AnnotationResource extends
         annotationViews = new AnnotationViews(graph);
     }
 
-    /**
-     * Retrieve an annotation by id.
-     *
-     * @param id The item's id
-     * @return The serialized annotation
-     * @throws ItemNotFound
-     * @throws AccessDenied
-     * @throws BadRequester
-     */
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/{id:.+}")
-    public Response getAction(@PathParam("id") String id) throws ItemNotFound,
+    @Override
+    public Response get(@PathParam("id") String id) throws ItemNotFound,
             AccessDenied, BadRequester {
-        return retrieve(id);
+        return getItem(id);
     }
 
-    /**
-     * List all annotations.
-     */
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
     @Path("/list")
-    public Response listAnnotations() throws ItemNotFound, BadRequester {
-        return page();
+    @Override
+    public Response list() throws BadRequester {
+        return listItems();
     }
+
+    @GET
+    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
+    @Path("/count")
+    @Override
+    public long count() throws BadRequester {
+        return countItems();
+    }
+
 
     /**
      * Create an annotation for a particular item.
@@ -162,38 +166,29 @@ public class AnnotationResource extends
 
     }
 
-    /**
-     * Update an annotation.
-     *
-     * @param id The annotation ID
-     * @return The updated item
-     * @throws PermissionDenied
-     * @throws ItemNotFound
-     * @throws ValidationError
-     * @throws BadRequester
-     */
     @PUT
     @Path("/{id:.+}")
-    public Response updateAnnotation(@PathParam("id") String id, Bundle bundle)
+    @Override
+    public Response update(@PathParam("id") String id, Bundle bundle)
             throws AccessDenied, PermissionDenied, ItemNotFound, ValidationError,
             BadRequester, DeserializationError, IntegrityError {
-        return update(id, bundle);
+        return updateItem(id, bundle);
     }
 
-    /**
-     * Delete an annotation.
-     *
-     * @param id The annotation ID
-     * @throws PermissionDenied
-     * @throws ItemNotFound
-     * @throws ValidationError
-     * @throws BadRequester
-     */
+    @PUT
+    @Override
+    public Response update(Bundle bundle)
+            throws PermissionDenied, ItemNotFound, ValidationError,
+            BadRequester, DeserializationError, IntegrityError {
+        return updateItem(bundle);
+    }
+
     @DELETE
     @Path("/{id:.+}")
-    public Response deleteAnnotation(@PathParam("id") String id)
+    @Override
+    public Response delete(@PathParam("id") String id)
             throws AccessDenied, PermissionDenied, ItemNotFound, ValidationError,
             BadRequester {
-        return delete(id);
+        return deleteItem(id);
     }
 }
