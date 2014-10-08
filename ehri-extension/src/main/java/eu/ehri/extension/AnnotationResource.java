@@ -1,9 +1,6 @@
 package eu.ehri.extension;
 
-import eu.ehri.extension.base.DeleteResource;
-import eu.ehri.extension.base.GetResource;
-import eu.ehri.extension.base.ListResource;
-import eu.ehri.extension.base.UpdateResource;
+import eu.ehri.extension.base.*;
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.*;

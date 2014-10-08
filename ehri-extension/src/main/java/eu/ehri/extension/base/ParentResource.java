@@ -10,26 +10,32 @@ import javax.ws.rs.core.Response;
 import java.util.List;
 
 /**
+ * Methods for managing resources that have a subordinate (hierarchical)
+ * relationship to another resource.
+ *
  * @author Mike Bryant (http://github.com/mikesname)
  */
 public interface ParentResource {
 
     /**
-     * List the child resources held by this item.
+     * List available resources subordinate to this item. Behaviour is the same
+     * as the general list method with respect to parameters.
+     * <p/>
+     * Example:
+     * <pre>
+     *     <code>
+     * curl http://localhost:7474/ehri/[RESOURCE]/[ID]/list
+     *     </code>
+     * </pre>
      *
-     * @param id  The requested item id
-     * @param all Whether to list all child items, or just those at the
-     *            immediate sub-level.
      * @return A list of serialized item representations
-     * @throws eu.ehri.project.exceptions.ItemNotFound
-     * @throws eu.ehri.extension.errors.BadRequester
-     * @throws eu.ehri.project.exceptions.PermissionDenied
+     * @throws BadRequester
      */
     public Response listChildren(String id, boolean all)
             throws ItemNotFound, BadRequester, PermissionDenied;
 
     /**
-     * Count the number of available resources held by this item.
+     * Count the number of available resources subordinate to this item.
      *
      * @param id  The requested item id
      * @param all Whether to count all child items, or just those at the
@@ -43,7 +49,7 @@ public interface ParentResource {
             throws ItemNotFound, BadRequester, PermissionDenied;
 
     /**
-     * Create a child resource.
+     * Create a subordinate resource.
      *
      * @param id The parent resource ID.
      * @param bundle A resource bundle.

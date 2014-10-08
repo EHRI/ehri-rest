@@ -2,6 +2,7 @@ package eu.ehri.extension;
 
 import com.google.common.collect.Sets;
 import com.tinkerpop.blueprints.Vertex;
+import eu.ehri.extension.AbstractRestResource;
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.acl.AclManager;
 import eu.ehri.project.exceptions.*;

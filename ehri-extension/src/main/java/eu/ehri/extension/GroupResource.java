@@ -1,10 +1,7 @@
 package eu.ehri.extension;
 
 import com.google.common.collect.Sets;
-import eu.ehri.extension.base.DeleteResource;
-import eu.ehri.extension.base.GetResource;
-import eu.ehri.extension.base.ListResource;
-import eu.ehri.extension.base.UpdateResource;
+import eu.ehri.extension.base.*;
 import eu.ehri.extension.errors.BadRequester;
 import eu.ehri.project.definitions.Entities;
 import eu.ehri.project.exceptions.*;
@@ -24,8 +21,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import java.util.List;
 import java.util.Set;
-
-import static eu.ehri.extension.RestHelpers.produceErrorMessageJson;
 
 /**
  * Provides a RESTful interface for the Group class.
@@ -92,8 +87,7 @@ public class GroupResource
             });
         } catch (ItemNotFound e) {
             graph.getBaseGraph().rollback();
-            return Response.status(Status.BAD_REQUEST)
-                    .entity((produceErrorMessageJson(e)).getBytes()).build();
+            throw new DeserializationError("User or group not found: " + e.getValue());
         }
     }
 
