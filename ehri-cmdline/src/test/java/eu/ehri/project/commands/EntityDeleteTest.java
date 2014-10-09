@@ -15,11 +15,10 @@ import static org.junit.Assert.assertEquals;
 public class EntityDeleteTest extends AbstractFixtureTest {
     @Test(expected = ItemNotFound.class)
     public void testExecWithOptions() throws Exception {
-        String[] args = new String[]{"delete","reto","--user","mike", "--log", "Goodbye, Reto"};
+        String[] args = new String[]{"reto", "--user", "mike", "--log", "Goodbye, Reto"};
 
         EntityDelete del = new EntityDelete();
-        del.setCustomOptions();
-        CommandLine cmdLine = new PosixParser().parse(del.options, args);
+        CommandLine cmdLine = del.getCmdLine(args);
         assertEquals(0, del.execWithOptions(graph, cmdLine));
         manager.getFrame("reto", UserProfile.class);
     }

@@ -66,10 +66,10 @@ public class EntityDelete extends BaseCommand implements Command {
     public int execWithOptions(final FramedGraph<? extends TransactionalGraph> graph,
             CommandLine cmdLine) throws Exception {
 
-        // the first argument is the entity type, and that must be specified
+        // the first argument is the item ID, and that must be specified
         if (cmdLine.getArgList().size() < 1)
             throw new RuntimeException(getHelp());
-        String id = cmdLine.getArgs()[1];
+        String id = cmdLine.getArgs()[0];
 
         String logMessage = "Deleting item " + id + " via the command-line";
         if (cmdLine.hasOption("log")) {
