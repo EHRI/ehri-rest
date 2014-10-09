@@ -20,8 +20,9 @@ import javax.ws.rs.core.Response.Status;
 import java.util.List;
 
 /**
- * Provides a RESTful interface for the AuthoritativeSet Also for managing the
- * HistoricalAgents that are in the AuthoritativeSet
+ * Provides a RESTful interface for the AuthoritativeSet items.
+ * Authoritative Sets are containers for Historical Agents
+ * (authority files.)
  * 
  * @author Mike Bryant (http://github.com/mikesname)
  * 
@@ -128,8 +129,6 @@ public class AuthoritativeSetResource extends
         return deleteItem(id);
     }
 
-    /*** HistoricalAgent manipulation ***/
-
     @DELETE
     @Path("/{id:.+}/all")
     public Response deleteAllAuthoritativeSetHistoricalAgents(
@@ -157,19 +156,6 @@ public class AuthoritativeSetResource extends
         }
     }
 
-    /**
-     * Create a top-level agent unit for this set.
-     *
-     * @param id The set ID
-     * @param bundle The item data
-     * @return A new item
-     * @throws eu.ehri.project.exceptions.PermissionDenied
-     * @throws eu.ehri.project.exceptions.ValidationError
-     * @throws eu.ehri.project.exceptions.IntegrityError
-     * @throws eu.ehri.project.exceptions.DeserializationError
-     * @throws eu.ehri.project.exceptions.ItemNotFound
-     * @throws eu.ehri.extension.errors.BadRequester
-     */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})

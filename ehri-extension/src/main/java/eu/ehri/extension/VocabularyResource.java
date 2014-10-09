@@ -22,10 +22,11 @@ import javax.ws.rs.core.Response.Status;
 import java.util.List;
 
 /**
- * Provides a RESTful interface for the Vocabulary Also for managing the
- * Concepts that are in the Vocabulary
+ * Provides a RESTful interface for the Vocabulary items. Vocabularies are
+ * containers for Concepts.
  *
  * @author Paul Boon (http://github.com/PaulBoon)
+ * @author Mike Bryant (http://github.com/mikesname)
  */
 @Path(Entities.CVOC_VOCABULARY)
 public class VocabularyResource extends AbstractAccessibleEntityResource<Vocabulary>
@@ -98,7 +99,6 @@ public class VocabularyResource extends AbstractAccessibleEntityResource<Vocabul
         return createItem(bundle, accessors);
     }
 
-    // Note: bundle contains id
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
@@ -128,10 +128,6 @@ public class VocabularyResource extends AbstractAccessibleEntityResource<Vocabul
             BadRequester {
         return deleteItem(id);
     }
-
-    /**
-     * Concept manipulation **
-     */
 
     @DELETE
     @Path("/{id:.+}/all")
@@ -165,19 +161,6 @@ public class VocabularyResource extends AbstractAccessibleEntityResource<Vocabul
         }
     }
 
-    /**
-     * Create a top-level concept unit for this vocabulary.
-     *
-     * @param id     The vocabulary ID
-     * @param bundle The new concept data
-     * @return The new concept
-     * @throws PermissionDenied
-     * @throws ValidationError
-     * @throws IntegrityError
-     * @throws DeserializationError
-     * @throws ItemNotFound
-     * @throws BadRequester
-     */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_XML})
