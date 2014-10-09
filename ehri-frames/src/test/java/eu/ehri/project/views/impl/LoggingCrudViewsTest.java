@@ -10,12 +10,12 @@ import eu.ehri.project.test.AbstractFixtureTest;
 import eu.ehri.project.test.TestData;
 import eu.ehri.project.views.Crud;
 import eu.ehri.project.views.ViewFactory;
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import static junit.framework.Assert.assertNotSame;
-import static junit.framework.Assert.assertTrue;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
