@@ -48,8 +48,7 @@ public class UserAdd extends BaseCommand implements Command {
 
     @Override
     public String getUsage() {
-        String help = "Create a new user, and optionally add them to a group";
-        return help;
+        return "Create a new user, and optionally add them to a group";
     }
 
     /**

@@ -25,9 +25,8 @@ public class PersonalitiesImport extends ImportCsvCommand implements Command {
     @Override
     public String getUsage() {
         String sep = System.getProperty("line.separator");
-        String help = "Import a CSV file into the graph database, using the specified"
+        return "Import a CSV file into the graph database, using the specified"
                 + sep + "scope and user.";
-        return help;
     }
 
    

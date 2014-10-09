@@ -4,7 +4,6 @@ import eu.ehri.project.exceptions.ItemNotFound;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.test.AbstractFixtureTest;
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.PosixParser;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;

@@ -56,8 +56,7 @@ public class EntityAdd extends BaseCommand implements Command {
 
     @Override
     public String getUsage() {
-        String help = "Create a new entity with the given id and properties";
-        return help;
+        return "Create a new entity with the given id and properties";
     }
 
     /**
