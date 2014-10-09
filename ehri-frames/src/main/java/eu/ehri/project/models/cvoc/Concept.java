@@ -45,7 +45,7 @@ public interface Concept extends AccessibleEntity, IdentifiableEntity,
     public void setVocabulary(final Vocabulary vocabulary);
 
     @Property(CHILD_COUNT)
-    public Long getChildCount();
+    public long getChildCount();
 
     // relations to other concepts
     
@@ -91,7 +91,7 @@ public interface Concept extends AccessibleEntity, IdentifiableEntity,
             it().setProperty(CHILD_COUNT, gremlin().out(Ontology.CONCEPT_HAS_NARROWER).count());
         }
 
-        public Long getChildCount() {
+        public long getChildCount() {
             Long count = it().getProperty(CHILD_COUNT);
             if (count == null) {
                 count = gremlin().out(Ontology.CONCEPT_HAS_NARROWER).count();

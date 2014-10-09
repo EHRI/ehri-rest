@@ -36,7 +36,7 @@ public interface AuthoritativeSet extends AccessibleEntity, IdentifiableEntity,
             it().setProperty(CHILD_COUNT, gremlin().in(Ontology.ITEM_IN_AUTHORITATIVE_SET).count());
         }
 
-        public Long getChildCount() {
+        public long getChildCount() {
             Long count = it().getProperty(CHILD_COUNT);
             if (count == null) {
                 count = gremlin().in(Ontology.ITEM_IN_AUTHORITATIVE_SET).count();

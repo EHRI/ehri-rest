@@ -87,7 +87,7 @@ public class ItsTest extends AbstractImporterTest {
         for (DocumentaryUnit d : unit.getChildren()) {
         	logger.debug("Child: " + d.getIdentifier());
         }
-        assertEquals(new Long(1), unit.getChildCount());
+        assertEquals(1L, unit.getChildCount());
         
         
         for(Description d : unit.getDocumentDescriptions()) {
