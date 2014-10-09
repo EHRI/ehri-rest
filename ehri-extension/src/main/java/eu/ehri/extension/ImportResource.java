@@ -1,5 +1,6 @@
 package eu.ehri.extension;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.hp.hpl.jena.shared.NoReaderForLangException;
@@ -14,6 +15,7 @@ import eu.ehri.project.importers.exceptions.InputParseError;
 import eu.ehri.project.models.UserProfile;
 import eu.ehri.project.models.base.PermissionScope;
 import eu.ehri.project.models.cvoc.Vocabulary;
+import org.apache.commons.io.FileUtils;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import javax.ws.rs.*;
@@ -67,7 +69,8 @@ public class ImportResource extends AbstractRestResource {
      *
      * @param scopeId    The id of the import scope (i.e. repository)
      * @param tolerant   Whether or not to die on the first validation error
-     * @param logMessage Log message for import
+     * @param logMessage Log message for import. If this refers to a local file
+     *                   its contents will be used.
      * @param format     The RDF format of the POSTed data
      * @param stream     A stream of SKOS data in a valid format.
      * @return A JSON object showing how many records were created,
@@ -95,7 +98,7 @@ public class ImportResource extends AbstractRestResource {
             ImportLog log = importer
                     .setFormat(format)
                     .setTolerant(tolerant)
-                    .importFile(stream, logMessage);
+                    .importFile(stream, getLogMessage(logMessage).orNull());
 
             graph.getBaseGraph().commit();
             return Response.ok(jsonMapper.writeValueAsBytes(log.getData())).build();
@@ -132,7 +135,8 @@ public class ImportResource extends AbstractRestResource {
      *
      * @param scopeId       The id of the import scope (i.e. repository)
      * @param tolerant      Whether or not to die on the first validation error
-     * @param logMessage    Log message for import
+     * @param logMessage    Log message for import. If this refers to a local file
+     *                      its contents will be used.
      * @param handlerClass  The fully-qualified handler class name
      *                      (defaults to IcaAtomEadHandler)
      * @param importerClass The fully-qualified import class name
@@ -175,7 +179,7 @@ public class ImportResource extends AbstractRestResource {
             ImportLog log = new SaxImportManager(graph, scope, user, importer, handler)
                     .setProperties(propertyFile)
                     .setTolerant(tolerant)
-                    .importFiles(paths, logMessage);
+                    .importFiles(paths, getLogMessage(logMessage).orNull());
 
             graph.getBaseGraph().commit();
             return Response.ok(jsonMapper.writeValueAsBytes(log.getData())).build();
@@ -205,7 +209,7 @@ public class ImportResource extends AbstractRestResource {
         return files;
     }
 
-    private static void checkPropertyFile(String properties)  {
+    private static void checkPropertyFile(String properties) {
         // Null properties are allowed
         if (properties != null) {
             File file = new File(properties);
@@ -261,6 +265,19 @@ public class ImportResource extends AbstractRestResource {
                         " not an instance of " + AbstractImporter.class.getSimpleName());
             }
             return (Class<? extends AbstractImporter>) importer;
+        }
+    }
+
+    private Optional<String> getLogMessage(String logMessage) throws IOException {
+        if (logMessage == null || logMessage.isEmpty()) {
+            return Optional.absent();
+        } else {
+            File fileTest = new File(logMessage);
+            if (fileTest.exists()) {
+                return Optional.of(FileUtils.readFileToString(fileTest, "UTF-8"));
+            } else {
+                return Optional.of(logMessage);
+            }
         }
     }
 }
