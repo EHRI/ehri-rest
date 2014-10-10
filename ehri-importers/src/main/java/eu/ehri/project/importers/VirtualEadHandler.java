@@ -10,6 +10,7 @@ import eu.ehri.project.models.DocumentaryUnit;
 import eu.ehri.project.models.MaintenanceEvent;
 import eu.ehri.project.models.VirtualUnit;
 import eu.ehri.project.models.base.AbstractUnit;
+import eu.ehri.project.models.base.Description;
 import eu.ehri.project.models.base.Frame;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +29,9 @@ import java.util.regex.Pattern;
  * @author Linda Reijnhoudt (https://github.com/lindareijnhoudt)
  */
 public class VirtualEadHandler extends SaxXmlHandler {
-    public static final String AUTHOR = "authors";
+    public static final String AUTHOR = "authors",
+            SOURCEFILEID = "sourceFileId";
+    List<MaintenanceEvent> maintenanceEvents = new ArrayList<MaintenanceEvent>();
     private final ImmutableMap<String, Class<? extends Frame>> possibleSubnodes
             = ImmutableMap.<String, Class<? extends Frame>>builder().put(
             "maintenanceEvent", MaintenanceEvent.class).build();
@@ -141,9 +144,9 @@ public class VirtualEadHandler extends SaxXmlHandler {
         
     	// If this is the <eadid> element, store its content
 //    	logger.debug("localName: " + localName + ", qName: " + qName);
-    	if (localName.equals("eadid") || qName.equals("eadid")) {
-    		eadId = (String) currentGraphPath.peek().get("eadId");
-    		logger.debug("Found <eadid>: "+ eadId);
+        if (localName.equals("eadid") || qName.equals("eadid")) {
+            eadId =(String) currentGraphPath.peek().get(SOURCEFILEID);
+    	    logger.debug("Found <eadid>: "+ eadId);
     	}
         else if (localName.equals("author") || qName.equals("author")) {
     		author = (String) currentGraphPath.peek().get(AUTHOR);
@@ -183,10 +186,20 @@ public class VirtualEadHandler extends SaxXmlHandler {
 
                     extractDate(currentGraph);
                     
+                    currentGraph.put(SOURCEFILEID, getSourceFileId());
+                    
                     //add the <author> of the ead to every description
                     addAuthor(currentGraph);
 
                     AbstractUnit current = (AbstractUnit) importer.importItem(currentGraph, pathIds());
+                    //add the maintenanceEvents, but only to the DD that was just created
+                    for(Description dd : current.getDescriptions()){
+                        if(getSourceFileId().equals(dd.asVertex().getProperty(SOURCEFILEID))){
+                            for(MaintenanceEvent me : maintenanceEvents){
+                                dd.addMaintenanceEvent(me);
+                            }
+                        }
+                    }
                     if (current.getType().equals(Entities.VIRTUAL_UNIT)) {
                         logger.debug("virtual unit created: " + current.getIdentifier());
                         topLevel = (VirtualUnit) current; // if it is not overwritten, the current DU is the topLevel
@@ -226,6 +239,12 @@ public class VirtualEadHandler extends SaxXmlHandler {
                     scopeIds.pop();
                 }
             } else {
+                //import the MaintenanceEvent
+                if(getImportantPath(currentPath).equals("maintenanceEvent")){ 
+                    Map<String, Object> me = importer.getMaintenanceEvent(currentGraph);
+                    maintenanceEvents.add(importer.importMaintenanceEvent(me));
+                }
+
                 putSubGraphInCurrentGraph(getImportantPath(currentPath), currentGraph);
                 depth--;
             }
@@ -233,23 +252,25 @@ public class VirtualEadHandler extends SaxXmlHandler {
 
         currentPath.pop();
         if(currentPath.isEmpty()){
-//            try {
-                //we're back at the top. find the maintenanceevents and add to the topLevel DU
-                Map<String, Object> current = currentGraphPath.pop();
-                importer.importTopLevelExtraNodes(topLevel, current);
-                //importer.importItem(currentGraphPath.pop(), Lists.<String>newArrayList());
-//            } catch (ValidationError ex) {
-//                logger.error(ex.getMessage());
-//            }
+                currentGraphPath.pop();
         }
         
     }
-    
+    protected String getSourceFileId(){
+        if(getEadId()
+                .toLowerCase()
+                .endsWith("#"+getDefaultLanguage()
+                    .toLowerCase()))
+            return getEadId();
+        return getEadId()+"#"+getDefaultLanguage().toUpperCase();
+    }
     /**
      * Get the EAD identifier of the EAD being imported
      * @return the <code><eadid></code> or null if it was not parsed yet or empty
      */
     protected String getEadId() {
+        if(eadId == null)
+            logger.error("eadid not set yet or empty");
     	return eadId;
     }
     protected String getAuthor(){
