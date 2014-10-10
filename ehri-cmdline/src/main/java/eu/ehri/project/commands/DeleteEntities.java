@@ -32,11 +32,6 @@ public class DeleteEntities extends BaseCommand implements Command {
     }
 
     @Override
-    public boolean isReadOnly() {
-        return true;
-    }
-
-    @Override
     protected void setCustomOptions() {
         options.addOption(new Option("user", true,
                 "Identifier of user to import as"));

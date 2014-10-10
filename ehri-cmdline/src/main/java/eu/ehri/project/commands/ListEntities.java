@@ -38,11 +38,6 @@ public class ListEntities extends BaseCommand implements Command {
     }
 
     @Override
-    public boolean isReadOnly() {
-        return true;
-    }
-
-    @Override
     protected void setCustomOptions() {
         options.addOption(OptionBuilder
                 .withType(String.class)
@@ -64,8 +59,7 @@ public class ListEntities extends BaseCommand implements Command {
 
     @Override
     public String getUsage() {
-        String help = "List entities of a given type.";
-        return help;
+        return "List entities of a given type.";
     }
 
     /**
@@ -94,7 +88,7 @@ public class ListEntities extends BaseCommand implements Command {
             printIds(manager, type);
         } else {
             // if there is a second argument, that might be 'json' or 'xml'
-            String format = (String) cmdLine.getOptionValue("f");
+            String format = cmdLine.getOptionValue("f");
             if (format.equalsIgnoreCase("xml")) {
                 printXml(manager, serializer, type, getTransformer(Optional.<InputStream>absent()),
                         rootName);
@@ -123,26 +117,12 @@ public class ListEntities extends BaseCommand implements Command {
         return 0;
     }
 
-    /**
-     * Output node IDs only.
-     *
-     * @param manager
-     * @param type
-     */
     private void printIds(GraphManager manager, EntityClass type) {
         for (AccessibleEntity acc : manager.getFrames(type, AccessibleEntity.class)) {
             System.out.println(acc.getId());
         }
     }
 
-    /**
-     * Output nodes as JSON.
-     *
-     * @param manager
-     * @param serializer
-     * @param type
-     * @throws SerializationError
-     */
     private void printJson(GraphManager manager, Serializer serializer, EntityClass type)
             throws SerializationError {
 
@@ -160,18 +140,6 @@ public class ListEntities extends BaseCommand implements Command {
 
     }
 
-    /**
-     * Output nodes as XML, with a given transformer.
-     *
-     * @param manager
-     * @param serializer
-     * @param type
-     * @param transformer
-     * @param rootName
-     * @throws SerializationError
-     * @throws TransformerException
-     * @throws UnsupportedEncodingException
-     */
     private void printXml(GraphManager manager, Serializer serializer, EntityClass type,
             Transformer transformer, String rootName)
                 throws UnsupportedEncodingException, SerializationError, TransformerException {
@@ -184,14 +152,6 @@ public class ListEntities extends BaseCommand implements Command {
         System.out.print("</" + rootName + ">\n"); // root element
     }
 
-    /**
-     * Get an XML Document transformer...
-     *
-     * @param xsltOpt Optional XSLT InputStream
-     * @throws java.io.IOException
-     * @throws javax.xml.transform.TransformerException
-     *
-     */
     private static Transformer getTransformer(Optional<InputStream> xsltOpt) throws IOException, TransformerException {
         TransformerFactory tf = TransformerFactory.newInstance();
         Transformer transformer = xsltOpt.isPresent()

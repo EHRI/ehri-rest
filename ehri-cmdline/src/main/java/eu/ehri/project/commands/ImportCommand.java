@@ -115,8 +115,9 @@ public abstract class ImportCommand extends BaseCommand implements Command{
     /**
      * Read a set of file paths from an input, either a file or standard in
      * if given the path '-'.
-     * @param listFile
-     * @param filePaths
+     * @param listFile A path to a local file
+     * @param filePaths An output parameter for file paths contained in
+     *                  the given file.
      * @throws Exception
      */
     protected void getPathsFromFile(String listFile, List<String> filePaths) throws Exception {
@@ -125,7 +126,7 @@ public abstract class ImportCommand extends BaseCommand implements Command{
                 : new FileReader(new File(listFile));
         BufferedReader br = new BufferedReader(reader);
         try {
-            String file = null;
+            String file;
             while ((file = br.readLine()) != null) {
                 filePaths.add(file);
             }

@@ -56,7 +56,7 @@ public interface DocumentaryUnit extends AbstractUnit {
     public Iterable<DocumentaryUnit> getAncestors();
 
     @JavaHandler
-    public Long getChildCount();
+    public long getChildCount();
 
     /**
      * Get child documentary units
@@ -83,7 +83,7 @@ public interface DocumentaryUnit extends AbstractUnit {
             it().setProperty(CHILD_COUNT, gremlin().in(Ontology.DOC_IS_CHILD_OF).count());
         }
 
-        public Long getChildCount() {
+        public long getChildCount() {
             Long count = it().getProperty(CHILD_COUNT);
             if (count == null) {
                 count = gremlin().in(Ontology.DOC_IS_CHILD_OF).count();

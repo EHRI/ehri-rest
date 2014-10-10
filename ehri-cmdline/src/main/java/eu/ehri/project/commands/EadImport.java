@@ -1,7 +1,5 @@
 package eu.ehri.project.commands;
 
-import org.apache.commons.cli.Option;
-
 import eu.ehri.project.importers.AbstractImporter;
 import eu.ehri.project.importers.EadHandler;
 import eu.ehri.project.importers.EadImporter;

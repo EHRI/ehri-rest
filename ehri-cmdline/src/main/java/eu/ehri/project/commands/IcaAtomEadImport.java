@@ -1,7 +1,5 @@
 package eu.ehri.project.commands;
 
-import org.apache.commons.cli.Option;
-
 import eu.ehri.project.importers.AbstractImporter;
 import eu.ehri.project.importers.EadHandler;
 import eu.ehri.project.importers.IcaAtomEadImporter;
@@ -39,8 +37,7 @@ public class IcaAtomEadImport extends ImportCommand implements Command {
     @Override
     public String getUsage() {
         String sep = System.getProperty("line.separator");
-        String help = "Import an EAD file into the graph database, using the specified"
+        return "Import an EAD file into the graph database, using the specified"
                 + sep + "Repository and User.";
-        return help;
     }
 }

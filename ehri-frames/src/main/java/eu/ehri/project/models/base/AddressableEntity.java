@@ -15,7 +15,4 @@ public interface AddressableEntity {
     @Fetch(value = Ontology.ENTITY_HAS_ADDRESS, whenNotLite = true)
     @Adjacency(label = Ontology.ENTITY_HAS_ADDRESS)
     public Iterable<Address> getAddresses();
-
-    @Adjacency(label = Ontology.ENTITY_HAS_ADDRESS)
-    public void addAddress(final Address address);
 }

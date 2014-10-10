@@ -34,17 +34,17 @@ public class DocumentaryUnitTest extends AbstractFixtureTest {
         DocumentaryUnit unit = manager.getFrame("c1", DocumentaryUnit.class);
         DocumentaryUnit child = manager.getFrame("c2", DocumentaryUnit.class);
         assertEquals(unit, child.getParent());
-        assertEquals(Long.valueOf(1L), unit.getChildCount());
+        assertEquals(1L, unit.getChildCount());
         unit.addChild(child);
-        assertEquals(Long.valueOf(1L), unit.getChildCount());
+        assertEquals(1L, unit.getChildCount());
     }
 
     @Test
     public void testCannotAddSelfAsChild() throws Exception {
         DocumentaryUnit unit = manager.getFrame("c1", DocumentaryUnit.class);
-        assertEquals(Long.valueOf(1L), unit.getChildCount());
+        assertEquals(1L, unit.getChildCount());
         unit.addChild(unit);
-        assertEquals(Long.valueOf(1L), unit.getChildCount());
+        assertEquals(1L, unit.getChildCount());
     }
 
     @Test

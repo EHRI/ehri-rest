@@ -7,7 +7,7 @@ import eu.ehri.project.persistence.utils.BundleUtils;
 import eu.ehri.project.test.AbstractFixtureTest;
 import org.junit.Test;
 
-import static junit.framework.Assert.*;
+import static org.junit.Assert.*;
 
 /**
  * @author Mike Bryant (http://github.com/mikesname)
