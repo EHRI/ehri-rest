@@ -126,51 +126,57 @@ public abstract class XmlImporter<T> extends AbstractImporter<T> {
         for (String key : itemData.keySet()) {
             if (key.equals("maintenanceEvent")) {
                 for (Map<String, Object> event : (List<Map<String, Object>>) itemData.get(key)) {
-                    Map<String, Object> e2 = new HashMap<String, Object>();
-                    for (String eventkey : event.keySet()) {
-                        if (eventkey.equals("maintenanceEvent/type")) {
-                            e2.put(MaintenanceEvent.EVENTTYPE, event.get(eventkey));
-                        } else if (eventkey.equals("maintenanceEvent/agentType")) {
-                            e2.put(MaintenanceEvent.AGENTTYPE, event.get(eventkey));
-                        } else {
-                            e2.put(eventkey, event.get(eventkey));
-                        }
-                    }
-                    if (!e2.containsKey(MaintenanceEvent.EVENTTYPE)){
-                        e2.put(MaintenanceEvent.EVENTTYPE, "unknown event type");
-                    }
-                    list.add(e2);
+                    list.add(getMaintenanceEvent(event));
                 }
             }
         }
         return list;
     }
     
+    /**
+     * Extract a representations of maintenance events from the maintenanceEvent data.
+     * 
+     * @param event
+     * @return 
+     */
     @Override
-    //TODO: should not be added to all descriptions of this topLevelUnit, 
-//            only to the one recently created, use the eadid (=sourceFileId) !
-    public void importTopLevelExtraNodes(AbstractUnit topLevelUnit, Map<String, Object> itemData){
-        BundleDAO persister = new BundleDAO(framedGraph, permissionScope.idPath());
-        for (Map<String, Object> event : extractMaintenanceEvent(itemData) ){
-            try {
-                Bundle unit = new Bundle(EntityClass.MAINTENANCE_EVENT, event);
-                //only if some source is given (especially with a creation) should a ME be created
-                for(String e : unit.getPropertyKeys()){
-                    logger.debug(e);
-                }
-                if (unit.getDataValue("source") != null) {
-                    Mutation<MaintenanceEvent> mutation = persister.createOrUpdate(unit, MaintenanceEvent.class);
-                    for (Description d : topLevelUnit.getDescriptions()) {
-                        d.addMaintenanceEvent(mutation.getNode());
-                    }
-                }
-            } catch (ValidationError ex) {
-                logger.error(ex.getMessage());
+    public Map<String, Object> getMaintenanceEvent(Map<String, Object> event) {
+        Map<String, Object> me = new HashMap<String, Object>();
+        for (String eventkey : event.keySet()) {
+            if (eventkey.equals("maintenanceEvent/type")) {
+                me.put(MaintenanceEvent.EVENTTYPE, event.get(eventkey));
+            } else if (eventkey.equals("maintenanceEvent/agentType")) {
+                me.put(MaintenanceEvent.AGENTTYPE, event.get(eventkey));
+            } else {
+                me.put(eventkey, event.get(eventkey));
             }
         }
-
-
+        if (!me.containsKey(MaintenanceEvent.EVENTTYPE)) {
+            me.put(MaintenanceEvent.EVENTTYPE, "unknown event type");
+        }
+        return me;
     }
+    
+
+    @Override
+    public MaintenanceEvent importMaintenanceEvent(Map<String, Object> event) {
+        BundleDAO persister = new BundleDAO(framedGraph, permissionScope.idPath());
+        try {
+            Bundle unit = new Bundle(EntityClass.MAINTENANCE_EVENT, event);
+            //only if some source is given (especially with a creation) should a ME be created
+            for (String e : unit.getPropertyKeys()) {
+                logger.debug(e);
+            }
+            if (unit.getDataValue("source") != null) {
+                Mutation<MaintenanceEvent> mutation = persister.createOrUpdate(unit, MaintenanceEvent.class);
+                return mutation.getNode();
+            }
+        } catch (ValidationError ex) {
+            logger.error(ex.getMessage());
+        }
+        return null;
+    }
+
     /**
      * Attempt to extract some date periods. This does not currently put the dates into ISO form.
      *

@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import eu.ehri.project.definitions.Ontology;
 import eu.ehri.project.importers.properties.XmlImportProperties;
 import eu.ehri.project.exceptions.ValidationError;
+import eu.ehri.project.models.DocumentDescription;
 import eu.ehri.project.models.DocumentaryUnit;
 
 import eu.ehri.project.models.MaintenanceEvent;
@@ -37,6 +38,8 @@ public class EadHandler extends SaxXmlHandler {
             SOURCEFILEID = "sourceFileId",
             MAINAGENCYCODE = "mainagencycode",
             AUTHOR = "author";
+    
+    List<MaintenanceEvent> maintenanceEvents = new ArrayList<MaintenanceEvent>();
                             
     private final ImmutableMap<String, Class<? extends Frame>> possibleSubnodes
             = ImmutableMap.<String, Class<? extends Frame>>builder().put(
@@ -162,7 +165,6 @@ public class EadHandler extends SaxXmlHandler {
     	// If this is the <eadid> element, store its content
 //    	logger.debug("localName: " + localName + ", qName: " + qName);
     	if (localName.equals("eadid") || qName.equals("eadid")) {
-            logger.debug(currentPath.lastElement() + "-"+ getImportantPath(currentPath) + "-"+ qName + ":"+ (String) currentGraphPath.peek().get(SOURCEFILEID));
             eadfileValues.put(EADID, (String) currentGraphPath.peek().get(SOURCEFILEID));
     	    logger.debug("Found <eadid>: "+ eadfileValues.get(EADID));
     	}
@@ -214,6 +216,15 @@ public class EadHandler extends SaxXmlHandler {
                     }
 
                     DocumentaryUnit current = (DocumentaryUnit) importer.importItem(currentGraph, pathIds());
+                    //add the maintenanceEvents, but only to the DD that was just created
+                    for(DocumentDescription dd : current.getDocumentDescriptions()){
+                        if(getSourceFileId().equals(dd.asVertex().getProperty(SOURCEFILEID))){
+                            for(MaintenanceEvent me : maintenanceEvents){
+                                dd.addMaintenanceEvent(me);
+                            }
+                        }
+                    }
+                    
                     topLevel=current; // if it is not overwritten, the current DU is the topLevel
                     logger.debug("importer used: " + importer.getClass());
                     if (depth > 0) { // if not on root level
@@ -236,6 +247,14 @@ public class EadHandler extends SaxXmlHandler {
                     scopeIds.pop();
                 }
             } else {
+                //import the MaintenanceEvent
+                if(getImportantPath(currentPath).equals("maintenanceEvent")){ 
+                    Map<String, Object> me = importer.getMaintenanceEvent(currentGraph);
+                    MaintenanceEvent event = importer.importMaintenanceEvent(me);
+                    if(event != null ){
+                        maintenanceEvents.add(event);
+                    }
+                }
                 putSubGraphInCurrentGraph(getImportantPath(currentPath), currentGraph);
                 depth--;
             }
@@ -243,14 +262,7 @@ public class EadHandler extends SaxXmlHandler {
 
         currentPath.pop();
         if(currentPath.isEmpty()){
-//            try {
-                //we're back at the top. find the maintenanceevents and add to the topLevel DD
-                Map<String, Object> current = currentGraphPath.pop();
-                importer.importTopLevelExtraNodes(topLevel, current); //TODO: add getEadId()
-                //importer.importItem(currentGraphPath.pop(), Lists.<String>newArrayList());
-//            } catch (ValidationError ex) {
-//                logger.error(ex.getMessage());
-//            }
+             currentGraphPath.pop();
         }
         
     }
@@ -372,8 +384,6 @@ public class EadHandler extends SaxXmlHandler {
      * @param otherIdentifier the alternative identifier to add
      */
     protected void addOtherIdentifier(Map<String, Object> currentGraph, String otherIdentifier) {
-       
-
         if (currentGraph.containsKey(Ontology.OTHER_IDENTIFIERS)) {
             logger.debug("adding alternative id: " + otherIdentifier);
             Object oids = currentGraph.get(Ontology.OTHER_IDENTIFIERS);
