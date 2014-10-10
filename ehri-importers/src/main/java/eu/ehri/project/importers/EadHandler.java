@@ -40,6 +40,7 @@ public class EadHandler extends SaxXmlHandler {
             AUTHOR = "author";
     
     List<MaintenanceEvent> maintenanceEvents = new ArrayList<MaintenanceEvent>();
+    int maintenanceOrder = 0;
                             
     private final ImmutableMap<String, Class<? extends Frame>> possibleSubnodes
             = ImmutableMap.<String, Class<? extends Frame>>builder().put(
@@ -250,6 +251,7 @@ public class EadHandler extends SaxXmlHandler {
                 //import the MaintenanceEvent
                 if(getImportantPath(currentPath).equals("maintenanceEvent")){ 
                     Map<String, Object> me = importer.getMaintenanceEvent(currentGraph);
+                    me.put("order", maintenanceOrder++);
                     MaintenanceEvent event = importer.importMaintenanceEvent(me);
                     if(event != null ){
                         maintenanceEvents.add(event);
